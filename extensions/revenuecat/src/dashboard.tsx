@@ -11,14 +11,17 @@ import { ProjectContext, ProjectDropdown, SELECTED_PROJECT_KEY } from "./compone
 import { CommonActions, Context, SettingsAction } from "./components/common";
 
 function Home({ context }: { context: Context }) {
-  const state = useResource(`${context.project.id}:overview:${context.currency}:${context.demo}`, (signal) =>
-    loadOverview(
-      new RevenueCatClient(context.apiKey),
-      context.project.id,
-      context.currency,
-      Boolean(context.demo),
-      signal,
-    ),
+  const state = useResource(
+    `${context.project.id}:overview:${context.currency}:${context.demo}:${context.chartsV3}`,
+    (signal) =>
+      loadOverview(
+        new RevenueCatClient(context.apiKey),
+        context.project.id,
+        context.currency,
+        Boolean(context.demo),
+        signal,
+        context.chartsV3 ?? true,
+      ),
   );
   const data = state.data;
   const navigation = (
@@ -108,7 +111,10 @@ function Home({ context }: { context: Context }) {
                           <List.Item.Detail.Metadata.Label title="Value" text={value} />
                           <List.Item.Detail.Metadata.Label title="Period" text={periodLabel(metric.period)} />
                           {metric.description && (
-                            <List.Item.Detail.Metadata.Label title="Description" text={metric.description} />
+                            <List.Item.Detail.Metadata.Label
+                              title="Description"
+                              text={metric.unavailableReason ?? metric.description}
+                            />
                           )}
                           {monetary && <List.Item.Detail.Metadata.Label title="Currency" text={currency} />}
                           {metric.last_updated_at != null && (
@@ -123,7 +129,7 @@ function Home({ context }: { context: Context }) {
                   }
                   actions={
                     <ActionPanel>
-                      <Action.CopyToClipboard title="Copy Metric Value" content={value} />
+                      {metric.value !== null && <Action.CopyToClipboard title="Copy Metric Value" content={value} />}
                       {navigation}
                       <CommonActions refresh={state.refresh} />
                     </ActionPanel>
@@ -174,6 +180,7 @@ function ConnectedRoot({ initial = "dashboard", demo = false }: RootProps & { de
     project,
     projects,
     currency: preferences.currency || "USD",
+    chartsV3: preferences.chartsV3 ?? true,
     demo,
   };
   return (

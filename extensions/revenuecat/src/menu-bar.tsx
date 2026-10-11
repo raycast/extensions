@@ -34,13 +34,18 @@ const openDashboard = () => launchCommand({ name: "dashboard", type: LaunchType.
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences.MenuBar>();
-  const cacheKey = `menu-bar:${preferences.demoMode}:${preferences.currency}`;
+  const cacheKey = `menu-bar:${preferences.demoMode}:${preferences.currency}:${preferences.chartsV3 ?? true}`;
   const state = useResource(cacheKey, async (signal) => {
     const selectedProjectId = await LocalStorage.getItem<string>(SELECTED_PROJECT_KEY);
     // Read/refresh existing tokens only. A background launch must never start OAuth.
     const data = await loadMenuBarOverview(
       new RevenueCatClient(credential),
-      { demo: preferences.demoMode, currency: preferences.currency || "USD", selectedProjectId },
+      {
+        demo: preferences.demoMode,
+        currency: preferences.currency || "USD",
+        chartsV3: preferences.chartsV3 ?? true,
+        selectedProjectId,
+      },
       signal,
     );
     signal.throwIfAborted();
@@ -52,14 +57,17 @@ export default function Command() {
   const data = state.data ?? cachedOverview(cacheKey);
   const metrics = sortedMetrics(data?.overview.metrics || []);
   const metric = selectedMenuBarMetric(metrics, preferences.metric);
-  const value = metric && data ? formatMetric(metric, data.overview.currency) : undefined;
+  const value =
+    metric && data ? (metric.value === null ? "N/A" : formatMetric(metric, data.overview.currency)) : undefined;
   const tooltip = state.error
     ? `RevenueCat: ${state.error}${data ? " Showing last loaded values." : ""}`
-    : metric && data
-      ? `${data.project.name} · ${metricTitle(metric)}: ${value} · ${periodLabel(metric.period)}`
-      : state.loading
-        ? "Loading RevenueCat metrics…"
-        : "Selected metric unavailable. Choose another metric in command settings.";
+    : metric?.unavailableReason
+      ? metric.unavailableReason
+      : metric && data
+        ? `${data.project.name} · ${metricTitle(metric)}: ${value} · ${periodLabel(metric.period)}`
+        : state.loading
+          ? "Loading RevenueCat metrics…"
+          : "Selected metric unavailable. Choose another metric in command settings.";
 
   return (
     <MenuBarExtra title={value ?? (state.loading ? "…" : "RevenueCat")} tooltip={tooltip} isLoading={state.loading}>
@@ -85,8 +93,10 @@ export default function Command() {
                     tintColor:
                       group.title === "Revenue" ? Color.Green : item.id.includes("trial") ? Color.Orange : Color.Blue,
                   }}
-                  tooltip={`${periodLabel(item.period)} · Click to copy value`}
-                  onAction={() => Clipboard.copy(formatMetric(item, data.overview.currency))}
+                  tooltip={item.unavailableReason ?? `${periodLabel(item.period)} · Click to copy value`}
+                  onAction={
+                    item.value === null ? undefined : () => Clipboard.copy(formatMetric(item, data.overview.currency))
+                  }
                 />
               ))}
             </MenuBarExtra.Section>

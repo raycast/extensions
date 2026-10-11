@@ -33,6 +33,14 @@ export async function loadOverview(
   currency: string,
   demo: boolean,
   signal?: AbortSignal,
+  chartsV3 = true,
 ): Promise<Overview> {
-  return demo ? { ...demoOverview, currency } : client.overview(projectId, currency, signal);
+  if (!demo) return client.overview(projectId, currency, signal, chartsV3);
+  return {
+    ...demoOverview,
+    currency,
+    metrics: demoOverview.metrics.map((metric) =>
+      chartsV3 && metric.id === "active_users" ? { ...metric, name: "Active Customers" } : metric,
+    ),
+  };
 }

@@ -14,14 +14,21 @@ export function selectedMenuBarMetric(metrics: Metric[], id = DEFAULT_MENU_BAR_M
 }
 export async function loadMenuBarOverview(
   client: Pick<RevenueCatClient, "projects" | "overview">,
-  options: { demo: boolean; currency: string; selectedProjectId?: string },
+  options: { demo: boolean; currency: string; selectedProjectId?: string; chartsV3?: boolean },
   signal: AbortSignal,
 ): Promise<MenuBarOverview> {
   const projects = options.demo ? [demoProject] : await client.projects(signal);
   signal.throwIfAborted();
   const project = projects.find((project) => project.id === options.selectedProjectId) || projects[0];
   if (!project) throw new Error("No accessible projects. Open Dashboard to check your RevenueCat connection.");
-  const overview = await loadOverview(client, project.id, options.currency, options.demo, signal);
+  const overview = await loadOverview(
+    client,
+    project.id,
+    options.currency,
+    options.demo,
+    signal,
+    options.chartsV3 ?? true,
+  );
   signal.throwIfAborted();
   return { project, projects, overview };
 }

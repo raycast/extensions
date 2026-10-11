@@ -10,7 +10,7 @@ A RevenueCat account with access to at least one project is required for live da
 
 ## Menu bar
 
-On macOS, run **Menu Bar Metrics** to keep a metric visible in the menu bar. MRR is shown by default. In the command’s settings, choose MRR, revenue, active subscriptions, active trials, new customers, or active users.
+On macOS, run **Menu Bar Metrics** to keep a metric visible in the menu bar. MRR is shown by default. In the command’s settings, choose MRR, revenue, active subscriptions, active trials, new customers, or active customers.
 
 Open the menu to browse metrics grouped by revenue, subscriptions, and customers. Click a value to copy it, or switch projects from the menu. Metrics use your selected currency, refresh every five minutes, and support Demo mode. Sign in through **Show Dashboard** first to use live data.
 
@@ -23,4 +23,5 @@ The AI connection has its own OAuth sign-in, so you may need to authorize it sep
 ## Settings
 
 - **Currency:** USD, EUR, GBP, or SEK for monetary metrics. Product prices are indicative US prices, and customer lifetime revenue is explicitly shown in USD.
+- **Use Charts v3:** enabled by default. Uses Charts v3 for revenue, new customers, and active customers in the dashboard and menu bar. Turn it off to use the legacy overview. RevenueCat cannot return a distinct active-customer total across calendar years, so that metric is unavailable while the 28-day range crosses New Year.
 - **Demo mode:** use the fictional Demo project with sample metrics, customers, subscriptions, events, and products. This does not contact RevenueCat or require sign-in. Turn it off to return to your saved account and project.

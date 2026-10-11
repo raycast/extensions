@@ -81,7 +81,7 @@
               "value": "new_customers"
             },
             {
-              "title": "Active Users",
+              "title": "Active Customers",
               "value": "active_users"
             }
           ]
@@ -115,6 +115,14 @@
           "value": "SEK"
         }
       ]
+    },
+    {
+      "name": "chartsV3",
+      "label": "Use Charts v3",
+      "description": "Use Charts v3 for dashboard and menu bar revenue and customer metrics. Turn off to match the legacy overview.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
     },
     {
       "name": "demoMode",

@@ -51,3 +51,77 @@ test("stops repeated pagination", async () => {
     json({ items: [], next_page: "/projects?limit=100" })) as typeof fetch);
   await assert.rejects(client.projects(), /repeated pagination/);
 });
+
+test("v3 replaces period metrics with verified chart totals; legacy makes only the overview request", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: new Date("2026-10-11T20:00:00Z") });
+  const urls: URL[] = [];
+  const client = new RevenueCatClient("test", (async (input) => {
+    const url = new URL(String(input));
+    urls.push(url);
+    if (url.pathname.endsWith("/overview")) return json(demoOverview);
+    assert.equal(url.searchParams.get("realtime"), "true");
+    assert.equal(url.searchParams.get("start_date"), "2026-09-13");
+    assert.equal(url.searchParams.get("end_date"), "2026-10-11");
+    assert.equal(url.searchParams.get("expand_periods"), "false");
+    if (url.pathname.endsWith("/customers_active")) {
+      assert.equal(url.searchParams.get("resolution"), "4");
+      assert.equal(url.searchParams.has("aggregate"), false);
+      return json({
+        object: "chart_data",
+        resolution: "year",
+        segments: null,
+        measures: [{ display_name: "Active Customers", unit: "#" }],
+        values: [{ measure: 0, value: 664 }],
+      });
+    }
+    const revenue = url.pathname.endsWith("/revenue");
+    assert.equal(url.searchParams.get("aggregate"), "total");
+    if (revenue) assert.deepEqual(JSON.parse(url.searchParams.get("selectors")!), { revenue_type: "revenue" });
+    const name = revenue ? "Revenue" : "New Customers";
+    return json({
+      object: "chart_data",
+      yaxis_currency: "USD",
+      segments: null,
+      measures: [{ display_name: name, unit: revenue ? "$" : "#" }],
+      summary: { total: { [name]: revenue ? 2072.78 : 525 } },
+    });
+  }) as typeof fetch);
+  const data = await client.overview("project", "USD", undefined, true);
+  assert.equal(urls.length, 4);
+  assert.equal(data.metrics.find((m) => m.id === "revenue")?.value, 2072.78);
+  assert.equal(data.metrics.find((m) => m.id === "new_customers")?.value, 525);
+  assert.equal(data.metrics.find((m) => m.id === "active_users")?.value, 664);
+  assert.equal(data.metrics.find((m) => m.id === "active_users")?.name, "Active Customers");
+  assert.deepEqual(
+    data.metrics.find((m) => m.id === "mrr"),
+    demoOverview.metrics.find((m) => m.id === "mrr"),
+  );
+  assert.equal(data.metrics.find((m) => m.id === "revenue")?.last_updated_at, null);
+  urls.length = 0;
+  assert.deepEqual(await client.overview("project", "USD", undefined, false), demoOverview);
+  assert.equal(urls.length, 1);
+});
+
+test("a range crossing calendar years leaves active customers unavailable, never a duplicate count or legacy fallback", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: new Date("2027-01-10T12:00:00Z") });
+  const client = new RevenueCatClient("test", (async (input) => {
+    const url = String(input);
+    assert.ok(!url.includes("customers_active"));
+    if (url.includes("/overview")) return json(demoOverview);
+    const revenue = url.includes("/revenue?");
+    const name = revenue ? "Revenue" : "New Customers";
+    return json({
+      object: "chart_data",
+      yaxis_currency: "USD",
+      segments: null,
+      measures: [{ display_name: name, unit: revenue ? "$" : "#" }],
+      summary: { total: { [name]: 0 } },
+    });
+  }) as typeof fetch);
+  const metric = (await client.overview("project", "USD", undefined, true)).metrics.find(
+    (m) => m.id === "active_users",
+  )!;
+  assert.equal(metric.value, null);
+  assert.match(metric.unavailableReason!, /calendar years/);
+  assert.equal(formatMetric(metric, "USD"), "Unavailable");
+});

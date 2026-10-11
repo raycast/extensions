@@ -6,6 +6,7 @@
 - Group menu metrics by revenue, subscriptions, and customers, with click-to-copy values and project switching.
 - Refresh metrics every five minutes using the selected project and currency, with support for Demo mode.
 - Keep the last loaded menu bar value and menu visible while refreshing or reopening the menu.
+- Add an extension-wide Use Charts v3 setting, enabled by default, for dashboard and menu bar period metrics.
 - Coordinate OAuth refreshes across commands so background updates cannot erase a refreshed connection.
 
 ## [Initial Version] - 2026-10-08

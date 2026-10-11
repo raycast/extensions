@@ -79,3 +79,18 @@ test("selection preserves zero, does not substitute missing metrics, and shares 
   );
   assert.equal(metrics[0].id, "active_users");
 });
+test("dashboard and menu bar default to v3 and honor the extension-wide legacy setting", async () => {
+  const versions: (boolean | undefined)[] = [];
+  const client = {
+    projects: async () => [{ id: "project", name: "Project" }],
+    overview: async (_id: string, _currency: string, _signal?: AbortSignal, v3?: boolean) => {
+      versions.push(v3);
+      return demoOverview;
+    },
+  };
+  await loadOverview(client, "project", "USD", false);
+  await loadOverview(client, "project", "USD", false, undefined, false);
+  await loadMenuBarOverview(client, { demo: false, currency: "USD" }, signal());
+  await loadMenuBarOverview(client, { demo: false, currency: "USD", chartsV3: false }, signal());
+  assert.deepEqual(versions, [true, false, true, false]);
+});
