@@ -1,5 +1,9 @@
 # IP Geolocation Changelog
 
+## [Compare IP Providers] - {PR_MERGE_DATE}
+
+- Add Compare IP Providers command: looks up an IP at ip-api, ipwho.is, ipapi.is, ipinfo and RDAP and shows where they agree
+
 ## [New Icon Style] - 2025-07-16
 
 - Optimize extension icons for macOS Tahoe
@@ -13,7 +17,7 @@
 
 ## [Fix Hotkey Error] - 2024-05-27
 
--  Fix the problem of using hotkeys to invoke commands
+- Fix the problem of using hotkeys to invoke commands
 
 ## [Copy IP] - 2024-05-27
 
