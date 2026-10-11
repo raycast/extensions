@@ -107,6 +107,10 @@ export async function runCopyAllTabs() {
     await Clipboard.copy(renderTabList(tabs, settings));
     await showHUD(`Copied ${tabs.length} ${tabs.length === 1 ? "tab" : "tabs"}`);
   } catch (error) {
+    if (error instanceof AmbiguousTabError) {
+      await showFailureToast(error, { title: "Several browsers are open" });
+      return;
+    }
     if (error instanceof NoTabError) {
       await showFailureToast(error, { title: "No browser window found" });
       return;
