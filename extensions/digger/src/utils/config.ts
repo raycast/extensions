@@ -36,6 +36,9 @@ export const TIMEOUTS = {
   /** The whole document, re-fetched for "View All SVGs". The dig stops at
    *  `</head>`; this reads the body too, so it gets a larger budget. */
   FULL_PAGE: 20000,
+  /** One sitemap file in the sitemap view. Larger than RESOURCE_FETCH: the dig
+   *  only sniffs a sitemap's first bytes, while the view reads the whole file. */
+  SITEMAP_FETCH: 20000,
   /** One external SVG file: a sprite sheet, or an `<img>` source being copied. */
   SVG_FILE: 8000,
   /** One page-referenced image downloaded for display (a thumbnail, a favicon). */
@@ -68,7 +71,7 @@ export const CACHE = {
    * with no swatch) for the full 48h TTL. Every one passed tsc, ray build and
    * ray lint, because a missing optional field is perfectly valid.
    *
-   * The lesson generalises past caching: when the correctness of a change
+   * The lesson generalizes past caching: when the correctness of a change
    * depends on a human remembering a second, unrelated edit, the remembering IS
    * the defect. Derive it instead. See scripts/cache-schema.mjs.
    */
@@ -97,6 +100,17 @@ export const CACHE = {
    * enough to be invisible.
    */
   REGISTRY_CHECK_INTERVAL_MS: 7 * 24 * 60 * 60 * 1000,
+  /**
+   * Sitemap bodies, kept apart from the dig cache. The dig cache is LocalStorage,
+   * and `getCacheIndex` calls `allItems()` on every read — megabytes of sitemap
+   * text there would be loaded into memory on every dig. Raycast's `Cache` is
+   * file-backed and evicts least-recently-used entries past `capacity` by itself.
+   *
+   * It stores the raw body, never a parse, so a parser fix applies to cached
+   * entries immediately and there is no shape to version.
+   */
+  SITEMAP_NAMESPACE: "sitemaps",
+  SITEMAP_CAPACITY_BYTES: 120 * 1024 * 1024,
 } as const;
 
 /**
@@ -111,8 +125,24 @@ export const LIMITS = {
   TLS_PORT: 443,
   /** Maximum resources (stylesheets, scripts, images) to parse per page */
   MAX_RESOURCES: 50,
-  /** Maximum entries to display in sitemap views */
-  MAX_DISPLAY_ENTRIES: 100,
+  /** Sitemap rows rendered at once. Search runs over every parsed entry; this
+   *  bounds only how many matches become List items. */
+  SITEMAP_RENDER_CAP: 2000,
+  /** Bytes read from one sitemap file, after decompression. The protocol caps a
+   *  file at 50 MB; real ones over 20 MB are rare and would dominate memory. */
+  SITEMAP_MAX_BYTES: 20 * 1024 * 1024,
+  /** Child sitemaps one index view will fetch while spidering, at any depth. */
+  SITEMAP_SPIDER_MAX_FILES: 100,
+  /** Index-of-index nesting followed below the opened sitemap. */
+  SITEMAP_SPIDER_MAX_DEPTH: 3,
+  /** Decompressed bytes one spider reads before it stops taking new files. A soft
+   *  cap: files already in flight finish, so the worst case is this plus
+   *  (SITEMAP_SPIDER_CONCURRENCY - 1) x SITEMAP_MAX_BYTES. */
+  SITEMAP_SPIDER_MAX_BYTES: 60 * 1024 * 1024,
+  /** Distinct pages one spider collects before it stops fetching. */
+  SITEMAP_SPIDER_MAX_PAGES: 100_000,
+  /** Child sitemaps fetched at once. */
+  SITEMAP_SPIDER_CONCURRENCY: 4,
   /** Bytes read before judging what a resource IS. Enough for a doctype, an
    *  XML declaration or an opening brace; far short of downloading the file. */
   SNIFF_BYTES: 1024,

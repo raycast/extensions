@@ -1,5 +1,34 @@
 # Digger Changelog
 
+## [Sitemap list, and more ways to start a dig] - {PR_MERGE_DATE}
+
+### Added
+
+- **Open Current Tab in Digger** and **Open Clipboard in Digger**, two commands that
+  dig the active browser tab (macOS, with the Raycast Browser Extension) or the URL on
+  the clipboard. Both are off by default.
+- **View Sitemap** is now a searchable list. Search covers every entry's full text,
+  not only the rows shown, and a sitemap index loads its child sitemaps so search
+  reaches their pages too, up to a size limit; the list says what it didn't search.
+  Open a child sitemap to browse it on its own, or dig any page in it with ⌘↵.
+  Sitemaps are cached for 48 hours; ⌘R reloads.
+
+### Changed
+
+- Digger's URL is now optional. Left empty, it digs the URL in the selected text,
+  then on the clipboard (both on by default), then in the current browser tab (off
+  by default). These settings existed before but never applied, because the URL
+  was required.
+- Text that isn't a URL, such as a single word, is now shown back as "isn't a URL"
+  instead of being dug as a website and failing to connect.
+- When a dig fails, the search bar shows the URL that failed. Correct it and press
+  ↵ to dig the new one.
+
+### Fixed
+
+- A sitemap `lastmod` date such as 2026-08-07 no longer shows as the day before in
+  time zones west of UTC.
+
 ## [SVG extraction, and faster access to Well-Known files and color tokens] - 2026-10-01
 
 ### Added
@@ -57,7 +86,7 @@
 
 ### Security
 
-- Stylesheets are fetched only from the site being analysed or a public host, with every
+- Stylesheets are fetched only from the site being analyzed or a public host, with every
   redirect re-checked. A page could previously name a stylesheet on `localhost`, a private
   network address, or a cloud metadata endpoint and have Digger request it. They are also
   now read with a hard byte cap rather than buffered in full.
@@ -84,8 +113,8 @@
 - A DNS lookup that failed outright now says so on every record row. It added a "Couldn't check" line at the top of the section while the six rows beneath it still read "No IPv4 addresses found", "No mail servers found" and so on — absences from queries that never returned.
 - Each DNS record type now reports its own outcome. A host can answer for one type and fail on another — an A record found while the MX query times out — and the failed row said "No mail servers found", a claim about the host from a query that never returned. Those rows now read "Couldn't check".
 - A DNS section that couldn't be checked no longer reads as a host with no records. This covers every way the lookup can fail, not a handful of named ones — a malformed resolver response or an out-of-memory error now reads "Couldn't check" like a timeout does. If the first record type came back empty — normal, plenty of hosts publish no AAAA or MX — and the resolver then failed on everything after it, only that first harmless result was kept and the section reported "no records found" for a lookup that never completed.
-- The Wayback Machine section no longer invents a snapshot count. When the precise-count request failed — and archive.org times out often — it fell back to a formula meant for huge archives, reporting a site with 8 snapshots as 5,000, labelled an estimate. It now says "Couldn't check".
-- A Wayback lookup is bounded and cancellable. Its four sequential requests each retried independently with no shared limit, so an unresponsive archive.org could hold the section for over a minute; and a dig you replaced kept fetching for a result nobody would see. The whole lookup now shares one budget and stops as soon as its dig is superseded.
+- The Wayback Machine section no longer invents a snapshot count. When the precise-count request failed — and archive.org times out often — it fell back to a formula meant for huge archives, reporting a site with 8 snapshots as 5,000, labeled an estimate. It now says "Couldn't check".
+- A Wayback lookup is bounded and cancelable. Its four sequential requests each retried independently with no shared limit, so an unresponsive archive.org could hold the section for over a minute; and a dig you replaced kept fetching for a result nobody would see. The whole lookup now shares one budget and stops as soon as its dig is superseded.
 - robots.txt, llms.txt and sitemap.xml no longer report "Not found" when the check itself failed. A 5xx, a timeout or a refused connection now reads "Couldn't check" in that row, and rows read "Checking…" until the request comes back. Only an answer from the server — a 404 or a 410, or for robots.txt and llms.txt a page that is really an error page — says the file is absent.
 
 ## [Failed digs no longer hang, and shortcuts work on Windows] - 2026-08-11
@@ -107,7 +136,7 @@
 
 ### Changed
 
-- The failure screen is now a centred empty state rather than a list row with a detail pane beside it.
+- The failure screen is now a centered empty state rather than a list row with a detail pane beside it.
 - "Save to Wayback Machine" moved from ⌘ ⇧ S to ⌘ ⇧ Y, and "Copy Canonical URL" from ⌘ ⌥ C to ⌘ ⌥ U, so they no longer shadow Raycast's standard shortcuts.
 - URLs written to the debug log are stripped of their query strings.
 
