@@ -1,4 +1,4 @@
-import { closeMainWindow, environment, PopToRootType } from "@raycast/api";
+import { closeMainWindow, PopToRootType } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -6,19 +6,10 @@ import path from "node:path";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
-const HELPER_NAME = "goose-2fa-helper";
-
-export function helperPath(): string {
-  return path.join(environment.assetsPath, HELPER_NAME);
-}
-
 /** 用 Vision 识别图片里的二维码/条码，逐行返回 payload。 */
 export async function detectBarcodes(imagePath: string): Promise<string[]> {
-  const { stdout } = await execFileAsync(helperPath(), ["qr", imagePath], { maxBuffer: 1024 * 1024 });
-  return stdout
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
+  const swift = await import("swift:../../swift/goose-2fa");
+  return swift.detectBarcodes(imagePath);
 }
 
 /** 交互式截屏到临时文件；用户按 ESC 取消时返回 null。 */
