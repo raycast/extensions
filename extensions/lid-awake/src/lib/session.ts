@@ -84,12 +84,14 @@ async function readSession(): Promise<SessionEntry | null> {
   }
 }
 
-async function writeSession(session: Session): Promise<void> {
+// Returns the key the session was written under, so a later undo can remove exactly this session.
+async function writeSession(session: Session): Promise<string> {
   // The new sequence number is one past every stored one, so this Start outranks any session already saved.
   // Overlapping Starts can compute the same number and write the same key. The last write wins, which is acceptable.
   const existing = await readSessionEntries();
   const seq = Math.max(0, ...existing.map((entry) => entry.seq)) + 1;
-  await LocalStorage.setItem(sessionKey(seq), JSON.stringify(session));
+  const key = sessionKey(seq);
+  await LocalStorage.setItem(key, JSON.stringify(session));
   // Drop only older sessions (lower sequence numbers). A higher one came from an overlapping Start and must stay.
   try {
     for (const entry of await readSessionEntries()) {
@@ -100,6 +102,7 @@ async function writeSession(session: Session): Promise<void> {
   } catch {
     // Leftover older sessions are harmless, since readSession always picks the newest.
   }
+  return key;
 }
 
 // Removes only the session under this key. Other sessions, including one another command just saved, are kept.
@@ -144,7 +147,8 @@ async function requireMenuBar(): Promise<void> {
   }
 }
 
-async function startSession(minutes: number | null): Promise<void> {
+// Returns the key of the session it saved.
+async function startSession(minutes: number | null): Promise<string> {
   if (!(await isRuleInstalled())) {
     throw new Error("Run Set up Lid Awake first, so Lid Awake can turn itself off while the lid is closed");
   }
@@ -165,21 +169,50 @@ async function startSession(minutes: number | null): Promise<void> {
   };
 
   await setSleepDisabled(true);
+  let key: string;
   try {
-    await writeSession(session);
+    key = await writeSession(session);
   } catch (error) {
     await setSleepDisabled(false).catch(() => undefined);
     throw error;
   }
-  // Auto-off from the menu bar may have turned sleep off while this session was being saved, so turn it back on.
+  // Auto-off from the menu bar or Turn Off from another command may have changed sleep while this session was being
+  // saved. If sleep is now off, turn it back on, unless the sessions were cleared in the meantime.
   if (!(await isSleepDisabled())) {
-    await setSleepDisabled(true);
+    await keepAwakeWhileSessionStored();
+  }
+  return key;
+}
+
+// Sleep stays disabled while any session is stored. Turn Off in another command may clear the sessions while this
+// runs, so check again after disabling sleep and allow it again if nothing is stored any more.
+async function keepAwakeWhileSessionStored(): Promise<void> {
+  if (!(await readSession())) {
+    return;
+  }
+  await setSleepDisabled(true);
+  if (!(await readSession())) {
+    await setSleepDisabled(false, { allowPrompt: false });
+  }
+}
+
+// Removes only the session this Start saved. If no other session is stored, sleep goes back on. Runs when the menu bar
+// cannot launch, so nothing else would turn Lid Awake off.
+async function undoStart(key: string): Promise<void> {
+  await clearSession(key);
+  if (!(await readSession())) {
+    await setSleepDisabled(false, { allowPrompt: false });
   }
 }
 
 async function stopSession(options: { allowPrompt?: boolean }): Promise<void> {
   await setSleepDisabled(false, { allowPrompt: options.allowPrompt });
   await clearAllSessions();
+  // A Start in another command may have disabled sleep again between the two steps above. If sleep is on and no
+  // session is stored, allow sleep again. A failure here is ignored, since the Turn Off itself has succeeded.
+  if ((await isSleepDisabled()) && !(await readSession())) {
+    await setSleepDisabled(false, { allowPrompt: false }).catch(() => undefined);
+  }
 }
 
 // The status plus the stored entry it was built from, so callers can clear or compare that exact entry.
@@ -223,7 +256,7 @@ async function autoDisable(): Promise<AutoDisableReason | null> {
   // A Start may have saved a newer session (higher sequence number) while sleep was being turned off. That session wins, so sleep goes back on.
   const current = await readSession();
   if (current && current.seq > entry.seq) {
-    await setSleepDisabled(true).catch(() => undefined);
+    await keepAwakeWhileSessionStored().catch(() => undefined);
     return null;
   }
   // Clear only the session we turned off for. A Start that saves a session after the check above keeps its own key.
@@ -232,13 +265,13 @@ async function autoDisable(): Promise<AutoDisableReason | null> {
 }
 
 export async function enable(minutes: number | null): Promise<void> {
-  await serialized(() => startSession(minutes));
+  const key = await serialized(() => startSession(minutes));
   try {
     // Outside the queue so launching the menu bar command never holds up other session actions.
     // This launch also refreshes the menu bar, so it is not repeated.
     await requireMenuBar();
   } catch (error) {
-    await serialized(() => stopSession({ allowPrompt: false })).catch(() => undefined);
+    await serialized(() => undoStart(key)).catch(() => undefined);
     throw error;
   }
 }

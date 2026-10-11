@@ -299,6 +299,62 @@ describe("enable", () => {
     await expect(enable(60)).rejects.toThrow("sudo: re-assert failed");
     expect(raycast.launchCommand).not.toHaveBeenCalled();
   });
+
+  it("keeps another Start's session when this Start's menu bar launch fails after that Start saved", async () => {
+    let rejectFirstLaunch!: (error: Error) => void;
+    raycast.launchCommand.mockImplementationOnce(
+      () =>
+        new Promise((_resolve, reject) => {
+          rejectFirstLaunch = reject;
+        }),
+    );
+
+    const first = enable(30);
+    // Wait until the first Start is waiting on the menu bar, so the second Start saves while the first is still pending.
+    await vi.waitFor(() => expect(raycast.launchCommand).toHaveBeenCalledTimes(1));
+    await enable(60);
+    rejectFirstLaunch(new Error("Menu bar command not enabled"));
+
+    await expect(first).rejects.toThrow("Run Lid Awake Menu Bar once and keep it enabled in Raycast");
+    // The fake clock moves while waiting, so check the 60 minute length rather than an exact start time.
+    const session = storedSession();
+    expect(session?.endsAt).toBe((session?.startedAt ?? 0) + 60 * MINUTE);
+    expect(session?.bootTime).toBe(BOOT);
+    expect([...raycast.store.keys()]).toEqual(["session:2"]);
+    const sleepAllowed = vi.mocked(system.setSleepDisabled).mock.calls.filter(([on]) => on === false);
+    expect(sleepAllowed).toEqual([]);
+  });
+
+  it("does not turn sleep on again when a Turn Off in another command cleared the sessions after the save", async () => {
+    let sessionAtCheck: Session | null = null;
+    vi.mocked(system.isSleepDisabled).mockImplementationOnce(async () => {
+      // The first check after the save is the one in startSession. A Turn Off in another command runs at this point:
+      // it allows sleep and clears the sessions.
+      sessionAtCheck = storedSession();
+      raycast.store.clear();
+      return false;
+    });
+
+    await enable(60);
+
+    expect(sessionAtCheck).toEqual({ startedAt: NOW, endsAt: NOW + 60 * MINUTE, bootTime: BOOT });
+    expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([[true]]);
+    expect(storedSession()).toBeNull();
+  });
+
+  it("allows sleep again when a Turn Off in another command clears the sessions while sleep is turned back on", async () => {
+    vi.mocked(system.setSleepDisabled)
+      .mockResolvedValueOnce(undefined)
+      // Turning sleep back on is the second call. A Turn Off in another command clears the sessions during it.
+      .mockImplementationOnce(async () => {
+        raycast.store.clear();
+      });
+
+    await enable(60);
+
+    expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([[true], [true], [false, { allowPrompt: false }]]);
+    expect(storedSession()).toBeNull();
+  });
 });
 
 describe("disable", () => {
@@ -338,6 +394,55 @@ describe("disable", () => {
 
     await expect(disable()).rejects.toThrow("sudo: a password is required");
     expect(storedSession()).toEqual(session);
+  });
+
+  it("allows sleep again when a Start in another command disabled it after the sessions were cleared", async () => {
+    seedSession({ startedAt: NOW - MINUTE, endsAt: null, bootTime: BOOT });
+    vi.mocked(system.isSleepDisabled).mockResolvedValue(true);
+
+    await disable();
+
+    expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([
+      [false, { allowPrompt: true }],
+      [false, { allowPrompt: false }],
+    ]);
+    expect(storedSession()).toBeNull();
+  });
+
+  it("does not allow sleep a second time when sleep already reads as off after the sessions were cleared", async () => {
+    seedSession({ startedAt: NOW - MINUTE, endsAt: null, bootTime: BOOT });
+    vi.mocked(system.isSleepDisabled).mockResolvedValue(false);
+
+    await disable();
+
+    expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([[false, { allowPrompt: true }]]);
+  });
+
+  it("does not allow sleep a second time when a Start saved a session before the check", async () => {
+    seedSession({ startedAt: NOW - MINUTE, endsAt: null, bootTime: BOOT });
+    const fresh = { startedAt: NOW, endsAt: NOW + 60 * MINUTE, bootTime: BOOT };
+    vi.mocked(system.isSleepDisabled).mockImplementation(async () => {
+      seedSession(fresh);
+      return true;
+    });
+
+    await disable();
+
+    expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([[false, { allowPrompt: true }]]);
+    expect(storedSession()).toEqual(fresh);
+  });
+
+  it("resolves when allowing sleep the second time fails, since the Turn Off itself succeeded", async () => {
+    seedSession({ startedAt: NOW - MINUTE, endsAt: null, bootTime: BOOT });
+    vi.mocked(system.isSleepDisabled).mockResolvedValue(true);
+    vi.mocked(system.setSleepDisabled).mockImplementation(async (_on, options) => {
+      if (options?.allowPrompt === false) {
+        throw new Error("sudo: a password is required");
+      }
+    });
+
+    await expect(disable()).resolves.toBeUndefined();
+    expect(storedSession()).toBeNull();
   });
 });
 
@@ -661,6 +766,45 @@ describe("enforce race", () => {
     expect(removeItem).toHaveBeenCalledWith(`session:${expiredSeq}`);
     expect([...raycast.store.keys()]).toEqual([`session:${freshSeq}`]);
     removeItem.mockRestore();
+  });
+
+  it("turns sleep back on after auto-off when a newer session was saved and is still stored", async () => {
+    seedSession({ startedAt: NOW - 61 * MINUTE, endsAt: NOW - MINUTE, bootTime: BOOT });
+    vi.mocked(system.isSleepDisabled).mockResolvedValue(true);
+    const fresh = { startedAt: NOW, endsAt: NOW + 60 * MINUTE, bootTime: BOOT };
+    vi.mocked(system.setSleepDisabled).mockImplementationOnce(async () => {
+      // A Start saved a newer session while auto-off turned sleep off.
+      seedSession(fresh);
+    });
+
+    await expect(enforce()).resolves.toBeNull();
+
+    expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([[false, { allowPrompt: false }], [true]]);
+    expect(storedSession()).toEqual(fresh);
+  });
+
+  it("allows sleep again when the newer session is cleared while sleep is turned back on", async () => {
+    seedSession({ startedAt: NOW - 61 * MINUTE, endsAt: NOW - MINUTE, bootTime: BOOT });
+    vi.mocked(system.isSleepDisabled).mockResolvedValue(true);
+    const fresh = { startedAt: NOW, endsAt: NOW + 60 * MINUTE, bootTime: BOOT };
+    vi.mocked(system.setSleepDisabled)
+      .mockImplementationOnce(async () => {
+        // A Start saved a newer session while auto-off turned sleep off.
+        seedSession(fresh);
+      })
+      .mockImplementationOnce(async () => {
+        // A Turn Off in another command clears the sessions while sleep is turned back on.
+        raycast.store.clear();
+      });
+
+    await expect(enforce()).resolves.toBeNull();
+
+    expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([
+      [false, { allowPrompt: false }],
+      [true],
+      [false, { allowPrompt: false }],
+    ]);
+    expect(storedSession()).toBeNull();
   });
 });
 

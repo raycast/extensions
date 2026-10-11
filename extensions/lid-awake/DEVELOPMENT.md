@@ -21,7 +21,7 @@ To uninstall: remove the sudoers rule (see README), then in Raycast right-click 
 ## Checks
 
 ```sh
-npm test           # unit tests (Vitest)
+npm test           # tests (Vitest), including the integration tests
 npm run typecheck  # builds first to generate the Preferences types, then TypeScript over src/ and test/
 npm run lint       # ray lint: ESLint, Prettier, manifest checks (needs internet access)
 npm run build      # production build
@@ -29,19 +29,11 @@ npm run build      # production build
 
 `npm run lint` checks the author against raycast.com, so run it on a machine with internet access.
 
-GitHub Actions (`.github/workflows/ci.yml`) runs all of these on pushes to `master` and on every pull request, using the Node version in `.nvmrc`. A second job runs the integration tests on `macos-latest`.
+GitHub Actions (`.github/workflows/ci.yml`) runs all of these on pushes to `master` and on every pull request, using the Node version in `.nvmrc`.
 
 ## Integration tests
 
-`npm run test:integration` (`test/integration/`) runs the real `pmset`, `sudo`, `visudo`, `sysctl`, `dscl` and `mktemp` commands. It covers turning sleep on and off, the sudoers rule for a dedicated test user (install, concurrent and failed installs, removal), and the session rules: timers, restarts, overlapping Starts, a menu bar launch failure and the battery cutoff. Only the Raycast API is faked.
-
-These tests change real sleep and sudoers settings, and they need passwordless sudo. They remove `/etc/sudoers.d/raycast-lid-awake` and turn sleep off when they finish, so on a Mac you use every day, the Lid Awake rule you set up stops working until you run Set up again. Run them only in CI on macOS, or locally on a throwaway Mac with:
-
-```sh
-LID_AWAKE_INTEGRATION=1 npm run test:integration
-```
-
-Without `LID_AWAKE_INTEGRATION=1`, or on any system other than macOS, the suites are skipped. `npm test` never runs them.
+`test/integration/` runs the real commands, `session.ts`, `system.ts` and `parse.ts` together. Two boundaries are faked: the Raycast API (`fake-raycast.ts`), and the Mac itself (`fake-mac.ts`), which answers the `pmset`, `sudo`, `osascript` and `sysctl` calls the way macOS would, from in-memory state. No test runs a real system command or changes your Mac, so `npm test` is safe anywhere, on macOS or Linux.
 
 ## Publishing to the Raycast Store
 
