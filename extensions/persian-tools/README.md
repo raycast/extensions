@@ -6,7 +6,7 @@ A Raycast extension providing essential productivity tools for Persian (Farsi) u
 
 ### Fix Keyboard Layout
 
-Convert text typed on the wrong keyboard layout between English (US) and Persian. You can provide an argument, select text in any application, or copy text to the clipboard. The auto-detected direction is shown first, with the opposite conversion shown second.
+Convert text typed on the wrong keyboard layout between English (US) and Persian. You can type the text in the search bar, provide an argument, select text in any application, or copy text to the clipboard. The auto-detected direction is shown first, with the opposite conversion shown second.
 
 - Actions: **Paste** (primary, ↵) and **Copy to Clipboard** (⌘↵).
 
@@ -14,13 +14,13 @@ Convert text typed on the wrong keyboard layout between English (US) and Persian
 
 A no-view command that directly transforms the selected text in the active application and pastes back the converted layout (`US → Persian` or `Persian → US`).
 
-- Automatically detects the source layout direction and preserves non-alphabetic keys.
+- Automatically detects the source layout direction. Preserves whitespace and ASCII digits; punctuation can change.
 
 ### Convert Persian Digits
 
 Convert Persian (`۰–۹`) and Arabic-Indic (`٠–٩`) digits to English digits (`0–9`), including Persian decimal (`٫` → `.`) and thousands (`٬` → `,`) separators while stripping invisible bidirectional control marks.
 
-- Reads input from argument, selected text, or clipboard.
+- Reads input from the search bar, argument, selected text, or clipboard.
 - Actions: **Paste** (primary, ↵) and **Copy to Clipboard** (⌘↵).
 
 ### Jalali Date
@@ -34,7 +34,7 @@ Convert between Jalali (Shamsi) and Gregorian dates, displaying the Persian long
 - **Empty input**: Defaults to today's date.
 - **Relative offsets**: `+10`, `-5`, `+2w`, `-1w`, `+30d`.
 - **Numeric dates** (using `/`, `-`, or `.`):
-  - Jalali (years 1–3177): `1403/5/12`, `1405-07-14`, `1399.1.1`.
+  - Jalali (years 1–1699, with a three- or four-digit year): `001/1/1`, `1403/5/12`, `1405-07-14`, `1399.1.1`. Use a Persian month name for Jalali years 1700–3177; numeric years from 1700 onward are read as Gregorian.
   - Gregorian (years ≥ 1700): `2024-08-02`, `2026/10/06`.
 - **Day and Month Name** (optional year):
   - Persian month names (Persian script or Latin transliteration): `۱۲ مرداد`, `14 mehr`, `14 mehr 1403`, `فروردین 1`, `tir 15`.
