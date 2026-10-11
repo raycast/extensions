@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stealth-ai-tool",
   "title": "Stealth AI",
-  "description": "In-line AI formatting. Configure your AI provider via the 'Configure AI Model' command. Set custom Hotkey & Alias per action in Settings.",
-  "version": "1.1.0",
+  "description": "In-line AI formatting. Use Raycast AI, a cloud provider, or a local model via LM Studio or Ollama. Configure via the 'Configure AI Model' command, and set a custom Hotkey & Alias per action in Settings.",
+  "version": "1.2.0",
   "icon": "icon.png",
   "author": "ahmed",
   "categories": [
@@ -26,7 +26,7 @@
       "name": "configure-model",
       "title": "Configure AI Model",
       "subtitle": "Stealth AI",
-      "description": "Fetch and select models for your provider",
+      "description": "Choose a provider (cloud or local) and select a model",
       "mode": "view",
       "icon": "icon.png"
     },
