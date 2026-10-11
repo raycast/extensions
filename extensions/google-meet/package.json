@@ -47,7 +47,7 @@
   "preferences": [
     {
       "title": "Open Meetings In",
-      "description": "Choose whether meetings open in your browser or in the installed Google Meet PWA. The link is always resolved through a real browser first and copied to your clipboard either way.",
+      "description": "Choose whether meetings open in your browser or in the installed Google Meet PWA. A Safari web app (File → Add to Dock) creates the meeting itself with no browser involved; other PWAs resolve the link through a real browser first. The link is copied to your clipboard either way.",
       "name": "launchTarget",
       "type": "dropdown",
       "required": true,

@@ -115,6 +115,35 @@ export function getSystemEventsWindowCountScript(processName: string): string {
 }
 
 /**
+ * Lists the window titles of a running app via System Events, addressed by
+ * bundle identifier. Returns an empty string when the app isn't running yet.
+ *
+ * Safari web apps all run under the same generic process name ("Web App"),
+ * and System Events turns a process taken out of a `whose` result (`item 1 of
+ * (every process whose ...)`) back into a by-name reference — which resolves
+ * to whichever "Web App" process comes first, e.g. a Google Chat web app
+ * instead of Meet. The titles are therefore read in the same query as the
+ * bundle identifier filter, so the process is never re-resolved by name.
+ */
+export function getWindowTitlesScript(bundleId: string): string {
+  return `
+    tell application "System Events"
+      set titleList to {}
+      set titlesPerProcess to name of every window of (every process whose bundle identifier is "${bundleId}")
+      repeat with processTitles in titlesPerProcess
+        repeat with windowTitle in processTitles
+          if contents of windowTitle is not missing value then set end of titleList to (contents of windowTitle)
+        end repeat
+      end repeat
+      set AppleScript's text item delimiters to (ASCII character 31)
+      set titleString to titleList as string
+      set AppleScript's text item delimiters to ""
+      return titleString
+    end tell
+  `;
+}
+
+/**
  * Firefox-family browsers have little to no AppleScript support, so this
  * focuses the browser and drives the address bar with keystrokes:
  * 1. Focus the browser.

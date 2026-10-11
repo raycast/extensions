@@ -1,6 +1,8 @@
 import { Clipboard, getPreferenceValues, open } from "@raycast/api";
+import type { Application } from "@raycast/api";
 import { getAdapterForBrowser } from "../browser-adapters";
-import { openInPwa } from "../browser-adapters/pwa";
+import { isSafariWebApp, openInPwa } from "../browser-adapters/pwa";
+import { createSafariWebAppSource } from "../browser-adapters/safari-web-app";
 import { MeetError } from "../errors";
 import { runAppleScriptSafe } from "../utils/apple-script";
 import { normalizeMeetingUrl } from "../utils/meeting-url";
@@ -35,6 +37,8 @@ export type CreateMeetingOptions = {
   profile?: string;
   /** Whether to attempt refocusing the previously active app after copying the link. */
   refocus?: boolean;
+  /** Overrides the "Open Meetings In" preference, e.g. for a profile with its own setting. */
+  launchTarget?: LaunchTarget;
 };
 
 export type CreateMeetingResult = {
@@ -52,20 +56,82 @@ export async function switchToPreviousApp(): Promise<void> {
   await runAppleScriptSafe(getSwitchToPreviousAppScript());
 }
 
+/** Validates a detected meeting URL and copies its canonical form. */
+async function copyMeetingUrl(rawUrl: string): Promise<string> {
+  const meetingUrl = normalizeMeetingUrl(rawUrl);
+  if (!meetingUrl) {
+    throw new MeetError("INVALID_MEETING_URL");
+  }
+
+  try {
+    await Clipboard.copy(meetingUrl);
+  } catch (error) {
+    throw new MeetError("CLIPBOARD_WRITE_FAILED", { cause: error });
+  }
+
+  return meetingUrl;
+}
+
+/**
+ * Creates the meeting directly inside a Google Meet Safari web app and reads
+ * the link back from its window title. No browser is involved, so neither the
+ * preferred nor the default browser is consulted — a default that isn't a
+ * supported browser (e.g. a link router such as Finicky) doesn't matter here.
+ */
+async function createMeetingInSafariWebApp(
+  app: Application,
+  options: CreateMeetingOptions,
+): Promise<CreateMeetingResult> {
+  const source = createSafariWebAppSource(app);
+  await source.recordExistingMeetings();
+
+  try {
+    await open(buildCreationUrl(options.profile), app);
+  } catch (error) {
+    throw new MeetError("APP_LAUNCH_FAILED", { cause: error, message: `Couldn't open ${app.name}.` });
+  }
+
+  // Measured: a Safari web app took 6.5–15s+ to show its meeting code (Meet
+  // sits on a bare "Meet" title while /new redirects), so this path ignores
+  // the timeout preference and always allows the maximum. A success still
+  // returns as soon as the code shows.
+  const rawUrl = await waitForMeetingUrl(() => source.getCandidateUrls(), {
+    timeoutMs: MAX_TIMEOUT_MS,
+    intervalMs: POLL_INTERVAL_MS,
+    describeTimeout: () => source.describeTimeout?.() ?? Promise.resolve(undefined),
+  });
+
+  const meetingUrl = await copyMeetingUrl(rawUrl);
+
+  if (options.refocus) {
+    await switchToPreviousApp().catch(() => undefined);
+  }
+
+  return { url: meetingUrl, target: "pwa" };
+}
+
 /**
  * The single, shared pipeline every command uses to create a meeting: pick
  * a launch target, open the creation URL, poll for the generated link,
  * validate it, copy it, optionally open it in the PWA, and optionally
  * refocus the previous app. No polling, validation, or clipboard logic is
  * duplicated across command entrypoints.
+ *
+ * A Safari web app PWA is the exception to "resolve through a browser
+ * first": its window title can be read, so the meeting is created in it
+ * directly — see {@link createMeetingInSafariWebApp}.
  */
 export async function createMeeting(options: CreateMeetingOptions): Promise<CreateMeetingResult> {
-  const launchTarget = getLaunchTarget();
+  const launchTarget = options.launchTarget ?? getLaunchTarget();
 
   // Resolved before touching the browser or clipboard so an unavailable PWA
   // fails fast with an actionable error instead of silently falling back to
   // browser mode.
   const pwaApp = launchTarget === "pwa" ? await resolvePwaApp() : undefined;
+
+  if (pwaApp && isSafariWebApp(pwaApp)) {
+    return createMeetingInSafariWebApp(pwaApp, options);
+  }
 
   const browser = await resolveCreationBrowser();
   const adapter = getAdapterForBrowser(browser.name);
@@ -84,16 +150,7 @@ export async function createMeeting(options: CreateMeetingOptions): Promise<Crea
       describeTimeout: () => adapter.describeTimeout?.() ?? Promise.resolve(undefined),
     });
 
-    const meetingUrl = normalizeMeetingUrl(rawUrl);
-    if (!meetingUrl) {
-      throw new MeetError("INVALID_MEETING_URL");
-    }
-
-    try {
-      await Clipboard.copy(meetingUrl);
-    } catch (error) {
-      throw new MeetError("CLIPBOARD_WRITE_FAILED", { cause: error });
-    }
+    const meetingUrl = await copyMeetingUrl(rawUrl);
 
     const result: CreateMeetingResult = { url: meetingUrl, target: launchTarget };
 
