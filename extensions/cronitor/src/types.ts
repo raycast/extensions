@@ -14,4 +14,8 @@ export type Monitor = {
   key: string;
   name: string;
   type: "job" | "heartbeat" | "check" | "site";
+  badges: {
+    simple: string;
+    detailed: string;
+  };
 };

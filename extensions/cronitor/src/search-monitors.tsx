@@ -51,6 +51,7 @@ export default function SearchMonitors() {
           title={monitor.name}
           detail={
             <List.Item.Detail
+              markdown={`![](${monitor.badges.detailed})`}
               metadata={
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label title="Created" text={monitor.created} />

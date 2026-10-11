@@ -16,7 +16,7 @@ This is a Raycast extension for [Cronitor](https://cronitor.io/) - _Monitoring m
     - `Copy` and `Paste` this in Preferences
 ---
 
-### Looking for more another solution? Try these:
+### Looking for another solution? Try these:
 
 <a title="Install hetrixtools Raycast Extension" href="https://www.raycast.com/xmok/hetrixtools"><img src="https://www.raycast.com/xmok/hetrixtools/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install uptime-robot Raycast Extension" href="https://www.raycast.com/xmok/uptime-robot"><img src="https://www.raycast.com/xmok/uptime-robot/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
