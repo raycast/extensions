@@ -1,5 +1,11 @@
 # Windows Terminal Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+
+- Uses static path for `wt.exe` in case the alias is not in the path
+- Removed macOS logic since it's not needed
+- Added support for portable Windows Terminal setups
+
 ## [Open with Terminal command] - 2026-09-27
 
 - Add `Open with Terminal` command that opens the selected file manager item in Terminal
