@@ -9,13 +9,21 @@ import {
 } from "../hooks/useTaskCache";
 import { TaskFilterState, TweekTask } from "../types";
 import {
+  addMonthsISO,
   formatTaskDate,
+  getMonthGridISO,
+  getMonthStartISO,
   getTodayISO,
   getWeekBoundsISO,
   isOverdue,
   parseQuickAddInput,
   parseVirtualTaskId,
 } from "../utils/date-utils";
+import {
+  groupTasksByDate,
+  renderDayCellSvg,
+  svgToDataUri,
+} from "../utils/month-calendar";
 import {
   formatTaskMarkdown,
   getChecklistProgress,
@@ -82,6 +90,42 @@ describe("date-utils", () => {
     expect(somedayParsed.cleanText).toBe("Read design book");
     expect(somedayParsed.date).toBeNull();
     expect(somedayParsed.color).toBe("yellowish");
+  });
+
+  it("handles defaultDate with non-date @mentions and inline overrides", () => {
+    const refDate = new Date(2026, 8, 26, 12, 0, 0); // 2026-09-26
+    const selectedDay = "2026-10-15";
+
+    // Non-date @mention should not drop defaultDate
+    const mentionParsed = parseQuickAddInput(
+      "Email @sarah about the Q4 launch",
+      undefined,
+      refDate,
+      selectedDay,
+    );
+    expect(mentionParsed.cleanText).toBe("Email @sarah about the Q4 launch");
+    expect(mentionParsed.date).toBe("2026-10-15");
+
+    // Inline @date token overrides defaultDate
+    const overrideParsed = parseQuickAddInput(
+      "Email @sarah @tomorrow #pink",
+      undefined,
+      refDate,
+      selectedDay,
+    );
+    expect(overrideParsed.cleanText).toBe("Email @sarah");
+    expect(overrideParsed.date).toBe("2026-09-27");
+    expect(overrideParsed.color).toBe("pink");
+
+    // Dedicated explicitDate argument has highest precedence (e.g. from dedicated date argument field in Quick Add)
+    const explicitWon = parseQuickAddInput(
+      "Buy milk @today #pink",
+      "2026-10-15",
+      refDate,
+    );
+    expect(explicitWon.cleanText).toBe("Buy milk");
+    expect(explicitWon.date).toBe("2026-10-15");
+    expect(explicitWon.color).toBe("pink");
   });
 
   it("correctly identifies overdue tasks", () => {
@@ -428,5 +472,104 @@ describe("tweek-client MCP & REST operations", () => {
 
     expect(postedBody).not.toBeNull();
     expect(postedBody!.date).toBe(getTodayISO());
+  });
+});
+
+describe("month calendar", () => {
+  it("builds full-week month grids respecting week start", () => {
+    // October 2026 starts on Thursday and has 31 days
+    const monday = getMonthGridISO("2026-10-15", "Monday");
+    expect(monday).toHaveLength(35);
+    expect(monday[0]).toBe("2026-09-28");
+    expect(monday[34]).toBe("2026-11-01");
+
+    const sunday = getMonthGridISO("2026-10-01", "Sunday");
+    expect(sunday[0]).toBe("2026-09-27");
+    expect(sunday.length % 7).toBe(0);
+
+    // February 2026 starts on Sunday with 28 days -> exactly 4 weeks on Sunday start
+    expect(getMonthGridISO("2026-02-01", "Sunday")).toHaveLength(28);
+    // Months can need 6 weeks (August 2026: starts Saturday, 31 days)
+    expect(getMonthGridISO("2026-08-01", "Monday")).toHaveLength(42);
+  });
+
+  it("keeps the grid inside Tweek's 92-day expansion limit", () => {
+    const grid = getMonthGridISO("2026-08-01", "Monday");
+    expect(grid.length).toBeLessThanOrEqual(42);
+  });
+
+  it("adds months with day clamping and year rollover", () => {
+    expect(addMonthsISO("2026-01-31", 1)).toBe("2026-02-28");
+    expect(addMonthsISO("2028-01-31", 1)).toBe("2028-02-29");
+    expect(addMonthsISO("2026-12-15", 1)).toBe("2027-01-15");
+    expect(addMonthsISO("2026-01-15", -1)).toBe("2025-12-15");
+    expect(getMonthStartISO("2026-10-09")).toBe("2026-10-01");
+  });
+
+  it("groups tasks by date and skips someday tasks", () => {
+    const mk = (id: string, date: string | null): TweekTask => ({
+      id,
+      calendarId: "cal",
+      text: id,
+      done: false,
+      date,
+    });
+    const grouped = groupTasksByDate([
+      mk("a", "2026-10-09"),
+      mk("b", "2026-10-09"),
+      mk("c", "2026-10-10"),
+      mk("d", null),
+    ]);
+    expect(grouped.get("2026-10-09")?.map((t) => t.id)).toEqual(["a", "b"]);
+    expect(grouped.get("2026-10-10")).toHaveLength(1);
+    expect(grouped.size).toBe(2);
+  });
+
+  it("renders day cell SVG with task dots, overflow and today marker", () => {
+    const tasks: TweekTask[] = Array.from({ length: 8 }, (_, i) => ({
+      id: `t${i}`,
+      calendarId: "cal",
+      text: `Task ${i}`,
+      done: i === 0,
+      date: "2026-10-09",
+      color: i % 2 === 0 ? "pink" : null,
+    }));
+    const svg = renderDayCellSvg({
+      dayNumber: 9,
+      tasks,
+      customColors: [],
+      inMonth: true,
+      isToday: true,
+      weekdayLabel: "Fri",
+      theme: "light",
+    });
+    expect(svg.match(/<circle cx="\d+" cy="108"/g)).toHaveLength(6);
+    expect(svg).toContain("+2");
+    expect(svg).toContain("7 tasks");
+    expect(svg).toContain("Fri");
+    expect(svg).toContain("#FF6363");
+    expect(svgToDataUri(svg).startsWith("data:image/svg+xml,")).toBe(true);
+  });
+
+  it("never leaks task text or unsafe colors into the SVG", () => {
+    const svg = renderDayCellSvg({
+      dayNumber: 1,
+      tasks: [
+        {
+          id: "x",
+          calendarId: "cal",
+          text: "<script>alert(1)</script>",
+          done: true,
+          date: "2026-10-01",
+          color: '"/><script>',
+        },
+      ],
+      customColors: [],
+      inMonth: false,
+      isToday: false,
+      theme: "dark",
+    });
+    expect(svg).not.toContain("<script>");
+    expect(svg).toContain("all done");
   });
 });

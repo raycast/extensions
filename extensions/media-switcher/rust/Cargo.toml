@@ -31,4 +31,5 @@ windows = { version = "0.58.0", features = [
     "Win32_System_Com",
     "Win32_Storage_FileSystem",
     "Win32_Storage_Packaging_Appx",
+    "Storage_Streams",
 ] }

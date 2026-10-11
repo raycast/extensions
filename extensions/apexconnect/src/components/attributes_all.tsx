@@ -1,17 +1,14 @@
-import { showFailureToast } from "@raycast/utils";
 import { State } from "@lib/apexapi";
 import { Action, ActionPanel, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { useHAStates } from "./hooks";
+import { useFailureToast, useHAStates } from "./hooks";
 
 export function StatesAttributesList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useSearch(searchText, allStates);
 
-  if (error) {
-    showFailureToast(error, { title: "Cannot search Apex Connect states" });
-  }
+  useFailureToast(error, { title: "Cannot search Apex Connect states" });
 
   if (!states) {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;

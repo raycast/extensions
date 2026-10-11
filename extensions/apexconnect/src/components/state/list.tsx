@@ -1,4 +1,3 @@
-import { showFailureToast } from "@raycast/utils";
 import { AutomationActionPanel } from "@components/automation/actions";
 import { ButtonActionPanel } from "@components/button/actions";
 import { CameraActionPanel } from "@components/camera/actions";
@@ -6,7 +5,7 @@ import { ClimateActionPanel } from "@components/climate/actions";
 import { CoverActionPanel } from "@components/cover/actions";
 import { EntityStandardActionSections } from "@components/entity";
 import { FanActionPanel } from "@components/fan/actions";
-import { useHAStates } from "@components/hooks";
+import { useFailureToast, useHAStates } from "@components/hooks";
 import { InputBooleanActionPanel } from "@components/input_boolean/actions";
 import { InputButtonActionPanel } from "@components/input_button/actions";
 import { InputDateTimeActionPanel } from "@components/input_datetime/actions";
@@ -38,9 +37,7 @@ export function StatesList(props: { domain: string; deviceClass?: string | undef
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useStateSearch(searchText, props.domain, props.deviceClass, allStates);
 
-  if (error) {
-    showFailureToast(error, { title: "Cannot search Apex Connect states." });
-  }
+  useFailureToast(error, { title: "Cannot search Apex Connect states." });
 
   if (!states) {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;

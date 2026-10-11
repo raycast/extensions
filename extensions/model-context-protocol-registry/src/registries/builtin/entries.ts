@@ -31,6 +31,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "a1-gallery",
+    title: "A1 Gallery",
+    description:
+      "Hand-curated web design references, inside your agent. Search 1,100+ real websites, their captured sections and interior pages, the fonts they use and the designers who made them, and read design tokens measured off each rendered page: type sizes, spacing, radius, container width and palette. 17 read-only tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, free A1 account (50 calls a day), no API key to paste.",
+    icon: "https://img.a1.gallery/brand/a1-app-icon-512.png",
+    homepage: "https://www.a1.gallery/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.a1.gallery/api/mcp"],
+    },
+    remoteUrl: "https://www.a1.gallery/api/mcp",
+  },
+  {
     name: "aiapplyd",
     title: "AI Applyd",
     description:
@@ -139,6 +152,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "bulkpublish",
+    title: "BulkPublish",
+    description:
+      "Schedule, cross-post and analyze social media posts across 15 platforms: Facebook, Instagram, X, TikTok, YouTube, Threads, Bluesky, Pinterest, Google Business Profile, LinkedIn, Mastodon, Discord, Telegram, Tumblr and Snapchat. List channels, draft posts with per-platform captions, upload images and video, schedule or take the next queue slot, publish and retry, read post metrics and analytics, and on Pro and Business plans answer DMs and comments. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, pasting a BulkPublish API key once on the consent screen; free plan available.",
+    icon: "https://www.bulkpublish.com/favicon.svg",
+    homepage: "https://www.bulkpublish.com/integrations/mcp-server/",
+    remoteUrl: "https://mcp.bulkpublish.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.bulkpublish.com/mcp"],
+    },
+  },
+  {
     name: "chirpie",
     title: "Chirpie",
     description:
@@ -239,6 +265,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "datacircle",
+    title: "Datacircle",
+    description:
+      "Datacircle is a data co-op. Query your favorite B2B data APIs through us. Same request, same price, no markup. Every morning, you get the flat file of your data plus everyone else's.",
+    icon: "https://datacircle.dev/favicon.png",
+    homepage: "https://docs.datacircle.dev/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.datacircle.dev/mcp"],
+    },
+    remoteUrl: "https://api.datacircle.dev/mcp",
+  },
+  {
     name: "desearch",
     title: "Desearch",
     description:
@@ -257,7 +296,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "dc-hub",
     title: "DC Hub",
     description:
-      "Live data on the physical infrastructure behind AI: facility coverage in 170+ countries, 300+ markets scored daily (DCPI), 1,700+ tracked M&A deals, live grid, fiber, gas and interconnection-queue data, and Capacity Source: search available data-center capacity by size and location, get exact fits or multi-provider bundles, and request brokered intros. 92 tools; every answer carries its source. Hosted remote Streamable HTTP server through `mcp-remote`; free tier works with no API key and no sign-in.",
+      "Live data on the physical infrastructure behind AI: facility coverage in 170+ countries, 300+ markets scored daily (DCPI), 1,700+ tracked M&A deals, live grid, fiber, gas and interconnection-queue data, and Capacity Source: search available data-center capacity by size and location, get exact fits or multi-provider bundles, and request brokered intros. 94 tools; every answer carries its source. Hosted remote Streamable HTTP server through `mcp-remote`; free tier works with no API key and no sign-in.",
     icon: "https://raw.githubusercontent.com/azmartone67/dchub-mcp-server/main/dchub-logo.png",
     homepage: "https://dchub.cloud/connect",
     configuration: {
@@ -568,13 +607,26 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "maqami-travel",
     title: "MAQAMI Travel",
     description:
-      "Official MCP server for MAQAMI, a hotel and flight booking platform with 3M+ hotels. Search hotels and flights, read hotel details and reviews, look up places and the weather, then prebook and book. Booking creates a real reservation and needs guest and payment details. Remote Streamable HTTP server at https://mcp.maqami.co/; no sign-in, no API key.",
+      "Official MCP server for MAQAMI, a hotel and flight booking platform with 3M+ hotels. Search hotels and flights, read hotel details and reviews, then give the customer a secure checkout link on book.maqami.co, where they pay. No booking or payment details in tool calls. Remote Streamable HTTP server at https://mcp.maqami.co/; no sign-in, no API key.",
     icon: "https://maqami.co/android-chrome-512x512.png",
     homepage: "https://github.com/negm17111995/mcp-server",
     remoteUrl: "https://mcp.maqami.co/",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.maqami.co/"],
+    },
+  },
+  {
+    name: "medbillanalyzer",
+    title: "MedBillAnalyzer",
+    description:
+      "Check a medical bill against the Explanation of Benefits (EOB) your insurer sent for the same care: the free scan shows how many lines disagree and the dollars in question; a $10 unlock gives each finding, a dispute letter and a phone script. Documents are never stored and cases delete after 30 days. Remote Streamable HTTP server at https://app.medbillanalyzer.com/mcp/apps; no sign-in, no API key.",
+    icon: "https://medbillanalyzer.com/icon-512.png",
+    homepage: "https://medbillanalyzer.com",
+    remoteUrl: "https://app.medbillanalyzer.com/mcp/apps",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.medbillanalyzer.com/mcp/apps"],
     },
   },
   {
@@ -623,7 +675,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "An MCP server implementation that integrates the Sonar API to provide Claude with unparalleled real-time, web-wide research.",
     icon: "https://svgl.app/library/perplexity.svg",
-    homepage: "https://github.com/ppl-ai/modelcontextprotocol",
+    homepage: "https://github.com/perplexityai/modelcontextprotocol",
     configuration: {
       command: "npx",
       args: ["-y", "server-perplexity-ask"],
@@ -669,6 +721,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.prisma.io/mcp"],
+    },
+  },
+  {
+    name: "qrx",
+    title: "QRX",
+    description:
+      "Branded, print-ready art QR codes that always scan. Describe a look and give a link: QRX paints an artistic QR code, checks that it decodes, and returns the image with a hosted qrx.to short link that can be re-pointed later. Start a code, wait for the image, list your codes, change where a code points, check your daily allowance and list styles. Hosted remote Streamable HTTP server through `mcp-remote`; QRX API key as an `Authorization: Bearer` header (free account, 42 codes a day).",
+    icon: "https://qrx.codes/images/brand/qrx-code-512.png",
+    homepage: "https://qrx.codes/developers/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://qrx.codes/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
   },
   {
@@ -763,6 +827,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote@0.14.3", "https://api.truthifi.com/mcp"],
+    },
+  },
+  {
+    name: "bankbridge",
+    title: "BankBridge",
+    description:
+      "Read-only access to your own US bank, credit card and investment accounts: balances, transactions, spending by category or merchant, recurring charges, monthly cashflow and holdings. Data is fetched live from your banks on each call and not stored. Remote Streamable HTTP server with BankBridge OAuth 2.1 sign-in (dynamic client registration, PKCE) through `mcp-remote`; no API key needed. Paid: $5/mo per connected bank. It can't move money.",
+    icon: "https://github.com/bankbridge-money.png",
+    homepage: "https://bankbridge.money/docs/raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote@0.14.3", "https://bankbridge.money/api/mcp"],
     },
   },
   {
@@ -906,7 +982,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "This project follows the Model Context Protocol standard, allowing AI assistants to interact with Stripe's API.",
     icon: "https://svgl.app/library/stripe.svg",
-    homepage: "https://github.com/stripe/agent-toolkit",
+    homepage: "https://github.com/stripe/ai",
     configuration: {
       command: "npx",
       args: ["-y", "@stripe/mcp", "--tools=all", "--api-key=YOUR_STRIPE_SECRET_KEY"],
@@ -923,6 +999,32 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "@supabase/mcp-server-supabase@latest", "--access-token", "<personal-access-token>"],
     },
+  },
+  {
+    name: "suparelay",
+    title: "Suparelay",
+    description:
+      "Make international calls from your AI assistant. Get the price per minute for a phone number or a country, and a Call link that opens the Suparelay browser dialer with the number ready; the person you call answers on their normal phone. Read-only. Hosted remote Streamable HTTP server at https://suparelay.app/mcp; no sign-in and no API key.",
+    icon: "https://suparelay.app/web-app-manifest-512x512.png",
+    homepage: "https://suparelay.app/ai/mcp",
+    remoteUrl: "https://suparelay.app/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://suparelay.app/mcp"],
+    },
+  },
+  {
+    name: "tapetide",
+    title: "Tapetide",
+    description:
+      "Indian stock market research for about 8,200 NSE and BSE listed companies: quotes, quarterly and annual financials, shareholding, a 326-ratio fundamental screener, technical screens, FII/DII flows, end-of-day index option chains, Tapetide Score, company filings and your own Tapetide portfolio and watchlist. 55 tools. Hosted remote Streamable HTTP server; OAuth 2.1 Google sign-in with dynamic client registration and PKCE, no API key to paste; free plan with 50 tool calls a day. Research data, not investment advice.",
+    icon: "https://github.com/Tapetide-hq.png",
+    homepage: "https://tapetide.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.tapetide.com/mcp"],
+    },
+    remoteUrl: "https://mcp.tapetide.com/mcp",
   },
   {
     name: "tavily",
@@ -1047,7 +1149,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "A Model Context Protocol (MCP) server implementation that integrates with Firecrawl for web scraping capabilities.",
     icon: "🔥",
-    homepage: "https://github.com/mendableai/firecrawl-mcp-server",
+    homepage: "https://github.com/firecrawl/firecrawl-mcp-server",
     configuration: {
       command: "npx",
       args: ["-y", "firecrawl-mcp"],
@@ -1636,7 +1738,7 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     description:
       "This project implements a Model Context Protocol (MCP) integration between Cursor AI and Figma, allowing Cursor to communicate with Figma for reading designs and modifying them programmatically.",
     icon: "https://svgl.app/library/figma.svg",
-    homepage: "https://github.com/sonnylazuardi/cursor-talk-to-figma-mcp",
+    homepage: "https://github.com/grab/cursor-talk-to-figma-mcp",
     configuration: {
       command: "bunx",
       args: ["cursor-talk-to-figma-mcp@latest"],
@@ -1843,6 +1945,31 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "kordoc",
+    title: "kordoc",
+    description:
+      "Parse Korean and office documents into Markdown and structured data: HWP 3.x/5.x, HWPX, HWPML, PDF, DOCX, XLS/XLSX, PPTX and PNG/JPG/WebP images. Also compares two documents, fills forms, applies format-preserving HWPX/HWP patches, generates HWPX from Markdown and renders previews. 17 tools that work on local file paths. Local stdio server from the `kordoc` npm package (MIT) through `npx`; no API key, Node.js 20+.",
+    icon: "https://github.com/chrisryugj.png",
+    homepage: "https://github.com/chrisryugj/kordoc",
+    configuration: {
+      command: "npx",
+      args: ["-y", "kordoc", "mcp"],
+    },
+  },
+  {
+    name: "korean-law",
+    title: "Korean Law MCP",
+    description:
+      "Search and read Korean law through the official Open API of Korea's Ministry of Government Legislation (법제처): statutes, precedents, administrative rules, local ordinances, treaties and legal interpretations, plus citation verification that checks statute and precedent citations in AI-written answers against the official database. 10 tools. Hosted remote Streamable HTTP server at https://mcp.gomdori.app/law; it works without a key through a shared, rate-limited key, or add your own free 법제처 Open API key as `?oc=YOUR_KEY`. Open source (MIT).",
+    icon: "https://github.com/chrisryugj.png",
+    homepage: "https://github.com/chrisryugj/korean-law-mcp",
+    remoteUrl: "https://mcp.gomdori.app/law",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.gomdori.app/law"],
+    },
+  },
+  {
     name: "kyma",
     title: "Kyma API",
     description:
@@ -1903,7 +2030,7 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     description:
       "MCP Server for monday.com, enabling MCP clients to interact with Monday.com boards, items, updates, and documents.",
     icon: "monday.svg",
-    homepage: "https://github.com/sakce/mcp-server-monday",
+    homepage: "https://github.com/Prat011/mcp-server-monday",
     configuration: {
       command: "uvx",
       args: ["mcp-server-monday"],
@@ -2085,10 +2212,10 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       "Use your own LinkedIn account from your AI assistant: look up profiles and companies, search people, jobs and Sales Navigator (with your own seat), read and send LinkedIn messages, read and write posts, comments and reactions, manage connection requests, read your own post analytics, and find work emails and mobile numbers. Not affiliated with LinkedIn. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. 7-day free trial without a card; connecting a LinkedIn account needs a paid plan (from $19/month).",
     icon: "https://app.linkmcp.io/logo-512.png",
     homepage: "https://app.linkmcp.io",
-    remoteUrl: "https://app.linkmcp.io/api/mcp",
+    remoteUrl: "https://app.linkmcp.io/api/mcp?ref=raycast",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://app.linkmcp.io/api/mcp"],
+      args: ["-y", "mcp-remote", "https://app.linkmcp.io/api/mcp?ref=raycast"],
     },
   },
   {

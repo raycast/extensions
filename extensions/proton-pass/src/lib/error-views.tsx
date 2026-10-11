@@ -2,6 +2,7 @@ import { List, ActionPanel, Action, Icon, openExtensionPreferences, showToast, T
 import { JSX } from "react";
 import { PassCliErrorType, PROTON_PASS_CLI_DOCS } from "./types";
 import { clearCliCache } from "./cli";
+import { NotLoggedInView } from "./login-view";
 
 function ClearCliCacheAction({ onComplete }: { onComplete?: () => void }): JSX.Element {
   const handle = async () => {
@@ -146,5 +147,7 @@ export function renderErrorView(
   message?: string,
 ): JSX.Element | null {
   if (!errorType) return null;
+  // The login screen, rather than a message: it can log in, and follow a login started before.
+  if (errorType === "not_authenticated" && onRetry) return <NotLoggedInView reload={onRetry} />;
   return <ErrorListView errorType={errorType} onRetry={onRetry} contextTitle={contextTitle} message={message} />;
 }

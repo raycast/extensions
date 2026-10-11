@@ -80,6 +80,59 @@ export function getDashboardFetchWindowISO(referenceDate: Date = new Date()): {
   };
 }
 
+/** Returns the first day of the month (YYYY-MM-01) containing `isoDate`. */
+export function getMonthStartISO(isoDate: string): string {
+  const [yyyy, mm] = isoDate.split("-");
+  return `${yyyy}-${mm}-01`;
+}
+
+/**
+ * Adds (or subtracts) whole months, clamping the day to the target month's
+ * length (e.g. Jan 31 + 1 month = Feb 28/29).
+ */
+export function addMonthsISO(isoDate: string, months: number): string {
+  const source = parseISODate(isoDate);
+  const day = source.getDate();
+  const target = new Date(
+    source.getFullYear(),
+    source.getMonth() + months,
+    1,
+    12,
+    0,
+    0,
+    0,
+  );
+  const daysInTarget = new Date(
+    target.getFullYear(),
+    target.getMonth() + 1,
+    0,
+  ).getDate();
+  target.setDate(Math.min(day, daysInTarget));
+  return toISODateString(target);
+}
+
+/**
+ * Returns every day (YYYY-MM-DD) shown in a month grid: full weeks (5 or 6)
+ * that cover the month, including leading/trailing days of adjacent months.
+ */
+export function getMonthGridISO(
+  monthStartISO: string,
+  weekStartsOn: WeekStartPreference = "Monday",
+): string[] {
+  const first = parseISODate(getMonthStartISO(monthStartISO));
+  const daysInMonth = new Date(
+    first.getFullYear(),
+    first.getMonth() + 1,
+    0,
+  ).getDate();
+  const gridStart = getWeekBoundsISO(first, weekStartsOn).startISO;
+  const leading = Math.round(
+    (first.getTime() - parseISODate(gridStart).getTime()) / 86_400_000,
+  );
+  const weeks = Math.ceil((leading + daysInMonth) / 7);
+  return Array.from({ length: weeks * 7 }, (_, i) => addDaysISO(gridStart, i));
+}
+
 export function formatTaskDate(
   isoDate: string | null | undefined,
   format: DateFormatPreference = "dd/MM/yyyy",
@@ -173,6 +226,7 @@ export function parseQuickAddInput(
   rawText: string,
   explicitDate?: string,
   referenceDate: Date = new Date(),
+  defaultDate?: string,
 ): {
   cleanText: string;
   date: string | null;
@@ -180,10 +234,27 @@ export function parseQuickAddInput(
 } {
   let text = rawText.trim();
   const todayISO = getTodayISO(referenceDate);
+
+  // 1. Base date from defaultDate (e.g. opened day view in calendar), otherwise today
   let resolvedDate: string | null = todayISO;
+  if (defaultDate && defaultDate.trim()) {
+    const cleanDefault = defaultDate.trim().toLowerCase();
+    if (cleanDefault === "today") {
+      resolvedDate = todayISO;
+    } else if (cleanDefault === "tomorrow") {
+      resolvedDate = addDaysISO(todayISO, 1);
+    } else if (cleanDefault === "nextweek") {
+      resolvedDate = addDaysISO(todayISO, 7);
+    } else if (cleanDefault === "someday") {
+      resolvedDate = null;
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(cleanDefault)) {
+      resolvedDate = cleanDefault;
+    }
+  }
+
   let resolvedColor: string | undefined;
 
-  // Extract #color token
+  // 2. Extract #color token
   const colorMatch =
     /(?:^|\s)#(blank|pink|yellowish|black|grey|cornflower|mango|greenish|lilac)\b/i.exec(
       text,
@@ -193,7 +264,7 @@ export function parseQuickAddInput(
     text = text.replace(colorMatch[0], " ").trim();
   }
 
-  // Extract @date token
+  // 3. Extract @date token (overrides defaultDate fallback)
   const dateTokenMatch =
     /(?:^|\s)@(today|tomorrow|nextweek|someday|\d{4}-\d{2}-\d{2})\b/i.exec(
       text,
@@ -214,12 +285,15 @@ export function parseQuickAddInput(
     text = text.replace(dateTokenMatch[0], " ").trim();
   }
 
+  // 4. Dedicated explicitDate argument has highest precedence (preserves dedicated field in Quick Add)
   if (explicitDate && explicitDate.trim()) {
     const cleanExplicit = explicitDate.trim().toLowerCase();
     if (cleanExplicit === "today") {
       resolvedDate = todayISO;
     } else if (cleanExplicit === "tomorrow") {
       resolvedDate = addDaysISO(todayISO, 1);
+    } else if (cleanExplicit === "nextweek") {
+      resolvedDate = addDaysISO(todayISO, 7);
     } else if (cleanExplicit === "someday") {
       resolvedDate = null;
     } else if (/^\d{4}-\d{2}-\d{2}$/.test(cleanExplicit)) {

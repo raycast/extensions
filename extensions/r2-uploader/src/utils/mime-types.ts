@@ -70,6 +70,17 @@ export function getMimeType(filePath: string): string {
 }
 
 /**
+ * Check if the file is an image format supported for WebP conversion
+ * @param filePath File path
+ * @returns True if it is a supported image format, otherwise false
+ */
+export function isWebpConvertibleImageFormat(filePath: string): boolean {
+  const ext = filePath.toLowerCase().substring(filePath.lastIndexOf("."));
+  const supportedFormats = [".jpg", ".jpeg", ".png", ".tiff"];
+  return supportedFormats.includes(ext);
+}
+
+/**
  * Check if the file is an image format supported for AVIF conversion
  * @param filePath File path
  * @returns True if it is a supported image format, otherwise false

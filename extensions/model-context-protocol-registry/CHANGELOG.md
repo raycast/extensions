@@ -1,5 +1,66 @@
 # Model Context Protocol Registry Changelog
 
+## [Update LinkMCP MCP Server] - 2026-10-10
+
+- Add a listing tag to LinkMCP's server URL (https://app.linkmcp.io/api/mcp?ref=raycast), so LinkMCP can see which sign-ups come from Raycast. The server works the same way.
+
+## [Update DC Hub MCP Server] - 2026-10-10
+
+- Update DC Hub's description: the server now has 94 tools.
+
+## [Update Datacircle MCP Server] - 2026-10-10
+
+- Update Datacircle's description.
+
+## [Add Korean Law MCP and kordoc MCP Servers] - 2026-10-10
+
+- Add Korean Law MCP to the community registry: Korean statutes, precedents, administrative rules, local ordinances, treaties and legal interpretations from the official 법제처 Open API, plus citation verification for statutes and precedents. Hosted remote Streamable HTTP server at https://mcp.gomdori.app/law; works without a key through a shared, rate-limited key, or with your own free key as `?oc=YOUR_KEY`.
+- Add kordoc to the community registry: parse HWP, HWPX, HWPML, PDF, DOCX, XLS/XLSX, PPTX and images into Markdown and structured data, compare documents, fill forms and apply format-preserving HWPX/HWP patches. Local stdio server `kordoc` (MIT) through `npx`; no API key.
+
+## [Add Tapetide MCP Server] - 2026-10-10
+
+- Add Tapetide to the official registry: Indian stock market research for about 8,200 NSE and BSE listed companies (quotes, financials, shareholding, screeners, FII/DII flows, option chains, filings, portfolio and watchlist), 55 tools. Hosted remote Streamable HTTP server at https://mcp.tapetide.com/mcp; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key.
+
+## [Add MedBillAnalyzer MCP Server] - 2026-10-10
+
+- Add MedBillAnalyzer to the official registry: Check a medical bill against the Explanation of Benefits (EOB) your insurer sent for the same care: the free scan shows how many lines disagree and the dollars in question; a $10 unlock gives each finding, a dispute letter and a phone script. Documents are never stored and cases delete after 30 days. Remote Streamable HTTP server at https://app.medbillanalyzer.com/mcp/apps; no sign-in, no API key.
+
+## [Add BankBridge MCP Server] - 2026-10-10
+
+- Add BankBridge to the official registry: read-only access to your own US bank, credit card and investment accounts (balances, transactions, spending summaries, recurring charges, cashflow and holdings), fetched live from your banks on each call. Hosted remote Streamable HTTP server at https://bankbridge.money/api/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key. Paid, $5/mo per connected bank. It can't move money.
+
+## [Add Datacircle MCP Server] - 2026-10-09
+
+- Add Datacircle (https://api.datacircle.dev/mcp, remote, OAuth) to the official registry: Query your favorite B2B data APIs through us. Same request, same price, no markup.
+
+## [Add QRX MCP Server] - 2026-10-09
+
+- Add QRX to the official registry: turn a prompt and a link into a branded, print-ready QR code that is checked to scan, with a hosted qrx.to short link. Hosted remote Streamable HTTP server at https://qrx.codes/mcp through `mcp-remote`; QRX API key sent as an `Authorization: Bearer` header.
+
+## [Add A1 Gallery MCP Server] - 2026-10-09
+
+- Add A1 Gallery to the official registry: hand-curated web design references, inside your agent. Search real websites, sections, pages, fonts and designers, and read design tokens measured off each rendered page. 17 read-only tools. Hosted remote Streamable HTTP server at https://www.a1.gallery/api/mcp; OAuth 2.1 sign-in with dynamic client registration, free A1 account, no API key.
+
+## [Add BulkPublish MCP Server] - 2026-10-09
+
+- Add BulkPublish to the official registry: schedule, cross-post and analyze social media posts across 15 platforms, including Facebook, Instagram, X, TikTok, YouTube, LinkedIn and Bluesky, with media uploads, queue slots, post analytics and, on Pro and Business plans, DM and comment replies. Raycast connects directly to the remote Streamable HTTP server at https://mcp.bulkpublish.com/mcp, with `mcp-remote` as the fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, pasting a BulkPublish API key once on the consent screen.
+
+## [Update MAQAMI Travel MCP Server] - 2026-10-09
+
+- Update MAQAMI Travel's description: the server searches hotels and flights and gives the customer a secure checkout link on book.maqami.co, where they pay. It no longer books or takes payment details in a tool call, and the places and weather tools are gone.
+
+## [Add Suparelay MCP Server] - 2026-10-08
+
+- Add Suparelay to the official entries: international calls from your AI assistant, with the price per minute and a Call link to the browser dialer.
+
+## [Update MAQAMI Travel MCP Server] - 2026-10-08
+
+- Update MAQAMI Travel's description: the server searches hotels and flights and gives the customer a secure checkout link on book.maqami.co, where they pay. It no longer books or takes payment details in a tool call, and the places and weather tools are gone.
+
+## [Update Moved Repository Links] - 2026-10-08
+
+- Update the homepage links of the Perplexity, Stripe, Firecrawl, Talk to Figma and Monday entries to the repositories they now redirect to.
+
 ## [Add The Bridge MCP Server] - 2026-10-07
 
 - Add The Bridge to the official registry: complete, hosted login, teams, billing and feature flags for your SaaS app, set up by your AI assistant. Remote Streamable HTTP server at https://api.thebridge.dev/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.

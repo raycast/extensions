@@ -7,6 +7,7 @@ import {
   Icon,
   Image,
   Keyboard,
+  type LaunchProps,
   List,
   open,
   openCommandPreferences,
@@ -21,16 +22,21 @@ import {
   setArticleReadStatusForArticle,
 } from "./article-archive";
 import { createArticleDetailMarkdown } from "./article-detail";
+import { ArticleCopyActions } from "./article-copy-actions";
 import { Article, ARTICLES_PER_FEED_PAGE, fetchArticleSearchPage } from "./articles";
 import { CATEGORY_OPTIONS, strings, translateCategory, type Strings } from "./strings";
 
 type ArticleEnterAction = "browser" | "reader";
 type ArticleCategoryFilter = "__all_categories__" | (typeof CATEGORY_OPTIONS)[number];
+type SearchLaunchContext = { searchText?: string };
 
 const MINIMUM_SEARCH_LENGTH = 2;
 const SEARCH_DELAY_MS = 400;
 const FILTER_ALL_CATEGORIES = "__all_categories__";
-export default function SearchTechgedoensCommand() {
+export default function SearchTechgedoensCommand({
+  fallbackText,
+  launchContext,
+}: LaunchProps<{ launchContext: SearchLaunchContext }>) {
   const preferences = getPreferenceValues<Preferences.SearchTechgedoens>();
   const translations = strings;
   const enterAction = preferences.articleEnterAction === "browser" ? "browser" : "reader";
@@ -39,7 +45,7 @@ export default function SearchTechgedoensCommand() {
     timeStyle: "short",
   });
   const listDateFormatter = new Intl.DateTimeFormat(translations.locale, { dateStyle: "medium" });
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState(() => launchContext?.searchText?.trim() || fallbackText?.trim() || "");
   const [selectedCategory, setSelectedCategory] = useState<ArticleCategoryFilter>(FILTER_ALL_CATEGORIES);
   const [loadedQuery, setLoadedQuery] = useState("");
   const [articles, setArticles] = useState<ArchivedArticle[]>([]);
@@ -56,6 +62,7 @@ export default function SearchTechgedoensCommand() {
     const currentRequestId = ++requestId.current;
     setError(undefined);
     setHasMore(false);
+    setIsLoadingMore(false);
     setNextPage(2);
 
     if (query.length < MINIMUM_SEARCH_LENGTH) {
@@ -307,11 +314,7 @@ function SearchArticleItem({
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.OpenWith title={translations.openWith} path={article.url} />
-            <Action.CopyToClipboard
-              title={translations.copyArticleLink}
-              content={article.url}
-              shortcut={Keyboard.Shortcut.Common.Copy}
-            />
+            <ArticleCopyActions article={article} translations={translations} />
             <Action title={translations.openSettings} icon={Icon.Gear} onAction={openCommandPreferences} />
           </ActionPanel.Section>
         </ActionPanel>
@@ -355,11 +358,7 @@ function SearchArticleDetail({
             shortcut={Keyboard.Shortcut.Common.Pin}
             onAction={() => onFavoriteStatusChange(article, !article.isFavorite)}
           />
-          <Action.CopyToClipboard
-            title={translations.copyArticleLink}
-            content={article.url}
-            shortcut={Keyboard.Shortcut.Common.Copy}
-          />
+          <ArticleCopyActions article={article} translations={translations} />
         </ActionPanel>
       }
     />

@@ -10,11 +10,17 @@ const expectedArgs = {
   "login-bad-host": ["login"],
   "login-garbage": ["login"],
   "login-hang": ["login"],
+  "login-wait": ["login"],
+  "login-slow-stop": ["login"],
+  "login-url-fail": ["login"],
+  "login-finishing": ["login"],
   "login-fail": ["login"],
   "login-fail-unknown": ["login"],
   "malformed-json": ["vault", "list", "--output", "json"],
   "json:vaults-array": ["vault", "list", "--output", "json"],
   "json:vaults-wrapper": ["vault", "list", "--output", "json"],
+  "json:vault-shares": ["share", "list", "--only-vaults", "true", "--output", "json"],
+  "json:vault-members": ["vault", "member", "list", "--share-id=vault-1", "--output", "json"],
   "json:items-full": ["item", "list", "--share-id=vault-1", "--output", "json", "--show-secrets"],
   "json:item-view": ["item", "view", "--share-id=vault-1", "--item-id=item-login", "--output", "json"],
   "json:totps-wrapper": ["item", "totp", "--share-id=vault-1", "--item-id=item-1", "--output", "json"],
@@ -33,6 +39,36 @@ const fixtures = {
   "vaults-wrapper": {
     vaults: [{ name: "Work", vault_id: "vault-id-2", share_id: "vault-2" }],
   },
+  "vault-shares": {
+    shares: [
+      { id: "vault-1", name: "Personal", share_type: "Vault", share_role: "Owner" },
+      { id: "vault-2", name: "Work", share_type: "Vault", share_role: "Viewer" },
+      {
+        id: "vault-3",
+        name: "Shared Projects",
+        share_type: "Vault",
+        share_role: { Custom: { name: "4", permission: 2 } },
+      },
+    ],
+  },
+  "vault-members": [
+    {
+      member_share_id: "member-1",
+      email: "alice@example.com",
+      name: "Alice",
+      is_group_share: false,
+      role: "Owner",
+      target_type: "Vault",
+    },
+    {
+      member_share_id: "member-2",
+      email: "bob@example.com",
+      name: "Bob",
+      is_group_share: false,
+      role: "Viewer",
+      target_type: "Vault",
+    },
+  ],
   "items-full": {
     items: [
       {
@@ -111,6 +147,35 @@ switch (mode) {
   case "login-hang":
     process.on("SIGTERM", () => process.exit(0));
     setInterval(() => {}, 1_000);
+    break;
+  case "login-wait":
+    console.log(
+      `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
+    );
+    process.on("SIGTERM", () => process.exit(0));
+    setInterval(() => {}, 1_000);
+    break;
+  case "login-slow-stop":
+    console.log(`Please open the following URL in your browser:\n${loginUrl}\n`);
+    process.on("SIGTERM", () => setTimeout(() => process.exit(1), 500));
+    setInterval(() => {}, 1_000);
+    break;
+  case "login-finishing":
+    console.log(
+      `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
+    );
+    setTimeout(() => console.log("Web authentication complete, setting up your account"), 50);
+    process.on("SIGTERM", () => process.exit(0));
+    setInterval(() => {}, 1_000);
+    break;
+  case "login-url-fail":
+    console.log(
+      `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
+    );
+    setTimeout(() => {
+      console.error("Error: This operation requires an authenticated client");
+      process.exitCode = 1;
+    }, 50);
     break;
   case "login-fail":
     console.error("Error: This operation requires an authenticated client");

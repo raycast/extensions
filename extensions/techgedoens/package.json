@@ -148,30 +148,6 @@
       ]
     },
     {
-      "name": "ask-techgedoens",
-      "title": "Ask Techgedöns",
-      "subtitle": "Techgedöns.de",
-      "description": "Answers questions using saved Techgedöns articles",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "question",
-          "placeholder": "Question for Techgedöns",
-          "type": "text",
-          "required": true
-        }
-      ],
-      "keywords": [
-        "tchgdns",
-        "techgedöns",
-        "artikel",
-        "fragen",
-        "suche",
-        "wissen",
-        "ai"
-      ]
-    },
-    {
       "name": "saved-articles",
       "title": "Favorites",
       "subtitle": "Techgedöns.de",
@@ -184,6 +160,24 @@
         "favoriten",
         "gespeichert",
         "leseliste"
+      ]
+    },
+    {
+      "name": "search-selected-text",
+      "title": "Search Selected Text",
+      "subtitle": "Techgedöns.de",
+      "description": "Searches Techgedöns.de for text selected in the frontmost application",
+      "mode": "no-view",
+      "keywords": [
+        "tchgdns",
+        "techgedoens",
+        "techgedöns",
+        "artikel",
+        "auswahl",
+        "markierter text",
+        "suchen",
+        "selected text",
+        "search"
       ]
     },
     {
@@ -233,6 +227,61 @@
         "website",
         "browser"
       ]
+    },
+    {
+      "name": "menu-bar-articles",
+      "title": "Techgedöns Menu Bar",
+      "subtitle": "Techgedöns.de",
+      "description": "Shows the unread count and latest articles in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1h",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "showMenuBarArticleDate",
+          "title": "Article Details",
+          "description": "Shows the publication date next to each article in the menu bar.",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Show publication date"
+        },
+        {
+          "name": "showMenuBarArticleCategory",
+          "title": "",
+          "description": "Shows the category next to each article in the menu bar.",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Show category"
+        }
+      ],
+      "keywords": [
+        "tchgdns",
+        "techgedoens",
+        "techgedöns",
+        "artikel",
+        "ungelesen",
+        "menüleiste",
+        "menu bar"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-articles",
+      "title": "Search Articles",
+      "description": "Searches the public Techgedöns.de archive and returns the five most relevant articles with their full RSS content"
+    },
+    {
+      "name": "get-latest-articles",
+      "title": "Get Latest Articles",
+      "description": "Returns the five latest articles published on Techgedöns.de"
+    },
+    {
+      "name": "get-article",
+      "title": "Get Article",
+      "description": "Loads a specific Techgedöns.de article by its exact title or URL"
     }
   ],
   "dependencies": {
