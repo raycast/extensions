@@ -4,14 +4,14 @@ Search local files by meaning using EmbeddingGemma 2. Documents, photos, video s
 
 ## Requirements and setup
 
-Apple silicon, macOS 26+, and the separately installed **Semantic Search Engine 0.5.0** are required. Allow about 2.5 GB for engine installation, plus model weights and your library index.
+Apple silicon, macOS 26+, and the separately installed **Semantic Search Engine 0.5.1** are required. Allow about 2.5 GB for engine installation, plus model weights and your library index.
 
 1. Open Semantic Search and choose **Download Search Engine** if the engine is missing.
 2. Open the companion installer from the release page and click **Install**. Python and decoding libraries are included. No Homebrew or terminal setup.
 3. Return to Search and choose **Check Installation**.
 4. Choose **Manage Library** in Actions, download a model, select folders and apply. Model weights download from Hugging Face.
 
-The 0.5.0 companion is unsigned; macOS may require explicit opening approval. See the [installation guide](https://github.com/nikusti/semantic-search/blob/main/docs/INSTALL.md).
+The 0.5.1 companion is unsigned; macOS may require explicit opening approval. See the [installation guide](https://github.com/nikusti/semantic-search/blob/main/docs/INSTALL.md).
 
 MLX 8-bit and Core ML are supported; each model keeps a separate index. Text queries load only the text encoder even when searching indexed media. The default index uses 512-dimensional float32 vectors. By default, model workers unload one minute after leaving search when no indexing or request is active.
 

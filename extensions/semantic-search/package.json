@@ -47,14 +47,14 @@
     "@raycast/eslint-config": "2.2.0",
     "@types/node": "24.19.2",
     "@types/react": "19.3.0",
-    "@types/react-test-renderer": "19.1.0",
     "esbuild": "0.25.12",
     "eslint": "10.0.1",
     "prettier": "3.8.2",
+    "typescript": "5.9.3",
     "react-test-renderer": "19.3.0",
-    "typescript": "5.9.3"
+    "@types/react-test-renderer": "19.1.0"
   },
-  "version": "0.5.0",
+  "version": "0.5.1",
   "categories": [
     "Productivity"
   ],
