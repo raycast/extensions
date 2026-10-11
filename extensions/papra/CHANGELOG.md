@@ -1,6 +1,6 @@
 # Papra Changelog
 
-## [Fix document search] - {PR_MERGE_DATE}
+## [Fix document search] - 2026-10-11
 
 - Search documents through the documents endpoint's `searchQuery` parameter, so searching no longer fails with an invalid document ID error
 
