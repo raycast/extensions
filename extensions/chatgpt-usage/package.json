@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chatgpt-usage",
+  "title": "ChatGPT Usage",
+  "description": "View shared ChatGPT and Codex plan limits in the menu bar or inline in Raycast and Tinycast.",
+  "icon": "icon.png",
+  "author": "chiubaca",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "usage",
+      "title": "Show Plan Usage",
+      "description": "Show remaining shared plan usage and reset times in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "5m"
+    },
+    {
+      "name": "view-usage",
+      "title": "View Plan Usage",
+      "description": "View remaining shared plan usage, progress bars, and reset times inside the launcher.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "codexPath",
+      "title": "Codex Executable",
+      "description": "Optional absolute path to Codex. Leave blank to find it automatically. Sign in with ChatGPT using codex login first.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/codex"
+    },
+    {
+      "name": "displayMode",
+      "title": "Menu Bar Display",
+      "description": "Choose which remaining percentages appear in the menu bar.",
+      "type": "dropdown",
+      "required": false,
+      "default": "both",
+      "data": [
+        {
+          "title": "Both Limits",
+          "value": "both"
+        },
+        {
+          "title": "5-Hour Limit",
+          "value": "five-hour"
+        },
+        {
+          "title": "Weekly Limit",
+          "value": "weekly"
+        },
+        {
+          "title": "Icon Only",
+          "value": "icon"
+        }
+      ]
+    },
+    {
+      "name": "hideDialIcon",
+      "title": "Hide Dial Icon",
+      "description": "Show only the usage text in the menu bar. Icon Only mode keeps the dial visible; error indicators are always shown.",
+      "type": "checkbox",
+      "label": "Hide the menu bar dial icon",
+      "required": false,
+      "default": false
+    }
+  ],
+  "scripts": {
+    "build": "node scripts/build-helper.mjs && ray build -e dist",
+    "build:tinycast": "node scripts/build-helper.mjs && ray build -e dist -o dist",
+    "build:helper": "node scripts/build-helper.mjs --force",
+    "dev": "node scripts/build-helper.mjs && ray develop",
+    "publish": "npx @raycast/api@latest publish",
+    "lint": "eslint . && prettier --check .",
+    "lint:fix": "eslint . --fix && prettier --write .",
+    "lint:store": "ray lint",
+    "test": "node scripts/build-helper.mjs && tsx --test tests/*.test.ts",
+    "test:tinycast": "npm run build:tinycast && tsx --test tests/tinycast.integration.ts",
+    "check:usage": "node scripts/build-helper.mjs && tsx scripts/check-usage.ts"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.0"
+  }
+}
