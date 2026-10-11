@@ -6,6 +6,7 @@
 - Choose whether the menu bar shows 3, 5, or 10 articles per section.
 - Optionally show only unread articles and hide the unread counter when it reaches zero.
 - Show favorite articles in a dedicated menu bar section.
+- Open the menu bar command settings directly from its menu.
 
 ## [Search Selected Text] - 2026-10-10
 

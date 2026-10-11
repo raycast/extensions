@@ -26,7 +26,7 @@ Read and search Techgedöns from Raycast. The extension uses the public RSS feed
 - Infinite scrolling and independent topic and read-status filters
 - Favorites remain stored regardless of the selected archive retention period
 - Automatic hourly background refresh with the latest update status shown in Raycast
-- Optional menu bar mode with 3, 5, or 10 articles per section, an unread-only filter, a hideable zero counter, a dedicated favorites section, configurable date and category details, and shortcuts to the main lists
+- Optional menu bar mode with 3, 5, or 10 articles per section, an unread-only filter, a hideable zero counter, a dedicated favorites section, configurable date and category details, and shortcuts to the main lists and settings
 - US English command interface with the original German blog topics
 
 ## Local Development

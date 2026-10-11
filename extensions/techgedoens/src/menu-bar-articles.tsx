@@ -7,6 +7,7 @@ import {
   LaunchType,
   MenuBarExtra,
   open,
+  openCommandPreferences,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -225,6 +226,7 @@ export default function MenuBarArticlesCommand() {
           onAction={() => launchCommand({ name: "saved-articles", type: LaunchType.UserInitiated })}
         />
         <MenuBarExtra.Item title={translations.reload} icon={Icon.RotateClockwise} onAction={reloadArticles} />
+        <MenuBarExtra.Item title={translations.openSettings} icon={Icon.Gear} onAction={openCommandPreferences} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
