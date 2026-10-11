@@ -1,5 +1,14 @@
 # Changelog
 
+## [Search and Menu Bar Improvements] - 2026-10-11
+
+- Display the selected text in the Techgedöns search bar so it remains visible and editable.
+- Choose whether the menu bar shows 3, 5, or 10 articles per section.
+- Choose a very short, short, medium, long, or full menu bar article title.
+- Optionally show only unread articles and choose whether the unread counter is always shown, hidden at zero, or always hidden.
+- Show favorite articles in a dedicated menu bar section.
+- Open the menu bar command settings directly from its menu.
+
 ## [Search Selected Text] - 2026-10-10
 
 - Search the public Techgedöns archive using text selected in the frontmost application.
