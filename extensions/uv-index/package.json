@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "uv-index",
+  "title": "UV Index",
+  "description": "See the current UV index for your city or town at a glance, in root search or the menu bar.",
+  "icon": "extension-icon.png",
+  "author": "samuel_ford_sam_ford",
+  "categories": [
+    "Data",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "uv-index",
+      "title": "UV Index",
+      "description": "Shows the current UV index for your city or town. The last reading stays visible next to the command in search.",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar-uv",
+      "title": "UV Index in Menu Bar",
+      "description": "Pins a minimal sun icon with the current UV index to the menu bar.",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "disabledByDefault": true
+    }
+  ],
+  "preferences": [
+    {
+      "name": "city",
+      "title": "City or Town",
+      "description": "Where to show the UV index for. Add a country or state to be specific, e.g. \"Perth, Scotland\".",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "e.g. Brisbane"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.6.0",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
