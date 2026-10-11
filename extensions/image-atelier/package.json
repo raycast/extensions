@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "image-atelier",
+  "title": "Image Atelier",
+  "description": "Generate and edit images with your own OpenAI-compatible API.",
+  "icon": "icon.png",
+  "author": "mikeboly",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Design Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "generate-image",
+      "title": "Generate or Edit Image",
+      "description": "Create an image or edit a reference image using your own API",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "generate-image",
+      "title": "Generate Image",
+      "description": "Generate an image from a text prompt using the user's configured image API. Returns a local image file and Markdown preview."
+    },
+    {
+      "name": "edit-image",
+      "title": "Edit Image",
+      "description": "Edit a local PNG, JPEG, or WebP image using a prompt. Requires an absolute local image path supplied by the user or returned by a previous image tool."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "title": "API Base URL",
+      "description": "API root including version, e.g. https://your-provider.com/v1. Requests append /images/generations or /images/edits.",
+      "required": true,
+      "placeholder": "https://your-provider.example/v1"
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "title": "API Key",
+      "description": "Bearer token for your image API",
+      "required": true
+    },
+    {
+      "name": "outputDirectory",
+      "type": "directory",
+      "title": "Save Images To",
+      "description": "Save generated images here. Defaults to ~/Pictures/Image Atelier/.",
+      "required": false
+    }
+  ],
+  "ai": {
+    "instructions": "Use generate-image for new images and edit-image for changes to an existing image. Preserve the user's prompt language and intent. Use a previous tool result's absolute path for follow-up edits. Never invent local file paths. If an attachment has no accessible local path, ask the user to save it and supply the path or use the Generate or Edit Image command. Display the returned markdown image and include a link to the saved file. Never claim success without a successful tool result. Do not retry failed generation automatically, as it may incur charges."
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "format": "prettier --write .",
+    "check": "npm run typecheck && eslint src tests && prettier --check . && npm test",
+    "check:store": "npm run check && npm run lint && npm run build",
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.3.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.8.0"
+  },
+  "keywords": [
+    "image",
+    "generation",
+    "editing",
+    "AI",
+    "BYOK"
+  ]
+}
