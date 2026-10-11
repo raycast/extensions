@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "orwell",
+  "title": "Orwell",
+  "description": "Watch, stop, restart, and launch your local dev servers.",
+  "icon": "command-icon.png",
+  "author": "ghaith_ayadi",
+  "categories": ["Developer Tools"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "orwell",
+      "title": "Orwell",
+      "description": "List running and offline dev servers and manage them.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Orwell Status",
+      "description": "Show the number of running dev servers in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "1h"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
