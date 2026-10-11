@@ -12,6 +12,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "install-fsearch",
+      "title": "Install FSearch",
+      "subtitle": "FSearch",
+      "description": "Build and install or update FSearch in Terminal, with startup at login",
+      "mode": "no-view"
+    },
+    {
       "name": "search-files",
       "title": "Search Files",
       "subtitle": "FSearch",

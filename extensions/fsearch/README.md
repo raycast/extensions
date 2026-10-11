@@ -6,6 +6,8 @@ Find any file on your Mac by name or by what's inside it, without leaving Raycas
 
 ## Commands
 
+**Install FSearch** opens Terminal to build and install FSearch, or update an existing installation. It offers to install Rust if needed, installs to `~/.local/bin/fsearch`, and enables startup at login. You can also start the installer from either search command when FSearch is missing, then choose **Try Again** after installation.
+
 **Search Files** finds files and folders anywhere on your Mac. Words match loosely, and a typo in a longer word still finds the file (`mian.rs` finds `main.rs`). Choose a kind from the menu in the search bar — Folders, Applications, Images, Documents, Code, and more — or narrow the search as you type:
 
 | Type                                | To find                                         |
@@ -33,17 +35,16 @@ The AI tools support the same file kinds and search modes as the commands. They 
 
 ## Install
 
-1. Install FSearch:
-
-   ```sh
-   git clone https://github.com/noahdunnagan/fsearch && cd fsearch
-   cargo build --release && ./target/release/fsearch install
-   ```
-
-2. Build the extension:
+1. Install the extension from the Raycast Store, or build it locally:
 
    ```sh
    npm install && npm run dev
    ```
+
+2. Run **Install FSearch** in Raycast and follow the Terminal prompts. Git and the Xcode Command Line Tools are required; the installer offers to install Rust if it isn't available.
+
+3. If you previously changed **FSearch Location** in the extension preferences, set it to `~/.local/bin/fsearch` to use this installation.
+
+For a manual installation, follow the [FSearch instructions](https://github.com/noahdunnagan/fsearch).
 
 The first search starts the FSearch daemon, which scans the disk once in about 20 seconds. For the daemon to search protected folders like Mail and Messages, give it Full Disk Access in System Settings > Privacy & Security, or start it from a terminal that has access.

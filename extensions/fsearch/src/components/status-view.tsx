@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { FSearchError } from "../lib/fsearch";
+import { installInTerminal } from "../lib/install";
 
 const INSTALL =
   "git clone https://github.com/noahdunnagan/fsearch && cd fsearch && cargo build --release && ./target/release/fsearch install";
@@ -22,12 +23,14 @@ export function StatusView({ error, onRetry }: { error: Error; onRetry: () => vo
         <List.EmptyView
           icon={Icon.Download}
           title="Install FSearch"
-          description={`${error.message}. Copy the install command, run it in Terminal, then search again.`}
+          description={`${error.message}. Install FSearch in Terminal, then choose Try Again.`}
           actions={
             <ActionPanel>
+              <Action title="Install in Terminal" icon={Icon.Terminal} onAction={installInTerminal} />
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRetry} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               <Action.CopyToClipboard title="Copy Install Command" content={INSTALL} />
               <Action.OpenInBrowser title="Open FSearch on GitHub" url="https://github.com/noahdunnagan/fsearch" />
-              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRetry} />
             </ActionPanel>
           }
         />
