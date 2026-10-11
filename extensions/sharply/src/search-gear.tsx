@@ -40,9 +40,7 @@ export default function SearchGear() {
     try {
       await recentHistory.load();
       await open(gearUrl(gear.slug));
-      await updateRecents(recentHistory.record(gear), {
-        shouldRevalidateAfter: false,
-      });
+      await updateRecents(recentHistory.record(gear));
       await closeMainWindow();
     } catch (error) {
       await showFailureToast(error, { title: "Could not open or save gear" });
