@@ -56,6 +56,10 @@ export const getAvailableModels = () => {
 };
 
 export const getModelName = (model: Model) => {
+  if ((model as string) === "gemini-3-pro-preview") {
+    return "Gemini 3 Pro Preview";
+  }
+
   return AvailableModels[model] ?? model;
 };
 

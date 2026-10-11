@@ -1,5 +1,6 @@
 import { Toast, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import { AvailableModels } from "../lib/OpenAI";
 import { useActionsState } from "../store/actions";
 import { Action } from "../types";
 import { Infinity32Bit } from "../utils";
@@ -17,12 +18,30 @@ interface AppleScriptError {
 
 function isValidAction(action: Action): boolean {
   const textFields: (keyof Action)[] = ["id", "name", "description", "systemPrompt", "model", "color", "temperature", "maxTokens"];
+  if (
+    !action ||
+    !textFields.every((field) => typeof action[field] === "string") ||
+    typeof action.favorite !== "boolean" ||
+    (action.reasoningLevel !== undefined && typeof action.reasoningLevel !== "string")
+  ) {
+    return false;
+  }
+
+  const temperature = Number(action.temperature);
+  const maxTokens = Number(action.maxTokens);
   return (
-    !!action &&
-    textFields.every((field) => typeof action[field] === "string") &&
-    typeof action.favorite === "boolean" &&
-    (action.reasoningLevel === undefined || typeof action.reasoningLevel === "string")
+    action.id.trim().length > 0 &&
+    action.temperature.trim().length > 0 &&
+    Number.isFinite(temperature) &&
+    temperature >= 0 &&
+    temperature <= 1 &&
+    Number.isSafeInteger(maxTokens) &&
+    (maxTokens === -1 || maxTokens > 0)
   );
+}
+
+function isValidActions(actions: unknown): actions is Action[] {
+  return Array.isArray(actions) && actions.every(isValidAction) && new Set(actions.map((action) => action.id)).size === actions.length;
 }
 
 export default class Backup {
@@ -96,8 +115,7 @@ export default class Backup {
           !Number.isInteger(version) ||
           version < 1 ||
           version > currentVersion ||
-          !Array.isArray(actions) ||
-          !actions.every(isValidAction)
+          !isValidActions(actions)
         ) {
           throw new Error("Invalid or unsupported backup file. Your saved actions have not been changed.");
         }
@@ -106,8 +124,18 @@ export default class Backup {
           actions: actions,
         };
 
-        const migratedActions = useActionsState.persist.getOptions().migrate?.(actionState, version) as typeof actionState;
-        useActionsState.setState(migratedActions);
+        const migratedState = (await useActionsState.persist.getOptions().migrate?.(actionState, version)) ?? actionState;
+        if (
+          !migratedState ||
+          typeof migratedState !== "object" ||
+          !("actions" in migratedState) ||
+          !isValidActions(migratedState.actions) ||
+          !migratedState.actions.every((action) => Object.hasOwn(AvailableModels, action.model))
+        ) {
+          throw new Error("Invalid or unsupported backup file. Your saved actions have not been changed.");
+        }
+
+        useActionsState.setState({ actions: migratedState.actions });
 
         showToast({
           title: "Actions has been imported",

@@ -63,6 +63,18 @@ async function hydrate(store) {
   }
 }
 
+async function importBackup(backup, storage) {
+  const { default: Backup } = loadSource("src/services/Backup.ts", {}, storage, {
+    "@raycast/utils": {
+      runAppleScript: async () => {
+        await new Promise((resolve) => setImmediate(resolve));
+        return JSON.stringify(backup);
+      },
+    },
+  });
+  await Backup.import();
+}
+
 async function withFetch(fetch, run) {
   const previous = globalThis.fetch;
   globalThis.fetch = fetch;
@@ -118,7 +130,7 @@ test("old OpenAI selections migrate and existing history survives the store upgr
   const history = [
     {
       id: "history-test",
-      action: action("gpt-4o-mini"),
+      action: action("gemini-3-pro-preview"),
       timestamp: 1,
       prompt: "Test",
       result: "Result",
@@ -129,6 +141,10 @@ test("old OpenAI selections migrate and existing history survives the store upgr
   const { useHistoryState } = loadSource("src/store/history.ts", {}, storage);
   await hydrate(useHistoryState);
   assert.deepEqual(useHistoryState.getState().history, history);
+  const { getModelName } = loadSource("src/lib/OpenAI.ts");
+  assert.equal(getModelName(useHistoryState.getState().history[0].action.model), "Gemini 3 Pro Preview");
+  assert.equal(getModelName("gemini-3.1-pro-preview"), "Gemini 3.1 Pro Preview");
+  assert.equal(getModelName("gpt-4o-mini"), "GPT-4o Mini");
 });
 
 test("model costs account for context thresholds and Gemini promotion dates", () => {
@@ -385,33 +401,67 @@ test("invalid backups cannot replace saved actions", async () => {
     { name: "alice-ai-config", version: 5, actions: [{ ...action(), systemPrompt: null }] },
   ]) {
     const storage = new Map([["actions", JSON.stringify(saved)]]);
-    const { default: Backup } = loadSource("src/services/Backup.ts", {}, storage, {
-      "@raycast/utils": {
-        runAppleScript: async () => {
-          await new Promise((resolve) => setImmediate(resolve));
-          return JSON.stringify(backup);
-        },
-      },
-    });
-    await Backup.import();
+    await importBackup(backup, storage);
     assert.deepEqual(JSON.parse(storage.get("actions")), saved);
   }
 });
 
+test("invalid numeric settings cannot replace saved actions", async (t) => {
+  const saved = JSON.stringify({ state: { actions: [action("gpt-4o-mini")] }, version: 5 });
+  const invalidSettings = {
+    maxTokens: ["abc", "32abc", "", "   ", "NaN", "Infinity", "-2", "0", "1.5", "9007199254740992"],
+    temperature: ["abc", "0.7abc", "", "   ", "NaN", "Infinity", "-0.1", "1.1"],
+  };
+  for (const [field, values] of Object.entries(invalidSettings)) {
+    for (const value of values) {
+      await t.test(`${field}: ${JSON.stringify(value)}`, async () => {
+        const storage = new Map([["actions", saved]]);
+        await importBackup({ name: "alice-ai-config", version: 5, actions: [{ ...action(), [field]: value }] }, storage);
+        assert.equal(storage.get("actions"), saved);
+      });
+    }
+  }
+});
+
+test("empty and duplicate backup action IDs cannot replace saved actions", async () => {
+  const saved = JSON.stringify({ state: { actions: [action("gpt-4o-mini")] }, version: 5 });
+  for (const actions of [
+    [action(), { ...action("gemini-3.8-flash"), name: "Another action" }],
+    [{ ...action(), id: "" }],
+    [{ ...action(), id: "   " }],
+  ]) {
+    const storage = new Map([["actions", saved]]);
+    await importBackup({ name: "alice-ai-config", version: 5, actions }, storage);
+    assert.equal(storage.get("actions"), saved);
+  }
+});
+
+test("unsupported backup models cannot replace saved actions after migration", async () => {
+  const saved = JSON.stringify({ state: { actions: [action("gpt-4o-mini")] }, version: 5 });
+  for (const version of [1, 4, 5]) {
+    for (const model of ["unknown-model", "", "toString", "constructor", "__proto__"]) {
+      const storage = new Map([["actions", saved]]);
+      await importBackup({ name: "alice-ai-config", version, actions: [action(model)] }, storage);
+      assert.equal(storage.get("actions"), saved);
+    }
+  }
+});
+
 test("valid backup imports migrate retired models and preserve prompts, favorites, and reasoning", async () => {
-  const imported = { ...action("gemini-3-pro-preview"), reasoningLevel: "high" };
-  const storage = new Map();
-  const { default: Backup } = loadSource("src/services/Backup.ts", {}, storage, {
-    "@raycast/utils": {
-      runAppleScript: async () => {
-        await new Promise((resolve) => setImmediate(resolve));
-        return JSON.stringify({ name: "alice-ai-config", version: 4, actions: [imported] });
-      },
-    },
-  });
-  await Backup.import();
-  assert.deepEqual(JSON.parse(storage.get("actions")), {
-    state: { actions: [{ ...imported, model: "gemini-3.1-pro-preview" }] },
-    version: 5,
-  });
+  for (const [version, oldModel, newModel] of [
+    [1, "gpt-3.5-turbo", "gpt-6-luna"],
+    [2, "gpt-4-turbo", "gpt-6-luna"],
+    [3, "gpt-4-turbo-preview", "gpt-6-luna"],
+    [4, "gemini-3-pro-preview", "gemini-3.1-pro-preview"],
+    [5, "gpt-4o-mini", "gpt-4o-mini"],
+  ]) {
+    const imported = { ...action(oldModel), reasoningLevel: "high", temperature: "0", maxTokens: "-1" };
+    const second = { ...action(), id: "second-action", temperature: "1", maxTokens: "1" };
+    const storage = new Map([["actions", JSON.stringify({ state: { actions: [action()] }, version: 5 })]]);
+    await importBackup({ name: "alice-ai-config", version, actions: [imported, second] }, storage);
+    assert.deepEqual(JSON.parse(storage.get("actions")), {
+      state: { actions: [{ ...imported, model: newModel }, second] },
+      version: 5,
+    });
+  }
 });

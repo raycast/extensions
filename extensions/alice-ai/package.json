@@ -219,7 +219,6 @@
     "@ai-sdk/openai": "^4.0.91",
     "@raycast/api": "2.7.3",
     "@raycast/utils": "^2.3.2",
-    "@reduxjs/toolkit": "^2.2.3",
     "ai": "^7.0.137",
     "zod": "^3.25.76",
     "zustand": "^5.0.15"
