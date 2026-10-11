@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Website Search Fallback] - {PR_MERGE_DATE}
+## [Website Search Fallback] - 2026-10-11
 
 ### Added
 
