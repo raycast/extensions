@@ -35,3 +35,16 @@ test("a selection or the clipboard needs something that looks like a URL", () =>
   assert.equal(urlFromAmbientText("127.0.0.1:8080/admin"), "127.0.0.1:8080/admin");
   assert.equal(urlFromAmbientText(""), null);
 });
+
+test("international, punycode and IPv6 hosts are URLs; an email address is not", () => {
+  assert.equal(urlFromInput("münchen.de"), "münchen.de");
+  assert.equal(urlFromInput("例え.jp/path"), "例え.jp/path");
+  assert.equal(urlFromInput("example.xn--p1ai"), "example.xn--p1ai");
+  assert.equal(urlFromInput("[::1]:8080"), "[::1]:8080");
+  assert.equal(urlFromInput("chris@example.com"), null);
+  assert.equal(urlFromInput("1.2"), null);
+  // `URL` accepts these; no DNS name can hold them.
+  assert.equal(urlFromInput("foo_bar.com"), null);
+  assert.equal(urlFromInput("foo%5fbar.com"), null);
+  assert.equal(urlFromInput("fart"), null);
+});

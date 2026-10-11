@@ -150,8 +150,9 @@ export function useSitemap(url: string, siteUrl: string): SitemapState & { reloa
                     ? `Over the ${LIMITS.SITEMAP_SPIDER_MAX_PAGES.toLocaleString()}-page limit`
                     : undefined;
             if (over) {
+              // No publish per skip: each one copies the whole map, and an index
+              // can hold 50,000 children past the limit. The level's end shows them.
               setFile(item.url, { status: "skipped", reason: over });
-              publish(true);
               return;
             }
 
@@ -226,6 +227,7 @@ export function useSitemap(url: string, siteUrl: string): SitemapState & { reloa
           },
           signal,
         );
+        publish(true);
         level = next;
       }
       publish(false);

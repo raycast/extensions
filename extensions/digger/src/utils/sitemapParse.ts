@@ -221,13 +221,55 @@ function searchText(block: string, loc: string): string {
   return `${plainText(block)} ${safeDecodeComponent(loc)}`.replace(/\s+/g, " ").trim().toLowerCase();
 }
 
+/**
+ * `xml` without its comments, so a commented-out `<url>` is not an entry. CDATA
+ * sections are kept whole: a `<loc>` may hold `<!--` as text. Linear: each
+ * search starts where the last one ended.
+ */
+export function stripComments(xml: string): string {
+  if (!xml.includes("<!--")) return xml;
+  const parts: string[] = [];
+  let cursor = 0;
+  let cdata = xml.indexOf("<![CDATA[");
+  while (true) {
+    const comment = xml.indexOf("<!--", cursor);
+    if (comment === -1) break;
+    if (cdata !== -1 && cdata < cursor) cdata = xml.indexOf("<![CDATA[", cursor);
+    if (cdata !== -1 && cdata < comment) {
+      const end = xml.indexOf("]]>", cdata + 9);
+      if (end === -1) break;
+      parts.push(xml.slice(cursor, end + 3));
+      cursor = end + 3;
+      continue;
+    }
+    parts.push(xml.slice(cursor, comment));
+    const end = xml.indexOf("-->", comment + 4);
+    // An unclosed comment runs to the end of the file.
+    cursor = end === -1 ? xml.length : end + 3;
+  }
+  parts.push(xml.slice(cursor));
+  return parts.join("");
+}
+
+/**
+ * Entries named with the root's prefix, or unprefixed when the root's prefix
+ * finds none: `<sm:urlset>` may declare the same namespace as its default and
+ * write `<url>` bare. Returns the prefix that matched, for the entry's fields.
+ */
+function scanEntries(xml: string, prefix: string, tag: string, limit: number) {
+  const scan = scanElements(xml, `${prefix}${tag}`, limit);
+  if (!prefix || scan.blocks.length > 0) return { ...scan, prefix };
+  return { ...scanElements(xml, tag, limit), prefix: "" };
+}
+
 export function parseSitemap(xml: string, limit: number = DEFAULT_PARSE_LIMIT): SitemapParse {
   const root = rootElement(xml);
   if (!root) return { kind: "invalid" };
-  const { local, prefix } = root;
+  const { local } = root;
+  const body = stripComments(xml);
 
   if (local === "urlset") {
-    const { blocks, capped } = scanElements(xml, `${prefix}url`, limit);
+    const { blocks, capped, prefix } = scanEntries(body, root.prefix, "url", limit);
     const pages: SitemapPage[] = [];
     for (const block of blocks) {
       const loc = childText(block, `${prefix}loc`);
@@ -244,7 +286,7 @@ export function parseSitemap(xml: string, limit: number = DEFAULT_PARSE_LIMIT): 
   }
 
   if (local === "sitemapindex") {
-    const { blocks, capped } = scanElements(xml, `${prefix}sitemap`, limit);
+    const { blocks, capped, prefix } = scanEntries(body, root.prefix, "sitemap", limit);
     const sitemaps: SitemapRef[] = [];
     for (const block of blocks) {
       const loc = childText(block, `${prefix}loc`);
@@ -254,7 +296,7 @@ export function parseSitemap(xml: string, limit: number = DEFAULT_PARSE_LIMIT): 
     return { kind: "index", sitemaps, capped };
   }
 
-  return { kind: "invalid", root: `${prefix}${local}` };
+  return { kind: "invalid", root: `${root.prefix}${local}` };
 }
 
 /**
@@ -289,7 +331,9 @@ const MB = 1024 * 1024;
  * which `fetch` has already undone, and a misnamed file is still compressed.
  *
  * `downloadTruncated` is the reader hitting its byte cap. A gzip stream cut
- * there still inflates (Z_SYNC_FLUSH) to everything that arrived. Inflating
+ * there still inflates (Z_SYNC_FLUSH) to everything that arrived. A stream that
+ * ends early on its own is damaged, and inflating it is an error, not a sitemap
+ * that looks complete. Inflating
  * PAST `maxBytes` is an error instead of a partial, because zlib gives back
  * nothing at all in that case — there is no partial to report.
  */
@@ -303,7 +347,10 @@ export function decodeSitemapBody(
     return { text: decoder.decode(bytes), truncated: downloadTruncated };
   }
   try {
-    const inflated = gunzipSync(bytes, { maxOutputLength: maxBytes, finishFlush: constants.Z_SYNC_FLUSH });
+    const inflated = gunzipSync(bytes, {
+      maxOutputLength: maxBytes,
+      ...(downloadTruncated ? { finishFlush: constants.Z_SYNC_FLUSH } : {}),
+    });
     return { text: decoder.decode(inflated), truncated: downloadTruncated };
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ERR_BUFFER_TOO_LARGE") {

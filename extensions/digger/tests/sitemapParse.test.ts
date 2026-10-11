@@ -169,3 +169,38 @@ test("page titles are the path, decoded, with the host only when it differs", ()
   assert.equal(pageTitle("https://cdn.example.com/a", "example.com"), "cdn.example.com/a");
   assert.equal(pageTitle("not a url", "example.com"), "not a url");
 });
+
+test("entries inside an XML comment are not entries", () => {
+  const xml = `<?xml version="1.0"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://example.com/live</loc></url>
+  <!-- <url><loc>https://example.com/retired</loc></url> -->
+  <url><loc><![CDATA[https://example.com/a?b=<!--c-->]]></loc></url>
+</urlset>`;
+  const parsed = parseSitemap(xml);
+  assert.equal(parsed.kind, "urlset");
+  if (parsed.kind !== "urlset") return;
+  assert.deepEqual(
+    parsed.pages.map((p) => p.loc),
+    ["https://example.com/live", "https://example.com/a?b=<!--c-->"],
+  );
+});
+
+test("a prefixed root with unprefixed entries still finds the entries", () => {
+  const xml = `<sm:urlset xmlns:sm="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://example.com/one</loc><lastmod>2026-01-02</lastmod></url>
+</sm:urlset>`;
+  const parsed = parseSitemap(xml);
+  assert.equal(parsed.kind, "urlset");
+  if (parsed.kind !== "urlset") return;
+  assert.deepEqual(
+    parsed.pages.map((p) => [p.loc, p.lastmod]),
+    [["https://example.com/one", "2026-01-02"]],
+  );
+});
+
+test("a gzip file that ends early on its own is an error, not a complete sitemap", () => {
+  const gz = gzipSync(Buffer.from(URLSET.repeat(50)));
+  const cut = gz.subarray(0, Math.floor(gz.length / 2));
+  assert.throws(() => decodeSitemapBody(cut, 1024 * 1024, false), /decompress/i);
+});

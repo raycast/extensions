@@ -33,15 +33,31 @@ export function extractUrl(input: string): string | null {
   return validateUrl(cleaned) ? cleaned : null;
 }
 
-/** A dotted host with an optional port and path: "raycast.com", "www.example.co.uk/docs". */
-const BARE_HOST = /^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}(:\d+)?([/?#]\S*)?$/i;
-
-/** Hosts with no dot that are still clearly hosts: localhost and IPv4 addresses. */
-const LOCAL_HOST = /^(localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?([/?#]\S*)?$/i;
-
-/** Text shaped like a host, which `validateUrl` then confirms parses. */
+/**
+ * Scheme-less text whose host is clearly a host: a dotted name ending in a real
+ * top-level domain ("raycast.com", "münchen.de", "example.xn--p1ai"), localhost,
+ * an IPv4 address, or a bracketed IPv6 one. The host is read by `URL`, which
+ * also turns an international name into the punycode its TLD is checked in.
+ */
 function looksLikeHost(text: string): boolean {
-  return (BARE_HOST.test(text) || LOCAL_HOST.test(text)) && validateUrl(text);
+  if (/\s/.test(text)) return false;
+  const authority = text.split(/[/?#]/, 1)[0];
+  // `chris@example.com` parses as a login on example.com; it is an email address.
+  if (authority.includes("@")) return false;
+  let host: string;
+  try {
+    host = new URL(`https://${text}`).hostname;
+  } catch {
+    return false;
+  }
+  if (host === "localhost" || host.startsWith("[")) return true;
+  // `URL` reads "1.2" as the address 1.0.0.2; only a fully written one counts.
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return authority.replace(/:\d+$/, "") === host;
+  const labels = host.split(".");
+  const tld = labels[labels.length - 1];
+  // Every label letters, digits and hyphens (punycode included), as DNS names are.
+  const dnsLabel = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+  return labels.length > 1 && labels.every((label) => dnsLabel.test(label)) && /^([a-z]{2,}|xn--[a-z0-9-]+)$/.test(tld);
 }
 
 /**

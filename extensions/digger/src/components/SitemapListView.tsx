@@ -153,7 +153,13 @@ function countLabel(shown: number, total: number): string {
 
 export function SitemapListView({ url, siteUrl = url }: SitemapListViewProps) {
   const [query, setQuery] = useState("");
-  const { root, files, pages, pageCount, pagesCapped, spidering, reload } = useSitemap(url, siteUrl);
+  const { root, files, pages, pageCount, pagesCapped, spidering, reload: reloadSitemap } = useSitemap(url, siteUrl);
+  // Reload swaps in a loading list, which empties the search bar; the filter goes too,
+  // or the reloaded list would be filtered by a search the bar no longer shows.
+  const reload = () => {
+    setQuery("");
+    reloadSitemap();
+  };
   const baseHost = hostOf(url);
   const name = fileName(url);
 
