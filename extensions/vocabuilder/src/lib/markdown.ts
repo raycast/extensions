@@ -19,17 +19,17 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// Chinese and Japanese words can occur without separating spaces; other scripts
-// need a word boundary before an exact or inflected form.
+// Han and kana can border words without separating spaces, including mixed-script
+// Japanese words such as Tシャツ.
 function findWordPattern(line: string, word: string): RegExp | null {
-  const trimmed = word.trim();
-  const escaped = escapeRegExp(trimmed);
+  const escaped = escapeRegExp(word.trim());
   if (!escaped) return null;
+  const unspaced = String.raw`[\p{Script_Extensions=Han}\p{Script_Extensions=Hiragana}\p{Script_Extensions=Katakana}]`;
+  const start = `(?:(?<![\\p{L}\\p{N}])|(?<=${unspaced}))`;
+  const end = `(?:(?![\\p{L}\\p{N}])|(?=${unspaced}))`;
   const candidates = [
-    new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, "giu"),
-    /^[\p{Script_Extensions=Han}\p{Script_Extensions=Hiragana}\p{Script_Extensions=Katakana}\p{M}]+$/u.test(trimmed)
-      ? new RegExp(escaped, "giu")
-      : new RegExp(`(?<![\\p{L}\\p{N}])${escaped}[\\p{L}\\p{N}]*`, "giu"),
+    new RegExp(`${start}${escaped}${end}`, "giu"),
+    new RegExp(`${start}${escaped}[\\p{L}\\p{N}]*`, "giu"),
   ];
   return candidates.find((pattern) => line.search(pattern) !== -1) ?? null;
 }

@@ -63,6 +63,7 @@ describe("buildTranslationDetailMarkdown", () => {
     ["cat", "The birds scatter."],
     ["кіт", "Це макітра."],
     ["말", "주말에 만나요."],
+    ["Tシャツ", "ATシャツB"],
   ])("does not bold %s inside an unrelated word", (word, exampleTranslation) => {
     const md = buildTranslationDetailMarkdown({ ...translation, word, exampleTranslation });
     const example = md.split("\n\n---\n\n")[1];
@@ -73,6 +74,10 @@ describe("buildTranslationDetailMarkdown", () => {
     ["猫", "猫は眠っています。", "**猫**は眠っています。"],
     ["ねこ", "ねこが眠っています。", "**ねこ**が眠っています。"],
     ["コーヒー", "私はコーヒーを飲む。", "私は**コーヒー**を飲む。"],
+    ["Tシャツ", "私はTシャツを着る。", "私は**Tシャツ**を着る。"],
+    ["Tシャツ", "Tシャツを着る。", "**Tシャツ**を着る。"],
+    ["iPhoneケース", "このiPhoneケースは軽い。", "この**iPhoneケース**は軽い。"],
+    ["AI", "私はAIを使う。", "私は**AI**を使う。"],
   ])("highlights only %s in an unspaced Japanese sentence", (word, exampleTranslation, expected) => {
     const md = buildTranslationDetailMarkdown({ ...translation, word, exampleTranslation });
     expect(md).toContain(expected);
