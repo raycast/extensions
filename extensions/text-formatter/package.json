@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "text-formatter",
+  "title": "Magic Formatter",
+  "description": "Re-space clipboard text into clean paragraphs while preserving bold, italics, and bullets — pastes correctly into both rich-text (Gmail/Docs) and markdown (Slack/Notion) tools",
+  "icon": "icon.png",
+  "author": "dakota_younger",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "clipboard",
+    "markdown",
+    "paragraphs",
+    "spacing",
+    "claude"
+  ],
+  "commands": [
+    {
+      "name": "format-clipboard",
+      "title": "Magic Formatter",
+      "description": "Re-space clipboard text into clean paragraphs while preserving bold, italics, and bullets — pastes correctly into both rich-text (Gmail/Docs) and markdown (Slack/Notion) tools",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "engine",
+          "type": "dropdown",
+          "title": "Engine",
+          "description": "Auto uses Claude when an API key is set and falls back to the offline formatter; otherwise force one.",
+          "default": "auto",
+          "required": false,
+          "data": [
+            {
+              "title": "Auto (AI if key set, else offline)",
+              "value": "auto"
+            },
+            {
+              "title": "AI only (Claude)",
+              "value": "ai"
+            },
+            {
+              "title": "Offline only (instant, free)",
+              "value": "offline"
+            }
+          ]
+        },
+        {
+          "name": "anthropicApiKey",
+          "type": "password",
+          "title": "Anthropic API Key",
+          "description": "Optional. Enables the AI engine. Get one at console.anthropic.com",
+          "required": false
+        },
+        {
+          "name": "model",
+          "type": "textfield",
+          "title": "Claude Model",
+          "description": "Model id for the AI engine. Leave blank for the default (Haiku 4.5).",
+          "placeholder": "claude-haiku-4-5-20251001",
+          "default": "claude-haiku-4-5-20251001",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "marked": "^14.1.4",
+    "turndown": "^7.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@types/turndown": "^5.0.6",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "install-local": "ray build -e dev"
+  }
+}
