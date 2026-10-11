@@ -226,6 +226,8 @@ export default function MenuBarArticlesCommand() {
           onAction={() => launchCommand({ name: "saved-articles", type: LaunchType.UserInitiated })}
         />
         <MenuBarExtra.Item title={translations.reload} icon={Icon.RotateClockwise} onAction={reloadArticles} />
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
         <MenuBarExtra.Item title={translations.openSettings} icon={Icon.Gear} onAction={openCommandPreferences} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
