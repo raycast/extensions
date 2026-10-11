@@ -41,6 +41,7 @@ export function searchCities(query: string, limit = 20): TimeZoneEntry[] {
       seen.add(key);
       return city.timezone;
     })
+    .sort((a, b) => matchRank(a, q) - matchRank(b, q) || b.pop - a.pop)
     .slice(0, limit - specialMatches.length)
     .map((city) => ({
       id: createCityId(city.timezone, city.city),
@@ -48,6 +49,16 @@ export function searchCities(query: string, limit = 20): TimeZoneEntry[] {
     }));
 
   return [...specialMatches, ...cityResults];
+}
+
+// The library also matches the query against state/province and country names, so rank cities
+// whose own name matches the query first (e.g. "New York" before other cities in New York state).
+function matchRank(city: CityData, query: string): number {
+  const name = city.city.toLowerCase();
+  if (name === query) return 0;
+  if (name.startsWith(query)) return 1;
+  if (name.includes(query)) return 2;
+  return 3;
 }
 
 export function lookupCity(id: string): CityData | undefined {
