@@ -1,14 +1,17 @@
-import { TelegramClient, Rich } from "teleproto";
+import { TelegramClient, Rich, events } from "teleproto";
 import { StringSession } from "teleproto/sessions";
 import { LocalStorage, environment } from "@raycast/api";
 import { Api } from "teleproto/tl";
 import { computeCheck } from "teleproto/Password";
 import * as fs from "fs";
 import * as path from "path";
+import QRCode from "qrcode";
+
+const QR_CODE_TIMEOUT = 30000;
 
 const SESSION_KEY = "telegram_session";
+const AUTH_SESSION_KEY = "telegram_auth_session";
 const USER_ID_KEY = "telegram_user_id";
-const PHONE_CODE_HASH_KEY = "telegram_phone_code_hash";
 const MEDIA_CACHE_DIR = path.join(environment.supportPath, "media");
 
 export type MediaType =
@@ -74,7 +77,6 @@ export interface Chat {
 export interface TelegramConfig {
   apiId: number;
   apiHash: string;
-  phoneNumber: string;
 }
 
 export interface GetChatsOptions {
@@ -106,26 +108,50 @@ export interface SendMessageOptions {
 }
 
 export interface AuthenticationResult {
-  needsCode: boolean;
   needsPassword: boolean;
+  success?: boolean;
 }
 
 let clientInstance: TelegramClient | null = null;
 
 export async function getClient(config: TelegramConfig): Promise<TelegramClient> {
   if (clientInstance && clientInstance.connected) {
-    return clientInstance;
+    if (clientInstance.apiId === config.apiId && clientInstance.apiHash === config.apiHash) {
+      return clientInstance;
+    }
+    try {
+      await clientInstance.disconnect();
+    } catch {
+      // Disconnect failed, allow recreation
+    }
+    clientInstance = null;
   }
 
-  const sessionString = await LocalStorage.getItem<string>(SESSION_KEY);
+  const sessionString =
+    (await LocalStorage.getItem<string>(SESSION_KEY)) || (await LocalStorage.getItem<string>(AUTH_SESSION_KEY));
   const session = new StringSession(sessionString || "");
 
   const client = new TelegramClient(session, config.apiId, config.apiHash, {
     connectionRetries: 5,
+    deviceModel: "Raycast",
+    systemVersion: process.platform === "win32" ? "Windows" : "macOS",
+    appVersion: "1.0.0",
   });
 
   clientInstance = client;
   return client;
+}
+
+export async function clearPendingAuthSession(): Promise<void> {
+  if (clientInstance) {
+    try {
+      await clientInstance.disconnect();
+    } catch {
+      // Disconnect failed, allow recreation
+    }
+    clientInstance = null;
+  }
+  await LocalStorage.removeItem(AUTH_SESSION_KEY);
 }
 
 export async function isAuthenticated(): Promise<boolean> {
@@ -133,98 +159,254 @@ export async function isAuthenticated(): Promise<boolean> {
   return !!sessionString;
 }
 
-async function completeAuthentication(client: TelegramClient): Promise<AuthenticationResult> {
+export interface LogOutResult {
+  remoteRevoked: boolean;
+  sessionExpired: boolean;
+  error?: Error;
+}
+
+export async function logOut(config?: TelegramConfig): Promise<LogOutResult> {
+  let client: TelegramClient | null = null;
+  let remoteRevoked = false;
+  let sessionExpired = false;
+  let logoutError: Error | undefined;
+  try {
+    client = clientInstance || (config ? await getClient(config) : null);
+    if (client) {
+      if (!client.connected) {
+        await client.connect();
+      }
+      if (await client.isUserAuthorized()) {
+        await client.invoke(new Api.auth.LogOut());
+        remoteRevoked = true;
+      } else {
+        sessionExpired = true;
+      }
+    }
+  } catch (err) {
+    logoutError = err instanceof Error ? err : new Error(String(err));
+  } finally {
+    if (client) {
+      try {
+        await client.disconnect();
+      } catch {
+        // Disconnect failed, ignore
+      }
+    }
+    clientInstance = null;
+    await LocalStorage.removeItem(SESSION_KEY);
+    await LocalStorage.removeItem(AUTH_SESSION_KEY);
+    await LocalStorage.removeItem(USER_ID_KEY);
+  }
+  return { remoteRevoked, sessionExpired, error: logoutError };
+}
+
+async function completeAuthentication(
+  client: TelegramClient,
+  isAborted?: () => boolean,
+): Promise<AuthenticationResult> {
+  if (isAborted?.()) return { needsPassword: false, success: false };
   const session = client.session.save() as unknown as string;
   await LocalStorage.setItem(SESSION_KEY, session);
 
+  if (isAborted?.()) return { needsPassword: false, success: false };
   const me = await client.getMe();
   await LocalStorage.setItem(USER_ID_KEY, me.id.toString());
 
-  await LocalStorage.removeItem(PHONE_CODE_HASH_KEY);
+  await LocalStorage.removeItem(AUTH_SESSION_KEY);
 
-  return { needsCode: false, needsPassword: false };
+  return { needsPassword: false, success: true };
 }
 
-export async function authenticate(
+export async function authenticateWithPassword(
   config: TelegramConfig,
-  options?: { code?: string; password?: string; forceResendCode?: boolean },
+  password: string,
 ): Promise<AuthenticationResult> {
   const client = await getClient(config);
-  const code = options?.code;
-  const password = options?.password;
-  const forceResendCode = options?.forceResendCode ?? false;
+
+  if (!client.connected) {
+    await client.connect();
+  }
+
+  const accountPassword = await client.invoke(new Api.account.GetPassword());
+  await client.invoke(
+    new Api.auth.CheckPassword({
+      password: await computeCheck(accountPassword, password),
+    }),
+  );
+
+  return completeAuthentication(client);
+}
+
+export interface QrCodeAuthCallbacks {
+  onQrCode: (qrData: { tgUrl: string; dataUrl: string }) => void | Promise<void>;
+  abortSignal?: AbortSignal;
+}
+
+async function handleLoginTokenResult(
+  client: TelegramClient,
+  result: Api.auth.TypeLoginToken,
+  isAborted?: () => boolean,
+): Promise<AuthenticationResult> {
+  if (result instanceof Api.auth.LoginTokenSuccess && result.authorization instanceof Api.auth.Authorization) {
+    if (isAborted?.()) return { needsPassword: false, success: false };
+    return completeAuthentication(client, isAborted);
+  }
+
+  if (result instanceof Api.auth.LoginTokenMigrateTo) {
+    if (isAborted?.()) return { needsPassword: false, success: false };
+    await (client as unknown as { _switchDC: (dcId: number) => Promise<void> })._switchDC(result.dcId);
+    if (isAborted?.()) return { needsPassword: false, success: false };
+    const migratedResult = await client.invoke(
+      new Api.auth.ImportLoginToken({
+        token: result.token,
+      }),
+    );
+    if (isAborted?.()) return { needsPassword: false, success: false };
+    if (
+      migratedResult instanceof Api.auth.LoginTokenSuccess &&
+      migratedResult.authorization instanceof Api.auth.Authorization
+    ) {
+      return completeAuthentication(client, isAborted);
+    }
+  }
+
+  throw new Error(`Unexpected login token result: ${(result as { className?: string })?.className || "unknown"}`);
+}
+
+export async function authenticateWithQr(
+  config: TelegramConfig,
+  callbacks: QrCodeAuthCallbacks,
+): Promise<AuthenticationResult> {
+  await clearPendingAuthSession();
+  const client = await getClient(config);
 
   if (!client.connected) {
     await client.connect();
   }
 
   if (await client.isUserAuthorized()) {
-    return { needsCode: false, needsPassword: false };
-  }
-
-  if (!code && !password) {
-    if (forceResendCode) {
-      await LocalStorage.removeItem(PHONE_CODE_HASH_KEY);
-    }
-
-    const phoneCodeHash = await LocalStorage.getItem<string>(PHONE_CODE_HASH_KEY);
-    if (!phoneCodeHash) {
-      const result = await client.sendCode(
-        {
-          apiId: config.apiId,
-          apiHash: config.apiHash,
-        },
-        config.phoneNumber,
-      );
-      await LocalStorage.setItem(PHONE_CODE_HASH_KEY, result.phoneCodeHash);
-      return { needsCode: true, needsPassword: false };
-    }
-    return { needsCode: true, needsPassword: false };
-  }
-
-  if (password) {
-    const accountPassword = await client.invoke(new Api.account.GetPassword());
-    await client.invoke(
-      new Api.auth.CheckPassword({
-        password: await computeCheck(accountPassword, password),
-      }),
-    );
-
     return completeAuthentication(client);
   }
 
-  const phoneCodeHash = await LocalStorage.getItem<string>(PHONE_CODE_HASH_KEY);
-  if (!phoneCodeHash) {
-    throw new Error("Phone code hash not found. Please restart authentication.");
+  const { abortSignal } = callbacks;
+  const isAborted = () => !!abortSignal?.aborted;
+  if (isAborted()) {
+    return { needsPassword: false, success: false };
   }
+
+  let scanDetected = false;
+  let resolveScanWait: (() => void) | undefined;
+
+  const rawEvent = new events.Raw({});
+  const onUpdate = (update: unknown) => {
+    if (update instanceof Api.UpdateLoginToken) {
+      scanDetected = true;
+      resolveScanWait?.();
+    }
+  };
+  client.addEventHandler(onUpdate, rawEvent);
 
   try {
-    await client.invoke(
-      new Api.auth.SignIn({
-        phoneNumber: config.phoneNumber,
-        phoneCodeHash: phoneCodeHash,
-        phoneCode: code!,
-      }),
-    );
-  } catch (error) {
-    const errorText =
-      error instanceof Error
-        ? error.message
-        : String((error as { errorMessage?: string } | undefined)?.errorMessage || "");
-    const normalizedErrorText = errorText.toUpperCase();
+    while (!isAborted()) {
+      let result: Api.auth.TypeLoginToken;
+      try {
+        result = await client.invoke(
+          new Api.auth.ExportLoginToken({
+            apiId: config.apiId,
+            apiHash: config.apiHash,
+            exceptIds: [],
+          }),
+        );
 
-    if (normalizedErrorText.includes("SESSION_PASSWORD_NEEDED")) {
-      return { needsCode: false, needsPassword: true };
+        if (isAborted()) {
+          return { needsPassword: false, success: false };
+        }
+
+        if (result instanceof Api.auth.LoginTokenSuccess || result instanceof Api.auth.LoginTokenMigrateTo) {
+          return await handleLoginTokenResult(client, result, isAborted);
+        }
+      } catch (err: unknown) {
+        if (isAborted()) {
+          return { needsPassword: false, success: false };
+        }
+
+        const errorText =
+          err instanceof Error ? err.message : String((err as { errorMessage?: string })?.errorMessage || err);
+        const upper = errorText.toUpperCase();
+
+        if (upper.includes("SESSION_PASSWORD_NEEDED") || upper.includes("ACCOUNT HAS 2FA ENABLED")) {
+          await LocalStorage.setItem(AUTH_SESSION_KEY, client.session.save() as unknown as string);
+          return { needsPassword: true, success: false };
+        }
+
+        if (upper.includes("AUTH_TOKEN_ALREADY_ACCEPTED")) {
+          if (await client.isUserAuthorized()) {
+            return completeAuthentication(client, isAborted);
+          }
+          await LocalStorage.setItem(AUTH_SESSION_KEY, client.session.save() as unknown as string);
+          return { needsPassword: true, success: false };
+        }
+
+        throw err;
+      }
+
+      if (result instanceof Api.auth.LoginToken) {
+        if (scanDetected) {
+          scanDetected = false;
+          continue;
+        }
+
+        const base64Url = Buffer.from(result.token).toString("base64url");
+        const tgUrl = `tg://login?token=${base64Url}`;
+        const dataUrl = await QRCode.toDataURL(tgUrl, {
+          margin: 1,
+          width: 200,
+        });
+
+        if (isAborted()) {
+          return { needsPassword: false, success: false };
+        }
+
+        await callbacks.onQrCode({ tgUrl, dataUrl });
+
+        if (!scanDetected && !isAborted()) {
+          await new Promise<void>((resolve) => {
+            let timer: NodeJS.Timeout | undefined;
+            let onAbort: (() => void) | undefined;
+
+            const cleanup = () => {
+              if (timer !== undefined) {
+                clearTimeout(timer);
+                timer = undefined;
+              }
+              if (onAbort && abortSignal) {
+                abortSignal.removeEventListener("abort", onAbort);
+              }
+              resolveScanWait = undefined;
+            };
+
+            const done = () => {
+              cleanup();
+              resolve();
+            };
+
+            resolveScanWait = done;
+            timer = setTimeout(done, QR_CODE_TIMEOUT);
+
+            if (abortSignal) {
+              onAbort = done;
+              abortSignal.addEventListener("abort", onAbort, { once: true });
+            }
+          });
+        }
+      }
     }
 
-    if (normalizedErrorText.includes("PHONE_CODE_EXPIRED")) {
-      await LocalStorage.removeItem(PHONE_CODE_HASH_KEY);
-    }
-
-    throw error;
+    return { needsPassword: false, success: false };
+  } finally {
+    client.removeEventHandler(onUpdate, rawEvent);
   }
-
-  return completeAuthentication(client);
 }
 
 function ensureMediaCacheDir(): void {
