@@ -23,7 +23,7 @@ vi.mock("./references", () => references);
 
 import { exportRef, exportRefPaste, exportBibtexRefPaste, exportPandocKeyPaste } from "./clipboard";
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe("exporting a reference that can be generated", () => {
   it("copies the reference and then confirms", async () => {
@@ -46,6 +46,20 @@ describe("exporting a reference that can be generated", () => {
     expect(api.showHUD).toHaveBeenCalledWith("Pasted to App");
     expect(api.paste.mock.invocationCallOrder[0]).toBeLessThan(api.showHUD.mock.invocationCallOrder[0]);
     expect(api.popToRoot).toHaveBeenCalled();
+  });
+
+  it("waits for the clipboard write before confirming", async () => {
+    references.generateReference.mockResolvedValue("[1] I. Newton, Principia, 1687.");
+    let finishPaste: () => void = () => undefined;
+    api.paste.mockReturnValue(new Promise<void>((resolve) => (finishPaste = resolve)));
+
+    const done = exportRefPaste("newton1687principia");
+    await vi.waitFor(() => expect(api.paste).toHaveBeenCalled());
+    expect(api.showHUD).not.toHaveBeenCalled();
+
+    finishPaste();
+    await done;
+    expect(api.showHUD).toHaveBeenCalledWith("Pasted to App");
   });
 
   it("pastes a pandoc citation key without reading the library", async () => {
