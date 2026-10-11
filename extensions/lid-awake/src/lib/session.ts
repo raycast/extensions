@@ -8,6 +8,9 @@ export type { Session } from "./parse";
 const SESSION_PREFIX = "session:";
 // Key used by older builds, which stored a single session. Removed on Turn Off, not read.
 const LEGACY_SESSION_KEY = "session";
+// Set when Lid Awake disabled sleep but could not read storage to confirm a session is still stored. The menu bar's
+// next check finishes that check once storage can be read again.
+const RECHECK_KEY = "recheck";
 
 export const PRESETS: (number | null)[] = [30, 60, 120, 240, null];
 
@@ -126,6 +129,7 @@ async function clearAllSessions(): Promise<void> {
     }
   }
   await LocalStorage.removeItem(LEGACY_SESSION_KEY);
+  await LocalStorage.removeItem(RECHECK_KEY);
 }
 
 // LocalStorage has no atomic operations, so the read-check-write steps below run one at a time in this process.
@@ -195,14 +199,43 @@ async function startSession(minutes: number | null): Promise<string> {
 
 // Sleep stays disabled while any session is stored. Turn Off in another command may clear the sessions while this
 // runs, so check again after disabling sleep and allow it again only if nothing is stored any more. A failed read is
-// treated as a stored session, so a storage hiccup never ends a timer.
+// treated as a stored session, so a storage hiccup never ends a timer. If the final read fails, the check is left for
+// the menu bar to finish, so a Turn Off that cleared the sessions meanwhile still ends with sleep allowed.
 async function keepAwakeWhileSessionStored(): Promise<void> {
   if ((await sessionStored()) === false) {
     return;
   }
   await setSleepDisabled(true);
-  if ((await sessionStored()) === false) {
+  const stored = await sessionStored();
+  if (stored === false) {
     await setSleepDisabled(false, { allowPrompt: false });
+  } else if (stored === null) {
+    await LocalStorage.setItem(RECHECK_KEY, "1").catch(() => undefined);
+  }
+}
+
+// Finishes a check keepAwakeWhileSessionStored could not complete. If a read now confirms that no session is stored,
+// sleep is allowed again. If storage still cannot be read, the check stays pending for the next run. Errors are ignored
+// so the regular auto-off check still runs.
+async function finishRecheck(on: boolean): Promise<void> {
+  try {
+    if ((await LocalStorage.getItem(RECHECK_KEY)) === undefined) {
+      return;
+    }
+    const stored = await sessionStored();
+    if (stored === null) {
+      return;
+    }
+    await LocalStorage.removeItem(RECHECK_KEY);
+    if (stored === false && on) {
+      await setSleepDisabled(false, { allowPrompt: false });
+      // A Start in another command may have saved a session while sleep was being allowed. Keep that one awake.
+      if ((await sessionStored()) !== false) {
+        await keepAwakeWhileSessionStored();
+      }
+    }
+  } catch {
+    // Ignored: see above.
   }
 }
 
@@ -253,8 +286,12 @@ async function readStatus(): Promise<StatusRead> {
 
 async function autoDisable(): Promise<AutoDisableReason | null> {
   const { status, entry } = await readStatus();
-  if (!status.on || !entry) {
-    // Either off, or on without a session (turned on outside the extension): leave it alone.
+  if (!entry) {
+    // On without a session is left alone, since it was turned on outside the extension, unless a check is pending.
+    await finishRecheck(status.on);
+    return null;
+  }
+  if (!status.on) {
     return null;
   }
   const { thresholdPercent } = getPrefs();

@@ -314,6 +314,70 @@ describe("storage read failures", () => {
     expect(await storedSessionKeys()).toHaveLength(1);
   });
 
+  it("keeps the timer when both reads after the save fail, and the next check leaves it running", async () => {
+    let fired = false;
+    raycast.afterSetItem = (key) => {
+      if (!fired && key.startsWith("session:")) {
+        fired = true;
+        // Auto-off turns sleep off right after the save. The cleanup read succeeds, then both post-save reads fail.
+        mac.sleepDisabled = false;
+        raycast.storageFaults = { skip: 1, fail: 2 };
+      }
+    };
+
+    await enable(30);
+
+    expect(fired).toBe(true);
+    expect(raycast.storageFaults).toEqual({ skip: 0, fail: 0 });
+    expect(mac.sleepDisabled).toBe(true);
+    expect(await storedSessionKeys()).toHaveLength(1);
+
+    await expect(enforce()).resolves.toBeNull();
+
+    expect(mac.sleepDisabled).toBe(true);
+    expect(await storedSessionKeys()).toHaveLength(1);
+  });
+
+  it("allows sleep on the next check when a Turn Off cleared the sessions while a Start's reads failed", async () => {
+    let fired = false;
+    raycast.afterSetItem = (key) => {
+      if (!fired && key.startsWith("session:")) {
+        fired = true;
+        // Turn Off in another command allows sleep and clears the sessions right after the save. The cleanup read
+        // succeeds, then both post-save reads fail, so the Start cannot see that the sessions are gone.
+        mac.sleepDisabled = false;
+        raycast.store.clear();
+        raycast.storageFaults = { skip: 1, fail: 2 };
+      }
+    };
+
+    await enable(30);
+
+    expect(fired).toBe(true);
+    expect(raycast.storageFaults).toEqual({ skip: 0, fail: 0 });
+    expect(mac.sleepDisabled).toBe(true);
+    expect(await storedSessionKeys()).toEqual([]);
+
+    // Storage is still failing on the first check, so the check stays pending and the Mac stays awake.
+    raycast.storageFaults = { skip: 0, fail: 2 };
+    await expect(enforce()).resolves.toBeNull();
+    expect(raycast.storageFaults).toEqual({ skip: 0, fail: 0 });
+    expect(mac.sleepDisabled).toBe(true);
+
+    await expect(enforce()).resolves.toBeNull();
+
+    expect(mac.sleepDisabled).toBe(false);
+    expect(raycast.store.has("recheck")).toBe(false);
+  });
+
+  it("leaves sleep disabled outside the extension alone when no check is pending", async () => {
+    mac.sleepDisabled = true;
+
+    await expect(enforce()).resolves.toBeNull();
+
+    expect(mac.sleepDisabled).toBe(true);
+  });
+
   it("keeps the Mac awake when the read after auto-off allows sleep fails, then turns it off on the next check", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     const start = Date.now();
