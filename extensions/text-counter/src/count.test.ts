@@ -104,8 +104,10 @@ describe("countText tokens", () => {
     expect(result.tokensO200k).toBeLessThan(result.tokensCl100k);
   });
 
-  it("does not throw on special-token text", () => {
-    expect(() => countText("before <|endoftext|> after")).not.toThrow();
+  it("counts special-token text exactly with both encodings", () => {
+    const result = countText("before <|endoftext|> after");
+    expect(result.tokensO200k).toBe(9);
+    expect(result.tokensCl100k).toBe(8);
   });
 });
 
@@ -125,6 +127,8 @@ describe("reading time", () => {
     expect(formatReadingTime(0.4)).toBe("24 sec");
     expect(formatReadingTime(2.4)).toBe("2 min");
     expect(formatReadingTime(65)).toBe("1 h 5 min");
+    expect(formatReadingTime(59.6)).toBe("1 h");
+    expect(formatReadingTime(119.6)).toBe("2 h");
     expect(formatReadingTime(120)).toBe("2 h");
   });
 });

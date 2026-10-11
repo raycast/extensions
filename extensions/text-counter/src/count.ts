@@ -140,9 +140,13 @@ export function countText(text: string): CountResult {
 
 export function formatReadingTime(minutes: number): string {
   if (minutes <= 0) return "0 min";
-  if (minutes < 1) return `${Math.max(1, Math.round(minutes * 60))} sec`;
-  if (minutes < 60) return `${Math.round(minutes)} min`;
-  const h = Math.floor(minutes / 60);
-  const m = Math.round(minutes % 60);
+  if (minutes < 1) {
+    const seconds = Math.max(1, Math.round(minutes * 60));
+    return seconds < 60 ? `${seconds} sec` : "1 min";
+  }
+  const roundedMinutes = Math.round(minutes);
+  if (roundedMinutes < 60) return `${roundedMinutes} min`;
+  const h = Math.floor(roundedMinutes / 60);
+  const m = roundedMinutes % 60;
   return m > 0 ? `${h} h ${m} min` : `${h} h`;
 }
