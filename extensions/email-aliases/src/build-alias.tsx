@@ -49,10 +49,14 @@ export default function Command() {
       const tabs = await getTabCandidates({
         browserSource: settings.browserSource,
         preferredBrowser: settings.preferredBrowser,
+        // Only the domain matters for an alias, not the page title.
+        urlOnly: true,
       });
       if (cancelled) return;
-      setCandidates(tabs);
-      if (tabs.length > 0) setSource(tabs[0].url);
+      // Windows showing the same URL give the same alias, so each URL is listed once.
+      const unique = tabs.filter((tab, index) => tabs.findIndex((other) => other.url === tab.url) === index);
+      setCandidates(unique);
+      if (unique.length > 0) setSource(unique[0].url);
       setIsLoading(false);
     })();
     return () => {

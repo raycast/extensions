@@ -43,6 +43,8 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       const tab = await getActiveTab({
         browserSource: settings.browserSource,
         preferredBrowser: settings.preferredBrowser,
+        // Only the domain matters for an alias, not the page title.
+        urlOnly: true,
       });
       const parsedHost = extractHost(tab.url);
       if (!parsedHost) {
