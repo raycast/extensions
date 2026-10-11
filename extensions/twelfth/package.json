@@ -1,0 +1,146 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "twelfth",
+  "title": "Twelfth",
+  "description": "Your Twelfth workspace from Raycast: what to do today, products, projects, and a quick way to ask Twelfth.",
+  "icon": "icon.png",
+  "author": "twelfth",
+  "owner": "twelfth.ai",
+  "access": "public",
+  "categories": [
+    "Productivity",
+    "Data"
+  ],
+  "keywords": [
+    "twelfth",
+    "retail",
+    "buyer",
+    "category management",
+    "merchandising"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "today",
+      "title": "What Should I Do Today",
+      "subtitle": "Twelfth",
+      "description": "Your open Twelfth actions, overdue first, then today, this week and later.",
+      "mode": "view",
+      "keywords": [
+        "today",
+        "tasks",
+        "actions",
+        "todo",
+        "brief"
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Twelfth Today",
+      "subtitle": "Twelfth",
+      "description": "Keeps overdue and due-today Twelfth actions in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "15m"
+    },
+    {
+      "name": "search-products",
+      "title": "Search Products",
+      "subtitle": "Twelfth",
+      "description": "Search your range with stock, cover, sales, GP% and open findings.",
+      "mode": "view",
+      "keywords": [
+        "sku",
+        "range",
+        "stock",
+        "catalogue"
+      ]
+    },
+    {
+      "name": "projects",
+      "title": "Projects",
+      "subtitle": "Twelfth",
+      "description": "Projects in flight, with their stage and overdue tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "ask",
+      "title": "Ask Twelfth",
+      "subtitle": "Twelfth",
+      "description": "Start a Twelfth chat with your question.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "question",
+          "placeholder": "Question",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-open-actions",
+      "title": "Get Open Actions",
+      "description": "List the open actions (tasks) in the user's Twelfth workspace, soonest due first, with the workspace's local date so you can tell what is overdue, due today and due later. Use it to answer what the user should do today or what is on their plate."
+    },
+    {
+      "name": "search-products",
+      "title": "Search Products",
+      "description": "Search or rank products in the user's Twelfth range with stock on hand, sales velocity, days of cover, units sold, GP%, price, supplier, category and open finding count. Use it to find a product or to rank products, for example by lowest cover or most open findings."
+    },
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "description": "List the user's Twelfth projects with workflow, stage, owner, open and overdue task counts."
+    }
+  ],
+  "ai": {
+    "instructions": "Twelfth is a retail buying and category-management workspace. All data is read-only. When the user asks what to do today, call get-open-actions and answer in priority order: overdue first, then due today, then the most important of this week. Compare due dates against the workspace's local date (`today`), never your own clock. Keep it short, and include each action's Twelfth link. Figures that are null were not measured; never treat them as zero.",
+    "evals": [
+      {
+        "input": "@twelfth what should I do today?"
+      },
+      {
+        "input": "@twelfth which products have the lowest cover?"
+      },
+      {
+        "input": "@twelfth which projects have overdue tasks?"
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Workspace API Key",
+      "description": "Optional. Leave empty to sign in with your Twelfth account. Owners and admins can create a key in Settings → AI & agents; a key reads the whole workspace.",
+      "type": "password",
+      "required": false,
+      "placeholder": "twelfth_mcp_…"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.6.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.0",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
