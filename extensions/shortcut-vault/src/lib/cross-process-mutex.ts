@@ -1,0 +1,479 @@
+import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+
+export interface MutexOptions {
+  acquireTimeoutMs?: number;
+  onBeforeReclaimForTesting?: () => void | Promise<void>;
+  onBeforeRenameForTesting?: () => void | Promise<void>;
+  onBeforeWriteLockContentForTesting?: () => void | Promise<void>;
+  onBeforeHeartbeatWriteForTesting?: () => void;
+}
+
+interface StaleLockSnapshot {
+  dirIno: number;
+  hasFile: boolean;
+  fileIno?: number;
+  content?: string;
+}
+
+export class CrossProcessMutex {
+  private readonly lockDir: string;
+  private readonly lockFile: string;
+  private readonly reclaimDir: string;
+  private readonly acquireTimeoutMs: number;
+  private readonly onBeforeReclaimForTesting?: () => void | Promise<void>;
+  private readonly onBeforeRenameForTesting?: () => void | Promise<void>;
+  private readonly onBeforeWriteLockContentForTesting?: () => void | Promise<void>;
+  private readonly onBeforeHeartbeatWriteForTesting?: () => void;
+  private static readonly HEARTBEAT_INTERVAL_MS = 1000;
+  private static readonly STALE_THRESHOLD_MS = 6000;
+  private static readonly DEFAULT_ACQUIRE_TIMEOUT_MS = 10000;
+
+  constructor(lockDir: string, options?: number | MutexOptions) {
+    this.lockDir = lockDir;
+    this.lockFile = path.join(this.lockDir, "pid.txt");
+    this.reclaimDir = `${this.lockDir}.reclaim`;
+    if (typeof options === "number") {
+      this.acquireTimeoutMs = options;
+    } else {
+      this.acquireTimeoutMs = options?.acquireTimeoutMs ?? CrossProcessMutex.DEFAULT_ACQUIRE_TIMEOUT_MS;
+      this.onBeforeReclaimForTesting = options?.onBeforeReclaimForTesting;
+      this.onBeforeRenameForTesting = options?.onBeforeRenameForTesting;
+      this.onBeforeWriteLockContentForTesting = options?.onBeforeWriteLockContentForTesting;
+      this.onBeforeHeartbeatWriteForTesting = options?.onBeforeHeartbeatWriteForTesting;
+    }
+  }
+
+  async runExclusive<T>(task: () => Promise<T>): Promise<T> {
+    const token = crypto.randomUUID();
+    const start = Date.now();
+    let acquired = false;
+    let acquiredDirIno: number | undefined;
+
+    while (Date.now() - start < this.acquireTimeoutMs) {
+      // If a recovery or reclaim operation is active, do not attempt to acquire.
+      // Wait for the transition / restoration to settle.
+      if (this.isReclaimInProgress()) {
+        await new Promise((resolve) => setTimeout(resolve, 25));
+        continue;
+      }
+
+      try {
+        fs.mkdirSync(this.lockDir);
+        let createdDirIno: number | undefined;
+        try {
+          const dirStat = fs.statSync(this.lockDir);
+          createdDirIno = dirStat.ino;
+          if (this.onBeforeWriteLockContentForTesting) {
+            await this.onBeforeWriteLockContentForTesting();
+          }
+          this.writeLockContent(token, createdDirIno);
+        } catch (writeErr) {
+          if (createdDirIno !== undefined) {
+            await this.tryReclaimStaleLockDir({
+              dirIno: createdDirIno,
+              hasFile: false,
+            });
+          }
+          throw writeErr;
+        }
+
+        // Post-creation check: if a reclaim barrier became active concurrently,
+        // verify our directory wasn't moved or replaced during acquisition
+        if (this.isReclaimInProgress()) {
+          try {
+            const currentStat = fs.statSync(this.lockDir);
+            if (currentStat.ino !== createdDirIno) {
+              await new Promise((resolve) => setTimeout(resolve, 25));
+              continue;
+            }
+          } catch {
+            await new Promise((resolve) => setTimeout(resolve, 25));
+            continue;
+          }
+        }
+
+        const currentStat = fs.statSync(this.lockDir);
+        if (currentStat.ino !== createdDirIno) {
+          await new Promise((resolve) => setTimeout(resolve, 25));
+          continue;
+        }
+
+        if (!fs.existsSync(this.lockFile)) {
+          await new Promise((resolve) => setTimeout(resolve, 25));
+          continue;
+        }
+
+        const currentLockContent = fs.readFileSync(this.lockFile, "utf-8");
+        const parts = currentLockContent.split(":");
+        if (parts[0] !== String(process.pid) || parts[2] !== token) {
+          await new Promise((resolve) => setTimeout(resolve, 25));
+          continue;
+        }
+
+        acquired = true;
+        acquiredDirIno = createdDirIno;
+        break;
+      } catch (e: unknown) {
+        const err = e as { code?: string; message?: string };
+        if (err.code === "EEXIST") {
+          if (await this.tryBreakStaleLock()) {
+            continue;
+          }
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        } else if (err.code === "ENOENT") {
+          fs.mkdirSync(path.dirname(this.lockDir), { recursive: true });
+          continue;
+        } else if (err.message?.includes("Lock directory") || err.message?.includes("Lock file")) {
+          await new Promise((resolve) => setTimeout(resolve, 25));
+          continue;
+        } else {
+          throw err;
+        }
+      }
+    }
+
+    const isOwnershipValid = (): boolean => {
+      try {
+        if (!fs.existsSync(this.lockDir)) return false;
+        const dirStat = fs.statSync(this.lockDir);
+        if (dirStat.ino !== acquiredDirIno) return false;
+        if (!fs.existsSync(this.lockFile)) return false;
+        const content = fs.readFileSync(this.lockFile, "utf-8");
+        const parts = content.split(":");
+        return parts[0] === String(process.pid) && parts[2] === token;
+      } catch {
+        return false;
+      }
+    };
+
+    if (!acquired || acquiredDirIno === undefined || !isOwnershipValid()) {
+      throw new Error("Could not acquire cross-process storage lock. Please try again.");
+    }
+
+    let lockLost = false;
+
+    const heartbeat = setInterval(() => {
+      if (!isOwnershipValid()) {
+        lockLost = true;
+        clearInterval(heartbeat);
+        return;
+      }
+      try {
+        if (this.onBeforeHeartbeatWriteForTesting) {
+          this.onBeforeHeartbeatWriteForTesting();
+        }
+        this.writeLockContent(token, acquiredDirIno);
+      } catch {
+        if (!isOwnershipValid()) {
+          lockLost = true;
+          clearInterval(heartbeat);
+        }
+      }
+    }, CrossProcessMutex.HEARTBEAT_INTERVAL_MS);
+
+    try {
+      if (!isOwnershipValid()) {
+        throw new Error("Cross-process storage lock was lost before operation started. Please retry.");
+      }
+      const result = await task();
+      if (lockLost || !isOwnershipValid()) {
+        throw new Error("Cross-process storage lock was lost while operation was running. Please retry.");
+      }
+      return result;
+    } finally {
+      clearInterval(heartbeat);
+      if (isOwnershipValid()) {
+        await this.releaseIfOwned(token, acquiredDirIno);
+      }
+    }
+  }
+
+  private async releaseIfOwned(token: string, expectedDirIno?: number): Promise<void> {
+    try {
+      if (!fs.existsSync(this.lockDir)) {
+        return;
+      }
+      const dirStat = fs.statSync(this.lockDir);
+      if (expectedDirIno !== undefined && dirStat.ino !== expectedDirIno) {
+        // Lock directory was replaced by another command — do not touch it
+        return;
+      }
+      if (!fs.existsSync(this.lockFile)) {
+        return;
+      }
+      const fileStat = fs.statSync(this.lockFile);
+      const content = fs.readFileSync(this.lockFile, "utf-8");
+      const parts = content.split(":");
+      const ownerPid = parseInt(parts[0] ?? "", 10);
+      const lockToken = parts[2] ?? "";
+      if (ownerPid !== process.pid || lockToken !== token) {
+        // Lock was reclaimed by another worker/process — do not touch it
+        return;
+      }
+      const snapshot: StaleLockSnapshot = {
+        dirIno: dirStat.ino,
+        hasFile: true,
+        fileIno: fileStat.ino,
+        content,
+      };
+      await this.tryReclaimStaleLockDir(snapshot);
+    } catch {
+      // Lock was already released or never fully acquired — nothing to clean up
+    }
+  }
+
+  private writeLockContent(token: string, expectedDirIno?: number): void {
+    if (expectedDirIno !== undefined) {
+      if (!fs.existsSync(this.lockDir)) {
+        throw new Error("Lock directory does not exist.");
+      }
+      const stat = fs.statSync(this.lockDir);
+      if (stat.ino !== expectedDirIno) {
+        throw new Error("Lock directory was replaced during acquisition.");
+      }
+      if (fs.existsSync(this.lockFile)) {
+        const content = fs.readFileSync(this.lockFile, "utf-8");
+        const parts = content.split(":");
+        if (parts[2] && parts[2] !== token) {
+          throw new Error("Lock file was replaced by another contender.");
+        }
+      }
+    }
+    const tmpFile = path.join(
+      this.lockDir,
+      `.pid.tmp.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}`,
+    );
+    fs.writeFileSync(tmpFile, `${process.pid}:${Date.now()}:${token}`);
+    if (expectedDirIno !== undefined) {
+      if (!fs.existsSync(this.lockDir) || fs.statSync(this.lockDir).ino !== expectedDirIno) {
+        try {
+          fs.unlinkSync(tmpFile);
+        } catch {
+          // Ignore unlink errors
+        }
+        throw new Error("Lock directory was replaced while writing lock content.");
+      }
+    }
+    fs.renameSync(tmpFile, this.lockFile);
+  }
+
+  private async tryBreakStaleLock(): Promise<boolean> {
+    try {
+      if (!fs.existsSync(this.lockDir)) {
+        return false;
+      }
+
+      // Check for aged, incomplete lock (lock directory exists, but pid.txt was never written)
+      if (!fs.existsSync(this.lockFile)) {
+        try {
+          const dirStat = fs.statSync(this.lockDir);
+          const dirAge = Date.now() - dirStat.mtimeMs;
+          if (dirAge > CrossProcessMutex.STALE_THRESHOLD_MS) {
+            const snapshot: StaleLockSnapshot = {
+              dirIno: dirStat.ino,
+              hasFile: false,
+            };
+            if (this.onBeforeReclaimForTesting) {
+              await this.onBeforeReclaimForTesting();
+            }
+            return await this.tryReclaimStaleLockDir(snapshot);
+          }
+        } catch {
+          return false;
+        }
+        return false;
+      }
+
+      const content = fs.readFileSync(this.lockFile, "utf-8");
+      const parts = content.split(":");
+      const pid = parseInt(parts[0] ?? "", 10);
+      const timestamp = parseInt(parts[1] ?? "", 10);
+
+      if (isNaN(timestamp) || isNaN(pid)) {
+        // Corrupt lock file — check age before breaking
+        try {
+          const dirStat = fs.statSync(this.lockDir);
+          const fileStat = fs.statSync(this.lockFile);
+          if (Date.now() - fileStat.mtimeMs > CrossProcessMutex.STALE_THRESHOLD_MS) {
+            const snapshot: StaleLockSnapshot = {
+              dirIno: dirStat.ino,
+              hasFile: true,
+              fileIno: fileStat.ino,
+              content,
+            };
+            if (this.onBeforeReclaimForTesting) {
+              await this.onBeforeReclaimForTesting();
+            }
+            return await this.tryReclaimStaleLockDir(snapshot);
+          }
+        } catch {
+          return false;
+        }
+        return false;
+      }
+
+      const isStale = Date.now() - timestamp > CrossProcessMutex.STALE_THRESHOLD_MS;
+      if (!isStale) {
+        return false;
+      }
+
+      try {
+        const dirStat = fs.statSync(this.lockDir);
+        const fileStat = fs.statSync(this.lockFile);
+        const snapshot: StaleLockSnapshot = {
+          dirIno: dirStat.ino,
+          hasFile: true,
+          fileIno: fileStat.ino,
+          content,
+        };
+        if (this.onBeforeReclaimForTesting) {
+          await this.onBeforeReclaimForTesting();
+        }
+        return await this.tryReclaimStaleLockDir(snapshot);
+      } catch {
+        return false;
+      }
+    } catch {
+      // Could not read the lock file (e.g. race: holder just released) — retry acquire
+      return false;
+    }
+  }
+
+  private async tryReclaimStaleLockDir(snapshot: StaleLockSnapshot): Promise<boolean> {
+    if (!this.acquireReclaimBarrier()) {
+      return false;
+    }
+
+    try {
+      if (!this.isSnapshotMatch(this.lockDir, snapshot)) {
+        return false;
+      }
+
+      if (this.onBeforeRenameForTesting) {
+        await this.onBeforeRenameForTesting();
+      }
+
+      const parentDir = path.dirname(this.lockDir);
+      const staleDir = path.join(
+        parentDir,
+        `${path.basename(this.lockDir)}.stale.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}`,
+      );
+
+      try {
+        fs.renameSync(this.lockDir, staleDir);
+      } catch {
+        // Another contender already reclaimed/renamed it, or it was released
+        return false;
+      }
+
+      if (!this.isSnapshotMatch(staleDir, snapshot)) {
+        // Race: live lock was moved right before renameSync. Restore it immediately!
+        // Because the reclaim barrier is active, no other command could have acquired this.lockDir.
+        try {
+          fs.renameSync(staleDir, this.lockDir);
+        } catch {
+          // If restore fails, do not touch destination
+        }
+        return false;
+      }
+
+      try {
+        fs.rmSync(staleDir, { recursive: true, force: true });
+      } catch {
+        // Ignore cleanup errors on the stale directory
+      }
+
+      return true;
+    } finally {
+      this.releaseReclaimBarrier();
+    }
+  }
+
+  private isReclaimInProgress(): boolean {
+    try {
+      if (!fs.existsSync(this.reclaimDir)) {
+        return false;
+      }
+      const stat = fs.statSync(this.reclaimDir);
+      if (Date.now() - stat.mtimeMs > CrossProcessMutex.STALE_THRESHOLD_MS) {
+        try {
+          fs.rmdirSync(this.reclaimDir);
+        } catch {
+          // Ignore
+        }
+        return false;
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private acquireReclaimBarrier(): boolean {
+    try {
+      fs.mkdirSync(this.reclaimDir);
+      return true;
+    } catch (e: unknown) {
+      const err = e as { code?: string };
+      if (err.code === "EEXIST") {
+        if (this.isReclaimInProgress()) {
+          return false;
+        }
+        try {
+          fs.mkdirSync(this.reclaimDir);
+          return true;
+        } catch {
+          return false;
+        }
+      }
+      return false;
+    }
+  }
+
+  private releaseReclaimBarrier(): void {
+    try {
+      fs.rmdirSync(this.reclaimDir);
+    } catch {
+      // Ignore cleanup error
+    }
+  }
+
+  private isSnapshotMatch(targetDir: string, snapshot: StaleLockSnapshot): boolean {
+    try {
+      if (!fs.existsSync(targetDir)) {
+        return false;
+      }
+      const dirStat = fs.statSync(targetDir);
+      if (dirStat.ino !== snapshot.dirIno) {
+        return false;
+      }
+
+      const targetFile = path.join(targetDir, "pid.txt");
+      if (snapshot.hasFile) {
+        if (!fs.existsSync(targetFile)) {
+          return false;
+        }
+        const fileStat = fs.statSync(targetFile);
+        if (snapshot.fileIno !== undefined && fileStat.ino !== snapshot.fileIno) {
+          return false;
+        }
+        if (snapshot.content !== undefined) {
+          const currentContent = fs.readFileSync(targetFile, "utf-8");
+          if (currentContent !== snapshot.content) {
+            return false;
+          }
+        }
+      } else {
+        if (fs.existsSync(targetFile)) {
+          return false;
+        }
+      }
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
+}
