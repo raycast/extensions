@@ -1,0 +1,207 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fake-data-generator",
+  "title": "Fake Data Generator",
+  "description": "Generate checksum-valid fake IBANs, BICs, VAT numbers, EINs, ABNs, IRD numbers, names, emails, phone numbers and companies for testing. One keystroke to copy.",
+  "icon": "extension-icon.png",
+  "author": "joachim_bauters",
+  "categories": [
+    "Developer Tools",
+    "Finance"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "generate-iban",
+      "title": "Generate IBAN",
+      "subtitle": "Fake Data",
+      "description": "Checksum-valid IBANs for 50 European countries, incl. national check digits and matching BIC.",
+      "mode": "view",
+      "keywords": [
+        "iban",
+        "bank",
+        "account",
+        "rekeningnummer",
+        "sepa"
+      ]
+    },
+    {
+      "name": "generate-vat",
+      "title": "Generate VAT Number",
+      "subtitle": "Fake Data",
+      "description": "Valid-format VAT numbers for all EU countries (VIES format), UK, Northern Ireland, Switzerland and Norway.",
+      "mode": "view",
+      "keywords": [
+        "vat",
+        "btw",
+        "tva",
+        "ust",
+        "mwst",
+        "iva",
+        "moms",
+        "tax"
+      ]
+    },
+    {
+      "name": "generate-tax-id",
+      "title": "Generate Tax ID",
+      "subtitle": "Fake Data",
+      "description": "US EIN, Australian ABN / ACN / TFN, New Zealand IRD / GST number and NZBN.",
+      "mode": "view",
+      "keywords": [
+        "ein",
+        "abn",
+        "acn",
+        "tfn",
+        "ird",
+        "gst",
+        "nzbn",
+        "tax"
+      ]
+    },
+    {
+      "name": "generate-financial",
+      "title": "Generate Financial Data",
+      "subtitle": "Fake Data",
+      "description": "BIC/SWIFT codes, Luhn-valid and Stripe test card numbers, ABA routing numbers, UK sort codes and AU BSBs.",
+      "mode": "view",
+      "keywords": [
+        "bic",
+        "swift",
+        "credit card",
+        "card",
+        "routing",
+        "aba",
+        "sort code",
+        "bsb",
+        "stripe"
+      ]
+    },
+    {
+      "name": "generate-phone",
+      "title": "Generate Phone Number",
+      "subtitle": "Fake Data",
+      "description": "Mobile or landline numbers per country, using regulator-reserved fictional ranges where they exist.",
+      "mode": "view",
+      "keywords": [
+        "phone",
+        "mobile",
+        "telephone",
+        "gsm",
+        "number"
+      ]
+    },
+    {
+      "name": "generate-person",
+      "title": "Generate Person",
+      "subtitle": "Fake Data",
+      "description": "Fake name, email, phone, birthdate and address for a country.",
+      "mode": "view",
+      "keywords": [
+        "name",
+        "person",
+        "identity",
+        "address",
+        "user"
+      ]
+    },
+    {
+      "name": "generate-company",
+      "title": "Generate Company",
+      "subtitle": "Fake Data",
+      "description": "Fake company with legal form, VAT number, registration number, IBAN, phone, email and address.",
+      "mode": "view",
+      "keywords": [
+        "company",
+        "business",
+        "bedrijf",
+        "firma",
+        "organisation",
+        "organization"
+      ]
+    },
+    {
+      "name": "generate-email",
+      "title": "Generate Email",
+      "subtitle": "Fake Data",
+      "description": "Fake email addresses on reserved domains (example.com, .test) that never reach a real inbox.",
+      "mode": "view",
+      "keywords": [
+        "email",
+        "mail",
+        "e-mail",
+        "address"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@faker-js/faker": "^10.6.0",
+    "@raycast/api": "^2.6.2",
+    "@raycast/utils": "^2.3.2",
+    "libphonenumber-js": "^1.13.14"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3"
+  },
+  "preferences": [
+    {
+      "name": "copyFormat",
+      "title": "Copy Format",
+      "description": "What Enter copies. The other format is always available with ⌘⇧C.",
+      "type": "dropdown",
+      "required": false,
+      "default": "compact",
+      "data": [
+        {
+          "title": "Compact (BE71096123456769)",
+          "value": "compact"
+        },
+        {
+          "title": "Formatted (BE71 0961 2345 6769)",
+          "value": "formatted"
+        }
+      ]
+    },
+    {
+      "name": "phoneMode",
+      "title": "Phone Numbers",
+      "description": "Fictional ranges never reach a real person, but UK and French mobile drama ranges fail libphonenumber validation.",
+      "type": "dropdown",
+      "required": false,
+      "default": "fictional",
+      "data": [
+        {
+          "title": "Prefer fictional (reserved) ranges",
+          "value": "fictional"
+        },
+        {
+          "title": "Always pass libphonenumber validation",
+          "value": "valid"
+        }
+      ]
+    },
+    {
+      "name": "emailDomain",
+      "title": "Email Domain",
+      "description": "Domain for generated person and email addresses. Reserved domains (example.com/.org/.net, .test) never receive mail; any other domain is real and mail to it can be delivered. Invalid values fall back to example.com.",
+      "type": "textfield",
+      "required": false,
+      "default": "example.com"
+    }
+  ]
+}
