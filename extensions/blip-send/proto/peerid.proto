@@ -1,0 +1,8 @@
+syntax = "proto3";
+package blip;
+
+
+message PeerId {
+  string user_id = 1;
+  string device_id = 2;
+}

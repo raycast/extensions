@@ -1,0 +1,48 @@
+syntax = "proto3";
+package frontend;
+
+import "frontend/bsarchive/entities.proto";
+import "frontend/transfer.proto";
+
+message PeerMessageBody {
+  message TransferInvite {
+    string transfer_id = 1;
+    bsarchive.Metadata archive_stub = 2;
+  }
+  message TransferRevokeInvite {
+    string transfer_id = 1;
+  }
+  message TransferAccept {
+    string transfer_id = 1;
+  }
+  message TransferDecline {
+    string transfer_id = 1;
+  }
+  message TransferAcceptedElsewhere {
+    string transfer_id = 1;
+  }
+  message TransferDeclinedElsewhere {
+    string transfer_id = 1;
+  }
+  message TransferTransportSignal {
+    string transfer_id = 1;
+    bytes signal = 2;
+  }
+  message TransferComplete {
+    string transfer_id = 1;
+  }
+  message TransferPaused {
+    string transfer_id = 1;
+    frontend.TransferErr err = 2;
+  }
+  message TransferUserCancel {
+    string transfer_id = 1;
+  }
+  message TransferRemoteSenderWantsResume {
+    string transfer_id = 1;
+  }
+  message TransferRemoteRecipientDidResume {
+    string transfer_id = 1;
+    int64 offset = 2;
+  }
+}
