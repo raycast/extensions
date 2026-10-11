@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hister",
+  "title": "Hister",
+  "description": "Search the full text of every page you've visited, indexed by your own Hister server.",
+  "icon": "icon.png",
+  "author": "KevinBatdorf",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Hister",
+      "subtitle": "Hister",
+      "description": "Full-text search over the pages and files your Hister server has indexed.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-pages",
+      "title": "Search Pages",
+      "description": "Full-text search over the pages and files the user has visited, as indexed by their Hister server."
+    },
+    {
+      "name": "read-page",
+      "title": "Read Page",
+      "description": "Read the stored text of one page from the user's Hister index."
+    }
+  ],
+  "ai": {
+    "instructions": "Hister is the user's personal search engine over pages they have visited and files they keep. Use search-pages to find pages, then read-page when the answer needs what a page actually says. Cite pages as markdown links with their titles."
+  },
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Server URL",
+      "description": "Where your Hister server runs.",
+      "type": "textfield",
+      "default": "http://127.0.0.1:4433",
+      "required": true
+    },
+    {
+      "name": "accessToken",
+      "title": "Access Token",
+      "description": "The access_token from your Hister config, or your profile's token on a multi-user server. Leave empty if your server has none.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.1",
+    "@raycast/utils": "^2.3.2",
+    "node-html-markdown": "^2.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.15.2",
+    "@types/react": "19.1.2",
+    "eslint": "^9.25.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
