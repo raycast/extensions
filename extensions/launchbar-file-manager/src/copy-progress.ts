@@ -271,13 +271,23 @@ export async function copyManyWithProgress(
 
   for (const { pair, plan } of pairs) {
     const current = path.basename(pair.src);
+    if (failedPlan.has(plan)) {
+      // A failed directory poisons its whole subtree: pouring children
+      // into it (or into whatever occupies its path now) would scatter
+      // files into an unrelated folder. Count as done, record nothing more.
+      doneFiles++;
+      showProgress(current, true);
+      continue;
+    }
     try {
       if (pair.kind === "dir") {
         // Created owner-only (0700 survives any umask): private trees are
         // never world-readable mid-copy, yet stay writable while children
-        // land inside. The final source mode is applied at the very end.
+        // land inside. Non-recursive on purpose: an occupant that appeared
+        // after planning must fail loudly, never be silently merged into.
+        // The final source mode is applied at the very end.
         await ensureParent(pair.dest);
-        await fs.mkdir(pair.dest, { mode: 0o700, recursive: true });
+        await fs.mkdir(pair.dest, { mode: 0o700 });
         pendingDirModes.push({ dest: pair.dest, mode: pair.mode });
       } else if (pair.kind === "file") {
         await ensureParent(pair.dest);
