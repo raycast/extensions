@@ -1,5 +1,14 @@
 # Changelog
 
+## [Work Timer Alerts and Pomodoro] - {PR_MERGE_DATE}
+
+- Add a configurable work-timer alert, notified once per timer in a silent, persistent foreground Raycast window.
+- Add optional Pomodoro work, short-break, and long-break intervals with manual transitions.
+- Show interval completion with actions to dismiss or start the next interval; work tracking continues through breaks and waiting.
+- Persist reminder state across restarts and use a tomato menu bar icon during Pomodoro sessions.
+- Add a visible ⌘⇧P shortcut for toggling Pomodoro in Start Work.
+- Combine simultaneous timer and Pomodoro reminders, retry failed notifications, and serialize timer changes with Pomodoro operations.
+
 ## [Initial Version] - 2026-10-09
 
 - Add client and internal project management.
