@@ -2,52 +2,41 @@
 
 ## [AI tools, Hue app look and bug fixes] - {PR_MERGE_DATE}
 
-- Add AI tools to control lights, rooms, zones and scenes by name in Raycast AI
-- Restyle tiles after the Hue app: its colors and whites, shading that darkens with brightness, and its translucent off cards instead of a crossed-out bulb
-- Show each room and zone's icon on its Control Groups tile, and draw all icons as sharp vector shapes from the Hue app, in black or white, whichever stands out
-- Show each color once in room, zone and scene images, and only those of lights that are on
-- Fix room and zone images showing their colors out of order when a light is set to a white from Set Color
-- Show scenes at their own brightness instead of all looking dim
-- Mark active scenes with a light bulb icon below the tile instead of an emoji in their name
-- Mark unreachable lights, like ones switched off at the wall, with an icon below the tile
-- Show images instantly
-- Update lights, rooms, zones and the active scene at once when setting a scene, turning a room or zone on or off, or changing a light
-- Rename Increase and Decrease Color Temperature to Make Cooler and Make Warmer
-- Fix Make Cooler and Make Warmer losing a light's own range after a change, and jumping to the coolest white from a color
-- Fix holding a room or zone's brightness shortcut showing errors and jumping back
-- Fix the Set Brightness icon of rooms and zones showing less than the actual brightness
-- Fix plugs, and rooms and zones of only plugs, offering brightness actions
-- Fix Set Scene opened from Control Groups not updating while open, and failing to set scenes when opened while connecting
-- Fix live updates from the bridge stopping or skipping changes
-- Fix lights, rooms, zones and scenes added in the Hue app not showing until the command is reopened, and deleted ones staying
-- Fix the loading indicator not showing after the first launch, and Control Lights loading forever without lights
-- Show the bridge's error message when an action fails
-- Say when the connection to the bridge is lost or the bridge is busy, instead of showing parsing errors
-- Try again twice when the bridge is busy before reporting it
-- Offer Retry when loading from the bridge fails
-- Fail a change after 5 seconds when the bridge doesn't answer it, instead of holding up every later change
-- Fix Toggle All Lights ignoring the manual bridge preferences, hiding connection errors, and misreporting partial failures
-- Find the bridge on the local network first, so Retry no longer uses up MeetHue's discovery limit, and fix discovery hanging on an unexpected MeetHue response
-- Fall back to MeetHue's discovery after 3 instead of 10 seconds when the local network doesn't answer, and ask the local network twice
-- Show each bridge setup toast once and hide it when its step ends, also when unlinking midway
-- Fix the Failed to link with bridge toast showing as a success
-- Ask to press the bridge's link button when only the bridge IP preference is set, instead of failing to link
-- Link as soon as the bridge's link button is pressed, without pressing Enter
-- Find the bridge again when its address changes, keeping the link, instead of having to unlink and link again
-- Offer to link again when the bridge no longer accepts the extension, keeping its saved address, instead of only unlinking
-- Validate the bridge IP preference again after Unlink
-- Show the bridge IP preference in its error when it isn't a valid IPv4 address
-- Report an IPv6 address in the bridge IP preference as invalid instead of failing to link with “Invalid URL”
-- Point to the Bridge Username preference when the bridge rejects it, instead of offering to link again, which failed at once
-- Mention the Bridge IP address preference when connecting or linking fails while it’s set, and offer Open Extension Preferences on the bridge setup screens
-- Fix the Bridge IP address and Bridge Username preferences clearing while typing and keeping only one character
-- Remove the Transition Time preference, which applied to some changes but not others, until it can apply to all
-- Fix Done after linking connecting to the bridge a second time
-- Reconnect when the connection to the bridge drops, for example when it restarts, or goes silent after a network change or sleep, instead of failing every change and missing updates until the command is opened again
-- Stop using the unlinked bridge's connection after Unlink
-- Show an error instead of crashing when the saved bridge configuration can't be read or saved
-- Keep connecting to bridges after Signify moves them to its secondary root certificate, and report a certificate mismatch at once instead of timing out
-- Fix the names of the Steel Blue and Old Lace colors and the Unlink Saved Hue Bridge action
+### New
+
+- AI tools to control lights, rooms, zones and scenes with Raycast AI
+- Tiles look more like the Hue app, with its colors, brightness shading and room and zone icons
+- Icons for active scenes and unreachable lights
+- Linking starts as soon as the bridge's link button is pressed
+- Automatic reconnection when the connection to the bridge drops, for example after sleep or a network change
+- The bridge is found again when its IP address changes, without linking again
+- Link Again option when the bridge no longer accepts the extension
+- Retry action when loading fails
+
+### Improved
+
+- Changes show immediately in every light, room, zone and scene they affect
+- Lights, rooms, zones and scenes added or removed in the Hue app show up without reopening the command
+- Faster bridge discovery
+- Clearer error messages, pointing to the relevant preference where it applies
+- Support for bridges using Signify's new certificate
+- Renamed Increase and Decrease Color Temperature to Make Cooler and Make Warmer
+- Removed the Transition Time preference, which only applied to some changes
+
+### Fixed
+
+- Live updates from the bridge stopping or skipping changes
+- Changes hanging when the bridge doesn't respond
+- Wrong brightness shown for rooms, zones and scenes
+- Errors when holding a room or zone's brightness shortcut
+- Make Cooler and Make Warmer jumping to the coolest white from a color
+- Brightness actions offered for plugs
+- Bridge IP address and Bridge Username preferences clearing while typing
+- Toggle All Lights ignoring the bridge preferences
+- Loading indicator not showing, or never going away in Control Lights
+- Bridge setup toasts showing at the wrong time
+- Crash when the saved bridge configuration can't be read
+- Typos in color and action names
 
 ## [Improvements] - 2026-06-01
 
