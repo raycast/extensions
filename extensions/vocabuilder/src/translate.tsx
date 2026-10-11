@@ -99,11 +99,11 @@ function shouldShowRecent(hasRecent: boolean, isEmptyInput: boolean, isLoading: 
   return hasRecent && (isEmptyInput || isLoading);
 }
 
-function isSafeClipboardSuggestion(raw: string): boolean {
+function normalizeClipboardSuggestion(raw: string): string | null {
   const text = raw.trim();
-  if (!text || text.includes("\n")) return false;
-  if (SECRET_PREFIX_RE.test(text)) return false;
-  return normalizeWordInput(text) !== null;
+  if (!text || text.includes("\n")) return null;
+  if (SECRET_PREFIX_RE.test(text)) return null;
+  return normalizeWordInput(text);
 }
 
 // Built from the selected provider rather than the resolved config: the scope is
@@ -113,6 +113,7 @@ function wordLookupScope(pairPrefix: string, prefs: ProviderPreferences): WordLo
     pairPrefix,
     provider: selectedProvider(prefs) ?? "unknown",
     model: prefs.translationModel?.trim() ?? "",
+    baseUrl: prefs.apiBaseUrl?.trim() ?? "",
   };
 }
 
@@ -303,8 +304,7 @@ export default function Translate() {
   async function readClipboardSuggestion(): Promise<string | null> {
     const text = await Clipboard.readText();
     if (!text) return null;
-    const trimmed = text.trim();
-    return isSafeClipboardSuggestion(trimmed) ? trimmed : null;
+    return normalizeClipboardSuggestion(text);
   }
 
   async function handleReadClipboard() {
@@ -809,8 +809,33 @@ if (import.meta.vitest) {
         pairPrefix: "en-uk",
         provider: "unknown",
         model: "",
+        baseUrl: "",
       });
     });
+
+    it("includes the configured API server without throwing on incomplete preferences", () => {
+      const first = wordLookupScope("en-uk", { ...prefs, apiBaseUrl: " http://localhost:4000/v1 " });
+      const second = wordLookupScope("en-uk", { ...prefs, apiBaseUrl: "http://localhost:5000/v1" });
+      expect(first.baseUrl).toBe("http://localhost:4000/v1");
+      expect(second.baseUrl).not.toBe(first.baseUrl);
+      expect(wordLookupScope("en-uk", { ...prefs, apiBaseUrl: "unfinished URL" }).baseUrl).toBe("unfinished URL");
+    });
+  });
+
+  describe("normalizeClipboardSuggestion", () => {
+    it.each([
+      ["  red    herring  ", "red herring"],
+      ["синій\tптах", "синій птах"],
+    ])("normalizes clipboard phrase %j before it becomes a lookup or saved lemma", (input, expected) => {
+      expect(normalizeClipboardSuggestion(input)).toBe(expected);
+    });
+
+    it.each(["", "red\nherring", "sk-secret", "AIzaSecret", "hello, world."])(
+      "rejects unsafe clipboard input %j",
+      (input) => {
+        expect(normalizeClipboardSuggestion(input)).toBeNull();
+      },
+    );
   });
 
   describe("recent visibility", () => {

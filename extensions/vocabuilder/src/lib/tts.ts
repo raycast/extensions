@@ -112,9 +112,10 @@ function evictOldestCacheFiles(dir: string, maxFiles: number): void {
   }
 }
 
-function playAudio(filePath: string): Promise<void> {
+function playAudio(filePath: string, signal?: AbortSignal): Promise<void> {
+  signal?.throwIfAborted();
   return new Promise((resolve, reject) => {
-    execFile("/usr/bin/afplay", [filePath], (err) => {
+    execFile("/usr/bin/afplay", [filePath], { signal }, (err) => {
       if (err) reject(err);
       else resolve();
     });
@@ -146,7 +147,7 @@ export async function pronounce(
   }
 
   const playbackMs = log.timer();
-  await playAudio(filePath);
+  await playAudio(filePath, signal);
   log.debug("tts playback completed", {
     provider: config.provider,
     model: config.model.trim(),
@@ -157,12 +158,13 @@ export async function pronounce(
   return { cached };
 }
 
-export async function pronounceFallback(word: string, langCode: string): Promise<void> {
+export async function pronounceFallback(word: string, langCode: string, signal?: AbortSignal): Promise<void> {
+  signal?.throwIfAborted();
   const voice = macosVoiceForLanguage(langCode);
   const fallbackMs = log.timer();
   log.debug("system voice fallback started", { langCode, voice, wordChars: word.length });
   return new Promise((resolve, reject) => {
-    execFile("/usr/bin/say", ["-v", voice, word], (err) => {
+    execFile("/usr/bin/say", ["-v", voice, word], { signal }, (err) => {
       if (err) {
         log.warn("system voice fallback failed", {
           langCode,

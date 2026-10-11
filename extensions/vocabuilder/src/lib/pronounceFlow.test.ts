@@ -104,6 +104,36 @@ describe("runPronounceWithFallback", () => {
     expect(outcome).toEqual({ kind: "aborted" });
     expect(attemptFallback).not.toHaveBeenCalled();
   });
+
+  it.each([true, false])("returns aborted when system fallback is cancelled (rejects: %s)", async (rejects) => {
+    const controller = new AbortController();
+    const outcome = await runPronounceWithFallback({
+      signal: controller.signal,
+      attemptPrimary: async () => {
+        throw new Error("network-offline");
+      },
+      attemptFallback: async () => {
+        controller.abort();
+        if (rejects) throw new Error("cancelled speech");
+      },
+      routeError: routedAsTransient(),
+    });
+    expect(outcome).toEqual({ kind: "aborted" });
+  });
+
+  it("does not start provider speech when the action was already cancelled", async () => {
+    const attemptPrimary = vi.fn();
+    const attemptFallback = vi.fn();
+    const outcome = await runPronounceWithFallback({
+      signal: AbortSignal.abort(),
+      attemptPrimary,
+      attemptFallback,
+      routeError: routedAsTransient(),
+    });
+    expect(outcome).toEqual({ kind: "aborted" });
+    expect(attemptPrimary).not.toHaveBeenCalled();
+    expect(attemptFallback).not.toHaveBeenCalled();
+  });
 });
 
 describe("runSystemVoice", () => {
@@ -134,6 +164,24 @@ describe("runSystemVoice", () => {
       attempt: async () => {
         controller.abort();
         throw new Error("killed");
+      },
+    });
+    expect(outcome).toEqual({ kind: "aborted" });
+  });
+
+  it("does not start system speech when the action was already cancelled", async () => {
+    const attempt = vi.fn();
+    const outcome = await runSystemVoice({ signal: AbortSignal.abort(), attempt });
+    expect(outcome).toEqual({ kind: "aborted" });
+    expect(attempt).not.toHaveBeenCalled();
+  });
+
+  it("returns aborted when system speech completes after cancellation", async () => {
+    const controller = new AbortController();
+    const outcome = await runSystemVoice({
+      signal: controller.signal,
+      attempt: async () => {
+        controller.abort();
       },
     });
     expect(outcome).toEqual({ kind: "aborted" });

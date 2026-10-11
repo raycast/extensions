@@ -59,6 +59,31 @@ describe("buildTranslationDetailMarkdown", () => {
     expect(md).toContain("我喜欢**猫**。");
   });
 
+  it.each([
+    ["cat", "The birds scatter."],
+    ["кіт", "Це макітра."],
+    ["말", "주말에 만나요."],
+  ])("does not bold %s inside an unrelated word", (word, exampleTranslation) => {
+    const md = buildTranslationDetailMarkdown({ ...translation, word, exampleTranslation });
+    const example = md.split("\n\n---\n\n")[1];
+    expect(example).not.toContain("**");
+  });
+
+  it.each([
+    ["猫", "猫は眠っています。", "**猫**は眠っています。"],
+    ["ねこ", "ねこが眠っています。", "**ねこ**が眠っています。"],
+    ["コーヒー", "私はコーヒーを飲む。", "私は**コーヒー**を飲む。"],
+  ])("highlights only %s in an unspaced Japanese sentence", (word, exampleTranslation, expected) => {
+    const md = buildTranslationDetailMarkdown({ ...translation, word, exampleTranslation });
+    expect(md).toContain(expected);
+  });
+
+  it.each(["", "  \t\n "])("omits an empty target example (%j) without markdown markers", (example) => {
+    const md = buildTranslationDetailMarkdown({ ...translation, example });
+    expect(md).toMatch(/\*\*Hello\*\*, how are you\?$/u);
+    expect(md.split("\n")).not.toContain("**");
+  });
+
   it("bolds multi-word lookups and words containing regex metacharacters", () => {
     const phrase = buildTranslationDetailMarkdown({
       ...translation,
@@ -257,6 +282,18 @@ describe("buildFlashcardDetailMarkdown", () => {
     expect(md).toContain("**Hello**, how are you?");
     expect(md.indexOf("**Hello**, how are you?")).toBeLessThan(md.indexOf("Привіт, як справи?"));
     expect(md).toContain("*Привіт, як справи?*");
+  });
+
+  it.each(["", "  \t\n "])("omits an empty target example (%j) without markdown markers", (example) => {
+    const md = buildFlashcardDetailMarkdown({
+      word: "hello",
+      translation: "привіт",
+      partOfSpeech: "interjection",
+      example,
+      exampleTranslation: "Hello, how are you?",
+    });
+    expect(md).toMatch(/\*\*Hello\*\*, how are you\?$/u);
+    expect(md.split("\n")).not.toContain("**");
   });
 });
 

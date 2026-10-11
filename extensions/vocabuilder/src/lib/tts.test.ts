@@ -1,9 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 vi.mock("child_process", () => ({
-  execFile: vi.fn((_cmd: string, _args: string[], cb: (err: Error | null) => void) => {
-    cb(null);
-  }),
+  execFile: vi.fn(
+    (_cmd: string, _args: string[], _options: { signal?: AbortSignal }, cb: (err: Error | null) => void) => {
+      cb(null);
+    },
+  ),
 }));
 
 vi.mock("fs", async (importOriginal) => {
@@ -20,6 +22,7 @@ vi.mock("fs", async (importOriginal) => {
 });
 
 import { existsSync, readdirSync, statSync, unlinkSync, writeFileSync } from "fs";
+import { execFile } from "child_process";
 import { pronounce, pronounceFallback } from "./tts";
 import type { TtsConfig } from "./providers/types";
 
@@ -422,18 +425,62 @@ describe("pronounce", () => {
     await expect(pronounce("hello", "en", ttsConfig(), signal)).rejects.toThrow();
     expect(fetch).not.toHaveBeenCalled();
   });
+
+  it("passes cancellation to cached audio playback", async () => {
+    vi.mocked(existsSync).mockReturnValue(true);
+    const controller = new AbortController();
+    vi.mocked(execFile).mockImplementationOnce((_cmd, _args, options, callback) => {
+      options?.signal?.addEventListener("abort", () => callback?.(new Error("cancelled playback"), "", ""), {
+        once: true,
+      });
+      return {} as ReturnType<typeof execFile>;
+    });
+
+    const speaking = pronounce("hello", "en", ttsConfig(), controller.signal);
+    const cancelled = expect(speaking).rejects.toThrow("cancelled playback");
+    controller.abort();
+    await cancelled;
+  });
 });
 
 describe("pronounceFallback", () => {
   it("calls macOS say with correct voice for English", async () => {
-    const { execFile } = await import("child_process");
     await pronounceFallback("hello", "en");
-    expect(execFile).toHaveBeenCalledWith("/usr/bin/say", ["-v", "Samantha", "hello"], expect.any(Function));
+    expect(execFile).toHaveBeenCalledWith(
+      "/usr/bin/say",
+      ["-v", "Samantha", "hello"],
+      { signal: undefined },
+      expect.any(Function),
+    );
   });
 
   it("calls macOS say with correct voice for Ukrainian", async () => {
-    const { execFile } = await import("child_process");
     await pronounceFallback("привіт", "uk");
-    expect(execFile).toHaveBeenCalledWith("/usr/bin/say", ["-v", "Lesya", "привіт"], expect.any(Function));
+    expect(execFile).toHaveBeenCalledWith(
+      "/usr/bin/say",
+      ["-v", "Lesya", "привіт"],
+      { signal: undefined },
+      expect.any(Function),
+    );
+  });
+
+  it("does not start a system voice for an already cancelled action", async () => {
+    await expect(pronounceFallback("hello", "en", AbortSignal.abort())).rejects.toThrow();
+    expect(execFile).not.toHaveBeenCalled();
+  });
+
+  it("passes cancellation to a running system voice", async () => {
+    const controller = new AbortController();
+    vi.mocked(execFile).mockImplementationOnce((_cmd, _args, options, callback) => {
+      options?.signal?.addEventListener("abort", () => callback?.(new Error("cancelled speech"), "", ""), {
+        once: true,
+      });
+      return {} as ReturnType<typeof execFile>;
+    });
+
+    const speaking = pronounceFallback("hello", "en", controller.signal);
+    const cancelled = expect(speaking).rejects.toThrow("cancelled speech");
+    controller.abort();
+    await cancelled;
   });
 });

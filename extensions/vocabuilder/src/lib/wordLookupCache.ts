@@ -12,6 +12,7 @@ export type WordLookupScope = {
   pairPrefix: string;
   provider: string;
   model: string;
+  baseUrl: string;
 };
 
 export type WordLookupCacheKey = WordLookupScope & {
@@ -30,7 +31,7 @@ export type WordLookupCache = {
 const DEFAULT_MAX_ENTRIES = 50;
 
 function cacheKey(input: WordLookupCacheKey): string {
-  return [input.pairPrefix, input.provider, input.model, input.word].join("\0");
+  return [input.pairPrefix, input.provider, input.model, input.baseUrl, input.word].join("\0");
 }
 
 export function createWordLookupCache(maxEntries = DEFAULT_MAX_ENTRIES): WordLookupCache {
@@ -80,7 +81,7 @@ export function decideWordLookup(
 if (import.meta.vitest) {
   const { describe, expect, it } = import.meta.vitest;
 
-  const scope: WordLookupScope = { pairPrefix: "en-uk", provider: "gemini", model: "gemini-3.5-flash" };
+  const scope: WordLookupScope = { pairPrefix: "en-uk", provider: "gemini", model: "gemini-3.5-flash", baseUrl: "" };
 
   const hello: CachedWordLookup = {
     effectiveWord: "hello",
@@ -122,6 +123,21 @@ if (import.meta.vitest) {
       expect(decideWordLookup("hello", cache, { ...scope, pairPrefix: "uk-en" }).kind).toBe("miss");
       expect(decideWordLookup("hello", cache, { ...scope, provider: "anthropic" }).kind).toBe("miss");
       expect(decideWordLookup("hello", cache, { ...scope, model: "other-model" }).kind).toBe("miss");
+    });
+
+    it("does not reuse a compatible server's lookup after switching to another server with the same model", () => {
+      const cache = createWordLookupCache();
+      const first = {
+        ...scope,
+        provider: "openai-compatible",
+        model: "shared-model",
+        baseUrl: "http://localhost:4000/v1",
+      };
+      const second = { ...first, baseUrl: "http://localhost:5000/v1" };
+      cache.set({ ...first, word: "hello" }, hello);
+
+      expect(decideWordLookup("hello", cache, second)).toEqual({ kind: "miss", word: "hello" });
+      expect(decideWordLookup("hello", cache, first)).toEqual({ kind: "hit", word: "hello", cached: hello });
     });
 
     it("leaves non-word input for manual submit instead of auto-translating", () => {

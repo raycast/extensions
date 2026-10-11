@@ -19,7 +19,9 @@ export type PronounceFlowDeps = {
 
 export async function runPronounceWithFallback(deps: PronounceFlowDeps): Promise<PronounceOutcome> {
   try {
+    deps.signal.throwIfAborted();
     const result = await deps.attemptPrimary();
+    deps.signal.throwIfAborted();
     return { kind: "primary", cached: result.cached };
   } catch (err) {
     if (deps.signal.aborted) return { kind: "aborted" };
@@ -28,8 +30,10 @@ export async function runPronounceWithFallback(deps: PronounceFlowDeps): Promise
     if (routed.fallback && deps.attemptFallback) {
       try {
         await deps.attemptFallback();
+        deps.signal.throwIfAborted();
         return { kind: "fallback-ok", message: routed.message };
       } catch {
+        if (deps.signal.aborted) return { kind: "aborted" };
         // Fallback also failed — fall through to surface the original provider failure.
       }
     }
@@ -47,7 +51,9 @@ export async function runSystemVoice(deps: {
   attempt: () => Promise<void>;
 }): Promise<PronounceOutcome> {
   try {
+    deps.signal.throwIfAborted();
     await deps.attempt();
+    deps.signal.throwIfAborted();
     return { kind: "system" };
   } catch {
     if (deps.signal.aborted) return { kind: "aborted" };

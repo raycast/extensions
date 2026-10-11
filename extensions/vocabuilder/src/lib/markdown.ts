@@ -19,17 +19,17 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// Most precise match first: the exact form, then an inflected form sharing the
-// stem ("cat" in "cats"), then a bare substring for scripts without word
-// boundaries (CJK). Boundaries are \p{L}\p{N} lookarounds, not \b, so Cyrillic
-// and other non-ASCII letters count as word characters.
+// Chinese and Japanese words can occur without separating spaces; other scripts
+// need a word boundary before an exact or inflected form.
 function findWordPattern(line: string, word: string): RegExp | null {
-  const escaped = escapeRegExp(word.trim());
+  const trimmed = word.trim();
+  const escaped = escapeRegExp(trimmed);
   if (!escaped) return null;
   const candidates = [
     new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, "giu"),
-    new RegExp(`(?<![\\p{L}\\p{N}])${escaped}[\\p{L}\\p{N}]*`, "giu"),
-    new RegExp(escaped, "giu"),
+    /^[\p{Script_Extensions=Han}\p{Script_Extensions=Hiragana}\p{Script_Extensions=Katakana}\p{M}]+$/u.test(trimmed)
+      ? new RegExp(escaped, "giu")
+      : new RegExp(`(?<![\\p{L}\\p{N}])${escaped}[\\p{L}\\p{N}]*`, "giu"),
   ];
   return candidates.find((pattern) => line.search(pattern) !== -1) ?? null;
 }
@@ -51,6 +51,15 @@ function emphasizeWordMultiline(value: string, word: string): string {
     .split(/\r?\n/)
     .map((line) => emphasizeWord(line, word))
     .join("  \n");
+}
+
+function buildExampleMarkdown(entry: Pick<Translation, "word" | "example" | "exampleTranslation">): string {
+  return [
+    emphasizeWordMultiline(entry.exampleTranslation, entry.word),
+    entry.example.trim() ? `*${escapeMarkdownMultiline(entry.example)}*` : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 }
 
 const ENTRY_SEPARATOR = " · ";
@@ -121,13 +130,7 @@ export function buildTranslationDetailMarkdown(
     buildEntryLine(translation),
     originalInput && originalInput !== translation.word ? `*Corrected from "${escapeMarkdown(originalInput)}"*` : "",
   ]);
-  const blocks = [
-    `# ${escapeMarkdown(translation.translation)}`,
-    apparatus,
-    "---",
-    emphasizeWordMultiline(translation.exampleTranslation, translation.word),
-    `*${escapeMarkdownMultiline(translation.example)}*`,
-  ];
+  const blocks = [`# ${escapeMarkdown(translation.translation)}`, apparatus, "---", buildExampleMarkdown(translation)];
   return blocks.filter(Boolean).join("\n\n");
 }
 
@@ -152,7 +155,5 @@ export function buildFlashcardDetailMarkdown(
 
 ---
 
-${emphasizeWordMultiline(card.exampleTranslation, card.word)}
-
-*${escapeMarkdownMultiline(card.example)}*`;
+${buildExampleMarkdown(card)}`;
 }

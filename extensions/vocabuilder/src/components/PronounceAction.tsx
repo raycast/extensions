@@ -32,14 +32,19 @@ export default function PronounceAction({ word, languageCode, title, shortcut }:
 
     const outcome =
       plan.kind === "system"
-        ? await runSystemVoice({ signal: controller.signal, attempt: () => pronounceFallback(word, languageCode) })
+        ? await runSystemVoice({
+            signal: controller.signal,
+            attempt: () => pronounceFallback(word, languageCode, controller.signal),
+          })
         : await runPronounceWithFallback({
             signal: controller.signal,
             attemptPrimary: () =>
               plan.kind === "provider"
                 ? pronounce(word, languageCode, plan.config, controller.signal)
                 : Promise.reject(plan.error),
-            attemptFallback: hasMacOsFallback(languageCode) ? () => pronounceFallback(word, languageCode) : null,
+            attemptFallback: hasMacOsFallback(languageCode)
+              ? () => pronounceFallback(word, languageCode, controller.signal)
+              : null,
             routeError: (err) => routeTtsError(err, languageCode),
           });
 
