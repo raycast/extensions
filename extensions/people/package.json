@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "people",
+  "title": "People",
+  "version": "2.0.0",
+  "description": "Search and browse contacts with People",
+  "icon": "icon.png",
+  "author": "mathiswrong",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "integrationAccessKey",
+      "title": "Raycast Access Key",
+      "description": "Copy this key from People → Settings → General → Launcher Access.",
+      "type": "password",
+      "required": false,
+      "placeholder": "Paste the Raycast access key"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build && tsc --noEmit",
+    "lint": "ray lint",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.5",
+    "typescript": "^5.8.0"
+  },
+  "commands": [
+    {
+      "name": "open-people",
+      "title": "Open People",
+      "description": "Launch People or bring its window to the front, even before setting up an access key",
+      "subtitle": "People",
+      "mode": "no-view",
+      "keywords": [
+        "launch",
+        "start",
+        "contacts"
+      ]
+    },
+    {
+      "name": "search-contacts",
+      "title": "Search People",
+      "description": "Search, browse, and copy fields from a contact",
+      "subtitle": "People",
+      "mode": "view",
+      "keywords": [
+        "ppl",
+        "contacts",
+        "people",
+        "address book"
+      ]
+    },
+    {
+      "name": "report-bug",
+      "title": "Report a Bug",
+      "description": "Email a bug report to People support",
+      "subtitle": "People",
+      "mode": "no-view",
+      "keywords": [
+        "pplbug",
+        "bug",
+        "support"
+      ]
+    }
+  ]
+}
