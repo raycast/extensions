@@ -96,6 +96,10 @@ export function countryCodeFromName(name?: string): string | undefined {
       for (let b = 65; b <= 90; b++) {
         const code = String.fromCharCode(a, b);
         try {
+          // Skip retired aliases (UK, SU, FX, YU...) that share a name with the current code
+          if (new Intl.Locale(`und-${code}`).region !== code) {
+            continue;
+          }
           const regionName = names.of(code);
           if (regionName && regionName !== code) {
             countryCodesByName.set(regionName.toLowerCase(), code);
