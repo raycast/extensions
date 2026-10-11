@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "550w-media",
+  "title": "550W Watermark & Text Eraser",
+  "description": "Erase image watermarks and text, local video subtitles and watermarks, and resolve TikTok and X share links.",
+  "version": "3.1.5",
+  "icon": "icon.png",
+  "author": "sunshinehu",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "commands": [
+    {
+      "name": "media",
+      "title": "Process Media",
+      "description": "Upload images and videos or resolve copied TikTok and X share links",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "authMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Authentication",
+      "description": "OAuth account connection or API Key",
+      "default": "oauth",
+      "data": [
+        {
+          "title": "OAuth",
+          "value": "oauth"
+        },
+        {
+          "title": "API Key",
+          "value": "api-key"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "API Key",
+      "description": "Get and manage your key: https://eraser.550wai.com/api/"
+    },
+    {
+      "name": "userNo",
+      "type": "textfield",
+      "required": false,
+      "title": "User No",
+      "description": "API account user number"
+    }
+  ],
+  "scripts": {
+    "build": "node prepare.mjs && ray build -e dist -o staging/build --non-interactive --exit-on-error",
+    "lint": "ray lint --non-interactive --exit-on-error",
+    "lint:source": "eslint 'src/**' && prettier --check 'src/**'",
+    "typecheck": "node prepare.mjs && tsc --noEmit",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@raycast/api": "2.6.2",
+    "react": "19.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.7",
+    "@types/react": "19.3.0",
+    "eslint": "10.12.0",
+    "prettier": "3.9.9",
+    "typescript": "5.9.3"
+  }
+}
