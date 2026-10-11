@@ -138,5 +138,9 @@
     "lint": "ray lint",
     "publish": "ray publish",
     "test": "tsc -p test && vitest run"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "fsevents@2.3.3": true
   }
 }

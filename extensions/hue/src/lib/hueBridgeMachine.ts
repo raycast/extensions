@@ -27,11 +27,7 @@ type HueContext = {
 type LinkInput = { ipAddress?: string; id?: string; username?: string };
 
 export type HueBridgeEvent =
-  | { type: "LINK" }
-  | { type: "RETRY" }
-  | { type: "DONE" }
-  | { type: "UNLINK" }
-  | { type: "DISCONNECTED" };
+  { type: "LINK" } | { type: "RETRY" } | { type: "DONE" } | { type: "UNLINK" } | { type: "DISCONNECTED" };
 export type SendHueBridgeEvent = (event: HueBridgeEvent) => void;
 export type HueBridgeState = SnapshotFrom<typeof hueBridgeMachine>;
 
