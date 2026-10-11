@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "email-aliases",
-  "title": "Email Aliases",
+  "title": "Email Subaddresses & Aliases",
   "description": "Generate a plus-addressed or catch-all email alias from the website you are currently on. Choose how many domain levels the alias uses, switch between several accounts, and add date or random suffixes so aliases cannot be guessed.",
   "icon": "icon.png",
   "author": "jnbp",
@@ -12,8 +12,7 @@
   ],
   "license": "MIT",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "commands": [
     {
@@ -43,7 +42,7 @@
     {
       "name": "accounts",
       "title": "Email Accounts",
-      "description": "Comma-separated list. Use a full address for plus addressing (me@gmail.com) or @example.com for a catch-all domain. Add an optional display name with a colon: Work: me@company.com",
+      "description": "Comma-separated list. The first entry is the default account used by Generate Email Alias. Use a full address for plus addressing (me@gmail.com) or @example.com for a catch-all domain. Add an optional display name with a colon: Work: me@company.com",
       "type": "textfield",
       "required": true,
       "placeholder": "me@gmail.com, Work: me@company.com, Catch-All: @mydomain.com"

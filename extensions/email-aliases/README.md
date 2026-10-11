@@ -1,4 +1,4 @@
-# Email Aliases
+# Email Subaddresses & Aliases
 
 Create a throwaway email alias for the website you are currently on, without leaving the sign-up form.
 
@@ -13,7 +13,7 @@ away. Pass an optional argument to use a label of your own (`newsletter`) or ano
 instead of the current tab.
 
 **Build Email Alias** — a form with an account picker, a live preview and per-run overrides for the domain
-depth and the extra suffix. This is also the way to work without a browser, for example on Windows.
+depth and the extra suffix. This is also the way to work without a browser: just type the domain.
 
 ## Setup
 
@@ -26,6 +26,10 @@ The only required preference is **Email Accounts**. It is a comma-separated list
 | `Catch-All: @mydomain.com` | `bvg.de@mydomain.com` |
 
 Entries starting with `@` are treated as catch-all domains, where the alias becomes the local part.
+
+**The first entry is your default account.** Generate Email Alias always uses it, because it runs without
+any window and is meant for a hotkey. Build Email Alias preselects the same account and lets you switch to
+any other one for that run. To change the default, move the account you want to the front of the list.
 
 ## Domain depth
 
@@ -74,13 +78,13 @@ A few examples:
 
 ## Where the URL comes from
 
-On macOS the extension talks to the frontmost browser through AppleScript, which needs no extra install.
+The extension talks to the frontmost browser through AppleScript, which needs no extra install.
 Supported are Arc, Dia, Chrome, Chromium, Brave, Edge, Vivaldi, Opera, Safari, Orion, Sidekick, Comet,
 Helium, Shift, Wavebox, Whale and Yandex, including their beta and canary builds.
 
 If that fails, or if you use Firefox or Zen, the extension falls back to the
-[Raycast browser extension](https://www.raycast.com/browser-extension). On Windows the browser extension
-is the only source; if it is not available, use **Build Email Alias** and type the domain.
+[Raycast browser extension](https://www.raycast.com/browser-extension). If neither works, use
+**Build Email Alias** and type the domain.
 
 ## Privacy
 
