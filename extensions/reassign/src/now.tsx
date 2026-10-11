@@ -1,0 +1,210 @@
+import {
+  Color,
+  getPreferenceValues,
+  Icon,
+  launchCommand,
+  LaunchType,
+  MenuBarExtra,
+  open,
+  openCommandPreferences,
+  showHUD,
+} from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { getScheduleRange } from "./lib/api";
+import { needsSignIn } from "./lib/envelope";
+import { SUBSCRIPTION_REQUIRED_TITLE } from "./lib/feedback";
+import { addDaysISO, clockPart, humanDuration, localMinutesBetween, todayISO } from "./lib/format";
+import { maybeNotifyTransitions } from "./lib/notify";
+import { signOut } from "./lib/oauth";
+import {
+  buildMenuBarModel,
+  eventMeeting,
+  kindLabel,
+  Now,
+  nowWallClock,
+  resolveArea,
+  ScheduleEvent,
+  spanMinutes,
+} from "./lib/schedule-model";
+import { PLAN_URL, WEB_BASE, webDayUrl } from "./lib/wire";
+
+export default function Command() {
+  const prefs = getPreferenceValues<Preferences>();
+  const { data, isLoading, revalidate } = useCachedPromise(loadAroundToday, [todayISO()], {
+    keepPreviousData: true,
+  });
+
+  // Fire block-transition notifications on each background tick. Skip the cached
+  // payload at launch: its `now` is old. Raycast unloads the command when
+  // isLoading is false, so the bar stays loading until the notify work completes.
+  const [notified, setNotified] = useState<typeof data>(undefined);
+  const notifyPending = prefs.notifyTransitions && !isLoading && Boolean(data?.ok) && notified !== data;
+  useEffect(() => {
+    if (!notifyPending || !data?.ok) return;
+    const payload = data;
+    void maybeNotifyTransitions(payload.data).finally(() => setNotified(payload));
+  }, [notifyPending, data]);
+
+  if (!data || !data.ok) {
+    const noSubscription = data && !data.ok && data.code === "permission";
+    return (
+      <MenuBarExtra icon={Icon.Circle} isLoading={isLoading} tooltip="Reassign">
+        {data && !data.ok && needsSignIn(data.code) && (
+          <MenuBarExtra.Item
+            title="Sign in to Reassign"
+            icon={Icon.Key}
+            onAction={async () => {
+              try {
+                await launchCommand({ name: "agenda", type: LaunchType.UserInitiated });
+              } catch {
+                await showHUD("Could not open Agenda. Open it from Raycast to sign in.");
+              }
+            }}
+          />
+        )}
+        <MenuBarExtra.Item
+          title={noSubscription ? SUBSCRIPTION_REQUIRED_TITLE : "Open Reassign"}
+          onAction={() => open(noSubscription ? PLAN_URL : WEB_BASE)}
+        />
+        <MenuBarExtra.Item title="Refresh Now" onAction={revalidate} />
+      </MenuBarExtra>
+    );
+  }
+
+  const model = buildMenuBarModel(data.data);
+  const backlogCount = data.data.backlogCount ?? 0;
+  const todayIso = nowWallClock(data.data.now).date;
+  const currentMeeting = model.current ? eventMeeting(model.current) : null;
+  const { title, icon } = barTitle(model.current, model.upcoming[0], prefs.showBlockName);
+
+  return (
+    <MenuBarExtra icon={icon} title={title} isLoading={isLoading || notifyPending} tooltip="Reassign">
+      {model.current && (
+        <MenuBarExtra.Section title="Now">
+          <MenuBarExtra.Item
+            title={model.current.name || "(untitled)"}
+            subtitle={currentSubtitle(model.current, model.now)}
+            onAction={() => launchCommand({ name: "agenda", type: LaunchType.UserInitiated })}
+          />
+          {currentMeeting && (
+            <MenuBarExtra.Item
+              title={currentMeeting.label ? `Join ${currentMeeting.label}` : "Join Meeting"}
+              icon={Icon.Video}
+              onAction={() => open(currentMeeting.url)}
+            />
+          )}
+          <MenuBarExtra.Item
+            title="Open in Reassign"
+            icon={Icon.Globe}
+            onAction={() => open(webDayUrl(todayIso, model.current!.id))}
+          />
+        </MenuBarExtra.Section>
+      )}
+      {model.upcoming.length > 0 && (
+        <MenuBarExtra.Section title="Up next">
+          {model.upcoming.map((event) => (
+            <MenuBarExtra.Item
+              key={`${event.id}-${event.start}`}
+              icon={{ source: Icon.Dot, tintColor: areaColor(event, model.areas) }}
+              title={`${clockPart(event.start)}  ${event.name || "(untitled)"}`}
+              onAction={() => launchCommand({ name: "agenda", type: LaunchType.UserInitiated })}
+            />
+          ))}
+        </MenuBarExtra.Section>
+      )}
+      {model.other.length > 0 && (
+        <MenuBarExtra.Section title="Also today">
+          {model.other.map((event) => (
+            <MenuBarExtra.Item
+              key={`${event.id}-${event.start}`}
+              icon={{ source: Icon.Dot, tintColor: areaColor(event, model.areas) }}
+              title={`${clockPart(event.start)}  ${event.name || "(untitled)"}`}
+              subtitle={kindLabel(event)}
+              onAction={() => launchCommand({ name: "agenda", type: LaunchType.UserInitiated })}
+            />
+          ))}
+        </MenuBarExtra.Section>
+      )}
+      {model.nextFree && (
+        <MenuBarExtra.Section>
+          <MenuBarExtra.Item
+            title={`Free from ${clockPart(model.nextFree.start)} for ${humanDuration(spanMinutes(model.nextFree) ?? 0)}`}
+          />
+        </MenuBarExtra.Section>
+      )}
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Add Block…"
+          icon={Icon.Plus}
+          onAction={() => launchCommand({ name: "add", type: LaunchType.UserInitiated })}
+        />
+        <MenuBarExtra.Item
+          title="Open Agenda"
+          icon={Icon.List}
+          onAction={() => launchCommand({ name: "agenda", type: LaunchType.UserInitiated })}
+        />
+        {backlogCount > 0 && (
+          <MenuBarExtra.Item
+            title={`Inbox (${backlogCount})`}
+            icon={Icon.Tray}
+            onAction={() => launchCommand({ name: "inbox", type: LaunchType.UserInitiated })}
+          />
+        )}
+        <MenuBarExtra.Item title="Open Reassign" icon={Icon.Globe} onAction={() => open(WEB_BASE)} />
+        <MenuBarExtra.Item title="Refresh Now" icon={Icon.ArrowClockwise} onAction={revalidate} />
+        <MenuBarExtra.Item title="Preferences…" icon={Icon.Gear} onAction={openCommandPreferences} />
+        <MenuBarExtra.Item
+          title="Log Out"
+          icon={Icon.Logout}
+          onAction={async () => {
+            await signOut();
+            revalidate();
+          }}
+        />
+      </MenuBarExtra.Section>
+    </MenuBarExtra>
+  );
+}
+
+/** Build the static bar title. It never counts down (the bar re-renders on tick). */
+function barTitle(
+  current: ScheduleEvent | null,
+  next: ScheduleEvent | undefined,
+  showName: boolean,
+): { title: string; icon: { source: Icon; tintColor: Color | string } } {
+  if (current) {
+    const until = clockPart(current.end);
+    const label = showName ? `${current.name || "block"} · until ${until}` : `until ${until}`;
+    return { title: label, icon: { source: Icon.CircleFilled, tintColor: Color.Green } };
+  }
+  if (next) {
+    return {
+      title: `Free until ${clockPart(next.start)}`,
+      icon: { source: Icon.Circle, tintColor: Color.SecondaryText },
+    };
+  }
+  return {
+    title: "Nothing planned",
+    icon: { source: Icon.Circle, tintColor: Color.SecondaryText },
+  };
+}
+
+function areaColor(event: ScheduleEvent, areas: Parameters<typeof resolveArea>[1]): Color | string {
+  return resolveArea(event, areas)?.color ?? Color.SecondaryText;
+}
+
+/** "until 14:30 · 23m left" for the current block. Recomputed each render. */
+function currentSubtitle(event: ScheduleEvent, now: Now): string {
+  const until = `until ${clockPart(event.end)}`;
+  const left = localMinutesBetween(nowWallClock(now).local, event.end);
+  return left !== null && left > 0 ? `${until} · ${humanDuration(left)} left` : until;
+}
+
+/**
+ * Read the device day and its neighbours. The account timezone can put "today"
+ * on another date than the device, and the model picks the day from `now`.
+ */
+function loadAroundToday(deviceDay: string) {
+  return getScheduleRange(addDaysISO(deviceDay, -1), addDaysISO(deviceDay, 1));
+}

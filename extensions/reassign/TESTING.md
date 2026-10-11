@@ -1,0 +1,133 @@
+# Local verification
+
+Nothing should be pushed or marked ready for review until the live checks below pass.
+
+## Automated checks
+
+Run `npm test`, `npx tsc --noEmit`, `npm run lint`, and `npm run build`.
+`npm run lint` (`ray lint`) checks only `src/`. Also run
+`npx eslint src tests` and `npx prettier --check src tests`.
+The tests cover duration preservation, overnight ranges, refresh failures, shared
+OAuth credentials across isolated command modules, logout during login, failed
+form submissions, Now's sign-in action, Inbox pagination, feedback requests, and
+nested scheduling receipts. OAuth and UI tests use mocked Raycast APIs; they do
+not replace a live OAuth callback or UI test.
+
+Session-lock integration tests run on macOS, the extension's supported platform.
+They use the real kernel lock, including separate command processes, a suspended
+owner, and recovery after process termination. The credential-write suite delays
+each login, logout, refresh, and invalid-grant write before it commits, and checks
+both fulfillment and rejection while another command waits. Portable unit tests
+cover acquisition timeout, filesystem errors, cleanup errors, and refusing to run
+unlocked on an unsupported platform. Native lock/OAuth suites are skipped elsewhere.
+
+The empty `oauth-session` file in supportPath is persistent: do not remove it while
+commands run. Ownership belongs to an open file descriptor, not the file's age.
+Only waiting commands time out; a pending credential write retains the lock until
+its action settles. Restart development commands when changing lock implementations.
+
+`npm run dev` registers the development extension in Raycast and watches local
+changes. Before final review, stop development mode, run `npm run build`, and
+repeat the live checks with that distribution build.
+
+## Live checks — pending
+
+Use a test account and remove or undo any blocks created during testing.
+
+- Open Agenda while signed out. Confirm Raycast's native OAuth prompt opens,
+  consent returns to Raycast, and the plan loads.
+- Enable Now. Log out from Agenda and Inbox. Neither should open OAuth again;
+  refreshing Now must stay signed out. Now's Sign In action should open Agenda.
+- Schedule `deep work tomorrow 9am-11am`: the duration must be two hours both
+  in the form and in Reassign. Repeat with `work tomorrow 11pm-1am`.
+- Schedule a flexible block, such as `writing tomorrow for 90m`. Verify
+  the open-slot list, calendar assignment, and Undo. Book a slot that another
+  block took a moment before: the list must show the nearest open slots.
+  A temporary sync conflict must keep the same slot available to retry and show
+  the server's reason. After a successful booking, repeated Enter presses while
+  the list closes must create only one block.
+- Save `buy milk and call mom tomorrow` to Inbox. Confirm two items, their
+  names in the toast, and one Undo for both. Select two lines of text, open
+  Add Block with no argument, and save to Inbox: both lines must reach the AI.
+- Save a bare idea, schedule it from Inbox, then undo/remove it. Verify that an
+  Inbox with over 50 items shows later items too.
+- Edit and move a block. Force a failed request (for example, disconnect the
+  network) and verify entered fields stay in place in edit, move, and Inbox forms.
+- In Edit Details and Move, choose a date without a time and submit. Confirm the
+  form stays open and asks for a time without changing the block. Then choose
+  explicit midnight and confirm the edit or move succeeds. Repeat for a whole series.
+- Verify check-off on a block from yesterday (today and Now show none), shift,
+  delete/Undo, search, calendar mirrors, and meeting links.
+- Set "Copies show" to Busy on a new block with a mirror. Check the copy in the
+  mirror calendar. Rename a Reassign-only block with copies: the copies must stay.
+- Verify Now with block names hidden and shown; verify opt-in notifications.
+- Test feedback validation locally; submit real feedback only when intended.
+
+## API alignment
+
+Checked the current `../reassign` route handlers, OAuth client registry, request
+schemas and response serializers, and the deployed public
+[OpenAPI schema](https://reassign.app/api/v1/openapi.json).
+
+The extension's OAuth client, web redirect, resource audience and event scopes
+remain supported. Schedule, event writes, search, calendars, Inbox mutations,
+and Undo use the existing public API. Find a Time reads `freeSlots` with
+`minDuration` and books the picked slot with an exact `/schedule/plan` request
+and a `requestId`: reassign#1329 removed `/schedule/confirm`. A retry with the
+same `requestId` replays the first booking. After a lost reply, the picker
+reads the day back before it books again. reassign#1499 accepts
+`mirrorStyles` on that request. No backend edits are required
+for the reviewed workflows. Compatibility fixes in this extension handle:
+
+- `nextBacklogOffset` pagination (50 Inbox items per schedule response).
+- Required feedback `kind` (`bug`, `idea`, or `other`).
+- Active trials as well as paid subscriptions in the documented requirements.
+- The `permission` gate opens `/settings/plan`. The old `/settings/billing`
+  link gave a 404.
+
+Sync anchor: reassign `5b5115d93` (#1520). Apart from #1499 (`mirrorStyles` on
+`/schedule/plan`, handled in #88), reassign#1468–#1520 change no field, error
+code, or status that the extension uses. The billing checkout
+routes alone return `checkout_unlinked` (409, #1512), and the extension does
+not call them. `GET /settings` (`weekStart`, #1515) is first-party only, and
+`reassign-raycast` is not in `FIRST_PARTY_ROUTE_CLIENTS`. reassign#1500 sorts
+nested keys in the `/schedule/plan` replay fingerprint. The extension sends the
+same body on a retry, so this change has no effect on it.
+
+The SDK is `@raycast/api` 2.4.1; the installed app is Raycast 2.4.1.
+The [OAuth docs](https://developers.raycast.com/api-reference/oauth) still recommend
+the web redirect used by the backend registry. Production authenticated calls
+and the browser callback remain part of the pending live checks.
+
+## Five-command layout and AI — live checks pending
+
+- Confirm Agenda, Add Block, Inbox, Search Blocks and Now appear in Raycast.
+  A fresh Agenda defaults to today; an explicit week choice persists.
+- Launch Search Blocks with and without a query. Verify the native OAuth flow
+  when signed out, search results, and the existing Agenda Command-F action.
+- In Add Block, Enter saves a bare idea to Inbox. Set a start or duration and
+  verify Schedule or Find a Time becomes primary. Clear them and verify capture is primary again.
+- Expand details in Add Block and Edit Details, enter notes and calendar targets,
+  collapse details, then save. Verify hidden values are preserved.
+- Fill with AI: describe one block, inspect the preview, accept it into the form,
+  then edit and save. Verify no block is created by Suggest or Use Suggested Block.
+- Try an overnight AI suggestion and an Inbox suggestion with a duration. Try
+  a multi-block or recurring request: unsupported suggestions must not be filled.
+- Change the description while AI is loading: the old response must not replace
+  the current description's draft. AI errors must leave manual entry available.
+- Save from the compact form and from a Find a Time slot. Both should
+  return to Raycast root after success, while a failure should keep the draft.
+- Book a Find a Time slot and turn the network off after the request leaves.
+  Wait for the failure, turn the network on, and tap a slot again. If the first
+  booking landed, the list closes with "Reassign saved it before the reply
+  failed." Reassign must show one block, not two.
+
+- Type only a date in the native Start picker: this must remain an Inbox idea, not create an
+  event at midnight. A scheduled event requires a concrete date and time.
+  Duration-only scheduling must list open slots before it books one.
+
+- Type “tomorrow at 10am” in Start and a later date/time in End. Duration should
+  disappear, and the preview/save must use the picked range. Clear either boundary:
+  Duration should return with the previous range's length. With only End plus a
+  duration, verify the calculated Start. Explicit midnight must remain a timed
+  event; a date-only picker value must never silently become midnight.
