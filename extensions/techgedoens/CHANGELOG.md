@@ -1,6 +1,6 @@
 # Changelog
 
-## [Search and Menu Bar Improvements] - {PR_MERGE_DATE}
+## [Search and Menu Bar Improvements] - 2026-10-11
 
 - Display the selected text in the Techgedöns search bar so it remains visible and editable.
 - Choose whether the menu bar shows 3, 5, or 10 articles per section.
