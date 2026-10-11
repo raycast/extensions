@@ -355,20 +355,29 @@ private func sync(_ payload: SyncPayload) async throws -> SyncResult {
 }
 
 /// Move every prayer reminder (open and completed) from one list to another, for when the Reminders List
-/// setting changes. A prayer the target list already has is left in the old list with its alarms removed,
-/// so it can't alert twice. Other reminders in the old list are not touched. Returns how many moved.
+/// setting changes. A prayer the target list already has keeps that copy, marked prayed if the old copy was;
+/// the old copy stays behind with its alarms removed. Other reminders in the old list are not touched.
+/// Returns how many moved.
 @raycast func movePrayerReminders(fromList: String, toList: String) async throws -> Int {
   try await withSyncLock {
     guard fromList != toList else { return 0 }
     let store = try await authorizedStore()
     guard let source = try findList(store, named: fromList) else { return 0 }
     let target = try findList(store, named: toList) ?? createList(store, named: toList)
-    let existing = Set(indexByKey(await fetch(store, store.predicateForReminders(in: [target]))).keys)
+    let existing = indexByKey(await fetch(store, store.predicateForReminders(in: [target])))
     var moved = 0
     var changed = false
     for reminder in await fetch(store, store.predicateForReminders(in: [source])) {
       guard let key = prayerKey(reminder) else { continue }
-      if existing.contains(key) {
+      if let kept = existing[key] {
+        // The target list's copy stays (e.g. switching back to a list used before). A prayer marked in
+        // the source list must stay marked: carry the completion over, which also stops its alarms.
+        if reminder.isCompleted, !kept.isCompleted, kept.refresh() {
+          kept.isCompleted = true
+          kept.completionDate = reminder.completionDate
+          try store.save(kept, commit: false)
+          changed = true
+        }
         guard reminder.alarms?.isEmpty == false else { continue }
         reminder.alarms = nil
       } else {
