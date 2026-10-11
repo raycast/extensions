@@ -2,364 +2,273 @@ import {
   Action,
   ActionPanel,
   Icon,
-  LaunchType,
+  Keyboard,
   List,
   Toast,
   confirmAlert,
-  launchCommand,
   showToast,
+  updateCommandMetadata,
   useNavigation,
 } from "@raycast/api";
-import { useState } from "react";
+import { randomUUID } from "node:crypto";
+import { useEffect, useRef, useState } from "react";
 import AddOrEditProgress from "./components/add-or-edit-progress";
 import ProgressDetail from "./components/progress-detail";
 import { useLocalStorageProgress } from "./hooks/use-local-storage-progress";
-import { Progress } from "./types";
+import { CustomProgressId, Progress, ProgressSnapshot } from "./types";
 import { getIcon } from "./utils/icon";
-import { getProgressNumByDate, getSubtitle } from "./utils/progress";
+import { refreshProgressCommands, supportsMenuBar } from "./utils/platform";
+import { getCommandSubtitle, getSubtitle } from "./utils/progress";
+import {
+  deleteCustomProgress,
+  saveCustomProgress,
+  selectCommand,
+  setMenuBarVisible,
+  setPinned,
+} from "./utils/progress-store";
 
 export default function XInProgress() {
   const navigation = useNavigation();
-  const [state, setState, getLatestXProgress] = useLocalStorageProgress();
+  const { state, reload } = useLocalStorageProgress();
   const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const [isMutating, setIsMutating] = useState(false);
+  const mutationPending = useRef(false);
+  const metadataQueue = useRef(Promise.resolve());
+  const subtitle = state.isLoading ? undefined : getCommandSubtitle(state);
 
-  const onShowingDetails = () => {
-    setIsShowingDetail((prev) => !prev);
-  };
-
-  const togglePinProgress = async (targetProgress: Progress) => {
-    setState((prev) => ({
-      ...prev,
-      allProgress: prev.allProgress.map((progress) => {
-        if (progress.title === targetProgress.title) {
-          return { ...progress, pinned: !progress.pinned };
+  useEffect(() => {
+    if (subtitle === undefined) return;
+    let cancelled = false;
+    metadataQueue.current = metadataQueue.current.then(async () => {
+      if (cancelled) return;
+      try {
+        await updateCommandMetadata({ subtitle });
+      } catch (error) {
+        if (!cancelled) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Could Not Update Command Subtitle",
+            message: error instanceof Error ? error.message : String(error),
+          }).catch(() => undefined);
         }
-        return progress;
-      }),
-    }));
-
-    await launchCommand({ name: "index", type: LaunchType.UserInitiated });
-  };
-
-  const toggleShowInMenubar = async (targetProgress: Progress) => {
-    const latestXProgress = await getLatestXProgress();
-
-    // 1. Toogle `menubar.shown` for target progress
-    const allProgress = latestXProgress.allProgress.map((progress) => {
-      if (progress.title === targetProgress.title) {
-        return { ...progress, menubar: { shown: !progress.menubar.shown, title: progress.menubar.title } };
       }
-      return progress;
     });
+    return () => {
+      cancelled = true;
+    };
+  }, [subtitle]);
 
-    // 2. If it is already been shown in menubar, find a next one to replace
-    let currMenubarProgressTitle = latestXProgress.currMenubarProgressTitle;
-    if (latestXProgress.currMenubarProgressTitle === targetProgress.title) {
-      currMenubarProgressTitle = allProgress.filter((p) => p.menubar.shown)[0]?.title;
-    }
-
-    // 3. If there has nothing to show in menubar
-    if (!latestXProgress.currMenubarProgressTitle) {
-      const isToggleToShow = targetProgress.menubar.shown ? false : true;
-      if (isToggleToShow) {
-        currMenubarProgressTitle = targetProgress.title;
-      }
-    }
-
-    setState((prev) => ({
-      ...prev,
-      allProgress,
-      currMenubarProgressTitle,
-    }));
-
-    await launchCommand({ name: "index", type: LaunchType.UserInitiated });
-  };
-
-  const setShowAsCommand = async (targetProgress: Progress) => {
-    setState((prev) => ({
-      ...prev,
-      allProgress: prev.allProgress.map((progress) => {
-        return { ...progress, showAsCommand: progress.title === targetProgress.title };
-      }),
-    }));
-    await launchCommand({ name: "year-in-progress", type: LaunchType.Background });
-  };
-
-  const onEditProgress = (targetProgress: Progress) => {
-    navigation.push(
-      <AddOrEditProgress
-        progress={targetProgress}
-        onSubmit={async (values) => {
-          const latestXProgress = await getLatestXProgress();
-          try {
-            // 1. Update progress
-            const allProgress: Progress[] = latestXProgress.allProgress.map((progress) => {
-              if (progress.title === targetProgress.title) {
-                return {
-                  title: progress.title,
-                  type: "user",
-                  pinned: progress.pinned,
-                  startDate: values.startDate.getTime(),
-                  endDate: values.endDate.getTime(),
-                  progressNum: getProgressNumByDate(values.startDate, values.endDate),
-                  menubar: {
-                    shown: values.showInMenubar,
-                    title: values.menubarTitle,
-                  },
-                  showAsCommand: values.showAsCommand,
-                };
-              }
-              return progress;
-            });
-
-            // 2. If it is already been shown in menubar, and we will turnoff it, find a next one to replace
-            let currMenubarProgressTitle = latestXProgress.currMenubarProgressTitle;
-            if (latestXProgress.currMenubarProgressTitle === targetProgress.title && !values.showInMenubar) {
-              currMenubarProgressTitle = allProgress.filter((p) => p.menubar.shown)[0]?.title;
-            }
-
-            // 3. If there has nothing to show in menubar
-            if (!latestXProgress.currMenubarProgressTitle) {
-              const isToggleToShow = values.showInMenubar;
-              if (isToggleToShow) {
-                currMenubarProgressTitle = targetProgress.title;
-              }
-            }
-
-            setState((prev) => ({ ...prev, allProgress, currMenubarProgressTitle }));
-
-            // 4. If it is shown as command subtitle, update it
-            const editedProcess = allProgress.find((p) => p.title === targetProgress.title) as Progress;
-            if (editedProcess.showAsCommand) {
-              setShowAsCommand(targetProgress);
-            }
-
-            navigation.pop();
-            await showToast({
-              style: Toast.Style.Success,
-              title: `"${targetProgress.title}" is updated!`,
-            });
-            await launchCommand({ name: "index", type: LaunchType.UserInitiated });
-          } catch (err) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Failed to update progress :(",
-            });
-          }
-        }}
-      />
-    );
-  };
-
-  const onAddProgress = () => {
-    navigation.push(
-      <AddOrEditProgress
-        onSubmit={async (values) => {
-          try {
-            const newProgress: Progress = {
-              title: values.title as string,
-              type: "user",
-              pinned: false,
-              startDate: values.startDate.getTime(),
-              endDate: values.endDate.getTime(),
-              // This will be re-calulated when accessing it
-              progressNum: getProgressNumByDate(values.startDate, values.endDate),
-              menubar: {
-                shown: values.showInMenubar,
-                title: values.menubarTitle,
-              },
-              showAsCommand: values.showAsCommand,
-            };
-            setState((prev) => ({ ...prev, allProgress: [...prev.allProgress, newProgress] }));
-            // If added process is shown as command, update it
-            if (newProgress.showAsCommand) {
-              setShowAsCommand(newProgress);
-            }
-            navigation.pop();
-            await showToast({
-              style: Toast.Style.Success,
-              title: `"${values.title}" is added!`,
-            });
-          } catch (err) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Failed to add progress :(",
-            });
-          }
-        }}
-      />
-    );
-  };
-
-  const onDeleteProgress = async (targetTitle: string) => {
-    if (await confirmAlert({ title: "Are you sure?" })) {
-      const latestXProgress = await getLatestXProgress();
-
-      // 1. filter out target progress
-      const allProgress = latestXProgress.allProgress.filter((progress) => progress.title !== targetTitle);
-
-      // 2. if it is been shown in menubar, find a new one to replace
-      let currMenubarProgressTitle = latestXProgress.currMenubarProgressTitle;
-      if (latestXProgress.currMenubarProgressTitle === targetTitle) {
-        currMenubarProgressTitle = allProgress.filter((p) => p.menubar.shown)[0]?.title;
-      }
-      setState((prev) => ({ ...prev, allProgress, currMenubarProgressTitle }));
-
-      // 3. If it is shown as command, update it
-      if (allProgress.filter((p) => p.showAsCommand).length == 0) {
-        const yearInProgress = allProgress.find((p) => p.title === "Year In Progress") as Progress;
-        setShowAsCommand(yearInProgress);
+  const mutate = async (save: () => Promise<unknown>, successTitle: string, onSaved?: () => void) => {
+    if (mutationPending.current) return;
+    mutationPending.current = true;
+    setIsMutating(true);
+    try {
+      try {
+        await save();
+      } catch (error) {
+        let message = error instanceof Error ? error.message : String(error);
+        let snapshot: ProgressSnapshot | undefined;
+        try {
+          snapshot = await reload();
+        } catch {
+          message += " Progress could not be reloaded.";
+        }
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Progress Was Not Fully Saved",
+          message: `${message} Some changes may have been saved. Review the reloaded list before retrying.`,
+        });
+        return { saved: false, snapshot };
       }
 
+      const failures: string[] = [];
+      try {
+        await reload();
+      } catch {
+        failures.push("List");
+      }
+      failures.push(...(await refreshProgressCommands()));
+      onSaved?.();
       await showToast({
-        style: Toast.Style.Success,
-        title: `${targetTitle} is deleted!`,
+        style: failures.length ? Toast.Style.Failure : Toast.Style.Success,
+        title: successTitle,
+        message: failures.length
+          ? `Saved, but ${failures.join(" and ")} could not refresh. Enable the command or reopen it to refresh.`
+          : undefined,
       });
-
-      await launchCommand({ name: "index", type: LaunchType.UserInitiated });
+      return { saved: true };
+    } finally {
+      mutationPending.current = false;
+      setIsMutating(false);
     }
   };
 
-  return (
-    <List isLoading={state.isLoading} navigationTitle="X In Progress" isShowingDetail={isShowingDetail}>
-      <List.Section title={`🟢 Pinned Progress`}>
-        {state.allProgress
-          .filter((p) => p.pinned)
-          .map((progress) => (
-            <List.Item
-              key={progress.title}
-              title={progress.title}
-              subtitle={getSubtitle(progress.progressNum)}
-              icon={getIcon(progress.progressNum)}
-              detail={<ProgressDetail progress={progress} />}
-              accessories={progress.showAsCommand ? [{ tag: "Selected" }] : []}
-              actions={
-                <Actions
-                  progress={progress}
-                  onShowingDetails={onShowingDetails}
-                  togglePinProgress={togglePinProgress}
-                  toggleShowInMenubar={toggleShowInMenubar}
-                  setShowAsCommand={setShowAsCommand}
-                  onEditProgress={onEditProgress}
-                  onAddProgress={onAddProgress}
-                  onDeleteProgress={onDeleteProgress}
-                />
-              }
-            />
-          ))}
-      </List.Section>
+  const openProgressForm = (progress?: Extract<Progress, { type: "user" }>) => {
+    const id: CustomProgressId = progress?.id ?? `custom:${randomUUID()}`;
+    let original = progress;
+    let requiresReload = false;
+    const rebase = (snapshot: ProgressSnapshot) => {
+      const saved = snapshot.allProgress.find((item) => item.id === id);
+      if (saved?.type === "user") original = saved;
+    };
+    navigation.push(
+      <AddOrEditProgress
+        progress={progress}
+        allProgress={state.allProgress}
+        onSubmit={async (values) => {
+          if (requiresReload) {
+            try {
+              rebase(await reload());
+              requiresReload = false;
+            } catch {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Could Not Reload Progress",
+                message: "Reopen the list before retrying. Some changes may already have been saved.",
+              });
+              return;
+            }
+          }
+          const result = await mutate(
+            () => saveCustomProgress(id, values, original),
+            progress ? "Progress Updated" : "Progress Added",
+            () => navigation.pop()
+          );
+          if (result?.saved === false) {
+            if (result.snapshot) rebase(result.snapshot);
+            requiresReload = !result.snapshot;
+          }
+        }}
+      />
+    );
+  };
 
-      <List.Section title={`🔵 All Progress`}>
-        {state.allProgress.length == 0 ? (
-          <List.Item icon={Icon.Plus} title="Add New Progress" actions={<ActionPanel></ActionPanel>} />
-        ) : (
-          state.allProgress
-            .filter((p) => !p.pinned)
-            .map((progress) => (
-              <List.Item
-                key={progress.title}
-                title={progress.title}
-                subtitle={getSubtitle(progress.progressNum)}
-                icon={getIcon(progress.progressNum)}
-                detail={<ProgressDetail progress={progress} />}
-                accessories={progress.showAsCommand ? [{ tag: "Selected" }] : []}
-                actions={
-                  <Actions
-                    progress={progress}
-                    onShowingDetails={onShowingDetails}
-                    togglePinProgress={togglePinProgress}
-                    toggleShowInMenubar={toggleShowInMenubar}
-                    setShowAsCommand={setShowAsCommand}
-                    onEditProgress={onEditProgress}
-                    onAddProgress={onAddProgress}
-                    onDeleteProgress={onDeleteProgress}
-                  />
+  const deleteProgress = async (progress: Progress) => {
+    if (progress.type !== "user") return;
+    if (
+      await confirmAlert({ title: `Delete "${progress.title}"?`, message: "This custom progress will be removed." })
+    ) {
+      await mutate(() => deleteCustomProgress(progress.id), "Progress Deleted");
+    }
+  };
+
+  const addAction = (
+    <Action
+      title="Add New Progress"
+      icon={Icon.Plus}
+      shortcut={Keyboard.Shortcut.Common.New}
+      onAction={() => openProgressForm()}
+    />
+  );
+
+  const renderProgress = (progress: Progress) => (
+    <List.Item
+      key={progress.id}
+      id={progress.id}
+      title={progress.title}
+      subtitle={getSubtitle(progress.progressNum)}
+      icon={getIcon(progress.progressNum)}
+      detail={<ProgressDetail progress={progress} />}
+      accessories={state.commandProgressId === progress.id ? [{ tag: "Selected" }] : []}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <Action
+              title={isShowingDetail ? "Hide Details" : "Show Details"}
+              icon={Icon.AppWindowSidebarLeft}
+              onAction={() => setIsShowingDetail((previous) => !previous)}
+            />
+            <Action.CopyToClipboard
+              title="Copy Progress"
+              icon={Icon.CopyClipboard}
+              content={getSubtitle(progress.progressNum)}
+            />
+            <Action
+              title={progress.pinned ? "Unpin Progress" : "Pin Progress"}
+              icon={Icon.Pin}
+              onAction={() => mutate(() => setPinned(progress.id, !progress.pinned), "Pin Updated")}
+            />
+            {supportsMenuBar && (
+              <Action
+                title={progress.menubar.shown ? "Hide from Menu Bar" : "Show in Menu Bar"}
+                icon={progress.menubar.shown ? Icon.EyeDisabled : Icon.Eye}
+                onAction={() =>
+                  mutate(() => setMenuBarVisible(progress.id, !progress.menubar.shown), "Menu Bar Visibility Updated")
                 }
               />
-            ))
-        )}
+            )}
+            {state.commandProgressId !== progress.id && (
+              <Action
+                title="Show in Command Subtitle"
+                icon={Icon.Eye}
+                onAction={() => mutate(() => selectCommand(progress.id), "Command Selection Updated")}
+              />
+            )}
+            {progress.type === "user" && (
+              <Action title="Edit Progress" icon={Icon.Pencil} onAction={() => openProgressForm(progress)} />
+            )}
+          </ActionPanel.Section>
+          <ActionPanel.Section>{addAction}</ActionPanel.Section>
+          {progress.type === "user" && (
+            <ActionPanel.Section>
+              <Action
+                title="Delete Progress"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                onAction={() => deleteProgress(progress)}
+              />
+            </ActionPanel.Section>
+          )}
+        </ActionPanel>
+      }
+    />
+  );
+
+  const customProgress = state.allProgress.filter((progress) => progress.type === "user");
+
+  return (
+    <List
+      isLoading={state.isLoading || isMutating}
+      navigationTitle="X in Progress"
+      isShowingDetail={isShowingDetail}
+      searchBarAccessory={
+        !state.isLoading && state.allProgress.length > 0 ? (
+          <List.Dropdown
+            tooltip="Command Progress"
+            value={state.commandProgressId}
+            storeValue={false}
+            onChange={async (value) => {
+              if (state.isLoading || value === state.commandProgressId) return;
+              const progress = state.allProgress.find((item) => item.id === value);
+              if (!progress) return;
+              await mutate(() => selectCommand(progress.id), "Command Progress Updated");
+            }}
+          >
+            <List.Dropdown.Section title="Calendar Progress">
+              {state.allProgress
+                .filter((progress) => progress.type === "default")
+                .map((progress) => (
+                  <List.Dropdown.Item key={progress.id} value={progress.id} title={progress.menubar.title} />
+                ))}
+            </List.Dropdown.Section>
+            {customProgress.length > 0 && (
+              <List.Dropdown.Section title="Custom Progress">
+                {customProgress.map((progress) => (
+                  <List.Dropdown.Item key={progress.id} value={progress.id} title={progress.title} />
+                ))}
+              </List.Dropdown.Section>
+            )}
+          </List.Dropdown>
+        ) : undefined
+      }
+    >
+      <List.EmptyView icon={Icon.Calendar} title="No Progress Found" actions={<ActionPanel>{addAction}</ActionPanel>} />
+      <List.Section title="Pinned Progress">
+        {state.allProgress.filter((progress) => progress.pinned).map(renderProgress)}
+      </List.Section>
+      <List.Section title="All Progress">
+        {state.allProgress.filter((progress) => !progress.pinned).map(renderProgress)}
       </List.Section>
     </List>
-  );
-}
-
-function Actions(props: {
-  progress: Progress;
-  onShowingDetails: () => void;
-  togglePinProgress: (targetProgress: Progress) => Promise<void>;
-  toggleShowInMenubar: (targetProgress: Progress) => Promise<void>;
-  setShowAsCommand: (targetProgress: Progress) => void;
-  onEditProgress: (targetProgress: Progress) => void;
-  onAddProgress: () => void;
-  onDeleteProgress: (targetTitle: string) => Promise<void>;
-}) {
-  const {
-    progress,
-    onShowingDetails,
-    togglePinProgress,
-    toggleShowInMenubar,
-    setShowAsCommand,
-    onEditProgress,
-    onAddProgress,
-    onDeleteProgress,
-  } = props;
-  return (
-    <ActionPanel>
-      <ActionPanel.Section>
-        <Action title="Show Details" icon={Icon.AppWindowSidebarLeft} onAction={onShowingDetails} />
-        <Action.CopyToClipboard title="Copy" icon={Icon.CopyClipboard} content={getSubtitle(progress.progressNum)} />
-        <Action
-          title={progress.pinned ? "Unpin it" : "Pin it"}
-          icon={Icon.Pin}
-          onAction={async () => {
-            await togglePinProgress(progress);
-          }}
-        />
-        <Action
-          title={`${progress.menubar.shown ? "Hide From Menu Bar" : "Show In Menu Bar"}`}
-          icon={progress.menubar.shown ? Icon.EyeDisabled : Icon.Eye}
-          onAction={async () => {
-            await toggleShowInMenubar(progress);
-          }}
-        />
-        {!progress.showAsCommand && (
-          <Action
-            title="Show in Command Subtitle"
-            icon={Icon.Eye}
-            onAction={async () => {
-              await setShowAsCommand(progress);
-            }}
-          />
-        )}
-
-        {progress.type === "user" && (
-          <Action
-            title="Edit Progress"
-            icon={Icon.Pencil}
-            onAction={() => {
-              onEditProgress(progress);
-            }}
-          />
-        )}
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Action
-          title="Add New Progress"
-          icon={Icon.Plus}
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
-          onAction={onAddProgress}
-        />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Action
-          title="Delete Progress"
-          icon={Icon.Trash}
-          style={Action.Style.Destructive}
-          onAction={async () => {
-            await onDeleteProgress(progress.title);
-          }}
-        />
-      </ActionPanel.Section>
-    </ActionPanel>
   );
 }
