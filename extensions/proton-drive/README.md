@@ -1,0 +1,77 @@
+# Proton Drive for Raycast
+
+Search, open, download and upload Proton Drive files from Raycast, using the official
+[Proton Drive CLI](https://proton.me/download/drive/cli/index.html).
+
+## Setup
+
+1. Install the CLI: download it from the [Proton Drive CLI download page](https://proton.me/download/drive/cli/index.html)
+   (`macos/arm64` for Apple silicon, `macos/x64` for Intel). It is a single binary, with no installer:
+   put it in a folder such as `~/.local/bin` (create it if needed) and make it executable:
+
+   ```bash
+   mkdir -p ~/.local/bin && mv ~/Downloads/proton-drive ~/.local/bin/ && chmod +x ~/.local/bin/proton-drive
+   ```
+
+2. Sign in once (opens your browser; the session is stored in the macOS Keychain), either with the
+   **Log In to Proton Drive** command or in a terminal:
+
+   ```bash
+   proton-drive auth login
+   ```
+
+Tested with Proton Drive CLI 0.8.0 and 0.9.0.
+
+The CLI Path preference defaults to `proton-drive`, looked up in `/opt/homebrew/bin`, `/usr/local/bin`,
+`~/.local/bin`, `~/bin` and `PATH`; set a full path there if the CLI is installed elsewhere.
+
+## Commands
+
+| Command | What it does |
+| --- | --- |
+| **Search Files** | Opens on your Drive's root; navigate folder by folder with a detail panel on the right. Typing filters the current folder and, if the search index exists, the whole Drive. Folders already visited show instantly from cache. Sort by name, date modified or size; folder sizes (all files below a folder) come from the search index, so without it folders keep their name order. |
+| **Upload Files** | Uploads the Finder selection, or files you choose when nothing is selected, to a folder you pick (existing files are renamed, folders merged). |
+| **Log In to Proton Drive** | Checks the CLI session; logs in through the browser (Terminal fallback) or logs out. |
+| **Refresh Search Index** | Rebuilds the index. Also runs daily while Raycast's Background Refresh is on for this command: off when installed from the Store, on once you run the command yourself, and switchable in the command's settings. |
+
+Actions on a file or folder: **Open** (downloads to a cache, then opens), **Download** (⌘D, to the
+download directory, never overwrites), **Show Enclosing Folder**, **Copy Public Link** (reuses an
+existing link, or asks before creating one), **Copy Drive Path**, **Copy Name**.
+
+Preferences: CLI Path for the whole extension; Primary Action (Open or Download on Enter) and Download Directory under Search Files, the only command that uses them.
+
+## How the index works
+
+The CLI has no search and no recursive listing, and each call takes a few seconds (it signs in and
+decrypts on every run). The extension therefore crawls the Drive once, folder by folder, in parallel,
+and keeps the result in Raycast's support directory.
+
+- Nothing is indexed until you ask for it (Build Search Index, ⌘⇧R in Search Files, or Refresh Search Index).
+- On a large Drive the first crawl takes a long time. It is **resumable**: progress is saved every
+  30 seconds, and the next run (opening Search Files, or the background refresh) continues from there.
+- During the first crawl, partial results are already searchable.
+- Afterwards, the previous complete index is kept until a new crawl finishes.
+- Opened files are kept for 24 hours, so reopening an unchanged file is instant.
+
+Only `/my-files` is indexed; "Shared with me", Photos and the trash are not.
+
+## Privacy and security
+
+- The extension never sees your password: the CLI signs in through the browser and keeps its
+  session in the macOS Keychain.
+- Your Drive is end-to-end encrypted, but what the extension keeps locally is not: the search
+  index and Raycast's folder cache contain file and folder **names** in clear, and files opened
+  from Raycast are kept decrypted for 24 hours. The last 20 CLI errors are kept in a local log
+  to diagnose failures. All of it is readable by your macOS user only;
+  FileVault protects it at rest.
+- Downloaded files get the macOS quarantine attribute, so Gatekeeper checks apps and scripts
+  from your Drive before they run, as it does for browser downloads.
+- Creating a public link always asks for confirmation first.
+- Logging out (Log In to Proton Drive → Log Out) deletes all of it: index, cached listings and
+  opened files. If the CLI session ends another way (`proton-drive auth logout`, expiry), the
+  extension deletes the same data as soon as the CLI reports it, and shows nothing from the Drive.
+
+## Credits
+
+Unofficial extension, not affiliated with or endorsed by Proton AG. The Proton Drive logo comes from
+Proton's [media kit](https://proton.me/media/kit). Proton Drive: [proton.me/drive](https://proton.me/drive).
