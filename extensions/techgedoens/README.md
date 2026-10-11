@@ -11,7 +11,7 @@ Read and search Techgedöns from Raycast. The extension uses the public RSS feed
 - **Refresh Articles** - Updates the latest articles and the local archive manually or through Raycast Background Refresh.
 - **Search Selected Text** - Searches the public blog archive for text selected in the frontmost application.
 - **Search Techgedöns** - Searches all published articles in the public Techgedöns.de blog archive.
-- **Techgedöns Menu Bar** - Optionally shows the unread count and five latest articles in the macOS menu bar.
+- **Techgedöns Menu Bar** - Optionally shows the unread count, configurable latest articles, and favorites in the macOS menu bar.
 
 ## Additional Features
 
@@ -26,7 +26,7 @@ Read and search Techgedöns from Raycast. The extension uses the public RSS feed
 - Infinite scrolling and independent topic and read-status filters
 - Favorites remain stored regardless of the selected archive retention period
 - Automatic hourly background refresh with the latest update status shown in Raycast
-- Optional menu bar mode with the unread count, latest articles, configurable date and category details, and shortcuts to the main lists
+- Optional menu bar mode with 3, 5, or 10 articles per section, an unread-only filter, a hideable zero counter, a dedicated favorites section, configurable date and category details, and shortcuts to the main lists
 - US English command interface with the original German blog topics
 
 ## Local Development

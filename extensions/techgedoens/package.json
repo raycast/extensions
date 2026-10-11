@@ -238,6 +238,46 @@
       "disabledByDefault": true,
       "preferences": [
         {
+          "name": "menuBarArticleCount",
+          "title": "Number of Articles",
+          "description": "Selects how many articles are shown in each menu bar section.",
+          "type": "dropdown",
+          "required": false,
+          "default": "5",
+          "data": [
+            {
+              "title": "3 Articles",
+              "value": "3"
+            },
+            {
+              "title": "5 Articles",
+              "value": "5"
+            },
+            {
+              "title": "10 Articles",
+              "value": "10"
+            }
+          ]
+        },
+        {
+          "name": "showOnlyUnreadMenuBarArticles",
+          "title": "Article Filter",
+          "description": "Only shows unread articles in the Latest Articles and Favorites sections.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Only show unread articles"
+        },
+        {
+          "name": "hideZeroMenuBarUnreadCount",
+          "title": "Unread Counter",
+          "description": "Hides the unread counter in the menu bar when there are no unread articles.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Hide counter when zero"
+        },
+        {
           "name": "showMenuBarArticleDate",
           "title": "Article Details",
           "description": "Shows the publication date next to each article in the menu bar.",

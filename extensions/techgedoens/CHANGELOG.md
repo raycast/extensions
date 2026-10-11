@@ -1,8 +1,11 @@
 # Changelog
 
-## [Show Selected Search Text] - {PR_MERGE_DATE}
+## [Search and Menu Bar Improvements] - {PR_MERGE_DATE}
 
 - Display the selected text in the Techgedöns search bar so it remains visible and editable.
+- Choose whether the menu bar shows 3, 5, or 10 articles per section.
+- Optionally show only unread articles and hide the unread counter when it reaches zero.
+- Show favorite articles in a dedicated menu bar section.
 
 ## [Search Selected Text] - 2026-10-10
 
