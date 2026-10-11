@@ -1,5 +1,9 @@
 # Changelog
 
+## [Show Selected Search Text] - {PR_MERGE_DATE}
+
+- Display the selected text in the Techgedöns search bar so it remains visible and editable.
+
 ## [Search Selected Text] - 2026-10-10
 
 - Search the public Techgedöns archive using text selected in the frontmost application.
