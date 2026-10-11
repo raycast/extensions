@@ -1,5 +1,5 @@
-import { Color, Icon, LaunchType, LocalStorage, MenuBarExtra, launchCommand } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { Color, getPreferenceValues, Icon, LaunchType, LocalStorage, MenuBarExtra, launchCommand } from "@raycast/api";
+import { showFailureToast, useCachedState } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 
 import { useChatSessions } from "./hooks/use-chat-sessions";
@@ -7,11 +7,15 @@ import { useUsage } from "./hooks/use-usage";
 import { combinedProviderMenuBarIcon, liveIcon, providerIcon, providerMenuBarIcon } from "./lib/presentation";
 import { shortcut, useShortcutStore } from "./lib/shortcuts";
 import {
-  providerRemainingPercent,
+  currentUsageWindows,
+  isUsageStateFresh,
+  usageProviderName,
+  type UsageProvider,
   usageCacheTtlMilliseconds,
   type ProviderUsageState,
   type UsageWindow,
 } from "./lib/usage";
+import { isShortTermWindow, selectMenuBarWindow, type MenuBarWindow } from "./lib/usage-selection";
 import type { ChatProvider } from "./lib/types";
 
 const providerOrder: ChatProvider[] = ["claude", "codex"];
@@ -25,14 +29,8 @@ const timeFormatter = new Intl.DateTimeFormat("en-US", {
   minute: "2-digit",
 });
 
-interface LimitingWindow {
-  provider: ChatProvider;
-  window: UsageWindow;
-}
-
-type MenuBarDisplay = "automatic" | "both" | ChatProvider;
+type MenuBarDisplay = "automatic" | "both" | UsageProvider;
 type MenuBarPercentage = "remaining" | "used";
-type MenuBarWindow = "automatic" | "short-term" | "weekly";
 type MenuBarContent = "percentage" | "reset" | "percentage-reset";
 
 export default function Command() {
@@ -44,28 +42,7 @@ export default function Command() {
   const { snapshot, isLoading, error, refresh } = useUsage({
     refreshIntervalMilliseconds: usageCacheTtlMilliseconds,
   });
-  const { sessions: discoveredSessions } = useChatSessions({ notifyOnError: false });
-  const [favoriteChatKeys] = useCachedState<string[]>("favorite-chat-keys", []);
-  const [sessionTitleOverrides] = useCachedState<Record<string, string>>("session-title-overrides", {});
-  const sessions = useMemo(
-    () =>
-      discoveredSessions.map((session) => ({
-        ...session,
-        title: sessionTitleOverrides[sessionKey(session)] || session.title,
-      })),
-    [discoveredSessions, sessionTitleOverrides],
-  );
-  const favoriteChats = useMemo(() => new Set(favoriteChatKeys), [favoriteChatKeys]);
-  const favoriteSessionCandidates = useMemo(
-    () => sessions.filter((session) => favoriteChats.has(sessionKey(session))),
-    [favoriteChats, sessions],
-  );
-  const liveSessionCandidates = useMemo(
-    () => sessions.filter((session) => session.isActive && !favoriteChats.has(sessionKey(session))),
-    [favoriteChats, sessions],
-  );
-  const favoriteSessions = favoriteSessionCandidates.slice(0, maximumMenuChatItems);
-  const liveSessions = liveSessionCandidates.slice(0, maximumMenuChatItems);
+  const { usageOnly } = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     let active = true;
@@ -86,22 +63,31 @@ export default function Command() {
     };
   }, []);
 
-  const states = providerOrder.map(
-    (provider): ProviderUsageState =>
-      snapshot?.providers[provider] || {
-        provider,
-        source: "unavailable",
-        error: error?.message,
-      },
-  );
+  const states = [
+    ...providerOrder.map(
+      (provider): ProviderUsageState =>
+        snapshot?.providers[provider] || {
+          provider,
+          source: "unavailable",
+          error: error?.message,
+        },
+    ),
+    ...(snapshot?.customProviders || []),
+  ];
   const combinedWindows = providerOrder.map((provider) => ({
     provider,
-    window: selectMenuBarWindow(states, provider, windowSelection)?.window,
+    ...selectMenuBarWindow(states, provider, windowSelection, Date.now(), usageOnly),
   }));
   const limitingWindow =
     display === "both"
       ? undefined
-      : selectMenuBarWindow(states, display === "automatic" ? undefined : display, windowSelection);
+      : selectMenuBarWindow(
+          states,
+          display === "automatic" ? undefined : display,
+          windowSelection,
+          Date.now(),
+          usageOnly,
+        );
   const displayedProvider =
     display === "automatic" ? limitingWindow?.provider : display === "both" ? undefined : display;
   const reset = limitingWindow?.window.resetsAt ? formatCompactReset(limitingWindow.window.resetsAt) : undefined;
@@ -109,13 +95,23 @@ export default function Command() {
     display === "both"
       ? combinedMenuBarTitle(combinedWindows, percentage, content)
       : limitingWindow
-        ? menuBarTitle(limitingWindow.window, percentage, content, reset)
+        ? menuBarTitle(limitingWindow.window, percentage, content, reset, limitingWindow.lastObserved)
         : "—";
   const tooltip =
     display === "both"
-      ? combinedWindows.map(({ provider, window }) => menuBarTooltip(provider, window, percentage)).join("\n")
+      ? combinedWindows
+          .map(({ provider, window, lastObserved }) =>
+            menuBarTooltip(provider, window, percentage, states, lastObserved),
+          )
+          .join("\n")
       : limitingWindow
-        ? menuBarTooltip(limitingWindow.provider, limitingWindow.window, percentage)
+        ? menuBarTooltip(
+            limitingWindow.provider,
+            limitingWindow.window,
+            percentage,
+            states,
+            limitingWindow.lastObserved,
+          )
         : "Usage unavailable";
   const latestUpdate = Math.max(...states.map((state) => state.data?.fetchedAt || 0));
   const selectDisplay = async (nextDisplay: MenuBarDisplay) => {
@@ -141,7 +137,7 @@ export default function Command() {
         display === "both"
           ? combinedProviderMenuBarIcon()
           : displayedProvider
-            ? providerMenuBarIcon(displayedProvider)
+            ? usageMenuIcon(displayedProvider)
             : Icon.Calendar
       }
       title={title}
@@ -164,13 +160,13 @@ export default function Command() {
         {states.map((state) => (
           <MenuBarExtra.Item
             key={`${state.provider}-display`}
-            title={`${"Show"} ${providerName(state.provider)}`}
+            title={`${"Show"} ${usageProviderName(state)}`}
             subtitle={
               display === state.provider
                 ? "Selected"
-                : providerSummaryTitle(state, percentage).replace(`${providerName(state.provider)} · `, "")
+                : providerSummaryTitle(state, percentage, usageOnly).replace(`${usageProviderName(state)} · `, "")
             }
-            icon={providerIcon(state.provider)}
+            icon={usageMenuIcon(state.provider)}
             onAction={() => selectDisplay(state.provider)}
           />
         ))}
@@ -233,58 +229,15 @@ export default function Command() {
         />
       </MenuBarExtra.Section>
 
-      {favoriteSessions.length > 0 || liveSessions.length > 0 ? (
-        <MenuBarExtra.Section title={"Chats"}>
-          {favoriteSessions.length > 0 ? (
-            <MenuBarExtra.Submenu title={`${"Favorite Chats"} · ${favoriteSessionCandidates.length}`} icon={Icon.Star}>
-              {favoriteSessions.map((session) => (
-                <MenuBarExtra.Item
-                  key={`favorite-${sessionKey(session)}`}
-                  title={session.title}
-                  subtitle={session.projectName}
-                  icon={providerIcon(session.provider)}
-                  onAction={() => openPromptCastCommand(sessionKey(session))}
-                />
-              ))}
-              {favoriteSessionCandidates.length > favoriteSessions.length ? (
-                <MenuBarExtra.Item
-                  title={"Open All Favorite Chats"}
-                  icon={Icon.List}
-                  onAction={() => openPromptCastCommand()}
-                />
-              ) : null}
-            </MenuBarExtra.Submenu>
-          ) : null}
-          {liveSessions.length > 0 ? (
-            <MenuBarExtra.Submenu title={`${"Live Chats"} · ${liveSessionCandidates.length}`} icon={liveIcon}>
-              {liveSessions.map((session) => (
-                <MenuBarExtra.Item
-                  key={`live-${sessionKey(session)}`}
-                  title={session.title}
-                  subtitle={session.projectName}
-                  icon={providerIcon(session.provider)}
-                  onAction={() => openPromptCastCommand(sessionKey(session))}
-                />
-              ))}
-              {liveSessionCandidates.length > liveSessions.length ? (
-                <MenuBarExtra.Item
-                  title={"Open All Live Chats"}
-                  icon={Icon.List}
-                  onAction={() => openPromptCastCommand()}
-                />
-              ) : null}
-            </MenuBarExtra.Submenu>
-          ) : null}
-        </MenuBarExtra.Section>
-      ) : null}
+      {!usageOnly ? <ChatMenuSection /> : null}
 
       <MenuBarExtra.Section title={"Overview"}>
         {states.map((state) => (
           <MenuBarExtra.Item
             key={state.provider}
-            title={providerSummaryTitle(state, percentage)}
-            subtitle={providerSummarySubtitle(state)}
-            icon={providerIcon(state.provider)}
+            title={providerSummaryTitle(state, percentage, usageOnly)}
+            subtitle={providerSummarySubtitle(state, usageOnly)}
+            icon={usageMenuIcon(state.provider)}
             onAction={openUsageCommand}
           />
         ))}
@@ -296,7 +249,7 @@ export default function Command() {
             state.data.windows.map((window) => (
               <MenuBarExtra.Item
                 key={window.id}
-                title={`${window.title} · ${formatPercent(windowPercent(window, percentage))} ${percentageLabel(percentage)}`}
+                title={`${isCurrentWindow(state, window) ? "" : "Last observed · "}${window.title} · ${formatPercent(windowPercent(window, percentage))} ${percentageLabel(percentage)}`}
                 subtitle={
                   window.resetsAt
                     ? `${"Resets"} ${formatReset(window.resetsAt)} · ${formatPercent(windowPercent(window, oppositePercentage(percentage)))} ${percentageLabel(oppositePercentage(percentage))}`
@@ -304,7 +257,7 @@ export default function Command() {
                 }
                 icon={{
                   source: isShortTermWindow(window) ? Icon.Hourglass : progressIcon(window.remainingPercent),
-                  tintColor: usageColor(window.remainingPercent),
+                  tintColor: isCurrentWindow(state, window) ? usageColor(window.remainingPercent) : Color.SecondaryText,
                 }}
                 onAction={openUsageCommand}
               />
@@ -317,9 +270,13 @@ export default function Command() {
               onAction={openUsageCommand}
             />
           )}
-          {state.source === "stale" && state.data ? (
+          {!isUsageStateFresh(state) && state.data ? (
             <MenuBarExtra.Item
-              title={"Last Valid Value"}
+              title={
+                selectMenuBarWindow([state], state.provider, "automatic", Date.now(), usageOnly)?.lastObserved
+                  ? "Last Observed · Updates While Claude Is Active"
+                  : "Historical Reading · Excluded From Menu Bar"
+              }
               subtitle={state.error}
               icon={Icon.Warning}
               onAction={openUsageCommand}
@@ -340,7 +297,7 @@ export default function Command() {
           <MenuBarExtra.Item
             title={`${"Updated"} ${timeFormatter.format(latestUpdate)}`}
             subtitle={"Refreshes automatically every 5 minutes"}
-            icon={states.some((state) => state.source === "stale") ? Icon.Warning : Icon.Clock}
+            icon={states.some((state) => !isUsageStateFresh(state)) ? Icon.Warning : Icon.Clock}
             onAction={() => refresh(true)}
           />
         ) : null}
@@ -350,46 +307,37 @@ export default function Command() {
 }
 
 async function openUsageCommand(): Promise<void> {
-  await launchCommand({ name: "cli-usage", type: LaunchType.UserInitiated });
+  try {
+    await launchCommand({ name: "cli-usage", type: LaunchType.UserInitiated });
+  } catch (error) {
+    await showFailureToast(error, { title: "Could Not Open Usage Viewer" });
+  }
 }
 
 async function openPromptCastCommand(sessionKey?: string): Promise<void> {
-  await launchCommand({
-    name: "codex-claude-cli",
-    type: LaunchType.UserInitiated,
-    context: sessionKey ? { sessionKey } : undefined,
-  });
+  try {
+    await launchCommand({
+      name: "codex-claude-cli",
+      type: LaunchType.UserInitiated,
+      context: sessionKey ? { sessionKey } : undefined,
+    });
+  } catch (error) {
+    await showFailureToast(error, { title: "Could Not Open PromptCast" });
+  }
 }
 
 function sessionKey(session: { provider: ChatProvider; id: string }): string {
   return `${session.provider}:${session.id}`;
 }
 
-function selectMenuBarWindow(
-  states: ProviderUsageState[],
-  provider: ChatProvider | undefined,
-  selection: MenuBarWindow,
-): LimitingWindow | undefined {
-  const candidates = states
-    .filter((state) => !provider || state.provider === provider)
-    .flatMap((state) =>
-      (state.data?.windows || []).map((window) => ({
-        provider: state.provider,
-        window,
-      })),
-    );
-  const matching = candidates.filter(({ window }) => {
-    if (selection === "automatic") return true;
-    if (selection === "short-term") return isShortTermWindow(window);
-    return isWeeklyWindow(window);
-  });
-  return (matching.length > 0 ? matching : candidates).sort(
-    (left, right) => left.window.remainingPercent - right.window.remainingPercent,
-  )[0];
-}
-
 function isMenuBarDisplay(value: string | undefined): value is MenuBarDisplay {
-  return value === "automatic" || value === "both" || value === "claude" || value === "codex";
+  return (
+    value === "automatic" ||
+    value === "both" ||
+    value === "claude" ||
+    value === "codex" ||
+    Boolean(value?.startsWith("custom-"))
+  );
 }
 
 function isMenuBarPercentage(value: string | undefined): value is MenuBarPercentage {
@@ -409,65 +357,75 @@ function menuBarTitle(
   percentage: MenuBarPercentage,
   content: MenuBarContent,
   reset: string | undefined,
+  lastObserved = false,
 ): string {
-  const percentageText = formatPercent(windowPercent(window, percentage));
+  const percentageText = `${lastObserved ? "~" : ""}${formatPercent(windowPercent(window, percentage))}`;
   const resetText = reset;
   if (content === "percentage") return percentageText;
-  if (content === "reset") return resetText || percentageText;
+  if (content === "reset") return resetText ? `${lastObserved ? "~" : ""}${resetText}` : percentageText;
   return [percentageText, resetText].filter(Boolean).join(" ");
 }
 
 function combinedMenuBarTitle(
-  selections: { provider: ChatProvider; window: UsageWindow | undefined }[],
+  selections: { provider: UsageProvider; window?: UsageWindow; lastObserved?: boolean }[],
   percentage: MenuBarPercentage,
   content: MenuBarContent,
 ): string {
   return selections
-    .map(({ window }) => {
+    .map(({ window, lastObserved }) => {
       const reset = window?.resetsAt ? formatCompactReset(window.resetsAt) : undefined;
-      return window ? menuBarTitle(window, percentage, content, reset) : "—";
+      return window ? menuBarTitle(window, percentage, content, reset, lastObserved) : "—";
     })
     .join("   ");
 }
 
 function menuBarTooltip(
-  provider: ChatProvider,
+  provider: UsageProvider,
   window: UsageWindow | undefined,
   percentage: MenuBarPercentage,
+  states: ProviderUsageState[],
+  lastObserved = false,
 ): string {
-  if (!window) return `${providerName(provider)} · ${"Usage unavailable"}`;
+  const name = usageProviderName(
+    states.find((state) => state.provider === provider) || { provider, source: "unavailable" },
+  );
+  if (!window) return `${name} · ${"Usage unavailable"}`;
   const reset = window.resetsAt ? formatCompactReset(window.resetsAt) : undefined;
-  return `${providerName(provider)} · ${window.title} · ${formatPercent(windowPercent(window, percentage))} ${percentageLabel(percentage)}${reset ? ` · ${"resets in"} ${reset}` : ""}`;
+  return `${name}${lastObserved ? " · Last observed" : ""} · ${window.title} · ${formatPercent(windowPercent(window, percentage))} ${percentageLabel(percentage)}${reset ? ` · ${"resets in"} ${reset}` : ""}`;
 }
 
-function providerSummaryTitle(state: ProviderUsageState, percentage: MenuBarPercentage): string {
-  const remaining = providerRemainingPercent(state.data);
+function providerSummaryTitle(state: ProviderUsageState, percentage: MenuBarPercentage, usageOnly: boolean): string {
+  const selection = selectMenuBarWindow([state], state.provider, "automatic", Date.now(), usageOnly);
+  const remaining = selection?.window.remainingPercent;
   const value = remaining === undefined ? undefined : percentage === "remaining" ? remaining : 100 - remaining;
-  return `${providerName(state.provider)} · ${value === undefined ? "—" : `${formatPercent(value)} ${percentageLabel(percentage)}`}`;
+  return `${usageProviderName(state)} · ${value === undefined ? "—" : `${selection?.lastObserved ? "~" : ""}${formatPercent(value)} ${percentageLabel(percentage)}`}`;
 }
 
-function providerSummarySubtitle(state: ProviderUsageState): string | undefined {
+function providerSummarySubtitle(state: ProviderUsageState, usageOnly: boolean): string | undefined {
   const parts: string[] = [];
   if (state.data?.plan) parts.push(planTitle(state.data.plan));
-  parts.push(sourceLabel(state));
+  parts.push(
+    selectMenuBarWindow([state], state.provider, "automatic", Date.now(), usageOnly)?.lastObserved
+      ? "Last observed"
+      : sourceLabel(state),
+  );
   if (!state.data && state.error) parts.push(state.error);
   return parts.filter(Boolean).join(" · ") || undefined;
 }
 
 function providerSectionTitle(state: ProviderUsageState): string {
   const plan = state.data?.plan ? ` · ${planTitle(state.data.plan)}` : "";
-  return `${providerName(state.provider)}${plan}`;
+  return `${usageProviderName(state)}${plan}`;
 }
 
 function sourceLabel(state: ProviderUsageState): string {
+  if (state.data && !isUsageStateFresh(state)) return "Historical · Not Counted";
+  if (state.error) return "Unavailable";
+  if (state.bridgeConnected && !state.data) return "Waiting for Claude Code";
   if (state.source === "live") return "Live";
   if (state.source === "cache") return "Recent Cache";
   if (state.source === "stale") return "Cached · Refresh Failed";
   return "Unavailable";
-}
-
-function providerName(provider: ChatProvider): string {
-  return provider === "claude" ? "Claude" : "Codex";
 }
 
 function planTitle(plan: string): string {
@@ -498,22 +456,6 @@ function oppositePercentage(percentage: MenuBarPercentage): MenuBarPercentage {
 
 function percentageLabel(percentage: MenuBarPercentage): string {
   return percentage === "remaining" ? "remaining" : "used";
-}
-
-function isShortTermWindow(window: UsageWindow): boolean {
-  return Boolean(
-    (window.durationMinutes && window.durationMinutes <= 1_440) ||
-    window.id.includes("five_hour") ||
-    /5[- ]hour/i.test(window.title),
-  );
-}
-
-function isWeeklyWindow(window: UsageWindow): boolean {
-  return Boolean(
-    window.id.toLowerCase().includes("week") ||
-    /week/i.test(window.title) ||
-    (window.durationMinutes && window.durationMinutes >= 6 * 24 * 60 && window.durationMinutes <= 8 * 24 * 60),
-  );
 }
 
 function formatCompactReset(timestamp: number): string | undefined {
@@ -554,4 +496,82 @@ function usageColor(remainingPercent: number): Color {
   if (remainingPercent <= 15) return Color.Red;
   if (remainingPercent <= 35) return Color.Yellow;
   return Color.Green;
+}
+
+function usageMenuIcon(provider: UsageProvider) {
+  return provider === "claude" || provider === "codex" ? providerMenuBarIcon(provider) : Icon.Gauge;
+}
+
+function isCurrentWindow(state: ProviderUsageState, window: UsageWindow): boolean {
+  return currentUsageWindows(state).includes(window);
+}
+
+function ChatMenuSection() {
+  const { sessions: discoveredSessions } = useChatSessions({ notifyOnError: false });
+  const [favoriteChatKeys] = useCachedState<string[]>("favorite-chat-keys", []);
+  const [sessionTitleOverrides] = useCachedState<Record<string, string>>("session-title-overrides", {});
+  const sessions = useMemo(
+    () =>
+      discoveredSessions.map((session) => ({
+        ...session,
+        title: sessionTitleOverrides[sessionKey(session)] || session.title,
+      })),
+    [discoveredSessions, sessionTitleOverrides],
+  );
+  const favoriteChats = useMemo(() => new Set(favoriteChatKeys), [favoriteChatKeys]);
+  const favoriteSessionCandidates = useMemo(
+    () => sessions.filter((session) => favoriteChats.has(sessionKey(session))),
+    [favoriteChats, sessions],
+  );
+  const liveSessionCandidates = useMemo(
+    () => sessions.filter((session) => session.isActive && !favoriteChats.has(sessionKey(session))),
+    [favoriteChats, sessions],
+  );
+  const favoriteSessions = favoriteSessionCandidates.slice(0, maximumMenuChatItems);
+  const liveSessions = liveSessionCandidates.slice(0, maximumMenuChatItems);
+
+  return favoriteSessions.length > 0 || liveSessions.length > 0 ? (
+    <MenuBarExtra.Section title={"Chats"}>
+      {favoriteSessions.length > 0 ? (
+        <MenuBarExtra.Submenu title={`${"Favorite Chats"} · ${favoriteSessionCandidates.length}`} icon={Icon.Star}>
+          {favoriteSessions.map((session) => (
+            <MenuBarExtra.Item
+              key={`favorite-${sessionKey(session)}`}
+              title={session.title}
+              subtitle={session.projectName}
+              icon={providerIcon(session.provider)}
+              onAction={() => openPromptCastCommand(sessionKey(session))}
+            />
+          ))}
+          {favoriteSessionCandidates.length > favoriteSessions.length ? (
+            <MenuBarExtra.Item
+              title={"Open All Favorite Chats"}
+              icon={Icon.List}
+              onAction={() => openPromptCastCommand()}
+            />
+          ) : null}
+        </MenuBarExtra.Submenu>
+      ) : null}
+      {liveSessions.length > 0 ? (
+        <MenuBarExtra.Submenu title={`${"Live Chats"} · ${liveSessionCandidates.length}`} icon={liveIcon}>
+          {liveSessions.map((session) => (
+            <MenuBarExtra.Item
+              key={`live-${sessionKey(session)}`}
+              title={session.title}
+              subtitle={session.projectName}
+              icon={providerIcon(session.provider)}
+              onAction={() => openPromptCastCommand(sessionKey(session))}
+            />
+          ))}
+          {liveSessionCandidates.length > liveSessions.length ? (
+            <MenuBarExtra.Item
+              title={"Open All Live Chats"}
+              icon={Icon.List}
+              onAction={() => openPromptCastCommand()}
+            />
+          ) : null}
+        </MenuBarExtra.Submenu>
+      ) : null}
+    </MenuBarExtra.Section>
+  ) : null;
 }
