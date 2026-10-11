@@ -1,8 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
+import { CONNECTION_TIMEOUT_MS } from "../src/helpers/constants";
+import HueClient, { UnauthorizedError } from "../src/lib/HueClient";
 import { createHueClient } from "../src/lib/hueBridge";
 import type { HueEvent } from "../src/lib/types";
-import { startBridge } from "./fakeBridge";
-import { lights } from "./fixtures/resources";
+import { type FakeBridge, html, json, type Route, startBridge } from "./fakeBridge";
+import { lights, rooms, scenes, zones } from "./fixtures/resources";
+import { sleeps } from "./mocks/timersPromises";
 
 const event = (type: HueEvent["type"], data: HueEvent["data"]): HueEvent => ({
   id: `event-${type}`,
@@ -11,10 +14,21 @@ const event = (type: HueEvent["type"], data: HueEvent["data"]): HueEvent => ({
   data,
 });
 
+async function connect(options?: Parameters<typeof startBridge>[0]) {
+  const bridge = await startBridge(options);
+  return { bridge, hueClient: await createHueClient(bridge.config) };
+}
+
+// The requests after the one createHueClient makes to check the username.
+const requestsAfterConnecting = (bridge: FakeBridge) =>
+  bridge.requests.slice(1).map(({ method, path, body }) => ({ method, path, body }));
+
+const change = { on: { on: true } };
+const changeRequest = { method: "PUT", path: `/clip/v2/resource/light/${lights[0].id}`, body: JSON.stringify(change) };
+
 describe("listenToEventSource", () => {
   async function listen() {
-    const bridge = await startBridge();
-    const hueClient = await createHueClient(bridge.config);
+    const { bridge, hueClient } = await connect();
     const events: HueEvent[] = [];
     const stop = hueClient.listenToEventSource((received) => events.push(received));
     await vi.waitFor(() => expect(bridge.eventStreams).toHaveLength(1));
@@ -89,5 +103,167 @@ describe("listenToEventSource", () => {
     const { bridge, stop } = await listen();
     stop();
     await vi.waitFor(() => expect(bridge.eventStreams[0].closed).toBe(true));
+  });
+});
+
+describe("getResources", () => {
+  it("fetches rooms, zones, scenes and lights one at a time, in that order", async () => {
+    const { bridge, hueClient } = await connect();
+    expect(await hueClient.getResources()).toEqual({ rooms, zones, scenes, lights });
+    expect(requestsAfterConnecting(bridge).map(({ path }) => path)).toEqual(
+      ["room", "zone", "scene", "light"].map((type) => `/clip/v2/resource/${type}`),
+    );
+    expect(bridge.maxInFlight).toBe(1);
+  });
+});
+
+describe("a busy bridge", () => {
+  it.each([429, 503])("retries a change answered %i twice, unchanged, after 250 then 500 ms", async (status) => {
+    const { bridge, hueClient } = await connect();
+    const answer = bridge.routes["PUT /clip/v2/resource/"];
+    let attempts = 0;
+    bridge.routes["PUT /clip/v2/resource/"] = (stream, body, headers) =>
+      ++attempts < 3 ? html(stream, status) : answer(stream, body, headers);
+    expect(await hueClient.updateLight(lights[0], change)).toEqual([{ rid: lights[0].id, rtype: "light" }]);
+    expect(requestsAfterConnecting(bridge)).toEqual([changeRequest, changeRequest, changeRequest]);
+    expect(sleeps).toEqual([250, 500]);
+  });
+});
+
+describe("an HTML error page", () => {
+  it("rejects with UnauthorizedError on 403", async () => {
+    const { bridge, hueClient } = await connect();
+    bridge.routes["GET /clip/v2/resource/light"] = (stream) => html(stream, 403);
+    await expect(hueClient.getLights()).rejects.toThrow(UnauthorizedError);
+  });
+
+  it.each([429, 503])("rejects as busy when the third attempt is answered %i too", async (status) => {
+    const { bridge, hueClient } = await connect();
+    bridge.routes["PUT /clip/v2/resource/"] = (stream) => html(stream, status);
+    await expect(hueClient.updateLight(lights[0], change)).rejects.toThrow("Hue Bridge is busy, try again");
+    expect(requestsAfterConnecting(bridge)).toEqual([changeRequest, changeRequest, changeRequest]);
+  });
+
+  it.each([200, 500])("rejects status %i with an error naming it", async (status) => {
+    const { bridge, hueClient } = await connect();
+    bridge.routes["GET /clip/v2/resource/light"] = (stream) => html(stream, status);
+    await expect(hueClient.getLights()).rejects.toThrow(`Status ${status}`);
+  });
+
+  it.each([
+    ["", false],
+    [", also with the event stream open on a bridge that ignores GOAWAY", true],
+  ])("rejects a change answered 403 with UnauthorizedError and disconnects%s", async (_, listening) => {
+    const { bridge, hueClient } = await connect({ ignoreGoaway: listening });
+    if (listening) {
+      hueClient.listenToEventSource(() => {});
+      await vi.waitFor(() => expect(bridge.eventStreams).toHaveLength(1));
+    }
+    const onDisconnect = vi.fn();
+    hueClient.onDisconnect(onDisconnect);
+    bridge.routes["PUT /clip/v2/resource/"] = (stream) => html(stream, 403);
+    await expect(hueClient.updateLight(lights[0], change)).rejects.toThrow(UnauthorizedError);
+    await vi.waitFor(() => expect(onDisconnect).toHaveBeenCalled());
+  });
+});
+
+describe("a JSON response with errors", () => {
+  it.each([200, 400])("rejects status %i with the error descriptions joined", async (status) => {
+    const { bridge, hueClient } = await connect();
+    const errors = [{ description: "device (light) is unreachable" }, { description: "invalid value for on" }];
+    bridge.routes["PUT /clip/v2/resource/"] = (stream) => json(stream, status, { errors, data: [] });
+    await expect(hueClient.updateLight(lights[0], change)).rejects.toThrow(
+      /^device \(light\) is unreachable, invalid value for on$/,
+    );
+  });
+});
+
+describe("a request the bridge never answers", () => {
+  it("rejects after the timeout and destroys the session", async () => {
+    const { bridge, hueClient } = await connect();
+    bridge.routes["GET /clip/v2/resource/light"] = () => {};
+    const onDisconnect = vi.fn();
+    hueClient.onDisconnect(onDisconnect);
+    await expect(hueClient.getLights()).rejects.toThrow("timed out");
+    await vi.waitFor(() => expect(onDisconnect).toHaveBeenCalled());
+  });
+
+  it("fails the changes queued behind it at once", async () => {
+    const { bridge, hueClient } = await connect();
+    bridge.routes["PUT /clip/v2/resource/"] = () => {};
+    const started = Date.now();
+    const results = await Promise.allSettled(lights.slice(0, 3).map((light) => hueClient.updateLight(light, change)));
+    expect(results.map(({ status }) => status)).toEqual(["rejected", "rejected", "rejected"]);
+    // One timeout, then the queue's 100 ms apart, rather than a timeout each
+    expect(Date.now() - started).toBeLessThan(2 * CONNECTION_TIMEOUT_MS);
+  });
+});
+
+describe("a connection dropped mid-request", () => {
+  it.each<[string, Route]>([
+    ["session", (stream) => stream.session?.destroy()],
+    ["stream", (stream) => stream.destroy()],
+  ])("rejects when the bridge destroys the %s", async (_, drop) => {
+    const { bridge, hueClient } = await connect();
+    bridge.routes["GET /clip/v2/resource/light"] = drop;
+    await expect(hueClient.getLights()).rejects.toThrow("Lost connection to Hue Bridge");
+  });
+});
+
+describe("onDisconnect", () => {
+  const listen = async (bridge: FakeBridge, hueClient: HueClient) => {
+    hueClient.listenToEventSource(() => {});
+    await vi.waitFor(() => expect(bridge.eventStreams).toHaveLength(1));
+  };
+
+  it.each<[string, (bridge: FakeBridge, hueClient: HueClient) => unknown]>([
+    ["the bridge destroys the session", (bridge) => bridge.sessions[0].destroy()],
+    [
+      // The event stream keeps the session open, so only the GOAWAY tells.
+      "the bridge sends GOAWAY",
+      async (bridge, hueClient) => {
+        await listen(bridge, hueClient);
+        bridge.sessions[0].close();
+      },
+    ],
+    [
+      "the event stream ends",
+      async (bridge, hueClient) => {
+        await listen(bridge, hueClient);
+        bridge.eventStreams[0].end();
+      },
+    ],
+    [
+      "the bridge answers the event stream with 403",
+      (bridge, hueClient) => {
+        bridge.routes["GET /eventstream/clip/v2"] = (stream) => html(stream, 403);
+        hueClient.listenToEventSource(() => {});
+      },
+    ],
+  ])("calls back when %s", async (_, cause) => {
+    const { bridge, hueClient } = await connect();
+    const onDisconnect = vi.fn();
+    hueClient.onDisconnect(onDisconnect);
+    await cause(bridge, hueClient);
+    await vi.waitFor(() => expect(onDisconnect).toHaveBeenCalled());
+  });
+
+  it("calls back at once for a client already closed", async () => {
+    const { hueClient } = await connect();
+    hueClient.close();
+    const onDisconnect = vi.fn();
+    hueClient.onDisconnect(onDisconnect);
+    expect(onDisconnect).toHaveBeenCalledOnce();
+  });
+
+  it("stops calling back once unsubscribed", async () => {
+    const { bridge, hueClient } = await connect();
+    const unsubscribed = vi.fn();
+    const subscribed = vi.fn();
+    hueClient.onDisconnect(unsubscribed)();
+    hueClient.onDisconnect(subscribed);
+    bridge.sessions[0].destroy();
+    await vi.waitFor(() => expect(subscribed).toHaveBeenCalled());
+    expect(unsubscribed).not.toHaveBeenCalled();
   });
 });
