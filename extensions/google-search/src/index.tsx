@@ -1,15 +1,18 @@
-import { ActionPanel, closeMainWindow, Action, Icon, Keyboard, List, open } from "@raycast/api";
+import { ActionPanel, closeMainWindow, Action, Icon, Keyboard, LaunchProps, List, open } from "@raycast/api";
 import { getIcon } from "./utils/resultUtils";
 import { useSearch } from "./utils/useSearch";
 
-export default function Command() {
-  const { isLoading, results, search, searchText, addHistory, deleteAllHistory, deleteHistoryItem } = useSearch();
+export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
+  const initialQuery = props.arguments.query || props.fallbackText || "";
+  const { isLoading, results, search, searchText, addHistory, deleteAllHistory, deleteHistoryItem } =
+    useSearch(initialQuery);
 
   return (
     <List
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={search}
+      throttle
       searchBarPlaceholder="Search Google or enter a URL..."
     >
       <List.Section title="Results" subtitle={results.length + ""}>
@@ -56,6 +59,7 @@ export default function Command() {
                         await deleteHistoryItem(item);
                       }}
                       icon={{ source: Icon.Trash }}
+                      style={Action.Style.Destructive}
                       shortcut={Keyboard.Shortcut.Common.Remove}
                     />
                   )}
@@ -66,6 +70,7 @@ export default function Command() {
                       await deleteAllHistory();
                     }}
                     icon={{ source: Icon.ExclamationMark }}
+                    style={Action.Style.Destructive}
                     shortcut={Keyboard.Shortcut.Common.RemoveAll}
                   />
                 </ActionPanel.Section>

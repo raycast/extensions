@@ -1,5 +1,20 @@
 # Google Search Changelog
 
+## [Fix Suggestion Errors] - {PR_MERGE_DATE}
+
+- Fix "Premature close" error toast appearing while typing quickly
+- Fix loading indicator staying on after a failed suggestion request
+- Searches from "Google Search Selected Text" are no longer saved when search history is turned off
+- Trim surrounding spaces from selected text before searching, and merge older history entries that differ only by those spaces
+- Add a Copy Error action to failure toasts
+- Show each result once, even when a suggestion matches the search or a history entry
+- Move a search back to the top of history when it is opened again
+- Wait for a pause in typing before fetching suggestions
+- Mark Remove from History and Clear All History as destructive actions
+- Add an optional Query argument, and start from the typed text when used as a fallback command
+- Replace `node-fetch` and `iconv-lite` with the built-in `fetch`
+- Update dependencies
+
 ## [Update] - 2026-07-13
 
 - Update Google G icon
