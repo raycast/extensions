@@ -32,3 +32,15 @@ export async function loadMenuBarOverview(
   signal.throwIfAborted();
   return { project, projects, overview };
 }
+
+export function menuBarCacheKey(options: { projectId?: string; demo: boolean; currency: string; chartsV3: boolean }) {
+  return JSON.stringify(["menu-bar", options.projectId ?? null, options.demo, options.currency, options.chartsV3]);
+}
+
+export function matchingMenuBarOverview(value: unknown, projectId: string | undefined): MenuBarOverview | undefined {
+  if (!projectId || !value || typeof value !== "object") return undefined;
+  const data = value as MenuBarOverview;
+  return data.project?.id === projectId && Array.isArray(data.projects) && Array.isArray(data.overview?.metrics)
+    ? data
+    : undefined;
+}

@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, LocalStorage } from "@raycast/api";
+import { selectedProject } from "./lib/project-selection";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { formatMetric, periodLabel, Project, RevenueCatClient } from "./lib/revenuecat";
 import { loadOverview, metricGroups } from "./lib/dashboard-metrics";
 import { demoProject } from "./lib/demo";
@@ -7,7 +8,7 @@ import { Catalog } from "./components/catalog";
 import { Customers } from "./components/customers";
 import { Trends } from "./components/trends";
 import { authorize, credential } from "./lib/auth";
-import { ProjectContext, ProjectDropdown, SELECTED_PROJECT_KEY } from "./components/projects";
+import { ProjectContext, ProjectDropdown } from "./components/projects";
 import { CommonActions, Context, SettingsAction } from "./components/common";
 
 function Home({ context }: { context: Context }) {
@@ -150,7 +151,7 @@ function ConnectedRoot({ initial = "dashboard", demo = false }: RootProps & { de
   const preferences = getPreferenceValues<Preferences>();
   const state = useResource(demo ? "demo-projects" : "projects", async (signal) => {
     if (demo) return { selected: demoProject.id, projects: [demoProject] };
-    const selected = await LocalStorage.getItem<string>(SELECTED_PROJECT_KEY);
+    const selected = await selectedProject();
     const projects = await new RevenueCatClient(credential).projects(signal);
     return { selected, projects };
   });

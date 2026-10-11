@@ -1,6 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { loadMenuBarOverview, selectedMenuBarMetric } from "../src/lib/menu-bar";
+import {
+  loadMenuBarOverview,
+  selectedMenuBarMetric,
+  menuBarCacheKey,
+  matchingMenuBarOverview,
+} from "../src/lib/menu-bar";
 import { loadOverview, sortedMetrics } from "../src/lib/dashboard-metrics";
 import { demoOverview, formatMetric } from "../src/lib/revenuecat";
 
@@ -93,4 +98,56 @@ test("dashboard and menu bar default to v3 and honor the extension-wide legacy s
   await loadMenuBarOverview(client, { demo: false, currency: "USD" }, signal());
   await loadMenuBarOverview(client, { demo: false, currency: "USD", chartsV3: false }, signal());
   assert.deepEqual(versions, [true, false, true, false]);
+});
+
+test("failed project switches and command restarts never reuse another project's metrics", async () => {
+  const cache = new Map<string, string>();
+  const options = { demo: false, currency: "USD", chartsV3: true };
+  const a = {
+    projects: [
+      { id: "a", name: "A" },
+      { id: "b", name: "B" },
+    ],
+    project: { id: "a", name: "A" },
+    overview: demoOverview,
+  };
+  cache.set(menuBarCacheKey({ ...options, projectId: "a" }), JSON.stringify(a));
+  const read = (projectId?: string) => {
+    const raw = cache.get(menuBarCacheKey({ ...options, projectId }));
+    return matchingMenuBarOverview(raw ? JSON.parse(raw) : undefined, projectId);
+  };
+  assert.equal(read("a")?.project.id, "a");
+  assert.equal(read("b"), undefined);
+  await assert.rejects(
+    loadMenuBarOverview(
+      {
+        projects: async () => a.projects,
+        overview: async () => {
+          throw new Error("Offline");
+        },
+      },
+      { ...options, selectedProjectId: "b" },
+      signal(),
+    ),
+    /Offline/,
+  );
+  // A fresh command reads the same persisted cache after the failed switch.
+  assert.equal(read("b"), undefined);
+  assert.equal(read(undefined), undefined);
+  assert.equal(matchingMenuBarOverview(a, "b"), undefined);
+  assert.equal(matchingMenuBarOverview(null, "a"), undefined);
+  // Switching back to A can show A immediately, including while offline.
+  assert.equal(read("a")?.overview.metrics[0].value, demoOverview.metrics[0].value);
+  const b = {
+    ...a,
+    project: { id: "b", name: "B" },
+    overview: { ...demoOverview, metrics: demoOverview.metrics.map((m) => ({ ...m, value: 0 })) },
+  };
+  cache.set(menuBarCacheKey({ ...options, projectId: "b" }), JSON.stringify(b));
+  // A late response for A only updates A's entry.
+  cache.set(menuBarCacheKey({ ...options, projectId: "a" }), JSON.stringify(a));
+  assert.equal(read("b")?.overview.metrics[0].value, 0);
+  assert.equal(cache.has(menuBarCacheKey({ ...options, projectId: "a", chartsV3: false })), false);
+  assert.equal(cache.has(menuBarCacheKey({ ...options, projectId: "a", demo: true })), false);
+  assert.equal(cache.has(menuBarCacheKey({ ...options, projectId: "a", currency: "EUR" })), false);
 });
