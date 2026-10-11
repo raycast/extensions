@@ -166,7 +166,7 @@ export async function allTabsFromAppleScript(appName: string): Promise<TabInfo[]
  * window, and the API does not say which window has the focus, so anything
  * beyond a single result is ambiguous and must not be guessed.
  */
-async function rawActiveTabsFromBrowserExtension(): Promise<TabInfo[]> {
+export async function activeTabsFromBrowserExtension(): Promise<TabInfo[]> {
   if (!environment.canAccess(BrowserExtension)) return [];
   try {
     const tabs = await BrowserExtension.getTabs();
@@ -178,9 +178,9 @@ async function rawActiveTabsFromBrowserExtension(): Promise<TabInfo[]> {
   }
 }
 
-/** URLs of the active tab of every window of every running AppleScript browser. */
-async function activeUrlsOfAppleScriptBrowsers(): Promise<Set<string>> {
-  const urls = new Set<string>();
+/** How often each URL is the active tab of a window of a running AppleScript browser. */
+async function activeUrlsOfAppleScriptBrowsers(): Promise<Map<string, number>> {
+  const counts = new Map<string, number>();
   for (const appName of await runningBrowsers()) {
     try {
       const raw = await runAppleScript(windowActiveUrlsScript(appName, APPLESCRIPT_BROWSERS[appName]), {
@@ -190,31 +190,40 @@ async function activeUrlsOfAppleScriptBrowsers(): Promise<Set<string>> {
         .split(RECORD_SEPARATOR)
         .map((url) => url.trim())
         .filter(Boolean)
-        .forEach((url) => urls.add(url));
+        .forEach((url) => counts.set(url, (counts.get(url) ?? 0) + 1));
     } catch {
-      // A browser that does not answer cannot be ruled out, so nothing is excluded.
+      // A browser that does not answer adds nothing to compare against.
     }
   }
-  return urls;
+  return counts;
 }
 
 /**
- * The active tabs reported by the browser extension, minus the ones that
- * provably belong to an AppleScript browser.
+ * Picks the tab from the browser extension's candidates, or throws.
  *
- * The extension API does not say which browser a tab comes from. When the tab
- * is meant to come from a browser without AppleScript (Firefox, Zen …), every
- * candidate whose URL is open as the active tab of an AppleScript browser is
- * dropped, so a Chrome tab in the background is not passed off as the Firefox
- * one. If that would drop everything, the unfiltered list is kept and the usual
- * one-or-ambiguous rule applies.
+ * The extension API carries no browser or window identity, so candidates are
+ * never filtered by guessing who they belong to: removing one could remove the
+ * very tab the user is looking at. Several candidates with the same URL are the
+ * same link and count once; different URLs are ambiguous.
+ *
+ * When the tab must come from a browser without AppleScript (Firefox, Zen …),
+ * a single candidate is only taken if it cannot be an AppleScript browser's tab
+ * in disguise: its URL is not open there, or the extension reports it more
+ * often than the AppleScript browsers have it open.
  */
-export async function activeTabsFromBrowserExtension(excludeAppleScriptBrowsers = false): Promise<TabInfo[]> {
-  const candidates = await rawActiveTabsFromBrowserExtension();
-  if (!excludeAppleScriptBrowsers || !isMac() || candidates.length === 0) return candidates;
-  const appleScriptUrls = await activeUrlsOfAppleScriptBrowsers();
-  const filtered = candidates.filter((tab) => !appleScriptUrls.has(tab.url));
-  return filtered.length > 0 ? filtered : candidates;
+async function pickExtensionTab(candidates: TabInfo[], target?: string): Promise<TabInfo | undefined> {
+  if (candidates.length === 0) return undefined;
+  const urls = new Set(candidates.map((tab) => tab.url));
+  if (urls.size > 1) throw new AmbiguousTabError(candidates, "windows");
+
+  const tab = candidates[0];
+  if (target && isMac()) {
+    const openInAppleScript = (await activeUrlsOfAppleScriptBrowsers()).get(tab.url) ?? 0;
+    if (openInAppleScript >= candidates.length) {
+      throw new AmbiguousTabError(candidates, "unattributed", target);
+    }
+  }
+  return tab;
 }
 
 /** Whether an app with this name is running, browser or not. */
@@ -308,12 +317,14 @@ export class NoTabError extends Error {
 export class AmbiguousTabError extends Error {
   readonly candidates: TabInfo[];
 
-  constructor(candidates: TabInfo[], reason: "windows" | "browsers") {
+  constructor(candidates: TabInfo[], reason: "windows" | "browsers" | "unattributed", target?: string) {
     const names = [...new Set(candidates.map((tab) => tab.source))].join(", ");
     super(
       reason === "browsers"
         ? `${names} are all open and none of them is in front, and macOS does not say which one you used last. Pick the site yourself, or set a preferred browser in the extension preferences.`
-        : `${candidates.length} browser windows report an active tab, and the browser extension does not say which one has the focus. Pick the site yourself, or close the windows you don't need.`,
+        : reason === "unattributed"
+          ? `The browser extension reports one tab, but the same page is also open in another browser, and the extension does not say which browser a tab belongs to. Pick the site yourself, or check that the Raycast browser extension is running in ${target ?? "your browser"}.`
+          : `${candidates.length} browser windows report an active tab, and the browser extension does not say which one has the focus. Pick the site yourself, or close the windows you don't need.`,
     );
     this.name = "AmbiguousTabError";
     this.candidates = candidates;
@@ -384,9 +395,9 @@ export async function getActiveTab(options: LookupOptions): Promise<TabInfo> {
   }
 
   if (useExtension) {
-    const candidates = await activeTabsFromBrowserExtension(preferredNeedsExtension || frontNeedsExtension);
-    if (candidates.length === 1) return candidates[0];
-    if (candidates.length > 1) throw new AmbiguousTabError(candidates, "windows");
+    const target = preferredNeedsExtension ? preferred : frontNeedsExtension ? frontApp : undefined;
+    const tab = await pickExtensionTab(await activeTabsFromBrowserExtension(), target);
+    if (tab) return tab;
   }
 
   throw new NoTabError(noTabMessage(options));
