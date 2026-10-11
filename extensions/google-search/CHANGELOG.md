@@ -10,7 +10,6 @@
 - Move "Use Clipboard Fallback" to the Google Search Selected Text command settings
 - Show each result once, even when a suggestion matches the search or a history entry
 - Move a search back to the top of history when it is opened again
-- Wait for a pause in typing before fetching suggestions
 - Mark Remove from History and Clear All History as destructive actions
 - Add an optional Query argument, and start from the typed text when used as a fallback command
 - Replace `node-fetch` and `iconv-lite` with the built-in `fetch`

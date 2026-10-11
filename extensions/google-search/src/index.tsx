@@ -12,7 +12,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={search}
-      throttle
       searchBarPlaceholder="Search Google or enter a URL..."
     >
       <List.Section title="Results" subtitle={results.length + ""}>

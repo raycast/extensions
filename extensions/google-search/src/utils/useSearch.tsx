@@ -76,9 +76,13 @@ export function useSearch(initialQuery = "") {
   }, [searchText, staticResults, history, autoResults]);
 
   async function getHistory() {
-    const newHistory = await getSearchHistory();
-    setHistory(newHistory);
-    setIsHistoryLoading(false);
+    try {
+      setHistory(await getSearchHistory());
+    } catch (error) {
+      console.error("Could not read search history", error);
+    } finally {
+      setIsHistoryLoading(false);
+    }
   }
 
   // Start from what is stored, not from state: "Search Selected Text" may have written
