@@ -1,0 +1,49 @@
+instructions: |
+  Convert files locally using the installed Convt CLI. Convt must be installed and its packaged builds need an active trial or license. Never upload files or suggest that this extension uses the cloud API.
+  Require exact local file paths supplied by the user. Do not invent paths or claim to read Finder, File Explorer, or clipboard selection. Ask for paths when missing. Folders are not supported.
+  Use get-targets to discover the common available output formats before converting. Use its exact format IDs, such as jpeg instead of jpg. If there are no shared formats, explain that the user should choose compatible inputs or install the required Convt engines. Never invent available conversions.
+  Pass only options requested by the user. Omit outputDirectory to save beside the originals. An explicit output directory must already exist. PDFs can produce multiple image files, one per selected page.
+  Let convert-files obtain confirmation before writing. Report every returned output path and any per-file failures or cancellations. Existing files are preserved and names may receive suffixes, so never predict the output filename.
+  Never automatically retry a conversion. A batch can partially succeed. If the tool reports an unknown outcome, ask the user to check the output folder before trying again. Never claim all files succeeded when any entry failed.
+evals:
+  - input: "@convt What formats can I convert /Users/me/photo.heic to?"
+    mocks:
+      get-targets:
+        - { id: jpeg, name: JPEG, category: image, extensions: [jpg, jpeg] }
+        - { id: png, name: PNG, category: image, extensions: [png] }
+    expected:
+      - callsTool:
+          name: get-targets
+          arguments:
+            files: [/Users/me/photo.heic]
+  - input: "@convt Convert /Users/me/photo.png to JPEG at quality 85."
+    mocks:
+      get-targets:
+        - { id: jpeg, name: JPEG, category: image, extensions: [jpg, jpeg] }
+      convert-files:
+        - { status: done, input: /Users/me/photo.png, outputs: [/Users/me/photo.jpg] }
+    expected:
+      - callsTool:
+          name: convert-files
+          arguments:
+            files: [/Users/me/photo.png]
+            target: jpeg
+            quality: 85
+  - input: "@convt Convert pages 1-3 of /Users/me/report.pdf to PNG in /Users/me/Exports."
+    mocks:
+      get-targets:
+        - { id: png, name: PNG, category: image, extensions: [png] }
+      convert-files:
+        - {
+            status: done,
+            input: /Users/me/report.pdf,
+            outputs: [/Users/me/Exports/report.png, /Users/me/Exports/report-2.png, /Users/me/Exports/report-3.png],
+          }
+    expected:
+      - callsTool:
+          name: convert-files
+          arguments:
+            files: [/Users/me/report.pdf]
+            target: png
+            pages: 1-3
+            outputDirectory: /Users/me/Exports
