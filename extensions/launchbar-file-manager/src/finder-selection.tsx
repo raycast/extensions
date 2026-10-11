@@ -12,14 +12,16 @@ import { usePromise } from "@raycast/utils";
 import { expandHome } from "./fs-utils";
 import { TransferTree } from "./transfer-tree";
 
-function getPrefs(): { startingPath?: string; showHiddenDefault?: boolean } {
+function getPrefs(): Preferences.FinderSelection {
   try {
-    return getPreferenceValues<{
-      startingPath?: string;
-      showHiddenDefault?: boolean;
-    }>();
+    return getPreferenceValues<Preferences.FinderSelection>();
   } catch {
-    return {};
+    return {
+      startingPath: "~",
+      startBehavior: "start",
+      showHiddenDefault: false,
+      transferStart: "home",
+    };
   }
 }
 

@@ -32,92 +32,137 @@ function splitName(base: string): { stem: string; ext: string } {
   return { stem: base, ext: "" };
 }
 
-async function exists(p: string): Promise<boolean> {
+/**
+ * True when anything occupies the path. Uses lstat (not access/stat) so a
+ * dangling symlink still counts as occupied — otherwise a planted link to a
+ * missing outside file would look like a free name and the later write
+ * would follow it out of the destination folder.
+ */
+async function occupied(p: string): Promise<boolean> {
   try {
-    await fs.access(p);
+    await fs.lstat(p);
     return true;
   } catch {
     return false;
   }
 }
 
-/** Destination that does not collide: "Name", "Name copy", "Name copy 2", … (ext-aware). */
+/**
+ * Destination that does not collide: "Name", "Name copy", "Name copy 2", …
+ * (ext-aware). Names chosen here are reserved in `reserved` so batch plans
+ * that pick several destinations up front can never hand out the same name
+ * twice (e.g. copying /a/report.txt and /b/report.txt together).
+ */
 export async function uniqueDest(
   destDir: string,
   baseName: string,
+  reserved: Set<string> = new Set(),
 ): Promise<string> {
   const { stem, ext } = splitName(baseName);
-  let candidate = path.join(destDir, baseName);
-  if (!(await exists(candidate))) return candidate;
-  candidate = path.join(destDir, `${stem} copy${ext}`);
-  if (!(await exists(candidate))) return candidate;
+  const candidates = [
+    path.join(destDir, baseName),
+    path.join(destDir, `${stem} copy${ext}`),
+  ];
   let n = 2;
+  for (const candidate of candidates) {
+    if (!reserved.has(candidate) && !(await occupied(candidate))) {
+      reserved.add(candidate);
+      return candidate;
+    }
+  }
   while (true) {
-    candidate = path.join(destDir, `${stem} copy ${n}${ext}`);
-    if (!(await exists(candidate))) return candidate;
+    const candidate = path.join(destDir, `${stem} copy ${n}${ext}`);
     n++;
+    if (!reserved.has(candidate) && !(await occupied(candidate))) {
+      reserved.add(candidate);
+      return candidate;
+    }
   }
 }
 
-type FilePair = { src: string; dest: string; size: number; symlink: boolean };
+type PlanEntry =
+  | { kind: "dir"; src: string; dest: string; mode: number }
+  | { kind: "file"; src: string; dest: string; size: number; mode: number }
+  | { kind: "special"; src: string; dest: string };
+
+export type CopyResult = {
+  src: string;
+  dest: string;
+  ok: boolean;
+  error?: string;
+};
 
 async function collectOne(
   src: string,
   dest: string,
-  pairs: FilePair[],
-): Promise<{ bytes: number; files: number }> {
+  out: PlanEntry[],
+): Promise<{ bytes: number }> {
   const lst = await fs.lstat(src);
-  if (lst.isSymbolicLink()) {
-    pairs.push({ src, dest, size: 0, symlink: true });
-    return { bytes: 0, files: 1 };
-  }
-  if (lst.isFile()) {
-    pairs.push({ src, dest, size: lst.size, symlink: false });
-    return { bytes: lst.size, files: 1 };
-  }
   if (lst.isDirectory()) {
+    // Directories are recorded explicitly so empty folders (and empty
+    // subfolders) are actually created at the destination.
+    out.push({ kind: "dir", src, dest, mode: lst.mode });
     let bytes = 0;
-    let files = 0;
-    const children = await fs.readdir(src);
-    for (const child of children) {
+    for (const child of await fs.readdir(src)) {
       const r = await collectOne(
         path.join(src, child),
         path.join(dest, child),
-        pairs,
+        out,
       );
       bytes += r.bytes;
-      files += r.files;
     }
-    // Empty dirs still count so mkdir happens
-    if (children.length === 0) files += 0;
-    return { bytes, files };
+    return { bytes };
   }
-  // sockets, fifos, etc: copy via fs.cp, untracked bytes
-  pairs.push({ src, dest, size: 0, symlink: true });
-  return { bytes: 0, files: 1 };
+  if (lst.isFile()) {
+    out.push({ src, dest, size: lst.size, mode: lst.mode, kind: "file" });
+    return { bytes: lst.size };
+  }
+  // Symlinks, sockets, fifos, …: copied as-is via fs.cp, untracked bytes.
+  out.push({ kind: "special", src, dest });
+  return { bytes: 0 };
 }
 
 function copyFileStream(
   src: string,
   dest: string,
+  mode: number,
   onBytes: (delta: number) => void,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const rs = nfs.createReadStream(src, { highWaterMark: 1024 * 1024 });
-    const ws = nfs.createWriteStream(dest, { mode: 0o644 });
+    const ws = nfs.createWriteStream(dest, {
+      // Created with the SOURCE mode up front (umask can only strip bits),
+      // so a private 0600 file is never world-readable mid-copy. O_EXCL
+      // ("wx") refuses symlinks and existing files — never follow or
+      // truncate something we didn't just reserve.
+      mode,
+      flags: "wx",
+    });
+    let opened = false;
+    ws.on("open", () => {
+      opened = true;
+    });
     rs.on("data", (chunk: string | Buffer) => {
       onBytes(
         typeof chunk === "string" ? Buffer.byteLength(chunk) : chunk.length,
       );
     });
-    rs.on("error", (e) => {
-      ws.destroy();
-      reject(e);
-    });
-    ws.on("error", (e) => {
+    const fail = (e: unknown) => {
       rs.destroy();
-      reject(e);
-    });
+      ws.destroy();
+      // Remove our own partial output only — never touch a path we failed
+      // to open (it isn't ours).
+      if (opened) {
+        fs.rm(dest, { force: true }).then(
+          () => reject(e),
+          () => reject(e),
+        );
+      } else {
+        reject(e);
+      }
+    };
+    rs.on("error", fail);
+    ws.on("error", fail);
     ws.on("finish", () => resolve());
     rs.pipe(ws);
   });
@@ -159,46 +204,74 @@ export async function copyManyWithProgress(
   destDir: string,
   toast: Toast,
   title = "Copying",
-): Promise<{ copied: number; errors: string[] }> {
-  const pairs: FilePair[] = [];
+): Promise<{ results: CopyResult[]; copied: number; errors: string[] }> {
+  // Plan phase — resolve + reserve every destination first so two sources
+  // with the same basename can never be handed the same target.
+  const reserved = new Set<string>();
+  const plans: { src: string; dest: string; pairs: PlanEntry[] }[] = [];
+  const results: CopyResult[] = [];
+  const errors: string[] = [];
   let totalBytes = 0;
-  // Plan phase — resolve unique destinations first
-  const topDests: string[] = [];
+
   for (const src of sources) {
-    const dest = await uniqueDest(destDir, path.basename(src));
-    topDests.push(dest);
-    const r = await collectOne(src, dest, pairs);
-    totalBytes += r.bytes;
+    try {
+      const dest = await uniqueDest(destDir, path.basename(src), reserved);
+      const pairs: PlanEntry[] = [];
+      const r = await collectOne(src, dest, pairs);
+      totalBytes += r.bytes;
+      plans.push({ src, dest, pairs });
+      results.push({ src, dest, ok: true });
+    } catch (e) {
+      // Unreadable source (vanished, no permission) — fail just this item.
+      const msg = `${src}: ${String(e)}`;
+      errors.push(msg);
+      results.push({
+        src,
+        dest: path.join(destDir, path.basename(src)),
+        ok: false,
+        error: msg,
+      });
+    }
   }
+
+  const pairs = plans.flatMap((p, i) =>
+    p.pairs.map((pair) => ({ pair, plan: i })),
+  );
   const totalFiles = pairs.length;
   let copiedBytes = 0;
   let doneFiles = 0;
-  const errors: string[] = [];
   const throttle = { last: 0 };
+  const failedPlan = new Set<number>();
 
-  toast.title = `${title} 0/${totalFiles}`;
-  updateToast(toast, {
-    title: toast.title,
-    copiedBytes,
-    totalBytes,
-    doneFiles,
-    totalFiles,
-    current: path.basename(sources[0] ?? ""),
-    force: true,
-    state: throttle,
-  });
+  const showProgress = (current: string, force: boolean) => {
+    toast.title = `${title} ${doneFiles}/${totalFiles}`;
+    updateToast(toast, {
+      title: toast.title,
+      copiedBytes,
+      totalBytes,
+      doneFiles,
+      totalFiles,
+      current,
+      force,
+      state: throttle,
+    });
+  };
+  showProgress(path.basename(sources[0] ?? ""), true);
 
-  for (const pair of pairs) {
+  for (const { pair, plan } of pairs) {
     const current = path.basename(pair.src);
     try {
-      if (pair.symlink) {
+      if (pair.kind === "dir") {
         await ensureParent(pair.dest);
-        await fs.cp(pair.src, pair.dest, { recursive: true });
-      } else {
+        await fs.mkdir(pair.dest);
+        try {
+          await fs.chmod(pair.dest, pair.mode);
+        } catch {
+          // non-fatal
+        }
+      } else if (pair.kind === "file") {
         await ensureParent(pair.dest);
-        // Preserve mode for executables
-        const st = await fs.stat(pair.src);
-        await copyFileStream(pair.src, pair.dest, (delta) => {
+        await copyFileStream(pair.src, pair.dest, pair.mode, (delta) => {
           copiedBytes += delta;
           updateToast(toast, {
             title: toast.title,
@@ -210,29 +283,30 @@ export async function copyManyWithProgress(
             state: throttle,
           });
         });
-        try {
-          await fs.chmod(pair.dest, st.mode);
-        } catch {
-          // non-fatal
-        }
+      } else {
+        await ensureParent(pair.dest);
+        await fs.cp(pair.src, pair.dest, { recursive: true });
       }
     } catch (e) {
+      failedPlan.add(plan);
       errors.push(`${pair.src}: ${String(e)}`);
     }
     doneFiles++;
-    toast.title = `${title} ${doneFiles}/${totalFiles}`;
-    updateToast(toast, {
-      title: toast.title,
-      copiedBytes,
-      totalBytes,
-      doneFiles,
-      totalFiles,
-      current,
-      force: true,
-      state: throttle,
-    });
+    showProgress(current, true);
   }
-  return { copied: doneFiles - errors.length, errors };
+
+  for (const [i, plan] of plans.entries()) {
+    if (failedPlan.has(i)) {
+      const r = results.find((x) => x.src === plan.src);
+      if (r) {
+        r.ok = false;
+        r.error = errors.find((e) => e.startsWith(plan.src));
+      }
+    }
+  }
+
+  const copied = results.filter((r) => r.ok).length;
+  return { results, copied, errors };
 }
 
 export async function moveManyWithProgress(
@@ -242,72 +316,49 @@ export async function moveManyWithProgress(
   title = "Moving",
 ): Promise<{ moved: number; errors: string[] }> {
   // Fast path: same-volume renames are instant — no byte progress needed.
-  const fallbacks: { src: string; dest: string }[] = [];
+  // Destinations are reserved up front (shared set) so same-named sources
+  // can't collide with each other here either.
+  const reserved = new Set<string>();
+  const plans: { src: string; dest: string }[] = [];
   const errors: string[] = [];
   let moved = 0;
 
-  for (let i = 0; i < sources.length; i++) {
-    const src = sources[i];
-    const dest = await uniqueDest(destDir, path.basename(src));
+  for (const src of sources) {
+    plans.push({
+      src,
+      dest: await uniqueDest(destDir, path.basename(src), reserved),
+    });
+  }
+
+  const fallbacks: string[] = [];
+  for (const plan of plans) {
     try {
-      await fs.rename(src, dest);
+      await fs.rename(plan.src, plan.dest);
       moved++;
       toast.title = `${title} ${moved}/${sources.length}`;
-      toast.message = `${progressBar(moved / sources.length)} ${Math.round((moved / sources.length) * 100)}%\n${path.basename(src).slice(0, 80)}`;
+      toast.message = `${progressBar(moved / sources.length)} ${Math.round((moved / sources.length) * 100)}%\n${path.basename(plan.src).slice(0, 80)}`;
     } catch {
-      fallbacks.push({ src, dest });
+      fallbacks.push(plan.src);
     }
   }
 
   if (fallbacks.length > 0) {
-    // Cross-volume: copy with byte progress, then trash originals.
+    // Cross-volume: copy with byte progress, then trash ONLY the sources
+    // whose copy fully succeeded (verified per source, never by guessing
+    // from destination existence).
     toast.title = `${title} (copying across volumes)`;
-    const r = await copyManyWithProgress(
-      fallbacks.map((f) => f.src),
-      destDir,
-      toast,
-      title,
-    );
+    const r = await copyManyWithProgress(fallbacks, destDir, toast, title);
     errors.push(...r.errors);
-    // Trash only what we successfully copied: re-derive by checking dest existence
-    const copiedSrcs: string[] = [];
-    for (const f of fallbacks) {
-      const dest = path.join(destDir, path.basename(f.src));
-      // uniqueDest may have suffixed; find the actual newest match
-      if (await exists(dest)) {
-        copiedSrcs.push(f.src);
-      } else {
-        // suffixed variant — assume copy succeeded if no error recorded for it
-        const hasErr = r.errors.some((e) => e.startsWith(f.src));
-        if (!hasErr) copiedSrcs.push(f.src);
-      }
-    }
-    try {
-      if (copiedSrcs.length > 0) {
-        const t = await safeTrash(copiedSrcs);
+    const okBySrc = new Map(r.results.map((x) => [x.src, x.ok] as const));
+    for (const src of fallbacks) {
+      if (!okBySrc.get(src)) continue;
+      const t = await safeTrash([src]);
+      if (t.errors.length > 0) {
         errors.push(...t.errors);
+      } else {
+        moved++;
       }
-    } catch (e) {
-      errors.push(`trash originals: ${String(e)}`);
     }
-    moved += r.copied;
   }
   return { moved, errors };
-}
-
-export async function duplicateWithProgress(
-  srcPath: string,
-  toast: Toast,
-): Promise<{ dest: string; errors: string[] }> {
-  const dest = await uniqueDest(path.dirname(srcPath), path.basename(srcPath));
-  const r = await copyManyWithProgress(
-    [srcPath],
-    path.dirname(srcPath),
-    toast,
-    "Duplicating",
-  );
-  // copyManyWithProgress re-resolves uniqueDest internally, so find actual result:
-  // if exactly one top-level dest was created, prefer it; otherwise return our precomputed one.
-  void dest;
-  return { dest, errors: r.errors };
 }

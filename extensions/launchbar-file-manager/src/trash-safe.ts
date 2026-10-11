@@ -1,18 +1,18 @@
 import { promises as fs } from "node:fs";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import trash from "trash";
+import { trash } from "@raycast/api";
 
 const execFileAsync = promisify(execFile);
 
 /**
  * Move paths to Trash with fallbacks.
  *
- * The `trash` package can fail with cryptic errors ("URL ...", missing
- * .Trash on some volumes, odd characters). Chain:
- *   1. trash() for everything that still exists (missing paths count as done)
- *   2. per-file AppleScript Finder delete as fallback
- * so a single odd file no longer fails the whole batch with "Delete failure".
+ * Primary path is Raycast's built-in trash(). If that fails (odd names,
+ * volumes without a .Trash dir, permission quirks), fall back per file to
+ * a Finder delete via osascript. Paths that no longer exist count as done
+ * so stale picks never fail a batch. Per-file results let callers trash
+ * only what actually succeeded.
  */
 export async function safeTrash(
   paths: string[],

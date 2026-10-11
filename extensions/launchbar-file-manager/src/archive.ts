@@ -1,10 +1,29 @@
 import { promises as fs } from "node:fs";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import * as os from "node:os";
 import * as path from "node:path";
 import { uniqueDest } from "./copy-progress";
 
 const execFileAsync = promisify(execFile);
+
+function isInsideOrEqual(child: string, parent: string): boolean {
+  if (child === parent) return true;
+  const rel = path.relative(parent, child);
+  return rel !== "" && !rel.startsWith("..") && !path.isAbsolute(rel);
+}
+
+/**
+ * Staging lives next to the destination (same volume = fast) unless the
+ * destination is inside one of the sources being archived — then staging
+ * there would copy the stage into itself, so fall back to the OS temp dir.
+ */
+async function makeStage(destDir: string, sources: string[]): Promise<string> {
+  const parent = sources.some((s) => isInsideOrEqual(destDir, s))
+    ? os.tmpdir()
+    : destDir;
+  return fs.mkdtemp(path.join(parent, ".compress-"));
+}
 
 /**
  * ZIP compress via macOS `ditto` (preserves resource forks, quarantine-safe).
@@ -26,7 +45,7 @@ export async function compressOne(
     return { dest };
   }
   // Directories: stage so the folder itself (not just its contents) is kept.
-  const stage = await fs.mkdtemp(path.join(destDir, ".compress-"));
+  const stage = await makeStage(destDir, [srcPath]);
   try {
     const name = await uniqueBasename(stage, base);
     await fs.cp(srcPath, path.join(stage, name), { recursive: true });
@@ -54,7 +73,7 @@ export async function compressMany(
     destDir,
     zipBaseName.endsWith(".zip") ? zipBaseName : `${zipBaseName}.zip`,
   );
-  const stage = await fs.mkdtemp(path.join(destDir, ".compress-"));
+  const stage = await makeStage(destDir, sources);
   try {
     const stagedNames: string[] = [];
     let done = 0;

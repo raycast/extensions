@@ -49,18 +49,16 @@ import { TransferTree } from "./transfer-tree";
 import { AppPicker } from "./app-picker";
 import { fuzzyScore } from "./fuzzy";
 
-type Prefs = {
-  startingPath?: string;
-  showHiddenDefault?: boolean;
-  transferStart?: string;
-  startBehavior?: string;
-};
-
-function getPrefs(): Prefs {
+function getPrefs(): Preferences.BrowseFiles {
   try {
-    return getPreferenceValues<Prefs>();
+    return getPreferenceValues<Preferences.BrowseFiles>();
   } catch {
-    return {};
+    return {
+      startingPath: "~",
+      startBehavior: "start",
+      showHiddenDefault: false,
+      transferStart: "home",
+    };
   }
 }
 
@@ -325,14 +323,14 @@ function FileBrowser(props: {
           />
         ))}
       </>
-      {entries.length === 0 && !isLoading ? (
+      {visibleEntries.length === 0 && !isLoading && entries.length === 0 ? (
         <List.EmptyView
           icon={Icon.Folder}
           title="Empty folder"
           description={
             selected.length > 0
               ? "Tab transfers your selection, ← goes up"
-              : "Press ← to go up"
+              : "Create something here, or press ← to go up"
           }
           actions={
             <ActionPanel>
@@ -344,6 +342,54 @@ function FileBrowser(props: {
                   onAction={() => openTransfer(selected[0])}
                 />
               ) : null}
+              <Action.Push
+                title="New Folder…"
+                icon={Icon.NewFolder}
+                target={<NewFolderForm dir={currentPath} onDone={refresh} />}
+              />
+              <Action.Push
+                title="New File…"
+                icon={Icon.NewDocument}
+                target={<NewFileForm dir={currentPath} onDone={refresh} />}
+              />
+              <Action
+                title="Toggle Hidden Files"
+                icon={Icon.Eye}
+                shortcut={Keyboard.Shortcut.Common.Pin}
+                onAction={props.onToggleHidden}
+              />
+              <ActionPanel.Section title="Go">
+                {FAVORITES.map((f) => (
+                  <Action
+                    key={f.path}
+                    title={`Go to ${f.title}`}
+                    icon={Icon.House}
+                    onAction={() => jumpTo(f.path)}
+                  />
+                ))}
+              </ActionPanel.Section>
+              <Action
+                title="Go up"
+                icon={Icon.ArrowLeft}
+                shortcut={{ modifiers: [], key: "arrowLeft" }}
+                onAction={goUp}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : null}
+      {visibleEntries.length === 0 && !isLoading && entries.length > 0 ? (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="No matches"
+          description={`Nothing in ${path.basename(currentPath) || currentPath} matches "${searchText}"`}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Clear Search"
+                icon={Icon.XMarkCircle}
+                onAction={() => setSearchText("")}
+              />
               <Action
                 title="Go up"
                 icon={Icon.ArrowLeft}
@@ -748,6 +794,26 @@ function RenameForm(props: { entry: FileEntry; onDone: () => void }) {
                 return;
               }
               try {
+                // Never silently replace another item: renaming onto an
+                // existing path destroys it on macOS, so ask first.
+                let occupied = false;
+                try {
+                  await fs.lstat(dest);
+                  occupied = true;
+                } catch {
+                  occupied = false;
+                }
+                if (occupied) {
+                  const replace = await confirmAlert({
+                    title: `Replace "${name.trim()}"?`,
+                    message: "An item with that name already exists here.",
+                    primaryAction: {
+                      title: "Replace",
+                      style: Alert.ActionStyle.Destructive,
+                    },
+                  });
+                  if (!replace) return;
+                }
                 await fs.rename(props.entry.fullPath, dest);
                 await showToast({
                   style: Toast.Style.Success,
@@ -842,7 +908,11 @@ function NewFileForm(props: { dir: string; onDone: () => void }) {
                 return;
               }
               try {
-                await fs.writeFile(path.join(props.dir, name.trim()), "");
+                // Exclusive create: refuse instead of truncating an
+                // existing file to empty.
+                await fs.writeFile(path.join(props.dir, name.trim()), "", {
+                  flag: "wx",
+                });
                 await showToast({
                   style: Toast.Style.Success,
                   title: "File created",
@@ -850,6 +920,15 @@ function NewFileForm(props: { dir: string; onDone: () => void }) {
                 props.onDone();
                 pop();
               } catch (e) {
+                if (
+                  typeof e === "object" &&
+                  e !== null &&
+                  "code" in e &&
+                  (e as { code?: string }).code === "EEXIST"
+                ) {
+                  setError("A file with that name already exists");
+                  return;
+                }
                 await showToast({
                   style: Toast.Style.Failure,
                   title: "Create failed",

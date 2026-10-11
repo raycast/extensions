@@ -6,28 +6,45 @@
   "icon": "icon.png",
   "author": "imed",
   "license": "MIT",
-  "platforms": ["macOS"],
-  "categories": ["Productivity", "System"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
   "commands": [
     {
       "name": "browse-files",
       "title": "Browse Files",
       "description": "Browse filesystem LaunchBar-style with quick file operations",
       "mode": "view",
-      "keywords": ["files", "browse", "finder", "manager", "folders"]
+      "keywords": [
+        "files",
+        "browse",
+        "finder",
+        "manager",
+        "folders"
+      ]
     },
     {
       "name": "finder-selection",
       "title": "Transfer Finder Selection",
       "description": "Transfer the files currently selected in Finder via the folder tree",
       "mode": "view",
-      "keywords": ["finder", "selection", "transfer", "move", "copy"]
+      "keywords": [
+        "finder",
+        "selection",
+        "transfer",
+        "move",
+        "copy"
+      ]
     }
   ],
   "preferences": [
     {
       "name": "startingPath",
-      "title": "Starting folder",
+      "title": "Starting Folder",
       "description": "Folder to open when the command starts",
       "type": "directory",
       "required": false,
@@ -35,42 +52,53 @@
     },
     {
       "name": "startBehavior",
-      "title": "On open",
+      "title": "On Open",
       "description": "Begin in the starting folder or the last opened folder",
       "type": "dropdown",
       "required": false,
       "default": "start",
       "data": [
-        { "title": "Starting folder", "value": "start" },
-        { "title": "Last opened folder", "value": "last" }
+        {
+          "title": "Starting Folder",
+          "value": "start"
+        },
+        {
+          "title": "Last Opened Folder",
+          "value": "last"
+        }
       ]
     },
     {
       "name": "showHiddenDefault",
-      "title": "View options",
+      "title": "View Options",
       "description": "Show hidden files by default",
       "type": "checkbox",
       "required": false,
-      "label": "Show hidden files",
+      "label": "Show Hidden Files",
       "default": false
     },
     {
       "name": "transferStart",
-      "title": "Transfer start folder",
+      "title": "Transfer Start Folder",
       "description": "Where the Tab transfer tree starts browsing",
       "type": "dropdown",
       "required": false,
       "default": "home",
       "data": [
-        { "title": "Home folder", "value": "home" },
-        { "title": "Current folder", "value": "current" }
+        {
+          "title": "Home Folder",
+          "value": "home"
+        },
+        {
+          "title": "Current Folder",
+          "value": "current"
+        }
       ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^2.7.3",
-    "@raycast/utils": "^2.3.2",
-    "trash": "^8.1.1"
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

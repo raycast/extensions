@@ -55,6 +55,9 @@ export function TransferTree(props: {
   const [currentPath, setCurrentPath] = useState(props.initialPath);
   const [searchText, setSearchText] = useState("");
   const [highlightId, setHighlightId] = useState<string | undefined>(undefined);
+  // Only one transfer at a time: overlapping runs could pick the same
+  // destination and clobber each other's output.
+  const [busy, setBusy] = useState(false);
 
   const manageBasket = props.manageBasket !== false;
 
@@ -128,13 +131,34 @@ export function TransferTree(props: {
   }
 
   function cancel() {
-    clearAll();
+    if (manageBasket) clearAll();
     pop();
   }
 
+  async function realDir(p: string): Promise<string> {
+    try {
+      return await fs.realpath(p);
+    } catch {
+      return p;
+    }
+  }
+
   async function execute(mode: "copy" | "move", destDir: string) {
+    if (busy) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Transfer already running",
+        message: "Wait for the current transfer to finish",
+      });
+      return;
+    }
+    // Resolve symlinks before containment checks: moving /work/project
+    // into /alias (a link to /work/project) must be caught here, not after
+    // a copy has already landed inside the source.
+    const realDest = await realDir(destDir);
     for (const src of sources) {
-      if (src === destDir || isInside(destDir, src)) {
+      const realSrc = await realDir(src);
+      if (realSrc === realDest || isInside(realDest, realSrc)) {
         await showToast({
           style: Toast.Style.Failure,
           title: `Cannot ${mode} a folder into itself`,
@@ -157,6 +181,7 @@ export function TransferTree(props: {
       title: `${verb} ${sources.length} Item${sources.length === 1 ? "" : "s"}…`,
       message: `→ ${destDir}`,
     });
+    setBusy(true);
     try {
       if (mode === "copy") {
         const r = await copyManyWithProgress(
@@ -194,6 +219,8 @@ export function TransferTree(props: {
       toast.style = Toast.Style.Failure;
       toast.title = `${mode === "copy" ? "Copy" : "Move"} failed`;
       toast.message = String(e);
+    } finally {
+      setBusy(false);
     }
   }
 
