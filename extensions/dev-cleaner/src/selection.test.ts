@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { emptySelectionTouches, mergeScanSelection } from "./selection";
-import type { CleanupCandidate } from "./types";
+import { emptySelectionTouches, mergeScanSelection, type PreselectLevel } from "./selection";
+import type { CleanupCandidate, RiskLevel } from "./types";
 
-function candidate(id: string, selectedByDefault: boolean): CleanupCandidate {
+function candidate(id: string, selectedByDefault: boolean, risk: RiskLevel = "safe"): CleanupCandidate {
   return {
     id,
     providerId: "npm",
@@ -12,7 +12,7 @@ function candidate(id: string, selectedByDefault: boolean): CleanupCandidate {
     subtitle: id,
     description: "test",
     cleanupPolicy: "command",
-    risk: "safe",
+    risk,
     selectedByDefault,
   };
 }
@@ -24,6 +24,26 @@ describe("scan selection merge", () => {
     expect(mergeScanSelection(new Set(), candidates, new Set(), emptySelectionTouches())).toEqual(
       new Set(["default-a", "default-b"]),
     );
+  });
+
+  it("preselects untouched candidates by level and never preselects high risk", () => {
+    const leveled = [
+      candidate("recommended", true),
+      candidate("safe", false),
+      candidate("review", false, "review"),
+      candidate("high", false, "high"),
+    ];
+    const merge = (level: PreselectLevel) =>
+      mergeScanSelection(new Set(), leveled, new Set(), emptySelectionTouches(), level);
+    expect(merge("recommended")).toEqual(new Set(["recommended"]));
+    expect(merge("safe")).toEqual(new Set(["recommended", "safe"]));
+    expect(merge("review")).toEqual(new Set(["recommended", "safe", "review"]));
+    expect(merge("off")).toEqual(new Set());
+  });
+
+  it("keeps touched candidates when preselection is off", () => {
+    const touches = { all: false, ids: new Set(["manual"]) };
+    expect(mergeScanSelection(new Set(["manual"]), candidates, new Set(), touches, "off")).toEqual(new Set(["manual"]));
   });
 
   it("keeps items the user selected or unselected during the scan", () => {

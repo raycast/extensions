@@ -1,3 +1,6 @@
+import os from "node:os";
+import path from "node:path";
+
 import type { CommandSpec } from "../types";
 
 export function formatBytes(bytes?: number): string {
@@ -28,4 +31,11 @@ export function formatDuration(start: string, end: string): string {
 
 export function formatCommand(command: CommandSpec): string {
   return [command.executable, ...command.args].join(" ");
+}
+
+export function formatPath(target: string, homeDirectory = os.homedir()): string {
+  if (!homeDirectory) return target;
+  if (target === homeDirectory) return "~";
+  const homePrefix = homeDirectory.endsWith(path.sep) ? homeDirectory : `${homeDirectory}${path.sep}`;
+  return target.startsWith(homePrefix) ? `~${path.sep}${target.slice(homePrefix.length)}` : target;
 }

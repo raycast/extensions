@@ -54,17 +54,6 @@ const DEFINITIONS: NativeDefinition[] = [
     sizePath: (home) => path.join(home, ".cache/uv"),
   },
   {
-    providerId: "bun",
-    section: "Package Managers",
-    title: "Clear Bun cache",
-    executable: "bun",
-    args: ["pm", "cache", "rm"],
-    description: "Clears the complete Bun package cache. Packages may need to be downloaded again.",
-    risk: "review",
-    selectedByDefault: false,
-    sizePath: (home) => path.join(home, ".bun/install/cache"),
-  },
-  {
     providerId: "homebrew",
     section: "Homebrew",
     title: "Clean downloads and old formula versions",

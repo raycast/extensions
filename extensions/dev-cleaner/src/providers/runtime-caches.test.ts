@@ -51,6 +51,7 @@ describe("runtime and build cache provider", () => {
     }
     for (const cache of [
       ".cargo/registry",
+      ".bun/install/cache",
       ".gradle/caches",
       ".gradle/wrapper/dists",
       ".android/cache",
@@ -63,7 +64,7 @@ describe("runtime and build cache provider", () => {
 
     const result = await new RuntimeCachesProvider().scan({ homeDirectory: home, projectRoots: [], extraPath: bin });
     expect(result.issues).toEqual([]);
-    expect(result.candidates).toHaveLength(8);
+    expect(result.candidates).toHaveLength(9);
     expect(result.candidates.every((candidate) => !candidate.selectedByDefault)).toBe(true);
     expect(result.candidates.map((candidate) => candidate.title)).toEqual(
       expect.arrayContaining([
@@ -71,6 +72,7 @@ describe("runtime and build cache provider", () => {
         "Node.js v18.20.0",
         "Rust nightly-aarch64-apple-darwin",
         "Cargo registry cache",
+        "Bun package cache",
         "Gradle caches",
         "Gradle wrapper distributions",
         "Android user cache",

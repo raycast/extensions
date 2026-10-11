@@ -250,6 +250,15 @@ async function scanRegenerableCaches(context: ScanContext): Promise<CleanupCandi
       risk: "review",
     },
     {
+      // ponytail: trashed directly because `bun pm cache rm` refuses to run without a package.json in its cwd.
+      providerId: "bun",
+      section: "Build and Package Caches",
+      title: "Bun package cache",
+      path: path.join(home, ".bun/install/cache"),
+      description: "The complete Bun package cache. Bun will download packages again when needed.",
+      risk: "review",
+    },
+    {
       providerId: "gradle",
       section: "Build and Package Caches",
       title: "Gradle caches",

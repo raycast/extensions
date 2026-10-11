@@ -30,7 +30,7 @@ import { CleanupHistory, CleanupReport } from "./components/CleanupHistory";
 import { ExcludedItems } from "./components/ExcludedItems";
 import { ProjectRootsForm } from "./components/ProjectRootsForm";
 import { isAbortError } from "./lib/async";
-import { formatBytes } from "./lib/format";
+import { formatBytes, formatPath } from "./lib/format";
 import { scanAll } from "./providers";
 import { emptySelectionTouches, mergeScanSelection, type SelectionTouches } from "./selection";
 import { readExcludedItems, readProjectRoots, recordCleanupRun, writeExcludedItems } from "./storage";
@@ -40,6 +40,7 @@ function CandidateActions({
   candidate,
   isSelected,
   selectedCount,
+  knownFootprint,
   toggle,
   keep,
   manageExcludedItems,
@@ -62,6 +63,7 @@ function CandidateActions({
   candidate: CleanupCandidate;
   isSelected: boolean;
   selectedCount: number;
+  knownFootprint: string;
   toggle: () => void;
   keep: () => Promise<void>;
   manageExcludedItems: () => void;
@@ -99,7 +101,7 @@ function CandidateActions({
         <Action title="Cancel Scan" icon={Icon.Stop} onAction={cancelScan} />
       ) : !isCleaning && selectedCount > 0 ? (
         <Action
-          title="Clean Selected Items"
+          title={`Clean ${selectedCount} Selected Item${selectedCount === 1 ? "" : "s"} (${knownFootprint})`}
           icon={Icon.Trash}
           style={Action.Style.Destructive}
           shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
@@ -216,7 +218,9 @@ function Dashboard({
         setProtectedItems(result.protectedItems ?? []);
         latestScan.current = { state: "complete", candidates: result.candidates };
         const keptIds = new Set(excludedItemsRef.current.map((item) => item.id));
-        setSelected((current) => mergeScanSelection(current, result.candidates, keptIds, selectionTouches.current));
+        setSelected((current) =>
+          mergeScanSelection(current, result.candidates, keptIds, selectionTouches.current, preferences.preselectLevel),
+        );
       })
       .catch(async (error) => {
         if (active) latestScan.current = { state: "unavailable" };
@@ -230,7 +234,7 @@ function Dashboard({
       active = false;
       controller.abort();
     };
-  }, [context, scanVersion]);
+  }, [context, scanVersion, preferences.preselectLevel]);
 
   const refresh = useCallback(() => setScanVersion((version) => version + 1), []);
   const cancelScan = useCallback(() => {
@@ -467,7 +471,6 @@ function Dashboard({
   const knownFootprint = selectedCandidates.some((candidate) => candidate.bytes !== undefined)
     ? formatBytes(selectedBytes)
     : "Size unavailable";
-  const navigationTitle = selected.size ? `${selected.size} selected · ${knownFootprint}` : "Developer Cleaner";
   const availableCandidateCount = candidates.filter((candidate) => !excludedIds.has(candidate.id)).length;
   const emptyTitle = isLoading
     ? "Scanning developer data…"
@@ -518,6 +521,7 @@ function Dashboard({
       candidate={candidate}
       isSelected={selected.has(candidate.id)}
       selectedCount={selected.size}
+      knownFootprint={knownFootprint}
       toggle={() => toggle(candidate.id)}
       keep={() => keepCandidate(candidate)}
       manageExcludedItems={manageExcludedItems}
@@ -543,7 +547,6 @@ function Dashboard({
     return (
       <Grid
         isLoading={isLoading || isCleaning}
-        navigationTitle={navigationTitle}
         columns={5}
         inset={Grid.Inset.Medium}
         filtering={true}
@@ -615,7 +618,16 @@ function Dashboard({
                 content={providerIcon(item.providerId, { source: Icon.Shield, tintColor: Color.Green })}
                 actions={
                   <ActionPanel>
-                    {item.path ? <Action.ShowInFinder path={item.path} /> : null}
+                    {item.path ? (
+                      <>
+                        <Action.ShowInFinder path={item.path} />
+                        <Action.CopyToClipboard
+                          title="Copy Path"
+                          content={item.path}
+                          shortcut={Keyboard.Shortcut.Common.CopyPath}
+                        />
+                      </>
+                    ) : null}
                     {viewAction}
                     {manageExcludedAction}
                   </ActionPanel>
@@ -632,7 +644,6 @@ function Dashboard({
     <List
       isLoading={isLoading || isCleaning}
       isShowingDetail
-      navigationTitle={navigationTitle}
       filtering={true}
       searchText={searchText}
       onSearchTextChange={setSearchText}
@@ -735,6 +746,7 @@ function Dashboard({
                       {item.path ? (
                         <>
                           <List.Item.Detail.Metadata.Separator />
+                          <List.Item.Detail.Metadata.Label title="Path" text={formatPath(item.path)} />
                           <List.Item.Detail.Metadata.Link
                             title="Location"
                             text="Show in Finder"
@@ -750,6 +762,11 @@ function Dashboard({
                 item.path ? (
                   <ActionPanel>
                     <Action.ShowInFinder path={item.path} />
+                    <Action.CopyToClipboard
+                      title="Copy Path"
+                      content={item.path}
+                      shortcut={Keyboard.Shortcut.Common.CopyPath}
+                    />
                     {viewAction}
                     {manageExcludedAction}
                   </ActionPanel>
@@ -839,6 +856,6 @@ export default function Command() {
         />
       </List>
     );
-  if (!roots) return <ProjectRootsForm onSave={setRoots} />;
+  if (!roots) return <ProjectRootsForm isRoot onSave={setRoots} />;
   return <Dashboard roots={roots} setRoots={setRoots} initialExcludedItems={initialExcludedItems} />;
 }

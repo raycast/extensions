@@ -22,7 +22,7 @@ describe("native tools provider", () => {
     temporaryDirectories.push(home);
     const bin = path.join(home, "bin");
     await mkdir(bin);
-    for (const tool of ["npm", "pnpm", "uv", "bun", "brew", "docker"]) {
+    for (const tool of ["npm", "pnpm", "uv", "brew", "docker"]) {
       const executable = path.join(bin, tool);
       const output =
         tool === "pnpm"
@@ -54,7 +54,7 @@ describe("native tools provider", () => {
     });
 
     expect(result.issues).toEqual([]);
-    expect(result.candidates).toHaveLength(8);
+    expect(result.candidates).toHaveLength(7);
     expect(result.candidates.filter((candidate) => candidate.id.startsWith("npm:npx:"))).toHaveLength(1);
     expect(result.candidates.find((candidate) => candidate.id === "npm:npx:old-workspace")).toMatchObject({
       cleanupPolicy: "trash",

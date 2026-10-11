@@ -6,10 +6,11 @@ import { normalizeProjectRoots, projectRootWarnings, writeProjectRoots } from ".
 
 interface ProjectRootsFormProps {
   initialRoots?: string[];
+  isRoot?: boolean;
   onSave: (roots: string[]) => void;
 }
 
-export function ProjectRootsForm({ initialRoots = [], onSave }: ProjectRootsFormProps) {
+export function ProjectRootsForm({ initialRoots = [], isRoot, onSave }: ProjectRootsFormProps) {
   const [roots, setRoots] = useState(initialRoots);
   const { pop } = useNavigation();
 
@@ -36,7 +37,7 @@ export function ProjectRootsForm({ initialRoots = [], onSave }: ProjectRootsForm
 
   return (
     <Form
-      navigationTitle="Project Scan Roots"
+      navigationTitle={isRoot ? undefined : "Project Scan Roots"}
       actions={
         <ActionPanel>
           <Action.SubmitForm

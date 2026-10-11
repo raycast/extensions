@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { useState } from "react";
 
-import { formatAge } from "../lib/format";
+import { formatAge, formatPath } from "../lib/format";
 import type { ExcludedItem } from "../types";
 import { fileLink, providerIcon } from "./CandidateDetail";
 
@@ -26,6 +26,7 @@ function KeptItemDetail({ item }: { item: ExcludedItem }) {
           {item.path ? (
             <>
               <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.Label title="Path" text={formatPath(item.path)} />
               <List.Item.Detail.Metadata.Link title="Location" text="Show in Finder" target={fileLink(item.path)} />
             </>
           ) : null}
@@ -66,7 +67,16 @@ export function ExcludedItems({
           actions={
             <ActionPanel>
               <Action title="Allow Cleanup Again" icon={Icon.Undo} onAction={() => allow(item.id)} />
-              {item.path ? <Action.ShowInFinder path={item.path} /> : null}
+              {item.path ? (
+                <>
+                  <Action.ShowInFinder path={item.path} />
+                  <Action.CopyToClipboard
+                    title="Copy Path"
+                    content={item.path}
+                    shortcut={Keyboard.Shortcut.Common.CopyPath}
+                  />
+                </>
+              ) : null}
             </ActionPanel>
           }
         />

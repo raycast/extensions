@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Color, Detail, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, Image, Keyboard, List } from "@raycast/api";
 import { pathToFileURL } from "node:url";
 
 import { providerBrandSource } from "../lib/brand-icons";
-import { formatAge, formatBytes, formatCommand } from "../lib/format";
+import { formatAge, formatBytes, formatCommand, formatPath } from "../lib/format";
 import type { CleanupCandidate, CleanupPolicy, ProviderId, RiskLevel } from "../types";
 
 export function providerIcon(providerId: ProviderId, fallback: Image.ImageLike): Image.ImageLike {
@@ -60,12 +60,18 @@ export function CandidateDetail({ candidate }: { candidate: CleanupCandidate }) 
           {candidate.modifiedAt ? (
             <Detail.Metadata.Label title="Last Modified" text={candidate.modifiedAt.toLocaleString()} />
           ) : null}
+          {candidate.path ? <Detail.Metadata.Label title="Path" text={formatPath(candidate.path)} /> : null}
         </Detail.Metadata>
       }
       actions={
         candidate.path ? (
           <ActionPanel>
             <Action.ShowInFinder path={candidate.path} />
+            <Action.CopyToClipboard
+              title="Copy Path"
+              content={candidate.path}
+              shortcut={Keyboard.Shortcut.Common.CopyPath}
+            />
           </ActionPanel>
         ) : undefined
       }
@@ -113,7 +119,14 @@ export function CandidateListDetail({ candidate, isSelected }: { candidate: Clea
           )}
           <List.Item.Detail.Metadata.Separator />
           {candidate.path ? (
-            <List.Item.Detail.Metadata.Link title="Location" text="Show in Finder" target={fileLink(candidate.path)} />
+            <>
+              <List.Item.Detail.Metadata.Label title="Path" text={formatPath(candidate.path)} />
+              <List.Item.Detail.Metadata.Link
+                title="Location"
+                text="Show in Finder"
+                target={fileLink(candidate.path)}
+              />
+            </>
           ) : null}
           {candidate.command ? (
             <List.Item.Detail.Metadata.Label title="Command" text={formatCommand(candidate.command)} />

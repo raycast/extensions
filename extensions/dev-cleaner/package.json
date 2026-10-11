@@ -7,9 +7,6 @@
   "author": "crafts69guy",
   "license": "MIT",
   "private": true,
-  "engines": {
-    "node": ">=24"
-  },
   "platforms": [
     "macOS"
   ],
@@ -33,6 +30,32 @@
       "type": "textfield",
       "required": false,
       "placeholder": "/opt/homebrew/bin:/usr/local/bin"
+    },
+    {
+      "name": "preselectLevel",
+      "title": "Preselect Items",
+      "description": "Which items are selected when a scan finishes. High-risk items are never preselected.",
+      "type": "dropdown",
+      "required": false,
+      "default": "recommended",
+      "data": [
+        {
+          "title": "Recommended by Each Tool",
+          "value": "recommended"
+        },
+        {
+          "title": "All Safe Items",
+          "value": "safe"
+        },
+        {
+          "title": "Safe and Review Items",
+          "value": "review"
+        },
+        {
+          "title": "Nothing",
+          "value": "off"
+        }
+      ]
     }
   ],
   "dependencies": {

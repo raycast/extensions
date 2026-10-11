@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatAge, formatBytes, formatCommand, formatDuration } from "./format";
+import { formatAge, formatBytes, formatCommand, formatDuration, formatPath } from "./format";
 
 describe("format helpers", () => {
   it("formats sizes across units", () => {
@@ -30,5 +30,14 @@ describe("format helpers", () => {
   it("formats native commands", () => {
     expect(formatCommand({ executable: "brew", args: ["cleanup", "--prune=all"] })).toBe("brew cleanup --prune=all");
     expect(formatCommand({ executable: "pnpm", args: [] })).toBe("pnpm");
+  });
+
+  it("abbreviates paths inside the home directory", () => {
+    expect(formatPath("/Users/dev/Library/Caches/CocoaPods", "/Users/dev")).toBe("~/Library/Caches/CocoaPods");
+    expect(formatPath("/Users/dev", "/Users/dev")).toBe("~");
+    expect(formatPath("/Users/dev/", "/Users/dev/")).toBe("~");
+    expect(formatPath("/Users/developer/cache", "/Users/dev")).toBe("/Users/developer/cache");
+    expect(formatPath("/opt/homebrew/cache", "/Users/dev")).toBe("/opt/homebrew/cache");
+    expect(formatPath("/opt/homebrew/cache", "")).toBe("/opt/homebrew/cache");
   });
 });
