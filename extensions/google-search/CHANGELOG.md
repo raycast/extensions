@@ -1,6 +1,6 @@
 # Google Search Changelog
 
-## [Fix Suggestion Errors] - {PR_MERGE_DATE}
+## [Fix Suggestion Errors] - 2026-10-11
 
 - Fix "Premature close" error toast appearing while typing quickly
 - Fix loading indicator staying on after a failed suggestion request
