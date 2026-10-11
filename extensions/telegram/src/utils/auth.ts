@@ -1,6 +1,6 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, launchCommand, LaunchType } from "@raycast/api";
 import { isAuthenticated, authenticate, TelegramConfig } from "../services/telegram-client";
-import { getTelegramErrorMessage } from "./errors";
+import { getTelegramErrorMessage, isTelegramAuthenticationError, TelegramAuthenticationError } from "./errors";
 
 export interface Preferences {
   apiId: string;
@@ -36,6 +36,26 @@ export async function ensureAuthenticated(): Promise<boolean> {
   }
 
   return true;
+}
+
+export async function requireAuthenticated(): Promise<void> {
+  if (!(await isAuthenticated())) {
+    throw new TelegramAuthenticationError("Run 'Authenticate with Telegram' to sign in.");
+  }
+}
+
+export async function launchAuthentication(): Promise<void> {
+  await launchCommand({ name: "authenticate", type: LaunchType.UserInitiated });
+}
+
+export async function showTelegramError(error: unknown): Promise<void> {
+  const needsAuthentication = isTelegramAuthenticationError(error);
+  await showToast({
+    style: Toast.Style.Failure,
+    title: needsAuthentication ? "Sign In to Telegram" : "Telegram Request Failed",
+    message: getTelegramErrorMessage(error),
+    primaryAction: needsAuthentication ? { title: "Sign In", onAction: launchAuthentication } : undefined,
+  });
 }
 
 export async function handleAuthFlow(options?: {

@@ -45,17 +45,18 @@ Before using this extension, you need to obtain API credentials from Telegram:
 4. Enter the code in Raycast
 5. You're all set! 🎉
 
-The extension will remember your session, so you only need to authenticate once.
+The extension remembers your session between commands. If Telegram invalidates or revokes the session, the extension will offer an **Authenticate with Telegram** action so you can sign in again.
 
 ## Commands
 
 ### Authenticate with Telegram
 
-Log in to your Telegram account. You'll need to do this once before using the other commands.
+Log in to your Telegram account before using the other commands, or sign in again when your saved session is no longer valid.
 
 ### View Saved Messages
 
 Browse your Telegram saved messages in a list view. Features:
+
 - Search through your messages
 - See message timestamps
 - Copy messages to clipboard
@@ -64,6 +65,7 @@ Browse your Telegram saved messages in a list view. Features:
 ### Send to Saved Messages
 
 Quickly send a message to your Telegram saved messages. Perfect for:
+
 - Saving quick notes
 - Storing links for later
 - Sending reminders to yourself
@@ -87,11 +89,12 @@ Make sure you've entered the correct API ID and API Hash in the extension prefer
 
 ### "Failed to Load Messages" Error
 
-This usually means your session has expired. Try running the "Authenticate with Telegram" command again.
+If the extension shows **Sign In to Telegram**, use **Authenticate with Telegram** to restore access. Telegram has rejected the saved session; the error alone does not identify why it became invalid. Network errors preserve your saved session, so retry the request once connectivity returns.
 
 ## Future Features
 
 Coming soon:
+
 - View all chats
 - Send messages to other users and groups
 - Media support (photos, files)

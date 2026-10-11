@@ -1,5 +1,11 @@
 # Telegram Changelog
 
+## [Recover Invalid Telegram Sessions] - {PR_MERGE_DATE}
+
+- Clear rejected or revoked sessions and offer a sign-in action instead of failing requests with an unusable saved key
+- Recover rejected saved keys during sign-in, and protect newer login state from overlapping request failures
+- Preserve saved sessions when requests fail because of network errors
+
 ## [Add Unit Tests] - 2026-09-16
 
 - Add a `vitest` suite covering message content parsing, sender attribution, media type detection, detail-pane markdown, and chat and date grouping, runnable with `npm test`
