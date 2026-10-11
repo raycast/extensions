@@ -68,6 +68,11 @@
       "name": "control-group",
       "title": "Control Group",
       "description": "Turn rooms, zones or all lights on or off, or change their brightness, color or white temperature"
+    },
+    {
+      "name": "recall-scene",
+      "title": "Recall Scene",
+      "description": "Set a scene in its room or zone"
     }
   ],
   "preferences": [
