@@ -1,6 +1,9 @@
+import type { TranslationKey } from "./lib/translations";
+
 export const PRH_API_BASE_URL = "https://avoindata.prh.fi/opendata-ytj-api/v3";
 
 export const YTJ_SEARCH_URL = "https://www.ytj.fi/en/index/company-search";
+export const YTJ_SEARCH_URL_FI = "https://www.ytj.fi/index/yrityshaku.html";
 
 export const MIN_TEXT_QUERY_LENGTH = 3;
 
@@ -11,35 +14,35 @@ export const DIGITS_ONLY_REGEX = /^\d+$/;
 // Reserved for backward compatibility with older local data.
 export const FAVORITES_STORAGE_KEY = "prh-favorites-v1";
 
-export const BUSINESS_ID_STATUS_LABELS: Record<string, string> = {
-  "1": "Pending",
-  "2": "Valid",
-  "5": "Business ID invalidated",
+export const BUSINESS_ID_STATUS_LABELS: Record<string, TranslationKey> = {
+  "1": "pending",
+  "2": "valid",
+  "5": "invalidated",
 };
 
-export const TRADE_REGISTER_STATUS_LABELS: Record<string, string> = {
-  "0": "Unregistered",
-  "1": "Registered",
-  "2": "Removed from register",
-  "3": "Start-up not registered",
-  "4": "Ceased",
+export const TRADE_REGISTER_STATUS_LABELS: Record<string, TranslationKey> = {
+  "0": "unregistered",
+  "1": "registered",
+  "2": "removed",
+  "3": "startupUnregistered",
+  "4": "ceased",
 };
 
-export const REGISTER_LABELS: Record<string, string> = {
-  "1": "Trade register",
-  "2": "Foundation register",
-  "3": "Register of Associations",
-  "4": "Tax Administration",
-  "5": "Prepayment register",
-  "6": "Value added tax-liability",
-  "7": "Employer register",
-  "8": "Register for insurance premium taxpayers",
+export const REGISTER_LABELS: Record<string, TranslationKey> = {
+  "1": "tradeRegister",
+  "2": "foundationRegister",
+  "3": "associationRegister",
+  "4": "taxAdministration",
+  "5": "prepaymentRegister",
+  "6": "vatRegister",
+  "7": "employerRegister",
+  "8": "insuranceRegister",
 };
 
-export const AUTHORITY_LABELS: Record<string, string> = {
-  "1": "Tax Administration",
-  "2": "Finnish Patent and Registration Office",
-  "3": "Finnish Population Register Centre",
+export const AUTHORITY_LABELS: Record<string, TranslationKey> = {
+  "1": "taxAdministration",
+  "2": "prh",
+  "3": "populationRegisterCentre",
 };
 
 export const APP_LINKS = {
@@ -50,43 +53,40 @@ export const APP_LINKS = {
 
 export interface WhatsNewEntry {
   version: string;
-  title: string;
+  title: TranslationKey;
   date: string;
-  changes: string[];
+  changes: TranslationKey[];
 }
 
 export const WHATS_NEW_ENTRIES: WhatsNewEntry[] = [
   {
+    version: "0.3.0",
+    title: "releaseFinnish",
+    date: "2026-10-11",
+    changes: ["releaseInterfaceLanguages", "releaseLanguageSettings", "releaseLocalizedData"],
+  },
+  {
     version: "0.2.1",
-    title: "Readable Search Results",
+    title: "releaseReadable",
     date: "2026-07-25",
     changes: [
-      "Company names now have more room in split-view search results.",
-      "Hover a company name to view it in full when it is truncated.",
-      "Address details now separate the street, postal code, city, and other available fields.",
-      "Copy a selected company's multiline postal address with `Command-Shift-C`.",
-      "Name history now uses compact rows that remain readable with long or numerous names.",
+      "releaseNamesSpace",
+      "releaseNameTooltip",
+      "releaseAddressFields",
+      "releaseCopyAddress",
+      "releaseNameHistory",
     ],
   },
   {
     version: "0.2.0",
-    title: "Quick Company Actions",
+    title: "releaseActions",
     date: "2026-07-23",
-    changes: [
-      "Copy a company's Y-tunnus directly from search results with `Command-C`.",
-      "Open a company's website directly from search results with `Command-O`.",
-      "Open the official e-invoice directory for the selected company with `Command-E`.",
-      "Improved persisted search-cache stability.",
-    ],
+    changes: ["releaseCopyId", "releaseWebsite", "releaseEInvoice", "releaseCache"],
   },
   {
     version: "0.1.0",
-    title: "Beta Launch",
+    title: "releaseBeta",
     date: "2026-07-23",
-    changes: [
-      "Search Finnish businesses by company name or Business ID using PRH YTJ open data.",
-      "Review ranked results and company details, including status, addresses, registers, and name history.",
-      "Copy IDs and addresses, open source pages, websites, and map links, and read release notes in-app.",
-    ],
+    changes: ["releaseSearch", "releaseDetails", "releaseLinks"],
   },
 ];

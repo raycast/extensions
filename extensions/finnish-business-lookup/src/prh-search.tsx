@@ -1,16 +1,20 @@
-import { Action, ActionPanel, Detail, Icon, List, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List, Keyboard, openExtensionPreferences } from "@raycast/api";
 import { getRawCompanyApiUrl } from "./api/prh";
 import CompanyDetail from "./components/company-detail";
 import { usePrhSearch } from "./hooks/use-prh-search";
-import { YTJ_SEARCH_URL } from "./constants";
+import { YTJ_SEARCH_URL, YTJ_SEARCH_URL_FI } from "./constants";
 import { buildSplitDetailMetadata } from "./lib/detail-view";
 import { buildEInvoiceDirectoryUrl } from "./lib/e-invoice";
 import { buildMapSearchLinks } from "./lib/maps";
 import { getPrimaryAddressClipboardText, getPrimaryAddressText } from "./lib/selectors";
 import { buildWhatsNewMarkdown, getLatestWhatsNewLabel } from "./lib/whats-new";
 import type { UiCompany } from "./types/ui";
+import { getLanguage } from "./lib/localization";
+import { getLanguageFromOrder } from "./lib/language";
+import { getTranslator } from "./lib/translations";
 
 function CompanyActions({ company, languageOrder }: { company: UiCompany; languageOrder: ("1" | "2" | "3")[] }) {
+  const t = getTranslator(getLanguageFromOrder(languageOrder));
   const primaryAddress = getPrimaryAddressText(company);
   const clipboardAddress = getPrimaryAddressClipboardText(company);
   const mapLinks = buildMapSearchLinks(company.displayName, primaryAddress);
@@ -18,59 +22,53 @@ function CompanyActions({ company, languageOrder }: { company: UiCompany; langua
   return (
     <ActionPanel>
       <Action.Push
-        title="View Details"
+        title={t("viewDetails")}
         target={
           <CompanyDetail businessId={company.businessId} languageOrder={languageOrder} initialCompany={company} />
         }
       />
       <Action.CopyToClipboard
-        title="Copy Y-Tunnus"
+        title={t("copyYTunnus")}
         content={company.businessId}
         icon={Icon.Clipboard}
         shortcut={{ modifiers: ["cmd"], key: "c" }}
       />
       {company.euVatNumber ? (
-        <Action.CopyToClipboard title="Copy EU VAT Number" content={company.euVatNumber} icon={Icon.CopyClipboard} />
+        <Action.CopyToClipboard title={t("copyVatNumber")} content={company.euVatNumber} icon={Icon.CopyClipboard} />
       ) : null}
       {clipboardAddress ? (
         <Action.CopyToClipboard
-          title="Copy Primary Address"
+          title={t("copyAddress")}
           content={clipboardAddress}
           icon={Icon.CopyClipboard}
           shortcut={Keyboard.Shortcut.Common.Copy}
         />
       ) : null}
-      {mapLinks ? <Action.OpenInBrowser title="Open in Google Maps" url={mapLinks.googleMaps} icon={Icon.Map} /> : null}
-      {mapLinks ? <Action.OpenInBrowser title="Open in Apple Maps" url={mapLinks.appleMaps} icon={Icon.Map} /> : null}
+      {mapLinks ? <Action.OpenInBrowser title={t("openGoogleMaps")} url={mapLinks.googleMaps} icon={Icon.Map} /> : null}
+      {mapLinks ? <Action.OpenInBrowser title={t("openAppleMaps")} url={mapLinks.appleMaps} icon={Icon.Map} /> : null}
       {company.website ? (
         <Action.OpenInBrowser
-          title="Open Website"
+          title={t("openWebsite")}
           url={company.website}
           icon={Icon.Globe}
           shortcut={Keyboard.Shortcut.Common.Open}
         />
       ) : null}
       <Action.OpenInBrowser
-        title="Open E-Invoice Directory"
+        title={t("openEInvoice")}
         url={buildEInvoiceDirectoryUrl(company.businessId)}
         icon={Icon.Receipt}
         shortcut={Keyboard.Shortcut.Common.Edit}
       />
-      <Action.OpenInBrowser title="Open YTJ Search Page" url={YTJ_SEARCH_URL} />
-      <Action.OpenInBrowser title="Open Raw PRH JSON" url={getRawCompanyApiUrl(company.businessId)} />
+      <Action.OpenInBrowser title={t("openYtj")} url={languageOrder[0] === "1" ? YTJ_SEARCH_URL_FI : YTJ_SEARCH_URL} />
+      <Action.OpenInBrowser title={t("openJson")} url={getRawCompanyApiUrl(company.businessId)} />
     </ActionPanel>
   );
 }
 
-function getResultSectionSubtitle(companiesCount: number, totalResults: number): string {
-  return `${companiesCount} of ${totalResults}`;
-}
-
-const WHATS_NEW_MARKDOWN = buildWhatsNewMarkdown();
-const LATEST_WHATS_NEW_LABEL = getLatestWhatsNewLabel();
-const SEARCH_PLACEHOLDER = "Name or Business ID (e.g. Nokia, 0112038-9)";
-
 export default function Command() {
+  const language = getLanguage();
+  const t = getTranslator(language);
   const {
     searchText,
     setSearchText,
@@ -94,29 +92,34 @@ export default function Command() {
       isShowingDetail={isSearchMode}
       onSearchTextChange={setSearchText}
       throttle
-      searchBarPlaceholder={SEARCH_PLACEHOLDER}
+      searchBarPlaceholder={t("searchPlaceholder")}
     >
       {trimmed.length === 0 ? (
-        <List.Section title="Get Started">
+        <List.Section title={t("getStarted")}>
           <List.Item
             icon={Icon.MagnifyingGlass}
-            title="Search Finnish Businesses"
-            subtitle="Type company name or Business ID to start"
+            title={t("searchBusinesses")}
+            subtitle={t("startHint")}
             accessories={[{ text: "PRH YTJ" }]}
+            actions={
+              <ActionPanel>
+                <Action title={t("openSettings")} icon={Icon.Gear} onAction={openExtensionPreferences} />
+              </ActionPanel>
+            }
           />
         </List.Section>
       ) : null}
 
       {trimmed.length === 0 ? (
-        <List.Section title="What's New">
+        <List.Section title={t("whatsNew")}>
           <List.Item
             icon={Icon.Bell}
-            title="Version History"
-            subtitle={LATEST_WHATS_NEW_LABEL}
-            accessories={[{ text: "Latest" }]}
+            title={t("versionHistory")}
+            subtitle={getLatestWhatsNewLabel(language)}
+            accessories={[{ text: t("latest") }]}
             actions={
               <ActionPanel>
-                <Action.Push title="View What's New" target={<Detail markdown={WHATS_NEW_MARKDOWN} />} />
+                <Action.Push title={t("viewWhatsNew")} target={<Detail markdown={buildWhatsNewMarkdown(language)} />} />
               </ActionPanel>
             }
           />
@@ -124,18 +127,21 @@ export default function Command() {
       ) : null}
 
       {trimmed.length > 0 && classification.hint ? (
-        <List.Section title="Search Hint">
+        <List.Section title={t("searchHint")}>
           <List.Item
             icon={Icon.Info}
             title={classification.hint}
-            subtitle="No API request was made"
-            accessories={[{ text: "Input validation" }]}
+            subtitle={t("noRequest")}
+            accessories={[{ text: t("inputValidation") }]}
           />
         </List.Section>
       ) : null}
 
       {isSearchMode ? (
-        <List.Section title="Results" subtitle={getResultSectionSubtitle(companies.length, totalResults)}>
+        <List.Section
+          title={t("results")}
+          subtitle={t("resultCount", { count: companies.length, total: totalResults })}
+        >
           {companies.map((company) => (
             <List.Item
               key={company.businessId}
@@ -149,22 +155,22 @@ export default function Command() {
           {!isLoading && companies.length === 0 ? (
             <List.Item
               icon={Icon.XmarkCircle}
-              title="No Companies Found"
-              subtitle={`No results for "${trimmed}"`}
-              accessories={[{ text: "Try another query" }]}
+              title={t("noCompanies")}
+              subtitle={t("noResults", { query: trimmed })}
+              accessories={[{ text: t("tryAnotherQuery") }]}
             />
           ) : null}
 
           {hasMoreResults ? (
             <List.Item
               icon={isLoadingMore ? Icon.Clock : Icon.ChevronDown}
-              title={isLoadingMore ? "Loading More Results..." : "Load More Results"}
-              subtitle={`${companies.length} of ${totalResults}`}
-              accessories={[{ text: `Page ${page}` }]}
+              title={isLoadingMore ? t("loadingMore") : t("loadMore")}
+              subtitle={t("resultCount", { count: companies.length, total: totalResults })}
+              accessories={[{ text: t("page", { page }) }]}
               actions={
                 <ActionPanel>
                   <Action
-                    title="Load More Results"
+                    title={t("loadMore")}
                     icon={Icon.ChevronDown}
                     onAction={() => {
                       loadNextPage();
