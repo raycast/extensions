@@ -16,7 +16,7 @@ export default function SearchMonitors() {
     (options) =>
       "https://cronitor.io/api/monitors?" +
       new URLSearchParams({
-        page: String(options.page),
+        page: String(options.page + 1),
         pageSize: String(CRONITOR_PAGE_SIZE),
       }).toString(),
     {
@@ -35,7 +35,7 @@ export default function SearchMonitors() {
       mapResult(result: { monitors: Monitor[]; page_size: number; page: number; total_monitor_count: number }) {
         return {
           data: result.monitors,
-          hasMore: result.total_monitor_count > 0 && result.page * result.page_size > result.total_monitor_count,
+          hasMore: (result.page + 1) * result.page_size < result.total_monitor_count,
         };
       },
       initialData: [],
@@ -67,7 +67,7 @@ export default function SearchMonitors() {
           }
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url={`https://cronitor.io/api/monitors/${monitor.key}`} />
+              <Action.OpenInBrowser url={`https://cronitor.io/app/monitors/${monitor.key}`} />
             </ActionPanel>
           }
         />
