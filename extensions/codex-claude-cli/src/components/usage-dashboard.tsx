@@ -81,6 +81,7 @@ function UsageProviderItem({ state, onRefresh }: { state: ProviderUsageState; on
       toast.title = connect ? "Claude Code connected" : "Claude Code disconnected";
       if (connect) toast.message = "Restart Claude Code, then continue a conversation to update usage.";
     } catch (error) {
+      await toast.hide();
       await showFailureToast(error, {
         title: connect ? "Could not connect Claude Code" : "Could not disconnect Claude Code",
       });
