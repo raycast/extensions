@@ -5,7 +5,16 @@ import { FileActions } from "./components/file-actions";
 import { FileDetail } from "./components/file-detail";
 import { StatusView } from "./components/status-view";
 import { search, type Hit } from "./lib/fsearch";
-import { expandHome, fileName, folderOf, formatDate, modifiedDate, pluralize, tildify } from "./lib/format";
+import {
+  expandHome,
+  fileName,
+  folderOf,
+  formatDate,
+  formatDuration,
+  modifiedDate,
+  pluralize,
+  tildify,
+} from "./lib/format";
 import { filtersFor, KINDS } from "./lib/kinds";
 import { useFSearch } from "./lib/use-fsearch";
 
@@ -29,6 +38,8 @@ export default function Command({ arguments: args, fallbackText }: LaunchProps<{
   );
 
   const hits = execute && !error ? (data?.hits ?? []) : [];
+  const timing = execute && !error && data ? formatDuration(data.tookMicros) : undefined;
+  const scopeLabel = scope ? tildify(scope) : undefined;
   const toggleDetail = () => setShowingDetail((shown) => !shown);
   const scopeTitle = scope ? fileName(scope) : undefined;
 
@@ -69,10 +80,17 @@ export default function Command({ arguments: args, fallbackText }: LaunchProps<{
           <List.EmptyView
             icon={Icon.MagnifyingGlass}
             title={isLoading ? "Searching…" : "No Results"}
-            description={scope ? `Nothing in ${tildify(scope)} matches.` : undefined}
+            description={
+              [scopeLabel ? `Nothing in ${scopeLabel} matches.` : undefined, isLoading ? undefined : timing]
+                .filter(Boolean)
+                .join("\n") || undefined
+            }
             actions={scope ? <ScopeActions onClear={() => setScope(undefined)} /> : undefined}
           />
-          <List.Section title={scope ? tildify(scope) : "Results"} subtitle={pluralize(hits.length, "result")}>
+          <List.Section
+            title={timing ?? scopeLabel ?? "Results"}
+            subtitle={[timing ? scopeLabel : undefined, pluralize(hits.length, "result")].filter(Boolean).join(" · ")}
+          >
             {hits.map((hit) => (
               <HitItem
                 key={hit.path}

@@ -5,7 +5,7 @@ import { StatusView } from "./components/status-view";
 import { splitContentQuery } from "./lib/content-query";
 import { editorName, openAtLine, preferredEditor } from "./lib/editors";
 import { grep, type GrepFile, type GrepMode } from "./lib/fsearch";
-import { expandHome, fileName, folderOf } from "./lib/format";
+import { expandHome, fileName, folderOf, formatDuration } from "./lib/format";
 import { useFSearch } from "./lib/use-fsearch";
 
 const NARROW = "The search stopped early. Add ext:, type:, or in: to search fewer files.";
@@ -34,6 +34,7 @@ export default function Command({
   );
 
   const files = execute && !error ? (data?.files ?? []) : [];
+  const timing = execute && !error && data ? formatDuration(data.tookMicros) : undefined;
   // The daemon stops reading at its time budget; the best-ranked files come first.
   const incomplete = execute && !error && !isLoading && data?.complete === false;
 
@@ -72,12 +73,12 @@ export default function Command({
         <List.EmptyView
           icon={Icon.Text}
           title={isLoading ? "Searching…" : incomplete ? "No Matches Yet" : "No Matches"}
-          description={incomplete ? NARROW : undefined}
+          description={isLoading ? undefined : incomplete ? (timing ? `${NARROW}\n${timing}` : NARROW) : timing}
         />
       ) : (
         <>
-          {files.map((file) => (
-            <FileSection key={file.path} file={file} />
+          {files.map((file, index) => (
+            <FileSection key={file.path} file={file} timing={index === 0 ? timing : undefined} />
           ))}
           {incomplete && (
             <List.Section title="Some Files Weren't Searched">
@@ -90,10 +91,11 @@ export default function Command({
   );
 }
 
-function FileSection({ file }: { file: GrepFile }) {
+function FileSection({ file, timing }: { file: GrepFile; timing?: string }) {
   const editor = preferredEditor();
+  const name = fileName(file.path);
   return (
-    <List.Section title={fileName(file.path)} subtitle={folderOf(file.path)}>
+    <List.Section title={timing ? `${timing} · ${name}` : name} subtitle={folderOf(file.path)}>
       {file.matches.map((match) => (
         <List.Item
           key={`${file.path}:${match.line}`}
@@ -101,7 +103,7 @@ function FileSection({ file }: { file: GrepFile }) {
           icon={{ fileIcon: file.path }}
           title={match.text.trim().slice(0, 240) || " "}
           accessories={[{ text: `Line ${match.line}` }]}
-          quickLook={{ path: file.path, name: fileName(file.path) }}
+          quickLook={{ path: file.path, name }}
           actions={
             <FileActions
               path={file.path}

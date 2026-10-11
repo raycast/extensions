@@ -53,6 +53,14 @@ export function pluralize(count: number, one: string, many = `${one}s`) {
   return `${count} ${count === 1 ? one : many}`;
 }
 
+/** Daemon time (`took_us`) for the results header: `840 µs`, `1.2 ms`, `250 ms`. */
+export function formatDuration(micros: number) {
+  if (micros < 1000) return `${Math.round(micros)} µs`;
+  if (micros < 10_000) return `${(micros / 1000).toFixed(1)} ms`;
+  if (micros < 1_000_000) return `${Math.round(micros / 1000)} ms`;
+  return `${(micros / 1_000_000).toFixed(1)} s`;
+}
+
 /** A path as a URL path, with every segment escaped so `#`, `?`, and `%` stay part of the name. */
 export function encodePath(path: string) {
   return path.split("/").map(encodeURIComponent).join("/");
