@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "fsearch",
+  "name": "fsearch-for-raycast",
   "title": "FSearch",
   "description": "Instant, typo-tolerant search of every file on your Mac, with filters, content search, and previews.",
   "icon": "icon.png",
