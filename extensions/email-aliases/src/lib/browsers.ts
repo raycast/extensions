@@ -47,6 +47,24 @@ export const APPLESCRIPT_BROWSERS: Record<string, ScriptFlavour> = {
   "Orion RC": "webkit",
 };
 
+/**
+ * Browsers without AppleScript support. Their tabs can only be read through the
+ * Raycast browser extension, so when one of them is in front, the tab of some
+ * other browser running in the background must not be taken instead.
+ */
+const EXTENSION_ONLY_BROWSERS = new Set([
+  "Firefox",
+  "Firefox Developer Edition",
+  "Firefox Nightly",
+  "Zen",
+  "Zen Browser",
+  "LibreWolf",
+  "Waterfox",
+  "Floorp",
+  "Tor Browser",
+  "Mullvad Browser",
+]);
+
 /** ASCII unit separator: splits the URL from the title inside one result. */
 const UNIT_SEPARATOR = "\u001F";
 /** ASCII record separator: splits one tab from the next. */
@@ -67,6 +85,21 @@ tell application "${app}"
   if (count of windows) is 0 then return ""
   return ${fields}
 end tell`;
+}
+
+function windowActiveUrlsScript(app: string, flavour: ScriptFlavour): string {
+  const field = flavour === "chromium" ? "URL of active tab of w" : "URL of current tab of w";
+  return `set rs to (ASCII character 30)
+set out to ""
+if application "${app}" is not running then return ""
+tell application "${app}"
+  repeat with w in windows
+    try
+      set out to out & (${field}) & rs
+    end try
+  end repeat
+end tell
+return out`;
 }
 
 function allTabsScript(app: string, flavour: ScriptFlavour): string {
@@ -99,6 +132,10 @@ export function isKnownBrowser(appName: string): boolean {
   return Object.prototype.hasOwnProperty.call(APPLESCRIPT_BROWSERS, appName);
 }
 
+function isExtensionOnlyBrowser(appName: string): boolean {
+  return EXTENSION_ONLY_BROWSERS.has(appName);
+}
+
 export async function tabFromAppleScript(appName: string): Promise<TabInfo | undefined> {
   const flavour = APPLESCRIPT_BROWSERS[appName];
   if (!isMac() || !flavour) return undefined;
@@ -129,7 +166,7 @@ export async function allTabsFromAppleScript(appName: string): Promise<TabInfo[]
  * window, and the API does not say which window has the focus, so anything
  * beyond a single result is ambiguous and must not be guessed.
  */
-export async function activeTabsFromBrowserExtension(): Promise<TabInfo[]> {
+async function rawActiveTabsFromBrowserExtension(): Promise<TabInfo[]> {
   if (!environment.canAccess(BrowserExtension)) return [];
   try {
     const tabs = await BrowserExtension.getTabs();
@@ -138,6 +175,60 @@ export async function activeTabsFromBrowserExtension(): Promise<TabInfo[]> {
       .map((tab) => ({ url: tab.url, title: tab.title ?? "", source: "Browser Extension" }));
   } catch {
     return [];
+  }
+}
+
+/** URLs of the active tab of every window of every running AppleScript browser. */
+async function activeUrlsOfAppleScriptBrowsers(): Promise<Set<string>> {
+  const urls = new Set<string>();
+  for (const appName of await runningBrowsers()) {
+    try {
+      const raw = await runAppleScript(windowActiveUrlsScript(appName, APPLESCRIPT_BROWSERS[appName]), {
+        timeout: 10_000,
+      });
+      raw
+        .split(RECORD_SEPARATOR)
+        .map((url) => url.trim())
+        .filter(Boolean)
+        .forEach((url) => urls.add(url));
+    } catch {
+      // A browser that does not answer cannot be ruled out, so nothing is excluded.
+    }
+  }
+  return urls;
+}
+
+/**
+ * The active tabs reported by the browser extension, minus the ones that
+ * provably belong to an AppleScript browser.
+ *
+ * The extension API does not say which browser a tab comes from. When the tab
+ * is meant to come from a browser without AppleScript (Firefox, Zen …), every
+ * candidate whose URL is open as the active tab of an AppleScript browser is
+ * dropped, so a Chrome tab in the background is not passed off as the Firefox
+ * one. If that would drop everything, the unfiltered list is kept and the usual
+ * one-or-ambiguous rule applies.
+ */
+export async function activeTabsFromBrowserExtension(excludeAppleScriptBrowsers = false): Promise<TabInfo[]> {
+  const candidates = await rawActiveTabsFromBrowserExtension();
+  if (!excludeAppleScriptBrowsers || !isMac() || candidates.length === 0) return candidates;
+  const appleScriptUrls = await activeUrlsOfAppleScriptBrowsers();
+  const filtered = candidates.filter((tab) => !appleScriptUrls.has(tab.url));
+  return filtered.length > 0 ? filtered : candidates;
+}
+
+/** Whether an app with this name is running, browser or not. */
+async function isAppRunning(appName: string): Promise<boolean> {
+  if (!isMac()) return true;
+  try {
+    const raw = await runAppleScript(
+      'tell application "System Events" to return name of every application process whose background only is false',
+      { timeout: 10_000 },
+    );
+    return raw.split(",").some((name) => name.trim() === appName);
+  } catch {
+    // Unknown: do not block the lookup on a failed check.
+    return true;
   }
 }
 
@@ -165,7 +256,7 @@ async function runningBrowsers(): Promise<string[]> {
 }
 
 /** The app in front, which is the one exact signal macOS does give us. */
-async function frontmostBrowser(): Promise<string | undefined> {
+async function frontmostApp(): Promise<string | undefined> {
   if (!isMac()) return undefined;
   try {
     let app = await getFrontmostApplication();
@@ -174,7 +265,7 @@ async function frontmostBrowser(): Promise<string | undefined> {
       await new Promise((resolve) => setTimeout(resolve, 200));
       app = await getFrontmostApplication();
     }
-    return isKnownBrowser(app.name) ? app.name : undefined;
+    return app.name;
   } catch {
     return undefined;
   }
@@ -183,12 +274,11 @@ async function frontmostBrowser(): Promise<string | undefined> {
 /**
  * Every browser that currently has a readable tab, the frontmost one first.
  *
- * The frontmost browser is looked up once, before any AppleScript runs, and
- * returned with the tabs: by the time the scripts are done, Raycast is often in
- * front, so asking again would lose the one reliable signal.
+ * The caller looks up the frontmost app once, before any AppleScript runs: by
+ * the time the scripts are done, Raycast is often in front, so asking again
+ * would lose the one reliable signal.
  */
-async function tabsFromRunningBrowsers(): Promise<{ tabs: TabInfo[]; front?: string }> {
-  const front = await frontmostBrowser();
+async function tabsFromRunningBrowsers(front: string | undefined): Promise<TabInfo[]> {
   const names = await runningBrowsers();
   const ordered = front ? [front, ...names.filter((name) => name !== front)] : names;
 
@@ -197,7 +287,7 @@ async function tabsFromRunningBrowsers(): Promise<{ tabs: TabInfo[]; front?: str
     const tab = await tabFromAppleScript(appName);
     if (tab) tabs.push(tab);
   }
-  return { tabs, front };
+  return tabs;
 }
 
 export interface LookupOptions {
@@ -260,12 +350,28 @@ export async function getActiveTab(options: LookupOptions): Promise<TabInfo> {
   const useAppleScript = options.browserSource !== "extension" && isMac() && !preferredNeedsExtension;
   const useExtension = options.browserSource !== "applescript";
 
-  if (useAppleScript) {
+  if (preferredNeedsExtension && !(await isAppRunning(preferred!))) {
+    throw new NoTabError(`${preferred} is not running. Open it, or pick a different preferred browser.`);
+  }
+
+  // Looked up once, before any AppleScript runs (see tabsFromRunningBrowsers).
+  const frontApp = !preferred && isMac() ? await frontmostApp() : undefined;
+  // Firefox, Zen … in front: their tab is the one meant, and only the browser
+  // extension can read it. A background browser's tab must not stand in for it.
+  const frontNeedsExtension = frontApp !== undefined && isExtensionOnlyBrowser(frontApp);
+  if (frontNeedsExtension && !useExtension) {
+    throw new NoTabError(
+      `${frontApp} does not support AppleScript, but the extension is set to read tabs through AppleScript only. Set the source preference to Automatic or Raycast browser extension.`,
+    );
+  }
+
+  if (useAppleScript && !frontNeedsExtension) {
     if (preferred) {
       const tab = await tabFromAppleScript(preferred);
       if (tab) return tab;
     } else {
-      const { tabs, front } = await tabsFromRunningBrowsers();
+      const front = frontApp && isKnownBrowser(frontApp) ? frontApp : undefined;
+      const tabs = await tabsFromRunningBrowsers(front);
       // One browser, or one in front: unambiguous. Several with none in front:
       // ask rather than pick an arbitrary one.
       if (tabs.length === 1) return tabs[0];
@@ -278,7 +384,7 @@ export async function getActiveTab(options: LookupOptions): Promise<TabInfo> {
   }
 
   if (useExtension) {
-    const candidates = await activeTabsFromBrowserExtension();
+    const candidates = await activeTabsFromBrowserExtension(preferredNeedsExtension || frontNeedsExtension);
     if (candidates.length === 1) return candidates[0];
     if (candidates.length > 1) throw new AmbiguousTabError(candidates, "windows");
   }
@@ -322,7 +428,14 @@ export async function getAllTabs(options: LookupOptions): Promise<TabInfo[]> {
     throw new NoTabError(noTabMessage(options));
   }
 
-  const front = await frontmostBrowser();
+  const frontApp = await frontmostApp();
+  if (frontApp && isExtensionOnlyBrowser(frontApp)) {
+    // Never copy the windows of a browser in the background instead.
+    throw new NoTabError(
+      `Copying a whole window needs AppleScript, which ${frontApp} does not support. Bring a browser that supports AppleScript to the front, or copy tabs one at a time.`,
+    );
+  }
+  const front = frontApp && isKnownBrowser(frontApp) ? frontApp : undefined;
   if (front) {
     const tabs = await allTabsFromAppleScript(front);
     if (tabs.length > 0) return tabs;
