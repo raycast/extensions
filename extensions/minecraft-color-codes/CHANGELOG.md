@@ -1,6 +1,6 @@
 # Minecraft Color Codes Changelog
 
-## [Windows support] - {PR_MERGE_DATE}
+## [Windows support] - 2026-10-11
 
 - Add support for Windows platform
 - Bump all dependencies to the latest
