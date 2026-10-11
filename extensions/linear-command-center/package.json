@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "linear-command-center",
+  "title": "Linear Command Center",
+  "description": "An actionable Linear menu bar for active work, agent sessions, reviews, and exceptions.",
+  "icon": "icon.png",
+  "author": "benadamsky",
+  "license": "MIT",
+  "categories": ["Developer Tools", "Productivity"],
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "linear-pulse",
+      "title": "Linear Pulse",
+      "subtitle": "Linear Command Center",
+      "description": "Monitor agent work, reviews, blockers, overdue issues, and stale work from the menu bar",
+      "mode": "menu-bar",
+      "interval": "15m"
+    },
+    {
+      "name": "work-dashboard",
+      "title": "Linear Work Dashboard",
+      "subtitle": "Linear Command Center",
+      "description": "Review and update active Linear work across teams without opening Linear",
+      "mode": "view"
+    },
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture Linear Issue",
+      "subtitle": "Linear Command Center",
+      "description": "Create a Linear issue with your preferred team, status, project, and priority",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "teamKey",
+      "title": "Preferred Team Key",
+      "description": "Optional team key used to filter the dashboard and preselect Quick Capture. Leave blank for all assigned work.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "ENG"
+    },
+    {
+      "name": "agentProjectId",
+      "title": "Agent Project ID",
+      "description": "Optional exact project UUID used to highlight agent work",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "agentProjectKeywords",
+      "title": "Agent Project Keywords",
+      "description": "Comma-separated project-name keywords used to recognize agent work in addition to Linear delegation and agent sessions",
+      "type": "textfield",
+      "required": false,
+      "default": "agent"
+    },
+    {
+      "name": "reviewStateNames",
+      "title": "Review Status Names",
+      "description": "Optional comma-separated review statuses. When blank, statuses containing ‘review’ are detected automatically.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "In Review, Ready for Review"
+    },
+    {
+      "name": "staleAfterHours",
+      "title": "Stale After",
+      "description": "Hours without an update before active work is considered stale",
+      "type": "textfield",
+      "required": true,
+      "default": "24"
+    },
+    {
+      "name": "menuItemLimit",
+      "title": "Menu Items per Section",
+      "description": "Maximum issues shown in each menu-bar section",
+      "type": "textfield",
+      "required": true,
+      "default": "6"
+    },
+    {
+      "name": "demoMode",
+      "title": "Demo Data",
+      "description": "Show sanitized sample work for previews and screenshots instead of loading Linear data",
+      "type": "checkbox",
+      "label": "Use demo data",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "eslint": "^9.25.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  },
+  "overrides": {
+    "esbuild": "^0.28.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  }
+}
