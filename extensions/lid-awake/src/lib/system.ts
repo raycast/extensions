@@ -71,14 +71,17 @@ export async function isRuleInstalled(): Promise<boolean> {
   }
 }
 
-export async function installRule(): Promise<void> {
-  const username = os.userInfo().username;
+export function sudoersRule(username: string): string {
   if (!/^[A-Za-z0-9._-]+$/.test(username)) {
     throw new Error(`Unsupported macOS username "${username}" for a sudoers rule`);
   }
-
   // The username check above guarantees the rule contains no quotes.
-  const rule = `${username} ALL=(root) NOPASSWD: ${PMSET} -a disablesleep 0, ${PMSET} -a disablesleep 1`;
+  return `${username} ALL=(root) NOPASSWD: ${PMSET} -a disablesleep 0, ${PMSET} -a disablesleep 1`;
+}
+
+// The root shell command that installs the rule for `username`. It is run through runAsAdmin, or as root by sudo in tests.
+export function installRuleScript(username: string): string {
+  const rule = sudoersRule(username);
   const install = [
     `${PRINTF} '%s\\n' '${rule}' > "$T"`,
     `${VISUDO} -cf "$T"`,
@@ -89,11 +92,15 @@ export async function installRule(): Promise<void> {
   // Everything runs as root inside the root-owned sudoers.d directory, so the user cannot swap the file.
   // mktemp gives each attempt its own 0600 file, so overlapping installs never share one. The dotted name
   // is ignored by sudo, so this staging file is never read as a rule.
-  await runAsAdmin(
-    `T=$(${MKTEMP} /etc/sudoers.d/.raycast-lid-awake.XXXXXX) || exit 1; ${install}; S=$?; ${RM} -f "$T"; exit $S`,
-  );
+  return `T=$(${MKTEMP} /etc/sudoers.d/.raycast-lid-awake.XXXXXX) || exit 1; ${install}; S=$?; ${RM} -f "$T"; exit $S`;
+}
+
+export const REMOVE_RULE_SCRIPT = `${RM} -f ${SUDOERS_PATH}`;
+
+export async function installRule(): Promise<void> {
+  await runAsAdmin(installRuleScript(os.userInfo().username));
 }
 
 export async function removeRule(): Promise<void> {
-  await runAsAdmin(`${RM} -f ${SUDOERS_PATH}`);
+  await runAsAdmin(REMOVE_RULE_SCRIPT);
 }

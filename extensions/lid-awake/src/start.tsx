@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List, showHUD, showToast, Toast, Color } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { PRESETS, disable, durationLabel, enable, getStatus } from "./lib/session";
-import { formatRemaining } from "./lib/parse";
+import { presetSubtitle, startAccessoryTitle, turnOnMessage } from "./lib/labels";
 
 export default function Command() {
   const { data: status, isLoading, revalidate } = usePromise(getStatus);
@@ -9,11 +9,7 @@ export default function Command() {
   async function start(minutes: number | null) {
     try {
       await enable(minutes);
-      await showHUD(
-        minutes === null
-          ? "Lid Awake on until you turn it off"
-          : `Lid Awake on for ${durationLabel(minutes).toLowerCase()}`,
-      );
+      await showHUD(turnOnMessage(minutes));
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -39,12 +35,8 @@ export default function Command() {
   }
 
   const on = status?.on ?? false;
-  const session = status?.session ?? null;
-  const accessoryTitle = on
-    ? session?.endsAt
-      ? `On, ${formatRemaining(session.endsAt - Date.now())} left`
-      : "On until you turn it off"
-    : "Off";
+  const now = Date.now();
+  const accessoryTitle = startAccessoryTitle(status, now);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Keep awake for how long?">
@@ -61,27 +53,19 @@ export default function Command() {
           }
         />
       )}
-      {PRESETS.map((minutes) => {
-        const label = durationLabel(minutes);
-        const endsAt = minutes === null ? null : new Date(Date.now() + minutes * 60_000);
-        return (
-          <List.Item
-            key={String(minutes)}
-            title={label}
-            subtitle={
-              endsAt
-                ? `Until ${endsAt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`
-                : "Until you turn it off"
-            }
-            icon={Icon.Clock}
-            actions={
-              <ActionPanel>
-                <Action title="Keep Awake" icon={Icon.Bolt} onAction={() => start(minutes)} />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+      {PRESETS.map((minutes) => (
+        <List.Item
+          key={String(minutes)}
+          title={durationLabel(minutes)}
+          subtitle={presetSubtitle(minutes, now)}
+          icon={Icon.Clock}
+          actions={
+            <ActionPanel>
+              <Action title="Keep Awake" icon={Icon.Bolt} onAction={() => start(minutes)} />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }

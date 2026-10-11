@@ -32,6 +32,23 @@ describe("parseSleepDisabled", () => {
   it("returns false when the SleepDisabled line is missing", () => {
     expect(parseSleepDisabled("System-wide power settings:\n sleep 1\n")).toBe(false);
   });
+
+  it("finds SleepDisabled in full pmset -g output when it is separated by a mix of tabs and spaces", () => {
+    const out = [
+      "System-wide power settings:",
+      " SleepDisabled \t 1",
+      "Currently in use:",
+      " standby              1",
+      " powernap             1",
+      " lowpowermode         0",
+      "",
+    ].join("\n");
+    expect(parseSleepDisabled(out)).toBe(true);
+  });
+
+  it("returns false when SleepDisabled is a value other than 0 or 1", () => {
+    expect(parseSleepDisabled("System-wide power settings:\n SleepDisabled\t\t2\n")).toBe(false);
+  });
 });
 
 describe("parseBattery", () => {
@@ -52,6 +69,27 @@ describe("parseBattery", () => {
       "Now drawing from 'Battery Power'\n -InternalBattery-0 (id=4653155)\t5%; discharging; 0:20 remaining present: true\n";
     expect(parseBattery(out)).toEqual({ hasBattery: true, percent: 5, onAC: false });
   });
+
+  it("reads a battery that is charging on AC power", () => {
+    const out =
+      "Now drawing from 'AC Power'\n -InternalBattery-0 (id=4653155)\t45%; charging; 1:20 remaining present: true\n";
+    expect(parseBattery(out)).toEqual({ hasBattery: true, percent: 45, onAC: true });
+  });
+
+  it("reads a battery that is finishing its charge on AC power", () => {
+    const out =
+      "Now drawing from 'AC Power'\n -InternalBattery-0 (id=4653155)\t98%; finishing charge; 0:05 remaining present: true\n";
+    expect(parseBattery(out)).toEqual({ hasBattery: true, percent: 98, onAC: true });
+  });
+
+  it("reports no battery for a UPS, even when it shows a percentage", () => {
+    const out = "Now drawing from 'Battery Power'\n -UPS-0 (id=12345)\t35%; discharging; present: true\n";
+    expect(parseBattery(out)).toEqual({ hasBattery: false, percent: null, onAC: false });
+  });
+
+  it("reports no battery and unknown power source for empty output", () => {
+    expect(parseBattery("")).toEqual({ hasBattery: false, percent: null, onAC: false });
+  });
 });
 
 describe("parseBootTime", () => {
@@ -61,6 +99,10 @@ describe("parseBootTime", () => {
 
   it("returns null for unexpected output", () => {
     expect(parseBootTime("not a boot time")).toBeNull();
+  });
+
+  it("returns null for empty output", () => {
+    expect(parseBootTime("")).toBeNull();
   });
 });
 
@@ -78,6 +120,23 @@ describe("formatRemaining", () => {
   it("shows hours and zero-padded minutes", () => {
     expect(formatRemaining(65 * 60_000)).toBe("1h 05m");
     expect(formatRemaining(4 * 60 * 60_000)).toBe("4h 00m");
+  });
+
+  it("shows 1h 00m at exactly 60 minutes", () => {
+    expect(formatRemaining(60 * 60_000)).toBe("1h 00m");
+  });
+
+  it("stays on minutes for 59 minutes and 59 seconds", () => {
+    expect(formatRemaining(59 * 60_000 + 59_000)).toBe("59m");
+  });
+
+  it("shows <1m for a negative duration", () => {
+    expect(formatRemaining(-1)).toBe("<1m");
+    expect(formatRemaining(-60_000)).toBe("<1m");
+  });
+
+  it("shows hours and zero-padded minutes for a multi-hour duration", () => {
+    expect(formatRemaining(4 * 60 * 60_000 + 5 * 60_000)).toBe("4h 05m");
   });
 });
 
@@ -112,6 +171,15 @@ describe("shouldAutoDisable", () => {
     it("does not return restart when the current boot time is null", () => {
       expect(shouldAutoDisable({ ...base, session: session(), currentBootTime: null })).toBeNull();
     });
+
+    it("returns restart even when the timer has not ended yet", () => {
+      const result = shouldAutoDisable({
+        ...base,
+        session: session({ bootTime: BOOT, endsAt: base.now + 60 * 60_000 }),
+        currentBootTime: BOOT + 3600,
+      });
+      expect(result).toBe("restart");
+    });
   });
 
   describe("timer", () => {
@@ -126,6 +194,11 @@ describe("shouldAutoDisable", () => {
 
     it("does not return timer one millisecond before endsAt", () => {
       expect(shouldAutoDisable({ ...base, session: session({ endsAt: base.now + 1 }) })).toBeNull();
+    });
+
+    it("returns null for a timer that has not ended, even on low battery plugged into AC power", () => {
+      const battery: Battery = { hasBattery: true, percent: 5, onAC: true };
+      expect(shouldAutoDisable({ ...base, session: session({ endsAt: base.now + 60_000 }), battery })).toBeNull();
     });
 
     it("never times out an indefinite session (endsAt null)", () => {

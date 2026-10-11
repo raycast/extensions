@@ -38,21 +38,29 @@ export function durationLabel(minutes: number | null): string {
   return hours === 1 ? "1 hour" : `${hours} hours`;
 }
 
-function sessionKey(startedAt: number): string {
-  return `${SESSION_PREFIX}${startedAt}`;
+// Session keys carry a sequence number, not the start time: the clock can move backward, but a sequence number only grows.
+function sessionKey(seq: number): string {
+  return `${SESSION_PREFIX}${seq}`;
 }
 
-async function readSessionEntries(): Promise<{ key: string; session: Session }[]> {
+type SessionEntry = { key: string; seq: number; session: Session };
+
+async function readSessionEntries(): Promise<SessionEntry[]> {
   const items = await LocalStorage.allItems();
-  const entries: { key: string; session: Session }[] = [];
+  const entries: SessionEntry[] = [];
   for (const [key, value] of Object.entries(items)) {
     if (!key.startsWith(SESSION_PREFIX)) {
+      continue;
+    }
+    // Keys from older builds hold a millisecond start time, which is a large number, so a new Start still outranks them.
+    const seq = Number(key.slice(SESSION_PREFIX.length));
+    if (!Number.isSafeInteger(seq) || seq <= 0) {
       continue;
     }
     try {
       const session = JSON.parse(String(value)) as Session;
       if (typeof session.startedAt === "number") {
-        entries.push({ key, session });
+        entries.push({ key, seq, session });
       }
     } catch {
       // Not a session; ignore it.
@@ -61,13 +69,13 @@ async function readSessionEntries(): Promise<{ key: string; session: Session }[]
   return entries;
 }
 
-async function readSession(): Promise<Session | null> {
+async function readSession(): Promise<SessionEntry | null> {
   try {
-    // If more than one session is stored, the newest one is the current session.
-    let newest: Session | null = null;
-    for (const { session } of await readSessionEntries()) {
-      if (!newest || session.startedAt > newest.startedAt) {
-        newest = session;
+    // If more than one session is stored, the one with the highest sequence number is the current session.
+    let newest: SessionEntry | null = null;
+    for (const entry of await readSessionEntries()) {
+      if (!newest || entry.seq > newest.seq) {
+        newest = entry;
       }
     }
     return newest;
@@ -77,11 +85,15 @@ async function readSession(): Promise<Session | null> {
 }
 
 async function writeSession(session: Session): Promise<void> {
-  await LocalStorage.setItem(sessionKey(session.startedAt), JSON.stringify(session));
-  // Drop only older sessions. A newer one came from an overlapping Start and must stay.
+  // The new sequence number is one past every stored one, so this Start outranks any session already saved.
+  // Overlapping Starts can compute the same number and write the same key. The last write wins, which is acceptable.
+  const existing = await readSessionEntries();
+  const seq = Math.max(0, ...existing.map((entry) => entry.seq)) + 1;
+  await LocalStorage.setItem(sessionKey(seq), JSON.stringify(session));
+  // Drop only older sessions (lower sequence numbers). A higher one came from an overlapping Start and must stay.
   try {
     for (const entry of await readSessionEntries()) {
-      if (entry.session.startedAt < session.startedAt) {
+      if (entry.seq < seq) {
         await LocalStorage.removeItem(entry.key);
       }
     }
@@ -90,9 +102,9 @@ async function writeSession(session: Session): Promise<void> {
   }
 }
 
-// Removes only the session with this start time. Other sessions, including one another command just saved, are kept.
-async function clearSession(startedAt: number): Promise<void> {
-  await LocalStorage.removeItem(sessionKey(startedAt));
+// Removes only the session under this key. Other sessions, including one another command just saved, are kept.
+async function clearSession(key: string): Promise<void> {
+  await LocalStorage.removeItem(key);
 }
 
 async function clearAllSessions(): Promise<void> {
@@ -120,13 +132,14 @@ export async function refreshMenuBar(): Promise<void> {
   }
 }
 
-// Only the menu bar command runs auto-off, so enable must fail before sleep is turned off if it cannot be launched.
+// Only the menu bar command runs auto-off. It is launched only after the session is saved, so its check sees the new
+// session instead of racing with it. If it cannot launch, enable undoes the start, because nothing would turn Lid Awake off.
 async function requireMenuBar(): Promise<void> {
   try {
     await launchCommand({ name: "menu-bar", type: LaunchType.Background });
   } catch {
     throw new Error(
-      "Turn on the Lid Awake Menu Bar command in Raycast first. It turns Lid Awake off when the timer ends, the battery is low, or after a restart",
+      "Run Lid Awake Menu Bar once and keep it enabled in Raycast. It turns Lid Awake off when the timer ends, the battery is low, or after a restart",
     );
   }
 }
@@ -139,7 +152,7 @@ async function startSession(minutes: number | null): Promise<void> {
   const battery = await getBattery();
   if (thresholdPercent > 0 && battery.hasBattery && !battery.onAC && battery.percent != null) {
     if (battery.percent <= thresholdPercent) {
-      throw new Error(`Battery is at ${battery.percent}%, below your ${thresholdPercent}% cutoff`);
+      throw new Error(`Battery is at ${battery.percent}%, at or below your ${thresholdPercent}% cutoff`);
     }
   }
 
@@ -158,6 +171,10 @@ async function startSession(minutes: number | null): Promise<void> {
     await setSleepDisabled(false).catch(() => undefined);
     throw error;
   }
+  // Auto-off from the menu bar may have turned sleep off while this session was being saved, so turn it back on.
+  if (!(await isSleepDisabled())) {
+    await setSleepDisabled(true);
+  }
 }
 
 async function stopSession(options: { allowPrompt?: boolean }): Promise<void> {
@@ -165,32 +182,35 @@ async function stopSession(options: { allowPrompt?: boolean }): Promise<void> {
   await clearAllSessions();
 }
 
-async function readStatus(): Promise<Status> {
+// The status plus the stored entry it was built from, so callers can clear or compare that exact entry.
+type StatusRead = { status: Status; entry: SessionEntry | null };
+
+async function readStatus(): Promise<StatusRead> {
   // Read the session first: enable turns sleep on before saving, so a session seen here means sleep is already on.
-  let session = await readSession();
+  let entry = await readSession();
   let on = await isSleepDisabled();
-  if (!on && session) {
+  if (!on && entry) {
     // Sleep is off, so this session is stale. Clear only its own key: a session another enable saved meanwhile is kept.
-    await clearSession(session.startedAt);
+    await clearSession(entry.key);
     // Report whatever session is stored now. If a new one was saved, check sleep again, since it may be on.
-    session = await readSession();
-    if (session) {
+    entry = await readSession();
+    if (entry) {
       on = await isSleepDisabled();
     }
   }
   const battery = await getBattery();
-  return { on, session, battery };
+  return { status: { on, session: entry?.session ?? null, battery }, entry };
 }
 
 async function autoDisable(): Promise<AutoDisableReason | null> {
-  const status = await readStatus();
-  if (!status.on || !status.session) {
+  const { status, entry } = await readStatus();
+  if (!status.on || !entry) {
     // Either off, or on without a session (turned on outside the extension): leave it alone.
     return null;
   }
   const { thresholdPercent } = getPrefs();
   const reason = shouldAutoDisable({
-    session: status.session,
+    session: entry.session,
     currentBootTime: await getBootTime(),
     now: Date.now(),
     battery: status.battery,
@@ -200,22 +220,27 @@ async function autoDisable(): Promise<AutoDisableReason | null> {
     return null;
   }
   await setSleepDisabled(false, { allowPrompt: false });
-  // A Start may have saved a newer session while sleep was being turned off. That session wins, so sleep goes back on.
+  // A Start may have saved a newer session (higher sequence number) while sleep was being turned off. That session wins, so sleep goes back on.
   const current = await readSession();
-  if (current && current.startedAt > status.session.startedAt) {
+  if (current && current.seq > entry.seq) {
     await setSleepDisabled(true).catch(() => undefined);
     return null;
   }
   // Clear only the session we turned off for. A Start that saves a session after the check above keeps its own key.
-  await clearSession(status.session.startedAt);
+  await clearSession(entry.key);
   return reason;
 }
 
 export async function enable(minutes: number | null): Promise<void> {
-  await requireMenuBar();
   await serialized(() => startSession(minutes));
-  // Refreshed outside the queue so launching the menu bar command never holds up other session actions.
-  await refreshMenuBar();
+  try {
+    // Outside the queue so launching the menu bar command never holds up other session actions.
+    // This launch also refreshes the menu bar, so it is not repeated.
+    await requireMenuBar();
+  } catch (error) {
+    await serialized(() => stopSession({ allowPrompt: false })).catch(() => undefined);
+    throw error;
+  }
 }
 
 export async function disable(options: { allowPrompt?: boolean } = { allowPrompt: true }): Promise<void> {
@@ -224,7 +249,7 @@ export async function disable(options: { allowPrompt?: boolean } = { allowPrompt
 }
 
 export async function getStatus(): Promise<Status> {
-  return serialized(readStatus);
+  return serialized(async () => (await readStatus()).status);
 }
 
 export async function enforce(): Promise<AutoDisableReason | null> {

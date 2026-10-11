@@ -1,6 +1,7 @@
 import { showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { disable, durationLabel, enable, getDefaultMinutes } from "./lib/session";
+import { disable, enable, getDefaultMinutes } from "./lib/session";
+import { turnOnMessage } from "./lib/labels";
 import { isSleepDisabled } from "./lib/system";
 
 export default async function Command() {
@@ -11,11 +12,7 @@ export default async function Command() {
     } else {
       const minutes = getDefaultMinutes();
       await enable(minutes);
-      await showHUD(
-        minutes === null
-          ? "Lid Awake on until you turn it off"
-          : `Lid Awake on for ${durationLabel(minutes).toLowerCase()}`,
-      );
+      await showHUD(turnOnMessage(minutes));
     }
   } catch (error) {
     await showFailureToast(error, { title: "Could not toggle Lid Awake" });

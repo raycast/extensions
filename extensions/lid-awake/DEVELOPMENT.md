@@ -29,7 +29,19 @@ npm run build      # production build
 
 `npm run lint` checks the author against raycast.com, so run it on a machine with internet access.
 
-GitHub Actions (`.github/workflows/ci.yml`) runs all of these on pushes to `master` and on every pull request, using the Node version in `.nvmrc`.
+GitHub Actions (`.github/workflows/ci.yml`) runs all of these on pushes to `master` and on every pull request, using the Node version in `.nvmrc`. A second job runs the integration tests on `macos-latest`.
+
+## Integration tests
+
+`npm run test:integration` (`test/integration/`) runs the real `pmset`, `sudo`, `visudo`, `sysctl`, `dscl` and `mktemp` commands. It covers turning sleep on and off, the sudoers rule for a dedicated test user (install, concurrent and failed installs, removal), and the session rules: timers, restarts, overlapping Starts, a menu bar launch failure and the battery cutoff. Only the Raycast API is faked.
+
+These tests change real sleep and sudoers settings, and they need passwordless sudo. They remove `/etc/sudoers.d/raycast-lid-awake` and turn sleep off when they finish, so on a Mac you use every day, the Lid Awake rule you set up stops working until you run Set up again. Run them only in CI on macOS, or locally on a throwaway Mac with:
+
+```sh
+LID_AWAKE_INTEGRATION=1 npm run test:integration
+```
+
+Without `LID_AWAKE_INTEGRATION=1`, or on any system other than macOS, the suites are skipped. `npm test` never runs them.
 
 ## Publishing to the Raycast Store
 
