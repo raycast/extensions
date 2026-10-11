@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "photoshop-projects",
+  "title": "Photoshop Projects",
+  "description": "Search and preview Photoshop files, browse recent projects, and purge caches.",
+  "icon": "extension-icon.png",
+  "author": "yashdoescode",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "recent",
+      "title": "Recent Projects",
+      "description": "Browse and open recently edited Photoshop files and projects",
+      "mode": "view"
+    },
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "description": "Search Photoshop files (.psd, .psb, .psdt) across your Mac",
+      "mode": "view"
+    },
+    {
+      "name": "clear-cache",
+      "title": "Clear Photoshop Cache",
+      "description": "Purge Photoshop memory/clipboard caches and clean temporary scratch files",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultViewMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default View Mode",
+      "description": "Choose between visual Grid view or detailed List view",
+      "default": "grid",
+      "data": [
+        {
+          "title": "Grid View (Visual Cards)",
+          "value": "grid"
+        },
+        {
+          "title": "List View (Dense with Details)",
+          "value": "list"
+        }
+      ]
+    },
+    {
+      "name": "gridColumns",
+      "type": "dropdown",
+      "required": false,
+      "title": "Grid Columns",
+      "description": "Number of columns in Grid view",
+      "default": "5",
+      "data": [
+        {
+          "title": "3 Columns (Large)",
+          "value": "3"
+        },
+        {
+          "title": "4 Columns (Medium-Large)",
+          "value": "4"
+        },
+        {
+          "title": "5 Columns (Standard)",
+          "value": "5"
+        },
+        {
+          "title": "6 Columns (Compact)",
+          "value": "6"
+        },
+        {
+          "title": "8 Columns (Dense)",
+          "value": "8"
+        }
+      ]
+    },
+    {
+      "name": "searchScope",
+      "type": "dropdown",
+      "required": false,
+      "title": "Search Scope",
+      "description": "Choose folder scope for searching Photoshop files",
+      "default": "home",
+      "data": [
+        {
+          "title": "User Home (~)",
+          "value": "home"
+        },
+        {
+          "title": "Entire System (/)",
+          "value": "all"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.9",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
