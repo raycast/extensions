@@ -1,5 +1,7 @@
 # Goose 2FA
 
+Shares one vault file with the Goose 2FA uTools plugin, including account IDs, groups, trash, and HOTP counters.
+
 A standalone Raycast extension for managing local TOTP and HOTP accounts. Create accounts from pasted Base32 secrets or screenshot/image QR codes, review their details before saving, then search and copy or paste generated codes from **Codes**. First-time users see setup shortcuts; afterward, use the action panel to add an account or scan a screenshot/image.
 
 Configure Return behavior in Raycast extension preferences. The interface is in English; account names may contain Chinese text. Data sources and JSON backups are managed under **Settings & Data** in Raycast.
@@ -16,7 +18,7 @@ Screenshot scanning hides Raycast before opening the system capture tool, then a
 
 Both pasted secrets and scanned QR codes use an account form before saving. Review the name, issuer, notes, and TOTP/HOTP settings there. Scanning or opening the form does not create an account; use **Save Account** to add it.
 
-The QR scanner uses a small Swift helper built locally from `swift/SyncHelper.swift` by `npm run build` on macOS; no additional download is required.
+The QR scanner uses macOS Vision through a Swift package. Raycast builds and bundles it automatically during `ray build` and `ray publish`.
 
 ## Optional file-format compatibility
 
