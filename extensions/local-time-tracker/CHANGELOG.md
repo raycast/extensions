@@ -1,5 +1,11 @@
 # Changelog
 
+## [Time Alerts and Pomodoro] - {PR_MERGE_DATE}
+
+- Add configurable daily-total and per-timer alerts with silent Raycast notifications.
+- Add optional Pomodoro work, short-break, and long-break intervals with manual transitions.
+- Persist reminder state across restarts and use a tomato menu bar icon during Pomodoro sessions.
+
 ## [Initial Version] - 2026-10-09
 
 - Add client and internal project management.

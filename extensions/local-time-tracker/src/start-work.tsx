@@ -19,6 +19,7 @@ import { showFailure } from "./lib/errors";
 import { findProject, sortProjectsByPreference } from "./lib/projects";
 import { getActiveTimer, getProjectCategories, getProjects, getWorkLogs } from "./lib/storage";
 import { ActiveTimerExistsError, startTimer, stopTimer } from "./lib/timer";
+import { getReminderSettings, startPomodoroInterval } from "./lib/reminder-service";
 import type { ActiveTimer, Project, ProjectCategory, WorkLog } from "./lib/types";
 
 const NO_DESCRIPTION = "__no_description__";
@@ -34,6 +35,8 @@ export default function StartWorkCommand() {
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [descriptionChoice, setDescriptionChoice] = useState(NO_DESCRIPTION);
   const [newDescription, setNewDescription] = useState("");
+  const [usePomodoro, setUsePomodoro] = useState(false);
+  const pomodoroEnabled = getReminderSettings().pomodoroEnabled;
   const projectDropdownRef = useRef<Form.Dropdown>(null);
 
   async function load() {
@@ -186,6 +189,16 @@ export default function StartWorkCommand() {
     try {
       const startedTimer = await startTimer(project.id, description);
       setActiveTimer(startedTimer);
+      if (usePomodoro && pomodoroEnabled) {
+        try {
+          await startPomodoroInterval(startedTimer.id);
+          // Refresh again after the separate pomodoro state has been saved.
+          await launchCommand({ name: "menu-bar", type: LaunchType.Background });
+        } catch (error) {
+          await showFailure("Work started, but Pomodoro could not start", error);
+          return;
+        }
+      }
       await showHUD(`Started: ${project.name}`);
     } catch (error) {
       if (error instanceof ActiveTimerExistsError) {
@@ -256,6 +269,15 @@ export default function StartWorkCommand() {
           onChange={setNewDescription}
         />
       )}
+      {pomodoroEnabled ? (
+        <Form.Checkbox
+          id="pomodoro"
+          title="Pomodoro"
+          label="Use Pomodoro alongside work tracking"
+          value={usePomodoro}
+          onChange={setUsePomodoro}
+        />
+      ) : null}
     </Form>
   );
 }
