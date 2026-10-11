@@ -1,5 +1,6 @@
 import {
   BridgeConfig,
+  BridgeHome,
   GroupedLight,
   GroupedLightRequest,
   HueEvent,
@@ -107,6 +108,12 @@ export default class HueClient {
       zigbeeConnectivity: await this.getAll<ZigbeeConnectivity>("zigbee_connectivity"),
       lights: await this.getLights(),
     };
+  }
+
+  // The bridge has exactly one.
+  public async getBridgeHome(): Promise<BridgeHome> {
+    const [bridgeHome] = await this.getAll<BridgeHome>("bridge_home");
+    return bridgeHome;
   }
 
   private getAll<R extends HueResource>(type: R["type"]): Promise<R[]> {

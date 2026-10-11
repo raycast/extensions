@@ -1,6 +1,6 @@
 // Resources from a real bridge, anonymised: fake UUIDs (except Hue's public scene images), English names, fake scene
 // keys and recall times. Typed literals, so tsc checks the types against real responses.
-import type { GroupedLight, Light, Room, Scene, Zone, ZigbeeConnectivity } from "../../src/lib/types";
+import type { BridgeHome, GroupedLight, Light, Room, Scene, Zone, ZigbeeConnectivity } from "../../src/lib/types";
 
 export const lights: Light[] = [
   {
@@ -2128,6 +2128,25 @@ export const zones: Zone[] = [
       archetype: "upstairs",
     },
     type: "zone",
+  },
+];
+
+export const bridgeHome: BridgeHome[] = [
+  {
+    id: "00000000-0000-4000-8000-000000000034",
+    id_v1: "/groups/0",
+    children: [
+      { rid: "00000000-0000-4000-8000-000000000097", rtype: "device" },
+      { rid: "00000000-0000-4000-8000-000000000046", rtype: "room" },
+      { rid: "00000000-0000-4000-8000-000000000042", rtype: "room" },
+      { rid: "00000000-0000-4000-8000-000000000054", rtype: "room" },
+      { rid: "00000000-0000-4000-8000-000000000052", rtype: "room" },
+      { rid: "00000000-0000-4000-8000-000000000044", rtype: "room" },
+      { rid: "00000000-0000-4000-8000-000000000038", rtype: "room" },
+      { rid: "00000000-0000-4000-8000-000000000056", rtype: "room" },
+    ],
+    services: [{ rid: "00000000-0000-4000-8000-000000000033", rtype: "grouped_light" }],
+    type: "bridge_home",
   },
 ];
 

@@ -4,7 +4,7 @@ import HueClient, { UnauthorizedError } from "../src/lib/HueClient";
 import { createHueClient } from "../src/lib/hueBridge";
 import type { HueEvent } from "../src/lib/types";
 import { type FakeBridge, html, json, type Route, startBridge } from "./fakeBridge";
-import { lights, rooms, scenes, zigbeeConnectivity, zones } from "./fixtures/resources";
+import { bridgeHome, lights, rooms, scenes, zigbeeConnectivity, zones } from "./fixtures/resources";
 import { sleeps } from "./mocks/timersPromises";
 
 const event = (type: HueEvent["type"], data: HueEvent["data"]): HueEvent => ({
@@ -114,6 +114,14 @@ describe("getResources", () => {
       ["room", "zone", "scene", "zigbee_connectivity", "light"].map((type) => `/clip/v2/resource/${type}`),
     );
     expect(bridge.maxInFlight).toBe(1);
+  });
+});
+
+describe("getBridgeHome", () => {
+  it("fetches the bridge's one home group", async () => {
+    const { bridge, hueClient } = await connect();
+    expect(await hueClient.getBridgeHome()).toEqual(bridgeHome[0]);
+    expect(requestsAfterConnecting(bridge).map(({ path }) => path)).toEqual(["/clip/v2/resource/bridge_home"]);
   });
 });
 

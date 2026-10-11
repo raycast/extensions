@@ -1272,7 +1272,34 @@ export type ZigbeeConnectivity = {
   extended_pan_id?: string;
 };
 
-export type HueResource = Light | GroupedLight | Scene | Room | Zone | ZigbeeConnectivity;
+/**
+ * The whole home: every room, and the devices in none. Its grouped light controls every light.
+ */
+export type BridgeHome = {
+  type: "bridge_home";
+
+  /**
+   * Unique identifier representing a specific resource instance
+   */
+  id: string;
+
+  /**
+   * Clip v1 resource identifier
+   */
+  id_v1?: string;
+
+  /**
+   * Child devices and services to group
+   */
+  children: ResourceIdentifier[];
+
+  /**
+   * Services aggregating the children's: grouped_light, grouped_motion and grouped_light_level
+   */
+  services: ResourceIdentifier[];
+};
+
+export type HueResource = Light | GroupedLight | Scene | Room | Zone | BridgeHome | ZigbeeConnectivity;
 
 type ChangedResource<R> = R extends HueResource ? Pick<R, "id" | "type"> & DeepPartial<R> : never;
 

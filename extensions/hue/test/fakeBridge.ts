@@ -73,6 +73,7 @@ export async function startBridge({
 
   const routes: Record<string, Route> = {
     "GET /clip/v2/resource/bridge": authorized((s) => json(s, 200, resources([{ id: "bridge", type: "bridge" }]))),
+    "GET /clip/v2/resource/bridge_home": authorized((s) => json(s, 200, resources(fixtures.bridgeHome))),
     "GET /clip/v2/resource/light": authorized((s) => json(s, 200, resources(fixtures.lights))),
     "GET /clip/v2/resource/grouped_light": authorized((s) => json(s, 200, resources(fixtures.groupedLights))),
     "GET /clip/v2/resource/room": authorized((s) => json(s, 200, resources(fixtures.rooms))),
