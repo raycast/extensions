@@ -1,4 +1,4 @@
-import { getPrayerStatuses, setPrayerCompleted, syncPrayerReminders } from "./helper";
+import { getPrayerStatuses, movePrayerReminders, setPrayerCompleted, syncPrayerReminders } from "./helper";
 import { addDays, getDaySchedule, PRAYER_KEYS, PrayerKey, PrayerSlot, toDateKey } from "./prayers";
 import { planHash, planReminders } from "./plan";
 import { Settings } from "./settings";
@@ -56,9 +56,13 @@ export async function syncReminders(settings: Settings, now = new Date(), force 
   const stale = !last || now.getTime() - new Date(last.at).getTime() > RESYNC_INTERVAL;
   if (!force && last?.hash === hash && !stale) return { ran: false, created: 0, updated: 0 };
 
+  // After the Reminders List setting changes, bring the prayers (and their history) along, so the old
+  // list stops alerting and Today's Prayers keeps its past days.
+  const previousList = last && (last.listName ?? last.hash.split("|")[0]);
   try {
+    if (previousList && previousList !== listName) await movePrayerReminders(previousList, listName);
     const result = await syncPrayerReminders({ listName, reminders: plan, staleAfterDays: cleanMissedAfterDays });
-    await writePlanState({ hash, at: now.toISOString() });
+    await writePlanState({ hash, at: now.toISOString(), listName });
     return { ran: true, created: result.created, updated: result.updated };
   } catch (error) {
     await writeSyncError(errorMessage(error));
@@ -74,9 +78,10 @@ async function localCompletions(from: Date, to: Date): Promise<CompletionMap> {
   const map: CompletionMap = new Map();
   for (let day = from; toDateKey(day) <= toDateKey(to); day = addDays(day, 1)) {
     const date = toDateKey(day);
-    if (date < since) continue;
     for (const key of PRAYER_KEYS) {
       const at = log[date]?.[key];
+      // Before tracking started, only saved marks count; unmarked prayers stay "no data", not missed.
+      if (date < since && !at) continue;
       map.set(`${date}/${key}`, { isCompleted: Boolean(at), completionDate: at });
     }
   }
@@ -134,8 +139,24 @@ export function prayedSet(history: History): Set<string> {
 }
 
 /**
- * Mark or unmark a prayer. With Reminders on, ticks its reminder (syncing first if it doesn't exist yet);
- * otherwise writes the local log.
+ * Create the reminder for one past prayer, without alarms, so it can be marked. The regular sync only
+ * fills today and later days, and a past day's reminder may be missing (e.g. before installing).
+ *
+ * @param slot - Past prayer slot.
+ * @param settings - Settings.
+ */
+async function createPastReminder(slot: PrayerSlot, settings: Settings): Promise<void> {
+  const day = new Date(`${slot.date}T12:00:00`);
+  const reminders = planReminders(day, settings.schedule, { ...settings.plan, days: 1 })
+    .filter((item) => item.key === slot.id)
+    .map((item) => ({ ...item, alarms: [] }));
+  const { listName, cleanMissedAfterDays } = settings.reminders;
+  await syncPrayerReminders({ listName, reminders, staleAfterDays: cleanMissedAfterDays });
+}
+
+/**
+ * Mark or unmark a prayer. With Reminders on, ticks its reminder (creating it first if it doesn't exist
+ * yet: a full sync for today and later, just that reminder for a past day); otherwise writes the local log.
  *
  * @param slot - Prayer slot.
  * @param settings - Settings.
@@ -150,7 +171,8 @@ export async function setPrayed(slot: PrayerSlot, settings: Settings, completed:
     const { listName } = settings.reminders;
     let found = await setPrayerCompleted(listName, slot.id, completed, completed ? at : undefined);
     if (!found) {
-      await syncReminders(settings, new Date(), true);
+      if (slot.date < toDateKey(new Date())) await createPastReminder(slot, settings);
+      else await syncReminders(settings, new Date(), true);
       found = await setPrayerCompleted(listName, slot.id, completed, completed ? at : undefined);
     }
     if (!found) throw new Error(`No reminder for ${slot.name} on ${slot.date} in "${listName}"`);

@@ -1,7 +1,7 @@
 import { addDays, getTimeline, PrayerSlot, toDateKey } from "./prayers";
 import { buildSettings, Settings } from "./settings";
 import { locateCurrent } from "./helper";
-import { distanceKm, locationFromFix, readLocatedFor, writeLocatedFor, writeLocation } from "./location";
+import { distanceKm, locationFromFix, readLocatedFor, shouldLocate, writeLocatedFor, writeLocation } from "./location";
 import { currentSlot, dueAlerts, nextSlot, passedAlertIds } from "./state";
 import { deliverAlert } from "./alerts";
 import { addFired, readFired, readSnoozes, writeSnoozes } from "./storage";
@@ -25,16 +25,18 @@ export async function refreshLocationIfDue(settings: Settings, now: Date): Promi
   if (settings.location.mode !== "current") return settings;
   const next = nextSlot(getTimeline(now, settings.schedule), now);
   if (!next || next.start.getTime() - now.getTime() > LOCATE_LEAD) return settings;
-  if ((await readLocatedFor()) === next.id) return settings;
-  await writeLocatedFor(next.id);
+  if (!shouldLocate(await readLocatedFor(), next.id, now)) return settings;
+  // Marks the attempt first, so ticks during a slow lookup don't start another one.
+  await writeLocatedFor(`${next.id}@${now.toISOString()}`);
 
   let fresh;
   try {
     fresh = locationFromFix(await locateCurrent(), now);
   } catch (error) {
-    console.error("location refresh failed", error);
+    console.error("location refresh failed; retrying in a few minutes", error);
     return settings;
   }
+  await writeLocatedFor(next.id);
   if (distanceKm(settings.location, fresh) < MOVE_THRESHOLD_KM) {
     await writeLocation({ ...settings.location, updatedAt: fresh.updatedAt });
     return settings;
@@ -90,7 +92,7 @@ export async function tick(initial: Settings, now = new Date()): Promise<TickRes
       const slot = slots.find((s) => s.id === entry.slotId);
       if (!slot || prayed.has(slot.id) || now >= slot.end) continue;
       if (new Date(entry.until) <= now) {
-        await deliverAlert(slot, entry.kind, settings.notify, now);
+        await deliverAlert(slot, entry.kind, settings.notify, now, settings.windows.dueAt);
         popups++;
       } else {
         keep.push(entry);
@@ -101,7 +103,7 @@ export async function tick(initial: Settings, now = new Date()): Promise<TickRes
     const due = dueAlerts(slots, now, prayed, await readFired(), settings.windows);
     const firedNow: string[] = [];
     for (const alert of due) {
-      await deliverAlert(alert.slot, alert.kind, settings.notify, now);
+      await deliverAlert(alert.slot, alert.kind, settings.notify, now, settings.windows.dueAt);
       popups++;
       firedNow.push(...passedAlertIds(alert.slot, now, settings.windows));
     }

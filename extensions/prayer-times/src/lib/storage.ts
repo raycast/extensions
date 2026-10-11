@@ -14,6 +14,8 @@ export interface PlanState {
   hash: string;
   /** ISO time of the sync. */
   at: string;
+  /** Reminders list synced to; older states only have it at the start of `hash`. */
+  listName?: string;
 }
 
 const KEYS = {

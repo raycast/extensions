@@ -1,7 +1,7 @@
 import { launchCommand, LaunchType } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { AlertKind } from "./state";
+import { AlertKind, AlertWindows, headsUpDue } from "./state";
 import { Settings } from "./settings";
 import { PrayerSlot } from "./prayers";
 import { formatRelative, formatTime, ltrName } from "./format";
@@ -18,14 +18,20 @@ export interface AlertContext {
  * @param slot - Prayer slot.
  * @param kind - Alert kind.
  * @param now - Current instant.
+ * @param dueAt - When reminders are due; decides what a heads-up counts down to.
  * @returns Title and message lines.
  */
-export function describeAlert(slot: PrayerSlot, kind: AlertKind, now: Date): { title: string; message: string } {
+export function describeAlert(
+  slot: PrayerSlot,
+  kind: AlertKind,
+  now: Date,
+  dueAt: AlertWindows["dueAt"],
+): { title: string; message: string } {
   const jamaat = slot.jamaat ? `Jamaat ${formatTime(slot.jamaat)}` : undefined;
   const ends = `Ends ${formatTime(slot.end)}`;
   switch (kind) {
     case "headsUp": {
-      const due = slot.jamaat && slot.jamaat > now && slot.start <= now ? slot.jamaat : slot.start;
+      const due = headsUpDue(slot, dueAt);
       const what = due === slot.jamaat ? `${ltrName(slot.name)} jamaat` : ltrName(slot.name);
       return {
         title: `${what} ${formatRelative(due, now)}`,
@@ -73,15 +79,17 @@ export async function postBanner(title: string, message: string): Promise<void> 
  * @param kind - Alert kind.
  * @param notify - Which of the extension's channels are on.
  * @param now - Current instant.
+ * @param dueAt - When reminders are due.
  */
 export async function deliverAlert(
   slot: PrayerSlot,
   kind: AlertKind,
   notify: Settings["notify"],
   now: Date,
+  dueAt: AlertWindows["dueAt"],
 ): Promise<void> {
   if (notify.banner) {
-    const { title, message } = describeAlert(slot, kind, now);
+    const { title, message } = describeAlert(slot, kind, now, dueAt);
     try {
       await postBanner(title, message);
     } catch (error) {

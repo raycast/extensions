@@ -139,7 +139,7 @@
       "default": "midnight",
       "data": [
         {
-          "title": "Islamic midnight",
+          "title": "Islamic Midnight",
           "value": "midnight"
         },
         {
@@ -214,7 +214,7 @@
       "default": "start",
       "data": [
         {
-          "title": "Prayer start",
+          "title": "Prayer Start",
           "value": "start"
         },
         {
@@ -225,7 +225,7 @@
     },
     {
       "name": "headsUpMinutes",
-      "title": "Heads-up (min)",
+      "title": "Heads-Up (Minutes)",
       "description": "Extra notification this many minutes before the due time (start or jamaat); the menu bar countdown turns yellow from then. 0 turns it off.",
       "type": "textfield",
       "required": false,
@@ -233,7 +233,7 @@
     },
     {
       "name": "startWindowMinutes",
-      "title": "Just Started (min)",
+      "title": "Just Started (Minutes)",
       "description": "For this many minutes after a prayer starts, its menu bar count (e.g. \"Asr +3\") shows in green, then blue.",
       "type": "textfield",
       "required": false,
@@ -241,7 +241,7 @@
     },
     {
       "name": "endingReminderMinutes",
-      "title": "Ending Reminder (min)",
+      "title": "Ending Reminder (Minutes)",
       "description": "Notify this many minutes before the prayer time ends. The menu bar keeps showing it until marked prayed.",
       "type": "textfield",
       "required": false,
@@ -249,7 +249,7 @@
     },
     {
       "name": "jamaatReminderMinutes",
-      "title": "Jamaat Reminder (min)",
+      "title": "Jamaat Reminder (Minutes)",
       "description": "Notify this many minutes before jamaat; the menu bar shows it from then.",
       "type": "textfield",
       "required": false,
@@ -273,19 +273,19 @@
       "default": "reminders",
       "data": [
         {
-          "title": "Reminders alarms",
+          "title": "Reminders Alarms",
           "value": "reminders"
         },
         {
-          "title": "Raycast popup",
+          "title": "Raycast Popup",
           "value": "popup"
         },
         {
-          "title": "Reminders alarms + Raycast popup",
+          "title": "Reminders Alarms + Raycast Popup",
           "value": "both"
         },
         {
-          "title": "macOS banner",
+          "title": "macOS Banner",
           "value": "banner"
         },
         {
@@ -337,7 +337,7 @@
     },
     {
       "name": "cleanMissedAfterDays",
-      "title": "Clean Missed After (days)",
+      "title": "Clean Missed After (Days)",
       "description": "A missed prayer stays dated, showing as overdue in Reminders and Calendar, for this many days. After that its date is removed; it still counts as missed in history. 0 never removes it.",
       "type": "textfield",
       "required": false,

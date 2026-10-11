@@ -59,22 +59,42 @@ export async function writeLocation(location: StoredLocation): Promise<void> {
   await LocalStorage.setItem(KEY, JSON.stringify(location));
 }
 
+/** A failed or interrupted automatic location refresh is tried again after this long. */
+const LOCATE_RETRY_MS = 5 * 60_000;
+
 /**
- * The slot id the last automatic location refresh ran for, so it runs once per prayer.
+ * The automatic refresh marker: the slot id once a refresh for that prayer succeeded, or
+ * `<slot id>@<ISO time>` while an attempt is running or after it failed.
  *
- * @returns Slot id, if any.
+ * @returns Marker, if any.
  */
 export function readLocatedFor(): Promise<string | undefined> {
   return LocalStorage.getItem<string>(LOCATED_FOR_KEY);
 }
 
 /**
- * Remember that the automatic refresh ran for a slot.
+ * Save the automatic refresh marker.
  *
- * @param slotId - Slot id.
+ * @param marker - Slot id after success, or `<slot id>@<ISO time>` for an attempt.
  */
-export function writeLocatedFor(slotId: string): Promise<void> {
-  return LocalStorage.setItem(LOCATED_FOR_KEY, slotId);
+export function writeLocatedFor(marker: string): Promise<void> {
+  return LocalStorage.setItem(LOCATED_FOR_KEY, marker);
+}
+
+/**
+ * Whether to try an automatic location refresh for a prayer now. Once per prayer after a success;
+ * after a failed or still-running attempt, again once {@link LOCATE_RETRY_MS} has passed.
+ *
+ * @param marker - Saved marker (see {@link readLocatedFor}).
+ * @param slotId - The prayer the refresh is for.
+ * @param now - Current instant.
+ * @returns True to locate now.
+ */
+export function shouldLocate(marker: string | undefined, slotId: string, now: Date): boolean {
+  if (marker === slotId) return false;
+  const [id, attemptAt] = (marker ?? "").split("@");
+  if (id !== slotId || !attemptAt) return true;
+  return now.getTime() - Date.parse(attemptAt) >= LOCATE_RETRY_MS;
 }
 
 type CityRow = [name: string, region: string, latitude: number, longitude: number, population: number];

@@ -50,10 +50,22 @@ const JAMAAT_GRACE = 5 * MINUTE;
  * @param windows - Minute settings.
  * @returns Alerts in firing order.
  */
+/**
+ * What a prayer's heads-up counts down to: jamaat when reminders are due at jamaat and the prayer has
+ * one, otherwise the prayer start.
+ *
+ * @param slot - Prayer slot.
+ * @param dueAt - When reminders are due.
+ * @returns The instant the heads-up is for.
+ */
+export function headsUpDue(slot: PrayerSlot, dueAt: AlertWindows["dueAt"]): Date {
+  return dueAt === "jamaat" && slot.jamaat ? slot.jamaat : slot.start;
+}
+
 export function alertsForSlot(slot: PrayerSlot, windows: AlertWindows): PrayerAlert[] {
   const alerts: PrayerAlert[] = [];
   if (windows.headsUpMinutes > 0) {
-    const due = windows.dueAt === "jamaat" && slot.jamaat ? slot.jamaat : slot.start;
+    const due = headsUpDue(slot, windows.dueAt);
     alerts.push({
       id: `${slot.id}:headsUp`,
       slot,

@@ -51,7 +51,7 @@ function PrayerAlert({ settings, context }: { settings: Settings; context?: Aler
   if (!slot) return <Detail markdown="# No prayer found" />;
 
   const kind: AlertKind = context?.kind ?? "start";
-  const { title, message } = describeAlert(slot, kind, now);
+  const { title, message } = describeAlert(slot, kind, now, settings.windows.dueAt);
   const close = () => closeMainWindow({ popToRootType: PopToRootType.Immediate });
 
   return (

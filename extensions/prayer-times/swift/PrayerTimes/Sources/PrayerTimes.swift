@@ -60,6 +60,7 @@ enum PrayerRemindersError: Error, LocalizedError, CustomStringConvertible {
   case duplicateLists(String, Int)
   case locationDenied
   case locationUnavailable(String)
+  case syncBusy
 
   var errorDescription: String? {
     switch self {
@@ -75,6 +76,8 @@ enum PrayerRemindersError: Error, LocalizedError, CustomStringConvertible {
       return "Location access denied. Allow Prayer Times Location in System Settings → Privacy & Security → Location Services."
     case .locationUnavailable(let reason):
       return "Could not get the current location: \(reason)"
+    case .syncBusy:
+      return "Another reminders sync is still running. Try again in a moment."
     }
   }
 
@@ -238,10 +241,30 @@ private func apply(_ reminder: EKReminder, due: Date, alarms: [Date], notes: Str
   reminder.notes = notes
 }
 
+/// Runs `body` while holding a lock shared by every process of this extension. The background tick,
+/// Today's Prayers and marking a prayer can each start a sync, each in its own process; two at once
+/// would both see a prayer as missing and both create it. Waits up to 20 s for the other sync.
+private func withSyncLock<T>(_ body: () async throws -> T) async throws -> T {
+  let path = (NSTemporaryDirectory() as NSString).appendingPathComponent("prayer-times-sync.lock")
+  let fd = open(path, O_CREAT | O_RDWR, 0o600)
+  guard fd >= 0 else { return try await body() }
+  defer { close(fd) }  // Closing the descriptor releases the lock.
+  let deadline = Date().addingTimeInterval(20)
+  while flock(fd, LOCK_EX | LOCK_NB) != 0 {
+    guard Date() < deadline else { throw PrayerRemindersError.syncBusy }
+    try await Task.sleep(nanoseconds: 200_000_000)
+  }
+  return try await body()
+}
+
 /// Create missing prayer reminders and move existing ones whose times changed.
 /// Completed reminders are left untouched. Each existing reminder is refreshed right before it is
 /// saved, so a completion written by the sync service in the meantime is not overwritten.
 @raycast func syncPrayerReminders(payload: SyncPayload) async throws -> SyncResult {
+  try await withSyncLock { try await sync(payload) }
+}
+
+private func sync(_ payload: SyncPayload) async throws -> SyncResult {
   let store = try await authorizedStore()
 
   var listCreated = false
@@ -329,6 +352,35 @@ private func apply(_ reminder: EKReminder, due: Date, alarms: [Date], notes: Str
   return SyncResult(
     created: created, updated: updated, unchanged: unchanged, skippedCompleted: skippedCompleted,
     undated: undated, listCreated: listCreated)
+}
+
+/// Move every prayer reminder (open and completed) from one list to another, for when the Reminders List
+/// setting changes. A prayer the target list already has is left in the old list with its alarms removed,
+/// so it can't alert twice. Other reminders in the old list are not touched. Returns how many moved.
+@raycast func movePrayerReminders(fromList: String, toList: String) async throws -> Int {
+  try await withSyncLock {
+    guard fromList != toList else { return 0 }
+    let store = try await authorizedStore()
+    guard let source = try findList(store, named: fromList) else { return 0 }
+    let target = try findList(store, named: toList) ?? createList(store, named: toList)
+    let existing = Set(indexByKey(await fetch(store, store.predicateForReminders(in: [target]))).keys)
+    var moved = 0
+    var changed = false
+    for reminder in await fetch(store, store.predicateForReminders(in: [source])) {
+      guard let key = prayerKey(reminder) else { continue }
+      if existing.contains(key) {
+        guard reminder.alarms?.isEmpty == false else { continue }
+        reminder.alarms = nil
+      } else {
+        reminder.calendar = target
+        moved += 1
+      }
+      try store.save(reminder, commit: false)
+      changed = true
+    }
+    if changed { try store.commit() }
+    return moved
+  }
 }
 
 /// Completion state of prayer reminders whose date is between `fromDate` and `toDate` (inclusive, YYYY-MM-DD).

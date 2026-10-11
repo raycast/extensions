@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { promisify } from "node:util";
 import {
   getPrayerStatuses as swiftGetPrayerStatuses,
+  movePrayerReminders as swiftMovePrayerReminders,
   setPrayerCompleted as swiftSetPrayerCompleted,
   syncPrayerReminders as swiftSyncPrayerReminders,
 } from "swift:../../swift/PrayerTimes";
@@ -72,6 +73,18 @@ export function syncPrayerReminders(payload: {
   staleAfterDays: number;
 }): Promise<SyncResult> {
   return withTimeout(swiftSyncPrayerReminders(payload) as Promise<SyncResult>);
+}
+
+/**
+ * Move the extension's prayer reminders (with their history) to another list, after the Reminders List
+ * setting changes. A prayer the new list already has stays in the old list with its alarms removed.
+ *
+ * @param fromList - Previous list.
+ * @param toList - New list, created if missing.
+ * @returns Number of reminders moved.
+ */
+export function movePrayerReminders(fromList: string, toList: string): Promise<number> {
+  return withTimeout(swiftMovePrayerReminders(fromList, toList) as Promise<number>);
 }
 
 /**

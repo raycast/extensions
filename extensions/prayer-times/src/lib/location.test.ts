@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { cityLabel, distanceKm, locationFromFix } from "./location";
+import { cityLabel, distanceKm, locationFromFix, shouldLocate } from "./location";
 import { listCountries } from "./countries";
 
 vi.mock("@raycast/api", () => ({ LocalStorage: {} }));
@@ -45,5 +45,25 @@ describe("listCountries", () => {
     expect(countries.length).toBeGreaterThan(240);
     const names = countries.map((c) => c.name);
     expect([...names].sort((a, b) => a.localeCompare(b))).toEqual(names);
+  });
+});
+
+describe("shouldLocate", () => {
+  const now = new Date("2026-10-08T11:00:00Z");
+  const minutesAgo = (m: number) => new Date(now.getTime() - m * 60_000).toISOString();
+
+  it("locates once per prayer after a success", () => {
+    expect(shouldLocate(undefined, "2026-10-08/asr", now)).toBe(true);
+    expect(shouldLocate("2026-10-08/asr", "2026-10-08/asr", now)).toBe(false);
+    expect(shouldLocate("2026-10-08/dhuhr", "2026-10-08/asr", now)).toBe(true);
+  });
+
+  it("retries a failed or interrupted attempt after five minutes, not every tick", () => {
+    expect(shouldLocate(`2026-10-08/asr@${minutesAgo(1)}`, "2026-10-08/asr", now)).toBe(false);
+    expect(shouldLocate(`2026-10-08/asr@${minutesAgo(5)}`, "2026-10-08/asr", now)).toBe(true);
+  });
+
+  it("ignores an attempt for another prayer", () => {
+    expect(shouldLocate(`2026-10-08/dhuhr@${minutesAgo(1)}`, "2026-10-08/asr", now)).toBe(true);
   });
 });
