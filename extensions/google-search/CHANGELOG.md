@@ -7,6 +7,7 @@
 - Searches from "Google Search Selected Text" are no longer saved when search history is turned off
 - Trim surrounding spaces from selected text before searching, and merge older history entries that differ only by those spaces
 - Add a Copy Error action to failure toasts
+- Move "Use Clipboard Fallback" to the Google Search Selected Text command settings
 - Show each result once, even when a suggestion matches the search or a history entry
 - Move a search back to the top of history when it is opened again
 - Wait for a pause in typing before fetching suggestions

@@ -12,7 +12,7 @@ import { showErrorToast } from "./utils/showErrorToast";
 import { HISTORY_KEY } from "./utils/types";
 
 export default async function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.SearchSelectText>();
 
   try {
     // Try to get selected text first, fall back to clipboard if enabled. A blank
@@ -26,7 +26,7 @@ export default async function Command() {
     if (!searchText && preferences.useClipboardFallback) {
       searchText = (await Clipboard.readText())?.trim() ?? "";
       if (!searchText) {
-        throw new Error("No text selected and clipboard is empty");
+        throw new Error("No text selected, and the clipboard has no text");
       }
     }
     if (!searchText) {
