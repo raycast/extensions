@@ -1,0 +1,74 @@
+[
+  {
+    "provider": "codex",
+    "account": "erin@example.com",
+    "source": "oauth",
+    "version": "0.159.0",
+    "rateWindowLabels": { "primary": "5h", "secondary": "Weekly", "tertiary": "Fable" },
+    "pace": {
+      "primary": {
+        "stage": "onTrack",
+        "willLastToReset": true,
+        "summary": "On pace",
+        "etaSeconds": 3600,
+        "expectedUsedPercent": 0,
+        "deltaPercent": 0
+      },
+      "secondary": {
+        "stage": "farAhead",
+        "willLastToReset": false,
+        "summary": "Runs out\nsoon",
+        "etaSeconds": 7200,
+        "expectedUsedPercent": 50,
+        "deltaPercent": 50
+      }
+    },
+    "usage": {
+      "accountEmail": "erin@example.com",
+      "loginMethod": "plus",
+      "updatedAt": "2026-09-29T20:00:00Z",
+      "primary": { "usedPercent": 0, "windowMinutes": 300, "resetsAt": "2026-09-29T23:00:00Z" },
+      "secondary": { "usedPercent": 100, "windowMinutes": 10080, "resetsAt": "2026-10-02T00:00:00Z" },
+      "tertiary": { "usedPercent": "n/a", "windowMinutes": 10080 },
+      "codexResetCredits": { "availableCount": 0, "updatedAt": "2026-09-29T20:00:00Z", "credits": [] }
+    }
+  },
+  {
+    "provider": "codex",
+    "account": "frank@example.com",
+    "source": "oauth",
+    "usage": {
+      "identity": { "providerID": "codex", "accountEmail": "frank@example.com", "loginMethod": "pro" },
+      "updatedAt": "2026-09-29T20:00:01Z",
+      "primary": { "windowMinutes": 300 },
+      "secondary": null,
+      "tertiary": null
+    }
+  },
+  {
+    "provider": "codex",
+    "account": "dave@example.com — Team Space",
+    "source": "oauth",
+    "error": {
+      "code": 1,
+      "message": "Codex auth.json needs refresh.\nReauthenticate this account.",
+      "kind": "provider"
+    }
+  },
+  {
+    "provider": "codex",
+    "account": "gina@example.com",
+    "source": "oauth",
+    "usage": {
+      "accountEmail": "gina@example.com",
+      "updatedAt": "2026-09-29T20:00:02Z",
+      "primary": null,
+      "secondary": null
+    }
+  },
+  {
+    "provider": "claude",
+    "account": "not-codex@example.com",
+    "usage": { "primary": { "usedPercent": 10 } }
+  }
+]

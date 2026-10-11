@@ -1,0 +1,153 @@
+{
+  "_synthesized": "FAKE claude-swap 0.26.0 --list --json payload for tests; every value is invented",
+  "schemaVersion": 1,
+  "activeAccountNumber": 2,
+  "accounts": [
+    {
+      "number": 1,
+      "email": "Dana@Example.com",
+      "organizationName": "Dana@Example.com's Organization",
+      "organizationUuid": "00000000-0000-4000-8000-00000000000a",
+      "isOrganization": true,
+      "active": false,
+      "usageStatus": "ok",
+      "usage": {
+        "fiveHour": { "pct": 0.0, "resetsAt": "2026-09-30T01:00:00.123456+00:00", "countdown": "3h", "clock": "18:00" },
+        "sevenDay": {
+          "pct": 100.0,
+          "resetsAt": "2026-10-02T18:00:00+00:00",
+          "countdown": "2d 20h",
+          "clock": "Oct 2 11:00",
+          "expectedPct": 52.4,
+          "aheadOfPace": true,
+          "projectedExhaustionAt": "2026-09-29T12:00:00Z",
+          "willLastToReset": false
+        },
+        "scoped": [
+          {
+            "pct": 100.0,
+            "resetsAt": "2026-10-02T18:00:00+00:00",
+            "expectedPct": 52.4,
+            "aheadOfPace": true,
+            "willLastToReset": false,
+            "name": "Fable"
+          },
+          { "pct": 0.0, "name": "Opus" }
+        ]
+      },
+      "usageFetchedAt": "2026-09-29T21:00:00Z",
+      "usageAgeSeconds": 12.5,
+      "alias": "work-max"
+    },
+    {
+      "number": 2,
+      "email": "erin@example.invalid",
+      "organizationName": "Example Research Lab",
+      "organizationUuid": "00000000-0000-4000-8000-00000000000b",
+      "isOrganization": true,
+      "active": true,
+      "usageStatus": "relogin_required",
+      "usage": null
+    },
+    {
+      "number": 3,
+      "email": "frank@example.invalid",
+      "organizationName": "",
+      "organizationUuid": "",
+      "isOrganization": false,
+      "active": false,
+      "usageStatus": "unavailable",
+      "usage": null,
+      "disabled": true,
+      "lastGoodUsage": {
+        "fiveHour": { "pct": 37.0, "resetsAt": "2026-09-29T23:00:00+00:00" },
+        "sevenDay": { "pct": 64.5, "resetsAt": "2026-10-01T18:00:00+00:00" }
+      },
+      "lastGoodFetchedAt": "2026-09-29T19:30:00Z",
+      "lastGoodAgeSeconds": 5400.0,
+      "usageError": "http-429",
+      "usageRetryAt": "2026-09-29T22:00:00Z"
+    },
+    {
+      "number": 4,
+      "email": "grace@example.com",
+      "organizationName": "grace@example.com's Organization",
+      "organizationUuid": "00000000-0000-4000-8000-00000000000d",
+      "isOrganization": true,
+      "active": false,
+      "usageStatus": "token_expired",
+      "usage": null
+    },
+    {
+      "number": 5,
+      "email": "heidi@example.com",
+      "organizationName": "",
+      "organizationUuid": "",
+      "isOrganization": false,
+      "active": false,
+      "usageStatus": "api_key",
+      "usage": null
+    },
+    {
+      "number": 6,
+      "email": "ivan@example.com",
+      "organizationName": "",
+      "organizationUuid": "",
+      "isOrganization": false,
+      "active": false,
+      "usageStatus": "keychain_unavailable",
+      "usage": null
+    },
+    {
+      "number": 7,
+      "email": "judy@example.com",
+      "organizationName": "",
+      "organizationUuid": "",
+      "isOrganization": false,
+      "active": false,
+      "usageStatus": "foreign_credential",
+      "usage": null
+    },
+    {
+      "number": 8,
+      "email": "mallory@example.com",
+      "organizationName": "",
+      "organizationUuid": "",
+      "isOrganization": false,
+      "active": false,
+      "usageStatus": "no_credentials",
+      "usage": null
+    },
+    {
+      "number": 9,
+      "email": "niaj@example.com",
+      "organizationName": "",
+      "organizationUuid": "",
+      "isOrganization": false,
+      "active": false,
+      "usageStatus": "unavailable",
+      "usage": null,
+      "lastGoodUsage": {
+        "fiveHour": { "pct": 12.0, "resetsAt": "2026-09-29T22:30:00+00:00" },
+        "sevenDay": { "pct": 20.0, "resetsAt": "2026-10-03T18:00:00+00:00" }
+      },
+      "lastGoodFetchedAt": "2026-09-29T20:00:00Z",
+      "lastGoodAgeSeconds": 3600.0
+    },
+    {
+      "number": 10,
+      "email": "olivia@example.com",
+      "organizationName": "",
+      "organizationUuid": "",
+      "isOrganization": false,
+      "active": false,
+      "usageStatus": "ok",
+      "usage": {
+        "sevenDay": { "pct": 5.0, "resetsAt": "2026-10-04T18:00:00+00:00" }
+      },
+      "usageFetchedAt": "2026-09-29T21:05:00Z",
+      "usageAgeSeconds": 1.0
+    }
+  ],
+  "duplicateAccountWarnings": ["Account-11 and Account-12 hold the same login (synthetic test warning)"]
+}
