@@ -3,6 +3,13 @@ import { basename, dirname } from "node:path";
 
 const HOME = homedir();
 
+/** `~/Developer` → `/Users/me/Developer`; anything else is returned trimmed. */
+export function expandHome(path: string) {
+  const trimmed = path.trim();
+  if (trimmed === "~") return HOME;
+  return trimmed.startsWith("~/") ? HOME + trimmed.slice(1) : trimmed;
+}
+
 /** `/Users/me/Developer` → `~/Developer`. */
 export function tildify(path: string) {
   if (path === HOME) return "~";
@@ -44,6 +51,14 @@ export function modifiedDate(mtime: number) {
 
 export function pluralize(count: number, one: string, many = `${one}s`) {
   return `${count} ${count === 1 ? one : many}`;
+}
+
+/** Daemon time (`took_us`) for the results header: `840 µs`, `1.2 ms`, `250 ms`. */
+export function formatDuration(micros: number) {
+  if (micros < 1000) return `${Math.round(micros)} µs`;
+  if (micros < 10_000) return `${(micros / 1000).toFixed(1)} ms`;
+  if (micros < 1_000_000) return `${Math.round(micros / 1000)} ms`;
+  return `${(micros / 1_000_000).toFixed(1)} s`;
 }
 
 /** A path as a URL path, with every segment escaped so `#`, `?`, and `%` stay part of the name. */

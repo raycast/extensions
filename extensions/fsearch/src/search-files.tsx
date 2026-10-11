@@ -5,16 +5,25 @@ import { FileActions } from "./components/file-actions";
 import { FileDetail } from "./components/file-detail";
 import { StatusView } from "./components/status-view";
 import { search, type Hit } from "./lib/fsearch";
-import { fileName, folderOf, formatDate, modifiedDate, pluralize, tildify } from "./lib/format";
+import {
+  expandHome,
+  fileName,
+  folderOf,
+  formatDate,
+  formatDuration,
+  modifiedDate,
+  pluralize,
+  tildify,
+} from "./lib/format";
 import { filtersFor, KINDS } from "./lib/kinds";
 import { useFSearch } from "./lib/use-fsearch";
 
 const LIMIT = 60;
 
-export default function Command({ fallbackText }: LaunchProps) {
-  const [text, setText] = useState(fallbackText ?? "");
-  const [kind, setKind] = useState("all");
-  const [scope, setScope] = useState<string>();
+export default function Command({ arguments: args, fallbackText }: LaunchProps<{ arguments: Arguments.SearchFiles }>) {
+  const [text, setText] = useState(args.query || fallbackText || "");
+  const [kind, setKind] = useState<string>(args.kind || "all");
+  const [scope, setScope] = useState<string | undefined>(args.folder?.trim() ? expandHome(args.folder) : undefined);
   const [isShowingDetail, setShowingDetail] = useCachedState("show-detail", false);
 
   // A kind or folder is enough to list something, even with no words.
@@ -29,6 +38,8 @@ export default function Command({ fallbackText }: LaunchProps) {
   );
 
   const hits = execute && !error ? (data?.hits ?? []) : [];
+  const timing = execute && !error && data ? formatDuration(data.tookMicros) : undefined;
+  const scopeLabel = scope ? tildify(scope) : undefined;
   const toggleDetail = () => setShowingDetail((shown) => !shown);
   const scopeTitle = scope ? fileName(scope) : undefined;
 
@@ -42,7 +53,12 @@ export default function Command({ fallbackText }: LaunchProps) {
       navigationTitle={scopeTitle ? `Search Files in ${scopeTitle}` : undefined}
       isShowingDetail={isShowingDetail && hits.length > 0}
       searchBarAccessory={
-        <List.Dropdown tooltip="Kind" storeValue onChange={setKind}>
+        // A kind chosen in root search wins over the one remembered from last time.
+        <List.Dropdown
+          tooltip="Kind"
+          {...(args.kind ? { defaultValue: args.kind } : { storeValue: true })}
+          onChange={setKind}
+        >
           {KINDS.map((k) => (
             <List.Dropdown.Item key={k.value} value={k.value} title={k.title} />
           ))}
@@ -64,10 +80,17 @@ export default function Command({ fallbackText }: LaunchProps) {
           <List.EmptyView
             icon={Icon.MagnifyingGlass}
             title={isLoading ? "Searching…" : "No Results"}
-            description={scope ? `Nothing in ${tildify(scope)} matches.` : undefined}
+            description={
+              [scopeLabel ? `Nothing in ${scopeLabel} matches.` : undefined, isLoading ? undefined : timing]
+                .filter(Boolean)
+                .join("\n") || undefined
+            }
             actions={scope ? <ScopeActions onClear={() => setScope(undefined)} /> : undefined}
           />
-          <List.Section title={scope ? tildify(scope) : "Results"} subtitle={pluralize(hits.length, "result")}>
+          <List.Section
+            title={timing ?? scopeLabel ?? "Results"}
+            subtitle={[timing ? scopeLabel : undefined, pluralize(hits.length, "result")].filter(Boolean).join(" · ")}
+          >
             {hits.map((hit) => (
               <HitItem
                 key={hit.path}
