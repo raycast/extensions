@@ -113,6 +113,107 @@
           "value": "90"
         }
       ]
+    },
+    {
+      "name": "menuBarDisplayArticleCount",
+      "title": "Menu Bar Article Count",
+      "description": "Selects how many articles are shown in each menu bar section.",
+      "type": "dropdown",
+      "required": false,
+      "default": "5",
+      "data": [
+        {
+          "title": "3 Articles",
+          "value": "3"
+        },
+        {
+          "title": "5 Articles",
+          "value": "5"
+        },
+        {
+          "title": "10 Articles",
+          "value": "10"
+        }
+      ]
+    },
+    {
+      "name": "menuBarDisplayTitleLength",
+      "title": "Menu Bar Title Length",
+      "description": "Selects the maximum article title length shown in the menu bar.",
+      "type": "dropdown",
+      "required": false,
+      "default": "medium",
+      "data": [
+        {
+          "title": "Very Short (Max. 40 Characters)",
+          "value": "very-short"
+        },
+        {
+          "title": "Short (Max. 55 Characters)",
+          "value": "short"
+        },
+        {
+          "title": "Medium (56-70 Characters)",
+          "value": "medium"
+        },
+        {
+          "title": "Long (71-90 Characters)",
+          "value": "long"
+        },
+        {
+          "title": "Full Title",
+          "value": "full"
+        }
+      ]
+    },
+    {
+      "name": "menuBarDisplayUnreadOnly",
+      "title": "Menu Bar Article Filter",
+      "description": "Only shows unread articles in the Latest Articles and Favorites sections.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Only show unread articles"
+    },
+    {
+      "name": "menuBarDisplayUnreadCounter",
+      "title": "Menu Bar Unread Counter",
+      "description": "Selects when the unread counter is shown in the menu bar.",
+      "type": "dropdown",
+      "required": false,
+      "default": "always",
+      "data": [
+        {
+          "title": "Always Show",
+          "value": "always"
+        },
+        {
+          "title": "Hide When Zero",
+          "value": "hide-zero"
+        },
+        {
+          "title": "Always Hide",
+          "value": "hidden"
+        }
+      ]
+    },
+    {
+      "name": "menuBarDisplayPublicationDate",
+      "title": "Menu Bar Article Details",
+      "description": "Shows the publication date next to each article in the menu bar.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show publication date"
+    },
+    {
+      "name": "menuBarDisplayCategory",
+      "title": "",
+      "description": "Shows the category next to each article in the menu bar.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show category"
     }
   ],
   "commands": [
@@ -236,109 +337,6 @@
       "mode": "menu-bar",
       "interval": "1h",
       "disabledByDefault": true,
-      "preferences": [
-        {
-          "name": "menuBarArticleCount",
-          "title": "Number of Articles",
-          "description": "Selects how many articles are shown in each menu bar section.",
-          "type": "dropdown",
-          "required": false,
-          "default": "5",
-          "data": [
-            {
-              "title": "3 Articles",
-              "value": "3"
-            },
-            {
-              "title": "5 Articles",
-              "value": "5"
-            },
-            {
-              "title": "10 Articles",
-              "value": "10"
-            }
-          ]
-        },
-        {
-          "name": "menuBarArticleTitleLength",
-          "title": "Title Length",
-          "description": "Selects the maximum article title length shown in the menu bar.",
-          "type": "dropdown",
-          "required": false,
-          "default": "medium",
-          "data": [
-            {
-              "title": "Very Short (Max. 40 Characters)",
-              "value": "very-short"
-            },
-            {
-              "title": "Short (Max. 55 Characters)",
-              "value": "short"
-            },
-            {
-              "title": "Medium (56-70 Characters)",
-              "value": "medium"
-            },
-            {
-              "title": "Long (71-90 Characters)",
-              "value": "long"
-            },
-            {
-              "title": "Full Title",
-              "value": "full"
-            }
-          ]
-        },
-        {
-          "name": "showOnlyUnreadMenuBarArticles",
-          "title": "Article Filter",
-          "description": "Only shows unread articles in the Latest Articles and Favorites sections.",
-          "type": "checkbox",
-          "required": false,
-          "default": false,
-          "label": "Only show unread articles"
-        },
-        {
-          "name": "menuBarUnreadCounter",
-          "title": "Unread Counter",
-          "description": "Selects when the unread counter is shown in the menu bar.",
-          "type": "dropdown",
-          "required": false,
-          "default": "always",
-          "data": [
-            {
-              "title": "Always Show",
-              "value": "always"
-            },
-            {
-              "title": "Hide When Zero",
-              "value": "hide-zero"
-            },
-            {
-              "title": "Always Hide",
-              "value": "hidden"
-            }
-          ]
-        },
-        {
-          "name": "showMenuBarArticleDate",
-          "title": "Article Details",
-          "description": "Shows the publication date next to each article in the menu bar.",
-          "type": "checkbox",
-          "required": false,
-          "default": true,
-          "label": "Show publication date"
-        },
-        {
-          "name": "showMenuBarArticleCategory",
-          "title": "",
-          "description": "Shows the category next to each article in the menu bar.",
-          "type": "checkbox",
-          "required": false,
-          "default": true,
-          "label": "Show category"
-        }
-      ],
       "keywords": [
         "tchgdns",
         "techgedoens",

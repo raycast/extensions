@@ -7,7 +7,7 @@ import {
   LaunchType,
   MenuBarExtra,
   open,
-  openCommandPreferences,
+  openExtensionPreferences,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -23,17 +23,18 @@ import {
 import { strings, translateCategory } from "./strings";
 
 const ARCHIVE_SYNC_INTERVAL = 5_000;
+const PREFERENCES_SYNC_INTERVAL = 1_000;
 
 export default function MenuBarArticlesCommand() {
-  const preferences = getPreferenceValues<Preferences.MenuBarArticles>();
+  const preferences = useMenuBarPreferences();
   const translations = strings;
   const retention = normalizeArticleRetention(preferences.archiveRetention);
-  const menuArticleCount = normalizeMenuArticleCount(preferences.menuBarArticleCount);
-  const menuArticleTitleLength = normalizeMenuArticleTitleLength(preferences.menuBarArticleTitleLength);
-  const showOnlyUnreadArticles = preferences.showOnlyUnreadMenuBarArticles === true;
-  const unreadCounterMode = preferences.menuBarUnreadCounter ?? "always";
-  const showArticleDate = preferences.showMenuBarArticleDate !== false;
-  const showArticleCategory = preferences.showMenuBarArticleCategory !== false;
+  const menuArticleCount = normalizeMenuArticleCount(preferences.menuBarDisplayArticleCount);
+  const menuArticleTitleLength = normalizeMenuArticleTitleLength(preferences.menuBarDisplayTitleLength);
+  const showOnlyUnreadArticles = preferences.menuBarDisplayUnreadOnly === true;
+  const unreadCounterMode = preferences.menuBarDisplayUnreadCounter ?? "always";
+  const showArticleDate = preferences.menuBarDisplayPublicationDate !== false;
+  const showArticleCategory = preferences.menuBarDisplayCategory !== false;
   const [articles, setArticles] = useState<ArchivedArticle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error>();
@@ -230,9 +231,33 @@ export default function MenuBarArticlesCommand() {
         <MenuBarExtra.Item title={translations.reload} icon={Icon.RotateClockwise} onAction={reloadArticles} />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item title={translations.openSettings} icon={Icon.Gear} onAction={openCommandPreferences} />
+        <MenuBarExtra.Item title={translations.openSettings} icon={Icon.Gear} onAction={openExtensionPreferences} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
+  );
+}
+
+function useMenuBarPreferences(): Preferences.MenuBarArticles {
+  const [preferences, setPreferences] = useState(() => getPreferenceValues<Preferences.MenuBarArticles>());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const latestPreferences = getPreferenceValues<Preferences.MenuBarArticles>();
+      setPreferences((currentPreferences) =>
+        haveSamePreferenceValues(currentPreferences, latestPreferences) ? currentPreferences : latestPreferences,
+      );
+    }, PREFERENCES_SYNC_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return preferences;
+}
+
+function haveSamePreferenceValues(first: Preferences.MenuBarArticles, second: Preferences.MenuBarArticles): boolean {
+  return (
+    Object.keys(first).length === Object.keys(second).length &&
+    Object.entries(first).every(([key, value]) => second[key as keyof Preferences.MenuBarArticles] === value)
   );
 }
 
@@ -302,7 +327,7 @@ function normalizeMenuArticleTitleLength(value: string | undefined): 40 | 55 | 7
 }
 
 function shouldShowUnreadCounter(
-  mode: Preferences.MenuBarArticles["menuBarUnreadCounter"],
+  mode: Preferences.MenuBarArticles["menuBarDisplayUnreadCounter"],
   unreadCount: number,
 ): boolean {
   return mode === "always" || (mode === "hide-zero" && unreadCount > 0);
