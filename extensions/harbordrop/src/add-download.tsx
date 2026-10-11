@@ -365,7 +365,7 @@ export default function Command() {
       <Form.Description title="Preview" text={safeURLPreview(url)} />
       <Form.Description
         title="Approval"
-        text="HarborDrop will ask you to confirm this URL and the download destination. This command does not read browser cookies or bypass licensing."
+        text="HarborDrop will ask you to confirm this URL and the download destination."
       />
       {pending && (
         <Form.Description

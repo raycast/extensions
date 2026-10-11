@@ -354,11 +354,6 @@ export default function Command() {
   return (
     <List
       isLoading={loading || busy}
-      navigationTitle={
-        visibleState
-          ? `Downloads · ${activeCount} Downloading${issue ? " (Last Shared)" : ""}`
-          : "Downloads"
-      }
       searchBarPlaceholder="Search download names"
       actions={<ActionPanel>{generalActions}</ActionPanel>}
     >

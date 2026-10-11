@@ -2,8 +2,6 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-Unreleased; prepared for the first Store submission.
-
 - Search downloads shared by HarborDrop and show downloading counts, progress, transferred bytes, and speed.
 - Show finishing tasks separately and identify partial or stale shared lists.
 - Select a download in HarborDrop or ask the app to reveal a completed file in Finder.
