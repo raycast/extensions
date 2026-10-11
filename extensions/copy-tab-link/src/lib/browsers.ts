@@ -190,8 +190,8 @@ async function otherBrowsersRunning(target: string): Promise<boolean> {
  * Picks the tab from the browser extension's candidates, or throws.
  *
  * The extension API carries no browser or window identity, so a candidate is
- * never attributed to a browser by its URL. Several candidates with the same
- * URL are the same link and count once; different URLs are ambiguous.
+ * never attributed to a browser by its URL. Candidates with the same URL and
+ * title are the same link and count once; anything else is ambiguous.
  *
  * When the tab must come from a browser without AppleScript (Firefox, Zen …),
  * a candidate is only taken if no other browser is running that could have
@@ -199,8 +199,9 @@ async function otherBrowsersRunning(target: string): Promise<boolean> {
  */
 async function pickExtensionTab(candidates: TabInfo[], target?: string): Promise<TabInfo | undefined> {
   if (candidates.length === 0) return undefined;
-  const urls = new Set(candidates.map((tab) => tab.url));
-  if (urls.size > 1) throw new AmbiguousTabError(candidates, "windows");
+  // URL and title both end up in the output, so only exact duplicates count once.
+  const distinct = new Set(candidates.map((tab) => `${tab.url}${UNIT_SEPARATOR}${tab.title}`));
+  if (distinct.size > 1) throw new AmbiguousTabError(candidates, "windows");
   if (target && (await otherBrowsersRunning(target))) {
     throw new AmbiguousTabError(candidates, "unattributed", target);
   }
