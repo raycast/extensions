@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Website Search Fallback] - {PR_MERGE_DATE}
+
+### Added
+
+- "Search on the Z-Library website" row at the end of the results (and when nothing is found), which opens the website's own search for your query in the browser, since the website can list books the CLI search does not return
+
+### Changed
+
+- The "No results" screen is replaced by the same website search row
+
 ## [Windows Support] - 2026-09-25
 
 ### Added
