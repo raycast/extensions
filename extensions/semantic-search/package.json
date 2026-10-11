@@ -1,0 +1,60 @@
+{
+  "name": "semantic-search",
+  "title": "Semantic Search",
+  "description": "Find local documents, photos, video scenes and sounds by meaning. Requires the Semantic Search Engine.",
+  "icon": "icon.png",
+  "author": "nik_ustinovich",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "semantic-search",
+      "title": "Semantic Search",
+      "description": "Find local files from a natural-language description",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Describe a file",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serviceURL",
+      "type": "textfield",
+      "title": "Custom Local Service (Optional)",
+      "description": "Leave blank to use the installed Semantic Search Engine. Advanced: connect to your own local service.",
+      "default": "",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "2.7.3",
+    "react": "19.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "esbuild": "0.25.12",
+    "eslint": "10.0.1",
+    "prettier": "3.8.2",
+    "typescript": "5.9.3"
+  },
+  "version": "0.5.0",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}
