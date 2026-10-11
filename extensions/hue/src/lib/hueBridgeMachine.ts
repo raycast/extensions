@@ -125,7 +125,9 @@ export const hueBridgeMachine = setup({
         {
           guard: "hasInvalidIpAddress",
           target: "failedToLoadPreferences",
-          actions: assign({ errorMessage: "Bridge IP address is not a valid IPv4 address" }),
+          actions: assign({
+            errorMessage: ({ context }) => `Bridge IP address “${context.bridgeIpAddress}” is not a valid IPv4 address`,
+          }),
         },
         { target: "loadingConfiguration" },
       ],
