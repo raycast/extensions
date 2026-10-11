@@ -6,7 +6,8 @@
   "icon": "MocoLogo.png",
   "author": "eviscares",
   "contributors": [
-    "el-schneider"
+    "el-schneider",
+    "TheFRedFox"
   ],
   "categories": [
     "Productivity"
@@ -23,7 +24,7 @@
     {
       "name": "moco_today",
       "title": "Todays Activities",
-      "subtitle": "moco",
+      "subtitle": "MOCO",
       "description": "Show todays activities",
       "mode": "view"
     },
@@ -34,6 +35,27 @@
       "description": "See if a timer is running with a glance",
       "mode": "menu-bar",
       "interval": "30s"
+    },
+    {
+      "name": "start_timer",
+      "title": "Start New Timer",
+      "subtitle": "MOCO",
+      "description": "Start a timer with a description",
+      "mode": "view"
+    },
+    {
+      "name": "edit_timer",
+      "title": "Edit Current / Last Active Timer",
+      "subtitle": "MOCO",
+      "description": "Edit description and time of the running or last timer",
+      "mode": "view"
+    },
+    {
+      "name": "menu_bar_tools",
+      "title": "Menu Bar Tools",
+      "subtitle": "MOCO",
+      "description": "Windows opened from the MOCO menu bar: task and project actions, favorites, settings",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -54,6 +76,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.43.2",
+    "@raycast/utils": "1.5.2",
     "axios": "^1.18.0",
     "zod": "^3.20.6"
   },
