@@ -1,0 +1,12 @@
+{
+  "user_id": "user-fixture-001",
+  "username": "listener",
+  "role": "user",
+  "enabled": true,
+  "created_at": "2026-01-01T00:00:00Z",
+  "display_name": "Fixture Listener",
+  "avatar_url": null,
+  "preferences": {},
+  "provider_filter": [],
+  "player_filter": []
+}
