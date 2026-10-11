@@ -26,13 +26,18 @@ Never use generated numbers outside of test data.
 
 ## Actions
 
-| Action            | Shortcut                           |
-| ----------------- | ---------------------------------- |
-| Copy to Clipboard | `↵`                                |
-| Copy Without Dots | `⌘ ⇧ C` (macOS), `⌃ ⇧ C` (Windows) |
-| Generate New SSN  | `⌘ N` (macOS), `⌃ N` (Windows)     |
-| Remove Entry      | `⌃ X`                              |
-| Clear History     | `⌃ ⇧ X`                            |
+| Action              | Shortcut                           |
+| ------------------- | ---------------------------------- |
+| Copy to Clipboard   | `↵`                                |
+| Paste in Active App | `⌘ ↵` (macOS), `⌃ ↵` (Windows)     |
+| Copy Without Dots   | `⌘ ⇧ C` (macOS), `⌃ ⇧ C` (Windows) |
+| Paste Without Dots  | `⌘ ⇧ V` (macOS), `⌃ ⇧ V` (Windows) |
+| Generate New SSN    | `⌘ N` (macOS), `⌃ N` (Windows)     |
+| Remove Entry        | `⌃ X`                              |
+| Clear History       | `⌃ ⇧ X`                            |
+
+The paste actions insert the value into the field that was active before Raycast opened.
+They use the clipboard, so clipboard managers may record the value.
 
 _Remove Entry_ and _Clear History_ are available on history entries.
 

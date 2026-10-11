@@ -49,6 +49,20 @@ export function CopyAction(props: { content: string; title?: string; shortcut?: 
   );
 }
 
+export function PasteAction(props: { content: string; title?: string; shortcut?: Keyboard.Shortcut }) {
+  return (
+    <Action
+      title={props.title ?? "Paste in Active App"}
+      icon={Icon.TextCursor}
+      shortcut={props.shortcut}
+      onAction={async () => {
+        await store.flush();
+        await Clipboard.paste(props.content);
+      }}
+    />
+  );
+}
+
 function useHistory(key: string, enabled: boolean, size: number) {
   const [entries, setEntries] = useState<string[]>();
 
@@ -107,6 +121,7 @@ export function ValueList({ generate, historyKey, noun, icon, extraActions }: Pr
             actions={
               <ActionPanel>
                 <CopyAction content={result.value} />
+                <PasteAction content={result.value} />
                 {extraActions?.(result.value)}
                 {generateAction}
               </ActionPanel>
@@ -125,6 +140,7 @@ export function ValueList({ generate, historyKey, noun, icon, extraActions }: Pr
             actions={
               <ActionPanel>
                 <CopyAction content={entry} />
+                <PasteAction content={entry} />
                 {extraActions?.(entry)}
                 {generateAction}
                 <Action
