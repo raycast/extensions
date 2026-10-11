@@ -1,0 +1,65 @@
+{
+  "name": "mistral-models",
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "title": "Mistral Models",
+  "icon": "extension-icon.png",
+  "author": "m1n",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "ai": {
+    "modelProvider": "models"
+  },
+  "commands": [
+    {
+      "name": "refresh-models",
+      "title": "Refresh Mistral Models",
+      "description": "Refresh the Mistral models available in Raycast AI",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Mistral API Key",
+      "description": "Your Mistral API key. Requests use your Mistral account's API allowance and billing settings.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
+    "build": "ray build -e dist -o dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "ray lint",
+    "lint:code": "eslint .",
+    "fix-lint": "ray lint --fix",
+    "format": "prettier --write .",
+    "test": "bun test",
+    "format:check": "prettier --check .",
+    "release:check": "bun run format:check && bun run build && bun run typecheck && bun test && bun run lint"
+  },
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mistral-hosted models for Raycast AI",
+  "license": "MIT",
+  "dependencies": {
+    "@ai-sdk/mistral": "^4.0.52",
+    "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.3.2",
+    "ai": "^7.0.118",
+    "eventsource-parser": "^3.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/bun": "^1.4.2",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "typescript": "~5.9.3"
+  }
+}
