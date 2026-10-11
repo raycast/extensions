@@ -1,6 +1,6 @@
 # Changelog
 
-## [Raycast Compatibility and Latest AI Models] - {PR_MERGE_DATE}
+## [Raycast Compatibility and Latest AI Models] - 2026-10-11
 
 - Fix extension startup failures caused by missing `zustand/vanilla` package exports.
 - Add GPT-6 Luna, GPT-6.1 Sol, and GPT-6 Astra, plus Gemini 3.8 Flash, 3.6 Flash, 3.5 Flash-Lite, 3.1 Flash-Lite, and 3.1 Pro Preview.
