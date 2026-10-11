@@ -39,11 +39,11 @@
   <img src="media/keyprobe-3.png" width="49%" alt="カスタム分割キーボードのレイアウト表示例" />
 </p>
 
-- Raycast の Preferences にある **Keyboard Layout** で、デフォルトのレイアウト（Auto-detect / ANSI / JIS / ISO）を設定できます
+- Raycast の Preferences にある **Keyboard Layout** で、デフォルトのレイアウト（Auto-Detect / ANSI / JIS / ISO）を設定できます
 - **Select Keyboard Layout** コマンドでは、同梱の全レイアウト（カスタムキーボード含む）を検索して選択できます。パネルを開いたままでも即座に切り替わります
 
 > [!NOTE]
-> Auto-detect は接続されている**キーボードのハードウェア種別**を見て判定しており、macOSの入力ソース（言語設定）とは無関係です。ANSI形状のキーボードは、ファームウェアがJISマップのキーコンボを送信してきても「ANSI」のまま扱われます。そうしたキーを検証したいときは明示的にJISを選んでください。
+> Auto-Detect は接続されている**キーボードのハードウェア種別**を見て判定しており、macOSの入力ソース（言語設定）とは無関係です。ANSI形状のキーボードは、ファームウェアがJISマップのキーコンボを送信してきても「ANSI」のまま扱われます。そうしたキーを検証したいときは明示的にJISを選んでください。
 
 ## 既知の制約
 

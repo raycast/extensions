@@ -39,11 +39,11 @@
   <img src="media/keyprobe-3.png" width="49%" alt="A custom split-keyboard layout" />
 </p>
 
-- The **Keyboard Layout** preference sets the default: Auto-detect, ANSI, JIS, or ISO
+- The **Keyboard Layout** preference sets the default: Auto-Detect, ANSI, JIS, or ISO
 - **Select Keyboard Layout** searches all bundled layouts — including the custom keyboards — and switches live, even while the panel is open
 
 > [!NOTE]
-> Auto-detect reads the physically attached keyboard's *hardware type*, not your macOS input source language. An ANSI-shaped board stays "ANSI" even if its firmware sends JIS key combos; pick JIS explicitly to test those.
+> Auto-Detect reads the physically attached keyboard's *hardware type*, not your macOS input source language. An ANSI-shaped board stays "ANSI" even if its firmware sends JIS key combos; pick JIS explicitly to test those.
 
 ## Known limitations
 

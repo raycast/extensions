@@ -52,7 +52,7 @@ export default function Command() {
   // row's "Current" badge while that read is in flight). null = read
   // finished, no override saved, so open.tsx falls back to the Preferences
   // pane's Keyboard Layout setting. Distinct from the string "auto", which
-  // is an override that was explicitly set to Auto-detect from this list.
+  // is an override that was explicitly set to Auto-Detect from this list.
   const [current, setCurrent] = useState<string | null | undefined>(undefined);
   const preferenceLayoutMode = getPreferenceValues<Preferences>().layoutMode;
 
@@ -96,7 +96,7 @@ export default function Command() {
   // use l.name instead of l.stem.
   const preferenceDisplayValue =
     preferenceLayoutMode === "auto"
-      ? "Auto-detect"
+      ? "Auto-Detect"
       : (layouts.find((l) => l.stem === preferenceLayoutMode)?.name ??
         preferenceLayoutMode);
 
@@ -110,7 +110,7 @@ export default function Command() {
       isLoading={current === undefined}
       searchBarPlaceholder="Search keyboard layouts..."
     >
-      <List.Section title="Built-in">
+      <List.Section title="Built-In">
         <List.Item
           title="Use Preference Setting"
           subtitle={`Currently: ${preferenceDisplayValue}`}
@@ -123,7 +123,7 @@ export default function Command() {
           }
         />
         <List.Item
-          title="Auto-detect"
+          title="Auto-Detect"
           subtitle="Auto-select based on the attached keyboard's hardware type"
           icon={Icon.MagnifyingGlass}
           accessories={current === "auto" ? [{ text: "Current" }] : []}
@@ -131,7 +131,7 @@ export default function Command() {
             <ActionPanel>
               <Action
                 title="Use This"
-                onAction={() => select("auto", "Auto-detect")}
+                onAction={() => select("auto", "Auto-Detect")}
               />
             </ActionPanel>
           }
