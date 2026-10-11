@@ -127,25 +127,42 @@ export class RevenueCatClient {
     activeQuery.delete("aggregate");
     const crossesYear = range.start.slice(0, 4) !== range.end.slice(0, 4);
     const permission = "charts_metrics:charts:read";
-    const [revenue, customers, active] = await Promise.all([
-      this.get<unknown>(`${base}revenue?${revenueQuery}`, signal, permission),
-      this.get<unknown>(`${base}customers_new?${query}`, signal, permission),
+    // Isolate both transport and parsing failures to the affected metric.
+    const results = await Promise.allSettled([
+      this.get<unknown>(`${base}revenue?${revenueQuery}`, signal, permission).then((chart) =>
+        chartTotal(chart, "Revenue", "$", data.currency),
+      ),
+      this.get<unknown>(`${base}customers_new?${query}`, signal, permission).then((chart) =>
+        chartTotal(chart, "New Customers", "#", data.currency),
+      ),
       crossesYear
         ? Promise.resolve(null)
-        : this.get<unknown>(`${base}customers_active?${activeQuery}`, signal, permission),
+        : this.get<unknown>(`${base}customers_active?${activeQuery}`, signal, permission).then(chartActiveCustomers),
     ]);
-    const values: Record<string, number | null> = {
-      revenue: chartTotal(revenue, "Revenue", "$", data.currency),
-      new_customers: chartTotal(customers, "New Customers", "#", data.currency),
-      active_users: crossesYear ? null : chartActiveCustomers(active),
-    };
+    // User cancellation still cancels the entire load and must not cache a
+    // partial result as if requests had genuinely failed.
+    signal?.throwIfAborted();
+    const values: Record<string, Pick<Metric, "value" | "unavailableReason">> = {};
+    ["revenue", "new_customers", "active_users"].forEach((id, index) => {
+      const result = results[index];
+      values[id] =
+        result.status === "fulfilled"
+          ? { value: result.value }
+          : {
+              value: null,
+              unavailableReason:
+                result.reason instanceof Error
+                  ? `Charts v3 unavailable: ${result.reason.message}`
+                  : "Could not load this metric from Charts v3. Try refreshing.",
+            };
+    });
     return {
       ...data,
       metrics: data.metrics.map((metric) => {
         if (!(metric.id in values)) return metric;
         return {
           ...metric,
-          value: values[metric.id],
+          ...values[metric.id],
           period: "P28D",
           last_updated_at: null,
           ...(metric.id === "active_users"
