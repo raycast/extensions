@@ -2,6 +2,7 @@ import _ from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Action, ActionPanel, Icon, Keyboard, List, LocalStorage, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import { listTemplateMethods } from "@/ai";
 import CustomItemForm from "@/components/CustomItemForm";
@@ -89,9 +90,10 @@ export default function FakerList() {
     handlePinnedRefsChange(_.reject(pinnedRefs, { section: item.section, id: item.id }));
   };
 
-  const persistCustomItems = (nextCustomItems: CustomItem[]) => {
+  // Writes first so a failed save never shows up in the list as if it had been stored.
+  const persistCustomItems = async (nextCustomItems: CustomItem[]) => {
+    await saveCustomItems(nextCustomItems);
     setCustomItems(nextCustomItems);
-    saveCustomItems(nextCustomItems);
   };
 
   const saveCustomItem = (customItem: CustomItem) => {
@@ -99,7 +101,7 @@ export default function FakerList() {
     const nextCustomItems = exists
       ? customItems.map((existing) => (existing.id === customItem.id ? customItem : existing))
       : [...customItems, customItem];
-    persistCustomItems(nextCustomItems);
+    return persistCustomItems(nextCustomItems);
   };
 
   const createCustomItem = () => {
@@ -111,12 +113,26 @@ export default function FakerList() {
     push(<CustomItemForm item={item.custom} availableMethods={availableMethods} onSave={saveCustomItem} />);
   };
 
-  const deleteCustomItem = (item: Item) => {
-    persistCustomItems(_.reject(customItems, { id: item.id }));
+  const deleteCustomItem = async (item: Item) => {
+    try {
+      await persistCustomItems(_.reject(customItems, { id: item.id }));
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not delete custom item" });
+      return;
+    }
     if (_.some(pinnedRefs, { section: item.section, id: item.id })) unpin(item);
   };
 
   const customItemProps = { onCreate: createCustomItem, onEdit: editCustomItem, onDelete: deleteCustomItem };
+
+  const createCustomItemAction = (
+    <Action
+      title="Create Custom Item"
+      icon={Icon.Plus}
+      shortcut={Keyboard.Shortcut.Common.New}
+      onAction={createCustomItem}
+    />
+  );
 
   return (
     <List
@@ -126,6 +142,15 @@ export default function FakerList() {
       filtering
       searchBarAccessory={<Locales value={locale} onChange={handleLocaleChange} />}
     >
+      {/* Shown when a search matches nothing, so the search can become the description of a new custom item. */}
+      {isReady && (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="No Matching Data"
+          description="Create a custom item to generate it."
+          actions={<ActionPanel>{createCustomItemAction}</ActionPanel>}
+        />
+      )}
       {isReady && pinnedItems.length > 0 && (
         <List.Section key="pinned" title="Pinned">
           {_.map(pinnedItems, (item) => (
@@ -147,16 +172,7 @@ export default function FakerList() {
               detail={
                 <List.Item.Detail markdown="Create your own generators, such as an integer between 5 and 10 or a full name with an email. Describe what you want and let Raycast AI write the template, or write it yourself." />
               }
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Create Custom Item"
-                    icon={Icon.Plus}
-                    shortcut={Keyboard.Shortcut.Common.New}
-                    onAction={createCustomItem}
-                  />
-                </ActionPanel>
-              }
+              actions={<ActionPanel>{createCustomItemAction}</ActionPanel>}
             />
           )}
         </List.Section>

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { AI, Action, ActionPanel, Form, Icon, Toast, environment, showToast, useNavigation } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
@@ -12,7 +12,7 @@ interface CustomItemFormProps {
   item?: CustomItem;
   initialPrompt?: string;
   availableMethods: string[];
-  onSave: (item: CustomItem) => void;
+  onSave: (item: CustomItem) => Promise<void>;
 }
 
 const TEMPLATE_INFO = [
@@ -32,6 +32,8 @@ function preview(template: string): { value?: string; error?: string } {
 export default function CustomItemForm({ item, initialPrompt, availableMethods, onSave }: CustomItemFormProps) {
   const { pop } = useNavigation();
   const [isGenerating, setIsGenerating] = useState(false);
+  // Guards against overlapping requests from repeated shortcuts, which state alone can miss before a re-render.
+  const isGeneratingRef = useRef(false);
   const canUseAI = environment.canAccess(AI);
 
   const { handleSubmit, itemProps, values, setValue, focus } = useForm<FormValues>({
@@ -43,15 +45,24 @@ export default function CustomItemForm({ item, initialPrompt, availableMethods, 
         return preview(value).error;
       },
     },
-    onSubmit: (formValues) => {
-      onSave({ id: item?.id ?? createCustomItemId(), name: formValues.name.trim(), template: formValues.template });
-      pop();
+    onSubmit: async (formValues) => {
+      try {
+        await onSave({
+          id: item?.id ?? createCustomItemId(),
+          name: formValues.name.trim(),
+          template: formValues.template,
+        });
+        pop();
+      } catch (error) {
+        await showFailureToast(error, { title: "Could not save custom item" });
+      }
     },
   });
 
   const templatePreview = useMemo(() => preview(values.template), [values.template]);
 
   const generateWithAI = async () => {
+    if (isGeneratingRef.current) return;
     const description = values.prompt.trim();
     if (!description) {
       focus("prompt");
@@ -59,6 +70,7 @@ export default function CustomItemForm({ item, initialPrompt, availableMethods, 
       return;
     }
 
+    isGeneratingRef.current = true;
     setIsGenerating(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Generating template…" });
 
@@ -97,6 +109,7 @@ export default function CustomItemForm({ item, initialPrompt, availableMethods, 
       toast.hide();
       await showFailureToast(error, { title: "Could not generate template" });
     } finally {
+      isGeneratingRef.current = false;
       setIsGenerating(false);
     }
   };
