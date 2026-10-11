@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Blawgy MCP Server] - {PR_MERGE_DATE}
+## [Add Blawgy MCP Server] - 2026-10-11
 
 - Add Blawgy to the official registry: read Search Console traffic, rankings and indexing, run keyword research, manage the content plan, and write, update and publish SEO articles to WordPress, Shopify, Webflow, Wix, Framer, Ghost or Duda. Hosted remote Streamable HTTP server at https://app.blawgy.com/mcp with direct HTTP connection in Raycast; OAuth 2.1 sign-in with dynamic client registration and PKCE, or an API key. Paid Blawgy plan required.
 
