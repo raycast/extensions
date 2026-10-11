@@ -102,16 +102,16 @@ export function useCache() {
   };
 
   /**
-   * @param isCancelled Optional predicate re-checked after eviction, immediately
+   * @param isCanceled Optional predicate re-checked after eviction, immediately
    *   before the write. `evictLRU` is a suspension point long enough for a newer
    *   fetch to start, abort this one, and persist its own entry first — after
    *   which this call would resume and overwrite that newer entry under the same
    *   key. Checking only before calling `saveToCache` cannot see that, because
    *   the supersession happens after the call has already begun.
    */
-  const saveToCache = async (url: string, data: DiggerResult, isCancelled?: () => boolean): Promise<void> => {
+  const saveToCache = async (url: string, data: DiggerResult, isCanceled?: () => boolean): Promise<void> => {
     await evictLRU();
-    if (isCancelled?.()) return;
+    if (isCanceled?.()) return;
 
     const cacheKey = getCacheKey(url);
     const now = Date.now();
