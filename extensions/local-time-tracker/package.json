@@ -33,7 +33,7 @@
       "subtitle": "View the running timer",
       "description": "Show the active timer in the menu bar",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "15s"
     },
     {
       "name": "work-logs",

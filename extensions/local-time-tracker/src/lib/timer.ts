@@ -2,7 +2,7 @@ import { LaunchType, launchCommand } from "@raycast/api";
 import { getDurationSeconds, isClockBeforeStart } from "./duration";
 import { clearActiveTimerIfMatches, getActiveTimer, getWorkLogs, saveActiveTimer, upsertWorkLog } from "./storage";
 import type { ActiveTimer, WorkLog } from "./types";
-import { endPomodoro, withReminderOperation } from "./reminder-service";
+import { endPomodoro, startPomodoroIntervalUnderLock, withReminderOperation } from "./reminder-service";
 
 export class ActiveTimerExistsError extends Error {
   constructor(public readonly activeTimer: ActiveTimer) {
@@ -11,8 +11,20 @@ export class ActiveTimerExistsError extends Error {
   }
 }
 
-export async function startTimer(projectId: string, description: string): Promise<ActiveTimer> {
-  const timer = await withReminderOperation(() => saveNewTimer(projectId, description));
+export async function startTimer(projectId: string, description: string, usePomodoro = false): Promise<ActiveTimer> {
+  const timer = await withReminderOperation(async () => {
+    const savedTimer = await saveNewTimer(projectId, description);
+    if (usePomodoro) {
+      try {
+        await startPomodoroIntervalUnderLock(savedTimer.id);
+      } catch (error) {
+        // No background refresh or other writer has seen this new timer yet.
+        await clearActiveTimerIfMatches(savedTimer.id);
+        throw error;
+      }
+    }
+    return savedTimer;
+  });
   await refreshMenuBar();
   return timer;
 }

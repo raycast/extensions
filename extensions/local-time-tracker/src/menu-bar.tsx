@@ -60,10 +60,13 @@ export default function MenuBarCommand() {
   let elapsed = "-";
   const now = new Date();
   const pomodoroFinished = pomodoro ? isIntervalFinished(pomodoro, now) : false;
+  const remaining = pomodoro
+    ? formatDuration(Math.max(0, Math.ceil((Date.parse(pomodoro.endsAt) - now.getTime()) / 1000)))
+    : "";
   const pomodoroTitle = pomodoro
     ? pomodoroFinished
       ? `${phaseLabel(pomodoro.phase)} finished — waiting`
-      : `${phaseLabel(pomodoro.phase)}: ${formatDuration(Math.max(0, Math.ceil((Date.parse(pomodoro.endsAt) - now.getTime()) / 1000)))}`
+      : `${phaseLabel(pomodoro.phase)}: ${remaining}`
     : "";
   if (activeTimer) {
     try {
@@ -113,7 +116,8 @@ export default function MenuBarCommand() {
     }
   }
 
-  const menuTitle = activeTimer ? `${elapsed}${pomodoro ? ` · ${pomodoroTitle}` : ""}` : undefined;
+  const pomodoroMenuTitle = pomodoro?.phase === "work" && !pomodoroFinished ? remaining : pomodoroTitle;
+  const menuTitle = activeTimer ? (pomodoro ? `${pomodoroMenuTitle} · Total: ${elapsed}` : elapsed) : undefined;
 
   return (
     <MenuBarExtra

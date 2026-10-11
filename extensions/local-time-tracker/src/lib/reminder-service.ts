@@ -24,7 +24,7 @@ export async function withReminderOperation<T>(action: () => Promise<T>): Promis
 }
 
 export function getReminderSettings(): ReminderSettings {
-  const values = getPreferenceValues<Record<string, unknown>>();
+  const values = getPreferenceValues<Preferences>();
   return {
     pomodoroEnabled: values.pomodoroEnabled !== false,
     timerAlertEnabled: values.timerAlertEnabled === true,
@@ -52,10 +52,11 @@ export async function getPomodoro(timer: ActiveTimer | null): Promise<PomodoroSt
 }
 
 export async function startPomodoroInterval(timerId: string, advanceFrom?: string): Promise<PomodoroState> {
-  return withReminderOperation(() => startInterval(timerId, advanceFrom));
+  return withReminderOperation(() => startPomodoroIntervalUnderLock(timerId, advanceFrom));
 }
 
-async function startInterval(timerId: string, advanceFrom?: string): Promise<PomodoroState> {
+// The caller must hold withReminderOperation for this shared-state write.
+export async function startPomodoroIntervalUnderLock(timerId: string, advanceFrom?: string): Promise<PomodoroState> {
   const settings = getReminderSettings();
   if (!settings.pomodoroEnabled) throw new Error("Enable Pomodoro in extension preferences first");
   const timer = await getActiveTimer();

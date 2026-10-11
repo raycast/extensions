@@ -16,6 +16,8 @@ test("reminder service integrates with Stop Work, storage and notification retri
   const timeLaunches = () => launched.filter((launch) => launch.context?.timeAlertTitles?.length);
   const pomodoroLaunches = () => launched.filter((launch) => launch.context?.pomodoroIntervalId);
   let failDelivery = false;
+  let failRefresh = false;
+  let onRefresh: (() => Promise<void>) | undefined;
   let beforeWrite: ((key: string) => Promise<void>) | undefined;
   const preferences = {
     pomodoroEnabled: true,
@@ -42,6 +44,10 @@ test("reminder service integrates with Stop Work, storage and notification retri
     },
     LaunchType: { Background: "background", UserInitiated: "userInitiated" },
     async launchCommand(options: (typeof launched)[number]) {
+      if (options.name === "menu-bar") {
+        if (failRefresh) throw new Error("menu bar refresh failed");
+        await onRefresh?.();
+      }
       if (options.context && failDelivery) throw new Error("notification failed");
       launched.push(options);
     },
@@ -119,7 +125,6 @@ test("reminder service integrates with Stop Work, storage and notification retri
     assert.equal(timeLaunches().length, 2);
     assert.match(timeLaunches()[1].context!.timeAlertTitles!.join(" · "), /Work timer reached 1 minutes/);
     await checkReminders(past, new Date());
-    assert.equal(timeLaunches().length, 2);
     assert.equal(timeLaunches().length, 2);
     api.environment.launchType = "userInitiated";
     preferences.timerAlertMinutes = "999";
@@ -240,6 +245,44 @@ test("reminder service integrates with Stop Work, storage and notification retri
     beforeWrite = undefined;
     assert.equal((await stopTimer()).status, "stopped");
     assert.equal((await getWorkLogs()).length, logCount + 1);
+
+    // Refresh can start checking immediately: timer and Pomodoro must both
+    // already be saved, and the lock must be released before launching it.
+    let refreshSawPomodoro = false;
+    onRefresh = async () => {
+      const current = await getActiveTimer();
+      refreshSawPomodoro = Boolean(current && (await getPomodoro(current)));
+      await checkReminders(current, new Date());
+    };
+    const atomicStart = await startTimer("project", "Atomic Pomodoro", true);
+    assert.equal(refreshSawPomodoro, true);
+    assert.equal((await getPomodoro(atomicStart))?.timerId, atomicStart.id);
+    onRefresh = undefined;
+    await stopTimer();
+
+    // Refresh failure must not turn a saved start or next interval into failure.
+    failRefresh = true;
+    const refreshed = await startTimer("project", "Refresh fails", true);
+    const savedOverlay = await getPomodoro(refreshed);
+    assert.equal((await getActiveTimer())?.id, refreshed.id);
+    assert.ok(savedOverlay);
+    await endPomodoro(refreshed.id);
+    const replacementOverlay = await startPomodoroInterval(refreshed.id);
+    const { refreshMenuBar } = loadModule("../src/lib/timer.ts") as typeof import("../src/lib/timer");
+    await refreshMenuBar();
+    assert.equal((await getPomodoro(refreshed))?.intervalId, replacementOverlay.intervalId);
+    failRefresh = false;
+    await stopTimer();
+
+    // Initial overlay failure rolls back the new timer before refreshing.
+    beforeWrite = async (key) => {
+      if (key === "pomodoroState") throw new Error("pomodoro write failed");
+    };
+    const launchesBeforeFailure = launched.length;
+    await assert.rejects(startTimer("project", "Failed initial Pomodoro", true), /pomodoro write failed/);
+    assert.equal(await getActiveTimer(), null);
+    assert.equal(launched.length, launchesBeforeFailure);
+    beforeWrite = undefined;
 
     // The opposite overlap is safe too: once Stop Work owns the write,
     // Pomodoro cannot save a session behind it.

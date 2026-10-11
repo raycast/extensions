@@ -20,7 +20,7 @@ import { formatDuration, getDurationSeconds } from "./lib/duration";
 import { showFailure } from "./lib/errors";
 import { findProject, sortProjectsByPreference } from "./lib/projects";
 import { getActiveTimer, getProjectCategories, getProjects, getWorkLogs } from "./lib/storage";
-import { ActiveTimerExistsError, startTimer, stopTimer } from "./lib/timer";
+import { ActiveTimerExistsError, refreshMenuBar, startTimer, stopTimer } from "./lib/timer";
 import { getPomodoro, getReminderSettings, startPomodoroInterval } from "./lib/reminder-service";
 import { isIntervalFinished, nextPhase, phaseLabel, type PomodoroState } from "./lib/reminders";
 import type { ActiveTimer, Project, ProjectCategory, WorkLog } from "./lib/types";
@@ -115,7 +115,7 @@ export default function StartWorkCommand({
                 try {
                   await startPomodoroInterval(activeTimer.id, finishedPomodoro.intervalId);
                   setFinishedPomodoro(null);
-                  await launchCommand({ name: "menu-bar", type: LaunchType.Background });
+                  await refreshMenuBar();
                   await closeMainWindow();
                 } catch (error) {
                   await showFailure("Could not start the next interval", error);
@@ -247,18 +247,8 @@ export default function StartWorkCommand({
 
     setIsSubmitting(true);
     try {
-      const startedTimer = await startTimer(project.id, description);
+      const startedTimer = await startTimer(project.id, description, usePomodoro && pomodoroEnabled);
       setActiveTimer(startedTimer);
-      if (usePomodoro && pomodoroEnabled) {
-        try {
-          await startPomodoroInterval(startedTimer.id);
-          // Refresh again after the separate pomodoro state has been saved.
-          await launchCommand({ name: "menu-bar", type: LaunchType.Background });
-        } catch (error) {
-          await showFailure("Work started, but Pomodoro could not start", error);
-          return;
-        }
-      }
       await showHUD(`Started: ${project.name}`);
     } catch (error) {
       if (error instanceof ActiveTimerExistsError) {
