@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quickadd",
+  "title": "QuickAdd for Obsidian",
+  "description": "Run QuickAdd choices, captures, and templates in your Obsidian vault straight from Raycast.",
+  "icon": "icon.png",
+  "author": "christian_bager_bach_houmann",
+  "categories": ["Productivity", "Applications"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "run-choice",
+      "title": "Run QuickAdd Choice",
+      "description": "Browse and run any QuickAdd choice, filling its inputs in Raycast.",
+      "keywords": ["obsidian", "capture", "note", "template", "macro"],
+      "mode": "view"
+    },
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "description": "Capture text to your vault through a QuickAdd capture choice without leaving Raycast.",
+      "keywords": ["obsidian", "capture", "note"],
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text to capture",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "captureChoice",
+          "type": "textfield",
+          "required": true,
+          "title": "Capture Choice",
+          "placeholder": "e.g. Quick Capture",
+          "description": "Name of the QuickAdd capture choice to send text to (as shown in Run QuickAdd Choice). Pick one that runs without prompts."
+        }
+      ]
+    },
+    {
+      "name": "capture-selection",
+      "title": "Capture Selection",
+      "description": "Capture the selected text to your vault through a QuickAdd capture choice.",
+      "keywords": ["obsidian", "capture", "note"],
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "captureChoice",
+          "type": "textfield",
+          "required": true,
+          "title": "Capture Choice",
+          "placeholder": "e.g. Quick Capture",
+          "description": "Name of the QuickAdd capture choice to send text to (as shown in Run QuickAdd Choice). Pick one that runs without prompts."
+        }
+      ]
+    },
+    {
+      "name": "capture-clipboard",
+      "title": "Capture Clipboard",
+      "description": "Capture the clipboard text to your vault through a QuickAdd capture choice.",
+      "keywords": ["obsidian", "capture", "note"],
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "captureChoice",
+          "type": "textfield",
+          "required": true,
+          "title": "Capture Choice",
+          "placeholder": "e.g. Quick Capture",
+          "description": "Name of the QuickAdd capture choice to send text to (as shown in Run QuickAdd Choice). Pick one that runs without prompts."
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "type": "directory",
+      "required": false,
+      "title": "Vault",
+      "description": "Leave empty to detect."
+    },
+    {
+      "name": "cliPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Obsidian CLI Path",
+      "description": "Path to the Obsidian CLI binary. Leave empty to auto-detect.",
+      "placeholder": "/opt/homebrew/bin/obsidian"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.9.4",
+    "typescript": "^5.8.0",
+    "vitest": "^5.0.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "e2e:protocol": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/e2e-protocol.mts",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

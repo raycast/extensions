@@ -1,0 +1,927 @@
+{
+  "choices": [
+    {
+      "id": "e2e-text",
+      "name": "Capture text",
+      "type": "Capture",
+      "command": false,
+      "appendLink": false,
+      "copyLinkToClipboard": false,
+      "captureTo": "Output/Inbox.md",
+      "captureToActiveFile": false,
+      "captureToCanvasNodeId": "",
+      "activeFileWritePosition": "bottom",
+      "createFileIfItDoesntExist": {
+        "enabled": true,
+        "createWithTemplate": false,
+        "template": ""
+      },
+      "format": {
+        "enabled": true,
+        "format": "- text: {{VALUE}}\n"
+      },
+      "insertAfter": {
+        "enabled": false,
+        "after": "",
+        "insertAtEnd": false,
+        "considerSubsections": false,
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top",
+        "inline": false,
+        "replaceExisting": false,
+        "blankLineAfterMatchMode": "auto",
+        "promptHeading": false
+      },
+      "insertBefore": {
+        "enabled": false,
+        "before": "",
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top"
+      },
+      "newLineCapture": {
+        "enabled": false,
+        "direction": "below"
+      },
+      "prepend": false,
+      "task": false,
+      "openFile": false,
+      "fileOpening": {
+        "location": "tab",
+        "direction": "vertical",
+        "mode": "default",
+        "focus": true
+      },
+      "templater": {
+        "afterCapture": "none"
+      }
+    },
+    {
+      "id": "e2e-select",
+      "name": "Capture color",
+      "type": "Capture",
+      "command": false,
+      "appendLink": false,
+      "copyLinkToClipboard": false,
+      "captureTo": "Output/Inbox.md",
+      "captureToActiveFile": false,
+      "captureToCanvasNodeId": "",
+      "activeFileWritePosition": "bottom",
+      "createFileIfItDoesntExist": {
+        "enabled": true,
+        "createWithTemplate": false,
+        "template": ""
+      },
+      "format": {
+        "enabled": true,
+        "format": "- color: {{VALUE:red,green,blue}}\n"
+      },
+      "insertAfter": {
+        "enabled": false,
+        "after": "",
+        "insertAtEnd": false,
+        "considerSubsections": false,
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top",
+        "inline": false,
+        "replaceExisting": false,
+        "blankLineAfterMatchMode": "auto",
+        "promptHeading": false
+      },
+      "insertBefore": {
+        "enabled": false,
+        "before": "",
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top"
+      },
+      "newLineCapture": {
+        "enabled": false,
+        "direction": "below"
+      },
+      "prepend": false,
+      "task": false,
+      "openFile": false,
+      "fileOpening": {
+        "location": "tab",
+        "direction": "vertical",
+        "mode": "default",
+        "focus": true
+      },
+      "templater": {
+        "afterCapture": "none"
+      }
+    },
+    {
+      "id": "e2e-multi",
+      "name": "Capture tags",
+      "type": "Capture",
+      "command": false,
+      "appendLink": false,
+      "copyLinkToClipboard": false,
+      "captureTo": "Output/Inbox.md",
+      "captureToActiveFile": false,
+      "captureToCanvasNodeId": "",
+      "activeFileWritePosition": "bottom",
+      "createFileIfItDoesntExist": {
+        "enabled": true,
+        "createWithTemplate": false,
+        "template": ""
+      },
+      "format": {
+        "enabled": true,
+        "format": "- tags: {{VALUE:alpha,beta,gamma|multi}}\n"
+      },
+      "insertAfter": {
+        "enabled": false,
+        "after": "",
+        "insertAtEnd": false,
+        "considerSubsections": false,
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top",
+        "inline": false,
+        "replaceExisting": false,
+        "blankLineAfterMatchMode": "auto",
+        "promptHeading": false
+      },
+      "insertBefore": {
+        "enabled": false,
+        "before": "",
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top"
+      },
+      "newLineCapture": {
+        "enabled": false,
+        "direction": "below"
+      },
+      "prepend": false,
+      "task": false,
+      "openFile": false,
+      "fileOpening": {
+        "location": "tab",
+        "direction": "vertical",
+        "mode": "default",
+        "focus": true
+      },
+      "templater": {
+        "afterCapture": "none"
+      }
+    },
+    {
+      "id": "e2e-custom",
+      "name": "Capture mood",
+      "type": "Capture",
+      "command": false,
+      "appendLink": false,
+      "copyLinkToClipboard": false,
+      "captureTo": "Output/Inbox.md",
+      "captureToActiveFile": false,
+      "captureToCanvasNodeId": "",
+      "activeFileWritePosition": "bottom",
+      "createFileIfItDoesntExist": {
+        "enabled": true,
+        "createWithTemplate": false,
+        "template": ""
+      },
+      "format": {
+        "enabled": true,
+        "format": "- mood: {{VALUE:happy,sad|custom}}\n"
+      },
+      "insertAfter": {
+        "enabled": false,
+        "after": "",
+        "insertAtEnd": false,
+        "considerSubsections": false,
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top",
+        "inline": false,
+        "replaceExisting": false,
+        "blankLineAfterMatchMode": "auto",
+        "promptHeading": false
+      },
+      "insertBefore": {
+        "enabled": false,
+        "before": "",
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top"
+      },
+      "newLineCapture": {
+        "enabled": false,
+        "direction": "below"
+      },
+      "prepend": false,
+      "task": false,
+      "openFile": false,
+      "fileOpening": {
+        "location": "tab",
+        "direction": "vertical",
+        "mode": "default",
+        "focus": true
+      },
+      "templater": {
+        "afterCapture": "none"
+      }
+    },
+    {
+      "id": "e2e-number",
+      "name": "Capture rating",
+      "type": "Capture",
+      "command": false,
+      "appendLink": false,
+      "copyLinkToClipboard": false,
+      "captureTo": "Output/Inbox.md",
+      "captureToActiveFile": false,
+      "captureToCanvasNodeId": "",
+      "activeFileWritePosition": "bottom",
+      "createFileIfItDoesntExist": {
+        "enabled": true,
+        "createWithTemplate": false,
+        "template": ""
+      },
+      "format": {
+        "enabled": true,
+        "format": "- rating: {{VALUE:rating|type:number|min:1|max:5}}\n"
+      },
+      "insertAfter": {
+        "enabled": false,
+        "after": "",
+        "insertAtEnd": false,
+        "considerSubsections": false,
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top",
+        "inline": false,
+        "replaceExisting": false,
+        "blankLineAfterMatchMode": "auto",
+        "promptHeading": false
+      },
+      "insertBefore": {
+        "enabled": false,
+        "before": "",
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top"
+      },
+      "newLineCapture": {
+        "enabled": false,
+        "direction": "below"
+      },
+      "prepend": false,
+      "task": false,
+      "openFile": false,
+      "fileOpening": {
+        "location": "tab",
+        "direction": "vertical",
+        "mode": "default",
+        "focus": true
+      },
+      "templater": {
+        "afterCapture": "none"
+      }
+    },
+    {
+      "id": "e2e-date",
+      "name": "Capture due date",
+      "type": "Capture",
+      "command": false,
+      "appendLink": false,
+      "copyLinkToClipboard": false,
+      "captureTo": "Output/Inbox.md",
+      "captureToActiveFile": false,
+      "captureToCanvasNodeId": "",
+      "activeFileWritePosition": "bottom",
+      "createFileIfItDoesntExist": {
+        "enabled": true,
+        "createWithTemplate": false,
+        "template": ""
+      },
+      "format": {
+        "enabled": true,
+        "format": "- due: {{VDATE:due,YYYY-MM-DD HH:mm}}\n"
+      },
+      "insertAfter": {
+        "enabled": false,
+        "after": "",
+        "insertAtEnd": false,
+        "considerSubsections": false,
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top",
+        "inline": false,
+        "replaceExisting": false,
+        "blankLineAfterMatchMode": "auto",
+        "promptHeading": false
+      },
+      "insertBefore": {
+        "enabled": false,
+        "before": "",
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top"
+      },
+      "newLineCapture": {
+        "enabled": false,
+        "direction": "below"
+      },
+      "prepend": false,
+      "task": false,
+      "openFile": false,
+      "fileOpening": {
+        "location": "tab",
+        "direction": "vertical",
+        "mode": "default",
+        "focus": true
+      },
+      "templater": {
+        "afterCapture": "none"
+      }
+    },
+    {
+      "id": "e2e-picker",
+      "name": "Capture to a picked note",
+      "type": "Capture",
+      "command": false,
+      "appendLink": false,
+      "copyLinkToClipboard": false,
+      "captureTo": "",
+      "captureToActiveFile": false,
+      "captureToCanvasNodeId": "",
+      "activeFileWritePosition": "bottom",
+      "createFileIfItDoesntExist": {
+        "enabled": true,
+        "createWithTemplate": false,
+        "template": ""
+      },
+      "format": {
+        "enabled": true,
+        "format": "- picked: {{VALUE}}\n"
+      },
+      "insertAfter": {
+        "enabled": false,
+        "after": "",
+        "insertAtEnd": false,
+        "considerSubsections": false,
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top",
+        "inline": false,
+        "replaceExisting": false,
+        "blankLineAfterMatchMode": "auto",
+        "promptHeading": false
+      },
+      "insertBefore": {
+        "enabled": false,
+        "before": "",
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top"
+      },
+      "newLineCapture": {
+        "enabled": false,
+        "direction": "below"
+      },
+      "prepend": false,
+      "task": false,
+      "openFile": false,
+      "fileOpening": {
+        "location": "tab",
+        "direction": "vertical",
+        "mode": "default",
+        "focus": true
+      },
+      "templater": {
+        "afterCapture": "none"
+      }
+    },
+    {
+      "id": "e2e-runtime",
+      "name": "Runtime prompts",
+      "type": "Capture",
+      "command": false,
+      "appendLink": false,
+      "copyLinkToClipboard": false,
+      "captureTo": "Output/Inbox.md",
+      "captureToActiveFile": false,
+      "captureToCanvasNodeId": "",
+      "activeFileWritePosition": "bottom",
+      "createFileIfItDoesntExist": {
+        "enabled": true,
+        "createWithTemplate": false,
+        "template": ""
+      },
+      "format": {
+        "enabled": true,
+        "format": "- runtime: {{VALUE:note}} | {{VALUE:alpha,beta,gamma|multi}} | {{VDATE:when,YYYY-MM-DD}}\n"
+      },
+      "insertAfter": {
+        "enabled": false,
+        "after": "",
+        "insertAtEnd": false,
+        "considerSubsections": false,
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top",
+        "inline": false,
+        "replaceExisting": false,
+        "blankLineAfterMatchMode": "auto",
+        "promptHeading": false
+      },
+      "insertBefore": {
+        "enabled": false,
+        "before": "",
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top"
+      },
+      "newLineCapture": {
+        "enabled": false,
+        "direction": "below"
+      },
+      "prepend": false,
+      "task": false,
+      "openFile": false,
+      "fileOpening": {
+        "location": "tab",
+        "direction": "vertical",
+        "mode": "default",
+        "focus": true
+      },
+      "templater": {
+        "afterCapture": "none"
+      },
+      "onePageInput": "never"
+    },
+    {
+      "id": "e2e-template",
+      "name": "New person",
+      "type": "Template",
+      "command": false,
+      "templatePath": "Templates/Person.md",
+      "fileNameFormat": {
+        "enabled": true,
+        "format": "{{VALUE:name}}"
+      },
+      "discoverExistingNotesBeforeCreate": false,
+      "folder": {
+        "enabled": true,
+        "folders": [
+          "Output"
+        ],
+        "chooseWhenCreatingNote": false,
+        "createInSameFolderAsActiveFile": false,
+        "chooseFromSubfolders": false
+      },
+      "appendLink": false,
+      "copyLinkToClipboard": false,
+      "openFile": false,
+      "fileOpening": {
+        "location": "tab",
+        "direction": "vertical",
+        "mode": "default",
+        "focus": true
+      },
+      "fileExistsBehavior": {
+        "kind": "apply",
+        "mode": "increment"
+      }
+    },
+    {
+      "id": "e2e-macro",
+      "name": "Script prompts",
+      "type": "Macro",
+      "command": false,
+      "runOnStartup": false,
+      "macro": {
+        "id": "e2e-macro-macro",
+        "name": "Script prompts",
+        "commands": [
+          {
+            "id": "e2e-macro-script",
+            "name": "prompts",
+            "type": "UserScript",
+            "path": "scripts/prompts.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "e2e-slow",
+      "name": "Slow macro",
+      "type": "Macro",
+      "command": false,
+      "runOnStartup": false,
+      "macro": {
+        "id": "e2e-slow-macro",
+        "name": "Slow macro",
+        "commands": [
+          {
+            "id": "e2e-slow-script",
+            "name": "slow",
+            "type": "UserScript",
+            "path": "scripts/slow.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "e2e-meeting",
+      "name": "Log a meeting",
+      "type": "Capture",
+      "command": false,
+      "appendLink": false,
+      "copyLinkToClipboard": false,
+      "captureTo": "Output/Meetings.md",
+      "captureToActiveFile": false,
+      "captureToCanvasNodeId": "",
+      "activeFileWritePosition": "bottom",
+      "createFileIfItDoesntExist": {
+        "enabled": true,
+        "createWithTemplate": false,
+        "template": ""
+      },
+      "format": {
+        "enabled": true,
+        "format": "- {{VALUE:topic|label:Topic}} with {{FILE:People|link|label:Person}} {{VALUE:decision,follow-up,idea|multi|label:Tags}}\n"
+      },
+      "insertAfter": {
+        "enabled": false,
+        "after": "",
+        "insertAtEnd": false,
+        "considerSubsections": false,
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top",
+        "inline": false,
+        "replaceExisting": false,
+        "blankLineAfterMatchMode": "auto",
+        "promptHeading": false
+      },
+      "insertBefore": {
+        "enabled": false,
+        "before": "",
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top"
+      },
+      "newLineCapture": {
+        "enabled": false,
+        "direction": "below"
+      },
+      "prepend": false,
+      "task": false,
+      "openFile": false,
+      "fileOpening": {
+        "location": "tab",
+        "direction": "vertical",
+        "mode": "default",
+        "focus": true
+      },
+      "templater": {
+        "afterCapture": "none"
+      }
+    },
+    {
+      "id": "e2e-current",
+      "name": "Capture to the current note",
+      "type": "Capture",
+      "command": false,
+      "appendLink": false,
+      "copyLinkToClipboard": false,
+      "captureTo": "",
+      "captureToActiveFile": true,
+      "captureToCanvasNodeId": "",
+      "activeFileWritePosition": "bottom",
+      "createFileIfItDoesntExist": {
+        "enabled": true,
+        "createWithTemplate": false,
+        "template": ""
+      },
+      "format": {
+        "enabled": true,
+        "format": "- current: {{VALUE}}\n"
+      },
+      "insertAfter": {
+        "enabled": false,
+        "after": "",
+        "insertAtEnd": false,
+        "considerSubsections": false,
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top",
+        "inline": false,
+        "replaceExisting": false,
+        "blankLineAfterMatchMode": "auto",
+        "promptHeading": false
+      },
+      "insertBefore": {
+        "enabled": false,
+        "before": "",
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top"
+      },
+      "newLineCapture": {
+        "enabled": false,
+        "direction": "below"
+      },
+      "prepend": false,
+      "task": false,
+      "openFile": false,
+      "fileOpening": {
+        "location": "tab",
+        "direction": "vertical",
+        "mode": "default",
+        "focus": true
+      },
+      "templater": {
+        "afterCapture": "none"
+      }
+    },
+    {
+      "id": "e2e-link",
+      "name": "Capture with a link",
+      "type": "Capture",
+      "command": false,
+      "appendLink": {
+        "enabled": true,
+        "placement": "newLine",
+        "requireActiveFile": false
+      },
+      "copyLinkToClipboard": false,
+      "captureTo": "Output/Inbox.md",
+      "captureToActiveFile": false,
+      "captureToCanvasNodeId": "",
+      "activeFileWritePosition": "bottom",
+      "createFileIfItDoesntExist": {
+        "enabled": true,
+        "createWithTemplate": false,
+        "template": ""
+      },
+      "format": {
+        "enabled": true,
+        "format": "- linked: {{VALUE}} {{LINKCURRENT}}\n"
+      },
+      "insertAfter": {
+        "enabled": false,
+        "after": "",
+        "insertAtEnd": false,
+        "considerSubsections": false,
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top",
+        "inline": false,
+        "replaceExisting": false,
+        "blankLineAfterMatchMode": "auto",
+        "promptHeading": false
+      },
+      "insertBefore": {
+        "enabled": false,
+        "before": "",
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top"
+      },
+      "newLineCapture": {
+        "enabled": false,
+        "direction": "below"
+      },
+      "prepend": false,
+      "task": false,
+      "openFile": false,
+      "fileOpening": {
+        "location": "tab",
+        "direction": "vertical",
+        "mode": "default",
+        "focus": true
+      },
+      "templater": {
+        "afterCapture": "none"
+      }
+    }
+  ],
+  "inputPrompt": "single-line",
+  "persistInputPromptDrafts": true,
+  "useSelectionAsCaptureValue": true,
+  "namePastedImagesAfterNoteTitle": false,
+  "searchNestedChoices": true,
+  "templateFolderLauncherRow": "bottom",
+  "devMode": false,
+  "templateFolderPaths": [],
+  "announceUpdates": "none",
+  "version": "2.30.0",
+  "globalVariables": {},
+  "onePageInputEnabled": false,
+  "disableOnlineFeatures": true,
+  "enableUriCallbacks": false,
+  "enableRibbonIcon": false,
+  "showCaptureNotification": true,
+  "showInputCancellationNotification": false,
+  "enableTemplatePropertyTypes": false,
+  "dateAliases": {
+    "t": "today",
+    "tm": "tomorrow",
+    "yd": "yesterday",
+    "nw": "next week",
+    "nm": "next month",
+    "ny": "next year",
+    "lw": "last week",
+    "lm": "last month",
+    "ly": "last year"
+  },
+  "ai": {
+    "defaultModel": "Ask me",
+    "defaultSystemPrompt": "As an AI assistant within Obsidian, your primary goal is to help users manage their ideas and knowledge more effectively. Format your responses using Markdown syntax. Please use the [[Obsidian]] link format. You can write aliases for the links by writing [[Obsidian|the alias after the pipe symbol]]. To use mathematical notation, use LaTeX syntax. LaTeX syntax for larger equations should be on separate lines, surrounded with double dollar signs ($$). You can also inline math expressions by wrapping it in $ symbols. For example, use $$w_{ij}^{\\text{new}}:=w_{ij}^{\\text{current}}+\\eta\\cdot\\delta_j\\cdot x_{ij}$$ on a separate line, but you can write \"($\\eta$ = learning rate, $\\delta_j$ = error term, $x_{ij}$ = input)\" inline.",
+    "promptTemplatesFolderPath": "",
+    "showAssistant": true,
+    "providers": [
+      {
+        "id": "openai",
+        "name": "OpenAI",
+        "endpoint": "https://api.openai.com/v1",
+        "kind": "openai",
+        "apiKey": "",
+        "models": [
+          {
+            "name": "gpt-6-sol",
+            "maxTokens": 1050000,
+            "maxOutputTokens": 128000,
+            "supportsTemperature": false
+          },
+          {
+            "name": "gpt-6-luna",
+            "maxTokens": 1050000,
+            "maxOutputTokens": 128000,
+            "supportsTemperature": false
+          },
+          {
+            "name": "gpt-6-astra",
+            "maxTokens": 1050000,
+            "maxOutputTokens": 128000,
+            "supportsTemperature": false
+          },
+          {
+            "name": "gpt-5.6-sol",
+            "maxTokens": 1050000,
+            "maxOutputTokens": 128000,
+            "supportsTemperature": false
+          },
+          {
+            "name": "gpt-5.6-luna",
+            "maxTokens": 1050000,
+            "maxOutputTokens": 128000,
+            "supportsTemperature": false
+          },
+          {
+            "name": "gpt-5.6-terra",
+            "maxTokens": 1050000,
+            "maxOutputTokens": 128000,
+            "supportsTemperature": false
+          },
+          {
+            "name": "gpt-5.5",
+            "maxTokens": 1050000,
+            "maxOutputTokens": 128000,
+            "supportsTemperature": false
+          },
+          {
+            "name": "gpt-5.4",
+            "maxTokens": 1050000,
+            "maxOutputTokens": 128000,
+            "supportsTemperature": true
+          },
+          {
+            "name": "gpt-5.4-mini",
+            "maxTokens": 400000,
+            "maxOutputTokens": 128000,
+            "supportsTemperature": true
+          },
+          {
+            "name": "gpt-5.4-nano",
+            "maxTokens": 400000,
+            "maxOutputTokens": 128000,
+            "supportsTemperature": true
+          },
+          {
+            "name": "gpt-4.1",
+            "maxTokens": 1047576,
+            "maxOutputTokens": 32768,
+            "supportsTemperature": true
+          },
+          {
+            "name": "gpt-4.1-mini",
+            "maxTokens": 1047576,
+            "maxOutputTokens": 32768,
+            "supportsTemperature": true
+          },
+          {
+            "name": "gpt-4o",
+            "maxTokens": 128000,
+            "maxOutputTokens": 16384,
+            "supportsTemperature": true
+          },
+          {
+            "name": "gpt-4o-mini",
+            "maxTokens": 128000,
+            "maxOutputTokens": 16384,
+            "supportsTemperature": true
+          },
+          {
+            "name": "o3",
+            "maxTokens": 200000,
+            "maxOutputTokens": 100000,
+            "supportsTemperature": false
+          },
+          {
+            "name": "o4-mini",
+            "maxTokens": 200000,
+            "maxOutputTokens": 100000,
+            "supportsTemperature": false
+          }
+        ],
+        "autoSyncModels": true,
+        "modelSource": "modelsDev"
+      },
+      {
+        "id": "gemini",
+        "name": "Gemini",
+        "endpoint": "https://generativelanguage.googleapis.com",
+        "kind": "gemini",
+        "apiKey": "",
+        "models": [
+          {
+            "name": "gemini-3.8-flash",
+            "maxTokens": 1048576,
+            "maxOutputTokens": 65536,
+            "supportsTemperature": true
+          },
+          {
+            "name": "gemini-3.7-flash",
+            "maxTokens": 1048576,
+            "maxOutputTokens": 65536,
+            "supportsTemperature": true
+          },
+          {
+            "name": "gemini-3.6-flash",
+            "maxTokens": 1048576,
+            "maxOutputTokens": 65536,
+            "supportsTemperature": true
+          },
+          {
+            "name": "gemini-3.5-flash",
+            "maxTokens": 1048576,
+            "maxOutputTokens": 65536,
+            "supportsTemperature": true
+          },
+          {
+            "name": "gemini-3.5-flash-lite",
+            "maxTokens": 1048576,
+            "maxOutputTokens": 65536,
+            "supportsTemperature": true
+          },
+          {
+            "name": "gemini-3.1-pro-preview",
+            "maxTokens": 1048576,
+            "maxOutputTokens": 65536,
+            "supportsTemperature": true
+          },
+          {
+            "name": "gemini-3.1-flash-lite",
+            "maxTokens": 1048576,
+            "maxOutputTokens": 65536,
+            "supportsTemperature": true
+          },
+          {
+            "name": "gemini-3-flash-preview",
+            "maxTokens": 1048576,
+            "maxOutputTokens": 65536,
+            "supportsTemperature": true
+          },
+          {
+            "name": "gemini-2.5-pro",
+            "maxTokens": 1048576,
+            "maxOutputTokens": 65536,
+            "supportsTemperature": true
+          },
+          {
+            "name": "gemini-2.5-flash",
+            "maxTokens": 1048576,
+            "maxOutputTokens": 65536,
+            "supportsTemperature": true
+          },
+          {
+            "name": "gemini-2.5-flash-lite",
+            "maxTokens": 1048576,
+            "maxOutputTokens": 65536,
+            "supportsTemperature": true
+          }
+        ],
+        "autoSyncModels": true,
+        "modelSource": "modelsDev"
+      }
+    ],
+    "confirmToolCalls": "destructive"
+  },
+  "migrations": {
+    "useQuickAddTemplateFolder": true,
+    "incrementFileNameSettingMoveToDefaultBehavior": true,
+    "consolidateFileExistsBehavior": true,
+    "repairTemplateFileExistsBehavior": true,
+    "mutualExclusionInsertAfterAndWriteToBottomOfFile": true,
+    "setVersionAfterUpdateModalRelease": true,
+    "addDefaultAIProviders": true,
+    "removeMacroIndirection": true,
+    "migrateFileOpeningSettings": true,
+    "backfillFileOpeningDefaults": true,
+    "setProviderModelDiscoveryMode": true,
+    "migrateProviderApiKeysToSecretStorage": true,
+    "migrateToMultipleTemplateFolders": true,
+    "refreshStaleDefaultModelSeeds": true,
+    "pinAiModelRefs": true
+  }
+}
