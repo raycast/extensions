@@ -1,0 +1,2 @@
+# Bundled QuickJS includes byte data in JavaScript strings; do not normalize line endings.
+assets/**/editor.js binary

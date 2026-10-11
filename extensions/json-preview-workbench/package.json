@@ -1,0 +1,125 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "json-preview-workbench",
+  "title": "JSON Workbench",
+  "description": "Edit, preview, transform, and convert JSON locally in a dedicated macOS window.",
+  "icon": "extension-icon.png",
+  "author": "tang_xiangrun",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "open-json-editor",
+      "title": "Open JSON Editor",
+      "subtitle": "JSON Workbench",
+      "description": "Open a local macOS split editor with JSON formatting and JavaScript transforms.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "input",
+          "placeholder": "JSON or file path (optional)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "preview-json",
+      "title": "Preview JSON",
+      "subtitle": "JSON Workbench",
+      "description": "Preview selected text, clipboard text, or a local JSON, YAML or XML file.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "input",
+          "placeholder": "JSON or file path (optional)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "indent",
+      "title": "Indentation",
+      "description": "Spaces used when formatting JSON",
+      "type": "dropdown",
+      "required": false,
+      "default": "2",
+      "data": [
+        {
+          "title": "2 spaces",
+          "value": "2"
+        },
+        {
+          "title": "4 spaces",
+          "value": "4"
+        }
+      ]
+    },
+    {
+      "name": "preferSelection",
+      "title": "Input",
+      "label": "Use selected text before the clipboard",
+      "description": "Read selected text when available, then fall back to the clipboard",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "build:editor": "node scripts/build-editor.mjs",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "lint:store": "ray lint",
+    "lint:fix": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "inspect:upxs": "python3 scripts/inspect-upxs.py",
+    "build:all": "npm run build:editor && npm run build",
+    "publish": "npx @raycast/api@latest publish",
+    "lint:source": "eslint src editor tests && prettier --check src editor tests scripts/build-editor.mjs package.json tsconfig.json eslint.config.js"
+  },
+  "dependencies": {
+    "@jitl/quickjs-singlefile-browser-release-sync": "^0.32.0",
+    "@raycast/api": "latest",
+    "fast-xml-parser": "latest",
+    "json5": "latest",
+    "lossless-json": "latest",
+    "quickjs-emscripten-core": "^0.32.0",
+    "yaml": "latest"
+  },
+  "devDependencies": {
+    "esbuild": "latest",
+    "@raycast/eslint-config": "latest",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "tsx": "latest",
+    "typescript": "^5.9.0",
+    "@codemirror/commands": "latest",
+    "@codemirror/lang-json": "latest",
+    "@codemirror/language": "latest",
+    "@codemirror/search": "latest",
+    "@codemirror/state": "latest",
+    "@codemirror/view": "latest",
+    "@lezer/highlight": "latest"
+  },
+  "keywords": [
+    "json",
+    "json5",
+    "yaml",
+    "xml",
+    "formatter",
+    "editor",
+    "transform"
+  ]
+}
