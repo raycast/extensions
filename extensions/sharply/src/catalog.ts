@@ -1,3 +1,5 @@
+import type { PriceMarket, UsedPrices } from "./pricing";
+
 export const BASE_URL = "https://www.sharplyphoto.com";
 
 export interface Gear {
@@ -7,18 +9,22 @@ export interface Gear {
   gearType: string;
   thumbnailUrl: string | null;
   estimatedUsedUsdCents?: number | null;
+  estimatedUsedPrices?: UsedPrices;
 }
 
 export function gearUrl(slug: string): string {
   return `${BASE_URL}/gear/${encodeURIComponent(slug)}`;
 }
 
-export function usedPrice(item: object): number | null {
+export function usedPrice(
+  item: object,
+  market: PriceMarket = "US",
+): number | null {
   if (!("usedPriceProjection" in item)) return null;
   const projection = item.usedPriceProjection;
-  if (!projection || typeof projection !== "object" || !("US" in projection))
+  if (!projection || typeof projection !== "object" || !(market in projection))
     return null;
-  const estimate = projection.US;
+  const estimate = (projection as Record<string, unknown>)[market];
   if (
     !estimate ||
     typeof estimate !== "object" ||
@@ -88,7 +94,12 @@ export async function searchGear(query: string): Promise<Gear[]> {
       throw new Error("Sharply returned an invalid gear item.");
     }
     return {
-      estimatedUsedUsdCents: usedPrice(item),
+      estimatedUsedPrices: Object.fromEntries(
+        (["US", "UK", "EU"] as const).flatMap((market) => {
+          const amount = usedPrice(item, market);
+          return amount == null ? [] : [[market, amount]];
+        }),
+      ),
       slug: item.slug,
       name: item.name,
       gearType: item.gearType,

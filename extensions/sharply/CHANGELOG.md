@@ -3,6 +3,6 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Search public camera and lens pages without an account or API key.
-- View thumbnails and estimated US used prices.
+- View thumbnails and estimated used prices for US, UK, or EU markets, with automatic macOS region detection and a preference override.
 - Open gear pages or copy their links.
 - Reopen the last 10 gear items from local history.

@@ -2,6 +2,8 @@ import {
   Action,
   ActionPanel,
   closeMainWindow,
+  getPreferenceValues,
+  openExtensionPreferences,
   Icon,
   Keyboard,
   List,
@@ -15,16 +17,23 @@ import {
 import { BASE_URL, searchGear, gearUrl } from "./catalog";
 
 import type { Gear } from "./catalog";
+import { detectMarket, formatUsedPrice } from "./pricing";
+import type { MarketPreference } from "./pricing";
 import { rememberGear } from "./recents";
 
 import { useState } from "react";
 
-const priceFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-});
-
 export default function SearchGear() {
+  const { priceMarket } = getPreferenceValues<{
+    priceMarket: MarketPreference;
+  }>();
+  const { data: automaticMarket, isLoading: detectingMarket } =
+    useCachedPromise(detectMarket, [], {
+      execute: priceMarket === "automatic",
+    });
+  const market =
+    priceMarket === "automatic" ? (automaticMarket ?? "US") : priceMarket;
+  const priceReady = priceMarket !== "automatic" || !detectingMarket;
   const [query, setQuery] = useState("");
   const {
     value: recents = [],
@@ -60,6 +69,11 @@ export default function SearchGear() {
           onAction={revalidate}
         />
       )}
+      <Action
+        title="Open Extension Preferences"
+        icon={Icon.Gear}
+        onAction={openExtensionPreferences}
+      />
       <Action.OpenInBrowser
         title="Search Sharply Website"
         url={`${BASE_URL}/search?q=${encodeURIComponent(query)}`}
@@ -100,8 +114,12 @@ export default function SearchGear() {
             id={gear.slug}
             title={gear.name}
             subtitle={
-              gear.estimatedUsedUsdCents != null
-                ? `~${priceFormatter.format(gear.estimatedUsedUsdCents / 100)}`
+              priceReady
+                ? formatUsedPrice(
+                    gear.estimatedUsedPrices,
+                    market,
+                    gear.estimatedUsedUsdCents,
+                  )
                 : undefined
             }
             icon={gear.thumbnailUrl ?? Icon.Camera}
@@ -129,6 +147,11 @@ export default function SearchGear() {
                     shortcut={Keyboard.Shortcut.Common.Refresh}
                   />
                 )}
+                <Action
+                  title="Open Extension Preferences"
+                  icon={Icon.Gear}
+                  onAction={openExtensionPreferences}
+                />
                 <Action.OpenInBrowser
                   title="Search Sharply Website"
                   url={`${BASE_URL}/search?q=${encodeURIComponent(query)}`}

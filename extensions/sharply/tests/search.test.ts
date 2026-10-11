@@ -20,7 +20,11 @@ test("search uses the public endpoint, encodes queries, and validates results", 
           brandName: "Nikon",
           thumbnailUrl: null,
           msrpNowUsdCents: 77900,
-          usedPriceProjection: { US: { typical: 68500, status: "current" } },
+          usedPriceProjection: {
+            US: { typical: 68500, status: "current" },
+            UK: { typical: 57900, status: "current" },
+            EU: { typical: 68900, status: "current" },
+          },
         },
       ],
     });
@@ -30,7 +34,11 @@ test("search uses the public endpoint, encodes queries, and validates results", 
     assert.equal(requests, 0);
     const results = await searchGear(" Nikon Z6 & lens ");
     assert.equal(results[0].name, "Nikon Z6");
-    assert.equal(results[0].estimatedUsedUsdCents, 68500);
+    assert.deepEqual(results[0].estimatedUsedPrices, {
+      US: 68500,
+      UK: 57900,
+      EU: 68900,
+    });
     assert.equal(
       gearUrl("nikon-z6"),
       "https://www.sharplyphoto.com/gear/nikon-z6",
