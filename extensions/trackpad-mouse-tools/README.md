@@ -52,6 +52,9 @@ Trackpad and the Magic Mouse – and asks macOS to reload them, so changes apply
 handled by the Dock (Mission Control, App Exposé, Show Desktop) restart the Dock for a moment.
 
 The click commands post mouse events through macOS' CoreGraphics, using the Accessibility permission Raycast
-already has. No helper app, no background process, no network requests.
+already has. A hold that ends after the next click or after a few seconds starts a small `osascript` process
+that lets go of the button: it exits after the release click (at the latest after ten minutes) or after the
+chosen number of seconds. Running the hold command again or **Release Mouse Buttons** stops it right away. No
+helper app, no network requests.
 
 System Settings reads its values when it opens, so close and reopen it to see a change there.

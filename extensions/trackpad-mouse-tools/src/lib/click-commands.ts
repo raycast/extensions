@@ -10,14 +10,14 @@ export async function clickCommand(button: MouseButton) {
   }
 }
 
-interface HoldPreferences {
-  release?: ReleaseMode;
-  seconds?: string;
-}
+/** The three Hold commands share the same preferences, so any one of the generated types describes them. */
+type HoldPreferences = Preferences.HoldLeftClick | Preferences.HoldRightClick | Preferences.HoldMiddleClick;
 
 export async function holdCommand(button: MouseButton) {
   try {
-    const { release = "click", seconds = "5" } = getPreferenceValues<HoldPreferences>();
+    const preferences = getPreferenceValues<HoldPreferences>();
+    const release: ReleaseMode = preferences.release ?? "click";
+    const seconds = preferences.seconds ?? "5";
     const secs = Number(seconds.replace(",", "."));
     const duration = Number.isFinite(secs) && secs > 0 ? secs : 5;
     const held = await toggleHold(button, release, duration);

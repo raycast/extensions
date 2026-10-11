@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, open } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   choiceTitle,
   readAll,
@@ -9,6 +9,7 @@ import {
   Setting,
   SETTINGS,
   setSetting,
+  stepSetting,
 } from "./lib/trackpad";
 import { confirmChange, reportError } from "./lib/feedback";
 
@@ -56,13 +57,35 @@ export default function Command() {
     reload();
   }, [reload]);
 
-  const apply = async (label: string, fn: () => Promise<boolean>) => {
+  // One change at a time: a second key press while the first is still being written would start from a
+  // stale value.
+  const busy = useRef(false);
+
+  const apply = async (label: string | (() => string), fn: () => Promise<boolean>) => {
+    if (busy.current) return;
+    busy.current = true;
     try {
-      await confirmChange(label, await fn());
+      const applied = await fn();
+      await confirmChange(typeof label === "function" ? label() : label, applied);
     } catch (e) {
       await reportError(e);
+    } finally {
+      busy.current = false;
     }
     await reload();
+  };
+
+  /** Steps from the value macOS has right now, not from the list, which may not be loaded yet. */
+  const step = (s: Setting, direction: 1 | -1) => () => {
+    let label = s.title;
+    return apply(
+      () => label,
+      async () => {
+        const result = await stepSetting(s.id, direction);
+        label = `${result.title}: ${result.position}`;
+        return result.applied;
+      },
+    );
   };
 
   const change = (s: Setting, value: string) => () =>
@@ -115,21 +138,19 @@ export default function Command() {
     }
 
     if (s.kind === "stepper") {
-      const up = s.choices[Math.min(idx + 1, s.choices.length - 1)];
-      const down = s.choices[Math.max(idx - 1, 0)];
       return (
         <ActionPanel>
           <Action
             title="Faster"
             icon={Icon.ChevronUp}
             shortcut={{ modifiers: ["cmd"], key: "arrowUp" }}
-            onAction={change(s, up.value)}
+            onAction={step(s, 1)}
           />
           <Action
             title="Slower"
             icon={Icon.ChevronDown}
             shortcut={{ modifiers: ["cmd"], key: "arrowDown" }}
-            onAction={change(s, down.value)}
+            onAction={step(s, -1)}
           />
           {common}
         </ActionPanel>

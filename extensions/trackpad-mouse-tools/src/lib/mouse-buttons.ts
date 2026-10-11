@@ -1,5 +1,6 @@
 import { closeMainWindow, LocalStorage, PopToRootType } from "@raycast/api";
 import { execFile, spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { promisify } from "node:util";
 
 const run = promisify(execFile);
@@ -54,9 +55,10 @@ async function post(button: MouseButton, phases: Phase[]) {
 /**
  * Starts a small background script that releases the button later, so the Raycast command can finish.
  * "click" waits for the next physical click on the trackpad or mouse (left or right button pressed and
- * released), "timer" waits a fixed number of seconds. Returns the process id so a manual release can stop it.
+ * released), "timer" waits a fixed number of seconds. Returns the process id and a random tag that is part
+ * of the script, so a later release can make sure the process is still this watcher before stopping it.
  */
-function startWatcher(button: MouseButton, mode: "click" | "timer", seconds: number): number | undefined {
+function startWatcher(button: MouseButton, mode: "click" | "timer", seconds: number): Watcher | undefined {
   // The watched button: a physical left click releases middle and right holds; a left hold waits for a right click.
   const watch = button === "left" ? 1 : 0;
   const wait =
@@ -69,21 +71,41 @@ delay(0.3);
 while (pressed() && Date.now() < deadline) delay(0.02);
 while (!pressed() && Date.now() < deadline) delay(0.02);
 while (pressed() && Date.now() < deadline) delay(0.02);`;
-  const script = `ObjC.import("CoreGraphics");${wait}${postScript(button, ["up"])}`;
+  const tag = randomUUID();
+  const script = `/* trackpad-mouse-tools watcher ${tag} */ObjC.import("CoreGraphics");${wait}${postScript(button, ["up"])}`;
   const child = spawn("/usr/bin/osascript", ["-l", "JavaScript", "-e", script], {
     detached: true,
     stdio: "ignore",
   });
   child.unref();
-  return child.pid;
+  return child.pid === undefined ? undefined : { pid: child.pid, tag };
 }
 
-function isRunning(pid: number) {
+interface Watcher {
+  pid: number;
+  tag: string;
+}
+
+/**
+ * Whether the process is still the watcher this extension started. Checking the process id alone is not
+ * enough: once the watcher has exited, macOS can hand the same id to an unrelated process.
+ */
+async function isWatcherRunning(watcher: Watcher | undefined): Promise<boolean> {
+  if (!watcher?.pid || !watcher.tag) return false;
   try {
-    process.kill(pid, 0);
-    return true;
+    const { stdout } = await run("/bin/ps", ["-ww", "-p", String(watcher.pid), "-o", "command="]);
+    return stdout.includes(watcher.tag);
   } catch {
-    return false;
+    return false; // ps exits with an error when no process has this id
+  }
+}
+
+async function stopWatcher(watcher: Watcher | undefined) {
+  if (!watcher || !(await isWatcherRunning(watcher))) return;
+  try {
+    process.kill(watcher.pid);
+  } catch {
+    // It exited in the meantime.
   }
 }
 
@@ -100,7 +122,7 @@ export async function click(button: MouseButton) {
 
 const heldKey = (button: MouseButton) => `held-${button}`;
 interface HoldState {
-  watcher?: number;
+  watcher?: Watcher;
 }
 
 async function readHold(button: MouseButton): Promise<HoldState | undefined> {
@@ -123,9 +145,9 @@ export async function toggleHold(button: MouseButton, mode: ReleaseMode, seconds
 
   if (state) {
     await LocalStorage.removeItem(heldKey(button));
-    const watcherAlive = state.watcher !== undefined && isRunning(state.watcher);
+    const watcherAlive = await isWatcherRunning(state.watcher);
     if (state.watcher === undefined || watcherAlive) {
-      if (watcherAlive) process.kill(state.watcher!);
+      if (watcherAlive) await stopWatcher(state.watcher);
       await post(button, ["up"]);
       return false;
     }
@@ -143,7 +165,7 @@ export async function releaseAll() {
   await getOutOfTheWay();
   for (const button of Object.keys(EVENTS) as MouseButton[]) {
     const state = await readHold(button);
-    if (state?.watcher !== undefined && isRunning(state.watcher)) process.kill(state.watcher);
+    await stopWatcher(state?.watcher);
     await LocalStorage.removeItem(heldKey(button));
     await post(button, ["up"]);
   }
