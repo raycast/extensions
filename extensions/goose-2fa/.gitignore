@@ -6,3 +6,4 @@ swift/**/.build/
 swift/**/.swiftpm/
 swift/**/.raycast-swift-build/
 swift/**/raycast.d.ts
+assets/compiled_raycast_swift/
