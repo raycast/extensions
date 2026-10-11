@@ -136,7 +136,7 @@
             "callsTool": "get-status"
           },
           {
-            "meetsCriteria": "Says the Meeting scene is active because a meeting is on"
+            "includes": "Meeting"
           }
         ]
       },
@@ -228,7 +228,7 @@
             "callsTool": "get-history"
           },
           {
-            "meetsCriteria": "Explains that a scene switched to the AirPods because a meeting started"
+            "includes": "AirPods"
           }
         ]
       }
