@@ -4,7 +4,10 @@ import { AutoDisableReason, Battery, Session, shouldAutoDisable } from "./parse"
 
 export type { Session } from "./parse";
 
-const SESSION_KEY = "session";
+// Each session is stored under its own key, so clearing one can never delete a session another command just saved.
+const SESSION_PREFIX = "session:";
+// Key used by older builds, which stored a single session. Removed on Turn Off, not read.
+const LEGACY_SESSION_KEY = "session";
 
 export const PRESETS: (number | null)[] = [30, 60, 120, 240, null];
 
@@ -35,21 +38,70 @@ export function durationLabel(minutes: number | null): string {
   return hours === 1 ? "1 hour" : `${hours} hours`;
 }
 
+function sessionKey(startedAt: number): string {
+  return `${SESSION_PREFIX}${startedAt}`;
+}
+
+async function readSessionEntries(): Promise<{ key: string; session: Session }[]> {
+  const items = await LocalStorage.allItems();
+  const entries: { key: string; session: Session }[] = [];
+  for (const [key, value] of Object.entries(items)) {
+    if (!key.startsWith(SESSION_PREFIX)) {
+      continue;
+    }
+    try {
+      const session = JSON.parse(String(value)) as Session;
+      if (typeof session.startedAt === "number") {
+        entries.push({ key, session });
+      }
+    } catch {
+      // Not a session; ignore it.
+    }
+  }
+  return entries;
+}
+
 async function readSession(): Promise<Session | null> {
   try {
-    const raw = await LocalStorage.getItem<string>(SESSION_KEY);
-    return raw ? (JSON.parse(raw) as Session) : null;
+    // If more than one session is stored, the newest one is the current session.
+    let newest: Session | null = null;
+    for (const { session } of await readSessionEntries()) {
+      if (!newest || session.startedAt > newest.startedAt) {
+        newest = session;
+      }
+    }
+    return newest;
   } catch {
     return null;
   }
 }
 
 async function writeSession(session: Session): Promise<void> {
-  await LocalStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  await LocalStorage.setItem(sessionKey(session.startedAt), JSON.stringify(session));
+  // Drop only older sessions. A newer one came from an overlapping Start and must stay.
+  try {
+    for (const entry of await readSessionEntries()) {
+      if (entry.session.startedAt < session.startedAt) {
+        await LocalStorage.removeItem(entry.key);
+      }
+    }
+  } catch {
+    // Leftover older sessions are harmless, since readSession always picks the newest.
+  }
 }
 
-async function clearSession(): Promise<void> {
-  await LocalStorage.removeItem(SESSION_KEY);
+// Removes only the session with this start time. Other sessions, including one another command just saved, are kept.
+async function clearSession(startedAt: number): Promise<void> {
+  await LocalStorage.removeItem(sessionKey(startedAt));
+}
+
+async function clearAllSessions(): Promise<void> {
+  for (const key of Object.keys(await LocalStorage.allItems())) {
+    if (key.startsWith(SESSION_PREFIX)) {
+      await LocalStorage.removeItem(key);
+    }
+  }
+  await LocalStorage.removeItem(LEGACY_SESSION_KEY);
 }
 
 // LocalStorage has no atomic operations, so the read-check-write steps below run one at a time in this process.
@@ -65,6 +117,17 @@ export async function refreshMenuBar(): Promise<void> {
     await launchCommand({ name: "menu-bar", type: LaunchType.Background });
   } catch {
     // Menu bar command not enabled yet; nothing to refresh.
+  }
+}
+
+// Only the menu bar command runs auto-off, so enable must fail before sleep is turned off if it cannot be launched.
+async function requireMenuBar(): Promise<void> {
+  try {
+    await launchCommand({ name: "menu-bar", type: LaunchType.Background });
+  } catch {
+    throw new Error(
+      "Turn on the Lid Awake Menu Bar command in Raycast first. It turns Lid Awake off when the timer ends, the battery is low, or after a restart",
+    );
   }
 }
 
@@ -99,7 +162,7 @@ async function startSession(minutes: number | null): Promise<void> {
 
 async function stopSession(options: { allowPrompt?: boolean }): Promise<void> {
   await setSleepDisabled(false, { allowPrompt: options.allowPrompt });
-  await clearSession();
+  await clearAllSessions();
 }
 
 async function readStatus(): Promise<Status> {
@@ -107,13 +170,11 @@ async function readStatus(): Promise<Status> {
   let session = await readSession();
   let on = await isSleepDisabled();
   if (!on && session) {
-    // Clear only the session we read. If another enable saved a new one meanwhile, keep it and re-check sleep.
-    const current = await readSession();
-    if (current?.startedAt === session.startedAt) {
-      await clearSession();
-      session = null;
-    } else {
-      session = current;
+    // Sleep is off, so this session is stale. Clear only its own key: a session another enable saved meanwhile is kept.
+    await clearSession(session.startedAt);
+    // Report whatever session is stored now. If a new one was saved, check sleep again, since it may be on.
+    session = await readSession();
+    if (session) {
       on = await isSleepDisabled();
     }
   }
@@ -139,17 +200,19 @@ async function autoDisable(): Promise<AutoDisableReason | null> {
     return null;
   }
   await setSleepDisabled(false, { allowPrompt: false });
-  // A Start may have saved a new session while sleep was being turned off. That session wins, so sleep goes back on.
+  // A Start may have saved a newer session while sleep was being turned off. That session wins, so sleep goes back on.
   const current = await readSession();
-  if (current && current.startedAt !== status.session.startedAt) {
+  if (current && current.startedAt > status.session.startedAt) {
     await setSleepDisabled(true).catch(() => undefined);
     return null;
   }
-  await clearSession();
+  // Clear only the session we turned off for. A Start that saves a session after the check above keeps its own key.
+  await clearSession(status.session.startedAt);
   return reason;
 }
 
 export async function enable(minutes: number | null): Promise<void> {
+  await requireMenuBar();
   await serialized(() => startSession(minutes));
   // Refreshed outside the queue so launching the menu bar command never holds up other session actions.
   await refreshMenuBar();

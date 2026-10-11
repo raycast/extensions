@@ -22,7 +22,7 @@ To uninstall: remove the sudoers rule (see README), then in Raycast right-click 
 
 ```sh
 npm test           # unit tests (Vitest)
-npm run typecheck  # TypeScript, covers src/ and test/
+npm run typecheck  # builds first to generate the Preferences types, then TypeScript over src/ and test/
 npm run lint       # ray lint: ESLint, Prettier, manifest checks (needs internet access)
 npm run build      # production build
 ```
