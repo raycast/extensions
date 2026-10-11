@@ -199,6 +199,7 @@ export async function readDragStyle(): Promise<DragStyle> {
 }
 
 async function writeDragStyle(v: DragStyle) {
+  const wasThreeFinger = asBool(await readTrackpad("TrackpadThreeFingerDrag"));
   await writeTrackpad("TrackpadThreeFingerDrag", "bool", v === "three-finger");
   await writeTrackpad("Dragging", "bool", v === "tap" || v === "tap-lock");
   await writeTrackpad("DragLock", "bool", v === "tap-lock");
@@ -206,6 +207,11 @@ async function writeDragStyle(v: DragStyle) {
     // Move three-finger swipes to four fingers, as macOS does.
     for (const axis of ["Horiz", "Vert"] as const) {
       if ((await readFingers(axis)) === "three") await writeFingers(axis, "four");
+    }
+  } else if (wasThreeFinger) {
+    // Three fingers are free again, so swipes that moved to four fingers go back, as macOS does.
+    for (const axis of ["Horiz", "Vert"] as const) {
+      if ((await readFingers(axis)) === "four") await writeFingers(axis, "three");
     }
   }
 }
@@ -312,8 +318,9 @@ export const SETTINGS: Setting[] = [
       return asBool(await readDefault(GLOBAL, "com.apple.trackpad.forceClick"), true) ? "force" : "off";
     },
     write: async (v) => {
+      // Each choice writes both keys, so the reader above always gets back what was chosen.
       await writeTrackpad("TrackpadThreeFingerTapGesture", "int", v === "tap" ? 2 : 0);
-      if (v === "force") await writeDefault(GLOBAL, "com.apple.trackpad.forceClick", "bool", true);
+      await writeDefault(GLOBAL, "com.apple.trackpad.forceClick", "bool", v === "force");
     },
   },
   {
@@ -351,11 +358,9 @@ export const SETTINGS: Setting[] = [
     kind: "bool",
     choices: BOOL,
     defaultValue: "on",
-    read: async () => b(asBool(await readDefault(GLOBAL, "com.apple.trackpad.forceClick"), true)),
-    write: async (v) => {
-      await writeDefault(GLOBAL, "com.apple.trackpad.forceClick", "bool", v === "on");
-      await writeTrackpad("ForceSuppressed", "bool", v !== "on");
-    },
+    // Look Up uses com.apple.trackpad.forceClick, so this setting only touches ForceSuppressed.
+    read: async () => b(!asBool(await readTrackpad("ForceSuppressed"), false)),
+    write: async (v) => writeTrackpad("ForceSuppressed", "bool", v !== "on"),
   },
 
   // Scroll & Zoom
@@ -551,7 +556,9 @@ export async function setSetting(setting: Setting, value: string): Promise<boole
 }
 
 export async function resetAll(): Promise<boolean> {
-  for (const s of SETTINGS) await s.write(s.defaultValue);
+  // Dragging style first: while three-finger drag is on, three-finger swipes would be moved to four fingers.
+  const ordered = [...SETTINGS].sort((a, b) => Number(b.id === "dragStyle") - Number(a.id === "dragStyle"));
+  for (const s of ordered) await s.write(s.defaultValue);
   return applySettings(true);
 }
 
@@ -586,7 +593,13 @@ export async function stepSetting(
   const setting = SETTINGS.find((s) => s.id === id);
   if (!setting || setting.kind !== "stepper") throw new Error(`Unknown setting: ${id}`);
   const value = await setting.read();
-  const current = setting.choices.findIndex((c) => c.value === value);
+  let current = setting.choices.findIndex((c) => c.value === value);
+  if (current < 0) {
+    // macOS may store a value between two steps: start from the closest one, never from the ends.
+    const n = Number(value);
+    const distances = setting.choices.map((c) => Math.abs(Number(c.value) - n));
+    current = Number.isFinite(n) ? distances.indexOf(Math.min(...distances)) : 0;
+  }
   const index = Math.max(0, Math.min(setting.choices.length - 1, current + direction));
   const applied = await setSetting(setting, setting.choices[index].value);
   return { title: setting.title, position: setting.choices[index].title, applied };
