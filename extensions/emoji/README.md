@@ -4,7 +4,7 @@ Find emojis by official name, shortcode, keyword, or everyday phrase, then paste
 
 ## Recents and search
 
-The command opens with **Recently Used** above **All Emojis** when there is history. Each successful copy or paste moves the emoji to the front of a 25-item, extension-local history. Existing history is migrated automatically; its original storage key is retained as a backup. This extension does not read macOS's system-wide emoji history.
+The command opens with **Recently Used** above **All Emojis** when there is history. Each successful copy or paste moves the emoji to the front of a 25-item, extension-local history. Existing history remains readable and is migrated automatically on the first successful history save; its original storage key is retained as a backup. This extension does not read macOS's system-wide emoji history.
 
 Typing from the default view searches the full catalog. Clearing the query restores recents above the catalog, without duplicate rows. Choose a category in the dropdown to narrow browsing and searching.
 

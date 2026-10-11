@@ -34,10 +34,9 @@ export class RecentEmojiStorage {
     const current = await this.storage.getItem(RECENTS_KEY);
     if (current !== undefined) return decode(current);
     const legacy = await this.storage.getItem(LEGACY_KEY);
-    const ids = decode(legacy, true);
-    // Keep the original key intact as a migration backup.
-    if (legacy !== undefined) await this.storage.setItem(RECENTS_KEY, JSON.stringify(ids));
-    return ids;
+    // Reading must still work when storage is read-only. The next successful
+    // record writes the new format and keeps this key as a migration backup.
+    return decode(legacy, true);
   }
 
   load(): Promise<string[]> {

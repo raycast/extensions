@@ -1,15 +1,12 @@
 import {
   Action,
   ActionPanel,
-  Clipboard,
   Icon,
   Keyboard,
   List,
   LocalStorage,
-  closeMainWindow,
   environment,
   getPreferenceValues,
-  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -19,6 +16,7 @@ import { loadCatalog, resolveRecents } from "./catalog";
 import { RecentEmojiStorage } from "./recent-storage";
 import { EmojiSearchIndex, SearchableEmoji } from "./search";
 import { ALL_EMOJIS, RECENTLY_USED, emojiSections } from "./sections";
+import { performEmojiAction } from "./emoji-action";
 
 const { primaryAction, unicodeVersion, shortCodes } = getPreferenceValues<Preferences>();
 const allEmojis = ALL_EMOJIS;
@@ -104,20 +102,7 @@ export default function Main(): ReactElement {
     if (usingEmoji.current) return;
     usingEmoji.current = true;
     try {
-      try {
-        await Clipboard[action](content);
-      } catch {
-        await showHUD("Could not " + action + " emoji");
-        return;
-      }
-      try {
-        // The action promise stays pending until history is persisted.
-        setRecentIds(await recentStorage.record(emoji.emoji));
-      } catch {
-        await showHUD("Emoji " + (action === "copy" ? "copied" : "pasted") + ", but recent history could not be saved");
-        return;
-      }
-      if (action === "copy") await closeMainWindow();
+      await performEmojiAction(emoji.emoji, action, recentStorage, setRecentIds, content);
     } finally {
       usingEmoji.current = false;
     }

@@ -11,13 +11,27 @@ function storage(seed: Record<string, string> = {}) {
   };
 }
 describe("RecentEmojiStorage", () => {
-  it("migrates existing history to unique identifiers without deleting the original", async () => {
+  it("reads legacy history, then migrates it on the first successful use without deleting the original", async () => {
     const original = JSON.stringify([{ emoji: "🚀", description: "rocket" }, { emoji: "🫡" }, { emoji: "🚀" }]);
     const db = storage({ "recently-used": original });
     const history = new RecentEmojiStorage(db);
     expect(await history.load()).toEqual(["🚀", "🫡"]);
-    expect(JSON.parse(db.data.get(RECENTS_KEY)!)).toEqual(["🚀", "🫡"]);
+    expect(db.setItem).not.toHaveBeenCalled();
+    expect(await history.record("🫡")).toEqual(["🫡", "🚀"]);
+    expect(JSON.parse(db.data.get(RECENTS_KEY)!)).toEqual(["🫡", "🚀"]);
     expect(db.data.get("recently-used")).toBe(original);
+  });
+  it("keeps valid legacy history readable when a migration write fails and retries on next use", async () => {
+    const original = JSON.stringify([{ emoji: "🚀", description: "rocket" }]);
+    const db = storage({ "recently-used": original });
+    db.setItem.mockRejectedValueOnce(new Error("read-only storage"));
+    const history = new RecentEmojiStorage(db);
+    expect(await history.load()).toEqual(["🚀"]);
+    await expect(history.record("🫡")).rejects.toThrow("read-only storage");
+    expect(await history.load()).toEqual(["🚀"]);
+    expect(db.data.get("recently-used")).toBe(original);
+    expect(await history.record("🫡")).toEqual(["🫡", "🚀"]);
+    expect(JSON.parse(db.data.get(RECENTS_KEY)!)).toEqual(["🫡", "🚀"]);
   });
   it("waits for the write and serializes rapid uses without losing either", async () => {
     const db = storage({ [RECENTS_KEY]: '["🫡"]' });
