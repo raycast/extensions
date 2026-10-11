@@ -1,5 +1,11 @@
 # Random Data Generator Changelog
 
+## [Custom Items] - {PR_MERGE_DATE}
+
+- Added custom items: define your own generator with a Faker template, e.g. `{{number.int({"min":5,"max":10})}}` or `{{person.firstName}} {{person.lastName}} <{{internet.email}}>`
+- Describe the data you want in plain language and let Raycast AI write the template (requires Raycast AI)
+- Custom items can be pinned, edited, deleted and used in copy/paste quicklinks like built-in items
+
 ## [Added contributor] - 2026-09-07
 
 ## [Fix Quicklinks and Locale Switching] - 2026-09-06
