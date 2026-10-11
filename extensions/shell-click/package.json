@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shell-click",
+  "title": "Shell Click",
+  "description": "Companion extension for Shell Click (https://shellclick.dev): search and run saved commands, switch workspaces, and manage listening ports. Requires the Shell Click macOS app.",
+  "icon": "icon.png",
+  "author": "Envl",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "palette",
+      "title": "Search Command",
+      "description": "Search Shell Click commands and open their actions",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "applicationBundlePath",
+      "title": "Shell Click App Path",
+      "description": "Optional absolute path to ShellClick.app. Leave blank to find an installed copy.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/Applications/ShellClick.app"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "check": "npm run typecheck && npm run lint && npm test",
+    "bundle": "ray bundle -o ../../dist/shell-click.rayext",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish",
+    "prepublishOnly": "node -e \"console.error('Use npm run publish to submit to the Raycast Store.'); process.exit(1)\""
+  },
+  "dependencies": {
+    "@raycast/api": "2.7.3",
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "react": "19.2.4",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "eslint": "^9.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  }
+}
