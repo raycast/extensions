@@ -81,4 +81,39 @@ describe("stop command", () => {
     expect((error as Error).message).toContain("-128");
     expect(options).toEqual({ title: "Could not turn off Lid Awake" });
   });
+
+  it("shows the success HUD and no failure toast when the power settings cannot be read during the final check", async () => {
+    await toggle();
+    // Turn Off reads the power settings once, after the sessions are cleared. That read fails.
+    mac.failPmsetReads = 1;
+
+    await stop();
+
+    expect(mac.sleepDisabled).toBe(false);
+    expect(raycast.showHUD).toHaveBeenLastCalledWith("Lid Awake off, your Mac can sleep normally");
+    expect(raycast.showFailureToast).not.toHaveBeenCalled();
+    expect([...raycast.store.keys()].filter((key) => key.startsWith("session:"))).toEqual([]);
+  });
+
+  it("shows the success HUD and no failure toast when storage cannot be read during the final check", async () => {
+    await toggle();
+    let fired = false;
+    raycast.afterRemoveItem = (key) => {
+      if (!fired && key.startsWith("session:")) {
+        fired = true;
+        // A Start in another command disables sleep after the sessions are cleared. The read that then checks for a
+        // session fails, so the sessions are unknown.
+        mac.sleepDisabled = true;
+        raycast.storageFaults = { skip: 0, fail: 1 };
+      }
+    };
+
+    await stop();
+
+    expect(fired).toBe(true);
+    expect(raycast.showHUD).toHaveBeenLastCalledWith("Lid Awake off, your Mac can sleep normally");
+    expect(raycast.showFailureToast).not.toHaveBeenCalled();
+    // An unknown session state keeps sleep disabled rather than allowing it, as the session module does.
+    expect(mac.sleepDisabled).toBe(true);
+  });
 });

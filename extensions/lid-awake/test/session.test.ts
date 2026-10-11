@@ -8,6 +8,8 @@ const raycast = vi.hoisted(() => ({
   store: new Map<string, string>(),
   prefs: { batteryThreshold: "20", defaultDuration: "60" } as Record<string, string>,
   launchCommand: vi.fn(),
+  // When set, the next allItems read rejects, then the flag clears. A test sets it inside a mock to fail the read it needs.
+  failNextAllItems: false,
 }));
 
 vi.mock("@raycast/api", () => ({
@@ -16,7 +18,13 @@ vi.mock("@raycast/api", () => ({
   LaunchType: { Background: "background", UserInitiated: "userInitiated" },
   LocalStorage: {
     getItem: async (key: string) => raycast.store.get(key),
-    allItems: async () => Object.fromEntries(raycast.store),
+    allItems: async () => {
+      if (raycast.failNextAllItems) {
+        raycast.failNextAllItems = false;
+        throw new Error("storage unavailable");
+      }
+      return Object.fromEntries(raycast.store);
+    },
     setItem: async (key: string, value: string) => {
       raycast.store.set(key, value);
     },
@@ -71,6 +79,7 @@ beforeEach(() => {
 
   vi.resetAllMocks();
   raycast.store.clear();
+  raycast.failNextAllItems = false;
   raycast.prefs = { batteryThreshold: "20", defaultDuration: "60" };
   raycast.launchCommand.mockResolvedValue(undefined);
 
@@ -96,6 +105,33 @@ describe("enable", () => {
 
   it("turns sleep on again when auto-off turned it off while the session was saved", async () => {
     // The default mock reports sleep off after the save, as if auto-off ran between the two steps.
+    await enable(60);
+
+    expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([[true], [true]]);
+    expect(storedSession()).toEqual({ startedAt: NOW, endsAt: NOW + 60 * MINUTE, bootTime: BOOT });
+  });
+
+  it("turns sleep on again when the read after the post-save check fails", async () => {
+    // The post-save check finds sleep allowed, and the storage read that decides whether to turn it off again fails.
+    vi.mocked(system.isSleepDisabled).mockImplementationOnce(async () => {
+      raycast.failNextAllItems = true;
+      return false;
+    });
+
+    await enable(60);
+
+    expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([[true], [true]]);
+    expect(storedSession()).toEqual({ startedAt: NOW, endsAt: NOW + 60 * MINUTE, bootTime: BOOT });
+  });
+
+  it("keeps sleep on when the re-check after turning sleep on again fails to read storage", async () => {
+    vi.mocked(system.setSleepDisabled)
+      .mockResolvedValueOnce(undefined)
+      .mockImplementationOnce(async () => {
+        // Sleep is turned off again, and the re-check that follows fails to read storage.
+        raycast.failNextAllItems = true;
+      });
+
     await enable(60);
 
     expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([[true], [true]]);
@@ -418,6 +454,28 @@ describe("disable", () => {
     expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([[false, { allowPrompt: true }]]);
   });
 
+  it("does not allow sleep a second time when the read that checks for a session fails", async () => {
+    seedSession({ startedAt: NOW - MINUTE, endsAt: null, bootTime: BOOT });
+    vi.mocked(system.isSleepDisabled).mockImplementationOnce(async () => {
+      // Sleep reads as on after the sessions were cleared, and the read that checks for a session then fails.
+      raycast.failNextAllItems = true;
+      return true;
+    });
+
+    await disable();
+
+    expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([[false, { allowPrompt: true }]]);
+  });
+
+  it("resolves when checking sleep after the sessions were cleared fails, since the Turn Off itself succeeded", async () => {
+    seedSession({ startedAt: NOW - MINUTE, endsAt: null, bootTime: BOOT });
+    vi.mocked(system.isSleepDisabled).mockRejectedValue(new Error("pmset: could not read power settings"));
+
+    await expect(disable()).resolves.toBeUndefined();
+    expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([[false, { allowPrompt: true }]]);
+    expect(storedSession()).toBeNull();
+  });
+
   it("does not allow sleep a second time when a Start saved a session before the check", async () => {
     seedSession({ startedAt: NOW - MINUTE, endsAt: null, bootTime: BOOT });
     const fresh = { startedAt: NOW, endsAt: NOW + 60 * MINUTE, bootTime: BOOT };
@@ -454,6 +512,19 @@ describe("menu bar refresh failures", () => {
     await expect(enable(60)).rejects.toThrow(
       "Run Lid Awake Menu Bar once and keep it enabled in Raycast. It turns Lid Awake off when the timer ends, the battery is low, or after a restart",
     );
+    expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([[true], [false, { allowPrompt: false }]]);
+    expect(storedSession()).toBeNull();
+  });
+
+  it("allows sleep when the read after the undo fails, since the menu bar cannot run to turn it off", async () => {
+    raycast.launchCommand.mockImplementationOnce(async () => {
+      // The menu bar cannot launch, and the read that checks for other sessions after the undo fails.
+      raycast.failNextAllItems = true;
+      throw new Error("Menu bar command not enabled");
+    });
+    vi.mocked(system.isSleepDisabled).mockResolvedValue(true);
+
+    await expect(enable(60)).rejects.toThrow("Run Lid Awake Menu Bar once and keep it enabled in Raycast");
     expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([[true], [false, { allowPrompt: false }]]);
     expect(storedSession()).toBeNull();
   });
@@ -766,6 +837,53 @@ describe("enforce race", () => {
     expect(removeItem).toHaveBeenCalledWith(`session:${expiredSeq}`);
     expect([...raycast.store.keys()]).toEqual([`session:${freshSeq}`]);
     removeItem.mockRestore();
+  });
+
+  it("keeps sleep disabled when the read that checks the newer session fails after auto-off", async () => {
+    seedSession({ startedAt: NOW - 61 * MINUTE, endsAt: NOW - MINUTE, bootTime: BOOT });
+    vi.mocked(system.isSleepDisabled).mockResolvedValue(true);
+    const fresh = { startedAt: NOW, endsAt: NOW + 60 * MINUTE, bootTime: BOOT };
+    vi.mocked(system.setSleepDisabled)
+      .mockImplementationOnce(async () => {
+        // A Start saved a newer session while auto-off turned sleep off.
+        seedSession(fresh);
+      })
+      .mockImplementationOnce(async () => {
+        // Sleep is turned back on, and the read that checks the stored session then fails.
+        raycast.failNextAllItems = true;
+      });
+
+    await expect(enforce()).resolves.toBeNull();
+
+    expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([[false, { allowPrompt: false }], [true]]);
+    expect(storedSession()).toEqual(fresh);
+  });
+
+  it("keeps sleep on and the expired session stored when the read after allowing sleep fails, then turns off on the next check", async () => {
+    const expired = { startedAt: NOW - 61 * MINUTE, endsAt: NOW - MINUTE, bootTime: BOOT };
+    seedSession(expired);
+    vi.mocked(system.isSleepDisabled).mockResolvedValue(true);
+    vi.mocked(system.setSleepDisabled).mockImplementationOnce(async () => {
+      // Auto-off allows sleep, and the read that checks for a newer session then fails.
+      raycast.failNextAllItems = true;
+    });
+
+    await expect(enforce()).resolves.toBeNull();
+
+    expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([[false, { allowPrompt: false }], [true]]);
+    expect(storedSession()).toEqual(expired);
+    expect(raycast.launchCommand).not.toHaveBeenCalled();
+
+    // The next check reads storage fine, so the still-expired session is turned off.
+    await expect(enforce()).resolves.toBe("timer");
+
+    expect(vi.mocked(system.setSleepDisabled).mock.calls).toEqual([
+      [false, { allowPrompt: false }],
+      [true],
+      [false, { allowPrompt: false }],
+    ]);
+    expect(storedSession()).toBeNull();
+    expect(raycast.launchCommand).toHaveBeenCalledTimes(1);
   });
 
   it("turns sleep back on after auto-off when a newer session was saved and is still stored", async () => {

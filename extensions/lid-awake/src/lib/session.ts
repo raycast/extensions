@@ -84,6 +84,15 @@ async function readSession(): Promise<SessionEntry | null> {
   }
 }
 
+// Whether any session is stored: true, false, or null when storage could not be read.
+async function sessionStored(): Promise<boolean | null> {
+  try {
+    return (await readSessionEntries()).length > 0;
+  } catch {
+    return null;
+  }
+}
+
 // Returns the key the session was written under, so a later undo can remove exactly this session.
 async function writeSession(session: Session): Promise<string> {
   // The new sequence number is one past every stored one, so this Start outranks any session already saved.
@@ -185,22 +194,24 @@ async function startSession(minutes: number | null): Promise<string> {
 }
 
 // Sleep stays disabled while any session is stored. Turn Off in another command may clear the sessions while this
-// runs, so check again after disabling sleep and allow it again if nothing is stored any more.
+// runs, so check again after disabling sleep and allow it again only if nothing is stored any more. A failed read is
+// treated as a stored session, so a storage hiccup never ends a timer.
 async function keepAwakeWhileSessionStored(): Promise<void> {
-  if (!(await readSession())) {
+  if ((await sessionStored()) === false) {
     return;
   }
   await setSleepDisabled(true);
-  if (!(await readSession())) {
+  if ((await sessionStored()) === false) {
     await setSleepDisabled(false, { allowPrompt: false });
   }
 }
 
-// Removes only the session this Start saved. If no other session is stored, sleep goes back on. Runs when the menu bar
-// cannot launch, so nothing else would turn Lid Awake off.
+// Removes only the session this Start saved, then allows sleep unless another session is stored. Runs when the menu bar
+// cannot launch. Sleep is allowed even when the read fails, because the menu bar cannot run, so nothing else would turn
+// Lid Awake off.
 async function undoStart(key: string): Promise<void> {
   await clearSession(key);
-  if (!(await readSession())) {
+  if ((await sessionStored()) !== true) {
     await setSleepDisabled(false, { allowPrompt: false });
   }
 }
@@ -209,9 +220,14 @@ async function stopSession(options: { allowPrompt?: boolean }): Promise<void> {
   await setSleepDisabled(false, { allowPrompt: options.allowPrompt });
   await clearAllSessions();
   // A Start in another command may have disabled sleep again between the two steps above. If sleep is on and no
-  // session is stored, allow sleep again. A failure here is ignored, since the Turn Off itself has succeeded.
-  if ((await isSleepDisabled()) && !(await readSession())) {
-    await setSleepDisabled(false, { allowPrompt: false }).catch(() => undefined);
+  // session is stored, allow sleep again. Turn Off has already succeeded at this point, so any error in this check
+  // is ignored instead of reported as a failure.
+  try {
+    if ((await isSleepDisabled()) && (await sessionStored()) === false) {
+      await setSleepDisabled(false, { allowPrompt: false });
+    }
+  } catch {
+    // Ignored: see above.
   }
 }
 
@@ -254,8 +270,15 @@ async function autoDisable(): Promise<AutoDisableReason | null> {
   }
   await setSleepDisabled(false, { allowPrompt: false });
   // A Start may have saved a newer session (higher sequence number) while sleep was being turned off. That session wins, so sleep goes back on.
-  const current = await readSession();
-  if (current && current.seq > entry.seq) {
+  let newerStored: boolean | null;
+  try {
+    newerStored = (await readSessionEntries()).some((stored) => stored.seq > entry.seq);
+  } catch {
+    newerStored = null;
+  }
+  if (newerStored !== false) {
+    // Either a newer Start saved a session while sleep was being allowed, or storage could not be read and one may have
+    // been saved. Keep the Mac awake. The expired session is still stored, so the next check turns it off again.
     await keepAwakeWhileSessionStored().catch(() => undefined);
     return null;
   }

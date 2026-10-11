@@ -292,3 +292,45 @@ describe("battery cutoff", () => {
     expect(mac.sleepDisabled).toBe(true);
   });
 });
+
+describe("storage read failures", () => {
+  it("keeps sleep disabled when the read after the save fails, after auto-off turned sleep off", async () => {
+    let fired = false;
+    raycast.afterSetItem = (key) => {
+      if (!fired && key.startsWith("session:")) {
+        fired = true;
+        // Auto-off turns sleep off right after the save. The next read is the cleanup of older sessions, which must
+        // succeed, and the read after it is the post-save check, which must fail.
+        mac.sleepDisabled = false;
+        raycast.storageFaults = { skip: 1, fail: 1 };
+      }
+    };
+
+    await enable(30);
+
+    expect(fired).toBe(true);
+    expect(raycast.storageFaults).toEqual({ skip: 0, fail: 0 });
+    expect(mac.sleepDisabled).toBe(true);
+    expect(await storedSessionKeys()).toHaveLength(1);
+  });
+
+  it("keeps the Mac awake when the read after auto-off allows sleep fails, then turns it off on the next check", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const start = Date.now();
+    await enable(30);
+    vi.setSystemTime(start + 31 * MINUTE);
+    // enforce reads storage once before it allows sleep (skip), then the read that checks for a newer session fails.
+    raycast.storageFaults = { skip: 1, fail: 1 };
+
+    await expect(enforce()).resolves.toBeNull();
+
+    expect(raycast.storageFaults).toEqual({ skip: 0, fail: 0 });
+    expect(mac.sleepDisabled).toBe(true);
+    expect(await storedSessionKeys()).toHaveLength(1);
+
+    await expect(enforce()).resolves.toBe("timer");
+
+    expect(mac.sleepDisabled).toBe(false);
+    expect(await storedSessionKeys()).toEqual([]);
+  });
+});

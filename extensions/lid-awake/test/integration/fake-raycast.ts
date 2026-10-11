@@ -15,6 +15,9 @@ export const raycast = {
   // that command runs in its own process and cannot be interleaved from here.
   afterSetItem: undefined as StorageHook | undefined,
   afterRemoveItem: undefined as StorageHook | undefined,
+  // Makes allItems reads fail. The first `skip` reads succeed, then the next `fail` reads reject with "storage
+  // unavailable". A hook sets these so the read it needs, and only that one, fails.
+  storageFaults: { skip: 0, fail: 0 },
 };
 
 export const raycastApi = {
@@ -24,7 +27,15 @@ export const raycastApi = {
   showHUD: raycast.showHUD,
   LocalStorage: {
     getItem: async (key: string) => raycast.store.get(key),
-    allItems: async () => Object.fromEntries(raycast.store),
+    allItems: async () => {
+      if (raycast.storageFaults.skip > 0) {
+        raycast.storageFaults.skip -= 1;
+      } else if (raycast.storageFaults.fail > 0) {
+        raycast.storageFaults.fail -= 1;
+        throw new Error("storage unavailable");
+      }
+      return Object.fromEntries(raycast.store);
+    },
     setItem: async (key: string, value: string) => {
       raycast.store.set(key, value);
       await raycast.afterSetItem?.(key);
@@ -47,6 +58,7 @@ export function resetRaycast(): void {
   raycast.prefs.defaultDuration = "60";
   raycast.afterSetItem = undefined;
   raycast.afterRemoveItem = undefined;
+  raycast.storageFaults = { skip: 0, fail: 0 };
   raycast.launchCommand.mockReset();
   raycast.launchCommand.mockResolvedValue(undefined);
   raycast.showHUD.mockReset();

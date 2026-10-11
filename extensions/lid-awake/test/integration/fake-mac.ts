@@ -57,6 +57,8 @@ export class FakeMac {
   sudoersFiles = new Map<string, string>();
   sudoersMeta = new Map<string, SudoersMeta>();
   adminPrompt: "approve" | "cancel" = "approve";
+  // How many of the next `pmset -g` reads fail, as a read does when the power settings cannot be read.
+  failPmsetReads = 0;
   // Every command the app ran, in order.
   log: LoggedCommand[] = [];
   // Commands the fake does not know. Any entry fails the test, even if the app code caught the error.
@@ -72,6 +74,7 @@ export class FakeMac {
     this.sudoersFiles = new Map();
     this.sudoersMeta = new Map();
     this.adminPrompt = "approve";
+    this.failPmsetReads = 0;
     this.log = [];
     this.unexpected = [];
     this.staging = new Map();
@@ -119,6 +122,10 @@ export class FakeMac {
   private pmset(args: string[]): string {
     const line = args.join(" ");
     if (line === "-g") {
+      if (this.failPmsetReads > 0) {
+        this.failPmsetReads -= 1;
+        throw new Error("pmset: could not read power settings");
+      }
       return this.generalReport();
     }
     if (line === "-g batt") {
