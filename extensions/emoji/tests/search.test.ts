@@ -85,4 +85,21 @@ describe("EmojiSearchIndex", () => {
 
     expect(new EmojiSearchIndex(items).search("")).toEqual(items);
   });
+
+  it("returns all matching results by default while honoring an explicit caller limit", () => {
+    const items = Array.from({ length: 150 }, (_, index) => emoji(String(index), "flag " + index));
+    const search = new EmojiSearchIndex(items);
+    expect(search.search("flag")).toEqual(items);
+    expect(search.search("flag", { limit: 5 })).toEqual(items.slice(0, 5));
+  });
+
+  it("matches punctuation-only keywords exactly without matching unrelated punctuation or every emoji", () => {
+    const smile = emoji("😄", "grinning face with smiling eyes", [":)"]);
+    const sad = emoji("😞", "disappointed face", [":("]);
+    const search = new EmojiSearchIndex([smile, sad, emoji("🚀", "rocket")]);
+    expect(search.search(" : ) ")).toEqual([]);
+    expect(search.search(" :) ")).toEqual([smile]);
+    expect(search.search(":(")).toEqual([sad]);
+    expect(search.search("???")).toEqual([]);
+  });
 });

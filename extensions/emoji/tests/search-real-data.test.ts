@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { EXTRA_ALIASES } from "../src/aliases";
 import { EmojiSearchIndex, SearchableEmoji } from "../src/search";
+import { RECENTLY_USED, emojiSections } from "../src/sections";
 
 const catalog: SearchableEmoji[] = JSON.parse(
   readFileSync(new URL("../assets/catalogs/15.1.json", import.meta.url), "utf8"),
@@ -9,6 +10,19 @@ const catalog: SearchableEmoji[] = JSON.parse(
 
 describe("EmojiSearchIndex with the bundled Unicode catalog", () => {
   const search = new EmojiSearchIndex(catalog);
+  it("keeps every country flag discoverable in the rendered search results", () => {
+    const flags = catalog.filter((item) => item.description.startsWith("flag: "));
+    expect(flags.length).toBeGreaterThan(100);
+    const results = emojiSections(catalog, [], search, "flag", RECENTLY_USED)[0].emojis;
+    for (const flag of flags) expect(results).toContain(flag);
+  });
+
+  it.each([":)", ":(", ";)"])("finds the bundled punctuation-only keyword %s", (keyword) => {
+    const expected = catalog.filter((item) => item.keywords?.includes(keyword));
+    expect(expected.length).toBeGreaterThan(0);
+    expect(search.search(keyword)).toEqual(expected);
+    expect(search.search(keyword, { category: "Flags" })).toEqual([]);
+  });
   it.each([
     ["warning", "⚠️"],
     ["rocket", "🚀"],

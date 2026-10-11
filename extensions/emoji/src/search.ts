@@ -30,6 +30,7 @@ type Prepared<T> = {
   aliases: string[];
   shortCodes: string[];
   keywords: string[];
+  literalKeywords: string[];
   tokens: string[];
 };
 function prepare<T extends SearchableEmoji>(item: T, order: number): Prepared<T> {
@@ -45,6 +46,7 @@ function prepare<T extends SearchableEmoji>(item: T, order: number): Prepared<T>
     aliases,
     shortCodes,
     keywords,
+    literalKeywords: (item.keywords ?? []).map((keyword) => keyword.trim().toLowerCase()),
     descriptionTokens: tokens(description),
     tokens: [...new Set([description, ...aliases, ...shortCodes, ...keywords].flatMap(tokens))],
   };
@@ -52,9 +54,11 @@ function prepare<T extends SearchableEmoji>(item: T, order: number): Prepared<T>
 function matches(query: string[], candidate: string[], prefix = false): boolean {
   return query.every((word) => candidate.some((token) => token === word || (prefix && token.startsWith(word))));
 }
-function score<T>(entry: Prepared<T>, query: string, words: string[], symbol: string): number {
+function score<T>(entry: Prepared<T>, query: string, words: string[], symbol: string, literalQuery: string): number {
   if (entry.symbol === symbol) return 1100;
-  if (!query) return 0;
+  // Punctuation-only emoticons lose all tokens during word normalization.
+  // Match their original spelling exactly instead of accepting an empty query.
+  if (!query) return entry.literalKeywords.includes(literalQuery) ? 780 : 0;
   if (entry.description === query) return 1000;
   if (entry.aliases.includes(query)) return 975;
   if (entry.description.startsWith(query + " ")) return 950;
@@ -91,7 +95,7 @@ export class EmojiSearchIndex<T extends SearchableEmoji> {
   constructor(private readonly emojis: T[]) {}
 
   search(rawQuery: string, options: SearchOptions<T> = {}): T[] {
-    const { category = "", recentlyUsed = [], limit = 100 } = options;
+    const { category = "", recentlyUsed = [], limit = this.emojis.length } = options;
     const inCategory = (item: T) => !category || item.category === category;
     const trimmed = rawQuery.trim();
     if (!trimmed) return this.emojis.filter(inCategory);
@@ -100,9 +104,10 @@ export class EmojiSearchIndex<T extends SearchableEmoji> {
     const query = normalize(trimmed);
     const words = tokens(query);
     const symbol = identity(trimmed);
+    const literalQuery = trimmed.toLowerCase();
     const candidates = this.prepared.filter((entry) => inCategory(entry.item));
     let results = candidates
-      .map((entry) => ({ entry, score: score(entry, query, words, symbol) }))
+      .map((entry) => ({ entry, score: score(entry, query, words, symbol, literalQuery) }))
       .filter((result) => result.score > 0);
     // Every query word must match. Only try typo correction if ordinary matches fail.
     if (results.length === 0 && words.length > 0) {

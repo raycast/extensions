@@ -8,7 +8,7 @@ The command opens with **Recently Used** above **All Emojis** when there is hist
 
 Typing from the default view searches the full catalog. Clearing the query restores recents above the catalog, without duplicate rows. Choose a category in the dropdown to narrow browsing and searching.
 
-Search ranks official names, curated aliases, shortcodes, and semantic keywords. Every query word must match. Conservative typo correction runs only when ordinary matching finds no results; recency breaks equal-relevance ties. Try `roger that`, `laughing crying`, `chef's kiss`, or `low battery`.
+Search ranks official names, curated aliases, shortcodes, and semantic keywords. Every query word must match, while punctuation-only emoticon keywords such as `:)` are matched exactly. All matching emojis remain available; broad searches such as `flag` are not truncated. Conservative typo correction runs only when ordinary matching finds no results; recency breaks equal-relevance ties. Try `roger that`, `laughing crying`, `chef's kiss`, or `low battery`.
 
 The existing Unicode version, primary action, and shortcode preferences are retained. Shortcodes remain searchable even when their labels and copy action are hidden. The original yellow/base emoji catalog is unchanged.
 
