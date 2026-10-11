@@ -7,7 +7,7 @@ import {
   LaunchType,
   MenuBarExtra,
   open,
-  openExtensionPreferences,
+  openCommandPreferences,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -231,7 +231,7 @@ export default function MenuBarArticlesCommand() {
         <MenuBarExtra.Item title={translations.reload} icon={Icon.RotateClockwise} onAction={reloadArticles} />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item title={translations.openSettings} icon={Icon.Gear} onAction={openExtensionPreferences} />
+        <MenuBarExtra.Item title={translations.openSettings} icon={Icon.Gear} onAction={openCommandPreferences} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
