@@ -1,0 +1,126 @@
+2026-10-08T14:22:03.2541743Z ##[group]Run make GO_ONLY=1 SKIP_GOLANGCI_LINT=1
+2026-10-08T14:22:03.2542156Z [36;1mmake GO_ONLY=1 SKIP_GOLANGCI_LINT=1[0m
+2026-10-08T14:22:03.2543079Z shell: sh -e {0}
+2026-10-08T14:22:03.2543308Z env:
+2026-10-08T14:22:03.2543518Z   GOMEMLIMIT: 13098762KiB
+2026-10-08T14:22:03.2543766Z ##[endgroup]
+2026-10-08T14:22:03.3496616Z >> checking code style
+2026-10-08T14:22:04.0815296Z >> checking license header
+2026-10-08T14:22:04.8236974Z >> checking for copyright years 2026 or later
+2026-10-08T14:22:04.8367035Z >> running yamllint on all YAML files in the repository
+2026-10-08T14:22:04.8367490Z yamllint .
+2026-10-08T14:22:14.0534477Z >> running check for unused/missing packages in go.mod
+2026-10-08T14:22:14.0535115Z go mod tidy
+2026-10-08T14:22:53.7527508Z + tsc --module esnext --target es2018 --outDir dist/esm
+2026-10-08T14:22:53.8950327Z + tsc6 --module commonjs --moduleResolution node --target es5 --outDir dist/cjs --downlevelIteration --ignoreDeprecations 6.0
+2026-10-08T14:22:55.5841128Z build react-app
+2026-10-08T14:22:56.1003668Z $ react-app-rewired build
+2026-10-08T14:22:57.3140033Z Creating an optimized production build...
+2026-10-08T14:23:37.3547804Z Compiled with warnings.
+2026-10-08T14:23:37.3548153Z 
+2026-10-08T14:23:37.3550960Z [eslint] 
+2026-10-08T14:23:37.3551602Z src/pages/graph/SeriesName.tsx
+2026-10-08T14:23:37.3552453Z   Line 1:21:  'useContext' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-08T14:23:37.3553212Z 
+2026-10-08T14:23:37.3553486Z src/pages/status/Status.tsx
+2026-10-08T14:23:37.3554682Z   Line 130:37:  Expected '!==' and instead saw '!='                                                                                                                                                                                                          eqeqeq
+2026-10-08T14:23:37.3557126Z   Line 133:6:   React Hook useEffect has a missing dependency: 'setAnimateLogo'. Either include it or remove the dependency array. If 'setAnimateLogo' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+2026-10-08T14:23:37.3559065Z 
+2026-10-08T14:23:37.3559463Z Search for the keywords to learn more about each warning.
+2026-10-08T14:23:37.3560222Z To ignore, add // eslint-disable-next-line to the line before.
+2026-10-08T14:23:37.3560773Z 
+2026-10-08T14:23:37.3561018Z File sizes after gzip:
+2026-10-08T14:23:37.3561338Z 
+2026-10-08T14:23:37.4283507Z   496.37 kB  build/static/js/main.43db6efb.js
+2026-10-08T14:23:37.4284491Z   53.76 kB   build/static/css/main.3a01f811.css
+2026-10-08T14:23:37.4285189Z 
+2026-10-08T14:23:37.4290320Z The project was built assuming it is hosted at ./.
+2026-10-08T14:23:37.4291125Z You can control this with the homepage field in your package.json.
+2026-10-08T14:23:37.4292546Z 
+2026-10-08T14:23:37.4292846Z The build folder is ready to be deployed.
+2026-10-08T14:44:39.3763771Z time=2026-10-08T14:44:25.266Z level=INFO source=head.go:761 msg="Replaying on-disk memory mappable chunks if any"
+2026-10-08T14:44:39.3764715Z time=2026-10-08T14:44:25.266Z level=INFO source=head.go:846 msg="On-disk memory mappable chunks replay completed" duration=4.519µs
+2026-10-08T14:44:39.3765597Z time=2026-10-08T14:44:25.267Z level=INFO source=head.go:854 msg="Replaying WAL, this may take a while"
+2026-10-08T14:44:39.3766496Z time=2026-10-08T14:44:25.268Z level=INFO source=head.go:949 msg="WAL segment loaded" segment=0 maxSegment=2 duration=1.330852ms
+2026-10-08T14:44:39.3767344Z time=2026-10-08T14:44:25.269Z level=INFO source=head.go:949 msg="WAL segment loaded" segment=1 maxSegment=2 duration=1.238881ms
+2026-10-08T14:44:39.3768369Z time=2026-10-08T14:44:25.270Z level=INFO source=head.go:949 msg="WAL segment loaded" segment=2 maxSegment=2 duration=380.206µs
+2026-10-08T14:44:39.3770248Z time=2026-10-08T14:44:25.270Z level=INFO source=head.go:986 msg="WAL replay completed" checkpoint_replay_duration=96.74µs wal_replay_duration=3.194784ms wbl_replay_duration=311ns chunk_snapshot_load_duration=0s mmap_chunk_replay_duration=4.519µs total_replay_duration=3.380739ms
+2026-10-08T14:44:39.3771551Z time=2026-10-08T14:44:25.305Z level=INFO source=db.go:2563 msg="Compactions disabled"
+2026-10-08T14:44:39.3772337Z time=2026-10-08T14:44:25.306Z level=INFO source=compact.go:689 msg="write block started" mint=15006 maxt=20000 ulid=01M4DZHZJTCRBW0BSQQ079WETG
+2026-10-08T14:44:39.3773497Z time=2026-10-08T14:44:25.321Z level=INFO source=compact.go:729 msg="write block completed" mint=15006 maxt=20000 ulid=01M4DZHZJTCRBW0BSQQ079WETG duration=15.824561ms ooo=false
+2026-10-08T14:44:39.3774493Z time=2026-10-08T14:44:25.322Z level=INFO source=head.go:1801 msg="Head GC started" caller=truncateMemory
+2026-10-08T14:44:39.3775537Z time=2026-10-08T14:44:25.342Z level=INFO source=head.go:1805 msg="Head GC completed" caller=truncateMemory duration=19.271082ms
+2026-10-08T14:44:39.3776092Z panic: test timed out after 10m0s
+2026-10-08T14:44:39.3776365Z 	running tests:
+2026-10-08T14:44:39.3776722Z 		TestChunkQuerierReadWriteRace_AppendV2 (2s)
+2026-10-08T14:44:39.3777078Z 		TestNoGapAfterRestartWithOOO_AppendV2 (1s)
+2026-10-08T14:44:39.3777567Z 		TestNoGapAfterRestartWithOOO_AppendV2/gauge_int_histogram (0s)
+2026-10-08T14:44:39.3778283Z 		TestNoGapAfterRestartWithOOO_AppendV2/gauge_int_histogram/case=0 (0s)
+2026-10-08T14:44:39.3778883Z 		TestOOOCompactionFailure_AppendV2 (0s)
+2026-10-08T14:44:39.3779257Z 		TestOOOCompactionFailure_AppendV2/gauge_float_histogram (0s)
+2026-10-08T14:44:39.3779630Z 		TestSizeRetention (2s)
+2026-10-08T14:44:39.3779904Z 		TestSizeRetention/enableSTStorage=true (1s)
+2026-10-08T14:44:39.3780210Z 
+2026-10-08T14:44:39.3780328Z goroutine 82409 [running]:
+2026-10-08T14:44:39.3780765Z testing.(*M).startAlarm.func1()
+2026-10-08T14:44:39.3781170Z 	/usr/local/go/src/testing/testing.go:2959 +0x605
+2026-10-08T14:44:39.3781486Z created by time.goFunc
+2026-10-08T14:44:39.3781828Z 	/usr/local/go/src/time/sleep.go:182 +0x45
+2026-10-08T14:44:39.4263563Z testing.(*testState).waitParallel(0xc00051c460)
+2026-10-08T14:44:39.4263900Z 	/usr/local/go/src/testing/testing.go:2377 +0x125
+2026-10-08T14:44:39.4264218Z testing.(*T).Parallel(0xc000343d48)
+2026-10-08T14:44:39.4264516Z 	/usr/local/go/src/testing/testing.go:1958 +0x533
+2026-10-08T14:44:39.4265182Z github.com/prometheus/prometheus/tsdb.testOOOCompactionWithDisabledWriteLog(0xc000343d48, {{0x1a8c450?, 0x4d5d29?}, 0x294aaf0?, 0x294aaf8?})
+2026-10-08T14:44:39.4265873Z 	/__w/prometheus/prometheus/tsdb/db_test.go:6115 +0x77
+2026-10-08T14:44:39.4266402Z github.com/prometheus/prometheus/tsdb.TestOOOCompactionWithDisabledWriteLog.func1(0xc000343d48)
+2026-10-08T14:44:39.4266952Z 	/__w/prometheus/prometheus/tsdb/db_test.go:6109 +0x65
+2026-10-08T14:44:39.4267297Z testing.tRunner(0xc000343d48, 0xc0c80fd080)
+2026-10-08T14:44:39.4267621Z 	/usr/local/go/src/testing/testing.go:2193 +0x21d
+2026-10-08T14:44:39.4267952Z created by testing.(*T).Run in goroutine 12545
+2026-10-08T14:44:39.4268280Z 	/usr/local/go/src/testing/testing.go:2258 +0xb13
+2026-10-08T14:44:39.4268905Z FAIL	github.com/prometheus/prometheus/tsdb	600.369s
+2026-10-08T14:44:39.4269302Z ok  	github.com/prometheus/prometheus/tsdb/agent	362.617s
+2026-10-08T14:44:39.4269695Z ok  	github.com/prometheus/prometheus/tsdb/chunkenc	3.076s
+2026-10-08T14:44:39.4270080Z ok  	github.com/prometheus/prometheus/tsdb/chunks	41.491s
+2026-10-08T14:44:39.4270510Z ?   	github.com/prometheus/prometheus/tsdb/compression	[no test files]
+2026-10-08T14:44:39.4270993Z ?   	github.com/prometheus/prometheus/tsdb/encoding	[no test files]
+2026-10-08T14:44:39.4271414Z ok  	github.com/prometheus/prometheus/tsdb/fileutil	1.041s
+2026-10-08T14:44:39.4271813Z ok  	github.com/prometheus/prometheus/tsdb/goversion	1.013s
+2026-10-08T14:44:39.4272205Z ok  	github.com/prometheus/prometheus/tsdb/index	62.357s
+2026-10-08T14:44:39.4272755Z ok  	github.com/prometheus/prometheus/tsdb/record	1.542s
+2026-10-08T14:44:39.4273145Z ok  	github.com/prometheus/prometheus/tsdb/tombstones	1.030s
+2026-10-08T14:44:39.4273545Z ok  	github.com/prometheus/prometheus/tsdb/tsdbutil	1.052s
+2026-10-08T14:44:39.4273925Z ok  	github.com/prometheus/prometheus/tsdb/wlog	134.727s
+2026-10-08T14:44:39.4274303Z ok  	github.com/prometheus/prometheus/util/almost	1.012s
+2026-10-08T14:44:39.4274702Z ok  	github.com/prometheus/prometheus/util/annotations	1.016s
+2026-10-08T14:44:39.4276543Z ?   	github.com/prometheus/prometheus/util/features	[no test files]
+2026-10-08T14:44:39.4276971Z ok  	github.com/prometheus/prometheus/util/fmtutil	1.015s
+2026-10-08T14:44:39.4277363Z ok  	github.com/prometheus/prometheus/util/fuzzing	2.398s
+2026-10-08T14:44:39.4277767Z ?   	github.com/prometheus/prometheus/util/gate	[no test files]
+2026-10-08T14:44:39.4278318Z ok  	github.com/prometheus/prometheus/util/httputil	1.065s
+2026-10-08T14:44:39.4278973Z ?   	github.com/prometheus/prometheus/util/jsonutil	[no test files]
+2026-10-08T14:44:39.4279514Z ok  	github.com/prometheus/prometheus/util/junitxml	1.013s
+2026-10-08T14:44:39.4279901Z ok  	github.com/prometheus/prometheus/util/kahansum	1.011s
+2026-10-08T14:44:39.4280054Z ok  	github.com/prometheus/prometheus/util/logging	1.214s
+2026-10-08T14:44:39.4280337Z ok  	github.com/prometheus/prometheus/util/namevalidationutil	1.014s
+2026-10-08T14:44:39.4280511Z ok  	github.com/prometheus/prometheus/util/netconnlimit	1.621s
+2026-10-08T14:44:39.4280676Z ok  	github.com/prometheus/prometheus/util/notifications	1.341s
+2026-10-08T14:44:39.4280851Z ?   	github.com/prometheus/prometheus/util/osutil	[no test files]
+2026-10-08T14:44:39.4280999Z ok  	github.com/prometheus/prometheus/util/pool	1.016s
+2026-10-08T14:44:39.4281147Z ok  	github.com/prometheus/prometheus/util/runtime	1.016s
+2026-10-08T14:44:39.4281319Z ?   	github.com/prometheus/prometheus/util/runutil	[no test files]
+2026-10-08T14:44:39.4281467Z ok  	github.com/prometheus/prometheus/util/stats	1.050s
+2026-10-08T14:44:39.4281615Z ok  	github.com/prometheus/prometheus/util/strutil	2.647s
+2026-10-08T14:44:39.4281798Z ?   	github.com/prometheus/prometheus/util/testrecord	[no test files]
+2026-10-08T14:44:39.4281964Z ok  	github.com/prometheus/prometheus/util/teststorage	1.059s
+2026-10-08T14:44:39.4282137Z ?   	github.com/prometheus/prometheus/util/testutil	[no test files]
+2026-10-08T14:44:39.4282420Z ok  	github.com/prometheus/prometheus/util/testwal	1.035s
+2026-10-08T14:44:39.4282728Z ?   	github.com/prometheus/prometheus/util/treecache	[no test files]
+2026-10-08T14:44:39.4282965Z ok  	github.com/prometheus/prometheus/util/zeropool	2.915s
+2026-10-08T14:44:39.4283179Z ok  	github.com/prometheus/prometheus/web	18.142s
+2026-10-08T14:44:39.4283448Z ?   	github.com/prometheus/prometheus/web/api/testhelpers	[no test files]
+2026-10-08T14:44:39.4283743Z ok  	github.com/prometheus/prometheus/web/api/v1	45.832s
+2026-10-08T14:44:39.4283985Z ?   	github.com/prometheus/prometheus/web/ui	[no test files]
+2026-10-08T14:44:39.4284079Z FAIL
+2026-10-08T14:44:40.8613290Z make: *** [Makefile.common:182: common-test] Error 1
+2026-10-08T14:44:40.8704710Z ##[error]Process completed with exit code 2.

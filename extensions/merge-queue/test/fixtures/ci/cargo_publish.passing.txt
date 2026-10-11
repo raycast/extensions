@@ -1,0 +1,26 @@
+2026-10-08T17:36:48.3135870Z env:
+2026-10-08T17:36:48.3136240Z   UV_LOCKED: 1
+2026-10-08T17:36:48.3136621Z   CARGO_INCREMENTAL: 0
+2026-10-08T17:36:48.3137042Z   CARGO_NET_RETRY: 10
+2026-10-08T17:36:48.3137436Z   CARGO_PROFILE_DEV_LTO: false
+2026-10-08T17:36:48.3137879Z   CARGO_PROFILE_DEV_OPT_LEVEL: 0
+2026-10-08T17:36:48.3138301Z   CARGO_TERM_COLOR: always
+2026-10-08T17:36:48.3138713Z   HAWK_VERSION: 0.1.15
+2026-10-08T17:36:48.3139109Z   RUSTUP_MAX_RETRIES: 10
+2026-10-08T17:36:48.3139510Z   PACKAGE_NAME: ruff
+2026-10-08T17:37:15.9793150Z ##[group]Run cargo publish --workspace --dry-run
+2026-10-08T17:37:15.9793687Z [36;1mcargo publish --workspace --dry-run[0m
+2026-10-08T17:37:15.9808407Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-08T17:37:18.0065690Z   [1m[94m|[0m
+2026-10-08T17:37:38.7111101Z [1m[92m   Compiling[0m ruff_python_literal v0.0.16
+2026-10-08T17:37:42.9575846Z [1m[92m   Compiling[0m ruff_python_codegen v0.0.16
+2026-10-08T17:37:48.7379335Z [1m[92m   Compiling[0m ruff_db v0.0.16
+2026-10-08T17:37:52.0927690Z [1m[92m   Compiling[0m ruff_python_edits v0.0.16
+2026-10-08T17:37:52.6791669Z [1m[92m   Compiling[0m ruff_python_importer v0.0.16
+2026-10-08T17:37:53.4368681Z [1m[92m   Compiling[0m ruff_ranged_value v0.0.16
+2026-10-08T17:38:12.5442818Z [1m[92m   Compiling[0m ty_module_resolver v0.0.16
+2026-10-08T17:38:12.5443179Z [1m[92m   Compiling[0m ty_site_packages v0.0.16
+2026-10-08T17:39:21.3599469Z [1m[92m   Compiling[0m ty_vendored v0.0.16
+2026-10-08T17:39:24.1863651Z [1m[92m   Compiling[0m ty_combine v0.0.16
+2026-10-08T17:39:30.9672364Z [1m[92m   Compiling[0m ty_python_core v0.0.16
+2026-10-08T17:39:32.4202116Z [1m[92m   Compiling[0m ty_python_semantic v0.0.16 (/home/runner/work/ruff/ruff/target/package/ty_python_semantic-0.0.16)

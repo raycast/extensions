@@ -1,0 +1,33 @@
+2026-10-07T14:02:01.9863341Z ##[group]Run uv run --locked --no-default-groups --group dev tox run -e typing
+2026-10-07T14:02:01.9864022Z [36;1muv run --locked --no-default-groups --group dev tox run -e typing[0m
+2026-10-07T14:02:02.0098382Z shell: /usr/bin/bash -e {0}
+2026-10-07T14:02:02.0099212Z env:
+2026-10-07T14:02:02.0099540Z   UV_PYTHON_INSTALL_DIR: /home/runner/work/_temp/uv-python-dir
+2026-10-07T14:02:02.0100200Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+2026-10-07T14:02:02.0100592Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.7/x64
+2026-10-07T14:02:02.0101028Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.7/x64/lib/pkgconfig
+2026-10-07T14:02:02.0101466Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.7/x64
+2026-10-07T14:02:02.0101852Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.7/x64
+2026-10-07T14:02:02.0102265Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.7/x64
+2026-10-07T14:02:02.0102660Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.7/x64/lib
+2026-10-07T14:02:02.0103036Z ##[endgroup]
+2026-10-07T14:02:03.3229192Z Using CPython 3.14.7 interpreter at: /opt/hostedtoolcache/Python/3.14.7/x64/bin/python3
+2026-10-07T14:02:03.3229739Z Creating virtual environment at: .venv
+2026-10-07T14:02:03.3286051Z    Building flask @ file:///home/runner/work/flask/flask
+2026-10-07T14:02:04.5423477Z       Built flask @ file:///home/runner/work/flask/flask
+2026-10-07T14:02:04.5517222Z Installed 23 packages in 8ms
+2026-10-07T14:02:06.6201275Z typing: venv> .venv/bin/uv venv -p /home/runner/work/flask/flask/.venv/bin/python --allow-existing '--prompt=flask[typing]' --python-preference system /home/runner/work/flask/flask/.tox/typing
+2026-10-07T14:02:06.6989105Z typing: uv-sync> .venv/bin/uv sync --locked --python-preference system --no-default-groups --no-editable --reinstall-package Flask --group typing -p /home/runner/work/flask/flask/.venv/bin/python
+2026-10-07T14:02:07.9858527Z typing: freeze> .venv/bin/uv --color never pip freeze
+2026-10-07T14:02:08.0010716Z typing: asgiref==3.12.1,ast-serialize==0.6.0,blinker==1.9.0,cffi==2.1.0,click==8.4.2,cryptography==49.0.0,flask @ file:///home/runner/work/flask/flask,iniconfig==2.3.0,itsdangerous==2.2.0,jinja2==3.1.6,librt==0.13.0,markupsafe==3.0.3,mypy==2.3.0,mypy-extensions==1.1.0,nodeenv==1.10.0,packaging==26.2,pathspec==1.1.1,pluggy==1.6.0,pycparser==3.0,pygments==2.20.0,pyright==1.1.411,pytest==9.1.1,python-dotenv==1.2.2,types-contextvars==2.4.7.3,types-dataclasses==0.6.6,typing-extensions==4.16.0,werkzeug==3.1.8
+2026-10-07T14:02:08.0013506Z typing: commands[0]> mypy
+2026-10-07T14:02:09.0770745Z src/flask/app.py:206: error: Incompatible types in assignment (expression has
+2026-10-07T14:02:09.0771705Z type "Mapping[str, Any]", base class "App" defined the type as "dict[str, Any]")
+2026-10-07T14:02:09.0772574Z  [assignment]
+2026-10-07T14:02:09.0772984Z         default_config: cabc.Mapping[str, t.Any] = {
+2026-10-07T14:02:09.0773500Z                                                    ^
+2026-10-07T14:02:09.1745382Z Found 1 error in 1 file (checked 27 source files)
+2026-10-07T14:02:09.1823366Z typing: exit 1 (1.18 seconds) /home/runner/work/flask/flask> mypy pid=2591
+2026-10-07T14:02:09.1828706Z   typing: FAIL code 1 (2.57=setup[1.39]+cmd[1.18] seconds)
+2026-10-07T14:02:09.1829303Z   evaluation failed :( (2.65 seconds)
+2026-10-07T14:02:09.2494196Z ##[error]Process completed with exit code 1.

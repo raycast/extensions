@@ -1,0 +1,34 @@
+2026-10-07T06:18:22.3162182Z env:
+2026-10-07T06:18:22.3162405Z   RUSTFLAGS: -Dwarnings
+2026-10-07T06:18:22.3162647Z   RUST_BACKTRACE: 1
+2026-10-07T06:18:22.3162907Z   RUSTUP_WINDOWS_PATH_ADD_BIN: 1
+2026-10-07T06:18:22.3163193Z   rust_stable: stable
+2026-10-07T06:18:22.3163449Z   rust_nightly: nightly-2025-10-12
+2026-10-07T06:18:23.2551759Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-07T06:18:32.1245763Z ##[group]Run cargo clippy --workspace --tests --no-deps --features $TOKIO_STABLE_FEATURES
+2026-10-07T06:18:32.1246394Z [36;1mcargo clippy --workspace --tests --no-deps --features $TOKIO_STABLE_FEATURES[0m
+2026-10-07T06:18:32.1246956Z [36;1m# Removing the tokio workspace patch to check without path dependencies[0m
+2026-10-07T06:18:32.1247364Z [36;1m# (if not specified differently in the crate)[0m
+2026-10-07T06:18:32.1247744Z [36;1mperl -0 -i.bak -pe 's/\[patch\.crates-io\].+\n\[/[/s' Cargo.toml[0m
+2026-10-07T06:18:32.1248430Z [36;1mcargo clippy --workspace --exclude tokio --tests --no-deps --features $TOKIO_STABLE_FEATURES[0m
+2026-10-07T06:18:33.1141187Z [1m[32m  Downloaded[0m mio v1.2.4
+2026-10-07T06:18:33.9004488Z [1m[32m   Compiling[0m libc v0.2.190
+2026-10-07T06:18:35.2360736Z [1m[32m    Checking[0m errno v0.3.14
+2026-10-07T06:18:35.2649656Z [1m[32m    Checking[0m parking_lot v0.12.5
+2026-10-07T06:18:35.2789338Z [1m[32m    Checking[0m signal-hook-registry v1.4.8
+2026-10-07T06:18:35.3459427Z [1m[32m    Checking[0m mio v1.2.4
+2026-10-07T06:18:35.3516375Z [1m[32m    Checking[0m socket2 v0.6.5
+2026-10-07T06:18:36.6279115Z [1m[32m    Checking[0m tempfile v3.27.0
+2026-10-07T06:18:37.5979864Z [1m[32m    Checking[0m tokio v1.53.2 (/home/runner/work/tokio/tokio/tokio)
+2026-10-07T06:18:42.4897717Z [1m[32m    Checking[0m tokio-util v0.7.19 (/home/runner/work/tokio/tokio/tokio-util)
+2026-10-07T06:18:43.4881893Z [1m[32m    Checking[0m tokio-stream v0.1.19 (/home/runner/work/tokio/tokio/tokio-stream)
+2026-10-07T06:18:43.9608936Z [1m[32m    Checking[0m tokio-test v0.4.6 (/home/runner/work/tokio/tokio/tokio-test)
+2026-10-07T06:18:55.4222863Z [1m[32m  Downloaded[0m tokio-util v0.7.19
+2026-10-07T06:18:55.4497062Z [1m[32m  Downloaded[0m tokio v1.53.2
+2026-10-07T06:18:55.5798865Z [1m[32m   Compiling[0m tokio-macros v2.7.2
+2026-10-07T06:18:56.1523449Z [1m[32m    Checking[0m parking_lot_core v0.9.12
+2026-10-07T06:18:56.2604452Z [1m[32m    Checking[0m getrandom v0.4.3
+2026-10-07T06:18:56.3158562Z [1m[32m    Checking[0m tokio v1.53.2
+2026-10-07T06:18:58.0006888Z [1m[32m    Checking[0m tokio-stream v0.1.19
+2026-10-07T06:18:58.0026182Z [1m[32m    Checking[0m tokio-util v0.7.19
+2026-10-07T06:18:58.1999309Z [1m[32m    Checking[0m tokio-test v0.4.6

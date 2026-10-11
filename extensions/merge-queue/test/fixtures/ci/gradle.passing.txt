@@ -1,0 +1,51 @@
+2026-10-08T11:12:27.6020727Z env:
+2026-10-08T11:12:27.6020888Z   JAVA_HOME: C:\hostedtoolcache\windows\Java_Liberica_jdk\25.0.4-9\x64
+2026-10-08T11:12:27.6022369Z   JAVA_HOME_27_X64: C:\hostedtoolcache\windows\Java_Liberica_jdk\27.0.0-36\x64
+2026-10-08T11:12:27.6022843Z   MAVEN_ARGS: -ntp
+2026-10-08T11:12:35.2509333Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2026-10-08T11:12:35.2509507Z   GRADLE_USER_HOME: D:\a\.gradle
+2026-10-08T11:12:35.2509657Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2026-10-08T11:12:35.2522933Z   DEVELOCITY_ACCESS_KEY: ***
+2026-10-08T11:12:35.2534326Z   GRADLE_ENTERPRISE_ACCESS_KEY: ***
+2026-10-08T11:12:36.4092760Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-08T11:12:40.2597624Z ##[group]Run ./gradlew build
+2026-10-08T11:12:40.2597799Z [36;1m./gradlew build[0m
+2026-10-08T11:16:55.6417519Z                ^
+2026-10-08T11:16:55.8223062Z > Task :build-plugin:spring-boot-gradle-plugin:nodeSetup
+2026-10-08T11:17:07.7294396Z > Task :platform:spring-boot-dependencies:createResolvedBom
+2026-10-08T11:17:10.7165506Z > Task :build-plugin:spring-boot-maven-plugin:syncHelpMojoInputs
+2026-10-08T11:17:20.5181825Z > Task :build-plugin:spring-boot-antlib:integrationTest
+2026-10-08T11:17:20.5190926Z Trying to override old definition of task fail
+2026-10-08T11:17:20.5204867Z Trying to override old definition of datatype resources
+2026-10-08T11:17:20.5205363Z Trying to override old definition of task buildnumber
+2026-10-08T11:17:25.9161255Z > Task :test-support:spring-boot-test-support:extractLegalResources
+2026-10-08T11:17:25.9161698Z > Task :test-support:spring-boot-test-support:jar
+2026-10-08T11:17:25.9162155Z > Task :buildpack:spring-boot-buildpack-platform:javadocJar
+2026-10-08T11:17:26.0149322Z > Task :buildpack:spring-boot-buildpack-platform:sourcesJar
+2026-10-08T11:17:26.0149788Z > Task :buildpack:spring-boot-buildpack-platform:generateMetadataFileForMavenPublication
+2026-10-08T11:17:26.0150211Z > Task :buildpack:spring-boot-buildpack-platform:generatePomFileForMavenPublication
+2026-10-08T11:17:26.0150602Z > Task :buildpack:spring-boot-buildpack-platform:publishMavenPublicationToProjectRepository
+2026-10-08T11:17:27.5313722Z > Task :configuration-metadata:spring-boot-configuration-processor:processResources
+2026-10-08T11:17:27.5314650Z > Task :configuration-metadata:spring-boot-configuration-processor:classes
+2026-10-08T11:17:27.5328999Z > Task :configuration-metadata:spring-boot-configuration-processor:extractLegalResources
+2026-10-08T11:17:27.5330095Z > Task :configuration-metadata:spring-boot-configuration-processor:jar
+2026-10-08T11:17:27.5330793Z > Task :core:spring-boot:checkKotlinGradlePluginConfigurationErrors SKIPPED
+2026-10-08T11:17:27.6158982Z > Task :core:spring-boot:syncJavaTemplates
+2026-10-08T11:17:45.4304598Z > Task :core:spring-boot:processResources
+2026-10-08T11:17:57.3488122Z > Task :module:spring-boot-micrometer-observation:processResources
+2026-10-08T11:17:57.3488624Z > Task :module:spring-boot-opentelemetry:processResources
+2026-10-08T11:17:57.3489074Z > Task :module:spring-boot-persistence:processResources
+2026-10-08T11:18:23.5693798Z > Task :build-plugin:spring-boot-gradle-plugin:antora
+2026-10-08T11:19:16.0228559Z > Task :module:spring-boot-web-server:compileJava
+2026-10-08T11:19:16.8442350Z > Task :build-plugin:spring-boot-maven-plugin:antora
+2026-10-08T11:19:23.9233142Z > Task :module:spring-boot-opentelemetry:compileJava
+2026-10-08T11:19:25.5216902Z > Task :module:spring-boot-persistence:compileJava
+2026-10-08T11:19:27.9319271Z > Task :module:spring-boot-actuator:compileJava
+2026-10-08T12:18:23.9896257Z gradle/actions: Writing build results to D:\a\_temp\.gradle-actions\build-results\build-1791457968623.json
+2026-10-08T12:18:23.9897445Z [Incubating] Problems report is available at: file:///D:/a/spring-boot/spring-boot/build/reports/problems/problems-report.html
+2026-10-08T12:18:23.9898234Z Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+2026-10-08T12:18:23.9898942Z You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+2026-10-08T12:18:23.9899905Z For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+2026-10-08T12:18:23.9900785Z 8896 actionable tasks: 8878 executed, 18 from cache
+2026-10-08T12:18:24.5881023Z Publishing Build Scan to Develocity...
+2026-10-08T12:18:24.7886565Z gradle/actions: Writing build results to D:\a\_temp\.gradle-actions\build-scans\build-1791457968623.json

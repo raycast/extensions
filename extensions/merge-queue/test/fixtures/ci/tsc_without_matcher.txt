@@ -1,0 +1,51 @@
+2026-10-08T17:22:43.4758626Z ##[group]Run pnpm types-and-precompiled
+2026-10-08T17:22:43.4758983Z [36;1mpnpm types-and-precompiled[0m
+2026-10-08T17:22:43.4789618Z shell: /usr/bin/bash -le {0}
+2026-10-08T17:22:43.4789879Z env:
+2026-10-08T17:22:43.4790073Z   NAPI_CLI_VERSION: 3.4.1
+2026-10-08T17:22:43.4790306Z   TURBO_VERSION: 2.9.4
+2026-10-08T17:22:43.4790656Z   TURBO_ARGS: -v --env-mode loose --remote-cache-timeout 300 --log-order stream
+2026-10-08T17:22:43.4791052Z   NODE_LTS_VERSION: 20.9.0
+2026-10-08T17:22:43.4791283Z   TEST_CONCURRENCY: 8
+2026-10-08T17:22:43.4791519Z   TURBO_TASKS_AVAILABLE_PARALLELISM: 4
+2026-10-08T17:22:43.4791789Z   RUST_BACKTRACE: 0
+2026-10-08T17:22:43.4792036Z   TURBO_TEAM: vtest314-next-adapter-e2e-tests
+2026-10-08T17:22:43.4792337Z   TURBO_CACHE: local:rw,remote:rw
+2026-10-08T17:22:45.5657309Z @next/third-parties:typescript: > @next/third-parties@16.5.0-canary.4 typescript /home/runner/work/next.js/next.js/packages/third-parties
+2026-10-08T17:22:45.5657985Z @next/third-parties:typescript: > tsc --noEmit -p tsconfig.json
+2026-10-08T17:22:45.5658348Z @next/third-parties:typescript: 
+2026-10-08T17:22:45.5747235Z @next/playwright:typescript: cache hit, replaying logs a2ded85952013365
+2026-10-08T17:22:45.5747648Z @next/playwright:typescript: 
+2026-10-08T17:22:45.5748209Z @next/playwright:typescript: > @next/playwright@16.5.0-canary.4 typescript /home/runner/work/next.js/next.js/packages/next-playwright
+2026-10-08T17:22:45.5748858Z @next/playwright:typescript: > tsc --noEmit -p tsconfig.json
+2026-10-08T17:22:45.5749211Z @next/playwright:typescript: 
+2026-10-08T17:22:45.8055129Z //:typescript: 
+2026-10-08T17:22:45.8055739Z //:typescript: > nextjs-project@0.0.0 typescript /home/runner/work/next.js/next.js
+2026-10-08T17:22:45.8056761Z //:typescript: > tsc --noEmit
+2026-10-08T17:22:45.8057026Z //:typescript: 
+2026-10-08T17:22:46.1758151Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-closure/input.tsx(1,22): error TS2307: Cannot find module './values' or its corresponding type declarations.
+2026-10-08T17:22:46.1759584Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-closure/input.tsx(2,26): error TS2307: Cannot find module './unrelated' or its corresponding type declarations.
+2026-10-08T17:22:46.1760928Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-closure/output.tsx(5,93): error TS2307: Cannot find module './values' or its corresponding type declarations.
+2026-10-08T17:22:46.1762271Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-closure/output.tsx(6,26): error TS2307: Cannot find module './unrelated' or its corresponding type declarations.
+2026-10-08T17:22:46.1764204Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-fallback/input.js(1,22): error TS2307: Cannot find module './values' or its corresponding type declarations.
+2026-10-08T17:22:46.1765681Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-fallback/input.js(2,27): error TS2307: Cannot find module './unrelated' or its corresponding type declarations.
+2026-10-08T17:22:46.1767021Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-fallback/input.js(21,17): error TS2307: Cannot find module './values' or its corresponding type declarations.
+2026-10-08T17:22:46.1768353Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-fallback/output.js(4,400): error TS2307: Cannot find module './values' or its corresponding type declarations.
+2026-10-08T17:22:46.1769723Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-fallback/output.js(5,27): error TS2307: Cannot find module './unrelated' or its corresponding type declarations.
+2026-10-08T17:22:46.1771061Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-fallback/output.js(33,19): error TS2307: Cannot find module './values' or its corresponding type declarations.
+2026-10-08T17:22:46.1772369Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-file/input.ts(3,31): error TS2307: Cannot find module './values' or its corresponding type declarations.
+2026-10-08T17:22:46.1773666Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-file/output.ts(4,31): error TS2307: Cannot find module './values' or its corresponding type declarations.
+2026-10-08T17:22:46.1774980Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-imports/input.js(2,51): error TS2307: Cannot find module './values' or its corresponding type declarations.
+2026-10-08T17:22:46.1776431Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-imports/input.js(3,28): error TS2307: Cannot find module './namespace' or its corresponding type declarations.
+2026-10-08T17:22:46.1777768Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-imports/input.js(4,27): error TS2307: Cannot find module './unrelated' or its corresponding type declarations.
+2026-10-08T17:22:46.1779099Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-imports/output.js(5,122): error TS2307: Cannot find module './values' or its corresponding type declarations.
+2026-10-08T17:22:46.1780431Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-imports/output.js(6,28): error TS2307: Cannot find module './namespace' or its corresponding type declarations.
+2026-10-08T17:22:46.1782065Z crates/next-custom-transforms/tests/fixture/server-actions/server-graph/turbopack/cache-imports/output.js(7,27): error TS2307: Cannot find module './unrelated' or its corresponding type declarations.
+2026-10-08T17:22:47.1734969Z  ELIFECYCLE  Command failed with exit code 123.
+2026-10-08T17:22:47.2146399Z  ELIFECYCLE  Command failed.
+2026-10-08T17:22:47.2153015Z //:typescript:  ELIFECYCLE  Command failed.
+2026-10-08T17:22:47.2164391Z  ELIFECYCLE  Command failed.
+2026-10-08T17:22:47.2365128Z  ERROR  run failed: command  exited (1)
+2026-10-08T17:22:47.2431681Z ERROR: "check-compiler-fixtures" exited with 123.
+2026-10-08T17:22:47.2568174Z  ELIFECYCLE  Command failed with exit code 1.
+2026-10-08T17:22:47.2793914Z ##[error]Process completed with exit code 1.
