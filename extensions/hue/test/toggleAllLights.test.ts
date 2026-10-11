@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import ToggleAllLights from "../src/toggleAllLights";
 import { useHueResources } from "../src/hooks/useHue";
-import { BRIDGE_CONFIG_KEY } from "../src/helpers/constants";
+import { BRIDGE_CONFIG_KEY, RESOURCES_CACHE_NAMESPACE } from "../src/helpers/constants";
 import { caches, environment, LaunchType, preferences, showHUD, storage, updateCommandMetadata } from "./raycast-stub";
 import { BRIDGE_ID, closedAddress, type FakeBridge, html, json, resources, startBridge, USERNAME } from "./fakeBridge";
 import { mdns } from "./mocks/bonjour";
@@ -110,7 +110,7 @@ it("sets the subtitle to the lights that are on after toggling", async () => {
   expect(updateCommandMetadata).toHaveBeenCalledWith({ subtitle: "All lights are off" });
 });
 
-it("caches the resources where useHueResources reads them", async () => {
+it("caches the resources where useHueResources reads them, and only those", async () => {
   const bridge = await startBridge();
   storage.set(BRIDGE_CONFIG_KEY, JSON.stringify(bridge.config));
   environment.launchType = LaunchType.Background;
@@ -122,4 +122,5 @@ it("caches the resources where useHueResources reads them", async () => {
     const cached = caches.get(options?.cacheNamespace ?? "")?.get(key);
     expect(JSON.parse(cached ?? "null"), key).toEqual(fixtures[key as keyof typeof fixtures]);
   }
+  expect([...caches.get(RESOURCES_CACHE_NAMESPACE)!.keys()].sort()).toEqual(reads.map(([key]) => key).sort());
 });

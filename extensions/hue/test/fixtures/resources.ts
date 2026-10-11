@@ -1,6 +1,6 @@
 // Resources from a real bridge, anonymised: fake UUIDs (except Hue's public scene images), English names, fake scene
 // keys and recall times. Typed literals, so tsc checks the types against real responses.
-import type { GroupedLight, Light, Room, Scene, Zone } from "../../src/lib/types";
+import type { GroupedLight, Light, Room, Scene, Zone, ZigbeeConnectivity } from "../../src/lib/types";
 
 export const lights: Light[] = [
   {
@@ -4684,5 +4684,221 @@ export const scenes: Scene[] = [
       source: "clip",
     },
     type: "scene",
+  },
+];
+
+export const zigbeeConnectivity: ZigbeeConnectivity[] = [
+  {
+    id: "00000000-0000-4000-8000-000000000075",
+    id_v1: "/lights/9",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000002",
+      rtype: "device",
+    },
+    status: "connected",
+    mac_address: "00:17:88:01:00:00:00:01",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000076",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000077",
+      rtype: "device",
+    },
+    status: "connected",
+    mac_address: "00:17:88:01:00:00:00:02",
+    channel: {
+      status: "set",
+      value: "channel_25",
+    },
+    extended_pan_id: "0000000000000001",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000078",
+    id_v1: "/lights/3",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000008",
+      rtype: "device",
+    },
+    status: "connectivity_issue",
+    mac_address: "00:17:88:01:00:00:00:03",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000079",
+    id_v1: "/lights/1",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000024",
+      rtype: "device",
+    },
+    status: "connectivity_issue",
+    mac_address: "00:17:88:01:00:00:00:04",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000080",
+    id_v1: "/lights/14",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000006",
+      rtype: "device",
+    },
+    status: "connected",
+    mac_address: "00:17:88:01:00:00:00:05",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000081",
+    id_v1: "/lights/2",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000016",
+      rtype: "device",
+    },
+    status: "connectivity_issue",
+    mac_address: "00:17:88:01:00:00:00:06",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000082",
+    id_v1: "/lights/12",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000012",
+      rtype: "device",
+    },
+    status: "connected",
+    mac_address: "00:17:88:01:00:00:00:07",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000083",
+    id_v1: "/lights/17",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000032",
+      rtype: "device",
+    },
+    status: "connectivity_issue",
+    mac_address: "00:17:88:01:00:00:00:08",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000084",
+    id_v1: "/lights/11",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000028",
+      rtype: "device",
+    },
+    status: "connected",
+    mac_address: "00:17:88:01:00:00:00:09",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000085",
+    id_v1: "/sensors/2",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000086",
+      rtype: "device",
+    },
+    status: "connected",
+    mac_address: "00:17:88:01:00:00:00:10",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000087",
+    id_v1: "/lights/16",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000026",
+      rtype: "device",
+    },
+    status: "connected",
+    mac_address: "00:17:88:01:00:00:00:11",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000088",
+    id_v1: "/lights/5",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000030",
+      rtype: "device",
+    },
+    status: "connected",
+    mac_address: "00:17:88:01:00:00:00:12",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000089",
+    id_v1: "/lights/15",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000004",
+      rtype: "device",
+    },
+    status: "connected",
+    mac_address: "00:17:88:01:00:00:00:13",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000090",
+    id_v1: "/sensors/32",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000091",
+      rtype: "device",
+    },
+    status: "connected",
+    mac_address: "00:17:88:01:00:00:00:14",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000092",
+    id_v1: "/lights/7",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000010",
+      rtype: "device",
+    },
+    status: "connected",
+    mac_address: "00:17:88:01:00:00:00:15",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000093",
+    id_v1: "/lights/6",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000014",
+      rtype: "device",
+    },
+    status: "connected",
+    mac_address: "00:17:88:01:00:00:00:16",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000094",
+    id_v1: "/lights/10",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000020",
+      rtype: "device",
+    },
+    status: "connectivity_issue",
+    mac_address: "00:17:88:01:00:00:00:17",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000095",
+    id_v1: "/lights/4",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000018",
+      rtype: "device",
+    },
+    status: "connected",
+    mac_address: "00:17:88:01:00:00:00:18",
+    type: "zigbee_connectivity",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000096",
+    id_v1: "/lights/13",
+    owner: {
+      rid: "00000000-0000-4000-8000-000000000022",
+      rtype: "device",
+    },
+    status: "connected",
+    mac_address: "00:17:88:01:00:00:00:19",
+    type: "zigbee_connectivity",
   },
 ];

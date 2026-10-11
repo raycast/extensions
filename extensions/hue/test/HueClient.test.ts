@@ -4,7 +4,7 @@ import HueClient, { UnauthorizedError } from "../src/lib/HueClient";
 import { createHueClient } from "../src/lib/hueBridge";
 import type { HueEvent } from "../src/lib/types";
 import { type FakeBridge, html, json, type Route, startBridge } from "./fakeBridge";
-import { lights, rooms, scenes, zones } from "./fixtures/resources";
+import { lights, rooms, scenes, zigbeeConnectivity, zones } from "./fixtures/resources";
 import { sleeps } from "./mocks/timersPromises";
 
 const event = (type: HueEvent["type"], data: HueEvent["data"]): HueEvent => ({
@@ -107,11 +107,11 @@ describe("listenToEventSource", () => {
 });
 
 describe("getResources", () => {
-  it("fetches rooms, zones, scenes and lights one at a time, in that order", async () => {
+  it("fetches rooms, zones, scenes, Zigbee connectivity and lights one at a time, in that order", async () => {
     const { bridge, hueClient } = await connect();
-    expect(await hueClient.getResources()).toEqual({ rooms, zones, scenes, lights });
+    expect(await hueClient.getResources()).toEqual({ rooms, zones, scenes, zigbeeConnectivity, lights });
     expect(requestsAfterConnecting(bridge).map(({ path }) => path)).toEqual(
-      ["room", "zone", "scene", "light"].map((type) => `/clip/v2/resource/${type}`),
+      ["room", "zone", "scene", "zigbee_connectivity", "light"].map((type) => `/clip/v2/resource/${type}`),
     );
     expect(bridge.maxInFlight).toBe(1);
   });

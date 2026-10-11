@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useCachedState, usePromise } from "@raycast/utils";
-import { DeepPartial, HueResource, Light, Room, Scene, Zone } from "../lib/types";
+import { DeepPartial, HueResource, Light, Room, Scene, ZigbeeConnectivity, Zone } from "../lib/types";
 import { useMachine } from "@xstate/react";
 import { hueBridgeMachine } from "../lib/hueBridgeMachine";
 import HueClient from "../lib/HueClient";
@@ -20,13 +20,29 @@ export function useHueResources() {
   const [rooms, setRooms] = useCachedState("rooms", [] as Room[], cache);
   const [zones, setZones] = useCachedState("zones", [] as Zone[], cache);
   const [scenes, setScenes] = useCachedState("scenes", [] as Scene[], cache);
-  return { lights, setLights, rooms, setRooms, zones, setZones, scenes, setScenes };
+  const [zigbeeConnectivity, setZigbeeConnectivity] = useCachedState(
+    "zigbeeConnectivity",
+    [] as ZigbeeConnectivity[],
+    cache,
+  );
+  return {
+    lights,
+    setLights,
+    rooms,
+    setRooms,
+    zones,
+    setZones,
+    scenes,
+    setScenes,
+    zigbeeConnectivity,
+    setZigbeeConnectivity,
+  };
 }
 
 export type Hue = ReturnType<typeof useHue>;
 
 export function useHue() {
-  const { setRooms, setZones, ...resources } = useHueResources();
+  const { setRooms, setZones, setZigbeeConnectivity, ...resources } = useHueResources();
   const { setLights, setScenes } = resources;
 
   const [hueBridgeState, send, hueBridgeActor] = useMachine(hueBridgeMachine);
@@ -46,6 +62,7 @@ export function useHue() {
       apply("room", setRooms);
       apply("zone", setZones);
       apply("scene", setScenes);
+      apply("zigbee_connectivity", setZigbeeConnectivity);
     });
     return () => {
       stopListening();
@@ -56,11 +73,12 @@ export function useHue() {
   // Unlink or a relink replaces the client while its fetch may still be running, and usePromise drops that result.
   const { isLoading, revalidate } = usePromise((hueClient: HueClient) => hueClient.getResources(), [hueClient!], {
     execute: hueClient !== undefined,
-    onData: ({ lights, rooms, zones, scenes }) => {
+    onData: ({ lights, rooms, zones, scenes, zigbeeConnectivity }) => {
       setLights(lights);
       setRooms(rooms);
       setZones(zones);
       setScenes(scenes);
+      setZigbeeConnectivity(zigbeeConnectivity);
     },
     onError: (error) =>
       void showToast({

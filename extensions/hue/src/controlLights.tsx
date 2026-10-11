@@ -7,7 +7,7 @@ import BrightnessActions from "./components/BrightnessActions";
 import { Hue, useHue } from "./hooks/useHue";
 import { useInputRateLimiter } from "./hooks/useInputRateLimiter";
 import { calculateAdjustedColorTemperature, hexToXy } from "./helpers/colors";
-import { getLightsFromGroup, getMiredFromLight } from "./helpers/hueResources";
+import { getLightsFromGroup, getMiredFromLight, isReachable } from "./helpers/hueResources";
 import { byName } from "./helpers/collections";
 import { applyUpdate, getIconForColor } from "./helpers/raycast";
 import { createLightIcon } from "./helpers/svgImages";
@@ -42,6 +42,11 @@ function LightItem(props: { light: Light; group: Group; hue: Hue; canExecute: ()
     <Grid.Item
       title={props.light.metadata.name}
       content={createLightIcon(props.light)}
+      accessory={
+        isReachable(props.light, props.hue.zigbeeConnectivity)
+          ? undefined
+          : { icon: Icon.WifiDisabled, tooltip: "Unreachable" }
+      }
       keywords={[props.group.metadata.name]}
       actions={
         <ActionPanel>

@@ -1227,7 +1227,52 @@ export type Zone = GroupBase & {
 
 export type Group = Room | Zone;
 
-export type HueResource = Light | GroupedLight | Scene | Room | Zone;
+export type ZigbeeConnectivity = {
+  type: "zigbee_connectivity";
+
+  /**
+   * Unique identifier representing a specific resource instance
+   */
+  id: string;
+
+  /**
+   * Clip v1 resource identifier
+   */
+  id_v1?: string;
+
+  /**
+   * Owner of the service. If the owner is deleted, the service is deleted too.
+   */
+  owner: ResourceIdentifier;
+
+  /**
+   * connected: the device has recently been available. connectivity_issue: the device is powered off or has network
+   * issues. unidirectional_incoming: the device only talks to the bridge. pending_discovery: the device is expected to
+   * be added to the network soon.
+   */
+  status: "connected" | "disconnected" | "connectivity_issue" | "unidirectional_incoming" | "pending_discovery";
+
+  /**
+   * Unique identifier of a Zigbee device on the network
+   */
+  mac_address: string;
+
+  channel?: {
+    status: "set" | "changing";
+
+    /**
+     * Current Zigbee channel. If recently changed, the channel it is changing to.
+     */
+    value?: "channel_11" | "channel_15" | "channel_20" | "channel_25" | "not_configured";
+  };
+
+  /**
+   * Extended pan ID of the Zigbee network
+   */
+  extended_pan_id?: string;
+};
+
+export type HueResource = Light | GroupedLight | Scene | Room | Zone | ZigbeeConnectivity;
 
 type ChangedResource<R> = R extends HueResource ? Pick<R, "id" | "type"> & DeepPartial<R> : never;
 

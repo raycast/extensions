@@ -78,6 +78,9 @@ export async function startBridge({
     "GET /clip/v2/resource/room": authorized((s) => json(s, 200, resources(fixtures.rooms))),
     "GET /clip/v2/resource/zone": authorized((s) => json(s, 200, resources(fixtures.zones))),
     "GET /clip/v2/resource/scene": authorized((s) => json(s, 200, resources(fixtures.scenes))),
+    "GET /clip/v2/resource/zigbee_connectivity": authorized((s) =>
+      json(s, 200, resources(fixtures.zigbeeConnectivity)),
+    ),
     "PUT /clip/v2/resource/": authorized((s, _, h) => {
       const [rtype, rid] = String(h[":path"]).split("/").slice(-2);
       json(s, 200, resources([{ rid, rtype }]));

@@ -1,4 +1,4 @@
-import { DeepPartial, Group, GroupedLight, Id, Light, Palette, Scene } from "../lib/types";
+import { DeepPartial, Group, GroupedLight, Id, Light, Palette, Scene, ZigbeeConnectivity } from "../lib/types";
 import { miredToHexString, xyToMired, xyToRgbHexString } from "./colors";
 import { MIRED_DEFAULT } from "./constants";
 import { byName } from "./collections";
@@ -11,6 +11,10 @@ export function getLightsFromGroup(lights: Light[], group: Group): Light[] {
     }),
   );
 }
+
+// The bridge tracks connectivity per device, which owns both the light and its zigbee_connectivity.
+export const isReachable = (light: Light, zigbeeConnectivity: ZigbeeConnectivity[]) =>
+  (zigbeeConnectivity.find(({ owner }) => owner.rid === light.owner.rid)?.status ?? "connected") === "connected";
 
 export type GroupedLightState = Pick<GroupedLight, "id" | "on" | "dimming">;
 

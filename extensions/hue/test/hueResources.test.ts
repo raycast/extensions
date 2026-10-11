@@ -9,9 +9,10 @@ import {
   getLightsFromGroup,
   getSceneChanges,
   getScenesFromGroup,
+  isReachable,
 } from "../src/helpers/hueResources";
-import type { DeepPartial, Light, Room, Scene, Xy } from "../src/lib/types";
-import { lights, rooms, scenes, zones } from "./fixtures/resources";
+import type { DeepPartial, Light, Room, Scene, Xy, ZigbeeConnectivity } from "../src/lib/types";
+import { lights, rooms, scenes, zigbeeConnectivity, zones } from "./fixtures/resources";
 
 type Action = Scene["actions"][number]["action"];
 type Palette = NonNullable<Scene["palette"]>;
@@ -66,6 +67,42 @@ describe("getLightsFromGroup", () => {
 
   it("finds none for a room without lights", () => {
     expect(getLightsFromGroup(lights, named(rooms, "Hallway"))).toEqual([]);
+  });
+});
+
+describe("isReachable", () => {
+  const pendant = named(lights, "Kitchen pendant");
+  const connectivity = (status: ZigbeeConnectivity["status"], rid = pendant.owner.rid): ZigbeeConnectivity => ({
+    id: "connectivity",
+    owner: { rid, rtype: "device" },
+    status,
+    mac_address: "00:17:88:01:00:00:00:99",
+    type: "zigbee_connectivity",
+  });
+
+  it("finds the lights whose devices have connectivity issues", () => {
+    expect(names(lights.filter((light) => !isReachable(light, zigbeeConnectivity)))).toEqual([
+      "Living room spot 3",
+      "Living room spot 2",
+      "Studio ceiling lamp",
+      "Living room spot 1",
+      "Living room floor lamp 4",
+    ]);
+  });
+
+  it.each([
+    ["connected", true],
+    ["disconnected", false],
+    ["connectivity_issue", false],
+    ["unidirectional_incoming", false],
+    ["pending_discovery", false],
+  ] as const)("is %s → %s", (status, reachable) => {
+    expect(isReachable(pendant, [connectivity(status)])).toBe(reachable);
+  });
+
+  it("is reachable without connectivity for its device", () => {
+    expect(isReachable(pendant, [])).toBe(true);
+    expect(isReachable(pendant, [connectivity("disconnected", "another-device")])).toBe(true);
   });
 });
 
