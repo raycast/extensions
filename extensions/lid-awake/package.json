@@ -1,0 +1,155 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lid-awake",
+  "title": "Lid Awake",
+  "description": "Keep your Mac awake with the lid closed, with auto-off timers and a low battery cutoff.",
+  "icon": "extension-icon.png",
+  "author": "o101k",
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "preferences": [
+    {
+      "name": "batteryThreshold",
+      "type": "dropdown",
+      "title": "Low Battery Cutoff",
+      "description": "Turn off automatically when running on battery below this level",
+      "required": false,
+      "default": "20",
+      "data": [
+        {
+          "title": "Off",
+          "value": "0"
+        },
+        {
+          "title": "5%",
+          "value": "5"
+        },
+        {
+          "title": "10%",
+          "value": "10"
+        },
+        {
+          "title": "15%",
+          "value": "15"
+        },
+        {
+          "title": "20%",
+          "value": "20"
+        },
+        {
+          "title": "25%",
+          "value": "25"
+        },
+        {
+          "title": "30%",
+          "value": "30"
+        },
+        {
+          "title": "40%",
+          "value": "40"
+        },
+        {
+          "title": "50%",
+          "value": "50"
+        }
+      ]
+    },
+    {
+      "name": "defaultDuration",
+      "type": "dropdown",
+      "title": "Default Duration",
+      "description": "Used by Toggle Lid Awake",
+      "required": false,
+      "default": "60",
+      "data": [
+        {
+          "title": "30 Minutes",
+          "value": "30"
+        },
+        {
+          "title": "1 Hour",
+          "value": "60"
+        },
+        {
+          "title": "2 Hours",
+          "value": "120"
+        },
+        {
+          "title": "4 Hours",
+          "value": "240"
+        },
+        {
+          "title": "Indefinitely",
+          "value": "0"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "setup",
+      "title": "Set up Lid Awake",
+      "description": "Install or remove the passwordless rule that lets Lid Awake toggle sleep",
+      "mode": "view"
+    },
+    {
+      "name": "start",
+      "title": "Keep Awake with Lid Closed",
+      "subtitle": "Lid Awake",
+      "description": "Pick how long to keep the Mac awake with the lid closed",
+      "mode": "view"
+    },
+    {
+      "name": "stop",
+      "title": "Allow Sleep",
+      "subtitle": "Lid Awake",
+      "description": "Turn Lid Awake off and let the Mac sleep normally",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Lid Awake",
+      "description": "Turn Lid Awake on for the default duration, or off",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Lid Awake Menu Bar",
+      "description": "Shows Lid Awake status and turns it off when the timer ends, the battery is low, or after a restart",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3"
+  }
+}
