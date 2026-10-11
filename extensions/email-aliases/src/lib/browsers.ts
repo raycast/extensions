@@ -87,21 +87,6 @@ tell application "${app}"
 end tell`;
 }
 
-function windowActiveUrlsScript(app: string, flavour: ScriptFlavour): string {
-  const field = flavour === "chromium" ? "URL of active tab of w" : "URL of current tab of w";
-  return `set rs to (ASCII character 30)
-set out to ""
-if application "${app}" is not running then return ""
-tell application "${app}"
-  repeat with w in windows
-    try
-      set out to out & (${field}) & rs
-    end try
-  end repeat
-end tell
-return out`;
-}
-
 function allTabsScript(app: string, flavour: ScriptFlavour): string {
   const body =
     flavour === "chromium"
@@ -178,67 +163,48 @@ export async function activeTabsFromBrowserExtension(): Promise<TabInfo[]> {
   }
 }
 
-/** How often each URL is the active tab of a window of a running AppleScript browser. */
-async function activeUrlsOfAppleScriptBrowsers(): Promise<Map<string, number>> {
-  const counts = new Map<string, number>();
-  for (const appName of await runningBrowsers()) {
-    try {
-      const raw = await runAppleScript(windowActiveUrlsScript(appName, APPLESCRIPT_BROWSERS[appName]), {
-        timeout: 10_000,
-      });
-      raw
-        .split(RECORD_SEPARATOR)
-        .map((url) => url.trim())
-        .filter(Boolean)
-        .forEach((url) => counts.set(url, (counts.get(url) ?? 0) + 1));
-    } catch {
-      // A browser that does not answer adds nothing to compare against.
-    }
-  }
-  return counts;
-}
-
 /**
- * Picks the tab from the browser extension's candidates, or throws.
+ * Whether any browser other than `target` is running. Unknown counts as yes.
  *
- * The extension API carries no browser or window identity, so candidates are
- * never filtered by guessing who they belong to: removing one could remove the
- * very tab the user is looking at. Several candidates with the same URL are the
- * same link and count once; different URLs are ambiguous.
- *
- * When the tab must come from a browser without AppleScript (Firefox, Zen …),
- * a single candidate is only taken if it cannot be an AppleScript browser's tab
- * in disguise: its URL is not open there, or the extension reports it more
- * often than the AppleScript browsers have it open.
+ * Process names are compared against the known browser lists and never used
+ * to abort the lookup: a preferred browser whose process has another name
+ * (Tor Browser runs as "firefox") still works.
  */
-async function pickExtensionTab(candidates: TabInfo[], target?: string): Promise<TabInfo | undefined> {
-  if (candidates.length === 0) return undefined;
-  const urls = new Set(candidates.map((tab) => tab.url));
-  if (urls.size > 1) throw new AmbiguousTabError(candidates, "windows");
-
-  const tab = candidates[0];
-  if (target && isMac()) {
-    const openInAppleScript = (await activeUrlsOfAppleScriptBrowsers()).get(tab.url) ?? 0;
-    if (openInAppleScript >= candidates.length) {
-      throw new AmbiguousTabError(candidates, "unattributed", target);
-    }
-  }
-  return tab;
-}
-
-/** Whether an app with this name is running, browser or not. */
-async function isAppRunning(appName: string): Promise<boolean> {
-  if (!isMac()) return true;
+async function otherBrowsersRunning(target: string): Promise<boolean> {
+  if (!isMac()) return false;
   try {
     const raw = await runAppleScript(
       'tell application "System Events" to return name of every application process whose background only is false',
       { timeout: 10_000 },
     );
-    return raw.split(",").some((name) => name.trim() === appName);
+    return raw
+      .split(",")
+      .map((name) => name.trim())
+      .some((name) => name && name !== target && (isKnownBrowser(name) || isExtensionOnlyBrowser(name)));
   } catch {
-    // Unknown: do not block the lookup on a failed check.
     return true;
   }
+}
+
+/**
+ * Picks the tab from the browser extension's candidates, or throws.
+ *
+ * The extension API carries no browser or window identity, so a candidate is
+ * never attributed to a browser by its URL. Several candidates with the same
+ * URL are the same link and count once; different URLs are ambiguous.
+ *
+ * When the tab must come from a browser without AppleScript (Firefox, Zen …),
+ * a candidate is only taken if no other browser is running that could have
+ * reported it. Otherwise the user picks.
+ */
+async function pickExtensionTab(candidates: TabInfo[], target?: string): Promise<TabInfo | undefined> {
+  if (candidates.length === 0) return undefined;
+  const urls = new Set(candidates.map((tab) => tab.url));
+  if (urls.size > 1) throw new AmbiguousTabError(candidates, "windows");
+  if (target && (await otherBrowsersRunning(target))) {
+    throw new AmbiguousTabError(candidates, "unattributed", target);
+  }
+  return candidates[0];
 }
 
 /**
@@ -323,7 +289,7 @@ export class AmbiguousTabError extends Error {
       reason === "browsers"
         ? `${names} are all open and none of them is in front, and macOS does not say which one you used last. Pick the site yourself, or set a preferred browser in the extension preferences.`
         : reason === "unattributed"
-          ? `The browser extension reports one tab, but the same page is also open in another browser, and the extension does not say which browser a tab belongs to. Pick the site yourself, or check that the Raycast browser extension is running in ${target ?? "your browser"}.`
+          ? `The browser extension does not say which browser a tab belongs to, and other browsers are running besides ${target ?? "yours"}. Pick the site yourself, or quit the other browsers.`
           : `${candidates.length} browser windows report an active tab, and the browser extension does not say which one has the focus. Pick the site yourself, or close the windows you don't need.`,
     );
     this.name = "AmbiguousTabError";
@@ -360,10 +326,6 @@ export async function getActiveTab(options: LookupOptions): Promise<TabInfo> {
   }
   const useAppleScript = options.browserSource !== "extension" && isMac() && !preferredNeedsExtension;
   const useExtension = options.browserSource !== "applescript";
-
-  if (preferredNeedsExtension && !(await isAppRunning(preferred!))) {
-    throw new NoTabError(`${preferred} is not running. Open it, or pick a different preferred browser.`);
-  }
 
   // Looked up once, before any AppleScript runs (see tabsFromRunningBrowsers).
   const frontApp = !preferred && isMac() ? await frontmostApp() : undefined;
