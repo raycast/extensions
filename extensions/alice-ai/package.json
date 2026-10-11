@@ -48,20 +48,44 @@
         {
           "name": "model",
           "title": "Model",
-          "description": "Select Custom Action Model",
+          "description": "Select the model for Custom Action. Models marked '(thinking)' support Reasoning Level.",
           "type": "dropdown",
-          "default": "gpt-4o-mini",
+          "default": "gpt-6-luna",
           "data": [
             {
-              "title": "GPT-5.4",
+              "title": "GPT-6 Luna (thinking)",
+              "value": "gpt-6-luna"
+            },
+            {
+              "title": "GPT-6.1 Sol (thinking)",
+              "value": "gpt-6.1-sol"
+            },
+            {
+              "title": "GPT-6 Astra (thinking)",
+              "value": "gpt-6-astra"
+            },
+            {
+              "title": "GPT-5.6 Sol (thinking)",
+              "value": "gpt-5.6-sol"
+            },
+            {
+              "title": "GPT-5.6 Terra (thinking)",
+              "value": "gpt-5.6-terra"
+            },
+            {
+              "title": "GPT-5.6 Luna (thinking)",
+              "value": "gpt-5.6-luna"
+            },
+            {
+              "title": "GPT-5.4 (thinking)",
               "value": "gpt-5.4"
             },
             {
-              "title": "GPT-5.4 Mini",
+              "title": "GPT-5.4 Mini (thinking)",
               "value": "gpt-5.4-mini"
             },
             {
-              "title": "GPT-5.4 Nano",
+              "title": "GPT-5.4 Nano (thinking)",
               "value": "gpt-5.4-nano"
             },
             {
@@ -73,28 +97,86 @@
               "value": "gpt-4o-mini"
             },
             {
-              "title": "Gemini 3 Flash Preview",
+              "title": "Gemini 3.8 Flash (thinking)",
+              "value": "gemini-3.8-flash"
+            },
+            {
+              "title": "Gemini 3.6 Flash (thinking)",
+              "value": "gemini-3.6-flash"
+            },
+            {
+              "title": "Gemini 3.5 Flash-Lite (thinking)",
+              "value": "gemini-3.5-flash-lite"
+            },
+            {
+              "title": "Gemini 3.1 Flash-Lite (thinking)",
+              "value": "gemini-3.1-flash-lite"
+            },
+            {
+              "title": "Gemini 3.1 Pro Preview (thinking)",
+              "value": "gemini-3.1-pro-preview"
+            },
+            {
+              "title": "Gemini 3 Flash Preview (thinking)",
               "value": "gemini-3-flash-preview"
             },
             {
-              "title": "Gemini 3 Pro Preview",
-              "value": "gemini-3-pro-preview"
-            },
-            {
-              "title": "Gemini 2.5 Flash",
+              "title": "Gemini 2.5 Flash (thinking)",
               "value": "gemini-2.5-flash"
             },
             {
-              "title": "Gemini 2.5 Flash-Lite",
+              "title": "Gemini 2.5 Flash-Lite (thinking)",
               "value": "gemini-2.5-flash-lite"
             }
           ],
           "required": true
         },
         {
+          "name": "reasoningLevel",
+          "title": "Reasoning Level",
+          "description": "Controls how much thinking models marked '(thinking)' do before answering. Higher levels can help with difficult tasks, but take longer and use more tokens. With Model Default, Alice AI sends no explicit reasoning level, so the model uses its own default thinking setting. This default can differ between models. Off disables thinking when supported. Other models ignore this setting; unsupported levels use Model Default.",
+          "type": "dropdown",
+          "default": "default",
+          "data": [
+            {
+              "title": "Model Default",
+              "value": "default"
+            },
+            {
+              "title": "Off",
+              "value": "none"
+            },
+            {
+              "title": "Minimal",
+              "value": "minimal"
+            },
+            {
+              "title": "Low",
+              "value": "low"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "High",
+              "value": "high"
+            },
+            {
+              "title": "Extra High",
+              "value": "xhigh"
+            },
+            {
+              "title": "Maximum",
+              "value": "max"
+            }
+          ],
+          "required": false
+        },
+        {
           "name": "temperature",
           "title": "Temperature",
-          "description": "Custom Action Temperature (value between 0.0 and 1.0)",
+          "description": "Controls how varied the answers are. Enter 0.0 to 1.0: lower values make wording more consistent; higher values make it more varied. Used by Gemini and OpenAI models without thinking. OpenAI thinking models ignore it unless Reasoning Level is Off and the model supports turning thinking off.",
           "type": "textfield",
           "default": "0.7",
           "required": true
@@ -102,7 +184,7 @@
         {
           "name": "maxTokens",
           "title": "Max Tokens",
-          "description": "Custom Action Max Tokens to be generated (set -1 for unlimited)",
+          "description": "The maximum number of tokens to generate. Set -1 for unlimited.",
           "type": "textfield",
           "default": "-1",
           "required": true
@@ -133,30 +215,33 @@
     }
   ],
   "dependencies": {
-    "@ai-sdk/google": "^1.2.22",
-    "@ai-sdk/openai": "^1.3.24",
-    "@raycast/api": "^1.69.0",
-    "@raycast/utils": "^1.14.0",
+    "@ai-sdk/google": "^4.0.93",
+    "@ai-sdk/openai": "^4.0.91",
+    "@raycast/api": "2.7.3",
+    "@raycast/utils": "^2.3.2",
     "@reduxjs/toolkit": "^2.2.3",
-    "ai": "^4.3.16",
-    "zod": "^3.23.8",
-    "zustand": "^4.5.4"
+    "ai": "^7.0.137",
+    "zod": "^3.25.76",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
     "@types/react": "19.0.10",
-    "eslint": "^8.51.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.12.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
   "scripts": {
-    "build": "ray build",
+    "build": "ray build --environment dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish",
-    "pull": "npx @raycast/api@latest pull-contributions"
+    "publish": "ray publish",
+    "pull": "ray pull-contributions",
+    "bundle": "ray bundle --output release/alice-ai.rayext",
+    "test": "node --test tests/*.test.cjs"
   },
   "platforms": [
     "macOS"

@@ -1,58 +1,14 @@
 import { Action, ActionPanel, Color, Detail, Icon, Keyboard } from "@raycast/api";
-import { streamText } from "ai";
-import type { CoreMessage } from "ai";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useCost } from "../hooks";
-import { getModel, getModelName } from "../lib/OpenAI";
+import { ReasoningLevels, getModelName, getReasoningLevel, isReasoningModel } from "../lib/OpenAI";
+import { generateActionResponse } from "../lib/generateActionResponse";
 import { useHistoryState } from "../store/history";
 import { Action as StoreAction } from "../types";
 
 interface Props {
   action: StoreAction;
   prompt: string;
-}
-
-interface UsageShape {
-  inputTokens?: number;
-  outputTokens?: number;
-  totalTokens?: number;
-  promptTokens?: number | null;
-  completionTokens?: number | null;
-  raw?: Record<string, unknown>;
-}
-
-function estimateTokenCount(text: string): number {
-  // Lightweight fallback approximation for GPT tokenization.
-  return Math.max(1, Math.round(text.length / 4));
-}
-
-function toValidNumber(value: unknown): number | undefined {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
-}
-
-function normalizeUsage(usage: UsageShape): UsageShape {
-  const inputTokens = toValidNumber(usage.inputTokens) ?? toValidNumber(usage.promptTokens);
-  const outputTokens = toValidNumber(usage.outputTokens) ?? toValidNumber(usage.completionTokens);
-  const totalTokens = toValidNumber(usage.totalTokens);
-
-  return {
-    inputTokens,
-    outputTokens,
-    totalTokens,
-    raw: usage.raw,
-  };
-}
-
-function readUsageFromRaw(raw: Record<string, unknown> | undefined): Pick<UsageShape, "inputTokens" | "outputTokens" | "totalTokens"> {
-  if (!raw) {
-    return {};
-  }
-
-  const inputTokens = (raw.inputTokens ?? raw.promptTokens ?? raw.prompt_tokens) as number | undefined;
-  const outputTokens = (raw.outputTokens ?? raw.completionTokens ?? raw.completion_tokens) as number | undefined;
-  const totalTokens = (raw.totalTokens ?? raw.total_tokens) as number | undefined;
-
-  return { inputTokens, outputTokens, totalTokens };
 }
 
 export default function ExecuteAction({ action, prompt }: Props) {
@@ -79,96 +35,40 @@ export default function ExecuteAction({ action, prompt }: Props) {
 
     setError("");
     setResult("");
+    setInputTokens(0);
+    setOutputTokens(0);
+    setTotalTokens(0);
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    const messages: CoreMessage[] = [
-      {
-        role: "system",
-        content: action.systemPrompt,
-      },
-      {
-        role: "user",
-        content: prompt,
-      },
-    ];
-
     try {
       setIsStreaming(true);
+      const response = await generateActionResponse(action, prompt, controller.signal, setResult);
+      setInputTokens(response.tokens.input);
+      setOutputTokens(response.tokens.output);
+      setTotalTokens(response.tokens.total);
 
-      let usageFromFinish: UsageShape | undefined;
-      let finishPartUsage: UsageShape | undefined;
-      const response = streamText({
-        model: getModel(action.model),
-        messages,
-        temperature: parseFloat(action.temperature),
-        maxTokens: +action.maxTokens === -1 ? undefined : +action.maxTokens,
-        abortSignal: controller.signal,
-        onFinish: (event) => {
-          const finishEvent = event as { usage?: UsageShape; totalUsage?: UsageShape };
-          usageFromFinish = (finishEvent.totalUsage ?? finishEvent.usage) as UsageShape | undefined;
-        },
-      });
-
-      let generatedText = "";
-      for await (const part of response.fullStream) {
-        const streamPart = part as {
-          type?: string;
-          text?: string;
-          textDelta?: string;
-          totalUsage?: UsageShape;
-        };
-
-        if (streamPart.type === "text") {
-          const textChunk = streamPart.text ?? "";
-          generatedText += textChunk;
-          setResult((prev) => prev + textChunk);
-        }
-
-        if (streamPart.type === "text-delta") {
-          const textChunk = streamPart.textDelta ?? "";
-          generatedText += textChunk;
-          setResult((prev) => prev + textChunk);
-        }
-
-        if (streamPart.type === "finish") {
-          finishPartUsage = streamPart.totalUsage;
-        }
+      if (response.text.length > 0) {
+        addHistoryItem({
+          action,
+          timestamp: Date.now(),
+          prompt,
+          result: response.text,
+          tokens: response.tokens,
+        });
       }
-
-      const usageSource = response as unknown as {
-        totalUsage?: Promise<{ inputTokens?: number; outputTokens?: number; totalTokens?: number }>;
-        usage?: Promise<{ inputTokens?: number; outputTokens?: number; totalTokens?: number }>;
-      };
-      const usage = normalizeUsage(
-        (finishPartUsage ?? usageFromFinish ?? (await usageSource.totalUsage) ?? (await usageSource.usage) ?? {}) as UsageShape,
-      );
-      const rawUsage = readUsageFromRaw(usage.raw);
-      const total = usage.totalTokens ?? rawUsage.totalTokens ?? 0;
-
-      let input = usage.inputTokens ?? rawUsage.inputTokens ?? 0;
-      let output = usage.outputTokens ?? rawUsage.outputTokens ?? 0;
-
-      if (total > 0 && input === 0 && output === 0) {
-        output = Math.min(total, estimateTokenCount(generatedText));
-        input = Math.max(0, total - output);
-      }
-
-      setInputTokens(input);
-      setOutputTokens(output);
-      setTotalTokens(total || rawUsage.totalTokens || input + output);
     } catch (e) {
-      const error = e as Error;
-      if (error.name !== "AbortError") {
-        setError(`## ⚠️ Error Encountered\n### ${error.message}`);
+      if (!controller.signal.aborted) {
+        const message = e instanceof Error ? e.message : String(e);
+        setError(`## ⚠️ Error Encountered\n### ${message}`);
       }
     } finally {
       setIsStreaming(false);
       abortControllerRef.current = null;
       generateLock.current = false;
     }
-  }, [action, prompt]);
+  }, [action, prompt, addHistoryItem]);
 
   useEffect(() => {
     if (hasStartedRef.current) {
@@ -178,22 +78,6 @@ export default function ExecuteAction({ action, prompt }: Props) {
     hasStartedRef.current = true;
     generateResponse();
   }, [generateResponse]);
-
-  useEffect(() => {
-    if (!isStreaming && error.length === 0 && result.length > 0) {
-      addHistoryItem({
-        action: action!,
-        timestamp: Date.now(),
-        prompt,
-        result,
-        tokens: {
-          input: inputTokens,
-          output: outputTokens,
-          total: totalTokens,
-        },
-      });
-    }
-  }, [result, isStreaming]);
 
   let markdown = result;
   if (error.length > 0) {
@@ -214,6 +98,9 @@ export default function ExecuteAction({ action, prompt }: Props) {
           <Detail.Metadata.TagList title="Model">
             <Detail.Metadata.TagList.Item text={getModelName(action.model)} color={Color.SecondaryText} />
           </Detail.Metadata.TagList>
+          {isReasoningModel(action.model) && (
+            <Detail.Metadata.Label title="Reasoning Level" text={ReasoningLevels[getReasoningLevel(action.model, action.reasoningLevel)]} />
+          )}
           <Detail.Metadata.Label title="Input Tokens" text={inputTokens.toString()} />
           <Detail.Metadata.Label title="Output Tokens" text={outputTokens.toString()} />
           <Detail.Metadata.Label title="Total Tokens" text={totalTokens.toString()} />

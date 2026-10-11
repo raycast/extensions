@@ -15,6 +15,16 @@ interface AppleScriptError {
   stderr: string;
 }
 
+function isValidAction(action: Action): boolean {
+  const textFields: (keyof Action)[] = ["id", "name", "description", "systemPrompt", "model", "color", "temperature", "maxTokens"];
+  return (
+    !!action &&
+    textFields.every((field) => typeof action[field] === "string") &&
+    typeof action.favorite === "boolean" &&
+    (action.reasoningLevel === undefined || typeof action.reasoningLevel === "string")
+  );
+}
+
 export default class Backup {
   public static async export(): Promise<void> {
     const actions = useActionsState.getState().actions;
@@ -80,8 +90,16 @@ export default class Backup {
       try {
         const { name, actions, version } = JSON.parse(res) as BackupData;
 
-        if (name !== "alice-ai-config" && version === undefined) {
-          throw new Error("Invalid backup file.");
+        const currentVersion = useActionsState.persist.getOptions().version ?? 0;
+        if (
+          name !== "alice-ai-config" ||
+          !Number.isInteger(version) ||
+          version < 1 ||
+          version > currentVersion ||
+          !Array.isArray(actions) ||
+          !actions.every(isValidAction)
+        ) {
+          throw new Error("Invalid or unsupported backup file. Your saved actions have not been changed.");
         }
 
         const actionState = {
