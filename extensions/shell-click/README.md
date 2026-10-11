@@ -18,7 +18,7 @@ The extension finds your installed app automatically. If you keep it elsewhere, 
 - Filter all commands, running commands, listening ports, or a Shell Click workspace.
 - Open a command’s terminal or editor in Shell Click; start, stop, restart, or delete saved commands.
 - Copy working-folder paths or open folders in another app.
-- Inspect listening ports and stop their processes after confirmation.
+- Open listening ports in your default browser with Return, or stop their processes after confirmation.
 - Open Shell Click’s Commands and Settings tabs.
 
 Workspaces come from Shell Click; they are not generated automatically from folder paths. The extension uses the same saved commands and sessions as the app.
@@ -27,7 +27,7 @@ Workspaces come from Shell Click; they are not generated automatically from fold
 
 | Shortcut | Action |
 | --- | --- |
-| Return | Open the selected item’s actions |
+| Return | Open command actions, or open the selected port in your browser |
 | ⌘ Return | Start or stop the selected command |
 | ⌘ R | Refresh |
 | Escape | Go back |

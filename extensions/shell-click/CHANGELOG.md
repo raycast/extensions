@@ -5,4 +5,4 @@
 - Add the companion extension for [Shell Click](https://shellclick.dev).
 - Search saved commands and filter by running state, workspace, or listening ports.
 - Start, stop, and restart commands; open terminals and edit commands in Shell Click.
-- Inspect and stop listening processes with confirmation.
+- Open listening ports in the default browser with Return; stop processes with confirmation.

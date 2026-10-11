@@ -244,6 +244,10 @@ export default function Palette() {
                   ]}
                   actions={
                     <ActionPanel>
+                      <Action.OpenInBrowser
+                        title="Open"
+                        url={`http://localhost:${port.port}`}
+                      />
                       {[false, true].map((force) => (
                         <Action
                           key={String(force)}
