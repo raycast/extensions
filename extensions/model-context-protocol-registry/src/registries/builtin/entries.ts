@@ -124,6 +124,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "blawgy",
+    title: "Blawgy",
+    description:
+      "Run your SEO blog from Raycast. Read Search Console traffic, rankings and indexing, run keyword research, manage the content plan, write, update and publish articles to WordPress, Shopify, Webflow, Wix, Framer, Ghost or Duda. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or an API key. Paid Blawgy plan required.",
+    icon: "https://blawgy.com/favicon-512.png",
+    homepage: "https://blawgy.com/mcp",
+    remoteUrl: "https://app.blawgy.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.blawgy.com/mcp"],
+    },
+  },
+  {
     name: "boim",
     title: "BOIM (보임)",
     description:
