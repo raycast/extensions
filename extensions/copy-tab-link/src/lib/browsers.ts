@@ -251,8 +251,14 @@ export async function getActiveTab(options: LookupOptions): Promise<TabInfo> {
   // A preferred browser without AppleScript support (Firefox, Zen …) can only be
   // read through the browser extension, so the other browsers must not be asked.
   const preferredNeedsExtension = Boolean(preferred) && !isKnownBrowser(preferred!);
+  if (preferredNeedsExtension && options.browserSource === "applescript") {
+    // Honour "AppleScript only" instead of quietly using the integration the user turned off.
+    throw new NoTabError(
+      `${preferred} does not support AppleScript, but the extension is set to read tabs through AppleScript only. Set the source preference to Automatic or Raycast browser extension, or pick a different preferred browser.`,
+    );
+  }
   const useAppleScript = options.browserSource !== "extension" && isMac() && !preferredNeedsExtension;
-  const useExtension = options.browserSource !== "applescript" || preferredNeedsExtension;
+  const useExtension = options.browserSource !== "applescript";
 
   if (useAppleScript) {
     if (preferred) {
