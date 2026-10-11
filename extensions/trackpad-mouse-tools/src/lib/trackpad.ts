@@ -1,3 +1,4 @@
+import { LocalStorage } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -157,6 +158,7 @@ function trackpadGesture(key: string, onValue: number, fallback: number) {
 
 // --- Finger count for swipe gestures (full-screen apps horizontal, Mission Control vertical)
 
+type Axis = "Horiz" | "Vert";
 type FingerChoice = "three" | "four" | "off";
 const FINGER_CHOICES: Choice[] = [
   { value: "three", title: "Three Fingers" },
@@ -164,7 +166,7 @@ const FINGER_CHOICES: Choice[] = [
   { value: "off", title: "Off" },
 ];
 
-async function readFingers(axis: "Horiz" | "Vert"): Promise<FingerChoice> {
+async function readFingers(axis: Axis): Promise<FingerChoice> {
   const three = asNum(await readTrackpad(`TrackpadThreeFinger${axis}SwipeGesture`), 2);
   const four = asNum(await readTrackpad(`TrackpadFourFinger${axis}SwipeGesture`), 2);
   if (three === 2) return "three";
@@ -172,7 +174,7 @@ async function readFingers(axis: "Horiz" | "Vert"): Promise<FingerChoice> {
   return "off";
 }
 
-async function writeFingers(axis: "Horiz" | "Vert", v: FingerChoice) {
+async function writeFingers(axis: Axis, v: FingerChoice) {
   // Three-finger drag occupies three fingers, so fall back to four like macOS does.
   if (v === "three" && asBool(await readTrackpad("TrackpadThreeFingerDrag"))) v = "four";
   await writeTrackpad(`TrackpadThreeFinger${axis}SwipeGesture`, "int", v === "three" ? 2 : 0);
@@ -180,6 +182,34 @@ async function writeFingers(axis: "Horiz" | "Vert", v: FingerChoice) {
   if (axis === "Vert") {
     await writeDefault(DOCK, "showMissionControlGestureEnabled", "bool", v !== "off");
   }
+}
+
+/**
+ * Swipes that three-finger drag moved from three to four fingers. Only these go back to three fingers when
+ * drag is turned off again; swipes the user put on four fingers themselves stay there.
+ */
+const MOVED_SWIPES_KEY = "swipes-moved-by-drag";
+
+async function readMovedSwipes(): Promise<Axis[]> {
+  try {
+    const raw = await LocalStorage.getItem<string>(MOVED_SWIPES_KEY);
+    const list = raw ? (JSON.parse(raw) as unknown) : [];
+    return Array.isArray(list) ? list.filter((a): a is Axis => a === "Horiz" || a === "Vert") : [];
+  } catch {
+    return [];
+  }
+}
+
+async function saveMovedSwipes(axes: Axis[]) {
+  if (axes.length === 0) await LocalStorage.removeItem(MOVED_SWIPES_KEY);
+  else await LocalStorage.setItem(MOVED_SWIPES_KEY, JSON.stringify(axes));
+}
+
+/** A swipe the user sets explicitly is theirs again: drag must not move it back later. */
+async function writeSwipeChoice(axis: Axis, v: FingerChoice) {
+  await writeFingers(axis, v);
+  const moved = await readMovedSwipes();
+  if (moved.includes(axis)) await saveMovedSwipes(moved.filter((a) => a !== axis));
 }
 
 // --- Dragging style (Accessibility → Pointer Control → Trackpad Options)
@@ -203,16 +233,22 @@ async function writeDragStyle(v: DragStyle) {
   await writeTrackpad("TrackpadThreeFingerDrag", "bool", v === "three-finger");
   await writeTrackpad("Dragging", "bool", v === "tap" || v === "tap-lock");
   await writeTrackpad("DragLock", "bool", v === "tap-lock");
-  if (v === "three-finger") {
-    // Move three-finger swipes to four fingers, as macOS does.
+  if (v === "three-finger" && !wasThreeFinger) {
+    // Move three-finger swipes to four fingers, as macOS does, and remember which ones moved.
+    const moved: Axis[] = [];
     for (const axis of ["Horiz", "Vert"] as const) {
-      if ((await readFingers(axis)) === "three") await writeFingers(axis, "four");
+      if ((await readFingers(axis)) === "three") {
+        await writeFingers(axis, "four");
+        moved.push(axis);
+      }
     }
-  } else if (wasThreeFinger) {
-    // Three fingers are free again, so swipes that moved to four fingers go back, as macOS does.
-    for (const axis of ["Horiz", "Vert"] as const) {
+    await saveMovedSwipes(moved);
+  } else if (v !== "three-finger" && wasThreeFinger) {
+    // Three fingers are free again: only the swipes drag moved go back to three fingers.
+    for (const axis of await readMovedSwipes()) {
       if ((await readFingers(axis)) === "four") await writeFingers(axis, "three");
     }
+    await saveMovedSwipes([]);
   }
 }
 
@@ -427,7 +463,7 @@ export const SETTINGS: Setting[] = [
     choices: FINGER_CHOICES,
     defaultValue: "three",
     read: () => readFingers("Horiz"),
-    write: (v) => writeFingers("Horiz", v as FingerChoice),
+    write: (v) => writeSwipeChoice("Horiz", v as FingerChoice),
     restartDock: true,
   },
   {
@@ -439,7 +475,7 @@ export const SETTINGS: Setting[] = [
     choices: FINGER_CHOICES,
     defaultValue: "three",
     read: () => readFingers("Vert"),
-    write: (v) => writeFingers("Vert", v as FingerChoice),
+    write: (v) => writeSwipeChoice("Vert", v as FingerChoice),
     restartDock: true,
   },
   {
