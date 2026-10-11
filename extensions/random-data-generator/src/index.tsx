@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Action, ActionPanel, Icon, Keyboard, List, LocalStorage, useNavigation } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
@@ -32,6 +32,9 @@ export default function FakerList() {
   const [locale, setLocale] = useState(fakerClient.locale);
   const [fakerItems, setFakerItems] = useState<Item[]>([]);
   const [customItems, setCustomItems] = useState<CustomItem[]>([]);
+  // Last list written to LocalStorage and the pending write, so changes apply one at a time to the latest list.
+  const storedCustomItems = useRef<CustomItem[]>([]);
+  const customItemsWrite = useRef<Promise<unknown>>(Promise.resolve());
   const [pinnedRefs, setPinnedRefs] = useState<PinnedRef[]>([]);
   const [searchText, setSearchText] = useState("");
 
@@ -62,7 +65,7 @@ export default function FakerList() {
   // instead of keeping a selection made before the Pinned section appeared above it.
   useEffect(() => {
     const init = async () => {
-      const [storedLocale, storedPinnedRefs, storedCustomItems] = await Promise.all([
+      const [storedLocale, storedPinnedRefs, loadedCustomItems] = await Promise.all([
         LocalStorage.getItem<string>("locale"),
         LocalStorage.getItem<string>("pinnedItemIds"),
         loadCustomItems(),
@@ -70,7 +73,8 @@ export default function FakerList() {
       fakerClient.setLocale(storedLocale || "en");
       setLocale(fakerClient.locale);
       setPinnedRefs(parsePinnedRefs(storedPinnedRefs));
-      setCustomItems(storedCustomItems);
+      storedCustomItems.current = loadedCustomItems;
+      setCustomItems(loadedCustomItems);
       setFakerItems(buildItems("", fakerClient.faker));
       setIsReady(true);
     };
@@ -90,19 +94,26 @@ export default function FakerList() {
     handlePinnedRefsChange(_.reject(pinnedRefs, { section: item.section, id: item.id }));
   };
 
-  // Writes first so a failed save never shows up in the list as if it had been stored.
-  const persistCustomItems = async (nextCustomItems: CustomItem[]) => {
-    await saveCustomItems(nextCustomItems);
-    setCustomItems(nextCustomItems);
+  // Writes are queued and each change is applied to the latest stored list, so overlapping edits or deletes
+  // cannot overwrite each other. The list only updates after a write succeeds, so a failed save never shows up.
+  const updateCustomItems = (update: (current: CustomItem[]) => CustomItem[]) => {
+    const write = customItemsWrite.current.then(async () => {
+      const nextCustomItems = update(storedCustomItems.current);
+      await saveCustomItems(nextCustomItems);
+      storedCustomItems.current = nextCustomItems;
+      setCustomItems(nextCustomItems);
+    });
+    // A failed write is reported to its caller and must not block the writes queued after it.
+    customItemsWrite.current = write.catch(() => undefined);
+    return write;
   };
 
-  const saveCustomItem = (customItem: CustomItem) => {
-    const exists = _.some(customItems, { id: customItem.id });
-    const nextCustomItems = exists
-      ? customItems.map((existing) => (existing.id === customItem.id ? customItem : existing))
-      : [...customItems, customItem];
-    return persistCustomItems(nextCustomItems);
-  };
+  const saveCustomItem = (customItem: CustomItem) =>
+    updateCustomItems((current) =>
+      _.some(current, { id: customItem.id })
+        ? current.map((existing) => (existing.id === customItem.id ? customItem : existing))
+        : [...current, customItem],
+    );
 
   const createCustomItem = () => {
     push(<CustomItemForm initialPrompt={searchText} availableMethods={availableMethods} onSave={saveCustomItem} />);
@@ -115,7 +126,7 @@ export default function FakerList() {
 
   const deleteCustomItem = async (item: Item) => {
     try {
-      await persistCustomItems(_.reject(customItems, { id: item.id }));
+      await updateCustomItems((current) => _.reject(current, { id: item.id }));
     } catch (error) {
       await showFailureToast(error, { title: "Could not delete custom item" });
       return;
