@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "meet-with",
+  "title": "Meet with",
+  "description": "Search a Google Workspace coworker and see their schedule at a glance",
+  "icon": "extension-icon.png",
+  "author": "fcarysnyder",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "meet-with",
+      "title": "Meet with",
+      "subtitle": "Google Workspace",
+      "description": "Search a coworker and view their schedule",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "type": "textfield",
+      "required": true,
+      "title": "Google OAuth Client ID",
+      "description": "Client ID of an iOS-type OAuth client (bundle ID com.raycast) in your Google Cloud project. See the README for setup.",
+      "placeholder": "1234567890-abc123.apps.googleusercontent.com"
+    },
+    {
+      "name": "eventColor",
+      "type": "dropdown",
+      "required": false,
+      "title": "Event Color",
+      "description": "Color for calendar blocks. System uses your macOS accent color.",
+      "default": "system",
+      "data": [
+        { "title": "System Accent", "value": "system" },
+        { "title": "Blue", "value": "#007AFF" },
+        { "title": "Green", "value": "#34C759" },
+        { "title": "Purple", "value": "#AF52DE" },
+        { "title": "Orange", "value": "#FF9500" },
+        { "title": "Pink", "value": "#FF2D55" },
+        { "title": "Red", "value": "#FF3B30" },
+        { "title": "Teal", "value": "#30B0C7" },
+        { "title": "Graphite", "value": "#8E8E93" },
+        { "title": "Custom", "value": "custom" }
+      ]
+    },
+    {
+      "name": "customEventColor",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Color",
+      "description": "Hex color used when Event Color is set to Custom.",
+      "placeholder": "#FF6B00"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.3.0",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
