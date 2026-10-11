@@ -12,10 +12,18 @@ import {
 
 import { connectService } from "./service";
 import { EngineSetup } from "./engine-setup";
-import { addExclusionFolders, reconcileValues } from "./settings-values";
+import {
+  addExclusionFolders,
+  reconcileValues,
+  sameSettingsValue,
+  formatFolderPaths,
+  parseFolderPaths,
+  folderRequestPaths,
+  SettingsPollGuard,
+} from "./settings-values";
 
 type Values = {
-  roots: string;
+  roots: string[];
   model_variant: string;
   model_url: string;
   dimensions: string;
@@ -28,7 +36,7 @@ type Values = {
   thumbnail_px: string;
   chunk_tokens: string;
   idle_seconds: string;
-  excluded_paths: string;
+  excluded_paths: string[];
 };
 type ModelSource = {
   id: string;
@@ -108,7 +116,10 @@ export default function ModelSettings({
   const [editExclusionPaths, setEditExclusionPaths] = useState(false);
   const submittedValues = useRef<Values | undefined>(undefined);
   const serverValues = useRef<Values | undefined>(undefined);
-  const mutationRevision = useRef(0);
+  const pollGuard = useRef(new SettingsPollGuard());
+  const [applyingSettings, setApplyingSettings] = useState(false);
+  const [exclusionText, setExclusionText] = useState("");
+  const [exclusionError, setExclusionError] = useState("");
   useEffect(() => {
     let active = true;
     setError("");
@@ -130,9 +141,9 @@ export default function ModelSettings({
     let active = true;
     let pending = false;
     const poll = async () => {
-      if (pending) return;
+      if (pending || pollGuard.current.pending) return;
       pending = true;
-      const revision = mutationRevision.current;
+      const revision = pollGuard.current.revision;
       try {
         const [response, statusResponse] = await Promise.all([
           fetch(`${baseURL}/v1/settings`),
@@ -144,7 +155,7 @@ export default function ModelSettings({
           );
         const data = (await response.json()) as Settings;
         const status = (await statusResponse.json()) as IndexStatus;
-        if (active && revision === mutationRevision.current) {
+        if (active && pollGuard.current.accepts(revision)) {
           setSettings(data);
           setIndexStatus(status);
           setError("");
@@ -152,7 +163,7 @@ export default function ModelSettings({
             Object.entries(data.current).map(([k, v]) => [
               k,
               Array.isArray(v)
-                ? v.join("\n")
+                ? [...v]
                 : typeof v === "boolean"
                   ? v
                   : String(v),
@@ -172,7 +183,7 @@ export default function ModelSettings({
           );
         }
       } catch (e) {
-        if (active) setError(String(e));
+        if (active && pollGuard.current.accepts(revision)) setError(String(e));
       } finally {
         pending = false;
       }
@@ -241,6 +252,7 @@ export default function ModelSettings({
   }, [baseURL, values?.model_variant, values?.model_url, settings?.job.state]);
   const [savingExclusions, setSavingExclusions] = useState(false);
   const busy =
+    applyingSettings ||
     !!indexStatus?.indexing ||
     ["downloading", "applying", "indexing", "cancelling"].includes(
       settings?.job.state || "",
@@ -249,40 +261,44 @@ export default function ModelSettings({
     values?.model_variant === "custom"
       ? customModel
       : settings?.models.find((m) => m.id === values?.model_variant);
+  const normalizedCurrent = (key: string) => {
+    const current = settings?.current[key];
+    return Array.isArray(current)
+      ? current
+      : typeof current === "boolean"
+        ? current
+        : String(current ?? "");
+  };
   const dirty =
-    values &&
-    settings &&
-    Object.entries(values).some(([key, value]) => {
-      if (key === "model_url" && values.model_variant !== "custom")
-        return false;
-      const current = settings.current[key];
-      return (
-        String(value) !==
-        (Array.isArray(current) ? current.join("\n") : String(current ?? ""))
-      );
-    });
+    !!values &&
+    !!settings &&
+    Object.entries(values).some(
+      ([key, value]) =>
+        !(key === "model_url" && values.model_variant !== "custom") &&
+        !sameSettingsValue(value, normalizedCurrent(key)),
+    );
   const exclusionsDirty =
     !!values &&
     !!settings &&
-    values.excluded_paths !==
-      ((settings.current.excluded_paths as string[]) || []).join("\n");
+    !sameSettingsValue(
+      values.excluded_paths,
+      settings.current.excluded_paths || [],
+    );
   const onlyExclusionsDirty =
     !!dirty &&
     Object.entries(values || {}).every(
       ([key, value]) =>
         key === "excluded_paths" ||
         (key === "model_url" && values?.model_variant !== "custom") ||
-        String(value) ===
-          (Array.isArray(settings?.current[key])
-            ? (settings?.current[key] as string[]).join("\n")
-            : String(settings?.current[key] ?? "")),
+        sameSettingsValue(value, normalizedCurrent(key)),
     );
-  const applyTitle =
-    busy && !exclusionsDirty
+  const applyTitle = applyingSettings
+    ? "Applying Settings…"
+    : busy && !exclusionsDirty
       ? "Indexing — Cancel in Actions"
       : busy && exclusionsDirty
         ? "Save Excluded Folders"
-        : !values?.roots.trim()
+        : !values?.roots.length
           ? "Choose Folders First"
           : selectedModel?.installed
             ? dirty
@@ -321,8 +337,9 @@ export default function ModelSettings({
       ? `Last ${lastScan.cancelled ? "update cancelled" : "update"}${lastScan.finished_at ? `: ${new Date(lastScan.finished_at * 1000).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}` : ""} · ${changesSummary}${lastScan.errors ? ` · ${lastScan.errors} skipped${settings?.job.report_path ? " (report in Actions)" : ""}` : ""}`
       : "Choose folders, then update the search index (⌘R).";
   const indexOverview = `${(indexStatus?.files ?? 0).toLocaleString()} files · ${(indexStatus?.chunks ?? 0).toLocaleString()} vectors${indexStatus?.database_bytes !== undefined ? ` · ${(indexStatus.database_bytes / 1e6).toFixed(1)} MB on disk` : ""}\n${contentCounts || ""}\n${scanSummary}`;
-  const operationMessage =
-    settings?.job.state === "cancelling"
+  const operationMessage = applyingSettings
+    ? "Applying settings…"
+    : settings?.job.state === "cancelling"
       ? "Stopping after the current operation… Completed files are preserved."
       : busy && dirty && !exclusionsDirty
         ? "Indexing is running. Cancel in Actions (⌘.) or wait before applying model changes."
@@ -335,7 +352,7 @@ export default function ModelSettings({
               : settings?.job.state === "downloaded"
                 ? "Model downloaded. Apply your settings when ready."
                 : "");
-  const update = (key: keyof Values, value: string | boolean) =>
+  const update = (key: keyof Values, value: string | boolean | string[]) =>
     setValues((previous) =>
       previous ? { ...previous, [key]: value } : previous,
     );
@@ -379,7 +396,7 @@ export default function ModelSettings({
       if (saved)
         for (const [key, value] of Object.entries(saved)) {
           if (key in next)
-            (next as Record<string, string | boolean>)[key] =
+            (next as Record<string, string | boolean | string[]>)[key] =
               typeof value === "boolean" ? value : String(value);
         }
       if (variant === "coreml-experimental") {
@@ -461,19 +478,16 @@ export default function ModelSettings({
     }
   };
   const saveExclusions = async () => {
-    if (!values || savingExclusions) return;
+    if (!values || pollGuard.current.pending) return;
     const submitted = values.excluded_paths;
     setSavingExclusions(true);
-    mutationRevision.current += 1;
+    pollGuard.current.begin();
     try {
       const response = await fetch(`${baseURL}/v1/exclusions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          excluded_paths: submitted
-            .split(/\r?\n/)
-            .map((path) => path.trim())
-            .filter(Boolean),
+          excluded_paths: folderRequestPaths(submitted),
         }),
       });
       const data = (await response.json()) as {
@@ -488,7 +502,7 @@ export default function ModelSettings({
       if (serverValues.current)
         serverValues.current = {
           ...serverValues.current,
-          excluded_paths: data.excluded_paths.join("\n"),
+          excluded_paths: data.excluded_paths,
         };
       setSettings((previous) =>
         previous
@@ -506,8 +520,8 @@ export default function ModelSettings({
           : previous,
       );
       setValues((previous) =>
-        previous?.excluded_paths === submitted
-          ? { ...previous, excluded_paths: data.excluded_paths.join("\n") }
+        previous && sameSettingsValue(previous.excluded_paths, submitted)
+          ? { ...previous, excluded_paths: data.excluded_paths }
           : previous,
       );
       await showToast({
@@ -522,12 +536,20 @@ export default function ModelSettings({
         message: String(e),
       });
     } finally {
-      mutationRevision.current += 1;
+      pollGuard.current.end();
       setSavingExclusions(false);
     }
   };
   const apply = async () => {
-    if (!values || savingExclusions) return;
+    if (!values || pollGuard.current.pending) return;
+    if (editExclusionPaths && exclusionError) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Check exclusion paths",
+        message: exclusionError,
+      });
+      return;
+    }
     if (exclusionsDirty && (busy || onlyExclusionsDirty)) {
       await saveExclusions();
       return;
@@ -541,7 +563,7 @@ export default function ModelSettings({
       });
       return;
     }
-    if (!values.roots.trim()) {
+    if (!values.roots.length) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Choose folders first",
@@ -563,20 +585,16 @@ export default function ModelSettings({
       await indexFiles();
       return;
     }
+    pollGuard.current.begin();
+    setApplyingSettings(true);
     try {
       const response = await fetch(`${baseURL}/v1/settings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...values,
-          roots: (values.roots || "")
-            .split(/\r?\n/)
-            .map((path) => path.trim())
-            .filter(Boolean),
-          excluded_paths: (values.excluded_paths || "")
-            .split(/\r?\n/)
-            .map((path) => path.trim())
-            .filter(Boolean),
+          roots: folderRequestPaths(values.roots),
+          excluded_paths: folderRequestPaths(values.excluded_paths),
           dimensions: Number(values.dimensions),
           thumbnail_px: Number(values.thumbnail_px),
           chunk_tokens: Number(values.chunk_tokens),
@@ -608,6 +626,9 @@ export default function ModelSettings({
         title: "Model setup failed",
         message: String(e),
       });
+    } finally {
+      pollGuard.current.end();
+      setApplyingSettings(false);
     }
   };
   const indexFiles = async () => {
@@ -682,6 +703,7 @@ export default function ModelSettings({
     <Form
       isLoading={
         savingExclusions ||
+        applyingSettings ||
         ["downloading", "applying"].includes(settings.job.state)
       }
       actions={
@@ -801,8 +823,8 @@ export default function ModelSettings({
         canChooseFiles={false}
         canChooseDirectories={true}
         allowMultipleSelection={true}
-        value={(values.roots || "").split(/\r?\n/).filter(Boolean)}
-        onChange={(folders) => update("roots", folders.join("\n"))}
+        value={values.roots}
+        onChange={(folders) => update("roots", folders)}
       />
       <Form.FilePicker
         id="excluded_folders"
@@ -811,27 +833,18 @@ export default function ModelSettings({
         canChooseDirectories={true}
         allowMultipleSelection={true}
         value={[]}
-        onChange={(folders) =>
-          setValues((previous) =>
-            previous
-              ? {
-                  ...previous,
-                  excluded_paths: addExclusionFolders(
-                    previous.excluded_paths,
-                    folders,
-                  ),
-                }
-              : previous,
-          )
-        }
+        onChange={(folders) => {
+          const next = addExclusionFolders(values.excluded_paths, folders);
+          update("excluded_paths", next);
+          setExclusionText(formatFolderPaths(next));
+          setExclusionError("");
+        }}
       />
       <Form.Description
         title="Excluded folders"
         text={
-          values.excluded_paths.trim()
+          values.excluded_paths.length
             ? values.excluded_paths
-                .split(/\r?\n/)
-                .filter(Boolean)
                 .map((path) => path.replace(/\/$/, "").split("/").pop() || "/")
                 .join(" · ")
             : "None"
@@ -841,15 +854,31 @@ export default function ModelSettings({
         id="edit_exclusion_paths"
         label="Edit exclusion paths manually"
         value={editExclusionPaths}
-        onChange={setEditExclusionPaths}
+        onChange={(enabled) => {
+          setEditExclusionPaths(enabled);
+          setExclusionText(formatFolderPaths(values.excluded_paths));
+          setExclusionError("");
+        }}
       />
       {editExclusionPaths && (
         <Form.TextArea
           id="excluded_paths"
           title="Exclusion paths"
           placeholder="~/Downloads/folder-to-exclude"
-          value={values.excluded_paths}
-          onChange={(v) => update("excluded_paths", v)}
+          value={exclusionText}
+          info="One path per line, or a JSON array for names with line breaks or surrounding whitespace."
+          error={exclusionError || undefined}
+          onChange={(text) => {
+            setExclusionText(text);
+            try {
+              update("excluded_paths", parseFolderPaths(text));
+              setExclusionError("");
+            } catch {
+              setExclusionError(
+                "Enter valid folder paths or a JSON array of paths.",
+              );
+            }
+          }}
         />
       )}
       <Form.Description text="Choose folders to add; edit paths to remove. Apply exclusions during indexing — other folders continue. Original files are preserved." />

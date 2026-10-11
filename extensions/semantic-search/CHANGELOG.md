@@ -4,3 +4,5 @@
 
 - Search local files with EmbeddingGemma 2 through a separately installed local engine.
 - Manage models, folders, exclusions and incremental indexing from Search.
+- Handle invalid custom service addresses without crashing setup.
+- Preserve exact folder picker paths and prevent stale polling responses from resetting applied settings.

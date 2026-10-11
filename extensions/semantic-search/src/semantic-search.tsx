@@ -54,7 +54,7 @@ const timecode = (seconds: number) => {
 };
 
 export default function SemanticSearch(
-  props: LaunchProps<{ arguments: { query?: string } }>,
+  props: LaunchProps<{ arguments: Arguments.SemanticSearch }>,
 ) {
   const { push } = useNavigation();
   const [libraryOpen, setLibraryOpen] = useState(false);

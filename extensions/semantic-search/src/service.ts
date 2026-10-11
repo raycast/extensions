@@ -10,23 +10,24 @@ export const sharedStorage = join(
   "Semantic Search",
 );
 let startup: Promise<string> | undefined;
-export function connectService(progress: (message: string) => void) {
-  const custom = getPreferenceValues<{
-    serviceURL?: string;
-  }>().serviceURL?.trim();
+export async function connectService(progress: (message: string) => void) {
+  const custom = getPreferenceValues<Preferences>().serviceURL?.trim();
   if (custom) {
-    const url = new URL(custom);
+    let url: URL;
+    try {
+      url = new URL(custom);
+    } catch {
+      throw new Error("A custom service must use a valid local HTTP address.");
+    }
     if (
       !["127.0.0.1", "localhost"].includes(url.hostname) ||
       url.protocol !== "http:" ||
       url.username ||
       url.password
     ) {
-      return Promise.reject(
-        new Error("A custom service must use a local HTTP address."),
-      );
+      throw new Error("A custom service must use a local HTTP address.");
     }
-    return Promise.resolve(custom.replace(/\/$/, ""));
+    return custom.replace(/\/$/, "");
   }
   if (!startup)
     startup = ensureService({
