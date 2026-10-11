@@ -190,17 +190,22 @@ async function otherBrowsersRunning(target: string): Promise<boolean> {
  * Picks the tab from the browser extension's candidates, or throws.
  *
  * The extension API carries no browser or window identity, so a candidate is
- * never attributed to a browser by its URL. Candidates with the same URL and
- * title are the same link and count once; anything else is ambiguous.
+ * never attributed to a browser by its URL. Candidates that would produce the
+ * same output count once: same URL and title, or just the same URL when the
+ * caller only uses the URL. Anything else is ambiguous.
  *
  * When the tab must come from a browser without AppleScript (Firefox, Zen …),
  * a candidate is only taken if no other browser is running that could have
  * reported it. Otherwise the user picks.
  */
-async function pickExtensionTab(candidates: TabInfo[], target?: string): Promise<TabInfo | undefined> {
+async function pickExtensionTab(
+  candidates: TabInfo[],
+  target: string | undefined,
+  urlOnly: boolean,
+): Promise<TabInfo | undefined> {
   if (candidates.length === 0) return undefined;
-  // URL and title both end up in the output, so only exact duplicates count once.
-  const distinct = new Set(candidates.map((tab) => `${tab.url}${UNIT_SEPARATOR}${tab.title}`));
+  const key = (tab: TabInfo) => (urlOnly ? tab.url : `${tab.url}${UNIT_SEPARATOR}${tab.title}`);
+  const distinct = new Set(candidates.map(key));
   if (distinct.size > 1) throw new AmbiguousTabError(candidates, "windows");
   if (target && (await otherBrowsersRunning(target))) {
     throw new AmbiguousTabError(candidates, "unattributed", target);
@@ -271,6 +276,8 @@ export interface LookupOptions {
   browserSource: string;
   /** Application name coming from an appPicker preference. */
   preferredBrowser?: string;
+  /** The caller only uses the URL, so tabs that differ only in their title are the same. */
+  urlOnly?: boolean;
 }
 
 export class NoTabError extends Error {
@@ -359,7 +366,7 @@ export async function getActiveTab(options: LookupOptions): Promise<TabInfo> {
 
   if (useExtension) {
     const target = preferredNeedsExtension ? preferred : frontNeedsExtension ? frontApp : undefined;
-    const tab = await pickExtensionTab(await activeTabsFromBrowserExtension(), target);
+    const tab = await pickExtensionTab(await activeTabsFromBrowserExtension(), target, options.urlOnly ?? false);
     if (tab) return tab;
   }
 
