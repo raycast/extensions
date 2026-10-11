@@ -1,0 +1,59 @@
+  AutoLink
+  autolink/deepseek-v4-flash                
+  autolink/gpt-5.6-luna                     
+  autolink/gpt-5.6-sol                      
+  autolink/gpt-5.6-terra                    
+  autolink/grok-4.7                         
+  autolink/grok-4.6                         
+  autolink/gpt-6-luna                       
+  autolink/gpt-6-sol                        
+  DeepSeek
+  deepseek/deepseek-flash                     DeepSeek V4.1 Flash  low/high/max
+  deepseek/deepseek-v4-pro                    DeepSeek V4 Pro  low/high/max
+  OpenRouter
+  openrouter/fireworks/ember-1                Ember-1  low/high/max
+  openrouter/z-ai/glm-5.3-prime               GLM 5.3 Prime  low/high/max
+  openrouter/qwen/qwen3.8-max-prime           Qwen 3.8 Max Prime  minimal/low/medium/high/xhigh
+  openrouter/stealth/space-bunny-alpha        Space Bunny Alpha  low/medium/high/xhigh/max
+  openrouter/aion-labs/aion-3.5-mini          Aion 3.5 Mini  low/high/max
+  openrouter/aion-labs/aion-3.5               Aion 3.5  low/high/max
+  openrouter/upstage/solar-mini4              Solar Mini 4  none/minimal/low/medium/high/xhigh/max
+  openrouter/cohere/command-a-plus            Command A+
+  openrouter/openai/gpt-6-luna-pro            GPT-6 Luna Pro  none/low/medium/high/xhigh/max
+  openrouter/openai/gpt-6-luna-pro:batch    
+  openrouter/openai/gpt-6-luna                GPT-6 Luna  none/low/medium/high/xhigh/max
+  openrouter/openai/gpt-6-luna:batch        
+  openrouter/openai/gpt-6-sol-pro             GPT-6 Sol Pro  none/low/medium/high/xhigh/max
+  openrouter/openai/gpt-6-sol-pro:batch     
+  openrouter/openai/gpt-6-sol                 GPT-6 Sol  none/low/medium/high/xhigh/max
+  openrouter/openai/gpt-6-sol:batch         
+  openrouter/anthropic/claude-opus-5.5        Claude Opus 5.5  low/medium/high/xhigh/max
+  openrouter/anthropic/claude-opus-5.5:batch
+  openrouter/xiaomi/mimo-v2.6-pro-ultraspeed  MiMo-V2.6-Pro-UltraSpeed
+  openrouter/xiaomi/mimo-v2.6-flash           MiMo-V2.6-Flash
+  openrouter/xiaomi/mimo-v2.6-pro             MiMo-V2.6-Pro
+  openrouter/x-ai/grok-4.7                    Grok 4.7  low/medium/high/xhigh
+  openrouter/qwen/qwen3.8-omni-flash          Qwen3.8 Omni Flash
+  openrouter/prism-ml/ternary-bonsai-2-27b    Ternary Bonsai 2 27B  medium/xhigh
+  Codex
+  codex/gpt-6-sol                             GPT-6-Sol  low/medium/high/xhigh/max/ultra
+  codex/gpt-6-astra                           GPT-6-Astra  low/medium/high/xhigh/max/ultra
+  codex/gpt-6-luna                            GPT-6-Luna  low/medium/high/xhigh/max
+  codex/gpt-5.6-sol                           GPT-5.6-Sol  low/medium/high/xhigh/max/ultra
+  codex/gpt-5.6-terra                         GPT-5.6-Terra  low/medium/high/xhigh/max/ultra
+  codex/gpt-5.6-luna                          GPT-5.6-Luna  low/medium/high/xhigh/max
+  codex/gpt-5.5                               GPT-5.5  low/medium/high/xhigh
+  Grok
+  grok/grok-4.7                             
+  grok/grok-4.7-build-fast                  
+  grok/grok-4.6                             
+  grok/grok-4.5                             
+  Routing groups
+  group/auto-gpt-5-6-luna                     GPT-5.6-Luna
+  group/auto-gpt-5-6-sol                      GPT-5.6-Sol
+  group/auto-gpt-5-6-terra                    GPT-5.6-Terra
+  group/auto-grok-4-7                         Grok 4.7
+  group/auto-grok-4-6                       
+  group/auto-gpt-6-luna                       GPT-6 Luna
+  group/auto-gpt-6-sol                        GPT-6 Sol
+  http://127.0.0.1:3425/v1

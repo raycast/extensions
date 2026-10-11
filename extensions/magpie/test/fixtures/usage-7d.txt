@@ -1,0 +1,11 @@
+421K tokens last 7 days · 19 calls · no price
+  in 417K  out 4.4K  cache read 90.8K  cache write 0  reasoning 1.1K 
+
+  agents
+  Codex  97% 409K    18 calls   no price
+  Pi      3% 12.4K   1 call     no price
+
+  models
+  autolink/gpt-5.6-sol  97% 409K    18 calls   no price
+  autolink/grok-4.7      3% 12.4K   1 call     no price
+  /Users/me/.config/magpie/usage.jsonl

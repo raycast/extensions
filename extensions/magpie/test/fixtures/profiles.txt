@@ -1,0 +1,2 @@
+  work  claude deepseek/deepseek-v4-pro · codex group/auto-gpt-6-sol
+  local  pi ollama/llama3
