@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "godot",
+  "title": "Godot Projects",
+  "description": "Search your Godot projects and open them in the editor, run them, or show them in Finder.",
+  "icon": "extension-icon.png",
+  "author": "shanto462",
+  "categories": [
+    "Developer Tools",
+    "Applications"
+  ],
+  "keywords": [
+    "Godot Engine",
+    "game engine",
+    "GDScript"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "subtitle": "Godot",
+      "description": "Search the projects in the Godot Project Manager and open them in the editor, run them, or show them in Finder.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "godotApp",
+      "title": "Godot Application",
+      "description": "The Godot app that opens and runs projects. Leave it empty to pick one automatically: the installed Godot that matches the project's version (or the newest one), and the .NET build for C# projects.",
+      "type": "appPicker",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
