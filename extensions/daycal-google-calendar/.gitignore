@@ -1,0 +1,30 @@
+# Dependencies / Raycast local state
+node_modules/
+.raycast/
+
+# macOS / editors
+.DS_Store
+.vscode/
+.idea/
+
+# Logs / build output
+*.log
+coverage/
+
+# Local secrets and auth artifacts
+.env
+.env.*
+!.env.example
+client_secret*.json
+*client-secret*.json
+google.json
+credentials*.json
+
+# Local backups / historical artifacts
+*.zip
+rollback/
+
+# Local captures
+*.mov
+*.mp4
+CALFLOW_HANDOFF_*.md
