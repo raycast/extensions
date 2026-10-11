@@ -19,7 +19,7 @@ import type { NewAccountInput } from "../vendor/lib/types";
 import AccountForm from "./account-form";
 import { captureScreenToTempFile, detectBarcodes } from "./lib/helper";
 import { t } from "./lib/i18n";
-import { useVault } from "./lib/vault-store";
+import { useVaultSnapshot } from "./lib/vault-store";
 
 export interface ScanResult {
   id: string;
@@ -29,7 +29,7 @@ export interface ScanResult {
 }
 
 export default function ScanQr({ source = "screen", result }: { source?: "screen" | "image"; result?: ScanResult }) {
-  const vault = useVault();
+  const vault = useVaultSnapshot();
   const { pop } = useNavigation();
   const [entries, setEntries] = useState<NewAccountInput[]>(result?.entries ?? []);
   const [status, setStatus] = useState<"selecting" | "scanning" | "ready" | "empty">(

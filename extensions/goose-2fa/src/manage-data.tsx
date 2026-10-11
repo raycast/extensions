@@ -38,12 +38,12 @@ import {
   resetLocalVault,
   resolveConflict,
   selectCreatedSource,
-  useVault,
+  useVaultSnapshot,
 } from "./lib/vault-store";
 import AccountForm from "./account-form";
 
 export default function ManageData() {
-  const vault = useVault();
+  const vault = useVaultSnapshot();
   const { push } = useNavigation();
 
   return (
