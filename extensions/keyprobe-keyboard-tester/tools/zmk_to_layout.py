@@ -188,9 +188,11 @@ def extract_layer_bindings(source, layer_name):
 def tokenize_bindings(text):
     """Splits a `bindings = < ... >` block into (behavior, [args]) calls.
     ZMK writes these as whitespace-separated `&behavior arg arg ...`
-    runs with no other delimiter, so a new call starts at each `&token`
-    and everything before the next `&` is its argument list."""
-    raw = text.split()
+    runs, so a new call starts at each `&token` and everything before the
+    next `&` is its argument list. The block may also be split into
+    comma-separated groups (`<&kp A>, <&kp B>`), whose brackets and commas
+    are dropped first."""
+    raw = re.sub(r"[<>,]", " ", text).split()
     calls = []
     for tok in raw:
         if tok.startswith("&"):

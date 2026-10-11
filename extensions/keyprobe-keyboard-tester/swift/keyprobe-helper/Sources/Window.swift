@@ -132,6 +132,9 @@ final class KeyProbeWindowController: NSObject, NSWindowDelegate {
         window.contentView = contentView
         window.center()
         window.makeKeyAndOrderFront(nil)
+        // Otherwise, with Keyboard navigation enabled in System Settings,
+        // AppKit focuses a button and Space would click it.
+        window.makeFirstResponder(contentView)
         NSApp.activate(ignoringOtherApps: true)
 
         self.window = window

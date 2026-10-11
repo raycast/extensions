@@ -124,8 +124,9 @@ guard let layout = Layout.load(from: layoutPath) else {
 }
 log("Loaded layout: \(layoutPath) (mode=\(layoutMode))")
 
+// Keystrokes are deliberately never logged: the tap is session-wide, so
+// they'd include typing in other apps (passwords too) while we're open.
 if !EventTap.shared.start(onActivity: { activity in
-    log(activity.logLine)
     if activity.isDown {
         KeyProbeWindowController.shared.handleDown(keycode: activity.keycode)
     } else {

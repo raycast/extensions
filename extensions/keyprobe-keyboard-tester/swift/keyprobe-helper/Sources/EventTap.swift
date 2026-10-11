@@ -8,7 +8,6 @@ import Carbon.HIToolbox
 struct KeyActivity {
     let keycode: Int64
     let isDown: Bool
-    let logLine: String
 }
 
 /// Captures global keyboard events via CGEventTap in listen-only mode —
@@ -146,9 +145,9 @@ class EventTap {
 
         switch type {
         case .keyDown:
-            emit(keyCode: keyCode, isDown: true, label: "keyDown", flags: flags)
+            emit(keyCode: keyCode, isDown: true)
         case .keyUp:
-            emit(keyCode: keyCode, isDown: false, label: "keyUp", flags: flags)
+            emit(keyCode: keyCode, isDown: false)
         case .flagsChanged:
             let isDown: Bool
             if let mask = Self.modifierMasks[keyCode] {
@@ -169,25 +168,13 @@ class EventTap {
             } else {
                 modifierKeysCurrentlyDown.remove(keyCode)
             }
-            emit(keyCode: keyCode, isDown: isDown, label: isDown ? "keyDown*" : "keyUp*", flags: flags)
+            emit(keyCode: keyCode, isDown: isDown)
         default:
             break
         }
     }
 
-    private func emit(keyCode: Int64, isDown: Bool, label: String, flags: CGEventFlags) {
-        let logLine = "\(label.padding(toLength: 9, withPad: " ", startingAt: 0)) keycode=\(keyCode) name=\(KeyNames.name(for: keyCode)) flags=\(Self.describeFlags(flags)) raw=0x\(String(flags.rawValue, radix: 16))"
-        onActivity?(KeyActivity(keycode: keyCode, isDown: isDown, logLine: logLine))
-    }
-
-    private static func describeFlags(_ flags: CGEventFlags) -> String {
-        var parts: [String] = []
-        if flags.contains(.maskShift) { parts.append("shift") }
-        if flags.contains(.maskControl) { parts.append("control") }
-        if flags.contains(.maskAlternate) { parts.append("option") }
-        if flags.contains(.maskCommand) { parts.append("command") }
-        if flags.contains(.maskSecondaryFn) { parts.append("fn") }
-        if flags.contains(.maskAlphaShift) { parts.append("capslock") }
-        return parts.isEmpty ? "-" : parts.joined(separator: "+")
+    private func emit(keyCode: Int64, isDown: Bool) {
+        onActivity?(KeyActivity(keycode: keyCode, isDown: isDown))
     }
 }

@@ -94,6 +94,9 @@ export async function startHelper(layoutMode: string): Promise<{
   if (!prepared.success) return prepared;
 
   let out: number | null = null;
+  // spawn() reports exec failures (e.g. a wrong-architecture binary) via
+  // this event, not by throwing, so the catch below never sees them.
+  let launchError: Error | null = null;
   try {
     out = fs.openSync(LOG_FILE, "a");
     const child = spawn(
@@ -113,6 +116,9 @@ export async function startHelper(layoutMode: string): Promise<{
         stdio: ["ignore", out, out],
       },
     );
+    child.on("error", (error) => {
+      launchError = error;
+    });
     child.unref();
   } catch (error) {
     return {
@@ -126,6 +132,12 @@ export async function startHelper(layoutMode: string): Promise<{
   // Poll for the helper to write its PID (event tap + window ready).
   for (let attempt = 0; attempt < 30; attempt++) {
     await new Promise((r) => setTimeout(r, 100));
+    if (launchError) {
+      return {
+        success: false,
+        error: `Helper failed to launch: ${(launchError as Error).message}`,
+      };
+    }
     const pid = readPid();
     if (pid) return { success: true };
   }
