@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "display-switch",
+  "title": "Display Switch",
+  "description": "Quickly enable and disable individual displays in a multi-monitor setup.",
+  "icon": "icon.png",
+  "author": "niechen",
+  "license": "MIT",
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "displays",
+      "title": "Toggle Displays",
+      "description": "Search displays and press Enter to turn one on or off.",
+      "mode": "view",
+      "keywords": [
+        "monitor",
+        "screen",
+        "on",
+        "off"
+      ],
+      "subtitle": "Display Switch"
+    },
+    {
+      "name": "enable-all",
+      "title": "Enable All Displays",
+      "description": "Enable all identifiable connected displays, including screens disabled by other tools, and retry pending layout restoration.",
+      "mode": "no-view",
+      "keywords": [
+        "restore",
+        "recover",
+        "monitors"
+      ],
+      "subtitle": "Display Switch"
+    },
+    {
+      "name": "toggle-display",
+      "title": "Toggle Display by Name",
+      "description": "Toggle one display by exact name or UUID. Set a hotkey for quick access.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "display",
+          "type": "text",
+          "placeholder": "Display name or UUID",
+          "required": true
+        }
+      ],
+      "subtitle": "Display Switch"
+    }
+  ],
+  "scripts": {
+    "build": "node scripts/verify-helpers.mjs && ray build -e dist -o dist --exit-on-error --non-interactive",
+    "dev": "node scripts/verify-helpers.mjs && ray develop",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "format": "prettier --write src tests scripts package.json tsconfig.json eslint.config.mjs",
+    "check": "npm run typecheck && npm test && npm run lint",
+    "bundle": "node scripts/bundle.mjs",
+    "build:native": "node scripts/build-helper.mjs",
+    "lint": "ray lint --exit-on-error --non-interactive",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "test:native": "node scripts/test-native.mjs",
+    "verify:native-source": "node scripts/verify-native-source.mjs"
+  },
+  "dependencies": {
+    "@raycast/api": "2.6.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.12.0",
+    "prettier": "^3.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
