@@ -1,5 +1,12 @@
 # Changelog
 
+## [Add Ask AI Support and Improve History] - {PR_MERGE_DATE}
+
+- Added Ask Art Wallpapers support to browse artworks, read history, and set or download wallpapers through Raycast AI.
+- Added history search by artwork words, artist, creation year, usage dates, and action type, plus a tool to set a wallpaper directly from history.
+- Show each wallpaper once in history, with every recorded action and timestamp in its details, newest first.
+- Deleting a wallpaper from history removes all its recorded actions.
+
 ## [Windows Support] - 2026-06-30
 
 - Added Windows support for setting wallpapers across all commands (Today's Wallpapers, Set Random Wallpaper, History, and Auto Switch Wallpaper).

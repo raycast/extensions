@@ -20,11 +20,12 @@ import {
   deleteWallpaperHistoryEntry,
   readWallpaperHistory,
   WallpaperHistoryEntry,
+  WallpaperHistoryItem,
 } from "./history-store";
 
 const HISTORY_LIMIT = 500;
 
-type HistoryListEntry = WallpaperHistoryEntry & {
+type HistoryListEntry = WallpaperHistoryItem & {
   downloadFileExists: boolean;
 };
 
@@ -65,14 +66,21 @@ function getArtworkUrl(entry: WallpaperHistoryEntry) {
   );
 }
 
-function buildHistoryMarkdown(entry: WallpaperHistoryEntry) {
+function buildHistoryMarkdown(entry: WallpaperHistoryItem) {
   return buildWallpaperMarkdown(
     entry.wallpaper,
     `
 
 ---
 
-**${formatEventType(entry)}** on ${formatTimestamp(entry.timestamp)}
+### History
+
+${entry.events
+  .map(
+    (event) =>
+      `- **${formatEventType(event)}** on ${formatTimestamp(event.timestamp)}`,
+  )
+  .join("\n")}
 `,
   );
 }
