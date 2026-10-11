@@ -58,6 +58,11 @@
       "name": "get-lights",
       "title": "Get Lights",
       "description": "Get the rooms, zones, lights and scenes, with their state"
+    },
+    {
+      "name": "control-light",
+      "title": "Control Light",
+      "description": "Turn lights on or off, or change their brightness, color or white temperature"
     }
   ],
   "preferences": [
