@@ -1,5 +1,10 @@
 # FSearch Changelog
 
+## [AI Search Tools] - {PR_MERGE_DATE}
+
+- Find files and folders with Raycast AI using name, kind, folder, extension, size, and modification-date filters.
+- Search file contents for text, regular expressions, or symbol definitions with matching line numbers.
+
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Search Files: find files and folders by name, filter by kind, preview details, and search inside a folder.

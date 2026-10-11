@@ -48,14 +48,41 @@
           "required": false,
           "default": "default",
           "data": [
-            { "title": "Default App", "value": "default" },
-            { "title": "Visual Studio Code", "value": "vscode" },
-            { "title": "Cursor", "value": "cursor" },
-            { "title": "Zed", "value": "zed" },
-            { "title": "Xcode", "value": "xcode" }
+            {
+              "title": "Default App",
+              "value": "default"
+            },
+            {
+              "title": "Visual Studio Code",
+              "value": "vscode"
+            },
+            {
+              "title": "Cursor",
+              "value": "cursor"
+            },
+            {
+              "title": "Zed",
+              "value": "zed"
+            },
+            {
+              "title": "Xcode",
+              "value": "xcode"
+            }
           ]
         }
       ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "description": "Find files and folders by name, kind, folder, extension, size, or modification date."
+    },
+    {
+      "name": "search-file-contents",
+      "title": "Search File Contents",
+      "description": "Search file contents for text, a regular expression, or a symbol definition, with matching line numbers."
     }
   ],
   "preferences": [
@@ -81,6 +108,7 @@
     "typescript": "~5.9.3"
   },
   "scripts": {
+    "test": "node --test tests/*.test.mjs",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",

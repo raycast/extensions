@@ -36,6 +36,8 @@ export interface GrepResult {
   files: GrepFile[];
   /** False when the time budget ran out before every candidate file was read. */
   complete: boolean;
+  /** True while the daemon is still building its content index. */
+  indexing: boolean;
   tookMicros: number;
 }
 
@@ -67,12 +69,23 @@ export async function search(q: string, filters: Filters, limit: number, signal?
   return { hits: r.hits, tookMicros: r.took_us };
 }
 
-export async function grep(pattern: string, q: string, mode: GrepMode, signal?: AbortSignal): Promise<GrepResult> {
-  const r = await request<{ files: GrepFile[]; complete: boolean; took_us: number }>(
-    { op: "grep", pattern, q, mode, limit: 100, per_file: 10 },
+export async function grep(
+  pattern: string,
+  q: string,
+  mode: GrepMode,
+  signal?: AbortSignal,
+  options: { filters?: Filters; limit?: number; perFile?: number } = {},
+): Promise<GrepResult> {
+  const r = await request<{ files: GrepFile[]; complete: boolean; indexing?: number | boolean; took_us: number }>(
+    { ...options.filters, op: "grep", pattern, q, mode, limit: options.limit ?? 100, per_file: options.perFile ?? 10 },
     signal,
   );
-  return { files: r.files, complete: r.complete, tookMicros: r.took_us };
+  return {
+    files: r.files,
+    complete: r.complete,
+    indexing: typeof r.indexing === "number" ? r.indexing > 0 : r.indexing === true,
+    tookMicros: r.took_us,
+  };
 }
 
 async function request<T>(body: object, signal?: AbortSignal): Promise<T> {
