@@ -1,0 +1,190 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "iconoven",
+  "title": "IconOven",
+  "description": "Search every IconOven icon and copy or paste it as SVG, React, Vue, Svelte, Angular or web component code.",
+  "icon": "icon.png",
+  "author": "expertguy",
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-icons",
+      "title": "Search Icons",
+      "subtitle": "IconOven",
+      "description": "Search IconOven icons by name, tag or old name and copy or paste them.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "format",
+      "title": "Paste As",
+      "description": "Format used by the Paste action.",
+      "type": "dropdown",
+      "required": false,
+      "default": "svg",
+      "data": [
+        {
+          "title": "SVG Markup",
+          "value": "svg"
+        },
+        {
+          "title": "React JSX",
+          "value": "jsx"
+        },
+        {
+          "title": "Vue",
+          "value": "vue"
+        },
+        {
+          "title": "Svelte",
+          "value": "svelte"
+        },
+        {
+          "title": "Angular",
+          "value": "angular"
+        },
+        {
+          "title": "Web Component",
+          "value": "webcomponent"
+        },
+        {
+          "title": "Icon Name",
+          "value": "name"
+        }
+      ]
+    },
+    {
+      "name": "strokeWidth",
+      "title": "Stroke Width",
+      "description": "Stroke width of copied icons.",
+      "type": "dropdown",
+      "required": false,
+      "default": "1.5",
+      "data": [
+        {
+          "title": "1",
+          "value": "1"
+        },
+        {
+          "title": "1.5",
+          "value": "1.5"
+        },
+        {
+          "title": "2",
+          "value": "2"
+        }
+      ]
+    },
+    {
+      "name": "corners",
+      "title": "Corners",
+      "description": "Rounded or sharp corners and stroke ends.",
+      "type": "dropdown",
+      "required": false,
+      "default": "rounded",
+      "data": [
+        {
+          "title": "Rounded",
+          "value": "rounded"
+        },
+        {
+          "title": "Sharp",
+          "value": "sharp"
+        }
+      ]
+    },
+    {
+      "name": "variant",
+      "title": "Style",
+      "description": "Stroke is free under MIT. The other 11 styles here need an IconOven Pro licence key (iconoven.com/icons/pro).",
+      "type": "dropdown",
+      "required": false,
+      "default": "stroke",
+      "data": [
+        {
+          "title": "Stroke (free)",
+          "value": "stroke"
+        },
+        {
+          "title": "Tinted (Pro)",
+          "value": "tinted"
+        },
+        {
+          "title": "Gradient (Pro)",
+          "value": "gradient"
+        },
+        {
+          "title": "Duotone (Pro)",
+          "value": "duotone"
+        },
+        {
+          "title": "Twotone (Pro)",
+          "value": "twotone"
+        },
+        {
+          "title": "Solid (Pro)",
+          "value": "solid"
+        },
+        {
+          "title": "Bulk (Pro)",
+          "value": "bulk"
+        },
+        {
+          "title": "Solid Twotone (Pro)",
+          "value": "solid-twotone"
+        },
+        {
+          "title": "Solid Gradient (Pro)",
+          "value": "solid-gradient"
+        },
+        {
+          "title": "Line Duo (Pro)",
+          "value": "line-duo"
+        },
+        {
+          "title": "Hybrid (Pro)",
+          "value": "hybrid"
+        },
+        {
+          "title": "Color Outline (Pro)",
+          "value": "color-outline"
+        }
+      ]
+    },
+    {
+      "name": "licenceKey",
+      "title": "Pro Licence Key",
+      "description": "Your IconOven Pro key (iok_…), from your order page. Needed for every style except Stroke.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@iconoven/icons": "^1.0.0",
+    "@raycast/api": "^1.80.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.9.9",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit -p ."
+  }
+}
