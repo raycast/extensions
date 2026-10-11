@@ -62,12 +62,25 @@ export async function deliver(payload: Payload, mode: Mode, label: string, setti
   await showHUD(`Copied as ${label}: ${truncate(payload.preview)}`);
 }
 
+/**
+ * Whether the page title ends up in what this format copies. Formats that only
+ * use the URL can treat windows showing the same address as the same tab.
+ */
+function usesTitle(formatId: FormatId, settings: Settings): boolean {
+  const probe = (title: string) => {
+    const payload = toPayload(formatId, toCleanTab("https://example.com/", title, settings.clean), settings);
+    return `${payload.html ?? ""}\n${payload.text}`;
+  };
+  return probe("Title A") !== probe("Title B");
+}
+
 export async function runCopyCommand(formatId: FormatId, mode: Mode = "copy") {
   const settings = getSettings();
   try {
     const tab = await getActiveTab({
       browserSource: settings.browserSource,
       preferredBrowser: settings.preferredBrowser,
+      urlOnly: !usesTitle(formatId, settings),
     });
     const clean = toCleanTab(tab.url, tab.title, settings.clean);
     await deliver(toPayload(formatId, clean, settings), mode, getFormat(formatId).title, settings);
