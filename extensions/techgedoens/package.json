@@ -265,19 +265,23 @@
           "description": "Selects the maximum article title length shown in the menu bar.",
           "type": "dropdown",
           "required": false,
-          "default": "70",
+          "default": "medium",
           "data": [
             {
-              "title": "50 Characters",
-              "value": "50"
+              "title": "Very Short (Max. 40 Characters)",
+              "value": "very-short"
             },
             {
-              "title": "70 Characters",
-              "value": "70"
+              "title": "Short (Max. 55 Characters)",
+              "value": "short"
             },
             {
-              "title": "90 Characters",
-              "value": "90"
+              "title": "Medium (56-70 Characters)",
+              "value": "medium"
+            },
+            {
+              "title": "Long (71-90 Characters)",
+              "value": "long"
             },
             {
               "title": "Full Title",

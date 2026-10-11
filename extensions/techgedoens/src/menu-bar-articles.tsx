@@ -285,11 +285,14 @@ function normalizeMenuArticleCount(value: string | undefined): 3 | 5 | 10 {
   return 5;
 }
 
-function normalizeMenuArticleTitleLength(value: string | undefined): 50 | 70 | 90 | undefined {
-  if (value === "50") {
-    return 50;
+function normalizeMenuArticleTitleLength(value: string | undefined): 40 | 55 | 70 | 90 | undefined {
+  if (value === "very-short") {
+    return 40;
   }
-  if (value === "90") {
+  if (value === "short") {
+    return 55;
+  }
+  if (value === "long") {
     return 90;
   }
   if (value === "full") {
