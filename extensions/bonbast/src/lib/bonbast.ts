@@ -19,6 +19,12 @@ function pad2(val: string | number | undefined): string {
   return String(val).padStart(2, "0");
 }
 
+function toPositive(raw: string | number | undefined): number | undefined {
+  if (raw === undefined || (typeof raw === "string" && raw.trim() === "")) return undefined;
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? n : undefined;
+}
+
 export async function fetchRates(): Promise<Rates> {
   const homeRes = await fetch("https://www.bonbast.com/", {
     headers: {
@@ -81,22 +87,17 @@ export async function fetchRates(): Promise<Rates> {
 
   for (const entry of CATALOG) {
     if (entry.sellKey && entry.buyKey) {
-      const rawSell = rawData[entry.sellKey];
-      const rawBuy = rawData[entry.buyKey];
-      if (rawSell === undefined || rawBuy === undefined) continue;
-      const sell = Number(rawSell);
-      const buy = Number(rawBuy);
-      if (!Number.isFinite(sell) || !Number.isFinite(buy)) continue;
+      const sell = toPositive(rawData[entry.sellKey]);
+      const buy = toPositive(rawData[entry.buyKey]);
+      if (sell === undefined || buy === undefined) continue;
       items.push({
         ...entry,
         sell,
         buy,
       });
     } else if (entry.valueKey) {
-      const rawVal = rawData[entry.valueKey];
-      if (rawVal === undefined) continue;
-      const value = Number(rawVal);
-      if (!Number.isFinite(value)) continue;
+      const value = toPositive(rawData[entry.valueKey]);
+      if (value === undefined) continue;
       items.push({
         ...entry,
         value,

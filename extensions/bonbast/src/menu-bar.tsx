@@ -34,10 +34,7 @@ function getPlainValue(item: RateItem, unit: Unit): string {
 }
 
 export default function MenuBarCommand() {
-  const { menuBarItem = "usd", unit = "toman" } = getPreferenceValues<{
-    menuBarItem?: string;
-    unit?: Unit;
-  }>();
+  const { menuBarItem, unit } = getPreferenceValues<Preferences.MenuBar>();
 
   const { isLoading, data, error } = useCachedPromise(fetchRates, [], {
     keepPreviousData: true,

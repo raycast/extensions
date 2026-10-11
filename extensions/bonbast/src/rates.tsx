@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, Image, Keyboard, List, getPreferenceValues } from "@raycast/api";
 import { showFailureToast, useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { RateItem, fetchRates } from "./lib/bonbast";
-import { Unit, copyValue, formatUsd, toDisplay, unitLabel } from "./lib/format";
+import { copyValue, formatUsd, toDisplay, unitLabel } from "./lib/format";
 
 function getItemIcon(item: RateItem): Image.ImageLike {
   if (item.kind === "currency") {
@@ -17,7 +17,7 @@ function getItemIcon(item: RateItem): Image.ImageLike {
 }
 
 export default function RatesCommand() {
-  const { unit = "toman" } = getPreferenceValues<{ unit?: Unit }>();
+  const { unit } = getPreferenceValues<Preferences.Rates>();
   const { isLoading, data, error, revalidate } = useCachedPromise(fetchRates, [], {
     keepPreviousData: true,
     onError: (err) => {

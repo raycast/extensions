@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, Image, Keyboard, LaunchProps, List, getPreferenceValues } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { RateItem, fetchRates, findItem } from "./lib/bonbast";
-import { Unit, copyValue, parseAmount, toDisplay, unitLabel } from "./lib/format";
+import { copyValue, parseAmount, toDisplay, unitLabel } from "./lib/format";
 
 function getItemIcon(item: RateItem): Image.ImageLike {
   if (item.kind === "currency") {
@@ -10,8 +10,8 @@ function getItemIcon(item: RateItem): Image.ImageLike {
   return Icon.Coins;
 }
 
-export default function ConvertCommand(props: LaunchProps<{ arguments: { amount: string; code?: string } }>) {
-  const { unit = "toman" } = getPreferenceValues<{ unit?: Unit }>();
+export default function ConvertCommand(props: LaunchProps<{ arguments: Arguments.Convert }>) {
+  const { unit } = getPreferenceValues<Preferences.Convert>();
   const { isLoading, data, error, revalidate } = useCachedPromise(fetchRates, [], {
     keepPreviousData: true,
     onError: (err) => {
