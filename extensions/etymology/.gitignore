@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+
+# `ray build` regenerates this from package.json on every build.
+raycast-env.d.ts
