@@ -24,7 +24,10 @@ export function ConversationDetailView({ conversation, updateConversation }: Con
   const [userQuestion, setUserQuestion] = useState("");
   const [streamingText, setStreamingText] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [selectedMessageIndex, setSelectedMessageIndex] = useState<number>(0);
+  // qaPairs is newest-first, so open on the newest exchange, not the oldest (id "0").
+  const [selectedMessageIndex, setSelectedMessageIndex] = useState<number>(() =>
+    Math.max(0, conversation.messages.length - 2),
+  );
   const [localMessages, setLocalMessages] = useState<Message[]>(conversation.messages);
   const [model, setModel] = useState(conversation.model);
 
