@@ -4,6 +4,7 @@
 
 - Add configurable daily-total and per-timer alerts with silent Raycast notifications.
 - Add optional Pomodoro work, short-break, and long-break intervals with manual transitions.
+- Open a persistent foreground Raycast window when a Pomodoro interval finishes, with actions to dismiss or start the next interval.
 - Persist reminder state across restarts and use a tomato menu bar icon during Pomodoro sessions.
 
 ## [Initial Version] - 2026-10-09

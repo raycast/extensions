@@ -9,6 +9,7 @@ test("reminder service integrates with Stop Work, storage and notification retri
   const directory = await mkdtemp(join(tmpdir(), "local-time-tracker-service-"));
   const items = new Map<string, string | number>();
   const delivered: string[] = [];
+  const launched: { name: string; type: string; context?: { pomodoroIntervalId: string } }[] = [];
   let failDelivery = false;
   const preferences = {
     pomodoroEnabled: true,
@@ -39,8 +40,11 @@ test("reminder service integrates with Stop Work, storage and notification retri
       if (failDelivery) throw new Error("notification failed");
       delivered.push(title);
     },
-    LaunchType: { Background: "background" },
-    async launchCommand() {},
+    LaunchType: { Background: "background", UserInitiated: "userInitiated" },
+    async launchCommand(options: (typeof launched)[number]) {
+      if (options.context && failDelivery) throw new Error("notification failed");
+      launched.push(options);
+    },
   };
   const globals = globalThis as typeof globalThis & { reminderTestAPI?: typeof api };
   globals.reminderTestAPI = api;
@@ -107,6 +111,24 @@ test("reminder service integrates with Stop Work, storage and notification retri
     const preserved = await startPomodoroInterval(past.id);
     await saveActiveTimer({ ...past, startedAt: new Date(Date.now() + 60000).toISOString() });
     assert.equal((await stopTimer()).status, "clock-rollback");
+    assert.equal((await getPomodoro(past))?.intervalId, preserved.intervalId);
+
+    // Finished intervals open a persistent foreground view, retry failed launches,
+    // and never automatically start another interval or send a Toast.
+    await saveActiveTimer(past);
+    const dueAt = new Date(preserved.endsAt);
+    failDelivery = true;
+    await assert.rejects(checkReminders([], past, dueAt), /notification failed/);
+    assert.equal(launched.filter((launch) => launch.context).length, 0);
+    failDelivery = false;
+    await checkReminders([], past, dueAt);
+    assert.deepEqual(
+      launched.filter((launch) => launch.context),
+      [{ name: "start-work", type: "userInitiated", context: { pomodoroIntervalId: preserved.intervalId } }],
+    );
+    assert.equal(delivered.length, 2);
+    await checkReminders([], past, new Date(dueAt.getTime() + 60000));
+    assert.equal(launched.filter((launch) => launch.context).length, 1);
     assert.equal((await getPomodoro(past))?.intervalId, preserved.intervalId);
   } finally {
     hooks.deregister();

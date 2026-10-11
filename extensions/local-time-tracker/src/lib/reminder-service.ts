@@ -1,4 +1,12 @@
-import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
+import {
+  environment,
+  getPreferenceValues,
+  launchCommand,
+  LaunchType,
+  LocalStorage,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { withReminderLock } from "./reminder-lock";
@@ -96,7 +104,15 @@ export async function checkReminders(
     if (!settings.pomodoroEnabled) await LocalStorage.removeItem(POMODORO_KEY);
     const pomodoro = settings.pomodoroEnabled ? await getPomodoro(currentTimer) : null;
     const events = dueReminders(settings, logs, currentTimer, pomodoro, now);
-    await deliverReminders(events, LocalStorage, (title) => showToast({ style: Toast.Style.Success, title }));
+    await deliverReminders(events, LocalStorage, (title, event) =>
+      event.key.startsWith("pomodoro:")
+        ? launchCommand({
+            name: "start-work",
+            type: LaunchType.UserInitiated,
+            context: { pomodoroIntervalId: pomodoro!.intervalId },
+          })
+        : showToast({ style: Toast.Style.Success, title }),
+    );
   });
   const dailyKey = `daily:${getStartOfToday(now).toISOString()}`;
   return {

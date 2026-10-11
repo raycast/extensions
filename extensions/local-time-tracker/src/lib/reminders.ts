@@ -117,11 +117,11 @@ export function notificationKey(eventKey: string): string {
 export async function deliverReminders(
   events: ReminderEvent[],
   store: ReminderStore,
-  notify: (title: string) => Promise<unknown>,
+  notify: (title: string, event: ReminderEvent) => Promise<unknown>,
 ): Promise<void> {
   for (const event of events) {
     if (await store.getItem(notificationKey(event.key))) continue;
-    await notify(event.title);
+    await notify(event.title, event);
     await store.setItem(notificationKey(event.key), "true");
   }
 }
