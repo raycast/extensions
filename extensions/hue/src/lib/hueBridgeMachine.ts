@@ -270,10 +270,18 @@ export const hueBridgeMachine = setup({
             target: "linked",
             actions: assign(({ event }) => event.output),
           },
-          onError: {
-            target: "failedToLink",
-            actions: { type: "reportError", params: ({ event }) => ({ error: event.error }) },
-          },
+          onError: [
+            // A username preference the bridge rejects, which the Link Again screen points to
+            {
+              guard: ({ event }) => event.error instanceof UnauthorizedError,
+              target: "unauthorized",
+              actions: { type: "logError", params: ({ event }) => ({ error: event.error }) },
+            },
+            {
+              target: "failedToLink",
+              actions: { type: "reportError", params: ({ event }) => ({ error: event.error }) },
+            },
+          ],
         },
       ],
     },
