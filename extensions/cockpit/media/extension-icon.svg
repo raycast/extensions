@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <title>Raycast Cockpit</title>
+  <desc>A bold cockpit gauge with a mint remaining-capacity sector on a navy rounded tile.</desc>
+  <rect width="512" height="512" rx="112" fill="#46536B"/>
+  <rect x="8" y="8" width="496" height="496" rx="104" fill="#101D32"/>
+  <path d="M146.398 373.602 A155 155 0 0 1 333.5 129.766" stroke="#F5F7FA" stroke-width="40" stroke-linecap="round"/>
+  <path d="M381.398 172.893 A155 155 0 0 1 365.602 373.602" stroke="#61EFCA" stroke-width="40" stroke-linecap="round"/>
+  <path d="M256 264 L333 203" stroke="#F5F7FA" stroke-width="28" stroke-linecap="round"/>
+  <circle cx="256" cy="264" r="28" fill="#F5F7FA"/>
+</svg>
