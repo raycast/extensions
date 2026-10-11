@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, LaunchProps } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { useCompareProviders } from "./hooks/useCompareProviders";
+import { PublicIpError, useCompareProviders } from "./hooks/useCompareProviders";
 import { formatOverallSummary, formatProviderSummary, getCountryFlag } from "./utils/ip-providers";
 import { IpEmptyView } from "./components/ip-empty-view";
 import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
@@ -10,7 +10,7 @@ import { ProviderResult } from "./types/ip-providers";
 export default function CompareIpProviders(props: LaunchProps<{ arguments: Arguments.CompareIpProviders }>) {
   const ipAddress = props.arguments?.ipAddress;
   const [searchContent, setSearchContent] = useState<string>(ipAddress ? ipAddress.trim() : "");
-  const { data, isLoading } = useCompareProviders(searchContent);
+  const { data, isLoading, error } = useCompareProviders(searchContent);
 
   const results = useMemo(() => data?.results || [], [data]);
   const summary = data?.summary;
@@ -78,7 +78,15 @@ export default function CompareIpProviders(props: LaunchProps<{ arguments: Argum
       onSearchTextChange={setSearchContent}
       throttle={true}
     >
-      <IpEmptyView title={isLoading ? "Loading..." : "Enter a valid IPv4 or IPv6 address"} />
+      <IpEmptyView
+        title={
+          isLoading
+            ? "Loading..."
+            : error instanceof PublicIpError
+              ? "Could not find your public IP"
+              : "Enter a valid IPv4 or IPv6 address"
+        }
+      />
       {data && summary && (
         <>
           <List.Section title="Summary">

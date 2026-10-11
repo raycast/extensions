@@ -25,13 +25,16 @@ interface IpwhoisResponse {
   };
 }
 
+// The free tier returns flat strings; the full format nests country and city under
+// `location` and returns `company` and `asn` as objects. Both are accepted.
 interface IpapiIsResponse {
   error?: string;
   is_bogon?: boolean;
   country?: string | null;
   city?: string | null;
-  company?: string | null;
-  asn?: string | null;
+  company?: string | { name?: string | null } | null;
+  asn?: string | { asn?: number | null; org?: string | null } | null;
+  location?: { country?: string | null; country_code?: string | null; city?: string | null } | null;
 }
 
 interface IpinfoResponse {
@@ -262,9 +265,17 @@ export async function lookupIpapiIs(ip: string): Promise<ProviderResult> {
     if (data.is_bogon) {
       return { provider: "ipapi.is", url, ok: false, error: "Private or reserved address" };
     }
-    const country = cleanString(data.country);
-    const asnText = cleanString(data.asn);
-    if (!country && !asnText && !cleanString(data.company)) {
+    const country = cleanString(data.location?.country) || cleanString(data.country);
+    const company =
+      data.company && typeof data.company === "object" ? cleanString(data.company.name) : cleanString(data.company);
+    let asnText: string | undefined;
+    if (data.asn && typeof data.asn === "object") {
+      const org = cleanString(data.asn.org);
+      asnText = data.asn.asn ? `AS${data.asn.asn}${org ? ` ${org}` : ""}` : undefined;
+    } else {
+      asnText = cleanString(data.asn);
+    }
+    if (!country && !asnText && !company) {
       return { provider: "ipapi.is", url, ok: false, error: "No data returned" };
     }
     return {
@@ -272,9 +283,9 @@ export async function lookupIpapiIs(ip: string): Promise<ProviderResult> {
       url,
       ok: true,
       country,
-      countryCode: countryCodeFromName(country),
-      city: cleanString(data.city),
-      isp: cleanString(data.company) || asnText?.replace(/^AS\d+\s*/i, ""),
+      countryCode: cleanString(data.location?.country_code)?.toUpperCase() || countryCodeFromName(country),
+      city: cleanString(data.location?.city) || cleanString(data.city),
+      isp: company || asnText?.replace(/^AS\d+\s*/i, ""),
       asn: formatAsn(asnText),
     };
   } catch (error: unknown) {
