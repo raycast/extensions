@@ -7,6 +7,8 @@ import {
   LaunchType,
   Toast,
   launchCommand,
+  closeMainWindow,
+  type LaunchProps,
   showHUD,
   showToast,
 } from "@raycast/api";
@@ -19,12 +21,17 @@ import { showFailure } from "./lib/errors";
 import { findProject, sortProjectsByPreference } from "./lib/projects";
 import { getActiveTimer, getProjectCategories, getProjects, getWorkLogs } from "./lib/storage";
 import { ActiveTimerExistsError, startTimer, stopTimer } from "./lib/timer";
+import { getPomodoro, getReminderSettings, startPomodoroInterval } from "./lib/reminder-service";
+import { isIntervalFinished, nextPhase, phaseLabel, type PomodoroState } from "./lib/reminders";
 import type { ActiveTimer, Project, ProjectCategory, WorkLog } from "./lib/types";
 
 const NO_DESCRIPTION = "__no_description__";
 const NEW_DESCRIPTION = "__new_description__";
 
-export default function StartWorkCommand() {
+export default function StartWorkCommand({
+  launchContext,
+}: LaunchProps<{ launchContext: { pomodoroIntervalId?: string } }>) {
+  const [finishedPomodoro, setFinishedPomodoro] = useState<PomodoroState | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [categories, setCategories] = useState<ProjectCategory[]>([]);
   const [workLogs, setWorkLogs] = useState<WorkLog[]>([]);
@@ -34,6 +41,8 @@ export default function StartWorkCommand() {
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [descriptionChoice, setDescriptionChoice] = useState(NO_DESCRIPTION);
   const [newDescription, setNewDescription] = useState("");
+  const [usePomodoro, setUsePomodoro] = useState(false);
+  const pomodoroEnabled = getReminderSettings().pomodoroEnabled;
   const projectDropdownRef = useRef<Form.Dropdown>(null);
 
   async function load() {
@@ -48,6 +57,12 @@ export default function StartWorkCommand() {
       setCategories(savedCategories);
       setWorkLogs(savedLogs);
       setActiveTimer(savedTimer);
+      if (launchContext?.pomodoroIntervalId && pomodoroEnabled) {
+        const state = await getPomodoro(savedTimer);
+        if (state?.intervalId === launchContext.pomodoroIntervalId && isIntervalFinished(state, new Date())) {
+          setFinishedPomodoro(state);
+        }
+      }
       const firstProject = sortProjectsByPreference(savedProjects.filter((project) => project.isActive))[0];
       setSelectedProjectId(firstProject?.id ?? "");
     } catch (error) {
@@ -79,6 +94,39 @@ export default function StartWorkCommand() {
 
   if (isLoading) {
     return <Detail isLoading markdown="Loading…" />;
+  }
+
+  if (finishedPomodoro && activeTimer) {
+    const next = phaseLabel(nextPhase(finishedPomodoro));
+    return (
+      <Detail
+        navigationTitle="Pomodoro Finished"
+        markdown={`# 🍅 ${phaseLabel(finishedPomodoro.phase)} Finished\n\n${finishedPomodoro.phase === "work" ? "Time to take a break." : "Your break is over."}\n\n**Next: ${next}**\n\nStart the next interval when you are ready. Work tracking continues while you wait.`}
+        actions={
+          <ActionPanel>
+            <Action
+              title={`Start ${next}`}
+              icon={Icon.Play}
+              onAction={async () => {
+                if (isSubmitting) return;
+                setIsSubmitting(true);
+                try {
+                  await startPomodoroInterval(activeTimer.id, finishedPomodoro.intervalId);
+                  setFinishedPomodoro(null);
+                  await launchCommand({ name: "menu-bar", type: LaunchType.Background });
+                  await closeMainWindow();
+                } catch (error) {
+                  await showFailure("Could not start the next interval", error);
+                } finally {
+                  setIsSubmitting(false);
+                }
+              }}
+            />
+            <Action title="Dismiss" icon={Icon.XMarkCircle} onAction={() => closeMainWindow()} />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   if (activeTimer) {
@@ -186,6 +234,16 @@ export default function StartWorkCommand() {
     try {
       const startedTimer = await startTimer(project.id, description);
       setActiveTimer(startedTimer);
+      if (usePomodoro && pomodoroEnabled) {
+        try {
+          await startPomodoroInterval(startedTimer.id);
+          // Refresh again after the separate pomodoro state has been saved.
+          await launchCommand({ name: "menu-bar", type: LaunchType.Background });
+        } catch (error) {
+          await showFailure("Work started, but Pomodoro could not start", error);
+          return;
+        }
+      }
       await showHUD(`Started: ${project.name}`);
     } catch (error) {
       if (error instanceof ActiveTimerExistsError) {
@@ -256,6 +314,15 @@ export default function StartWorkCommand() {
           onChange={setNewDescription}
         />
       )}
+      {pomodoroEnabled ? (
+        <Form.Checkbox
+          id="pomodoro"
+          title="Pomodoro"
+          label="Use Pomodoro alongside work tracking"
+          value={usePomodoro}
+          onChange={setUsePomodoro}
+        />
+      ) : null}
     </Form>
   );
 }

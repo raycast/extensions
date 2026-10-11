@@ -2,6 +2,7 @@ import { LaunchType, launchCommand } from "@raycast/api";
 import { getDurationSeconds, isClockBeforeStart } from "./duration";
 import { clearActiveTimerIfMatches, getActiveTimer, getWorkLogs, saveActiveTimer, upsertWorkLog } from "./storage";
 import type { ActiveTimer, WorkLog } from "./types";
+import { endPomodoro } from "./reminder-service";
 
 export class ActiveTimerExistsError extends Error {
   constructor(public readonly activeTimer: ActiveTimer) {
@@ -49,6 +50,7 @@ export async function stopTimer(): Promise<StopTimerResult> {
 
   if (existingLog) {
     await clearActiveTimerIfMatches(activeTimer.id);
+    await cleanupPomodoro(activeTimer.id);
     await refreshMenuBar();
     return {
       status: "recovered",
@@ -77,6 +79,7 @@ export async function stopTimer(): Promise<StopTimerResult> {
 
   await upsertWorkLog(workLog);
   await clearActiveTimerIfMatches(activeTimer.id);
+  await cleanupPomodoro(activeTimer.id);
   await refreshMenuBar();
   return { status: "stopped", workLog, durationSeconds };
 }
@@ -86,5 +89,14 @@ export async function refreshMenuBar(): Promise<void> {
     await launchCommand({ name: "menu-bar", type: LaunchType.Background });
   } catch (error) {
     console.error("Failed to refresh menu bar", error);
+  }
+}
+
+async function cleanupPomodoro(timerId: string): Promise<void> {
+  try {
+    await endPomodoro(timerId);
+  } catch (error) {
+    // Stale state is ignored by timer ID; cleanup must not prevent saving work.
+    console.error("Failed to clear pomodoro state", error);
   }
 }
