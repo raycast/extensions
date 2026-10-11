@@ -5,16 +5,16 @@ import { FileActions } from "./components/file-actions";
 import { FileDetail } from "./components/file-detail";
 import { StatusView } from "./components/status-view";
 import { search, type Hit } from "./lib/fsearch";
-import { fileName, folderOf, formatDate, modifiedDate, pluralize, tildify } from "./lib/format";
+import { expandHome, fileName, folderOf, formatDate, modifiedDate, pluralize, tildify } from "./lib/format";
 import { filtersFor, KINDS } from "./lib/kinds";
 import { useFSearch } from "./lib/use-fsearch";
 
 const LIMIT = 60;
 
-export default function Command({ fallbackText }: LaunchProps) {
-  const [text, setText] = useState(fallbackText ?? "");
-  const [kind, setKind] = useState("all");
-  const [scope, setScope] = useState<string>();
+export default function Command({ arguments: args, fallbackText }: LaunchProps<{ arguments: Arguments.SearchFiles }>) {
+  const [text, setText] = useState(args.query || fallbackText || "");
+  const [kind, setKind] = useState<string>(args.kind || "all");
+  const [scope, setScope] = useState<string | undefined>(args.folder?.trim() ? expandHome(args.folder) : undefined);
   const [isShowingDetail, setShowingDetail] = useCachedState("show-detail", false);
 
   // A kind or folder is enough to list something, even with no words.
@@ -42,7 +42,12 @@ export default function Command({ fallbackText }: LaunchProps) {
       navigationTitle={scopeTitle ? `Search Files in ${scopeTitle}` : undefined}
       isShowingDetail={isShowingDetail && hits.length > 0}
       searchBarAccessory={
-        <List.Dropdown tooltip="Kind" storeValue onChange={setKind}>
+        // A kind chosen in root search wins over the one remembered from last time.
+        <List.Dropdown
+          tooltip="Kind"
+          {...(args.kind ? { defaultValue: args.kind } : { storeValue: true })}
+          onChange={setKind}
+        >
           {KINDS.map((k) => (
             <List.Dropdown.Item key={k.value} value={k.value} title={k.title} />
           ))}

@@ -5,7 +5,7 @@ import { StatusView } from "./components/status-view";
 import { splitContentQuery } from "./lib/content-query";
 import { editorName, openAtLine, preferredEditor } from "./lib/editors";
 import { grep, type GrepFile, type GrepMode } from "./lib/fsearch";
-import { fileName, folderOf } from "./lib/format";
+import { expandHome, fileName, folderOf } from "./lib/format";
 import { useFSearch } from "./lib/use-fsearch";
 
 const NARROW = "The search stopped early. Add ext:, type:, or in: to search fewer files.";
@@ -16,14 +16,19 @@ const MODES: { value: GrepMode; title: string; placeholder: string }[] = [
   { value: "symbol", title: "Definition", placeholder: "Find where a function or type is defined" },
 ];
 
-export default function Command({ fallbackText }: LaunchProps) {
-  const [text, setText] = useState(fallbackText ?? "");
-  const [mode, setMode] = useState<GrepMode>("literal");
+export default function Command({
+  arguments: args,
+  fallbackText,
+}: LaunchProps<{ arguments: Arguments.SearchContents }>) {
+  const [text, setText] = useState(args.text || fallbackText || "");
+  const [mode, setMode] = useState<GrepMode>((args.mode as GrepMode) || "literal");
+  const folder = args.folder?.trim() ? expandHome(args.folder) : undefined;
   const { pattern, q } = splitContentQuery(text);
   const execute = pattern.length > 0;
 
   const { data, isLoading, error, indexing, revalidate } = useFSearch(
-    (signal, p: string, query: string, m: GrepMode) => grep(p, query, m, signal),
+    (signal, p: string, query: string, m: GrepMode) =>
+      grep(p, query, m, signal, folder ? { filters: { in: folder } } : {}),
     [pattern, q, mode],
     execute,
   );
@@ -40,8 +45,13 @@ export default function Command({ fallbackText }: LaunchProps) {
       searchText={text}
       onSearchTextChange={setText}
       searchBarPlaceholder={MODES.find((m) => m.value === mode)?.placeholder}
+      navigationTitle={folder ? `Search File Contents in ${fileName(folder)}` : undefined}
       searchBarAccessory={
-        <List.Dropdown tooltip="Match" storeValue onChange={(value) => setMode(value as GrepMode)}>
+        <List.Dropdown
+          tooltip="Match"
+          {...(args.mode ? { defaultValue: args.mode } : { storeValue: true })}
+          onChange={(value) => setMode(value as GrepMode)}
+        >
           {MODES.map((m) => (
             <List.Dropdown.Item key={m.value} value={m.value} title={m.title} />
           ))}

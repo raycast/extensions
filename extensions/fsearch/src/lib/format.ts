@@ -3,6 +3,13 @@ import { basename, dirname } from "node:path";
 
 const HOME = homedir();
 
+/** `~/Developer` → `/Users/me/Developer`; anything else is returned trimmed. */
+export function expandHome(path: string) {
+  const trimmed = path.trim();
+  if (trimmed === "~") return HOME;
+  return trimmed.startsWith("~/") ? HOME + trimmed.slice(1) : trimmed;
+}
+
 /** `/Users/me/Developer` → `~/Developer`. */
 export function tildify(path: string) {
   if (path === HOME) return "~";

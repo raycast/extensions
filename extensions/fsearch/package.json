@@ -33,6 +33,68 @@
         "folder",
         "fuzzy",
         "spotlight"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Name",
+          "required": false
+        },
+        {
+          "name": "kind",
+          "type": "dropdown",
+          "placeholder": "Kind",
+          "required": false,
+          "data": [
+            {
+              "title": "Files",
+              "value": "file"
+            },
+            {
+              "title": "Folders",
+              "value": "folder"
+            },
+            {
+              "title": "Applications",
+              "value": "app"
+            },
+            {
+              "title": "Images",
+              "value": "image"
+            },
+            {
+              "title": "Documents",
+              "value": "doc"
+            },
+            {
+              "title": "Code",
+              "value": "code"
+            },
+            {
+              "title": "Videos",
+              "value": "video"
+            },
+            {
+              "title": "Audio",
+              "value": "audio"
+            },
+            {
+              "title": "Archives",
+              "value": "archive"
+            },
+            {
+              "title": "Fonts",
+              "value": "font"
+            }
+          ]
+        },
+        {
+          "name": "folder",
+          "type": "text",
+          "placeholder": "Folder",
+          "required": false
+        }
       ]
     },
     {
@@ -79,6 +141,40 @@
               "value": "xcode"
             }
           ]
+        }
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Text",
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "dropdown",
+          "placeholder": "Match",
+          "required": false,
+          "data": [
+            {
+              "title": "Text",
+              "value": "literal"
+            },
+            {
+              "title": "Regular Expression",
+              "value": "regex"
+            },
+            {
+              "title": "Definition",
+              "value": "symbol"
+            }
+          ]
+        },
+        {
+          "name": "folder",
+          "type": "text",
+          "placeholder": "Folder",
+          "required": false
         }
       ]
     }

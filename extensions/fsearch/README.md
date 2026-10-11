@@ -1,5 +1,3 @@
-<img src="media/banner.png" alt="FSearch" width="100%">
-
 # FSearch for Raycast
 
 Find any file on your Mac by name or by what's inside it, without leaving Raycast. Built on [FSearch](https://github.com/noahdunnagan/fsearch), which indexes the whole disk and answers in about a millisecond.
@@ -20,7 +18,9 @@ Find any file on your Mac by name or by what's inside it, without leaving Raycas
 
 Press Command-D to show details with a preview, Command-Y for Quick Look, and Command-F to search inside the selected folder.
 
-**Search File Contents** finds text inside your files. Choose Text, Regular Expression, or Definition from the menu in the search bar; Definition finds where a function or type is declared. Searches ignore case unless you type an uppercase letter. Add `ext:`, `type:`, or `in:` to search fewer files. To open each match at its line, choose an editor in the command's settings.
+You can also fill in Name, Kind, and Folder right in Raycast's root search, before the command opens. Press Tab to move between them; each one is optional.
+
+**Search File Contents** finds text inside your files. Choose Text, Regular Expression, or Definition from the menu in the search bar; Definition finds where a function or type is declared. Searches ignore case unless you type an uppercase letter. Add `ext:`, `type:`, or `in:` to search fewer files. To open each match at its line, choose an editor in the command's settings. In root search, fill in Text, Match, and Folder to start a search before the command opens.
 
 ## Raycast AI
 
