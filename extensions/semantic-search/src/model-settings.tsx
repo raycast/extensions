@@ -120,6 +120,19 @@ export default function ModelSettings({
   const [applyingSettings, setApplyingSettings] = useState(false);
   const [exclusionText, setExclusionText] = useState("");
   const [exclusionError, setExclusionError] = useState("");
+  const excludedPaths = values?.excluded_paths;
+  useEffect(() => {
+    if (!excludedPaths || exclusionError) return;
+    try {
+      // Keep equivalent user formatting, but reflect accepted server changes.
+      if (sameSettingsValue(parseFolderPaths(exclusionText), excludedPaths))
+        return;
+    } catch {
+      // An unfinished manual draft must survive background polling.
+      return;
+    }
+    setExclusionText(formatFolderPaths(excludedPaths));
+  }, [excludedPaths, exclusionText, exclusionError]);
   useEffect(() => {
     let active = true;
     setError("");

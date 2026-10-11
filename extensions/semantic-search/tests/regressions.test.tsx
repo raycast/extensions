@@ -328,6 +328,174 @@ test("invalid custom address shows a repair screen rather than throwing on mount
   }
 });
 
+test("the open exclusion editor follows accepted polls and canonical save responses", async (t) => {
+  launcher.serviceURL = "http://127.0.0.1:18799";
+  let poll!: () => void;
+  t.mock.method(globalThis, "setInterval", (callback: () => void) => {
+    poll = callback;
+    return 1;
+  });
+  t.mock.method(globalThis, "clearInterval", () => {});
+  let saved = ["/private/tmp/private"];
+  const requests: string[][] = [];
+  const saving = deferred<Response>();
+  t.mock.method(
+    globalThis,
+    "fetch",
+    async (url: string, init?: RequestInit) => {
+      if (url.endsWith("/v1/status")) return response(status);
+      if (init?.method === "POST") {
+        requests.push(JSON.parse(String(init.body)).excluded_paths);
+        return saving.promise;
+      }
+      return response(snapshot({ ...current, excluded_paths: saved }));
+    },
+  );
+  let view!: ReactTestRenderer;
+  try {
+    await act(async () => {
+      view = create(createElement(ModelSettings));
+    });
+    await act(async () => {
+      field(view, "Checkbox", "edit_exclusion_paths").props.onChange(true);
+    });
+    saved = [...saved, "/private/tmp/other-launcher"];
+    await act(async () => {
+      poll();
+    });
+    assert.equal(
+      field(view, "TextArea", "excluded_paths").props.value,
+      saved.join("\n"),
+    );
+    await act(async () => {
+      field(view, "TextArea", "excluded_paths").props.onChange(
+        saved.join("\n") + "\n~/Documents/private",
+      );
+    });
+    let pending!: Promise<void>;
+    await act(async () => {
+      pending = field(view, "SubmitForm").props.onSubmit();
+    });
+    assert.deepEqual(requests[0], [...saved, "~/Documents/private"]);
+    saved = [...saved, "/private/tmp/resolved/private"];
+    await act(async () => {
+      saving.resolve(
+        response({
+          excluded_paths: saved,
+          excluded_files_removed: 0,
+          excluded_saved_entries_removed: 0,
+          cleanup_pending: 0,
+        }),
+      );
+      await pending;
+    });
+    assert.equal(
+      field(view, "TextArea", "excluded_paths").props.value,
+      saved.join("\n"),
+    );
+  } finally {
+    await act(async () => {
+      view?.unmount();
+    });
+  }
+});
+
+test("exclusion polling preserves valid formatting, unfinished edits, and edits made during save", async (t) => {
+  launcher.serviceURL = "http://127.0.0.1:18799";
+  let poll!: () => void;
+  t.mock.method(globalThis, "setInterval", (callback: () => void) => {
+    poll = callback;
+    return 1;
+  });
+  t.mock.method(globalThis, "clearInterval", () => {});
+  let saved = ["/private/tmp/private"];
+  let postCount = 0;
+  const saving = deferred<Response>();
+  t.mock.method(
+    globalThis,
+    "fetch",
+    async (url: string, init?: RequestInit) => {
+      if (url.endsWith("/v1/status")) return response(status);
+      if (init?.method === "POST") {
+        postCount++;
+        return saving.promise;
+      }
+      return response(snapshot({ ...current, excluded_paths: saved }));
+    },
+  );
+  let view!: ReactTestRenderer;
+  try {
+    await act(async () => {
+      view = create(createElement(ModelSettings));
+    });
+    await act(async () => {
+      field(view, "Checkbox", "edit_exclusion_paths").props.onChange(true);
+    });
+    const draft = ' [ "/private/tmp/local" ] ';
+    await act(async () => {
+      field(view, "TextArea", "excluded_paths").props.onChange(draft);
+    });
+    saved = [...saved, "/private/tmp/other-launcher"];
+    await act(async () => {
+      poll();
+    });
+    assert.equal(field(view, "TextArea", "excluded_paths").props.value, draft);
+    const unfinished = '["/private/tmp/unfinished"';
+    await act(async () => {
+      field(view, "TextArea", "excluded_paths").props.onChange(unfinished);
+    });
+    await act(async () => {
+      poll();
+    });
+    assert.equal(
+      field(view, "TextArea", "excluded_paths").props.value,
+      unfinished,
+    );
+    assert.ok(field(view, "TextArea", "excluded_paths").props.error);
+    await act(async () => {
+      await field(view, "SubmitForm").props.onSubmit();
+    });
+    assert.equal(
+      postCount,
+      0,
+      "unfinished input cannot submit a different hidden list",
+    );
+    await act(async () => {
+      field(view, "TextArea", "excluded_paths").props.onChange(
+        "~/Documents/first",
+      );
+    });
+    let pending!: Promise<void>;
+    await act(async () => {
+      pending = field(view, "SubmitForm").props.onSubmit();
+    });
+    await act(async () => {
+      field(view, "TextArea", "excluded_paths").props.onChange(
+        "~/Documents/newer-draft",
+      );
+    });
+    await act(async () => {
+      saving.resolve(
+        response({
+          excluded_paths: ["/private/tmp/resolved/first"],
+          excluded_files_removed: 0,
+          excluded_saved_entries_removed: 0,
+          cleanup_pending: 0,
+        }),
+      );
+      await pending;
+    });
+    assert.equal(
+      field(view, "TextArea", "excluded_paths").props.value,
+      "~/Documents/newer-draft",
+    );
+  } finally {
+    await act(async () => {
+      view?.unmount();
+    });
+  }
+});
+
 test("failed Apply keeps edits and polling resumes without accepting stale errors", async (t) => {
   launcher.serviceURL = "http://127.0.0.1:18799";
   launcher.toasts.length = 0;
