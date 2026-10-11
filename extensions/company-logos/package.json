@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "company-logos",
+  "title": "Company Logos",
+  "description": "Find company logos by name or domain, then copy or paste them as images.",
+  "icon": "extension-icon.png",
+  "author": "gestern",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-logos",
+      "title": "Search Company Logos",
+      "description": "Browse popular company logos or enter any website domain. Copy an image or paste it into your active app.",
+      "mode": "view",
+      "keywords": [
+        "brand",
+        "favicon",
+        "icon",
+        "company",
+        "logo"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts"
+  }
+}
