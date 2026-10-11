@@ -1,0 +1,6 @@
+node_modules/
+dist/
+bin/
+*.log
+
+assets/QuickShell.Suggest.exe

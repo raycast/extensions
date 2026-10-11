@@ -1,0 +1,167 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quickshell",
+  "title": "Quick Shell Workspaces",
+  "description": "Open saved project folders in Terminal, Windows Terminal, and other shells",
+  "icon": "extension-icon.png",
+  "author": "tonythethompson",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "quickshell",
+    "quick shell",
+    "terminal",
+    "windows terminal",
+    "iterm",
+    "workspace",
+    "developer",
+    "powershell",
+    "wsl",
+    "git"
+  ],
+  "preferences": [
+    {
+      "name": "terminalApplication",
+      "title": "Default Terminal App",
+      "description": "Terminal application used when a workspace launch uses the Quick Shell default. On macOS use Terminal or iTerm2; Windows values are ignored on Mac.",
+      "type": "dropdown",
+      "required": false,
+      "default": "wt",
+      "data": [
+        {
+          "title": "System default",
+          "value": "system"
+        },
+        {
+          "title": "Windows Terminal",
+          "value": "wt"
+        },
+        {
+          "title": "Windows Console Host",
+          "value": "conhost"
+        },
+        {
+          "title": "Intelligent Terminal",
+          "value": "it"
+        },
+        {
+          "title": "Terminal (macOS)",
+          "value": "terminal"
+        },
+        {
+          "title": "iTerm2 (macOS)",
+          "value": "iterm"
+        }
+      ]
+    },
+    {
+      "name": "defaultProfile",
+      "title": "Default Profile",
+      "description": "Profile name for the default terminal app. Use __default__ for the app default profile.",
+      "type": "textfield",
+      "required": false,
+      "default": "__default__",
+      "placeholder": "__default__"
+    },
+    {
+      "name": "showRecents",
+      "title": "Recent Workspaces",
+      "description": "Show recently opened workspaces in Workspaces.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show recent workspaces"
+    },
+    {
+      "name": "singleWindowTabs",
+      "title": "Multi-command Launch",
+      "description": "Open multiple launch commands as tabs in one window (Windows Terminal on Windows; Terminal.app or iTerm2 on macOS).",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Open multiple commands as tabs in one window"
+    },
+    {
+      "name": "blockDirtyBranchSwitch",
+      "title": "Git Branch Gate",
+      "description": "Block launch when a target branch is set and the working tree has uncommitted changes.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Block dirty branch switch"
+    }
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "commands": [
+    {
+      "name": "open-workspace",
+      "title": "Open Workspace",
+      "description": "Search, open, create, and manage saved workspaces (qs)",
+      "icon": "command-open.png",
+      "keywords": [
+        "qs",
+        "quickshell",
+        "quick shell",
+        "workspaces",
+        "workspace",
+        "terminal",
+        "dev",
+        "home",
+        "create",
+        "edit",
+        "discover",
+        "git"
+      ],
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Workspace name or abbreviation",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^1.19.1"
+  },
+  "overrides": {
+    "esbuild": "0.28.1",
+    "postcss": "8.5.24",
+    "brace-expansion": "5.0.8",
+    "filelist": {
+      "minimatch": "10.2.6"
+    }
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^10.8.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.8"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true
+  }
+}
