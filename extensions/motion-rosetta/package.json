@@ -1,0 +1,186 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "motion-rosetta",
+  "title": "Motion Rosetta",
+  "description": "Translate easing curves and springs with explicit conversion fidelity.",
+  "icon": "extension-icon.png",
+  "author": "sebastiangonzales",
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "convert-easing",
+      "title": "Convert Easing",
+      "description": "Paste an easing, inspect its curve, and copy platform equivalents.",
+      "mode": "view"
+    }
+  ],
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "dependencies": {
+    "@raycast/api": "2.4.1",
+    "gifenc": "1.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "motion": "12.23.24",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "4.1.11"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "benchmark": "node --experimental-strip-types scripts/benchmark.ts",
+    "assets": "node --experimental-strip-types scripts/assets.ts",
+    "verify-apple-response": "node --experimental-strip-types scripts/verify-apple-response.ts",
+    "verify-cache-recovery": "node --experimental-strip-types scripts/verify-cache-recovery.ts",
+    "verify-cache-concurrency": "node --experimental-strip-types scripts/verify-cache-concurrency.ts",
+    "verify-swift": "node --experimental-strip-types scripts/verify-swift.ts",
+    "format-icons": "node --experimental-strip-types scripts/format-icons.ts"
+  },
+  "preferences": [
+    {
+      "name": "shortcut_copy_figma",
+      "type": "textfield",
+      "required": false,
+      "title": "Copy Figma Shortcut",
+      "description": "All shortcuts: use cmd+shift+1 syntax; none disables. Blank uses defaults or migrated bindings from earlier local versions. Reopen Convert Easing to apply.",
+      "placeholder": "cmd+shift+1"
+    },
+    {
+      "name": "shortcut_copy_figma_css",
+      "type": "textfield",
+      "required": false,
+      "title": "Copy Figma CSS Syntax Shortcut",
+      "description": "Figma output in CSS syntax.",
+      "placeholder": "cmd+shift+2"
+    },
+    {
+      "name": "shortcut_copy_css_bezier",
+      "type": "textfield",
+      "required": false,
+      "title": "Copy CSS Bézier Shortcut",
+      "description": "CSS timing function.",
+      "placeholder": "cmd+shift+3"
+    },
+    {
+      "name": "shortcut_copy_css_linear",
+      "type": "textfield",
+      "required": false,
+      "title": "Copy CSS linear() / steps() Shortcut",
+      "description": "Sampled curve or discrete steps.",
+      "placeholder": "cmd+shift+4"
+    },
+    {
+      "name": "shortcut_copy_motion",
+      "type": "textfield",
+      "required": false,
+      "title": "Copy Motion Shortcut",
+      "description": "Motion transition object.",
+      "placeholder": "cmd+shift+5"
+    },
+    {
+      "name": "shortcut_copy_swiftui",
+      "type": "textfield",
+      "required": false,
+      "title": "Copy SwiftUI Shortcut",
+      "description": "SwiftUI animation.",
+      "placeholder": "cmd+shift+6"
+    },
+    {
+      "name": "shortcut_copy_compose",
+      "type": "textfield",
+      "required": false,
+      "title": "Copy Jetpack Compose Shortcut",
+      "description": "Compose animation specification.",
+      "placeholder": "cmd+shift+7"
+    },
+    {
+      "name": "shortcut_copy_tailwind",
+      "type": "textfield",
+      "required": false,
+      "title": "Copy Tailwind Shortcut",
+      "description": "Tailwind animation classes.",
+      "placeholder": "cmd+shift+8"
+    },
+    {
+      "name": "shortcut_copy_dtcg",
+      "type": "textfield",
+      "required": false,
+      "title": "Copy DTCG Shortcut",
+      "description": "Design token output.",
+      "placeholder": "cmd+shift+9"
+    },
+    {
+      "name": "shortcut_copy_figma_motion",
+      "type": "textfield",
+      "required": false,
+      "title": "Copy Figma Motion Shortcut",
+      "description": "Bounce-only spring output.",
+      "placeholder": "cmd+opt+1"
+    },
+    {
+      "name": "shortcut_copy_motion_time",
+      "type": "textfield",
+      "required": false,
+      "title": "Copy Motion Visual Duration Shortcut",
+      "description": "Time-based Motion spring.",
+      "placeholder": "cmd+opt+2"
+    },
+    {
+      "name": "shortcut_preview_sheet",
+      "type": "textfield",
+      "required": false,
+      "title": "Preview on Sheet Shortcut",
+      "description": "Long-travel preview.",
+      "placeholder": "ctrl+1"
+    },
+    {
+      "name": "shortcut_preview_toggle",
+      "type": "textfield",
+      "required": false,
+      "title": "Preview on Toggle Shortcut",
+      "description": "Short-travel preview.",
+      "placeholder": "ctrl+2"
+    },
+    {
+      "name": "shortcut_preview_tooltip",
+      "type": "textfield",
+      "required": false,
+      "title": "Preview on Tooltip Shortcut",
+      "description": "Small-element preview.",
+      "placeholder": "ctrl+3"
+    },
+    {
+      "name": "shortcut_preview_staggered_list",
+      "type": "textfield",
+      "required": false,
+      "title": "Preview on Staggered List Shortcut",
+      "description": "Six staggered rows.",
+      "placeholder": "ctrl+4"
+    },
+    {
+      "name": "shortcut_confirm",
+      "type": "textfield",
+      "required": false,
+      "title": "Confirm Input and Preview Shortcut",
+      "description": "Generate the current preview.",
+      "placeholder": "cmd+return"
+    }
+  ]
+}
