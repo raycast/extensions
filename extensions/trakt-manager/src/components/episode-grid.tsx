@@ -9,8 +9,12 @@ import { createEpisodeMarkdown, createEpisodeMetadata } from "../lib/detail-help
 import { getScreenshotUrl } from "../lib/helper";
 import { markEpisodeWatched } from "../lib/media-mutations";
 import { TraktEpisodeListItem, TraktShowBaseItem } from "../lib/schema";
+import { useRatingsSync } from "../lib/use-ratings";
+import { useWatchedState, useWatchedSync } from "../lib/use-watched";
 import { EpisodeActionPanel, episodeTraktUrl } from "./episode-actions";
 import { GenericGrid } from "./generic-grid";
+import { RemoveFromHistoryAction } from "./history-actions";
+import { RatingActions } from "./rating-actions";
 
 export const EpisodeGrid = ({
   showId,
@@ -24,6 +28,10 @@ export const EpisodeGrid = ({
   const abortable = useRef<AbortController | undefined>(undefined);
   const traktClient = initTraktClient();
   const [actionLoading, setActionLoading] = useState(false);
+  // A season can be opened from any command, so this view reads the ratings and the history itself.
+  useRatingsSync();
+  useWatchedSync();
+  const { setWatched } = useWatchedState();
   const { isLoading, data: episodes } = useCachedPromise(
     async (showId: number, seasonNumber: number) => {
       abortable.current = new AbortController();
@@ -59,9 +67,15 @@ export const EpisodeGrid = ({
     },
   );
 
-  const markWatched = useCallback(async (episode: TraktEpisodeListItem) => {
-    await markEpisodeWatched(traktClient, episode.ids.trakt, { signal: abortable.current?.signal });
-  }, []);
+  const markWatched = useCallback(
+    async (episode: TraktEpisodeListItem) => {
+      await markEpisodeWatched(traktClient, episode.ids.trakt, { signal: abortable.current?.signal });
+      setWatched({ type: "episode", showId, season: episode.season, number: episode.number }, true);
+    },
+    [showId],
+  );
+  const signal = () => abortable.current?.signal;
+  const episodeLabel = (episode: TraktEpisodeListItem) => `S${episode.season}E${episode.number} ${episode.title}`;
 
   const handleAction = useActionRunner<TraktEpisodeListItem>({ setActionLoading });
 
@@ -105,6 +119,28 @@ export const EpisodeGrid = ({
                 handleAction(episode, markWatched, `Marked S${episode.season}E${episode.number} as watched`),
             },
           ]}
+          extraActions={(episode) => (
+            <>
+              <RemoveFromHistoryAction
+                item={episode}
+                target={{ type: "episode", showId, season: episode.season, number: episode.number }}
+                traktId={episode.ids.trakt}
+                title={episodeLabel(episode)}
+                client={traktClient}
+                signal={signal}
+                run={handleAction}
+              />
+              <RatingActions
+                item={episode}
+                type="episode"
+                traktId={episode.ids.trakt}
+                title={episodeLabel(episode)}
+                client={traktClient}
+                signal={signal}
+                run={handleAction}
+              />
+            </>
+          )}
         />
       )}
     />

@@ -1,5 +1,20 @@
 # Changelog
 
+## [Raycast Compatibility and Latest AI Models] - 2026-10-11
+
+- Fix extension startup failures caused by missing `zustand/vanilla` package exports.
+- Add GPT-6 Luna, GPT-6.1 Sol, and GPT-6 Astra, plus Gemini 3.8 Flash, 3.6 Flash, 3.5 Flash-Lite, 3.1 Flash-Lite, and 3.1 Pro Preview.
+- Add GPT-5.6 Sol, Terra, and Luna with model-specific reasoning levels and long-context cost estimates.
+- Use GPT-6 Luna for initial built-in actions, new actions, and the initial Custom Action setting while preserving model choices in existing saved actions.
+- Migrate retired Gemini 3 Pro Preview selections to Gemini 3.1 Pro Preview.
+- Add a Reasoning Level setting for OpenAI and Gemini models in saved actions and Custom Action.
+- Mark models that support thinking in Custom Action's Raycast settings and explain how Reasoning Level and Temperature apply to each model.
+- Improve response streaming, error handling, token totals, and model cost estimates; use the Responses API for OpenAI reasoning models.
+- Fix loading of saved actions and prevent list sorting from changing stored data.
+- Reject invalid or unsupported backups before replacing saved actions.
+- Update build and publishing tools to Raycast SDK 2.7.3.
+- Refresh the extension icon from a higher-resolution source.
+
 ## [AI SDK, Multi-Provider & Model Updates] - 2026-04-12
 
 - Internal: Migrated model integration from `openai` SDK to `ai` SDK with provider routing.

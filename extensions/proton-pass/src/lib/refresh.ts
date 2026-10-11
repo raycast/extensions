@@ -67,3 +67,29 @@ export function createSerialQueue() {
     },
   };
 }
+
+/**
+ * Orders the saves of complete listings across views: List Vaults and the Search Items it opens list in parallel,
+ * and a listing that started before the one saved last must not replace it.
+ */
+export function createListingSaves() {
+  const queue = createSerialQueue();
+  let started = 0;
+  let saved = 0;
+  return {
+    /** Numbers a listing as it starts, for `save`. */
+    start: () => ++started,
+    /** Runs `write` unless a listing that started later was saved first. Tells whether it ran. */
+    save(listing: number, write: () => Promise<unknown>): Promise<boolean> {
+      return queue.run(async () => {
+        if (listing < saved) return false;
+        saved = listing;
+        await write();
+        return true;
+      });
+    },
+  };
+}
+
+/** Shared by the views of a command, e.g. List Vaults and the Search Items it opens. */
+export const listingSaves = createListingSaves();

@@ -1,0 +1,320 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "upload-post",
+  "title": "Upload-Post",
+  "description": "Publish and schedule videos, photos and text posts to TikTok, Instagram, YouTube, LinkedIn, X and more social networks with Upload-Post",
+  "icon": "extension-icon.png",
+  "author": "juan_carlos_cavero_gracia",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Media",
+    "Communication"
+  ],
+  "keywords": [
+    "social media",
+    "tiktok",
+    "instagram",
+    "youtube",
+    "linkedin",
+    "twitter",
+    "x",
+    "facebook",
+    "threads",
+    "schedule",
+    "publish"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Upload-Post API key. Create one at https://app.upload-post.com/api-keys",
+      "type": "password",
+      "required": true,
+      "placeholder": "Paste your Upload-Post API key"
+    }
+  ],
+  "commands": [
+    {
+      "name": "create-post",
+      "title": "Create Post",
+      "subtitle": "Upload-Post",
+      "description": "Publish or schedule a text, photo or video post to your connected social networks.",
+      "mode": "view",
+      "keywords": [
+        "upload",
+        "publish",
+        "schedule",
+        "video",
+        "photo",
+        "text"
+      ]
+    },
+    {
+      "name": "scheduled-posts",
+      "title": "Scheduled Posts",
+      "subtitle": "Upload-Post",
+      "description": "Browse your scheduled posts and cancel the ones you no longer need.",
+      "mode": "view",
+      "keywords": [
+        "calendar",
+        "queue",
+        "cancel"
+      ]
+    },
+    {
+      "name": "upload-history",
+      "title": "Upload History",
+      "subtitle": "Upload-Post",
+      "description": "Browse your recent uploads and open the published posts.",
+      "mode": "view",
+      "keywords": [
+        "history",
+        "published",
+        "posts"
+      ]
+    },
+    {
+      "name": "profiles",
+      "title": "Profiles",
+      "subtitle": "Upload-Post",
+      "description": "Browse your Upload-Post profiles and the social accounts connected to each one.",
+      "mode": "view",
+      "keywords": [
+        "accounts",
+        "users",
+        "connected"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-profiles",
+      "title": "Get Profiles",
+      "description": "List the user's Upload-Post profiles and, for each one, the social networks connected to it (and whether any of them needs to be reconnected). Call this first to know which profile and platforms can be used to publish."
+    },
+    {
+      "name": "create-post",
+      "title": "Create Post",
+      "description": "Publish, schedule or queue a post on one Upload-Post profile. Supports text posts, photo posts (one or more image URLs or local file paths) and video posts (a video URL or local file path). Returns the request_id (immediate posts) or job_id (scheduled or queued posts) to track it."
+    },
+    {
+      "name": "get-scheduled-posts",
+      "title": "Get Scheduled Posts",
+      "description": "List the posts that are scheduled or queued to be published in the future, optionally filtered by profile and date range. Each item includes the job_id needed to cancel it."
+    },
+    {
+      "name": "cancel-scheduled-post",
+      "title": "Cancel Scheduled Post",
+      "description": "Cancel a scheduled or queued post by its job_id. The post will not be published and its reserved upload credits are returned."
+    },
+    {
+      "name": "get-upload-history",
+      "title": "Get Upload History",
+      "description": "List past uploads (most recent first) with their platform, result, error message and the URL of the published post. Can be filtered by profile, platform, success or failure, and date range."
+    },
+    {
+      "name": "get-upload-status",
+      "title": "Get Upload Status",
+      "description": "Get the per-platform status of an upload by its request_id (immediate posts) or job_id (scheduled or queued posts), including the URLs of the published posts."
+    }
+  ],
+  "ai": {
+    "instructions": "- Always call get-profiles before create-post to find the profile username and the platforms connected to it. Only publish to platforms that are connected to that profile.\n- If the user has a single profile, use it without asking. If there are several and the user did not name one, ask which profile to use.\n- The X (Twitter) platform is called \"x\". Reddit is not available.\n- Text posts support: x, linkedin, facebook, threads, bluesky, discord, telegram, google_business, slack, mastodon, nostr, lemmy, devto, hashnode, wordpress, whop, listmonk. Photo posts support: tiktok, instagram, linkedin, facebook, x, threads, pinterest, bluesky, discord, telegram, google_business, mastodon, lemmy, wordpress. Video posts support: tiktok, instagram, youtube, linkedin, facebook, x, threads, pinterest, bluesky, discord, telegram, google_business, mastodon, wordpress. Instagram, TikTok and YouTube need a photo or a video.\n- YouTube requires a title.\n- Scheduled dates must be in the future and at most 365 days ahead. Send them in ISO-8601 with an explicit offset (for example 2026-10-01T09:00:00+02:00) or send a timezone.\n- Never combine scheduledDate and addToQueue.\n- After publishing, report the request_id or job_id to the user. Use get-upload-status to check the result and share the post URLs.\n- Before cancelling, use get-scheduled-posts to find the right job_id.",
+    "evals": [
+      {
+        "input": "@upload-post post \"We just shipped dark mode \ud83c\udf19\" on X and LinkedIn",
+        "mocks": {
+          "get-profiles": [
+            {
+              "username": "acme",
+              "connectedPlatforms": [
+                "x",
+                "linkedin",
+                "instagram"
+              ],
+              "reconnectRequired": []
+            }
+          ],
+          "create-post": {
+            "success": true,
+            "request_id": "req_123",
+            "message": "Upload initiated successfully in background."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-profiles"
+          },
+          {
+            "callsTool": {
+              "name": "create-post",
+              "arguments": {
+                "profile": "acme",
+                "platforms": "x,linkedin",
+                "type": "text"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@upload-post what do I have scheduled?",
+        "mocks": {
+          "get-scheduled-posts": {
+            "total": 1,
+            "scheduled_posts": [
+              {
+                "job_id": "job_1",
+                "scheduled_date": "2026-10-02T09:00:00Z",
+                "post_type": "video",
+                "profile_username": "acme",
+                "title": "Product demo",
+                "platforms": [
+                  "tiktok",
+                  "instagram"
+                ]
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-scheduled-posts"
+          },
+          {
+            "meetsCriteria": "The answer mentions the Product demo post scheduled for TikTok and Instagram."
+          }
+        ]
+      },
+      {
+        "input": "@upload-post cancel the product demo post",
+        "mocks": {
+          "get-scheduled-posts": {
+            "total": 1,
+            "scheduled_posts": [
+              {
+                "job_id": "job_1",
+                "scheduled_date": "2026-10-02T09:00:00Z",
+                "post_type": "video",
+                "profile_username": "acme",
+                "title": "Product demo",
+                "platforms": [
+                  "tiktok",
+                  "instagram"
+                ]
+              }
+            ]
+          },
+          "cancel-scheduled-post": {
+            "success": true,
+            "message": "Job job_1 cancelled and assets deleted.",
+            "credits_refunded": 2
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-scheduled-posts"
+          },
+          {
+            "callsTool": {
+              "name": "cancel-scheduled-post",
+              "arguments": {
+                "jobId": "job_1"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@upload-post did my last uploads fail?",
+        "mocks": {
+          "get-upload-history": [
+            {
+              "platform": "instagram",
+              "success": false,
+              "error_message": "Media too short",
+              "upload_timestamp": "2026-09-29T10:00:00Z",
+              "post_title": "Teaser"
+            },
+            {
+              "platform": "tiktok",
+              "success": true,
+              "post_url": "https://www.tiktok.com/@acme/video/1",
+              "upload_timestamp": "2026-09-29T10:00:00Z",
+              "post_title": "Teaser"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-upload-history"
+          },
+          {
+            "meetsCriteria": "The answer says the Instagram upload failed because the media was too short and the TikTok upload succeeded."
+          }
+        ]
+      },
+      {
+        "input": "@upload-post did the post with request id req_123 go live?",
+        "mocks": {
+          "get-upload-status": {
+            "request_id": "req_123",
+            "status": "completed",
+            "completed": 2,
+            "total": 2,
+            "results": [
+              {
+                "platform": "x",
+                "success": true,
+                "post_url": "https://x.com/acme/status/1"
+              },
+              {
+                "platform": "linkedin",
+                "success": true,
+                "post_url": "https://www.linkedin.com/feed/update/urn:li:share:1"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-upload-status",
+              "arguments": {
+                "requestId": "req_123"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "The answer says the post was published on X and LinkedIn and shares the post URLs."
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^2.5.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.4",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

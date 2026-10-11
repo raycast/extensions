@@ -1,5 +1,6 @@
 import { Color, LocalStorage, getPreferenceValues } from "@raycast/api";
-import { StateCreator, create } from "zustand";
+import { useStore } from "zustand/react";
+import { StateCreator, createStore as createVanillaStore } from "zustand/vanilla";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 export const Infinity32Bit = 2147483647;
@@ -30,7 +31,8 @@ interface StoreOptions<T> {
 }
 
 export function createStore<T>({ name, version, state, migrate }: StoreOptions<T>) {
-  return create<T>()(
+  // Import both subpaths explicitly so Raycast includes them in the packaged exports.
+  const store = createVanillaStore<T>()(
     persist(state, {
       name,
       version,
@@ -42,6 +44,9 @@ export function createStore<T>({ name, version, state, migrate }: StoreOptions<T
       })),
     }),
   );
+
+  const useBoundStore = <U>(selector: (state: T) => U) => useStore(store, selector);
+  return Object.assign(useBoundStore, store);
 }
 
 export function truncateText(text: string, maxLength: number): string {

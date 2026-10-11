@@ -42,6 +42,10 @@ Search Z-Library and download books directly from Raycast.
    - **Open in Browser** - Visit the book's Z-Library page
    - **Copy Book ID** - Copy the book's identifier
 
+### Can't find a book?
+
+The search runs through the `zlib` CLI, and its results can differ from the Z-Library website (the website sometimes has books the CLI does not return). The last row of the results, **Search "..." on the Z-Library website**, opens the website's own search for your query in your browser. It uses your **Z-Library Domain Override** if set, otherwise the domain of the results.
+
 > **Note:** These shortcuts use `⌘` on macOS and `Ctrl` on Windows.
 
 ### Bulk Download (select and download now)

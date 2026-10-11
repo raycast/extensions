@@ -5,8 +5,12 @@ import { truncateText } from "./utils";
 
 export default function MenuBar() {
   const ready = useActionsAreReady();
-  const actions = useActionsState((state) => state.actions.sort((a, b) => a.name.localeCompare(b.name)));
-  const history = useHistoryState((state) => state.history.sort((a, b) => b.timestamp - a.timestamp));
+  const actions = useActionsState((state) => state.actions)
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const history = useHistoryState((state) => state.history)
+    .slice()
+    .sort((a, b) => b.timestamp - a.timestamp);
 
   const regular = actions.filter((action) => !action.favorite);
   const favorites = actions.filter((action) => action.favorite);

@@ -13,6 +13,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { createArticleDetailMarkdown } from "./article-detail";
+import { ArticleCopyActions } from "./article-copy-actions";
 import {
   ArchivedArticle,
   normalizeArticleRetention,
@@ -171,11 +172,7 @@ function SavedArticleItem({
             shortcut={Keyboard.Shortcut.Common.Remove}
             onAction={() => onRemoveFavorite(article)}
           />
-          <Action.CopyToClipboard
-            title={translations.copyArticleLink}
-            content={article.url}
-            shortcut={Keyboard.Shortcut.Common.Copy}
-          />
+          <ArticleCopyActions article={article} translations={translations} />
         </ActionPanel>
       }
     />
@@ -208,11 +205,7 @@ function SavedArticleDetail({
             shortcut={Keyboard.Shortcut.Common.Remove}
             onAction={() => onRemoveFavorite(article)}
           />
-          <Action.CopyToClipboard
-            title={translations.copyArticleLink}
-            content={article.url}
-            shortcut={Keyboard.Shortcut.Common.Copy}
-          />
+          <ArticleCopyActions article={article} translations={translations} />
         </ActionPanel>
       }
     />

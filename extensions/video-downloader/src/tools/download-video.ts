@@ -11,6 +11,7 @@ import {
   looksLikeFilePath,
   normalizeVideoUrl,
   sanitizeVideoTitle,
+  fastRemux,
 } from "../utils.js";
 import fs from "node:fs";
 import path from "node:path";
@@ -67,9 +68,11 @@ export default async function tool(input: Input) {
   if (bestFormat) {
     const formatValue = getFormatValue(bestFormat);
     const [downloadFormat, recodeFormat] = formatValue.split("#");
+    const hasWebmAudio = video.formats.some((f) => f.acodec?.includes("opus") || f.acodec?.includes("vorbis"));
+    const canRemux = fastRemux && (recodeFormat !== "webm" || hasWebmAudio);
     options.push("--ffmpeg-location", ffmpegPath);
     options.push("--format", downloadFormat);
-    options.push("--recode-video", recodeFormat);
+    options.push(canRemux ? "--remux-video" : "--recode-video", recodeFormat);
   }
 
   options.push("--print", "after_move:filepath");

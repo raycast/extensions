@@ -4,6 +4,7 @@ import {
   afterDate,
   client,
   collect,
+  isUuid,
   PageInput,
   resolveInitiative,
   resolveProjectLabel,
@@ -80,7 +81,7 @@ export default withLinear(async (input: Input) => {
     status: input.state
       ? {
           or: [
-            { id: { eq: input.state } },
+            ...(isUuid(input.state) ? [{ id: { eq: input.state } }] : []),
             { name: { eqIgnoreCase: input.state } },
             { type: { eqIgnoreCase: input.state } },
           ],

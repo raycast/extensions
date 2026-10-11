@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Form, Icon, Keyboard, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import type { SearchEngine } from "./types";
 import { getCustomSearchEngines, addCustomSearchEngine } from "./data/custom-search-engines";
@@ -6,6 +7,7 @@ import { getBuiltinSearchEngine } from "./data/search-engines";
 import { useDefaultSearchEngine } from "./data/cache";
 import { isValidUrl } from "./utils";
 import { platform } from "os";
+import { getEngineTriggerPreference } from "./preferences";
 
 type AddCustomSearchEngineProps = {
   engine?: SearchEngine;
@@ -13,6 +15,7 @@ type AddCustomSearchEngineProps = {
 };
 
 export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCustomSearchEngineProps) {
+  const { triggerPrefix, warning } = getEngineTriggerPreference();
   const isWindows = platform() === "win32";
   const { pop } = useNavigation();
   const [defaultSearchEngine, setDefaultSearchEngine] = useDefaultSearchEngine();
@@ -117,14 +120,10 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
       await showToast({
         style: Toast.Style.Success,
         title: isEditing ? "Search engine updated" : "Search engine added",
-        message: `!${newEngine.t}`,
+        message: `${triggerPrefix}${newEngine.t}`,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to save search engine",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      await showFailureToast(error, { title: "Failed to save search engine" });
     }
   };
 
@@ -186,6 +185,7 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
         </ActionPanel>
       }
     >
+      {warning && <Form.Description title="Invalid Engine Trigger Prefix" text={warning} />}
       <Form.TextField
         id="name"
         title="Name"
@@ -197,7 +197,7 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
       <Form.TextField
         id="trigger"
         title="Trigger"
-        placeholder="e.g., mycustom (will become !mycustom)"
+        placeholder={`e.g., mycustom (use as ${triggerPrefix}mycustom)`}
         defaultValue={engine?.t || ""}
         error={triggerError}
         onChange={() => setTriggerError(undefined)}

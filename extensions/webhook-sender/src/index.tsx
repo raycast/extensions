@@ -4,30 +4,41 @@ import {
   Alert,
   Color,
   Icon,
+  Keyboard,
   List,
   Toast,
   confirmAlert,
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { HistoryEntry, SavedWebhook } from "./types";
-import { clearHistory, deleteHistory, deleteSaved, getHistory, getSaved } from "./storage";
+import { addHistory, clearHistory, deleteHistory, deleteSaved, getHistory, getSaved } from "./storage";
 import { WebhookForm } from "./WebhookForm";
 import { ResponseView } from "./ResponseView";
-import { relativeTime, statusColor, truncateUrl } from "./utils";
+import { generateId, relativeTime, sendWebhook, statusColor, truncateUrl } from "./utils";
 
 export default function Command() {
   const { push } = useNavigation();
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [saved, setSaved] = useState<SavedWebhook[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const isSending = useRef(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    const [h, s] = await Promise.all([getHistory(), getSaved()]);
-    setHistory(h);
-    setSaved(s);
-    setIsLoading(false);
+    try {
+      const [h, s] = await Promise.all([getHistory(), getSaved()]);
+      setHistory(h);
+      setSaved(s);
+      setLoadError(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setLoadError(message);
+      await showToast({ style: Toast.Style.Failure, title: "Failed to load webhooks", message });
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -69,6 +80,82 @@ export default function Command() {
     );
   };
 
+  const handleSendSaved = async (webhook: SavedWebhook) => {
+    if (isSending.current) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Another webhook is still sending",
+        message: `"${webhook.name}" was not sent. Try again once the current request finishes.`,
+      });
+      return;
+    }
+    const { request } = webhook;
+    if (request.bodyMode === "raw" && request.rawJson.trim()) {
+      try {
+        JSON.parse(request.rawJson);
+      } catch {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid JSON in body",
+          message: "Open the webhook in the form to fix its raw JSON",
+        });
+        return;
+      }
+    }
+
+    isSending.current = true;
+    try {
+      const toast = await showToast({ style: Toast.Style.Animated, title: `Sending "${webhook.name}"…` });
+      let result: Awaited<ReturnType<typeof sendWebhook>> | undefined;
+      let errorMessage: string | undefined;
+      try {
+        result = await sendWebhook(request);
+      } catch (err) {
+        errorMessage = err instanceof Error ? err.message : String(err);
+      }
+
+      let historyFailed = false;
+      try {
+        await addHistory({
+          id: generateId(),
+          timestamp: Date.now(),
+          request,
+          ...(result
+            ? { responseStatus: result.status, responseBody: result.body, responseTime: result.responseTime }
+            : { error: errorMessage }),
+        });
+      } catch {
+        historyFailed = true;
+      }
+      await refresh();
+
+      if (!result) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Request failed";
+        toast.message = errorMessage;
+        return;
+      }
+
+      if (historyFailed) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Sent, but couldn't save to history";
+      } else {
+        await toast.hide();
+      }
+      push(
+        <ResponseView
+          status={result.status}
+          body={result.body}
+          responseTime={result.responseTime}
+          request={request}
+          onEditInForm={() => openFromSaved(webhook)}
+        />,
+      );
+    } finally {
+      isSending.current = false;
+    }
+  };
+
   const handleDeleteHistory = async (id: string) => {
     await deleteHistory(id);
     await refresh();
@@ -106,21 +193,26 @@ export default function Command() {
     }
   };
 
+  const showLoadError = !isLoading && !!loadError && saved.length === 0 && history.length === 0;
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search webhooks…">
       {/* ── New Webhook ── */}
-      <List.Section title="Actions">
-        <List.Item
-          title="Send New Webhook"
-          subtitle="Open the webhook form"
-          icon={{ source: Icon.ArrowRight, tintColor: Color.Blue }}
-          actions={
-            <ActionPanel>
-              <Action title="Send New Webhook" icon={Icon.ArrowRight} onAction={openNewForm} />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
+      {/* Hidden on a failed load so the Retry EmptyView can show (it only renders when no items remain) */}
+      {!showLoadError && (
+        <List.Section title="Actions">
+          <List.Item
+            title="Send New Webhook"
+            subtitle="Open the webhook form"
+            icon={{ source: Icon.ArrowRight, tintColor: Color.Blue }}
+            actions={
+              <ActionPanel>
+                <Action title="Send New Webhook" icon={Icon.ArrowRight} onAction={openNewForm} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
 
       {/* ── Saved ── */}
       {saved.length > 0 && (
@@ -139,12 +231,18 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action title="Open in Form" icon={Icon.Pencil} onAction={() => openFromSaved(webhook)} />
+                  <Action title="Send Webhook" icon={Icon.ArrowRight} onAction={() => handleSendSaved(webhook)} />
+                  <Action
+                    title="Open in Form"
+                    icon={Icon.Pencil}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
+                    onAction={() => openFromSaved(webhook)}
+                  />
                   <Action
                     title="Delete Saved Webhook"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => handleDeleteSaved(webhook.id, webhook.name)}
                   />
                 </ActionPanel>
@@ -188,24 +286,21 @@ export default function Command() {
                     <Action
                       title="Edit in Form"
                       icon={Icon.Pencil}
-                      shortcut={{ modifiers: ["cmd"], key: "return" }}
+                      shortcut={Keyboard.Shortcut.Common.Edit}
                       onAction={() => openFromHistory(entry)}
                     />
                     <Action
                       title="Delete Entry"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
-                      shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                       onAction={() => handleDeleteHistory(entry.id)}
                     />
                     <Action
                       title="Clear All History"
                       icon={Icon.XMarkCircle}
                       style={Action.Style.Destructive}
-                      shortcut={{
-                        modifiers: ["cmd", "shift"],
-                        key: "backspace",
-                      }}
+                      shortcut={Keyboard.Shortcut.Common.RemoveAll}
                       onAction={handleClearHistory}
                     />
                   </ActionPanel>
@@ -217,7 +312,19 @@ export default function Command() {
       )}
 
       {/* ── Empty states ── */}
-      {!isLoading && saved.length === 0 && history.length === 0 && (
+      {showLoadError && (
+        <List.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title="Couldn't load webhooks"
+          description={`${loadError}\nYour saved webhooks may still exist. Try again.`}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={refresh} />
+            </ActionPanel>
+          }
+        />
+      )}
+      {!isLoading && !loadError && saved.length === 0 && history.length === 0 && (
         <List.EmptyView
           icon={Icon.ArrowRight}
           title="No webhooks yet"

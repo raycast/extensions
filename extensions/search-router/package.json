@@ -35,7 +35,7 @@
         "bangs",
         "kagi"
       ],
-      "subtitle": "Search the Web with !bangs",
+      "subtitle": "!bangs with a customizable prefix",
       "description": "Search the Web using any of the available search engines. Powered by Kagi's Bangs and custom search engines",
       "mode": "view",
       "arguments": [
@@ -76,6 +76,17 @@
         "bang",
         "create"
       ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "engineTriggerPrefix",
+      "title": "Engine Trigger Prefix",
+      "description": "Prefix for engine triggers at the start of a query. Leave blank for bare triggers such as yt query. With a blank prefix, common first words like go or docs can redirect plain English queries away from your default engine. @ is reserved for sites. Invalid prefixes (@ or internal whitespace) use ! instead.",
+      "type": "textfield",
+      "required": false,
+      "default": "!",
+      "placeholder": "Leave blank for bare triggers"
     }
   ],
   "dependencies": {

@@ -1,7 +1,7 @@
 import { Action, Icon } from "@raycast/api";
 import { ResourceDetailView } from "../components/ResourceDetailView";
 import { ResourcesListView } from "../components/ResourcesListView";
-import { SitemapDetailView } from "../components/SitemapDetailView";
+import { SitemapListView } from "../components/SitemapListView";
 import { DiggerResult } from "../types";
 
 /**
@@ -83,9 +83,7 @@ export function DiscoverabilityActions({ sitemapUrl, robotsUrl, llmsTxtUrl }: Di
 
   return (
     <>
-      {sitemapUrl && (
-        <Action.Push title="View Sitemap" icon={Icon.Map} target={<SitemapDetailView url={sitemapUrl} />} />
-      )}
+      {sitemapUrl && <Action.Push title="View Sitemap" icon={Icon.Map} target={<SitemapListView url={sitemapUrl} />} />}
       {robotsUrl && (
         <ResourceViewAction title="View Robots.txt" url={robotsUrl} resourceName="robots.txt" icon={Icon.Document} />
       )}

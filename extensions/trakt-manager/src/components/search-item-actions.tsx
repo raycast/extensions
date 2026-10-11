@@ -10,8 +10,13 @@ import {
   removeShowFromWatchlist,
 } from "../lib/media-mutations";
 import { TraktMovieListItem, TraktShowListItem } from "../lib/schema";
+import { useWatchedState } from "../lib/use-watched";
 import { useWatchlistState } from "../lib/use-watchlist-ids";
+import { AddToListActions } from "./add-to-list-actions";
 import { CheckinActions } from "./checkin-actions";
+import { RemoveFromHistoryAction } from "./history-actions";
+import { RatingActions } from "./rating-actions";
+import { RelatedGrid } from "./related-grid";
 import { MarkWatchedOnActions } from "./watch-actions";
 
 type TraktClient = ReturnType<typeof initTraktClient>;
@@ -36,13 +41,17 @@ export const MovieSearchActions = ({
   run,
 }: SearchItemActionsProps<TraktMovieListItem>) => {
   const { isMovieWatchlisted, setListed } = useWatchlistState();
+  const { setWatched } = useWatchedState();
   const listed = isMovieWatchlisted(movie.movie.ids.trakt);
   const traktId = movie.movie.ids.trakt;
 
   const markWatched = (watchedAt?: string) =>
     run(
       movie,
-      (item) => markMovieWatched(client, item.movie.ids.trakt, { signal: signal(), watchedAt }),
+      async (item) => {
+        await markMovieWatched(client, item.movie.ids.trakt, { signal: signal(), watchedAt });
+        setWatched({ type: "movie", traktId }, true);
+      },
       `Marked "${movie.movie.title}" as watched`,
     );
 
@@ -87,6 +96,15 @@ export const MovieSearchActions = ({
         shortcut={Keyboard.Shortcut.Common.Duplicate}
         onAction={() => markWatched()}
       />
+      <RemoveFromHistoryAction
+        item={movie}
+        target={{ type: "movie", traktId }}
+        traktId={traktId}
+        title={movie.movie.title}
+        client={client}
+        signal={signal}
+        run={run}
+      />
       <MarkWatchedOnActions allowReleaseDate={false} onMark={markWatched} />
       <CheckinActions
         item={movie}
@@ -98,6 +116,21 @@ export const MovieSearchActions = ({
         run={run}
         checkIn={(item) => checkInMovie(client, item.movie.ids.trakt, { signal: signal() })}
       />
+      <RatingActions
+        item={movie}
+        type="movie"
+        traktId={traktId}
+        title={movie.movie.title}
+        client={client}
+        signal={signal}
+        run={run}
+      />
+      <Action.Push
+        title="Similar Titles"
+        icon={Icon.LightBulb}
+        target={<RelatedGrid mediaType="movie" traktId={traktId} title={movie.movie.title} />}
+      />
+      <AddToListActions kind="movies" traktId={traktId} title={movie.movie.title} />
     </>
   );
 };
@@ -109,13 +142,17 @@ export const MovieSearchActions = ({
  */
 export const ShowSearchActions = ({ item: show, client, signal, run }: SearchItemActionsProps<TraktShowListItem>) => {
   const { isShowWatchlisted, setListed } = useWatchlistState();
+  const { setWatched } = useWatchedState();
   const listed = isShowWatchlisted(show.show.ids.trakt);
   const traktId = show.show.ids.trakt;
 
   const markWatched = (watchedAt?: string) =>
     run(
       show,
-      (item) => markShowWatched(client, item.show.ids.trakt, { signal: signal(), watchedAt }),
+      async (item) => {
+        await markShowWatched(client, item.show.ids.trakt, { signal: signal(), watchedAt });
+        setWatched({ type: "show", traktId }, true);
+      },
       `Marked "${show.show.title}" as watched`,
     );
 
@@ -160,7 +197,31 @@ export const ShowSearchActions = ({ item: show, client, signal, run }: SearchIte
         shortcut={Keyboard.Shortcut.Common.Duplicate}
         onAction={() => markWatched()}
       />
+      <RemoveFromHistoryAction
+        item={show}
+        target={{ type: "show", traktId }}
+        traktId={traktId}
+        title={show.show.title}
+        client={client}
+        signal={signal}
+        run={run}
+      />
       <MarkWatchedOnActions title="Mark Whole Show as Watched on…" allowReleaseDate={false} onMark={markWatched} />
+      <RatingActions
+        item={show}
+        type="show"
+        traktId={traktId}
+        title={show.show.title}
+        client={client}
+        signal={signal}
+        run={run}
+      />
+      <Action.Push
+        title="Similar Titles"
+        icon={Icon.LightBulb}
+        target={<RelatedGrid mediaType="show" traktId={traktId} title={show.show.title} />}
+      />
+      <AddToListActions kind="shows" traktId={traktId} title={show.show.title} />
     </>
   );
 };

@@ -13,7 +13,9 @@ View and manage your Proton Mail inbox directly in Raycast via Proton Mail Bridg
 - **Attachments** - Download individual attachments or all at once
 - **Quicklinks** - Save current folder/filter view as a Raycast quicklink
 - **Open in Proton Mail** - Jump to the email in Proton Mail web interface (uses search as a workaround since direct email links aren't available)
-- **Expanded Email View** - Read emails in full-screen with metadata sidebar
+- **Expanded Email View** - Read emails in full screen, with the subject, sender, recipients and date above the email
+- **Open Original in Browser** - See the email's full HTML in your browser when the layout matters
+- **Remote Images** - Off by default so senders can't track when you open an email; turn on Browse Email's "Remote Images" preference to show them
 - **Demo Mode** - Anonymize email data for screenshots and demos
 - **Email Actions**:
   - Reply / Reply All / Forward (with compose form)
@@ -113,3 +115,4 @@ Toggle it off with the same shortcut when done.
 | Toggle Demo Mode | ⇧⌘D |
 | Copy as Markdown | ⇧⌘M |
 | Compose New Email | ⌘N |
+| Open Original in Browser | ⇧⌘O |

@@ -145,7 +145,7 @@
     },
     {
       "name": "ask-tweek",
-      "title": "Ask Tweek",
+      "title": "Summarize My Tasks (AI)",
       "subtitle": "Tweek",
       "description": "Ask Raycast AI about your Tweek schedule, overdue tasks, or daily priorities.",
       "mode": "view",
@@ -261,6 +261,15 @@
           "value": "Sunday"
         }
       ]
+    },
+    {
+      "name": "defaultToMonthView",
+      "type": "checkbox",
+      "required": false,
+      "title": "Dashboard View",
+      "label": "Open the Dashboard in monthly calendar view by default",
+      "description": "When enabled, the Tweek Dashboard opens as a monthly calendar instead of the task list. You can still switch to the task list from the calendar.",
+      "default": false
     },
     {
       "name": "defaultTaskColor",

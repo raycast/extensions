@@ -19,10 +19,12 @@ import type { OutputFormat, Upload } from "./api/types";
 import { BucketBrowser } from "./components/BucketBrowser";
 import { ConnectionEmptyView } from "./components/ConnectionEmptyView";
 import { QRCodeView } from "./components/QRCodeView";
+import { ReplaceForm } from "./components/ReplaceForm";
 import { UploadForm } from "./components/UploadForm";
 import { showAktarFailure } from "./lib/errors";
 import { formatExpiryDate } from "./lib/expiry";
 import { destinationIcon, FORMAT_TITLES, formatBytes, isImageUpload, parentPrefix } from "./lib/format";
+import { escapeMarkdown, markdownURL } from "./lib/markdown";
 import { primaryShortcut } from "./lib/platform";
 import { resolveFormat } from "./lib/output";
 import { thumbnailIcon, thumbnailMarkdown, useDetailThumbnail, useThumbnailIcons } from "./lib/thumbnails";
@@ -52,13 +54,18 @@ export default function Command() {
     (upload) => destinationFilter === ALL_DESTINATIONS || upload.destinationId === destinationFilter,
   );
   const icons = useThumbnailIcons(
-    visible.map((upload) => ({ id: upload.id, source: { kind: "upload", id: upload.id } })),
+    visible.map((upload) => ({
+      id: upload.id,
+      source: { kind: "upload", id: upload.id, replacedAt: upload.replacedAt },
+    })),
     selectedId,
   );
   const selected = isShowingDetail ? visible.find((upload) => upload.id === selectedId) : undefined;
   // An image's preview is the image itself from its link, so no thumbnail is made for it.
   const preview = useDetailThumbnail(
-    selected && !isImageUpload(selected) ? { kind: "upload", id: selected.id } : undefined,
+    selected && !isImageUpload(selected)
+      ? { kind: "upload", id: selected.id, replacedAt: selected.replacedAt }
+      : undefined,
   );
 
   async function remove(upload: Upload) {
@@ -201,6 +208,17 @@ export default function Command() {
                     shortcut={primaryShortcut("u")}
                     target={<UploadForm onUploaded={revalidate} />}
                   />
+                  <Action.Push
+                    title="Replace File"
+                    icon={Icon.Repeat}
+                    shortcut={primaryShortcut("r", "shift")}
+                    target={
+                      <ReplaceForm
+                        target={{ kind: "upload", id: upload.id, name: upload.filename }}
+                        onReplaced={revalidate}
+                      />
+                    }
+                  />
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
@@ -234,11 +252,13 @@ function showsFormat(format: OutputFormat) {
 
 /** `preview`: the thumbnail of a video, PDF or document, for files that aren't images. */
 function UploadDetail({ upload, preview }: { upload: Upload; preview?: string | null }) {
+  // After a replace, a new query makes Raycast load the new image instead of its cached copy.
+  const imageURL = upload.replacedAt ? `${upload.url}?v=${Date.parse(upload.replacedAt)}` : upload.url;
   const markdown = isImageUpload(upload)
-    ? `![](${upload.url})`
+    ? `![](${markdownURL(imageURL)})`
     : preview
       ? thumbnailMarkdown(preview)
-      : `### ${upload.filename}\n\n${preview === undefined ? "" : "No preview for this file."}`;
+      : `### ${escapeMarkdown(upload.filename)}\n\n${preview === undefined ? "" : "No preview for this file."}`;
   return (
     <List.Item.Detail
       markdown={markdown}
@@ -249,6 +269,9 @@ function UploadDetail({ upload, preview }: { upload: Upload; preview?: string | 
           <List.Item.Detail.Metadata.Label title="Size" text={formatBytes(upload.size)} />
           <List.Item.Detail.Metadata.Label title="Type" text={upload.mimeType} />
           <List.Item.Detail.Metadata.Label title="Uploaded" text={new Date(upload.createdAt).toLocaleString()} />
+          {upload.replacedAt && (
+            <List.Item.Detail.Metadata.Label title="Replaced" text={new Date(upload.replacedAt).toLocaleString()} />
+          )}
           {upload.expiresAt && (
             <List.Item.Detail.Metadata.TagList title="Deletes">
               <List.Item.Detail.Metadata.TagList.Item

@@ -16,7 +16,9 @@ import { thumbnail as legacyThumbnail } from "./format";
  * back to the image itself from its public link.
  */
 export type ThumbnailSource =
-  { kind: "upload"; id: string } | { kind: "object"; destinationId: string; object: BucketObject };
+  /** `replacedAt` is part of an upload's identity, so a replaced file gets its new thumbnail. */
+  | { kind: "upload"; id: string; replacedAt?: string | null }
+  | { kind: "object"; destinationId: string; object: BucketObject };
 
 /** Pixels for list icons and for the detail pane. */
 export const ICON_PX = 128;
@@ -44,7 +46,7 @@ const inFlight = new Map<string, Promise<string | null>>();
 
 function identity(source: ThumbnailSource) {
   return source.kind === "upload"
-    ? `upload\n${source.id}`
+    ? `upload\n${source.id}\n${source.replacedAt ?? ""}`
     : ["object", source.destinationId, source.object.key, source.object.size, source.object.lastModified ?? ""].join(
         "\n",
       );
