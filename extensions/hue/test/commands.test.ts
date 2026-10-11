@@ -28,20 +28,12 @@ describe("group toggle", () => {
     expect(offIds(hue)).toEqual(officeLights.map((light) => light.id));
   });
 
-  it.each([
-    {
-      handling: "swallows",
-      error: 'device (grouped_light) is "soft off", command (.on) may not have effect',
-      style: "SUCCESS",
-      off: officeLights.map((light) => light.id),
-    },
-    { handling: "reports", error: "Status 500 from Hue Bridge", style: "FAILURE", off: [] },
-  ])("$handling the bridge's error: $error", async ({ error, style, off }) => {
+  it("reports the bridge's error and undoes the change", async () => {
     const hue = fakeHue({ lights, scenes });
-    hue.hueClient!.updateGroupedLight.mockRejectedValue(new Error(error));
+    hue.hueClient!.updateGroupedLight.mockRejectedValue(new Error("Status 500 from Hue Bridge"));
     await toggle(hue);
-    expect(toasts).toEqual([expect.objectContaining({ event: "show", style })]);
-    expect(offIds(hue)).toEqual(off);
+    expect(toasts).toEqual([expect.objectContaining({ event: "show", style: "FAILURE" })]);
+    expect(offIds(hue)).toEqual([]);
   });
 });
 

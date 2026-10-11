@@ -28,6 +28,7 @@ import { logError } from "../helpers/errors";
 import { CONNECTION_TIMEOUT_MS } from "../helpers/constants";
 
 const DATA_PREFIX = "data: ";
+const SOFT_OFF = 'device (grouped_light) is "soft off", command (.on) may not have effect';
 
 // The bridge no longer accepts the username: it was removed in the Hue app, or the bridge was reset.
 export class UnauthorizedError extends Error {}
@@ -123,7 +124,12 @@ export default class HueClient {
     properties: GroupedLightRequest,
   ): Promise<ResourceIdentifier[]> {
     return this.groupedLightsQueue.enqueueRequest(() =>
-      this.makeRequest<ResourceIdentifier>("PUT", `/clip/v2/resource/grouped_light/${groupedLight.id}`, properties),
+      this.makeRequest<ResourceIdentifier>("PUT", `/clip/v2/resource/grouped_light/${groupedLight.id}`, properties)
+        // The bridge applies the change, but warns that lights switched off in software stay off.
+        .catch((error: Error) => {
+          if (error.message !== SOFT_OFF) throw error;
+          return [];
+        }),
     );
   }
 

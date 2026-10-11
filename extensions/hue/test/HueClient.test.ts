@@ -176,6 +176,13 @@ describe("a JSON response with errors", () => {
       /^device \(light\) is unreachable, invalid value for on$/,
     );
   });
+
+  it("resolves a group change the bridge says may have no effect on lights that are soft off", async () => {
+    const { bridge, hueClient } = await connect();
+    const errors = [{ description: 'device (grouped_light) is "soft off", command (.on) may not have effect' }];
+    bridge.routes["PUT /clip/v2/resource/"] = (stream) => json(stream, 207, { errors, data: [] });
+    await expect(hueClient.updateGroupedLight({ id: "grouped-light" }, { on: { on: false } })).resolves.toEqual([]);
+  });
 });
 
 describe("a request the bridge never answers", () => {

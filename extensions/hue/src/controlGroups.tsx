@@ -151,10 +151,7 @@ export function handleToggle(
   return applyUpdate(hue, {
     canExecute,
     lights: changesToLights,
-    request: (hueClient) =>
-      hueClient.updateGroupedLight(groupedLight, changesToGroup).catch((error: Error) => {
-        if (error.message !== 'device (grouped_light) is "soft off", command (.on) may not have effect') throw error;
-      }),
+    request: (hueClient) => hueClient.updateGroupedLight(groupedLight, changesToGroup),
     success: `Turned ${groupedLight.on?.on ? "off" : "on"} ${group.metadata.name}`,
     failure: `Failed turning ${groupedLight.on?.on ? "off" : "on"} ${group.metadata.name}`,
   });

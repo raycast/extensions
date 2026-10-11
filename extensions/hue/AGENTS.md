@@ -186,8 +186,8 @@ fall back to `unknown_archetype` for lights, which covers 25 newer ones without 
   grouped_light turns off at once and back on at the lowest brightness. Without it the bridge fades
   both ways, so group toggles must omit dynamics. (Still unfixed in firmware 1978418030, Oct 2026.)
 - **"soft off" error on group toggle**:
-  `'device (grouped_light) is "soft off", command (.on) may not have effect'` is expected and swallowed. "Soft off"
-  means the light is off via software but physically powered.
+  `'device (grouped_light) is "soft off", command (.on) may not have effect'` is expected:
+  `HueClient.updateGroupedLight` swallows it. "Soft off" means the light is off via software but physically powered.
 - **One HTML error page for everything**: a rejected username (403, also on the event stream), too many requests
   (429) and, per openHAB, even a 200 get nginx's "Oops, there appears to be no lighting here" as `text/html`. Only
   the status means anything. No `Retry-After`.
