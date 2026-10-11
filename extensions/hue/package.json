@@ -63,6 +63,11 @@
       "name": "control-light",
       "title": "Control Light",
       "description": "Turn lights on or off, or change their brightness, color or white temperature"
+    },
+    {
+      "name": "control-group",
+      "title": "Control Group",
+      "description": "Turn rooms, zones or all lights on or off, or change their brightness, color or white temperature"
     }
   ],
   "preferences": [

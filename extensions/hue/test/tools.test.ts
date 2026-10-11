@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BRIDGE_CONFIG_KEY } from "../src/helpers/constants";
+import controlGroup from "../src/tools/control-group";
 import controlLight from "../src/tools/control-light";
 import getLights from "../src/tools/get-lights";
 import { storage } from "./raycast-stub";
@@ -104,4 +105,73 @@ describe("control-light", () => {
       "Failed Kitchen pendant: Status 500 from Hue Bridge. Failed Office candle: Status 500 from Hue Bridge.",
     );
   });
+});
+
+describe("control-group", () => {
+  const groupedLight = (id: string) => `/clip/v2/resource/grouped_light/00000000-0000-4000-8000-000000000${id}`;
+  const off = { on: { on: false } };
+
+  it("changes a group through its grouped light", async () => {
+    const bridge = await linkBridge();
+    expect(await controlGroup({ groups: ["office"], on: false })).toBe("Turned off Office.");
+    expect(puts(bridge)).toEqual([{ path: groupedLight("045"), body: off }]);
+  });
+
+  it("changes groups one after another", async () => {
+    const bridge = await linkBridge();
+    expect(await controlGroup({ groups: ["Office", "Kitchen"], on: false })).toBe("Turned off Office and Kitchen.");
+    expect(puts(bridge)).toEqual([
+      { path: groupedLight("045"), body: off },
+      { path: groupedLight("043"), body: off },
+    ]);
+  });
+
+  it("changes a group named twice once", async () => {
+    const bridge = await linkBridge();
+    expect(await controlGroup({ groups: ["Office", "office"], on: false })).toBe("Turned off Office.");
+    expect(puts(bridge)).toHaveLength(1);
+  });
+
+  it("names each unreachable light once across overlapping groups", async () => {
+    await linkBridge();
+    expect(await controlGroup({ groups: ["Living room", "Downstairs"], on: false })).toBe(
+      "Turned off Living room and Downstairs. Skipped Living room spot 3, Living room spot 2, Living room spot 1 and " +
+        "Living room floor lamp 4: unreachable.",
+    );
+  });
+
+  it("changes every light through the home's grouped light", async () => {
+    const bridge = await linkBridge();
+    expect(await controlGroup({ allLights: true, on: false })).toBe(
+      "Turned off all lights. Skipped Living room spot 3, Living room spot 2, Studio ceiling lamp, Living room spot 1 " +
+        "and Living room floor lamp 4: unreachable.",
+    );
+    expect(bridge.requests.map(({ path }) => path)).toContain("/clip/v2/resource/bridge_home");
+    expect(puts(bridge)).toEqual([{ path: groupedLight("033"), body: off }]);
+  });
+
+  it("sends a color to each light, skipping the ones without", async () => {
+    const bridge = await linkBridge();
+    expect(await controlGroup({ groups: ["Living room"], color: "red" })).toBe(
+      "Nothing changed. Skipped Living room floor lamp 2, Living room plug, Living room floor lamp 1 and Living room " +
+        "floor lamp 3: no color. Skipped Living room spot 3, Living room spot 2, Living room spot 1 and Living room " +
+        "floor lamp 4: unreachable.",
+    );
+    expect(puts(bridge)).toEqual([]);
+  });
+
+  it("skips a room without lights", async () => {
+    const bridge = await linkBridge();
+    expect(await controlGroup({ groups: ["Hallway"], on: true })).toBe("Nothing changed. Skipped Hallway: no lights.");
+    expect(puts(bridge)).toEqual([]);
+  });
+
+  it.each([{ on: false }, { groups: ["Office"], allLights: true, on: false }])(
+    "rejects %o without asking the bridge",
+    async (input) => {
+      const bridge = await linkBridge();
+      await expect(controlGroup(input)).rejects.toThrow("Give either groups or allLights.");
+      expect(bridge.requests).toEqual([]);
+    },
+  );
 });
