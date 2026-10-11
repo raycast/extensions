@@ -166,7 +166,7 @@ export default class HueClient {
     return response.data;
   }
 
-  public listenToEventSource(onUpdate: (resources: HueEvent["data"]) => void): () => void {
+  public listenToEventSource(onEvent: (event: HueEvent) => void): () => void {
     // Node 22 throws, inside the effect that listens, when the session closed before the effect ran.
     if (this.http2Session.closed || this.http2Session.destroyed) return () => {};
     const stream = this.http2Session.request(
@@ -189,9 +189,7 @@ export default class HueClient {
       for (const line of lines) {
         if (!line.startsWith(DATA_PREFIX)) continue;
         try {
-          (JSON.parse(line.slice(DATA_PREFIX.length)) as HueEvent[]).forEach((updateEvent) =>
-            onUpdate(updateEvent.data),
-          );
+          (JSON.parse(line.slice(DATA_PREFIX.length)) as HueEvent[]).forEach((event) => onEvent(event));
         } catch (error) {
           logError(error);
         }

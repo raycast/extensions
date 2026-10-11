@@ -1232,7 +1232,8 @@ export type HueResource = Light | GroupedLight | Scene | Room | Zone;
 type ChangedResource<R> = R extends HueResource ? Pick<R, "id" | "type"> & DeepPartial<R> : never;
 
 /**
- * An event from the event stream. Its data holds only the properties that changed, in the shape of a GET response.
+ * An event from the event stream, its data in the shape of a GET response: whole resources for an add, their IDs for a
+ * delete, and only the properties that changed for an update.
  */
 export type HueEvent = {
   /**

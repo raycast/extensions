@@ -4,7 +4,7 @@ import { DeepPartial, HueResource, Light, Room, Scene, Zone } from "../lib/types
 import { useMachine } from "@xstate/react";
 import { hueBridgeMachine } from "../lib/hueBridgeMachine";
 import HueClient from "../lib/HueClient";
-import { updateItems } from "../helpers/collections";
+import { applyEvent } from "../helpers/collections";
 import { RESOURCES_CACHE_NAMESPACE } from "../helpers/constants";
 import { Cache, showToast, Toast } from "@raycast/api";
 
@@ -36,13 +36,11 @@ export function useHue() {
   // command closes: stopping the machine runs no exit actions.
   useEffect(() => {
     if (hueClient === undefined) return;
-    const stopListening = hueClient.listenToEventSource((resources) => {
+    const stopListening = hueClient.listenToEventSource((event) => {
       const apply = <R extends HueResource>(type: R["type"], setState: React.Dispatch<React.SetStateAction<R[]>>) => {
-        const changes = resources.filter((r) => r.type === type) as (DeepPartial<R> & { id: string })[];
-        if (changes.length === 0) return;
-        setState((items) =>
-          changes.reduce((result, change) => updateItems(result, new Map([[change.id, change]])), items),
-        );
+        const resources = event.data.filter((r) => r.type === type) as (DeepPartial<R> & { id: string })[];
+        if (resources.length === 0) return;
+        setState((items) => applyEvent(items, event.type, resources));
       };
       apply("light", setLights);
       apply("room", setRooms);

@@ -133,8 +133,8 @@ export async function startBridge({
     sessions,
     eventStreams,
     maxInFlight: 0,
-    // Writes raw text to the open event streams.
-    write: (text: string) => eventStreams.forEach((stream) => stream.write(text)),
+    // Writes raw text or bytes to the open event streams.
+    write: (chunk: string | Uint8Array) => eventStreams.forEach((stream) => stream.write(chunk)),
     // Sends events as one data line, like the bridge.
     sendEvents: (events: Partial<HueEvent>[]) => bridge.write(`id: 1:0\ndata: ${JSON.stringify(events)}\n\n`),
     close: () =>

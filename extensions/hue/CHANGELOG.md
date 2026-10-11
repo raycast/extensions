@@ -17,6 +17,7 @@
 - Fix plugs, and rooms and zones of only plugs, offering brightness actions
 - Fix Set Scene opened from Control Groups not updating while open, and failing to set scenes when opened while connecting
 - Fix live updates from the bridge stopping or skipping changes
+- Fix lights, rooms, zones and scenes added in the Hue app not showing until the command is reopened, and deleted ones staying
 - Fix the loading indicator not showing after the first launch, and Control Lights loading forever without lights
 - Show the bridge's error message when an action fails
 - Say when the connection to the bridge is lost or the bridge is busy, instead of showing parsing errors

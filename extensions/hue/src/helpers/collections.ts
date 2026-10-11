@@ -1,4 +1,28 @@
-import { DeepPartial, HasId, Id } from "../lib/types";
+import { DeepPartial, HasId, HueEvent, Id } from "../lib/types";
+
+// An add brings a whole resource, which replaces one with its ID, a delete only the ID, and an update what changed.
+export function applyEvent<T extends HasId>(
+  items: T[],
+  type: HueEvent["type"],
+  resources: (DeepPartial<T> & HasId)[],
+): T[] {
+  switch (type) {
+    case "add":
+      return resources.reduce(
+        (result, resource) =>
+          result.some((it) => it.id === resource.id)
+            ? result.map((it) => (it.id === resource.id ? (resource as T) : it))
+            : [...result, resource as T],
+        items,
+      );
+    case "delete":
+      return items.filter((it) => !resources.some((resource) => resource.id === it.id));
+    case "update":
+      return resources.reduce((result, change) => updateItems(result, new Map([[change.id, change]])), items);
+    case "error":
+      return items;
+  }
+}
 
 // existingOnly skips properties an item lacks, so an optimistic update can't give a plug dimming.
 export function updateItems<T extends HasId>(
