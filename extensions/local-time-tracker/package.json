@@ -64,7 +64,7 @@
     "lint": "eslint 'src/**/*.{ts,tsx}' && prettier --check 'src/**/*.{ts,tsx}' 'tests/**/*.ts' README.md package.json tsconfig.json",
     "lint:ray": "ray lint",
     "publish": "ray publish",
-    "test": "tsx --test tests/*.test.ts"
+    "test": "node --import tsx --test tests/*.test.ts"
   },
   "dependencies": {
     "@raycast/api": "2.4.1",
@@ -78,5 +78,65 @@
     "prettier": "3.9.9",
     "tsx": "4.23.15",
     "typescript": "6.0.3"
-  }
+  },
+  "preferences": [
+    {
+      "name": "timerAlertEnabled",
+      "type": "checkbox",
+      "title": "Work Timer Alert",
+      "required": false,
+      "default": false,
+      "description": "Notify once per work timer when elapsed time reaches the threshold.",
+      "label": "Enable alert"
+    },
+    {
+      "name": "timerAlertMinutes",
+      "type": "textfield",
+      "title": "Timer Alert (Minutes)",
+      "required": false,
+      "default": "480",
+      "description": "Positive whole minutes; invalid values use 480."
+    },
+    {
+      "name": "pomodoroEnabled",
+      "type": "checkbox",
+      "title": "Pomodoro",
+      "label": "Enable Pomodoro",
+      "required": false,
+      "default": true,
+      "description": "Allow Pomodoro alongside work tracking. Disabling ends the Pomodoro session on the next menu bar refresh; work tracking continues."
+    },
+    {
+      "name": "workMinutes",
+      "type": "textfield",
+      "title": "Pomodoro Work (Minutes)",
+      "required": false,
+      "default": "25",
+      "description": "Positive whole minutes; invalid values use 25."
+    },
+    {
+      "name": "shortBreakMinutes",
+      "type": "textfield",
+      "title": "Pomodoro Short Break (Minutes)",
+      "required": false,
+      "default": "5",
+      "description": "Positive whole minutes; invalid values use 5."
+    },
+    {
+      "name": "longBreakMinutes",
+      "type": "textfield",
+      "title": "Pomodoro Long Break (Minutes)",
+      "required": false,
+      "default": "15",
+      "description": "Positive whole minutes; invalid values use 15."
+    },
+    {
+      "name": "longBreakEvery",
+      "type": "textfield",
+      "title": "Work Intervals Before Long Break",
+      "required": false,
+      "default": "4",
+      "description": "Positive whole number; invalid values use 4."
+    }
+  ]
 }
