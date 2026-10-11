@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "app-management",
+  "title": "Window Switcher & Badges",
+  "description": "Switch to any window and see Dock badges for the apps you track, in one list.",
+  "icon": "extension-icon.png",
+  "author": "bretbuilds",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "manage-apps",
+      "title": "Manage Apps",
+      "description": "Open a list of running apps and their windows, with Dock badges for the apps you track. Rescans on every open, so give this command your hotkey.",
+      "mode": "no-view"
+    },
+    {
+      "name": "app-list",
+      "title": "App List",
+      "description": "The list Manage Apps opens. Run Manage Apps instead: it rescans windows and badges every time.",
+      "mode": "view"
+    },
+    {
+      "name": "configure-app-management",
+      "title": "Manage Pinned Apps",
+      "description": "Choose pinned apps, which apps show their Dock badge and in what order, and the Trash pin. Also opens from the list with ⌘⇧C.",
+      "mode": "view"
+    },
+    {
+      "name": "quit-selected-app",
+      "title": "Quit Selected App",
+      "description": "Quit the app selected in the list, or close the selected window when its app has others, and keep the list open. Meant for a hotkey.",
+      "mode": "view"
+    },
+    {
+      "name": "quit-other-apps",
+      "title": "Quit Other Apps",
+      "description": "Quit every running app in the list except the selected one, after a confirmation. Meant for a hotkey.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "expandByDefault",
+      "title": "Windows",
+      "label": "Expand windows by default",
+      "description": "On: every app with two or more windows lists them beneath its row. Off: the list starts compact and Expand Windows opens a group.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test 'test/**/*.test.ts'",
+    "build:helper:window": "mkdir -p assets && swiftc -O -swift-version 5 -target arm64-apple-macos14 helper/window/*.swift -o assets/window-helper && (cd helper/window && shasum -a 256 *.swift > SOURCES.sha256)",
+    "build:helper:badge": "mkdir -p assets && swiftc -O -target arm64-apple-macos14 helper/badge/dock-badges.swift -o assets/dock-badges && shasum -a 256 helper/badge/dock-badges.swift > helper/badge/dock-badges.swift.sha256",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
