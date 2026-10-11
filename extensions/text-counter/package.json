@@ -64,7 +64,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.23",
+    "@raycast/api": "^2.7.3",
     "gpt-tokenizer": "^2.6.2"
   },
   "devDependencies": {

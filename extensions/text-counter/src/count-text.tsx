@@ -12,14 +12,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { countText, CountResult, formatReadingTime } from "./count";
-import { useModelPricing, formatCost, formatContextUsage, FALLBACK_CONTEXT_WINDOWS } from "./pricing";
-
-interface Preferences {
-  preferSelectedText: boolean;
-  showTokenCounts: boolean;
-  showReadingTime: boolean;
-  showCostEstimates: boolean;
-}
+import { useModelPricing, formatCost, formatContextUsage, buildTokenRows } from "./pricing";
 
 type TextSource = "selection" | "clipboard";
 
@@ -187,46 +180,8 @@ export default function CountText() {
       : []),
   ];
 
-  const tokenRows: Array<{
-    id: string;
-    title: string;
-    subtitle: string;
-    icon: Icon;
-    tokens: number;
-    contextWindow: number;
-    costPerMTok?: number;
-    label: string;
-  }> = [
-    {
-      id: "o200k",
-      title: "GPT-4o / o-series",
-      subtitle: "o200k_base",
-      icon: Icon.Bolt,
-      tokens: counts.tokensO200k,
-      contextWindow: pricing?.o200k.contextWindow ?? FALLBACK_CONTEXT_WINDOWS.o200k,
-      costPerMTok: pricing?.o200k.inputCostPerMTok,
-      label: "GPT-4o tokens count",
-    },
-    {
-      id: "cl100k",
-      title: "GPT-4 / GPT-3.5",
-      subtitle: "cl100k_base",
-      icon: Icon.Stars,
-      tokens: counts.tokensCl100k,
-      contextWindow: FALLBACK_CONTEXT_WINDOWS.o200k,
-      label: "GPT-4 tokens count",
-    },
-    {
-      id: "claude",
-      title: "Claude (~estimate)",
-      subtitle: "tokenizer not public",
-      icon: Icon.Star,
-      tokens: counts.tokensClaudeEstimate,
-      contextWindow: pricing?.claude.contextWindow ?? FALLBACK_CONTEXT_WINDOWS.claude,
-      costPerMTok: pricing?.claude.inputCostPerMTok,
-      label: "Claude tokens count",
-    },
-  ];
+  const tokenRows = buildTokenRows(counts, pricing);
+  const tokenIcons = { o200k: Icon.Bolt, cl100k: Icon.Stars, claude: Icon.Star };
 
   const previewText = loaded.text.trim().replace(/\s+/g, " ").slice(0, 80);
   const sourceLabel = loaded.source === "selection" ? "Selected text" : "Clipboard";
@@ -279,12 +234,14 @@ export default function CountText() {
               key={row.id}
               title={row.title}
               subtitle={row.subtitle}
-              icon={row.icon}
+              icon={tokenIcons[row.id]}
               accessories={[
                 ...(preferences.showCostEstimates && row.costPerMTok !== undefined
                   ? [{ tag: `${formatCost(row.tokens, row.costPerMTok)} input` }]
                   : []),
-                { text: formatContextUsage(row.tokens, row.contextWindow) },
+                ...(row.contextWindow !== undefined
+                  ? [{ text: formatContextUsage(row.tokens, row.contextWindow) }]
+                  : []),
                 { text: `${formatNumber(row.tokens)} tokens` },
               ]}
               actions={

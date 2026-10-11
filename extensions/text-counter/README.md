@@ -2,7 +2,7 @@
 
 A Raycast extension that instantly counts words, characters, lines, sentences, paragraphs, reading time, and LLM tokens from your selected text or clipboard — with proper support for Chinese, Japanese, and Korean.
 
-![Demo](demo.png)
+![Text Counter in Raycast](media/demo.png)
 
 ## Features
 
@@ -14,8 +14,8 @@ A Raycast extension that instantly counts words, characters, lines, sentences, p
   - `o200k_base` (GPT-4o, o-series) — exact
   - `cl100k_base` (GPT-4, GPT-3.5-turbo) — exact
   - Claude — estimate (Claude 3+ tokenizers are not public)
-- **Context Window Usage**: see what percentage of a model's context your text occupies
-- **Cost Estimates**: input cost per model, using live pricing from [models.dev](https://models.dev) (cached for 24 hours; hidden gracefully when offline)
+- **Context Window Usage**: see usage for named GPT-4o and Claude Sonnet models; the generic `cl100k_base` encoding has no single context window
+- **Cost Estimates**: GPT-4o and the latest Claude Sonnet input cost, using live pricing from [models.dev](https://models.dev) (cached for 24 hours; hidden gracefully when offline)
 
 ## Usage
 

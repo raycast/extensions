@@ -1,5 +1,6 @@
 import { Cache } from "@raycast/api";
 import { useEffect, useState } from "react";
+import type { CountResult } from "./count";
 
 export interface ModelPricing {
   /** Display name from models.dev, e.g. "GPT-4o" */
@@ -16,6 +17,16 @@ export interface PricingData {
   /** Latest Claude Sonnet model */
   claude: ModelPricing;
   fetchedAt: number;
+}
+
+export interface TokenRow {
+  id: "o200k" | "cl100k" | "claude";
+  title: string;
+  subtitle: string;
+  tokens: number;
+  contextWindow?: number;
+  costPerMTok?: number;
+  label: string;
 }
 
 /** Used for context-window percentages when live pricing is unavailable */
@@ -49,15 +60,15 @@ interface ModelsDevModel {
   release_date?: string;
 }
 
-function extractPricing(api: Record<string, { models?: Record<string, ModelsDevModel> }>): PricingData | null {
+export function extractPricing(api: Record<string, { models?: Record<string, ModelsDevModel> }>): PricingData | null {
   const gpt4o = api?.openai?.models?.["gpt-4o"];
 
   const sonnets = Object.entries(api?.anthropic?.models ?? {})
     .filter(([id]) => /^claude-sonnet/.test(id))
     .map(([, model]) => model)
     .filter((m) => m?.cost?.input && m?.limit?.context && m?.release_date)
-    .sort((a, b) => (b.release_date! < a.release_date! ? -1 : 1));
-  const claude = sonnets[sonnets.length - 1];
+    .sort((a, b) => b.release_date!.localeCompare(a.release_date!));
+  const claude = sonnets[0];
 
   if (!gpt4o?.cost?.input || !gpt4o?.limit?.context || !claude) return null;
 
@@ -74,6 +85,37 @@ function extractPricing(api: Record<string, { models?: Record<string, ModelsDevM
     },
     fetchedAt: Date.now(),
   };
+}
+
+/** Context and price belong to a named model, never to an encoding alone. */
+export function buildTokenRows(counts: CountResult, pricing: PricingData | null): TokenRow[] {
+  return [
+    {
+      id: "o200k",
+      title: "GPT-4o",
+      subtitle: "o200k_base",
+      tokens: counts.tokensO200k,
+      contextWindow: pricing?.o200k.contextWindow ?? FALLBACK_CONTEXT_WINDOWS.o200k,
+      costPerMTok: pricing?.o200k.inputCostPerMTok,
+      label: "GPT-4o tokens count",
+    },
+    {
+      id: "cl100k",
+      title: "GPT-4 / GPT-3.5 Encoding",
+      subtitle: "cl100k_base · context depends on model",
+      tokens: counts.tokensCl100k,
+      label: "cl100k_base tokens count",
+    },
+    {
+      id: "claude",
+      title: pricing?.claude.name ?? "Claude Sonnet (~estimate)",
+      subtitle: "tokenizer estimate",
+      tokens: counts.tokensClaudeEstimate,
+      contextWindow: pricing?.claude.contextWindow ?? FALLBACK_CONTEXT_WINDOWS.claude,
+      costPerMTok: pricing?.claude.inputCostPerMTok,
+      label: "Claude estimated tokens count",
+    },
+  ];
 }
 
 /**

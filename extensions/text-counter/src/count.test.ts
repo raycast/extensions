@@ -25,6 +25,10 @@ describe("countText words", () => {
     expect(countText("안녕하세요").words).toBe(5);
   });
 
+  it("counts supplementary Han characters individually", () => {
+    expect(countText("𠀀𠀁").words).toBe(2);
+  });
+
   it("returns 0 for empty and whitespace-only text", () => {
     expect(countText("").words).toBe(0);
     expect(countText("   \n\t").words).toBe(0);
@@ -44,8 +48,18 @@ describe("countText sentences", () => {
     expect(countText("Pi is 3.14159 approximately.").sentences).toBe(1);
   });
 
+  it("does not split after common abbreviations", () => {
+    expect(countText("Dr. Smith is here.").sentences).toBe(1);
+    expect(countText("Use e.g. this example. Then continue.").sentences).toBe(2);
+  });
+
+  it("counts a final sentence without punctuation", () => {
+    expect(countText("First sentence. Another thought").sentences).toBe(2);
+  });
+
   it("treats terminator-less text as one sentence", () => {
     expect(countText("no terminator here").sentences).toBe(1);
+    expect(countText("🙂").sentences).toBe(1);
   });
 });
 

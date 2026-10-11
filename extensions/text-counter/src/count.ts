@@ -21,7 +21,56 @@ export interface CountResult {
 
 // CJK scripts (Han, Kana, Hangul) have no word-delimiting spaces:
 // count each CJK character as one word (same convention as Word/Pages)
-const CJK_REGEX = /[぀-ヿ㐀-䶿一-鿿豈-﫿가-힯]/g;
+const CJK_REGEX = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/gu;
+
+const ABBREVIATIONS = new Set([
+  "dr.",
+  "mr.",
+  "mrs.",
+  "ms.",
+  "prof.",
+  "sr.",
+  "jr.",
+  "st.",
+  "vs.",
+  "etc.",
+  "e.g.",
+  "i.e.",
+  "a.m.",
+  "p.m.",
+]);
+
+function countSentences(text: string): number {
+  if (!text.trim()) return 0;
+
+  let sentences = 0;
+  let segmentStart = 0;
+  const terminators = /[.!?]+|[。！？…]+/gu;
+
+  for (const match of text.matchAll(terminators)) {
+    const punctuation = match[0];
+    const end = match.index + punctuation.length;
+    const next = text.slice(end);
+
+    // A Latin terminator needs whitespace or the end of the text. This also
+    // keeps decimal points and dotted abbreviations from splitting mid-token.
+    if (/^[.!?]/u.test(punctuation) && next && !/^\s/u.test(next)) continue;
+
+    if (punctuation === "." && /^\s+\p{L}/u.test(next)) {
+      const precedingWord = text
+        .slice(0, end)
+        .match(/[\p{L}.]+$/u)?.[0]
+        ?.toLowerCase();
+      if (precedingWord && ABBREVIATIONS.has(precedingWord)) continue;
+    }
+
+    if (/[\p{L}\p{N}]/u.test(text.slice(segmentStart, end))) sentences++;
+    segmentStart = end;
+  }
+
+  if (/[\p{L}\p{N}]/u.test(text.slice(segmentStart))) sentences++;
+  return Math.max(sentences, 1);
+}
 
 // Average reading speeds: ~200 words/min for space-delimited scripts,
 // ~300 characters/min for CJK text
@@ -52,11 +101,7 @@ export function countText(text: string): CountResult {
   const characters = countGraphemes(text);
   const charactersNoSpaces = countGraphemes(text.replace(/\s/g, ""));
 
-  // Latin terminators need trailing whitespace/end so "3.14" or "e.g." mid-sentence
-  // don't count; CJK terminators (。！？…) count anywhere since they aren't followed by spaces
-  const sentenceRegex = /[.!?]+[\s\n]+|[.!?]+$|[。！？…]+/g;
-  const sentenceMatches = text.match(sentenceRegex);
-  const sentences = sentenceMatches ? sentenceMatches.length : text.trim().length > 0 ? 1 : 0;
+  const sentences = countSentences(text);
 
   const paragraphs =
     text

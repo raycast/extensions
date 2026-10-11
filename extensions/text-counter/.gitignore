@@ -105,3 +105,6 @@ dist
 
 # macOS
 .DS_Store
+
+# Raycast build output
+/count-text.js
