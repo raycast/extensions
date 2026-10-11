@@ -138,7 +138,7 @@ function ToggleGroupAction(props: { group: Group; groupedLight: GroupedLightStat
   );
 }
 
-function handleToggle(
+export function handleToggle(
   hue: Hue,
   canExecute: () => boolean,
   groupLights: Light[],
@@ -160,7 +160,7 @@ function handleToggle(
   });
 }
 
-function handleSetBrightness(
+export function handleSetBrightness(
   hue: Hue,
   canExecute: () => boolean,
   groupLights: Light[],

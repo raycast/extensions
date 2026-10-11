@@ -184,7 +184,7 @@ function handleSetBrightness(hue: Hue, canExecute: () => boolean, light: Light, 
   });
 }
 
-function handleSetColor(hue: Hue, canExecute: () => boolean, light: Light, color: CssColor) {
+export function handleSetColor(hue: Hue, canExecute: () => boolean, light: Light, color: CssColor) {
   const { xy, brightness } = hexToXy(color.value);
 
   // Darker colors will result in a lower brightness value to better match the color.

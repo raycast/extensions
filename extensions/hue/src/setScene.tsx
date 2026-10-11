@@ -89,7 +89,7 @@ function SceneItem(props: {
   );
 }
 
-function handleSetScene(hue: Hue, group: Group, scene: Scene) {
+export function handleSetScene(hue: Hue, group: Group, scene: Scene) {
   const changesToLights = new Map(
     scene.actions.map(({ target, action: { on, dimming, color, color_temperature } }) => [
       target.rid,

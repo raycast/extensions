@@ -18,20 +18,18 @@ export type FakeClient = ReturnType<typeof fakeClient>;
 type State<T> = T[] | ((items: T[]) => T[]);
 const apply = <T>(items: T[], update: State<T>) => (typeof update === "function" ? update(items) : update);
 
-export function fakeHue({
-  lights = [],
-  scenes = [],
-  rooms = [],
-  zones = [],
-  hueClient = fakeClient(),
-}: {
-  lights?: Light[];
-  scenes?: Scene[];
-  rooms?: Room[];
-  zones?: Zone[];
-  // undefined: not connected
-  hueClient?: FakeClient | undefined;
-} = {}) {
+export function fakeHue(
+  options: {
+    lights?: Light[];
+    scenes?: Scene[];
+    rooms?: Room[];
+    zones?: Zone[];
+    // undefined: not connected
+    hueClient?: FakeClient | undefined;
+  } = {},
+) {
+  const { lights = [], scenes = [], rooms = [], zones = [] } = options;
+  const hueClient = "hueClient" in options ? options.hueClient : fakeClient();
   const hue = {
     lights,
     scenes,
