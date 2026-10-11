@@ -1,6 +1,6 @@
 # Digger Changelog
 
-## [Sitemap list, and more ways to start a dig] - {PR_MERGE_DATE}
+## [Sitemap list, and more ways to start a dig] - 2026-10-11
 
 ### Added
 
