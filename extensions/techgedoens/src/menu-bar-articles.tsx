@@ -29,10 +29,10 @@ export default function MenuBarArticlesCommand() {
   const translations = strings;
   const retention = normalizeArticleRetention(preferences.archiveRetention);
   const menuArticleCount = normalizeMenuArticleCount(preferences.menuBarArticleCount);
-  const menuArticleTitleLength = normalizeMenuArticleTitleLength(preferences.menuBarArticleTitleLength);
+  const menuArticleTitleLength = normalizeMenuArticleTitleLength(preferences.menuBarTitleLengthPreset);
   const showOnlyUnreadArticles = preferences.showOnlyUnreadMenuBarArticles === true;
   const unreadCounterMode = preferences.menuBarUnreadCounter ?? "always";
-  const showArticleDate = preferences.showMenuBarArticleDate !== false;
+  const showArticleDate = preferences.showMenuBarPublicationDate !== false;
   const showArticleCategory = preferences.showMenuBarArticleCategory !== false;
   const [articles, setArticles] = useState<ArchivedArticle[]>([]);
   const [isLoading, setIsLoading] = useState(true);

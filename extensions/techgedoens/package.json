@@ -260,7 +260,7 @@
           ]
         },
         {
-          "name": "menuBarArticleTitleLength",
+          "name": "menuBarTitleLengthPreset",
           "title": "Title Length",
           "description": "Selects the maximum article title length shown in the menu bar.",
           "type": "dropdown",
@@ -321,7 +321,7 @@
           ]
         },
         {
-          "name": "showMenuBarArticleDate",
+          "name": "showMenuBarPublicationDate",
           "title": "Article Details",
           "description": "Shows the publication date next to each article in the menu bar.",
           "type": "checkbox",
