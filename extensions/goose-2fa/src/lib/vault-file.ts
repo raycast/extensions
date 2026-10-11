@@ -134,16 +134,20 @@ export async function writeVaultFile(
   content: string,
   expectedContent: string | null,
   createOnly = false,
+  allowEmpty = false,
 ): Promise<VaultFileWrite> {
   if (Buffer.byteLength(content) > SYNC_MAX_BYTES) return { status: "error" };
   const target = resolveVaultPath(filePath);
   const lockPath = lockPathFor(target);
   if (!(await acquireLock(lockPath))) return { status: "locked", lockContent: readVaultLock(target) };
   try {
+    let replaceEmpty = false;
     if (createOnly) {
       try {
-        statSync(target);
-        return { status: "conflict" };
+        const stats = statSync(target);
+        if (!allowEmpty || !stats.isFile() || stats.size > SYNC_MAX_BYTES || readFileSync(target, "utf8").trim())
+          return { status: "conflict" };
+        replaceEmpty = true;
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== "ENOENT") return { status: "error" };
       }
@@ -167,7 +171,7 @@ export async function writeVaultFile(
       } finally {
         closeSync(fd);
       }
-      if (createOnly) {
+      if (createOnly && !replaceEmpty) {
         linkSync(tempPath, target);
         unlinkSync(tempPath);
       } else {

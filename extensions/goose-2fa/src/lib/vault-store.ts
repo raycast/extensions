@@ -396,7 +396,13 @@ async function persist(
   const serialized = exportAsSyncJson(snapshot.accounts, snapshot.groups, snapshot.trash);
   // 版本依据是逐字节内容，不是 mtime/size：锁内比对，外部一改就拒绝。
   const expectedContent = !options.overwrite && baseline ? baseline.content : null;
-  const result = await writeVaultFile(state.filePath, serialized, expectedContent, options.createOnly);
+  const result = await writeVaultFile(
+    state.filePath,
+    serialized,
+    expectedContent,
+    options.createOnly,
+    options.allowCreate,
+  );
   if (result.status === "ok") {
     baseline = { content: serialized, stat: { mtimeMs: result.mtimeMs, size: result.size } };
     setState({
