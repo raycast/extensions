@@ -160,6 +160,23 @@ The view commands' light, group and scene mutations go through `applyUpdate()` i
    request for a newer one
 4. Event stream may override with the real state at any time
 
+### AI Tools
+
+Raycast AI controls lights by name through four tools in `src/tools`, one per resource type: `get-lights`,
+`control-light`, `control-group` and `recall-scene`. They share `helpers/tools.ts`:
+
+- Each call connects through `withHueClient`, like Toggle All Lights, and closes the client after, also when it
+  fails. Tools render nothing and write no cache.
+- Names match case-insensitively on the whole trimmed name, and a room wins over a zone. Errors for a wrong input
+  say how to correct the call. Skipped and failed targets go in the returned summary; a tool throws only when nothing
+  changed and something failed.
+- Relative changes are the bridge's `dimming_delta` and `color_temperature_delta`, sent without `on`. Rooms, zones
+  and all lights (`bridge_home`) change through their grouped light, except colors, which go to each light.
+- The CLI derives each tool's schemas from its default export: the input is one type literal whose JSDoc the AI
+  reads, unions are all string literals or all booleans, and the output schema leaves out what it can't express.
+  `ray build --print-tool-schemas` shows them.
+- `ai.yaml` holds the instructions and evals, both unverified until a Raycast Pro trial.
+
 ### Image Generation
 
 Gradients and light icons are SVG data URIs that `svgImages.ts` builds while rendering, to look like the Hue app's
@@ -197,6 +214,10 @@ fall back to `unknown_archetype` for lights, which covers 25 newer ones without 
 - **No keep-alive on the event stream**: it's silent between changes, so a connection lost without a reset only
   shows when a request times out.
 - **Certificate dates**: macOS's curl rejects the bridge certificate's notBefore format, so probe with Node's `http2`.
+- **Grouped changes apply per light**: a grouped `dimming_delta` or `color_temperature_delta` moves each light from
+  its own level, and a grouped `color_temperature` is clipped to each light's range. A delta with `on: true` turned
+  lights on from their own level, but one then read 0%.
+- **No grouped color** for a room of white lights: 207, "Color feature not supported by grouped light resource".
 
 Probed on a BSB002 with firmware 1978418030, Oct 2026.
 

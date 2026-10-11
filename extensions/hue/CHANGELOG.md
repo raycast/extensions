@@ -1,7 +1,8 @@
 # Hue Changelog
 
-## [Hue app look and bug fixes] - {PR_MERGE_DATE}
+## [AI tools, Hue app look and bug fixes] - {PR_MERGE_DATE}
 
+- Add AI tools to control lights, rooms, zones and scenes by name in Raycast AI
 - Restyle tiles after the Hue app: its colors and whites, shading that darkens with brightness, and its translucent off cards instead of a crossed-out bulb
 - Show each room and zone's icon on its Control Groups tile, and draw all icons as sharp vector shapes from the Hue app, in black or white, whichever stands out
 - Show each color once in room, zone and scene images, and only those of lights that are on
