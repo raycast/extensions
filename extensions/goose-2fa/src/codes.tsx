@@ -74,7 +74,10 @@ export default function Codes(
   const [quickDone, setQuickDone] = useState(false);
   const [onboarded, setOnboarded] = useState<boolean | null>(null);
   const codes = useOtpCodes(vault.accounts);
-  const visible = useMemo(() => filterAccounts(vault.accounts, query), [vault.accounts, query]);
+  const visible = useMemo(
+    () => filterAccounts(vault.accounts, query, vault.groups),
+    [vault.accounts, vault.groups, query],
+  );
 
   useEffect(() => {
     if (!scanResult || vault.status !== "ready" || resumedScan.current === scanResult.id) return;
