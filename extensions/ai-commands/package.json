@@ -1,0 +1,368 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-commands",
+  "title": "AI Commands",
+  "description": "Run AI commands through configured providers, with optional Ollama model management",
+  "icon": "icon.png",
+  "author": "anwarulislam",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anwarulislam/ai-commands.git"
+  },
+  "preferences": [
+    {
+      "name": "resultViewInput",
+      "description": "Choose preferred input source",
+      "type": "dropdown",
+      "required": false,
+      "title": "Input Source",
+      "data": [
+        {
+          "title": "Selected Text",
+          "value": "SelectedText"
+        },
+        {
+          "title": "Clipboard",
+          "value": "Clipboard"
+        }
+      ],
+      "default": "SelectedText"
+    },
+    {
+      "name": "resultViewInputFallback",
+      "description": "If there isn't text on main input source enable this option permit to fallback to other input source",
+      "type": "checkbox",
+      "required": false,
+      "title": "Enable Input Source Fallback",
+      "label": "Check for enable input fallback"
+    },
+    {
+      "name": "chatHistoryMessagesNumber",
+      "description": "Number of last messages to use as memory",
+      "type": "textfield",
+      "required": false,
+      "title": "Chat Memory Messages",
+      "default": "20"
+    },
+    {
+      "name": "certificateValidation",
+      "description": "Uncheck for Disable Certificate Validation",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Certificate Validation Enabled"
+    },
+    {
+      "name": "ollamaWebApiKey",
+      "description": "Ollama API Key used by Web Search Tools",
+      "type": "password",
+      "required": false,
+      "title": "Ollama Web API Key"
+    },
+    {
+      "name": "quickAIView",
+      "description": "Choose how Quick AI displays results",
+      "type": "dropdown",
+      "required": false,
+      "title": "Quick AI View Mode",
+      "data": [
+        {
+          "title": "Single Result View",
+          "value": "single"
+        },
+        {
+          "title": "Chat View",
+          "value": "chat"
+        }
+      ],
+      "default": "chat"
+    }
+  ],
+  "tools": [
+    {
+      "name": "cmd-web-fetch",
+      "title": "Web Fetch",
+      "description": "Fetches a single web page by URL and returns its content."
+    },
+    {
+      "name": "cmd-web-search",
+      "title": "Web Search",
+      "description": "Performs a web search for a single query and returns relevant results."
+    }
+  ],
+  "commands": [
+    {
+      "name": "ai-chat",
+      "icon": "ai-chat.png",
+      "title": "AI Chat",
+      "subtitle": "AI Command",
+      "description": "Chat with AI",
+      "mode": "view"
+    },
+    {
+      "name": "quick-ai",
+      "icon": "quick-ai.png",
+      "title": "Quick AI",
+      "subtitle": "AI Command",
+      "description": "Answer the selected text directly",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Ask AI...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "cmd-ask-selected-text",
+      "icon": "ask-selected.png",
+      "title": "Ask Selected Text",
+      "subtitle": "AI Command",
+      "description": "Ask AI a question about the selected text",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Your question",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "cmd-ask-webpage",
+      "icon": "ask-web.png",
+      "title": "Ask Webpage",
+      "subtitle": "AI Command",
+      "description": "Ask AI a question about the current webpage",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Your question",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "cmd-browser-summarize",
+      "icon": "summarize-web.png",
+      "title": "Summarize Webpage",
+      "subtitle": "AI Command",
+      "description": "Summarize content from current Webpage.",
+      "mode": "no-view"
+    },
+    {
+      "name": "cmd-casual",
+      "icon": "icon.png",
+      "title": "Change Tone to Casual",
+      "subtitle": "AI Command",
+      "description": "Make selected text more casual",
+      "mode": "no-view"
+    },
+    {
+      "name": "cmd-code-explain",
+      "icon": "code.png",
+      "title": "Explain Code Step by Step",
+      "subtitle": "AI Command",
+      "description": "Explain the selected code step by step",
+      "mode": "no-view"
+    },
+    {
+      "name": "cmd-confident",
+      "icon": "confident.png",
+      "title": "Change Tone to Confident",
+      "subtitle": "AI Command",
+      "description": "Make selected text more confident",
+      "mode": "no-view"
+    },
+    {
+      "name": "cmd-explain",
+      "icon": "explain.png",
+      "title": "Explain This in Simple Terms",
+      "subtitle": "AI Command",
+      "description": "Explain selected text in simple terms",
+      "mode": "no-view"
+    },
+    {
+      "name": "cmd-fix-spelling-grammar",
+      "icon": "grammar.png",
+      "title": "Fix Spelling and Grammar",
+      "subtitle": "AI Command",
+      "description": "Fix selected text from spelling and grammar error",
+      "mode": "no-view"
+    },
+    {
+      "name": "cmd-friendly",
+      "icon": "friendly.png",
+      "title": "Change Tone to Friendly",
+      "subtitle": "AI Command",
+      "description": "Make selected text more friendly",
+      "mode": "no-view"
+    },
+    {
+      "name": "cmd-image-describe",
+      "icon": "image-describe.png",
+      "title": "Describe Content of Image",
+      "subtitle": "AI Command",
+      "description": "Describe content of the image on the clipboard or selected from finder",
+      "mode": "no-view"
+    },
+    {
+      "name": "cmd-image-to-text",
+      "icon": "image-to-text.png",
+      "title": "Get Text from Image",
+      "subtitle": "AI Command",
+      "description": "Get text from image on the clipboard or selected from finder",
+      "mode": "no-view"
+    },
+    {
+      "name": "cmd-improve-writing",
+      "icon": "improve.png",
+      "title": "Improve Writing",
+      "subtitle": "AI Command",
+      "description": "Improve writing of selected text",
+      "mode": "no-view"
+    },
+    {
+      "name": "cmd-longer",
+      "icon": "icon.png",
+      "title": "Make Longer",
+      "subtitle": "AI Command",
+      "description": "Make selected text longer",
+      "mode": "no-view"
+    },
+    {
+      "name": "cmd-professional",
+      "icon": "professional.png",
+      "title": "Change Tone to Professional",
+      "subtitle": "AI Command",
+      "description": "Make selected text more professional",
+      "mode": "no-view"
+    },
+    {
+      "name": "cmd-shorter",
+      "icon": "icon.png",
+      "title": "Make Shorter",
+      "subtitle": "AI Command",
+      "description": "Make selected text shorter",
+      "mode": "no-view"
+    },
+    {
+      "name": "cmd-translate",
+      "icon": "translate.png",
+      "title": "Translate",
+      "subtitle": "AI Command",
+      "description": "Translate selected text",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "source",
+          "placeholder": "Source Language",
+          "type": "text",
+          "required": true,
+          "data": "english"
+        },
+        {
+          "name": "target",
+          "placeholder": "Target Language",
+          "type": "text",
+          "required": true,
+          "data": "bangla"
+        }
+      ]
+    },
+    {
+      "name": "models",
+      "icon": "models.png",
+      "title": "Manage Ollama Models",
+      "subtitle": "AI Command",
+      "description": "Pull, inspect, and manage Ollama models",
+      "mode": "view"
+    },
+    {
+      "name": "custom-create",
+      "icon": "icon.png",
+      "title": "Create AI Command",
+      "subtitle": "AI Command",
+      "description": "Create a custom AI command",
+      "mode": "view"
+    },
+    {
+      "name": "mcp-server",
+      "icon": "mcp.png",
+      "title": "Manage MCP Server",
+      "subtitle": "AI Command",
+      "description": "Manage configured MCP Server",
+      "mode": "view"
+    },
+    {
+      "name": "ai-commands",
+      "icon": "icon.png",
+      "title": "Manage AI Commands",
+      "subtitle": "AI Command",
+      "description": "Manage prompts and model settings for all AI commands",
+      "mode": "view"
+    },
+    {
+      "name": "manage-custom-providers",
+      "icon": "icon.png",
+      "title": "Manage Custom Providers",
+      "subtitle": "AI Command",
+      "description": "Manage custom AI providers and models",
+      "mode": "view"
+    },
+    {
+      "name": "cmd-answer",
+      "icon": "icon.png",
+      "title": "AI Answer",
+      "subtitle": "AI Command",
+      "description": "View AI answers",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "id",
+          "placeholder": "Command ID",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "^3.0.43",
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@raycast/api": "^2.1.2",
+    "@raycast/utils": "^2.3.0",
+    "ai": "^7.0.92",
+    "file-type": "^22.0.2",
+    "ollama": "^0.6.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/mime-types": "^3.0.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
