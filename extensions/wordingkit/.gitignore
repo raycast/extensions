@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+coverage/
+manual-eval/reports/
+
+# Raycast generated
+raycast-env.d.ts
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment & secrets
+.env
+.env.*
+*.key
+*.pem
+.mcp.json
+
+# TypeScript
+*.tsbuildinfo
+
+# Temporary files
+/tmp/
+*.tmp
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local agent plans
+docs/superpowers/
