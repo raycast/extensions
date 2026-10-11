@@ -260,6 +260,32 @@
           ]
         },
         {
+          "name": "menuBarArticleTitleLength",
+          "title": "Title Length",
+          "description": "Selects the maximum article title length shown in the menu bar.",
+          "type": "dropdown",
+          "required": false,
+          "default": "70",
+          "data": [
+            {
+              "title": "50 Characters",
+              "value": "50"
+            },
+            {
+              "title": "70 Characters",
+              "value": "70"
+            },
+            {
+              "title": "90 Characters",
+              "value": "90"
+            },
+            {
+              "title": "Full Title",
+              "value": "full"
+            }
+          ]
+        },
+        {
           "name": "showOnlyUnreadMenuBarArticles",
           "title": "Article Filter",
           "description": "Only shows unread articles in the Latest Articles and Favorites sections.",

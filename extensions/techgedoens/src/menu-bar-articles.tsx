@@ -22,7 +22,6 @@ import {
 } from "./article-archive";
 import { strings, translateCategory } from "./strings";
 
-const MAX_MENU_ARTICLE_TITLE_LENGTH = 70;
 const ARCHIVE_SYNC_INTERVAL = 5_000;
 
 export default function MenuBarArticlesCommand() {
@@ -30,6 +29,7 @@ export default function MenuBarArticlesCommand() {
   const translations = strings;
   const retention = normalizeArticleRetention(preferences.archiveRetention);
   const menuArticleCount = normalizeMenuArticleCount(preferences.menuBarArticleCount);
+  const menuArticleTitleLength = normalizeMenuArticleTitleLength(preferences.menuBarArticleTitleLength);
   const showOnlyUnreadArticles = preferences.showOnlyUnreadMenuBarArticles === true;
   const unreadCounterMode = preferences.menuBarUnreadCounter ?? "always";
   const showArticleDate = preferences.showMenuBarArticleDate !== false;
@@ -187,6 +187,7 @@ export default function MenuBarArticlesCommand() {
               key={article.id}
               article={article}
               dateFormatter={dateFormatter}
+              maximumTitleLength={menuArticleTitleLength}
               onOpen={openArticle}
               showArticleCategory={showArticleCategory}
               showArticleDate={showArticleDate}
@@ -202,6 +203,7 @@ export default function MenuBarArticlesCommand() {
               key={article.id}
               article={article}
               dateFormatter={dateFormatter}
+              maximumTitleLength={menuArticleTitleLength}
               onOpen={openArticle}
               showArticleCategory={showArticleCategory}
               showArticleDate={showArticleDate}
@@ -237,6 +239,7 @@ export default function MenuBarArticlesCommand() {
 function MenuArticleItem({
   article,
   dateFormatter,
+  maximumTitleLength,
   onOpen,
   showArticleCategory,
   showArticleDate,
@@ -244,6 +247,7 @@ function MenuArticleItem({
 }: {
   article: ArchivedArticle;
   dateFormatter: Intl.DateTimeFormat;
+  maximumTitleLength: number | undefined;
   onOpen: (article: ArchivedArticle) => Promise<void>;
   showArticleCategory: boolean;
   showArticleDate: boolean;
@@ -259,7 +263,7 @@ function MenuArticleItem({
 
   return (
     <MenuBarExtra.Item
-      title={`${showFavoriteIndicator && article.isFavorite ? "★ " : ""}${truncateTitle(article.title)}`}
+      title={`${showFavoriteIndicator && article.isFavorite ? "★ " : ""}${truncateTitle(article.title, maximumTitleLength)}`}
       subtitle={subtitle || undefined}
       tooltip={article.title}
       icon={{
@@ -281,6 +285,19 @@ function normalizeMenuArticleCount(value: string | undefined): 3 | 5 | 10 {
   return 5;
 }
 
+function normalizeMenuArticleTitleLength(value: string | undefined): 50 | 70 | 90 | undefined {
+  if (value === "50") {
+    return 50;
+  }
+  if (value === "90") {
+    return 90;
+  }
+  if (value === "full") {
+    return undefined;
+  }
+  return 70;
+}
+
 function shouldShowUnreadCounter(
   mode: Preferences.MenuBarArticles["menuBarUnreadCounter"],
   unreadCount: number,
@@ -288,17 +305,15 @@ function shouldShowUnreadCounter(
   return mode === "always" || (mode === "hide-zero" && unreadCount > 0);
 }
 
-function truncateTitle(title: string): string {
-  if (title.length <= MAX_MENU_ARTICLE_TITLE_LENGTH) {
+function truncateTitle(title: string, maximumLength: number | undefined): string {
+  if (maximumLength === undefined || title.length <= maximumLength) {
     return title;
   }
 
-  const truncatedTitle = title.slice(0, MAX_MENU_ARTICLE_TITLE_LENGTH - 1).trimEnd();
+  const truncatedTitle = title.slice(0, maximumLength - 1).trimEnd();
   const lastWordBoundary = truncatedTitle.lastIndexOf(" ");
   const shortenedTitle =
-    lastWordBoundary >= MAX_MENU_ARTICLE_TITLE_LENGTH * 0.7
-      ? truncatedTitle.slice(0, lastWordBoundary)
-      : truncatedTitle;
+    lastWordBoundary >= maximumLength * 0.7 ? truncatedTitle.slice(0, lastWordBoundary) : truncatedTitle;
 
   return `${shortenedTitle}…`;
 }
