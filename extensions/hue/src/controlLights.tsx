@@ -9,7 +9,7 @@ import { useInputRateLimiter } from "./hooks/useInputRateLimiter";
 import { calculateAdjustedColorTemperature, hexToXy } from "./helpers/colors";
 import { getLightsFromGroup, getMiredFromLight } from "./helpers/hueResources";
 import { byName } from "./helpers/collections";
-import { applyUpdate, getIconForColor, withTransition } from "./helpers/raycast";
+import { applyUpdate, getIconForColor } from "./helpers/raycast";
 import { createLightIcon } from "./helpers/svgImages";
 
 export default function ControlLights() {
@@ -163,7 +163,7 @@ function handleToggle(hue: Hue, canExecute: () => boolean, light: Light) {
   return applyUpdate(hue, {
     canExecute,
     lights: new Map([[light.id, changes]]),
-    request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
+    request: (hueClient) => hueClient.updateLight(light, changes),
     success: `Turned ${light.on.on ? "off" : "on"} ${light.metadata.name}`,
     failure: `Failed turning ${light.on.on ? "off" : "on"} ${light.metadata.name}`,
   });
@@ -178,7 +178,7 @@ function handleSetBrightness(hue: Hue, canExecute: () => boolean, light: Light, 
   return applyUpdate(hue, {
     canExecute,
     lights: new Map([[light.id, changes]]),
-    request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
+    request: (hueClient) => hueClient.updateLight(light, changes),
     success: `Set brightness of ${light.metadata.name} to ${(brightness / 100).toLocaleString("en", { style: "percent" })}`,
     failure: `Failed setting brightness of ${light.metadata.name}`,
   });
@@ -198,7 +198,7 @@ function handleSetColor(hue: Hue, canExecute: () => boolean, light: Light, color
     canExecute,
     // Clear the color temperature like the bridge does in color mode, as getColorFromLight prefers it over color.
     lights: new Map([[light.id, { ...changes, color_temperature: { mirek: null, mirek_valid: false } }]]),
-    request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
+    request: (hueClient) => hueClient.updateLight(light, changes),
     success: `Set color of ${light.metadata.name} to ${color.name}`,
     failure: "Failed setting color",
   });
@@ -221,7 +221,7 @@ function handleColorTemperatureChange(
   return applyUpdate(hue, {
     canExecute,
     lights: new Map([[light.id, changes]]),
-    request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
+    request: (hueClient) => hueClient.updateLight(light, changes),
     success: `Made ${light.metadata.name} ${direction}`,
     failure: `Failed making ${light.metadata.name} ${direction}`,
   });

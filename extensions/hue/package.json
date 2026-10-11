@@ -55,15 +55,6 @@
   ],
   "preferences": [
     {
-      "name": "transitionTime",
-      "title": "Transition Time",
-      "description": "The time in milliseconds that transitions will take, rounded to the nearest 100ms.",
-      "placeholder": "400",
-      "type": "textfield",
-      "default": "400",
-      "required": false
-    },
-    {
       "name": "toggleAllLights",
       "title": "“Toggle All Lights” when some lights are on",
       "description": "When some—but not all—lights are on, the command should",

@@ -12,7 +12,6 @@ export const MIRED_MIN = 153;
 export const MIRED_MAX = 500;
 export const MIRED_STEP = (MIRED_MAX - MIRED_MIN) / 10;
 export const MIRED_DEFAULT = 357;
-export const DEFAULT_TRANSITION_TIME_MS = 400;
 export const COLORS: CssColor[] = [
   { name: "Alice Blue", value: "#f0f8ff" },
   { name: "Antique White", value: "#faebd7" },

@@ -7,7 +7,7 @@ import { createGradientUri } from "./helpers/svgImages";
 import { useMemo } from "react";
 import { getBrightnessFromScene, getColorsFromScene, getScenesFromGroup } from "./helpers/hueResources";
 
-import { applyUpdate, getTransitionTimeInMs } from "./helpers/raycast";
+import { applyUpdate } from "./helpers/raycast";
 
 export default function SetSceneCommand() {
   return <SetScene hue={useHue()} />;
@@ -102,10 +102,7 @@ function handleSetScene(hue: Hue, group: Group, scene: Scene) {
     scene,
     request: (hueClient) =>
       hueClient.updateScene(scene, {
-        recall: {
-          action: "active",
-          duration: getTransitionTimeInMs(),
-        },
+        recall: { action: "active" },
       }),
     success: `Scene ${scene.metadata.name} set for ${group.metadata.name}`,
     failure: `Failed setting scene ${scene.metadata.name} for ${group.metadata.name}`,

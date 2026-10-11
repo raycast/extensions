@@ -2,8 +2,7 @@ import { CssColor, DeepPartial, HasId, Id, Light, Scene } from "../lib/types";
 import type HueClient from "../lib/HueClient";
 import type { Hue } from "../hooks/useHue";
 import React from "react";
-import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api";
-import { DEFAULT_TRANSITION_TIME_MS } from "./constants";
+import { Icon, Image, showToast, Toast } from "@raycast/api";
 import { updateItems } from "./collections";
 import { logError } from "./errors";
 import { getSceneChanges } from "./hueResources";
@@ -12,26 +11,6 @@ import { RequestDroppedError } from "../lib/RateLimitedQueue";
 export function getIconForColor(color: CssColor): Image {
   return { source: Icon.CircleFilled, tintColor: { light: color.value, dark: color.value, adjustContrast: false } };
 }
-
-// This code can be simplified if/once the default value is read when a Raycast preference field is cleared. As of
-//   writing this, clearing a preference field counts as setting it with an empty string, which results in NaN when
-//   trying to parse as an integer.
-export function getTransitionTimeInMs(): number {
-  const { transitionTime: transitionTimePreference } = getPreferenceValues<Preferences>();
-  const transitionTime = parseInt(transitionTimePreference);
-
-  if (isNaN(transitionTime)) {
-    return DEFAULT_TRANSITION_TIME_MS;
-  }
-
-  return transitionTime;
-}
-
-// Requests take a transition time, which the light's state doesn't hold.
-export const withTransition = <T extends object>(changes: T) => ({
-  ...changes,
-  dynamics: { duration: getTransitionTimeInMs() },
-});
 
 export async function applyUpdate(
   { hueBridgeActor, lights, scenes, setLights, setScenes }: Hue,

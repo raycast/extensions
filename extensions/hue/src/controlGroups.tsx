@@ -15,7 +15,7 @@ import {
   GroupedLightState,
 } from "./helpers/hueResources";
 import { byName } from "./helpers/collections";
-import { applyUpdate, withTransition } from "./helpers/raycast";
+import { applyUpdate } from "./helpers/raycast";
 
 export default function ControlGroups() {
   const hue = useHue();
@@ -145,11 +145,7 @@ function handleToggle(
   groupedLight: GroupedLightState,
   group: Group,
 ) {
-  const changesToGroup = {
-    on: { on: !groupedLight.on?.on },
-    // No dynamics when toggling groups: with a duration, the bridge turns them off at once and back on at the lowest
-    // brightness. Its default transition fades both ways.
-  };
+  const changesToGroup = { on: { on: !groupedLight.on?.on } };
   const changesToLights = new Map(groupLights.map((light) => [light.id, changesToGroup]));
 
   return applyUpdate(hue, {
@@ -182,7 +178,7 @@ function handleSetBrightness(
   return applyUpdate(hue, {
     canExecute,
     lights: changesToLights,
-    request: (hueClient) => hueClient.updateGroupedLight(groupedLight, withTransition(changes)),
+    request: (hueClient) => hueClient.updateGroupedLight(groupedLight, changes),
     success: `Set brightness of ${group.metadata.name} to ${(brightness / 100).toLocaleString("en", { style: "percent" })}`,
     failure: `Failed setting brightness of ${group.metadata.name}`,
   });
