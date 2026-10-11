@@ -2,27 +2,19 @@
 
 # Tally
 
-This is a Raycast extension for [Tally](https://tally.so/). With this extension you can:
-- view **Forms**
-    - view **Submissions**
-- view **Workspaces**
-    - rename **Workspaces**
+This is a Raycast extension for tracking attendance. With this extension you can:
+- create reusable **Templates** with headings, notes, and default times
+- manage a separate **Check In** roster for each template
+- copy attendance tables to Excel or another spreadsheet
+- export and import JSON backups
 
 ## 🚀 Getting Started
 
-1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/tally) OR `install` via Raycast Store
+1. **Install extension**: run `npm install`, then `npm run dev` from this project directory to load it locally in Raycast.
 
 <a title="Install tally Raycast Extension" href="https://www.raycast.com/xmok/tally"><img src="https://www.raycast.com/xmok/tally/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 
-2. **Enter your Tally API Key**:
-
-    a. `Go` to [Settings > API Keys](https://tally.so/settings/api-keys)
-
-    b. `Click` on the “+ Create API key” button
-
-    c. `Enter` Name and `Click` "Create"
-
-    d. `Copy` and `Paste` in Extension Preferences
+2. Open **Template** to create a roster template, then use **Check In** to add attendance entries.
 
 ---
 
