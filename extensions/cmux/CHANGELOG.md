@@ -1,5 +1,13 @@
 # cmux
 
+## [Fix CLI lookup without PATH install] - {PR_MERGE_DATE}
+
+- Fall back to the cmux CLI bundled in `cmux.app` when it isn't installed into PATH, fixing `spawn cmux ENOENT`
+- Document that cmux's Socket Control Mode must be set to Automation mode for Raycast to connect
+- Remove the reserved `⌘↵` shortcut from Show Surfaces; it is the second action, so Raycast already assigns `⌘↵` to it
+- Use the same `cmux.app` copy for the CLI and for opening the app, preferring the one that is running
+- Show how to fix cmux's Access denied error instead of "cmux is not running"
+
 ## [Improved workspace search] - 2026-05-27
 
 - Added workspace metadata from `cmux tree --all --json` for better matching
