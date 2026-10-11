@@ -1,0 +1,143 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "meross",
+  "title": "Meross",
+  "description": "Control your Meross smart plugs and power strips from Raycast",
+  "icon": "extension-icon.png",
+  "author": "joinsider",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "keywords": [
+    "meross",
+    "smart plug",
+    "smart home",
+    "power strip",
+    "switch"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "devices",
+      "title": "Search Devices",
+      "subtitle": "Meross",
+      "description": "List your Meross plugs and switch them on or off",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-device",
+      "title": "Toggle Device",
+      "subtitle": "Meross",
+      "description": "Pick an online plug and toggle it",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "device",
+          "placeholder": "Filter",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "switch-device",
+      "title": "Switch Device by Name",
+      "subtitle": "Meross",
+      "description": "Switch a plug by its exact name, without opening a window (for hotkeys and quicklinks)",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "device",
+          "placeholder": "Device name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "action",
+          "placeholder": "Action",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Toggle",
+              "value": "toggle"
+            },
+            {
+              "title": "On",
+              "value": "on"
+            },
+            {
+              "title": "Off",
+              "value": "off"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Devices",
+      "subtitle": "Meross",
+      "description": "Show your Meross plugs in the menu bar",
+      "mode": "menu-bar",
+      "interval": "10m"
+    },
+    {
+      "name": "logout",
+      "title": "Log out",
+      "subtitle": "Meross",
+      "description": "End the Meross cloud session and forget the stored login token",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "email",
+      "title": "Email",
+      "description": "Email address of your Meross account",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "description": "Password of your Meross account",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "localHttpFirst",
+      "title": "Local Network",
+      "label": "Control devices over the local network first",
+      "description": "Send commands directly to the device via HTTP when its LAN IP is known, and fall back to the cloud otherwise",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.3.2",
+    "meross-cloud": "^3.1.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.6.2",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to Raycast Store, please run \\`npm run publish\\` instead.\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
