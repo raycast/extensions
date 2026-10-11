@@ -1,7 +1,8 @@
-import { getPreferenceValues } from "@raycast/api";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 
 let email: string | undefined;
+const EMAIL_KEY = "account-email";
 
 function decodeJWT(token: string): { email?: string } {
   const payload = token.split(".")[1];
@@ -25,16 +26,15 @@ const SCOPES = [
 export const google = OAuthService.google({
   // The Classroom API has to be enabled in the Google Cloud project that owns the client,
   // which isn't the case for Raycast's own Google client
-  clientId: getPreferenceValues<{ clientId: string }>().clientId.trim(),
+  clientId: getPreferenceValues<Preferences>().clientId.trim(),
   authorizeUrl: "https://accounts.google.com/o/oauth2/v2/auth",
   tokenUrl: "https://oauth2.googleapis.com/token",
   scope: SCOPES.map((scope) => `https://www.googleapis.com/auth/${scope}`).join(" "),
-  onAuthorize({ idToken }) {
-    email = undefined;
-    if (!idToken) return;
-
-    const { email: decodedEmail } = decodeJWT(idToken);
-    email = decodedEmail;
+  async onAuthorize({ idToken }) {
+    // Google only sends the ID token when signing in, not when it refreshes the access token. Without
+    // remembering the address, the account would become unknown an hour after signing in.
+    email = idToken ? decodeJWT(idToken).email : await LocalStorage.getItem<string>(EMAIL_KEY);
+    if (idToken && email) await LocalStorage.setItem(EMAIL_KEY, email);
   },
 });
 

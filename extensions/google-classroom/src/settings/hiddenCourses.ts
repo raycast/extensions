@@ -8,7 +8,8 @@ import { getAccountEmail } from "../api/googleAuth";
 const key = () => `hidden-courses:${getAccountEmail() ?? ""}`;
 
 export async function getHiddenCourseIds(): Promise<string[]> {
-  const stored = await LocalStorage.getItem<string>(key());
+  // Falls back to what was saved while the account wasn't known yet
+  const stored = (await LocalStorage.getItem<string>(key())) ?? (await LocalStorage.getItem<string>("hidden-courses:"));
   try {
     const ids: unknown = stored ? JSON.parse(stored) : [];
     return Array.isArray(ids) ? ids.filter((id) => typeof id === "string") : [];

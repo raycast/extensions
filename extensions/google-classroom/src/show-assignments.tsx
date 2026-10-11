@@ -1,7 +1,7 @@
 import { useRenderReport } from "./helpers/profiling";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AssignmentFilter, getAssignments } from "./api/classroom";
 import CourseStream from "./components/CourseStream";
 import IssuesSection from "./components/IssuesSection";
@@ -47,6 +47,13 @@ function Command() {
     !!hiddenIds,
     "assignments",
   );
+  // Hiding only filters, but a course that is shown again may not be in what was loaded while it was hidden
+  const previouslyHidden = useRef(hiddenIds);
+  useEffect(() => {
+    const wasShown = previouslyHidden.current?.some((id) => !hiddenIds?.includes(id));
+    previouslyHidden.current = hiddenIds;
+    if (wasShown) refresh();
+  }, [hiddenIds]);
   // A course disappears the moment it's hidden, without waiting for the list to reload
   const data = loaded?.filter((assignment) => !hiddenIds?.includes(assignment.courseId));
   useRenderReport("assignments", data);

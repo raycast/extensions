@@ -4,14 +4,13 @@ import { Attachment, Course, Status, StreamItem, StreamItemType, getStatus } fro
 import { withAuthUser } from "../api/googleAuth";
 
 export function formatDateTime(date: Date): string {
-  const systemLocale = Intl.DateTimeFormat().resolvedOptions().locale;
-  const time = new Intl.DateTimeFormat(systemLocale, { hour: "2-digit", minute: "2-digit" }).format(date);
+  const time = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(date);
 
   if (isToday(date)) return `Today at ${time}`;
   if (isYesterday(date)) return `Yesterday at ${time}`;
   if (isTomorrow(date)) return `Tomorrow at ${time}`;
 
-  const day = new Intl.DateTimeFormat(systemLocale, { year: "numeric", month: "short", day: "numeric" }).format(date);
+  const day = new Intl.DateTimeFormat("en-US", { year: "numeric", month: "short", day: "numeric" }).format(date);
   return `${day} at ${time}`;
 }
 
