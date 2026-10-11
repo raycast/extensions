@@ -1,0 +1,15 @@
+{
+  "architectures": [
+    "arm64",
+    "x86_64"
+  ],
+  "compiler": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx26.0",
+  "sdk": "27.0",
+  "signature": "ad hoc; not notarized",
+  "sha256": {
+    "native/main.swift": "8322c1cab8b01d7e590c1c78ce5c853a793bd2124334c45d5affd84d26466d0d",
+    "native/Info.plist": "9b1a07ebab1272f38123522d10f07ce713a8a9f7227a59c057d78bf29a89a320",
+    "scripts/build-native.sh": "58a374cefbf0a4939d64b46b3f662aac82123dc0c2dd45d6a4682113c937f631",
+    "assets/QuickDropcastBridge.app/Contents/MacOS/QuickDropcastBridge": "59e067c5518daa4acf5745e8dc46f3d9b5f202560fd8ee3b7b645d7bcecdb69b"
+  }
+}
