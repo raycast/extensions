@@ -31,7 +31,7 @@ export default function MenuBarArticlesCommand() {
   const retention = normalizeArticleRetention(preferences.archiveRetention);
   const menuArticleCount = normalizeMenuArticleCount(preferences.menuBarArticleCount);
   const showOnlyUnreadArticles = preferences.showOnlyUnreadMenuBarArticles === true;
-  const hideZeroUnreadCount = preferences.hideZeroMenuBarUnreadCount === true;
+  const unreadCounterMode = preferences.menuBarUnreadCounter ?? "always";
   const showArticleDate = preferences.showMenuBarArticleDate !== false;
   const showArticleCategory = preferences.showMenuBarArticleCategory !== false;
   const [articles, setArticles] = useState<ArchivedArticle[]>([]);
@@ -166,7 +166,7 @@ export default function MenuBarArticlesCommand() {
   return (
     <MenuBarExtra
       icon="icon.png"
-      title={hideZeroUnreadCount && unreadCount === 0 ? undefined : String(unreadCount)}
+      title={shouldShowUnreadCounter(unreadCounterMode, unreadCount) ? String(unreadCount) : undefined}
       tooltip={translations.unreadCount(unreadCount)}
       isLoading={isLoading}
     >
@@ -279,6 +279,13 @@ function normalizeMenuArticleCount(value: string | undefined): 3 | 5 | 10 {
     return 10;
   }
   return 5;
+}
+
+function shouldShowUnreadCounter(
+  mode: Preferences.MenuBarArticles["menuBarUnreadCounter"],
+  unreadCount: number,
+): boolean {
+  return mode === "always" || (mode === "hide-zero" && unreadCount > 0);
 }
 
 function truncateTitle(title: string): string {

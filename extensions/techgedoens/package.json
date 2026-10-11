@@ -269,13 +269,26 @@
           "label": "Only show unread articles"
         },
         {
-          "name": "hideZeroMenuBarUnreadCount",
+          "name": "menuBarUnreadCounter",
           "title": "Unread Counter",
-          "description": "Hides the unread counter in the menu bar when there are no unread articles.",
-          "type": "checkbox",
+          "description": "Selects when the unread counter is shown in the menu bar.",
+          "type": "dropdown",
           "required": false,
-          "default": false,
-          "label": "Hide counter when zero"
+          "default": "always",
+          "data": [
+            {
+              "title": "Always Show",
+              "value": "always"
+            },
+            {
+              "title": "Hide When Zero",
+              "value": "hide-zero"
+            },
+            {
+              "title": "Always Hide",
+              "value": "hidden"
+            }
+          ]
         },
         {
           "name": "showMenuBarArticleDate",
