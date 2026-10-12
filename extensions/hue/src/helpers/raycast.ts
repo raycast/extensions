@@ -3,7 +3,7 @@ import type HueClient from "../lib/HueClient";
 import type { Hue } from "../hooks/useHue";
 import React from "react";
 import { Icon, Image, showToast, Toast } from "@raycast/api";
-import { updateItems } from "./collections";
+import { merge } from "./collections";
 import { logError } from "./errors";
 import { getSceneChanges } from "./hueResources";
 
@@ -28,14 +28,18 @@ export async function applyUpdate(
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (update.canExecute && !update.canExecute()) return;
     // Rooms and zones follow from their lights while rendering.
-    const undos = [
+    const settles = [
       optimisticUpdates(update.lights, setLights),
       optimisticUpdates(getSceneChanges(scenes, lights, update.lights, update.scene), setScenes),
     ];
-    await update.request(hueClient).catch((error) => {
-      undos.forEach((undo) => undo());
-      throw error;
-    });
+    const settle = (succeeded: boolean) => settles.forEach((settle) => settle(succeeded));
+    await update.request(hueClient).then(
+      () => settle(true),
+      (error) => {
+        settle(false);
+        throw error;
+      },
+    );
     await showToast({ style: Toast.Style.Success, title: update.success });
   } catch (error) {
     logError(error);
@@ -47,22 +51,68 @@ export async function applyUpdate(
   }
 }
 
+// The optimistic writes whose request is pending, oldest first, by resource ID and property. Each holds the value it
+// replaced: a failed write restores it, or hands it to the next write, which then restores it if it fails too.
+const pendingWrites = new Map<string, PendingWrite[]>();
+type PendingWrite = { id: Id; key: string; before: unknown };
+
+function queueOf(id: Id, key: string) {
+  const queueKey = `${id}/${key}`;
+  if (!pendingWrites.has(queueKey)) pendingWrites.set(queueKey, []);
+  return pendingWrites.get(queueKey)!;
+}
+
+// Loads and events report the bridge's state, which is what failures of all pending writes go back to.
+export function rebasePendingWrites(resources: HasId[]) {
+  for (const { id, ...properties } of resources) {
+    for (const [key, value] of Object.entries(properties)) {
+      const oldest = pendingWrites.get(`${id}/${key}`)?.[0];
+      if (oldest) oldest.before = merge(oldest.before, value);
+    }
+  }
+}
+
 function optimisticUpdates<T extends HasId>(
   changes: Map<Id, DeepPartial<T>>,
   setState: React.Dispatch<React.SetStateAction<T[]>>,
-): () => void {
+): (succeeded: boolean) => void {
   // Setting cached state writes the whole list to the cache, even when nothing changes.
   if (changes.size === 0) return () => {};
 
-  let previous = new Map<Id, T>();
+  const writes: PendingWrite[] = [];
+  setState((items: T[]) =>
+    items.map((item) => {
+      const change = changes.get(item.id);
+      if (!change) return item;
+      const updated = { ...item } as Record<string, unknown>;
+      // Skips properties the item lacks, so an optimistic update can't give a plug dimming.
+      for (const [key, value] of Object.entries(change)) {
+        if (!(key in item) || value === undefined) continue;
+        const write = { id: item.id, key, before: updated[key] };
+        writes.push(write);
+        queueOf(item.id, key).push(write);
+        updated[key] = merge(write.before, value);
+      }
+      return updated as T;
+    }),
+  );
 
-  setState((items: T[]) => {
-    previous = new Map(items.filter((item) => changes.has(item.id)).map((item) => [item.id, item]));
-    return updateItems(items, changes, { existingOnly: true });
-  });
-
-  // Restores only the items this update changed, keeping what the event stream changed in the meantime.
-  return (): void => {
-    setState((items: T[]) => items.map((item) => previous.get(item.id) ?? item));
+  // A success settles the older writes too, as the bridge now has a newer value.
+  return (succeeded: boolean): void => {
+    const restores = new Map<Id, Record<string, unknown>>();
+    for (const write of writes) {
+      const { id, key, before } = write;
+      const queue = queueOf(id, key);
+      const index = queue.indexOf(write);
+      if (index === -1) continue;
+      if (succeeded) queue.splice(0, index + 1);
+      else {
+        if (index === queue.length - 1) restores.set(id, { ...restores.get(id), [key]: before });
+        else queue[index + 1].before = before;
+        queue.splice(index, 1);
+      }
+    }
+    if (restores.size > 0)
+      setState((items) => items.map((item) => (restores.has(item.id) ? { ...item, ...restores.get(item.id) } : item)));
   };
 }

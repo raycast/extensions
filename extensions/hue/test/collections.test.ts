@@ -73,13 +73,4 @@ describe("updateItems", () => {
     expect(updated.on).toBe(first.on);
     expect(updated.color_temperature).toEqual({ ...first.color_temperature, mirek: null, mirek_valid: false });
   });
-
-  it("with existingOnly, leaves out properties the item lacks", () => {
-    const plug = lights.find((light) => light.dimming === undefined)!;
-    const change = { on: { on: true }, dimming: { brightness: 50 } };
-    const [updated] = updateItems([plug], new Map([[plug.id, change]]), { existingOnly: true });
-    expect(updated).not.toHaveProperty("dimming");
-    expect(updated.on).toEqual({ on: true });
-    expect(updateItems([plug], new Map([[plug.id, change]]))[0].dimming).toEqual({ brightness: 50 });
-  });
 });

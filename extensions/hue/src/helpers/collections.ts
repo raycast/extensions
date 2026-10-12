@@ -24,21 +24,10 @@ export function applyEvent<T extends HasId>(
   }
 }
 
-// existingOnly skips properties an item lacks, so an optimistic update can't give a plug dimming.
-export function updateItems<T extends HasId>(
-  items: T[],
-  changes: Map<Id, DeepPartial<T>>,
-  { existingOnly = false } = {},
-): T[] {
+export function updateItems<T extends HasId>(items: T[], changes: Map<Id, DeepPartial<T>>): T[] {
   return items.map((it) => {
     const change = changes.get(it.id);
-    if (!change) return it;
-    return merge(
-      it,
-      existingOnly
-        ? (Object.fromEntries(Object.entries(change).filter(([key]) => key in it)) as typeof change)
-        : change,
-    );
+    return change ? merge(it, change) : it;
   });
 }
 
@@ -46,7 +35,7 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
 // Merges objects key by key, so a change keeps the properties it leaves out, like a light's mirek_schema.
-function merge<T>(item: T, change: DeepPartial<T>): T {
+export function merge<T>(item: T, change: DeepPartial<T>): T {
   if (!isObject(item) || !isObject(change)) return change as T;
   const merged: Record<string, unknown> = { ...item };
   for (const [key, value] of Object.entries(change)) {

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { applyUpdate } from "../src/helpers/raycast";
+import { applyUpdate, rebasePendingWrites } from "../src/helpers/raycast";
 import { applyEvent } from "../src/helpers/collections";
 import type { Hue } from "../src/hooks/useHue";
 import type { DeepPartial, Id, Light } from "../src/lib/types";
@@ -66,12 +66,81 @@ describe("applyUpdate", () => {
         throw new Error("Status 500 from Hue Bridge");
       },
     });
-    expect(find(hue.lights, lamp.id)).toBe(lamp);
+    expect(find(hue.lights, lamp.id)).toEqual(lamp);
     expect(find(hue.lights, other.id).dimming?.brightness).toBe(12);
     expect(hue.scenes).toEqual(scenes);
     expect(toasts).toEqual([
       expect.objectContaining({ event: "show", style: "FAILURE", message: "Status 500 from Hue Bridge" }),
     ]);
+  });
+
+  it("on failure, keeps what a newer update changed since, also of the same light and scene", async () => {
+    const hue = fakeHue({ lights, scenes });
+    const newer = new Map<Id, DeepPartial<Light>>([[lamp.id, { on: { on: true }, dimming: { brightness: 12 } }]]);
+    await update(hue, {
+      request: async () => {
+        await update(hue, { lights: newer, scene: relax });
+        throw new Error("Status 500 from Hue Bridge");
+      },
+    });
+    expect(find(hue.lights, lamp.id)).toMatchObject({ on: { on: true }, dimming: { brightness: 12 } });
+    expect(find(hue.scenes, relax.id).status.active).toBe("static");
+  });
+
+  it("on failure, keeps a newer update's change to the same value", async () => {
+    const hue = fakeHue({ lights, scenes });
+    await update(hue, {
+      request: async () => {
+        await update(hue, { lights: new Map([[lamp.id, { on: { on: false }, dimming: { brightness: 12 } }]]) });
+        throw new Error("Status 500 from Hue Bridge");
+      },
+    });
+    expect(find(hue.lights, lamp.id)).toMatchObject({ on: { on: false }, dimming: { brightness: 12 } });
+  });
+
+  it.each([
+    ["older", "newer"],
+    ["newer", "older"],
+  ])("when two updates of a light fail, the %s first, restores what came before both", async (first) => {
+    const hue = fakeHue({ lights, scenes });
+    const requests = { older: Promise.withResolvers<never>(), newer: Promise.withResolvers<never>() };
+    const updates = (["older", "newer"] as const).map((name, index) =>
+      update(hue, {
+        lights: new Map([[lamp.id, { dimming: { brightness: 10 + index } }]]),
+        request: () => requests[name].promise,
+      }),
+    );
+    for (const name of first === "older" ? (["older", "newer"] as const) : (["newer", "older"] as const)) {
+      requests[name].reject(new Error("Status 500 from Hue Bridge"));
+      await updates[name === "older" ? 0 : 1];
+    }
+    expect(find(hue.lights, lamp.id)).toEqual(lamp);
+  });
+
+  it("on failure, keeps what the event stream reported of the change, which the bridge applied", async () => {
+    const hue = fakeHue({ lights, scenes });
+    const change = { id: lamp.id, type: "light" as const, on: { on: false } };
+    await update(hue, {
+      request: async () => {
+        rebasePendingWrites([change]);
+        hue.setLights((items) => applyEvent<Light>(items, "update", [change]));
+        throw new Error("Request timed out");
+      },
+    });
+    expect(find(hue.lights, lamp.id).on).toEqual({ on: false });
+  });
+
+  it("on failure, restores what it changed of a light the event stream changed otherwise", async () => {
+    const hue = fakeHue({ lights, scenes });
+    await update(hue, {
+      request: async () => {
+        hue.setLights((items) =>
+          applyEvent(items, "update", [{ id: lamp.id, type: "light", dimming: { brightness: 12 } }]),
+        );
+        throw new Error("Status 500 from Hue Bridge");
+      },
+    });
+    expect(find(hue.lights, lamp.id)).toEqual({ ...lamp, dimming: { ...lamp.dimming, brightness: 12 } });
   });
 
   it("writes no scenes when the change ends none, like dimming", async () => {

@@ -155,7 +155,8 @@ The view commands' light, group and scene mutations go through `applyUpdate()` i
    the bridge too: a recalled scene turns static and other active scenes with one of its lights inactive; switching
    a light on or off or changing its color ends its active scenes, dimming doesn't
 2. Send API request (see Rate Limiting)
-3. On error, undo the optimistic changes and show a failure toast
+3. On error, undo the optimistic changes and show a failure toast. A newer pending change to the same property takes
+   over what to restore, a newer successful one stays, and events update what an undo restores
 4. Event stream may override with the real state at any time
 
 ### AI Tools

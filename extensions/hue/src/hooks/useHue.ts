@@ -5,6 +5,7 @@ import { useMachine } from "@xstate/react";
 import { hueBridgeMachine } from "../lib/hueBridgeMachine";
 import HueClient from "../lib/HueClient";
 import { applyEvent } from "../helpers/collections";
+import { rebasePendingWrites } from "../helpers/raycast";
 import { RESOURCES_CACHE_NAMESPACE } from "../helpers/constants";
 import { Cache, showToast, Toast } from "@raycast/api";
 
@@ -49,6 +50,7 @@ export function useHue() {
   const { hueClient } = hueBridgeState.context;
 
   const applyEventToState = (event: HueEvent) => {
+    if (event.type === "update" || event.type === "add") rebasePendingWrites(event.data);
     const apply = <R extends HueResource>(type: R["type"], setState: React.Dispatch<React.SetStateAction<R[]>>) => {
       const resources = event.data.filter((r) => r.type === type) as (DeepPartial<R> & { id: string })[];
       if (resources.length === 0) return;
@@ -85,6 +87,7 @@ export function useHue() {
     },
     // The cached state's setters read the latest value, so the events apply over the loaded resources.
     onData: ({ lights, rooms, zones, scenes, zigbeeConnectivity }) => {
+      rebasePendingWrites([...lights, ...scenes]);
       setLights(lights);
       setRooms(rooms);
       setZones(zones);
