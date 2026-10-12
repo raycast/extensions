@@ -41,7 +41,7 @@ export async function saveSessions(sessions: Session[]) {
 }
 
 export async function getTargetConfig(): Promise<TargetConfig> {
-  // Preference name: targetWeeklyHours (number, weekly). We convert to daily target hours.
+  // Convert the weekly hours text preference to a daily target.
   try {
     const prefs = getPreferenceValues<Preferences>();
     const prefDays = toNumber(prefs?.workDaysPerWeek);
