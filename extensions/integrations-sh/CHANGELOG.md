@@ -1,6 +1,6 @@
 # integrations.sh Changelog
 
-## [Surface Actions and Search Cancellation] - {PR_MERGE_DATE}
+## [Surface Actions and Search Cancellation] - 2026-10-12
 
 - Added per-surface actions to copy MCP endpoint URLs, copy npm or Homebrew install commands, and open the credential pages referenced by each surface.
 - Omitted unavailable actions when endpoint URLs, supported package metadata, or credential pages are missing.
