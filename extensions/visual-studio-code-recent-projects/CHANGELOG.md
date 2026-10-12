@@ -1,5 +1,12 @@
 # Visual Studio Code Changelog
 
+## [Separate IDE and Agents windows] - {PR_MERGE_DATE}
+
+- Add `Open IDE` to focus or open the editor separately from Agents in Cursor and VS Code.
+- Fix `Open Agents Window` for Cursor and VS Code, reusing existing target windows on macOS.
+- Launch the requested view when the app is quit without waiting for startup menus or System Events.
+- Fall back to installed application paths when Raycast's app list misses Cursor, VS Code, or VS Code Insiders.
+
 ## [Open Agents Window command and enhancements] - 2026-09-28
 
 - Add `Open Agents Window` command: opens Agents Window for VSCode, opens Antigravity 2.0 for Antigravity IDE

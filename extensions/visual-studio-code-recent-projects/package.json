@@ -36,7 +36,8 @@
     "sillashead",
     "KamilDev",
     "muhammadrizo",
-    "Tambouil"
+    "Tambouil",
+    "samuelkraft"
   ],
   "keywords": [
     "vscode",
@@ -64,6 +65,12 @@
       "name": "open-with-vscode",
       "title": "Open with Visual Studio Code",
       "description": "Open the currently selected file manager item with VS Code",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-ide",
+      "title": "Open IDE",
+      "description": "Focus or open the editor window for the selected build, separate from Agents",
       "mode": "no-view"
     },
     {
@@ -259,6 +266,7 @@
   },
   "scripts": {
     "dev": "ray develop",
+    "build:native": "node scripts/build-editor-helper.cjs",
     "build": "ray build",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
