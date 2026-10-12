@@ -329,6 +329,38 @@ test("a failed full load keeps early vault items visible and offers a working Re
   assert.deepEqual(render().props.items, [item]);
 });
 
+test("the pass-cli not found screen opens the extension preferences first", async () => {
+  let opened = 0;
+  const { CliNotFoundView } = loadView("error-views.tsx", {
+    react: {},
+    "@raycast/api": {
+      List: { EmptyView: {} },
+      ActionPanel: {},
+      Action: { OpenInBrowser: {} },
+      Icon: {},
+      Toast: { Style: {} },
+      showToast: async () => undefined,
+      openExtensionPreferences: async () => {
+        opened++;
+      },
+    },
+    "./types": { PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
+    "./cli": { clearCliCache: async () => undefined },
+    "./login-view": {},
+  });
+
+  // The empty view holds its actions in a prop rather than in its children.
+  const emptyView = actions(CliNotFoundView({})).find((props) => "description" in props);
+  assert.equal(emptyView?.title, "Proton Pass CLI Not Found");
+  const [fix, guide] = actions(emptyView?.actions).filter((props) => "title" in props);
+  // The CLI Path preference is the fix, so its action is the one Enter runs.
+  assert.equal(fix.title, "Open Extension Preferences");
+  await (fix.onAction as () => Promise<void>)();
+  assert.equal(opened, 1);
+  assert.equal(guide.title, "Open Installation Guide");
+  assert.equal(guide.url, "https://example.com/docs");
+});
+
 test("pass-cli not found shows its screen instead of the cached items, which can't load passwords or codes", async () => {
   const notFound = async (): Promise<never> => {
     throw new PassCliError("pass-cli not found at '/example/pass-cli'.", "not_installed");
