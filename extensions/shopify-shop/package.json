@@ -50,9 +50,11 @@
     "@types/react": "19.2.17",
     "eslint": "^10.4.1",
     "prettier": "^3.8.4",
+    "react-test-renderer": "19.0.0",
     "typescript": "^6.0.3"
   },
   "scripts": {
+    "test": "node --experimental-strip-types --test tests/*.test.*",
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
