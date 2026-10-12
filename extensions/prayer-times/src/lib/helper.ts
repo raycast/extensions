@@ -151,8 +151,29 @@ const INFO_PLIST = `<?xml version="1.0" encoding="UTF-8"?>
 `;
 
 /**
- * `Prayer Times Location.app` in the extension's support folder, (re)built from the Swift binary
- * Raycast compiled into the extension whenever that binary changes.
+ * Version of the location app's behavior: its `locate` code and its Info.plist. Bump it only when either
+ * changes. The app is signed ad hoc, so macOS ties the location permission to the exact binary; every
+ * rebuild means a new permission prompt, and a plain reinstall or update must not cause one.
+ */
+const LOCATION_APP_VERSION = 1;
+
+/**
+ * Whether the location app needs (re)building.
+ *
+ * @param stamp - Saved stamp: `v<version>`, an older `size:mtime:length` stamp, or "" when none.
+ * @param exists - Whether the app's binary exists.
+ * @returns True to build it.
+ */
+export function locationAppNeedsBuild(stamp: string, exists: boolean): boolean {
+  if (!exists) return true;
+  // Apps built before versioning already hold the user's permission; keep them rather than re-prompt.
+  if (!stamp.startsWith("v")) return false;
+  return stamp !== `v${LOCATION_APP_VERSION}`;
+}
+
+/**
+ * `Prayer Times Location.app` in the extension's support folder, built from the Swift binary Raycast
+ * compiled into the extension when missing or when {@link LOCATION_APP_VERSION} changes.
  *
  * macOS only shows the location prompt to an app bundle with a usage description; a binary run
  * directly by Raycast gets no prompt and no fix. So the bundle is assembled here from the same
@@ -164,15 +185,16 @@ async function locationApp(): Promise<string> {
   const source = join(environment.assetsPath, "compiled_raycast_swift", EXECUTABLE);
   const app = join(environment.supportPath, LOCATION_APP);
   const target = join(app, "Contents", "MacOS", EXECUTABLE);
-  // codesign rewrites the copied binary, so the copy can't be compared with the source directly.
   const stampFile = join(environment.supportPath, "location-app-source");
-  const built = await stat(source);
-  const stamp = `${built.size}:${built.mtimeMs}:${INFO_PLIST.length}`;
+  const stamp = `v${LOCATION_APP_VERSION}`;
   const [previous, existing] = await Promise.all([
     readFile(stampFile, "utf8").catch(() => ""),
     stat(target).catch(() => undefined),
   ]);
-  if (existing && previous === stamp) return app;
+  if (!locationAppNeedsBuild(previous, Boolean(existing))) {
+    if (previous !== stamp) await writeFile(stampFile, stamp);
+    return app;
+  }
 
   await rm(app, { recursive: true, force: true });
   await mkdir(join(app, "Contents", "MacOS"), { recursive: true });
