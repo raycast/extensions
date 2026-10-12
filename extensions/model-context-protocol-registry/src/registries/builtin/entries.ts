@@ -44,6 +44,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://www.a1.gallery/api/mcp",
   },
   {
+    name: "aggregate",
+    title: "Aggregate",
+    description:
+      "Every company's money in one ledger: cash, burn, runway, receivables, recurring spend, payroll and month-end close, from banks and cards (Plaid, Mercury, Brex, Ramp, Wise), payments (Stripe, Square, Shopify), QuickBooks, Xero and payroll. Read-only to banks, Stripe and other providers; it can't move money. AI writes (cash sales, paper bills, corrections) are labeled and undoable for 30 days, and closing books always waits for a person. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, you choose which companies and data each connection sees, no API key to paste. Open-sourcing (AGPL) at launch.",
+    icon: "https://app.aggregate.finance/icon-512.png",
+    homepage: "https://aggregate.finance",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.aggregate.finance/mcp"],
+    },
+    remoteUrl: "https://app.aggregate.finance/mcp",
+  },
+  {
     name: "aiapplyd",
     title: "AI Applyd",
     description:
