@@ -1,5 +1,10 @@
 # Is Agentic Changelog
 
+## [Fix Website Search] - {PR_MERGE_DATE}
+
+- Debounce URL edits and cancel replaced requests so only the current website report is shown and saved to history.
+- Correct the optional URL argument so the command can also open without a URL.
+
 ## [Initial Version] - 2026-08-23
 
 - Initial version of the Is Agentic extension.
