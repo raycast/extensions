@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add looot MCP Server] - 2026-10-12
+
+- Add looot to the official registry: one key and one prepaid balance for about 2,500 data API operations (emails, phones, company and people search, SERP, web pages, news). 19 tools. Hosted remote Streamable HTTP server at https://api.looot.ai/mcp with direct HTTP connection in Raycast; OAuth 2.1 sign-in with dynamic client registration, or a Bearer API key.
+
 ## [Add Flowra MCP Server] - 2026-10-11
 
 - Add Flowra to the community registry: one MCP server for your apps' tools and your own custom tools, plus hosted AI agents and workflows with approval gates and a run ledger. Hosted remote Streamable HTTP server at https://mcp.flowra.dev/mcp.
