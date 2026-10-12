@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Clipboard,
   Color,
   confirmAlert,
   getPreferenceValues,
@@ -12,21 +13,31 @@ import {
   Toast,
   Keyboard,
 } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { deleteUpload, getStatus, isConnectionError, listDestinations, listUploads } from "./api/client";
-import type { OutputFormat, Upload } from "./api/types";
+import {
+  AktarError,
+  createShortLink,
+  deleteUpload,
+  getShortLink,
+  getStatus,
+  isConnectionError,
+  listDestinations,
+  listUploads,
+} from "./api/client";
+import type { OutputFormat, ShortLink, Upload } from "./api/types";
 import { BucketBrowser } from "./components/BucketBrowser";
 import { ConnectionEmptyView } from "./components/ConnectionEmptyView";
 import { QRCodeView } from "./components/QRCodeView";
 import { ReplaceForm } from "./components/ReplaceForm";
 import { UploadForm } from "./components/UploadForm";
-import { showAktarFailure } from "./lib/errors";
+import { openAktarSettings, showAktarFailure } from "./lib/errors";
 import { formatExpiryDate } from "./lib/expiry";
 import { destinationIcon, FORMAT_TITLES, formatBytes, isImageUpload, parentPrefix } from "./lib/format";
 import { escapeMarkdown, markdownURL } from "./lib/markdown";
 import { primaryShortcut } from "./lib/platform";
 import { resolveFormat } from "./lib/output";
+import { formatClicks, shareLink } from "./lib/short-links";
 import { thumbnailIcon, thumbnailMarkdown, useDetailThumbnail, useThumbnailIcons } from "./lib/thumbnails";
 
 const ALL_DESTINATIONS = "all";
@@ -67,11 +78,17 @@ export default function Command() {
       ? { kind: "upload", id: selected.id, replacedAt: selected.replacedAt }
       : undefined,
   );
+  // Clicks come from the shortener, so they're only asked for the selected upload.
+  const { data: shortLink } = usePromise(
+    async (id: string | undefined) => (id ? getShortLink(id) : null),
+    [selected?.shortUrl ? selected.id : undefined],
+    { onError: () => undefined },
+  );
 
   async function remove(upload: Upload) {
     const confirmed = await confirmAlert({
       title: `Delete “${upload.filename}”?`,
-      message: `It will be deleted from ${upload.destinationName} and removed from your history. Anyone with its link will get an error.`,
+      message: `It will be deleted from ${upload.destinationName} and removed from your history. Anyone with its link will get an error.${upload.shortUrl ? " Aktar deletes its short link too." : ""}`,
       icon: Icon.Trash,
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
@@ -85,6 +102,28 @@ export default function Command() {
       toast.title = `Deleted ${upload.filename}`;
     } catch (error) {
       await showAktarFailure(error, "Couldn't delete the upload");
+    }
+  }
+
+  async function shorten(upload: Upload) {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Making a short link" });
+    try {
+      const { shortLink } = await createShortLink(upload.id);
+      await Clipboard.copy(shortLink.shortUrl);
+      toast.style = Toast.Style.Success;
+      toast.title = "Short link copied";
+      toast.message = shortLink.shortUrl;
+      revalidate();
+    } catch (error) {
+      if (error instanceof AktarError && error.status === 409) {
+        // The destination has no link shortener (or was removed); shorteners are set up in Aktar.
+        toast.style = Toast.Style.Failure;
+        toast.title = "Couldn't make a short link";
+        toast.message = error.message;
+        toast.primaryAction = { title: "Open Aktar Settings", onAction: () => openAktarSettings() };
+      } else {
+        await showAktarFailure(error, "Couldn't make a short link");
+      }
     }
   }
 
@@ -134,7 +173,7 @@ export default function Command() {
             id={upload.id}
             icon={thumbnailIcon(icons[upload.id], upload.filename, upload.url)}
             title={upload.filename}
-            keywords={[upload.objectKey, upload.destinationName]}
+            keywords={[upload.objectKey, upload.destinationName, ...(upload.shortUrl ? [upload.shortUrl] : [])]}
             accessories={
               isShowingDetail
                 ? undefined
@@ -147,11 +186,22 @@ export default function Command() {
                           },
                         ]
                       : []),
+                    ...(upload.shortUrl ? [{ icon: Icon.Link, tooltip: `Short link: ${upload.shortUrl}` }] : []),
                     { text: formatBytes(upload.size) },
                     { date: new Date(upload.createdAt), tooltip: new Date(upload.createdAt).toLocaleString() },
                   ]
             }
-            detail={<UploadDetail upload={upload} preview={upload.id === selected?.id ? preview : undefined} />}
+            detail={
+              <UploadDetail
+                upload={upload}
+                preview={upload.id === selected?.id ? preview : undefined}
+                shortLink={
+                  shortLink && upload.id === selected?.id && shortLink.shortUrl === upload.shortUrl
+                    ? shortLink
+                    : undefined
+                }
+              />
+            }
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
@@ -162,7 +212,7 @@ export default function Command() {
                     title="Show QR Code"
                     icon={Icon.Mobile}
                     shortcut={primaryShortcut("q", "shift")}
-                    target={<QRCodeView name={upload.filename} link={upload.url} />}
+                    target={<QRCodeView name={upload.filename} link={shareLink(upload)} />}
                   />
                   <Action
                     title={isShowingDetail ? "Hide Details" : "Show Details"}
@@ -172,6 +222,24 @@ export default function Command() {
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Copy As">
+                  {upload.shortUrl ? (
+                    <>
+                      <Action.CopyToClipboard
+                        title="Copy Short Link"
+                        icon={Icon.Link}
+                        content={upload.shortUrl}
+                        shortcut={primaryShortcut("l", "shift")}
+                      />
+                      <Action.CopyToClipboard title="Copy Original Link" icon={Icon.Link} content={upload.url} />
+                    </>
+                  ) : (
+                    <Action
+                      title="Create Short Link"
+                      icon={Icon.Link}
+                      shortcut={primaryShortcut("l", "shift")}
+                      onAction={() => shorten(upload)}
+                    />
+                  )}
                   {(Object.keys(FORMAT_TITLES) as OutputFormat[])
                     .filter((candidate) => candidate !== format && showsFormat(candidate))
                     .map((candidate) => (
@@ -251,7 +319,16 @@ function showsFormat(format: OutputFormat) {
 }
 
 /** `preview`: the thumbnail of a video, PDF or document, for files that aren't images. */
-function UploadDetail({ upload, preview }: { upload: Upload; preview?: string | null }) {
+/** `shortLink`: the selected upload's short link with its clicks, once fetched. */
+function UploadDetail({
+  upload,
+  preview,
+  shortLink,
+}: {
+  upload: Upload;
+  preview?: string | null;
+  shortLink?: ShortLink;
+}) {
   // After a replace, a new query makes Raycast load the new image instead of its cached copy.
   const imageURL = upload.replacedAt ? `${upload.url}?v=${Date.parse(upload.replacedAt)}` : upload.url;
   const markdown = isImageUpload(upload)
@@ -283,6 +360,27 @@ function UploadDetail({ upload, preview }: { upload: Upload; preview?: string | 
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Destination" text={upload.destinationName} />
           <List.Item.Detail.Metadata.Link title="Link" text={upload.url} target={upload.url} />
+          {upload.shortUrl && (
+            <List.Item.Detail.Metadata.Link title="Short Link" text={upload.shortUrl} target={upload.shortUrl} />
+          )}
+          {shortLink && (
+            <>
+              <List.Item.Detail.Metadata.Label title="Shortener" text={shortLink.providerName} />
+              <List.Item.Detail.Metadata.Label title="Clicks" text={formatClicks(shortLink.clicks)} />
+              {shortLink.lastClickAt && (
+                <List.Item.Detail.Metadata.Label
+                  title="Last Click"
+                  text={new Date(shortLink.lastClickAt).toLocaleString()}
+                />
+              )}
+              {shortLink.expiresAt && (
+                <List.Item.Detail.Metadata.Label
+                  title="Short Link Expires"
+                  text={new Date(shortLink.expiresAt).toLocaleString()}
+                />
+              )}
+            </>
+          )}
         </List.Item.Detail.Metadata>
       }
     />
