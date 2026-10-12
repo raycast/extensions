@@ -38,7 +38,7 @@ func assertUnchangedOutside(_ before: CGImage, _ after: CGImage, _ regions: [Red
   for y in 0..<before.height {
     for x in 0..<before.width {
       if !regions.contains(where: { x >= $0.x && x < $0.x + $0.width && y >= $0.y && y < $0.y + $0.height }) {
-        require(pixel(before, x: x, y: y) == pixel(after, x: x, y: y), "outside pixels changed at \(x),\(y)")
+        require(pixel(before, x: x, y: y) == pixel(after, x: x, y: y), "outside pixels changed at \(x),\(y): \(pixel(before, x: x, y: y)) != \(pixel(after, x: x, y: y))")
       }
     }
   }
@@ -155,3 +155,48 @@ for secret in ["sk_live_AbcDef1234567890", "sk live AbcDef1234567890", "sk live 
   require(numericDetections("\(secret) 4111 1111 1111 1111").hasCard, "missed a real card beside a secret")
 }
 print("Native redaction geometry, crop direction, replacement alpha, immutable source, and numeric regressions passed.")
+
+
+// Round-trip a synthetic image through the encrypted review snapshot. Every edit
+// starts from this source, including re-enabling a mask after excluding all hits.
+let reviewDirectory = URL(fileURLWithPath: CommandLine.arguments[1])
+let reviewOutput = reviewDirectory.appendingPathComponent("review.png")
+let sourcePath = reviewDirectory.appendingPathComponent("source.sealed").path
+let reviewKey = try saveReviewSource(source, beside: reviewOutput)
+let sealed = try Data(contentsOf: URL(fileURLWithPath: sourcePath))
+require(!sealed.starts(with: [137, 80, 78, 71, 13, 10, 26, 10]), "unredacted source must not be stored as PNG")
+let twoBoxes = [first.box, second.box]
+for style in [Style.blackout, .pixelate, .blur] {
+  for boxes in [twoBoxes, [second.box], [], twoBoxes] {
+    let json = String(data: try JSONEncoder().encode(boxes), encoding: .utf8)!
+    let count = try renderReview(sourcePath: sourcePath, key: reviewKey, boxesJSON: json,
+                                 style: style.rawValue, outputPath: reviewOutput.path)
+    require(count == boxes.count, "review count disagrees with selected regions")
+    let actual = NSImage(contentsOf: reviewOutput)!.cgImage(forProposedRect: nil, context: nil, hints: nil)!
+    let expectedRegions = try redactionRegions(boxes: boxes, imageWidth: source.width, imageHeight: source.height)
+    let expected = try renderRedactions(image: source, regions: expectedRegions, style: style)
+    // Normalize decoded pixels into the same RGBA layout before comparison.
+    let normalized = try renderRedactions(image: actual, regions: [], style: .blackout)
+    for y in 0..<expected.height {
+      for x in 0..<expected.width {
+        let before = pixel(expected, x: x, y: y)
+        let after = pixel(normalized, x: x, y: y)
+        let masked = expectedRegions.contains { x >= $0.x && x < $0.x + $0.width && y >= $0.y && y < $0.y + $0.height }
+        // Core Image can round a blurred RGB channel by one level after PNG decoding.
+        // Outside masks, alpha, blackout and pixelation must remain byte-exact.
+        let tolerance = style == .blur && masked ? 1 : 0
+        require(zip(before.prefix(3), after.prefix(3)).allSatisfy { abs(Int($0) - Int($1)) <= tolerance } && before[3] == after[3],
+                "review \(style) boxes=\(boxes.count) mismatch at \(x),\(y): \(before) != \(after)")
+      }
+    }
+  }
+}
+try FileManager.default.removeItem(at: reviewOutput)
+for key in ["invalid", Data(repeating: 0, count: 32).base64EncodedString()] {
+  do {
+    _ = try renderReview(sourcePath: sourcePath, key: key, boxesJSON: "[]", style: "blackout", outputPath: reviewOutput.path)
+    fatalError("invalid key accepted")
+  } catch {}
+  require(!FileManager.default.fileExists(atPath: reviewOutput.path), "invalid key produced output")
+}
+print("Encrypted review snapshot, reversible exclusions, and all three styles passed pixel checks.")

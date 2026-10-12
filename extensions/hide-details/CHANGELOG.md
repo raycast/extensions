@@ -1,5 +1,11 @@
 # Hide Details Changelog
 
+## [Review Controls] - {PR_MERGE_DATE}
+
+- Add per-detection Don't Redact / Redact actions and restore-all control, with scan-specific selections and synchronized preview/copy output.
+- Configure What to Hide with checkboxes shared by both commands, preserving legacy category preferences and offering a reversible migration.
+- Retain an encrypted temporary snapshot during review so exclusions can be reversed without rereading the clipboard; remove it when the scan closes.
+
 ## Initial Version - 2026-10-08
 
 - Redact sensitive details in clipboard images using on-device text and face detection.

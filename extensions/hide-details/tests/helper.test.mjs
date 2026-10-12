@@ -317,3 +317,35 @@ test("one line matching two categories reports one unique masked region", () => 
   assert.ok(report.hits.some((hit) => hit.kind === "name" && hit.confidenceSource === "rule"));
   assert.equal(report.regionCount, 1);
 });
+
+test("generated Swift review binding rerenders only selected masks from its encrypted source", () => {
+  const initial = redactImage({
+    inputPath: input,
+    outputPath: path.join(directory, "review-initial.png"),
+    categories: "email,card",
+    forReview: true,
+  });
+  assert.equal(Buffer.from(initial.reviewKey, "base64").length, 32);
+  assert.equal(initial.hits.length, 2);
+  const selected = initial.hits.filter((hit) => hit.kind === "card");
+  const output = path.join(directory, "review-selected.png");
+  const count = callSwift(
+    "updateReviewImage",
+    path.join(directory, "source.sealed"),
+    initial.reviewKey,
+    JSON.stringify(selected.map((hit) => hit.box)),
+    "blackout",
+    output,
+  );
+  assert.equal(count, 1);
+  const reportFile = path.join(directory, "review-selected.json");
+  writeFileSync(reportFile, JSON.stringify({ hits: selected, regionCount: count }));
+  execFileSync("xcrun", [
+    "swift",
+    "-module-cache-path",
+    path.join(directory, "module-cache"),
+    path.join(root, "tests/check-blackout.swift"),
+    output,
+    reportFile,
+  ]);
+});
