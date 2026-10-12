@@ -26,7 +26,7 @@ const API = "https://api.revenuecat.com/v2";
 export function formatMetric(metric: Metric, currency: string): string {
   if (metric.value === null) return "Unavailable";
   if (metric.unit === "$" || metric.unit === currency) {
-    return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 2 }).format(
+    return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 0 }).format(
       metric.value,
     );
   }

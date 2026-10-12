@@ -4,6 +4,7 @@
 
 - Use today’s Charts v3 values for MRR, active subscriptions, and active trials in the dashboard and menu bar.
 - Refresh the menu bar cache so previous legacy values are not reused with Charts v3 enabled.
+- Round dashboard and menu bar currency values to whole amounts.
 
 ## [Menu Bar Metrics] - 2026-10-12
 
