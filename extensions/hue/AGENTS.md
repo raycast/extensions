@@ -166,9 +166,9 @@ Raycast AI controls lights by name through four tools in `src/tools`, one per re
 
 - Each call connects through `withHueClient`, like Toggle All Lights, and closes the client after, also when it
   fails. Tools render nothing and write no cache.
-- Names match case-insensitively on the whole trimmed name, and a room wins over a zone. Errors for a wrong input
-  say how to correct the call. Skipped and failed targets go in the returned summary; a tool throws only when nothing
-  changed and something failed.
+- Names match case-insensitively on the whole trimmed name, a room wins over a zone, and a name two rooms or two
+  zones match is rejected. Errors for a wrong input say how to correct the call. Skipped and failed targets go in the
+  returned summary; a tool throws only when nothing changed and something failed.
 - Relative changes are the bridge's `dimming_delta` and `color_temperature_delta`, sent without `on`. Rooms, zones
   and all lights (`bridge_home`) change through their grouped light, except colors, which go to each light.
 - The CLI derives each tool's schemas from its default export: the input is one type literal whose JSDoc the AI

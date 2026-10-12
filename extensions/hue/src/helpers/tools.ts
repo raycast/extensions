@@ -42,8 +42,13 @@ const withRoom = (rooms: Room[], light: Light) => {
 // A room wins over a zone with the same name. Control Group's targets get hints the room and group inputs of the
 // other tools don't.
 export function findGroup({ rooms, zones, lights }: Resources, name: string, forControlGroup = false): Group {
-  const [group] = [...named(rooms, name), ...named(zones, name)];
-  if (group) return group;
+  const matches = [named(rooms, name), named(zones, name)].find((matches) => matches.length > 0) ?? [];
+  if (matches.length > 1) {
+    throw new Error(
+      `${matches.length} ${matches[0].type}s match ${name}: ${names(matches)}. Rename one in the Hue app.`,
+    );
+  }
+  if (matches.length === 1) return matches[0];
   if (named(lights, name).length > 0) {
     throw new Error(
       forControlGroup ? `${name} is a light: use Control Light.` : `${name} is a light, not a room or zone.`,

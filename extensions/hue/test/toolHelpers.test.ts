@@ -101,6 +101,14 @@ describe("findGroup", () => {
     expect(findGroup({ ...resources, zones: [zone, ...zones.slice(1)] }, "Office")).toBe(byName(rooms, "Office"));
   });
 
+  it("rejects a name two rooms match, also differing in case", () => {
+    const office = byName(rooms, "Office");
+    const copy = { ...office, id: "copy", metadata: { ...office.metadata, name: "office" } };
+    expect(() => findGroup({ ...resources, rooms: [...rooms, copy] }, "Office")).toThrow(
+      "2 rooms match Office: Office, office. Rename one in the Hue app.",
+    );
+  });
+
   it("points a light's name to Control Light from Control Group", () => {
     expect(() => findGroup(resources, "Kitchen pendant", true)).toThrow(
       "Kitchen pendant is a light: use Control Light.",
