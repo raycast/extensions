@@ -794,3 +794,51 @@ test("failed or invalid render retains the previous selection and allows retry",
   assert.equal(next.regionCount, 0);
   await wrapper.disposeScan(next);
 });
+
+test("edits and closing preserve output until every already-started copy finishes", async () => {
+  for (const close of [false, true]) {
+    const readers = [];
+    const wrapper = await harness({
+      native: async (args, operation) => {
+        if (operation === "copyRedactedImage") {
+          await new Promise((resolve) => {
+            readers.push(resolve);
+          });
+          await access(args[0]); // Model a native process that only opens the file after spawning.
+          return;
+        }
+        if (operation === "updateReviewImage") {
+          await writeFile(args[4], png);
+          return 0;
+        }
+        await writeFile(args[0], png);
+        return { hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: 17 };
+      },
+    });
+    const scan = await wrapper.redactClipboard({ forReview: true });
+    const firstCopy = wrapper.copyRedacted(scan);
+    const secondCopy = wrapper.copyRedacted(scan);
+    let finished = false;
+    const pending = (close ? wrapper.disposeScan(scan) : wrapper.updateRedactions(scan, [scan.hits[0].id])).then(
+      (result) => {
+        finished = true;
+        return result;
+      },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    assert.equal(finished, false);
+    await access(scan.output);
+    readers[0]();
+    await firstCopy;
+    assert.equal(finished, false, "the second copy also owns the old output");
+    readers[1]();
+    await secondCopy;
+    const result = await pending;
+    await absent(scan.output);
+    if (!close) {
+      assert.equal(result.regionCount, 0);
+      await wrapper.disposeScan(result);
+    }
+    assert.deepEqual(await wrapper.outputs(), []);
+  }
+});

@@ -17,6 +17,7 @@ type Session = {
   current: Scan;
   disposed: boolean;
   pending?: Promise<Scan>;
+  copies: Set<Promise<void>>;
 };
 const sessions = new WeakMap<Scan, Session>();
 
@@ -237,6 +238,7 @@ export async function redactClipboard(
       height,
       current: scan,
       disposed: false,
+      copies: new Set(),
     });
     return scan;
   } catch (error) {
@@ -277,6 +279,9 @@ export async function updateRedactions(scan: Scan, excludedIds: readonly string[
       ) {
         throw new Error("The redaction helper returned an invalid preview. Try again.");
       }
+      // Copy helpers run in separate processes and may not have opened the old file yet.
+      // Pending edits block new copies, so this set contains every reader to preserve.
+      await Promise.allSettled(session.copies);
       if (session.disposed) throw new Error("This preview has expired. Scan the current clipboard again.");
       const next: Scan = { ...scan, output, regionCount: count, excludedIds: [...ids] };
       sessions.set(next, session);
@@ -303,9 +308,15 @@ export async function copyRedacted(scan: Scan, options: { requireOriginalClipboa
     throw new Error("This preview has expired. Scan the current clipboard again.");
   }
   if (session.pending) throw new Error("The preview is updating. Wait before copying.");
-  await runNative(() =>
+  const copy = runNative(() =>
     copyRedactedImage(scan.output, options.requireOriginalClipboard ? scan.clipboardChangeCount : null),
   );
+  session.copies.add(copy);
+  try {
+    await copy;
+  } finally {
+    session.copies.delete(copy);
+  }
 }
 
 export async function disposeScan(scan: Scan) {
@@ -313,6 +324,7 @@ export async function disposeScan(scan: Scan) {
   if (!session || session.disposed) return;
   session.disposed = true;
   await session.pending?.catch(() => undefined);
+  await Promise.allSettled(session.copies);
   session.reviewKey = undefined;
   await rm(session.directory, { recursive: true, force: true });
 }
