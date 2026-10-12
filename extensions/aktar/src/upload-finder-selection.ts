@@ -1,6 +1,7 @@
 import { getSelectedFinderItems, showHUD, showToast, Toast } from "@raycast/api";
 import { expiryWarning, preferredExpiry } from "./lib/expiry";
 import { batchSummary, onlyFiles, uploadPaths } from "./lib/upload";
+import { shortLinkWarning } from "./lib/short-links";
 import { FILE_MANAGER } from "./lib/platform";
 
 export default async function Command() {
@@ -24,8 +25,8 @@ export default async function Command() {
 
   const expires = preferredExpiry();
   const uploads = await uploadPaths(files, { expires });
-  // The failure toast stays up when Delete After didn't take.
-  if (uploads.length === files.length && !expiryWarning(uploads, expires)) {
+  // The failure toast stays up when Delete After or a short link didn't take.
+  if (uploads.length === files.length && !expiryWarning(uploads, expires) && !shortLinkWarning(uploads)) {
     if (uploads.length === 1) {
       await showHUD(
         uploads[0].reused

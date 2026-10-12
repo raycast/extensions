@@ -1,5 +1,9 @@
 # Changelog
 
+## [Live Menu Bar Preferences] - 2026-10-12
+
+- Keep all menu bar display options in the dedicated menu bar command settings and apply changes while it is running.
+
 ## [Search and Menu Bar Improvements] - 2026-10-11
 
 - Display the selected text in the Techgedöns search bar so it remains visible and editable.

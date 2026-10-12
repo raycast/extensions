@@ -44,6 +44,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://www.a1.gallery/api/mcp",
   },
   {
+    name: "aggregate",
+    title: "Aggregate",
+    description:
+      "Every company's money in one ledger: cash, burn, runway, receivables, recurring spend, payroll and month-end close, from banks and cards (Plaid, Mercury, Brex, Ramp, Wise), payments (Stripe, Square, Shopify), QuickBooks, Xero and payroll. Read-only to banks, Stripe and other providers; it can't move money. AI writes (cash sales, paper bills, corrections) are labeled and undoable for 30 days, and closing books always waits for a person. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, you choose which companies and data each connection sees, no API key to paste. Open-sourcing (AGPL) at launch.",
+    icon: "https://app.aggregate.finance/icon-512.png",
+    homepage: "https://aggregate.finance",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.aggregate.finance/mcp"],
+    },
+    remoteUrl: "https://app.aggregate.finance/mcp",
+  },
+  {
     name: "aiapplyd",
     title: "AI Applyd",
     description:
@@ -309,7 +322,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "dc-hub",
     title: "DC Hub",
     description:
-      "Live data on the physical infrastructure behind AI: facility coverage in 170+ countries, 300+ markets scored daily (DCPI), 1,700+ tracked M&A deals, live grid, fiber, gas and interconnection-queue data, and Capacity Source: search available data-center capacity by size and location, get exact fits or multi-provider bundles, and request brokered intros. 94 tools; every answer carries its source. Hosted remote Streamable HTTP server through `mcp-remote`; free tier works with no API key and no sign-in.",
+      "DC Hub is the live data layer for data-center site selection. Its Data Center Power Index (DCPI) is a daily score of where data centers can get grid power, across 300+ markets. Also live grid, fiber, gas and interconnection-queue data, and Capacity Source: search available data-center capacity by size and location and request introductions. 94 tools; every answer carries its source. Hosted remote Streamable HTTP server through `mcp-remote`; free tier works with no API key and no sign-in.",
     icon: "https://raw.githubusercontent.com/azmartone67/dchub-mcp-server/main/dchub-logo.png",
     homepage: "https://dchub.cloud/connect",
     configuration: {
@@ -578,6 +591,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         KBC_STORAGE_TOKEN: "your_keboola_storage_token",
         KBC_WORKSPACE_SCHEMA: "your_workspace_schema",
       },
+    },
+  },
+  {
+    name: "keeploop",
+    title: "Keeploop",
+    description:
+      "Your Mac's Apple Mail and Calendar for Raycast AI. Search mail, read threads, see who is waiting on a reply and check your calendar; writes stay off until you allow them on your Mac. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs the Keeploop Mac app with Keeploop Pro or its free trial for remote use; local use is free.",
+    icon: "https://keeploop.app/assets/app-icon.svg",
+    homepage: "https://keeploop.app",
+    remoteUrl: "https://mcp.keeploop.app/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.keeploop.app/mcp"],
     },
   },
   {

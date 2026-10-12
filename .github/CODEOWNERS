@@ -508,6 +508,7 @@
 /extensions/comet                                                   @JohanDevl @xmok @pernielsentikaer
 /extensions/cometapi                                                @mutewinter
 /extensions/comma-separator                                         @sidextron92
+/extensions/commandcode-ai                                          @alhassanaraouf
 /extensions/commercequest                                           @skrollme
 /extensions/commit-issue-parser                                     @JulesJuul
 /extensions/commit-message-formatter                                @zrr1999
@@ -1018,7 +1019,7 @@
 /extensions/fxcodex                                                 @maximkrouk
 /extensions/g-cloud                                                 @ojowwalker77 @bselleslagh
 /extensions/gadak                                                   @midagedev
-/extensions/gaffiot                                                 @dytavan
+/extensions/gaffiot                                                 @pernielsentikaer
 /extensions/gamaliel                                                @cirne
 /extensions/game-scout                                              @Glct26
 /extensions/gandi                                                   @kud @xmok
@@ -1426,6 +1427,7 @@
 /extensions/keyboard-win-mac-switch                                 @fab-uleuh
 /extensions/keychain-password-gen                                   @breadone @one-data-cookie
 /extensions/keygen                                                  @xmok
+/extensions/keyprobe-keyboard-tester                                @yuzukq
 /extensions/keyraycast                                              @benostein @0xdhrv
 /extensions/kill-mcp                                                @baptitse-jn
 /extensions/kill-node-modules                                       @NicolasMontone @M-Subhan1 @ridemountainpig
@@ -2217,7 +2219,7 @@
 /extensions/prettier                                                @aeither @jasonwaters @xmok
 /extensions/pretty-pr-link                                          @joaopcm
 /extensions/primer                                                  @colebemis
-/extensions/printer-status                                          @dytavan
+/extensions/printer-status                                          @pernielsentikaer
 /extensions/prism-launcher                                          @lockieluke @tomjpeg @pernielsentikaer @TakenMC
 /extensions/prisma-cli-commands                                     @rajmasha
 /extensions/prisma-docs-search                                      @petradonka @petradonka @yusifaliyevpro
@@ -2244,6 +2246,7 @@
 /extensions/pronounce-the-word                                      @SandeepBaskaran
 /extensions/protobuf2typescript                                     @7gugu
 /extensions/proton-authenticator                                    @FareedFarag
+/extensions/proton-drive                                            @bst1n
 /extensions/proton-mail                                             @NormCopeland @bst1n
 /extensions/proton-pass                                             @izyuumi @FeernandoOFF
 /extensions/proton-version                                          @flavienbonvin @pernielsentikaer
@@ -2874,6 +2877,7 @@
 /extensions/tabnews                                                 @juniorodilton
 /extensions/tabstack                                                @JustSteveKing
 /extensions/tabstash                                                @mkhnsn
+/extensions/tagesschau                                              @Cherubeam
 /extensions/tails                                                   @iambtshft
 /extensions/tailscale                                               @samlinville @rosszurowski @samlinville @itsmingjie @erics118 @brandenwagner @j3lte @itsmatteomanf @MatteoGauthier @McKeev @noidwasavailable
 /extensions/tailwindcss                                             @vimtor @cy-98 @emilshr @pernielsentikaer @ridemountainpig @ridemountainpig @jarntz @garrill @olafvanmidden @Hyftar @xmok @SuperAce100
