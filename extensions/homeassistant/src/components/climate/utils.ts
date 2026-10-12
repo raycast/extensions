@@ -3,6 +3,7 @@ import type { State } from "../../lib/haapi";
 const TEMPERATURE_DECIMAL_PLACES = 6;
 const STEP_ROUNDING_TOLERANCE = 1e-9;
 const TARGET_TEMPERATURE_FEATURE = 1;
+const MAX_TEMPERATURE_OPTIONS = 1000;
 
 export function climateOptions(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
@@ -39,7 +40,7 @@ export function climateTemperatures(state: State): number[] {
   ) {
     return [];
   }
-  return Array.from({ length: Math.floor((max - min) / step + STEP_ROUNDING_TOLERANCE) + 1 }, (_, index) =>
-    Number((min + index * step).toFixed(TEMPERATURE_DECIMAL_PLACES)),
-  );
+  const count = Math.floor((max - min) / step + STEP_ROUNDING_TOLERANCE) + 1;
+  if (count > MAX_TEMPERATURE_OPTIONS) return [];
+  return Array.from({ length: count }, (_, index) => Number((min + index * step).toFixed(TEMPERATURE_DECIMAL_PLACES)));
 }

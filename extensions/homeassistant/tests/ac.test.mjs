@@ -71,6 +71,25 @@ test("temperature choices respect device bounds, fractional steps and capabiliti
   assert.equal(climateTemperature(state, null), "Not reported");
 });
 
+test("temperature choices reject excessive counts and overflow before allocation", () => {
+  const state = {
+    state: "cool",
+    attributes: { min_temp: 0, max_temp: 999, temperature: 20, target_temp_step: 1, supported_features: 1 },
+  };
+  const temperatures = climateTemperatures(state);
+  assert.equal(temperatures.length, 1000);
+  assert.equal(temperatures[0], 0);
+  assert.equal(temperatures.at(-1), 999);
+  for (const attributes of [
+    { max_temp: 1000 },
+    { min_temp: 16, max_temp: 18, target_temp_step: 0.001 },
+    { target_temp_step: Number.MIN_VALUE },
+    { min_temp: -Number.MAX_VALUE, max_temp: Number.MAX_VALUE },
+  ]) {
+    assert.equal(climateTemperatures({ ...state, attributes: { ...state.attributes, ...attributes } }).length, 0);
+  }
+});
+
 test("visibility toggle refreshes the menu in background and rolls back failures", async () => {
   const values = new Map();
   const launches = [];
@@ -109,7 +128,7 @@ test("AC controls refresh the selected entity after commands and distinguish ref
       ha: {
         post: async (service, data) => {
           if (fail) throw new Error("Connection failed");
-          calls.push([service, data.entity_id, data.hvac_mode]);
+          calls.push([service, { ...data }]);
           if (failRefresh && service === "services/homeassistant/update_entity") throw new Error("Refresh failed");
         },
       },
@@ -134,28 +153,72 @@ test("AC controls refresh the selected entity after commands and distinguish ref
   const power = controls.props.children[0];
   await power.props.onAction();
   assert.deepEqual(calls, [
-    ["services/climate/set_hvac_mode", "climate.office", "cool"],
-    ["services/homeassistant/update_entity", "climate.office", undefined],
+    ["services/climate/set_hvac_mode", { entity_id: "climate.office", hvac_mode: "cool" }],
+    ["services/homeassistant/update_entity", { entity_id: "climate.office" }],
   ]);
   assert.equal(refreshes, 1);
   const turnOff = ACControls({ state: { ...state, state: "cool" }, available: true }).props.children[0];
   calls.length = 0;
   await turnOff.props.onAction();
   assert.deepEqual(calls, [
-    ["services/climate/set_hvac_mode", "climate.office", "off"],
-    ["services/homeassistant/update_entity", "climate.office", undefined],
+    ["services/climate/set_hvac_mode", { entity_id: "climate.office", hvac_mode: "off" }],
+    ["services/homeassistant/update_entity", { entity_id: "climate.office" }],
   ]);
   assert.equal(refreshes, 2);
+  const activeState = {
+    ...state,
+    state: "cool",
+    attributes: {
+      hvac_modes: ["off", "cool", "fan_only"],
+      min_temp: 16,
+      max_temp: 18,
+      temperature: 17,
+      target_temp_step: 0.5,
+      supported_features: 1,
+      fan_modes: ["auto", "high"],
+      swing_modes: ["off", "vertical"],
+      swing_horizontal_modes: ["off", "left_right"],
+      preset_modes: ["none", "eco_mode"],
+    },
+  };
+  const [, temperatureMenu, optionMenus] = ACControls({ state: activeState, available: true }).props.children;
+  const [warmer, cooler, temperatureChoices] = temperatureMenu.props.children;
+  const actions = [
+    [warmer, "set_temperature", { temperature: 17.5 }],
+    [cooler, "set_temperature", { temperature: 16.5 }],
+    [temperatureChoices.props.children.at(-1), "set_temperature", { temperature: 18 }],
+  ];
+  for (const [title, option, service, data] of [
+    ["Mode", "Fan only", "set_hvac_mode", { hvac_mode: "fan_only" }],
+    ["Fan", "High", "set_fan_mode", { fan_mode: "high" }],
+    ["Swing", "Vertical", "set_swing_mode", { swing_mode: "vertical" }],
+    ["Horizontal Swing", "Left right", "set_swing_horizontal_mode", { swing_horizontal_mode: "left_right" }],
+    ["Preset", "Eco mode", "set_preset_mode", { preset_mode: "eco_mode" }],
+  ]) {
+    const menu = optionMenus.find((item) => item.props.title === title);
+    actions.push([menu.props.children.find((item) => item.props.title === option), service, data]);
+  }
+  for (const [action, service, data] of actions) {
+    calls.length = 0;
+    const previousRefreshes = refreshes;
+    await action.props.onAction();
+    assert.deepEqual(calls, [
+      [`services/climate/${service}`, { entity_id: "climate.office", ...data }],
+      ["services/homeassistant/update_entity", { entity_id: "climate.office" }],
+    ]);
+    assert.equal(refreshes, previousRefreshes + 1);
+  }
+  const successfulRefreshes = refreshes;
   fail = true;
   calls.length = 0;
   await power.props.onAction();
   assert.deepEqual(calls, []);
-  assert.equal(refreshes, 2);
+  assert.equal(refreshes, successfulRefreshes);
   assert.match(messages[0], /AC control failed/);
   fail = false;
   failRefresh = true;
   await turnOff.props.onAction();
-  assert.equal(refreshes, 2);
+  assert.equal(refreshes, successfulRefreshes);
   assert.match(messages[1], /AC command sent.*status refresh failed/);
 });
 
