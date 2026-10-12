@@ -185,10 +185,10 @@ export class CodePenClient {
     });
   }
 
-  async updatePen(penId: string, details: PenDetails) {
+  async updatePen(penId: string, details: Partial<PenDetails>) {
     const pen = await this.requireV2(penId);
-    // Keeping an existing Protected password does not require sending it again.
-    const parsed = penDetailsSchema.parse(details);
+    // Omitted fields stay unchanged, including an existing Protected password.
+    const parsed = penDetailsSchema.partial().parse(details);
     if (parsed.access === "Protected" && pen.access !== "Protected" && !parsed.password)
       throw new Error("Protected Pens require a password of at least 8 characters");
     if (parsed.password && (parsed.access ?? pen.access) !== "Protected")
@@ -260,7 +260,7 @@ export class CodePenClient {
   saveCollection(details: CollectionDetails, collectionId?: string) {
     const parsed = z
       .object({
-        title: z.string().trim().min(1),
+        title: collectionId ? z.string().trim().min(1).optional() : z.string().trim().min(1),
         description: z.string().optional(),
         access: z.enum(["Public", "Private"]).optional(),
       })

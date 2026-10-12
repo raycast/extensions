@@ -3,7 +3,7 @@ import { FormValidation, useForm } from "@raycast/utils";
 import { getClient } from "../lib/api";
 import { useMutation } from "../lib/hooks";
 import { starterFiles } from "../lib/starter-files";
-import { accessSchema, buildMessage, type Pen } from "../lib/models";
+import { accessSchema, buildMessage, type Pen, type PenDetails } from "../lib/models";
 import { PenDetail } from "./pen-detail";
 
 type Props = { mode: "create"; onSaved?: () => void } | { mode: "edit" | "fork"; pen: Pen; onSaved: () => void };
@@ -46,46 +46,62 @@ export function PenForm(props: Props) {
       },
     },
     onSubmit: async (input) => {
-      const details = {
-        title: input.title,
-        description: input.description,
-        tags: input.tags
-          .split(",")
-          .map((tag) => tag.trim())
-          .filter(Boolean),
-        access: input.access === "default" ? undefined : accessSchema.parse(input.access),
-        password: input.access === "Protected" && input.password ? input.password : undefined,
-        template: input.template,
-      };
-      const files = input.customCode ? starterFiles(input) : undefined;
+      const tags = input.tags
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean);
+      const access = input.access === "default" ? undefined : accessSchema.parse(input.access);
+      const password = input.access === "Protected" && input.password ? input.password : undefined;
       if (props.mode === "edit") {
+        const current = props.pen;
+        const details: Partial<PenDetails> = {};
+        if (input.title !== current.title) details.title = input.title;
+        if (input.description !== current.description) details.description = input.description;
+        if (!sameSequence(tags, current.tags)) details.tags = tags;
+        if (access && access !== current.access) details.access = access;
+        if (password) details.password = password;
+        if (input.template !== current.template) details.template = input.template;
+        if (Object.keys(details).length === 0) {
+          props.onSaved();
+          pop();
+          return;
+        }
         await mutation.run(
           "Pen updated",
-          () => getClient().updatePen(props.pen.id, details),
+          () => getClient().updatePen(current.id, details),
           () => {
             props.onSaved();
             pop();
           },
         );
-      } else {
-        await mutation.run(
-          props.mode === "fork" ? "Pen forked" : "Pen created",
-          () =>
-            props.mode === "fork" ? getClient().forkPen(props.pen.id, details) : getClient().createPen(details, files),
-          (created) => {
-            void showToast({
-              style: Toast.Style.Success,
-              title: props.mode === "fork" ? "Pen forked" : "Pen created",
-              message: buildMessage(created.build),
-            });
-            if (props.onSaved) {
-              props.onSaved();
-              pop();
-            } else reset();
-            push(<PenDetail penId={created.id} />);
-          },
-        );
+        return;
       }
+      const details = {
+        title: input.title,
+        description: input.description,
+        tags,
+        access,
+        password,
+        template: input.template,
+      };
+      const files = input.customCode ? starterFiles(input) : undefined;
+      await mutation.run(
+        props.mode === "fork" ? "Pen forked" : "Pen created",
+        () =>
+          props.mode === "fork" ? getClient().forkPen(props.pen.id, details) : getClient().createPen(details, files),
+        (created) => {
+          void showToast({
+            style: Toast.Style.Success,
+            title: props.mode === "fork" ? "Pen forked" : "Pen created",
+            message: buildMessage(created.build),
+          });
+          if (props.onSaved) {
+            props.onSaved();
+            pop();
+          } else reset();
+          push(<PenDetail penId={created.id} />);
+        },
+      );
     },
   });
   const title = props.mode === "create" ? "Create Pen" : props.mode === "fork" ? "Fork Pen" : "Edit Pen";
@@ -138,4 +154,8 @@ export function PenForm(props: Props) {
       )}
     </Form>
   );
+}
+
+function sameSequence(left: readonly string[], right: readonly string[]) {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
 }

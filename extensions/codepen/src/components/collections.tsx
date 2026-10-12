@@ -4,7 +4,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { getClient } from "../lib/api";
 import { useMutation, usePaged } from "../lib/hooks";
-import { collectionSchema, type Collection, type Pen } from "../lib/models";
+import { collectionSchema, type Collection, type CollectionDetails, type Pen } from "../lib/models";
 import { PenList } from "../search-pens";
 import { CommonActions, EmptyView, LoadMoreItem } from "./common";
 
@@ -117,17 +117,22 @@ export function CollectionForm({ collection, onSaved }: { collection?: Collectio
     },
     validation: { title: FormValidation.Required },
     onSubmit: async (values) => {
+      const access = values.access === "default" ? undefined : z.enum(["Public", "Private"]).parse(values.access);
+      const details: CollectionDetails = collection
+        ? {
+            ...(values.title !== collection.title ? { title: values.title } : {}),
+            ...(values.description !== collection.description ? { description: values.description } : {}),
+            ...(access && access !== collection.access ? { access } : {}),
+          }
+        : { title: values.title, description: values.description, access };
+      if (collection && Object.keys(details).length === 0) {
+        onSaved?.();
+        pop();
+        return;
+      }
       await mutation.run(
         collection ? "Collection updated" : "Collection created",
-        () =>
-          getClient().saveCollection(
-            {
-              title: values.title,
-              description: values.description,
-              access: values.access === "default" ? undefined : z.enum(["Public", "Private"]).parse(values.access),
-            },
-            collection?.id,
-          ),
+        () => getClient().saveCollection(details, collection?.id),
         (result) => {
           onSaved?.();
           if (onSaved) pop();

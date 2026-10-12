@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { CodePenClient, CodePenError, apiURL, nextLink, pensPath, validatePenDetails } from "../src/lib/client";
-import { buildMessage, isBuildPending } from "../src/lib/models";
+import { buildIssueLines, buildMessage, isBuildPending } from "../src/lib/models";
 
 const build = {
   id: "version-1",
@@ -180,6 +180,35 @@ test("Classic snapshots read converted files and never request nonexistent versi
   assert.equal(calls[1].url, "https://api.codepen.io/v2/pens/pen-1/files");
 });
 
+test("pen updates omit fields that were not changed so newer server values stay in place", async () => {
+  const { client, calls } = fixture([json(pen), json({ ...pen, description: "Edited" })]);
+  const updated = await client.updatePen("pen-1", { description: "Edited" });
+  assert.equal(calls[0].options?.method, "GET");
+  assert.equal(calls[1].options?.method, "PATCH");
+  assert.deepEqual(body(calls[1]), { description: "Edited" });
+  assert.equal(updated.description, "Edited");
+});
+
+test("collection updates omit fields that were not changed and new collections still require a title", async () => {
+  const collection = {
+    id: "collection-1",
+    title: "Ideas",
+    description: "A group",
+    access: "Public",
+    items_count: 1,
+    created_at: "2026-10-01T10:00:00Z",
+    updated_at: "2026-10-01T10:00:00Z",
+    url: "https://codepen.io/collection/ideas",
+  };
+  const { client, calls } = fixture([json({ ...collection, description: "Edited" })]);
+  await client.saveCollection({ description: "Edited" }, collection.id);
+  assert.equal(calls[0].options?.method, "PATCH");
+  assert.deepEqual(body(calls[0]), { description: "Edited" });
+  const creating = fixture([]);
+  assert.throws(() => creating.client.saveCollection({ description: "No title" }));
+  assert.equal(creating.calls.length, 0);
+});
+
 test("changing to Protected requires a password while existing Protected passwords can be retained or rotated", async () => {
   const changing = fixture([json(pen)]);
   await assert.rejects(() => changing.client.updatePen("pen-1", { title: "Secret", access: "Protected" }), /password/);
@@ -252,6 +281,23 @@ test("file writes carry the expected version and return compiler-adjusted source
   assert.equal(result.version.files[0].content, "<h1>Formatted</h1>\n");
   assert.equal(calls.filter((call) => call.options?.method === "PUT").length, 1);
   assert.deepEqual(structuredClone(result), result);
+});
+
+test("failed builds show errors and diagnostics without repeating the same message", () => {
+  const failed = {
+    ...build,
+    status: "Failed" as const,
+    errors: [{ type: "Error", message: "Invalid CSS", path: "/style.css" }],
+    diagnostics: [
+      { type: "Error", message: "Invalid CSS", path: "/style.css" },
+      { type: "Warning", message: "Unused variable", path: "/script.js" },
+    ],
+  };
+  assert.deepEqual(buildIssueLines(failed), [
+    "- **Error** (/style.css): Invalid CSS",
+    "- **Warning** (/script.js): Unused variable",
+  ]);
+  assert.deepEqual(buildIssueLines({ ...build, diagnostics: [], errors: [] }), []);
 });
 
 test("build status distinguishes compiler follow-ups from terminal canceled builds", () => {

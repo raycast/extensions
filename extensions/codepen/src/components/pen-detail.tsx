@@ -13,7 +13,7 @@ import {
 import { usePromise } from "@raycast/utils";
 import { getClient } from "../lib/api";
 import { useMutation, usePaged } from "../lib/hooks";
-import { isBuildPending, versionSchema, type Pen } from "../lib/models";
+import { buildIssueLines, isBuildPending, versionSchema, type Pen } from "../lib/models";
 import { CommonActions, EmptyView } from "./common";
 import { PenForm } from "./pen-form";
 import { PenFiles } from "./pen-files";
@@ -180,10 +180,7 @@ export function PenDetail({ penId, onChanged }: { penId: string; onChanged?: () 
         screenshot ? `![Pen preview](${screenshot})` : "",
         pen.editor === "Classic" ? "Classic Pens are read-only through the API. Open in CodePen to make changes." : "",
         build ? `**Build: ${build.status}**${isBuildPending(build) ? " — refresh to check progress." : ""}` : "",
-        ...(build?.diagnostics ?? []).map(
-          (diagnostic) =>
-            `- **${diagnostic.type}**${diagnostic.path ? ` (${diagnostic.path})` : ""}: ${diagnostic.message}`,
-        ),
+        ...buildIssueLines(build),
       ]
         .filter(Boolean)
         .join("\n\n")

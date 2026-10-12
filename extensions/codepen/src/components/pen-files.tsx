@@ -149,7 +149,7 @@ function FileForm({
         <Form.TextField title="Path" placeholder="/src/app.js" {...itemProps.path} />
       )}
       <Form.TextArea title="Source" {...itemProps.content} />
-      <Form.Description text="Saving creates a new version and starts a build. CodePen may format or adjust your files. If the Pen changed since you opened this form, refresh the source files before saving again." />
+      <Form.Description text="Saving creates a new version and starts a build. If auto-deploy is enabled, CodePen may also publish your changes to the live deployment. CodePen may format or adjust your files. If the Pen changed since you opened this form, refresh the source files before saving again." />
     </Form>
   );
 }

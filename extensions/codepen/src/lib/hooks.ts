@@ -22,8 +22,9 @@ export function useMutation() {
     if (busy.current) return;
     busy.current = true;
     setIsLoading(true);
-    const toast = await showToast({ style: Toast.Style.Animated, title });
+    let toast: Toast | undefined;
     try {
+      toast = await showToast({ style: Toast.Style.Animated, title });
       const value = await operation();
       toast.style = Toast.Style.Success;
       toast.title = title;
@@ -33,6 +34,7 @@ export function useMutation() {
         toast.message = "The change succeeded. Refresh CodePen to see it.";
       }
     } catch (error) {
+      if (!toast) throw error;
       toast.style = Toast.Style.Failure;
       toast.title = "CodePen request failed";
       toast.message = error instanceof Error ? error.message : "Please try again";

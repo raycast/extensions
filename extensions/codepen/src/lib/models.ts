@@ -93,7 +93,7 @@ export const penDetailsSchema = z.object({
   template: z.boolean().optional(),
 });
 export type PenDetails = z.infer<typeof penDetailsSchema>;
-export type CollectionDetails = { title: string; description?: string; access?: "Public" | "Private" };
+export type CollectionDetails = { title?: string; description?: string; access?: "Public" | "Private" };
 export type TextFileInput = { path: string; content: string };
 
 export function isBuildPending(build: Build | null | undefined): boolean {
@@ -105,4 +105,16 @@ export function buildMessage(build: Build): string {
   if (build.status === "Failed") return "Files saved, but the build failed. Inspect the build diagnostics.";
   if (build.status === "Canceled") return "Files saved, but the compiler needs changes. Open the Pen in CodePen.";
   return "Build succeeded";
+}
+
+export function buildIssueLines(build: Build | null | undefined): string[] {
+  if (!build) return [];
+  const seen = new Set<string>();
+  const lines: string[] = [];
+  for (const diagnostic of [...build.diagnostics, ...build.errors]) {
+    if (seen.has(diagnostic.message)) continue;
+    seen.add(diagnostic.message);
+    lines.push(`- **${diagnostic.type}**${diagnostic.path ? ` (${diagnostic.path})` : ""}: ${diagnostic.message}`);
+  }
+  return lines;
 }
