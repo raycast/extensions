@@ -11,6 +11,9 @@ import {
 } from "@raycast/api";
 
 import { connectService } from "./service";
+import { getLauncherOwner } from "./launcher";
+import { useAutomaticSettings } from "./automatic-settings";
+import { AutomaticStatus } from "./automatic-client";
 import { EngineSetup } from "./engine-setup";
 import {
   addExclusionFolders,
@@ -94,6 +97,7 @@ type IndexStatus = {
   };
 };
 type Settings = {
+  automatic?: AutomaticStatus;
   folders?: { path: string; files: number }[];
   models: ModelSource[];
   storage_path: string;
@@ -101,6 +105,7 @@ type Settings = {
   profiles?: Record<string, Record<string, string | number | boolean>>;
   job: {
     state: string;
+    pausing?: boolean;
     error?: string;
     index_errors?: number;
     exclusion_cleanup_pending?: number;
@@ -131,6 +136,14 @@ export default function ModelSettings({
     "Connecting to local search…",
   );
   const [settings, setSettings] = useState<Settings>();
+  const activationAllowed = useRef(true);
+  const automatic = useAutomaticSettings(
+    baseURL,
+    settings?.automatic,
+    (job) =>
+      setSettings((previous) => (previous ? { ...previous, job } : previous)),
+    () => activationAllowed.current,
+  );
   const [indexStatus, setIndexStatus] = useState<IndexStatus>();
   const [error, setError] = useState("");
   const [values, setValues] = useState<Values>();
@@ -356,6 +369,7 @@ export default function ModelSettings({
         (key === "model_url" && values?.model_variant !== "custom") ||
         sameSettingsValue(value, normalizedCurrent(key)),
     );
+  activationAllowed.current = !dirty && !folderToRemove && !exclusionError;
   const applyTitle = applyingSettings
     ? "Applying Settings…"
     : savingFolders
@@ -825,7 +839,12 @@ export default function ModelSettings({
     }
   };
   const apply = async () => {
-    if (!values || pollGuard.current.pending) return;
+    if (!values) return;
+    if (automatic.dirty) {
+      await automatic.save();
+      return;
+    }
+    if (pollGuard.current.pending) return;
     if (folderToRemove) {
       await removeFolder();
       return;
@@ -881,10 +900,12 @@ export default function ModelSettings({
     setApplyingSettings(true);
     const pendingFolders = [...addedFolders.current];
     try {
+      const launcher = await getLauncherOwner();
       const response = await fetch(`${baseURL}/v1/settings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          launcher,
           ...values,
           roots: folderRequestPaths(values.roots),
           excluded_paths: folderRequestPaths(values.excluded_paths),
@@ -936,14 +957,14 @@ export default function ModelSettings({
       return;
     }
     try {
+      const launcher = await getLauncherOwner();
       const response = await fetch(`${baseURL}/v1/index/start`, {
         method: "POST",
-        ...(retrySkipped
-          ? {
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ retry_skipped: true }),
-            }
-          : {}),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          launcher,
+          ...(retrySkipped ? { retry_skipped: true } : {}),
+        }),
       });
       if (!response.ok)
         throw new Error(
@@ -1004,6 +1025,7 @@ export default function ModelSettings({
   return (
     <Form
       isLoading={
+        automatic.saving ||
         savingFolders ||
         savingExclusions ||
         applyingSettings ||
@@ -1011,7 +1033,34 @@ export default function ModelSettings({
       }
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={applyTitle} onSubmit={apply} />
+          <Action.SubmitForm
+            title={
+              automatic.dirty ? "Save Automatic Update Settings" : applyTitle
+            }
+            onSubmit={apply}
+          />
+          {indexStatus?.indexing && settings.job.state !== "cancelling" && (
+            <Action
+              title={
+                settings.job.pausing ? "Pausing Indexing…" : "Pause Indexing"
+              }
+              onAction={() => automatic.control("pause")}
+            />
+          )}
+          {!indexStatus?.indexing &&
+            !settings.job.pausing &&
+            (settings.job.state === "paused" || automatic.paused) && (
+              <Action
+                title="Resume Indexing"
+                onAction={() => automatic.control("resume")}
+              />
+            )}
+          {automatic.enabled && (
+            <Action
+              title="Activate Background Checks"
+              onAction={automatic.activate}
+            />
+          )}
           {folderToRemove && (
             <Action
               title="Remove Selected Folder"
@@ -1026,7 +1075,10 @@ export default function ModelSettings({
             />
           )}
           {(indexStatus?.indexing ||
-            ["indexing", "cancelling"].includes(settings.job.state)) && (
+            (automatic.paused && settings.automatic?.continuation_origin) ||
+            ["indexing", "cancelling", "paused"].includes(
+              settings.job.state,
+            )) && (
             <Action
               title={
                 settings.job.state === "cancelling"
@@ -1362,6 +1414,7 @@ export default function ModelSettings({
           }
         />
       )}
+      {automatic.fields}
       <Form.Separator />
       <Form.Checkbox
         id="show_advanced"

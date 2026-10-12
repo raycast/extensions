@@ -1,6 +1,6 @@
 {
-  "version": "0.6.4",
-  "sha256": "c6a70d42f3718cf731e6486ba1921fbeb21e88b97734b42debdaf6cad0f7fe85",
+  "version": "0.7.0",
+  "sha256": "198ef86e6c032d03f3645a0310f21a0c8aa6e6a224de591b24667bb96c8562fb",
   "platform": "darwin-arm64",
-  "unpacked_bytes": 1078421018
+  "unpacked_bytes": 1078444374
 }

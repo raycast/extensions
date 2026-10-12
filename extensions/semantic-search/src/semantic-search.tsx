@@ -14,6 +14,7 @@ import {
 } from "@raycast/api";
 
 import { connectService } from "./service";
+import { getLauncherOwner } from "./launcher";
 import { EngineSetup } from "./engine-setup";
 import ModelSettings from "./model-settings";
 import { createPreviewFiles } from "./preview-files";
@@ -505,14 +506,14 @@ export default function SemanticSearch(
   const updateIndex = async (retrySkipped = false) => {
     if (!baseURL || status?.indexing) return;
     try {
+      const launcher = await getLauncherOwner();
       const response = await fetch(`${baseURL}/v1/index/start`, {
         method: "POST",
-        ...(retrySkipped
-          ? {
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ retry_skipped: true }),
-            }
-          : {}),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          launcher,
+          ...(retrySkipped ? { retry_skipped: true } : {}),
+        }),
       });
       if (!response.ok)
         throw new Error(

@@ -6,7 +6,8 @@ import { act, create, ReactTestRenderer } from "react-test-renderer";
 import { connectService } from "../src/service";
 import ModelSettings from "../src/model-settings";
 import SemanticSearch from "../src/semantic-search";
-import { launcher } from "./raycast-mock";
+import { launcher, environment } from "./raycast-mock";
+import AutomaticIndex from "../src/automatic-index";
 import {
   addExclusionFolders,
   formatFolderPaths,
@@ -1472,5 +1473,284 @@ test("Photos-only video settings apply without a folder and show separate source
     await act(async () => {
       view?.unmount();
     });
+  }
+});
+
+const automaticOff = {
+  enabled: false,
+  interval_seconds: 10800,
+  only_on_power: true,
+  paused: false,
+  revision: 0,
+  last_reason: "disabled",
+};
+const syntheticOwner = {
+  pid: 12345,
+  host: "Tinycast",
+  started: "synthetic",
+  executable: "/synthetic/Tinycast",
+  extension_path: "/private/tmp/synthetic-extension",
+  extension_marker: "1:2",
+};
+
+test("automatic settings save during indexing without applying model or folder edits", async (t) => {
+  const launchesBefore = launcher.launches.length;
+  launcher.serviceURL = "http://127.0.0.1:18799";
+  launcher.owner = syntheticOwner;
+  const posts: { url: string; body: Record<string, unknown> }[] = [];
+  t.mock.method(globalThis, "setInterval", () => 1);
+  t.mock.method(globalThis, "clearInterval", () => {});
+  t.mock.method(
+    globalThis,
+    "fetch",
+    async (url: string, init?: RequestInit) => {
+      if (init?.method === "POST") {
+        const body = JSON.parse(String(init.body));
+        posts.push({ url, body });
+        return response({ ...automaticOff, ...body, revision: 1 });
+      }
+      return response(
+        url.endsWith("/v1/settings")
+          ? {
+              ...snapshot(),
+              job: { state: "indexing" },
+              automatic: automaticOff,
+            }
+          : { ...status, indexing: true },
+      );
+    },
+  );
+  let view!: ReactTestRenderer;
+  try {
+    await act(async () => {
+      view = create(createElement(ModelSettings));
+    });
+    await act(async () =>
+      field(view, "Checkbox", "enable_documents").props.onChange(false),
+    );
+    await act(async () =>
+      field(view, "Checkbox", "automatic_enabled").props.onChange(true),
+    );
+    assert.equal(
+      field(view, "SubmitForm").props.title,
+      "Save Automatic Update Settings",
+    );
+    await act(async () => field(view, "SubmitForm").props.onSubmit());
+    assert.equal(posts.length, 1);
+    assert.ok(posts[0].url.endsWith("/v1/automatic"));
+    assert.equal(posts[0].body.enabled, true);
+    assert.equal(posts[0].body.only_on_power, true);
+    assert.equal(posts[0].body.roots, undefined);
+    assert.equal(posts[0].body.enable_documents, undefined);
+    assert.deepEqual(posts[0].body.launcher, syntheticOwner);
+    assert.equal(
+      field(view, "Checkbox", "enable_documents").props.value,
+      false,
+    );
+    assert.ok(
+      view.root.findAll(
+        (node) =>
+          String(node.type) === "Action" &&
+          node.props.title === "Activate Background Checks",
+      ).length,
+    );
+    assert.equal(launcher.launches.length, launchesBefore);
+  } finally {
+    launcher.owner = undefined;
+    await act(async () => view?.unmount());
+  }
+});
+
+test("automatic settings preserve newer edits and reject a stale pre-save poll", async (t) => {
+  const launchesBefore = launcher.launches.length;
+  launcher.serviceURL = "http://127.0.0.1:18799";
+  launcher.owner = syntheticOwner;
+  let poll!: () => void;
+  const initial = { ...automaticOff, enabled: true };
+  const pending = deferred<Response>();
+  t.mock.method(globalThis, "setInterval", (callback: () => void) => {
+    poll = callback;
+    return 1;
+  });
+  t.mock.method(globalThis, "clearInterval", () => {});
+  t.mock.method(
+    globalThis,
+    "fetch",
+    async (url: string, init?: RequestInit) => {
+      if (init?.method === "POST") return pending.promise;
+      return response(
+        url.endsWith("/v1/settings")
+          ? { ...snapshot(), automatic: initial }
+          : status,
+      );
+    },
+  );
+  let view!: ReactTestRenderer;
+  try {
+    await act(async () => {
+      view = create(createElement(ModelSettings));
+    });
+    await act(async () =>
+      field(view, "Checkbox", "automatic_power").props.onChange(false),
+    );
+    let saving!: Promise<void>;
+    await act(async () => {
+      saving = field(view, "SubmitForm").props.onSubmit();
+    });
+    await act(async () =>
+      field(view, "Dropdown", "automatic_interval").props.onChange("3600"),
+    );
+    await act(async () => {
+      pending.resolve(
+        response({ ...initial, only_on_power: false, revision: 1 }),
+      );
+      await saving;
+    });
+    await act(async () => poll());
+    assert.equal(field(view, "Checkbox", "automatic_power").props.value, false);
+    assert.equal(
+      field(view, "Dropdown", "automatic_interval").props.value,
+      "3600",
+    );
+    assert.equal(
+      field(view, "SubmitForm").props.title,
+      "Save Automatic Update Settings",
+    );
+    assert.equal(launcher.launches.length, launchesBefore);
+    const activate = view.root.findAll(
+      (node) =>
+        String(node.type) === "Action" &&
+        node.props.title === "Activate Background Checks",
+    )[0];
+    await act(async () => activate.props.onAction());
+    assert.equal(launcher.launches.length, launchesBefore);
+  } finally {
+    launcher.owner = undefined;
+    await act(async () => view?.unmount());
+  }
+});
+
+test("pause and resume keep unapplied library edits and attach the launcher to continuation", async (t) => {
+  launcher.serviceURL = "http://127.0.0.1:18799";
+  launcher.owner = syntheticOwner;
+  let poll!: () => void;
+  let paused = false;
+  let resumed: Record<string, unknown> | undefined;
+  t.mock.method(globalThis, "setInterval", (callback: () => void) => {
+    poll = callback;
+    return 1;
+  });
+  t.mock.method(globalThis, "clearInterval", () => {});
+  t.mock.method(
+    globalThis,
+    "fetch",
+    async (url: string, init?: RequestInit) => {
+      if (init?.method === "POST") {
+        if (url.endsWith("/pause")) {
+          paused = true;
+          return response({ state: "indexing", pausing: true });
+        }
+        resumed = JSON.parse(String(init.body));
+        paused = false;
+        return response({ state: "indexing" });
+      }
+      return response(
+        url.endsWith("/v1/settings")
+          ? {
+              ...snapshot(),
+              job: { state: paused ? "paused" : "indexing" },
+              automatic: {
+                ...automaticOff,
+                enabled: true,
+                paused,
+                revision: paused ? 1 : 0,
+              },
+            }
+          : { ...status, indexing: !paused },
+      );
+    },
+  );
+  let view!: ReactTestRenderer;
+  try {
+    await act(async () => {
+      view = create(createElement(ModelSettings));
+    });
+    await act(async () =>
+      field(view, "Checkbox", "enable_documents").props.onChange(false),
+    );
+    const action = (title: string) =>
+      view.root.findAll(
+        (node) => String(node.type) === "Action" && node.props.title === title,
+      )[0];
+    await act(async () => action("Pause Indexing").props.onAction());
+    await act(async () => poll());
+    assert.equal(
+      field(view, "Checkbox", "enable_documents").props.value,
+      false,
+    );
+    await act(async () => action("Resume Indexing").props.onAction());
+    assert.deepEqual(resumed?.launcher, syntheticOwner);
+    assert.equal(
+      field(view, "Checkbox", "enable_documents").props.value,
+      false,
+    );
+  } finally {
+    launcher.owner = undefined;
+    await act(async () => view?.unmount());
+  }
+});
+
+test("custom background checks read engine-owned preferences and start a short tick without installing the runtime", async (t) => {
+  launcher.serviceURL = "http://127.0.0.1:18799";
+  launcher.owner = syntheticOwner;
+  environment.launchType = "background";
+  const before = launcher.startupCalls;
+  const huds = launcher.huds.length;
+  const calls: string[] = [];
+  t.mock.method(
+    globalThis,
+    "fetch",
+    async (url: string, init?: RequestInit) => {
+      calls.push(url);
+      if (url.endsWith("/tick")) {
+        assert.deepEqual(
+          JSON.parse(String(init?.body)).launcher,
+          syntheticOwner,
+        );
+        return response({ ...automaticOff, enabled: true, state: "indexing" });
+      }
+      return response({ ...automaticOff, enabled: true });
+    },
+  );
+  try {
+    await AutomaticIndex();
+    assert.deepEqual(calls, [
+      "http://127.0.0.1:18799/v1/automatic",
+      "http://127.0.0.1:18799/v1/automatic/tick",
+    ]);
+    assert.equal(launcher.startupCalls, before);
+    assert.equal(launcher.huds.length, huds);
+    assert.match(String(launcher.metadata.at(-1)?.subtitle), /background/);
+  } finally {
+    environment.launchType = "userInitiated";
+    launcher.owner = undefined;
+  }
+});
+
+test("paused custom background checks do not obtain an owner or schedule work", async (t) => {
+  launcher.serviceURL = "http://127.0.0.1:18799";
+  launcher.owner = undefined;
+  environment.launchType = "background";
+  const calls: string[] = [];
+  t.mock.method(globalThis, "fetch", async (url: string) => {
+    calls.push(url);
+    return response({ ...automaticOff, enabled: true, paused: true });
+  });
+  try {
+    await AutomaticIndex();
+    assert.deepEqual(calls, ["http://127.0.0.1:18799/v1/automatic"]);
+    assert.match(String(launcher.metadata.at(-1)?.subtitle), /Paused/);
+  } finally {
+    environment.launchType = "userInitiated";
   }
 });

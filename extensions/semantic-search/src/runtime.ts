@@ -27,6 +27,11 @@ export class CompanionRequired extends Error {
     );
   }
 }
+export class BackgroundNotReady extends Error {
+  constructor() {
+    super("Open Semantic Search once to finish the engine update.");
+  }
+}
 export type Distribution = {
   mode: "bundled" | "companion";
   installer_url?: string;
@@ -55,6 +60,7 @@ export async function distribution(assets: string): Promise<Distribution> {
   return value;
 }
 type Options = {
+  background?: boolean;
   assets: string;
   storage: string;
   port?: number;
@@ -116,6 +122,20 @@ export async function installed(path: string, manifest: RuntimeManifest) {
   } catch {
     return false;
   }
+}
+export async function preparedRuntime(
+  options: Options,
+  manifest: RuntimeManifest,
+) {
+  const runtime = join(options.storage, "runtime", manifest.version);
+  if (!(await installed(runtime, manifest))) throw new BackgroundNotReady();
+  try {
+    if ((await readFile(join(runtime, ".startup-cache-ready"), "utf8")) !== "1")
+      throw new BackgroundNotReady();
+  } catch {
+    throw new BackgroundNotReady();
+  }
+  return runtime;
 }
 async function prepareStartupCache(
   path: string,
@@ -275,6 +295,13 @@ export async function ensureService(options: Options) {
   const running = await info(base);
   if (running) {
     if (running.version === manifest.version) return base;
+  }
+  if (options.background) {
+    // Scheduled checks never install, upgrade, stop another service or spend
+    // minutes compiling/warming models inside a short launcher command.
+    if (running) throw new BackgroundNotReady();
+    const runtime = await preparedRuntime(options, manifest);
+    return startRuntime(options, runtime, manifest.version, base);
   }
   // Install/verify the replacement before stopping a working service. Model
   // weights, settings and indexes are outside versioned runtimes.

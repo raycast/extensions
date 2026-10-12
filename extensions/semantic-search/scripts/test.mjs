@@ -27,6 +27,9 @@ try {
           builder.onResolve({ filter: /^@raycast\/api$/ }, () => ({
             path: resolve("tests/raycast-mock.tsx"),
           }));
+          builder.onResolve({ filter: /^\.\/launcher$/ }, () => ({
+            path: resolve("tests/raycast-mock.tsx"),
+          }));
           builder.onResolve({ filter: /^\.\/runtime$/ }, (args) =>
             args.importer.endsWith("service.ts") ||
             args.importer.endsWith("engine-setup.tsx")

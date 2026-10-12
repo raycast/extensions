@@ -47,7 +47,10 @@ export const List = Object.assign(component("List"), {
 export const useNavigation = () => ({ push: (_view: ReactNode) => {} });
 export async function open(_target: string) {}
 export const Icon = {};
-export const LaunchType = { UserInitiated: "userInitiated" };
+export const LaunchType = {
+  UserInitiated: "userInitiated",
+  Background: "background",
+};
 export const Keyboard = { Shortcut: { Common: { Refresh: {}, Pin: {} } } };
 export const Toast = {
   Style: { Success: "success", Failure: "failure", Animated: "animated" },
@@ -55,13 +58,26 @@ export const Toast = {
 export const environment = {
   assetsPath: "/private/tmp/semantic-test-assets",
   supportPath: "/private/tmp/com.tinycast.app/test",
+  launchType: "userInitiated",
 };
 export const launcher = {
   serviceURL: "",
   startupCalls: 0,
   failStartup: false,
   toasts: [] as Props[],
+  launches: [] as Props[],
+  metadata: [] as Props[],
+  huds: [] as string[],
+  owner: undefined as Record<string, unknown> | undefined,
 };
+export async function launchCommand(props: Props) {
+  launcher.launches.push(props);
+}
+export async function getLauncherOwner(required = false) {
+  if (required && !launcher.owner)
+    throw new Error("Synthetic launcher unavailable");
+  return launcher.owner;
+}
 export const getPreferenceValues = () => ({ serviceURL: launcher.serviceURL });
 export async function showToast(props: Props) {
   launcher.toasts.push(props);
@@ -76,3 +92,10 @@ export async function distribution() {
   return { mode: "companion", installer_url: "https://example.com/engine" };
 }
 export type Distribution = Awaited<ReturnType<typeof distribution>>;
+
+export async function updateCommandMetadata(props: Props) {
+  launcher.metadata.push(props);
+}
+export async function showHUD(message: string) {
+  launcher.huds.push(message);
+}

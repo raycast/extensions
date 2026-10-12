@@ -10,7 +10,10 @@ export const sharedStorage = join(
   "Semantic Search",
 );
 let startup: Promise<string> | undefined;
-export async function connectService(progress: (message: string) => void) {
+export async function connectService(
+  progress: (message: string) => void,
+  background = false,
+) {
   const custom = getPreferenceValues<Preferences>().serviceURL?.trim();
   if (custom) {
     let url: URL;
@@ -31,6 +34,7 @@ export async function connectService(progress: (message: string) => void) {
   }
   if (!startup)
     startup = ensureService({
+      background,
       assets: environment.assetsPath,
       storage: sharedStorage,
       progress,

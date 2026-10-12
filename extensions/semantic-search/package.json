@@ -20,6 +20,13 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "automatic-index",
+      "title": "Check for Library Updates",
+      "description": "Check the automatic indexing schedule and update changed files when due",
+      "mode": "no-view",
+      "interval": "15m"
     }
   ],
   "preferences": [
@@ -54,7 +61,7 @@
     "react-test-renderer": "19.3.0",
     "@types/react-test-renderer": "19.1.0"
   },
-  "version": "0.6.4",
+  "version": "0.7.0",
   "categories": [
     "Productivity"
   ],
