@@ -1,6 +1,6 @@
 # Messages 2FA Changelog
 
-## [Update contributors] - {PR_MERGE_DATE}
+## [Update contributors] - 2026-10-12
 
 - Move `ronaldheft` to past contributors.
 
