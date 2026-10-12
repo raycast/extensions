@@ -238,7 +238,7 @@
       "disabledByDefault": true,
       "preferences": [
         {
-          "name": "menuBarDisplayArticleCount",
+          "name": "menuBarArticleCount",
           "title": "Number of Articles",
           "description": "Selects how many articles are shown in each menu bar section.",
           "type": "dropdown",
@@ -260,7 +260,7 @@
           ]
         },
         {
-          "name": "menuBarDisplayTitleLength",
+          "name": "menuBarArticleTitleLength",
           "title": "Title Length",
           "description": "Selects the maximum article title length shown in the menu bar.",
           "type": "dropdown",
@@ -290,7 +290,7 @@
           ]
         },
         {
-          "name": "menuBarDisplayUnreadOnly",
+          "name": "showOnlyUnreadMenuBarArticles",
           "title": "Article Filter",
           "description": "Only shows unread articles in the Latest Articles and Favorites sections.",
           "type": "checkbox",
@@ -299,7 +299,7 @@
           "label": "Only show unread articles"
         },
         {
-          "name": "menuBarDisplayUnreadCounter",
+          "name": "menuBarUnreadCounter",
           "title": "Unread Counter",
           "description": "Selects when the unread counter is shown in the menu bar.",
           "type": "dropdown",
@@ -321,7 +321,7 @@
           ]
         },
         {
-          "name": "menuBarDisplayPublicationDate",
+          "name": "showMenuBarArticleDate",
           "title": "Article Details",
           "description": "Shows the publication date next to each article in the menu bar.",
           "type": "checkbox",
@@ -330,7 +330,7 @@
           "label": "Show publication date"
         },
         {
-          "name": "menuBarDisplayCategory",
+          "name": "showMenuBarArticleCategory",
           "title": "",
           "description": "Shows the category next to each article in the menu bar.",
           "type": "checkbox",

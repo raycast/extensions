@@ -29,12 +29,12 @@ export default function MenuBarArticlesCommand() {
   const preferences = useMenuBarPreferences();
   const translations = strings;
   const retention = normalizeArticleRetention(preferences.archiveRetention);
-  const menuArticleCount = normalizeMenuArticleCount(preferences.menuBarDisplayArticleCount);
-  const menuArticleTitleLength = normalizeMenuArticleTitleLength(preferences.menuBarDisplayTitleLength);
-  const showOnlyUnreadArticles = preferences.menuBarDisplayUnreadOnly === true;
-  const unreadCounterMode = preferences.menuBarDisplayUnreadCounter ?? "always";
-  const showArticleDate = preferences.menuBarDisplayPublicationDate !== false;
-  const showArticleCategory = preferences.menuBarDisplayCategory !== false;
+  const menuArticleCount = normalizeMenuArticleCount(preferences.menuBarArticleCount);
+  const menuArticleTitleLength = normalizeMenuArticleTitleLength(preferences.menuBarArticleTitleLength);
+  const showOnlyUnreadArticles = preferences.showOnlyUnreadMenuBarArticles === true;
+  const unreadCounterMode = preferences.menuBarUnreadCounter ?? "always";
+  const showArticleDate = preferences.showMenuBarArticleDate !== false;
+  const showArticleCategory = preferences.showMenuBarArticleCategory !== false;
   const [articles, setArticles] = useState<ArchivedArticle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error>();
@@ -327,7 +327,7 @@ function normalizeMenuArticleTitleLength(value: string | undefined): 40 | 55 | 7
 }
 
 function shouldShowUnreadCounter(
-  mode: Preferences.MenuBarArticles["menuBarDisplayUnreadCounter"],
+  mode: Preferences.MenuBarArticles["menuBarUnreadCounter"],
   unreadCount: number,
 ): boolean {
   return mode === "always" || (mode === "hide-zero" && unreadCount > 0);
