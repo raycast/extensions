@@ -1292,7 +1292,7 @@
 /extensions/imagekit-uploader                                       @ludafa
 /extensions/imageoptim                                              @marckohlbrugge
 /extensions/imdb                                                    @ryan-exe @kgrhartlage @bibixx @dnsv @owain-williams @xmok
-/extensions/imessage-2fa                                            @yuercl @thomaspaulmann @arronhunt @ronaldheft @hitolaus @taschaub @omaerkhan @clins1994
+/extensions/imessage-2fa                                            @yuercl @thomaspaulmann @arronhunt @hitolaus @taschaub @omaerkhan @clins1994
 /extensions/imgbed-uploader                                         @thomas7725353
 /extensions/imgur                                                   @BalliAsghar @pernielsentikaer @caumeira @j3lte
 /extensions/immich                                                  @xmok @julien-wff
@@ -2877,6 +2877,7 @@
 /extensions/tabnews                                                 @juniorodilton
 /extensions/tabstack                                                @JustSteveKing
 /extensions/tabstash                                                @mkhnsn
+/extensions/tagesschau                                              @Cherubeam
 /extensions/tails                                                   @iambtshft
 /extensions/tailscale                                               @samlinville @rosszurowski @samlinville @itsmingjie @erics118 @brandenwagner @j3lte @itsmatteomanf @MatteoGauthier @McKeev @noidwasavailable
 /extensions/tailwindcss                                             @vimtor @cy-98 @emilshr @pernielsentikaer @ridemountainpig @ridemountainpig @jarntz @garrill @olafvanmidden @Hyftar @xmok @SuperAce100
