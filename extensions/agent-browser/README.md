@@ -72,11 +72,25 @@ If Raycast cannot find the executable, run `command -v agent-browser` and copy t
 | Browser Visibility       | Enabled         | Opens Raycast AI sessions in a visible browser window. Disable it for headless automation.                                |
 | Post-Interaction Delay   | 500 ms          | Waits after each page interaction before Raycast AI continues. Submission and animation flows can request a longer delay. |
 
-## Raycast Command
+## Raycast Commands
 
 ### Open in Agent Browser
 
 Opens a URL in a visible agent-browser session. Provide an optional session name to continue work in an existing isolated browser, and an optional profile name to override the configured default.
+
+### Manage Sessions
+
+Lists active agent-browser CLI sessions in the default CLI environment and the profile socket directories recorded by this extension. Select a row to **Open URL in Session**, copy its name for an AI request, refresh the list, or **Close Session** after a destructive confirmation. Opening a URL navigates the session's current tab and preserves its current visibility; it does not make a headless browser visible.
+
+There is no CLI operation to switch a global active session or focus an existing browser window. Choosing a row targets that session for the next open or close action; AI requests still need the session name explicitly. Identical names in different socket directories remain separate rows. No cookies, saved authentication state, page URLs, or credentials are read or displayed by this command.
+
+Dia and Safari sessions use native tabs, so they are not included in the CLI list. Continue using their existing **Open Browser** and **Close Browser** AI tools. Other CLI namespaces and socket directories are visible only when inherited by Raycast or recorded in a Raycast profile binding. This command does not enumerate saved restore-state files.
+
+The command checks that the selected session is still listed immediately before opening or closing it. Refresh after a stale-session error. A daemon can still exit or be replaced between this check and the operation: agent-browser may automatically start a daemon for the same name. A timeout or cancelling the view stops waiting for the CLI; an already accepted browser operation may still finish. Refresh before retrying.
+
+Closing follows the CLI's behavior, including its configured restore policy and handling of attached browsers; it does not delete saved authentication state. The extension clears its matching profile binding after a successful close, while preserving a profile bridge if other CLI sessions still share it. Listing can let the CLI remove stale daemon bookkeeping files, as its own `session list` does.
+
+Requires a CLI supporting `session list --json` with a `success` envelope and `data.sessions` string array. Verified against agent-browser **0.34.0** and [upstream session source](https://github.com/vercel-labs/agent-browser/blob/d9570915f4dd6504dee4070379d2c4f79d81dbb2/cli/src/main.rs); see the [session documentation](https://agent-browser.dev/sessions). Missing executables, unsupported responses, and timeouts show actionable errors. If only some session directories fail, available sessions remain visible with a warning and a refresh action.
 
 ## Raycast AI Tools
 
@@ -177,6 +191,7 @@ npm run dev
 Run the validation suite before publishing:
 
 ```bash
+npm test
 npm run fix-lint
 npx tsc --noEmit
 npm run lint
@@ -188,3 +203,5 @@ npx ray evals
 
 - [agent-browser documentation](https://agent-browser.dev/)
 - [Raycast extension documentation](https://developers.raycast.com/)
+
+Session tests use mocked inventories and disposable Node executables. They never invoke agent-browser or operate on real browser sessions. Windows runs the portable service tests; executable-shim tests are POSIX-only. Native Raycast UI testing remains a manual check.

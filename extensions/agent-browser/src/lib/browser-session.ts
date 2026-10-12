@@ -89,6 +89,23 @@ export async function clearBrowserSessionContext(sessionValue?: string): Promise
   await LocalStorage.removeItem(contextKey(session));
 }
 
+export async function getBrowserSessionContexts(): Promise<Record<string, BrowserSessionContext>> {
+  const items = await LocalStorage.allItems();
+  const contexts: Record<string, BrowserSessionContext> = Object.create(null);
+  for (const [key, value] of Object.entries(items)) {
+    if (!key.startsWith(SESSION_CONTEXT_PREFIX) || typeof value !== "string") continue;
+    const name = key.slice(SESSION_CONTEXT_PREFIX.length);
+    if (!/^[a-zA-Z0-9._-]{1,64}$/.test(name)) continue;
+    try {
+      const context = JSON.parse(value) as BrowserSessionContext | null;
+      if (context && typeof context === "object" && !Array.isArray(context)) contexts[name] = context;
+    } catch {
+      // Ignore corrupt records; listing must not delete stored browser bindings.
+    }
+  }
+  return contexts;
+}
+
 export function getBrowserArguments(context?: BrowserSessionContext): string[] {
   const args: string[] = [];
   if (context?.executablePath) args.push("--executable-path", context.executablePath);
