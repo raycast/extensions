@@ -7,7 +7,9 @@ import {
   formatDelta,
   formatTimeAt,
   getDaySummary,
+  getDayTarget,
   getEstimatedWorkEnd,
+  isSessionPaused,
   isStatusCommandStale,
   msToClock,
   sameDay,
@@ -17,6 +19,7 @@ import { Session } from "./types";
 export default function Command() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [targetHours, setTargetHours] = useState(8);
+  const [workDaysPerWeek, setWorkDaysPerWeek] = useState(5);
   const [vacationDays, setVacationDays] = useState<string[]>([]);
   const [now, setNow] = useState(new Date());
   const [referenceDate, setReferenceDate] = useState(new Date());
@@ -34,6 +37,7 @@ export default function Command() {
       if (!mounted) return;
       setSessions(all);
       setTargetHours(target.targetHours);
+      setWorkDaysPerWeek(target.workDaysPerWeek);
       setVacationDays(vacations);
       setShowStatusHint(isStatusCommandStale(statusLastSeenIso, new Date().toISOString()));
       setIsLoading(false);
@@ -55,10 +59,13 @@ export default function Command() {
     [sessions, referenceDate, nowIso],
   );
   const isVacation = vacationDays.includes(dayKey(referenceDate));
-  const targetMs = isVacation ? 0 : targetHours * 3600 * 1000;
+  const { targetMs } = getDayTarget(referenceDate, workDaysPerWeek, targetHours, vacationDays);
   const delta = totals.net - targetMs;
   const activeSlice = slices.find((slice) => !slice.session.end);
-  const workEnd = isToday && activeSlice ? getEstimatedWorkEnd(now, totals.net, targetMs, isVacation) : null;
+  const workEnd =
+    isToday && activeSlice && !isSessionPaused(activeSlice.session)
+      ? getEstimatedWorkEnd(now, totals.net, targetMs, isVacation)
+      : null;
 
   const goToPreviousDay = () => {
     const previous = new Date(referenceDate);

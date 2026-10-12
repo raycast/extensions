@@ -22,6 +22,7 @@ import {
   hasAnotherOpenSession,
   hasOverlappingPause,
   hasOverlappingSession,
+  isClosedWithFutureEnd,
   isOpenWithFutureStart,
   isPauseWithinSession,
   msBetween,
@@ -263,6 +264,10 @@ function SessionForm({
       );
       return;
     }
+    if (isClosedWithFutureEnd(hasEnd ? end : null)) {
+      await showToast(Toast.Style.Failure, "A session can't end in the future", "Leave it open or pick an earlier end");
+      return;
+    }
     const success = await onSave({ start, end: hasEnd ? end : undefined });
     if (success) pop();
   };
@@ -315,74 +320,84 @@ function PauseList({ sessionId, onRefresh }: { sessionId: string; onRefresh: () 
     return () => clearInterval(tick);
   }, [sessionId]);
 
-  const saveSessionPauses = async (nextPauses: Pause[]) => {
+  // Every edit is checked and applied against freshly loaded data, so a Pause started or ended
+  // elsewhere (Toggle Pause, Status) or a Session changed meanwhile is never overwritten.
+  const editPauses = async (edit: (target: Session) => Pause[] | string): Promise<boolean> => {
     const sessions = await getSessions();
     const target = sessions.find((s) => s.id === sessionId);
     if (!target) {
       await showToast(Toast.Style.Failure, "Session not found");
-      return;
+      await load();
+      return false;
     }
-    target.pauses = nextPauses;
+    const result = edit(target);
+    if (typeof result === "string") {
+      await showToast(Toast.Style.Failure, result);
+      await load();
+      return false;
+    }
+    target.pauses = result.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
     await saveSessions(sessions);
     await onRefresh();
     await load();
+    return true;
   };
+
+  const validatePause = (target: Session, values: PauseFormValues, excludeIndex?: number) => {
+    const sessionEnd = target.end ? new Date(target.end) : null;
+    const pauseEnd = values.end ?? null;
+    if (!isPauseWithinSession(new Date(target.start), sessionEnd, values.start, pauseEnd)) {
+      return "Pause must be within the session's time span";
+    }
+    if (hasOverlappingPause(target.pauses ?? [], values.start, pauseEnd, excludeIndex)) {
+      return "Pause overlaps another pause";
+    }
+    return null;
+  };
+
+  const findPauseIndex = (target: Session, pause: Pause) =>
+    (target.pauses ?? []).findIndex((p) => p.start === pause.start && p.end === pause.end);
+
+  const toPause = (values: PauseFormValues): Pause => ({
+    start: values.start.toISOString(),
+    end: values.end?.toISOString(),
+  });
 
   const addPause = async (values: PauseFormValues): Promise<boolean> => {
-    if (!session) return false;
-    const sessionStart = new Date(session.start);
-    const sessionEnd = session.end ? new Date(session.end) : null;
-    const pauseEnd = values.end ?? null;
-    if (!isPauseWithinSession(sessionStart, sessionEnd, values.start, pauseEnd)) {
-      await showToast(Toast.Style.Failure, "Pause must be within the session's time span");
-      return false;
-    }
-    const existing = session.pauses ?? [];
-    if (hasOverlappingPause(existing, values.start, pauseEnd)) {
-      await showToast(Toast.Style.Failure, "Pause overlaps another pause");
-      return false;
-    }
-    const next = [...existing, { start: values.start.toISOString(), end: values.end?.toISOString() }];
-    next.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
-    await saveSessionPauses(next);
-    await showToast(Toast.Style.Success, "Pause added");
-    return true;
+    const saved = await editPauses(
+      (target) => validatePause(target, values) ?? [...(target.pauses ?? []), toPause(values)],
+    );
+    if (saved) await showToast(Toast.Style.Success, "Pause added");
+    return saved;
   };
 
-  const updatePause = async (index: number, values: PauseFormValues): Promise<boolean> => {
-    if (!session) return false;
-    const existing = session.pauses ?? [];
-    if (!existing[index]) return false;
-    const sessionStart = new Date(session.start);
-    const sessionEnd = session.end ? new Date(session.end) : null;
-    const pauseEnd = values.end ?? null;
-    if (!isPauseWithinSession(sessionStart, sessionEnd, values.start, pauseEnd)) {
-      await showToast(Toast.Style.Failure, "Pause must be within the session's time span");
-      return false;
-    }
-    if (hasOverlappingPause(existing, values.start, pauseEnd, index)) {
-      await showToast(Toast.Style.Failure, "Pause overlaps another pause");
-      return false;
-    }
-    const next = [...existing];
-    next[index] = { start: values.start.toISOString(), end: values.end?.toISOString() };
-    next.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
-    await saveSessionPauses(next);
-    await showToast(Toast.Style.Success, "Pause updated");
-    return true;
+  const updatePause = async (original: Pause, values: PauseFormValues): Promise<boolean> => {
+    const saved = await editPauses((target) => {
+      const index = findPauseIndex(target, original);
+      if (index < 0) return "Pause was changed elsewhere";
+      const error = validatePause(target, values, index);
+      if (error) return error;
+      const next = [...(target.pauses ?? [])];
+      next[index] = toPause(values);
+      return next;
+    });
+    if (saved) await showToast(Toast.Style.Success, "Pause updated");
+    return saved;
   };
 
-  const deletePause = async (index: number) => {
+  const deletePause = async (pause: Pause) => {
     const confirmed = await confirmAlert({
       title: "Delete pause?",
       message: "This will remove the pause entry.",
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
-    if (!confirmed || !session) return;
-    const next = [...(session.pauses ?? [])];
-    next.splice(index, 1);
-    await saveSessionPauses(next);
-    await showToast(Toast.Style.Success, "Pause deleted");
+    if (!confirmed) return;
+    const saved = await editPauses((target) => {
+      const index = findPauseIndex(target, pause);
+      if (index < 0) return "Pause was changed elsewhere";
+      return (target.pauses ?? []).filter((_, i) => i !== index);
+    });
+    if (saved) await showToast(Toast.Style.Success, "Pause deleted");
   };
 
   const pauses = session?.pauses ?? [];
@@ -409,7 +424,7 @@ function PauseList({ sessionId, onRefresh }: { sessionId: string; onRefresh: () 
                     title="Edit Pause"
                     icon={Icon.Pencil}
                     target={
-                      <PauseForm title="Edit Pause" initial={pause} onSave={(values) => updatePause(index, values)} />
+                      <PauseForm title="Edit Pause" initial={pause} onSave={(values) => updatePause(pause, values)} />
                     }
                   />
                   <Action.Push
@@ -421,7 +436,7 @@ function PauseList({ sessionId, onRefresh }: { sessionId: string; onRefresh: () 
                     title="Delete Pause"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    onAction={() => deletePause(index)}
+                    onAction={() => deletePause(pause)}
                   />
                 </ActionPanel>
               }

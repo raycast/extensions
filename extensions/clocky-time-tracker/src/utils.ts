@@ -194,6 +194,20 @@ export function normalizeWorkDays(value: number): number {
   return Math.min(7, Math.max(1, Math.floor(value)));
 }
 
+// Work days are the first `workDaysPerWeek` days of the week, counted from Monday.
+export function isWorkDay(day: Date, workDaysPerWeek: number): boolean {
+  const workDayCount = normalizeWorkDays(Number.isFinite(workDaysPerWeek) ? workDaysPerWeek : 7);
+  return (day.getDay() + 6) % 7 < workDayCount;
+}
+
+// Only work days carry the daily target; a vacation on a work day removes it.
+export function getDayTarget(day: Date, workDaysPerWeek: number, targetHours: number, vacationDays: string[]) {
+  const workDay = isWorkDay(day, workDaysPerWeek);
+  const isVacation = workDay && vacationDays.includes(dayKey(day));
+  const targetMs = workDay && !isVacation ? targetHours * 3600 * 1000 : 0;
+  return { isWorkDay: workDay, isVacation, targetMs };
+}
+
 export type WeekDaySummary = {
   day: Date;
   isWorkDay: boolean;
@@ -211,17 +225,13 @@ export function getWeekSummary(
   vacationDays: string[],
   nowIso?: string,
 ) {
-  const rawCount = Number.isFinite(workDaysPerWeek) ? workDaysPerWeek : 7;
-  const workDayCount = normalizeWorkDays(rawCount);
   const start = startOfDay(weekStart);
   const end = new Date(start);
   end.setDate(start.getDate() + 6);
-  const allDays: WeekDaySummary[] = eachDayOfInterval(start, end).map((day, index) => {
-    const isWorkDay = index < workDayCount;
-    const isVacation = isWorkDay && vacationDays.includes(dayKey(day));
+  const allDays: WeekDaySummary[] = eachDayOfInterval(start, end).map((day) => {
+    const target = getDayTarget(day, workDaysPerWeek, targetHours, vacationDays);
     const summary = getDaySummary(sessions, day, nowIso);
-    const targetMs = isWorkDay && !isVacation ? targetHours * 3600 * 1000 : 0;
-    return { day, isWorkDay, isVacation, summary, targetMs, delta: summary.totals.net - targetMs };
+    return { day, ...target, summary, delta: summary.totals.net - target.targetMs };
   });
   const totals = allDays.reduce(
     (acc, d) => ({
@@ -295,6 +305,13 @@ export function allPausesWithinSession(
       nowIso,
     ),
   );
+}
+
+// A closed Session ending after now would collide with the open Session as it keeps running.
+export function isClosedWithFutureEnd(end: Date | null | undefined, nowIso?: string): boolean {
+  if (!end) return false;
+  const now = nowIso ? new Date(nowIso) : new Date();
+  return end.getTime() > now.getTime();
 }
 
 export function isOpenWithFutureStart(start: Date, end: Date | null | undefined, nowIso?: string): boolean {

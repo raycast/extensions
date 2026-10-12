@@ -4,12 +4,14 @@ import {
   closeSessionAt,
   detectTickGapMs,
   getDaySummary,
+  getDayTarget,
   getForgotClockInSuggestion,
   getForgotClockOutSuggestion,
   getWeekSummary,
   hasAnotherOpenSession,
   hasOverlappingPause,
   hasOverlappingSession,
+  isClosedWithFutureEnd,
   isOpenWithFutureStart,
   isPauseWithinSession,
   normalizeWorkDays,
@@ -99,6 +101,32 @@ describe("getWeekSummary", () => {
   it("lowers the weekly target for a vacation on a work day", () => {
     const week = getWeekSummary([], monday, 5, 8, ["2026-09-08"], nowIso);
     expect(week.targetMs).toBe(32 * hour);
+  });
+});
+
+describe("getDayTarget", () => {
+  const hour = 3600 * 1000;
+  const saturday = new Date("2026-09-12T10:00:00");
+  const monday = new Date("2026-09-07T10:00:00");
+
+  it("gives a non-work day no target, so weekend work counts as plus", () => {
+    expect(getDayTarget(saturday, 5, 8, []).targetMs).toBe(0);
+  });
+
+  it("gives a work day the daily target", () => {
+    expect(getDayTarget(monday, 5, 8, []).targetMs).toBe(8 * hour);
+  });
+
+  it("treats Saturday as a work day with a six-day week", () => {
+    expect(getDayTarget(saturday, 6, 8, []).targetMs).toBe(8 * hour);
+  });
+
+  it("removes the target on a vacation work day", () => {
+    expect(getDayTarget(monday, 5, 8, ["2026-09-07"])).toEqual({ isWorkDay: true, isVacation: true, targetMs: 0 });
+  });
+
+  it("falls back to a seven-day week for a non-finite workDaysPerWeek", () => {
+    expect(getDayTarget(saturday, NaN, 8, []).isWorkDay).toBe(true);
   });
 });
 
@@ -323,6 +351,22 @@ describe("isOpenWithFutureStart", () => {
     expect(
       isOpenWithFutureStart(new Date("2026-09-07T13:00:00.000Z"), new Date("2026-09-07T14:00:00.000Z"), nowIso),
     ).toBe(false);
+  });
+});
+
+describe("isClosedWithFutureEnd", () => {
+  const nowIso = "2026-09-07T12:00:00.000Z";
+
+  it("returns true for a closed entry ending after now", () => {
+    expect(isClosedWithFutureEnd(new Date("2026-09-07T13:00:00.000Z"), nowIso)).toBe(true);
+  });
+
+  it("returns false for a closed entry ending exactly now", () => {
+    expect(isClosedWithFutureEnd(new Date(nowIso), nowIso)).toBe(false);
+  });
+
+  it("returns false for an open entry", () => {
+    expect(isClosedWithFutureEnd(null, nowIso)).toBe(false);
   });
 });
 

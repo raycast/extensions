@@ -17,6 +17,7 @@ import {
   formatDelta,
   formatTimeAt,
   getActiveSession,
+  getDayTarget,
   getDaySummary,
   getEstimatedWorkEnd,
   getForgotClockInSuggestion,
@@ -27,16 +28,28 @@ import {
   msToClock,
   newSessionId,
 } from "./utils";
-import { Session, StatusState } from "./types";
+import { PendingGapSuggestion, Session, StatusState } from "./types";
 
 // Gaps below this are ordinary timer jitter or the regular 1-minute background interval between
 // runs of this command (see package.json), not a real sleep/wake event.
 const SLEEP_GAP_TOLERANCE_MS = 3 * 60_000;
 
+// A "forgot to clock out" suggestion only applies while its Session is still open and started
+// before the suggested end; an edit in Adjust Entries can invalidate it at any time.
+function findGapSession(sessions: Session[], pendingGap: PendingGapSuggestion) {
+  return sessions.find(
+    (s) =>
+      s.id === pendingGap.sessionId &&
+      !s.end &&
+      new Date(s.start).getTime() <= new Date(pendingGap.suggestedEndIso).getTime(),
+  );
+}
+
 export default function Command() {
   const [now, setNow] = useState(new Date());
   const [sessions, setSessions] = useState<Session[]>([]);
   const [targetHours, setTargetHours] = useState(8);
+  const [workDaysPerWeek, setWorkDaysPerWeek] = useState(5);
   const [vacationDays, setVacationDays] = useState<string[]>([]);
   const [thresholds, setThresholds] = useState({ forgotClockOutMs: 15 * 60 * 1000, forgotClockInMs: 30 * 60 * 1000 });
   const [statusState, setStatusState] = useState<StatusState>({});
@@ -98,6 +111,7 @@ export default function Command() {
       const nowIso = isoNow();
       setSessions(all);
       setTargetHours(target.targetHours);
+      setWorkDaysPerWeek(target.workDaysPerWeek);
       setVacationDays(vacations);
       setThresholds(forgotThresholds);
       sessionsRef.current = all;
@@ -126,6 +140,7 @@ export default function Command() {
       if (!mounted) return;
       setSessions(all);
       setTargetHours(target.targetHours);
+      setWorkDaysPerWeek(target.workDaysPerWeek);
       setVacationDays(vacations);
       setThresholds(forgotThresholds);
       if (lastTickRef.current) updateStatusState({ lastTickIso: lastTickRef.current });
@@ -164,10 +179,7 @@ export default function Command() {
   useEffect(() => {
     const pendingGap = statusState.pendingGap;
     if (!pendingGap) return;
-    const session = sessions.find((s) => s.id === pendingGap.sessionId);
-    const stillValid =
-      session && !session.end && new Date(session.start).getTime() <= new Date(pendingGap.suggestedEndIso).getTime();
-    if (!stillValid) {
+    if (!findGapSession(sessions, pendingGap)) {
       updateStatusState({ pendingGap: undefined });
     }
   }, [sessions, statusState.pendingGap]);
@@ -192,7 +204,7 @@ export default function Command() {
   const netMs = totals.net;
   const icon = status === "working" ? Icon.Play : status === "paused" ? Icon.Pause : Icon.Circle;
   const isVacation = vacationDays.includes(dayKey(now));
-  const targetMs = isVacation ? 0 : targetHours * 3600 * 1000;
+  const { targetMs } = getDayTarget(now, workDaysPerWeek, targetHours, vacationDays);
   const workEnd = status === "working" ? getEstimatedWorkEnd(now, netMs, targetMs, isVacation) : null;
   const title =
     status === "working"
@@ -218,10 +230,10 @@ export default function Command() {
   const confirmForgotClockOut = async () => {
     if (!pendingGap) return;
     const allSessions = await getSessions();
-    const target = allSessions.find((s) => s.id === pendingGap.sessionId && !s.end);
+    const target = findGapSession(allSessions, pendingGap);
     if (!target) {
       updateStatusState({ pendingGap: undefined });
-      await showToast(Toast.Style.Failure, "Session already closed");
+      await showToast(Toast.Style.Failure, "Session was closed or changed");
       return;
     }
     closeSessionAt(target, pendingGap.suggestedEndIso);
