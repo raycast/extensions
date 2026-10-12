@@ -49,10 +49,15 @@ export function describeAlert(
         message: [jamaat, ends].filter(Boolean).join(" · "),
       };
     case "ending":
-      return {
-        title: `${ltrName(slot.name)} ends ${formatRelative(slot.end, now)}`,
-        message: `Not marked prayed · ${ends}`,
-      };
+      return slot.late < slot.end
+        ? {
+            title: `${ltrName(slot.name)} preferred time ends ${formatRelative(slot.late, now)}`,
+            message: `Not marked prayed · Disliked after ${formatTime(slot.late)} · ${ends}`,
+          }
+        : {
+            title: `${ltrName(slot.name)} ends ${formatRelative(slot.end, now)}`,
+            message: `Not marked prayed · ${ends}`,
+          };
   }
 }
 

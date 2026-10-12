@@ -117,7 +117,7 @@ export async function loadHistory(settings: Settings, from: Date, to: Date): Pro
       history[slot.date][slot.key] = {
         completed: status.isCompleted,
         completedAt,
-        onTime: status.isCompleted && (!completedAt || completedAt < slot.end),
+        onTime: status.isCompleted && (!completedAt || completedAt < slot.late),
       };
     }
   }
@@ -182,8 +182,8 @@ export async function setPrayed(slot: PrayerSlot, settings: Settings, completed:
 
 /**
  * The completion time recorded when a prayer is marked on time or late after the fact.
- * On time: now if the prayer time is still running, else the jamaat (or start) time.
- * Late: the moment the prayer time ended, or now if that is later.
+ * On time: now if the prayer isn't late yet, else the jamaat (or start) time.
+ * Late: the moment it became late (its `late` boundary), or now if that is later.
  *
  * @param slot - Prayer slot.
  * @param onTime - Desired status.
@@ -191,8 +191,8 @@ export async function setPrayed(slot: PrayerSlot, settings: Settings, completed:
  * @returns Completion time to store.
  */
 export function completionTimeFor(slot: PrayerSlot, onTime: boolean, now = new Date()): Date {
-  if (onTime) return now < slot.end ? now : (slot.jamaat ?? slot.start);
-  return now > slot.end ? now : slot.end;
+  if (onTime) return now < slot.late ? now : (slot.jamaat ?? slot.start);
+  return now > slot.late ? now : slot.late;
 }
 
 /**

@@ -4,7 +4,7 @@ import { AlertWindows, MenuBarState } from "./state";
 const MINUTE = 60_000;
 
 /** Color of the minaret (or mosque) before the menu bar text. */
-export type TitleTone = "plain" | "yellow" | "green" | "blue" | "red";
+export type TitleTone = "plain" | "yellow" | "green" | "blue" | "orange" | "red";
 
 /** What the menu bar shows: the text, its color, and whether the mosque replaces the dot. */
 export interface MenuBarTitle {
@@ -33,7 +33,8 @@ export function formatMinutes(ms: number, round: "ceil" | "floor"): string {
  * - `Asr -5`    5 minutes until Asr starts
  * - `Asr +5`    5 minutes since Asr started
  * - 🕌 `Asr -5` 5 minutes until Asr jamaat (`+2` just after it)
- * - `Asr (-5)`  5 minutes left in Asr's time (red)
+ * - `Asr (-5)`  5 minutes until Asr becomes late (red)
+ * - `Asr (-12)` past Asr's preferred time, 12 minutes left in its valid time (orange)
  *
  * @param state - What the menu bar shows.
  * @param now - Current instant.
@@ -70,8 +71,14 @@ export function menuBarTitle(state: MenuBarState, now: Date, windows: AlertWindo
     }
     case "ending":
       return {
-        text: `${ltrName(slot.name)} (-${formatMinutes(slot.end.getTime() - t, "ceil")})`,
+        text: `${ltrName(slot.name)} (-${formatMinutes(slot.late.getTime() - t, "ceil")})`,
         tone: "red",
+        mosque: false,
+      };
+    case "disliked":
+      return {
+        text: `${ltrName(slot.name)} (-${formatMinutes(slot.end.getTime() - t, "ceil")})`,
+        tone: "orange",
         mosque: false,
       };
   }

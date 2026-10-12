@@ -27,6 +27,7 @@ const TONE_COLORS: Record<TitleTone, Color> = {
   yellow: Color.Yellow,
   green: Color.Green,
   blue: Color.Blue,
+  orange: Color.Orange,
   red: Color.Red,
 };
 
@@ -60,10 +61,17 @@ function prayerStatus(slot: PrayerSlot, record: PrayerRecord | undefined, active
   }
   if (slot.start > now) return { icon: { source: Icon.Clock, tintColor: Color.SecondaryText }, subtitle: "" };
   if (now >= slot.end) return { icon: { source: Icon.XMarkCircle, tintColor: Color.Red }, subtitle: "Missed" };
+  if (active && slot.preferredEnd && now >= slot.preferredEnd) {
+    return {
+      icon: { source: Icon.CircleProgress75, tintColor: Color.Orange },
+      subtitle: `Disliked time · ends ${formatTime(slot.end)}`,
+    };
+  }
   if (active) {
+    const until = slot.preferredEnd ? `preferred until ${formatTime(slot.preferredEnd)}, ` : "";
     return {
       icon: { source: Icon.CircleProgress50, tintColor: Color.Blue },
-      subtitle: `Now · ends ${formatTime(slot.end)}`,
+      subtitle: `Now · ${until}ends ${formatTime(slot.end)}`,
     };
   }
   return { icon: { source: Icon.Circle, tintColor: Color.SecondaryText }, subtitle: "" };

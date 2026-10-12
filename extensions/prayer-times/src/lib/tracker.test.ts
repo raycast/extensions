@@ -12,6 +12,7 @@ const asr: PrayerSlot = {
   date: "2026-10-08",
   start: at(16, 33),
   end: at(18, 12),
+  late: at(18, 12),
   jamaat: at(16, 45),
 };
 

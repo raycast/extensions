@@ -65,8 +65,15 @@ describe("defaults (no preferences saved)", () => {
     expect(s.schedule).toMatchObject({
       method: "Karachi",
       madhab: "hanafi",
-      ishaEnd: "midnight",
+      // Hanafi: Isha is valid until Fajr and disliked after midnight.
+      ishaEnd: "fajr",
+      ishaPreferred: "midnight",
       dhuhrEnd: "shafiAsr",
+      asrPreferred: "yellow",
+      maghribStart: "sunset",
+      maghribEnd: "isha",
+      maghribPreferred: "stars",
+      lateAt: "valid",
     });
     expect(s.windows).toMatchObject({
       startWindowMinutes: 5,

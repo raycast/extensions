@@ -11,7 +11,10 @@ export interface AlertWindows {
   startWindowMinutes: number;
   /** Alert this long before jamaat; menu bar shows from then until 5 minutes after jamaat. */
   jamaatReminderMinutes: number;
-  /** Alert this long before the prayer time ends; menu bar shows until it ends or is prayed. */
+  /**
+   * Alert this long before the prayer becomes late (its `late` boundary: the valid end, or the preferred end
+   * when lateness follows it); menu bar shows until it ends or is prayed.
+   */
   endingReminderMinutes: number;
   /** Heads-up this long before the due time; 0 for none. Not shown in the menu bar. */
   headsUpMinutes: number;
@@ -35,10 +38,10 @@ export interface PrayerAlert {
 export interface MenuBarState {
   slot: PrayerSlot;
   /**
-   * `start`, `jamaat`, `ending`: alert windows. `pending`: running, not prayed, no window.
-   * `upcoming`: the next prayer.
+   * `start`, `jamaat`, `ending`: alert windows. `disliked`: past the preferred end, still valid.
+   * `pending`: running, not prayed, no window. `upcoming`: the next prayer.
    */
-  kind: Exclude<AlertKind, "headsUp"> | "pending" | "upcoming";
+  kind: Exclude<AlertKind, "headsUp"> | "disliked" | "pending" | "upcoming";
 }
 
 const JAMAAT_GRACE = 5 * MINUTE;
@@ -91,9 +94,9 @@ export function alertsForSlot(slot: PrayerSlot, windows: AlertWindows): PrayerAl
       expires: slot.jamaat,
     });
   }
-  const endingAt = new Date(slot.end.getTime() - windows.endingReminderMinutes * MINUTE);
+  const endingAt = new Date(slot.late.getTime() - windows.endingReminderMinutes * MINUTE);
   if (endingAt > slot.start) {
-    alerts.push({ id: `${slot.id}:ending`, slot, kind: "ending", at: endingAt, expires: slot.end });
+    alerts.push({ id: `${slot.id}:ending`, slot, kind: "ending", at: endingAt, expires: slot.late });
   }
   return alerts.sort((a, b) => a.at.getTime() - b.at.getTime());
 }
@@ -148,14 +151,17 @@ export function passedAlertIds(slot: PrayerSlot, now: Date, windows: AlertWindow
 }
 
 /**
- * The slot whose time is running at `now`, if any.
+ * The slot whose time is running at `now`, if any. When times overlap (Ja'fari Dhuhr runs to sunset,
+ * Maghrib to midnight), the one that started last.
  *
- * @param slots - Timeline slots.
+ * @param slots - Timeline slots, sorted by start.
  * @param now - Current instant.
  * @returns Current slot, or undefined between sunrise and Dhuhr and similar gaps.
  */
 export function currentSlot(slots: PrayerSlot[], now: Date): PrayerSlot | undefined {
-  return slots.find((slot) => slot.start <= now && now < slot.end);
+  let running: PrayerSlot | undefined;
+  for (const slot of slots) if (slot.start <= now && now < slot.end) running = slot;
+  return running;
 }
 
 /**
@@ -187,7 +193,8 @@ export function nextSlot(slots: PrayerSlot[], now: Date): PrayerSlot | undefined
  * Decide what the menu bar shows.
  *
  * Once a prayer starts it stays until it is marked prayed or its time ends. While shown: the jamaat
- * window wins, then the ending window, then the first minutes after start, else pending. After it's prayed, the next prayer shows as a countdown during
+ * window wins, then the ending window (before it becomes late), then the disliked time after its
+ * preferred end, then the first minutes after start, else pending. After it's prayed, the next prayer shows as a countdown during
  * the heads-up window, or all the time with `always`.
  *
  * @param slots - Timeline slots, sorted by start.
@@ -211,7 +218,9 @@ export function menuBarState(
       const from = slot.jamaat.getTime() - windows.jamaatReminderMinutes * MINUTE;
       if (t >= from && t < slot.jamaat.getTime() + JAMAAT_GRACE) return { slot, kind: "jamaat" };
     }
-    if (t >= slot.end.getTime() - windows.endingReminderMinutes * MINUTE) return { slot, kind: "ending" };
+    const late = slot.late.getTime();
+    if (t >= late - windows.endingReminderMinutes * MINUTE && t < late) return { slot, kind: "ending" };
+    if (slot.preferredEnd && t >= slot.preferredEnd.getTime()) return { slot, kind: "disliked" };
     if (t < slot.start.getTime() + windows.startWindowMinutes * MINUTE) return { slot, kind: "start" };
     return { slot, kind: "pending" };
   }

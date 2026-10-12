@@ -41,7 +41,7 @@ export function alarmTimes(slot: PrayerSlot, due: Date, options: PlanOptions): D
     times.push(new Date(slot.jamaat.getTime() - windows.jamaatReminderMinutes * MINUTE));
   }
   if (windows.endingReminderMinutes > 0) {
-    const ending = new Date(slot.end.getTime() - windows.endingReminderMinutes * MINUTE);
+    const ending = new Date(slot.late.getTime() - windows.endingReminderMinutes * MINUTE);
     if (ending > slot.start) times.push(ending);
   }
   const unique = new Map(times.map((time) => [Math.round(time.getTime() / MINUTE), time]));

@@ -4,6 +4,7 @@ import { MethodName, PRAYER_KEYS, PrayerKey, ScheduleConfig } from "./prayers";
 import { PlanOptions } from "./plan";
 import { readLocation, StoredLocation } from "./location";
 import { parseJamaatRule } from "./jamaat";
+import { resolveRules, toSchool } from "./rules";
 
 /** Parsed, typed view of the extension preferences. */
 export interface Settings {
@@ -92,6 +93,17 @@ export function buildSettings(location: StoredLocation): Settings {
   const titles = (prefs.reminderTitles ?? "").split(",").map((part) => part.trim());
   const alerts = prefs.alerts ?? "reminders";
 
+  const rules = resolveRules(toSchool(prefs.school), {
+    asrStart: prefs.madhab,
+    asrPreferred: prefs.asrPreferred,
+    maghribStart: prefs.maghribStart,
+    maghribEnd: prefs.maghribEnd,
+    maghribPreferred: prefs.maghribPreferred,
+    ishaEnd: prefs.ishaEnd,
+    ishaPreferred: prefs.ishaPreferred,
+    dhuhrEndsAtOneShadow: prefs.dhuhrEndsAtShafiAsr !== false,
+  });
+
   const dueAt = prefs.dueAt === "jamaat" ? "jamaat" : "start";
   const headsUpMinutes = Math.max(0, toNumber(prefs.headsUpMinutes, 15));
   const windows: AlertWindows = {
@@ -108,10 +120,17 @@ export function buildSettings(location: StoredLocation): Settings {
       latitude,
       longitude,
       method: (prefs.method || "Karachi") as MethodName,
-      madhab: prefs.madhab === "shafi" ? "shafi" : "hanafi",
+      madhab: rules.asrStart,
       adjustments: Object.fromEntries(PRAYER_KEYS.map((key, i) => [key, offsets[i] ?? 0])) as Record<PrayerKey, number>,
-      ishaEnd: prefs.ishaEnd === "fajr" ? "fajr" : "midnight",
-      dhuhrEnd: prefs.dhuhrEndsAtShafiAsr === false ? "asr" : "shafiAsr",
+      ishaEnd: rules.ishaEnd,
+      dhuhrEnd: rules.dhuhrEnd,
+      maghribStart: rules.maghribStart,
+      maghribEnd: rules.maghribEnd,
+      dhuhrPreferred: rules.dhuhrPreferred,
+      asrPreferred: rules.asrPreferred,
+      maghribPreferred: rules.maghribPreferred,
+      ishaPreferred: rules.ishaPreferred,
+      lateAt: prefs.lateAt === "preferred" ? "preferred" : "valid",
       jamaat: {
         fajr: prefs.jamaatFajr ?? "",
         dhuhr: prefs.jamaatDhuhr ?? "",

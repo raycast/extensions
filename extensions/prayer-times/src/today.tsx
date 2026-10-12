@@ -34,6 +34,9 @@ function statusAccessory(slot: PrayerSlot, record: PrayerRecord | undefined, now
       : { tag: { value: "Prayed late", color: Color.Orange }, icon: Icon.CheckCircle };
   }
   if (now < slot.start) return { text: formatRelative(slot.start, now), icon: Icon.Clock };
+  if (slot.preferredEnd && now >= slot.preferredEnd && now < slot.end) {
+    return { tag: { value: `Disliked · ends ${formatRelative(slot.end, now)}`, color: Color.Orange } };
+  }
   if (now < slot.end) return { tag: { value: `Ends ${formatRelative(slot.end, now)}`, color: Color.Blue } };
   if (!record) return { tag: { value: "No reminder", color: Color.SecondaryText } };
   return { tag: { value: "Not marked", color: Color.Red } };
@@ -196,6 +199,12 @@ function TodayList({ settings }: { settings: Settings }) {
           const record = history[todayKey]?.[slot.key];
           const accessories: List.Item.Accessory[] = [];
           if (slot.jamaat) accessories.push({ text: `Jamaat ${formatTime(slot.jamaat)}`, icon: Icon.TwoPeople });
+          if (slot.preferredEnd) {
+            accessories.push({
+              text: `Preferred until ${formatTime(slot.preferredEnd)}`,
+              tooltip: "After this the prayer is still valid, but delaying it is disliked (makruh)",
+            });
+          }
           accessories.push({ text: `Ends ${formatTime(slot.end)}` });
           accessories.push(statusAccessory(slot, record, now));
           return (
