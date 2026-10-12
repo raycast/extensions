@@ -51,12 +51,3 @@ Rows you use often float to the top (frecency).
 Generators were checked against independent validators: 5 000 samples per country/type through
 [python-stdnum](https://arthurdejong.org/python-stdnum/) (IBAN incl. national BBAN checks, every VAT number, EIN, ABN, ACN, TFN, IRD, ABA, Luhn, BIC) and
 [ibantools](https://github.com/Simplify/ibantools) (IBAN + BBAN national checks) — 0 failures. Phone numbers were checked with libphonenumber-js (max metadata).
-
-## Development
-
-```bash
-npm install
-npm run dev     # loads the extension into Raycast with hot reload
-npm run build
-npm run lint
-```

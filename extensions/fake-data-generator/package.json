@@ -139,7 +139,7 @@
   ],
   "dependencies": {
     "@faker-js/faker": "^10.6.0",
-    "@raycast/api": "^2.6.2",
+    "@raycast/api": "^2.7.3",
     "@raycast/utils": "^2.3.2",
     "libphonenumber-js": "^1.13.14"
   },
