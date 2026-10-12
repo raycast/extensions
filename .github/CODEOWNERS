@@ -508,6 +508,7 @@
 /extensions/comet                                                   @JohanDevl @xmok @pernielsentikaer
 /extensions/cometapi                                                @mutewinter
 /extensions/comma-separator                                         @sidextron92
+/extensions/commandcode-ai                                          @alhassanaraouf
 /extensions/commercequest                                           @skrollme
 /extensions/commit-issue-parser                                     @JulesJuul
 /extensions/commit-message-formatter                                @zrr1999
@@ -1426,6 +1427,7 @@
 /extensions/keyboard-win-mac-switch                                 @fab-uleuh
 /extensions/keychain-password-gen                                   @breadone @one-data-cookie
 /extensions/keygen                                                  @xmok
+/extensions/keyprobe-keyboard-tester                                @yuzukq
 /extensions/keyraycast                                              @benostein @0xdhrv
 /extensions/kill-mcp                                                @baptitse-jn
 /extensions/kill-node-modules                                       @NicolasMontone @M-Subhan1 @ridemountainpig
@@ -2244,6 +2246,7 @@
 /extensions/pronounce-the-word                                      @SandeepBaskaran
 /extensions/protobuf2typescript                                     @7gugu
 /extensions/proton-authenticator                                    @FareedFarag
+/extensions/proton-drive                                            @bst1n
 /extensions/proton-mail                                             @NormCopeland @bst1n
 /extensions/proton-pass                                             @izyuumi @FeernandoOFF
 /extensions/proton-version                                          @flavienbonvin @pernielsentikaer
