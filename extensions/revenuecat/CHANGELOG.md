@@ -1,6 +1,6 @@
 # RevenueCat Changelog
 
-## [Menu Bar Metrics] - {PR_MERGE_DATE}
+## [Menu Bar Metrics] - 2026-10-12
 
 - Add Menu Bar Metrics on macOS with a text-only value and a metric picker in command settings.
 - Group menu metrics by revenue, subscriptions, and customers, with click-to-copy values and project switching.
