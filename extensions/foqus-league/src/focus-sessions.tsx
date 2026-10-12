@@ -11,7 +11,6 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import type { LaunchProps } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { writeFile } from "node:fs/promises";
 import * as path from "node:path";
@@ -23,14 +22,23 @@ import { store } from "./lib/runtime.ts";
 import { DOWNLOADS, saveNew } from "./lib/shareImage.ts";
 import { UNLABELLED } from "./lib/stats.ts";
 import { dayKey } from "./lib/streaks.ts";
-import { statusNotes } from "./lib/statusNotes.ts";
+import { noteDetail, statusNotes, type StatusNote } from "./lib/statusNotes.ts";
 import { exportFilename, serializeSessions } from "./lib/transfer.ts";
+import { TurnOnMenuBarAction } from "./lib/TurnOnMenuBarAction.tsx";
 import { useStats } from "./lib/useStats.ts";
 import type { Session } from "./lib/types.ts";
 
 const ALL_GOALS = "__all__";
 
 const NOTES_PREVIEW = 60;
+
+const TROUBLE_ICONS: Record<StatusNote["kind"], Icon> = {
+  menuBar: Icon.Power,
+  empty: Icon.Stopwatch,
+  sync: Icon.Warning,
+  blind: Icon.Warning,
+  collector: Icon.Warning,
+};
 
 type Context = { add?: boolean };
 
@@ -65,7 +73,7 @@ function sessionAccessories(session: Session): List.Item.Accessory[] {
   return accessories;
 }
 
-export default function FocusSessions({ launchContext }: LaunchProps<{ launchContext?: Context }>) {
+export default function FocusSessions({ launchContext }: { launchContext?: Context }) {
   const { data, isLoading, revalidate } = useStats();
   const [goalFilter, setGoalFilter] = useState(ALL_GOALS);
   const { push } = useNavigation();
@@ -212,11 +220,12 @@ export default function FocusSessions({ launchContext }: LaunchProps<{ launchCon
         );
       })}
       <List.EmptyView
-        icon={trouble ? (trouble.kind === "empty" ? Icon.Stopwatch : Icon.Warning) : Icon.MagnifyingGlass}
+        icon={trouble ? TROUBLE_ICONS[trouble.kind] : Icon.MagnifyingGlass}
         title={trouble ? trouble.title : "No sessions match"}
-        description={trouble ? trouble.body : "Try another goal, or add one by hand."}
+        description={trouble ? noteDetail(trouble) : "Try another goal, or add one by hand."}
         actions={
           <ActionPanel>
+            {trouble?.kind === "menuBar" && <TurnOnMenuBarAction onDone={revalidate} />}
             {addAction}
             {transferActions}
           </ActionPanel>

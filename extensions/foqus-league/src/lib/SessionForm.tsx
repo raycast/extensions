@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useRef, useState } from "react";
+import { formatDurationLong, parseDuration } from "./format.ts";
 import { MAX_SESSION_MINUTES } from "./log.ts";
 import { store } from "./runtime.ts";
 import { UNLABELLED } from "./stats.ts";
@@ -18,24 +19,36 @@ const REFUSED = {
   missing: { title: "Session Deleted", message: "This session no longer exists." },
 };
 
+const MAX_DURATION = formatDurationLong(MAX_SESSION_MINUTES);
+
 export function SessionForm({ session, goals, onDone }: Props) {
   const { pop } = useNavigation();
   const [goal, setGoal] = useState(session?.goal ?? goals[0] ?? "");
   const [start, setStart] = useState<Date | null>(session ? new Date(session.start) : new Date());
-  const [minutes, setMinutes] = useState(session ? String(session.duration) : "25");
+  const [durationText, setDurationText] = useState(formatDurationLong(session?.duration ?? 25));
+  const [checkedDurationText, setCheckedDurationText] = useState<string>();
   const [notes, setNotes] = useState(session?.notes ?? "");
   const inFlight = useRef(false);
 
-  const duration = Number.parseInt(minutes, 10);
-  const minutesError =
-    !Number.isFinite(duration) || duration < 1 || duration > MAX_SESSION_MINUTES
-      ? `Between 1 and ${MAX_SESSION_MINUTES}`
-      : undefined;
+  const duration = parseDuration(durationText);
+  const durationError =
+    duration === null
+      ? `Try 45 min, max ${MAX_DURATION}`
+      : duration < 1 || duration > MAX_SESSION_MINUTES
+        ? `1 minute to ${MAX_DURATION}`
+        : undefined;
   const startError = !start ? "Required" : start.getTime() > Date.now() ? "Must be in the past" : undefined;
   const notesError = notes.trim().length > MAX_NOTES ? `Up to ${MAX_NOTES} characters` : undefined;
 
+  function checkDuration() {
+    const text = duration === null ? durationText : formatDurationLong(duration);
+    setDurationText(text);
+    setCheckedDurationText(text);
+  }
+
   async function submit() {
-    if (minutesError || startError || notesError || !start || inFlight.current) return;
+    checkDuration();
+    if (duration === null || durationError || startError || notesError || !start || inFlight.current) return;
     inFlight.current = true;
 
     const next = editedSession(session, { start: start.getTime(), goal, duration, notes });
@@ -88,7 +101,15 @@ export function SessionForm({ session, goals, onDone }: Props) {
         onChange={setStart}
         error={startError}
       />
-      <Form.TextField id="minutes" title="Minutes" value={minutes} onChange={setMinutes} error={minutesError} />
+      <Form.TextField
+        id="duration"
+        title="Duration"
+        placeholder="45, 1:30, 1h 30m or 2.5 hours"
+        value={durationText}
+        onChange={setDurationText}
+        onBlur={checkDuration}
+        error={durationText === checkedDurationText ? durationError : undefined}
+      />
       <Form.TextArea
         id="notes"
         title="Notes"

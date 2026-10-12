@@ -1,12 +1,29 @@
-import { environment, getApplications, getPreferenceValues, LaunchType, showHUD } from "@raycast/api";
+import {
+  environment,
+  getApplications,
+  getPreferenceValues,
+  launchCommand,
+  LaunchType,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { execFile } from "child_process";
+import * as fs from "fs/promises";
 import * as path from "path";
 import { setTimeout as sleep } from "timers/promises";
 import { promisify } from "util";
-import { collectorPaths as pathsUnder, collectorStatus as statusOf, ensureCollector } from "./collector.ts";
+import {
+  collectorPaths as pathsUnder,
+  collectorStatus as statusOf,
+  ensureCollector,
+  MENU_BAR_URL,
+  mtimeOf,
+} from "./collector.ts";
 import { builtinsAsLogged, readCategories } from "./focusCategories.ts";
 import type { Category } from "./focusSetup.ts";
 import { learnGoalBlocks as learn } from "./goalBlocks.ts";
+import { heartbeatMoved, recentlyPinged } from "./menuBarHeartbeat.ts";
 import { claim, hudText, moments } from "./moments.ts";
 import { parsePreferences, type Preferences as ParsedPreferences } from "./prefs.ts";
 import { CALENDAR_WEEKS, computeStats } from "./stats.ts";
@@ -47,6 +64,42 @@ export const store = new LocalSessionStore(environment.supportPath);
 export const collectorPaths = () => pathsUnder(environment.supportPath);
 export const collectorStatus = () => statusOf(collectorPaths());
 export const resumeRecording = () => ensureCollector(collectorPaths());
+
+export async function markMenuBarRan(): Promise<void> {
+  const { dir, heartbeat } = collectorPaths();
+  await fs.mkdir(dir, { recursive: true });
+  await fs.writeFile(heartbeat, "");
+}
+
+export const menuBarRanAt = () => mtimeOf(collectorPaths().heartbeat);
+export const wasPoked = async () => recentlyPinged(await mtimeOf(collectorPaths().ping));
+
+const MENU_BAR_WAIT_TRIES = 20;
+
+const MENU_BAR_WAIT_MS = 250;
+
+export async function turnOnMenuBar(): Promise<void> {
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Turning on Menu Bar Stats…" });
+  let on = false;
+  try {
+    const before = await menuBarRanAt();
+    if (isRaycast2) await run("/usr/bin/open", ["-g", MENU_BAR_URL]);
+    else await launchCommand({ name: "focus-menu-bar", type: LaunchType.UserInitiated });
+    on = await heartbeatMoved(menuBarRanAt, before, () => sleep(MENU_BAR_WAIT_MS), MENU_BAR_WAIT_TRIES);
+  } catch (error) {
+    console.error(error);
+  }
+
+  if (on) {
+    toast.style = Toast.Style.Success;
+    toast.title = "Menu Bar Stats is on";
+    toast.message = "It's counting your Focus sessions now.";
+  } else {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Menu Bar Stats is still off";
+    toast.message = "Open it from Raycast search.";
+  }
+}
 
 const installedApps = async () =>
   new Set((await getApplications()).flatMap((app) => (app.bundleId ? [app.bundleId] : [])));

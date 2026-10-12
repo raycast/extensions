@@ -268,7 +268,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "datacircle",
     title: "Datacircle",
     description:
-      "Datacircle is a data co-op. Query your favorite B2B data APIs through us. Same request, same price, no markup. Every morning, you get the flat file of your data plus everyone else's. Right now we have 2 live LinkedIn profile APIs that we trust: Up2Data and HarvestAPI.",
+      "Datacircle is a data co-op. Query your favorite B2B data APIs through us. Same request, same price, no markup. Every morning, you get the flat file of your data plus everyone else's.",
     icon: "https://datacircle.dev/favicon.png",
     homepage: "https://docs.datacircle.dev/mcp-server",
     configuration: {
@@ -296,7 +296,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "dc-hub",
     title: "DC Hub",
     description:
-      "Live data on the physical infrastructure behind AI: facility coverage in 170+ countries, 300+ markets scored daily (DCPI), 1,700+ tracked M&A deals, live grid, fiber, gas and interconnection-queue data, and Capacity Source: search available data-center capacity by size and location, get exact fits or multi-provider bundles, and request brokered intros. 92 tools; every answer carries its source. Hosted remote Streamable HTTP server through `mcp-remote`; free tier works with no API key and no sign-in.",
+      "Live data on the physical infrastructure behind AI: facility coverage in 170+ countries, 300+ markets scored daily (DCPI), 1,700+ tracked M&A deals, live grid, fiber, gas and interconnection-queue data, and Capacity Source: search available data-center capacity by size and location, get exact fits or multi-provider bundles, and request brokered intros. 94 tools; every answer carries its source. Hosted remote Streamable HTTP server through `mcp-remote`; free tier works with no API key and no sign-in.",
     icon: "https://raw.githubusercontent.com/azmartone67/dchub-mcp-server/main/dchub-logo.png",
     homepage: "https://dchub.cloud/connect",
     configuration: {
@@ -1945,6 +1945,31 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "kordoc",
+    title: "kordoc",
+    description:
+      "Parse Korean and office documents into Markdown and structured data: HWP 3.x/5.x, HWPX, HWPML, PDF, DOCX, XLS/XLSX, PPTX and PNG/JPG/WebP images. Also compares two documents, fills forms, applies format-preserving HWPX/HWP patches, generates HWPX from Markdown and renders previews. 17 tools that work on local file paths. Local stdio server from the `kordoc` npm package (MIT) through `npx`; no API key, Node.js 20+.",
+    icon: "https://github.com/chrisryugj.png",
+    homepage: "https://github.com/chrisryugj/kordoc",
+    configuration: {
+      command: "npx",
+      args: ["-y", "kordoc", "mcp"],
+    },
+  },
+  {
+    name: "korean-law",
+    title: "Korean Law MCP",
+    description:
+      "Search and read Korean law through the official Open API of Korea's Ministry of Government Legislation (법제처): statutes, precedents, administrative rules, local ordinances, treaties and legal interpretations, plus citation verification that checks statute and precedent citations in AI-written answers against the official database. 10 tools. Hosted remote Streamable HTTP server at https://mcp.gomdori.app/law; it works without a key through a shared, rate-limited key, or add your own free 법제처 Open API key as `?oc=YOUR_KEY`. Open source (MIT).",
+    icon: "https://github.com/chrisryugj.png",
+    homepage: "https://github.com/chrisryugj/korean-law-mcp",
+    remoteUrl: "https://mcp.gomdori.app/law",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.gomdori.app/law"],
+    },
+  },
+  {
     name: "kyma",
     title: "Kyma API",
     description:
@@ -2187,10 +2212,10 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       "Use your own LinkedIn account from your AI assistant: look up profiles and companies, search people, jobs and Sales Navigator (with your own seat), read and send LinkedIn messages, read and write posts, comments and reactions, manage connection requests, read your own post analytics, and find work emails and mobile numbers. Not affiliated with LinkedIn. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. 7-day free trial without a card; connecting a LinkedIn account needs a paid plan (from $19/month).",
     icon: "https://app.linkmcp.io/logo-512.png",
     homepage: "https://app.linkmcp.io",
-    remoteUrl: "https://app.linkmcp.io/api/mcp",
+    remoteUrl: "https://app.linkmcp.io/api/mcp?ref=raycast",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://app.linkmcp.io/api/mcp"],
+      args: ["-y", "mcp-remote", "https://app.linkmcp.io/api/mcp?ref=raycast"],
     },
   },
   {

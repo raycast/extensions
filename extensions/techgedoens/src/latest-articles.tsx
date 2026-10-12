@@ -12,6 +12,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { createArticleDetailMarkdown } from "./article-detail";
+import { ArticleCopyActions } from "./article-copy-actions";
 import { Article, ARTICLE_COUNT } from "./articles";
 import {
   ArchivedArticle,
@@ -219,11 +220,7 @@ function ArticleListItem({
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.OpenWith title={translations.openWith} path={article.url} />
-            <Action.CopyToClipboard
-              title={translations.copyArticleLink}
-              content={article.url}
-              shortcut={Keyboard.Shortcut.Common.Copy}
-            />
+            <ArticleCopyActions article={article} translations={translations} />
             <Action title={translations.reloadArticle} icon={Icon.RotateClockwise} onAction={revalidate} />
           </ActionPanel.Section>
         </ActionPanel>
@@ -278,11 +275,7 @@ function ArticleDetail({
             shortcut={Keyboard.Shortcut.Common.Pin}
             onAction={() => onFavoriteStatusChange(article, !article.isFavorite)}
           />
-          <Action.CopyToClipboard
-            title={translations.copyArticleLink}
-            content={article.url}
-            shortcut={Keyboard.Shortcut.Common.Copy}
-          />
+          <ArticleCopyActions article={article} translations={translations} />
         </ActionPanel>
       }
     />

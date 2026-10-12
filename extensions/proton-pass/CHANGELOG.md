@@ -8,7 +8,12 @@
 - Browse Items checks the pass-cli session before showing saved items and vaults: when it has ended, the login screen shows right away, instead of items whose passwords can't load. When pass-cli is slow to answer, the saved items show after a second, and the login screen replaces them if the session has ended
 - Browse Items says TOTP code rather than 2FA code, like Get TOTP Code: Copy TOTP Code, Paste TOTP Code, and the TOTP Code row of the details. 2FA covers other methods too, such as SMS codes
 
-## [Login Fixes] - {PR_MERGE_DATE}
+## [CLI Not Found Screen] - {PR_MERGE_DATE}
+
+- The screen shown when pass-cli can't be found points to the CLI Path preference, with an Open Extension Preferences action. It used to ask to install pass-cli, which the extension already does by itself
+- Search Items and Get TOTP show that screen too, instead of their saved items, whose passwords and codes can't load without pass-cli
+
+## [Login Fixes] - 2026-10-10
 
 - Login with Browser no longer fails when the extension is opened again right after logging in in the browser. The extension ran other pass-cli commands while pass-cli was saving the new session, and pass-cli then deleted that session "for security": the browser showed a successful login, and the extension stayed logged out without saying why. No other pass-cli command runs during a login now
 - pass-cli runs the login on its own, so it completes even if Raycast closes while you're in the browser
@@ -24,11 +29,6 @@
 - The vault menu of Search Items shows the number of items in each vault, and in all vaults. The selected one stays in the search bar
 - List Vaults shows the number of items in each vault. Its refresh lists the items too, which also keeps Search Items' cache fresh
 - List Vaults marks shared vaults with an icon. Its tooltip says whether you shared the vault, or it was shared with you and with which role (Manager, Editor or Viewer)
-
-## [CLI Not Found Screen] - {PR_MERGE_DATE}
-
-- The screen shown when pass-cli can't be found points to the CLI Path preference, with an Open Extension Preferences action. It used to ask to install pass-cli, which the extension already does by itself
-- Search Items and Get TOTP show that screen too, instead of their saved items, whose passwords and codes can't load without pass-cli
 
 ## [Smoother List Scrolling] - 2026-10-05
 
