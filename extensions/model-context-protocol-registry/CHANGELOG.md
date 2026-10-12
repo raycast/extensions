@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Keeploop MCP Server] - {PR_MERGE_DATE}
+
+- Add Keeploop to the official registry: your Mac's Apple Mail and Calendar for Raycast AI. Search mail, read threads, see who is waiting on a reply and check your calendar; writes stay off until you allow them on your Mac. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs the Keeploop Mac app with Keeploop Pro or its free trial for remote use; local use is free. Direct HTTP connection in Raycast at https://mcp.keeploop.app/mcp.
+
 ## [Add looot MCP Server] - 2026-10-12
 
 - Add looot to the official registry: one key and one prepaid balance for about 2,500 data API operations (emails, phones, company and people search, SERP, web pages, news). 19 tools. Hosted remote Streamable HTTP server at https://api.looot.ai/mcp with direct HTTP connection in Raycast; OAuth 2.1 sign-in with dynamic client registration, or a Bearer API key.
