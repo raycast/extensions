@@ -113,7 +113,7 @@ function ProductsGrid({
   const pageHasMore = useRef(false);
   const [notice, setNotice] = useState<ProductPageCursor["notice"]>();
   const isSearching = searchText.length >= 2;
-  const execute = !isSearching && !isMetadataLoading;
+  const execute = !isSearching && !isMetadataLoading && !backgroundError;
   const response = useCachedPromise(
     (url: string) => (options: ProductPageOptions) => fetchProductsPage(url, options, abortable.current?.signal),
     [productsUrl],

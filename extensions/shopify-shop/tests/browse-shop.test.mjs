@@ -137,7 +137,8 @@ function harness(handler) {
   mock.method(globalThis, "fetch", async (input, init) => {
     const url = new URL(input);
     requests.push({ url, signal: init?.signal });
-    if (url.pathname === "/meta.json") return Response.json({ currency: "USD" });
+    if (url.pathname === "/meta.json")
+      return h.metaFailure ? new Response("Unavailable", { status: 503 }) : Response.json({ currency: "USD" });
     if (url.pathname === "/collections.json")
       return Response.json({ collections: [{ id: 1, title: "Sale", handle: "sale" }] });
     if (url.pathname === "/search/suggest.json") {
@@ -373,4 +374,15 @@ test("a failed first page shows an error and cannot request later pages", async 
   assert.match(h.renderer.root.findByType("Grid.EmptyView").props.description, /503/);
   await h.loadMore();
   assert.equal(h.productRequests().length, 1);
+});
+
+test("a metadata error does not start hidden browse-page requests", async () => {
+  const h = harness(() => productsResponse([product(1)]));
+  h.metaFailure = true;
+  await h.mount();
+  assert.deepEqual(h.items(), []);
+  assert.equal(h.grid().props.isLoading, false);
+  assert.match(h.renderer.root.findByType("Grid.EmptyView").props.description, /503/);
+  assert.equal(h.grid().props.pagination, undefined);
+  assert.equal(h.productRequests().length, 0);
 });
