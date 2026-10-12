@@ -87,7 +87,8 @@ function sendTo(path: string, request: Request): Promise<Reply> {
     let buffer = "";
     socket.setTimeout(5000, () => socket.destroy(new Error("ToneCue did not answer in time.")));
     socket.on("connect", () => socket.write(JSON.stringify(request) + "\n"));
-    socket.on("data", (chunk) => (buffer += chunk.toString("utf8")));
+    socket.setEncoding("utf8");
+    socket.on("data", (chunk) => (buffer += chunk));
     socket.on("error", (error: NodeJS.ErrnoException) =>
       reject(error.code === "ENOENT" || error.code === "ECONNREFUSED" ? new NotRunningError() : error),
     );

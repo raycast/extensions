@@ -64,7 +64,7 @@ export default function Command() {
   const run = async (work: Promise<State>, text: (s: State) => string) => {
     try {
       const next = await work;
-      await mutate(Promise.resolve(next), { shouldRevalidateAfter: false });
+      await mutate(Promise.resolve(next), { optimisticUpdate: () => next, shouldRevalidateAfter: false });
       await done(text(next));
     } catch (e) {
       await fail(e);
