@@ -64,12 +64,26 @@ test("reminder service integrates with Stop Work, storage and notification retri
   try {
     const loadModule = createRequire(join(process.cwd(), "tests/reminder-service.test.ts"));
     const { startTimer, stopTimer } = loadModule("../src/lib/timer.ts") as typeof import("../src/lib/timer");
-    const { getActiveTimer, getWorkLogs, saveActiveTimer } = loadModule(
+    const { getActiveTimer, getWorkLogs, saveActiveTimer, getProjectGroups } = loadModule(
       "../src/lib/storage.ts",
     ) as typeof import("../src/lib/storage");
     const { startPomodoroInterval, getPomodoro, getFinishedPomodoro, checkReminders, endPomodoro } = loadModule(
       "../src/lib/reminder-service.ts",
     ) as typeof import("../src/lib/reminder-service");
+
+    // Missing groups remain empty; loading saved Store-format groups preserves JSON.
+    assert.deepEqual(await getProjectGroups(), []);
+    const group = {
+      id: "group-uuid",
+      name: "Work",
+      icon: "Folder",
+      createdAt: "2026-10-01T00:00:00.000Z",
+      updatedAt: "2026-10-01T00:00:00.000Z",
+    };
+    const savedGroupJson = JSON.stringify([group]);
+    items.set("projectCategories", savedGroupJson);
+    assert.deepEqual(await getProjectGroups(), [group]);
+    assert.equal(items.get("projectCategories"), savedGroupJson);
 
     const timer = await startTimer("project", "Task");
     const pomodoro = await startPomodoroInterval(timer.id);

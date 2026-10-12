@@ -14,12 +14,12 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { getRecentDescriptions } from "./lib/descriptions";
-import { getCategoryIcon } from "./lib/project-groups";
+import { getProjectGroupIcon } from "./lib/project-groups";
 import { launchWithFailure } from "./lib/command-actions";
 import { formatDuration, getDurationSeconds } from "./lib/duration";
 import { showFailure } from "./lib/errors";
 import { findProject, sortProjectsByPreference } from "./lib/projects";
-import { getActiveTimer, getProjectCategories, getProjects, getWorkLogs } from "./lib/storage";
+import { getActiveTimer, getProjectGroups, getProjects, getWorkLogs } from "./lib/storage";
 import { ActiveTimerExistsError, refreshMenuBar, startTimer, stopTimer } from "./lib/timer";
 import { getFinishedPomodoro, getReminderSettings, startPomodoroInterval } from "./lib/reminder-service";
 import { nextPhase, phaseLabel, type PomodoroState } from "./lib/reminders";
@@ -49,7 +49,7 @@ export default function StartWorkCommand({
     try {
       const [savedProjects, savedCategories, savedLogs, savedTimer] = await Promise.all([
         getProjects(),
-        getProjectCategories(),
+        getProjectGroups(),
         getWorkLogs(),
         getActiveTimer(),
       ]);
@@ -378,7 +378,7 @@ function ProjectDropdown({
                 key={project.id}
                 value={project.id}
                 title={project.name}
-                icon={getCategoryIcon(categories, category.id)}
+                icon={getProjectGroupIcon(categories, category.id)}
               />
             ))}
           </Form.Dropdown.Section>

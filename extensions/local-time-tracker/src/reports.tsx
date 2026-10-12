@@ -1,10 +1,10 @@
 import { Icon, List } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { formatDuration } from "./lib/duration";
-import { getCategoryIcon, getCategoryName } from "./lib/project-groups";
+import { getProjectGroupIcon, getProjectGroupName } from "./lib/project-groups";
 import { showFailure } from "./lib/errors";
 import { createReport } from "./lib/reports";
-import { getActiveTimer, getProjectCategories, getProjects, getWorkLogs } from "./lib/storage";
+import { getActiveTimer, getProjectGroups, getProjects, getWorkLogs } from "./lib/storage";
 import type { ActiveTimer, Project, ProjectCategory, ReportPeriod, WorkLog } from "./lib/types";
 
 const PERIOD_TITLES: Record<ReportPeriod, string> = {
@@ -28,7 +28,7 @@ export default function ReportsCommand() {
         const [savedLogs, savedProjects, savedCategories, savedTimer] = await Promise.all([
           getWorkLogs(),
           getProjects(),
-          getProjectCategories(),
+          getProjectGroups(),
           getActiveTimer(),
         ]);
         setWorkLogs(savedLogs);
@@ -75,7 +75,7 @@ export default function ReportsCommand() {
         {categories.map((category) => (
           <List.Item
             key={category.id}
-            icon={getCategoryIcon(categories, category.id)}
+            icon={getProjectGroupIcon(categories, category.id)}
             title={category.name}
             accessories={[{ text: formatDuration(report.categorySeconds[category.id] ?? 0) }]}
           />
@@ -93,9 +93,9 @@ export default function ReportsCommand() {
         {report.projects.map((project) => (
           <List.Item
             key={project.projectId}
-            icon={project.type === "unknown" ? Icon.QuestionMark : getCategoryIcon(categories, project.type)}
+            icon={project.type === "unknown" ? Icon.QuestionMark : getProjectGroupIcon(categories, project.type)}
             title={project.projectName}
-            subtitle={project.type === "unknown" ? "UNKNOWN" : getCategoryName(categories, project.type).toUpperCase()}
+            subtitle={project.type === "unknown" ? "UNKNOWN" : getProjectGroupName(categories, project.type).toUpperCase()}
             accessories={[{ text: formatDuration(project.seconds) }]}
           />
         ))}
