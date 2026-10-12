@@ -1,3 +1,9 @@
+## [Plant Bare Domains] - {PR_MERGE_DATE}
+
+- Accept domains such as `example.com` in Plant a Website and the Plant Website AI tool, defaulting to HTTPS.
+- Preserve HTTP/HTTPS addresses, paths, and valid ports while rejecting unsafe schemes, malformed addresses, and embedded credentials.
+- Clarify the form's address guidance and validation errors.
+
 ## [Initial Version] - 2026-08-23
 
 - Discover a random website with Go for a Walk, plant a website, and open The Forest from Raycast.

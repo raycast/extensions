@@ -17,9 +17,45 @@ function addRequestDeadline(request: ClientRequest, operation: string) {
 }
 
 export function normalizeWebsiteUrl(value: string) {
-  const website = new URL(value.trim());
+  const input = value.trim();
+  if (!input || /[\s\\\p{Cc}]/u.test(input)) {
+    throw new Error("Enter a website address without spaces or backslashes");
+  }
+
+  const hasHttpScheme = /^https?:\/\//i.test(input);
+  // A host followed by a numeric port resembles a scheme to the URL parser.
+  const hasHostPort = /^(?:localhost|[^:/?#]+\.[^:/?#]+):\d+(?:[/?#]|$)/i.test(input);
+  if (!hasHttpScheme && /^[a-z][a-z\d+.-]*:/i.test(input) && !hasHostPort) {
+    throw new Error("Website must use HTTP or HTTPS");
+  }
+  if (input.startsWith("//") || /^https?:\/{3,}/i.test(input)) {
+    throw new Error("Enter a valid website address");
+  }
+  const authority = (hasHttpScheme ? input.slice(input.indexOf("://") + 3) : input).split(/[/?#]/, 1)[0];
+  if (authority.includes("@") || authority.endsWith(":")) {
+    throw new Error("Enter a valid website address without login credentials");
+  }
+
+  const website = new URL(hasHttpScheme ? input : `https://${input}`);
   if (website.protocol !== "http:" && website.protocol !== "https:") {
     throw new Error("Website must use HTTP or HTTPS");
+  }
+  const hostname = website.hostname;
+  const validHostname =
+    hostname.startsWith("[") ||
+    hostname
+      .replace(/\.$/, "")
+      .split(".")
+      .every((label) => /^[a-z\d](?:[a-z\d-]*[a-z\d])?$/i.test(label) && label.length <= 63);
+  if (
+    !hostname ||
+    !validHostname ||
+    hostname.length > 253 ||
+    website.username ||
+    website.password ||
+    (!hasHttpScheme && !hostname.includes(".") && hostname !== "localhost" && !hostname.startsWith("["))
+  ) {
+    throw new Error("Enter a valid website address without login credentials");
   }
   return website.toString();
 }
