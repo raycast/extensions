@@ -31,6 +31,9 @@ export default async function textToResume(input: TextToResumeInput): Promise<st
   } catch {
     throw new Error("resumeJson must be a JSON object encoded as a JSON string.");
   }
+  if (resume === null || typeof resume !== "object" || Array.isArray(resume)) {
+    throw new Error("resumeJson must encode a JSON Resume object, not a primitive or array.");
+  }
   const result = await validateResume(resume);
   if (!result.valid) {
     throw new Error(`Invalid JSON Resume: ${String(result.error)}. Correct the fields and retry.`);

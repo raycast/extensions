@@ -219,6 +219,8 @@ test("rejects invalid JSON and schema fields before writing", async () => {
     "[]",
     "42",
     '"string"',
+    '"{}"',
+    '"[]"',
     '{"education":[{"score":4}]}',
     '{"projects":[{"highlights":"bad"}]}',
     '{"work":[{"startDate":"yesterday"}]}',
