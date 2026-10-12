@@ -40,9 +40,10 @@ export default function UploadForm({ initialFiles = [] }: { initialFiles?: strin
       if (submitting.current) return;
       submitting.current = true;
       setIsLoading(true);
-      const toast = await showToast(Toast.Style.Animated, `Uploading ${files.length} file(s)...`);
+      let toast: Toast | undefined;
 
       try {
+        toast = await showToast(Toast.Style.Animated, `Uploading ${files.length} file(s)...`);
         const expiry = values.time as ExpiryTime;
         const result = await uploadFilesBatch(files, expiry, {
           uploadFile,
@@ -52,14 +53,18 @@ export default function UploadForm({ initialFiles = [] }: { initialFiles?: strin
         updateSuccessToast(toast, result.uploads);
         pop();
       } catch (error) {
+        // Toast creation can fail too; always release the guard in finally.
+        if (!toast) throw error;
         toast.style = Toast.Style.Failure;
 
         if (error instanceof UploadBatchError) {
           if (error.uploads.length > 0) {
             const uploadedCount = error.uploads.length;
             const fileLabel = error.totalFiles === 1 ? "file" : "files";
-            // Uploads are sequential; remove the successful prefix before retry.
-            setValue("file", files.slice(uploadedCount));
+            // Uploads are sequential, but the picker may have changed while
+            // they ran. Remove successful paths without replacing newer edits.
+            const uploadedPaths = new Set(files.slice(0, uploadedCount));
+            setValue("file", (currentFiles) => currentFiles.filter((file) => !uploadedPaths.has(file)));
             const clipboardMessage = error.clipboardCopied
               ? "Uploaded URLs copied to clipboard."
               : "Uploaded URLs were not copied.";

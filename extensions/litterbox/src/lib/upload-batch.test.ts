@@ -159,4 +159,31 @@ describe("uploadFilesBatch", () => {
     ).rejects.toMatchObject({ clipboardCopied: true, historyErrorMessage: "Storage unavailable" });
     expect(copyToClipboard).toHaveBeenCalledWith("https://litter.catbox.moe/one.txt");
   });
+  it.each(["upload", "history", "clipboard"] as const)(
+    "treats an empty %s error message as a failure",
+    async (stage) => {
+      const uploadFile = vi.fn().mockResolvedValue("https://litter.catbox.moe/one.txt");
+      const addRecentUpload = vi.fn().mockResolvedValue(undefined);
+      const copyToClipboard = vi.fn().mockResolvedValue(undefined);
+      const failingAction = { upload: uploadFile, history: addRecentUpload, clipboard: copyToClipboard }[stage];
+      failingAction.mockRejectedValue(new Error(""));
+
+      const result = uploadFilesBatch(["/synthetic/one.txt"], "24h", { uploadFile, addRecentUpload, copyToClipboard });
+      await expect(result).rejects.toBeInstanceOf(UploadBatchError);
+      await expect(result).rejects.toMatchObject({
+        message: "Upload failed",
+        clipboardCopied: stage === "history",
+        ...(stage === "upload" ? { failedFilename: "one.txt", uploads: [] } : {}),
+        ...(stage === "history" ? { historyErrorMessage: "Upload failed" } : {}),
+        ...(stage === "clipboard" ? { clipboardErrorMessage: "Upload failed" } : {}),
+      });
+      if (stage === "upload") {
+        expect(addRecentUpload).not.toHaveBeenCalled();
+        expect(copyToClipboard).not.toHaveBeenCalled();
+      } else {
+        expect(addRecentUpload).toHaveBeenCalledOnce();
+        expect(copyToClipboard).toHaveBeenCalledOnce();
+      }
+    },
+  );
 });

@@ -54,7 +54,7 @@ export class UploadBatchError extends Error {
 }
 
 function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Upload failed";
+  return error instanceof Error && error.message.trim() ? error.message : "Upload failed";
 }
 
 async function copyUploadedUrls(uploads: UploadedFile[], copyToClipboard: CopyToClipboardFn): Promise<void> {
@@ -118,7 +118,7 @@ export async function uploadFilesBatch(
     }
   }
 
-  if (uploadError || historyErrorMessage || clipboardErrorMessage) {
+  if (uploadError !== undefined || historyErrorMessage !== undefined || clipboardErrorMessage !== undefined) {
     throw new UploadBatchError({
       message: uploadError ?? historyErrorMessage ?? clipboardErrorMessage ?? "Upload failed",
       uploads,
