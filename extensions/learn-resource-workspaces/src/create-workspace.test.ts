@@ -21,6 +21,14 @@ vi.mock("react", () => ({
   useRef: (initial: unknown) => ({ current: initial }),
   useState: (initial: unknown) => [initial, vi.fn()],
 }));
+vi.mock("@raycast/utils", () => ({
+  showFailureToast: (error: unknown, options?: { title?: string }) =>
+    mocks.showToast({
+      style: "failure",
+      title: options?.title,
+      message: error instanceof Error ? error.message : String(error),
+    }),
+}));
 vi.mock("./learn-cli.js", () => ({
   createLearnWorkspace: mocks.createLearnWorkspace,
 }));

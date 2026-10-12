@@ -12,8 +12,8 @@ import {
   useNavigation,
   type LaunchProps,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { useEffect, useRef, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useRef, useState } from "react";
 import { CAPTURE_WORKSPACE_KEY } from "./capture.js";
 import type { BrowserTab } from "./browser.js";
 import { listLearnWorkspaces } from "./learn-cli.js";
@@ -64,11 +64,7 @@ function CaptureSelection({ context }: { context: CaptureContext }) {
       });
     } catch (error) {
       launching.current = false;
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not save browser URL",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailureToast(error, { title: "Could not save browser URL" });
     }
   }
 
@@ -161,18 +157,8 @@ function WorkspaceSelection({ executable }: { executable: string }) {
     error,
     revalidate,
   } = usePromise(listLearnWorkspaces, [executable], {
-    onError: () => undefined,
     failureToastOptions: { title: "Could not list Learn workspaces" },
   });
-
-  useEffect(() => {
-    if (!error) return;
-    void showToast({
-      style: Toast.Style.Failure,
-      title: "Could not list Learn workspaces",
-      message: error.message,
-    });
-  }, [error]);
 
   function createWorkspace() {
     push(

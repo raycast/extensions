@@ -24,7 +24,15 @@ vi.mock("@raycast/api", () => ({
   showToast: mocks.showToast,
   Toast: { Style: { Failure: "failure" } },
 }));
-vi.mock("@raycast/utils", () => ({ usePromise: vi.fn() }));
+vi.mock("@raycast/utils", () => ({
+  showFailureToast: (error: unknown, options?: { title?: string }) =>
+    mocks.showToast({
+      style: "failure",
+      title: options?.title,
+      message: error instanceof Error ? error.message : String(error),
+    }),
+  usePromise: vi.fn(),
+}));
 vi.mock("react", () => ({
   useState: (initial: unknown) => [initial, vi.fn()],
   useRef: (initial: unknown) => ({ current: initial }),

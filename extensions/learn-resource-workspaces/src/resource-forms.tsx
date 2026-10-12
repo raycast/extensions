@@ -1,4 +1,11 @@
-import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { updateLearnTags } from "./learn-cli.js";
 import {
@@ -37,11 +44,7 @@ export function EditTagsForm({
       await showToast({ style: Toast.Style.Success, title: "Tags updated" });
       await onSaved();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not update tags",
-        message: (error as Error).message,
-      });
+      await showFailureToast(error, { title: "Could not update tags" });
     } finally {
       busy.current = false;
       setLoading(false);

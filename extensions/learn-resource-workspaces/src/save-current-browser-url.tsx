@@ -1,16 +1,14 @@
 import {
   BrowserExtension,
   closeMainWindow,
-  getFrontmostApplication,
   launchCommand,
   LaunchType,
   LocalStorage,
   PopToRootType,
   showHUD,
-  showToast,
-  Toast,
   type LaunchProps,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   captureBrowserUrl,
   getSavedCaptureWorkspace,
@@ -31,7 +29,6 @@ export default async function SaveCurrentBrowserUrl({
   try {
     const executable = getLearnExecutable();
     let request = launchContext?.capture;
-    const application = request ? undefined : await getFrontmostApplication();
     await closeMainWindow({
       clearRootSearch: true,
       popToRootType: PopToRootType.Immediate,
@@ -42,10 +39,7 @@ export default async function SaveCurrentBrowserUrl({
         BrowserExtension.getTabs(),
         listLearnWorkspaces(executable),
       ]);
-      const activeTabs = getActiveBrowserTabs({
-        applicationName: application?.name,
-        tabs,
-      });
+      const activeTabs = getActiveBrowserTabs({ tabs });
       const savedWorkspace = await getSavedCaptureWorkspace({
         listWorkspaces: async () => workspaces,
         store: LocalStorage,
@@ -75,11 +69,7 @@ export default async function SaveCurrentBrowserUrl({
     });
     await showResult(result, request);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could not save browser URL",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: "Could not save browser URL" });
   }
 }
 
@@ -88,10 +78,8 @@ async function showResult(
   request: BrowserCaptureRequest,
 ): Promise<void> {
   if (result.status === "duplicate") {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(new Error(`This URL is already in ${request.workspace}`), {
       title: "Already saved",
-      message: `This URL is already in ${request.workspace}`,
     });
     return;
   }

@@ -15,7 +15,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import path from "node:path";
 import { AddResourceForm } from "./add-resource.js";
@@ -172,6 +172,7 @@ export default function BrowseResources() {
   );
 }
 
+const AGENT_NAMES = { claude: "Claude", codex: "Codex", pi: "Pi" } as const;
 const STATUS_COLORS = {
   pending: Color.Yellow,
   ingested: Color.Green,
@@ -247,11 +248,7 @@ export function WorkspaceResourceList({
     try {
       await action();
     } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title,
-        message: (e as Error).message,
-      });
+      await showFailureToast(e, { title });
     }
   }
   async function ingest(agent?: IngestAgent) {
@@ -290,11 +287,7 @@ export function WorkspaceResourceList({
       });
       await revalidate();
     } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not remove resource",
-        message: (e as Error).message,
-      });
+      await showFailureToast(e, { title: "Could not remove resource" });
     } finally {
       busy.current = false;
     }
@@ -356,7 +349,7 @@ export function WorkspaceResourceList({
           {(["claude", "codex", "pi"] as const).map((agent) => (
             <Action
               key={agent}
-              title={`Ingest with ${agent}`}
+              title={`Ingest with ${AGENT_NAMES[agent]}`}
               onAction={() => ingest(agent)}
             />
           ))}

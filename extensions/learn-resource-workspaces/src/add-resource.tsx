@@ -9,7 +9,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { CAPTURE_WORKSPACE_KEY } from "./capture.js";
 import { CreateWorkspaceForm } from "./create-workspace.js";
@@ -102,11 +102,7 @@ export function AddResourceForm({
         executable,
       );
     } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not add resource",
-        message: (e as Error).message,
-      });
+      await showFailureToast(e, { title: "Could not add resource" });
       submitting.current = false;
       setSaving(false);
       return;
@@ -120,10 +116,8 @@ export function AddResourceForm({
       if (onAdded) await onAdded();
       else await closeMainWindow();
     } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(e, {
         title: "Resource saved; could not refresh the view",
-        message: (e as Error).message,
       });
     } finally {
       submitting.current = false;
@@ -134,7 +128,7 @@ export function AddResourceForm({
   return (
     <Form
       isLoading={isLoading || saving}
-      navigationTitle="Add Learn Resource"
+      navigationTitle={onAdded ? "Add Learn Resource" : undefined}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Add Resource" onSubmit={submit} />

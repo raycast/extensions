@@ -129,7 +129,7 @@ export async function updateLearnTags(
       !help.stdout.includes("literal resource/tag operands")
     ) {
       throw new Error(
-        "Removing tags named w or -workspace requires an updated Learn CLI. Build it from the latest Learn source checkout.",
+        "Removing tags named w or -workspace requires a newer Learn CLI. Update it with: npm install -g @humanive/learn-cli@latest",
       );
     }
   }

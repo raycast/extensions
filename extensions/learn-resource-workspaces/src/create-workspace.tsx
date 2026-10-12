@@ -7,6 +7,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { CAPTURE_WORKSPACE_KEY } from "./capture.js";
 import { createLearnWorkspace } from "./learn-cli.js";
@@ -62,10 +63,8 @@ export function CreateWorkspaceForm({
         await closeMainWindow();
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: "Could not finish workspace setup",
-        message: error instanceof Error ? error.message : String(error),
       });
     } finally {
       submitting.current = false;
@@ -76,7 +75,7 @@ export function CreateWorkspaceForm({
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle="Create Learn Workspace"
+      navigationTitle={onCreated ? "Create Learn Workspace" : undefined}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Workspace" onSubmit={submit} />

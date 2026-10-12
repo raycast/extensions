@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "learn-raycast",
+  "name": "learn-resource-workspaces",
   "version": "0.1.0",
   "private": true,
   "description": "Collect, browse, and organize resources in local Learn workspaces",
@@ -9,7 +9,7 @@
   "type": "module",
   "scripts": {
     "build": "ray build -e dist",
-    "develop": "ray develop",
+    "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish",
@@ -31,7 +31,7 @@
     "typescript": "5.9.3",
     "vitest": "1.6.1"
   },
-  "title": "Learn",
+  "title": "Learn - Resource Workspaces",
   "icon": "icon.png",
   "platforms": [
     "macOS"
@@ -43,30 +43,35 @@
     {
       "name": "save-current-browser-url",
       "title": "Save Current Browser URL",
+      "subtitle": "Learn",
       "description": "Save the active browser tab to the selected Learn workspace",
       "mode": "no-view"
     },
     {
       "name": "browse-resources",
       "title": "Browse Learn Resources",
+      "subtitle": "Learn",
       "description": "Browse workspaces, find resources, edit tags, and open local content",
       "mode": "view"
     },
     {
       "name": "add-resource",
       "title": "Add Learn Resource",
+      "subtitle": "Learn",
       "description": "Save a URL, repository, or local path with a title and tags",
       "mode": "view"
     },
     {
       "name": "create-workspace",
       "title": "Create Learn Workspace",
+      "subtitle": "Learn",
       "description": "Create a learning workspace and select it for browser capture",
       "mode": "view"
     },
     {
       "name": "choose-workspace",
       "title": "Choose Learn Workspace",
+      "subtitle": "Learn",
       "description": "Choose the workspace used by browser capture",
       "mode": "view"
     }

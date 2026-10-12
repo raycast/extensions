@@ -1,4 +1,4 @@
-# Learn
+# Learn - Resource Workspaces
 
 Collect, browse, and organize resources in local [Learn](https://github.com/Humanive/Learn) workspaces. Save the current browser tab in one step, add URLs or local paths with titles and tags, and find your collected resources without leaving Raycast.
 
@@ -8,7 +8,7 @@ Saving adds a pending resource. Start ingestion separately from the resource lis
 
 - macOS and Raycast.
 - A browser connected to the [Raycast Browser Extension](https://www.raycast.com/browser-extension).
-- A compatible Learn CLI that supports `new`, `list --json`, `<workspace> ls --json`, `add`, `tag`, `rm`, and `ingest`. Ordinary tag editing works with published 0.1.0. Removing tags named `w` or `-workspace` requires the latest CLI's literal operand support; the extension checks compatibility before attempting those changes.
+- A compatible Learn CLI that supports `new`, `list --json`, `<workspace> ls --json`, `add`, `tag`, `rm`, and `ingest`. Update with `npm install -g @humanive/learn-cli@latest` if a tag operation reports that the CLI is out of date.
 
 ## Set Up the Learn CLI
 
@@ -23,35 +23,13 @@ command -v learn
 
 Use the path from `command -v learn` in the **Learn Executable** preference, or keep the default `learn` if it is on Raycast's PATH. Do not install the unrelated unscoped packages `learn` or `learn-cli`.
 
-For development, you can also build the CLI from a Learn checkout that includes the Raycast integration. Install Git, Node.js 24, and pnpm 12.6.0, then clone Learn and build its CLI:
-
-```bash
-git clone https://github.com/Humanive/Learn.git
-cd Learn
-pnpm install --frozen-lockfile
-pnpm -r --filter @humanive/learn-core --filter @humanive/learn-cli build
-chmod +x apps/cli/dist/cli.js
-
-node apps/cli/dist/cli.js new browser-agents
-node apps/cli/dist/cli.js list --json
-
-# Copy this absolute path into the Learn Executable preference.
-node -e 'console.log(process.cwd() + "/apps/cli/dist/cli.js")'
-```
-
-`list --json` should print a JSON array containing your workspace name. Keep the checkout and its dependencies in place: the compiled CLI depends on the other installed packages in the repository.
-
-In Raycast's extension preferences, set **Learn Executable** to the absolute path printed above. This preference accepts an executable file path; use a full path instead of `~` or a command such as `node /path/to/cli.js`.
-
 The CLI requires Node to be available in Raycast's PATH. Homebrew's standard locations (`/opt/homebrew/bin` and `/usr/local/bin`) are included automatically. If Node is installed only through a shell version manager, configure an executable wrapper that uses the absolute Node path and executes the CLI with its arguments, then point **Learn Executable** to that wrapper.
 
 ## Connect Your Browser
 
 Install the Raycast Browser Extension in your browser and complete its setup. Raycast can prompt you to install it when the command first requests browser tabs.
 
-This extension reads tabs exclusively through `BrowserExtension.getTabs()`. Use a browser supported by Raycast's browser integration. The local application filter accepts Safari, Google Chrome, Google Chrome Canary, Arc, Aside, Brave Browser, Microsoft Edge, Vivaldi, Opera, and Chromium, but appearing in that filter alone does not guarantee that the Raycast browser integration supports that browser. Firefox is not currently accepted by the extension.
-
-Only HTTP and HTTPS pages can be saved. Browser settings pages, new-tab pages, and local files are not supported.
+This extension reads tabs exclusively through `BrowserExtension.getTabs()`, so any browser connected to the Raycast Browser Extension works, including Dia, Comet, and Zen. Only HTTP and HTTPS pages can be saved. Browser settings pages, new-tab pages, and local files are not supported.
 
 ## Commands
 
@@ -101,27 +79,12 @@ Enter a workspace name to create it through the Learn CLI. The extension selects
 
 ## Troubleshooting
 
-- **Duplicate commands under Learn and Learn Browser Capture:** two development registrations are enabled. In Raycast Settings, search for **Learn Browser Capture** and disable the old two-command extension. Keep **Learn** enabled. This does not remove learning workspaces or resources.
 - **No Learn workspace found:** use **Create Learn Workspace** or create one from the workspace picker's empty state.
 - **Learn returned an invalid workspace list:** check that your CLI supports `list --json` and prints a JSON array without extra output.
 - **The Learn executable cannot be found:** set **Learn Executable** to an absolute path and ensure the file is executable.
 - **Node cannot be found:** check the Node PATH requirement in the CLI setup section.
 - **No active browser tab found:** check that the browser is connected to Raycast and has an active HTTP/HTTPS tab.
-- **Switch to a supported browser:** bring an accepted browser to the foreground before invoking the command.
 
 ## Data
 
 The extension passes the selected URL and page title to the local Learn CLI. Learn records them in the selected workspace, under `~/Learn` by default. Raycast LocalStorage holds the selected workspace name. The extension does not upload captured resources to a remote service; any later ingestion uses the adapters configured in Learn.
-
-## Development
-
-Inside the Learn monorepo:
-
-```bash
-pnpm --filter learn-raycast develop
-pnpm --filter learn-raycast build
-pnpm --filter learn-raycast test
-pnpm --filter learn-raycast lint
-```
-
-In a standalone extension checkout, use `npm ci` followed by `npm run build`, `npm test`, and `npm run lint`. The extension includes its own npm lockfile for Raycast Store CI.

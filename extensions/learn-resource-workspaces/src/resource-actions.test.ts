@@ -60,7 +60,15 @@ vi.mock("@raycast/api", () => {
     useNavigation: () => ({ push: mocks.push, pop: mocks.pop }),
   };
 });
-vi.mock("@raycast/utils", () => ({ usePromise: mocks.usePromise }));
+vi.mock("@raycast/utils", () => ({
+  showFailureToast: (error: unknown, options?: { title?: string }) =>
+    mocks.showToast({
+      style: "failure",
+      title: options?.title,
+      message: error instanceof Error ? error.message : String(error),
+    }),
+  usePromise: mocks.usePromise,
+}));
 vi.mock("react", () => ({
   useRef: (value: unknown) => ({ current: value }),
   useState: (value: unknown) => [value, vi.fn()],
@@ -264,7 +272,7 @@ describe("resource actions", () => {
     );
   });
   it("starts the explicitly selected agent in Terminal", async () => {
-    await action(list(), "Ingest with pi").props.onAction!();
+    await action(list(), "Ingest with Pi").props.onAction!();
     expect(mocks.startIngestion).toHaveBeenCalledWith(
       "/bin/learn",
       "papers",

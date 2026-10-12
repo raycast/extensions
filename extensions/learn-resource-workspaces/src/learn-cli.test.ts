@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => ({ runAppleScript: vi.fn() }));
 vi.mock("@raycast/utils", () => ({ runAppleScript: mocks.runAppleScript }));
 
 const testDir = fs.mkdtempSync(
-  path.join(os.tmpdir(), "learn-raycast-integration-"),
+  path.join(os.tmpdir(), "learn-resource-workspaces-integration-"),
 );
 const testHome = path.join(testDir, "home");
 const executable = path.join(testDir, "learn wrapper");

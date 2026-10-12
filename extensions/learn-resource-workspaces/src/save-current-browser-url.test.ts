@@ -27,6 +27,14 @@ vi.mock("@raycast/api", () => ({
   showToast: mocks.showToast,
   Toast: { Style: { Failure: "failure" } },
 }));
+vi.mock("@raycast/utils", () => ({
+  showFailureToast: (error: unknown, options?: { title?: string }) =>
+    mocks.showToast({
+      style: "failure",
+      title: options?.title,
+      message: error instanceof Error ? error.message : String(error),
+    }),
+}));
 vi.mock("./learn-cli.js", () => ({
   listLearnWorkspaces: mocks.listLearnWorkspaces,
   runLearn: mocks.runLearn,
@@ -241,8 +249,11 @@ describe("Save Current Browser URL", () => {
     expect(mocks.showHUD).not.toHaveBeenCalled();
   });
 
-  it("reports an unsupported foreground app without opening an empty error page", async () => {
+  it("reports when the browser has no active tab", async () => {
     mocks.getFrontmostApplication.mockResolvedValue({ name: "Notes" });
+    mocks.getTabs.mockResolvedValue([
+      { id: 1, url: "https://example.com", active: false },
+    ]);
 
     await SaveCurrentBrowserUrl(launchProps);
 
@@ -250,7 +261,7 @@ describe("Save Current Browser URL", () => {
     expect(mocks.showToast).toHaveBeenCalledWith({
       style: "failure",
       title: "Could not save browser URL",
-      message: "Switch to a supported browser before saving its URL",
+      message: "No active browser tab found",
     });
     expect(mocks.runLearn).not.toHaveBeenCalled();
     expect(mocks.launchCommand).not.toHaveBeenCalled();
