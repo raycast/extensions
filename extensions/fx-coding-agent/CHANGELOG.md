@@ -1,6 +1,6 @@
 # Fx Coding Agent Changelog
 
-## [Fix Request Cancellation] - {PR_MERGE_DATE}
+## [Fix Request Cancellation] - 2026-10-12
 
 - Stop active Ask Fx requests and their child processes when leaving the result view, starting another request, or using the Cancel action.
 - Ensure timed-out requests stop their tools and cannot return partial JSON as a successful response.
