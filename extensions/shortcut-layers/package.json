@@ -47,6 +47,15 @@
         { "title": "Instant — a single key runs its action", "value": "instant" },
         { "title": "Search — type to filter, press Enter to run", "value": "search" }
       ]
+    },
+    {
+      "name": "copyToClipboard",
+      "title": "Copy Exported JSON",
+      "label": "Copy to the clipboard too",
+      "description": "Also copy exported layers to the clipboard, in addition to writing the file",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {

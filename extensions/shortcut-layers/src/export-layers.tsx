@@ -1,4 +1,4 @@
-import { showHUD, showToast, Toast } from "@raycast/api";
+import { Clipboard, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
@@ -12,17 +12,41 @@ export default async function Command() {
     return;
   }
 
-  try {
-    const path = join(homedir(), "Downloads", exportFileName());
-    writeFileSync(path, layersToJson(layers), "utf8");
-  } catch (error) {
+  const json = layersToJson(layers);
+  const { copyToClipboard } = getPreferenceValues<Preferences.ExportLayers>();
+
+  const saved = writeExport(json);
+  // Copy when asked, and always when the file could not be written.
+  const copied = (copyToClipboard || !saved) && (await copyExport(json));
+
+  if (!saved && !copied) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Could not write the export file",
-      message: error instanceof Error ? error.message : String(error),
+      title: "Export failed",
+      message: "Could not write the file or copy to the clipboard",
     });
     return;
   }
 
-  await showHUD(`Exported ${layers.length} layer${layers.length === 1 ? "" : "s"} to Downloads`);
+  const count = `${layers.length} layer${layers.length === 1 ? "" : "s"}`;
+  const where = [saved ? "saved to Downloads" : null, copied ? "copied" : null].filter(Boolean).join(", ");
+  await showHUD(`Exported ${count} (${where})`);
+}
+
+function writeExport(json: string): boolean {
+  try {
+    writeFileSync(join(homedir(), "Downloads", exportFileName()), json, "utf8");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function copyExport(json: string): Promise<boolean> {
+  try {
+    await Clipboard.copy(json);
+    return true;
+  } catch {
+    return false;
+  }
 }
