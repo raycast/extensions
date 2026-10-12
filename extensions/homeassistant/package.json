@@ -12,7 +12,8 @@
     "krsntn",
     "mikikiv",
     "techmaved",
-    "mattiacolombomc"
+    "mattiacolombomc",
+    "mateus_badalotti"
   ],
   "license": "MIT",
   "description": "Manage your smart home with Raycast",
@@ -136,6 +137,21 @@
       "subtitle": "Home Assistant",
       "description": "Get/Set states of Home Assistant climate entities",
       "mode": "view"
+    },
+    {
+      "name": "acmenu",
+      "title": "AC Menu",
+      "subtitle": "Home Assistant",
+      "description": "Control Home Assistant air conditioners from the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "toggle-ac-menu",
+      "title": "Toggle AC Menu",
+      "subtitle": "Home Assistant",
+      "description": "Show or hide the air conditioner menu bar item",
+      "mode": "no-view"
     },
     {
       "name": "attributes",
@@ -730,6 +746,7 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
+    "test:ac": "node --experimental-strip-types --test tests/ac.test.mjs",
     "dev": "ray develop",
     "build": "ray build -e dist",
     "fix-lint": "ray lint --fix",
