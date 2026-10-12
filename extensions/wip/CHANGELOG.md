@@ -1,6 +1,6 @@
 # WIP Changelog
 
-## [Fix todo search debounce] - {PR_MERGE_DATE}
+## [Fix todo search debounce] - 2026-10-12
 
 - Cancel pending debounced todo searches when the search query changes
 
