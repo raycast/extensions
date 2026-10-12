@@ -82,6 +82,21 @@ function readHistoryEntry(filePath: string) {
   }
 }
 
+export async function getExistingHistoryDownloadPath(
+  item: WallpaperHistoryItem,
+) {
+  for (const event of item.events) {
+    if (!event.downloadPath) continue;
+    try {
+      await fs.promises.access(event.downloadPath);
+      return event.downloadPath;
+    } catch {
+      // Try an older download if this file was removed.
+    }
+  }
+  return undefined;
+}
+
 export function recordWallpaperHistory(
   input: WallpaperHistoryInput,
 ): WallpaperHistoryEntry {
@@ -229,6 +244,21 @@ export function clearWallpaperHistory() {
   }
 
   return files.length;
+}
+
+export async function getExistingHistoryDownloadPath(
+  item: WallpaperHistoryItem,
+) {
+  for (const event of item.events) {
+    if (!event.downloadPath) continue;
+    try {
+      await fs.promises.access(event.downloadPath);
+      return event.downloadPath;
+    } catch {
+      // Try an older download if this file was removed.
+    }
+  }
+  return undefined;
 }
 
 export function recordWallpaperHistoryBestEffort(input: WallpaperHistoryInput) {

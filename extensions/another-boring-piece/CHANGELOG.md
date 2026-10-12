@@ -6,6 +6,7 @@
 - Added history search by artwork words, artist, creation year, usage dates, and action type, plus a tool to set a wallpaper directly from history.
 - Show each wallpaper once in history, with every recorded action and timestamp in its details, newest first.
 - Deleting a wallpaper from history removes all its recorded actions.
+- Keep earlier downloads available in Finder.
 - Fixed README screenshot links.
 
 ## [Windows Support] - 2026-06-30

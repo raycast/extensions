@@ -1,4 +1,3 @@
-import fs from "fs";
 import {
   Action,
   ActionPanel,
@@ -19,24 +18,24 @@ import {
   clearWallpaperHistory,
   deleteWallpaperHistoryEntry,
   readWallpaperHistory,
+  getExistingHistoryDownloadPath,
   WallpaperHistoryEntry,
   WallpaperHistoryItem,
 } from "./history-store";
 
 const HISTORY_LIMIT = 500;
 
-type HistoryListEntry = WallpaperHistoryItem & {
-  downloadFileExists: boolean;
-};
+type HistoryListEntry = WallpaperHistoryItem;
 
 async function loadHistory() {
   await new Promise<void>((resolve) => setTimeout(resolve, 0));
-  return readWallpaperHistory({ limit: HISTORY_LIMIT }).map((entry) => ({
-    ...entry,
-    downloadFileExists: entry.downloadPath
-      ? fs.existsSync(entry.downloadPath)
-      : false,
-  }));
+  const entries = readWallpaperHistory({ limit: HISTORY_LIMIT });
+  return Promise.all(
+    entries.map(async (entry) => ({
+      ...entry,
+      downloadPath: await getExistingHistoryDownloadPath(entry),
+    })),
+  );
 }
 
 function formatTimestamp(timestamp: string) {
@@ -107,7 +106,7 @@ function HistoryActions(props: {
           icon={Icon.Folder}
           target={environment.supportPath}
         />
-        {entry.downloadFileExists && entry.downloadPath ? (
+        {entry.downloadPath ? (
           <Action.ShowInFinder
             title="Show Download in Finder"
             path={entry.downloadPath}

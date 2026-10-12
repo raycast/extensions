@@ -132,3 +132,18 @@ test("setting from history uses stored artwork and rejects unknown IDs", async (
   assert.equal(result.status, "selected");
   assert.deepEqual(JSON.parse(JSON.stringify(selected[0])), saved.wallpaper);
 });
+
+
+test("Finder uses an older existing download after later actions or missing downloads", async (t) => {
+  const { store, addEvent } = createStore(t);
+  const downloadPath = path.join(os.tmpdir(), `wallpaper-download-${process.pid}.jpg`);
+  fs.writeFileSync(downloadPath, "image");
+  t.after(() => fs.rmSync(downloadPath, { force: true }));
+  const downloaded = addEvent("download", "a", "2026-01-01T00:00:00.000Z", "downloaded");
+  downloaded.downloadPath = downloadPath;
+  const missing = { ...downloaded, eventId: "missing", downloadPath: `${downloadPath}-missing` };
+  const selected = addEvent("selected", "a", "2026-01-03T00:00:00.000Z");
+  assert.equal(await store.getExistingHistoryDownloadPath({ ...selected, events: [selected, missing, downloaded] }), downloadPath);
+  assert.equal(await store.getExistingHistoryDownloadPath({ ...selected, events: [selected, missing] }), undefined);
+});
+
