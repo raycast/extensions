@@ -6,6 +6,7 @@ struct Request: Decodable {
     let text: String?
     let paths: [String]?
     let instruction: String?
+    let shareFailureMessage: String?
     let rightToLeft: Bool?
 }
 
@@ -22,11 +23,13 @@ func finish(_ status: String, _ message: String? = nil, code: Int32 = 0) -> Neve
 final class ShareHost: NSObject, NSApplicationDelegate, NSSharingServiceDelegate, NSWindowDelegate {
     let items: [Any]
     let instruction: String
+    let shareFailureMessage: String
     let rightToLeft: Bool
     var window: NSWindow!
     var service: NSSharingService?
-    init(items: [Any], instruction: String, rightToLeft: Bool) {
+    init(items: [Any], instruction: String, shareFailureMessage: String, rightToLeft: Bool) {
         self.items = items; self.instruction = instruction; self.rightToLeft = rightToLeft
+        self.shareFailureMessage = shareFailureMessage
     }
     func applicationDidFinishLaunching(_ notification: Notification) {
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 160), styleMask: [.titled, .closable], backing: .buffered, defer: false)
@@ -59,6 +62,13 @@ final class ShareHost: NSObject, NSApplicationDelegate, NSSharingServiceDelegate
     func sharingService(_ sharingService: NSSharingService, didShareItems items: [Any]) { finish("shared") }
     func sharingService(_ sharingService: NSSharingService, didFailToShareItems items: [Any], error: Error) {
         if (error as NSError).code == NSUserCancelledError { finish("cancelled") }
+        // Raycast may have unloaded the command after readiness; report failures here too.
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = "QuickDropcast"
+        alert.informativeText = shareFailureMessage
+        NSApp.activate(ignoringOtherApps: true)
+        alert.runModal()
         finish("error", "shareFailed", code: 1)
     }
     func windowShouldClose(_ sender: NSWindow) -> Bool { finish("cancelled") }
@@ -86,6 +96,6 @@ default: finish("error", "unsupportedKind", code: 1)
 }
 let app = NSApplication.shared
 app.setActivationPolicy(.regular)
-let host = ShareHost(items: items, instruction: request.instruction ?? "Choose the device in QuickDrop. Close this window to cancel.", rightToLeft: request.rightToLeft ?? false)
+let host = ShareHost(items: items, instruction: request.instruction ?? "Choose the device in QuickDrop. Close this window to cancel.", shareFailureMessage: request.shareFailureMessage ?? "QuickDrop could not share the content. Check its window and the device connection.", rightToLeft: request.rightToLeft ?? false)
 app.delegate = host
 app.run()

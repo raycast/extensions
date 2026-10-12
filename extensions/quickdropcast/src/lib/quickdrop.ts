@@ -97,6 +97,7 @@ export async function share(request: ShareRequest): Promise<void> {
       JSON.stringify({
         ...request,
         instruction: t("instruction"),
+        shareFailureMessage: t("shareFailed"),
       }),
     );
   });
