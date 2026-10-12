@@ -1,5 +1,9 @@
 import { Model, ReasoningLevel } from "../lib/OpenAI";
 
+export interface ItemLaunchContext {
+  id?: string;
+}
+
 export interface Action {
   id: string;
   name: string;

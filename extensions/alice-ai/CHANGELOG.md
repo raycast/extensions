@@ -1,5 +1,10 @@
 # Changelog
 
+## [Quicklink and Menu Bar Launch Fixes] - {PR_MERGE_DATE}
+
+- Fix Quicklinks that opened the action list instead of the saved action by passing the action ID through launch context.
+- Fix menu-bar launches of saved actions and history entries using the same launch context.
+
 ## [Raycast Compatibility and Latest AI Models] - 2026-10-11
 
 - Fix extension startup failures caused by missing `zustand/vanilla` package exports.
