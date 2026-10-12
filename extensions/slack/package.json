@@ -260,6 +260,11 @@
       "title": "Archive Channels",
       "name": "archive-channels",
       "description": "Archive one or more Slack channels. Pass channel IDs (starting with C or G), one per line; use Get Channels to resolve channel names to IDs. Returns whether each channel was archived."
+    },
+    {
+      "title": "Rename Channel",
+      "name": "rename-channel",
+      "description": "Rename a Slack channel. Pass the channel ID (starting with C or G) and the new name without the leading #; use Get Channels to resolve channel names to IDs. Names are lowercased and spaces become hyphens. Returns the channel's new name."
     }
   ],
   "ai": {
