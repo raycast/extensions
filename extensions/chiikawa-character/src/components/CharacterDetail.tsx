@@ -1,6 +1,8 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import { CHARACTERS, CATEGORY_LABELS } from "../data/characters";
 import { ChiikawaCharacter } from "../types/character";
+import { existsSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 
 interface Props {
   character: ChiikawaCharacter;
@@ -19,6 +21,9 @@ function toMarkdown(character: ChiikawaCharacter): string {
   return [
     `# ${character.nameEn} (${character.nameJp})`,
     "",
+    ...(character.icon && existsSync(character.icon)
+      ? [`![${character.nameEn}](${pathToFileURL(character.icon).href}?raycast-width=250&raycast-height=250)`, ""]
+      : []),
     `**Category:** ${CATEGORY_LABELS[character.category]}`,
     "",
     character.description,

@@ -54,8 +54,15 @@ Raycast extension for searching and browsing [Chiikawa](https://www.chiikawaoffi
 
 ## Detail Actions
 
+Each character's detail view includes its bundled image above the profile. Images work offline; if an image is unavailable, the profile still shows its text and actions.
+
 - Copy Japanese name (`Cmd + C`)
 - Copy bio (`Cmd + Shift + C`)
 - [Open official page](https://www.chiikawaofficial.com/characters) (`Cmd + O`)
 - Copy profile as markdown (`Cmd + M`)
 - Jump to random character (`Cmd + R`)
+
+## Development Checks
+
+Run `npm ci`, `npm test`, `npm run lint`, `npx tsc --noEmit`, and `npm run build`.
+Tests inspect the detail component's markdown and actions with a mocked Raycast API, including all bundled images, missing images, and optional catchphrases. Native Raycast rendering should be checked separately.
