@@ -1,5 +1,8 @@
 # Antinote Changelog
 
+## [Fix crash when the database is missing] - {PR_MERGE_DATE}
+- Search Notes and Search Slotted Notes no longer crash when Antinote's database file does not exist; they show a message instead: [#30498](https://github.com/raycast/extensions/issues/30498)
+
 ## [v2.0.0] - 2026-08-10
 - Added support for Antinote v2.* (Beta)
 - Added "Search Slotted Notes" command for Antinote v2.* (Beta)
