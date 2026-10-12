@@ -14,6 +14,18 @@ const jsonResponse = (products: unknown[]) => Response.json({ products });
 
 afterEach(() => mock.restoreAll());
 
+test("a storefront returning fresh IDs forever stops at a finite request budget", async () => {
+  let requests = 0;
+  mock.method(globalThis, "fetch", async () => {
+    if (++requests > 101) throw new Error("Exceeded the finite request budget");
+    return jsonResponse([product(requests)]);
+  });
+  const catalog = await fetchProducts(productsUrl);
+  assert.equal(catalog.paginationLimited, true);
+  assert.equal(catalog.products.length, 101);
+  assert.equal(requests, 101);
+});
+
 test("Shopify's ceiling preserves the loaded catalog and explicitly marks it incomplete", async () => {
   const requests: number[] = [];
   mock.method(globalThis, "fetch", async (input: string) => {

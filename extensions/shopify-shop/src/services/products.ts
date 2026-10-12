@@ -2,6 +2,8 @@ import type { Product } from "../types";
 
 const PAGE_SIZE = 250;
 const PAGINATION_LIMIT = 25000;
+// Allow Shopify's accessible pages plus one completion probe, even if a storefront ignores its ceiling.
+const MAX_PAGE_REQUESTS = PAGINATION_LIMIT / PAGE_SIZE + 1;
 
 export async function fetchProducts(
   productsUrl: string,
@@ -12,7 +14,7 @@ export async function fetchProducts(
   const url = new URL(productsUrl);
   url.searchParams.set("limit", String(PAGE_SIZE));
 
-  for (let page = 1; ; page++) {
+  for (let page = 1; page <= MAX_PAGE_REQUESTS; page++) {
     signal?.throwIfAborted();
     url.searchParams.set("page", String(page));
     const response = await fetch(url.toString(), { signal });
@@ -68,4 +70,6 @@ export async function fetchProducts(
       throw new Error("Store returned a repeated products page; pagination could not continue");
     }
   }
+
+  return { products, paginationLimited: true };
 }

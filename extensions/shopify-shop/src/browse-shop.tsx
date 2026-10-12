@@ -55,7 +55,7 @@ export default function Command() {
       if (catalog.paginationLimited) {
         showToast({
           style: Toast.Style.Failure,
-          title: "Store Pagination Limit Reached",
+          title: "Pagination Limit Reached",
           message: `Showing ${catalog.products.length} products. Select a smaller collection to browse more.`,
         });
       }
@@ -136,7 +136,7 @@ export default function Command() {
     <Grid
       navigationTitle={
         searchText.length < 2 && resp?.paginationLimited
-          ? `Showing ${products.length} Products (Store Limit Reached)`
+          ? `Showing ${products.length} Products (Pagination Limit Reached)`
           : undefined
       }
       columns={columns}
