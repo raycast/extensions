@@ -1,11 +1,16 @@
 <div align="center">
-  <br/>
-  <br/>
-  <img src="./assets/icon.png" alt="fx Coding Agent" width="100"/>
-  <h3>fx Coding Agent</h3>
-  <p>Run fx, revisit sessions, and delegate coding work from Raycast</p>
-  <br/>
-  <br/>
+    <br/>
+    <br/>
+    <img src="./assets/icon.png" alt="fx Coding Agent" width="100"/>
+    <h3>fx Coding Agent</h3>
+    <p>Run fx, revisit sessions, and delegate coding work from Raycast</p>
+    <p align="center">
+        <a href="https://buymeacoffee.com/0xdhrv"><img alt="Buy Me a Coffee" src="https://shieldcn.dev/badge/buymecoffee-FFDD04.svg?size=default&amp;theme=neutral&amp;logo=buymeacoffee" /></a>
+        <a href="https://github.com/0xdhrv"><img alt="GitHub" src="https://shieldcn.dev/badge/github-181717.svg?size=default&amp;theme=neutral&amp;logo=github" /></a>
+        <a href="https://x.com/0xdhrv"><img alt="Twitter" src="https://shieldcn.dev/badge/twitter-1DA1F2.svg?size=default&amp;theme=neutral&amp;logo=x" /></a>
+    </p>
+    <br/>
+    <br/>
 </div>
 
 fx Coding Agent is a Raycast extension for working with the [fx coding agent](https://fx.sh/) without losing the speed and context of Raycast. Search saved conversations, read complete session history, resume interactive work in Terminal, run noninteractive prompts, inspect local health and usage, or delegate coding tasks through Raycast AI.
