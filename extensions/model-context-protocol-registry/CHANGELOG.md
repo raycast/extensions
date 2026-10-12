@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add seodata.dev MCP Server] - {PR_MERGE_DATE}
+
+- Add seodata.dev to the official registry: Google search volume, CPC, competition and similar keywords for 50+ countries, 3 read-only tools. Hosted remote Streamable HTTP server at https://mcp.seodata.dev/mcp with direct HTTP connection in Raycast; works without sign-in, or OAuth 2.1 sign-in with dynamic client registration and PKCE for higher limits.
+
 ## [Add looot MCP Server] - 2026-10-12
 
 - Add looot to the official registry: one key and one prepaid balance for about 2,500 data API operations (emails, phones, company and people search, SERP, web pages, news). 19 tools. Hosted remote Streamable HTTP server at https://api.looot.ai/mcp with direct HTTP connection in Raycast; OAuth 2.1 sign-in with dynamic client registration, or a Bearer API key.

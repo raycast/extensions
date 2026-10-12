@@ -915,6 +915,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "seodata",
+    title: "seodata.dev",
+    description:
+      "Keyword research inside your agent: Google monthly search volume, CPC, competition and similar keywords with their own volumes, for one keyword or up to 25 at once, in 50+ countries. 3 read-only tools. Hosted remote Streamable HTTP server; works with no sign-in (20 lookups a day), or OAuth 2.1 sign-in with dynamic client registration and PKCE for 500 a month free and $4.99 a month for unlimited.",
+    icon: "https://www.seodata.dev/icon-512.png",
+    homepage: "https://www.seodata.dev/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.seodata.dev/mcp"],
+    },
+    remoteUrl: "https://mcp.seodata.dev/mcp",
+  },
+  {
     name: "shopify-dev",
     title: "Shopify Dev",
     description:
