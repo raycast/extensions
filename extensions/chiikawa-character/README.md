@@ -1,4 +1,12 @@
-# Chiikawa Characters
+<div align="center">
+    <br/>
+    <br/>
+    <img src="./assets/icon.png" alt="Chiikawa Characters" width="100"/>
+    <h3>Chiikawa Characters</h3>
+    <p>Search and browse Chiikawa characters offline</p>
+    <br/>
+    <br/>
+</div>
 
 Raycast extension for searching and browsing [Chiikawa](https://www.chiikawaofficial.com/home/) character profiles offline. Character data and "open official page" actions use the [official character pages](https://www.chiikawaofficial.com/characters).
 
