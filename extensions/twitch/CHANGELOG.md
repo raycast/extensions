@@ -1,6 +1,6 @@
 # Twitch Changelog
 
-## [Open menu bar streams with Streamlink] - {PR_MERGE_DATE}
+## [Open menu bar streams with Streamlink] - 2026-10-12
 
 - Clicking a live channel in the menu bar now uses Streamlink when it is the primary action, instead of always opening the browser ([#32158](https://github.com/raycast/extensions/issues/32158))
 
