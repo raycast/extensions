@@ -128,7 +128,7 @@ async function readStored(): Promise<StoredRegistry | undefined> {
  * The catalog to sweep: the shipped snapshot, replaced by a fetched registry
  * when one has been stored.
  *
- * Local rulings survive the swap. `probe: false` is a judgement about whether a
+ * Local rulings survive the swap. `probe: false` is a judgment about whether a
  * bare GET can answer for a path at all — it is not in the registry and IANA
  * will never supply it, so a refresh that dropped it would silently start
  * probing 30 paths that cannot answer and inflating the denominator with them.

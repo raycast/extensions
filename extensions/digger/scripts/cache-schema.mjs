@@ -6,7 +6,7 @@
  * `CACHE.KEY_PREFIX`, and each time the same defect followed: an entry cached
  * under the old shape has no such field, the section renders the missing field
  * as an established absence — "None published", "No theme declared", a token
- * with no colour — and serves that for the full 48h TTL. Every instance passed
+ * with no color — and serves that for the full 48h TTL. Every instance passed
  * tsc, ray build and ray lint, because a missing optional field is valid.
  *
  * A checklist item does not fix this; remembering IS the failure. So the version

@@ -22,9 +22,15 @@ A [Raycast](https://raycast.com/) extension that lets you search books on Librar
 ![Screencast](./metadata/library-genesis-1.png)
 The extension sends query directly to the fastest mirror of Library Genesis. It then presents all the results with their book covers to help you quickly identify the desired book you are looking for.
 
+Mirror candidates include current and historical aliases, even when they are unreachable on a particular network. The extension selects the first mirror that returns a valid search page and cancels the remaining checks. The Test Mirrors command checks all candidates independently.
+
+The current parser supports the `index.php` / `tablelibgen` search interface. Historical hosts serving a different interface remain candidates but cannot be selected unless they return the supported format. DNS failures, certificate errors, and placeholder pages are shown as failed checks rather than causing domains to be permanently removed.
+
 ### Direct Download
 
 The extension allows you to quickly download the book file to your local machine with a single click.
+
+Downloads resolve a fresh GET link and validate the response before saving. If a download fails, the extension tries another validated mirror for the same book. HTML error pages, incomplete files, and checksum mismatches are rejected. Both save options use the same download checks.
 
 ![Screencast](./metadata/library-genesis-2.png)
 You can choose either to save it in a default directory, or to specify the directory every time, by configuring the extension.

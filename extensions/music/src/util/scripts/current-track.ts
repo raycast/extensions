@@ -232,7 +232,11 @@ export const addToPlaylist = (playlist: string): TE.TaskEither<Error, string> =>
 
       set existingTracks to (get tracks of library playlist 1 whose name is theName and artist is theArtist and album is theAlbum)
       if (count of existingTracks) = 0 then
-        duplicate playingTrack to library playlist 1
+        try
+          duplicate playingTrack to library playlist 1
+        on error number -10006
+          duplicate playingTrack to source 1
+        end try
         repeat 20 times
           set existingTracks to (get tracks of library playlist 1 whose name is theName and artist is theArtist and album is theAlbum)
           if (count of existingTracks) > 0 then exit repeat

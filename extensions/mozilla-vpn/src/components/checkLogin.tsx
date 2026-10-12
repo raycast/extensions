@@ -1,79 +1,29 @@
 // src/components/checkLogin.tsx
 import React from 'react';
-import * as Raycast from '@raycast/api';
-import { exec } from 'child_process';
-
-// Extract simple components
-const popToRoot = Raycast.popToRoot;
-const closeMainWindow = Raycast.closeMainWindow;
-const Icon = Raycast.Icon;
-
-// Define proper types for List to avoid 'any' usage and interface extension issues
-interface ListProps {
-  isLoading?: boolean;
-  navigationTitle?: string;
-  children?: React.ReactNode;
-}
-
-interface ListComponent {
-  (props: ListProps): React.ReactElement | null;
-  Item: React.ComponentType<Record<string, unknown>>;
-  Section: React.ComponentType<Record<string, unknown>>;
-  EmptyView: React.ComponentType<Record<string, unknown>>;
-}
-
-// Define proper types for ActionPanel
-interface ActionPanelProps {
-  children?: React.ReactNode;
-}
-
-interface ActionPanelComponent {
-  (props: ActionPanelProps): React.ReactElement | null;
-  Section: React.ComponentType<Record<string, unknown>>;
-}
-
-// Define proper types for Action
-interface ActionProps {
-  title: string;
-  icon?: unknown;
-  onAction?: () => void;
-  shortcut?: unknown;
-}
-
-interface ActionComponent {
-  (props: ActionProps): React.ReactElement | null;
-  OpenInBrowser: React.ComponentType<Record<string, unknown>>;
-  Push: React.ComponentType<Record<string, unknown>>;
-  Pop: React.ComponentType<Record<string, unknown>>;
-  Copy: React.ComponentType<Record<string, unknown>>;
-  Paste: React.ComponentType<Record<string, unknown>>;
-  ShowInFinder: React.ComponentType<Record<string, unknown>>;
-  Open: React.ComponentType<Record<string, unknown>>;
-  OpenWith: React.ComponentType<Record<string, unknown>>;
-  SubmitForm: React.ComponentType<Record<string, unknown>>;
-  Trash: React.ComponentType<Record<string, unknown>>;
-}
-
-// Type assertions to bypass the complex intersection type issues
-const List = (Raycast as unknown as { List: ListComponent }).List;
-const ActionPanel = (
-  Raycast as unknown as { ActionPanel: ActionPanelComponent }
-).ActionPanel;
-const Action = (Raycast as unknown as { Action: ActionComponent }).Action;
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  List,
+  closeMainWindow,
+  open,
+  popToRoot,
+} from '@raycast/api';
+import { showFailureToast } from '@raycast/utils';
 
 interface CheckLoginProps {
   onBack?: () => void; // Add optional onBack prop
 }
 
-const openMozillaVPNApp = () => {
-  exec('open -a "Mozilla VPN"', (error) => {
-    if (error) {
-      console.error('Error opening Mozilla VPN:', error);
-    } else {
-      popToRoot();
-      closeMainWindow();
-    }
-  });
+const openMozillaVPNApp = async () => {
+  try {
+    await open('/Applications/Mozilla VPN.app');
+    await popToRoot();
+    await closeMainWindow();
+  } catch (error) {
+    console.error('Error opening Mozilla VPN:', error);
+    await showFailureToast(error, { title: 'Failed to open Mozilla VPN' });
+  }
 };
 
 const CheckLogin: React.FC<CheckLoginProps> = ({ onBack }) => {

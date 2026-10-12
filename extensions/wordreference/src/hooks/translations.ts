@@ -14,7 +14,7 @@ export function useSearchTranslations({
   const [searchText, setSearchText] = useState(initialSearch);
 
   const { data: response, isLoading } = useFetch<SearchTranslationsResponse>(
-    `https://www.wordreference.com/autocomplete?dict=${translationKey}&query=${searchText.trim()}`,
+    `https://www.wordreference.com/autocomplete?dict=${translationKey}&query=${encodeURIComponent(searchText.trim())}`,
     {
       method: "GET",
       headers: wordReferenceRequestHeaders,

@@ -1,4 +1,14 @@
-import { Action, ActionPanel, closeMainWindow, getApplications, Icon, open, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  getApplications,
+  Icon,
+  open,
+  showToast,
+  Toast,
+  Keyboard,
+} from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useCallback, useState } from "react";
 import {
@@ -159,7 +169,7 @@ function OpenInOtherBrowserAction(props: { url: string }) {
     <ActionPanel.Submenu
       icon={Icon.Globe}
       title="Open in Other Browser"
-      shortcut={{ modifiers: ["cmd"], key: "o" }}
+      shortcut={Keyboard.Shortcut.Common.Open}
       onOpen={() => setOpen(true)}
     >
       {data?.map((browser) => (
@@ -298,17 +308,9 @@ export function OpenLinkActionSections(props: { tabOrUrl: Tab | string; searchTe
 export function CopyLinkActionSection(props: { url: string; title?: string }) {
   return (
     <ActionPanel.Section>
-      <Action.CopyToClipboard
-        title="Copy URL"
-        content={props.url}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-      />
+      <Action.CopyToClipboard title="Copy URL" content={props.url} shortcut={Keyboard.Shortcut.Common.Copy} />
       {props.title && (
-        <Action.CopyToClipboard
-          title="Copy Title"
-          content={props.title}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-        />
+        <Action.CopyToClipboard title="Copy Title" content={props.title} shortcut={Keyboard.Shortcut.Common.CopyName} />
       )}
       {props.title && (
         <Action.CopyToClipboard
@@ -335,7 +337,7 @@ export function CreateQuickLinkActionSection(props: { url: string; title?: strin
     <ActionPanel.Section>
       <Action.CreateQuicklink
         quicklink={{ link: props.url, name: props.title, application: "Arc" }}
-        shortcut={{ modifiers: ["cmd"], key: "s" }}
+        shortcut={Keyboard.Shortcut.Common.Save}
       />
     </ActionPanel.Section>
   );

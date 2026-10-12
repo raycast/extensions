@@ -65,6 +65,7 @@ export default withLinear(async (input: Input) => {
   const nullable = (value?: string) => (value === "null" ? null : value);
   const resolved = await issueInput({
     ...input,
+    currentTeamId: existing?.teamId,
     description,
     cycle: nullable(input.cycle),
     project: nullable(input.project),

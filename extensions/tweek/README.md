@@ -9,6 +9,8 @@ A full-featured Raycast extension for [Tweek Calendar & Task Management](https:/
 - **Calendar Switcher**: Switch between any of your Tweek calendars (`ROLE_OWNER`, `ROLE_EDITOR`, `ROLE_VIEWER`) and Someday Lists from the top dropdown.
 - **Split-Pane Markdown Details (`⌘ + I`)**: Inspect full Markdown notes, checklists (`2/5`), recurrence cadence, and color badges inline.
 - **Inline Quick Add**: Type directly into the Dashboard search bar (e.g. `Review Q4 roadmap @tomorrow #pink`) and press `Enter` to add a task immediately.
+- **Monthly Calendar View (`⌘ + ⌥ + M`)**: Open a 7-column month grid from the Dashboard. Each day shows its tasks as color-coded dots (dimmed when completed). Press `Enter` on a day to manage its tasks, `⌘ + N` to create a task on that day, `⌘ + [` / `⌘ + ]` to change month, and `⌘ + T` to jump back to today.
+  - Enable **Dashboard View** in the extension preferences to open the Dashboard as the monthly calendar by default. Use `⌘ + ⌥ + L` in the calendar to switch to the task list.
 
 ### 2. Full Task Management & Bulk Operations
 - **Create & Edit (`⌘ + N` / `⌘ + E`)**: Modal form with Calendar selector, Date picker vs. Someday List placement, Color badge picker, Recurrence cadence (`Daily`, `Weekly`, `Monthly`, `Annually`, `Every Weekday`, `Every 2 Weeks`), Markdown notes, and Subtasks.
@@ -45,6 +47,9 @@ A full-featured Raycast extension for [Tweek Calendar & Task Management](https:/
 | Create New Task | `⌘ + N` |
 | Delete Task (with confirmation) | `⌘ + ⌫` |
 | Toggle Split Markdown Detail | `⌘ + I` |
+| Open Monthly Calendar (Dashboard) | `⌘ + ⌥ + M` |
+| Previous / Next Month (Calendar) | `⌘ + [` / `⌘ + ]` |
+| Go to Today (Calendar) | `⌘ + T` |
 | Open Full Markdown View | `⌘ + P` |
 | Copy Task Description | `⌘ + Shift + C` |
 | Open Calendar in Tweek | `⌘ + O` |

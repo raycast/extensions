@@ -14,6 +14,7 @@ import {
 import { usePromise } from "@raycast/utils";
 import { ErrorView } from "./thread-list";
 import {
+  assertPromptSupported,
   createWorktree,
   defaultBaseBranch,
   errorMessage,
@@ -50,6 +51,7 @@ export default function Command() {
   const [submitting, setSubmitting] = useState(false);
 
   const { data, isLoading, error, revalidate } = usePromise(async () => {
+    await assertPromptSupported();
     const snapshot = await getShell();
     const [models, lastProjectId] = await Promise.all([
       modelChoices(snapshot),
@@ -135,6 +137,7 @@ export default function Command() {
       title: "Starting session",
     });
     try {
+      await assertPromptSupported();
       const modelSelection = selectedModel
         ? parseModelKey(selectedModel)
         : inheritedSettings(

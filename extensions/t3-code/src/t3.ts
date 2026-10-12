@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -67,6 +67,10 @@ export type Thread = {
     activeTurnId: string | null;
     lastError: string | null;
   } | null;
+  /** Protocol v2 replaced latestTurn and session with these. */
+  status?: string;
+  activeRunId?: string | null;
+  lastError?: string | null;
 };
 
 export type ShellSnapshot = {
@@ -76,11 +80,22 @@ export type ShellSnapshot = {
   updatedAt: string;
 };
 
+type EnvironmentDescriptor = {
+  serverVersion?: string;
+  /** Absent on servers that predate protocol v2. */
+  orchestrationProtocolVersion?: number;
+};
+
 /** The server is unreachable, the token is rejected, or the request failed. Commands
  * branch on `kind` to decide whether offering "Launch T3 Code" makes sense. */
 export class T3Error extends Error {
   constructor(
-    readonly kind: "unreachable" | "unauthorized" | "http" | "insecure-origin",
+    readonly kind:
+      | "unreachable"
+      | "unauthorized"
+      | "http"
+      | "insecure-origin"
+      | "unsupported",
     message: string,
   ) {
     super(message);
@@ -148,10 +163,45 @@ export async function resolveOrigin(): Promise<string> {
   return "http://127.0.0.1:3773";
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const origin = await resolveOrigin();
+const PROTOCOL_HEADER = "x-t3-orchestration-protocol";
+
+const descriptors = new Map<string, Promise<EnvironmentDescriptor>>();
+
+/** The server describes itself once per command run. Cached per origin, so a server
+ * that restarts on another port or version is asked again. */
+function serverDescriptor(origin: string): Promise<EnvironmentDescriptor> {
+  let descriptor = descriptors.get(origin);
+  if (!descriptor) {
+    descriptor = request<EnvironmentDescriptor>(
+      "/.well-known/t3/environment",
+      undefined,
+      false,
+      origin,
+    ).catch((error) => {
+      descriptors.delete(origin);
+      throw error;
+    });
+    descriptors.set(origin, descriptor);
+  }
+  return descriptor;
+}
+
+/** v2 servers reject orchestration reads without the protocol header; older servers
+ * predate the field, so a missing value means v1. */
+async function serverProtocolVersion(origin: string): Promise<number> {
+  return (await serverDescriptor(origin)).orchestrationProtocolVersion ?? 1;
+}
+
+async function request<T>(
+  path: string,
+  init?: RequestInit,
+  versioned = true,
+  knownOrigin?: string,
+): Promise<T> {
+  const origin = knownOrigin ?? (await resolveOrigin());
   assertTokenSafeOrigin(origin);
   const { token } = preferences();
+  const version = versioned ? await serverProtocolVersion(origin) : 1;
   let response: Response;
   try {
     response = await fetch(`${origin}${path}`, {
@@ -159,6 +209,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        ...(version >= 2 ? { [PROTOCOL_HEADER]: String(version) } : {}),
         ...(init?.headers ?? {}),
       },
     });
@@ -184,8 +235,50 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
-export const getShell = () =>
-  request<ShellSnapshot>("/api/orchestration/shell");
+/** v2 reports run state on the thread itself. Rebuild the v1 latestTurn so every
+ * consumer keeps reading one shape. */
+function normalizeThread(thread: Thread): Thread {
+  if (thread.latestTurn !== undefined || thread.status === undefined) {
+    return thread;
+  }
+  const state: LatestTurn["state"] | null =
+    thread.activeRunId || thread.status === "running"
+      ? "running"
+      : thread.status === "failed" || thread.status === "error"
+        ? "error"
+        : thread.status === "interrupted"
+          ? "interrupted"
+          : null;
+  return {
+    ...thread,
+    latestTurn: state && {
+      turnId: thread.activeRunId ?? "",
+      state,
+      requestedAt: thread.updatedAt,
+      startedAt: null,
+      completedAt: null,
+    },
+    session: thread.lastError
+      ? { status: "error", activeTurnId: null, lastError: thread.lastError }
+      : null,
+  };
+}
+
+export const getShell = async (): Promise<ShellSnapshot> => {
+  const snapshot = await request<ShellSnapshot>("/api/orchestration/shell");
+  return { ...snapshot, threads: snapshot.threads.map(normalizeThread) };
+};
+
+/** Thread creation is an HTTP command on v1 and WebSocket-only on v2, which this
+ * extension does not speak yet. */
+export async function assertPromptSupported(): Promise<void> {
+  if ((await serverProtocolVersion(await resolveOrigin())) >= 2) {
+    throw new T3Error(
+      "unsupported",
+      "This T3 Code server uses protocol v2, where threads can only be created over WebSocket. Prompt T3 Code is not supported yet.",
+    );
+  }
+}
 
 export const dispatch = (command: Record<string, unknown>) =>
   request<{ sequence: number }>("/api/orchestration/dispatch", {
@@ -371,7 +464,49 @@ export function threadTitle(prompt: string): string {
   return firstLine.trim().slice(0, 60);
 }
 
-const appName = () => preferences().appName?.trim() || "T3 Code";
+// The preference used to default to this, which matches neither release bundle, so a
+// stored copy counts as unset unless an app with that exact name is installed.
+const LEGACY_APP_NAME = "T3 Code";
+const STABLE_APP = "T3 Code (Alpha)";
+const NIGHTLY_APP = "T3 Code (Nightly)";
+// Same pattern T3 uses to brand a build as Nightly. Preview builds share the branding.
+const NIGHTLY_VERSION = /^[^-+]+-(?:nightly|preview)\.\d{8}\.\d+$/;
+
+async function isInstalled(name: string): Promise<boolean> {
+  for (const dir of ["/Applications", join(homedir(), "Applications")]) {
+    try {
+      await access(join(dir, `${name}.app`));
+      return true;
+    } catch {
+      // not in this folder
+    }
+  }
+  return false;
+}
+
+/** The app bundle is named after its release channel, so a fixed name only fits one
+ * of them. The preference wins; otherwise follow the running server's version, and
+ * with no server running use whichever app is installed, stable first. */
+async function appName(): Promise<string> {
+  const configured = preferences().appName?.trim();
+  if (
+    configured &&
+    (configured !== LEGACY_APP_NAME || (await isInstalled(configured)))
+  ) {
+    return configured;
+  }
+  try {
+    const { serverVersion } = await serverDescriptor(await resolveOrigin());
+    if (serverVersion) {
+      return NIGHTLY_VERSION.test(serverVersion) ? NIGHTLY_APP : STABLE_APP;
+    }
+  } catch {
+    // the server is not running, so look at what is installed
+  }
+  return (await isInstalled(STABLE_APP)) || !(await isInstalled(NIGHTLY_APP))
+    ? STABLE_APP
+    : NIGHTLY_APP;
+}
 
 const escapeForAppleScript = (value: string) =>
   value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
@@ -437,7 +572,7 @@ export async function focusThread(
   target: PaletteThread,
 ): Promise<"opened" | "ambiguous" | "unfocused"> {
   const query = paletteQuery(target);
-  const name = appName();
+  const name = await appName();
   await run("/usr/bin/open", ["-a", name]);
   await run("/usr/bin/osascript", [
     "-e",
@@ -475,7 +610,7 @@ return "unfocused"`,
 }
 
 export async function launchApp(): Promise<void> {
-  await run("/usr/bin/open", ["-a", appName()]);
+  await run("/usr/bin/open", ["-a", await appName()]);
 }
 
 export function worktreePathFor(workspaceRoot: string, branch: string): string {

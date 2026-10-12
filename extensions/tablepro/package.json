@@ -22,7 +22,7 @@
     "macOS"
   ],
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "commands": [
     {
       "name": "search-connections",
@@ -509,18 +509,19 @@
   },
   "preferences": [
     {
-      "name": "tableProAppPath",
-      "title": "TablePro App",
-      "description": "Path to the TablePro app. Used to detect installation and open the app on demand.",
-      "type": "appPicker",
+      "name": "mcpPort",
+      "title": "MCP Port",
+      "description": "The port of TablePro's MCP server. Change it only if TablePro shows a different port in its settings.",
+      "type": "textfield",
       "required": false,
-      "default": "/Applications/TablePro.app"
+      "default": "23508",
+      "placeholder": "23508"
     }
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@raycast/api": "^1.83.0",
-    "@raycast/utils": "^1.18.1"
+    "@raycast/api": "^1.104.12",
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

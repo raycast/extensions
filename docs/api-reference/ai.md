@@ -227,40 +227,28 @@ If a number is passed, it needs to be in the range 0-2. For larger values, 2 wil
 
 ### AI.Model
 
-The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-5.6_Luna"]`.
+The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-6_Luna"]`.
 
 | Model | Description |
 | --- | --- |
-| OpenAI_GPT-5_mini | OpenAI's compact model, great for well-defined tasks and precise prompts. |
-| OpenAI_GPT-5_nano | OpenAI's lightweight model, great for summarization and classification tasks. |
-| OpenAI_GPT-4.1 | OpenAI's previous generation flagship model optimized for complex problem solving. |
-| OpenAI_GPT-4.1_mini | Balanced GPT-4.1 variant optimized for speed and cost efficiency. |
-| OpenAI_GPT-4.1_nano | Fastest and most cost-effective GPT-4.1 variant. |
-| OpenAI_GPT-4 | Previous generation GPT-4 model with broad knowledge and complex instruction handling. |
-| OpenAI_GPT-4o | Advanced OpenAI model optimized for speed and complex problem solving. |
-| OpenAI_GPT-4o_mini | Fast and intelligent model for everyday tasks. |
-| OpenAI_GPT-5.1 | OpenAI's model with adaptive reasoning, great for coding and agentic tasks across domains. |
-| OpenAI_GPT-5.2 | OpenAI's GPT-5.2-class model for professional work and long-running agents with strong tool-calling. |
-| OpenAI_GPT-5.3_Instant | OpenAI's fast, capable GPT-5.3-class model for everyday work with improved info-seeking, how-tos, and technical writing. |
 | OpenAI_GPT-5.3_Codex | A version of GPT-5.3 optimized for agentic coding tasks in Codex or similar environments. |
 | OpenAI_GPT-5.4 | OpenAI's high-performance GPT-5.4-class model for professional work and long-running agents with state-of-the-art tool-calling. |
 | OpenAI_GPT-5.4_mini | OpenAI's strongest mini model yet for coding and agentic workflows. |
 | OpenAI_GPT-5.4_nano | OpenAI's cheapest GPT-5.4-class model for simpler tasks. |
 | OpenAI_GPT-5.5 | OpenAI's high-performance GPT-5.5-class model for complex reasoning and long-running agentic work. |
 | OpenAI_GPT-5.5_Instant | OpenAI's fast, capable model for everyday work with improved info-seeking, how-tos, and technical writing. |
-| OpenAI_GPT-5.6_Sol | OpenAI's frontier GPT-5.6 model for complex, professional-grade reasoning and long-running agentic work. |
 | OpenAI_GPT-5.6_Terra | OpenAI's balanced GPT-5.6 model for everyday work across writing, analysis, and coding. |
 | OpenAI_GPT-5.6_Luna | OpenAI's fastest GPT-5.6 model for responsive everyday tasks. |
 | OpenAI_GPT-6_Astra | OpenAI's frontier GPT-6 model for the hardest end-to-end reasoning, coding, and agentic work. |
 | OpenAI_GPT-6_Sol | OpenAI's GPT-6 model for complex coding and agentic workflows. |
+| OpenAI_GPT-6.1_Sol | OpenAI's GPT-6.1 model for complex coding and agentic workflows. |
 | OpenAI_GPT-6_Luna | OpenAI's efficient GPT-6 model for focused, high-volume tasks. |
-| OpenAI_o4-mini | Fast, efficient model optimized for coding and visual tasks. |
-| OpenAI_o3-mini | Fast reasoning model optimized for STEM tasks. |
 | Groq_GPT-OSS_20b | OpenAI's first open-source model, 20b variant. |
 | Groq_GPT-OSS_120b | OpenAI's first open-source model, 120b variant. |
 | Anthropic_Claude_Haiku_4.5 | Anthropic's offering focusing on being the best combination of performance and speed. |
 | Anthropic_Claude_Sonnet_4.6 | Anthropic's previous generation Sonnet model with high intelligence across most tasks. |
 | Anthropic_Claude_Sonnet_5 | Anthropic's best combination of speed and intelligence, with combined reasoning and non-reasoning capabilities. |
+| Anthropic_Claude_Sonnet_5.5 | Anthropic's best combination of speed and intelligence, with combined reasoning and non-reasoning capabilities. |
 | Anthropic_Claude_Opus_4.7 | Anthropic's previous generation Opus model with combined reasoning and non-reasoning capabilities. |
 | Anthropic_Claude_Opus_4.8 | Anthropic's previous generation Opus model with combined reasoning and non-reasoning capabilities. |
 | Anthropic_Claude_Opus_5 | Anthropic's previous flagship Opus model with combined reasoning and non-reasoning capabilities. |
@@ -281,9 +269,6 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-5
 | Google_Gemini_3.1_Flash_Lite | Ultra-fast, cost-effective model for high-volume tasks and lightweight agentic workflows. |
 | Google_Gemini_3_Flash | Fast thinking model with strong balance of speed, performance, and value. |
 | Google_Gemini_3.1_Pro | Next generation thinking model for complex problem solving. |
-| Google_Gemini_2.5_Pro | Previous generation thinking model for complex problem solving. |
-| Google_Gemini_2.5_Flash | Fast, well-rounded thinking model. |
-| Google_Gemini_2.5_Flash_Lite | Fast model optimized for large-scale text output. |
 | xAI_Grok-4.7 | xAI's latest flagship Grok model, delivering frontier reasoning, stronger coding, and multimodal understanding. |
 | xAI_Grok-4.6 | xAI's previous flagship Grok model with frontier reasoning, strong coding, and multimodal understanding. |
 | xAI_Grok-4.5 | xAI's earlier flagship Grok model with strong reasoning, coding, and multimodal understanding. |
