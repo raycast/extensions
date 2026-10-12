@@ -1,5 +1,5 @@
 import { Clipboard, getSelectedText, showHUD } from "@raycast/api";
-import { getLayoutKeyMaps } from "swift:../swift";
+import { getLayoutKeyMaps, selectLayout } from "swift:../swift";
 import {
   detectSourceLayout,
   getTargetOrder,
@@ -7,7 +7,6 @@ import {
   selectLine,
 } from "./utils";
 import { HistoryManager } from "./SessionManager";
-import { LayoutManager } from "./LayoutManager";
 
 export default async function main() {
   // 1. Load layouts + history BEFORE getSelectedText to minimize selection-to-paste gap
@@ -86,7 +85,7 @@ export default async function main() {
   try {
     await new Promise((r) => setTimeout(r, 50));
     await Clipboard.paste(pick.transformed);
-    await LayoutManager.setInput(pick.target.id);
+    await selectLayout(pick.target.id);
     await showHUD(`✅ ${pick.target.title}`);
   } catch (e) {
     await showHUD((e as Error).message);

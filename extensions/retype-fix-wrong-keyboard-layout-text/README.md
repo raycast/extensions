@@ -10,6 +10,8 @@ Fix text that you typed in a wrong keyboard layout and switch to the correct lay
 2. Run **Correct Text Typed in Wrong Keyboard Layout**. Assign a hotkey for best results.
 3. Retype pastes the fixed text and switches your keyboard to the correct layout.
 
+If you select nothing, the first time macOS can ask you to let Raycast control System Events. Click **OK**. Retype uses System Events to select the line.
+
 ## Features
 
 - **Automatic layout detection.** You do not configure language pairs. Retype finds the layout that the text was typed in.

@@ -3,12 +3,6 @@ import Foundation
 import InputMethodKit
 import RaycastSwiftMacros
 
-struct KeyboardLayout: Encodable {
-    let title: String
-    let id: String
-    let active: Bool
-}
-
 struct LayoutKeyMap: Encodable {
     let id: String
     let title: String
@@ -30,23 +24,6 @@ private let numberKeyCodes: [UInt16] = [
 ]
 
 // MARK: - Raycast Exports
-
-@raycast func getEnabledLayouts() -> [KeyboardLayout] {
-    let sources = enabledInputSources()
-    let current = currentLayoutName()
-
-    return sources.map { source in
-        KeyboardLayout(
-            title: getLocalizedName(source),
-            id: getInputSourceID(source),
-            active: getLocalizedName(source) == current
-        )
-    }
-}
-
-@raycast func getCurrentLayout() -> String {
-    currentLayoutName()
-}
 
 @raycast func selectLayout(name: String) throws -> String {
     let sources = enabledInputSources()
