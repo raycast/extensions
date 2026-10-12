@@ -1,31 +1,87 @@
-import { Action, ActionPanel, Color, Detail } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, Detail, Form } from "@raycast/api";
+import { useState } from "react";
+import { useDiscovery } from "./use-discovery";
 
 import { checkNumber, formatDate } from "./api";
 
 export default function Command({ arguments: args }: { arguments: { number: string } }) {
-  const input = args.number.trim();
+  const [input, setInput] = useState(args.number.trim());
+  const [draft, setDraft] = useState(input);
+  const [isEditing, setIsEditing] = useState(false);
   const isValid = /^\d+$/.test(input);
-  const {
-    data: result,
-    isLoading,
-    error: fetchError,
-  } = usePromise(checkNumber, [input], {
-    execute: isValid,
-  });
+  const { state, cancel, retry } = useDiscovery(checkNumber, input, isValid && !isEditing);
+  const isLoading = isValid && state.kind === "loading";
+  const result = state.kind === "success" ? state.result : undefined;
+  const error = !isValid
+    ? "Please enter a valid number (digits only)"
+    : state.kind === "error"
+      ? state.message
+      : undefined;
+  const edit = () => {
+    cancel();
+    setDraft(input);
+    setIsEditing(true);
+  };
+  const discoveryActions = (
+    <ActionPanel.Section>
+      <Action title="Discover Another Number" onAction={edit} />
+      {isValid && <Action title="Retry Discovery" onAction={retry} />}
+    </ActionPanel.Section>
+  );
 
-  const error = !isValid ? "Please enter a valid number (digits only)" : fetchError?.message;
+  if (isEditing) {
+    return (
+      <Form
+        actions={
+          <ActionPanel>
+            <Action.SubmitForm
+              title="Discover Number"
+              onSubmit={(values: { input: string }) => {
+                const next = values.input.trim();
+                if (!/^\d+$/.test(next)) return;
+                setInput(next);
+                retry();
+                setIsEditing(false);
+              }}
+            />
+          </ActionPanel>
+        }
+      >
+        <Form.TextField
+          id="input"
+          title="Number"
+          value={draft}
+          onChange={setDraft}
+          error={!/^\d+$/.test(draft.trim()) ? "Please enter a valid number (digits only)" : undefined}
+        />
+      </Form>
+    );
+  }
 
   if (isLoading) {
-    return <Detail isLoading markdown="" />;
+    return (
+      <Detail
+        isLoading
+        markdown={`# Checking \`${input}\``}
+        actions={
+          <ActionPanel>
+            <Action title="Cancel Discovery" onAction={cancel} />
+            <Action title="Discover Another Number" onAction={edit} />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   if (error || !result) {
     return (
       <Detail
-        markdown={`# Error\n\n${error ?? "Something went wrong."}`}
+        markdown={
+          state.kind === "cancelled" ? "# Discovery Cancelled" : `# Error\n\n${error ?? "Something went wrong."}`
+        }
         actions={
           <ActionPanel>
+            {discoveryActions}
             <Action.OpenInBrowser url="https://numberresearch.xyz" />
           </ActionPanel>
         }
@@ -79,6 +135,7 @@ export default function Command({ arguments: args }: { arguments: { number: stri
       }
       actions={
         <ActionPanel>
+          {discoveryActions}
           <Action.CopyToClipboard title="Copy Number" content={result.number} />
           <Action.OpenInBrowser url="https://numberresearch.xyz" />
         </ActionPanel>
