@@ -144,3 +144,67 @@ describe("Terminal ingestion", () => {
     ]);
   });
 });
+
+describe("tag updates against a legacy CLI", () => {
+  function legacyExecutable(helpText: string) {
+    const file = path.join(
+      testDir,
+      `legacy-${Math.random().toString(36).slice(2)}`,
+    );
+    fs.writeFileSync(
+      file,
+      `#!/usr/bin/env node
+const args = process.argv.slice(2);
+if (args[0] === "tag" && args[1] === "--help") {
+  console.log(${JSON.stringify(helpText)});
+  process.exit(0);
+}
+if (args[1] === "ls") {
+  console.log(JSON.stringify({ workspace: "papers", path: ${JSON.stringify(testHome)}, resources: [{ source: "https://example.com/a", type: "web", status: "pending", tags: ["w"] }] }));
+  process.exit(0);
+}
+process.exit(0);
+`,
+      { mode: 0o755 },
+    );
+    return file;
+  }
+
+  it("asks the user to update instead of silently failing on option-like tag removal", async () => {
+    const legacy = legacyExecutable(
+      "Usage: learn tag [options] <source> <tags...>",
+    );
+    await expect(
+      updateLearnTags(
+        "papers",
+        {
+          source: "https://example.com/a",
+          type: "web",
+          status: "pending",
+          tags: ["w"],
+        },
+        [],
+        legacy,
+      ),
+    ).rejects.toThrow("npm install -g @humanive/learn-cli@latest");
+  });
+
+  it("uses the separator path when the CLI advertises literal operands", async () => {
+    const legacy = legacyExecutable(
+      "Add or remove tags on a resource. Use -- before literal resource/tag operands.",
+    );
+    await expect(
+      updateLearnTags(
+        "papers",
+        {
+          source: "https://example.com/a",
+          type: "web",
+          status: "pending",
+          tags: ["w"],
+        },
+        [],
+        legacy,
+      ),
+    ).rejects.toThrow("Tags did not match the requested change");
+  });
+});

@@ -63,6 +63,14 @@ describe("getActiveBrowserTabs", () => {
     ).toThrow("Only HTTP and HTTPS");
   });
 
+  it("rejects tabs whose URL cannot be parsed", () => {
+    expect(() =>
+      getActiveBrowserTabs({
+        tabs: [{ id: 1, url: "not a url", active: true }],
+      }),
+    ).toThrow("Only HTTP and HTTPS");
+  });
+
   it("reports when no browser tab is active", () => {
     expect(() =>
       getActiveBrowserTabs({

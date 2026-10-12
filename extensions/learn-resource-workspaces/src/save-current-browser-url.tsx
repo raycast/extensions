@@ -78,9 +78,12 @@ async function showResult(
   request: BrowserCaptureRequest,
 ): Promise<void> {
   if (result.status === "duplicate") {
-    await showFailureToast(new Error(`This URL is already in ${request.workspace}`), {
-      title: "Already saved",
-    });
+    await showFailureToast(
+      new Error(`This URL is already in ${request.workspace}`),
+      {
+        title: "Already saved",
+      },
+    );
     return;
   }
 

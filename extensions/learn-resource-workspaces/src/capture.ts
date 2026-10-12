@@ -5,12 +5,6 @@ export interface CaptureStore {
   setItem(key: string, value: string): Promise<void>;
 }
 
-export interface WorkspaceSelectionDependencies {
-  listWorkspaces: () => Promise<string[]>;
-  chooseWorkspace: (workspaces: string[]) => Promise<string | undefined>;
-  store: CaptureStore;
-}
-
 export interface SavedWorkspaceDependencies {
   listWorkspaces: () => Promise<string[]>;
   store: CaptureStore;
@@ -47,33 +41,6 @@ export async function getSavedCaptureWorkspace(
   return savedWorkspace && workspaces.includes(savedWorkspace)
     ? savedWorkspace
     : undefined;
-}
-
-export async function resolveCaptureWorkspace(
-  dependencies: WorkspaceSelectionDependencies,
-): Promise<string> {
-  const workspaces = await dependencies.listWorkspaces();
-  const savedWorkspace = await getSavedCaptureWorkspace({
-    ...dependencies,
-    workspaces,
-  });
-  if (savedWorkspace) return savedWorkspace;
-  if (workspaces.length === 0) {
-    throw new Error(
-      "No Learn workspace found. Create one with: learn new <name>",
-    );
-  }
-
-  const selectedWorkspace = await dependencies.chooseWorkspace(workspaces);
-  if (!selectedWorkspace) {
-    throw new Error("Workspace selection was cancelled");
-  }
-  if (!workspaces.includes(selectedWorkspace)) {
-    throw new Error(`Unknown Learn workspace: ${selectedWorkspace}`);
-  }
-
-  await dependencies.store.setItem(CAPTURE_WORKSPACE_KEY, selectedWorkspace);
-  return selectedWorkspace;
 }
 
 export async function captureBrowserUrl(

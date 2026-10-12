@@ -28,7 +28,7 @@ vi.mock("@raycast/utils", () => ({
   showFailureToast: (error: unknown, options?: { title?: string }) =>
     mocks.showToast({
       style: "failure",
-      title: options?.title,
+      title: options?.title ?? "Something went wrong",
       message: error instanceof Error ? error.message : String(error),
     }),
   usePromise: vi.fn(),

@@ -3,7 +3,6 @@ import type { LearnCommandResult } from "./capture.js";
 import SaveCurrentBrowserUrl from "./save-current-browser-url.js";
 
 const mocks = vi.hoisted(() => ({
-  getFrontmostApplication: vi.fn(),
   getTabs: vi.fn(),
   closeMainWindow: vi.fn(),
   launchCommand: vi.fn(),
@@ -11,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   setItem: vi.fn(),
   showHUD: vi.fn(),
   showToast: vi.fn(),
+  showFailureToast: vi.fn(),
   listLearnWorkspaces: vi.fn(),
   runLearn: vi.fn(),
 }));
@@ -18,7 +18,6 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@raycast/api", () => ({
   BrowserExtension: { getTabs: mocks.getTabs },
   closeMainWindow: mocks.closeMainWindow,
-  getFrontmostApplication: mocks.getFrontmostApplication,
   launchCommand: mocks.launchCommand,
   LaunchType: { UserInitiated: "userInitiated" },
   LocalStorage: { getItem: mocks.getItem, setItem: mocks.setItem },
@@ -28,12 +27,16 @@ vi.mock("@raycast/api", () => ({
   Toast: { Style: { Failure: "failure" } },
 }));
 vi.mock("@raycast/utils", () => ({
-  showFailureToast: (error: unknown, options?: { title?: string }) =>
-    mocks.showToast({
+  // Mirror the real showFailureToast: default title, options.message override,
+  // and the error's own message when none is supplied.
+  showFailureToast: (error: unknown, options?: { title?: string }) => {
+    mocks.showFailureToast(error, options);
+    return mocks.showToast({
       style: "failure",
-      title: options?.title,
+      title: options?.title ?? "Something went wrong",
       message: error instanceof Error ? error.message : String(error),
-    }),
+    });
+  },
 }));
 vi.mock("./learn-cli.js", () => ({
   listLearnWorkspaces: mocks.listLearnWorkspaces,
@@ -53,7 +56,6 @@ const launchProps = { arguments: {}, launchType: "userInitiated" as const };
 
 beforeEach(() => {
   vi.resetAllMocks();
-  mocks.getFrontmostApplication.mockResolvedValue({ name: "Google Chrome" });
   mocks.getTabs.mockResolvedValue([tab]);
   mocks.listLearnWorkspaces.mockResolvedValue(["papers", "browser-agents"]);
   mocks.getItem.mockResolvedValue("papers");
@@ -200,7 +202,6 @@ describe("Save Current Browser URL", () => {
       },
     });
 
-    expect(mocks.getFrontmostApplication).not.toHaveBeenCalled();
     expect(mocks.getTabs).not.toHaveBeenCalled();
     expect(mocks.listLearnWorkspaces).not.toHaveBeenCalled();
     expect(mocks.runLearn).toHaveBeenCalledWith(
@@ -250,7 +251,6 @@ describe("Save Current Browser URL", () => {
   });
 
   it("reports when the browser has no active tab", async () => {
-    mocks.getFrontmostApplication.mockResolvedValue({ name: "Notes" });
     mocks.getTabs.mockResolvedValue([
       { id: 1, url: "https://example.com", active: false },
     ]);

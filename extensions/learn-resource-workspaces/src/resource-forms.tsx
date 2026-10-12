@@ -1,10 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { updateLearnTags } from "./learn-cli.js";

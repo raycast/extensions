@@ -29,7 +29,7 @@ The CLI requires Node to be available in Raycast's PATH. Homebrew's standard loc
 
 Install the Raycast Browser Extension in your browser and complete its setup. Raycast can prompt you to install it when the command first requests browser tabs.
 
-This extension reads tabs exclusively through `BrowserExtension.getTabs()`, so any browser connected to the Raycast Browser Extension works, including Dia, Comet, and Zen. Only HTTP and HTTPS pages can be saved. Browser settings pages, new-tab pages, and local files are not supported.
+This extension reads tabs exclusively through `BrowserExtension.getTabs()`, so any browser with the Raycast Browser Extension installed works. Only HTTP and HTTPS pages can be saved. Browser settings pages, new-tab pages, and local files are not supported.
 
 ## Commands
 
