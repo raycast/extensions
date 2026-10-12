@@ -51,7 +51,11 @@ test("all 11 profiles render their existing bundled PNG and retain profile conte
     assert.equal(detail.props.navigationTitle, character.nameEn);
     assert.ok(detail.props.actions);
     const copySection = detail.props.actions.props.children[1];
-    assert.equal(copySection.props.children[2].props.content, detail.props.markdown);
+    const copiedMarkdown = copySection.props.children[2].props.content;
+    assert.ok(!copiedMarkdown.includes("!["));
+    assert.ok(!copiedMarkdown.includes("file://"));
+    assert.ok(!copiedMarkdown.includes(character.icon));
+    assert.equal(copiedMarkdown, detail.props.markdown.replace(/!\[[^\n]+\]\([^\n]+\)\n\n/, ""));
   }
 });
 

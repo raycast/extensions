@@ -54,7 +54,7 @@ Raycast extension for searching and browsing [Chiikawa](https://www.chiikawaoffi
 
 ## Detail Actions
 
-Each character's detail view includes its bundled image above the profile. Images work offline; if an image is unavailable, the profile still shows its text and actions.
+Each character's detail view includes its bundled image above the profile. Images work offline; if an image is unavailable, the profile still shows its text and actions. Copy as Markdown keeps a portable text profile without a local image URL.
 
 - Copy Japanese name (`Cmd + C`)
 - Copy bio (`Cmd + Shift + C`)

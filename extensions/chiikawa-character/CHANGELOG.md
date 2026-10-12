@@ -4,6 +4,7 @@
 
 - Show each character's bundled image in their detail view while browsing, comparing, or picking a random character.
 - Keep profiles readable when an image is unavailable, without downloading new assets.
+- Keep copied Markdown portable by omitting the local image URL.
 
 ## [Initial Version] - 2026-02-19
 
