@@ -20,14 +20,20 @@ const fixtureSource = `#!/usr/bin/env node
 const fs = require("node:fs");
 const path = require("node:path");
 const args = process.argv.slice(2);
+const record = (entry) => fs.appendFileSync(path.join(path.dirname(process.argv[1]), "queries.log"), entry + "\\n");
 const formats = [
   {id: "jpeg", name: "JPEG", category: "image", extensions: ["jpg", "jpeg"]},
   {id: "png", name: "PNG", category: "image", extensions: ["png"]},
   {id: "webp", name: "WebP", category: "image", extensions: ["webp"]},
 ];
 const emit = value => process.stdout.write(JSON.stringify(value) + "\\n");
-if (args[0] === "formats") { emit(formats); process.exit(0); }
+if (args[0] === "formats") { record("formats"); emit(formats); process.exit(0); }
 if (args[0] === "targets") {
+  record("targets " + path.basename(args[1]));
+  if (path.basename(args[1]).startsWith("stall")) {
+    setInterval(() => {}, 1000);
+    return;
+  }
   if (args[1].endsWith(".pdf")) console.log("png\\njpeg");
   else if (args[1].endsWith(".png")) console.log("jpeg\\nwebp");
   else { console.error("unknown format"); process.exit(1); }
@@ -178,6 +184,30 @@ test("a pre-cancelled request does not start conversion", async (t) => {
   const results = await convertFiles(binary, { files, target: "jpeg" }, { signal: AbortSignal.abort() });
   assert.equal(results[0].status, "cancelled");
   await assert.rejects(readFile(path.join(directory, "argv.json")));
+  await assert.rejects(readFile(path.join(directory, "queries.log")));
+});
+
+test("aborts target checks and does not start later ones", { timeout: 10_000 }, async (t) => {
+  const { binary, files, directory } = await fixture(t, ["stall.png", "report.pdf"]);
+  const controller = new AbortController();
+  const pending = convertFiles(binary, { files, target: "jpeg" }, { signal: controller.signal });
+  const logPath = path.join(directory, "queries.log");
+  const started = Date.now();
+  let log = "";
+  while (Date.now() - started < 5_000) {
+    log = await readFile(logPath, "utf8").catch(() => "");
+    if (log.includes("targets stall.png")) break;
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+  controller.abort();
+  const results = await pending;
+  assert.deepEqual(
+    results.map((result) => result.status),
+    ["cancelled", "cancelled"],
+  );
+  log = await readFile(logPath, "utf8");
+  assert.match(log, /targets stall\.png/);
+  assert.doesNotMatch(log, /report\.pdf/);
 });
 
 test("cancels an active process while retaining completed outputs", { timeout: 10_000 }, async (t) => {

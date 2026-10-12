@@ -90,16 +90,26 @@ export async function resolveBinary(configuredPath?: string): Promise<string> {
   );
 }
 
-async function query(binary: string, args: string[]): Promise<string> {
+function abortError(signal: AbortSignal): Error {
+  if (signal.reason instanceof Error) return signal.reason;
+  const error = new Error("The operation was aborted");
+  error.name = "AbortError";
+  return error;
+}
+
+async function query(binary: string, args: string[], signal?: AbortSignal): Promise<string> {
+  if (signal?.aborted) throw abortError(signal);
   try {
     const { stdout } = await execFileAsync(binary, args, {
       env: cliEnvironment(),
       timeout: 30_000,
       maxBuffer: 2 * 1024 * 1024,
       windowsHide: true,
+      signal,
     });
     return stdout;
   } catch (error) {
+    if (signal?.aborted) throw error;
     if (error instanceof Error && "stderr" in error && typeof error.stderr === "string" && error.stderr.trim()) {
       throw new Error(error.stderr.trim());
     }
@@ -130,8 +140,8 @@ export function parseFormats(text: string): Format[] {
   });
 }
 
-export async function getFormats(binary: string): Promise<Format[]> {
-  return parseFormats(await query(binary, ["formats", "--json"]));
+export async function getFormats(binary: string, signal?: AbortSignal): Promise<Format[]> {
+  return parseFormats(await query(binary, ["formats", "--json"], signal));
 }
 
 export async function validateFiles(files: string[]): Promise<string[]> {
@@ -156,16 +166,18 @@ export async function validateFiles(files: string[]): Promise<string[]> {
   return normalized;
 }
 
-export async function getTargets(binary: string, files: string[]): Promise<Format[]> {
+export async function getTargets(binary: string, files: string[], signal?: AbortSignal): Promise<Format[]> {
   const inputs = await validateFiles(files);
-  const formats = await getFormats(binary);
+  if (signal?.aborted) throw abortError(signal);
+  const formats = await getFormats(binary, signal);
   // Targets depend on the source format and installed engines, not file contents.
   const byExtension = new Map<string, string>();
   for (const file of inputs) byExtension.set(path.extname(file).toLowerCase(), file);
   let common = new Set(formats.map((format) => format.id));
   for (const file of byExtension.values()) {
+    if (signal?.aborted) throw abortError(signal);
     const targets = new Set(
-      (await query(binary, ["targets", file]))
+      (await query(binary, ["targets", file], signal))
         .split(/\r?\n/)
         .map((line) => line.trim())
         .filter(Boolean),
@@ -263,7 +275,16 @@ export async function convertFiles(
   validateOptions(request);
   const files = await validateFiles(request.files);
   const target = request.target.trim().toLowerCase();
-  const targets = await getTargets(binary, files);
+  const cancelled = (): ConversionResult[] =>
+    files.map((input) => ({ status: "cancelled", input, message: "Conversion cancelled." }));
+  if (callbacks.signal?.aborted) return cancelled();
+  let targets: Format[];
+  try {
+    targets = await getTargets(binary, files, callbacks.signal);
+  } catch (error) {
+    if (callbacks.signal?.aborted) return cancelled();
+    throw error;
+  }
   if (!targets.some((format) => format.id === target))
     throw new Error(`These files cannot all convert to ${target}. Choose one of their available formats.`);
   const outputDirectory = request.outputDirectory ? expandPath(request.outputDirectory) : undefined;
@@ -273,8 +294,7 @@ export async function convertFiles(
     await access(outputDirectory, constants.W_OK);
   }
   const args = conversionArgs({ ...request, files, target, outputDirectory });
-  if (callbacks.signal?.aborted)
-    return files.map((input) => ({ status: "cancelled", input, message: "Conversion cancelled." }));
+  if (callbacks.signal?.aborted) return cancelled();
 
   return new Promise((resolve, reject) => {
     const child = spawn(binary, args, { env: cliEnvironment(), windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });

@@ -97,6 +97,11 @@ function Converter({
 }) {
   const [formats, setFormats] = useState<Format[]>([]);
   const [target, setTarget] = useState("");
+  const [outputDirectory, setOutputDirectory] = useState<string[]>([]);
+  const [quality, setQuality] = useState("");
+  const [maxSize, setMaxSize] = useState("");
+  const [pages, setPages] = useState("");
+  const [dpi, setDpi] = useState("");
   const [loadingTargets, setLoadingTargets] = useState(false);
   const [fileError, setFileError] = useState<string>();
   const [results, setResults] = useState<ConversionResult[]>();
@@ -277,6 +282,8 @@ function Converter({
       <Form.FilePicker
         id="outputDirectory"
         title="Output Folder"
+        value={outputDirectory}
+        onChange={setOutputDirectory}
         canChooseDirectories
         canChooseFiles={false}
         allowMultipleSelection={false}
@@ -286,6 +293,8 @@ function Converter({
         <Form.TextField
           id="quality"
           title="Quality"
+          value={quality}
+          onChange={setQuality}
           placeholder="Default (1–100)"
           info="Applies to lossy formats supported by Convt."
         />
@@ -294,6 +303,8 @@ function Converter({
         <Form.TextField
           id="maxSize"
           title="Maximum Image Size"
+          value={maxSize}
+          onChange={setMaxSize}
           placeholder="Original size"
           info="Longest edge in pixels. Smaller images are not enlarged."
         />
@@ -302,11 +313,15 @@ function Converter({
         <Form.TextField
           id="pages"
           title="PDF Pages"
+          value={pages}
+          onChange={setPages}
           placeholder="All pages"
           info="Use a page or range, such as 2, 1-3, or 4-. Each page becomes a separate file."
         />
       )}
-      {(hasPdf || hasSvg) && image && <Form.TextField id="dpi" title="Render DPI" placeholder="Default (18–1200)" />}
+      {(hasPdf || hasSvg) && image && (
+        <Form.TextField id="dpi" title="Render DPI" value={dpi} onChange={setDpi} placeholder="Default (18–1200)" />
+      )}
     </Form>
   );
 }
