@@ -1,6 +1,6 @@
 # Drug Search Changelog
 
-## [Fix Drug Name Searches] - {PR_MERGE_DATE}
+## [Fix Drug Name Searches] - 2026-10-12
 
 - Search brand, generic, and active ingredient names safely, including names containing quotes or colons.
 - Show an empty state for no matches while preserving genuine API errors.
