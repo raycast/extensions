@@ -55,7 +55,10 @@ closes.
 
 ## Import / export
 
-The Export Layers command writes `~/Downloads/shortcut-layers-<date>-<time>.json`.
+The Export Layers command writes `~/Downloads/shortcut-layers-<date>-<time>.json`. Turn
+on Copy Exported JSON in the extension preferences to also copy the JSON to the
+clipboard. If the file cannot be written, the clipboard is used regardless so the
+export is not lost.
 
 The Import Layers command merges a pasted or picked JSON file. Layers match by `id`
 and actions by `key`. New layers are appended. In a matched layer an action is added
