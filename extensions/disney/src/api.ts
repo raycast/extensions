@@ -109,3 +109,40 @@ export function toggleFavourite(favourites: Character[], character: Character): 
     ? favourites.filter((item) => item._id !== character._id)
     : [...favourites, character];
 }
+
+// Film and show lists each own a hook, but they write one favourite array.
+// Updates run one at a time and each one starts from the latest array, so a
+// slow save cannot replace a toggle that happened while it was writing.
+export function createFavouriteSaver(initial?: Character[]) {
+  let latest: Character[] | undefined = initial;
+  let queue: Promise<void> = Promise.resolve();
+
+  return {
+    current(): Character[] | undefined {
+      return latest;
+    },
+    initialize(loaded: Character[]): boolean {
+      if (latest !== undefined) return false;
+      latest = loaded;
+      return true;
+    },
+    update(character: Character, persist: (favourites: Character[]) => Promise<void>): Promise<void> {
+      const run = queue.then(async () => {
+        const current = latest ?? [];
+        const next = toggleFavourite(current, character);
+        latest = next;
+        try {
+          await persist(next);
+        } catch (error) {
+          latest = current;
+          throw error;
+        }
+      });
+      queue = run.then(
+        () => undefined,
+        () => undefined,
+      );
+      return run;
+    },
+  };
+}

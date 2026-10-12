@@ -1,6 +1,6 @@
 # Disney Changelog
 
-## [Improve Character Browsing] - {PR_MERGE_DATE}
+## [Improve Character Browsing] - 2026-10-13
 
 - Fix browsing and searching with the current Disney API, including single-character responses and pagination.
 - Add locally saved favourites that remain available offline.

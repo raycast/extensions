@@ -3,6 +3,7 @@ const { test } = require("node:test");
 const {
   buildCharacterUrl,
   characterWikiUrl,
+  createFavouriteSaver,
   normalizeCharacters,
   parseCharacterPage,
   parseCharacterResponse,
@@ -134,6 +135,72 @@ test("wiki actions use supplied links or a properly encoded wiki search", () => 
   assert.equal(url.hostname, "disney.fandom.com");
   assert.equal(url.pathname, "/wiki/Special:Search");
   assert.equal(url.searchParams.get("query"), "Queen Ariel & Friends");
+});
+
+test("queued favourite toggles keep every character while an earlier save is still writing", async () => {
+  const ariel = { _id: 1, name: "Ariel" };
+  const elsa = { _id: 2, name: "Elsa" };
+  const saver = createFavouriteSaver([]);
+  let stored = [];
+  let releaseFirst;
+  const firstWrite = new Promise((resolve) => {
+    releaseFirst = resolve;
+  });
+  const first = saver.update(ariel, async (next) => {
+    await firstWrite;
+    stored = next;
+  });
+  const second = saver.update(elsa, async (next) => {
+    stored = next;
+  });
+  releaseFirst();
+  await first;
+  await second;
+  assert.deepEqual(
+    stored.map((character) => character._id),
+    [1, 2],
+  );
+});
+
+test("a failed favourite save is discarded and the next toggle keeps its own character", async () => {
+  const ariel = { _id: 1, name: "Ariel" };
+  const elsa = { _id: 2, name: "Elsa" };
+  const saver = createFavouriteSaver([]);
+  const writes = [];
+  const first = saver.update(ariel, async () => {
+    throw new Error("disk full");
+  });
+  const second = saver.update(elsa, async (next) => {
+    writes.push(next.map((character) => character._id));
+  });
+  await assert.rejects(first, /disk full/);
+  await second;
+  assert.deepEqual(writes, [[2]]);
+  assert.deepEqual(
+    saver.current().map((character) => character._id),
+    [2],
+  );
+});
+
+test("a favourite list read from storage does not replace a toggle already in progress", async () => {
+  const ariel = { _id: 1, name: "Ariel" };
+  const elsa = { _id: 2, name: "Elsa" };
+  const saver = createFavouriteSaver();
+  let release;
+  const writing = new Promise((resolve) => {
+    release = resolve;
+  });
+  const saving = saver.update(elsa, async () => {
+    await writing;
+  });
+  await Promise.resolve();
+  assert.equal(saver.initialize([ariel]), false);
+  release();
+  await saving;
+  assert.deepEqual(
+    saver.current().map((character) => character._id),
+    [2],
+  );
 });
 
 test("favourites retain full character data across storage and toggle by ID", () => {

@@ -19,7 +19,7 @@ export default function Command() {
 }
 
 function CharacterList({ appearance }: { appearance?: Appearance }) {
-  const { showImages } = getPreferenceValues<{ showImages: boolean }>();
+  const { showImages } = getPreferenceValues<Preferences>();
   const [mode, setMode] = useState<BrowseMode>("characters");
   const [searchText, setSearchText] = useState("");
   const { favourites, toggle, isLoading: favouritesLoading } = useFavourites();
