@@ -51,6 +51,18 @@ export async function getPomodoro(timer: ActiveTimer | null): Promise<PomodoroSt
   return value.timerId === timer?.id ? value : null;
 }
 
+export async function getFinishedPomodoro(
+  timer: ActiveTimer | null,
+  now: Date = new Date(),
+  expectedIntervalId?: string,
+): Promise<PomodoroState | null> {
+  if (!timer || !getReminderSettings().pomodoroEnabled || now.getTime() < Date.parse(timer.startedAt)) return null;
+  const state = await getPomodoro(timer);
+  return state && (!expectedIntervalId || state.intervalId === expectedIntervalId) && isIntervalFinished(state, now)
+    ? state
+    : null;
+}
+
 export async function startPomodoroInterval(timerId: string, advanceFrom?: string): Promise<PomodoroState> {
   return withReminderOperation(() => startPomodoroIntervalUnderLock(timerId, advanceFrom));
 }

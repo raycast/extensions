@@ -67,7 +67,7 @@ test("reminder service integrates with Stop Work, storage and notification retri
     const { getActiveTimer, getWorkLogs, saveActiveTimer } = loadModule(
       "../src/lib/storage.ts",
     ) as typeof import("../src/lib/storage");
-    const { startPomodoroInterval, getPomodoro, checkReminders, endPomodoro } = loadModule(
+    const { startPomodoroInterval, getPomodoro, getFinishedPomodoro, checkReminders, endPomodoro } = loadModule(
       "../src/lib/reminder-service.ts",
     ) as typeof import("../src/lib/reminder-service");
 
@@ -151,6 +151,25 @@ test("reminder service integrates with Stop Work, storage and notification retri
     await checkReminders(past, new Date(dueAt.getTime() + 60000));
     assert.equal(pomodoroLaunches().length, 1);
     assert.equal((await getPomodoro(past))?.intervalId, preserved.intervalId);
+
+    // Reopening Start Work can recover the finished interval even after its
+    // one-time notification was delivered, without delivering it again.
+    const beforeReopen = new Map(items);
+    const launchesBeforeReopen = launched.length;
+    assert.equal(await getFinishedPomodoro(past, new Date(dueAt.getTime() - 1)), null);
+    assert.equal((await getFinishedPomodoro(past, dueAt))?.intervalId, preserved.intervalId);
+    assert.equal(await getFinishedPomodoro(past, dueAt, "stale-interval"), null);
+    assert.equal(await getFinishedPomodoro(null, dueAt), null);
+    assert.equal(await getFinishedPomodoro({ ...past, id: "other-timer" }, dueAt), null);
+    assert.equal(
+      await getFinishedPomodoro({ ...past, startedAt: new Date(dueAt.getTime() + 1).toISOString() }, dueAt),
+      null,
+    );
+    preferences.pomodoroEnabled = false;
+    assert.equal(await getFinishedPomodoro(past, dueAt), null);
+    preferences.pomodoroEnabled = true;
+    assert.deepEqual(items, beforeReopen);
+    assert.equal(launched.length, launchesBeforeReopen);
 
     // A time alert and Pomodoro completion share one window and independent IDs.
     items.delete(`reminderNotified:timer:${past.id}`);

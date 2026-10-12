@@ -21,8 +21,8 @@ import { showFailure } from "./lib/errors";
 import { findProject, sortProjectsByPreference } from "./lib/projects";
 import { getActiveTimer, getProjectCategories, getProjects, getWorkLogs } from "./lib/storage";
 import { ActiveTimerExistsError, refreshMenuBar, startTimer, stopTimer } from "./lib/timer";
-import { getPomodoro, getReminderSettings, startPomodoroInterval } from "./lib/reminder-service";
-import { isIntervalFinished, nextPhase, phaseLabel, type PomodoroState } from "./lib/reminders";
+import { getFinishedPomodoro, getReminderSettings, startPomodoroInterval } from "./lib/reminder-service";
+import { nextPhase, phaseLabel, type PomodoroState } from "./lib/reminders";
 import type { ActiveTimer, Project, ProjectCategory, WorkLog } from "./lib/types";
 
 const NO_DESCRIPTION = "__no_description__";
@@ -57,9 +57,9 @@ export default function StartWorkCommand({
       setCategories(savedCategories);
       setWorkLogs(savedLogs);
       setActiveTimer(savedTimer);
-      if (launchContext?.pomodoroIntervalId && pomodoroEnabled) {
-        const state = await getPomodoro(savedTimer);
-        if (state?.intervalId === launchContext.pomodoroIntervalId && isIntervalFinished(state, new Date())) {
+      if (savedTimer && pomodoroEnabled) {
+        const state = await getFinishedPomodoro(savedTimer, new Date(), launchContext?.pomodoroIntervalId);
+        if (state) {
           setFinishedPomodoro(state);
           // Request the finished menu-bar state before presenting this screen.
           // A display-only refresh cannot contend with the notification's lock.
@@ -110,7 +110,7 @@ export default function StartWorkCommand({
         actions={
           <ActionPanel>
             <Action
-              title={`Start ${next}`}
+              title={nextPhase(finishedPomodoro) === "work" ? "Start Work Interval" : `Start ${next}`}
               icon={Icon.Play}
               onAction={async () => {
                 if (isSubmitting) return;
