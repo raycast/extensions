@@ -1,6 +1,6 @@
 # Chiikawa Character Changelog
 
-## [Character Images in Detail] - {PR_MERGE_DATE}
+## [Character Images in Detail] - 2026-10-12
 
 - Show each character's bundled image in their detail view while browsing, comparing, or picking a random character.
 - Keep profiles readable when an image is unavailable, without downloading new assets.
