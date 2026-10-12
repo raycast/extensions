@@ -1,6 +1,6 @@
 # Hide Details Changelog
 
-## [Review Controls] - {PR_MERGE_DATE}
+## [Review Controls] - 2026-10-12
 
 - Add per-detection Don't Redact / Redact actions and restore-all control, with scan-specific selections and synchronized preview/copy output.
 - Configure What to Hide with checkboxes shared by both commands, preserving legacy category preferences and offering a reversible migration.
