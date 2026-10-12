@@ -1,6 +1,6 @@
 # Changelog
 
-## [Quicklink and Menu Bar Launch Fixes] - {PR_MERGE_DATE}
+## [Quicklink and Menu Bar Launch Fixes] - 2026-10-12
 
 - Fix Quicklinks that opened the action list instead of the saved action by passing the action ID through launch context.
 - Fix menu-bar launches of saved actions and history entries using the same launch context.
