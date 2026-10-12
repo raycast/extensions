@@ -29,6 +29,18 @@ export interface Organization {
   slug: string;
 }
 
+export interface Workspace extends Organization {
+  isCurrent: boolean;
+  role: string;
+  status: string;
+}
+
+export interface ListWorkspacesResponse {
+  authentication: { type: string };
+  currentWorkspace: Organization | null;
+  workspaces: Workspace[];
+}
+
 export interface PostDetails {
   organization: Organization;
   post: Post | null;
@@ -138,4 +150,9 @@ export interface ListIntegrationsResponse {
   linear: LinearIntegration[];
   organization: Organization;
   slack: unknown[];
+}
+
+export interface WorkspaceScopedOptions {
+  execute?: boolean;
+  organizationId?: string;
 }

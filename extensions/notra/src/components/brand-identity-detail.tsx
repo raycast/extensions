@@ -14,7 +14,7 @@ import {
 import { useFetch } from "@raycast/utils";
 import { deleteBrandIdentity, getNotraRequestInit, NOTRA_API_URL, updateBrandIdentity } from "../lib/notra";
 import type { BrandIdentity, GetBrandIdentityResponse } from "../types";
-import { getErrorMessage, notraUrl } from "../utils";
+import { getErrorMessage, notraOrganizationUrl } from "../utils";
 import { EditBrandIdentityForm } from "./edit-brand-identity-form";
 
 function buildMarkdown(bi: BrandIdentity): string {
@@ -165,7 +165,7 @@ export function BrandIdentityDetail({
                 icon={Icon.Globe}
                 shortcut={Keyboard.Shortcut.Common.OpenWith}
                 title="View on Notra"
-                url={notraUrl("/settings/brand")}
+                url={notraOrganizationUrl("/brand/identity")}
               />
               <Action.OpenInBrowser title="Open Website" url={bi.websiteUrl} />
               <Action

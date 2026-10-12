@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Detail, Icon, useNavigation } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { getBrandIdentityGenerationStatus, getPostGenerationStatus } from "../lib/notra";
-import { notraUrl } from "../utils";
+import { notraOrganizationUrl } from "../utils";
 import type { GenerationEvent, GenerationJobStatus } from "../types";
 import { BrandIdentityDetail } from "./brand-identity-detail";
 
@@ -148,10 +148,18 @@ export function GenerationStatus({ type, jobId, onComplete }: GenerationStatusPr
       actions={
         <ActionPanel>
           {status === "completed" && resultId && type === "post" && (
-            <Action.OpenInBrowser icon={Icon.Globe} title="View on Notra" url={notraUrl(`/content/${resultId}`)} />
+            <Action.OpenInBrowser
+              icon={Icon.Globe}
+              title="View on Notra"
+              url={notraOrganizationUrl(`/content/${resultId}`)}
+            />
           )}
           {status === "completed" && type === "brand-identity" && (
-            <Action.OpenInBrowser icon={Icon.Globe} title="View on Notra" url={notraUrl("/settings/brand")} />
+            <Action.OpenInBrowser
+              icon={Icon.Globe}
+              title="View on Notra"
+              url={notraOrganizationUrl("/brand/identity")}
+            />
           )}
           <Action.CopyToClipboard content={jobId} title="Copy Job ID" />
         </ActionPanel>

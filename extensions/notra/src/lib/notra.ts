@@ -35,6 +35,8 @@ import type {
   GeoVisibilityTimeseriesResponse,
 } from "../types/geo";
 import { clearNotraCache, getPostCacheKey, setCachedValue } from "../utils";
+import { getOrganizationHeaders } from "../utils/workspace";
+import { getSelectedWorkspace } from "./selected-workspace";
 
 const NOTRA_API_URL = "https://api.usenotra.com";
 
@@ -123,17 +125,23 @@ interface CreateGitHubIntegrationResponse {
 
 interface NotraRequestInit extends Omit<RequestInit, "headers"> {
   headers?: Record<string, string>;
+  /** Organization to act on. Defaults to the selected workspace; `null` sends no organization header. */
+  organizationId?: string | null;
 }
 
 export { NOTRA_API_URL };
 
-export function getNotraRequestInit(init?: NotraRequestInit): RequestInit {
+export function getNotraRequestInit({
+  organizationId = getSelectedWorkspace()?.id,
+  ...init
+}: NotraRequestInit = {}): RequestInit {
   const { apiKey } = getPreferenceValues<Preferences>();
 
   return {
     ...init,
     headers: {
-      ...init?.headers,
+      ...init.headers,
+      ...getOrganizationHeaders(organizationId),
       Accept: "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
