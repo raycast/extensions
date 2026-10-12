@@ -188,3 +188,16 @@ test("planting surfaces mocked HTTP failure without any real requests", async ()
     statusCode = 200;
   }
 });
+
+test("hostname length excludes the optional trailing root dot", () => {
+  const longestHost = ["a".repeat(63), "b".repeat(63), "c".repeat(63), "d".repeat(61)].join(".");
+  const overlongHost = `${longestHost}d`;
+  assert.equal(longestHost.length, 253);
+  for (const scheme of ["", "http://", "https://"]) {
+    for (const suffix of ["", "."]) {
+      const input = `${scheme}${longestHost}${suffix}/blog`;
+      assert.equal(normalizeWebsiteUrl(input), `${scheme || "https://"}${longestHost}${suffix}/blog`);
+      assert.throws(() => normalizeWebsiteUrl(`${scheme}${overlongHost}${suffix}/blog`));
+    }
+  }
+});

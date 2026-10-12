@@ -41,16 +41,14 @@ export function normalizeWebsiteUrl(value: string) {
     throw new Error("Website must use HTTP or HTTPS");
   }
   const hostname = website.hostname;
+  const domainHostname = hostname.replace(/\.$/, "");
   const validHostname =
     hostname.startsWith("[") ||
-    hostname
-      .replace(/\.$/, "")
-      .split(".")
-      .every((label) => /^[a-z\d](?:[a-z\d-]*[a-z\d])?$/i.test(label) && label.length <= 63);
+    domainHostname.split(".").every((label) => /^[a-z\d](?:[a-z\d-]*[a-z\d])?$/i.test(label) && label.length <= 63);
   if (
     !hostname ||
     !validHostname ||
-    hostname.length > 253 ||
+    domainHostname.length > 253 ||
     website.username ||
     website.password ||
     (!hasHttpScheme && !hostname.includes(".") && hostname !== "localhost" && !hostname.startsWith("["))
