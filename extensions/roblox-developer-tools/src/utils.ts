@@ -41,12 +41,22 @@ export async function run(title: string, action: () => Promise<string | void>) {
       await toast.hide();
     }
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title =
-      error instanceof Error ? error.message : "Something went wrong.";
-    toast.primaryAction = {
-      title: "Open Settings",
-      onAction: () => openExtensionPreferences(),
-    };
+    await showError(error, toast);
   }
+}
+
+export async function showError(error: unknown, toast?: Toast) {
+  const failure =
+    toast ??
+    (await showToast({
+      style: Toast.Style.Failure,
+      title: "Something went wrong.",
+    }));
+  failure.style = Toast.Style.Failure;
+  failure.title =
+    error instanceof Error ? error.message : "Something went wrong.";
+  failure.primaryAction = {
+    title: "Open Settings",
+    onAction: () => openExtensionPreferences(),
+  };
 }
