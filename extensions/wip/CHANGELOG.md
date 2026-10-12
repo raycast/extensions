@@ -1,5 +1,9 @@
 # WIP Changelog
 
+## [Fix todo search debounce] - {PR_MERGE_DATE}
+
+- Cancel pending debounced todo searches when the search query changes
+
 ## [Fix] - 2026-08-21
 
 - Reduced background streak refreshes to once per minute.
