@@ -21,6 +21,7 @@ export default function Command() {
   const [now, setNow] = useState(new Date());
   const [referenceDate, setReferenceDate] = useState(new Date());
   const [showStatusHint, setShowStatusHint] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     let mounted = true;
     const refresh = async () => {
@@ -35,6 +36,7 @@ export default function Command() {
       setTargetHours(target.targetHours);
       setVacationDays(vacations);
       setShowStatusHint(isStatusCommandStale(statusLastSeenIso, new Date().toISOString()));
+      setIsLoading(false);
     };
     refresh();
     const refreshTimer = setInterval(refresh, 15000);
@@ -82,7 +84,7 @@ export default function Command() {
     : `${formatDayLabel(referenceDate)} - ${msToClock(totals.net)} net`;
 
   return (
-    <List>
+    <List isLoading={isLoading}>
       <List.Section
         title={sectionTitle}
         subtitle={`Work ${msToClock(totals.work)} | Breaks ${msToClock(totals.breaks)} | Delta ${formatDelta(delta)}${

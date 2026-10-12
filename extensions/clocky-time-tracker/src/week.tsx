@@ -11,6 +11,7 @@ export default function Command() {
   const [vacationDays, setVacationDays] = useState<string[]>([]);
   const [now, setNow] = useState(new Date());
   const [referenceDate, setReferenceDate] = useState(new Date());
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     let mounted = true;
     const refresh = async () => {
@@ -20,6 +21,7 @@ export default function Command() {
       setTargetHours(target.targetHours);
       setWorkDaysPerWeek(target.workDaysPerWeek);
       setVacationDays(vacations);
+      setIsLoading(false);
     };
     refresh();
     const refreshTimer = setInterval(refresh, 15000);
@@ -69,7 +71,7 @@ export default function Command() {
     : `Week of ${formatDayLabel(weekStart)} - ${msToClock(weeklyTotals.net)} net`;
 
   return (
-    <List>
+    <List isLoading={isLoading}>
       <List.Section
         title={sectionTitle}
         subtitle={`Work ${msToClock(weeklyTotals.work)} | Breaks ${msToClock(weeklyTotals.breaks)} | Delta ${formatDelta(weeklyDelta)}`}

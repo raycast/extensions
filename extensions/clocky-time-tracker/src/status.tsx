@@ -29,8 +29,9 @@ import {
 } from "./utils";
 import { Session, StatusState } from "./types";
 
-// Gaps below this are ordinary timer jitter (system load, tab throttling), not a real sleep/wake event.
-const SLEEP_GAP_TOLERANCE_MS = 60_000;
+// Gaps below this are ordinary timer jitter or the regular 1-minute background interval between
+// runs of this command (see package.json), not a real sleep/wake event.
+const SLEEP_GAP_TOLERANCE_MS = 3 * 60_000;
 
 export default function Command() {
   const [now, setNow] = useState(new Date());
@@ -39,6 +40,8 @@ export default function Command() {
   const [vacationDays, setVacationDays] = useState<string[]>([]);
   const [thresholds, setThresholds] = useState({ forgotClockOutMs: 15 * 60 * 1000, forgotClockInMs: 30 * 60 * 1000 });
   const [statusState, setStatusState] = useState<StatusState>({});
+  // Raycast unloads a menu bar command as soon as isLoading is false, so keep it loaded until the first load is done.
+  const [isLoading, setIsLoading] = useState(true);
 
   const sessionsRef = useRef<Session[]>([]);
   const thresholdsRef = useRef(thresholds);
@@ -129,7 +132,11 @@ export default function Command() {
       await saveStatusLastSeenIso(isoNow());
     };
 
-    initialize().then(refresh);
+    initialize()
+      .then(refresh)
+      .finally(() => {
+        if (mounted) setIsLoading(false);
+      });
     const refreshTimer = setInterval(refresh, 15000);
     const tick = setInterval(() => {
       const nowIso = isoNow();
@@ -248,7 +255,7 @@ export default function Command() {
   };
 
   return (
-    <MenuBarExtra icon={icon} title={title} tooltip={`Delta: ${formatDelta(delta)}`}>
+    <MenuBarExtra isLoading={isLoading} icon={icon} title={title} tooltip={`Delta: ${formatDelta(delta)}`}>
       <MenuBarExtra.Item title={`Status: ${status}`} />
       <MenuBarExtra.Item title={`Live: ${title}`} />
       {workEnd ? <MenuBarExtra.Item title={`Estimated work end: ${formatTimeAt(workEnd)}`} /> : null}

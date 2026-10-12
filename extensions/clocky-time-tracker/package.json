@@ -91,7 +91,8 @@
       "title": "Status",
       "subtitle": "Clocky",
       "description": "Shows your current state (working, paused, or off) and live time delta for today.",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "interval": "1m"
     },
     {
       "name": "history",
