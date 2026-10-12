@@ -98,3 +98,21 @@ it("awaits PowerShell completion and reports partial failure without retry", asy
   await expect(pending).rejects.toThrow("Earlier chords may have run");
   expect(runPowerShellScript).toHaveBeenCalledTimes(1);
 });
+it.each([
+  "Release held modifier keys and retry manually",
+  "Focus the web page content and retry manually",
+  "Open a single target window, focus it, and retry manually",
+])("surfaces the known PowerShell failure %s", async (message) => {
+  jest
+    .mocked(runPowerShellScript)
+    .mockRejectedValue(new Error(`Command failed with exit code 1: powershell\nException: ${message}\nAt line:1`));
+  await expect(runWindowsShortcuts(target, 0, sequence)).rejects.toThrow(new Error(message));
+});
+it("keeps generic text for unknown PowerShell failures", async () => {
+  jest.mocked(runPowerShellScript).mockRejectedValue(new Error("Command failed: C:\\Users\\secret\\script.ps1"));
+  await expect(runWindowsShortcuts(target, 0, sequence)).rejects.toThrow(
+    new Error(
+      "Shortcut execution stopped. Check the target window, held modifiers, and application elevation. Earlier chords may have run; retry manually."
+    )
+  );
+});

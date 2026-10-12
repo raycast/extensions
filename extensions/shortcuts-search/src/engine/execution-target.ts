@@ -1,8 +1,7 @@
 import { isWindowsProcessName } from "../shortcut-core/windows";
 
 export type MacExecutionTarget =
-  | { kind: "desktop"; bundleId: string }
-  | { kind: "browser"; bundleId: string; hostname: string; url: string };
+  { kind: "desktop"; bundleId: string } | { kind: "browser"; bundleId: string; hostname: string; url: string };
 export type WindowsExecutionTarget =
   | { kind: "desktop"; windowsProcessName: string; processId?: number; windowHandle?: string }
   | {
@@ -77,4 +76,23 @@ export function parseDelay(value: string | number): number {
   const delay = Number(value);
   if (!Number.isFinite(delay) || delay < 0 || delay > 5) throw new Error("Delay must be between 0 and 5 seconds");
   return delay;
+}
+const executionMessages = [
+  /Application did not become ready; no keys were sent/,
+  /Application window changed; no keys were sent/,
+  /Application focus changed; remaining keys were cancelled/,
+  /Web page changed; remaining keys were cancelled/,
+  /Could not send chord \d+; earlier chords may have run\. Check Accessibility and Automation permissions\./,
+  /Release held modifier keys and retry manually/,
+  /Windows blocked input; earlier keys may have run\. Check application elevation and retry manually\./,
+  /Focus the web page content and retry manually/,
+  /Open a single target window, focus it, and retry manually/,
+];
+export function executionError(error: unknown, fallback: string): Error {
+  const output = error instanceof Error ? `${error.message}\n${"stderr" in error ? String(error.stderr) : ""}` : "";
+  for (const pattern of executionMessages) {
+    const match = output.match(pattern);
+    if (match) return new Error(match[0]);
+  }
+  return new Error(fallback);
 }

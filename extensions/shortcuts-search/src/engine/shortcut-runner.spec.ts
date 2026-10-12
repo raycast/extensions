@@ -64,3 +64,22 @@ it("awaits native completion and reports a partial failure without retrying", as
   expect(native).toHaveBeenCalledTimes(1);
   expect(native.mock.calls[0][0]).toBe("/usr/bin/osascript");
 });
+
+it.each([
+  ["Web page changed; remaining keys were cancelled", "Web page changed; remaining keys were cancelled"],
+  [
+    "Could not send chord 2; earlier chords may have run. Check Accessibility and Automation permissions.",
+    "Could not send chord 2; earlier chords may have run. Check Accessibility and Automation permissions.",
+  ],
+  [
+    "/tmp/private path leaked",
+    "Shortcut execution stopped. Check the target and Accessibility/Automation permissions. Earlier chords may have run; retry manually.",
+  ],
+])("surfaces only known osascript failures: %s", async (stderr, expected) => {
+  const native = execFile as unknown as jest.Mock;
+  native.mockReset();
+  native.mockImplementation((_file, _args, _options, callback) =>
+    callback(Object.assign(new Error("Command failed"), { stderr: `execution error: Error: ${stderr} (-2700)` }))
+  );
+  await expect(runShortcuts(target, 0, sequence, { c: "8" })).rejects.toThrow(new Error(expected));
+});

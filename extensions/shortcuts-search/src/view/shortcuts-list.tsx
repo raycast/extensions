@@ -100,9 +100,9 @@ export function ShortcutsList({
       navigationTitle={application?.name}
     >
       {application && selectedKeymap
-        ? selectedKeymap.sections.map((section) => (
-            <List.Section key={section.title} title={section.title}>
-              {section.hotkeys.map((shortcut) => {
+        ? selectedKeymap.sections.map((section, sectionIndex) => (
+            <List.Section key={`${sectionIndex}-${section.title}`} title={section.title}>
+              {section.hotkeys.map((shortcut, shortcutIndex) => {
                 const hotkeyAccessories = generateHotkeyAccessories(shortcut);
                 const commentAccessory: List.Item.Accessory[] = shortcut.comment
                   ? [{ text: shortcut.comment, icon: Icon.SpeechBubble }]
@@ -116,7 +116,7 @@ export function ShortcutsList({
 
                 return (
                   <List.Item
-                    key={generateShortcutKey(shortcut)}
+                    key={`${shortcutIndex}-${generateShortcutKey(shortcut)}`}
                     title={shortcut.title}
                     accessories={[...hotkeyAccessories, ...commentAccessory]}
                     keywords={[section.title]}
