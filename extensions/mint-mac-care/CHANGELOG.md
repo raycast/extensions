@@ -1,6 +1,6 @@
 # Mint Changelog
 
-## [Clearer access, recovery and AI answers] - {PR_MERGE_DATE}
+## [Clearer access, recovery and AI answers] - 2026-10-12
 
 - Installation guidance now explains Direct's weekly free allowances and the differences between editions.
 - Undo guidance explains which actions can be recovered and when recovery is no longer possible.
