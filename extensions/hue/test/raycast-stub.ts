@@ -90,10 +90,10 @@ export const showToast = vi.fn(async (options: ToastOptions) => {
   };
 });
 
-export const showHUD = vi.fn(async (_title: string) => {});
-export const confirmAlert = vi.fn(async (_options: object) => true);
+export const showHUD = vi.fn(async () => {});
+export const confirmAlert = vi.fn(async () => true);
 export const openExtensionPreferences = vi.fn(async () => {});
-export const updateCommandMetadata = vi.fn(async (_metadata: { subtitle?: string | null }) => {});
+export const updateCommandMetadata = vi.fn(async () => {});
 export const useNavigation = () => ({ push: () => {}, pop: () => {} });
 
 export function resetRaycast() {

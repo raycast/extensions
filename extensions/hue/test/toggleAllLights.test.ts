@@ -9,7 +9,10 @@ import * as fixtures from "./fixtures/resources";
 
 // Records the keys useHueResources reads, and lets it run outside React.
 const useCachedState = vi.hoisted(() =>
-  vi.fn((_key: string, initial: unknown, _options?: { cacheNamespace?: string }) => [initial, () => {}]),
+  vi.fn<(key: string, initial: unknown, options?: { cacheNamespace?: string }) => unknown>((_key, initial) => [
+    initial,
+    () => {},
+  ]),
 );
 vi.mock("@raycast/utils", async (importOriginal) => ({ ...(await importOriginal<object>()), useCachedState }));
 
