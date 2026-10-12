@@ -11,6 +11,7 @@ import {
 import { watch, FSWatcher } from "node:fs";
 import { join } from "node:path";
 import { Paths } from "./paths";
+import { selectedPath } from "./selection";
 import { readResourceBlock, ResourceBlock } from "./resources";
 import {
   Config,
@@ -192,6 +193,15 @@ export class Controller {
           "50",
           "--zgate",
           MIN_SEMANTIC_Z,
+          ...this.config.roots.flatMap((root) => ["--root", root]),
+          ...this.config.excludedFolders.flatMap((folder) => [
+            "--exclude",
+            folder,
+          ]),
+          ...this.config.excludedExtensions.flatMap((extension) => [
+            "--exclude-ext",
+            extension,
+          ]),
         ],
         {
           models: this.locations.models,
@@ -204,17 +214,7 @@ export class Controller {
       queryWorker = this.worker;
       const rows = decodeHits(await queryWorker.done);
       // Removed or excluded folders must stop appearing immediately, before the next prune pass.
-      const hits = rows.filter(
-        (hit) =>
-          this.config.roots.some((root) => hit.path.startsWith(`${root}/`)) &&
-          !this.config.excludedFolders.some(
-            (folder) =>
-              hit.path === folder || hit.path.startsWith(`${folder}/`),
-          ) &&
-          !this.config.excludedExtensions.includes(
-            hit.path.split(".").pop()?.toLowerCase() ?? "",
-          ),
-      );
+      const hits = rows.filter((hit) => selectedPath(this.config, hit.path));
       if (this.cache.size >= CACHE_LIMIT) {
         this.cache.delete(this.cache.keys().next().value!);
       }

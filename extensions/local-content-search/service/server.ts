@@ -1,5 +1,6 @@
 import { createServer, IncomingMessage, ServerResponse } from "node:http";
 import { createConnection } from "node:net";
+import { StringDecoder } from "node:string_decoder";
 import { mkdir, chmod, lstat, unlink } from "node:fs/promises";
 import { Paths } from "./paths";
 import { Controller } from "./controller";
@@ -37,6 +38,8 @@ function respond(res: ServerResponse, status: number, value: unknown): void {
 
 function body(req: IncomingMessage): Promise<unknown> {
   return new Promise((resolve, reject) => {
+    // JSON text may cross UTF-8 byte boundaries; enforce byte limits without changing its characters.
+    const decoder = new StringDecoder();
     let bytes = 0,
       output = "",
       exceeded = false;
@@ -53,7 +56,7 @@ function body(req: IncomingMessage): Promise<unknown> {
         return;
       }
       if (!exceeded) {
-        output += chunk.toString();
+        output += decoder.write(chunk);
       }
     });
     req.on("end", () => {
@@ -61,7 +64,7 @@ function body(req: IncomingMessage): Promise<unknown> {
         return;
       }
       try {
-        resolve(JSON.parse(output));
+        resolve(JSON.parse(output + decoder.end()));
       } catch {
         reject(new RequestError(HTTP_BAD_REQUEST, "Expected JSON request"));
       }

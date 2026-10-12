@@ -10,24 +10,11 @@ import { useEffect, useState } from "react";
 import { basename, dirname } from "node:path";
 import { LocalClient } from "../service/client";
 import { Hit } from "../service/protocol";
+import { location } from "./location";
 
 // Debounce and abort stale requests; typing never launches overlapping model workers.
 const DEBOUNCE_MS = 300;
 const client = new LocalClient();
-
-function location(hit: Hit): string {
-  if (hit.loc === undefined) {
-    return hit.kind;
-  }
-  if (["page", "pageImage"].includes(hit.segment)) {
-    return `Page ${hit.loc}`;
-  }
-  if (["audio", "frame"].includes(hit.segment)) {
-    const minutes = Math.floor(hit.loc / 60);
-    return `${minutes}:${String(Math.floor(hit.loc % 60)).padStart(2, "0")}`;
-  }
-  return `${hit.segment} ${hit.focus ?? hit.loc}`;
-}
 
 function actions(hit?: Hit) {
   return (

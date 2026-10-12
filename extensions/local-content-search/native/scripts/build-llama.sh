@@ -13,9 +13,6 @@ PATCH=scripts/llama.cpp-no-logits.patch
 SOURCE=Vendor/llama.cpp
 OUT=Vendor/llama
 STAMP="$TAG $(shasum -a 256 "$PATCH" | cut -c1-12)"
-if [[ -f "$OUT/lib/libllamacpp.a" && "$(cat "$OUT/BUILD" 2>/dev/null)" == "$STAMP" ]]; then
-  exit 0
-fi
 if [[ -z "${DEVELOPER_DIR:-}" && -d /Applications/Xcode.app ]]; then
   export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 fi
@@ -27,8 +24,10 @@ elif [[ "$(git -C "$SOURCE" describe --tags --exact-match 2>/dev/null)" != "$TAG
   git -C "$SOURCE" checkout --quiet --force "$TAG"   # --force also drops the old patch
 fi
 # Without the patch, every input token costs 1 MiB of logits that an embedding model never produces (262k vocabulary).
-if git -C "$SOURCE" apply --check "../../$PATCH" 2>/dev/null; then
-  git -C "$SOURCE" apply "../../$PATCH"
+/bin/bash scripts/check-llama-patch.sh "$SOURCE" "$PWD/$PATCH"
+# Trust a cached library only after proving its source still contains the required patch.
+if [[ -f "$OUT/lib/libllamacpp.a" && "$(cat "$OUT/BUILD" 2>/dev/null)" == "$STAMP" ]]; then
+  exit 0
 fi
 
 if ! command -v cmake > /dev/null; then

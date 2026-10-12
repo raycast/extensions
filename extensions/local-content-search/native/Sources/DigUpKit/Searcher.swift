@@ -38,6 +38,7 @@ public final class Searcher {
     /// False for the vectors the later pass adds (`Indexer.finishLongFiles`): scored, but they don't set the scale.
     private var rowSetsScale: [Bool] = []
     private var fileKind: [Int64: FileKind] = [:]
+    private var filePath: [Int64: String] = [:]
     public private(set) var vectorSource: String?
     /// False after `releaseVectors()` (or `loadVectors: false`): keyword search still works, and the next search with
     /// a query vector loads them again.
@@ -100,8 +101,10 @@ public final class Searcher {
 
     private func reloadFiles() throws {
         fileKind.removeAll(keepingCapacity: true)
-        try store.db.query("SELECT id, kind FROM files") { row in
+        filePath.removeAll(keepingCapacity: true)
+        try store.db.query("SELECT id, kind, path FROM files") { row in
             fileKind[row.int(0)] = FileKind(rawValue: row.text(1) ?? "")
+            filePath[row.int(0)] = row.text(2)
         }
         vectorSource = try store.meta("vector_source")
     }
@@ -114,17 +117,30 @@ public final class Searcher {
     public static let codeWordWeight = 1.0
 
     public func search(_ text: String, queryVector: [Float]?, kinds: Set<FileKind>? = nil, limit: Int = 20,
-                       zGate: Double = 2.0, wordWeight: Double? = nil, prefixLast: Bool = false) throws -> [SearchHit] {
+                       zGate: Double = 2.0, wordWeight: Double? = nil, prefixLast: Bool = false,
+                       selection: FolderSelection? = nil, excludedExtensions: Set<String> = []) throws -> [SearchHit] {
         let wordWeight = wordWeight ?? (isCode ? Self.codeWordWeight : Self.wordWeight)
         if queryVector != nil, !vectorsLoaded { try reload() }
         let fileKind = self.fileKind
-        let allowed = { (file: Int64) -> Bool in kinds == nil || fileKind[file].map { kinds!.contains($0) } ?? false }
+        // Selection precedes both semantic normalization and FTS limits; excluded rows cannot displace matches.
+        // files -> allowed IDs -> vector scale / FTS -> ranking -> result limit
+        let allowedFiles = Set(fileKind.keys.filter { id in
+            guard let path = filePath[id], let kind = fileKind[id] else { return false }
+            return (kinds?.contains(kind) ?? true)
+                && (selection?.isSearched(path) ?? true)
+                && !excludedExtensions.contains((path as NSString).pathExtension.lowercased())
+        })
+        guard !allowedFiles.isEmpty else { return [] }
+        let allowed = { (file: Int64) -> Bool in allowedFiles.contains(file) }
+        let scoped = selection != nil || kinds != nil || !excludedExtensions.isEmpty
+        let scopeSQL = scoped ? "AND s.file IN (\(allowedFiles.sorted().map(String.init).joined(separator: ",")))" : ""
 
         // Meaning: score every vector on this query's scale (`meaning`), keep each file's best segment.
         var best: [Int64: (z: Double, cosine: Double, row: Int)] = [:]
         if let query = queryVector, query.count == Vectors.dimension, !rowFile.isEmpty {
             let scores = score(query)
-            let meaning = Self.meaning(scores, rowModality, setsScale: rowSetsScale)
+            let scale = rowFile.indices.map { rowSetsScale[$0] && allowed(rowFile[$0]) }
+            let meaning = Self.meaning(scores, rowModality, setsScale: scale)
             for row in 0..<scores.count where allowed(rowFile[row]) {
                 let z = meaning[row]
                 if z > (best[rowFile[row]]?.z ?? -.infinity) { best[rowFile[row]] = (z, Double(scores[row]), row) }
@@ -143,7 +159,7 @@ public final class Searcher {
             try store.db.query("""
                 SELECT s.file, s.id, snippet(fts, 1, '«', '»', '…', 12), fts.original FROM fts
                 JOIN segments s ON s.id = fts.rowid
-                WHERE fts MATCH ? ORDER BY bm25(fts, 3.0, 1.0) LIMIT 1000
+                WHERE fts MATCH ? \(scopeSQL) ORDER BY bm25(fts, 3.0, 1.0) LIMIT 1000
                 """, [.text(patterns.joined(separator: " OR "))]) { row in
                 let file = row.int(0)
                 guard words.count < 100, allowed(file), seen.insert(file).inserted else { return }

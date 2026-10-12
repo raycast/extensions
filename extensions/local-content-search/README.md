@@ -30,7 +30,7 @@ The extension is registered locally through Raycast's developer tooling. It has 
 | --- | --- |
 | Search File Contents | Semantic and exact-word retrieval, excerpts, page/time metadata, Quick Look, open/reveal, and copy actions |
 | Manage Content Index | Select folders, inspect progress, pause/resume, set exclusions, and choose power/memory limits |
-| Set up Local Content Search | Installation and removal instructions |
+| Install Local Content Search | Installation and removal instructions |
 
 Readers support text/Markdown, rich documents, PDFs including scans, images/screenshots with OCR, audio windows, and sampled video frames with audio. macOS frameworks handle decoding; no external transcription service is used.
 
@@ -50,7 +50,7 @@ The per-user login service runs independently of Raycast. It reconciles changed 
 - Index workers use utility scheduling, reduced CPU priority, and at most four CPU threads. Builds use two compiler jobs.
 - macOS receives a 512 MB service-host budget and a configurable native-worker budget, 2 GB by default. RSS monitoring also stops over-budget workers; timeouts and cancellation reap stuck workers.
 - Low Power Mode and high memory pressure suspend indexing. A charger-only policy is available.
-- Text documents above 20 MB and images above 50 MB are skipped. Hidden directories, app bundles, credentials/key files, generated dependencies, datasets, and online-only iCloud files are excluded by default.
+- Text documents above 20 MB and images above 50 MB are skipped. Audio tracks above one hour, above the 256 MB WAV scratch budget, or without a 1 GB free-space reserve are skipped with an explicit reason. Hidden directories, app bundles, credentials/key files, generated dependencies, datasets, and online-only iCloud files are excluded by default.
 
 Resource limits reduce risk; they cannot guarantee that macOS or a driver will never crash. Exclusions also cannot identify every sensitive file. Review the folders you select.
 

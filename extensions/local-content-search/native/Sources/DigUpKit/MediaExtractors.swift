@@ -27,15 +27,33 @@ struct MediaPiece: Sendable {
 
 enum AudioExtractor {
     static let sampleRate = 16_000.0
+    private static let maxDuration = 3600.0
+    private static let maxScratchBytes = 256 * 1024 * 1024
+    private static let reserveBytes: Int64 = 1024 * 1024 * 1024
+    private static let wavHeaderBytes = 44
+    private static let bytesPerSample = 2
 
     /// Decodes audio (a file, or a video's soundtrack) to 16 kHz mono and writes `window`-second WAV pieces `hop`
     /// seconds apart, skipping silent ones. One model input ignores anything past 30 s, so windows stay ≤ 30 s.
-    /// Streams: memory stays at one window, even for a 3-hour podcast.
-    static func windows(of url: URL, window: Double, hop: Double, minimum: Double = 2, to folder: URL) async throws
+    /// Memory stays at one window; recordings over one hour or the scratch budget are skipped before writing.
+    static func windows(of url: URL, window: Double, hop: Double, minimum: Double = 2,
+                        maximumDuration: Double = maxDuration, maximumBytes: Int = maxScratchBytes, to folder: URL) async throws
         -> (pieces: [MediaPiece], duration: Double) {
         let asset = AVURLAsset(url: url)
         guard let track = try await asset.loadTracks(withMediaType: .audio).first else { return ([], 0) }
         let duration = try await asset.load(.duration).seconds
+        // Bound disk use before decoding starts, including overlap; never silently truncate a long recording.
+        guard duration.isFinite, duration >= 0, window > 0, hop > 0, hop <= window else {
+            throw ExtractError.unreadable("invalid audio duration or window settings")
+        }
+        guard duration <= maximumDuration else {
+            throw ExtractError.leftOut("audio exceeds the \(Int(maximumDuration / 60))-minute duration limit")
+        }
+        let estimated = ceil(duration / hop) * (window * sampleRate * Double(bytesPerSample) + Double(wavHeaderBytes))
+        guard estimated <= Double(maximumBytes) else {
+            throw ExtractError.leftOut("audio exceeds the scratch-space budget")
+        }
+        try requireDisk(folder, writing: Int64(estimated))
         let reader = try AVAssetReader(asset: asset)
         let output = AVAssetReaderTrackOutput(track: track, outputSettings: [
             AVFormatIDKey: kAudioFormatLinearPCM, AVSampleRateKey: sampleRate, AVNumberOfChannelsKey: 1,
@@ -49,11 +67,18 @@ enum AudioExtractor {
         var buffer: [Int16] = []
         var offset = 0   // sample index of buffer[0] in the file
         var pieces: [MediaPiece] = []
+        var scratchBytes = 0
         func emit(_ count: Int) throws {
             let slice = buffer[0..<count]
             guard rms(slice) > 0.003 else { return }   // ≈ −50 dBFS: silence isn't worth a vector
+            let bytes = wavHeaderBytes + count * bytesPerSample
+            guard scratchBytes + bytes <= maximumBytes else {
+                throw ExtractError.leftOut("audio exceeded the scratch-space budget")
+            }
+            try requireDisk(folder, writing: Int64(bytes))
             let out = folder.appendingPathComponent(UUID().uuidString + ".wav")
             try writeWAV(slice, to: out)
+            scratchBytes += bytes
             pieces.append(MediaPiece(path: out.path, start: Double(offset) / sampleRate,
                                      end: Double(offset + count) / sampleRate))
         }
@@ -75,6 +100,14 @@ enum AudioExtractor {
         let alreadyCovered = offset == 0 ? 0 : windowSamples - hopSamples
         if buffer.count - alreadyCovered >= Int(minimum * sampleRate) { try emit(buffer.count) }
         return (pieces, duration.isFinite ? duration : Double(offset + buffer.count) / sampleRate)
+    }
+
+    // Recheck available storage as each piece is written; another process may consume space mid-decode.
+    private static func requireDisk(_ folder: URL, writing bytes: Int64) throws {
+        let values = try folder.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
+        guard let free = values.volumeAvailableCapacityForImportantUsage, free >= reserveBytes + bytes else {
+            throw ExtractError.leftOut("insufficient scratch space: keep at least 1 GB free")
+        }
     }
 
     private static func rms(_ samples: ArraySlice<Int16>) -> Double {

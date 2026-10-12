@@ -1,4 +1,5 @@
 import { request } from "node:http";
+import { StringDecoder } from "node:string_decoder";
 import { paths } from "./paths";
 import { Config, Hit, Status, PROTOCOL_VERSION } from "./protocol";
 
@@ -50,6 +51,8 @@ export class LocalClient {
           headers: { "Content-Type": "application/json" },
         },
         (res) => {
+          // Decode across transport chunks so non-ASCII file paths and excerpts remain exact.
+          const decoder = new StringDecoder();
           let bytes = 0,
             output = "";
           res.on("data", (chunk: Buffer) => {
@@ -60,12 +63,12 @@ export class LocalClient {
               );
               return;
             }
-            output += chunk.toString();
+            output += decoder.write(chunk);
           });
           res.on("error", reject);
           res.on("end", () => {
             try {
-              const value = JSON.parse(output);
+              const value = JSON.parse(output + decoder.end());
               if (res.statusCode !== 200) {
                 reject(
                   new Error(value.error ?? "Local service request failed"),
@@ -86,7 +89,7 @@ export class LocalClient {
         if (error.code === "ENOENT" || error.code === "ECONNREFUSED") {
           reject(
             new Error(
-              "Background service is not running. Open Set Up Local Content Search",
+              "Background service is not running. Open Install Local Content Search",
             ),
           );
           return;

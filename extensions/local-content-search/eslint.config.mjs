@@ -1,7 +1,8 @@
 import tseslint from "typescript-eslint";
+import { defineConfig } from "eslint/config";
 
 // Check the code we own; inherited native sources keep their upstream style.
-export default tseslint.config({
+export default defineConfig({
   files: ["src/**/*.{ts,tsx}", "service/**/*.ts", "scripts/**/*.ts", "tests/**/*.ts"],
   extends: [...tseslint.configs.recommended],
   rules: {

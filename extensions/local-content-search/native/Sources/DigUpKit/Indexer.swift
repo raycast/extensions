@@ -120,7 +120,9 @@ public final class Indexer {
             // keep its rows rather than take that for "deleted".
             let vanished = roots.map { FolderSelection.realPath($0.path) }
                 .filter { !FileManager.default.fileExists(atPath: $0) }.map { $0.hasSuffix("/") ? $0 : $0 + "/" }
+            // Keep saved content beneath failed enumerations, while still pruning genuinely deleted siblings.
             for row in existing where !seen.contains(row.path) && !movedFrom.contains(row.path)
+                && !crawl.unreadable.contains(where: { row.path == $0 || FolderSelection.isInside(row.path, $0) })
                 && !vanished.contains(where: { row.path.hasPrefix($0) }) {
                 try store.delete(row.id)
                 summary.removed += 1
@@ -407,13 +409,13 @@ public final class Indexer {
                 prepared.payload = .audio(pieces: pieces, duration: duration)
             case .video:
                 let (interval, window, hop) = (options.frameInterval, options.audioWindow, options.audioHop)
-                let (frames, duration, hasAudio) = try runBlocking {
+                // Reject an oversized soundtrack before generating video-frame scratch files.
+                let sound = try runBlocking {
+                    try await AudioExtractor.windows(of: url, window: window, hop: hop, to: folder).pieces
+                }
+                let (frames, duration, _) = try runBlocking {
                     try await VideoExtractor.keyframes(of: url, every: interval, maxPixel: 1024, to: folder)
                 }
-                let sound = hasAudio
-                    ? try runBlocking { try await AudioExtractor.windows(of: url, window: window, hop: hop, to: folder) }
-                        .pieces
-                    : []
                 prepared.payload = .video(frames: frames, sound: sound, duration: duration)
             case .code:
                 prepared.payload = .code(try CodeExtractor.read(url, options: options))
@@ -642,20 +644,44 @@ public final class Indexer {
                 + (worded.count < code.pieces.count ? ", \(code.pieces.count - worded.count) for keywords only" : ""))
     }
 
+    // Only complete, finite vectors make a media piece searchable; retain failures even when other pieces succeed.
+    private func usableMedia(_ embedding: Embedding) -> Bool {
+        embedding.error == nil && embedding.vector?.count == Vectors.dimension
+            && (embedding.vector?.allSatisfy(\.isFinite) ?? false)
+    }
+
+    private func finishMedia(_ file: FileRecord, embeddings: [Embedding], expected: Int,
+                             info: [String: String]) throws -> (String, String?) {
+        let failures = (0..<expected).compactMap { index -> String? in
+            guard index < embeddings.count else { return "piece \(index + 1): missing embedding" }
+            guard !usableMedia(embeddings[index]) else { return nil }
+            return "piece \(index + 1): \(embeddings[index].error ?? "invalid vector")"
+        }
+        let successful = expected - failures.count
+        let state = successful > 0 ? "done" : "failed"
+        let detail = failures.isEmpty ? nil : "\(failures.count)/\(expected) pieces failed: " + failures.prefix(10).joined(separator: "; ")
+        var saved = info
+        saved["embedding_errors"] = String(failures.count)
+        try store.finish(file.id, state: state, detail: detail, info: saved)
+        return (state, detail)
+    }
+
     private func audio(_ file: FileRecord, pieces: [MediaPiece], duration: Double) throws -> (String, String?) {
         guard !pieces.isEmpty else {
             try store.finish(file.id, state: "skipped", detail: "silent or shorter than 2 s")
             return ("skipped", "silent or too short")
         }
         let vectors = try fullWorker().embedAudio(pieces.map(\.path))
+        var result: (String, String?) = ("failed", nil)
         try store.db.transaction {
-            for (piece, embedding) in zip(pieces, vectors) {
+            for (piece, embedding) in zip(pieces, vectors) where usableMedia(embedding) {
                 try store.addSegment(file: file.id, kind: .audio, modality: .audio, loc: piece.start, locEnd: piece.end,
                                      vector: embedding.vector)
             }
-            try store.finish(file.id, state: "done", info: ["duration": String(format: "%.1f", duration)])
+            result = try finishMedia(file, embeddings: vectors, expected: pieces.count,
+                                     info: ["duration": String(format: "%.1f", duration)])
         }
-        return ("done", "\(pieces.count) windows, \(Int(duration)) s")
+        return result
     }
 
     private func video(_ file: FileRecord, frames: [MediaPiece], sound: [MediaPiece], duration: Double) throws
@@ -667,18 +693,22 @@ public final class Indexer {
         let worker = try fullWorker()
         let frameVectors = try worker.embedImages(frames.map(\.path), budget: options.frameBudget)
         let soundVectors = try worker.embedAudio(sound.map(\.path))
+        // Keep expected frame/audio slots aligned when a worker returns fewer results.
+        let framesSaved = Array(frameVectors.prefix(frames.count)) + Array(repeating: Embedding(vector: nil, error: "missing frame embedding"), count: max(0, frames.count - frameVectors.count))
+        var result: (String, String?) = ("failed", nil)
         try store.db.transaction {
-            for (frame, embedding) in zip(frames, frameVectors) {
+            for (frame, embedding) in zip(frames, frameVectors) where usableMedia(embedding) {
                 try store.addSegment(file: file.id, kind: .frame, modality: .image, loc: frame.start,
                                      locEnd: frame.end, vector: embedding.vector)
             }
-            for (piece, embedding) in zip(sound, soundVectors) {
+            for (piece, embedding) in zip(sound, soundVectors) where usableMedia(embedding) {
                 try store.addSegment(file: file.id, kind: .audio, modality: .audio, loc: piece.start,
                                      locEnd: piece.end, vector: embedding.vector)
             }
-            try store.finish(file.id, state: "done", info: ["duration": String(format: "%.1f", duration),
-                                                            "frames": "\(frames.count)", "sound_windows": "\(sound.count)"])
+            result = try finishMedia(file, embeddings: framesSaved + soundVectors, expected: frames.count + sound.count,
+                                     info: ["duration": String(format: "%.1f", duration), "frames": "\(frames.count)",
+                                            "sound_windows": "\(sound.count)"])
         }
-        return ("done", "\(frames.count) frames, \(sound.count) sound windows, \(Int(duration)) s")
+        return result
     }
 }

@@ -13,6 +13,8 @@ public struct Candidate: Sendable {
 
 public struct CrawlReport: Sendable {
     public var candidates: [Candidate] = []
+    // Enumeration failures protect persisted rows; an unreadable subtree is not evidence of deletion.
+    fileprivate(set) var unreadable: [String] = []
     public var skipped: [String: Int] = [:]          // reason → files
     public var skippedFolders: [String: Int] = [:]   // reason → folders not walked into
     public var datasets: [String: Int] = [:]         // folder → files skipped as a dataset
@@ -54,7 +56,13 @@ public enum Crawler {
             }.flatMap { [$0, FolderSelection.realPath($0)] }
             guard let walker = fm.enumerator(at: root, includingPropertiesForKeys: keys,
                                              options: [.skipsHiddenFiles, .skipsPackageDescendants],
-                                             errorHandler: { _, _ in true }) else { continue }
+                                             errorHandler: { url, _ in
+                                                 report.unreadable.append(FolderSelection.realPath(url.path))
+                                                 return true
+                                             }) else {
+                report.unreadable.append(real)
+                continue
+            }
             func visit(_ url: URL) {
                 let values = try? url.resourceValues(forKeys: Set(keys))
                 if values?.isDirectory == true, values?.isPackage != true {

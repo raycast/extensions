@@ -49,7 +49,7 @@
     },
     {
       "name": "setup",
-      "title": "Set up Local Content Search",
+      "title": "Install Local Content Search",
       "description": "Set up the local EmbeddingGemma 2 model and independent macOS login service",
       "keywords": [
         "install",

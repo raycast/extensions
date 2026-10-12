@@ -8,6 +8,7 @@ import {
   rename,
   rm,
   copyFile,
+  realpath,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -282,6 +283,41 @@ async function main(): Promise<void> {
     assert.equal(pdf[0]?.path.split("/").pop(), "records.pdf");
     assert.equal(pdf[0].loc, 1);
     console.log("PASS PDF, image, spoken-audio, and video content retrieval");
+    // Exercise service -> native scope arguments and UTF-8 paths while stale out-of-scope rows remain indexed.
+    const selected = join(content, "résumé-日本-🐈");
+    await mkdir(selected);
+    await writeFile(
+      join(selected, "selected.txt"),
+      "uniquereviewmarker The rental agreement permits cats and dogs in the apartment.",
+    );
+    await client.rescan();
+    await wait(async () => {
+      const status = await client.status();
+      return status.counts?.searchable === 9 && status.activity === "idle";
+    }, "Unicode descendant indexed");
+    await client.configure({
+      ...(await client.status()).config,
+      roots: [selected],
+      excludedFolders: [content],
+      paused: true,
+    });
+    const selectedFile = join(await realpath(selected), "selected.txt");
+    assert.deepEqual(
+      (await client.search("uniquereviewmarker")).map((hit) => hit.path),
+      [selectedFile],
+    );
+    assert.equal(
+      (await client.search("restrictions on domestic animals"))[0]?.path,
+      selectedFile,
+    );
+    await client.configure({
+      ...(await client.status()).config,
+      excludedExtensions: ["txt"],
+    });
+    assert.deepEqual(await client.search("uniquereviewmarker"), []);
+    console.log(
+      "PASS native scope, ancestor exclusions, extension exclusions, and Unicode paths",
+    );
     const result = {
       timestamp: new Date().toISOString(),
       semanticLatencyMs: latencyMs,
@@ -295,6 +331,9 @@ async function main(): Promise<void> {
         "disconnected roots",
         "deletions",
         "PDF/image/spoken-audio/video retrieval",
+        "native pre-ranking scope and selected descendants",
+        "Unicode file paths",
+        "native extension exclusions",
       ],
     };
     assert.ok(

@@ -5,6 +5,7 @@ import {
 } from "node:child_process";
 import { promisify } from "node:util";
 import { createInterface } from "node:readline";
+import { StringDecoder } from "node:string_decoder";
 import { MIN_MEMORY_MB } from "./protocol";
 
 // One bounded subprocess owns native extraction/inference; it cannot exhaust Node's output buffer.
@@ -86,6 +87,9 @@ export function startWorker(
       stdio: ["pipe", "pipe", "pipe"],
     },
   );
+  // Stream decoders retain incomplete UTF-8 characters until the next byte chunk arrives.
+  const outputDecoder = new StringDecoder();
+  const errorDecoder = new StringDecoder();
   let output = "",
     stderr = "",
     bytes = 0,
@@ -143,11 +147,11 @@ export function startWorker(
       return;
     }
     if (!options.onLine) {
-      output += chunk.toString();
+      output += outputDecoder.write(chunk);
     }
   });
   child.stderr.on("data", (chunk: Buffer) => {
-    stderr = (stderr + chunk.toString()).slice(-8192);
+    stderr = (stderr + errorDecoder.write(chunk)).slice(-8192);
   });
   const lines = options.onLine
     ? createInterface({ input: child.stdout })
@@ -165,6 +169,8 @@ export function startWorker(
     });
     child.on("close", (code, signal) => {
       finished = true;
+      output += outputDecoder.end();
+      stderr = (stderr + errorDecoder.end()).slice(-8192);
       clearTimeout(timeout);
       clearInterval(monitor);
       if (killed) {

@@ -51,7 +51,7 @@ struct Arguments {
     var flags: Set<String> = []
     static let valued: Set<String> = ["--index", "--limit", "--kind", "-n", "--zgate", "--word-weight", "--new-limit",
                                       "--linger", "--shot-tokens", "--code-stretch"]
-    static let repeated: Set<String> = ["--exclude", "--exclude-ext", "--code-root", "--code-exclude"]
+    static let repeated: Set<String> = ["--root", "--exclude", "--exclude-ext", "--code-root", "--code-exclude"]
 
     init(_ raw: ArraySlice<String>) throws {
         var index = raw.startIndex
@@ -341,7 +341,11 @@ func search(_ args: Arguments) throws {
     let encoded = Date()
     let hits = try searcher.search(query, queryVector: vector, kinds: try args.kinds(),
                                    limit: args.values["-n"].flatMap(Int.init) ?? 10, zGate: args.zGate,
-                                   wordWeight: args.wordWeight)
+                                   wordWeight: args.wordWeight,
+                                   selection: args.lists["--root"].map { roots in
+                                       FolderSelection(chosen: roots.map { FolderSelection.realPath($0) },
+                                                       skipped: args.options.excludedFolders)
+                                   }, excludedExtensions: args.options.excludedExtensions)
     let searched = Date()
     if args.flags.contains("--json") {
         let rows: [[String: Any]] = hits.map { hit in
