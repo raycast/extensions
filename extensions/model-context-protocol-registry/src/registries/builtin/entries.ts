@@ -993,6 +993,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "solidping",
+    title: "SolidPing",
+    description:
+      "Open-source uptime and synthetic monitoring. Create, run and diagnose checks (HTTP, DNS, TLS, databases, queues and more), read results and incidents, manage status pages and maintenance windows. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. Self-hosted instances serve the same endpoint at <base URL>/api/v1/mcp.",
+    icon: "https://www.solidping.io/img/logo.png",
+    homepage: "https://www.solidping.io",
+    remoteUrl: "https://solidping.io/api/v1/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://solidping.io/api/v1/mcp"],
+    },
+  },
+  {
     name: "springbrand",
     title: "SpringBrand",
     description:
