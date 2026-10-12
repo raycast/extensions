@@ -82,7 +82,7 @@ test("pure reads repair legacy positions without saving even when writes fail", 
   assert.equal(ctx.storage.get(orderKey), '{"service:Home":0}');
 });
 
-test("overlapping edits serialize and independent readers do not wait or write", async () => {
+test("independent workers serialize overlapping edits while readers do not wait or write", async () => {
   const ctx = apiMock({ [favoritesKey]: '{"service:Work":true}', [orderKey]: '{"service:Work":0}' });
   const metadata = loadSource("favorite-metadata.ts", { "@raycast/api": ctx.api });
   const reader = loadSource("favorite-metadata.ts", { "@raycast/api": ctx.api });
@@ -107,12 +107,13 @@ test("overlapping edits serialize and independent readers do not wait or write",
   });
   await entered;
   let changed = false;
-  const second = metadata.updateFavoriteMetadata(({ favorites, order }) => {
+  const second = reader.updateFavoriteMetadata(({ favorites, order }) => {
     changed = true;
     delete favorites["service:Work"];
     delete order["service:Work"];
   });
   assert.deepEqual((await reader.readFavoriteMetadata()).favorites, { "service:Work": true });
+  await new Promise((resolve) => setTimeout(resolve, 40));
   assert.equal(changed, false);
   assert.equal(writes, 1);
   releaseWrite();
@@ -233,4 +234,29 @@ test("snapshot validation ignores invalid values without reviving stale legacy d
     assert.deepEqual(await metadata.loadFavorites(), {});
     assert.deepEqual(await metadata.loadFavoriteOrder(), {});
   }
+});
+
+test("writer lock failure is reported without blocking pure reads or changing saved data", async () => {
+  const ctx = apiMock({ [favoritesKey]: '{"service:Work":true}' });
+  let attempts = 0;
+  const metadata = loadSource("favorite-metadata.ts", {
+    "@raycast/api": ctx.api,
+    "proper-lockfile": {
+      lock: async () => {
+        attempts++;
+        throw new Error("lock unavailable");
+      },
+    },
+  });
+  assert.deepEqual((await metadata.readFavoriteMetadata()).favorites, { "service:Work": true });
+  assert.equal(attempts, 0);
+  await assert.rejects(
+    metadata.updateFavoriteMetadata(({ favorites }) => {
+      favorites["service:Home"] = true;
+    }),
+    /lock unavailable/,
+  );
+  assert.deepEqual((await metadata.readFavoriteMetadata()).favorites, { "service:Work": true });
+  assert.equal(attempts, 1);
+  assert.equal(ctx.storage.has(metadataKey), false);
 });

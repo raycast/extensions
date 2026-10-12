@@ -656,7 +656,7 @@ test("visible favorites move past hidden neighbors without changing their saved 
   assert.deepEqual(await ctx.network.loadFavoriteOrder(), { "service:One": 0, "service:Hidden": 2, "service:Two": 1 });
 });
 
-for (const failure of ["read", "write"]) {
+for (const failure of ["read", "write", "lock"]) {
   test(`discovery, menu bar status and real toggle ignore favorites ${failure} failures`, async (t) => {
     const ctx = setup({
       "network-service-last-used": "Work VPN",
@@ -664,6 +664,14 @@ for (const failure of ["read", "write"]) {
     });
     const reads = [],
       writes = [];
+    let lockAttempts = 0;
+    ctx.mocks["proper-lockfile"] = {
+      lock: async () => {
+        lockAttempts++;
+        throw new Error("lock unavailable");
+      },
+    };
+    ctx.network = loadSource("network-services.ts", ctx.mocks);
     const getItem = ctx.api.LocalStorage.getItem,
       setItem = ctx.api.LocalStorage.setItem;
     ctx.api.LocalStorage.getItem = async (key) => {
@@ -688,6 +696,7 @@ for (const failure of ["read", "write"]) {
     await toggle();
     assert.match(ctx.hud.at(-1), /already connecting/);
     assert.equal(ctx.calls.filter((c) => c.args[0] === "-connectpppoeservice").length, 1);
+    assert.equal(lockAttempts, 0);
     assert.equal(
       reads.some((key) => key.includes("favorite")),
       false,
@@ -745,16 +754,22 @@ test("a refresh that starts during a pending favorite save cannot overwrite the 
   const ctx = setup();
   const current = await mount(ctx, t);
   const setItem = ctx.api.LocalStorage.setItem;
-  let releaseWrite, save, finishRead, refresh;
+  let releaseWrite, save, finishRead, refresh, enteredWrite;
+  const entered = new Promise((resolve) => {
+    enteredWrite = resolve;
+  });
   ctx.api.LocalStorage.setItem = async (key, value) => {
-    if (key.includes("favorite"))
+    if (key.includes("favorite")) {
+      enteredWrite();
       await new Promise((resolve) => {
         releaseWrite = resolve;
       });
+    }
     return setItem(key, value);
   };
   await act(async () => {
     save = current().addToFavorites(current().otherServices[0]);
+    await entered;
   });
   ctx.output.onRead = (callback) => {
     finishRead = callback;

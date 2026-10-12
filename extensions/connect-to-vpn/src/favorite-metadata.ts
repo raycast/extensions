@@ -1,4 +1,7 @@
-import { LocalStorage } from "@raycast/api";
+import { environment, LocalStorage } from "@raycast/api";
+import { mkdir } from "node:fs/promises";
+import { join } from "node:path";
+import { lock } from "proper-lockfile";
 
 const FAVORITES_KEY = "network-service-favorites";
 const FAVORITES_ORDER_KEY = "network-service-favorites-order";
@@ -70,18 +73,22 @@ export async function readFavoriteMetadata(): Promise<FavoriteMetadata> {
   return metadata;
 }
 
-// Only the list edits favorites. Serialize rapid user actions within that command so
-// each edit reads the snapshot committed by the preceding edit, including after failure.
-let pendingEdit: Promise<unknown> = Promise.resolve();
-export function updateFavoriteMetadata(change: (metadata: FavoriteMetadata) => void): Promise<FavoriteMetadata> {
-  const edit = pendingEdit.then(async () => {
+// Only explicit list edits acquire the cross-worker guard. Discovery and metadata reads
+// never wait for it, and never write migration or repair results back to storage.
+export async function updateFavoriteMetadata(change: (metadata: FavoriteMetadata) => void): Promise<FavoriteMetadata> {
+  await mkdir(environment.supportPath, { recursive: true });
+  const release = await lock(join(environment.supportPath, "favorite-metadata"), {
+    realpath: false,
+    retries: { retries: 20, minTimeout: 25, maxTimeout: 100 },
+  });
+  try {
     const metadata = await readFavoriteMetadata();
     const previous = JSON.stringify(metadata);
     change(metadata);
     const next = JSON.stringify(metadata);
     if (next !== previous) await LocalStorage.setItem(FAVORITE_METADATA_KEY, next);
     return metadata;
-  });
-  pendingEdit = edit.catch(() => undefined);
-  return edit;
+  } finally {
+    await release();
+  }
 }
