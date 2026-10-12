@@ -94,7 +94,7 @@ export type Change = {
   temperatureChange?: "warmer" | "cooler";
 };
 
-const isRelative = ({ brightnessChange, temperatureChange }: Change) =>
+export const isRelative = ({ brightnessChange, temperatureChange }: Change) =>
   brightnessChange !== undefined || temperatureChange !== undefined;
 // chroma reads CSS names without spaces, like "darkred".
 const parseColor = (color: string) => chroma(color.replace(/\s+/g, "").toLowerCase());

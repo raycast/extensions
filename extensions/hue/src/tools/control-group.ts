@@ -3,11 +3,13 @@ import {
   findGroup,
   getGroupedLightId,
   GroupTarget,
+  isRelative,
   omitNull,
   Outcome,
   parseChange,
   summarize,
   updateGroup,
+  updateLights,
   withHueClient,
 } from "../helpers/tools";
 
@@ -71,6 +73,11 @@ export default async function tool(input: Input) {
           groupedLightId: getGroupedLightId(group),
           lights: getLightsFromGroup(resources.lights, group),
         }));
+    const lights = targets.flatMap((target) => target.lights);
+    // A relative change moves each light from its own level, so a light in two groups would move twice.
+    if (isRelative(change) && new Set(lights).size < lights.length) {
+      return summarize(change, await updateLights(hueClient, lights, change, resources.zigbeeConnectivity));
+    }
     // One at a time: the grouped-light queue sends one request a second and keeps only one waiting.
     const outcomes: Outcome[] = [];
     for (const target of targets) {

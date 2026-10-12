@@ -144,6 +144,22 @@ describe("control-group", () => {
     );
   });
 
+  it("changes each light of overlapping groups once for a relative change", async () => {
+    const bridge = await linkBridge();
+    expect(await controlGroup({ groups: ["Living room", "Downstairs"], brightnessChange: -20 })).toBe(
+      "Made Living room floor lamp 2, Living room floor lamp 1, Living room floor lamp 3, Kitchen pendant and Office " +
+        "pendant 2 20% dimmer. Skipped Living room plug: no brightness. Skipped Living room spot 3, Living room spot " +
+        "2, Living room spot 1 and Living room floor lamp 4: unreachable.",
+    );
+    const dimmer = { dimming_delta: { action: "down", brightness_delta: 20 } };
+    expect(puts(bridge)).toEqual(
+      ["003", "011", "025", "001", "009"].map((id) => ({
+        path: `/clip/v2/resource/light/00000000-0000-4000-8000-000000000${id}`,
+        body: dimmer,
+      })),
+    );
+  });
+
   it("changes every light through the home's grouped light", async () => {
     const bridge = await linkBridge();
     expect(await controlGroup({ allLights: true, on: false })).toBe(
