@@ -1,6 +1,6 @@
 # Changelog
 
-## [Live Menu Bar Preferences] - {PR_MERGE_DATE}
+## [Live Menu Bar Preferences] - 2026-10-12
 
 - Keep all menu bar display options in the dedicated menu bar command settings and apply changes while it is running.
 
