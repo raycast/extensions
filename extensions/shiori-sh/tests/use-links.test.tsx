@@ -99,3 +99,43 @@ it("does not refetch if a mutation completes after the view unmounts", async () 
   await refreshAfterMutation();
   expect(fetchMock).toHaveBeenCalledTimes(1);
 });
+
+it("discards a pending page when the same query is refreshed after a bookmark change", async () => {
+  fetchMock.mockResolvedValueOnce(response([1], 3));
+  await act(async () => {
+    renderer = create(<Probe search="design" read="unread" />);
+  });
+  let finishOldPage!: (value: Response) => void;
+  let oldPageSignal: AbortSignal;
+  fetchMock.mockImplementationOnce((_url, init) => {
+    oldPageSignal = init!.signal!;
+    // Model a response that arrives even though its request was cancelled.
+    return new Promise((resolve) => {
+      finishOldPage = resolve;
+    });
+  });
+  await act(async () => state.pagination.onLoadMore());
+
+  fetchMock.mockResolvedValueOnce(response([9], 1));
+  await act(async () => {
+    await state.revalidate();
+  });
+  expect(oldPageSignal!.aborted).toBe(true);
+  await act(async () => finishOldPage(response([2, 3], 3)));
+
+  expect(state.links.map((item) => item.id)).toEqual(["9"]);
+  expect(state.total).toBe(1);
+  expect(state.nextOffset).toBeNull();
+  expect(state.error).toBeUndefined();
+  expect(state.isLoading).toBe(false);
+  expect(
+    fetchMock.mock.calls.map(([url]) => {
+      const query = new URL(String(url)).searchParams;
+      return [query.get("search"), query.get("read"), query.get("offset")];
+    }),
+  ).toEqual([
+    ["design", "unread", "0"],
+    ["design", "unread", "1"],
+    ["design", "unread", "0"],
+  ]);
+});
