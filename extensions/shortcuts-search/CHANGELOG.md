@@ -1,6 +1,6 @@
 # Shortcuts Search Changelog
 
-## [Reliability Fixes] - {PR_MERGE_DATE}
+## [Reliability Fixes] - 2026-10-12
 
 - Show specific shortcut execution errors, such as a changed page or held modifier keys
 - Show an error toast when sign-in is cancelled from a favorite action
