@@ -1,11 +1,16 @@
 <div align="center">
-  <br/>
-  <br/>
-  <img src="./assets/icon.png" alt="Agent Browser" width="100"/>
-  <h3>Agent Browser</h3>
-  <p>Control websites from Raycast and Raycast AI</p>
-  <br/>
-  <br/>
+    <br/>
+    <br/>
+    <img src="./assets/icon.png" alt="Agent Browser" width="100"/>
+    <h3>Agent Browser</h3>
+    <p>Control websites from Raycast and Raycast AI</p>
+    <p align="center">
+        <a href="https://buymeacoffee.com/0xdhrv"><img alt="Buy Me a Coffee" src="https://shieldcn.dev/badge/buymecoffee-FFDD04.svg?size=default&amp;theme=neutral&amp;logo=buymeacoffee" /></a>
+        <a href="https://github.com/0xdhrv"><img alt="GitHub" src="https://shieldcn.dev/badge/github-181717.svg?size=default&amp;theme=neutral&amp;logo=github" /></a>
+        <a href="https://x.com/0xdhrv"><img alt="Twitter" src="https://shieldcn.dev/badge/twitter-1DA1F2.svg?size=default&amp;theme=neutral&amp;logo=x" /></a>
+    </p>
+    <br/>
+    <br/>
 </div>
 
 Agent Browser is a Raycast extension that connects [agent-browser](https://agent-browser.dev/) to Raycast AI. Open websites in isolated browser sessions, inspect page content, interact with elements, enter text through virtual keyboards, and verify the resulting page state from a Raycast AI conversation.
