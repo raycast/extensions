@@ -86,9 +86,9 @@ test("search matches all words across artwork fields without case sensitivity", 
 
 test("search uses older matching actions and orders results by those actions", async (t) => {
   const { store, addEvent } = createStore(t);
-  addEvent("a-old", "a", "2026-01-01T10:00:00.000Z", "downloaded");
-  addEvent("b", "b", "2026-01-02T10:00:00.000Z", "downloaded");
-  addEvent("a-new", "a", "2026-01-03T10:00:00.000Z", "selected");
+  addEvent("a-old", "a", new Date(2026, 0, 1, 10).toISOString(), "downloaded");
+  addEvent("b", "b", new Date(2026, 0, 2, 10).toISOString(), "downloaded");
+  addEvent("a-new", "a", new Date(2026, 0, 3, 10).toISOString(), "selected");
   const results = await store.searchWallpaperHistory({
     fromDate: "2026-01-01", toDate: "2026-01-02", eventType: "downloaded",
   });
