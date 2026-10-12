@@ -57,6 +57,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.GetMar
         inputs.push({ source: "Clipboard", url: clipboardUrl });
       }
 
+      if (isCancelled) return;
+      setSuggestedInputs([...inputs]);
+
       for (const url of await getActiveBrowserUrls()) {
         if (!inputs.some((input) => input.url === url)) inputs.push({ source: "Active Browser Tab", url });
       }

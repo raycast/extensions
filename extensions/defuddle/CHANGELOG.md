@@ -3,6 +3,7 @@
 ## [AI Tool and Browser Inputs] - {PR_MERGE_DATE}
 
 - Add an Extract Markdown AI tool that returns page content and metadata without clipboard, export, or history writes.
+- Preserve bare hostname inputs with numeric ports and show selected/clipboard suggestions before browser lookup finishes.
 - Suggest active browser tab URLs on macOS when the Raycast Browser Extension is available.
 - Add a 30-second extraction timeout, URL validation, and network cancellation when leaving the detail view.
 - Update Defuddle to a patched release addressing unescaped attribute interpolation in site extractors.

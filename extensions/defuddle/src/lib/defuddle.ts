@@ -165,7 +165,8 @@ export function normalizeUrl(value: string): string | undefined {
     return undefined;
   }
 
-  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) {
+  const isBareHostnameWithPort = /^(?:[a-z0-9-]+\.)+[a-z0-9-]+:\d+(?:[/?#]|$)/i.test(trimmed);
+  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed) && !isBareHostnameWithPort) {
     if (isLikelySvgNamespaceUrl(trimmed)) return undefined;
     try {
       return validateUrl(trimmed);

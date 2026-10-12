@@ -15,6 +15,7 @@ function harness({ fetchImpl = async () => new Response(article), timeoutMs, can
   const writes = [];
   const toasts = [];
   const effects = [];
+  const stateUpdates = [];
   const api = {
     Clipboard: { copy: () => writes.push("clipboard"), readText: async () => "" },
     LocalStorage: { getItem: async () => undefined, setItem: () => writes.push("history") },
@@ -55,7 +56,10 @@ function harness({ fetchImpl = async () => new Response(article), timeoutMs, can
         require: (name) => {
           if (name === "@raycast/api") return api;
           if (name === "react")
-            return { useEffect: (fn) => effects.push(fn), useState: (initial) => [initial, () => {}] };
+            return {
+              useEffect: (fn) => effects.push(fn),
+              useState: (initial) => [initial, (value) => stateUpdates.push(value)],
+            };
           if (name === "defuddle/node") return { Defuddle };
           if (name === "linkedom") return { parseHTML };
           if (name.startsWith(".")) return load(path.resolve(path.dirname(file), `${name}.ts`));
@@ -73,7 +77,7 @@ function harness({ fetchImpl = async () => new Response(article), timeoutMs, can
     );
     return module.exports;
   }
-  return { load, writes, toasts, effects, api };
+  return { load, writes, toasts, effects, stateUpdates, api };
 }
 
 function stalledFetch(_url, { signal }) {
@@ -287,4 +291,67 @@ test("cancellation propagates to image validation requests", async () => {
   await started;
   controller.abort();
   await assert.rejects(pending, { name: "AbortError" });
+});
+
+test("bare hostnames with numeric ports remain valid while unsupported schemes and invalid ports fail", () => {
+  const normalize = harness().load("src/lib/defuddle.ts").normalizeUrl;
+  for (const input of [
+    "example.com:8080/article",
+    "www.example.com:8080/article",
+    "sub.example.com:8443/article?x=1#section",
+  ]) {
+    assert.equal(normalize(input), `https://${input}`);
+  }
+  for (const input of [
+    "example.com:99999/article",
+    "example.com:abc/article",
+    "ftp://example.com:8080/article",
+    "javascript:alert(1)",
+  ]) {
+    assert.equal(normalize(input), undefined);
+  }
+});
+
+for (const source of ["Selected Text", "Clipboard"]) {
+  test(`${source} suggestions render before a slow browser reply and remain intact afterward`, async () => {
+    let resolveTabs;
+    const tabs = new Promise((resolve) => {
+      resolveTabs = resolve;
+    });
+    const h = harness({ tabs: () => tabs });
+    if (source === "Selected Text") h.api.getSelectedText = async () => url;
+    else h.api.Clipboard.readText = async () => url;
+    h.load("src/get-markdown.tsx").default({ arguments: {} });
+    const cleanup = h.effects.pop()();
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(h.stateUpdates.length, 1);
+    assert.equal(h.stateUpdates[0][0].source, source);
+    assert.equal(h.stateUpdates[0][0].url, url);
+    resolveTabs([
+      { active: true, url },
+      { active: true, url: "https://example.org/" },
+    ]);
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(h.stateUpdates[0].length, 1, "the published snapshot must not be mutated");
+    assert.equal(h.stateUpdates[1].length, 2);
+    assert.equal(h.stateUpdates[1][1].source, "Active Browser Tab");
+    cleanup();
+  });
+}
+
+test("a late browser reply cannot update suggestions after leaving the command", async () => {
+  let resolveTabs;
+  const tabs = new Promise((resolve) => {
+    resolveTabs = resolve;
+  });
+  const h = harness({ tabs: () => tabs });
+  h.api.Clipboard.readText = async () => url;
+  h.load("src/get-markdown.tsx").default({ arguments: {} });
+  const cleanup = h.effects.pop()();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(h.stateUpdates.length, 1);
+  cleanup();
+  resolveTabs([{ active: true, url: "https://example.org/" }]);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(h.stateUpdates.length, 1);
 });
