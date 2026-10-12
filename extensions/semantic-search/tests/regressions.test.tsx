@@ -1,9 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { LaunchType } from "@raycast/api";
 import { createElement } from "react";
 import { act, create, ReactTestRenderer } from "react-test-renderer";
 import { connectService } from "../src/service";
 import ModelSettings from "../src/model-settings";
+import SemanticSearch from "../src/semantic-search";
 import { launcher } from "./raycast-mock";
 import {
   addExclusionFolders,
@@ -60,6 +62,264 @@ const snapshot = (values = current) => ({
   media_decoder_available: true,
 });
 const status = { files: 1, chunks: 1, indexing: false };
+
+test("settings keeps one loading view through connection and fetching, without installation instructions", async (t) => {
+  launcher.serviceURL = "http://127.0.0.1:18799";
+  t.mock.method(globalThis, "setInterval", () => 1);
+  t.mock.method(globalThis, "clearInterval", () => {});
+  const settingsResponse = deferred<Response>();
+  t.mock.method(globalThis, "fetch", async (url: string) =>
+    url.endsWith("/v1/settings") ? settingsResponse.promise : response(status),
+  );
+  let view!: ReactTestRenderer;
+  try {
+    act(() => {
+      view = create(createElement(ModelSettings));
+    });
+    const initialList = field(view, "List");
+    assert.equal(field(view, "ListItem").props.title, "Loading settings…");
+    assert.equal(
+      view.root.findAll((node) => String(node.type) === "Detail").length,
+      0,
+    );
+    assert.equal(
+      view.root.findAll((node) => String(node.type) === "Action").length,
+      0,
+    );
+    await act(async () => {});
+    assert.equal(
+      field(view, "List"),
+      initialList,
+      "connection must not replace the loading view",
+    );
+    assert.equal(field(view, "ListItem").props.title, "Loading settings…");
+    await act(async () => {
+      settingsResponse.resolve(response(snapshot()));
+    });
+    assert.ok(field(view, "Form"));
+    assert.equal(
+      view.root.findAll((node) => String(node.type) === "Detail").length,
+      0,
+    );
+  } finally {
+    await act(async () => {
+      view?.unmount();
+    });
+  }
+});
+
+test("search keeps its list and query input while connecting without flashing setup", async (t) => {
+  launcher.serviceURL = "http://127.0.0.1:18799";
+  t.mock.method(globalThis, "setInterval", () => 1);
+  t.mock.method(globalThis, "clearInterval", () => {});
+  t.mock.method(globalThis, "fetch", async (url: string) =>
+    response(
+      url.endsWith("/v1/status")
+        ? { ...status, roots: ["/private/tmp/library"] }
+        : {},
+    ),
+  );
+  let view!: ReactTestRenderer;
+  try {
+    act(() => {
+      view = create(
+        createElement(SemanticSearch, {
+          arguments: { query: "" },
+          launchType: LaunchType.UserInitiated,
+        }),
+      );
+    });
+    const initialList = field(view, "List");
+    assert.equal(initialList.props.isLoading, false);
+    assert.equal(
+      field(view, "ListEmptyView").props.title,
+      "Describe What You Remember",
+    );
+    assert.equal(
+      view.root.findAll((node) => String(node.type) === "Detail").length,
+      0,
+    );
+    await act(async () => {});
+    assert.equal(
+      field(view, "List"),
+      initialList,
+      "search input must survive connection",
+    );
+    assert.equal(
+      field(view, "ListEmptyView").props.title,
+      "Describe What You Remember",
+    );
+    assert.equal(
+      view.root.findAll((node) => String(node.type) === "Detail").length,
+      0,
+    );
+  } finally {
+    await act(async () => {
+      view?.unmount();
+    });
+  }
+});
+
+test("connection failures still show setup and can retry in both commands", async (t) => {
+  t.mock.method(globalThis, "setInterval", () => 1);
+  t.mock.method(globalThis, "clearInterval", () => {});
+  t.mock.method(globalThis, "fetch", async (url: string) =>
+    response(
+      url.endsWith("/v1/settings")
+        ? snapshot()
+        : { ...status, roots: current.roots },
+    ),
+  );
+  for (const command of [ModelSettings, SemanticSearch]) {
+    launcher.serviceURL = "not-a-url";
+    let view!: ReactTestRenderer;
+    try {
+      await act(async () => {
+        view = create(
+          createElement(command as typeof SemanticSearch, {
+            arguments: { query: "" },
+            launchType: LaunchType.UserInitiated,
+          }),
+        );
+      });
+      const detail = field(view, "Detail");
+      assert.equal(detail.props.isLoading, false);
+      assert.match(String(detail.props.markdown), /valid local HTTP address/);
+      assert.equal(field(view, "Action").props.title, "Check Installation");
+      assert.ok(field(view, "OpenInBrowser"));
+      launcher.serviceURL = "http://127.0.0.1:18799";
+      await act(async () => {
+        await field(view, "Action").props.onAction();
+      });
+      assert.equal(
+        view.root.findAll((node) => String(node.type) === "Detail").length,
+        0,
+      );
+      assert.ok(field(view, command === ModelSettings ? "Form" : "List"));
+    } finally {
+      await act(async () => {
+        view?.unmount();
+      });
+    }
+  }
+});
+
+test("Photos-only search keeps its source status and does not require folders", async (t) => {
+  launcher.serviceURL = "http://127.0.0.1:18799";
+  t.mock.method(globalThis, "setInterval", () => 1);
+  t.mock.method(globalThis, "clearInterval", () => {});
+  t.mock.method(globalThis, "fetch", async (url: string) =>
+    response(
+      url.endsWith("/v1/status")
+        ? {
+            ...status,
+            roots: [],
+            photos_library: { enabled: true, indexed: 1 },
+          }
+        : {},
+    ),
+  );
+  let view!: ReactTestRenderer;
+  try {
+    await act(async () => {
+      view = create(
+        createElement(SemanticSearch, {
+          arguments: { query: "" },
+          launchType: LaunchType.UserInitiated,
+        }),
+      );
+    });
+    assert.equal(
+      field(view, "ListSection").props.title,
+      "Apple Photos · 1 files",
+    );
+    assert.equal(
+      field(view, "ListEmptyView").props.title,
+      "Describe What You Remember",
+    );
+  } finally {
+    await act(async () => {
+      view?.unmount();
+    });
+  }
+});
+
+test("Photos result copies image data and shows capture date without exposing internal links", async (t) => {
+  launcher.serviceURL = "http://127.0.0.1:18799";
+  launcher.toasts.length = 0;
+  t.mock.method(globalThis, "setInterval", () => 1);
+  t.mock.method(globalThis, "clearInterval", () => {});
+  t.mock.method(globalThis, "setTimeout", (callback: () => void) => {
+    queueMicrotask(callback);
+    return 1;
+  });
+  t.mock.method(globalThis, "clearTimeout", () => {});
+  const copied: unknown[] = [];
+  const item = {
+    path: "photos://asset/test-asset",
+    name: "sample.jpg",
+    source: "photos",
+    kind: "image",
+    score: 1,
+    snippet: "",
+    open_target: "photos://asset?identifier=test-asset",
+  };
+  t.mock.method(
+    globalThis,
+    "fetch",
+    async (url: string, init?: RequestInit) => {
+      if (url.endsWith("/v1/search")) return response({ results: [item] });
+      if (url.endsWith("/v1/status"))
+        return response({
+          ...status,
+          roots: [],
+          photos_library: { enabled: true, indexed: 1 },
+        });
+      if (url.endsWith("/v1/photos/details"))
+        return response({ created_at: 1700000000 });
+      if (url.endsWith("/v1/photos/copy")) {
+        copied.push(JSON.parse(String(init?.body)));
+        return response({ copied: true, width: 4000, height: 3000 });
+      }
+      if (url.endsWith("/v1/preview"))
+        return response({ preview: "data:image/jpeg;base64,/9j/", pages: 0 });
+      return response({});
+    },
+  );
+  let view!: ReactTestRenderer;
+  try {
+    await act(async () => {
+      view = create(
+        createElement(SemanticSearch, {
+          arguments: { query: "a photo" },
+          launchType: LaunchType.UserInitiated,
+        }),
+      );
+    });
+    const markdown = String(field(view, "ListItemDetail").props.markdown);
+    assert.match(markdown, /Date taken:/);
+    assert.doesNotMatch(markdown, /photos:\/\/|Photos link/);
+    assert.equal(
+      view.root.findAll((node) => node.props.title === "Copy Photos Link")
+        .length,
+      0,
+    );
+    const action = view.root.findAll(
+      (node) =>
+        String(node.type) === "Action" && node.props.title === "Copy Photo",
+    );
+    assert.equal(action.length, 1);
+    await act(async () => {
+      await action[0].props.onAction();
+    });
+    assert.deepEqual(copied, [{ path: item.path }]);
+    assert.equal(launcher.toasts.at(-1)?.title, "Photo copied");
+  } finally {
+    await act(async () => {
+      view?.unmount();
+    });
+  }
+});
 function field(view: ReactTestRenderer, type: string, id?: string) {
   const found = view.root.findAll(
     (node) => node.type === type && (!id || node.props.id === id),
@@ -556,6 +816,74 @@ test("failed Apply keeps edits and polling resumes without accepting stale error
     });
     assert.equal(getCount, 3, "fresh polling resumes after failed mutation");
     assert.equal(field(view, "Dropdown", "dimensions").props.value, "256");
+  } finally {
+    await act(async () => {
+      view?.unmount();
+    });
+  }
+});
+
+test("Photos-only video settings apply without a folder and show separate source storage", async (t) => {
+  launcher.serviceURL = "http://127.0.0.1:18799";
+  t.mock.method(globalThis, "setInterval", () => 1);
+  t.mock.method(globalThis, "clearInterval", () => {});
+  const photos = {
+    ...current,
+    roots: [],
+    enable_photos_library: true,
+    photos_allow_network: false,
+    enable_images: false,
+    enable_video: true,
+  };
+  let posted: Record<string, unknown> | undefined;
+  t.mock.method(
+    globalThis,
+    "fetch",
+    async (url: string, init?: RequestInit) => {
+      if (init?.method === "POST") {
+        posted = JSON.parse(String(init.body));
+        return response({ state: "applying" });
+      }
+      return response(
+        url.endsWith("/v1/status")
+          ? {
+              ...status,
+              photos_library: {
+                by_kind: [
+                  { kind: "video", files: 2, vectors: 10, vector_bytes: 20480 },
+                ],
+              },
+            }
+          : snapshot(photos),
+      );
+    },
+  );
+  let view!: ReactTestRenderer;
+  try {
+    await act(async () => {
+      view = create(createElement(ModelSettings));
+    });
+    assert.equal(
+      field(view, "Checkbox", "enable_photos_library").props.value,
+      true,
+    );
+    const source = view.root.findAll(
+      (node) =>
+        String(node.type) === "Description" &&
+        node.props.title === "Photos index",
+    );
+    assert.equal(source[0].props.text, "2 videos · 0.02 MB of vectors");
+    await act(async () => {
+      field(view, "Checkbox", "photos_allow_network").props.onChange(true);
+    });
+    await act(async () => {
+      await field(view, "SubmitForm").props.onSubmit();
+    });
+    assert.deepEqual(posted?.roots, []);
+    assert.equal(posted?.enable_photos_library, true);
+    assert.equal(posted?.enable_images, false);
+    assert.equal(posted?.enable_video, true);
+    assert.equal(posted?.photos_allow_network, true);
   } finally {
     await act(async () => {
       view?.unmount();

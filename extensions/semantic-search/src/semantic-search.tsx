@@ -19,6 +19,8 @@ import ModelSettings from "./model-settings";
 import { createPreviewFiles } from "./preview-files";
 
 type Result = {
+  source?: "file" | "photos";
+  open_target?: string;
   path: string;
   name: string;
   kind: "image" | "document" | "video" | "audio";
@@ -42,6 +44,7 @@ type Status = {
   files: number;
   indexing: boolean;
   roots: string[];
+  photos_library?: { enabled: boolean; indexed: number };
   runtime?: { state: string };
   progress?: { processed: number; total: number };
 };
@@ -70,7 +73,6 @@ export default function SemanticSearch(
   const [error, setError] = useState("");
   const [status, setStatus] = useState<Status>();
   const [selection, setSelection] = useState<string | null>(null);
-  const [showPhotoDetails, setShowPhotoDetails] = useState(false);
   const [preview, setPreview] = useState<{
     path: string;
     start: number;
@@ -78,12 +80,20 @@ export default function SemanticSearch(
     pages: number;
   }>();
   const [previewError, setPreviewError] = useState("");
+  const [photoDate, setPhotoDate] = useState<{
+    path: string;
+    created_at: number | null;
+  }>();
+  const photoDates = useRef(new Map<string, number | null>());
+  const copyingPhoto = useRef(false);
   const generation = useRef(0);
   const lastIndexRevision = useRef<number | undefined>(undefined);
   const lastIndexEnd = useRef<number | undefined>(undefined);
   const [indexVersion, setIndexVersion] = useState(0);
   const [baseURL, setBaseURL] = useState("");
-  const [setupMessage, setSetupMessage] = useState("Preparing local search…");
+  const [setupMessage, setSetupMessage] = useState(
+    "Connecting to local search…",
+  );
   useEffect(() => {
     let active = true;
     setError("");
@@ -137,6 +147,10 @@ export default function SemanticSearch(
             files: data.files,
             indexing: data.indexing,
             roots: data.roots,
+            photos_library: data.photos_library && {
+              enabled: data.photos_library.enabled,
+              indexed: data.photos_library.indexed,
+            },
             runtime: { state: data.runtime?.state || "" },
             progress: data.progress && {
               processed: data.progress.processed,
@@ -164,9 +178,11 @@ export default function SemanticSearch(
   }, [baseURL, libraryOpen]);
 
   const scope =
-    status?.roots
-      .map((root) => root.split("/").filter(Boolean).pop())
-      .join(", ") || "Local Files";
+    [
+      ...(status?.roots.map((root) => root.split("/").filter(Boolean).pop()) ||
+        []),
+      ...(status?.photos_library?.enabled ? ["Apple Photos"] : []),
+    ].join(", ") || "Local Files";
   const progress =
     status?.indexing && status.progress
       ? `Indexing ${scope}: ${status.progress.processed} / ${status.progress.total}`
@@ -282,6 +298,81 @@ export default function SemanticSearch(
     };
   }, [previewPath, previewStart, baseURL, selectedThumbnail]);
 
+  const requestPhoto = async (action: "details" | "copy", path: string) => {
+    for (let attempt = 0; ; attempt++) {
+      const response = await fetch(`${baseURL}/v1/photos/${action}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path }),
+      });
+      if (response.status === 409 && attempt < 40) {
+        await new Promise((resolve) => setTimeout(resolve, 250));
+        continue;
+      }
+      const data = (await response.json()) as {
+        detail?: string;
+        copied?: boolean;
+        width?: number;
+        height?: number;
+        created_at?: number | null;
+      };
+      if (!response.ok)
+        throw new Error(data.detail || "Photos operation failed");
+      return data;
+    }
+  };
+  useEffect(() => {
+    photoDates.current.clear();
+    setPhotoDate(undefined);
+  }, [indexVersion]);
+  useEffect(() => {
+    if (!baseURL || selected?.source !== "photos") return;
+    const path = selected.path;
+    if (photoDates.current.has(path)) {
+      setPhotoDate({ path, created_at: photoDates.current.get(path)! });
+      return;
+    }
+    let active = true;
+    const timer = setTimeout(() => {
+      void requestPhoto("details", path)
+        .then((data) => {
+          if (!active) return;
+          const created_at = data.created_at ?? null;
+          photoDates.current.set(path, created_at);
+          setPhotoDate({ path, created_at });
+        })
+        .catch(() => {
+          /* Searching remains usable without Photos metadata. */
+        });
+    }, 300);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [baseURL, selected?.path, selected?.source, indexVersion]);
+
+  const copyPhoto = async (result: Result) => {
+    if (copyingPhoto.current) return;
+    copyingPhoto.current = true;
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Copying full-resolution photo…",
+    });
+    try {
+      const data = await requestPhoto("copy", result.path);
+      if (!data.copied) throw new Error("The photo could not be copied");
+      toast.style = Toast.Style.Success;
+      toast.title = "Photo copied";
+      toast.message = `${data.width} × ${data.height} pixels · Ready to paste`;
+    } catch (e) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not copy photo";
+      toast.message = String(e);
+    } finally {
+      copyingPhoto.current = false;
+    }
+  };
+
   const detailMarkdown = (result: Result) => {
     if (result.kind === "image" || result.kind === "video") {
       const image =
@@ -290,14 +381,16 @@ export default function SemanticSearch(
           (result.kind === "video" ? result.start_seconds || 0 : 0)
           ? preview.image
           : undefined;
-      // Allow the pane's entire width, keeping portraits within its visible height.
-      // Reserve space for metadata only when explicitly expanded. The thumbnail
-      // and every refinement frame share these bounds to avoid layout jumps.
-      const height = showPhotoDetails
-        ? 260
-        : result.kind === "video"
-          ? 340
-          : 380;
+      // Details scroll below the image rather than reserving preview space.
+      // Every refinement frame keeps the same bounds to avoid layout jumps.
+      const height = result.kind === "video" ? 340 : 380;
+      const escapeText = (text: string) =>
+        text.replace(/[\\`*_{}[\]<>#|]/g, "\\$&");
+      const date =
+        photoDate?.path === result.path && photoDate.created_at != null
+          ? `\n\n**Date taken:** ${new Date(photoDate.created_at * 1000).toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}`
+          : "";
+      const details = `\n\n---\n\n**File:** ${escapeText(result.name)}\n\n**Location:** ${result.source === "photos" ? "Apple Photos Library" : escapeText(result.path)}${result.source === "photos" ? date : ""}\n\n**Matched by:** ${result.kind === "image" ? "Visual content" : result.matched_modality === "audio" ? "Audio content" : "Video scene"}`;
       const match =
         result.kind === "video" &&
         result.start_seconds != null &&
@@ -309,7 +402,9 @@ export default function SemanticSearch(
           ? `![Preview](${image}?raycast-width=1024&raycast-height=${height})`
           : previewError === result.path
             ? "Preview unavailable. Use Open File to view the image."
-            : "Loading image preview…") + match
+            : "Loading image preview…") +
+        match +
+        details
       );
     }
     if (result.kind === "audio")
@@ -343,12 +438,16 @@ export default function SemanticSearch(
       const data = (await response.json()) as {
         path?: string;
         detail?: string;
+        audio_unavailable?: boolean;
       };
       if (!response.ok || !data.path)
         throw new Error(data.detail || "Segment unavailable");
       await open(data.path);
       toast.style = Toast.Style.Success;
       toast.title = "Matched segment opened";
+      if (data.audio_unavailable)
+        toast.message =
+          "Opened without sound: the soundtrack could not be decoded.";
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Could not open segment";
@@ -423,11 +522,11 @@ export default function SemanticSearch(
     }
   };
 
-  if (!baseURL)
+  if (!baseURL && error)
     return (
       <EngineSetup
         message={error || setupMessage}
-        failed={!!error}
+        failed={true}
         retry={() => setRetry((value) => value + 1)}
       />
     );
@@ -437,7 +536,9 @@ export default function SemanticSearch(
       onSearchTextChange={setQuery}
       filtering={false}
       isLoading={
-        (!baseURL && !error) || loading || status?.runtime?.state === "loading"
+        (!baseURL && !!query.trim() && !error) ||
+        loading ||
+        status?.runtime?.state === "loading"
       }
       onSelectionChange={setSelection}
       isShowingDetail={results.length > 0}
@@ -456,13 +557,6 @@ export default function SemanticSearch(
         </List.Dropdown>
       }
     >
-      {!baseURL && !error && (
-        <List.Item
-          title={setupMessage}
-          subtitle="The local engine is prepared automatically on first launch."
-          icon={Icon.Download}
-        />
-      )}
       <List.Section
         title={progress}
         subtitle={
@@ -474,7 +568,11 @@ export default function SemanticSearch(
             key={result.path}
             id={result.path}
             title={result.name}
-            subtitle={result.path.slice(0, result.path.lastIndexOf("/"))}
+            subtitle={
+              result.source === "photos"
+                ? "Apple Photos"
+                : result.path.slice(0, result.path.lastIndexOf("/"))
+            }
             icon={
               result.kind === "image" || result.kind === "video"
                 ? {
@@ -495,8 +593,8 @@ export default function SemanticSearch(
               <List.Item.Detail
                 markdown={detailMarkdown(result)}
                 metadata={
-                  (result.kind === "image" || result.kind === "video") &&
-                  !showPhotoDetails ? undefined : (
+                  result.kind === "image" ||
+                  result.kind === "video" ? undefined : (
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label
                         title="File"
@@ -504,18 +602,18 @@ export default function SemanticSearch(
                       />
                       <List.Item.Detail.Metadata.Label
                         title="Location"
-                        text={result.path}
+                        text={
+                          result.source === "photos"
+                            ? "Apple Photos Library"
+                            : result.path
+                        }
                       />
                       <List.Item.Detail.Metadata.Label
                         title="Matched by"
                         text={
-                          result.kind === "image"
-                            ? "Visual content"
-                            : result.kind === "document"
-                              ? "Document content"
-                              : result.matched_modality === "audio"
-                                ? "Audio content"
-                                : "Video scene"
+                          result.kind === "document"
+                            ? "Document content"
+                            : "Audio content"
                         }
                       />
                     </List.Item.Detail.Metadata>
@@ -525,7 +623,12 @@ export default function SemanticSearch(
             }
             actions={
               <ActionPanel>
-                <Action.Open title="Open File" target={result.path} />
+                <Action.Open
+                  title={
+                    result.source === "photos" ? "Open in Photos" : "Open File"
+                  }
+                  target={result.open_target || result.path}
+                />
                 {(result.kind === "video" || result.kind === "audio") && (
                   <Action
                     title="Open Matched Segment"
@@ -534,21 +637,21 @@ export default function SemanticSearch(
                     shortcut={{ modifiers: ["cmd"], key: "return" }}
                   />
                 )}
-                <Action.ShowInFinder path={result.path} />
-                <Action.CopyToClipboard
-                  title="Copy Path"
-                  content={result.path}
-                />
-                {(result.kind === "image" || result.kind === "video") && (
-                  <Action
-                    title={
-                      showPhotoDetails
-                        ? "Hide File Details"
-                        : "Show File Details"
-                    }
-                    icon={Icon.Info}
-                    shortcut={{ modifiers: ["cmd"], key: "i" }}
-                    onAction={() => setShowPhotoDetails((visible) => !visible)}
+                {result.source !== "photos" && (
+                  <Action.ShowInFinder path={result.path} />
+                )}
+                {result.source === "photos" ? (
+                  result.kind === "image" && (
+                    <Action
+                      title="Copy Photo"
+                      icon={Icon.Clipboard}
+                      onAction={() => copyPhoto(result)}
+                    />
+                  )
+                ) : (
+                  <Action.CopyToClipboard
+                    title="Copy Path"
+                    content={result.path}
                   />
                 )}
                 <Action
@@ -572,22 +675,20 @@ export default function SemanticSearch(
         title={
           error
             ? "Search Needs Attention"
-            : !baseURL
-              ? "Setting Up Semantic Search"
-              : status?.roots.length === 0
-                ? "Choose Your Folders"
-                : loading
-                  ? "Searching…"
-                  : query.trim()
-                    ? "No Results"
-                    : "Describe What You Remember"
+            : status?.roots.length === 0 && !status.photos_library?.enabled
+              ? "Choose Your Folders"
+              : loading || (!baseURL && !!query.trim())
+                ? "Searching…"
+                : query.trim()
+                  ? "No Results"
+                  : "Describe What You Remember"
         }
         description={
           error
             ? error
-            : !baseURL
+            : !baseURL && !!query.trim()
               ? setupMessage
-              : status?.roots.length === 0
+              : status?.roots.length === 0 && !status.photos_library?.enabled
                 ? "Open Model Settings, add folders and download the recommended model."
                 : status?.indexing
                   ? `${progress}. ${status.files} files are already searchable.`
