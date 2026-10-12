@@ -1,5 +1,9 @@
 # Messages 2FA Changelog
 
+## [Update contributors] - {PR_MERGE_DATE}
+
+- Move `ronaldheft` to past contributors.
+
 ## [Fix invalid verification links] - 2026-05-28
 
 - Ignore unsupported verification link URLs before rendering them in the list.
