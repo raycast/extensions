@@ -1,4 +1,4 @@
-import { normalizeLayer } from "./schema";
+import { generateId, normalizeLayer } from "./schema";
 import type { Layer } from "./types";
 
 export function layersToJson(layers: Layer[]): string {
@@ -51,6 +51,8 @@ export function parseLayersJson(text: string): Layer[] {
     }
 
     const layer = normalizeLayer(src);
+    // Fresh internal ids: the file's ids are untrusted and may repeat.
+    layer.entries = layer.entries.map((item) => ({ ...item, id: generateId() }));
     const previousRow = seenLayerIds.get(layer.id);
     if (previousRow !== undefined) {
       errors.push(`Rows ${previousRow} and ${row}: duplicate layer id "${layer.id}"`);

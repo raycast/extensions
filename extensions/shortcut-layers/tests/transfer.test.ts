@@ -37,6 +37,14 @@ test("parseLayersJson rejects actions without a key", () => {
   assert.throws(() => parseLayersJson(json), /action 1 \("No key"\) has no key/);
 });
 
+test("parseLayersJson replaces supplied action ids", () => {
+  const json =
+    '[{"name":"Apps","entries":[{"id":"same","key":"g","title":"G"},{"id":"same","key":"b","title":"B"}]}]';
+  const ids = parseLayersJson(json)[0].entries.map((entry) => entry.id);
+  assert.equal(new Set(ids).size, 2);
+  assert.ok(ids.every((id) => id !== "same"));
+});
+
 test("mergeLayers appends new layers and merges actions by key", () => {
   const existing: Layer[] = [
     {
