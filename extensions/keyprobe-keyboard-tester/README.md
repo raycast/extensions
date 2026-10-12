@@ -27,10 +27,10 @@
 ## Setup
 
 1. Run **Open KeyProbe** from Raycast
-2. Grant **Input Monitoring** permission when prompted, then run the command again
+2. If macOS asks, grant **Input Monitoring** to **Raycast**, then run the command again
 
 > [!IMPORTANT]
-> The first run needs **Input Monitoring** permission (not Accessibility). Grant it in System Settings → Privacy & Security → Input Monitoring by enabling `KeyProbeHelper`, then run **Open KeyProbe** again. Until it's granted, the panel doesn't open — Raycast opens the Input Monitoring settings for you instead.
+> KeyProbe's helper runs as part of Raycast, so macOS checks Raycast's permissions when it reads keystrokes. If Raycast already has **Accessibility** permission (it usually asks for this during setup), nothing else is needed. Otherwise, enable **Raycast** in System Settings → Privacy & Security → Input Monitoring, then run **Open KeyProbe** again. Until it's granted, the panel doesn't open — Raycast opens the Input Monitoring settings for you instead.
 
 ## Choosing a layout
 

@@ -1,4 +1,4 @@
-import { execFileSync, spawn } from "child_process";
+import { execFileSync } from "child_process";
 import { environment, open, showHUD } from "@raycast/api";
 import path from "path";
 import fs from "fs";
@@ -13,7 +13,7 @@ const LOG_FILE = path.join(environment.supportPath, "keyprobe-helper.log");
 // the Keyboard Layout preference for the next launch.
 export const OVERRIDE_KEY = "selectedLayout";
 
-// Written by main.swift when the event tap can't be created.
+// Written by KeyProbe.swift when the event tap can't be created.
 const PERMISSION_DENIED_LOG = "Input Monitoring permission not granted";
 const INPUT_MONITORING_PANE =
   "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent";
@@ -21,10 +21,6 @@ const INPUT_MONITORING_PANE =
 export type StartResult =
   | { success: true }
   | { success: false; error: string; needsPermission?: boolean };
-
-function getHelperPath(): string {
-  return path.join(environment.assetsPath, "KeyProbeHelper");
-}
 
 function getLayoutDir(): string {
   return path.join(environment.assetsPath, "layouts");
@@ -38,7 +34,8 @@ function isKeyProbeHelper(pid: number): boolean {
     const command = execFileSync("ps", ["-p", String(pid), "-o", "comm="], {
       encoding: "utf8",
     }).trim();
-    return path.basename(command) === "KeyProbeHelper";
+    // ray build names the executable after the Swift package's folder.
+    return path.basename(command) === "keyprobe-helper";
   } catch {
     return false;
   }
@@ -70,38 +67,17 @@ export function focusExisting(pid: number): void {
   process.kill(pid, "SIGUSR1");
 }
 
-function prepareHelper(
-  helperPath: string,
-): { success: true } | { success: false; error: string } {
-  if (!fs.existsSync(helperPath)) {
-    return {
-      success: false,
-      error: "KeyProbe's helper is missing. Try reinstalling the extension.",
-    };
-  }
+// Only what this launch appended to the log says why it failed: the file
+// is shared across launches.
+function readLogSince(offset: number): string {
   try {
-    fs.accessSync(helperPath, fs.constants.X_OK);
+    return fs.readFileSync(LOG_FILE).subarray(offset).toString("utf8");
   } catch {
-    try {
-      fs.chmodSync(helperPath, 0o755);
-    } catch {
-      return {
-        success: false,
-        error:
-          "KeyProbe's helper couldn't be made executable. Try reinstalling the extension.",
-      };
-    }
+    return "";
   }
-  return { success: true };
 }
 
 export async function startHelper(layoutMode: string): Promise<StartResult> {
-  const helperPath = getHelperPath();
-  const prepared = prepareHelper(helperPath);
-  if (!prepared.success) return prepared;
-
-  // The log is appended to across launches, so only what this launch
-  // writes after this offset says why it failed.
   let logOffset = 0;
   try {
     logOffset = fs.statSync(LOG_FILE).size;
@@ -109,77 +85,31 @@ export async function startHelper(layoutMode: string): Promise<StartResult> {
     // no log yet
   }
 
-  let out: number | null = null;
-  // spawn() reports exec failures (e.g. a wrong-architecture binary) via
-  // this event, not by throwing, so the catch below never sees them.
-  let launchError: Error | null = null;
-  let exitedWithError = false;
   try {
-    out = fs.openSync(LOG_FILE, "a");
-    const child = spawn(
-      helperPath,
-      [
-        "--pid",
-        PID_FILE,
-        "--log",
-        LOG_FILE,
-        "--layout-dir",
-        getLayoutDir(),
-        "--layout-mode",
-        layoutMode,
-      ],
-      {
-        detached: true,
-        stdio: ["ignore", out, out],
-      },
-    );
-    child.on("error", (error) => {
-      launchError = error;
-    });
-    // A non-zero exit before the PID file appears is a failed startup, so
-    // there's no point waiting out the rest of the poll. (Zero is a second
-    // launch deferring to one that's already starting.)
-    child.on("exit", (code) => {
-      exitedWithError = code !== 0;
-    });
-    child.unref();
+    // openPanel starts the panel in a detached process and returns at once;
+    // readiness is the PID file appearing, below.
+    const { openPanel } = await import("swift:../swift/keyprobe-helper");
+    await openPanel(getLayoutDir(), layoutMode, PID_FILE, LOG_FILE);
   } catch (error) {
     return {
       success: false,
       error: `KeyProbe's helper failed to launch: ${error instanceof Error ? error.message : String(error)}`,
     };
-  } finally {
-    if (out !== null) fs.closeSync(out);
   }
 
   // Poll for the helper to write its PID (event tap + window ready).
   for (let attempt = 0; attempt < 30; attempt++) {
     await new Promise((r) => setTimeout(r, 100));
-    if (launchError) {
-      return {
-        success: false,
-        error: `KeyProbe's helper failed to launch: ${(launchError as Error).message}`,
-      };
-    }
     const pid = readPid();
     if (pid) return { success: true };
-    if (exitedWithError) break;
+    // The helper exits right after logging this, so stop waiting early.
+    if (readLogSince(logOffset).includes(PERMISSION_DENIED_LOG)) break;
   }
 
-  let thisLaunchLog = "";
-  try {
-    thisLaunchLog = fs
-      .readFileSync(LOG_FILE)
-      .subarray(logOffset)
-      .toString("utf8");
-  } catch {
-    // fall through to the generic message
-  }
-  if (thisLaunchLog.includes(PERMISSION_DENIED_LOG)) {
+  if (readLogSince(logOffset).includes(PERMISSION_DENIED_LOG)) {
     return {
       success: false,
-      error:
-        "Grant Input Monitoring to KeyProbeHelper, then run Open KeyProbe again",
+      error: "Grant Input Monitoring to Raycast, then run Open KeyProbe again",
       needsPermission: true,
     };
   }

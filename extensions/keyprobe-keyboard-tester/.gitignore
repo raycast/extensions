@@ -2,6 +2,7 @@ node_modules/
 dist/
 raycast-env.d.ts
 .raycast-swift-build/
+compiled_raycast_swift/
 .DS_Store
 *.log
 .swiftpm/
