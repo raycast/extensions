@@ -1,9 +1,5 @@
 # QuickAdd for Obsidian
 
-[![CI](https://github.com/chhoumann/raycast-quickadd/actions/workflows/ci.yml/badge.svg)](https://github.com/chhoumann/raycast-quickadd/actions/workflows/ci.yml)
-[![MIT license](https://img.shields.io/github/license/chhoumann/raycast-quickadd)](LICENSE)
-[![Raycast Store: coming soon](https://img.shields.io/badge/Raycast_Store-coming_soon-FF6363?logo=raycast&logoColor=white)](https://www.raycast.com/christian_bager_bach_houmann/quickadd)
-
 ![The Run QuickAdd Choice command in Raycast, listing a vault's QuickAdd choices with a Recent section at the top](media/hero.jpg)
 
 Run your [QuickAdd](https://github.com/chhoumann/quickadd) choices from Raycast. The forms, the pickers, and the finish message are Raycast's. The work is QuickAdd's, running inside Obsidian through Obsidian's command-line interface. Nothing is re-implemented, so every capture, template, and macro you already have works the day you install this.
@@ -60,19 +56,6 @@ When a run ends, the toast reads "Created Books/Piranesi.md" or "Added to Inbox.
 
 The extension reads Obsidian's vault list and uses the one vault that has QuickAdd enabled. When several vaults have it, **Run QuickAdd Choice** lists them and the capture commands ask you to set the **Vault** preference. When the vault is closed, the extension opens it, waits until QuickAdd answers, and brings Raycast back to the front.
 
-## Install
-
-The extension is not in the Raycast Store yet. Until it is, run it from source:
-
-```bash
-git clone https://github.com/chhoumann/raycast-quickadd
-cd raycast-quickadd
-npm install
-npm run dev
-```
-
-`npm run dev` installs the extension into Raycast and keeps it up to date while it runs.
-
 ## Requirements
 
 | What                                                             | Needs                                                                                                                                             |
@@ -119,23 +102,4 @@ npm run dev
 
 ## How it works
 
-Obsidian ships a command-line interface, and QuickAdd registers handlers on it. The extension shells out to that CLI to list choices and to start a choice, and QuickAdd sends each prompt to Raycast over a local connection instead of opening a modal. Raycast renders the prompt as a native control and sends the answer back, and QuickAdd does the rest inside Obsidian. [ARCHITECTURE.md](ARCHITECTURE.md) has the protocol, the vault lookup, and the reasons behind each choice.
-
-## Development
-
-```bash
-npm install
-npm run dev         # ray develop: installs into Raycast in watch mode
-npm run lint        # ray lint: manifest, code, and store screenshots
-npm test            # unit tests for field parsing, completion, and the run state machine
-npm run build
-npm run e2e:protocol  # drives every e2e choice through the real plugin
-```
-
-`e2e-vault/` has one QuickAdd choice per field kind and a macro script that raises every script prompt. Build QuickAdd in `~/Developer/quickadd` (or set `QUICKADD_DIR`), run `scripts/setup-e2e-vault.sh` to copy the plugin in, open the folder in Obsidian once with **Open folder as vault**, and run `npm run e2e:protocol`. The script runs every choice through `quickadd:interactive`, answers each prompt the way the extension would, and checks the notes QuickAdd writes to `e2e-vault/Output/`.
-
-`demo-vault/` is the vault in the pictures above. `scripts/setup-demo-vault.sh` downloads the QuickAdd release it expects. To open a choice against either vault from a deeplink, URL-encode `{"vaultPath":"<repo>/demo-vault","choiceId":"quick-capture"}` and append it as `?context=` to `raycast://extensions/christian_bager_bach_houmann/quickadd/run-choice`.
-
-## License
-
-[MIT](LICENSE)
+Obsidian ships a command-line interface, and QuickAdd registers handlers on it. The extension shells out to that CLI to list choices and to start a choice, and QuickAdd sends each prompt to Raycast over a local connection instead of opening a modal. Raycast renders the prompt as a native control and sends the answer back, and QuickAdd does the rest inside Obsidian. [ARCHITECTURE.md](https://github.com/chhoumann/raycast-quickadd/blob/main/ARCHITECTURE.md) has the protocol, the vault lookup, and the reasons behind each choice.

@@ -1,1 +1,0 @@
-Friend: {{FILE:People}}
