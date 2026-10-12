@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add SolidPing MCP Server] - {PR_MERGE_DATE}
+## [Add SolidPing MCP Server] - 2026-10-12
 
 - Add SolidPing to the official registry: open-source uptime and synthetic monitoring. Create, run and diagnose checks, read results and incidents, manage status pages and maintenance windows. Hosted remote Streamable HTTP server with OAuth 2.1 sign-in. Direct HTTP connection in Raycast at https://solidping.io/api/v1/mcp.
 
