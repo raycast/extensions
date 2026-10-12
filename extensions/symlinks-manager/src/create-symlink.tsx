@@ -2,7 +2,7 @@ import { Action, ActionPanel, Alert, Form, Toast, confirmAlert, showToast } from
 import { showFailureToast, useForm } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
-import { createLink, isInside, lstatOrUndefined } from "./links";
+import { createLink, lstatOrUndefined, placementProblem } from "./links";
 import { getSymlinks, saveSymlink } from "./storage";
 
 interface FormValues {
@@ -45,12 +45,9 @@ export default function Command() {
                     setValidationError("name", "A symlink with this name already exists");
                     return false;
                 }
-                if (linkPath === source) {
-                    setValidationError("destination", "This folder already holds the source");
-                    return false;
-                }
-                if (isInside(destinationDir, source)) {
-                    setValidationError("destination", "Destination is inside the source, which would create a loop");
+                const problem = placementProblem(source, destinationDir);
+                if (problem) {
+                    setValidationError("destination", problem);
                     return false;
                 }
 
@@ -72,8 +69,9 @@ export default function Command() {
                     if (!confirmed) return false;
                 }
 
-                await createLink(source, linkPath, existing !== undefined);
-                saveSymlink({ name, source, destination: linkPath });
+                await createLink(source, linkPath, existing !== undefined, () =>
+                    saveSymlink({ name, source, destination: linkPath }),
+                );
 
                 await showToast({ style: Toast.Style.Success, title: "Symlink created", message: linkPath });
                 reset(INITIAL_VALUES);
