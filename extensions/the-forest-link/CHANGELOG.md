@@ -1,4 +1,4 @@
-## [Plant Bare Domains] - {PR_MERGE_DATE}
+## [Plant Bare Domains] - 2026-10-12
 
 - Accept domains such as `example.com` in Plant a Website and the Plant Website AI tool, defaulting to HTTPS.
 - Preserve HTTP/HTTPS addresses, paths, and valid ports while rejecting unsafe schemes, malformed addresses, and embedded credentials.
