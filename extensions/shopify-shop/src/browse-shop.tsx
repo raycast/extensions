@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ActionPanel, Action, Icon, Grid, Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useFetch, useLocalStorage } from "@raycast/utils";
+import { useCachedPromise, useFetch, useLocalStorage } from "@raycast/utils";
 import type { Product } from "./types";
 import ProductDetail from "./product-detail";
 import { buildStoreOrigin } from "./services/shopify-api";
 import { formatPrice, normalizeTags } from "./services/product-mapper";
 import { useSearchSuggest, useStoreMeta } from "./services/hooks";
+import { fetchAllProducts } from "./services/products";
 
 type FetchResponse = {
   ok: boolean;
@@ -14,10 +15,7 @@ type FetchResponse = {
 };
 
 export default function Command() {
-  type ShopifyResponse = {
-    products?: Product[];
-    product?: Product;
-  };
+  const abortable = useRef<AbortController | null>(null);
   const [columns] = useState(3);
   const [searchText, setSearchText] = useState("");
   const { storeUrl } = getPreferenceValues<Preferences>();
@@ -47,23 +45,12 @@ export default function Command() {
   const searchSuggest = useSearchSuggest(storeUrl, searchText, ["product"], searchText.length >= 2, storeCurrency);
 
   const productsUrl = collectionHandle
-    ? `${storeOrigin}/collections/${collectionHandle}/products.json?currency=${storeCurrency || "USD"}`
-    : `${storeOrigin}/products.json?currency=${storeCurrency || "USD"}`;
+    ? `${storeOrigin}/collections/${encodeURIComponent(collectionHandle)}/products.json?currency=${encodeURIComponent(storeCurrency || "USD")}`
+    : `${storeOrigin}/products.json?currency=${encodeURIComponent(storeCurrency || "USD")}`;
 
-  const response = useFetch<ShopifyResponse | null>(productsUrl, {
-    parseResponse: async (res: FetchResponse) => {
-      if (!res.ok) {
-        throw new Error(`Failed to load products (${res.status})`);
-      }
-      try {
-        const json = await res.json();
-        return json as ShopifyResponse;
-      } catch {
-        throw new Error("Store returned an invalid products response");
-      }
-    },
-    keepPreviousData: true,
-    execute: !searchText || searchText.length < 2,
+  const response = useCachedPromise((url: string) => fetchAllProducts(url, abortable.current?.signal), [productsUrl], {
+    abortable,
+    execute: searchText.length < 2 && !storeMetaResp.isLoading,
   });
 
   const isLoadingFromFetch = response.isLoading || searchSuggest.isLoading || storeMetaResp.isLoading;
@@ -123,10 +110,8 @@ export default function Command() {
         },
       ],
     }));
-  } else if (resp?.products && Array.isArray(resp.products)) {
-    products = resp.products;
-  } else if (resp?.product) {
-    products = [resp.product];
+  } else if (searchText.length < 2) {
+    products = resp ?? [];
   }
 
   async function handleSelectCollection(handle: string | null) {
