@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Rename Channel AI Tool] - {PR_MERGE_DATE}
+
+- Add a **Rename Channel** AI tool that renames a channel by ID after confirmation. Names are converted to Slack's format (lowercase, hyphens instead of spaces), and common errors such as a taken name or missing permission are explained.
+
 ## [Fix user search stalling] - 2026-10-10
 
 - Fix searching for users in **Send Message** and **Open Channel** loading indefinitely in large workspaces.

@@ -204,3 +204,21 @@ evals:
           archived: true
         - channel: C87654321
           archived: true
+  - input: "@slack rename #old-project to project-launch"
+    expected:
+      - callsTool:
+          name: get-channels
+      - callsTool:
+          name: rename-channel
+          arguments:
+            channel: C12345678
+            name: project-launch
+    mocks:
+      get-channels:
+        - id: C12345678
+          name: old-project
+        - id: C87654321
+          name: general
+      rename-channel:
+        channel: C12345678
+        name: project-launch
