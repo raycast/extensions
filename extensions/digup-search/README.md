@@ -52,13 +52,16 @@ Pick a file type from the dropdown to narrow the search. The Code item is there 
 | ![A lease found by "the clause about pets in the lease", with the page that matched](media/page.png) | ![A function found by "code: retry a failed call with backoff", shown as code, opening in the editor](media/code.png) |
 | ![A photo and a video moment found by "a red parrot"](media/photo.png) | |
 
-| Action | What it does |
-|---|---|
-| Open | Videos and recordings open in QuickTime Player at the moment that matched. PDFs open in your default PDF app; when that is Preview and the match is past the first page, Preview's search is filled with a word from that page. Code opens in your editor at the line. Everything else opens normally. |
-| Toggle Quick Look | Previews the file |
-| Show in Finder | Reveals it |
-| Open With… | Picks another app |
-| Copy File / Copy Path | Copies the file itself, or where it is |
+| Action | Key | What it does |
+|---|---|---|
+| Open | ↩ | Videos and recordings open in QuickTime Player at the moment that matched. PDFs open in your default PDF app; when that is Preview and the match is past the first page, Preview's search is filled with a word from that page. Code opens in your editor at the line. Everything else opens normally. |
+| Show in Finder | ⌘↩ | Reveals the file |
+| Toggle Quick Look | ⌘Y | Previews the file |
+| Open With… | ⌘⇧O | Picks another app |
+| Copy File | ⌘⇧C | Copies the file itself, to paste anywhere |
+| Copy Path | ⌘⌃C | Copies where the file is |
+
+⌘P opens the file-type dropdown, and ⌘K lists every action.
 
 ### Which app plays videos and recordings
 

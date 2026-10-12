@@ -326,8 +326,9 @@ function Search(props: {
                         icon={hit.kind === "code" ? Icon.Code : momentOf(hit) !== null ? Icon.Play : Icon.Document}
                         onAction={() => openHit(hit)}
                       />
-                      <Action.ToggleQuickLook shortcut={Keyboard.Shortcut.Common.ToggleQuickLook} />
+                      {/* Second, so it gets ⌘↩: where Finder-like lists, and DigUp's own panel, reveal a file. */}
                       <Action.ShowInFinder path={hit.path} />
+                      <Action.ToggleQuickLook shortcut={Keyboard.Shortcut.Common.ToggleQuickLook} />
                       <Action.OpenWith path={hit.path} shortcut={Keyboard.Shortcut.Common.OpenWith} />
                     </ActionPanel.Section>
                     <ActionPanel.Section>
