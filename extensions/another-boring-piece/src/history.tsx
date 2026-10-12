@@ -248,7 +248,7 @@ export default function Command() {
                 entry.wallpaper.name,
                 entry.wallpaper.artist,
                 entry.wallpaper.creationDate,
-                entry.eventType,
+                ...new Set(entry.events.map((event) => event.eventType)),
               ]}
               icon={{
                 source: getThumbnailUrl(entry.wallpaper.url, { width: 100 }),
