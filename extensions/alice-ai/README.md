@@ -57,6 +57,8 @@ Revisit previous outputs, compare results, and copy what you need from past exec
 
 Pin your most-used actions, launch from menu bar, and integrate with Quicklinks for an even faster daily workflow.
 
+If an older Quicklink opens the action list instead of running the action, recreate it using that action's **Create Quicklink** menu item.
+
 ### 🔄 Portable Action Library
 
 Export and import actions to back up your setup or share proven prompts with your team.
