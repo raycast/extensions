@@ -89,6 +89,7 @@ export async function updateFavoriteMetadata(change: (metadata: FavoriteMetadata
     if (next !== previous) await LocalStorage.setItem(FAVORITE_METADATA_KEY, next);
     return metadata;
   } finally {
-    await release();
+    // Cleanup cannot undo a committed snapshot or replace the original save error.
+    await release().catch((err: unknown) => console.error("Unable to release favorites save lock:", err));
   }
 }

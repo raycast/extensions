@@ -260,3 +260,33 @@ test("writer lock failure is reported without blocking pure reads or changing sa
   assert.equal(attempts, 1);
   assert.equal(ctx.storage.has(metadataKey), false);
 });
+
+for (const saveFails of [false, true]) {
+  test(`lock cleanup failure preserves the ${saveFails ? "original save error" : "committed edit result"}`, async () => {
+    const ctx = apiMock({ [favoritesKey]: '{"service:Work":true}' });
+    const metadata = loadSource("favorite-metadata.ts", {
+      "@raycast/api": ctx.api,
+      "proper-lockfile": {
+        lock: async () => async () => {
+          throw new Error("cleanup failed");
+        },
+      },
+    });
+    if (saveFails)
+      ctx.api.LocalStorage.setItem = async () => {
+        throw new Error("save failed");
+      };
+    const edit = metadata.updateFavoriteMetadata(({ favorites, order }) => {
+      favorites["service:Home"] = true;
+      order["service:Home"] = 1;
+    });
+    if (saveFails) {
+      await assert.rejects(edit, /save failed/);
+      assert.equal(ctx.storage.has(metadataKey), false);
+    } else {
+      const result = await edit;
+      assert.deepEqual(JSON.parse(ctx.storage.get(metadataKey)), result);
+      assert.equal(result.favorites["service:Home"], true);
+    }
+  });
+}
