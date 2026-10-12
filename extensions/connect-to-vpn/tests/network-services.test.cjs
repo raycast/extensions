@@ -788,3 +788,29 @@ test("a refresh that starts during a pending favorite save cannot overwrite the 
   assert.equal(current().favoriteServices.length, 1);
   assert.equal(current().otherServices.length, 0);
 });
+
+const manifestSortOptions = require("../package.json").preferences.find(
+  (preference) => preference.name === "sortBy",
+).data;
+for (const { value: sortBy } of manifestSortOptions) {
+  test(`the generated ${sortBy} preference preserves list sorting`, async (t) => {
+    const ctx = setup();
+    ctx.api.getPreferenceValues = () => ({ hideInvalidDevices: true, sortBy });
+    ctx.output.order = serviceOrder([
+      [1, "Alpha", "Zeta"],
+      [2, "Beta", "Alpha"],
+    ]);
+    ctx.output.statuses = vpnList([["Alpha"], ["Beta"]]);
+    const current = await mount(ctx, t);
+    const expected = {
+      ascService: ["Alpha", "Beta"],
+      descService: ["Beta", "Alpha"],
+      ascType: ["Beta", "Alpha"],
+      descType: ["Alpha", "Beta"],
+    };
+    assert.deepEqual(
+      current().otherServices.map((service) => service.name),
+      expected[sortBy],
+    );
+  });
+}

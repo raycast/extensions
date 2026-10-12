@@ -5,11 +5,6 @@ import { getVpnStatus, updateVpnStatus } from "./store";
 import { readFavoriteMetadata, updateFavoriteMetadata } from "./favorite-metadata";
 export { loadFavorites, loadFavoriteOrder } from "./favorite-metadata";
 
-type Preferences = {
-  hideInvalidDevices: boolean;
-  sortBy: "ascService" | "descService" | "ascType" | "descType";
-};
-
 export type NetworkService = {
   id: string;
   name: string;
@@ -411,10 +406,7 @@ export function openNetworkSettings() {
   });
 }
 
-export const sortNetworkServices = (
-  services: NetworkService[],
-  sortBy: "ascService" | "descService" | "ascType" | "descType",
-): NetworkService[] =>
+export const sortNetworkServices = (services: NetworkService[], sortBy: Preferences["sortBy"]): NetworkService[] =>
   services.sort((a, b) => {
     // Manual favorite order takes precedence over connection status.
     if (a.favorite && !b.favorite) return -1;
