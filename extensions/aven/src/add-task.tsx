@@ -29,6 +29,7 @@ export default function Command() {
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitInFlight = useRef(false);
+  const hasShownForm = useRef(false);
 
   const {
     data: workspacesOutput,
@@ -101,7 +102,8 @@ export default function Command() {
   const isInitialLoad =
     !listError && (workspacesOutput === undefined || (workspaces.length > 0 && projectsOutput === undefined));
 
-  if (isInitialLoad) return <Form isLoading />;
+  if (isInitialLoad && !hasShownForm.current) return <Form isLoading />;
+  hasShownForm.current = true;
 
   return (
     <Form
