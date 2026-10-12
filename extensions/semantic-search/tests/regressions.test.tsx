@@ -244,6 +244,131 @@ test("Photos-only search keeps its source status and does not require folders", 
   }
 });
 
+for (const end of [
+  "selection",
+  "close",
+  "library",
+  "active",
+  "late-close",
+] as const) {
+  test(
+    end === "active"
+      ? "Active Photos metadata resumes after a busy response"
+      : `Photos metadata stops busy retries after ${end}`,
+    async (t) => {
+      launcher.serviceURL = "http://127.0.0.1:18799";
+      t.mock.method(globalThis, "setInterval", () => 1);
+      t.mock.method(globalThis, "clearInterval", () => {});
+      const retries: (() => void)[] = [];
+      const lateResponse = deferred<Response>();
+      t.mock.method(
+        globalThis,
+        "setTimeout",
+        (callback: () => void, delay: number) => {
+          if (delay === 250) retries.push(callback);
+          else queueMicrotask(callback);
+          return 1;
+        },
+      );
+      t.mock.method(globalThis, "clearTimeout", () => {});
+      const photos = ["first", "second"].map((id) => ({
+        path: `photos://asset/${id}`,
+        name: `${id}.jpg`,
+        source: "photos",
+        kind: "image",
+        score: 1,
+        snippet: "",
+      }));
+      let oldRequests = 0;
+      t.mock.method(
+        globalThis,
+        "fetch",
+        async (url: string, init?: RequestInit) => {
+          if (url.endsWith("/v1/search")) return response({ results: photos });
+          if (url.endsWith("/v1/status"))
+            return response({
+              ...status,
+              roots: [],
+              photos_library: { enabled: true, indexed: 2 },
+            });
+          if (url.endsWith("/v1/preview"))
+            return response({
+              preview: "data:image/jpeg;base64,/9j/",
+              pages: 0,
+            });
+          if (url.endsWith("/v1/photos/details")) {
+            if (JSON.parse(String(init?.body)).path === photos[0].path) {
+              oldRequests += 1;
+              if (oldRequests === 1) {
+                if (end === "late-close") return lateResponse.promise;
+                return new Response("busy", { status: 409 });
+              }
+            }
+            return response({ created_at: 1700000000 });
+          }
+          return response({});
+        },
+      );
+      let view!: ReactTestRenderer;
+      try {
+        await act(async () => {
+          view = create(
+            createElement(SemanticSearch, {
+              arguments: { query: "a photo" },
+              launchType: LaunchType.UserInitiated,
+            }),
+          );
+        });
+        assert.equal(oldRequests, 1);
+        assert.equal(retries.length, end === "late-close" ? 0 : 1);
+        await act(async () => {
+          if (end === "selection")
+            field(view, "List").props.onSelectionChange(photos[1].path);
+          else if (end === "close" || end === "late-close") view.unmount();
+          else if (end === "library") {
+            const manage = view.root.findAll(
+              (node) =>
+                String(node.type) === "Action" &&
+                node.props.title === "Manage Library",
+            )[0];
+            manage.props.onAction();
+          }
+        });
+        await act(async () => {
+          if (end === "late-close")
+            lateResponse.resolve(new Response("busy", { status: 409 }));
+          else retries.shift()!();
+        });
+        assert.equal(
+          oldRequests,
+          end === "active" ? 2 : 1,
+          "only active metadata may retry",
+        );
+        assert.equal(
+          retries.length,
+          0,
+          "abandoned metadata must not schedule another retry",
+        );
+        if (end === "selection" || end === "active") {
+          const row = field(
+            view,
+            "ListItem",
+            photos[end === "selection" ? 1 : 0].path,
+          );
+          const detail = row.findAll(
+            (node) => String(node.type) === "ListItemDetail",
+          )[0];
+          assert.match(String(detail.props.markdown), /Date taken:/);
+        }
+      } finally {
+        await act(async () => {
+          view?.unmount();
+        });
+      }
+    },
+  );
+}
+
 test("Photos result copies image data and shows capture date without exposing internal links", async (t) => {
   launcher.serviceURL = "http://127.0.0.1:18799";
   launcher.toasts.length = 0;
@@ -279,6 +404,7 @@ test("Photos result copies image data and shows capture date without exposing in
         return response({ created_at: 1700000000 });
       if (url.endsWith("/v1/photos/copy")) {
         copied.push(JSON.parse(String(init?.body)));
+        if (copied.length === 1) return new Response("busy", { status: 409 });
         return response({ copied: true, width: 4000, height: 3000 });
       }
       if (url.endsWith("/v1/preview"))
@@ -312,7 +438,7 @@ test("Photos result copies image data and shows capture date without exposing in
     await act(async () => {
       await action[0].props.onAction();
     });
-    assert.deepEqual(copied, [{ path: item.path }]);
+    assert.deepEqual(copied, [{ path: item.path }, { path: item.path }]);
     assert.equal(launcher.toasts.at(-1)?.title, "Photo copied");
   } finally {
     await act(async () => {

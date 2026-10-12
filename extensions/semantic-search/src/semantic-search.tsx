@@ -298,13 +298,19 @@ export default function SemanticSearch(
     };
   }, [previewPath, previewStart, baseURL, selectedThumbnail]);
 
-  const requestPhoto = async (action: "details" | "copy", path: string) => {
+  const requestPhoto = async (
+    action: "details" | "copy",
+    path: string,
+    isActive: () => boolean = () => true,
+  ) => {
     for (let attempt = 0; ; attempt++) {
+      if (!isActive()) throw new Error("Photo request is no longer active");
       const response = await fetch(`${baseURL}/v1/photos/${action}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ path }),
       });
+      if (!isActive()) throw new Error("Photo request is no longer active");
       if (response.status === 409 && attempt < 40) {
         await new Promise((resolve) => setTimeout(resolve, 250));
         continue;
@@ -326,7 +332,7 @@ export default function SemanticSearch(
     setPhotoDate(undefined);
   }, [indexVersion]);
   useEffect(() => {
-    if (!baseURL || selected?.source !== "photos") return;
+    if (!baseURL || libraryOpen || selected?.source !== "photos") return;
     const path = selected.path;
     if (photoDates.current.has(path)) {
       setPhotoDate({ path, created_at: photoDates.current.get(path)! });
@@ -334,7 +340,7 @@ export default function SemanticSearch(
     }
     let active = true;
     const timer = setTimeout(() => {
-      void requestPhoto("details", path)
+      void requestPhoto("details", path, () => active)
         .then((data) => {
           if (!active) return;
           const created_at = data.created_at ?? null;
@@ -349,7 +355,7 @@ export default function SemanticSearch(
       active = false;
       clearTimeout(timer);
     };
-  }, [baseURL, selected?.path, selected?.source, indexVersion]);
+  }, [baseURL, libraryOpen, selected?.path, selected?.source, indexVersion]);
 
   const copyPhoto = async (result: Result) => {
     if (copyingPhoto.current) return;

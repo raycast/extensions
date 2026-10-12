@@ -12,3 +12,4 @@
 - Copy Photos images at full resolution and show creation dates below previews.
 - Keep completed video scenes searchable when soundtrack decoding fails.
 - Reduce startup screen transitions and speed up library statistics.
+- Stop obsolete Photos metadata retries when switching results, closing Search or opening Manage Library.
