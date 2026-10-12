@@ -80,6 +80,10 @@ export class BearDb {
 
   constructor(database: Database) {
     this.database = database;
+    // SQLite's built-in lower() only folds ASCII, so non-Latin (e.g. Cyrillic) search was case-sensitive
+    this.database.create_function("lower", (value: unknown) =>
+      value == null ? null : String(value).toLocaleLowerCase(),
+    );
   }
 
   close() {
