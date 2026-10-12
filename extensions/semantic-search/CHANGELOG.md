@@ -1,5 +1,17 @@
 # Semantic Search Changelog
 
+## Review Folder and Settings Edge Cases - {PR_MERGE_DATE}
+
+- Preserve newer folder additions and deletion choices while settings requests finish.
+- Explain pending source setup before removal and preserve retained/offline sources.
+- Respect image-content selection while video is enabled.
+
+## Additive Search Folders - {PR_MERGE_DATE}
+
+- Add folders without replacing earlier sources and show the selected list.
+- Remove sources with optional index cleanup, while preserving originals and remaining nested folders.
+- Keep folder changes compatible with the existing database and active indexing.
+
 ## [Initial Store Release] - {PR_MERGE_DATE}
 
 - Search local files with EmbeddingGemma 2 through a separately installed local engine.
@@ -13,3 +25,5 @@
 - Keep completed video scenes searchable when soundtrack decoding fails.
 - Reduce startup screen transitions and speed up library statistics.
 - Stop obsolete Photos metadata retries when switching results, closing Search or opening Manage Library.
+
+- Compare unchanged Photos using metadata, remember stable skips and delay temporary retries. Offer Retry Skipped Files while preserving indexed video scenes and successful entries.

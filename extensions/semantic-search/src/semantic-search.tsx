@@ -502,11 +502,17 @@ export default function SemanticSearch(
     };
   }, [query, kind, baseURL, indexVersion]);
 
-  const updateIndex = async () => {
+  const updateIndex = async (retrySkipped = false) => {
     if (!baseURL || status?.indexing) return;
     try {
       const response = await fetch(`${baseURL}/v1/index/start`, {
         method: "POST",
+        ...(retrySkipped
+          ? {
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ retry_skipped: true }),
+            }
+          : {}),
       });
       if (!response.ok)
         throw new Error(
@@ -515,9 +521,12 @@ export default function SemanticSearch(
         );
       await showToast({
         style: Toast.Style.Success,
-        title: "Updating search index",
-        message:
-          "New and changed files are indexed. Results refresh after the scan.",
+        title: retrySkipped
+          ? "Retrying skipped files"
+          : "Updating search index",
+        message: retrySkipped
+          ? "Previously skipped files are checked again. Completed entries are preserved."
+          : "New and changed files are indexed. Results refresh after the scan.",
       });
     } catch (e) {
       await showToast({
@@ -667,6 +676,11 @@ export default function SemanticSearch(
                   onAction={updateIndex}
                 />
                 <Action
+                  title="Retry Skipped Files"
+                  icon={Icon.ArrowClockwise}
+                  onAction={() => updateIndex(true)}
+                />
+                <Action
                   title="Manage Library"
                   icon={Icon.Gear}
                   onAction={showLibrary}
@@ -714,6 +728,11 @@ export default function SemanticSearch(
               icon={Icon.ArrowClockwise}
               shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={updateIndex}
+            />
+            <Action
+              title="Retry Skipped Files"
+              icon={Icon.ArrowClockwise}
+              onAction={() => updateIndex(true)}
             />
           </ActionPanel>
         }

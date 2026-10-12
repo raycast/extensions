@@ -53,12 +53,16 @@ type ModelSource = {
   capabilities?: { images: boolean; video: boolean; audio: boolean };
 };
 type IndexStatus = {
+  retained_files?: number;
   last_index_summary?: {
     added: number;
     updated: number;
     unchanged: number;
     deleted: number;
     errors: number;
+    cached_skips?: number;
+    retry_deferred?: number;
+    audio_retries_deferred?: number;
     deferred_photos?: number;
     deferred_videos?: number;
     partial_videos?: number;
@@ -83,11 +87,14 @@ type IndexStatus = {
     processed: number;
     total: number;
     errors: number;
+    cached_skips?: number;
+    retry_deferred?: number;
     current_chunks_done: number;
     current_chunks_total: number;
   };
 };
 type Settings = {
+  folders?: { path: string; files: number }[];
   models: ModelSource[];
   storage_path: string;
   current: Record<string, string | number | boolean | string[]>;
@@ -97,6 +104,7 @@ type Settings = {
     error?: string;
     index_errors?: number;
     exclusion_cleanup_pending?: number;
+    folder_cleanup_pending?: number;
     excluded_files_removed?: number;
     report_path?: string;
     freed_bytes?: number;
@@ -139,6 +147,15 @@ export default function ModelSettings({
   const [exclusionError, setExclusionError] = useState("");
   const [photosMessage, setPhotosMessage] = useState("");
   const [connectingPhotos, setConnectingPhotos] = useState(false);
+  const [folderRemoval, setFolderRemoval] = useState({
+    path: "",
+    deleteSaved: false,
+  });
+  const folderToRemove = folderRemoval.path;
+  const deleteFolderIndex = folderRemoval.deleteSaved;
+  const [savingFolders, setSavingFolders] = useState(false);
+  const addedFolders = useRef<string[]>([]);
+  const submittedFolders = useRef<string[]>([]);
   const excludedPaths = values?.excluded_paths;
   useEffect(() => {
     if (!excludedPaths || exclusionError) return;
@@ -203,16 +220,23 @@ export default function ModelSettings({
           ) as Values;
           const submission =
             data.job.state === "complete" ? submittedValues.current : undefined;
+          if (submission) {
+            addedFolders.current = addedFolders.current.filter(
+              (path) => !submittedFolders.current.includes(path),
+            );
+            submittedFolders.current = [];
+          }
           if (["complete", "error"].includes(data.job.state))
             submittedValues.current = undefined;
           const priorServer = serverValues.current;
           serverValues.current = normalized;
-          setValues((previous) =>
-            submission &&
+          setValues((previous) => ({
+            ...(submission &&
             JSON.stringify(previous) === JSON.stringify(submission)
               ? normalized
-              : reconcileValues(previous, priorServer, normalized),
-          );
+              : reconcileValues(previous, priorServer, normalized)),
+            roots: addExclusionFolders(normalized.roots, addedFolders.current),
+          }));
         }
       } catch (e) {
         if (active && pollGuard.current.accepts(revision)) setError(String(e));
@@ -324,19 +348,35 @@ export default function ModelSettings({
         (key === "model_url" && values?.model_variant !== "custom") ||
         sameSettingsValue(value, normalizedCurrent(key)),
     );
+  const onlyFoldersDirty =
+    !!dirty &&
+    Object.entries(values || {}).every(
+      ([key, value]) =>
+        key === "roots" ||
+        (key === "model_url" && values?.model_variant !== "custom") ||
+        sameSettingsValue(value, normalizedCurrent(key)),
+    );
   const applyTitle = applyingSettings
     ? "Applying Settings…"
-    : busy && !exclusionsDirty
-      ? "Indexing — Cancel in Actions"
-      : busy && exclusionsDirty
-        ? "Save Excluded Folders"
-        : !values?.roots.length && !values?.enable_photos_library
-          ? "Choose Folders First"
-          : selectedModel?.installed
-            ? dirty
-              ? "Apply"
-              : "Update Search Index"
-            : "Download & Apply";
+    : savingFolders
+      ? "Saving Folders…"
+      : folderToRemove
+        ? deleteFolderIndex
+          ? "Remove Folder & Delete Index"
+          : "Remove Search Folder"
+        : onlyFoldersDirty && selectedModel?.installed
+          ? "Save Search Folders"
+          : busy && !exclusionsDirty
+            ? "Indexing — Cancel in Actions"
+            : busy && exclusionsDirty
+              ? "Save Excluded Folders"
+              : !values?.roots.length && !values?.enable_photos_library
+                ? "Choose Folders First"
+                : selectedModel?.installed
+                  ? dirty
+                    ? "Apply"
+                    : "Update Search Index"
+                  : "Download & Apply";
   const progress = indexStatus?.progress;
   const contentCounts =
     settings?.storage_by_kind &&
@@ -357,6 +397,12 @@ export default function ModelSettings({
         lastScan.added && `${lastScan.added} new`,
         lastScan.updated && `${lastScan.updated} changed`,
         lastScan.deleted && `${lastScan.deleted} removed`,
+        lastScan.cached_skips &&
+          `${lastScan.cached_skips} skipped without retry`,
+        lastScan.retry_deferred &&
+          `${lastScan.retry_deferred} waiting to retry`,
+        lastScan.audio_retries_deferred &&
+          `${lastScan.audio_retries_deferred} audio retries postponed`,
         lastScan.deferred_photos &&
           `${lastScan.deferred_photos} iCloud photos deferred`,
         lastScan.deferred_videos &&
@@ -367,7 +413,7 @@ export default function ModelSettings({
     : "";
   const scanSummary = indexStatus?.indexing
     ? progress && progress.total
-      ? `Indexing: ${progress.processed.toLocaleString()} / ${progress.total.toLocaleString()} checked (${Math.floor((progress.processed / progress.total) * 100)}%). ${Math.max(0, progress.total - progress.processed).toLocaleString()} remaining.${progress.errors ? ` ${progress.errors} skipped.` : ""}${progress.current_chunks_total ? `\nCurrent file: ${progress.current_chunks_done} / ${progress.current_chunks_total} segments.` : ""}`
+      ? `Indexing: ${progress.processed.toLocaleString()} / ${progress.total.toLocaleString()} checked (${Math.floor((progress.processed / progress.total) * 100)}%). ${Math.max(0, progress.total - progress.processed).toLocaleString()} remaining.${progress.errors ? ` ${progress.errors} issues.` : ""}${progress.cached_skips ? ` ${progress.cached_skips} skipped without retry.` : ""}${progress.retry_deferred ? ` ${progress.retry_deferred} waiting to retry.` : ""}${progress.current_chunks_total ? `\nCurrent file: ${progress.current_chunks_done} / ${progress.current_chunks_total} segments.` : ""}`
       : "Indexing: discovering files…"
     : lastScan
       ? `Last ${lastScan.cancelled ? "update cancelled" : "update"}${lastScan.finished_at ? `: ${new Date(lastScan.finished_at * 1000).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}` : ""} · ${changesSummary}${lastScan.errors > (lastScan.partial_videos || 0) ? ` · ${lastScan.errors - (lastScan.partial_videos || 0)} skipped${settings?.job.report_path ? " (report in Actions)" : ""}` : ""}${lastScan.partial_videos ? ` · ${lastScan.partial_videos} videos with incomplete audio` : ""}`
@@ -546,6 +592,175 @@ export default function ModelSettings({
       });
     }
   };
+  const acceptFolders = (
+    roots: string[],
+    savedAdditions: string[] = [],
+    removed?: string,
+  ) => {
+    addedFolders.current = addedFolders.current.filter(
+      (path) => !savedAdditions.includes(path) && path !== removed,
+    );
+    if (serverValues.current)
+      serverValues.current = { ...serverValues.current, roots };
+    setSettings((previous) =>
+      previous
+        ? {
+            ...previous,
+            current: { ...previous.current, roots },
+          }
+        : previous,
+    );
+    setValues((previous) =>
+      previous
+        ? {
+            ...previous,
+            roots: addExclusionFolders(roots, addedFolders.current),
+          }
+        : previous,
+    );
+  };
+  const saveFolders = async () => {
+    if (!values || pollGuard.current.pending) return;
+    const submitted = [...addedFolders.current];
+    if (!submitted.length) return;
+    pollGuard.current.begin();
+    setSavingFolders(true);
+    try {
+      const response = await fetch(`${baseURL}/v1/folders/add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paths: folderRequestPaths(submitted) }),
+      });
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.detail || "Could not save search folders");
+      acceptFolders(data.roots, submitted);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Search folders saved",
+        message:
+          "Existing entries are preserved. Run Update Search Index to check new folders.",
+      });
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not save search folders",
+        message: String(e),
+      });
+    } finally {
+      pollGuard.current.end();
+      setSavingFolders(false);
+    }
+  };
+  const removeFolder = async () => {
+    if (!values || !folderToRemove || pollGuard.current.pending) return;
+    const path = folderToRemove;
+    const saved = (settings?.current.roots as string[])?.includes(path);
+    if (!saved) {
+      if (submittedValues.current?.roots.includes(path)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "This folder is being applied",
+          message:
+            "Wait for model setup to apply this folder, then remove it. Your removal has not been applied.",
+        });
+        return;
+      }
+      addedFolders.current = addedFolders.current.filter(
+        (root) => root !== path,
+      );
+      setValues((previous) =>
+        previous
+          ? {
+              ...previous,
+              roots: previous.roots.filter((root) => root !== path),
+            }
+          : previous,
+      );
+      setFolderRemoval({ path: "", deleteSaved: false });
+      return;
+    }
+    pollGuard.current.begin();
+    setSavingFolders(true);
+    try {
+      const response = await fetch(`${baseURL}/v1/folders/remove`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: folderRequestPaths([path])[0],
+          delete_saved_index: deleteFolderIndex,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.detail || "Could not remove search folder");
+      acceptFolders(data.roots, [], path);
+      setSettings((previous) =>
+        previous
+          ? {
+              ...previous,
+              job: {
+                ...previous.job,
+                folder_cleanup_pending: data.cleanup_pending,
+              },
+            }
+          : previous,
+      );
+      setFolderRemoval((previous) =>
+        previous.path === path ? { path: "", deleteSaved: false } : previous,
+      );
+      await showToast({
+        style: data.cleanup_pending ? Toast.Style.Failure : Toast.Style.Success,
+        title: "Search folder removed",
+        message: deleteFolderIndex
+          ? `${data.deleted_entries} saved entries deleted.${data.cleanup_pending ? " Some saved indexes need Retry Folder Cleanup in Actions." : ""} Original files are preserved.`
+          : "Source removed. Entries outside remaining search folders are kept for reuse and hidden from search.",
+      });
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not remove search folder",
+        message: String(e),
+      });
+    } finally {
+      pollGuard.current.end();
+      setSavingFolders(false);
+    }
+  };
+  const retryFolderCleanup = async () => {
+    try {
+      const response = await fetch(`${baseURL}/v1/folders/cleanup`, {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.detail || "Could not clean saved folder entries");
+      setSettings((previous) =>
+        previous
+          ? {
+              ...previous,
+              job: {
+                ...previous.job,
+                folder_cleanup_pending: data.cleanup_pending,
+              },
+            }
+          : previous,
+      );
+      await showToast({
+        style: data.cleanup_pending ? Toast.Style.Failure : Toast.Style.Success,
+        title: data.cleanup_pending
+          ? "Folder cleanup pending"
+          : "Folder cleanup complete",
+        message: `${data.deleted_entries} saved entries deleted. Original files are preserved.`,
+      });
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Folder cleanup failed",
+        message: String(e),
+      });
+    }
+  };
   const saveExclusions = async () => {
     if (!values || pollGuard.current.pending) return;
     const submitted = values.excluded_paths;
@@ -611,12 +826,20 @@ export default function ModelSettings({
   };
   const apply = async () => {
     if (!values || pollGuard.current.pending) return;
+    if (folderToRemove) {
+      await removeFolder();
+      return;
+    }
     if (editExclusionPaths && exclusionError) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Check exclusion paths",
         message: exclusionError,
       });
+      return;
+    }
+    if (onlyFoldersDirty && selectedModel?.installed) {
+      await saveFolders();
       return;
     }
     if (exclusionsDirty && (busy || onlyExclusionsDirty)) {
@@ -656,6 +879,7 @@ export default function ModelSettings({
     }
     pollGuard.current.begin();
     setApplyingSettings(true);
+    const pendingFolders = [...addedFolders.current];
     try {
       const response = await fetch(`${baseURL}/v1/settings`, {
         method: "POST",
@@ -679,6 +903,7 @@ export default function ModelSettings({
       if (!response.ok)
         throw new Error(data.detail || "Could not apply settings");
       submittedValues.current = values;
+      submittedFolders.current = pendingFolders;
       setSettings((previous) =>
         previous ? { ...previous, job: data } : previous,
       );
@@ -700,7 +925,7 @@ export default function ModelSettings({
       setApplyingSettings(false);
     }
   };
-  const indexFiles = async () => {
+  const indexFiles = async (retrySkipped = false) => {
     if (busy) return;
     if (dirty) {
       await showToast({
@@ -713,6 +938,12 @@ export default function ModelSettings({
     try {
       const response = await fetch(`${baseURL}/v1/index/start`, {
         method: "POST",
+        ...(retrySkipped
+          ? {
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ retry_skipped: true }),
+            }
+          : {}),
       });
       if (!response.ok)
         throw new Error(
@@ -721,9 +952,12 @@ export default function ModelSettings({
         );
       await showToast({
         style: Toast.Style.Success,
-        title: "Updating search index",
-        message:
-          "New and changed files are indexed. Unchanged files are skipped.",
+        title: retrySkipped
+          ? "Retrying skipped files"
+          : "Updating search index",
+        message: retrySkipped
+          ? "Previously skipped files are checked again. Completed entries are preserved."
+          : "New and changed files are indexed. Unchanged files are skipped.",
       });
     } catch (e) {
       await showToast({
@@ -770,6 +1004,7 @@ export default function ModelSettings({
   return (
     <Form
       isLoading={
+        savingFolders ||
         savingExclusions ||
         applyingSettings ||
         ["downloading", "applying"].includes(settings.job.state)
@@ -777,6 +1012,19 @@ export default function ModelSettings({
       actions={
         <ActionPanel>
           <Action.SubmitForm title={applyTitle} onSubmit={apply} />
+          {folderToRemove && (
+            <Action
+              title="Remove Selected Folder"
+              style={deleteFolderIndex ? Action.Style.Destructive : undefined}
+              onAction={removeFolder}
+            />
+          )}
+          {!!settings.job.folder_cleanup_pending && (
+            <Action
+              title="Retry Folder Cleanup"
+              onAction={retryFolderCleanup}
+            />
+          )}
           {(indexStatus?.indexing ||
             ["indexing", "cancelling"].includes(settings.job.state)) && (
             <Action
@@ -809,6 +1057,11 @@ export default function ModelSettings({
             title="Update Search Index"
             onAction={indexFiles}
             shortcut={Keyboard.Shortcut.Common.Refresh}
+          />
+          <Action
+            title="Retry Skipped Files"
+            icon={Icon.ArrowClockwise}
+            onAction={() => indexFiles(true)}
           />
           <Action
             title={
@@ -900,15 +1153,82 @@ export default function ModelSettings({
               : "Paste a supported model URL.")
         }
       />
+      <Form.Description
+        title="Folders to Search"
+        text={
+          values.roots.length
+            ? values.roots
+                .map((path) => {
+                  const saved = settings.folders?.find(
+                    (folder) => folder.path === path,
+                  );
+                  return `${path}${saved ? ` · ${saved.files.toLocaleString()} files` : ""}`;
+                })
+                .join("\n")
+            : "None"
+        }
+      />
       <Form.FilePicker
         id="roots"
-        title="Folders to Search"
+        title="Add Search Folders"
         canChooseFiles={false}
         canChooseDirectories={true}
         allowMultipleSelection={true}
-        value={values.roots}
-        onChange={(folders) => update("roots", folders)}
+        value={[]}
+        onChange={(folders) => {
+          setFolderRemoval({ path: "", deleteSaved: false });
+          addedFolders.current = addExclusionFolders(
+            addedFolders.current,
+            folders.filter(
+              (path) => !(settings.current.roots as string[])?.includes(path),
+            ),
+          );
+          setValues((previous) =>
+            previous
+              ? {
+                  ...previous,
+                  roots: addExclusionFolders(previous.roots, folders),
+                }
+              : previous,
+          );
+        }}
       />
+      {!!values.roots.length && (
+        <Form.Dropdown
+          id="folder_to_remove"
+          title="Remove a Folder"
+          value={folderToRemove}
+          onChange={(path) => {
+            setFolderRemoval({ path, deleteSaved: false });
+          }}
+        >
+          <Form.Dropdown.Item value="" title="Choose a folder…" />
+          {values.roots.map((path) => (
+            <Form.Dropdown.Item key={path} value={path} title={path} />
+          ))}
+        </Form.Dropdown>
+      )}
+      {!!folderToRemove && (
+        <>
+          {(settings.current.roots as string[])?.includes(folderToRemove) && (
+            <Form.Checkbox
+              id="delete_folder_index"
+              label="Delete this folder's saved index entries"
+              value={deleteFolderIndex}
+              onChange={(deleteSaved) =>
+                setFolderRemoval((previous) => ({ ...previous, deleteSaved }))
+              }
+            />
+          )}
+          <Form.Description text="Use the removal action below. Saved entries are kept by default. Other selected folders still include their subfolders. Original files are never deleted." />
+        </>
+      )}
+      {!!indexStatus?.retained_files && (
+        <Form.Description
+          title="Saved for reuse"
+          text={`${indexStatus.retained_files.toLocaleString()} entries from removed folders are stored but not searchable.`}
+        />
+      )}
       <Form.FilePicker
         id="excluded_folders"
         title="Add excluded folders"
