@@ -7,7 +7,7 @@ import { IssueListEmptyView } from "./components/IssueListEmptyView";
 import IssueListItem from "./components/IssueListItem";
 import { getProjectAvatar } from "./helpers/avatars";
 import { containsText, eqString, group, or, withProjectFilter } from "./helpers/jql";
-import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import { withJiraCredentialsComponent } from "./helpers/withJiraCredentials";
 import useIssues from "./hooks/useIssues";
 
 type SearchIssuesProps = {
@@ -143,4 +143,4 @@ export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
     </List>
   );
 }
-export default withJiraCredentials(SearchIssues);
+export default withJiraCredentialsComponent(SearchIssues);

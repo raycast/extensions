@@ -7,6 +7,7 @@
 - Fixed Jira issue type icons rendering as white squares in Raycast by dynamically parsing the `content-type` response header (e.g., `image/svg+xml`, `image/png`) instead of hardcoding `"image/jpeg"`.
 - Added performance optimization for icon resolution using a Map-based `iconUriCache` cache to prevent duplicate concurrent network requests.
 - Loaded all Jira projects instead of stopping after the first 100 results
+- Migrated from `node-fetch` to Node 21+ built-in native `fetch` API, using standard stream pipelines for file downloads.
 
 ## [Fixed team field on issue creation] - 2026-08-25
 

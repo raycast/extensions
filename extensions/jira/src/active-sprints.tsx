@@ -6,7 +6,7 @@ import { Project, getProjects } from "./api/projects";
 import StatusIssueList from "./components/StatusIssueList";
 import { getProjectAvatar } from "./helpers/avatars";
 import { sanitizeJqlIdentifier, withProjectFilter } from "./helpers/jql";
-import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import { withJiraCredentialsComponent } from "./helpers/withJiraCredentials";
 import useIssues from "./hooks/useIssues";
 
 export function ActiveSprints() {
@@ -70,4 +70,4 @@ export function ActiveSprints() {
   );
 }
 
-export default withJiraCredentials(ActiveSprints);
+export default withJiraCredentialsComponent(ActiveSprints);

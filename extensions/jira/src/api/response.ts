@@ -1,5 +1,3 @@
-import { type Response } from "node-fetch";
-
 import { getRateLimitErrorMessage } from "../helpers/errors.ts";
 
 const HTML_RESPONSE_ERROR_MESSAGE = "Jira returned an HTML page instead of JSON. Please reconnect Jira and try again.";

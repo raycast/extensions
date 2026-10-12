@@ -2,7 +2,7 @@ import { Clipboard, Detail, PopToRootType, closeMainWindow, getPreferenceValues,
 import { useEffect, useState } from "react";
 
 import IssueDetail from "./components/IssueDetail";
-import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import { withJiraCredentialsComponent } from "./helpers/withJiraCredentials";
 
 const issueKeyRegex = /^\w{2,}-\d+$/gm;
 function isValidIssueKey(input: string): boolean {
@@ -59,4 +59,4 @@ function OpenFromClipboard() {
 
   return <OpenIssue issueKey={issueKey} />;
 }
-export default withJiraCredentials(OpenFromClipboard);
+export default withJiraCredentialsComponent(OpenFromClipboard);

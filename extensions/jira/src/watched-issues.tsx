@@ -1,5 +1,5 @@
 import StatusIssueList from "./components/StatusIssueList";
-import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import { withJiraCredentialsComponent } from "./helpers/withJiraCredentials";
 import useIssues from "./hooks/useIssues";
 
 export function WatchedIssues() {
@@ -8,4 +8,4 @@ export function WatchedIssues() {
   return <StatusIssueList issues={issues} isLoading={isLoading} mutate={mutate} />;
 }
 
-export default withJiraCredentials(WatchedIssues);
+export default withJiraCredentialsComponent(WatchedIssues);

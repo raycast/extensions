@@ -281,6 +281,7 @@ async function resolveIssueTypeIconUri(issuetype?: IssueType) {
       try {
         return await getAuthenticatedUri(url, "image/jpeg");
       } catch {
+        iconUriCache.delete(url);
         return url;
       }
     })();

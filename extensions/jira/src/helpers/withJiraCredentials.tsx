@@ -5,20 +5,18 @@ import { withAccessToken } from "@raycast/utils";
 
 import { jira, jiraWithApiToken } from "../api/jiraCredentials";
 
-export function withJiraCredentials<T, R>(fn: (input: T) => Promise<R> | R) {
+export function withJiraCredentialsComponent<T extends Record<string, unknown> = Record<string, unknown>>(
+  Component: ComponentType<T>,
+) {
   const { token, email, siteUrl } = getPreferenceValues<Preferences>();
   const credentials = token && email && siteUrl ? jiraWithApiToken : jira;
 
-  const isReactComponent =
-    typeof fn === "function" &&
-    fn.name &&
-    fn.name[0] === fn.name[0].toUpperCase() &&
-    fn.name[0] !== fn.name[0].toLowerCase() &&
-    fn.constructor.name !== "AsyncFunction";
+  return withAccessToken<T>(credentials)(Component);
+}
 
-  if (isReactComponent) {
-    return withAccessToken<T>(credentials)(fn as unknown as ComponentType<T>);
-  }
+export function withJiraCredentials<T, R>(fn: (input: T) => Promise<R> | R) {
+  const { token, email, siteUrl } = getPreferenceValues<Preferences>();
+  const credentials = token && email && siteUrl ? jiraWithApiToken : jira;
 
   return withAccessToken<T>(credentials)(async (input: T) => {
     try {

@@ -10,7 +10,7 @@ import IssueListItem from "./components/IssueListItem";
 import StatusIssueList from "./components/StatusIssueList";
 import { getProjectAvatar } from "./helpers/avatars";
 import { withProjectFilter } from "./helpers/jql";
-import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import { withJiraCredentialsComponent } from "./helpers/withJiraCredentials";
 import useIssues from "./hooks/useIssues";
 
 const EMPTY_PROJECTS: Project[] = [];
@@ -328,4 +328,4 @@ export function OpenIssues() {
   );
 }
 
-export default withJiraCredentials(OpenIssues);
+export default withJiraCredentialsComponent(OpenIssues);

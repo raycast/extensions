@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Filter, getFilters } from "./api/filters";
 import StatusIssueList from "./components/StatusIssueList";
-import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import { withJiraCredentialsComponent } from "./helpers/withJiraCredentials";
 import useIssues from "./hooks/useIssues";
 
 export function MyFilters() {
@@ -53,4 +53,4 @@ export function MyFilters() {
   );
 }
 
-export default withJiraCredentials(MyFilters);
+export default withJiraCredentialsComponent(MyFilters);

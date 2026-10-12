@@ -1,11 +1,12 @@
 import { createWriteStream, existsSync } from "fs";
 import { homedir } from "os";
+import { Readable } from "stream";
+import { pipeline } from "stream/promises";
 
 import { Action, ActionPanel, Icon, List, showInFinder, showToast, Toast, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { filesize } from "filesize";
-import fetch from "node-fetch";
 
 import { Attachment } from "../api/issues";
 import { getJiraCredentials } from "../api/jiraCredentials";
@@ -57,23 +58,12 @@ export default function IssueAttachments({ attachments }: IssueAttachmentsProps)
         filePath = `${basePath}/${fileNameWithoutExtension} (${counter}).${fileExtension}`;
         counter++;
       } while (existsSync(filePath));
-    } else {
-      const fileStream = createWriteStream(filePath);
-      await response.body?.pipe(fileStream);
     }
 
     const fileStream = createWriteStream(filePath);
-    response.body?.pipe(fileStream);
+    await pipeline(Readable.fromWeb(response.body as import("stream/web").ReadableStream), fileStream);
 
-    return new Promise((resolve, reject) => {
-      fileStream.on("finish", () => {
-        return resolve(filePath);
-      });
-
-      fileStream.on("error", () => {
-        return reject();
-      });
-    });
+    return filePath;
   }
 
   async function downloadSingleFile(attachment: Attachment) {

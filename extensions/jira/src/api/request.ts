@@ -1,6 +1,4 @@
-import fetch, { type RequestInit } from "node-fetch";
-
-import { getJiraCredentials } from "../api/jiraCredentials";
+import { getJiraCredentials } from "./jiraCredentials.ts";
 
 import { parseJiraResponse } from "./response";
 

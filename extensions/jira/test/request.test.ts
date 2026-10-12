@@ -1,8 +1,6 @@
 import { rejects } from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { Response } from "node-fetch";
-
 import { parseJiraJsonResponse } from "../src/api/response.ts";
 
 describe("parseJiraJsonResponse", () => {

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { IssueListEmptyView } from "./components/IssueListEmptyView";
 import IssueListFallback from "./components/IssueListFallback";
 import IssueListItem from "./components/IssueListItem";
-import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import { withJiraCredentialsComponent } from "./helpers/withJiraCredentials";
 import useIssues from "./hooks/useIssues";
 
 export function RecentlyUpdatedIssues() {
@@ -38,4 +38,4 @@ export function RecentlyUpdatedIssues() {
   );
 }
 
-export default withJiraCredentials(RecentlyUpdatedIssues);
+export default withJiraCredentialsComponent(RecentlyUpdatedIssues);
