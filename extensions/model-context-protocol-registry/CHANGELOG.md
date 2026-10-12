@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Aggregate MCP Server] - 2026-10-12
+## [Add Aggregate MCP Server] - {PR_MERGE_DATE}
 
 - Add Aggregate to the official registry: every company's money in one ledger (cash, burn, runway, receivables, payroll, month-end close) from banks, cards, Stripe, QuickBooks, Xero and payroll. Read-only to banks and Stripe; it can't move money. Hosted remote Streamable HTTP server at https://app.aggregate.finance/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration.
 
