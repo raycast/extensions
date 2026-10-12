@@ -365,3 +365,15 @@ test("the PDF search word is a whole word on the page, not a piece of a longer o
   // Scripts written without spaces have no word edges to look for: there a piece of a run still counts.
   assert.equal(landmark("租约里的宠物条款说明", ["宠物条款"]), "宠物条款");
 });
+
+test("the VLC script sets the time only on the file it was asked to open", () => {
+  // If VLC hasn't started the file when the wait is over, whatever is playing is something else: setting its time
+  // would move the wrong recording, and still report success.
+  const afterTheWait = VLC_SCRIPT.slice(VLC_SCRIPT.lastIndexOf("end repeat"));
+  const checks = afterTheWait.indexOf("path of current item is thePath");
+  const fails = afterTheWait.indexOf("error ");
+  const sets = afterTheWait.indexOf("set current time to");
+  assert.ok(checks > 0, "after the wait, it checks which file is playing");
+  assert.ok(fails > checks, "it fails when that isn't the file");
+  assert.ok(sets > fails, "and sets the time only after that");
+});

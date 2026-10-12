@@ -37,6 +37,8 @@ export interface SearchParams {
 export interface ServiceOptions {
   spawner?: Spawner;
   onEvent?: (event: ServiceEvent) => void;
+  /** The helper ended by itself and another was started in its place; its `ready` event follows. */
+  onRestart?: () => void;
   /** The helper ended by itself for the second time and won't be started again. `log`: the end of its stderr. */
   onFailed?: (log: string) => void;
   killAfterMs?: number;
@@ -221,6 +223,7 @@ export class DigUpService {
     if (this.restarts < 1) {
       this.restarts += 1;
       this.start();
+      this.options.onRestart?.();
       return;
     }
     this.failed = true;

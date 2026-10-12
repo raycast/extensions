@@ -51,7 +51,7 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "lint:fix": "ray lint --fix",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "ray build -e dist && tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "smoke": "tsx scripts/smoke.ts",
     "publish": "npx @raycast/api@latest publish"

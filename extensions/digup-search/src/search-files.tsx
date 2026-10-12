@@ -120,16 +120,23 @@ function Search(props: {
   const session = useRef<SearchSession | null>(null);
   const editor = useMemo(() => chooseEditor(ready.settings.codeEditor, apps), [ready, apps]);
   // The app for videos and recordings, from the extension's settings: QuickTime Player unless it was changed.
-  const { player } = getPreferenceValues<{ player?: Application }>();
+  const { player } = getPreferenceValues<Preferences>();
 
   // The helper lives as long as the command is open.
   useEffect(() => {
-    let readyEvents = 0;
+    let replaced = false;
     const digup = new DigUpService(ready.launch, {
       onEvent: (event) => {
         if (event.event === "encoder") setEncoder(event.state);
-        // Ready a second time: it was started again, and what's typed is searched again.
-        if (event.event === "ready" && ++readyEvents > 1) setRestarts((value) => value + 1);
+        // The helper that took over is ready: what's typed is searched again, and the selected row gets its
+        // preview again. (Also when the first helper ended before it ever got ready.)
+        if (event.event === "ready" && replaced) {
+          replaced = false;
+          setRestarts((value) => value + 1);
+        }
+      },
+      onRestart: () => {
+        replaced = true;
       },
       onFailed,
     });
@@ -200,7 +207,7 @@ function Search(props: {
       current = false;
       clearTimeout(resting);
     };
-  }, [selectedKey]);
+  }, [selectedKey, restarts]);
 
   // Which app opens the selected recording decides whether the action says "Open at 0:06".
   useEffect(() => {

@@ -226,3 +226,14 @@ test("when the helper can't be started at all, the reason is kept for the error 
   children[1].fail(new Error("spawn /Applications/DigUp.app/Contents/Helpers/digup EACCES"));
   assert.match(failure ?? "", /EACCES/);
 });
+
+test("the extension is told when a replacement helper is started, even one for a helper that never got ready", () => {
+  let restarts = 0;
+  const { service, children } = started({ onRestart: () => (restarts += 1) });
+  children[0].exit(1); // before it ever said it was ready
+  assert.equal(children.length, 2);
+  assert.equal(restarts, 1);
+  service.stop();
+  children[1].exit(0); // stopped on purpose: not a restart
+  assert.equal(restarts, 1);
+});

@@ -73,7 +73,7 @@ export function quickTimeArguments(path: string, seconds: number): string[] {
 
 /**
  * Opens a recording in VLC at a moment, in whole seconds. VLC takes a time only for what it is playing, so the
- * script waits (three seconds at most; it is only run for a VLC that is already open) until VLC plays this file: set at once, the time
+ * script waits (five seconds at most) until VLC plays this file, and fails if it still doesn't: set at once, the time
  * would land on whatever was playing before, or on nothing.
  *
  * It doesn't wait for VLC's answer to the open: VLC 3 takes five seconds to give it, playing from the start
@@ -88,12 +88,13 @@ export const VLC_SCRIPT = `on run argv
         ignoring application responses
             open theFile
         end ignoring
-        repeat 60 times
+        repeat 100 times
             try
                 if playing and (path of current item is thePath) then exit repeat
             end try
             delay 0.05
         end repeat
+        if not (playing and (path of current item is thePath)) then error "VLC did not start " & thePath
         set current time to theSeconds
         return current time
     end tell
