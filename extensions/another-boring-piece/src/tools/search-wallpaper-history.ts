@@ -19,7 +19,7 @@ type HistoryItem = {
 
 /** Returns unique artworks with only matching events, ordered by latest matching action. Omit filters to return all history. */
 export default async function tool(input: Input): Promise<HistoryItem[]> {
-  return searchWallpaperHistory(input).map((entry) => ({
+  return (await searchWallpaperHistory(input)).map((entry) => ({
     wallpaper: entry.wallpaper,
     events: entry.events.map((event) => ({
       eventType: event.eventType,

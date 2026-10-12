@@ -66,9 +66,9 @@ function getEventFiles() {
   return fs.readdirSync(EVENTS_DIR).filter((file) => file.endsWith(".json"));
 }
 
-function readHistoryEntry(filePath: string) {
+function parseHistoryEntry(contents: string) {
   try {
-    const parsed = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    const parsed = JSON.parse(contents);
     if (!isHistoryEntry(parsed)) return undefined;
     return {
       eventId: parsed.eventId,
@@ -77,6 +77,22 @@ function readHistoryEntry(filePath: string) {
       wallpaper: parsed.wallpaper,
       downloadPath: parsed.downloadPath,
     };
+  } catch {
+    return undefined;
+  }
+}
+
+function readHistoryEntry(filePath: string) {
+  try {
+    return parseHistoryEntry(fs.readFileSync(filePath, "utf8"));
+  } catch {
+    return undefined;
+  }
+}
+
+async function readHistoryEntryAsync(filePath: string) {
+  try {
+    return parseHistoryEntry(await fs.promises.readFile(filePath, "utf8"));
   } catch {
     return undefined;
   }
@@ -122,24 +138,38 @@ export function recordWallpaperHistory(
   return entry;
 }
 
-export function readWallpaperHistory(
+export async function readWallpaperHistory(
   options: { limit?: number } = {},
-): WallpaperHistoryItem[] {
+): Promise<WallpaperHistoryItem[]> {
   const entries = new Map<string, WallpaperHistoryItem>();
-  const files = getEventFiles().sort((a, b) => b.localeCompare(a));
+  let files: string[];
+  try {
+    files = await fs.promises.readdir(EVENTS_DIR);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+    throw error;
+  }
+  files = files
+    .filter((file) => file.endsWith(".json"))
+    .sort((a, b) => b.localeCompare(a));
 
-  for (const file of files) {
-    const entry = readHistoryEntry(path.join(EVENTS_DIR, file));
-    if (!entry) continue;
-
-    const item = entries.get(entry.wallpaper.id);
-    if (item) {
-      item.events.push(entry);
-    } else if (!options.limit || entries.size < options.limit) {
-      entries.set(entry.wallpaper.id, { ...entry, events: [entry] });
+  // Bound concurrent reads while retaining all events for the visible artworks.
+  for (let offset = 0; offset < files.length; offset += 32) {
+    const batch = await Promise.all(
+      files
+        .slice(offset, offset + 32)
+        .map((file) => readHistoryEntryAsync(path.join(EVENTS_DIR, file))),
+    );
+    for (const entry of batch) {
+      if (!entry) continue;
+      const item = entries.get(entry.wallpaper.id);
+      if (item) {
+        item.events.push(entry);
+      } else if (!options.limit || entries.size < options.limit) {
+        entries.set(entry.wallpaper.id, { ...entry, events: [entry] });
+      }
     }
   }
-
   return [...entries.values()];
 }
 
@@ -180,9 +210,9 @@ function parseHistoryDate(value: string, nextDay = false) {
   return date.getTime();
 }
 
-export function searchWallpaperHistory(
+export async function searchWallpaperHistory(
   options: WallpaperHistorySearch = {},
-): WallpaperHistoryItem[] {
+): Promise<WallpaperHistoryItem[]> {
   const from = options.fromDate
     ? parseHistoryDate(options.fromDate)
     : undefined;
@@ -195,7 +225,7 @@ export function searchWallpaperHistory(
   const words =
     options.query?.trim().toLowerCase().split(/\s+/).filter(Boolean) || [];
   const results: WallpaperHistoryItem[] = [];
-  for (const item of readWallpaperHistory()) {
+  for (const item of await readWallpaperHistory()) {
     const wallpaper = item.wallpaper;
     const text = [
       wallpaper.id,
@@ -244,21 +274,6 @@ export function clearWallpaperHistory() {
   }
 
   return files.length;
-}
-
-export async function getExistingHistoryDownloadPath(
-  item: WallpaperHistoryItem,
-) {
-  for (const event of item.events) {
-    if (!event.downloadPath) continue;
-    try {
-      await fs.promises.access(event.downloadPath);
-      return event.downloadPath;
-    } catch {
-      // Try an older download if this file was removed.
-    }
-  }
-  return undefined;
 }
 
 export function recordWallpaperHistoryBestEffort(input: WallpaperHistoryInput) {

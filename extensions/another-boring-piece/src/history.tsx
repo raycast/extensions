@@ -28,8 +28,7 @@ const HISTORY_LIMIT = 500;
 type HistoryListEntry = WallpaperHistoryItem;
 
 async function loadHistory() {
-  await new Promise<void>((resolve) => setTimeout(resolve, 0));
-  const entries = readWallpaperHistory({ limit: HISTORY_LIMIT });
+  const entries = await readWallpaperHistory({ limit: HISTORY_LIMIT });
   return Promise.all(
     entries.map(async (entry) => ({
       ...entry,

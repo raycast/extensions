@@ -7,7 +7,7 @@ type Input = {
 };
 
 export default async function tool(input: Input) {
-  const entry = readWallpaperHistory().find(
+  const entry = (await readWallpaperHistory()).find(
     (item) => item.wallpaper.id === input.wallpaperId,
   );
   if (!entry)

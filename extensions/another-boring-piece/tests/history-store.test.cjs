@@ -6,7 +6,7 @@ const { test } = require("node:test");
 const vm = require("node:vm");
 const ts = require("typescript");
 
-function createStore(t) {
+function createStore(t, asyncOnly = false) {
   const supportPath = fs.mkdtempSync(path.join(os.tmpdir(), "wallpaper-history-"));
   t.after(() => fs.rmSync(supportPath, { recursive: true, force: true }));
   const source = fs.readFileSync(path.join(__dirname, "../src/history-store.ts"), "utf8");
@@ -16,7 +16,15 @@ function createStore(t) {
   const exports = {};
   vm.runInNewContext(outputText, {
     exports,
-    require: (id) => id === "@raycast/api" ? { environment: { supportPath } } : require(id),
+    require: (id) => {
+      if (id === "@raycast/api") return { environment: { supportPath } };
+      if (id === "fs" && asyncOnly) return {
+        ...fs,
+        readFileSync: () => { throw new Error("Synchronous history read"); },
+        readdirSync: () => { throw new Error("Synchronous history listing"); },
+      };
+      return require(id);
+    },
     console,
   });
   const eventsDir = path.join(supportPath, "history/events");
@@ -35,13 +43,13 @@ function createStore(t) {
   return { store: exports, addEvent };
 }
 
-test("history returns each wallpaper once, using its latest event before applying the limit", (t) => {
+test("history returns each wallpaper once, using its latest event before applying the limit", async (t) => {
   const { store, addEvent } = createStore(t);
   addEvent("a-old", "a", "2026-01-01T00:00:00.000Z", "downloaded");
   addEvent("b", "b", "2026-01-02T00:00:00.000Z");
   addEvent("a-middle", "a", "2026-01-03T00:00:00.000Z");
   addEvent("a-new", "a", "2026-01-04T00:00:00.000Z", "auto-switched");
-  const entries = store.readWallpaperHistory({ limit: 2 });
+  const entries = await store.readWallpaperHistory({ limit: 2 });
   assert.equal(entries.length, 2);
   assert.equal(entries[0].eventId, "a-new");
   assert.equal(entries[0].eventType, "auto-switched");
@@ -51,37 +59,37 @@ test("history returns each wallpaper once, using its latest event before applyin
   assert.equal(entries[0].events[1].eventId, "a-middle");
   assert.equal(entries[0].events[2].eventId, "a-old");
   assert.equal(entries[1].events.length, 1);
-  const limited = store.readWallpaperHistory({ limit: 1 });
+  const limited = await store.readWallpaperHistory({ limit: 1 });
   assert.equal(limited.length, 1);
   assert.equal(limited[0].events.length, 3);
 });
 
-test("deleting a wallpaper removes its older events without removing other wallpapers", (t) => {
+test("deleting a wallpaper removes its older events without removing other wallpapers", async (t) => {
   const { store, addEvent } = createStore(t);
   addEvent("a-old", "a", "2026-01-01T00:00:00.000Z");
   addEvent("b", "b", "2026-01-02T00:00:00.000Z");
   addEvent("a-new", "a", "2026-01-03T00:00:00.000Z");
   assert.equal(store.deleteWallpaperHistoryEntry("a-new"), true);
-  const remaining = store.readWallpaperHistory();
+  const remaining = await store.readWallpaperHistory();
   assert.equal(remaining.length, 1);
   assert.equal(remaining[0].wallpaper.id, "b");
   assert.equal(store.deleteWallpaperHistoryEntry("a-new"), false);
 });
 
-test("search matches all words across artwork fields without case sensitivity", (t) => {
+test("search matches all words across artwork fields without case sensitivity", async (t) => {
   const { store, addEvent } = createStore(t);
   addEvent("a", "a", "2026-01-01T10:00:00.000Z");
-  assert.equal(store.searchWallpaperHistory({ query: "  ARTwork artist 1900 " }).length, 1);
-  assert.equal(store.searchWallpaperHistory({ query: "Artwork absent" }).length, 0);
-  assert.equal(store.searchWallpaperHistory({ query: "   " }).length, 1);
+  assert.equal((await store.searchWallpaperHistory({ query: "  ARTwork artist 1900 " })).length, 1);
+  assert.equal((await store.searchWallpaperHistory({ query: "Artwork absent" })).length, 0);
+  assert.equal((await store.searchWallpaperHistory({ query: "   " })).length, 1);
 });
 
-test("search uses older matching actions and orders results by those actions", (t) => {
+test("search uses older matching actions and orders results by those actions", async (t) => {
   const { store, addEvent } = createStore(t);
   addEvent("a-old", "a", "2026-01-01T10:00:00.000Z", "downloaded");
   addEvent("b", "b", "2026-01-02T10:00:00.000Z", "downloaded");
   addEvent("a-new", "a", "2026-01-03T10:00:00.000Z", "selected");
-  const results = store.searchWallpaperHistory({
+  const results = await store.searchWallpaperHistory({
     fromDate: "2026-01-01", toDate: "2026-01-02", eventType: "downloaded",
   });
   assert.equal(results.length, 2);
@@ -90,23 +98,23 @@ test("search uses older matching actions and orders results by those actions", (
   assert.equal(results[1].events[0].eventId, "a-old");
 });
 
-test("search includes the entire local end date and excludes the next day", (t) => {
+test("search includes the entire local end date and excludes the next day", async (t) => {
   const { store, addEvent } = createStore(t);
   addEvent("start", "a", new Date(2026, 0, 1, 0, 0, 0).toISOString());
   addEvent("end", "a", new Date(2026, 0, 1, 23, 59, 59).toISOString());
   addEvent("next", "a", new Date(2026, 0, 2, 0, 0, 0).toISOString());
-  const results = store.searchWallpaperHistory({ fromDate: "2026-01-01", toDate: "2026-01-01" });
+  const results = await store.searchWallpaperHistory({ fromDate: "2026-01-01", toDate: "2026-01-01" });
   assert.equal(results.length, 1);
   assert.equal(results[0].events.length, 2);
   assert.equal(results[0].events[0].eventId, "end");
   assert.equal(results[0].events[1].eventId, "start");
 });
 
-test("search rejects invalid dates and reversed ranges", (t) => {
+test("search rejects invalid dates and reversed ranges", async (t) => {
   const { store } = createStore(t);
-  assert.throws(() => store.searchWallpaperHistory({ fromDate: "yesterday" }), /YYYY-MM-DD/);
-  assert.throws(() => store.searchWallpaperHistory({ toDate: "2026-02-30" }), /Invalid history date/);
-  assert.throws(() => store.searchWallpaperHistory({ fromDate: "2026-01-03", toDate: "2026-01-01" }), /start date/);
+  await assert.rejects(store.searchWallpaperHistory({ fromDate: "yesterday" }), /YYYY-MM-DD/);
+  await assert.rejects(store.searchWallpaperHistory({ toDate: "2026-02-30" }), /Invalid history date/);
+  await assert.rejects(store.searchWallpaperHistory({ fromDate: "2026-01-03", toDate: "2026-01-01" }), /start date/);
 });
 
 test("setting from history uses stored artwork and rejects unknown IDs", async (t) => {
@@ -147,3 +155,17 @@ test("Finder uses an older existing download after later actions or missing down
   assert.equal(await store.getExistingHistoryDownloadPath({ ...selected, events: [selected, missing] }), undefined);
 });
 
+
+test("async loading retains complete timelines across read batches without synchronous reads", async (t) => {
+  const { store, addEvent } = createStore(t, true);
+  for (let day = 1; day <= 40; day++) {
+    addEvent(`event-${day}`, "a", new Date(2026, 0, day).toISOString());
+  }
+  addEvent("latest", "b", new Date(2026, 2, 1).toISOString());
+  const entries = await store.readWallpaperHistory({ limit: 2 });
+  assert.equal(entries.length, 2);
+  assert.equal(entries[0].wallpaper.id, "b");
+  assert.equal(entries[1].events.length, 40);
+  assert.equal(entries[1].events[0].eventId, "event-40");
+  assert.equal(entries[1].events[39].eventId, "event-1");
+});

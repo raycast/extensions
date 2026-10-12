@@ -10,7 +10,7 @@ type HistoryItem = {
 };
 
 export default async function tool(): Promise<HistoryItem[]> {
-  return readWallpaperHistory().map((entry) => ({
+  return (await readWallpaperHistory()).map((entry) => ({
     wallpaper: entry.wallpaper,
     events: entry.events.map((event) => ({
       eventType: event.eventType,
