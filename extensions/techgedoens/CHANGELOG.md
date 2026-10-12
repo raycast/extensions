@@ -1,11 +1,14 @@
 # Changelog
 
+## [Live Menu Bar Preferences] - {PR_MERGE_DATE}
+
+- Keep all menu bar display options in the dedicated menu bar command settings and apply changes while it is running.
+
 ## [Search and Menu Bar Improvements] - 2026-10-11
 
 - Display the selected text in the Techgedöns search bar so it remains visible and editable.
 - Choose whether the menu bar shows 3, 5, or 10 articles per section.
 - Choose a very short, short, medium, long, or full menu bar article title.
-- Keep all menu bar display options in the dedicated menu bar command settings and apply changes while it is running.
 - Optionally show only unread articles and choose whether the unread counter is always shown, hidden at zero, or always hidden.
 - Show favorite articles in a dedicated menu bar section.
 - Open the menu bar command settings directly from its menu.
