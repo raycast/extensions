@@ -6,13 +6,14 @@ View and manage your Proton Mail inbox directly in Raycast via Proton Mail Bridg
 
 - **Email List View** - Browse emails with subject, sender, date, and read/unread status
 - **Email Detail View** - Read full email content in a detail pane
-- **Folder Navigation** - Switch between Inbox, Sent, Drafts, Archive, Trash, and custom folders/labels
+- **Mailboxes** - Browse Inbox, Sent, Drafts, Archive, Trash, your folders (with their subfolders) and labels, with email and unread counts
 - **Filtering** - Filter emails by All, Unread, Read, or Has Attachment
 - **Compose Email** - Write new emails or Reply, Reply All, and Forward
-- **Pagination** - Load more emails as needed with configurable page size
+- **Pagination** - Older emails load as you scroll, with a configurable page size
+- **Bridge Status** - Says when Proton Mail Bridge isn't running or rejects the credentials, and loads your emails as soon as it's ready
 - **Attachments** - Download individual attachments or all at once
 - **Quicklinks** - Save current folder/filter view as a Raycast quicklink
-- **Open in Proton Mail** - Jump to the email in Proton Mail web interface (uses search as a workaround since direct email links aren't available)
+- **Open in Proton Mail** - Open the email in the Proton Mail web app
 - **Expanded Email View** - Read emails in full screen, with the subject, sender, recipients and date above the email
 - **Open Original in Browser** - See the email's full HTML in your browser when the layout matters
 - **Remote Images** - Off by default so senders can't track when you open an email; turn on Browse Email's "Remote Images" preference to show them
@@ -44,7 +45,7 @@ View and manage your Proton Mail inbox directly in Raycast via Proton Mail Bridg
    - **SMTP Port**: Usually `1025`
    - **Username**: Your Proton Mail email address
    - **Password**: The Bridge-generated password (found in Bridge app, NOT your Proton account password)
-   - **Emails to Load**: Number of emails per page (25, 50, 100, or 200)
+4. Optionally, set **Emails to Load** (25, 50, 100, or 200 per page) in the Browse Email command's preferences
 
 ## How to Find Your Bridge Settings
 
@@ -57,16 +58,15 @@ View and manage your Proton Mail inbox directly in Raycast via Proton Mail Bridg
 
 ## Filtering
 
-The extension provides a single dropdown that combines:
+The command opens on your inbox. Press Esc (or ⌘[ "Back") to go back to the Mailboxes screen, which lists your mailboxes, folders and labels with their email and unread counts. Opening a folder shows its subfolders above its emails. To start on the Mailboxes screen instead, set Browse Email's "Open On" preference to Mailboxes.
 
-- **Folder selection** (Inbox, Sent, Drafts, etc.)
-- **Status filters** (All, Unread, Read, Has Attachment)
+The list uses the full width. Press ⌘D to show the selected email next to it, or turn on Browse Email's "Email Preview" preference to show it by default.
 
-Select a folder first, then use the filter section to narrow down emails.
+The dropdown next to the search bar filters the current folder: All, Unread, Read or Has Attachment.
 
 ## Pagination
 
-The extension loads emails in pages based on your "Emails to Load" preference. Press ⌘L or select "Load More Emails" from the action menu to fetch older emails.
+The extension loads emails in pages based on Browse Email's "Emails to Load" preference. Scroll to the bottom of the list to load older emails automatically, or press ⌘L ("Load More Emails" in the action menu).
 
 ## Attachments
 
@@ -105,14 +105,16 @@ Toggle it off with the same shortcut when done.
 | Forward | ⌘F |
 | Mark Read/Unread | ⇧⌘U |
 | Archive | ⌘E |
-| Delete | ⌘⌫ |
+| Move to Trash (Delete Permanently in Trash and Drafts) | ⌘⌫ |
 | Copy Subject | ⌘C |
 | Copy Sender | ⇧⌘C |
 | Save as Quicklink | ⇧⌘S |
-| Download Attachments | ⌘D |
+| Download Attachments | ⇧⌘A |
+| Show/Hide Preview | ⌘D |
 | Load More Emails | ⌘L |
 | Expand Email | ⌘↩ |
 | Toggle Demo Mode | ⇧⌘D |
 | Copy as Markdown | ⇧⌘M |
 | Compose New Email | ⌘N |
 | Open Original in Browser | ⇧⌘O |
+| Back (to the parent folder or Mailboxes) | ⌘[ |
