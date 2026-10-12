@@ -1,6 +1,6 @@
 # Aktar Changelog
 
-## [Short Links] - {PR_MERGE_DATE}
+## [Short Links] - 2026-10-12
 
 - Uploads get the short link from the link shortener set up for their destination in Aktar (Shlink, YOURLS, Kutt, Dub, Short.io, or your own HTTP request), and the extension copies and pastes it like Aktar does. Show QR Code uses it too
 - Search Uploads shows an upload's short link with its shortener, clicks, and last click. Copy Short Link (⌘⇧L, Ctrl+Shift+L on Windows) and Copy Original Link copy either one, and Create Short Link makes one for an upload that has none
