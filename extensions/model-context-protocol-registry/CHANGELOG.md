@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Keeploop MCP Server] - 2026-10-12
+
+- Add Keeploop to the official registry: your Mac's Apple Mail and Calendar for Raycast AI. Search mail, read threads, see who is waiting on a reply and check your calendar; writes stay off until you allow them on your Mac. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs the Keeploop Mac app with Keeploop Pro or its free trial for remote use; local use is free. Direct HTTP connection in Raycast at https://mcp.keeploop.app/mcp.
+
 ## [Add Aggregate MCP Server] - 2026-10-12
 
 - Add Aggregate to the official registry: every company's money in one ledger (cash, burn, runway, receivables, payroll, month-end close) from banks, cards, Stripe, QuickBooks, Xero and payroll. Read-only to banks and Stripe; it can't move money. Hosted remote Streamable HTTP server at https://app.aggregate.finance/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration.

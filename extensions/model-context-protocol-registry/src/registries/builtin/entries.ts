@@ -594,6 +594,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "keeploop",
+    title: "Keeploop",
+    description:
+      "Your Mac's Apple Mail and Calendar for Raycast AI. Search mail, read threads, see who is waiting on a reply and check your calendar; writes stay off until you allow them on your Mac. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs the Keeploop Mac app with Keeploop Pro or its free trial for remote use; local use is free.",
+    icon: "https://keeploop.app/assets/app-icon.svg",
+    homepage: "https://keeploop.app",
+    remoteUrl: "https://mcp.keeploop.app/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.keeploop.app/mcp"],
+    },
+  },
+  {
     name: "filesystem",
     title: "Filesystem",
     description:
