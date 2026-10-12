@@ -1,0 +1,31 @@
+# Add (or modify) tools that should be pinned in this project here.
+[tools]
+node = "22"
+
+[tasks.install]
+description = "Install dependencies"
+run = "npm install"
+
+[tasks.dev]
+description = "Run the extension in Raycast with hot reload"
+run = "npm run dev"
+
+[tasks.build]
+description = "Build the extension"
+run = "npm run build"
+
+[tasks.lint]
+description = "Lint and check formatting"
+run = "npm run lint"
+
+[tasks.fix]
+description = "Auto-fix lint and formatting"
+run = "npm run fix-lint"
+
+[tasks.test]
+description = "Run unit tests"
+run = "npm run test"
+
+[tasks.check]
+description = "Lint, test, and build"
+depends = ["lint", "test", "build"]
