@@ -17,7 +17,7 @@ function limitConversationLength(chats: Chat[]) {
   const newChats: Chat[] = [];
   let tokens = 0;
 
-  for (const chat of chats) {
+  for (const chat of [...chats].reverse()) {
     const questionTokens = countOpenAITokens(chat.question);
     const answerTokens = countOpenAITokens(chat.answer);
 
@@ -27,7 +27,7 @@ function limitConversationLength(chats: Chat[]) {
       break;
     }
 
-    newChats.push(chat);
+    newChats.unshift(chat);
   }
 
   return newChats;

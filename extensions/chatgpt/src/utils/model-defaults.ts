@@ -6,7 +6,7 @@ export const DEFAULT_MODEL: Model = {
   created_at: "",
   name: "Default",
   prompt: "You are a helpful assistant.",
-  option: "gpt-5-nano",
+  option: "gpt-6-luna",
   temperature: "1",
   enableReasoningEffortChange: false,
   reasoningEffort: "medium",
@@ -27,7 +27,7 @@ export const DEFAULT_COMMANDS: Record<string, Command> = {
       "You are an assistant that fixes spelling, grammar and punctuation. Don't insert any " +
       "extra information; only provide the corrected text. After receiving corrections, the user can request " +
       "clarifications, and you need to answer them in detail.",
-    model: "gpt-5-nano",
+    model: "gpt-6-luna",
     temperature: "0.7",
     contentSource: "selectedText",
     isDisplayInput: true,
@@ -50,7 +50,7 @@ Strictly follow these rules:
 - ALWAYS maintain the existing tone of voice and style, e.g. formal, casual, polite, etc.
 - NEVER surround the improved text with quotes or any additional formatting
 - If the text is already well-written and requires no improvement, don't change the given text`,
-    model: "gpt-5-nano",
+    model: "gpt-6-luna",
     temperature: "0.7",
     contentSource: "selectedText",
     isDisplayInput: true,
@@ -61,7 +61,7 @@ Strictly follow these rules:
     configurationMode: "independent",
     prompt:
       "Read and summarize the main ideas and key points from this text. Summarize the information concisely and clearly.",
-    model: "gpt-5-nano",
+    model: "gpt-6-luna",
     temperature: "1",
     contentSource: "browserTab",
     isDisplayInput: false,

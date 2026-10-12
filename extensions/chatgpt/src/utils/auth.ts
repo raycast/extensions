@@ -1,0 +1,212 @@
+import { getPreferenceValues, LocalStorage, open } from "@raycast/api";
+import { CodexAppServerClient, withCodexAppServer } from "./codex-app-server";
+import { AuthProvider, ConnectionMode, selectAuthProvider } from "./auth-choice";
+
+export type { AuthProvider, ConnectionMode } from "./auth-choice";
+
+export function getConnectionMode(preferences?: Preferences): ConnectionMode {
+  const mode = (preferences ?? getPreferenceValues<Preferences>()).connectionMode;
+  return mode === "chatgpt" ? "chatgpt" : "apiKey";
+}
+
+export interface CodexAuthSession {
+  email: string;
+  planType: string | null;
+  updatedAt: string;
+}
+
+export interface AuthStatus {
+  provider: AuthProvider;
+  hasApiKey: boolean;
+  hasChatGPTSession: boolean;
+  apiKey: string;
+  session: CodexAuthSession | null;
+}
+
+interface ChatGPTAccount {
+  type: "chatgpt";
+  email: string;
+  planType?: string | null;
+}
+
+interface AccountReadResponse {
+  account: { type?: string; email?: string; planType?: string | null } | null;
+  requiresOpenaiAuth: boolean;
+}
+
+interface LoginStartResponse {
+  type: "chatgpt" | string;
+  loginId?: string;
+  authUrl?: string;
+}
+
+interface LoginCompletedNotification {
+  loginId: string | null;
+  success: boolean;
+  error: string | null;
+}
+
+const AUTH_STATUS_CACHE_MS = 15 * 1000;
+export const CHATGPT_SESSION_MARKER = "chatgpt-session-present";
+
+let cachedChatGPTAccount: {
+  account: ChatGPTAccount | null;
+  expiresAt: number;
+} | null = null;
+let resolveAuthStatusPromise: Promise<AuthStatus> | null = null;
+
+export function getConfiguredApiKey(preferences?: Preferences): string {
+  const config = preferences ?? getPreferenceValues<Preferences>();
+  return (config.apiKey ?? "").trim();
+}
+
+export function getInitialAuthStatus(preferences?: Preferences): AuthStatus {
+  const config = preferences ?? getPreferenceValues<Preferences>();
+  const apiKey = getConfiguredApiKey(config);
+  const hasApiKey = apiKey.length > 0;
+
+  return {
+    provider:
+      getConnectionMode(config) === "chatgpt"
+        ? "none"
+        : selectAuthProvider(getConnectionMode(config), hasApiKey, false),
+    hasApiKey,
+    hasChatGPTSession: false,
+    apiKey,
+    session: null,
+  };
+}
+
+export async function resolveAuthStatus(preferences?: Preferences): Promise<AuthStatus> {
+  if (resolveAuthStatusPromise) {
+    return resolveAuthStatusPromise;
+  }
+
+  resolveAuthStatusPromise = (async () => {
+    const config = preferences ?? getPreferenceValues<Preferences>();
+    const initial = getInitialAuthStatus(config);
+    // An API key remains usable if the Codex runtime is temporarily unavailable.
+    const account =
+      initial.hasApiKey && getConnectionMode(config) === "apiKey"
+        ? null
+        : initial.hasApiKey
+          ? await readChatGPTAccountSafe().catch(() => null)
+          : await readChatGPTAccountSafe();
+    const hasChatGPTSession = !!account;
+    if (account) await LocalStorage.setItem(CHATGPT_SESSION_MARKER, true);
+
+    return {
+      provider: selectAuthProvider(getConnectionMode(config), initial.hasApiKey, hasChatGPTSession),
+      hasApiKey: initial.hasApiKey,
+      hasChatGPTSession,
+      apiKey: initial.apiKey,
+      session: account
+        ? {
+            email: account.email,
+            planType: account.planType ?? null,
+            updatedAt: new Date().toISOString(),
+          }
+        : null,
+    };
+  })();
+
+  try {
+    return await resolveAuthStatusPromise;
+  } finally {
+    resolveAuthStatusPromise = null;
+  }
+}
+
+export async function hasChatGPTAccount(): Promise<boolean> {
+  return (await readChatGPTAccountSafe()) !== null;
+}
+
+export async function signInWithCodexAuth(): Promise<CodexAuthSession> {
+  return withCodexAppServer(async (client) => {
+    const response = await client.request<LoginStartResponse>("account/login/start", { type: "chatgpt" });
+    if (response.type !== "chatgpt" || !response.loginId || !response.authUrl) {
+      throw new Error("Codex app-server did not return a ChatGPT login URL.");
+    }
+
+    const loginAbort = new AbortController();
+    const loginSignal = AbortSignal.any([loginAbort.signal, AbortSignal.timeout(5 * 60 * 1000)]);
+    const completion = client.waitForNotification<LoginCompletedNotification>(
+      "account/login/completed",
+      (params) => params.loginId === response.loginId,
+      loginSignal,
+    );
+    void completion.catch(() => undefined);
+    try {
+      await open(response.authUrl);
+    } catch (error) {
+      loginAbort.abort();
+      await completion.catch(() => undefined);
+      throw error;
+    }
+    const completed = await completion;
+
+    if (!completed.success) {
+      throw new Error(completed.error?.trim() || "ChatGPT sign-in did not complete.");
+    }
+
+    const account = await readChatGPTAccount(client);
+    if (!account) {
+      throw new Error("ChatGPT sign-in completed, but no active ChatGPT account was returned by Codex app-server.");
+    }
+
+    primeCachedChatGPTAccount(account);
+    await LocalStorage.setItem(CHATGPT_SESSION_MARKER, true);
+
+    return {
+      email: account.email,
+      planType: account.planType ?? null,
+      updatedAt: new Date().toISOString(),
+    };
+  });
+}
+
+export async function clearCodexAuthSession(): Promise<void> {
+  try {
+    await withCodexAppServer(async (client) => {
+      await client.request("account/logout", {});
+    });
+  } finally {
+    clearCachedChatGPTAccount();
+    await LocalStorage.removeItem("chatgpt-auth-status-cache");
+    await LocalStorage.removeItem(CHATGPT_SESSION_MARKER);
+  }
+}
+
+async function readChatGPTAccountSafe(): Promise<ChatGPTAccount | null> {
+  if (cachedChatGPTAccount && cachedChatGPTAccount.expiresAt > Date.now()) {
+    return cachedChatGPTAccount.account;
+  }
+
+  const account = await withCodexAppServer((client) => readChatGPTAccount(client));
+  primeCachedChatGPTAccount(account);
+  return account;
+}
+
+async function readChatGPTAccount(client: CodexAppServerClient): Promise<ChatGPTAccount | null> {
+  const response = await client.request<AccountReadResponse>("account/read", { refreshToken: false });
+  if (!response.account || response.account.type !== "chatgpt" || !response.account.email?.trim()) {
+    return null;
+  }
+
+  return {
+    type: "chatgpt",
+    email: response.account.email.trim(),
+    planType: response.account.planType ?? null,
+  };
+}
+
+function primeCachedChatGPTAccount(account: ChatGPTAccount | null): void {
+  cachedChatGPTAccount = {
+    account,
+    expiresAt: Date.now() + AUTH_STATUS_CACHE_MS,
+  };
+}
+
+function clearCachedChatGPTAccount(): void {
+  cachedChatGPTAccount = null;
+}

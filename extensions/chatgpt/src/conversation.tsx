@@ -1,3 +1,4 @@
+import { AuthGate } from "./views/auth-required";
 import { ActionPanel, Action, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { DestructiveAction, PinAction, PrimaryAction } from "./actions";
@@ -10,6 +11,14 @@ import { ExportData, ImportData } from "./utils/import-export";
 import { ImportForm } from "./views/import-form";
 
 export default function Conversation() {
+  return (
+    <AuthGate>
+      <ConversationContent />
+    </AuthGate>
+  );
+}
+
+function ConversationContent() {
   const conversations = useConversations();
   const { push } = useNavigation();
 

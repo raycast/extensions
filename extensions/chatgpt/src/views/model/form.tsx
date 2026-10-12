@@ -12,7 +12,7 @@ export const ModelForm = (props: { model?: Model; name?: string; onSaved?: (mode
   const { model } = props;
   const models = useModel();
   const { pop } = useNavigation();
-  const reasoningEffortOptions: ReasoningEffort[] = ["none", "low", "medium", "high"];
+  const reasoningEffortOptions: ReasoningEffort[] = ["none", "low", "medium", "high", "xhigh", "max"];
 
   const { handleSubmit, itemProps, setValue } = useForm<Model>({
     onSubmit: async (values) => {
@@ -39,7 +39,7 @@ export const ModelForm = (props: { model?: Model; name?: string; onSaved?: (mode
     initialValues: {
       name: model?.name ?? props.name ?? "",
       temperature: model?.temperature.toString() ?? "1",
-      option: model?.option ?? "gpt-5-nano",
+      option: model?.option ?? "gpt-6-luna",
       prompt: model?.prompt ?? "You are a helpful assistant.",
       enableReasoningEffortChange: model?.enableReasoningEffortChange ?? false,
       reasoningEffort: model?.reasoningEffort ?? "medium",
@@ -114,12 +114,7 @@ export const ModelForm = (props: { model?: Model; name?: string; onSaved?: (mode
         title="Prompt"
         placeholder="Describe your prompt"
         {...itemProps.prompt}
-        info="If you encounter issues while using certain models(o1-mini, o1-preview, etc.), you can leave this item blank."
-      />
-      <Form.TextField
-        title="Temperature"
-        placeholder="Set your sampling temperature (0 - 2)"
-        {...itemProps.temperature}
+        info="Instructions for the model."
       />
       <Form.Checkbox
         id="enableReasoningEffortChange"

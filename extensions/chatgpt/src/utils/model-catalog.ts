@@ -1,6 +1,7 @@
 import type { Command, Model, ReasoningEffort } from "../type";
 import { COMMAND_MODEL_PREFIX, DEFAULT_COMMANDS, DEFAULT_MODEL } from "./model-defaults";
 import { resolveCommandSettings } from "./command-settings";
+import { isModelId } from "./model-support";
 
 export const CATALOG_STORAGE_KEY = "model-command-catalog-v1";
 export type Catalog = { version: 1; models: Record<string, Model>; commands: Record<string, Command> };
@@ -12,12 +13,13 @@ export const commandIdFromModel = (id: string) =>
   isCommandModel(id) ? id.slice(COMMAND_MODEL_PREFIX.length + 1) : undefined;
 
 export function normalizeModel(model: StoredModel, timestamp: string): Model {
-  const efforts: ReasoningEffort[] = ["none", "low", "medium", "high"];
+  const efforts: ReasoningEffort[] = ["none", "low", "medium", "high", "xhigh", "max"];
   return {
     ...DEFAULT_MODEL,
     ...model,
     created_at: model.created_at || timestamp,
     updated_at: model.updated_at || timestamp,
+    option: isModelId(model.option ?? "") ? model.option! : DEFAULT_MODEL.option,
     temperature: String(model.temperature ?? DEFAULT_MODEL.temperature),
     enableReasoningEffortChange: Boolean(model.enableReasoningEffortChange),
     reasoningEffort: efforts.includes(model.reasoningEffort!) ? model.reasoningEffort! : "medium",
@@ -41,6 +43,7 @@ export function normalizeModels(stored: StoredModel[] | Record<string, StoredMod
 export function attachCommand(catalog: Catalog, command: Command, timestamp: string): Catalog {
   command = {
     ...command,
+    model: isModelId(command.model) ? command.model : DEFAULT_MODEL.option,
     configurationMode: command.configurationMode ?? (command.baseModelId ? "inherit" : "independent"),
     created_at: catalog.commands[command.id]?.created_at || command.created_at || timestamp,
     updated_at: timestamp,
@@ -129,7 +132,23 @@ export function createModelCatalog(storage: Storage, now: () => Date = () => new
     if (saved) {
       const next: Catalog = JSON.parse(saved);
       if (next.version !== 1) throw new Error("Unsupported model configuration version.");
-      return next;
+      const migrated: Catalog = {
+        ...next,
+        models: normalizeModels(next.models, now().toISOString()),
+        commands: Object.fromEntries(
+          Object.entries(next.commands).map(([id, command]) => [
+            id,
+            {
+              ...command,
+              model: isModelId(command.model) ? command.model : DEFAULT_MODEL.option,
+            },
+          ]),
+        ),
+      };
+      if (JSON.stringify(migrated) !== JSON.stringify(next)) {
+        await storage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(migrated));
+      }
+      return migrated;
     }
     const [models, commands] = await Promise.all([storage.getItem("models"), storage.getItem("commands")]);
     const next = migrateCatalog(JSON.parse(models || "{}"), JSON.parse(commands || "{}"), now().toISOString());
