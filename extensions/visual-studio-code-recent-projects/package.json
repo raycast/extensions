@@ -36,8 +36,7 @@
     "sillashead",
     "KamilDev",
     "muhammadrizo",
-    "Tambouil",
-    "samuelkraft"
+    "Tambouil"
   ],
   "keywords": [
     "vscode",
@@ -70,7 +69,7 @@
     {
       "name": "open-ide",
       "title": "Open IDE",
-      "description": "Focus or open the editor window for the selected build, separate from Agents",
+      "description": "Open the editor window for the selected build, separate from Agents",
       "mode": "no-view"
     },
     {
@@ -266,7 +265,6 @@
   },
   "scripts": {
     "dev": "ray develop",
-    "build:native": "node scripts/build-editor-helper.cjs",
     "build": "ray build",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

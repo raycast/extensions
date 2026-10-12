@@ -1,12 +1,11 @@
 import { closeMainWindow } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { build } from "./lib/preferences";
-import { openEditorWindow } from "./utils/open-editor-window";
+import { getVSCodeCLI } from "./lib/vscode";
 
 export default async function command() {
   try {
     await closeMainWindow();
-    await openEditorWindow(build);
+    await getVSCodeCLI().openIDE();
   } catch (error) {
     await showFailureToast(error, { title: "Could not open IDE" });
   }

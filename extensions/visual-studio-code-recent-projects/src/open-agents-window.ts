@@ -6,7 +6,7 @@ import { build } from "./lib/preferences";
 import { VSCodeBuild } from "./lib/types";
 import { isMac } from "./lib/utils";
 import { getEditorApplication } from "./utils/editor";
-import { openAgentsWindow } from "./utils/open-editor-window";
+import { getVSCodeCLI } from "./lib/vscode";
 
 function windowsProgramFile(...segments: string[]): string {
   return path.join(os.homedir(), "AppData", "Local", "Programs", ...segments);
@@ -37,6 +37,19 @@ async function openAntigravityAgentsWindow() {
 }
 
 /**
+ * Cursor has no agents-window equivalent, so just launch it regularly by
+ * absolute path — it is missing from Raycast's Windows app list, so
+ * name-based resolution (like "Open New Window" uses) silently misses it.
+ */
+async function openCursorWindow() {
+  if (isMac) {
+    await openPathOrThrow(macAppPath("Cursor.app"), "Cursor app");
+  } else {
+    await openPathOrThrow(windowsProgramFile("cursor", "Cursor.exe"), "Cursor app");
+  }
+}
+
+/**
  * Fallback for the remaining builds: just launch the editor regularly, same
  * as "Open New Window" does on Windows.
  */
@@ -53,8 +66,10 @@ export default async function command() {
     await closeMainWindow();
     if (build === VSCodeBuild.AntigravityIDE) {
       await openAntigravityAgentsWindow();
-    } else if (build === VSCodeBuild.Code || build === VSCodeBuild.CodeInsiders || build === VSCodeBuild.Cursor) {
-      await openAgentsWindow(build);
+    } else if (build === VSCodeBuild.Code || build === VSCodeBuild.CodeInsiders) {
+      getVSCodeCLI().openAgentsWindowSync();
+    } else if (build === VSCodeBuild.Cursor) {
+      await openCursorWindow();
     } else {
       await openRegularly();
     }

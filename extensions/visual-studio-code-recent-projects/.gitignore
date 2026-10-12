@@ -4,7 +4,6 @@
 /node_modules
 
 # Raycast specific files
-/dist
 raycast-env.d.ts
 .raycast-swift-build
 .swiftpm
