@@ -1,3 +1,9 @@
+## [Fix SSO sign-in] - {PR_MERGE_DATE}
+
+- Single sign-on no longer fails with "localhost refused to connect" when the browser login takes
+  longer than the Raycast "Pop to Root Search" delay. The command now stays loaded until the
+  identity provider redirects back.
+
 ## [Initial Version] - 2026-09-26
 
 - Search applications across several ArgoCD instances at once, or one of them, with a scope
