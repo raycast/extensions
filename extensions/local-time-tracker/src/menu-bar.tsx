@@ -5,6 +5,7 @@ import { formatDuration, getDurationSeconds } from "./lib/duration";
 import { showFailure } from "./lib/errors";
 import { getProjectName } from "./lib/projects";
 import { getActiveTimer, getProjects } from "./lib/storage";
+import { isMenuBarDisplayRefresh } from "./lib/menu-bar-refresh";
 import { stopTimer } from "./lib/timer";
 import {
   checkReminders,
@@ -39,11 +40,15 @@ export default function MenuBarCommand() {
         setPomodoro(null);
         reminderFailed = true;
       }
-      try {
-        await checkReminders(savedTimer, new Date());
-      } catch (error) {
-        console.error("Failed to check reminders", error);
-        reminderFailed = true;
+      // The notification command can refresh the visible state while the
+      // original reminder check still owns the lock. Do not check or notify again.
+      if (!(await isMenuBarDisplayRefresh())) {
+        try {
+          await checkReminders(savedTimer, new Date());
+        } catch (error) {
+          console.error("Failed to check reminders", error);
+          reminderFailed = true;
+        }
       }
       setReminderError(reminderFailed);
     } catch (error) {

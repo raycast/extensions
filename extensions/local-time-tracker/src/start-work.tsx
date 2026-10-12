@@ -61,6 +61,9 @@ export default function StartWorkCommand({
         const state = await getPomodoro(savedTimer);
         if (state?.intervalId === launchContext.pomodoroIntervalId && isIntervalFinished(state, new Date())) {
           setFinishedPomodoro(state);
+          // Request the finished menu-bar state before presenting this screen.
+          // A display-only refresh cannot contend with the notification's lock.
+          await refreshMenuBar({ displayOnly: true });
         }
       }
       const firstProject = sortProjectsByPreference(savedProjects.filter((project) => project.isActive))[0];

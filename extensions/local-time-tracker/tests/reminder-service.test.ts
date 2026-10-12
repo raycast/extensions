@@ -48,7 +48,7 @@ test("reminder service integrates with Stop Work, storage and notification retri
         if (failRefresh) throw new Error("menu bar refresh failed");
         await onRefresh?.();
       }
-      if (options.context && failDelivery) throw new Error("notification failed");
+      if (options.name === "start-work" && options.context && failDelivery) throw new Error("notification failed");
       launched.push(options);
     },
   };
@@ -272,6 +272,31 @@ test("reminder service integrates with Stop Work, storage and notification retri
     await refreshMenuBar();
     assert.equal((await getPomodoro(refreshed))?.intervalId, replacementOverlay.intervalId);
     failRefresh = false;
+    await stopTimer();
+
+    // A completion screen can request a display update while notification
+    // processing owns the lock, without changing the timer, interval or delivery keys.
+    const { withReminderOperation } = loadModule(
+      "../src/lib/reminder-service.ts",
+    ) as typeof import("../src/lib/reminder-service");
+    const displayTimer = await startTimer("project", "Display refresh", true);
+    const displayOverlay = await getPomodoro(displayTimer);
+    const beforeDisplayRefresh = new Map(items);
+    const beforeDisplayLaunches = launched.length;
+    await withReminderOperation(() => refreshMenuBar({ displayOnly: true }));
+    assert.deepEqual(launched.slice(beforeDisplayLaunches), [{ name: "menu-bar", type: "background" }]);
+    const { isMenuBarDisplayRefresh } = loadModule(
+      "../src/lib/menu-bar-refresh.ts",
+    ) as typeof import("../src/lib/menu-bar-refresh");
+    assert.equal(await isMenuBarDisplayRefresh(), true);
+    const expiry = items.get("menuBarDisplayRefreshUntil") as number;
+    assert.equal(await isMenuBarDisplayRefresh(expiry + 1), false);
+    assert.equal(await isMenuBarDisplayRefresh(expiry - 10001), false);
+    const afterDisplayRefresh = new Map(items);
+    afterDisplayRefresh.delete("menuBarDisplayRefreshUntil");
+    assert.deepEqual(afterDisplayRefresh, beforeDisplayRefresh);
+    assert.equal((await getPomodoro(displayTimer))?.intervalId, displayOverlay?.intervalId);
+    assert.equal((await getActiveTimer())?.id, displayTimer.id);
     await stopTimer();
 
     // Initial overlay failure rolls back the new timer before refreshing.

@@ -2,6 +2,7 @@ import { LaunchType, launchCommand } from "@raycast/api";
 import { getDurationSeconds, isClockBeforeStart } from "./duration";
 import { clearActiveTimerIfMatches, getActiveTimer, getWorkLogs, saveActiveTimer, upsertWorkLog } from "./storage";
 import type { ActiveTimer, WorkLog } from "./types";
+import { markMenuBarDisplayRefresh } from "./menu-bar-refresh";
 import { endPomodoro, startPomodoroIntervalUnderLock, withReminderOperation } from "./reminder-service";
 
 export class ActiveTimerExistsError extends Error {
@@ -106,8 +107,9 @@ async function stopCurrentTimer(): Promise<StopTimerResult> {
   return { status: "stopped", workLog, durationSeconds };
 }
 
-export async function refreshMenuBar(): Promise<void> {
+export async function refreshMenuBar({ displayOnly = false }: { displayOnly?: boolean } = {}): Promise<void> {
   try {
+    if (displayOnly) await markMenuBarDisplayRefresh();
     await launchCommand({ name: "menu-bar", type: LaunchType.Background });
   } catch (error) {
     console.error("Failed to refresh menu bar", error);
