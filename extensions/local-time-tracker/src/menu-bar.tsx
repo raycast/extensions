@@ -70,7 +70,7 @@ export default function MenuBarCommand() {
     : "";
   const pomodoroTitle = pomodoro
     ? pomodoroFinished
-      ? `${phaseLabel(pomodoro.phase)} finished — waiting`
+      ? `${phaseLabel(pomodoro.phase)} finished`
       : `${phaseLabel(pomodoro.phase)}: ${remaining} left`
     : "";
   if (activeTimer) {
