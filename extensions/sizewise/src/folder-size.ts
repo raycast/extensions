@@ -45,26 +45,42 @@ export function otherAppsDataInside(
 const timeout = 120_000;
 
 /**
+ * What `du` measures for `path`. The startup disk is two volumes, and `-x` keeps `du` on the one it
+ * starts on, so `/` is measured as the system volume and the data volume that holds the home folders.
+ */
+export function duFolders(path: string): string[] {
+  const folder = path.replace(/\/+$/, "") || "/";
+  return folder === "/" ? ["/", "/System/Volumes/Data"] : [path];
+}
+
+/**
  * Runs the system's `du`, which counts allocated size as Sizewise does, without following
  * symbolic links (`-P`) or leaving the folder's disk (`-x`), as Sizewise's scanner doesn't either.
+ * `LC_ALL=C` keeps its messages in English, which `parseDu` reads, whatever the Mac's language.
  */
 export function runDu(path: string, skippedNames: string[] = otherAppsDataInside(path)): Promise<DuOutput> {
-  const args = ["-skxP", ...skippedNames.flatMap((name) => ["-I", name]), "--", path];
+  const args = ["-skxP", ...skippedNames.flatMap((name) => ["-I", name]), "--", ...duFolders(path)];
+  const env = { ...process.env, LC_ALL: "C" };
   return new Promise((resolve) => {
-    execFile("/usr/bin/du", args, { timeout, maxBuffer: 16 * 1024 * 1024 }, (error, stdout, stderr) => {
+    execFile("/usr/bin/du", args, { timeout, maxBuffer: 16 * 1024 * 1024, env }, (error, stdout, stderr) => {
       resolve({ stdout, stderr, timedOut: error?.killed === true });
     });
   });
 }
 
-/** Reads `du -sk`'s total and counts the folders it reported it couldn't read. */
-export function parseDu(output: DuOutput, skipsOtherAppsData = false): FolderSize | undefined {
-  const total = /^(\d+)\t/m.exec(output.stdout);
-  if (total === null) return undefined;
+/** Adds up `du -sk`'s totals, one for each folder it measured, and counts the folders it couldn't read. */
+export function parseDu(output: DuOutput, skipsOtherAppsData = false, folderCount = 1): FolderSize | undefined {
+  // Only the first line for each folder: a folder's name can hold a line break, which du prints as is.
+  const totals = [...output.stdout.matchAll(/^(\d+)\t/gm)].slice(0, folderCount).map((total) => Number(total[1]));
+  if (totals.length === 0) return undefined;
   const unreadableFolderCount = output.stderr
     .split("\n")
     .filter((line) => /: (Permission denied|Operation not permitted)$/.test(line)).length;
-  return { bytes: Number(total[1]) * 1024, unreadableFolderCount, skipsOtherAppsData };
+  return {
+    bytes: totals.reduce((sum, kilobytes) => sum + kilobytes, 0) * 1024,
+    unreadableFolderCount,
+    skipsOtherAppsData,
+  };
 }
 
 export class MeasureError extends Error {}
@@ -78,7 +94,7 @@ export async function measureFolder(
   if (output.timedOut) {
     throw new MeasureError("Measuring took too long. Open the folder in Sizewise, which is faster.");
   }
-  const size = parseDu(output, skippedNames.length > 0);
+  const size = parseDu(output, skippedNames.length > 0, duFolders(path).length);
   if (size === undefined)
     throw new MeasureError(
       output.stderr.trim() || "macOS didn't report a size for this folder. Open it in Sizewise instead.",

@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { measureFolder, otherAppsDataInside, parseDu, runDu, sizeSentence } from "../src/folder-size";
+import { duFolders, measureFolder, otherAppsDataInside, parseDu, runDu, sizeSentence } from "../src/folder-size";
 
 describe("parseDu", () => {
   test("reads the total in KiB as bytes", () => {
@@ -23,8 +23,29 @@ describe("parseDu", () => {
     expect(parseDu({ stdout: "10\t/Users/ada\n", stderr, timedOut: false })?.unreadableFolderCount).toBe(2);
   });
 
+  test("adds up the totals of each folder du measured", () => {
+    const stdout = "1024\t/\n2048\t/System/Volumes/Data\n";
+    expect(parseDu({ stdout, stderr: "", timedOut: false }, false, 2)?.bytes).toBe(3 * 1024 * 1024);
+  });
+
+  test("reads one total per folder, whatever a folder's name holds", () => {
+    const stdout = "2048\t/Users/ada/odd\n999\tname\n";
+    expect(parseDu({ stdout, stderr: "", timedOut: false })?.bytes).toBe(2 * 1024 * 1024);
+  });
+
   test("returns nothing without a total", () => {
     expect(parseDu({ stdout: "", stderr: "du: /x: No such file or directory\n", timedOut: false })).toBeUndefined();
+  });
+});
+
+describe("duFolders", () => {
+  test("measures the startup disk as both of its volumes", () => {
+    expect(duFolders("/")).toEqual(["/", "/System/Volumes/Data"]);
+    expect(duFolders("//")).toEqual(["/", "/System/Volumes/Data"]);
+  });
+
+  test("measures any other folder as it is", () => {
+    expect(duFolders("/Users/ada/Downloads/")).toEqual(["/Users/ada/Downloads/"]);
   });
 });
 

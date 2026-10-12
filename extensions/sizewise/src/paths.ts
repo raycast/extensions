@@ -28,8 +28,10 @@ export function expandPath(text: string, home: string = homedir()): string | und
 
 /** How a folder is named in messages: its name, or "your home folder" for the home folder. */
 export function folderName(path: string, home: string = homedir()): string {
-  if (path === home) return "your home folder";
-  return basename(path) || path;
+  // Finder gives folders with a trailing slash.
+  const folder = path.replace(/\/+$/, "") || "/";
+  if (folder === home.replace(/\/+$/, "")) return "your home folder";
+  return basename(folder) || folder;
 }
 
 /**

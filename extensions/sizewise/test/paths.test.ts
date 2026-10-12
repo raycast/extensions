@@ -34,6 +34,7 @@ describe("expandPath", () => {
 describe("folderName", () => {
   test("names the home folder in words and other folders by name", () => {
     expect(folderName(home, home)).toBe("your home folder");
+    expect(folderName(`${home}/`, home)).toBe("your home folder");
     expect(folderName("/Users/ada/Downloads", home)).toBe("Downloads");
     expect(folderName("/Users/ada/Desktop/", home)).toBe("Desktop");
     expect(folderName("/", home)).toBe("/");
