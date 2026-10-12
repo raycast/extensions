@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update DC Hub MCP Server] - {PR_MERGE_DATE}
+## [Update DC Hub MCP Server] - 2026-10-12
 
 - Update DC Hub's description to its current canonical wording.
 
