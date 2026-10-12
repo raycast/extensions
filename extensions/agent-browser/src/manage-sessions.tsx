@@ -16,7 +16,12 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { resolveAgentBrowserExecutable } from "./lib/agent-browser";
-import { clearBrowserSessionContext, getBrowserEnvironment, getBrowserSessionContexts } from "./lib/browser-session";
+import {
+  clearBrowserSessionContext,
+  getBrowserEnvironment,
+  getBrowserSessionContexts,
+  getRetainedBrowserSessionEnvironments,
+} from "./lib/browser-session";
 import { executeSessionCLI } from "./lib/session-cli";
 import {
   actOnSession,
@@ -24,6 +29,7 @@ import {
   normalizeSessionUrl,
   cleanupClosedSession,
   closeSessionWithConfirmation,
+  describeSessionTarget,
   Session,
   SessionRunner,
 } from "./lib/sessions";
@@ -56,9 +62,12 @@ export default function ManageSessions() {
     setIsLoading(true);
     setError(undefined);
     try {
-      const contexts = await getBrowserSessionContexts();
+      const [contexts, retainedEnvironments] = await Promise.all([
+        getBrowserSessionContexts(),
+        getRetainedBrowserSessionEnvironments(),
+      ]);
       request.signal.throwIfAborted();
-      const result = await listSessions(contexts, createRunner(request.signal), request.signal);
+      const result = await listSessions(contexts, createRunner(request.signal), request.signal, retainedEnvironments);
       setSessions(result.sessions);
       setFailedSources(result.failedSources);
     } catch (failure) {
@@ -92,11 +101,10 @@ export default function ManageSessions() {
       const run = createRunner(request.signal);
       const closed = await closeSessionWithConfirmation(
         session,
-        async () => {
+        async (target) => {
           const confirmed = await confirmAlert({
             title: `Close “${session.name}”?`,
-            message:
-              "This closes the session's browser and tabs. Unsaved work and transient state may be lost. CLI restore settings may save authentication state. Attached browsers follow the CLI's close behavior.",
+            message: `${target}\n\nThis closes the session's browser and tabs. Unsaved work and transient state may be lost. CLI restore settings may save authentication state. Attached browsers follow the CLI's close behavior.`,
             primaryAction: { title: "Close Session", style: Alert.ActionStyle.Destructive },
           });
           if (confirmed && !request.signal.aborted) setIsLoading(true);
@@ -106,8 +114,8 @@ export default function ManageSessions() {
         request.signal,
       );
       if (!closed) return;
-      const current = (await getBrowserSessionContexts())[session.name];
-      await cleanupClosedSession(session, current, run, clearBrowserSessionContext, request.signal);
+      const contexts = await getBrowserSessionContexts();
+      await cleanupClosedSession(session, contexts, run, clearBrowserSessionContext, request.signal);
       if (!request.signal.aborted) await showToast({ style: Toast.Style.Success, title: "Session Closed" });
     } catch (failure) {
       if (!request.signal.aborted)
@@ -239,7 +247,7 @@ function OpenSessionUrl({ session, onOpened }: { session: Session; onOpened: () 
         </ActionPanel>
       }
     >
-      <Form.Description title="Session" text={`${session.name} · ${session.label}`} />
+      <Form.Description title="Session and Source" text={describeSessionTarget(session)} />
       <Form.Description text="Opens this URL in the session's current tab. This may replace the current page. Existing browser visibility is preserved." />
       <Form.TextField
         id="url"

@@ -5,6 +5,8 @@
 - List active CLI sessions, including Raycast profile sessions in their own socket directories.
 - Open a URL in a selected session and close sessions after confirmation.
 - Handle empty lists, stale sessions, partial failures, cancellation, and CLI timeouts without displaying raw browser output.
+- Release closed session names while preserving shared profile files and other bindings.
+- Identify session directories in list rows, URL forms, and destructive confirmations.
 - Add isolated session-management regression tests and document CLI and native-browser limitations.
 
 ## [Initial Version] - 2026-08-31

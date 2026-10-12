@@ -3,12 +3,14 @@ export type SessionContext = {
   applicationName?: string;
   fakeHome?: string;
   socketDirectory?: string;
+  profile?: string;
 };
 
 export type Session = {
   id: string;
   name: string;
   label: string;
+  source: string;
   context?: SessionContext;
   managed: boolean;
 };
@@ -21,6 +23,17 @@ export type SessionRunner = (
 
 function environmentKey(context?: SessionContext): string {
   return JSON.stringify([context?.socketDirectory ?? "", context?.fakeHome ?? ""]);
+}
+
+export function describeSessionSource(context?: SessionContext): string {
+  const parts: string[] = [];
+  if (context?.socketDirectory) parts.push(`Socket directory: ${context.socketDirectory}`);
+  if (context?.fakeHome) parts.push(`Profile bridge: ${context.fakeHome}`);
+  return parts.join(" · ") || "Inherited CLI environment";
+}
+
+export function describeSessionTarget(session: Session): string {
+  return `${session.name}\n${session.source}`;
 }
 
 export function parseSessionList(result: unknown): string[] {
@@ -40,9 +53,10 @@ export async function listSessions(
   contexts: Record<string, SessionContext>,
   run: SessionRunner,
   signal: AbortSignal,
+  retainedEnvironments: SessionContext[] = [],
 ): Promise<{ sessions: Session[]; failedSources: number }> {
   const sources = new Map<string, SessionContext | undefined>([[environmentKey(), undefined]]);
-  for (const context of Object.values(contexts)) {
+  for (const context of [...Object.values(contexts), ...retainedEnvironments]) {
     if (context.backend === "dia" || context.backend === "safari") continue;
     if (context.socketDirectory || context.fakeHome) sources.set(environmentKey(context), context);
   }
@@ -53,10 +67,12 @@ export async function listSessions(
         const stored = Object.hasOwn(contexts, name) ? contexts[name] : undefined;
         const managed =
           !!stored && stored.backend !== "dia" && stored.backend !== "safari" && environmentKey(stored) === key;
+        const source = describeSessionSource(context);
         return {
           id: JSON.stringify([key, name]),
           name,
-          label: managed ? `Raycast · ${stored.applicationName || "Agent Browser"}` : "CLI",
+          label: `${managed ? `Raycast · ${stored.applicationName || "Agent Browser"}` : "CLI"} · ${source}`,
+          source,
           context,
           managed,
         };
@@ -108,12 +124,12 @@ export async function actOnSession(
 
 export async function closeSessionWithConfirmation(
   session: Session,
-  confirm: () => Promise<boolean>,
+  confirm: (target: string) => Promise<boolean>,
   run: SessionRunner,
   signal: AbortSignal,
 ): Promise<boolean> {
   signal.throwIfAborted();
-  if (!(await confirm())) return false;
+  if (!(await confirm(describeSessionTarget(session)))) return false;
   signal.throwIfAborted();
   await actOnSession(session, { type: "close" }, run, signal);
   return true;
@@ -121,16 +137,33 @@ export async function closeSessionWithConfirmation(
 
 export async function cleanupClosedSession(
   session: Session,
-  current: SessionContext | undefined,
+  contexts: Record<string, SessionContext>,
   run: SessionRunner,
-  clear: (name: string) => Promise<void>,
+  clear: (name: string, options: { preserveFiles: boolean }) => Promise<void>,
   signal: AbortSignal,
 ): Promise<void> {
   signal.throwIfAborted();
+  const current = Object.hasOwn(contexts, session.name) ? contexts[session.name] : undefined;
   if (!session.managed || !current || current.backend === "dia" || current.backend === "safari") return;
   if (environmentKey(current) !== environmentKey(session.context)) return;
-  // Preserve a profile bridge while any other daemon still uses its directory.
-  if (current.fakeHome && parseSessionList(await run(["session", "list"], current, signal)).length > 0) return;
+  let preserveFiles = false;
+  if (current.fakeHome) {
+    preserveFiles = Object.entries(contexts).some(
+      ([name, context]) =>
+        name !== session.name &&
+        (context.fakeHome === current.fakeHome ||
+          (!!current.socketDirectory && context.socketDirectory === current.socketDirectory)),
+    );
+    if (!preserveFiles) {
+      try {
+        preserveFiles = parseSessionList(await run(["session", "list"], current, signal)).length > 0;
+      } catch {
+        // Closure already succeeded. Forget its binding but keep files when liveness is unknown.
+        signal.throwIfAborted();
+        preserveFiles = true;
+      }
+    }
+  }
   signal.throwIfAborted();
-  await clear(session.name);
+  await clear(session.name, { preserveFiles });
 }

@@ -8,6 +8,7 @@ import { promisify } from "node:util";
 
 import { DIA_BUNDLE_ID } from "./dia";
 import { SAFARI_BUNDLE_ID, SafariTab } from "./safari";
+import { createProfileBridgeHome, readRetainedEnvironments, removeSessionBinding } from "./session-resources";
 
 const execFileAsync = promisify(execFile);
 const DEFAULT_SESSION = "raycast";
@@ -82,11 +83,19 @@ export async function getBrowserSessionContext(sessionValue?: string): Promise<B
   }
 }
 
-export async function clearBrowserSessionContext(sessionValue?: string): Promise<void> {
+export async function clearBrowserSessionContext(
+  sessionValue?: string,
+  options: { preserveFiles?: boolean } = {},
+): Promise<void> {
   const session = normalizeSession(sessionValue);
   const context = await getBrowserSessionContext(session);
-  if (context?.fakeHome) await removeSessionFiles(context);
-  await LocalStorage.removeItem(contextKey(session));
+  await removeSessionBinding(contextKey(session), context, options.preserveFiles === true, LocalStorage, async () => {
+    if (context?.fakeHome) await removeSessionFiles(context);
+  });
+}
+
+export async function getRetainedBrowserSessionEnvironments(): Promise<BrowserSessionContext[]> {
+  return readRetainedEnvironments(await LocalStorage.allItems());
 }
 
 export async function getBrowserSessionContexts(): Promise<Record<string, BrowserSessionContext>> {
@@ -335,7 +344,9 @@ async function prepareProfileBridge(
     .update(`${environment.supportPath}\0${session}\0${browserDataDirectory}`)
     .digest("hex")
     .slice(0, 12);
-  const fakeHome = existingFakeHome ?? path.join(environment.supportPath, "browser-sessions", session, fingerprint);
+  const fakeHome =
+    existingFakeHome ??
+    (await createProfileBridgeHome(path.join(environment.supportPath, "browser-sessions"), session, fingerprint));
   const socketDirectory = existingSocketDirectory ?? (await mkdtemp(path.join(shortTemporaryDirectory(), "rab-")));
   const bridgePath = getBridgePath(fakeHome);
   await mkdir(path.dirname(bridgePath), { recursive: true });

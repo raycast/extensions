@@ -4,6 +4,7 @@ import {
   actOnSession,
   cleanupClosedSession,
   closeSessionWithConfirmation,
+  describeSessionTarget,
   listSessions,
   normalizeSessionUrl,
   parseSessionList,
@@ -13,7 +14,13 @@ import {
 
 const signal = () => new AbortController().signal;
 const list = (sessions: string[]) => ({ success: true, data: { sessions } });
-const session: Session = { id: "fixture", name: "fixture", label: "CLI", managed: false };
+const session: Session = {
+  id: "fixture",
+  name: "fixture",
+  label: "CLI",
+  source: "Inherited CLI environment",
+  managed: false,
+};
 
 test("strict JSON session parsing, duplicates, empty state and unsafe names", () => {
   assert.deepEqual(parseSessionList(list(["z", "fixture", "z"])), ["fixture", "z"]);
@@ -241,31 +248,95 @@ test("confirming close rechecks liveness; cancelling confirmation prevents mutat
   );
 });
 
-test("cleanup preserves unowned, changed and native bindings, and shared profile bridges", async () => {
+test("cleanup forgets only the matching closed binding and preserves shared files", async () => {
   const context = { fakeHome: "/fixture/home", socketDirectory: "/fixture/socket" };
   const managed = { ...session, managed: true, context };
-  let cleared = 0;
-  const clear = async () => {
-    cleared++;
+  const cleared: Array<{ name: string; preserveFiles: boolean }> = [];
+  const clear = async (name: string, options: { preserveFiles: boolean }) => {
+    cleared.push({ name, ...options });
   };
-  await cleanupClosedSession(session, context, async () => list([]), clear, signal());
-  await cleanupClosedSession(managed, { socketDirectory: "/changed" }, async () => list([]), clear, signal());
-  await cleanupClosedSession(managed, { ...context, backend: "dia" }, async () => list([]), clear, signal());
-  await cleanupClosedSession(managed, context, async () => list(["peer"]), clear, signal());
-  await assert.rejects(
-    cleanupClosedSession(
-      managed,
-      context,
-      async () => {
-        throw new Error("Unavailable");
-      },
-      clear,
-      signal(),
-    ),
+  await cleanupClosedSession(session, { fixture: context }, async () => list([]), clear, signal());
+  await cleanupClosedSession(
+    managed,
+    { fixture: { socketDirectory: "/changed" } },
+    async () => list([]),
+    clear,
+    signal(),
   );
-  assert.equal(cleared, 0);
-  await cleanupClosedSession(managed, context, async () => list([]), clear, signal());
-  assert.equal(cleared, 1);
+  await cleanupClosedSession(
+    managed,
+    { fixture: { ...context, backend: "dia" } },
+    async () => list([]),
+    clear,
+    signal(),
+  );
+  assert.deepEqual(cleared, []);
+  await cleanupClosedSession(managed, { fixture: context }, async () => list(["peer"]), clear, signal());
+  assert.deepEqual(cleared, [{ name: "fixture", preserveFiles: true }]);
+  await cleanupClosedSession(
+    managed,
+    { fixture: context },
+    async () => {
+      throw new Error("Unavailable");
+    },
+    clear,
+    signal(),
+  );
+  assert.deepEqual(cleared[1], { name: "fixture", preserveFiles: true });
+  await cleanupClosedSession(managed, { fixture: context }, async () => list([]), clear, signal());
+  assert.deepEqual(cleared[2], { name: "fixture", preserveFiles: false });
+});
+
+test("cleanup preserves files referenced by other bindings even with an empty CLI inventory", async () => {
+  const context = { fakeHome: "/fixture/shared-home", socketDirectory: "/fixture/socket" };
+  const managed = { ...session, managed: true, context };
+  const contexts = { fixture: context, peer: { ...context, socketDirectory: "/fixture/peer-socket" } };
+  let cleared: string | undefined;
+  await cleanupClosedSession(
+    managed,
+    contexts,
+    async () => list([]),
+    async (name, options) => {
+      assert.equal(options.preserveFiles, true);
+      cleared = name;
+    },
+    signal(),
+  );
+  assert.equal(cleared, "fixture");
+  assert.deepEqual(contexts.peer, { fakeHome: "/fixture/shared-home", socketDirectory: "/fixture/peer-socket" });
+});
+
+test("same-name unbound sessions have distinct labels and follow-up targets, and close only the selected source", async () => {
+  const contexts = {
+    ownerA: { fakeHome: "/fixture/home-a", socketDirectory: "/fixture/socket-a", applicationName: "Chrome" },
+    ownerB: { fakeHome: "/fixture/home-b", socketDirectory: "/fixture/socket-b", applicationName: "Chrome" },
+  };
+  const { sessions } = await listSessions(contexts, async () => list(["work"]), signal());
+  assert.equal(sessions.length, 3);
+  assert.equal(
+    sessions.every((item) => !item.managed),
+    true,
+  );
+  assert.equal(new Set(sessions.map((item) => item.label)).size, 3);
+  assert.equal(new Set(sessions.map(describeSessionTarget)).size, 3);
+  for (const selected of sessions) {
+    let confirmationTarget: string | undefined;
+    await closeSessionWithConfirmation(
+      selected,
+      async (target) => {
+        confirmationTarget = target;
+        return true;
+      },
+      async (args, context) => {
+        assert.equal(context, selected.context);
+        return args[0] === "session" ? list(["work"]) : { success: true };
+      },
+      signal(),
+    );
+    assert.equal(confirmationTarget, describeSessionTarget(selected));
+    assert.ok(confirmationTarget?.includes(selected.source));
+    if (selected.context?.socketDirectory) assert.ok(selected.label.includes(selected.context.socketDirectory));
+  }
 });
 
 test("unsuccessful mutations cannot report success or trigger cleanup", async () => {
