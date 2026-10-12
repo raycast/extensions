@@ -1,6 +1,6 @@
 # KeyProbe Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-12
 
 - Native translucent panel that highlights keys as they're pressed and marks them tested once released.
 - Built-in ANSI, JIS, and ISO layouts with automatic hardware-based detection.
