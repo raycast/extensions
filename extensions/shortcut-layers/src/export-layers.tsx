@@ -1,4 +1,4 @@
-import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
+import { showHUD, showToast, Toast } from "@raycast/api";
 import { writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
@@ -12,20 +12,7 @@ export default async function Command() {
     return;
   }
 
-  const json = layersToJson(layers);
   const path = join(homedir(), "Downloads", exportFileName());
-  writeFileSync(path, json, "utf8");
-
-  const copied = await copyToClipboard(json);
-  const count = `${layers.length} layer${layers.length === 1 ? "" : "s"}`;
-  await showHUD(copied ? `Exported ${count}, copied and saved to Downloads` : `Exported ${count} to Downloads`);
-}
-
-async function copyToClipboard(text: string): Promise<boolean> {
-  try {
-    await Clipboard.copy(text);
-    return (await Clipboard.readText()) === text;
-  } catch {
-    return false;
-  }
+  writeFileSync(path, layersToJson(layers), "utf8");
+  await showHUD(`Exported ${layers.length} layer${layers.length === 1 ? "" : "s"} to Downloads`);
 }
