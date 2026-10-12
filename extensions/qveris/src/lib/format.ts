@@ -20,9 +20,25 @@ export function formatLatency(tool: ToolInfo): string {
 
 export function formatProbeQuote(probe: ProbeResponse): string {
   const estimate = probe.quote?.estimate_credits;
-  if (estimate === undefined || estimate === null) return "No exact estimate returned";
+  if (estimate === undefined || estimate === null) return "No estimate returned";
   return `${estimate} ${probe.quote?.currency ?? "credits"}${probe.quote?.exact ? " (exact)" : " (estimate)"}`;
 }
+
+export function probeQuoteFingerprint(probe: ProbeResponse): string {
+  return JSON.stringify({
+    estimateCredits: probe.quote?.estimate_credits ?? null,
+    currency: probe.quote?.currency ?? "credits",
+    exact: probe.quote?.exact ?? false,
+    basis: probe.quote?.basis ?? null,
+  });
+}
+
+export function probeQuotesMatch(left: ProbeResponse, right: ProbeResponse): boolean {
+  return probeQuoteFingerprint(left) === probeQuoteFingerprint(right);
+}
+
+export const PROBE_QUOTE_DISCLAIMER =
+  "The Probe estimate is non-binding: it is not a spending cap, reservation, or authorization, and the actual charge may differ.";
 
 export function probeError(probe: ProbeResponse): string | undefined {
   if (probe.schema?.valid !== false) return undefined;

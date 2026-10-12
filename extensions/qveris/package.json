@@ -45,16 +45,16 @@
     {
       "name": "probe-capability",
       "title": "Probe Capability",
-      "description": "Validate parameters and request a free pre-call quote for a QVeris capability without executing it."
+      "description": "Validate parameters and request a free, non-binding pre-call estimate for a QVeris capability without executing it."
     },
     {
       "name": "call-capability",
       "title": "Call Capability",
-      "description": "Execute a QVeris capability selected from a prior discovery. The extension validates parameters and shows a confirmation with the available cost estimate before execution."
+      "description": "Execute a QVeris capability selected from a prior discovery. The extension validates parameters, detects changed estimates, and requires confirmation before execution."
     }
   ],
   "ai": {
-    "instructions": "Use Discover before Inspect or Call. Preserve tool_id and search_id exactly as returned. Inspect the selected capability and build parameters only from its current schema. Probe before calling whenever parameters or cost are uncertain. Never invent a tool ID or parameter. Capability calls can consume QVeris credits and may have third-party side effects; rely on the confirmation shown by the extension."
+    "instructions": "Use Discover before Inspect or Call. Preserve tool_id and search_id exactly as returned. Inspect the selected capability and build parameters only from its current schema. Probe before calling whenever parameters or cost are uncertain. Probe estimates are non-binding and actual charges may differ. Never invent a tool ID or parameter. Capability calls can consume QVeris credits and may have third-party side effects; rely on the confirmation shown by the extension."
   },
   "preferences": [
     {

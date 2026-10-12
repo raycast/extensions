@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { Action, ActionPanel, Alert, Form, Icon, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { callCapability, probeCapability } from "../lib/api";
-import { formatProbeQuote, probeError } from "../lib/format";
+import { formatProbeQuote, probeError, probeQuotesMatch, PROBE_QUOTE_DISCLAIMER } from "../lib/format";
 import { parseJsonObject, stringify } from "../lib/json";
 import type { ToolInfo } from "../lib/types";
 import { ExecutionResult } from "./execution-result";
@@ -44,14 +44,38 @@ export function ExecuteCapabilityForm({ tool, searchId }: { tool: ToolInfo; sear
 
       const confirmed = await confirmAlert({
         title: `Run ${tool.name ?? tool.tool_id}?`,
-        message:
-          "This capability may consume QVeris credits and may cause side effects in a third-party service. Review the parameters before continuing.",
+        message: `Current Probe estimate: ${formatProbeQuote(probe)}. ${PROBE_QUOTE_DISCLAIMER} This capability may also cause side effects in a third-party service. Review the parameters before continuing.`,
         primaryAction: { title: "Run Capability", style: Alert.ActionStyle.Default },
         dismissAction: { title: "Cancel" },
       });
       if (!confirmed) return;
 
-      await showToast({ style: Toast.Style.Animated, title: "Running Capability", message: formatProbeQuote(probe) });
+      const currentProbe = await probeCapability({ toolId: tool.tool_id, parameters });
+      const currentValidationError = probeError(currentProbe);
+      if (currentValidationError) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Parameters Failed Revalidation",
+          message: currentValidationError,
+        });
+        return;
+      }
+
+      if (!probeQuotesMatch(probe, currentProbe)) {
+        const reconfirmed = await confirmAlert({
+          title: "Probe Estimate Changed",
+          message: `The estimate changed from ${formatProbeQuote(probe)} to ${formatProbeQuote(currentProbe)}. ${PROBE_QUOTE_DISCLAIMER} No call will be made unless you confirm this updated estimate.`,
+          primaryAction: { title: "Confirm Updated Estimate", style: Alert.ActionStyle.Default },
+          dismissAction: { title: "Cancel" },
+        });
+        if (!reconfirmed) return;
+      }
+
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Running Capability",
+        message: formatProbeQuote(currentProbe),
+      });
       const response = await callCapability({
         toolId: tool.tool_id,
         searchId,

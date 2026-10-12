@@ -9,7 +9,7 @@ type Input = {
 };
 
 /**
- * Validate capability parameters and request a free pre-call quote without executing the capability.
+ * Validate capability parameters and request a free, non-binding pre-call estimate without executing the capability.
  */
 export default async function probe(input: Input) {
   return probeCapability({ toolId: input.toolId, parameters: parseJsonObject(input.parametersJson) });

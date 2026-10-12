@@ -16,7 +16,7 @@ The API key is stored as a Raycast password preference and is sent only to the s
 
 Describe a task in natural language to find ranked capabilities. Open a result to review its current parameters, provider, reliability, latency, and available pricing information.
 
-You can copy a capability ID or choose **Run Capability…**. Before execution, the extension validates the JSON parameters and requests a free quote. It then asks for confirmation because a capability call may consume QVeris credits or cause side effects in a third-party service.
+You can copy a capability ID or choose **Run Capability…**. Before execution, the extension validates the JSON parameters and requests a free Probe estimate. It then asks for confirmation because a capability call may consume QVeris credits or cause side effects in a third-party service. If the estimate changes during revalidation, the extension stops and requires confirmation of the updated estimate before any call is made.
 
 ## Raycast AI Tools
 
@@ -24,14 +24,14 @@ Raycast Pro users can mention `@qveris` in AI Chat. The extension provides four 
 
 - **Discover Capabilities** — find capabilities for a task.
 - **Inspect Capability** — retrieve the current schema and pricing metadata.
-- **Probe Capability** — validate parameters and get a free quote without execution.
+- **Probe Capability** — validate parameters and get a free, non-binding estimate without execution.
 - **Call Capability** — execute a selected capability after validation and explicit confirmation.
 
 For reliable calls, follow the sequence Discover → Inspect → Probe → Call and preserve the returned `tool_id` and `search_id` values exactly.
 
 ## Billing and Privacy
 
-Discover, Inspect, and Probe are free. Call pricing depends on the selected capability and is shown when QVeris returns a quote. Final billing information is available in your QVeris account.
+Discover, Inspect, and Probe are free. A Probe estimate is not a spending cap, reservation, or authorization to execute, and the actual charge may differ. Call pricing depends on the selected capability. Final billing information is available in your QVeris account.
 
 Search queries, capability parameters, and execution data are sent to the selected QVeris API endpoint to perform the requested operation. The extension includes no external analytics.
 
