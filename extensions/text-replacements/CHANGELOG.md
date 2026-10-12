@@ -1,6 +1,6 @@
 # Text Replacement Changelog
 
-## [Fix large replacement sets] - {PR_MERGE_DATE}
+## [Fix large replacement sets] - 2026-10-12
 
 - Fix "stdout maxBuffer length exceeded" when importing or listing a large set of text replacements
 - Import only active replacements, filtering deleted ones in the database query
