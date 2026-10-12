@@ -1,6 +1,6 @@
 # Proton Mail Changelog
 
-## [Mailboxes, Faster List and Bridge Status] - {PR_MERGE_DATE}
+## [Mailboxes, Faster List and Bridge Status] - 2026-10-12
 
 - New Mailboxes screen listing system mailboxes, folders and labels with their email and unread counts. Browse Email still opens on the inbox (Esc or ⌘[ goes back), or directly on the mailboxes with the new "Open On" preference. Folders list their subfolders above their emails, and the dropdown only holds filters
 - The list uses the full width, with Today, Yesterday and month sections. ⌘D shows the email preview, or the new "Email Preview" preference shows it by default. "Download Attachments" moves from ⌘D to ⌘⇧A
