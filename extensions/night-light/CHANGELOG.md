@@ -1,6 +1,6 @@
 # Night Light Changelog
 
-## [Find nightlight in either Homebrew prefix] - {PR_MERGE_DATE}
+## [Find nightlight in either Homebrew prefix] - 2026-10-12
 
 - Look for the `nightlight` CLI in both `/opt/homebrew/bin` and `/usr/local/bin`, and show how to install it when it is missing instead of a raw shell error ([#29427](https://github.com/raycast/extensions/issues/29427))
 
