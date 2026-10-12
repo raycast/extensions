@@ -14,6 +14,9 @@ import { constants } from "node:fs";
 import { join } from "node:path";
 import type { ShareRequest } from "./payload";
 
+// The helper has already shown this failure even if Raycast remained alive.
+class PresentedShareError extends LocalizedError {}
+
 const bundleId = "com.leonboettger.neardrop";
 export async function ensureQuickDrop() {
   const app = (await getApplications()).find(
@@ -78,10 +81,17 @@ export async function share(request: ShareRequest): Promise<void> {
         const result = JSON.parse(output.trim().split("\n").at(-1) || "") as {
           status: string;
           errorCode?: string;
+          errorPresented?: boolean;
         };
         if (!result || typeof result.status !== "string")
           throw new LocalizedError("invalidResponse");
         if (code === 0 && result.status === "cancelled") return resolve();
+        if (
+          result.status === "error" &&
+          result.errorCode === "shareFailed" &&
+          result.errorPresented === true
+        )
+          throw new PresentedShareError("shareFailed");
         if (code !== 0 || result.status !== "shared")
           throw new LocalizedError(nativeErrorKey(result.errorCode));
         resolve();
@@ -104,6 +114,7 @@ export async function share(request: ShareRequest): Promise<void> {
 }
 
 export async function reportError(error: unknown) {
+  if (error instanceof PresentedShareError) return;
   await showToast({
     style: Toast.Style.Failure,
     title: "QuickDropcast",

@@ -10,8 +10,9 @@ struct Request: Decodable {
     let rightToLeft: Bool?
 }
 
-func finish(_ status: String, _ message: String? = nil, code: Int32 = 0) -> Never {
-    var result = ["status": status]
+func finish(_ status: String, _ message: String? = nil, code: Int32 = 0, errorPresented: Bool = false) -> Never {
+    var result: [String: Any] = ["status": status]
+    if errorPresented { result["errorPresented"] = true }
     if let message = message { result["errorCode"] = message }
     if let data = try? JSONSerialization.data(withJSONObject: result) {
         FileHandle.standardOutput.write(data)
@@ -62,14 +63,14 @@ final class ShareHost: NSObject, NSApplicationDelegate, NSSharingServiceDelegate
     func sharingService(_ sharingService: NSSharingService, didShareItems items: [Any]) { finish("shared") }
     func sharingService(_ sharingService: NSSharingService, didFailToShareItems items: [Any], error: Error) {
         if (error as NSError).code == NSUserCancelledError { finish("cancelled") }
-        // Raycast may have unloaded the command after readiness; report failures here too.
+        // Raycast may have unloaded the command after readiness; present failures here.
         let alert = NSAlert()
         alert.alertStyle = .warning
         alert.messageText = "QuickDropcast"
         alert.informativeText = shareFailureMessage
         NSApp.activate(ignoringOtherApps: true)
         alert.runModal()
-        finish("error", "shareFailed", code: 1)
+        finish("error", "shareFailed", code: 1, errorPresented: true)
     }
     func windowShouldClose(_ sender: NSWindow) -> Bool { finish("cancelled") }
 }
