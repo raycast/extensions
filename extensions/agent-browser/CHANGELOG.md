@@ -1,6 +1,6 @@
 # Agent Browser Changelog
 
-## [Manage Sessions] - {PR_MERGE_DATE}
+## [Manage Sessions] - 2026-10-12
 
 - List active CLI sessions, including Raycast profile sessions in their own socket directories.
 - Open a URL in a selected session and close sessions after confirmation.
