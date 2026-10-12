@@ -102,6 +102,7 @@ it.each([
   "Release held modifier keys and retry manually",
   "Focus the web page content and retry manually",
   "Open a single target window, focus it, and retry manually",
+  "Application window changed; no further keys were sent",
 ])("surfaces the known PowerShell failure %s", async (message) => {
   jest
     .mocked(runPowerShellScript)

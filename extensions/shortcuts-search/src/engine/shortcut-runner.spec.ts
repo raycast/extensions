@@ -79,7 +79,16 @@ it.each([
   const native = execFile as unknown as jest.Mock;
   native.mockReset();
   native.mockImplementation((_file, _args, _options, callback) =>
-    callback(Object.assign(new Error("Command failed"), { stderr: `execution error: Error: ${stderr} (-2700)` }))
+    callback(
+      Object.assign(
+        new Error(
+          `Command failed: /usr/bin/osascript -l JavaScript -e ${"Application did not become ready; no keys were sent"}`
+        ),
+        {
+          stderr: `execution error: Error: ${stderr} (-2700)`,
+        }
+      )
+    )
   );
   await expect(runShortcuts(target, 0, sequence, { c: "8" })).rejects.toThrow(new Error(expected));
 });

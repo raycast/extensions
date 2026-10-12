@@ -79,7 +79,7 @@ export function parseDelay(value: string | number): number {
 }
 const executionMessages = [
   /Application did not become ready; no keys were sent/,
-  /Application window changed; no keys were sent/,
+  /Application window changed; no (?:further )?keys were sent/,
   /Application focus changed; remaining keys were cancelled/,
   /Web page changed; remaining keys were cancelled/,
   /Could not send chord \d+; earlier chords may have run\. Check Accessibility and Automation permissions\./,
@@ -89,7 +89,9 @@ const executionMessages = [
   /Open a single target window, focus it, and retry manually/,
 ];
 export function executionError(error: unknown, fallback: string): Error {
-  const output = error instanceof Error ? `${error.message}\n${"stderr" in error ? String(error.stderr) : ""}` : "";
+  // Match stderr alone when present: error.message can include the script, which quotes every message.
+  const stderr = error instanceof Error && "stderr" in error ? String(error.stderr ?? "") : "";
+  const output = stderr || (error instanceof Error ? error.message : "");
   for (const pattern of executionMessages) {
     const match = output.match(pattern);
     if (match) return new Error(match[0]);

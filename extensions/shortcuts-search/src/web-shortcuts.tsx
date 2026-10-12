@@ -45,7 +45,7 @@ export default function WebShortcuts() {
   }, [appsLoading, hostname, slug, hostnameLoading, apps]);
 
   if (!slug && !hostnameLoading && !appsLoading) {
-    if (targetError) {
+    if (targetError || (target && !hostname)) {
       return (
         <UnsupportedApp
           title={`Could not read the current page${frontmostApp ? ` in ${frontmostApp.name}` : ""}`}
