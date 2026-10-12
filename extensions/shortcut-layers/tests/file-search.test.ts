@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { fileTitle, parseSearchOutput } from "../src/file-search";
 
-test("parseSearchOutput trims, dedupes, and caps", () => {
-  const stdout = "/a/b.md\n  /c/d.txt  \n\n/a/b.md\n/e/f\n";
-  assert.deepEqual(parseSearchOutput(stdout), ["/a/b.md", "/c/d.txt", "/e/f"]);
-  assert.deepEqual(parseSearchOutput(stdout, 2), ["/a/b.md", "/c/d.txt"]);
+test("parseSearchOutput keeps paths verbatim, dedupes, and caps", () => {
+  const stdout = "/a/b.md\0/c/trailing \0\0/a/b.md\0/e/f\0";
+  assert.deepEqual(parseSearchOutput(stdout), ["/a/b.md", "/c/trailing ", "/e/f"]);
+  assert.deepEqual(parseSearchOutput(stdout, 2), ["/a/b.md", "/c/trailing "]);
   assert.deepEqual(parseSearchOutput(""), []);
 });
 

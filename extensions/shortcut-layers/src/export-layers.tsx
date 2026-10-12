@@ -12,7 +12,17 @@ export default async function Command() {
     return;
   }
 
-  const path = join(homedir(), "Downloads", exportFileName());
-  writeFileSync(path, layersToJson(layers), "utf8");
+  try {
+    const path = join(homedir(), "Downloads", exportFileName());
+    writeFileSync(path, layersToJson(layers), "utf8");
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could not write the export file",
+      message: error instanceof Error ? error.message : String(error),
+    });
+    return;
+  }
+
   await showHUD(`Exported ${layers.length} layer${layers.length === 1 ? "" : "s"} to Downloads`);
 }

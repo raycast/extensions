@@ -1,15 +1,33 @@
 import { open, showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
+import { spawn } from "child_process";
 import { homedir } from "os";
-import { promisify } from "util";
 import { getShellEnvironment, shellPath } from "./shell-env";
 import type { Entry } from "./types";
 
-const execAsync = promisify(exec);
+const MAX_STDERR = 2000;
 
 function expandPath(value: string): string {
   if (value === "~") return homedir();
   return value.startsWith("~/") ? value.replace("~", homedir()) : value;
+}
+
+/**
+ * Runs a shell command. stdout is discarded and stderr is capped, so a verbose
+ * command cannot be killed by an unused buffer.
+ */
+function runShellCommand(command: string, env: NodeJS.ProcessEnv): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, { shell: shellPath(), env, stdio: ["ignore", "ignore", "pipe"] });
+    let stderr = "";
+    child.stderr?.on("data", (chunk: Buffer) => {
+      if (stderr.length < MAX_STDERR) stderr += chunk.toString();
+    });
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(stderr.trim() || `Exited with code ${code}`));
+    });
+  });
 }
 
 /**
@@ -20,10 +38,9 @@ function expandPath(value: string): string {
 export async function runEntry(entry: Entry): Promise<void> {
   try {
     switch (entry.kind) {
-      case "shell": {
-        await execAsync(entry.value, { env: await getShellEnvironment(), shell: shellPath() });
+      case "shell":
+        await runShellCommand(entry.value, await getShellEnvironment());
         break;
-      }
       case "file":
         await open(expandPath(entry.value));
         break;
