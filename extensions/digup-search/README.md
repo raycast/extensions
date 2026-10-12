@@ -131,5 +131,6 @@ The helper's protocol is described at the top of DigUp's
 
 ## License
 
-MIT. DigUp is by Abdur Rahim, MIT licensed; EmbeddingGemma is a Google model. Raycast is a trademark of Raycast
-Technologies.
+MIT. Parts of this extension are adapted from DigUp, which is by Abdur Rahim and MIT licensed: see
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). EmbeddingGemma is a Google model. Raycast is a trademark of
+Raycast Technologies.
