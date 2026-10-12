@@ -1,31 +1,6 @@
-import fetch from "cross-fetch";
-import {
-  Detail,
-  ActionPanel,
-  Action,
-  LocalStorage,
-  environment,
-} from "@raycast/api";
+import { Detail, ActionPanel, Action, LocalStorage, environment } from "@raycast/api";
 import { useState, useMemo, useEffect } from "react";
 import { Solar, HolidayUtil } from "lunar-javascript";
-
-import zhTranslations from "../locales/zh.json";
-import enTranslations from "../locales/en.json";
-
-// 兼容 Raycast 不同版本的 localization 属性读取，解决 TS2339 报错
-function getLanguage(): string {
-  const env = environment as unknown as {
-    localization?: { language?: string };
-  };
-  return env.localization?.language || "en";
-}
-
-// 国际化翻译函数
-function t(key: keyof typeof zhTranslations): string {
-  const lang = getLanguage();
-  const translations = lang.startsWith("zh") ? zhTranslations : enTranslations;
-  return translations[key] || zhTranslations[key];
-}
 
 // API 返回的节假日类型定义
 interface HolidayItem {
@@ -80,17 +55,25 @@ export default function Command() {
 
       // 从网络 API 获取最新数据并更新缓存
       try {
-        const response = await fetch(
-          `https://timor.tech/api/holiday/year/${year}/`,
-        );
+        const response = await fetch(`https://timor.tech/api/holiday/year/${year}/`);
         const json = (await response.json()) as {
           code: number;
-          holiday?: HolidayMap;
+          holiday?: Record<string, HolidayItem>;
         };
 
         if (json.code === 0 && json.holiday && isMounted) {
-          setHolidays(json.holiday);
-          await LocalStorage.setItem(cacheKey, JSON.stringify(json.holiday));
+          // 规范化 Key：双保险兼容 MM-DD 格式的 key 拼接或 item.date
+          const normalized: HolidayMap = {};
+          for (const [key, item] of Object.entries(json.holiday)) {
+            const dateStr = key.length === 5 ? `${year}-${key}` : item.date || key;
+            normalized[dateStr] = {
+              ...item,
+              date: dateStr,
+            };
+          }
+
+          setHolidays(normalized);
+          await LocalStorage.setItem(cacheKey, JSON.stringify(normalized));
         }
       } catch (error) {
         console.error(`获取 ${year} 年节假日数据失败:`, error);
@@ -133,7 +116,8 @@ export default function Command() {
         dateStr,
         lunarText: getLunarText(solar, holidays[dateStr]),
         holidayStatus: getHolidayStatus(solar, holidays[dateStr]),
-        isToday: false,
+        // 只要格子日期和真实今天相符，无论是否为当前主视月份，都显示“今”
+        isToday: dateStr === todayStr,
         isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
       });
     }
@@ -173,7 +157,7 @@ export default function Command() {
           dateStr,
           lunarText: getLunarText(solar, holidays[dateStr]),
           holidayStatus: getHolidayStatus(solar, holidays[dateStr]),
-          isToday: false,
+          isToday: dateStr === todayStr,
           isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
         });
       }
@@ -187,30 +171,18 @@ export default function Command() {
     const isDark = environment.theme === "dark";
     const fullCalendarSvg = generateFullCalendarSvg(calendarData, isDark);
 
-    // Markdown 标题多语言适配（调用已做类型兼容处理的 getLanguage 函数）
-    const lang = getLanguage();
-    let titleText = "";
-    if (lang.startsWith("zh")) {
-      titleText = `${year}年 ${month}月`;
-    } else {
-      const monthName = new Date(year, month - 1).toLocaleString("en-US", {
-        month: "long",
-      });
-      titleText = `${monthName} ${year}`;
-    }
+    // Markdown 标题多语言适配（已移除旧的多语言判断，统一输出英文格式标题）
+    const monthName = new Date(year, month - 1).toLocaleString("en-US", {
+      month: "long",
+    });
+    const titleText = `${monthName} ${year}`;
 
     return `# ${titleText}\n\n![Calendar](${fullCalendarSvg})`;
   }, [year, month, calendarData]);
 
   // 使用准确的相对月份加减，规避构造函数越界偏差
-  const nextMonth = () =>
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1),
-    );
-  const prevMonth = () =>
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1),
-    );
+  const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+  const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
   const resetToday = () => setCurrentDate(new Date());
 
   return (
@@ -218,21 +190,9 @@ export default function Command() {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action
-            title={t("nextMonth")}
-            shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
-            onAction={nextMonth}
-          />
-          <Action
-            title={t("prevMonth")}
-            shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
-            onAction={prevMonth}
-          />
-          <Action
-            title={t("today")}
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
-            onAction={resetToday}
-          />
+          <Action title="Next Month" shortcut={{ modifiers: ["cmd"], key: "arrowRight" }} onAction={nextMonth} />
+          <Action title="Previous Month" shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }} onAction={prevMonth} />
+          <Action title="Reset to Today" shortcut={{ modifiers: ["cmd"], key: "t" }} onAction={resetToday} />
         </ActionPanel>
       }
     />
@@ -240,10 +200,7 @@ export default function Command() {
 }
 
 // 判断是否有休假/补班状态
-function getHolidayStatus(
-  solar: Solar,
-  holidayItem?: HolidayItem,
-): { isHoliday?: boolean; isWork?: boolean } {
+function getHolidayStatus(solar: Solar, holidayItem?: HolidayItem): { isHoliday?: boolean; isWork?: boolean } {
   if (holidayItem) {
     return {
       isHoliday: holidayItem.holiday,
@@ -251,11 +208,7 @@ function getHolidayStatus(
     };
   }
 
-  const h = HolidayUtil.getHoliday(
-    solar.getYear(),
-    solar.getMonth(),
-    solar.getDay(),
-  );
+  const h = HolidayUtil.getHoliday(solar.getYear(), solar.getMonth(), solar.getDay());
   if (h) {
     return {
       isHoliday: !h.isWork(),
@@ -302,16 +255,7 @@ function getLunarText(solar: Solar, holidayItem?: HolidayItem): string {
   const jieQi = lunar.getJieQi();
   if (jieQi) return jieQi;
 
-  const mainLunarFestivals = [
-    "除夕",
-    "春节",
-    "元宵节",
-    "端午节",
-    "七夕节",
-    "中秋节",
-    "重阳节",
-    "腊八节",
-  ];
+  const mainLunarFestivals = ["除夕", "春节", "元宵节", "端午节", "七夕节", "中秋节", "重阳节", "腊八节"];
   const lunarFestivals = lunar.getFestivals();
   for (const f of lunarFestivals) {
     if (mainLunarFestivals.includes(f)) {
@@ -328,10 +272,7 @@ function getLunarText(solar: Solar, holidayItem?: HolidayItem): string {
 }
 
 // 渲染整张完整月历 SVG（自动根据 isDark 切换配色）
-function generateFullCalendarSvg(
-  calendarData: CalendarCell[],
-  isDark: boolean,
-) {
+function generateFullCalendarSvg(calendarData: CalendarCell[], isDark: boolean) {
   const fontFamily = "system-ui, sans-serif";
   const colWidth = 100;
   const rowHeight = 85;
@@ -404,13 +345,11 @@ function generateFullCalendarSvg(
       const rectY = centerY - cardH / 2;
 
       let rectSvg = "";
-      let textColor = item.isCurrentMonth
-        ? theme.currentMonthText
-        : theme.otherMonthText;
-      let lunarColor = item.isCurrentMonth
-        ? theme.currentMonthLunar
-        : theme.otherMonthLunar;
-      let badgeSvg = "";
+      let textColor = item.isCurrentMonth ? theme.currentMonthText : theme.otherMonthText;
+      let lunarColor = item.isCurrentMonth ? theme.currentMonthLunar : theme.otherMonthLunar;
+
+      // 收集并构建角标对象，以便统一按优先级在右上角从上到下排列
+      const rawBadges: { type: string; svg: string; priority: number }[] = [];
 
       // 当月周末
       if (item.isCurrentMonth && item.isWeekend) {
@@ -418,43 +357,63 @@ function generateFullCalendarSvg(
         lunarColor = theme.weekendLunar;
       }
 
-      // 1. 调休（班）：角标 fill="#4E5877" 保持不变
+      // 1. 调休（班）：优先级设高一点，使其排在上方
       if (item.holidayStatus.isWork) {
         textColor = theme.workText;
         lunarColor = theme.workLunar;
         const bX = rectX + cardW - badgeW / 2;
-        const bY = rectY - badgeH / 2;
-        badgeSvg = `
-          <rect x="${bX}" y="${bY}" width="${badgeW}" height="${badgeH}" rx="4" fill="#4E5877"/>
-          <text x="${bX + badgeW / 2}" y="${bY + 13}" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle" font-family="${fontFamily}">班</text>
-        `;
+        rawBadges.push({
+          type: "work",
+          priority: 1, // 优先级更高，排在上方
+          svg: `
+            <rect x="${bX}" y="0" width="${badgeW}" height="${badgeH}" rx="4" fill="#4E5877"/>
+            <text x="${bX + badgeW / 2}" y="13" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle" font-family="${fontFamily}">班</text>
+          `,
+        });
       }
-      // 2. 放假（休）：角标 fill="#EB3434" 保持不变
+      // 2. 放假（休）：优先级设高一点，使其排在上方
       else if (item.holidayStatus.isHoliday) {
         rectSvg = `<rect x="${rectX}" y="${rectY}" width="${cardW}" height="${cardH}" rx="10" fill="${theme.holidayBg}"/>`;
         textColor = isDark ? "#FF4D4F" : "#EB3434";
         lunarColor = isDark ? "#FF4D4F" : "#EB3434";
         const bX = rectX + cardW - badgeW / 2;
-        const bY = rectY - badgeH / 2;
-        badgeSvg = `
-          <rect x="${bX}" y="${bY}" width="${badgeW}" height="${badgeH}" rx="4" fill="#EB3434"/>
-          <text x="${bX + badgeW / 2}" y="${bY + 13}" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle" font-family="${fontFamily}">休</text>
-        `;
+        rawBadges.push({
+          type: "holiday",
+          priority: 1, // 优先级更高，排在上方
+          svg: `
+            <rect x="${bX}" y="0" width="${badgeW}" height="${badgeH}" rx="4" fill="#EB3434"/>
+            <text x="${bX + badgeW / 2}" y="13" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle" font-family="${fontFamily}">休</text>
+          `,
+        });
       }
 
-      // 3. 今天（今）：蓝色高亮框，角标 fill="#4E6EF2" 保持不变
+      // 3. 今天（今）：蓝色高亮框，优先级设低一点，使其排在下方
       if (item.isToday) {
         rectSvg = `<rect x="${rectX}" y="${rectY}" width="${cardW}" height="${cardH}" rx="10" fill="none" stroke="#4E6EF2" stroke-width="2"/>`;
         textColor = "#4E6EF2";
         lunarColor = "#4E6EF2";
 
         const bX = rectX + cardW - badgeW / 2;
-        const bY = rectY - badgeH / 2;
-        badgeSvg = `
-          <rect x="${bX}" y="${bY}" width="${badgeW}" height="${badgeH}" rx="4" fill="#4E6EF2"/>
-          <text x="${bX + badgeW / 2}" y="${bY + 13}" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle" font-family="${fontFamily}">今</text>
-        `;
+        rawBadges.push({
+          type: "today",
+          priority: 2, // 优先级较低，“今”排在下方
+          svg: `
+            <rect x="${bX}" y="0" width="${badgeW}" height="${badgeH}" rx="4" fill="#4E6EF2"/>
+            <text x="${bX + badgeW / 2}" y="13" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle" font-family="${fontFamily}">今</text>
+          `,
+        });
       }
+
+      // 按照优先级排序，数字小的排在最上方
+      rawBadges.sort((a, b) => a.priority - b.priority);
+
+      const badgeSvg = rawBadges
+        .map((b, bIdx) => {
+          // 每个角标垂直向下错开 20px (badgeH 18 + 间距 2)
+          const offsetY = rectY - badgeH / 2 + bIdx * 20;
+          return `<g transform="translate(0, ${offsetY})">${b.svg}</g>`;
+        })
+        .join("");
 
       return `
         <g>
@@ -472,6 +431,5 @@ function generateFullCalendarSvg(
     ${cellsSvg}
   </svg>`;
 
-  // 使用 encodeURIComponent 编码，规避 @types/node 缺失下的 Buffer 报错
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
