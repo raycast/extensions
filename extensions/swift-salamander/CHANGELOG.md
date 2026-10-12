@@ -1,6 +1,6 @@
 # Swift Salamander Changelog
 
-## [Updated Icon] - 2026-10-11
+## [Updated Icon] - {PR_MERGE_DATE}
 
 - Updated the extension icon to the new Swift Salamander app icon.
 
