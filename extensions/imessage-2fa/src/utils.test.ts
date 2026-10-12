@@ -384,6 +384,16 @@ describe("Testing HTML stripping", () => {
     expect(extractCode(text)).toBe("482913");
   });
 
+  test.each([
+    ["comment", "<!--[if mso]><table><tr><td>777777</td></tr></table><![endif]--><p>Your code is 482913</p>", "777777"],
+    ["head", "<head><title>Ref 555555</title></head><p>Your code is 482913</p>", "555555"],
+    ["script", "<script>var id = 666666;</script><p>Your code is 482913</p>", "666666"],
+  ])("drops %s content before extracting the code", (_, html, decoy) => {
+    const text = stripHtmlTags(html);
+    expect(text).not.toContain(decoy);
+    expect(extractCode(text)).toBe("482913");
+  });
+
   test("keeps body text and line breaks", () => {
     expect(stripHtmlTags("<p>Hello&nbsp;there<br/>Code: 1234</p>")).toBe("Hello there\nCode: 1234");
   });
