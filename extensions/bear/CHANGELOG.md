@@ -1,6 +1,6 @@
 # Bear Changelog
 
-## [Fix non-Latin search] - {PR_MERGE_DATE}
+## [Fix non-Latin search] - 2026-10-12
 
 - Search is now case-insensitive for non-Latin text such as Cyrillic: [#32214](https://github.com/raycast/extensions/issues/32214)
 
