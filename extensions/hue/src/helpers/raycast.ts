@@ -6,7 +6,6 @@ import { Icon, Image, showToast, Toast } from "@raycast/api";
 import { updateItems } from "./collections";
 import { logError } from "./errors";
 import { getSceneChanges } from "./hueResources";
-import { RequestDroppedError } from "../lib/RateLimitedQueue";
 
 export function getIconForColor(color: CssColor): Image {
   return { source: Icon.CircleFilled, tintColor: { light: color.value, dark: color.value, adjustContrast: false } };
@@ -34,13 +33,11 @@ export async function applyUpdate(
       optimisticUpdates(getSceneChanges(scenes, lights, update.lights, update.scene), setScenes),
     ];
     await update.request(hueClient).catch((error) => {
-      // The queue replaced this request with a newer one, whose optimistic update already includes this one's.
-      if (!(error instanceof RequestDroppedError)) undos.forEach((undo) => undo());
+      undos.forEach((undo) => undo());
       throw error;
     });
     await showToast({ style: Toast.Style.Success, title: update.success });
   } catch (error) {
-    if (error instanceof RequestDroppedError) return;
     logError(error);
     await showToast({
       style: Toast.Style.Failure,

@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { applyUpdate } from "../src/helpers/raycast";
 import { applyEvent } from "../src/helpers/collections";
-import { RequestDroppedError } from "../src/lib/RateLimitedQueue";
 import type { Hue } from "../src/hooks/useHue";
 import type { DeepPartial, Id, Light } from "../src/lib/types";
 import { toasts } from "./raycast-stub";
@@ -73,13 +72,6 @@ describe("applyUpdate", () => {
     expect(toasts).toEqual([
       expect.objectContaining({ event: "show", style: "FAILURE", message: "Status 500 from Hue Bridge" }),
     ]);
-  });
-
-  it("keeps the change, without a toast, when the queue drops the request for a newer one", async () => {
-    const hue = fakeHue({ lights, scenes });
-    await update(hue, { request: () => Promise.reject(new RequestDroppedError()) });
-    expect(find(hue.lights, lamp.id).on).toEqual({ on: false });
-    expect(toasts).toEqual([]);
   });
 
   it("writes no scenes when the change ends none, like dimming", async () => {

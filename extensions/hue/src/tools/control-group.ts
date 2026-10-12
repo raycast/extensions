@@ -5,7 +5,6 @@ import {
   GroupTarget,
   isRelative,
   omitNull,
-  Outcome,
   parseChange,
   summarize,
   updateGroup,
@@ -78,11 +77,9 @@ export default async function tool(input: Input) {
     if (isRelative(change) && new Set(lights).size < lights.length) {
       return summarize(change, await updateLights(hueClient, lights, change, resources.zigbeeConnectivity));
     }
-    // One at a time: the grouped-light queue sends one request a second and keeps only one waiting.
-    const outcomes: Outcome[] = [];
-    for (const target of targets) {
-      outcomes.push(...(await updateGroup(hueClient, target, change, resources.zigbeeConnectivity)));
-    }
-    return summarize(change, outcomes);
+    const outcomes = await Promise.all(
+      targets.map((target) => updateGroup(hueClient, target, change, resources.zigbeeConnectivity)),
+    );
+    return summarize(change, outcomes.flat());
   });
 }

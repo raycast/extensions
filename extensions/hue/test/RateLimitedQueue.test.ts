@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import RateLimitedQueue, { RequestDroppedError } from "../src/lib/RateLimitedQueue";
+import RateLimitedQueue from "../src/lib/RateLimitedQueue";
 
 let start: number;
 let log: string[];
@@ -43,25 +43,6 @@ it("starts a request only once the previous one settles", async () => {
   await vi.runAllTimersAsync();
   expect(await results).toEqual(["a", "b"]);
   expect(log).toEqual(["a@0", "b@500"]);
-});
-
-it("replaces the waiting request with a newer one, rejecting it unrun", async () => {
-  const queue = new RateLimitedQueue(10, 1);
-  const results = Promise.allSettled(["a", "b", "c"].map((name) => queue.enqueueRequest(request(name))));
-  await vi.runAllTimersAsync();
-  expect(await results).toEqual([fulfilled("a"), rejected(expect.any(RequestDroppedError)), fulfilled("c")]);
-  expect(log).toEqual(["a@0", "c@100"]);
-});
-
-it("keeps a running request when later ones arrive", async () => {
-  const queue = new RateLimitedQueue(10, 1);
-  const running = queue.enqueueRequest(request("a", 500));
-  await vi.advanceTimersByTimeAsync(0);
-  expect(log).toEqual(["a@0"]);
-  const later = Promise.allSettled(["b", "c"].map((name) => queue.enqueueRequest(request(name))));
-  await vi.runAllTimersAsync();
-  expect(await running).toBe("a");
-  expect(await later).toEqual([rejected(expect.any(RequestDroppedError)), fulfilled("c")]);
 });
 
 it.each<[string, () => Promise<string>]>([

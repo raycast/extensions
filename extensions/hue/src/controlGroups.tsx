@@ -20,7 +20,7 @@ import { applyUpdate } from "./helpers/raycast";
 export default function ControlGroups() {
   const hue = useHue();
   const { hueBridgeState, send, isLoading, lights, rooms, zones } = hue;
-  // groupedLightsQueue sends one request per second, so faster input would only be dropped there.
+  // groupedLightsQueue sends one request per second, so faster input would only queue up there.
   const canExecute = useInputRateLimiter(1000);
   const icons = useMemo(
     () =>

@@ -64,7 +64,7 @@ export async function request(session: ClientHttp2Session, headers: OutgoingHttp
 
 export default class HueClient {
   private readonly lightsQueue = new RateLimitedQueue(10);
-  private readonly groupedLightsQueue = new RateLimitedQueue(1, 1);
+  private readonly groupedLightsQueue = new RateLimitedQueue(1);
 
   readonly createdAt = Date.now();
 

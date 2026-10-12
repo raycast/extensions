@@ -138,8 +138,7 @@ Recovery, without unlinking:
 Three layers protect against Hue Bridge API rate limits:
 
 - **Individual lights** (`lightsQueue`): 10 requests/sec, one at a time, unlimited queue depth
-- **Grouped lights** (`groupedLightsQueue`): 1 request/sec, max 1 queued (rejects the oldest with
-  `RequestDroppedError`)
+- **Grouped lights** (`groupedLightsQueue`): 1 request/sec, one at a time, unlimited queue depth
 - **User input** (`useInputRateLimiter`): Drops input sooner than 100 ms (lights) or 1 s (groups)
   after the last, matching their queues
 
@@ -156,8 +155,7 @@ The view commands' light, group and scene mutations go through `applyUpdate()` i
    the bridge too: a recalled scene turns static and other active scenes with one of its lights inactive; switching
    a light on or off or changing its color ends its active scenes, dimming doesn't
 2. Send API request (see Rate Limiting)
-3. On error, undo the optimistic changes and show a failure toast, unless the queue dropped the
-   request for a newer one
+3. On error, undo the optimistic changes and show a failure toast
 4. Event stream may override with the real state at any time
 
 ### AI Tools
