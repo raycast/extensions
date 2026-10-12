@@ -15,8 +15,15 @@ const upload = (fields: Partial<Upload>): Upload =>
 
 const uploads: Upload[] = [];
 const created = vi.fn(async (id: string) => ({
-  shortLink: { shortUrl: "https://s.example.com/x", targetUrl: "https://files.example.com/2026/a.png", providerName: "Shlink" },
-  upload: { ...uploads.find((candidate) => candidate.id === id), formats: { markdown: "[a](https://s.example.com/x)" } },
+  shortLink: {
+    shortUrl: "https://s.example.com/x",
+    targetUrl: "https://files.example.com/2026/a.png",
+    providerName: "Shlink",
+  },
+  upload: {
+    ...uploads.find((candidate) => candidate.id === id),
+    formats: { markdown: "[a](https://s.example.com/x)" },
+  },
 }));
 
 vi.mock("../src/lib/destinations", () => ({
@@ -54,9 +61,25 @@ describe("short link helpers", () => {
 describe("create-short-link tool", () => {
   it("only uses an upload whose key matches exactly", async () => {
     uploads.splice(0, uploads.length, upload({ id: "u1", objectKey: "2026/a.png.bak" }), upload({ id: "u2" }));
-    const result = await createShortLinkTool.default({ key: "/2026/a.png" });
+    const result = await createShortLinkTool.default({ key: "2026/a.png" });
     expect(created).toHaveBeenLastCalledWith("u2");
     expect(result.shortUrl).toBe("https://s.example.com/x");
+  });
+
+  it("keeps a leading slash or space that is part of the stored key", async () => {
+    uploads.splice(
+      0,
+      uploads.length,
+      upload({ id: "u1" }),
+      upload({ id: "u2", objectKey: "/2026/a.png" }),
+      upload({ id: "u3", objectKey: " 2026/a.png" }),
+    );
+    await createShortLinkTool.default({ key: "/2026/a.png" });
+    expect(created).toHaveBeenLastCalledWith("u2");
+    await createShortLinkTool.default({ key: " 2026/a.png" });
+    expect(created).toHaveBeenLastCalledWith("u3");
+    await createShortLinkTool.default({ key: "2026/a.png" });
+    expect(created).toHaveBeenLastCalledWith("u1");
   });
 
   it("asks for a destination when the key is in several", async () => {

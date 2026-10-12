@@ -11,13 +11,10 @@ type Input = {
   destination?: string;
 };
 
-function keyFor(input: Input) {
-  return input.key.trim().replace(/^\/+/, "");
-}
-
 /** The upload in Aktar's history with exactly this key; a key used in several destinations needs one named. */
 async function findUpload(input: Input): Promise<Upload> {
-  const key = keyFor(input);
+  // Keys are matched as search-uploads returned them: a stored key may itself start with "/" or a space.
+  const key = input.key;
   const destination = input.destination ? await findDestination(input.destination) : undefined;
   const uploads = (await listUploads({ query: key, destinationId: destination?.id, limit: 1000 })).filter(
     (upload) => upload.objectKey === key,

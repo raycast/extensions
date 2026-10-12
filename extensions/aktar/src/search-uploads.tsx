@@ -79,11 +79,17 @@ export default function Command() {
       : undefined,
   );
   // Clicks come from the shortener, so they're only asked for the selected upload.
-  const { data: shortLink } = usePromise(
+  const { data: shortLink, revalidate: revalidateShortLink } = usePromise(
     async (id: string | undefined) => (id ? getShortLink(id) : null),
     [selected?.shortUrl ? selected.id : undefined],
     { onError: () => undefined },
   );
+
+  // Refresh also asks the shortener again, so the selected upload's clicks are current.
+  function refresh() {
+    revalidate();
+    if (selected?.shortUrl) revalidateShortLink();
+  }
 
   async function remove(upload: Upload) {
     const confirmed = await confirmAlert({
@@ -107,13 +113,9 @@ export default function Command() {
 
   async function shorten(upload: Upload) {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Making a short link" });
+    let shortLink: ShortLink;
     try {
-      const { shortLink } = await createShortLink(upload.id);
-      await Clipboard.copy(shortLink.shortUrl);
-      toast.style = Toast.Style.Success;
-      toast.title = "Short link copied";
-      toast.message = shortLink.shortUrl;
-      revalidate();
+      ({ shortLink } = await createShortLink(upload.id));
     } catch (error) {
       if (error instanceof AktarError && error.status === 409) {
         // The destination has no link shortener (or was removed); shorteners are set up in Aktar.
@@ -124,6 +126,19 @@ export default function Command() {
       } else {
         await showAktarFailure(error, "Couldn't make a short link");
       }
+      return;
+    }
+    // The link exists now, so the list shows it even if copying fails.
+    revalidate();
+    try {
+      await Clipboard.copy(shortLink.shortUrl);
+      toast.style = Toast.Style.Success;
+      toast.title = "Short link copied";
+      toast.message = shortLink.shortUrl;
+    } catch {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Made a short link but couldn't copy it";
+      toast.message = shortLink.shortUrl;
     }
   }
 
@@ -291,7 +306,7 @@ export default function Command() {
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
                     shortcut={Keyboard.Shortcut.Common.Refresh}
-                    onAction={revalidate}
+                    onAction={refresh}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
