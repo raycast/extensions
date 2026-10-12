@@ -1,7 +1,14 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+const { stat, access } = vi.hoisted(() => ({ stat: vi.fn(), access: vi.fn() }));
+vi.mock("fs/promises", () => ({ stat, access }));
 import { UploadBatchError, uploadFilesBatch } from "./upload-batch";
 
 describe("uploadFilesBatch", () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    stat.mockResolvedValue({ isFile: () => true, size: 5 });
+    access.mockResolvedValue(undefined);
+  });
   it("copies all uploaded URLs to the clipboard in one write", async () => {
     const uploadFile = vi.fn(async (filePath: string) => `https://litterbox.catbox.moe/${filePath.split("/").pop()}`);
     const addRecentUpload = vi.fn(async () => undefined);
@@ -74,7 +81,7 @@ describe("uploadFilesBatch", () => {
     });
   });
 
-  it("does not store uploads if copying URLs to the clipboard fails", async () => {
+  it("preserves successful uploads when copying URLs to the clipboard fails", async () => {
     const uploadFile = vi.fn(async (filePath: string) => `https://litterbox.catbox.moe/${filePath.split("/").pop()}`);
     const addRecentUpload = vi.fn(async () => undefined);
     const copyToClipboard = vi.fn(async () => {
@@ -99,6 +106,57 @@ describe("uploadFilesBatch", () => {
     expect(copyToClipboard).toHaveBeenCalledWith(
       "https://litterbox.catbox.moe/one.txt\nhttps://litterbox.catbox.moe/two.png",
     );
+    expect(addRecentUpload).toHaveBeenCalledTimes(2);
+  });
+
+  it("starts no uploads when a later selected file fails preflight", async () => {
+    stat
+      .mockResolvedValueOnce({ isFile: () => true, size: 5 })
+      .mockResolvedValueOnce({ isFile: () => true, size: 1_000_000_001 });
+    const uploadFile = vi.fn();
+    const addRecentUpload = vi.fn();
+    const copyToClipboard = vi.fn();
+    await expect(
+      uploadFilesBatch(["/synthetic/one.txt", "/synthetic/large.bin"], "24h", {
+        uploadFile,
+        addRecentUpload,
+        copyToClipboard,
+      }),
+    ).rejects.toThrow("large.bin exceeds");
+    expect(uploadFile).not.toHaveBeenCalled();
     expect(addRecentUpload).not.toHaveBeenCalled();
+    expect(copyToClipboard).not.toHaveBeenCalled();
+  });
+
+  it("stops after a network failure without uploading the remaining files", async () => {
+    const uploadFile = vi
+      .fn()
+      .mockResolvedValueOnce("https://litter.catbox.moe/one.txt")
+      .mockRejectedValueOnce(new Error("Network down"));
+    const addRecentUpload = vi.fn();
+    const copyToClipboard = vi.fn();
+    await expect(
+      uploadFilesBatch(["/synthetic/one.txt", "/synthetic/two.txt", "/synthetic/three.txt"], "24h", {
+        uploadFile,
+        addRecentUpload,
+        copyToClipboard,
+      }),
+    ).rejects.toMatchObject({ totalFiles: 3, failedFilename: "two.txt", clipboardCopied: true });
+    expect(uploadFile).toHaveBeenCalledTimes(2);
+    expect(addRecentUpload).toHaveBeenCalledOnce();
+  });
+
+  it("still copies successful links if local history fails", async () => {
+    const uploadFile = vi.fn().mockResolvedValue("https://litter.catbox.moe/one.txt");
+    const addRecentUpload = vi.fn().mockRejectedValue(new Error("Storage unavailable"));
+    const copyToClipboard = vi.fn();
+    await expect(
+      uploadFilesBatch(["/synthetic/one.txt"], "24h", {
+        uploadFile,
+        addRecentUpload,
+        copyToClipboard,
+      }),
+    ).rejects.toMatchObject({ clipboardCopied: true, historyErrorMessage: "Storage unavailable" });
+    expect(copyToClipboard).toHaveBeenCalledWith("https://litter.catbox.moe/one.txt");
   });
 });
