@@ -89,6 +89,15 @@ describe("paginated search", () => {
 });
 
 describe("saving bookmarks", () => {
+  it.each([
+    ["example.com:8080/article", "https://example.com:8080/article"],
+    ["localhost:3000", "https://localhost:3000/"],
+    ["[::1]:8080/article", "https://[::1]:8080/article"],
+    ["HTTPS://example.com/article", "https://example.com/article"],
+  ])("normalizes valid URLs without losing host ports: %s", (input, expected) => {
+    expect(normalizeUrl(input)).toBe(expected);
+  });
+
   it("shows the normalized URL, title, status, and duplicate side effect without a request", async () => {
     expect(await confirmation({ url: " example.com/article ", title: " A title ", read: true })).toEqual({
       message: expect.stringContaining("bumped"),

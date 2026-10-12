@@ -93,7 +93,9 @@ export async function createLink(url: string, title?: string, read?: boolean): P
 export function normalizeUrl(value: string): string {
   const trimmed = value.trim();
   if (!trimmed) throw new Error("URL is required.");
-  const withScheme = /^[a-z][a-z\d+.-]*:/i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  const hasScheme = /^[a-z][a-z\d+.-]*:/i.test(trimmed);
+  const isHostWithPort = /^[^/:\s]+:\d+(?:[/?#]|$)/.test(trimmed);
+  const withScheme = hasScheme && !isHostWithPort ? trimmed : `https://${trimmed}`;
   try {
     const url = new URL(withScheme);
     if (!["https:", "http:"].includes(url.protocol) || !url.hostname || url.username || url.password) {
