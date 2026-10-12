@@ -52,7 +52,7 @@
     {
       "name": "projects",
       "title": "Projects",
-      "subtitle": "Manage projects and categories",
+      "subtitle": "Manage projects and project groups",
       "description": "Manage projects",
       "mode": "view"
     }

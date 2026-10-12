@@ -7,7 +7,7 @@ Track project work entirely inside Raycast. Local Time Tracker uses no server, e
 - Manage client and internal projects
 - Mark one project as preferred for faster timer starts
 - Start and stop a single active timer
-- Choose from registered project categories
+- Choose from registered project groups
 - Keep task descriptions optional and reuse recent descriptions for each project
 - See elapsed time in the menu bar
 - Search, edit, delete, and manually add work logs
@@ -17,7 +17,7 @@ Track project work entirely inside Raycast. Local Time Tracker uses no server, e
 
 ## Getting Started
 
-1. Open **Projects** and add the categories and projects you work with.
+1. Open **Projects** and add the project groups and projects you work with.
 2. Optionally mark a project as preferred so it is selected first in **Start Work**.
 3. Open **Start Work**, choose a project, and optionally enter a task description.
 4. Open **Menu Bar Timer** once to enable the menu bar item and background refresh.

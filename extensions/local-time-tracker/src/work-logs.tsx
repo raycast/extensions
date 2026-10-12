@@ -157,7 +157,7 @@ function WorkLogDetail({
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label
-            title="Category"
+            title="Project Group"
             text={project ? getCategoryName(categories, project.type) : "Unknown"}
           />
           <Detail.Metadata.Separator />

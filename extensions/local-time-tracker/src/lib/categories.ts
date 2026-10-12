@@ -2,7 +2,7 @@ import { Icon } from "@raycast/api";
 import type { ProjectCategory } from "./types";
 
 export function getCategoryName(categories: ProjectCategory[], categoryId: string): string {
-  return categories.find((category) => category.id === categoryId)?.name ?? "Uncategorized";
+  return categories.find((category) => category.id === categoryId)?.name ?? "Ungrouped";
 }
 
 export const CATEGORY_ICONS = Object.entries(Icon).map(([name, icon]) => ({ name, icon }));

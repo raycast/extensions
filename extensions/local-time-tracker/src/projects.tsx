@@ -71,7 +71,7 @@ export default function ProjectsCommand() {
                 />
               ) : null}
               <Action.Push
-                title="Manage Categories"
+                title="Manage Project Groups"
                 icon={Icon.Folder}
                 target={<CategoryList projects={projects} onChanged={reload} />}
               />
@@ -154,7 +154,7 @@ function ProjectSection({
                 />
               ) : null}
               <Action.Push
-                title="Manage Categories"
+                title="Manage Project Groups"
                 icon={Icon.Folder}
                 target={<CategoryList projects={allProjects} onChanged={onChanged} />}
               />
@@ -294,7 +294,7 @@ function ProjectForm({
       }
     >
       <Form.TextField id="name" title="Name" defaultValue={project?.name} autoFocus />
-      <Form.Dropdown id="type" title="Category" defaultValue={project?.type ?? categories[0]?.id}>
+      <Form.Dropdown id="type" title="Project Group" defaultValue={project?.type ?? categories[0]?.id}>
         {categories.map((category) => (
           <Form.Dropdown.Item
             key={category.id}
@@ -326,14 +326,14 @@ function CategoryList({ projects, onChanged }: { projects: Project[]; onChanged:
     void reload();
   }, []);
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search categories">
+    <List isLoading={isLoading} searchBarPlaceholder="Search project groups">
       {categories.length === 0 ? (
         <List.EmptyView
-          title="No Categories"
+          title="No Project Groups"
           actions={
             <ActionPanel>
               <Action.Push
-                title="Add Category"
+                title="Add Project Group"
                 icon={Icon.Plus}
                 target={<CategoryForm categories={categories} onSaved={reload} />}
               />
@@ -352,18 +352,18 @@ function CategoryList({ projects, onChanged }: { projects: Project[]; onChanged:
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="Edit Category"
+                  title="Edit Project Group"
                   icon={Icon.Pencil}
                   target={<CategoryForm categories={categories} category={category} onSaved={reload} />}
                 />
                 <Action.Push
-                  title="Add Category"
+                  title="Add Project Group"
                   icon={Icon.Plus}
                   target={<CategoryForm categories={categories} onSaved={reload} />}
                   shortcut={Keyboard.Shortcut.Common.New}
                 />
                 <Action
-                  title="Delete Category"
+                  title="Delete Project Group"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   onAction={() => void deleteCategory(category, categories, projects, reload)}
@@ -389,13 +389,13 @@ function CategoryForm({
   const { pop } = useNavigation();
   async function submit(values: { name: string; icon: string }) {
     const name = values.name.trim();
-    if (!name) return void showToast({ style: Toast.Style.Failure, title: "Category name is required" });
+    if (!name) return void showToast({ style: Toast.Style.Failure, title: "Project group name is required" });
     if (
       categories.some(
         (item) => item.id !== category?.id && item.name.localeCompare(name, undefined, { sensitivity: "accent" }) === 0,
       )
     )
-      return void showToast({ style: Toast.Style.Failure, title: "Category name already exists" });
+      return void showToast({ style: Toast.Style.Failure, title: "Project group name already exists" });
     const now = new Date().toISOString();
     const next = category
       ? categories.map((item) =>
@@ -410,7 +410,7 @@ function CategoryForm({
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={category ? "Save Category" : "Add Category"} onSubmit={submit} />
+          <Action.SubmitForm title={category ? "Save Project Group" : "Add Project Group"} onSubmit={submit} />
         </ActionPanel>
       }
     >
@@ -434,16 +434,16 @@ async function deleteCategory(
   if (count > 0)
     return void showToast({
       style: Toast.Style.Failure,
-      title: "Category is in use",
+      title: "Project group is in use",
       message: `Move or delete ${count} project${count === 1 ? "" : "s"} first.`,
     });
   const confirmed = await confirmAlert({
-    title: "Delete Category?",
+    title: "Delete Project Group?",
     message: category.name,
     primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
   });
   if (!confirmed) return;
   await saveProjectCategories(categories.filter((item) => item.id !== category.id));
-  await showToast({ style: Toast.Style.Success, title: "Category deleted", message: category.name });
+  await showToast({ style: Toast.Style.Success, title: "Project group deleted", message: category.name });
   await onChanged();
 }
