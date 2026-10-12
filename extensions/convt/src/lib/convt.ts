@@ -289,8 +289,12 @@ export async function convertFiles(
     throw new Error(`These files cannot all convert to ${target}. Choose one of their available formats.`);
   const outputDirectory = request.outputDirectory ? expandPath(request.outputDirectory) : undefined;
   if (outputDirectory) {
-    if (!path.isAbsolute(outputDirectory) || !(await stat(outputDirectory)).isDirectory())
-      throw new Error("Choose an existing output folder.");
+    if (!path.isAbsolute(outputDirectory)) throw new Error("Choose an existing output folder.");
+    const info = await stat(outputDirectory).catch((error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT" || error.code === "ENOTDIR") return undefined;
+      throw error;
+    });
+    if (!info?.isDirectory()) throw new Error("Choose an existing output folder.");
     await access(outputDirectory, constants.W_OK);
   }
   const args = conversionArgs({ ...request, files, target, outputDirectory });

@@ -150,6 +150,21 @@ test("intersects available targets across all source formats", async (t) => {
   await assert.rejects(convertFiles(binary, { files, target: "webp" }), /cannot all convert/);
 });
 
+test("rejects invalid output folders with friendly validation before conversion", async (t) => {
+  const { binary, files, directory } = await fixture(t, ["one.png"]);
+  for (const outputDirectory of [
+    "relative",
+    files[0],
+    path.join(directory, "missing"),
+    path.join(files[0], "nested"),
+  ]) {
+    await assert.rejects(convertFiles(binary, { files, target: "jpeg", outputDirectory }), {
+      message: "Choose an existing output folder.",
+    });
+  }
+  await assert.rejects(readFile(path.join(directory, "argv.json")), { code: "ENOENT" });
+});
+
 test("keeps actual multi-page output paths and successful files when another file fails", async (t) => {
   const { binary, files, directory } = await fixture(t, ["café $(echo nope).png", "fail.png", "report.pdf"]);
   const results = await convertFiles(binary, { files, target: "jpeg", outputDirectory: directory });
