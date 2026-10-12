@@ -7,7 +7,8 @@ import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { formatBytes, parseMintCommandJSON, resolveMintCLI } from "./mint-cli";
+import { formatBytes, MINIMUM_APP_VERSION, parseMintCommandJSON, resolveMintCLI } from "./mint-cli";
+import type { MintCLIResolution, MintCommandEnvelope } from "./mint-cli";
 import { growers, parseAtlasHistory, windowStartIndex } from "./mint-model";
 import type { AtlasHistoryLine, StatusJSON } from "./mint-model";
 import { pilesOf } from "./mint-panes";
@@ -19,9 +20,10 @@ export const MINT_AI_DOWNLOAD_URL = "https://mintstorage.app/r/raycast-ai";
 const SUPPORT = join(homedir(), "Library", "Application Support", "Mint");
 const GIB = 1024 ** 3;
 
-export type StatusAnswer = StatusJSON & {
-  groups?: StatusJSON["groups"] & { scannedAt?: string };
-};
+export type StatusAnswer = StatusJSON &
+  Partial<MintCommandEnvelope> & {
+    groups?: StatusJSON["groups"] & { scannedAt?: string };
+  };
 
 type Group = { name: string; bytes: number; size: string; what: string };
 
@@ -135,14 +137,20 @@ export function growthOverview(lines: AtlasHistoryLine[], days = 7, limit = 8) {
 // --- Reading Mint ------------------------------------------------------------
 
 /** The signed mint-cli, or an error Raycast AI can say in plain words. */
-export function readyMintCLI(): string {
-  const resolution = resolveMintCLI();
+export function readyMintCLI(resolution: MintCLIResolution = resolveMintCLI()): string {
   if (resolution.status === "ready") return resolution.path;
   if (resolution.status === "incompatible") {
-    throw new Error("Mint is older than 1.0.80. Open Mint and choose Check for Updates, then ask again.");
+    throw new Error(
+      `These commands need Mint Direct ${MINIMUM_APP_VERSION} or later with the supported command-line tool. Open Mint and choose Check for Updates, then ask again.`,
+    );
+  }
+  if (resolution.status === "untrusted") {
+    throw new Error(
+      `Mint's command-line tool was found, but its DZG Studio signature could not be verified. Download Mint Direct again from ${MINT_AI_DOWNLOAD_URL}; open it once, then ask again.`,
+    );
   }
   throw new Error(
-    `Mint is not installed. It is free to download from ${MINT_AI_DOWNLOAD_URL}; open it once, then ask again.`,
+    `Mint Direct's command-line tool was not found. The Mac App Store and Setapp editions do not include it. Download Mint Direct for free from ${MINT_AI_DOWNLOAD_URL}; open it once from Applications, then ask again.`,
   );
 }
 
@@ -155,10 +163,10 @@ export function readStatus(cli: string): Promise<StatusAnswer> {
       { encoding: "utf8", timeout: 30_000, maxBuffer: 8 * 1024 * 1024 },
       (error, stdout, stderr) => {
         const answer = parseMintCommandJSON<StatusAnswer>(stdout || undefined, "status.v1");
-        if (answer) {
+        if (answer && !answer.error && !error) {
           resolve(answer);
         } else {
-          const detail = stderr?.trim() || error?.message || "no answer";
+          const detail = answer?.error || stderr?.trim() || error?.message || "no valid answer";
           reject(new Error(`Mint did not report the disk (${detail}). Try again in a moment.`));
         }
       },
