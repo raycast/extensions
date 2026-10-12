@@ -36,6 +36,17 @@ test("normalizeKey keeps one character, case-sensitive", () => {
   assert.equal(normalizeKey(undefined), "");
 });
 
+test("normalizeKey takes one code point", () => {
+  assert.equal(normalizeKey("ab"), "a");
+  assert.equal(normalizeKey("🎹"), "🎹");
+  assert.equal([...normalizeKey("🎹")].length, 1);
+});
+
+test("normalizeEntry keeps file paths verbatim and trims other targets", () => {
+  assert.equal(normalizeEntry({ key: "x", title: "Path", kind: "file", value: "/tmp/name " }).value, "/tmp/name ");
+  assert.equal(normalizeEntry({ key: "x", title: "URL", kind: "url", value: " https://a " }).value, "https://a");
+});
+
 test("normalizeEntry fills defaults", () => {
   const entry = normalizeEntry({ key: "N", title: "New note", value: "obsidian://new" });
   assert.equal(entry.key, "N");

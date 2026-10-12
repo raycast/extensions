@@ -26,10 +26,10 @@ export function findLayerClash(layers: Layer[], name: string, ignoreId?: string)
   );
 }
 
-/** Single key. Case-sensitive, so "a" and "A" can be different actions. */
+/** Single key, one Unicode code point. Case-sensitive, so "a" and "A" differ. */
 export function normalizeKey(value: unknown): string {
   if (typeof value !== "string") return "";
-  return value.trim().slice(0, 1);
+  return [...value.trim()][0] ?? "";
 }
 
 function normalizeKind(value: unknown): EntryKind {
@@ -44,12 +44,15 @@ function normalizeKeywords(value: unknown): string[] | undefined {
 
 export function normalizeEntry(value: unknown): Entry {
   const src = (typeof value === "object" && value !== null ? value : {}) as Record<string, unknown>;
+  const kind = normalizeKind(src.kind);
+  const rawValue = typeof src.value === "string" ? src.value : "";
   return {
     id: typeof src.id === "string" && src.id.length > 0 ? src.id : generateId(),
     key: normalizeKey(src.key),
     title: typeof src.title === "string" ? src.title.trim() : "",
-    kind: normalizeKind(src.kind),
-    value: typeof src.value === "string" ? src.value.trim() : "",
+    kind,
+    // File paths are opaque: a trailing space is part of the name.
+    value: kind === "file" ? rawValue : rawValue.trim(),
     icon: typeof src.icon === "string" && src.icon.length > 0 ? src.icon : undefined,
     keywords: normalizeKeywords(src.keywords),
   };
