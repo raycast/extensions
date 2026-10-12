@@ -125,10 +125,11 @@ Recovery, without unlinking:
   if the certificate CN is the saved bridge ID, and saves only the new IP. Not with an IP preference, after a 403, or
   in Toggle All Lights' background runs (MeetHue allows one request per 15 minutes).
 - **Rejected username** (403, `UnauthorizedError`): connecting leads to `unauthorized`, the Link Again screen, which
-  keeps the bridge's IP and ID. A 403 on a change destroys the session, so reconnecting gets there too: closing it
-  would wait for the event stream, which the bridge may keep open. Linking only checks a username preference, so its
-  403 leads there as well, and with a username preference the screen points to it instead of offering Link Again,
-  which would check it again. Failure screens name a set IP preference.
+  keeps the bridge's ID and the IP that answered, saving a moved bridge's new one. A 403 on a change destroys the
+  session, so reconnecting gets there too: closing it would wait for the event stream, which the bridge may keep open.
+  Linking only checks a username preference, so its 403 leads there as well, and with a username preference the
+  screen points to it instead of offering Link Again, which would check it again. Failure screens name a set IP
+  preference.
 - **Dropped connection**: `connected` invokes `watchClient`, which turns `HueClient.onDisconnect` (session closed or
   GOAWAY) into `DISCONNECTED` and reconnects. The event stream's end closes the session, and a request without an
   answer in 5 seconds destroys it. A client that drops within 10 seconds of connecting goes to Failed to connect.

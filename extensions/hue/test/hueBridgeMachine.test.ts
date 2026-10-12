@@ -162,14 +162,14 @@ describe("connecting", () => {
     expect(actor.getSnapshot().context.bridgeConfig).toBe(client.bridgeConfig);
   });
 
-  it("asks to link again when the bridge rejects the username, and links with the saved IP address and ID", async () => {
-    connectToBridge.mockRejectedValue(new UnauthorizedError("Hue Bridge rejected the username"));
+  it("asks to link again when the bridge rejects the username, and links at the address it answered at", async () => {
+    connectToBridge.mockRejectedValue(new UnauthorizedError("192.0.2.30"));
     const actor = start();
     await reach(actor, "unauthorized");
-    expect(actor.getSnapshot().context).toMatchObject({ bridgeIpAddress: config.ipAddress, bridgeId: config.id });
+    expect(actor.getSnapshot().context).toMatchObject({ bridgeIpAddress: "192.0.2.30", bridgeId: config.id });
     actor.send({ type: "LINK" });
     expect(actor.getSnapshot().value).toBe("waitingForLinkButton");
-    expect(linkWithBridge).toHaveBeenCalledWith(config.ipAddress, config.id, undefined, expect.any(AbortSignal));
+    expect(linkWithBridge).toHaveBeenCalledWith("192.0.2.30", config.id, undefined, expect.any(AbortSignal));
   });
 
   it("fails with the error's message, and connects again on Retry", async () => {
@@ -217,7 +217,7 @@ describe("linking", () => {
   it("goes to unauthorized when the bridge rejects the username preference", async () => {
     preferences.bridgeIpAddress = config.ipAddress;
     preferences.bridgeUsername = "rejected";
-    linkWithBridge.mockRejectedValue(new UnauthorizedError("Hue Bridge rejected the username"));
+    linkWithBridge.mockRejectedValue(new UnauthorizedError(config.ipAddress));
     await reach(start(), "unauthorized");
   });
 

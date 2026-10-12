@@ -31,8 +31,13 @@ import { CONNECTION_TIMEOUT_MS } from "../helpers/constants";
 const DATA_PREFIX = "data: ";
 const SOFT_OFF = 'device (grouped_light) is "soft off", command (.on) may not have effect';
 
-// The bridge no longer accepts the username: it was removed in the Hue app, or the bridge was reset.
-export class UnauthorizedError extends Error {}
+// The bridge no longer accepts the username: it was removed in the Hue app, or the bridge was reset. Carries the
+// address that answered, a moved bridge's new one, to link again at.
+export class UnauthorizedError extends Error {
+  constructor(readonly ipAddress: string) {
+    super("Hue Bridge rejected the username");
+  }
+}
 
 export const authHeaders = (username: string) => ({
   "hue-application-key": username,
@@ -164,7 +169,7 @@ export default class HueClient {
       if (status === 403) {
         // Reconnecting leads to the Link Again screen. Closing would wait for the event stream, which may stay open.
         this.http2Session.destroy();
-        throw new UnauthorizedError("Hue Bridge rejected the username");
+        throw new UnauthorizedError(this.bridgeConfig.ipAddress);
       }
       if (status === 429 || status === 503) throw new Error("Hue Bridge is busy, try again");
       throw new Error(`Status ${status} from Hue Bridge`);

@@ -173,8 +173,8 @@ export const hueBridgeMachine = setup({
               target: "unauthorized",
               actions: [
                 { type: "logError", params: ({ event }) => ({ error: event.error }) },
-                assign(({ context }) => ({
-                  bridgeIpAddress: context.bridgeConfig?.ipAddress,
+                assign(({ context, event }) => ({
+                  bridgeIpAddress: (event.error as UnauthorizedError).ipAddress,
                   bridgeId: context.bridgeConfig?.id,
                 })),
               ],
@@ -244,7 +244,7 @@ export const hueBridgeMachine = setup({
         },
       },
     },
-    // Linking again keeps the bridge's address and ID.
+    // Linking again keeps the bridge's ID and the address that answered.
     unauthorized: {
       on: { LINK: "waitingForLinkButton" },
     },

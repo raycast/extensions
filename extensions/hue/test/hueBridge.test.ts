@@ -206,6 +206,17 @@ describe("connectToBridge", () => {
     expect(connect).toHaveBeenCalledTimes(connections);
   });
 
+  it("rejects with the new address, saving it, when the bridge it finds rejects the username", async () => {
+    const bridge = await startBridge();
+    const dead = await closedAddress();
+    storage.set(BRIDGE_CONFIG_KEY, JSON.stringify(saved(dead)));
+    meetHue([found(bridge.address)]);
+    await expect(connectToBridge({ ...config(dead), username: "rejected" })).rejects.toEqual(
+      new UnauthorizedError(bridge.address),
+    );
+    expect(JSON.parse(storage.get(BRIDGE_CONFIG_KEY)!)).toEqual(saved(bridge.address));
+  });
+
   it("doesn't look for the bridge after it rejects the username", async () => {
     const bridge = await startBridge();
     await expect(connectToBridge({ ...bridge.config, username: "rejected" })).rejects.toThrow(UnauthorizedError);

@@ -89,11 +89,15 @@ export async function connectToBridge(bridgeConfig: BridgeConfig): Promise<HueCl
       .catch(discoverBridgeUsingHuePublicApi)
       .catch(() => undefined);
     if (found === undefined || found.ipAddress === bridgeConfig.ipAddress) throw error;
-    const hueClient = await createHueClient({ ...bridgeConfig, ipAddress: found.ipAddress }).catch(() => {
+    // The certificate check passed, so the new address is saved also when it rejects the username, which leads to
+    // linking again there.
+    const result = await createHueClient({ ...bridgeConfig, ipAddress: found.ipAddress }).catch((newError) => {
+      if (newError instanceof UnauthorizedError) return newError;
       throw error;
     });
     await saveBridgeIpAddress(found.ipAddress);
-    return hueClient;
+    if (result instanceof UnauthorizedError) throw result;
+    return result;
   }
 }
 
@@ -106,7 +110,7 @@ export async function createHueClient(bridgeConfig: BridgeConfig, session?: http
       ":path": "/clip/v2/resource/bridge",
       ...authHeaders(bridgeConfig.username),
     });
-    if (headers[":status"] === 403) throw new UnauthorizedError("Hue Bridge rejected the username");
+    if (headers[":status"] === 403) throw new UnauthorizedError(bridgeConfig.ipAddress);
     if (headers[":status"] !== 200) throw new Error(`Status ${headers[":status"]}`);
     return new HueClient(bridgeConfig, session);
   } catch (error) {
