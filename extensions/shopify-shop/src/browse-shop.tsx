@@ -6,7 +6,7 @@ import ProductDetail from "./product-detail";
 import { buildStoreOrigin } from "./services/shopify-api";
 import { formatPrice, normalizeTags } from "./services/product-mapper";
 import { useSearchSuggest, useStoreMeta } from "./services/hooks";
-import { fetchProducts } from "./services/products";
+import { fetchProductsPage, type ProductPageCursor, type ProductPageOptions } from "./services/products";
 
 type FetchResponse = {
   ok: boolean;
@@ -15,10 +15,13 @@ type FetchResponse = {
 };
 
 export default function Command() {
-  const abortable = useRef<AbortController | null>(null);
+  const { storeUrl } = getPreferenceValues<Preferences>();
+  return <BrowseShop key={storeUrl} storeUrl={storeUrl} />;
+}
+
+function BrowseShop({ storeUrl }: { storeUrl: string }) {
   const [columns] = useState(3);
   const [searchText, setSearchText] = useState("");
-  const { storeUrl } = getPreferenceValues<Preferences>();
   const { value: collectionHandle, setValue: setCollectionHandle } = useLocalStorage<string | null>(
     "collectionHandle",
     null,
@@ -48,30 +51,93 @@ export default function Command() {
     ? `${storeOrigin}/collections/${encodeURIComponent(collectionHandle)}/products.json?currency=${encodeURIComponent(storeCurrency || "USD")}`
     : `${storeOrigin}/products.json?currency=${encodeURIComponent(storeCurrency || "USD")}`;
 
-  const response = useCachedPromise((url: string) => fetchProducts(url, abortable.current?.signal), [productsUrl], {
-    abortable,
-    execute: searchText.length < 2 && !storeMetaResp.isLoading,
-    onData: (catalog) => {
-      if (catalog.paginationLimited) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Pagination Limit Reached",
-          message: `Showing ${catalog.products.length} products. Select a smaller collection to browse more.`,
-        });
-      }
-    },
-  });
+  async function handleSelectCollection(handle: string | null) {
+    try {
+      await setCollectionHandle(handle);
+      await showToast(Toast.Style.Success, handle ? `Filtered by ${handle}` : "Showing all products");
+    } catch {
+      await showToast(Toast.Style.Failure, "Failed to set collection filter");
+    }
+  }
 
-  const isLoadingFromFetch = response.isLoading || searchSuggest.isLoading || storeMetaResp.isLoading;
-  const resp = response.data ?? null;
-  const hasError = Boolean(response.error || searchSuggest.error || storeMetaResp.error || collectionsResp.error);
-  const isLoading = isLoadingFromFetch || (resp === null && !searchSuggest.data && !hasError);
-  const errorMessage =
-    response.error?.message ??
-    searchSuggest.error?.message ??
-    storeMetaResp.error?.message ??
-    collectionsResp.error?.message ??
-    null;
+  return (
+    <ProductsGrid
+      key={`${productsUrl}:${searchText.length >= 2 ? "search" : "browse"}`}
+      productsUrl={productsUrl}
+      storeUrl={storeUrl}
+      storeCurrency={storeCurrency}
+      columns={columns}
+      searchText={searchText}
+      setSearchText={setSearchText}
+      collectionHandle={collectionHandle}
+      collections={collections}
+      onSelectCollection={handleSelectCollection}
+      searchSuggest={searchSuggest}
+      isMetadataLoading={storeMetaResp.isLoading}
+      backgroundError={storeMetaResp.error?.message ?? collectionsResp.error?.message ?? null}
+    />
+  );
+}
+
+type ProductsGridProps = {
+  productsUrl: string;
+  storeUrl: string;
+  storeCurrency?: string;
+  columns: number;
+  searchText: string;
+  setSearchText: (value: string) => void;
+  collectionHandle: string | null | undefined;
+  collections: { id: number; title: string; handle: string }[];
+  onSelectCollection: (handle: string | null) => Promise<void>;
+  searchSuggest: ReturnType<typeof useSearchSuggest>;
+  isMetadataLoading: boolean;
+  backgroundError: string | null;
+};
+
+function ProductsGrid({
+  productsUrl,
+  storeUrl,
+  storeCurrency,
+  columns,
+  searchText,
+  setSearchText,
+  collectionHandle,
+  collections,
+  onSelectCollection,
+  searchSuggest,
+  isMetadataLoading,
+  backgroundError,
+}: ProductsGridProps) {
+  const abortable = useRef<AbortController | null>(null);
+  const loadingMore = useRef(false);
+  const pageHasMore = useRef(false);
+  const [notice, setNotice] = useState<ProductPageCursor["notice"]>();
+  const isSearching = searchText.length >= 2;
+  const execute = !isSearching && !isMetadataLoading;
+  const response = useCachedPromise(
+    (url: string) => (options: ProductPageOptions) => fetchProductsPage(url, options, abortable.current?.signal),
+    [productsUrl],
+    {
+      abortable,
+      execute,
+      onData: (_data, options) => {
+        loadingMore.current = false;
+        const pageNotice = (options?.cursor as ProductPageCursor | undefined)?.notice;
+        // Keep completion from reopening when the hook reuses an empty cached first page.
+        pageHasMore.current = _data.length > 0 && !pageNotice;
+        setNotice(pageNotice);
+        if (pageNotice) {
+          showToast({
+            style: Toast.Style.Failure,
+            ...pageNotice,
+          });
+        }
+      },
+    },
+  );
+
+  const isLoading = isMetadataLoading || (isSearching ? searchSuggest.isLoading : response.isLoading);
+  const errorMessage = (isSearching ? searchSuggest.error?.message : response.error?.message) ?? backgroundError;
 
   let products: Product[] = [];
   if (searchText.length >= 2 && searchSuggest.data?.resources?.results?.products) {
@@ -120,23 +186,37 @@ export default function Command() {
       ],
     }));
   } else if (searchText.length < 2) {
-    products = resp?.products ?? [];
+    products = response.data ?? [];
   }
 
-  async function handleSelectCollection(handle: string | null) {
-    try {
-      await setCollectionHandle(handle);
-      await showToast(Toast.Style.Success, handle ? `Filtered by ${handle}` : "Showing all products");
-    } catch {
-      await showToast(Toast.Style.Failure, "Failed to set collection filter");
-    }
+  function reloadProducts() {
+    loadingMore.current = false;
+    response.revalidate();
   }
 
   return (
     <Grid
-      navigationTitle={
-        searchText.length < 2 && resp?.paginationLimited
-          ? `Showing ${products.length} Products (Pagination Limit Reached)`
+      navigationTitle={notice ? `Showing ${products.length} Products (Partial Results)` : undefined}
+      filtering={!isSearching}
+      pagination={
+        execute && response.pagination
+          ? {
+              ...response.pagination,
+              hasMore: response.pagination.hasMore && pageHasMore.current && !notice && !response.error,
+              onLoadMore: () => {
+                if (
+                  response.isLoading ||
+                  response.error ||
+                  loadingMore.current ||
+                  !pageHasMore.current ||
+                  notice ||
+                  !response.pagination?.hasMore
+                )
+                  return;
+                loadingMore.current = true;
+                response.pagination.onLoadMore();
+              },
+            }
           : undefined
       }
       columns={columns}
@@ -156,7 +236,7 @@ export default function Command() {
             if (v.startsWith("by:") || v.startsWith("show:")) {
               const parts = v.split(":");
               const val = parts.slice(1).join(":");
-              handleSelectCollection(val === "__all__" ? null : val);
+              onSelectCollection(val === "__all__" ? null : val);
             }
           }}
         >
@@ -173,8 +253,7 @@ export default function Command() {
       }
     >
       {!isLoading && errorMessage && <Grid.EmptyView title="Could Not Load Products" description={errorMessage} />}
-      {!isLoading &&
-        !errorMessage &&
+      {!errorMessage &&
         products.map((p, index) => {
           const key = p.id ?? p.handle ?? p.title ?? `missing-${index}`;
           const firstImage = p.images && p.images.length > 0 ? p.images[0].src : undefined;
@@ -202,6 +281,7 @@ export default function Command() {
                     target={<ProductDetail handle={p.handle ?? ""} baseUrl={storeUrl} />}
                   />
                   <Action.CopyToClipboard content={p.handle ?? ""} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+                  {notice && <Action title="Reload Products" icon={Icon.ArrowClockwise} onAction={reloadProducts} />}
                 </ActionPanel>
               }
             />
