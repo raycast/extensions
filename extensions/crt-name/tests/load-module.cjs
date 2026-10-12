@@ -13,7 +13,12 @@ function loadModule(filename, mocks) {
     if (name.startsWith(".")) return loadModule(resolve(filename, "..", `${name}.ts`), mocks);
     return require(name);
   };
-  vm.runInThisContext(`(function(require, module, exports) { ${source}\n })`)(localRequire, module, module.exports);
+  vm.runInThisContext(`(function(require, module, exports, fetch) { ${source}\n })`)(
+    localRequire,
+    module,
+    module.exports,
+    mocks.fetch ?? globalThis.fetch,
+  );
   return module.exports;
 }
 
