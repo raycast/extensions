@@ -32,7 +32,7 @@ Set **Default Language** in extension preferences for clipboard, selected-text, 
 
 The language menu is a curated subset of the extensions advertised by the [paste.rs web form](https://paste.rs/web), verified on 2026-10-12. Unsupported extensions such as `.ts` and `.swift` are not offered. See the [service API](https://paste.rs/) and [service source](https://github.com/SergioBenitez/rktpb/blob/master/src/main.rs) for rendering behavior. Adding or removing the language suffix changes how the same paste is displayed; deleting either URL deletes the underlying paste.
 
-The exact returned URL, including its selected language suffix, is copied and saved in history. Invalid service URLs and failed uploads do not replace the clipboard. Partial uploads copy the URL with a warning. If copying fails after upload, the error includes the created URL for recovery. If local history cannot be saved, the command reports that the URL was copied but history is unavailable. Network requests time out after 30 seconds.
+The exact returned URL, including its selected language suffix, is copied and saved in history. Invalid service URLs and failed uploads do not replace the clipboard. Partial uploads copy the URL with a warning. Successful uploads are saved to history before copying the URL. If copying fails, the paste remains in history when storage is available, and the error includes its URL for recovery. If local history cannot be saved, the command reports that the URL was copied but history is unavailable. Network requests time out after 30 seconds.
 
 ## Development checks
 

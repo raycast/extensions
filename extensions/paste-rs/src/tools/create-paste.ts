@@ -30,7 +30,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
  * instead of asking for confirmation in your reply.
  */
 export default async function tool(input: Input) {
-  const { language = "" } = getPreferenceValues<{ language?: string }>();
+  const { language = "" } = getPreferenceValues<Preferences>();
   const result = await createAndCopyPaste(input.content, language);
 
   return {

@@ -17,7 +17,7 @@ export async function pasteText(
     if (confirm && !(await confirm(content))) return;
 
     toast = await showToast({ style: Toast.Style.Animated, title: "Creating paste" });
-    const { language = "" } = getPreferenceValues<{ language?: string }>();
+    const { language = "" } = getPreferenceValues<Preferences>();
     const result = await createAndCopyPaste(content, language);
     if (!result.historySaved) {
       toast.style = Toast.Style.Failure;

@@ -10,7 +10,7 @@ interface FormValues {
 
 export default function CreatePaste() {
   const { handleSubmit, itemProps } = useForm<FormValues>({
-    initialValues: { language: getPreferenceValues<{ language?: string }>().language ?? "" },
+    initialValues: { language: getPreferenceValues<Preferences>().language ?? "" },
     validation: {
       content: FormValidation.Required,
     },

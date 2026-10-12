@@ -4,17 +4,20 @@ import { addToHistory } from "./history";
 
 export async function createAndCopyPaste(content: string, language: string) {
   const result = await createPaste(content, language);
-  try {
-    await Clipboard.copy(result.url);
-  } catch {
-    throw new Error(`Paste created but the URL could not be copied: ${result.url}`);
-  }
-
   let historySaved = true;
   try {
     await addToHistory({ url: result.url, content, partial: result.partial });
   } catch {
     historySaved = false;
+  }
+
+  try {
+    await Clipboard.copy(result.url);
+  } catch {
+    throw new Error(
+      `${result.partial ? "Paste partially uploaded" : "Paste created"} but the URL could not be copied: ${result.url}` +
+        (historySaved ? "" : " Local history could not be saved."),
+    );
   }
   return { ...result, historySaved };
 }

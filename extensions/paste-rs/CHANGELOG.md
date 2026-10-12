@@ -6,7 +6,7 @@
 - Add Paste Selected Text with public-upload confirmation and empty/unavailable selection handling.
 - Remove the tagline from the extension title.
 - Validate service URLs, preserve language URLs in clipboard/history, and delete highlighted pastes by their underlying ID.
-- Handle request timeouts and distinguish clipboard-copy failures from local history failures.
+- Handle request timeouts, preserve successful upload history when copying fails, and distinguish clipboard-copy failures from local history failures.
 
 ## [Initial Version] - 2026-07-06
 

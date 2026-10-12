@@ -8,7 +8,16 @@ const ts = require("typescript");
 // Every module runs with synthetic Raycast APIs and a mocked fetch. These tests
 // never load @raycast/api or read the real clipboard/selection/local storage.
 function harness(options = {}) {
-  const calls = { requests: [], copies: [], history: [], toasts: [], hud: [], confirmations: [], pops: 0 };
+  const calls = {
+    requests: [],
+    copies: [],
+    history: [],
+    historyAttempts: 0,
+    toasts: [],
+    hud: [],
+    confirmations: [],
+    pops: 0,
+  };
   const raycast = {
     Toast: { Style: { Failure: "failure", Success: "success", Animated: "animated" } },
     Clipboard: {
@@ -84,6 +93,7 @@ function harness(options = {}) {
         if (specifier === "./history" || specifier === "../history") {
           return {
             addToHistory: async (record) => {
+              calls.historyAttempts++;
               if (options.historyError) throw new Error("Storage unavailable");
               calls.history.push(record);
             },
@@ -227,10 +237,13 @@ test("partial uploads copy the highlighted URL and warn", async () => {
   assert.deepEqual(h.calls.hud, ["Paste partially uploaded, URL copied"]);
 });
 
-test("clipboard copy failure surfaces the created URL without claiming it was copied", async () => {
+test("clipboard copy failure preserves upload history and surfaces the URL without claiming it was copied", async () => {
   const h = harness({ content: "synthetic", language: "rs", copyError: true });
   await h.load("src/paste-selected-text.ts").default();
-  assert.equal(h.calls.history.length, 0);
+  assert.equal(h.calls.history.length, 1);
+  assert.equal(h.calls.history[0].url, "https://paste.rs/Fixture123.rs");
+  assert.equal(h.calls.history[0].content, "synthetic");
+  assert.equal(h.calls.copies.length, 0);
   assert.equal(h.calls.hud.length, 0);
   assert.match(h.calls.toasts.at(-1).message, /could not be copied: https:\/\/paste.rs\/Fixture123.rs/);
 });
@@ -320,4 +333,42 @@ test("form and AI tool surface local history failure after copying", async () =>
   const result = await h.load("src/tools/create-paste.ts").default({ content: "synthetic" });
   assert.equal(result.url, h.calls.copies[1]);
   assert.match(result.message, /Local history could not be saved/);
+});
+
+for (const status of [201, 206]) {
+  test(`AI copy failure preserves the uploaded URL and partial status (${status})`, async () => {
+    const h = harness({ language: "rs", copyError: true, status });
+    await assert.rejects(
+      h.load("src/tools/create-paste.ts").default({ content: "  synthetic AI fixture\n" }),
+      /could not be copied: https:\/\/paste.rs\/Fixture123.rs/,
+    );
+    assert.equal(h.calls.requests.length, 1);
+    assert.equal(h.calls.copies.length, 0);
+    assert.equal(h.calls.historyAttempts, 1);
+    assert.equal(h.calls.history[0].url, "https://paste.rs/Fixture123.rs");
+    assert.equal(h.calls.history[0].content, "  synthetic AI fixture\n");
+    assert.equal(h.calls.history[0].partial, status === 206);
+  });
+}
+
+test("AI simultaneous copy and history failures report the URL and both failures", async () => {
+  const h = harness({ language: "rs", copyError: true, historyError: true });
+  await assert.rejects(
+    h.load("src/tools/create-paste.ts").default({ content: "synthetic" }),
+    /could not be copied: https:\/\/paste.rs\/Fixture123.rs Local history could not be saved/,
+  );
+  assert.equal(h.calls.historyAttempts, 1);
+  assert.equal(h.calls.history.length, 0);
+  assert.equal(h.calls.requests.length, 1);
+  assert.equal(h.calls.copies.length, 0);
+});
+
+test("form copy failure preserves history and leaves the form open", async () => {
+  const h = harness({ copyError: true });
+  h.load("src/create-paste.tsx").default();
+  await h.calls.form.onSubmit({ content: "synthetic", language: "rs" });
+  assert.equal(h.calls.history[0].url, "https://paste.rs/Fixture123.rs");
+  assert.equal(h.calls.pops, 0);
+  assert.equal(h.calls.toasts[0].style, "failure");
+  assert.match(h.calls.toasts[0].message, /could not be copied/);
 });
