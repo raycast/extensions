@@ -6,7 +6,7 @@ import ProductDetail from "./product-detail";
 import { buildStoreOrigin } from "./services/shopify-api";
 import { formatPrice, normalizeTags } from "./services/product-mapper";
 import { useSearchSuggest, useStoreMeta } from "./services/hooks";
-import { fetchAllProducts } from "./services/products";
+import { fetchProducts } from "./services/products";
 
 type FetchResponse = {
   ok: boolean;
@@ -48,9 +48,18 @@ export default function Command() {
     ? `${storeOrigin}/collections/${encodeURIComponent(collectionHandle)}/products.json?currency=${encodeURIComponent(storeCurrency || "USD")}`
     : `${storeOrigin}/products.json?currency=${encodeURIComponent(storeCurrency || "USD")}`;
 
-  const response = useCachedPromise((url: string) => fetchAllProducts(url, abortable.current?.signal), [productsUrl], {
+  const response = useCachedPromise((url: string) => fetchProducts(url, abortable.current?.signal), [productsUrl], {
     abortable,
     execute: searchText.length < 2 && !storeMetaResp.isLoading,
+    onData: (catalog) => {
+      if (catalog.paginationLimited) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Store Pagination Limit Reached",
+          message: `Showing ${catalog.products.length} products. Select a smaller collection to browse more.`,
+        });
+      }
+    },
   });
 
   const isLoadingFromFetch = response.isLoading || searchSuggest.isLoading || storeMetaResp.isLoading;
@@ -111,7 +120,7 @@ export default function Command() {
       ],
     }));
   } else if (searchText.length < 2) {
-    products = resp ?? [];
+    products = resp?.products ?? [];
   }
 
   async function handleSelectCollection(handle: string | null) {
@@ -125,6 +134,11 @@ export default function Command() {
 
   return (
     <Grid
+      navigationTitle={
+        searchText.length < 2 && resp?.paginationLimited
+          ? `Showing ${products.length} Products (Store Limit Reached)`
+          : undefined
+      }
       columns={columns}
       inset={Grid.Inset.Large}
       isLoading={isLoading}

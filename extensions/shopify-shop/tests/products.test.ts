@@ -1,12 +1,60 @@
 import assert from "node:assert/strict";
 import { afterEach, mock, test } from "node:test";
-import { fetchAllProducts } from "../src/services/products.ts";
+import { fetchProducts } from "../src/services/products.ts";
+
+async function fetchAllProducts(...args: Parameters<typeof fetchProducts>) {
+  const catalog = await fetchProducts(...args);
+  assert.equal(catalog.paginationLimited, false);
+  return catalog.products;
+}
 
 const productsUrl = "https://store.example/products.json?currency=CAD";
 const product = (id: number) => ({ id, handle: `product-${id}`, title: `Product ${id}` });
 const jsonResponse = (products: unknown[]) => Response.json({ products });
 
 afterEach(() => mock.restoreAll());
+
+test("Shopify's ceiling preserves the loaded catalog and explicitly marks it incomplete", async () => {
+  const requests: number[] = [];
+  mock.method(globalThis, "fetch", async (input: string) => {
+    const page = Number(new URL(input).searchParams.get("page"));
+    requests.push(page);
+    if (page === 101) return Response.json({ errors: "Page * Limit exceeds the 25000 limit." }, { status: 400 });
+    return jsonResponse(Array.from({ length: 250 }, (_, index) => product((page - 1) * 250 + index + 1)));
+  });
+
+  const catalog = await fetchProducts(productsUrl);
+  assert.equal(catalog.paginationLimited, true);
+  assert.equal(catalog.products.length, 25000);
+  assert.equal(catalog.products.at(-1)?.id, 25000);
+  assert.equal(requests.length, 101);
+});
+
+test("a catalog ending before the ceiling completes without a limit warning", async () => {
+  mock.method(globalThis, "fetch", async (input: string) => {
+    const page = Number(new URL(input).searchParams.get("page"));
+    if (page === 100) return jsonResponse([]);
+    return jsonResponse([product(page)]);
+  });
+  const catalog = await fetchProducts(productsUrl);
+  assert.equal(catalog.paginationLimited, false);
+  assert.equal(catalog.products.length, 99);
+});
+
+test("other HTTP 400 responses beyond the ceiling remain failures", async () => {
+  mock.method(globalThis, "fetch", async (input: string) => {
+    const page = Number(new URL(input).searchParams.get("page"));
+    return page === 101 ? Response.json({ errors: "Bad request" }, { status: 400 }) : jsonResponse([product(page)]);
+  });
+  await assert.rejects(fetchProducts(productsUrl), /Failed to load products \(400\)/);
+});
+
+test("the ceiling message before the boundary remains a failure", async () => {
+  mock.method(globalThis, "fetch", async () =>
+    Response.json({ errors: "Page * Limit exceeds the 25000 limit." }, { status: 400 }),
+  );
+  await assert.rejects(fetchProducts(productsUrl), /Failed to load products \(400\)/);
+});
 
 test("loads every page, including short pages, and stops at the empty page", async () => {
   const pages = [[product(1), product(2)], [product(3)], [product(4)], []];
