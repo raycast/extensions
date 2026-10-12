@@ -27,7 +27,7 @@ active.
 | Run Layer     | The runner. Press a key to fire an action. Opens a picker if run directly.  |
 | Manage Layers | Create and edit layers and their single-key actions.                       |
 | Import Layers | Merge layers from a JSON file or pasted text.                              |
-| Export Layers | Write all layers to `~/Downloads` and copy the JSON.                       |
+| Export Layers | Write all layers to a timestamped JSON file in `~/Downloads`.            |
 
 ## Setup
 
@@ -55,8 +55,7 @@ closes.
 
 ## Import / export
 
-The Export Layers command writes `~/Downloads/shortcut-layers-<date>-<time>.json` and
-copies it to the clipboard.
+The Export Layers command writes `~/Downloads/shortcut-layers-<date>-<time>.json`.
 
 The Import Layers command merges a pasted or picked JSON file. Layers match by `id`
 and actions by `key`. New layers are appended. In a matched layer an action is added
@@ -101,4 +100,6 @@ action and fires it, and `esc` closes the layer.
   true of every extension.
 - Opening a layer shows and focuses the Raycast panel, so there is a brief flash. It
   can't run invisibly.
+- File and folder search uses the Spotlight index, so an unindexed path won't show
+  up in the list. Type the path instead and pick it.
 - macOS only for now.
