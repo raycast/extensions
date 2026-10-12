@@ -1,3 +1,5 @@
+import { chartTotal, chartActiveCustomers, overviewDateRange } from "./chart-overview";
+
 export interface Project {
   id: string;
   name: string;
@@ -11,7 +13,8 @@ export interface Metric {
   description: string;
   unit: string;
   period: string;
-  value: number;
+  value: number | null;
+  unavailableReason?: string;
   last_updated_at: number | null;
 }
 export interface Overview {
@@ -21,6 +24,7 @@ export interface Overview {
 const API = "https://api.revenuecat.com/v2";
 
 export function formatMetric(metric: Metric, currency: string): string {
+  if (metric.value === null) return "Unavailable";
   if (metric.unit === "$" || metric.unit === currency) {
     return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 2 }).format(
       metric.value,
@@ -83,7 +87,7 @@ export class RevenueCatClient {
     }
     return projects;
   }
-  async overview(projectId: string, currency: string, signal?: AbortSignal): Promise<Overview> {
+  async overview(projectId: string, currency: string, signal?: AbortSignal, chartsV3 = false): Promise<Overview> {
     const data = await this.get<Overview>(
       `/projects/${encodeURIComponent(projectId)}/metrics/overview?currency=${encodeURIComponent(currency)}`,
       signal,
@@ -102,7 +106,80 @@ export class RevenueCatClient {
       )
     )
       throw new Error("Unexpected RevenueCat metrics response.");
-    return data;
+    if (!chartsV3) return data;
+    const range = overviewDateRange();
+    const base = `/projects/${encodeURIComponent(projectId)}/charts/`;
+    const query = new URLSearchParams({
+      realtime: "true",
+      start_date: range.start,
+      end_date: range.end,
+      expand_periods: "false",
+      currency: data.currency,
+      resolution: "0",
+      aggregate: "total",
+    });
+    const revenueQuery = new URLSearchParams(query);
+    revenueQuery.set("selectors", JSON.stringify({ revenue_type: "revenue" }));
+    // A single yearly bucket gives a distinct count over exactly the requested
+    // range. Never add counts across buckets: returning customers would repeat.
+    const activeQuery = new URLSearchParams(query);
+    activeQuery.set("resolution", "4");
+    activeQuery.delete("aggregate");
+    const crossesYear = range.start.slice(0, 4) !== range.end.slice(0, 4);
+    const permission = "charts_metrics:charts:read";
+    // Isolate both transport and parsing failures to the affected metric.
+    const results = await Promise.allSettled([
+      this.get<unknown>(`${base}revenue?${revenueQuery}`, signal, permission).then((chart) =>
+        chartTotal(chart, "Revenue", "$", data.currency),
+      ),
+      this.get<unknown>(`${base}customers_new?${query}`, signal, permission).then((chart) =>
+        chartTotal(chart, "New Customers", "#", data.currency),
+      ),
+      crossesYear
+        ? Promise.resolve(null)
+        : this.get<unknown>(`${base}customers_active?${activeQuery}`, signal, permission).then(chartActiveCustomers),
+    ]);
+    // User cancellation still cancels the entire load and must not cache a
+    // partial result as if requests had genuinely failed.
+    signal?.throwIfAborted();
+    const values: Record<string, Pick<Metric, "value" | "unavailableReason">> = {};
+    ["revenue", "new_customers", "active_users"].forEach((id, index) => {
+      const result = results[index];
+      values[id] =
+        result.status === "fulfilled"
+          ? { value: result.value }
+          : {
+              value: null,
+              unavailableReason:
+                result.reason instanceof Error
+                  ? `Charts v3 unavailable: ${result.reason.message}`
+                  : "Could not load this metric from Charts v3. Try refreshing.",
+            };
+    });
+    return {
+      ...data,
+      metrics: data.metrics.map((metric) => {
+        if (!(metric.id in values)) return metric;
+        return {
+          ...metric,
+          ...values[metric.id],
+          period: "P28D",
+          last_updated_at: null,
+          ...(metric.id === "active_users"
+            ? {
+                name: "Active Customers",
+                description: "Unique customers with SDK activity in the last 28 days, including today (UTC).",
+                ...(crossesYear
+                  ? {
+                      unavailableReason:
+                        "RevenueCat cannot return a distinct total across calendar years. Available again when the 28-day range falls within one year.",
+                    }
+                  : {}),
+              }
+            : {}),
+        };
+      }),
+    };
   }
 }
 export const demoOverview: Overview = {
