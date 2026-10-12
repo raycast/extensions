@@ -42,6 +42,7 @@ export function CreateBrandIdentityForm({ isLoading, onCreated, workspacePicker 
       push(
         <GenerationStatus
           jobId={result.job.id}
+          organization={result.organization}
           onComplete={() => {
             onCreated?.();
           }}

@@ -68,7 +68,7 @@ export default function Command() {
       toast.style = Toast.Style.Success;
       toast.title = "Generation queued";
 
-      push(<GenerationStatus jobId={result.job.id} type="post" />);
+      push(<GenerationStatus jobId={result.job.id} organization={result.organization} type="post" />);
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to queue generation";

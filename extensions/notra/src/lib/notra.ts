@@ -348,15 +348,17 @@ export function generatePost(input: GeneratePostRequest): Promise<GeneratePostRe
   });
 }
 
-export function getPostGenerationStatus(jobId: string): Promise<PostGenerationStatusResponse> {
-  return notraRequest<PostGenerationStatusResponse>(`/v1/posts/generate/${jobId}`);
+export function getPostGenerationStatus(jobId: string, organizationId: string): Promise<PostGenerationStatusResponse> {
+  return notraRequest<PostGenerationStatusResponse>(`/v1/posts/generate/${jobId}`, { organizationId });
 }
 
 export async function updateBrandIdentity(
   id: string,
   input: UpdateBrandIdentityRequest,
+  organizationId?: string,
 ): Promise<GetBrandIdentityResponse> {
   const response = await notraRequest<GetBrandIdentityResponse>(`/v1/brand-identities/${id}`, {
+    organizationId,
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
@@ -365,8 +367,9 @@ export async function updateBrandIdentity(
   return response;
 }
 
-export async function deleteBrandIdentity(id: string): Promise<DeleteBrandIdentityResponse> {
+export async function deleteBrandIdentity(id: string, organizationId?: string): Promise<DeleteBrandIdentityResponse> {
   const response = await notraRequest<DeleteBrandIdentityResponse>(`/v1/brand-identities/${id}`, {
+    organizationId,
     method: "DELETE",
   });
   clearNotraCache();
@@ -381,8 +384,13 @@ export function generateBrandIdentity(input: GenerateBrandIdentityRequest): Prom
   });
 }
 
-export function getBrandIdentityGenerationStatus(jobId: string): Promise<BrandIdentityGenerationStatusResponse> {
-  return notraRequest<BrandIdentityGenerationStatusResponse>(`/v1/brand-identities/generate/${jobId}`);
+export function getBrandIdentityGenerationStatus(
+  jobId: string,
+  organizationId: string,
+): Promise<BrandIdentityGenerationStatusResponse> {
+  return notraRequest<BrandIdentityGenerationStatusResponse>(`/v1/brand-identities/generate/${jobId}`, {
+    organizationId,
+  });
 }
 
 export async function createGitHubIntegration(

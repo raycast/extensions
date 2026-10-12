@@ -29,6 +29,13 @@ export interface Organization {
   slug: string;
 }
 
+export interface GenerationStatusProps {
+  jobId: string;
+  onComplete?: () => void;
+  organization: Organization;
+  type: "post" | "brand-identity";
+}
+
 export interface Workspace extends Organization {
   isCurrent: boolean;
   role: string;

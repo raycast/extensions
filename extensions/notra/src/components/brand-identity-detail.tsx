@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { deleteBrandIdentity, getNotraRequestInit, NOTRA_API_URL, updateBrandIdentity } from "../lib/notra";
-import type { BrandIdentity, GetBrandIdentityResponse } from "../types";
+import type { BrandIdentity, GetBrandIdentityResponse, Organization } from "../types";
 import { getErrorMessage, notraOrganizationUrl } from "../utils";
 import { EditBrandIdentityForm } from "./edit-brand-identity-form";
 
@@ -64,9 +64,11 @@ function buildMarkdown(bi: BrandIdentity): string {
 export function BrandIdentityDetail({
   brandIdentityId,
   onMutated,
+  organization,
 }: {
   brandIdentityId: string;
   onMutated?: () => Promise<void> | void;
+  organization?: Organization;
 }) {
   const { pop } = useNavigation();
 
@@ -75,7 +77,7 @@ export function BrandIdentityDetail({
     BrandIdentity | null,
     BrandIdentity | null
   >(`${NOTRA_API_URL}/v1/brand-identities/${brandIdentityId}`, {
-    ...getNotraRequestInit(),
+    ...getNotraRequestInit({ organizationId: organization?.id }),
     execute: Boolean(brandIdentityId),
     mapResult(result) {
       return { data: result.brandIdentity };
@@ -98,7 +100,7 @@ export function BrandIdentityDetail({
       title: "Setting as default...",
     });
     try {
-      await updateBrandIdentity(bi.id, { isDefault: true });
+      await updateBrandIdentity(bi.id, { isDefault: true }, organization?.id);
       await handleRefresh();
       toast.style = Toast.Style.Success;
       toast.title = "Set as default brand identity";
@@ -127,7 +129,7 @@ export function BrandIdentityDetail({
       title: "Deleting...",
     });
     try {
-      await deleteBrandIdentity(bi.id);
+      await deleteBrandIdentity(bi.id, organization?.id);
       await onMutated?.();
       toast.style = Toast.Style.Success;
       toast.title = "Brand identity deleted";
@@ -148,7 +150,13 @@ export function BrandIdentityDetail({
               <Action.Push
                 icon={Icon.Pencil}
                 shortcut={Keyboard.Shortcut.Common.Edit}
-                target={<EditBrandIdentityForm brandIdentity={bi} onUpdated={handleRefresh} />}
+                target={
+                  <EditBrandIdentityForm
+                    brandIdentity={bi}
+                    onUpdated={handleRefresh}
+                    organizationId={organization?.id}
+                  />
+                }
                 title="Edit Brand Identity"
               />
               {!bi.isDefault && <Action icon={Icon.Star} onAction={handleSetDefault} title="Set as Default" />}
@@ -165,7 +173,7 @@ export function BrandIdentityDetail({
                 icon={Icon.Globe}
                 shortcut={Keyboard.Shortcut.Common.OpenWith}
                 title="View on Notra"
-                url={notraOrganizationUrl("/brand/identity")}
+                url={notraOrganizationUrl("/brand/identity", organization?.slug)}
               />
               <Action.OpenInBrowser title="Open Website" url={bi.websiteUrl} />
               <Action
