@@ -19,10 +19,6 @@ import { DEFAULT_KEY_COLOR, findEntry } from "./schema";
 import { SORT_OPTIONS, sortEntries, type SortOption } from "./sort";
 import type { Entry, EntryKind, KeyMode } from "./types";
 
-interface Preferences {
-  defaultMode: KeyMode;
-}
-
 /** A focused layer: a single key runs its action, and it doubles as the action editor. */
 export function LayerView({ layerId }: { layerId: string }) {
   const { layers, isLoading, revalidate } = useLayers();
@@ -57,11 +53,8 @@ export function LayerView({ layerId }: { layerId: string }) {
       return;
     }
     const visible = text.trim();
-    if (visible.length === 0) {
-      setSearchText("");
-      return;
-    }
-    if (visible.length > 1) {
+    const chars = [...visible];
+    if (chars.length !== 1) {
       setSearchText("");
       return;
     }
@@ -79,6 +72,25 @@ export function LayerView({ layerId }: { layerId: string }) {
     setMode(next);
     setSearchText("");
   }
+
+  // Shown both when nothing is selected and in every item's panel, since a
+  // selection hides the list-level panel.
+  const sharedActions = (
+    <>
+      <Action
+        title={isInstant ? "Switch to Search Mode" : "Switch to Instant Mode"}
+        icon={Icon.MagnifyingGlass}
+        shortcut={{ modifiers: ["cmd"], key: "t" }}
+        onAction={toggleMode}
+      />
+      <Action
+        title="Delete All Actions"
+        icon={Icon.Trash}
+        style={Action.Style.Destructive}
+        onAction={() => deleteAllEntries(current.id, revalidate)}
+      />
+    </>
+  );
 
   return (
     <List
@@ -102,20 +114,7 @@ export function LayerView({ layerId }: { layerId: string }) {
             shortcut={Keyboard.Shortcut.Common.New}
             target={<EntryForm layerId={current.id} mutate={revalidate} />}
           />
-          <Action
-            title={isInstant ? "Switch to Search Mode" : "Switch to Instant Mode"}
-            icon={Icon.MagnifyingGlass}
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
-            onAction={toggleMode}
-          />
-          <ActionPanel.Section>
-            <Action
-              title="Delete All Actions"
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              onAction={() => deleteAllEntries(current.id, revalidate)}
-            />
-          </ActionPanel.Section>
+          <ActionPanel.Section>{sharedActions}</ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -165,6 +164,7 @@ export function LayerView({ layerId }: { layerId: string }) {
                   onAction={() => deleteEntry(current.id, entry, revalidate)}
                 />
               </ActionPanel.Section>
+              <ActionPanel.Section>{sharedActions}</ActionPanel.Section>
             </ActionPanel>
           }
         />

@@ -80,7 +80,7 @@ export function EntryForm({
       return;
     }
     const title = values.title.trim();
-    const target = value.trim();
+    const target = kind === "file" ? value : value.trim();
     if (!title || !target) {
       await showToast({ style: Toast.Style.Failure, title: "Title and target are required" });
       return;
@@ -143,7 +143,7 @@ export function EntryForm({
         value={key}
         error={keyError}
         info="g/G"
-        onChange={(next) => setKey(next.slice(-1))}
+        onChange={(next) => setKey([...next].at(-1) ?? "")}
       />
       <Form.TextField id="title" title="Title" placeholder="Action name" defaultValue={source?.title} />
       <Form.Dropdown id="kind" title="Type" value={kind} onChange={(next) => setKind(next as EntryKind)}>
