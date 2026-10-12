@@ -4,11 +4,6 @@
     <img src="./assets/icon.png" alt="The Forest" width="100"/>
     <h3>The Forest</h3>
     <p>Rediscover the joy of getting lost on the web</p>
-    <p align="center">
-        <a href="https://buymeacoffee.com/0xdhrv"><img alt="Buy Me a Coffee" src="https://shieldcn.dev/badge/buymecoffee-FFDD04.svg?size=default&amp;theme=neutral&amp;logo=buymeacoffee" /></a>
-        <a href="https://github.com/0xdhrv"><img alt="GitHub" src="https://shieldcn.dev/badge/github-181717.svg?size=default&amp;theme=neutral&amp;logo=github" /></a>
-        <a href="https://x.com/0xdhrv"><img alt="Twitter" src="https://shieldcn.dev/badge/twitter-1DA1F2.svg?size=default&amp;theme=neutral&amp;logo=x" /></a>
-    </p>
     <br/>
     <br/>
 </div>
