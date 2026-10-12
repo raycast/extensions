@@ -97,8 +97,15 @@ async function moveBack(from: string, to: string) {
             await fs.promises.symlink(await fs.promises.readlink(from), to);
             await fs.promises.unlink(from);
         } else if (stats.isDirectory()) {
-            // rename never overwrites a file, or a folder that has anything in it.
-            await fs.promises.rename(from, to);
+            // rename would silently replace an empty folder at `to`. So claim the name with mkdir first, which fails
+            // if anything is there, then rename onto the empty folder we just made.
+            await fs.promises.mkdir(to);
+            try {
+                await fs.promises.rename(from, to);
+            } catch (error) {
+                await fs.promises.rmdir(to).catch(() => undefined);
+                throw error;
+            }
         } else {
             await fs.promises.link(from, to);
             await fs.promises.unlink(from);
@@ -138,8 +145,9 @@ export async function createLink(source: string, linkPath: string, replace: bool
         throw error;
     }
 
-    // `previous` is a symlink, so unlinking it never touches what it points to.
-    if (previous) await fs.promises.unlink(previous);
+    // `previous` is a symlink, so unlinking it never touches what it points to. The new link is in place and saved by
+    // now, so a failed cleanup mustn't report the creation as failed.
+    if (previous) await fs.promises.unlink(previous).catch(() => undefined);
 }
 
 /**
@@ -157,6 +165,11 @@ export async function removeLink(record: LinkLocation) {
         await moveBack(aside, record.destination);
         return false;
     }
-    await fs.promises.unlink(aside);
+    try {
+        await fs.promises.unlink(aside);
+    } catch (error) {
+        // Already gone means it's removed, which is what we wanted.
+        if (errorCode(error) !== "ENOENT") throw error;
+    }
     return true;
 }
