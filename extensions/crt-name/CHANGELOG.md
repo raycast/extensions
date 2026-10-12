@@ -1,6 +1,6 @@
 # CRT Name Changelog
 
-## [Copy All and First-Seen Sorting] - {PR_MERGE_DATE}
+## [Copy All and First-Seen Sorting] - 2026-10-12
 
 - Copy all unique indexed names in the selected order, including results outside the current filter or display page
 - Sort by oldest or newest first-seen timestamp, or alphabetically, with unknown dates last
