@@ -38,7 +38,7 @@ function ACMenu({ onHide }: { onHide: () => void }) {
 
   return (
     <MenuBarExtra
-      icon={{ source: Icon.Snowflake, tintColor: iconColor }}
+      icon={{ source: "air-conditioner.svg", tintColor: iconColor }}
       title={activeCount > 0 ? `${activeCount}` : undefined}
       tooltip={
         error ? "ACs: connection failed" : `Air conditioners · ${activeCount} on · ${entities?.length ?? 0} total`
@@ -59,7 +59,7 @@ function ACMenu({ onHide }: { onHide: () => void }) {
         const roomTemperature = climateTemperature(entity, entity.attributes.current_temperature);
         const targetTemperature = climateTemperature(entity, entity.attributes.temperature);
         const icon = {
-          source: Icon.Snowflake,
+          source: "air-conditioner.svg",
           tintColor: available && entity.state !== "off" ? Color.Blue : Color.SecondaryText,
         };
         return (
