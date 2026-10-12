@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update DC Hub MCP Server] - {PR_MERGE_DATE}
+
+- Update DC Hub's description to its current canonical wording.
+
 ## [Add Keeploop MCP Server] - 2026-10-12
 
 - Add Keeploop to the official registry: your Mac's Apple Mail and Calendar for Raycast AI. Search mail, read threads, see who is waiting on a reply and check your calendar; writes stay off until you allow them on your Mac. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs the Keeploop Mac app with Keeploop Pro or its free trial for remote use; local use is free. Direct HTTP connection in Raycast at https://mcp.keeploop.app/mcp.
