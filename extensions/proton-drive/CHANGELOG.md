@@ -1,6 +1,6 @@
 # Proton Drive Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-12
 
 - Search Files: browse your Drive folder by folder, with a detail panel for each file and folder
 - Filter the current folder as you type; search the whole Drive once the optional search index is built
