@@ -1,5 +1,10 @@
 # Fx Coding Agent Changelog
 
+## [Fix Request Cancellation] - {PR_MERGE_DATE}
+
+- Stop active Ask Fx requests and their child processes when leaving the result view, starting another request, or using the Cancel action.
+- Ensure timed-out requests stop their tools and cannot return partial JSON as a successful response.
+
 ## [Initial Version] - 2026-08-24
 
 - Added complete saved conversation history to session details, including every user and fx turn plus compact tool activity.
