@@ -69,8 +69,9 @@ npm run dev
 
 - Symlinks are created with Node's `fs.symlink`. No shell commands are run.
 - Symlink information is stored in a JSON file in the extension's support directory
-- The extension validates paths before creating links, and refuses to link a folder into itself
-- Force creation swaps the old symlink for the new one atomically
+- The extension validates paths before creating links, and refuses to link a folder into itself, including through folder symlinks
+- Before replacing or deleting a link, the extension moves it aside and checks it there, so a real file or folder that takes its place is never touched
+- If saving a new link to the list fails, the link is removed again and any link it replaced is restored
 
 ## Credits
 
