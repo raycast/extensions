@@ -1,6 +1,6 @@
 # Notra Changelog
 
-## [Account API Keys and Workspace Switching] - {PR_MERGE_DATE}
+## [Account API Keys and Workspace Switching] - 2026-10-12
 
 - Added support for account API keys that work across all of your workspaces
 - Added a workspace switcher to every command when your key has access to more than one workspace
