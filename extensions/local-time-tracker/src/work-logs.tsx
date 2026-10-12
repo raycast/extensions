@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { formatLogDate, formatTime, isSameLocalDay } from "./lib/date";
-import { getCategoryIcon, getCategoryName } from "./lib/categories";
+import { getCategoryIcon, getCategoryName } from "./lib/project-groups";
 import { formatDuration, getDurationSeconds } from "./lib/duration";
 import { showFailure } from "./lib/errors";
 import { findProject, getProjectName, sortProjectsByPreference } from "./lib/projects";

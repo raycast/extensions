@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { showFailure } from "./lib/errors";
-import { CATEGORY_ICONS, getCategoryIcon, getCategoryIconName, getCategoryName } from "./lib/categories";
+import { CATEGORY_ICONS, getCategoryIcon, getCategoryIconName, getCategoryName } from "./lib/project-groups";
 import { sortProjectsByPreference } from "./lib/projects";
 import { getProjectCategories, getProjects, saveProjectCategories, saveProjects } from "./lib/storage";
 import type { Project, ProjectCategory } from "./lib/types";

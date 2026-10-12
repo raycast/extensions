@@ -1,7 +1,7 @@
 import { Icon, List } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { formatDuration } from "./lib/duration";
-import { getCategoryIcon, getCategoryName } from "./lib/categories";
+import { getCategoryIcon, getCategoryName } from "./lib/project-groups";
 import { showFailure } from "./lib/errors";
 import { createReport } from "./lib/reports";
 import { getActiveTimer, getProjectCategories, getProjects, getWorkLogs } from "./lib/storage";

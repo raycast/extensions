@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { getRecentDescriptions } from "./lib/descriptions";
-import { getCategoryIcon } from "./lib/categories";
+import { getCategoryIcon } from "./lib/project-groups";
 import { launchWithFailure } from "./lib/command-actions";
 import { formatDuration, getDurationSeconds } from "./lib/duration";
 import { showFailure } from "./lib/errors";
