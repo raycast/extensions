@@ -22,7 +22,7 @@ export default function Command() {
     moveFavoriteDown,
     hideInvalidDevices,
     getActionForService,
-  } = useNetworkServices();
+  } = useNetworkServices({ withFavorites: true });
 
   const hasVisibleServices =
     favoriteServices.length > 0 || otherServices.length > 0 || (!hideInvalidDevices && invalidServices.length > 0);

@@ -1,10 +1,3 @@
-const { after } = require("node:test");
-const { tmpdir } = require("node:os");
-const { mkdtempSync, rmSync } = require("node:fs");
-const tempFolders = [];
-after(() => {
-  for (const folder of tempFolders) rmSync(folder, { recursive: true, force: true });
-});
 const { readFileSync } = require("node:fs");
 const { resolve, dirname } = require("node:path");
 const ts = require("typescript");
@@ -31,8 +24,6 @@ function loadSource(entry, mocks) {
 }
 
 function apiMock(initial = {}) {
-  const supportPath = mkdtempSync(resolve(tmpdir(), "vpn-tests-"));
-  tempFolders.push(supportPath);
   const storage = new Map(Object.entries(initial));
   const hud = [],
     launches = [],
@@ -58,7 +49,7 @@ function apiMock(initial = {}) {
       launchCommand: async (options) => {
         launches.push(options);
       },
-      environment: { supportPath, entryPointName: "index", launchType: "userInitiated" },
+      environment: { entryPointName: "index", launchType: "userInitiated" },
       LaunchType: { Background: "background" },
       Toast: { Style: { Failure: "failure", Success: "success" } },
       Icon: {},

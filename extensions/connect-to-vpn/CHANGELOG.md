@@ -2,6 +2,7 @@
 
 ## [Fixes and Improvements] - {PR_MERGE_DATE}
 
+- Keep VPN discovery and toggling independent of favorites storage; repair favorites in memory and save only user edits.
 - Clarify extension and command descriptions, service filtering, and sorting preferences.
 - Search services by name or type, refresh from an empty list with a keyboard shortcut, and see connected VPN names in the menu bar tooltip.
 - Fix silent toggle failures when no VPN is selected or the saved VPN is missing, unavailable, or already connecting or disconnecting.

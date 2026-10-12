@@ -31,10 +31,10 @@ function setup(initial = {}) {
   return { ...context, network, calls, output, mocks };
 }
 
-async function mount(ctx, t) {
+async function mount(ctx, t, withFavorites = true) {
   let current, renderer;
   function Component() {
-    current = ctx.network.useNetworkServices();
+    current = ctx.network.useNetworkServices({ withFavorites });
     return null;
   }
   await act(async () => {
@@ -65,7 +65,7 @@ test("discovers disabled VPNs, quoted names and physical interfaces with one bat
   assert.equal(ctx.calls.length, 2);
 });
 
-test("named favorites preserve identity after network reordering", async () => {
+test("named favorites preserve identity after network reordering", async (t) => {
   const ctx = setup({
     "network-service-favorites": '{"service:Work VPN":true}',
     "network-service-favorites-order": '{"service:Work VPN":4}',
@@ -84,9 +84,9 @@ test("named favorites preserve identity after network reordering", async () => {
     [1, "Home VPN"],
     [2, "Work VPN"],
   ]);
-  const services = await ctx.network.getNetworkServices();
-  assert.equal(services["service:Work VPN"].favorite, true);
-  assert.equal(services["service:Home VPN"].favorite, false);
+  const current = await mount(ctx, t);
+  assert.equal(current().favoriteServices[0].name, "Work VPN");
+  assert.equal(current().otherServices[0].name, "Home VPN");
 });
 
 test("legacy favorites never attach to a VPN reusing a numeric position across discovery and refresh", async (t) => {
@@ -654,4 +654,122 @@ test("visible favorites move past hidden neighbors without changing their saved 
   await act(async () => current().moveFavoriteUp(current().favoriteServices[2]));
   assert.deepEqual(names(), ["One", "Two", "Hidden"]);
   assert.deepEqual(await ctx.network.loadFavoriteOrder(), { "service:One": 0, "service:Hidden": 2, "service:Two": 1 });
+});
+
+for (const failure of ["read", "write"]) {
+  test(`discovery, menu bar status and real toggle ignore favorites ${failure} failures`, async (t) => {
+    const ctx = setup({
+      "network-service-last-used": "Work VPN",
+      "network-service-favorites": '{"service:Work VPN":true}',
+    });
+    const reads = [],
+      writes = [];
+    const getItem = ctx.api.LocalStorage.getItem,
+      setItem = ctx.api.LocalStorage.setItem;
+    ctx.api.LocalStorage.getItem = async (key) => {
+      reads.push(key);
+      if (failure === "read" && key.includes("favorite")) throw new Error("favorites unavailable");
+      return getItem(key);
+    };
+    ctx.api.LocalStorage.setItem = async (key, value) => {
+      writes.push(key);
+      if (failure === "write" && key.includes("favorite")) throw new Error("favorites unavailable");
+      return setItem(key, value);
+    };
+    assert.equal((await ctx.network.getNetworkServices())["service:Work VPN"].status, "disconnected");
+    const menu = await mount(ctx, t, false);
+    assert.equal(menu().error, undefined);
+    assert.equal(menu().otherServices[0].name, "Work VPN");
+    ctx.api.environment.entryPointName = "toggle";
+    const toggle = loadSource("toggle.ts", ctx.mocks).default;
+    await toggle();
+    assert.match(ctx.hud.at(-1), /Connecting to Work VPN/);
+    assert.equal(ctx.calls.filter((c) => c.args[0] === "-connectpppoeservice").length, 1);
+    await toggle();
+    assert.match(ctx.hud.at(-1), /already connecting/);
+    assert.equal(ctx.calls.filter((c) => c.args[0] === "-connectpppoeservice").length, 1);
+    assert.equal(
+      reads.some((key) => key.includes("favorite")),
+      false,
+    );
+    assert.equal(
+      writes.some((key) => key.includes("favorite")),
+      false,
+    );
+  });
+}
+
+test("favorites read failure keeps fresh services actionable and retains known favorites on refresh", async (t) => {
+  const ctx = setup({
+    "network-service-favorites": '{"service:Work VPN":true}',
+    "network-service-favorites-order": '{"service:Work VPN":4}',
+  });
+  const current = await mount(ctx, t);
+  const getItem = ctx.api.LocalStorage.getItem;
+  ctx.api.LocalStorage.getItem = async (key) => {
+    if (key.includes("favorite")) throw new Error("favorites unavailable");
+    return getItem(key);
+  };
+  ctx.output.order = serviceOrder([
+    [1, "Work VPN"],
+    [2, "Home VPN"],
+  ]);
+  ctx.output.statuses = vpnList([["Work VPN", "Connected"], ["Home VPN"]]);
+  await act(async () => current().refreshServices());
+  assert.match(current().error.message, /Unable to load favorites/);
+  assert.equal(current().favoriteServices[0].status, "connected");
+  assert.equal(current().favoriteServices[0].order, 4);
+  assert.equal(current().otherServices[0].name, "Home VPN");
+  await act(async () => current().getActionForService(current().otherServices[0]).action());
+  assert.equal(ctx.calls.filter((c) => c.args[0] === "-connectpppoeservice").length, 1);
+  ctx.api.LocalStorage.getItem = getItem;
+  await act(async () => current().refreshServices());
+  assert.equal(current().error, undefined);
+});
+
+test("first favorites read failure still discovers services and supports toggling", async (t) => {
+  const ctx = setup();
+  const getItem = ctx.api.LocalStorage.getItem;
+  ctx.api.LocalStorage.getItem = async (key) => {
+    if (key.includes("favorite")) throw new Error("favorites unavailable");
+    return getItem(key);
+  };
+  const current = await mount(ctx, t);
+  assert.match(current().error.message, /favorites unavailable/);
+  assert.equal(current().otherServices.length, 1);
+  await act(async () => current().getActionForService(current().otherServices[0]).action());
+  assert.equal(ctx.calls.filter((c) => c.args[0] === "-connectpppoeservice").length, 1);
+});
+
+test("a refresh that starts during a pending favorite save cannot overwrite the completed edit", async (t) => {
+  const ctx = setup();
+  const current = await mount(ctx, t);
+  const setItem = ctx.api.LocalStorage.setItem;
+  let releaseWrite, save, finishRead, refresh;
+  ctx.api.LocalStorage.setItem = async (key, value) => {
+    if (key.includes("favorite"))
+      await new Promise((resolve) => {
+        releaseWrite = resolve;
+      });
+    return setItem(key, value);
+  };
+  await act(async () => {
+    save = current().addToFavorites(current().otherServices[0]);
+  });
+  ctx.output.onRead = (callback) => {
+    finishRead = callback;
+  };
+  await act(async () => {
+    refresh = current().refreshServices();
+  });
+  await act(async () => {
+    releaseWrite();
+    await save;
+  });
+  await act(async () => {
+    finishRead(null, ctx.output.statuses);
+    assert.equal(await refresh, "superseded");
+  });
+  assert.equal(current().favoriteServices.length, 1);
+  assert.equal(current().otherServices.length, 0);
 });

@@ -1,7 +1,4 @@
-import { environment, LocalStorage } from "@raycast/api";
-import { mkdir } from "node:fs/promises";
-import { join } from "node:path";
-import { lock } from "proper-lockfile";
+import { LocalStorage } from "@raycast/api";
 
 const FAVORITES_KEY = "network-service-favorites";
 const FAVORITES_ORDER_KEY = "network-service-favorites-order";
@@ -54,38 +51,37 @@ async function loadFavoriteMetadata(): Promise<FavoriteMetadata> {
 export const loadFavorites = async (): Promise<Record<string, boolean>> => (await loadFavoriteMetadata()).favorites;
 export const loadFavoriteOrder = async (): Promise<Record<string, number>> => (await loadFavoriteMetadata()).order;
 
-/** All commands read, migrate, and edit the latest metadata under the same process-shared lock. */
-export async function updateFavoriteMetadata(change?: (metadata: FavoriteMetadata) => void): Promise<FavoriteMetadata> {
-  await mkdir(environment.supportPath, { recursive: true });
-  const release = await lock(join(environment.supportPath, "favorite-metadata"), {
-    realpath: false,
-    retries: { retries: 20, minTimeout: 25, maxTimeout: 100 },
-  });
-  try {
-    const metadata = await loadFavoriteMetadata();
-    const previous = JSON.stringify(metadata);
-    const { favorites, order } = metadata;
-    // Numeric network positions contain no owner identity. Retain them unchanged, but never
-    // assign them to the service currently in that slot, even if the original VPN returns.
-    const ids = Object.keys(favorites)
-      .filter((id) => favorites[id] && !/^\d+$/.test(id))
-      .sort((a, b) => (order[a] ?? Infinity) - (order[b] ?? Infinity));
-    // Keep absent named favorites in their manual order. A historical partial save can leave
-    // favorites without positions; append those after every favorite with a known position.
-    if (ids.some((id) => order[id] === undefined) || new Set(ids.map((id) => order[id])).size !== ids.length) {
-      ids.forEach((id, index) => {
-        order[id] = index;
-      });
-    }
-    change?.(metadata);
-    const next = JSON.stringify(metadata);
-    if (next !== previous || (await LocalStorage.getItem<string>(FAVORITE_METADATA_KEY)) === undefined) {
-      // One write commits membership and order together. Leave the old keys untouched so a
-      // failed initial import can be retried from the original data.
-      await LocalStorage.setItem(FAVORITE_METADATA_KEY, next);
-    }
-    return metadata;
-  } finally {
-    await release();
+/** Import and repair in memory; reading never changes saved favorites. */
+export async function readFavoriteMetadata(): Promise<FavoriteMetadata> {
+  const metadata = await loadFavoriteMetadata();
+  const { favorites, order } = metadata;
+  // Numeric network positions contain no owner identity. Retain them unchanged, but never
+  // assign them to the service currently in that slot, even if the original VPN returns.
+  const ids = Object.keys(favorites)
+    .filter((id) => favorites[id] && !/^\d+$/.test(id))
+    .sort((a, b) => (order[a] ?? Infinity) - (order[b] ?? Infinity));
+  // Keep absent named favorites in their manual order. A historical partial save can leave
+  // favorites without positions; append those after every favorite with a known position.
+  if (ids.some((id) => order[id] === undefined) || new Set(ids.map((id) => order[id])).size !== ids.length) {
+    ids.forEach((id, index) => {
+      order[id] = index;
+    });
   }
+  return metadata;
+}
+
+// Only the list edits favorites. Serialize rapid user actions within that command so
+// each edit reads the snapshot committed by the preceding edit, including after failure.
+let pendingEdit: Promise<unknown> = Promise.resolve();
+export function updateFavoriteMetadata(change: (metadata: FavoriteMetadata) => void): Promise<FavoriteMetadata> {
+  const edit = pendingEdit.then(async () => {
+    const metadata = await readFavoriteMetadata();
+    const previous = JSON.stringify(metadata);
+    change(metadata);
+    const next = JSON.stringify(metadata);
+    if (next !== previous) await LocalStorage.setItem(FAVORITE_METADATA_KEY, next);
+    return metadata;
+  });
+  pendingEdit = edit.catch(() => undefined);
+  return edit;
 }

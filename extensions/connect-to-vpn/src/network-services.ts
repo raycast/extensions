@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { exec, execFile } from "child_process";
 import { Icon, LocalStorage, Toast, getPreferenceValues, showToast, environment, LaunchType } from "@raycast/api";
 import { getVpnStatus, updateVpnStatus } from "./store";
-import { updateFavoriteMetadata } from "./favorite-metadata";
+import { readFavoriteMetadata, updateFavoriteMetadata } from "./favorite-metadata";
 export { loadFavorites, loadFavoriteOrder } from "./favorite-metadata";
 
 type Preferences = {
@@ -74,18 +74,7 @@ export const getNetworkServices = async () => {
   const serviceStatuses = await Promise.all(
     services.map(async (service) => ({ ...service, status: await currentStatus(service, vpnStatuses) })),
   );
-  // Discovery does not hold the metadata lock. Once it finishes, use the latest saved edits.
-  const { favorites, order } = await updateFavoriteMetadata();
-  return Object.fromEntries(
-    serviceStatuses.map((service) => [
-      service.id,
-      {
-        ...service,
-        favorite: favorites[service.id] ?? false,
-        order: order[service.id] ?? 0,
-      },
-    ]),
-  );
+  return Object.fromEntries(serviceStatuses.map((service) => [service.id, service]));
 };
 
 // How a service in transition is watched until it settles. Each check is one scutil call of about
@@ -101,7 +90,7 @@ const SETTLE_GRACE_CHECKS = 4;
 const statusBeforeTransition = (status: NetworkServiceStatus) =>
   status === "connecting" ? "disconnected" : status === "disconnecting" ? "connected" : undefined;
 
-export function useNetworkServices() {
+export function useNetworkServices({ withFavorites = false } = {}) {
   const { sortBy, hideInvalidDevices } = getPreferenceValues<Preferences>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | undefined>(undefined);
@@ -119,6 +108,19 @@ export function useNetworkServices() {
     setIsLoading(true);
     try {
       const services = await getNetworkServices();
+      let favoritesError: Error | undefined;
+      if (withFavorites) {
+        try {
+          const { favorites, order } = await readFavoriteMetadata();
+          for (const service of Object.values(services)) {
+            service.favorite = favorites[service.id] ?? false;
+            service.order = order[service.id] ?? 0;
+          }
+        } catch (err) {
+          if (isSessionGone(err)) throw err;
+          favoritesError = new Error(`Unable to load favorites: ${err instanceof Error ? err.message : String(err)}`);
+        }
+      }
       const update = await getVpnStatus();
       if (update && Date.now() - update.timestamp >= 0 && Date.now() - update.timestamp < 1_000) {
         const service = services[update.serviceId];
@@ -128,8 +130,17 @@ export function useNetworkServices() {
       }
       if (revision.current !== startedAtRevision) return "superseded";
       settleChecks.current = {};
-      setNetworkServices(services);
-      setError(undefined);
+      setNetworkServices((current) =>
+        favoritesError
+          ? Object.fromEntries(
+              Object.entries(services).map(([id, service]) => [
+                id,
+                { ...service, favorite: current[id]?.favorite ?? false, order: current[id]?.order ?? 0 },
+              ]),
+            )
+          : services,
+      );
+      setError(favoritesError);
       return "refreshed";
     } catch (err) {
       if (!isSessionGone(err)) setError(err instanceof Error ? err : new Error(String(err)));
@@ -138,7 +149,7 @@ export function useNetworkServices() {
       refreshing.current = false;
       setIsLoading(false);
     }
-  }, []);
+  }, [withFavorites]);
 
   const refreshServicesFromAction = async () => {
     const result = await refreshServices();
@@ -269,6 +280,7 @@ export function useNetworkServices() {
     revision.current += 1;
     try {
       const { favorites, order } = await updateFavoriteMetadata(change);
+      revision.current += 1;
       setNetworkServices((current) =>
         Object.fromEntries(
           Object.entries(current).map(([id, service]) => [
