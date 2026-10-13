@@ -1,4 +1,4 @@
-import { AlbumResponseDto, getAlbumInfo, getAllAlbums } from "@immich/sdk";
+import { AlbumResponseDto, AssetResponseDto, getAlbumInfo, getAllAlbums, searchAssets } from "@immich/sdk";
 import { Action, ActionPanel, Grid, Icon, LaunchProps } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getAssetThumbnail, initialize } from "./immich";
@@ -66,7 +66,21 @@ function AlbumAssetsView({ album }: { album: AlbumResponseDto }) {
   const { isLoading, data: assets } = useCachedPromise(
     async (id: string) => {
       const res = await getAlbumInfo({ id });
-      return res.assets;
+      if (res.assets && res.assets.length > 0) {
+        return res.assets;
+      }
+      if (res.assetCount === 0) {
+        return [];
+      }
+      // Newer Immich servers no longer include `assets` in the album response, so page through search instead
+      const items: AssetResponseDto[] = [];
+      let page: number | null = 1;
+      while (page !== null) {
+        const searchRes = await searchAssets({ metadataSearchDto: { albumIds: [id], page, size: 1000 } });
+        items.push(...searchRes.assets.items);
+        page = searchRes.assets.nextPage ? Number(searchRes.assets.nextPage) : null;
+      }
+      return items;
     },
     [album.id],
     { initialData: [] },
