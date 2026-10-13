@@ -81,7 +81,8 @@
     "fix-lint": "ray lint --fix"
   },
   "dependencies": {
-    "@raycast/api": "^2.7.3"
+    "@raycast/api": "^2.7.3",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
@@ -89,6 +90,7 @@
     "@types/react": "^19.0.10",
     "eslint": "^9.39.5",
     "prettier": "^3.9.9",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "@types/qrcode": "^1.5.6"
   }
 }

@@ -17,6 +17,7 @@ import { formatCode } from "../vendor/lib/otp";
 import { filterAccounts } from "../vendor/lib/search";
 import type { AccountData, VaultGroup } from "../vendor/lib/types";
 import AccountForm from "./account-form";
+import { AccountExportAction } from "./account-export";
 import { commit } from "./lib/commit";
 import { deliverCode } from "./lib/deliver";
 import { t } from "./lib/i18n";
@@ -349,6 +350,7 @@ function CodeItem({
             shortcut={Keyboard.Shortcut.Common.Edit}
             target={<AccountForm mode="edit" account={account} />}
           />
+          <AccountExportAction accountId={account.id} />
           <ManageActions />
           <ActionPanel.Section>
             <Action

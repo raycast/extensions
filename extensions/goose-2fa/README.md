@@ -6,6 +6,14 @@ A standalone Raycast extension for managing local TOTP and HOTP accounts. Create
 
 Configure Return behavior in Raycast extension preferences. The interface is in English; account names may contain Chinese text. Data sources and JSON backups are managed under **Settings & Data** in Raycast.
 
+## Export an account to another authenticator
+
+Select an account in **Codes** or **Settings & Data**, then choose **Export Account** from the action panel. The export view displays a locally generated QR code for a phone authenticator to scan. **Copy Setup Link** copies the same `otpauth://` URI; **Copy Secret** copies the Base32 key for manual entry. Use **Show Setup Text** to view either value as text. The edit form also offers **Export Saved Account**, which uses the latest saved account, not unsaved edits.
+
+The URI preserves the account's type, algorithm, digits, and TOTP period or current HOTP counter, following the [Key URI format](https://github.com/google/google-authenticator/wiki/Key-Uri-Format). The receiving authenticator must support those parameters. Colons within names and issuers are exported as full-width colons to avoid the format's reserved separator; stored names remain unchanged. Showing or copying an export does not advance the HOTP counter. If an account's label is too long for a QR code, the complete setup link and secret remain available to copy.
+
+QR codes are generated in memory without network requests or image files. Copied setup links and secrets use Raycast's confidential clipboard option to exclude them from Raycast Clipboard History. **Both contain the account's two-factor secret.**
+
 ## Optional shared data source
 
 Accounts are stored locally in Raycast by default. To use a shared data source, select an existing JSON file in the **Data Source File** preference, or open **Codes → Settings & Data** to create one in a folder you choose. You can select the same iCloud Drive file in Goose 2FA on another Mac. iCloud file synchronization is not instantaneous or a substitute for backups; avoid editing the file simultaneously on multiple devices. If the file is unavailable or has changed unexpectedly, resolve the issue before writing again.
@@ -18,8 +26,4 @@ Screenshot scanning hides Raycast before opening the system capture tool, then a
 
 Both pasted secrets and scanned QR codes use an account form before saving. Review the name, issuer, notes, and TOTP/HOTP settings there. Scanning or opening the form does not create an account; use **Save Account** to add it.
 
-The QR scanner uses macOS Vision through a Swift package. Raycast builds and bundles it automatically during `ray build` and `ray publish`.
-
-## Optional file-format compatibility
-
-The shared JSON format can also be used with the Goose 2FA uTools plugin.
+The QR scanner uses macOS Vision through a bundled Swift helper.

@@ -1,7 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { exportAsSyncJson } from "../vendor/lib/data-transfer";
+import { deduplicateImports, exportAsSyncJson, parseImportBundle } from "../vendor/lib/data-transfer";
+import { normalizeNewAccountInput } from "../vendor/lib/account-validation";
 import type { AccountData, NewAccountInput } from "../vendor/lib/types";
 import {
+  addAccounts,
   addGroup,
   emptyTrash,
   mergeExternalSnapshot,
@@ -117,4 +119,13 @@ test("导出的备份可以被自己解析（格式闭环）", () => {
   expect(parsed.app).toBe("goose-2fa");
   expect(parsed.accounts).toHaveLength(1);
   expect(parsed.trash).toHaveLength(1);
+});
+
+test("扫码进入编辑后保存保留 HOTP 计数器并拒绝重复", () => {
+  const scanned = parseImportBundle("otpauth://hotp/GitHub:alice@example.com?secret=JBSWY3DPEHPK3PXP&issuer=GitHub&counter=7")?.accounts[0];
+  const edited = normalizeNewAccountInput({ ...scanned, name: "Alice" });
+  expect(edited).not.toBeNull();
+  const saved = addAccounts({ accounts: [], groups: [], trash: [] }, [edited!], null);
+  expect(saved.accounts[0]).toMatchObject({ name: "Alice", type: "hotp", counter: 7 });
+  expect(deduplicateImports([edited!], saved.accounts).newAccounts).toHaveLength(0);
 });

@@ -8,7 +8,13 @@ import type { AccountData, VaultGroup } from "./types";
 export function matchAccount(account: AccountData, query: string, groupName = ""): boolean {
   const q = query.trim().toLowerCase();
   if (!q) return true;
-  const haystack = [account.issuer, account.name, account.remark ?? "", account.note ?? "", groupName]
+  const haystack = [
+    account.issuer,
+    account.name,
+    account.remark ?? "",
+    account.note ?? "",
+    groupName,
+  ]
     .join(" ")
     .toLowerCase();
   return q
@@ -17,7 +23,11 @@ export function matchAccount(account: AccountData, query: string, groupName = ""
     .every((token) => haystack.includes(token));
 }
 
-export function filterAccounts(accounts: AccountData[], query: string, groups: VaultGroup[] = []): AccountData[] {
+export function filterAccounts(
+  accounts: AccountData[],
+  query: string,
+  groups: VaultGroup[] = [],
+): AccountData[] {
   if (!query.trim()) return accounts;
   const names = new Map(groups.map((group) => [group.id, group.name]));
   return accounts.filter((account) => matchAccount(account, query, names.get(account.groupId ?? "") ?? ""));

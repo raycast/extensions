@@ -8,7 +8,10 @@ export function isUngrouped(account: AccountData): boolean {
   return !account.groupId;
 }
 
-export function filterByGroup(accounts: AccountData[], groupId: string | null): AccountData[] {
+export function filterByGroup(
+  accounts: AccountData[],
+  groupId: string | null,
+): AccountData[] {
   if (groupId === null) return accounts;
   if (groupId === UNGROUPED_KEY) return accounts.filter(isUngrouped);
   return accounts.filter((a) => a.groupId === groupId);
@@ -22,7 +25,10 @@ export interface GroupTally {
 }
 
 /** 按 order 排列用户分组，并附带账户数。 */
-export function buildGroupTallies(groups: VaultGroup[], accounts: AccountData[]): GroupTally[] {
+export function buildGroupTallies(
+  groups: VaultGroup[],
+  accounts: AccountData[],
+): GroupTally[] {
   const counts = new Map<string, number>();
   let ungrouped = 0;
   for (const account of accounts) {
@@ -34,7 +40,9 @@ export function buildGroupTallies(groups: VaultGroup[], accounts: AccountData[])
     counts.set(id, (counts.get(id) ?? 0) + 1);
   }
 
-  const sorted = [...groups].sort((a, b) => a.order - b.order || a.name.localeCompare(b.name, "zh"));
+  const sorted = [...groups].sort(
+    (a, b) => a.order - b.order || a.name.localeCompare(b.name, "zh"),
+  );
 
   const tallies: GroupTally[] = sorted.map((g) => ({
     id: g.id,
