@@ -288,7 +288,6 @@ function localIconPath(value: string): string | undefined {
 
 /** Real icon for app and file entries; falls back to the kind's glyph. */
 function entryIcon(entry: Entry): string | { fileIcon: string } {
-  if (entry.icon) return entry.icon;
   if (entry.kind === "app" || entry.kind === "file") {
     const path = localIconPath(entry.value);
     if (path) return { fileIcon: path };

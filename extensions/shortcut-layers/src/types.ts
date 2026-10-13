@@ -8,7 +8,6 @@ export interface Entry {
   kind: EntryKind;
   /** App bundle path, URL or deeplink (including `raycast://`), file path, or shell command. */
   value: string;
-  icon?: string;
   keywords?: string[];
 }
 

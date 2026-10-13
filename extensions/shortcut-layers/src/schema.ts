@@ -53,7 +53,6 @@ export function normalizeEntry(value: unknown): Entry {
     kind,
     // File paths are opaque: a trailing space is part of the name.
     value: kind === "file" ? rawValue : rawValue.trim(),
-    icon: typeof src.icon === "string" && src.icon.length > 0 ? src.icon : undefined,
     keywords: normalizeKeywords(src.keywords),
   };
 }
