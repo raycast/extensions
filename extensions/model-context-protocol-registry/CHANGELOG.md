@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Bool MCP Server] - {PR_MERGE_DATE}
+## [Add Bool MCP Server] - 2026-10-13
 
 - Add Bool to the official registry: make your own apps and tools from a conversation. Create projects, prompt the builder or edit files, define data, and publish working web apps to a live URL. Hosted remote Streamable HTTP server with OAuth 2.1 sign-in. Direct HTTP connection in Raycast at https://bool.com/api/mcp.
 
