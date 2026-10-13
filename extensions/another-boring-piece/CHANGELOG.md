@@ -8,6 +8,7 @@
 - Deleting a wallpaper from history removes all its recorded actions.
 - Keep earlier downloads available in Finder and match every recorded action in History search.
 - Load history files asynchronously while preserving complete artwork timelines.
+- Prevent older history loads from restoring deleted rows after a newer refresh.
 - Fixed README screenshot links.
 
 ## [Windows Support] - 2026-06-30

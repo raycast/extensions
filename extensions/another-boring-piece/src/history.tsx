@@ -11,7 +11,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { DownloadWallpaperAction, SetWallpaperAction } from "./actions";
 import { buildWallpaperMarkdown, getThumbnailUrl } from "./utils";
 import {
@@ -193,34 +193,25 @@ export default function Command() {
   const [history, setHistory] = useState<HistoryListEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  async function refreshHistory() {
+  const loadRequest = useRef(0);
+
+  const refreshHistory = useCallback(async () => {
+    const request = ++loadRequest.current;
     setIsLoading(true);
     try {
       const entries = await loadHistory();
-      setHistory(entries);
+      if (request === loadRequest.current) setHistory(entries);
     } finally {
-      setIsLoading(false);
+      if (request === loadRequest.current) setIsLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    let isMounted = true;
-
-    async function load() {
-      try {
-        const entries = await loadHistory();
-        if (isMounted) setHistory(entries);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    }
-
-    load();
-
+    refreshHistory();
     return () => {
-      isMounted = false;
+      loadRequest.current++;
     };
-  }, []);
+  }, [refreshHistory]);
 
   return (
     <List
