@@ -32,7 +32,6 @@ export function TranslationsList({ isSearchFromClipboard, isSearchFromSelection 
         if (error) {
           throw error;
         }
-
         setTranslations(data);
         setUrl(url);
         setLanguages([input.sourceLanguage, input.targetLanguage]);
@@ -50,12 +49,15 @@ export function TranslationsList({ isSearchFromClipboard, isSearchFromSelection 
     [setTranslations, setUrl, setLanguages, setLoading],
   );
 
+  // Prefill (clipboard/selection) runs once on mount: depending on `searchText` re-reads it on
+  // every edit, so clearing the field resurrected the clipboard term in a loop.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only prefill
   useEffect(() => {
     if (isSearchFromClipboard) {
       (async () => {
         const clipboardText = await Clipboard.readText();
 
-        if (clipboardText && clipboardText !== searchText) {
+        if (clipboardText) {
           fetchTranslations(clipboardText);
         }
       })();
@@ -64,18 +66,28 @@ export function TranslationsList({ isSearchFromClipboard, isSearchFromSelection 
       (async () => {
         const selectedText = await getSelectedText();
 
-        if (selectedText && selectedText !== searchText) {
+        if (selectedText) {
           fetchTranslations(selectedText);
         }
       })();
     }
-  }, [isSearchFromClipboard, isSearchFromSelection, fetchTranslations, searchText]);
+    // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only prefill
+  }, []);
 
   return (
     <List
       isLoading={loading}
       searchText={searchText}
-      onSearchTextChange={(text) => fetchTranslations(text)}
+      onSearchTextChange={(text) => {
+        if (text === "") {
+          // Esc cleared the search bar: drop the results and the query in the same tick, so no
+          // later render can resurrect the old text through the throttled fetch path.
+          setSearchText("");
+          setTranslations([]);
+          return;
+        }
+        fetchTranslations(text);
+      }}
       navigationTitle="Search dict.cc"
       searchBarPlaceholder="Search term (e.g. 'en de Home', or 'Home')"
       throttle
