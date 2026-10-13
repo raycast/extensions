@@ -1,6 +1,6 @@
 # Is Agentic Changelog
 
-## [Fix Website Search] - {PR_MERGE_DATE}
+## [Fix Website Search] - 2026-10-13
 
 - Debounce URL edits and cancel replaced requests so only the current website report is shown and saved to history.
 - Correct the optional URL argument so the command can also open without a URL.
