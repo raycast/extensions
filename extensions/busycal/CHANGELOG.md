@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix Create Event and Create Task Dates] - {PR_MERGE_DATE}
+## [Fix Create Event and Create Task Dates] - 2026-10-13
 
 - Fix "Could not parse startDate" when creating an event or a task with a due time: timed dates are now sent as local `YYYY-MM-DDTHH:mm:ss`, without the UTC offset BusyCal rejects ([#30119](https://github.com/raycast/extensions/issues/30119), [#30103](https://github.com/raycast/extensions/issues/30103))
 
