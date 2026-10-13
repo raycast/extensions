@@ -141,7 +141,7 @@ export async function searchMessages({
     candidateOffset += candidates.length;
 
     const messageOrder = new Map(candidates.map(({ id }, index) => [id, index]));
-    const candidateGlobs = candidates.flatMap(({ id }) => ["-g", `**/${id}.emlx*`]);
+    const candidateGlobs = candidates.flatMap(({ id }) => ["-g", `**/${id}.{emlx,partial.emlx}`]);
     const trashGlobs = includeTrash ? [] : trashMailboxGlobs.flatMap((glob) => ["-g", glob]);
     const args = search
       ? [search, ...candidateGlobs, ...trashGlobs, "-i", "-l", basePath]
