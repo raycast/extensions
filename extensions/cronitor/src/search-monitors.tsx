@@ -1,6 +1,7 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { ErrorResult, Monitor } from "./types";
+import { useState } from "react";
 
 const { api_key } = getPreferenceValues<Preferences>();
 const token = btoa(`${api_key}:`);
@@ -8,6 +9,8 @@ const CRONITOR_VERSION = "2025-11-28";
 const CRONITOR_PAGE_SIZE = 20;
 
 export default function SearchMonitors() {
+  const [searchText, setSearchText] = useState("");
+
   const {
     isLoading,
     data: monitors,
@@ -18,6 +21,7 @@ export default function SearchMonitors() {
       new URLSearchParams({
         page: String(options.page + 1),
         pageSize: String(CRONITOR_PAGE_SIZE),
+        search: searchText,
       }).toString(),
     {
       headers: {
@@ -35,7 +39,7 @@ export default function SearchMonitors() {
       mapResult(result: { monitors: Monitor[]; page_size: number; page: number; total_monitor_count: number }) {
         return {
           data: result.monitors,
-          hasMore: (result.page + 1) * result.page_size < result.total_monitor_count,
+          hasMore: result.page * result.page_size < result.total_monitor_count,
         };
       },
       initialData: [],
@@ -43,7 +47,7 @@ export default function SearchMonitors() {
   );
 
   return (
-    <List isLoading={isLoading} pagination={pagination} isShowingDetail>
+    <List isLoading={isLoading} pagination={pagination} isShowingDetail onSearchTextChange={setSearchText} throttle>
       {monitors.map((monitor) => (
         <List.Item
           key={monitor.key}
