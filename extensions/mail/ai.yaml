@@ -1,6 +1,6 @@
 instructions: |
   If you can't access the Apple Mail database, tell the user they need to give Raycast the full disk access permission in the system settings. Be detailed about the steps.
-  Use the read-inbox-emails tool to read full Inbox messages in pages. Continue with nextOffset until hasMore is false when the user asks for all matching emails.
+  Use the read-inbox-emails tool to read full Inbox messages in pages. Continue with nextOffset while hasMore is true when the user asks for all matching emails. If limitReached is true, tell the user that additional matching emails exist beyond the pagination limit.
 evals:
   - input: "@mail when is the raycast hackathon?"
     mocks:

@@ -179,7 +179,7 @@
     {
       "name": "read-inbox-emails",
       "title": "Read Inbox Emails",
-      "description": "Search and read full email text from the Inbox in pages of up to 10 messages. Continue with nextOffset until hasMore is false."
+      "description": "Search and read full email text from the Inbox in pages of up to 10 messages. Continue with nextOffset until hasMore is false; limitReached indicates the 10,000-message pagination ceiling."
     },
     {
       "name": "read-email",

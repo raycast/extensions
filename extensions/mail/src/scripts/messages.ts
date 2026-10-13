@@ -530,6 +530,56 @@ export const getMessageContent = async (message: Message, mailbox: Mailbox) => {
   }
 };
 
+export const getNativeReplyRecipients = async (
+  message: Message,
+  mailbox: Mailbox,
+  action: OutgoingMessageAction.Reply | OutgoingMessageAction.ReplyAll,
+) => {
+  const messageAccount = escapeAppleScriptString(message.account);
+  const messageMailbox = escapeAppleScriptString(mailbox.name);
+  const messageId = escapeAppleScriptString(String(message.id));
+  const actionScript =
+    action === OutgoingMessageAction.Reply ? "reply msg" : "reply msg with properties {reply to all: true}";
+  const script = `
+    tell application "Mail"
+      tell account "${messageAccount}"
+        set msg to (first message of (first mailbox whose name is "${messageMailbox}") whose id is "${messageId}")
+      end tell
+      set previewMessage to ${actionScript}
+      try
+        set visible of previewMessage to false
+        set output to ""
+        tell previewMessage
+          repeat with theRecipient in to recipients
+            set output to output & address of theRecipient & "$recipient$"
+          end repeat
+          set output to output & "$field$"
+          repeat with theCc in cc recipients
+            set output to output & address of theCc & "$recipient$"
+          end repeat
+          set output to output & "$field$"
+          repeat with theBcc in bcc recipients
+            set output to output & address of theBcc & "$recipient$"
+          end repeat
+        end tell
+        close previewMessage saving no
+      on error errorMessage number errorNumber
+        try
+          close previewMessage saving no
+        end try
+        error errorMessage number errorNumber
+      end try
+      return output
+    end tell
+  `;
+
+  const output = await runAppleScript(script);
+  const [to = "", cc = "", bcc = ""] = output.split("$field$");
+  const parseAddresses = (addresses: string) => addresses.split("$recipient$").filter(Boolean);
+
+  return { to: parseAddresses(to), cc: parseAddresses(cc), bcc: parseAddresses(bcc) };
+};
+
 export const getMessageHtml = async (message: Message, mailbox: Mailbox) => {
   try {
     const source = await tellMessage(message, mailbox, "tell msg to return source");
@@ -591,8 +641,13 @@ export const sendMessage = async (
   action = OutgoingMessageAction.New,
   message?: Message,
   mailbox?: Mailbox,
+  { preserveNativeReplyRecipients = false }: { preserveNativeReplyRecipients?: boolean } = {},
 ) => {
-  if (outgoingMessage.to.length === 0) {
+  const keepNativeReplyRecipients =
+    preserveNativeReplyRecipients &&
+    (action === OutgoingMessageAction.Reply || action === OutgoingMessageAction.ReplyAll);
+
+  if (outgoingMessage.to.length === 0 && !keepNativeReplyRecipients) {
     await showToast(Toast.Style.Failure, "No recipients specified");
     throw new Error("No recipients specified");
   }
@@ -615,6 +670,11 @@ export const sendMessage = async (
     cc: outgoingMessage.cc.map(escapeAppleScriptString),
     bcc: outgoingMessage.bcc.map(escapeAppleScriptString),
   };
+  const toAppleScriptList = (values: string[]) => (values.length > 0 ? `{"${values.join(`", "`)}"}` : "{}");
+  const toList = toAppleScriptList(recipients.to);
+  const ccList = toAppleScriptList(recipients.cc);
+  const bccList = toAppleScriptList(recipients.bcc);
+  const attachmentList = toAppleScriptList(attachments);
   const sender = escapeAppleScriptString(outgoingMessage.from);
   const subject = escapeAppleScriptString(outgoingMessage.subject);
   const content = escapeAppleScriptString(outgoingMessage.content);
@@ -651,10 +711,10 @@ export const sendMessage = async (
         end tell`
           : ""
       }
-      set theTos to {"${recipients.to.join(`", "`)}"}
-      set theCcs to {"${recipients.cc.join(`", "`)}"}
-      set theBccs to {"${recipients.bcc.join(`", "`)}"}
-      set theAttachments to {"${attachments.join(`", "`)}"}
+      set theTos to ${toList}
+      set theCcs to ${ccList}
+      set theBccs to ${bccList}
+      set theAttachments to ${attachmentList}
       set newMessage to ${actionScript}
       set senderValue to "${sender}"
       ${
@@ -673,20 +733,21 @@ export const sendMessage = async (
       }
       tell newMessage
         ${
-          !isReplyOrForward
+          action === OutgoingMessageAction.Forward
             ? `
-        repeat with theTo in theTos
-          make new recipient at end of to recipients with properties {address:theTo}
-        end repeat
+        delete every recipient
+        delete every cc recipient
+        delete every bcc recipient
         `
-            : action === OutgoingMessageAction.Forward
+            : isReplyOrForward && !keepNativeReplyRecipients
               ? `
-        repeat with theTo in theTos
-          make new recipient at end of to recipients with properties {address:theTo}
-        end repeat
+        delete every recipient
         `
               : ""
         }
+        repeat with theTo in theTos
+          make new recipient at end of to recipients with properties {address:theTo}
+        end repeat
         repeat with theCc in theCcs
           make new cc recipient at end of cc recipients with properties {address:theCc}
         end repeat

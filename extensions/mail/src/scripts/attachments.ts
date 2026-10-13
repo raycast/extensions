@@ -1,4 +1,5 @@
 import { existsSync } from "fs";
+import { open as openFile, unlink } from "fs/promises";
 import { homedir } from "os";
 import { extname, join } from "path";
 import { showToast, Toast, open, showInFinder, closeMainWindow, getPreferenceValues } from "@raycast/api";
@@ -31,17 +32,41 @@ const sanitizeAttachmentName = (name: string) => {
   return sanitized && sanitized !== "." && sanitized !== ".." ? sanitized : "attachment";
 };
 
-const getUniqueAttachmentName = (name: string) => {
+const reserveUniqueAttachmentName = async (name: string) => {
   const extension = extname(name);
   const baseName = extension ? name.slice(0, -extension.length) : name;
-  let candidate = name;
-  let suffix = 1;
+  for (let suffix = 0; ; suffix++) {
+    const candidate = suffix === 0 ? name : `${baseName} (${suffix})${extension}`;
+    const attachmentPath = join(attachmentsDirectory, candidate);
+    if (existsSync(attachmentPath)) {
+      continue;
+    }
 
-  while (existsSync(join(attachmentsDirectory, candidate))) {
-    candidate = `${baseName} (${suffix++})${extension}`;
+    const lockPath = `${attachmentPath}.lock`;
+    let lock;
+    try {
+      lock = await openFile(lockPath, "wx");
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") {
+        throw error;
+      }
+      continue;
+    }
+
+    if (existsSync(attachmentPath)) {
+      await lock.close();
+      await unlink(lockPath);
+      continue;
+    }
+
+    return {
+      name: candidate,
+      release: async () => {
+        await lock.close();
+        await unlink(lockPath);
+      },
+    };
   }
-
-  return candidate;
 };
 
 export const getAttachmentSaveDirectory = () => attachmentsDirectory;
@@ -105,7 +130,8 @@ export const saveAttachment = async (
     name = attachmentName;
   }
 
-  name = getUniqueAttachmentName(sanitizeAttachmentName(name));
+  const reservation = await reserveUniqueAttachmentName(sanitizeAttachmentName(name));
+  name = reservation.name;
   const attachmentPath = join(attachmentsDirectory, name);
 
   const script = `
@@ -148,6 +174,8 @@ export const saveAttachment = async (
     }
     console.error(error);
     throw error;
+  } finally {
+    await reservation.release();
   }
 };
 

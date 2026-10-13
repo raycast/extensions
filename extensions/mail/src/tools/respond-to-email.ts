@@ -1,6 +1,6 @@
 import type { Tool } from "@raycast/api";
 
-import { getMessageContent, getMessageById, getRecipients, sendMessage } from "../scripts/messages";
+import { getMessageById, getNativeReplyRecipients, sendMessage } from "../scripts/messages";
 import { OutgoingMessageAction } from "../types";
 import { Validation } from "../utils/validation";
 
@@ -48,22 +48,14 @@ async function getContext(input: Input) {
     throw new Error(`Email address "${from}" is not part of account "${account.name}"`);
   }
 
-  const recipients =
-    input.action === "reply"
-      ? [message.senderAddress]
-      : input.action === "replyAll"
-        ? await getRecipients(message, mailbox, { strict: true })
-        : input.to || [];
-  const ownAddresses = new Set(account.emails.map((address) => address.toLowerCase()));
+  const nativeReplyRecipients =
+    input.action === "forward" ? undefined : await getNativeReplyRecipients(message, mailbox, actionMap[input.action]);
+  const recipients = input.to ?? nativeReplyRecipients?.to ?? [];
   const seenRecipients = new Set<string>();
   const to = recipients.reduce<string[]>((result, recipient) => {
     const address = recipient.trim();
     const normalizedAddress = address.toLowerCase();
-    if (
-      !address ||
-      (input.action !== "forward" && ownAddresses.has(normalizedAddress)) ||
-      seenRecipients.has(normalizedAddress)
-    ) {
+    if (!address || seenRecipients.has(normalizedAddress)) {
       return result;
     }
 
@@ -74,9 +66,7 @@ async function getContext(input: Input) {
 
   if (to.length === 0) {
     throw new Error(
-      input.action === "forward"
-        ? "At least one recipient is required to forward"
-        : "No external reply recipient found",
+      input.action === "forward" ? "At least one recipient is required to forward" : "No reply recipient found",
     );
   }
 
@@ -86,16 +76,16 @@ async function getContext(input: Input) {
   }
 
   const subject = getSubject(input.action, input.subject || "", message.subject);
-  const content =
-    input.action === "forward"
-      ? `${input.content.trim()}\n\n---------- Forwarded message ----------\nFrom: ${message.senderAddress}\nSubject: ${message.subject}\n\n${await getMessageContent(message, mailbox)}`
-      : input.content.trim();
+  const content = input.content.trim();
+  const cc = nativeReplyRecipients?.cc ?? [];
+  const bcc = nativeReplyRecipients?.bcc ?? [];
+  const toOverride = input.action === "forward" || input.to !== undefined ? to : [];
 
-  return { account, mailbox, message, from, to, subject, content };
+  return { account, mailbox, message, from, to, cc, bcc, toOverride, subject, content };
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const { account, message, from, to, subject, content } = await getContext(input);
+  const { account, message, from, to, cc, bcc, subject, content } = await getContext(input);
 
   return {
     message: `Are you sure you want to ${input.action === "replyAll" ? "reply to all" : input.action}?`,
@@ -103,6 +93,8 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
       { name: "Original", value: message.subject },
       { name: "From", value: from },
       { name: "To", value: to.join(", ") },
+      ...(cc.length > 0 ? [{ name: "Cc", value: cc.join(", ") }] : []),
+      ...(bcc.length > 0 ? [{ name: "Bcc", value: bcc.join(", ") }] : []),
       { name: "Subject", value: subject },
       { name: "Content", value: content },
       { name: "Account", value: account.name },
@@ -114,12 +106,12 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 };
 
 export default async function (input: Input) {
-  const { mailbox, message, from, to, subject, content } = await getContext(input);
+  const { mailbox, message, from, to, toOverride, subject, content } = await getContext(input);
 
   await sendMessage(
     {
       from,
-      to,
+      to: toOverride,
       cc: [],
       bcc: [],
       subject,
@@ -128,6 +120,7 @@ export default async function (input: Input) {
     actionMap[input.action],
     message,
     mailbox,
+    { preserveNativeReplyRecipients: input.action !== "forward" && input.to === undefined },
   );
 
   return { message: `${input.action} sent`, messageId: message.id, recipients: to };

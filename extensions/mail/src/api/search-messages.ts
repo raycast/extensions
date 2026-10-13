@@ -62,6 +62,7 @@ const trashMailboxGlobs = [
   "!**/Deleted Mail.mbox/**",
   "!**/Deleted Messages.mbox/**",
 ];
+const CANDIDATE_BATCH_SIZE = 200;
 
 export async function searchMessages({
   search,
@@ -124,68 +125,60 @@ export async function searchMessages({
   `;
 
   const databasePath = await getDatabasePath();
-  const messages = await executeSQL<{ id: number }>(databasePath, query);
-  const messageIds = messages.map((message) => message.id);
-
-  if (messages.length === 0) {
-    return [];
-  }
-
-  const mailboxGlobs = mailbox === "inbox" ? ["-g", "*[iI][nN][bB][oO][xX].mbox/**"] : [];
-
-  const args = search
-    ? [
-        search,
-        "-g",
-        "*.emlx",
-        ...mailboxGlobs,
-        ...(!includeTrash ? trashMailboxGlobs.flatMap((glob) => ["-g", glob]) : []),
-        "-i",
-        "-l",
-        basePath,
-      ]
-    : [
-        "--files",
-        "-g",
-        "*.emlx",
-        ...mailboxGlobs,
-        ...(!includeTrash ? trashMailboxGlobs.flatMap((glob) => ["-g", glob]) : []),
-        basePath,
-      ];
-
-  const { stdout, stderr } = await execa({ reject: false })(rgPath, args);
-
-  if (stderr) {
-    throw new Error("Error searching messages");
-  }
-
-  const messageOrder = new Map(messageIds.map((id, index) => [id, index]));
+  const relativePaths: string[] = [];
   const matchedMessageIds = new Set<number>();
-  const relativePaths = stdout
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .filter((path) => {
-      const id = getIdFromPath(path);
-      return messageOrder.has(id);
-    })
-    .filter((path) => includeTrash || !isTrashPath(path))
-    .filter((path) => !mailbox || isMailboxPath(path, mailbox))
-    .filter((path) => {
+  let candidateOffset = 0;
+  let skippedMatches = 0;
+
+  while (relativePaths.length < resultLimit) {
+    const candidates = await executeSQL<{ id: number }>(
+      databasePath,
+      `${query.replace(/;\s*$/, "")} LIMIT ${CANDIDATE_BATCH_SIZE} OFFSET ${candidateOffset};`,
+    );
+    if (candidates.length === 0) {
+      break;
+    }
+    candidateOffset += candidates.length;
+
+    const messageOrder = new Map(candidates.map(({ id }, index) => [id, index]));
+    const candidateGlobs = candidates.flatMap(({ id }) => ["-g", `**/${id}.emlx*`]);
+    const trashGlobs = includeTrash ? [] : trashMailboxGlobs.flatMap((glob) => ["-g", glob]);
+    const args = search
+      ? [search, ...candidateGlobs, ...trashGlobs, "-i", "-l", basePath]
+      : ["--files", ...candidateGlobs, ...trashGlobs, basePath];
+    const { stdout, stderr } = await execa({ reject: false })(rgPath, args);
+
+    if (stderr) {
+      throw new Error("Error searching messages");
+    }
+
+    const batchPaths = stdout
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .filter((path) => messageOrder.has(getIdFromPath(path)))
+      .filter((path) => includeTrash || !isTrashPath(path))
+      .filter((path) => !mailbox || isMailboxPath(path, mailbox))
+      .toSorted((a, b) => messageOrder.get(getIdFromPath(a))! - messageOrder.get(getIdFromPath(b))!);
+
+    for (const path of batchPaths) {
       const id = getIdFromPath(path);
       if (matchedMessageIds.has(id)) {
-        return false;
+        continue;
+      }
+      matchedMessageIds.add(id);
+
+      if (skippedMatches < offset) {
+        skippedMatches++;
+        continue;
       }
 
-      matchedMessageIds.add(id);
-      return true;
-    })
-    .toSorted((a, b) => {
-      const aId = getIdFromPath(a);
-      const bId = getIdFromPath(b);
-      return messageOrder.get(aId)! - messageOrder.get(bId)!;
-    })
-    .slice(offset, offset + resultLimit);
+      relativePaths.push(path);
+      if (relativePaths.length === resultLimit) {
+        break;
+      }
+    }
+  }
 
   const absolutePaths = relativePaths.map((relativePath) => resolve(basePath, relativePath));
 

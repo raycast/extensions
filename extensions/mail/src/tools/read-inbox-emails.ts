@@ -16,7 +16,7 @@ type Input = {
 };
 
 const MAX_PAGE_SIZE = 10;
-const MAX_MESSAGE_TEXT_LENGTH = 4000;
+const MAX_OFFSET = 10000;
 
 export default async function (input: Input) {
   const limit = input.limit ?? 5;
@@ -26,8 +26,8 @@ export default async function (input: Input) {
     throw new Error(`Limit must be an integer between 1 and ${MAX_PAGE_SIZE}`);
   }
 
-  if (!Number.isSafeInteger(offset) || offset < 0 || offset > 10000) {
-    throw new Error("Offset must be an integer between 0 and 10000");
+  if (!Number.isSafeInteger(offset) || offset < 0 || offset > MAX_OFFSET) {
+    throw new Error(`Offset must be an integer between 0 and ${MAX_OFFSET}`);
   }
 
   const results = await searchMessages({
@@ -38,20 +38,19 @@ export default async function (input: Input) {
     limit: limit + 1,
     offset,
   });
-  const hasMore = results.length > limit;
+  const hasMoreResults = results.length > limit;
   const page = results.slice(0, limit);
-  const messages = page.map(({ id, from, subject, text = "" }) => {
-    const trimmedText =
-      text.length > MAX_MESSAGE_TEXT_LENGTH ? `${text.slice(0, MAX_MESSAGE_TEXT_LENGTH)}\n... [truncated]` : text;
-    return { id, from, subject, text: trimmedText };
-  });
+  const messages = page.map(({ id, filePath, from, subject, text = "" }) => ({ id, filePath, from, subject, text }));
+  const nextOffset = hasMoreResults && offset + page.length <= MAX_OFFSET ? offset + page.length : null;
+  const limitReached = hasMoreResults && nextOffset === null;
 
   return {
     mailbox: "inbox",
     offset,
     limit,
-    hasMore,
-    nextOffset: hasMore ? offset + page.length : null,
+    hasMore: nextOffset !== null,
+    nextOffset,
+    limitReached,
     messages,
   };
 }
