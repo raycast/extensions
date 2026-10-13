@@ -1,10 +1,17 @@
+import fs from "fs";
 import { Clipboard, closeMainWindow, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import tesseractOcr from "./ocr";
+import visionOcr from "./vision";
 import utils from "./utils";
 import takeScreenshot from "./screenshot";
 import { detect, LanguageCodeFormat } from "raycast-language-detector";
 
 export default async function main() {
+  if (getPreferenceValues<Preferences>().ocr_engine === "vision") {
+    await recognizeWithVision();
+    return;
+  }
+
   const isTesseractInstalled = await utils.isTesseractInstalled();
 
   if (!isTesseractInstalled) {
@@ -69,6 +76,42 @@ export default async function main() {
       style: Toast.Style.Failure,
       title: "Failed to OCR the image!",
       message: "Failed to OCR the image!",
+    });
+  }
+}
+
+async function recognizeWithVision() {
+  await closeMainWindow();
+  const filePath = await takeScreenshot();
+
+  // The selection was cancelled with Esc, so there is nothing to read.
+  if (!fs.existsSync(filePath)) {
+    return;
+  }
+
+  try {
+    const text = utils.handleNewLines(await visionOcr(filePath));
+
+    if (!text.trim()) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `No text found on image!`,
+        message: `No text found on image!`,
+      });
+      return;
+    }
+
+    await Clipboard.copy(text);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Text copied to clipboard! Engine: Apple Vision",
+      message: "Text copied to clipboard! Engine: Apple Vision",
+    });
+  } catch (e) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to OCR the image!",
+      message: e instanceof Error ? e.message : "Failed to OCR the image!",
     });
   }
 }
