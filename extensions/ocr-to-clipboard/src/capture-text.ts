@@ -17,6 +17,8 @@ const CAPTURE_TIMEOUT_SECONDS = 300;
 /** Show "Recognizing…" only if recognition is still running after this delay. */
 const PROGRESS_HUD_DELAY_MS = 400;
 
+type Outcome = { ok: true; result: OCRResult } | { ok: false; error: unknown };
+
 export default async function Command() {
   // Get Raycast out of the way before the crosshair appears.
   await closeMainWindow();
@@ -34,8 +36,9 @@ export default async function Command() {
     const options = ocrOptionsFromPreferences();
 
     // Start the recognizer now: it loads Vision while the user is still drawing the selection,
-    // then waits for the marker that says the PNG is complete.
-    const recognition: Promise<OCRResult> = recognizeCaptureWhenReady(
+    // then waits for the marker that says the PNG is complete. The outcome is captured right away
+    // so a rejection during the selection (timeout, spawn failure) is never left unhandled.
+    const recognition: Promise<Outcome> = recognizeCaptureWhenReady(
       capture,
       readyMarker,
       cancelMarker,
@@ -44,19 +47,26 @@ export default async function Command() {
       options.autoDetectLanguage,
       options.mergeLines,
       options.tabBetweenColumns,
+    ).then(
+      (result: OCRResult) => ({ ok: true, result }),
+      (error: unknown) => ({ ok: false, error }),
     );
 
     const captured = await captureInteractively(capture);
     if (!captured) {
       await writeFile(cancelMarker, "");
-      await recognition.catch(() => undefined);
+      await recognition;
       return; // User pressed Esc.
     }
 
     await writeFile(readyMarker, "");
     const progress = setTimeout(() => void showHUD("Recognizing…"), PROGRESS_HUD_DELAY_MS);
     try {
-      await deliverToClipboard(await recognition);
+      const outcome = await recognition;
+      if (!outcome.ok) {
+        throw outcome.error;
+      }
+      await deliverToClipboard(outcome.result);
     } finally {
       clearTimeout(progress);
     }

@@ -10,6 +10,7 @@ export type OCRResult = {
   confidence: number;
   languages: string[];
   barcodes: string[];
+  skippedFiles: string[];
 };
 
 /** Arguments shared by the Swift entry points, derived from the extension preferences. */
@@ -63,7 +64,10 @@ export async function deliverToClipboard(result: OCRResult, subject = "line"): P
   if (prefs.confirmation === "sound" || prefs.confirmation === "both") {
     playSound(prefs.sound);
   }
-  if (prefs.confirmation === "hud" || prefs.confirmation === "both") {
+  if (result.skippedFiles.length > 0) {
+    // A partial result always deserves a message, whatever the confirmation setting.
+    await showHUD(`Copied, but could not read ${result.skippedFiles.join(", ")}`);
+  } else if (prefs.confirmation === "hud" || prefs.confirmation === "both") {
     await showHUD(hudMessage(result, text, prefs.showPreview, subject));
   }
 }

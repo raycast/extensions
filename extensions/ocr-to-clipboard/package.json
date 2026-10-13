@@ -72,7 +72,7 @@
       "default": "auto",
       "data": [
         {
-          "title": "Auto (your Mac's languages)",
+          "title": "Auto (Your Mac's Languages)",
           "value": "auto"
         },
         {
@@ -179,11 +179,11 @@
       "default": "keep",
       "data": [
         {
-          "title": "Keep line breaks",
+          "title": "Keep Line Breaks",
           "value": "keep"
         },
         {
-          "title": "Merge into paragraphs",
+          "title": "Merge Into Paragraphs",
           "value": "merge"
         }
       ]
@@ -197,7 +197,7 @@
       "default": "tab",
       "data": [
         {
-          "title": "Tab (spreadsheet-friendly)",
+          "title": "Tab (Spreadsheet-Friendly)",
           "value": "tab"
         },
         {
@@ -228,11 +228,11 @@
           "value": "sound"
         },
         {
-          "title": "HUD message",
+          "title": "HUD Message",
           "value": "hud"
         },
         {
-          "title": "Sound and HUD message",
+          "title": "Sound and HUD Message",
           "value": "both"
         },
         {
@@ -250,11 +250,11 @@
       "default": "screenshot",
       "data": [
         {
-          "title": "macOS screenshot (default)",
+          "title": "macOS Screenshot (Default)",
           "value": "screenshot"
         },
         {
-          "title": "Camera shutter",
+          "title": "Camera Shutter",
           "value": "shutter"
         },
         {
@@ -262,11 +262,11 @@
           "value": "click"
         },
         {
-          "title": "Sent acknowledgment",
+          "title": "Sent Acknowledgment",
           "value": "ack"
         },
         {
-          "title": "Accessibility capture",
+          "title": "Accessibility Capture",
           "value": "capture"
         },
         {
@@ -290,8 +290,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.7.3",
-    "@raycast/utils": "^2.3.2"
+    "@raycast/api": "^2.7.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
