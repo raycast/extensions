@@ -1,6 +1,6 @@
 # Anki Changelog
 
-## [Custom Notes and AI Tools] - {PR_MERGE_DATE}
+## [Custom Notes and AI Tools] - 2026-10-13
 
 - Improved note creation with custom Anki note types, ordered fields, and optional fields.
 - Fixed media attachments and support for all accepted audio and video formats.
