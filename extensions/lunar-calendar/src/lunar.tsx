@@ -268,7 +268,7 @@ export default function Command() {
             title="Next Month"
             shortcut={{
               macOS: { modifiers: ["cmd"], key: "arrowRight" },
-              windows: { modifiers: ["ctrl"], key: "arrowRight" },
+              Windows: { modifiers: ["ctrl"], key: "arrowRight" },
             }}
             onAction={nextMonth}
           />
@@ -276,7 +276,7 @@ export default function Command() {
             title="Previous Month"
             shortcut={{
               macOS: { modifiers: ["cmd"], key: "arrowLeft" },
-              windows: { modifiers: ["ctrl"], key: "arrowLeft" },
+              Windows: { modifiers: ["ctrl"], key: "arrowLeft" },
             }}
             onAction={prevMonth}
           />
@@ -284,7 +284,7 @@ export default function Command() {
             title="Reset to Today"
             shortcut={{
               macOS: { modifiers: ["cmd"], key: "t" },
-              windows: { modifiers: ["ctrl"], key: "t" },
+              Windows: { modifiers: ["ctrl"], key: "t" },
             }}
             onAction={resetToday}
           />
