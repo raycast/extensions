@@ -1,6 +1,6 @@
 # Connect to VPN Changelog
 
-## [Fixes and Improvements] - {PR_MERGE_DATE}
+## [Fixes and Improvements] - 2026-10-13
 
 - Keep VPN discovery and toggling independent of favorites storage; repair favorites in memory and save only user edits.
 - Clarify extension and command descriptions, service filtering, and sorting preferences.
