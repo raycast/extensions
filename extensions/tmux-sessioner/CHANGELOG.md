@@ -1,5 +1,11 @@
 # Tmux Sessioner Changelog
 
+## [Fix Save Tmux Sessions getting stuck] - {PR_MERGE_DATE}
+
+### Fixed
+
+- **Save Tmux Sessions** no longer waits on (and can get stuck reporting "Waiting for an in-progress save…" against) a slow or piled-up save. Serializing saves is the save script's responsibility — `tmux-resurrect` and `prefix + Ctrl-s` run it with no cross-process lock, and heavy auto-savers wrap it in their own mutex — so the command now just invokes the configured save script and lets it decide, while still nudging `tmux-continuum` to back off to avoid a competing automatic save.
+
 ## [Save Tmux Sessions on demand] - 2026-09-16
 
 ### Added
