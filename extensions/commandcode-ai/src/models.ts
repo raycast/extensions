@@ -11,6 +11,13 @@ import { join } from "node:path";
 export const BASE_URL = "https://api.commandcode.ai/provider/v1";
 export const DEFAULT_MODEL = "deepseek/deepseek-v4-flash";
 const MAX_TOOL_NAME_LENGTH = 64;
+// The only reasoning_effort values Command Code accepts. models.dev also lists e.g. "none"/"minimal".
+const API_EFFORTS = ["off", "low", "medium", "high", "xhigh", "max"];
+
+function toApiEffort(effort: string | undefined): string | undefined {
+  const value = effort === "none" || effort === "minimal" ? "off" : effort;
+  return value && API_EFFORTS.includes(value) ? value : undefined;
+}
 // Anthropic requires max_tokens, and the SDK's fallback for unknown model IDs is only 4096;
 // used when models.dev doesn't list the model's output limit.
 const ANTHROPIC_MAX_OUTPUT_TOKENS = 32_000;
@@ -69,6 +76,7 @@ export const getModels: AI.GetModels = async () => {
   const [{ models }, capabilities] = await Promise.all([fetchModels(), loadCapabilities()]);
   return models.map((m) => {
     const caps = lookupCapabilities(capabilities, m.id);
+    const efforts = caps?.efforts?.filter((e) => toApiEffort(e));
     return {
       id: m.id,
       title: m.name,
@@ -82,12 +90,12 @@ export const getModels: AI.GetModels = async () => {
         // Raycast only sends its tools (web search, read page, charts, extension tools) when this is set.
         tools: { supported: caps?.tools !== false },
         ...(caps?.vision ? { vision: { mediaTypes: ["image/png", "image/jpeg", "image/webp", "image/gif"] } } : {}),
-        ...(caps?.efforts
+        ...(efforts?.length
           ? {
               reasoningEffort: {
                 supported: true,
-                options: caps.efforts,
-                default: ["medium", "high"].find((e) => caps.efforts!.includes(e)) ?? caps.efforts[0],
+                options: efforts,
+                default: ["medium", "high"].find((e) => efforts.includes(e)) ?? efforts[0],
               },
             }
           : {}),
@@ -115,7 +123,7 @@ type GenerateRequest = Omit<AI.ModelRequest, "providerOptions"> & { reasoningEff
 export async function* generate(modelId: string, request: GenerateRequest): AsyncGenerator<AI.ModelStreamPart> {
   const model = await languageModel(modelId);
   const anthropic = model.provider.startsWith("anthropic");
-  const effort = request.reasoningEffort;
+  const effort = toApiEffort(request.reasoningEffort);
   const caps = lookupCapabilities(cachedCapabilities(), modelId);
   const { tools, restoreName } = toTools(request.tools);
   const result = streamText({
@@ -126,17 +134,27 @@ export async function* generate(modelId: string, request: GenerateRequest): Asyn
     tools,
     toolChoice: request.toolChoice,
     maxOutputTokens: anthropic ? (caps?.maxOutputTokens ?? ANTHROPIC_MAX_OUTPUT_TOKENS) : undefined,
-    providerOptions: effort
-      ? anthropic
-        ? { anthropic: { thinking: { type: "adaptive" }, effort } }
-        : { commandcode: { reasoningEffort: effort } }
-      : undefined,
+    providerOptions: !effort
+      ? undefined
+      : anthropic
+        ? effort === "off"
+          ? { anthropic: { thinking: { type: "disabled" } } }
+          : { anthropic: { thinking: { type: "adaptive" }, effort } }
+        : { commandcode: { reasoningEffort: effort } },
     maxRetries: 0,
     // Errors are yielded below; skip the SDK's default console logging.
     onError: () => {},
   });
   for await (const part of result.fullStream) {
     if (part.type === "error") {
+      const status = (part.error as { statusCode?: number })?.statusCode;
+      // Raycast only receives an error's message and retries every failure, so a request that can't succeed
+      // (e.g. a model outside the user's plan) is shown as the reply instead of 10 silent retries.
+      if (status !== undefined && status >= 400 && status < 500 && status !== 408 && status !== 429) {
+        yield { type: "text-delta", id: "error", text: `⚠️ ${friendlyError(part.error)}` };
+        yield { type: "finish", finishReason: "stop" };
+        return;
+      }
       yield { type: "error", error: friendlyError(part.error) };
       continue;
     }
