@@ -263,7 +263,7 @@ export default function Command() {
     const titleText = `${monthName} ${year}`;
 
     return `# ${titleText}\n\n![Calendar](${fullCalendarSvg})`;
-  }, [year, month, calendarData]);
+  }, [year, month, calendarData, environment.theme]);
 
   // 使用准确的相对月份加减，规避构造函数越界偏差
   const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
