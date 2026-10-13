@@ -17,7 +17,9 @@ function limitConversationLength(chats: Chat[]) {
   const newChats: Chat[] = [];
   let tokens = 0;
 
-  for (const chat of chats) {
+  // Walk from the newest chat back so the most recent turns are kept when the budget runs out.
+  for (let i = chats.length - 1; i >= 0; i--) {
+    const chat = chats[i];
     const questionTokens = countOpenAITokens(chat.question);
     const answerTokens = countOpenAITokens(chat.answer);
 
@@ -27,7 +29,7 @@ function limitConversationLength(chats: Chat[]) {
       break;
     }
 
-    newChats.push(chat);
+    newChats.unshift(chat);
   }
 
   return newChats;
