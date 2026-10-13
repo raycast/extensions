@@ -1,6 +1,6 @@
 # QuickAdd for Obsidian Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-13
 
 - Run any QuickAdd choice from Raycast and answer its prompts in native Raycast forms and lists.
 - Quick Capture sends text to a capture choice of your choosing.
