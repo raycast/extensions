@@ -6,6 +6,7 @@ vi.mock("@raycast/utils", () => ({ runAppleScript: vi.fn() }));
 import {
   detectSourceLayout,
   getTargetOrder,
+  isWholeLineCopy,
   pickNextTarget,
   transformText,
 } from "./utils";
@@ -306,5 +307,15 @@ describe("getTargetOrder", () => {
       activeId: "a",
     });
     expect(result.map((l) => l.id)).toEqual(["b", "c"]);
+  });
+});
+
+describe("isWholeLineCopy", () => {
+  it("flags one line + newline (editor copied the line, nothing selected)", () => {
+    expect(isWholeLineCopy("фыва\n")).toBe(true);
+  });
+  it("keeps real selections", () => {
+    expect(isWholeLineCopy("фыва")).toBe(false);
+    expect(isWholeLineCopy("a\nb\n")).toBe(false);
   });
 });
