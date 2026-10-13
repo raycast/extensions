@@ -7,10 +7,12 @@ export function getAdbDir(): string {
   const preferences = getPreferenceValues<PreferenceValues>();
   const adbDir = preferences["adbDir"];
   if (adbDir) {
-    return adbDir;
+    return untildify(adbDir);
   }
   const home = process.env.HOME;
-  return `${home}/Library/Android/sdk/platform-tools`;
+  // Android Studio's SDK first, then Homebrew's android-platform-tools (Apple silicon, Intel)
+  const candidates = [`${home}/Library/Android/sdk/platform-tools`, "/opt/homebrew/bin", "/usr/local/bin"];
+  return candidates.find((dir) => fs.existsSync(`${dir}/adb`)) ?? candidates[0];
 }
 
 export function existsAdb(): boolean {
