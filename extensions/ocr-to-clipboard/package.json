@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ocr-to-clipboard",
   "title": "OCR to Clipboard",
-  "description": "Select an area of the screen, recognize its text with Apple Vision, and copy it to the clipboard. Like CleanShot X's OCR, inside Raycast.",
+  "description": "Select an area of the screen, recognize its text on-device with Apple Vision, and copy it to the clipboard.",
   "icon": "icon.png",
   "author": "lucienklein",
   "license": "MIT",

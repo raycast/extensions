@@ -1,6 +1,6 @@
 # OCR to Clipboard
 
-Select an area of the screen, recognize its text with Apple's on-device Vision framework, and copy it to the clipboard. The same workflow as CleanShot X's "Capture Text", as Raycast commands you can bind to a hotkey.
+Select an area of the screen, recognize its text with Apple's on-device Vision framework, and copy it to the clipboard. Raycast commands you can bind to a hotkey.
 
 Everything runs locally. Nothing leaves your Mac.
 
@@ -16,7 +16,7 @@ The recognizer starts and loads Vision while you are still drawing the selection
 
 QR codes and barcodes in the capture are decoded too. Their content is copied after the text, or on its own when the selection contains no text.
 
-Tip: give **Capture Text** a hotkey in Raycast → Extensions (for example ⌃⇧2) to get a CleanShot-style shortcut.
+Tip: give **Capture Text** a hotkey in Raycast → Extensions (for example ⌃⇧2) so text capture is one keystroke away.
 
 ## Preferences
 
