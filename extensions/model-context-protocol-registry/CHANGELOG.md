@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Bool MCP Server] - 2026-10-13
+
+- Add Bool to the official registry: make your own apps and tools from a conversation. Create projects, prompt the builder or edit files, define data, and publish working web apps to a live URL. Hosted remote Streamable HTTP server with OAuth 2.1 sign-in. Direct HTTP connection in Raycast at https://bool.com/api/mcp.
+
 ## [Add SolidPing MCP Server] - 2026-10-12
 
 - Add SolidPing to the official registry: open-source uptime and synthetic monitoring. Create, run and diagnose checks, read results and incidents, manage status pages and maintenance windows. Hosted remote Streamable HTTP server with OAuth 2.1 sign-in. Direct HTTP connection in Raycast at https://solidping.io/api/v1/mcp.

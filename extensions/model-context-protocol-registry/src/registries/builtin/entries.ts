@@ -163,6 +163,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "bool",
+    title: "Bool",
+    description:
+      "Make your own apps and tools from a conversation. Create Bool projects, prompt Bool's builder or edit files directly, define data entities and records, then publish working web apps to a live URL. Start from templates, remix projects and organize them across workspaces. Writes act only on your own Bool account, including creating, publishing and deleting projects. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Bool account, no API key to paste.",
+    icon: "https://bool.com/bool-mark.png",
+    homepage: "https://bool.com/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://bool.com/api/mcp"],
+    },
+    remoteUrl: "https://bool.com/api/mcp",
+  },
+  {
     name: "brave-search",
     title: "Brave Search",
     description:
