@@ -17,7 +17,7 @@ Search, save, and manage your [Shiori](https://www.shiori.sh) bookmarks directly
 - **Save Current Tab** — Save the page you're currently viewing in your browser with one command. Requires the [Raycast Browser Extension](https://raycast.com/browser-extension).
 - **Save from Clipboard** — Press `⌘N` inside Search Links to save whatever URL is on your clipboard.
 - **Menu Bar** — See your unread link count at a glance and jump to recent unread links without opening Raycast.
-- **Mark Read / Unread** — Toggle read status with `⌘R`. After a change, the list reloads from the first page so read filters and pagination stay accurate.
+- **Mark Read / Unread** — Toggle read status with `⌘R`. Changes update the loaded list in place. A link leaves the current view when its new read status no longer matches the selected filter.
 - **Delete** — Remove links with a confirmation prompt.
 
 ## Setup
@@ -58,7 +58,7 @@ Mention `@shiori-sh` in Raycast AI to use the same API key as the commands:
 
 Search tools return one page (default 100 links, configurable from 1 to 100), the matching `total`, `hasMore`, and `nextOffset`. To continue, pass `nextOffset` as `offset` with the same query/topic and filters. A page is not necessarily the complete result set. `since` accepts an ISO 8601 timestamp or a duration such as `1h`, `7d`, `2w`, `1m`, or `1y`. Starred-only results use the server's starred-date ordering.
 
-The list deduplicates overlapping pages. Offset pagination is not a snapshot: adding, removing, or changing bookmarks while scrolling can shift results. Use **Refresh Links** to restart from the first page. Search/filter changes cancel the previous request and clear its results. A later-page failure keeps already loaded links visible and offers refresh; an API failure is shown separately from an empty library.
+The list deduplicates overlapping pages. Offset pagination is not a snapshot: adding, removing, or changing bookmarks while scrolling can shift results. Read-status changes, edits, and deletions keep the loaded pages visible after saving. Use **Refresh Links** to restart from the first page and re-run full-text search after editing a title or summary. Search/filter changes cancel the previous request and clear its results. A later-page failure keeps already loaded links visible and offers refresh; an API failure is shown separately from an empty library.
 
 Requests time out after 30 seconds and are not automatically retried. If a save fails or times out, check your Shiori library before retrying because the server may already have saved it. For authentication failures, update the key in extension preferences; never paste it into AI Chat. Shiori documents limits of 60 API requests and 30 link creations per minute per key.
 

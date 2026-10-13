@@ -2,12 +2,20 @@ import React from "react";
 import { act, create, ReactTestRenderer } from "react-test-renderer";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { useLinks } from "../src/use-links";
+import { deleteLink, updateLinkDetails, updateLinks } from "../src/api";
+import { Link } from "../src/types";
 
 vi.mock("@raycast/api", () => ({ getPreferenceValues: () => ({ apiKey: "shk_test_only" }) }));
 const fetchMock = vi.fn<typeof fetch>();
-const link = (id: number) => ({ id: String(id), url: `https://example.com/${id}` });
-const response = (ids: number[], total: number) =>
-  new Response(JSON.stringify({ success: true, links: ids.map(link), total }));
+const link = (id: number, read = false) => ({
+  id: String(id),
+  url: `https://example.com/${id}`,
+  title: `Article ${id}`,
+  summary: `Summary ${id}`,
+  read_at: read ? "2026-10-01T00:00:00Z" : null,
+});
+const response = (ids: number[], total: number, read = false) =>
+  new Response(JSON.stringify({ success: true, links: ids.map((id) => link(id, read)), total }));
 let state: ReturnType<typeof useLinks>;
 let renderer: ReactTestRenderer;
 function Probe({ search = "", read = "all" }: { search?: string; read?: "all" | "read" | "unread" }) {
@@ -138,4 +146,283 @@ it("discards a pending page when the same query is refreshed after a bookmark ch
     ["design", "unread", "1"],
     ["design", "unread", "0"],
   ]);
+});
+
+const ids = (first: number, last: number) => Array.from({ length: last - first + 1 }, (_, index) => first + index);
+const saved = () => new Response(JSON.stringify({ success: true, updated: 1, linkId: "151" }));
+const offsets = () =>
+  fetchMock.mock.calls
+    .filter(([, init]) => !init?.method)
+    .map(([url]) => new URL(String(url)).searchParams.get("offset"));
+async function loadTwoPages(read: "all" | "read" | "unread" = "all", search = "") {
+  fetchMock.mockResolvedValueOnce(response(ids(1, 100), 205, read === "read"));
+  await act(async () => {
+    renderer = create(<Probe read={read} search={search} />);
+  });
+  fetchMock.mockResolvedValueOnce(response(ids(101, 200), 205, read === "read"));
+  await act(async () => state.pagination.onLoadMore());
+  expect(state.links).toHaveLength(200);
+}
+async function toggle(link: Link) {
+  const read = !link.read_at;
+  await updateLinks([link.id], read);
+  return { read_at: read ? "2026-10-13T00:00:00Z" : null };
+}
+async function remove(link: Link) {
+  await deleteLink(link.id);
+  return null;
+}
+async function edit(link: Link) {
+  await updateLinkDetails(link.id, "Edited article", "Edited summary");
+  return { title: "Edited article", summary: "Edited summary" };
+}
+
+it("keeps both loaded pages visible while marking a link read and continues at the existing offset", async () => {
+  await loadTwoPages();
+  let finishWrite!: (response: Response) => void;
+  fetchMock.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finishWrite = resolve;
+      }),
+  );
+  let mutation!: Promise<boolean>;
+  await act(async () => {
+    mutation = state.mutateLink("151", toggle);
+  });
+  expect(state.links).toHaveLength(200);
+  expect(state.links[150].read_at).toBeNull();
+  expect(state.isLoading).toBe(false);
+  await act(async () => state.pagination.onLoadMore());
+  expect(fetchMock).toHaveBeenCalledTimes(3);
+  await act(async () => {
+    finishWrite(saved());
+    await mutation;
+  });
+  expect(state.links.map((item) => item.id)).toEqual(ids(1, 200).map(String));
+  expect(state.links[150].read_at).not.toBeNull();
+  expect(state.total).toBe(205);
+  expect(state.nextOffset).toBe(200);
+  fetchMock.mockResolvedValueOnce(response(ids(201, 205), 205));
+  await act(async () => state.pagination.onLoadMore());
+  expect(state.links).toHaveLength(205);
+  expect(offsets()).toEqual(["0", "100", "200"]);
+});
+
+it.each(["unread", "read"] as const)(
+  "removes toggled rows from the %s filter without skipping the next unseen link",
+  async (read) => {
+    await loadTwoPages(read);
+    fetchMock.mockResolvedValueOnce(saved());
+    await act(async () => {
+      await state.mutateLink("151", toggle);
+    });
+    expect(state.links).toHaveLength(199);
+    expect(state.links.some((item) => item.id === "151")).toBe(false);
+    expect(state.total).toBe(204);
+    expect(state.nextOffset).toBe(199);
+    fetchMock.mockResolvedValueOnce(response(ids(201, 205), 204, read === "read"));
+    await act(async () => state.pagination.onLoadMore());
+    expect(state.links.map((item) => item.id)).toEqual(
+      ids(1, 205)
+        .filter((id) => id !== 151)
+        .map(String),
+    );
+    expect(state.pagination.hasMore).toBe(false);
+    expect(offsets()).toEqual(["0", "100", "199"]);
+  },
+);
+
+it("deletes multiple rows in place and ignores a repeated deletion without double-decrementing the cursor", async () => {
+  await loadTwoPages();
+  fetchMock.mockResolvedValueOnce(saved()).mockResolvedValueOnce(saved());
+  let results: boolean[] = [];
+  await act(async () => {
+    results = await Promise.all([
+      state.mutateLink("151", remove),
+      state.mutateLink("160", remove),
+      state.mutateLink("151", remove),
+    ]);
+  });
+  expect(results).toEqual([true, true, false]);
+  expect(state.links).toHaveLength(198);
+  expect(state.total).toBe(203);
+  expect(state.nextOffset).toBe(198);
+  expect(fetchMock).toHaveBeenCalledTimes(4);
+  fetchMock.mockResolvedValueOnce(response(ids(201, 205), 203));
+  await act(async () => state.pagination.onLoadMore());
+  expect(state.links.map((item) => item.id)).toEqual(
+    ids(1, 205)
+      .filter((id) => id !== 151 && id !== 160)
+      .map(String),
+  );
+  expect(offsets()).toEqual(["0", "100", "198"]);
+});
+
+it("serializes repeated toggles using the latest row state, without losing a subsequent edit", async () => {
+  await loadTwoPages();
+  fetchMock.mockResolvedValueOnce(saved()).mockResolvedValueOnce(saved()).mockResolvedValueOnce(saved());
+  await act(async () => {
+    await Promise.all([
+      state.mutateLink("151", toggle),
+      state.mutateLink("151", toggle),
+      state.mutateLink("151", edit),
+    ]);
+  });
+  const writes = fetchMock.mock.calls.slice(2).map(([, init]) => JSON.parse(String(init?.body)));
+  expect(writes).toEqual([
+    { ids: ["151"], read: true },
+    { ids: ["151"], read: false },
+    { title: "Edited article", summary: "Edited summary" },
+  ]);
+  expect(state.links[150]).toMatchObject({
+    id: "151",
+    title: "Edited article",
+    summary: "Edited summary",
+    read_at: null,
+  });
+  expect(state.links).toHaveLength(200);
+  expect(state.total).toBe(205);
+  expect(state.nextOffset).toBe(200);
+  expect(offsets()).toEqual(["0", "100"]);
+});
+
+it("retains loaded search results after editing and overlaps the next page to account for changed search membership", async () => {
+  await loadTwoPages("all", "article");
+  fetchMock.mockResolvedValueOnce(saved());
+  await act(async () => {
+    await state.mutateLink("151", edit);
+  });
+  expect(state.links[150].title).toBe("Edited article");
+  expect(state.links).toHaveLength(200);
+  expect(state.nextOffset).toBe(199);
+  fetchMock.mockResolvedValueOnce(response(ids(200, 205), 205));
+  await act(async () => state.pagination.onLoadMore());
+  expect(state.links.map((item) => item.id)).toEqual(ids(1, 205).map(String));
+  expect(offsets()).toEqual(["0", "100", "199"]);
+});
+
+it("keeps loaded rows and cursor on mutation failure and lets later actions succeed", async () => {
+  await loadTwoPages();
+  fetchMock.mockResolvedValueOnce(new Response("Server error", { status: 500 })).mockResolvedValueOnce(saved());
+  let results: PromiseSettledResult<boolean>[] = [];
+  await act(async () => {
+    results = await Promise.allSettled([state.mutateLink("151", remove), state.mutateLink("160", toggle)]);
+  });
+  expect(results.map((result) => result.status)).toEqual(["rejected", "fulfilled"]);
+  expect(state.links[150].id).toBe("151");
+  expect(state.links[159].read_at).not.toBeNull();
+  expect(state.links).toHaveLength(200);
+  expect(state.total).toBe(205);
+  expect(state.nextOffset).toBe(200);
+  expect(state.pagination.hasMore).toBe(true);
+  expect(offsets()).toEqual(["0", "100"]);
+});
+
+it("cancels a pending page on deletion and resumes at the adjusted offset without resurrecting stale results", async () => {
+  await loadTwoPages();
+  let finishOldPage!: (response: Response) => void;
+  let oldSignal!: AbortSignal;
+  fetchMock.mockImplementationOnce((_url, init) => {
+    oldSignal = init!.signal!;
+    return new Promise((resolve) => {
+      finishOldPage = resolve;
+    });
+  });
+  await act(async () => state.pagination.onLoadMore());
+  fetchMock.mockResolvedValueOnce(saved());
+  await act(async () => {
+    await state.mutateLink("151", remove);
+  });
+  expect(oldSignal.aborted).toBe(true);
+  expect(state.links).toHaveLength(199);
+  expect(state.nextOffset).toBe(199);
+  await act(async () => finishOldPage(response(ids(201, 205), 205)));
+  expect(state.links).toHaveLength(199);
+  fetchMock.mockResolvedValueOnce(response(ids(201, 205), 204));
+  await act(async () => state.pagination.onLoadMore());
+  expect(state.links.map((item) => item.id)).toEqual(
+    ids(1, 205)
+      .filter((id) => id !== 151)
+      .map(String),
+  );
+  expect(offsets()).toEqual(["0", "100", "200", "199"]);
+});
+
+it("waits for an in-flight write before an explicit refresh and still permits a page-zero reset", async () => {
+  await loadTwoPages();
+  let finishWrite!: (response: Response) => void;
+  fetchMock.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finishWrite = resolve;
+      }),
+  );
+  let mutation!: Promise<boolean>;
+  await act(async () => {
+    mutation = state.mutateLink("151", remove);
+  });
+  fetchMock.mockResolvedValueOnce(response(ids(1, 100), 204));
+  let refresh!: Promise<void>;
+  await act(async () => {
+    refresh = state.revalidate();
+  });
+  expect(fetchMock).toHaveBeenCalledTimes(3);
+  await act(async () => {
+    finishWrite(saved());
+    await mutation;
+    await refresh;
+  });
+  expect(state.links.map((item) => item.id)).toEqual(ids(1, 100).map(String));
+  expect(state.total).toBe(204);
+  expect(state.nextOffset).toBe(100);
+  expect(offsets()).toEqual(["0", "100", "0"]);
+});
+
+it("does not apply an old mutation to a new query and waits for the write before fetching it", async () => {
+  await loadTwoPages();
+  let finishWrite!: (response: Response) => void;
+  fetchMock.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finishWrite = resolve;
+      }),
+  );
+  let mutation!: Promise<boolean>;
+  await act(async () => {
+    mutation = state.mutateLink("151", edit);
+  });
+  fetchMock.mockResolvedValueOnce(response([151], 1));
+  await act(async () => renderer.update(<Probe search="new query" />));
+  expect(state.links).toEqual([]);
+  expect(fetchMock).toHaveBeenCalledTimes(3);
+  await act(async () => {
+    finishWrite(saved());
+    await mutation;
+  });
+  expect(state.links).toEqual([link(151)]);
+  expect(state.total).toBe(1);
+  expect(state.nextOffset).toBeNull();
+});
+
+it("does not start queued mutations or fetch again after the view unmounts", async () => {
+  await loadTwoPages();
+  let finishWrite!: (response: Response) => void;
+  fetchMock.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finishWrite = resolve;
+      }),
+  );
+  let first!: Promise<boolean>;
+  let queued!: Promise<boolean>;
+  await act(async () => {
+    first = state.mutateLink("151", toggle);
+    queued = state.mutateLink("160", toggle);
+  });
+  await act(async () => renderer.unmount());
+  finishWrite(saved());
+  expect(await first).toBe(true);
+  expect(await queued).toBe(false);
+  expect(fetchMock).toHaveBeenCalledTimes(3);
 });

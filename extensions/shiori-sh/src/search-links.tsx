@@ -92,20 +92,23 @@ export default function SearchLinks() {
   const [showDetail, setShowDetail] = useState(true);
   const [searchText, setSearchText] = useState("");
 
-  const { links, total, isLoading, error, pagination, revalidate } = useLinks(filter, searchText);
+  const { links, total, isLoading, error, pagination, revalidate, mutateLink } = useLinks(filter, searchText);
 
   const handleToggleRead = useCallback(
     async (link: Link) => {
-      const markRead = !link.read_at;
+      let markRead = false;
       try {
-        await updateLinks([link.id], markRead);
-        void revalidate();
-        await showToast(Toast.Style.Success, markRead ? "Marked as read" : "Moved to inbox");
+        const changed = await mutateLink(link.id, async (current) => {
+          markRead = !current.read_at;
+          await updateLinks([current.id], markRead);
+          return { read_at: markRead ? new Date().toISOString() : null };
+        });
+        if (changed) await showToast(Toast.Style.Success, markRead ? "Marked as read" : "Moved to inbox");
       } catch (error) {
         await showToast(Toast.Style.Failure, "Failed to update", (error as Error).message);
       }
     },
-    [revalidate],
+    [mutateLink],
   );
 
   const handleDelete = useCallback(
@@ -118,15 +121,17 @@ export default function SearchLinks() {
         })
       ) {
         try {
-          await deleteLink(link.id);
-          void revalidate();
-          await showToast(Toast.Style.Success, "Link deleted");
+          const changed = await mutateLink(link.id, async (current) => {
+            await deleteLink(current.id);
+            return null;
+          });
+          if (changed) await showToast(Toast.Style.Success, "Link deleted");
         } catch (error) {
           await showToast(Toast.Style.Failure, "Failed to delete", (error as Error).message);
         }
       }
     },
-    [revalidate],
+    [mutateLink],
   );
 
   const handleSaveFromClipboard = useCallback(async () => {
@@ -153,15 +158,21 @@ export default function SearchLinks() {
       const summary = normalizedSummary ? normalizedSummary : null;
 
       try {
-        await updateLinkDetails(link.id, title, summary);
-        void revalidate();
-        await showToast(Toast.Style.Success, "Link updated");
+        const changed = await mutateLink(link.id, async (current) => {
+          const result = await updateLinkDetails(current.id, title, summary);
+          return {
+            title: result.link?.title ?? title,
+            summary: result.link ? result.link.summary : summary,
+            updated_at: result.link?.updated_at ?? new Date().toISOString(),
+          };
+        });
+        if (changed) await showToast(Toast.Style.Success, "Link updated");
       } catch (error) {
         await showToast(Toast.Style.Failure, "Failed to update", (error as Error).message);
         throw error;
       }
     },
-    [revalidate],
+    [mutateLink],
   );
 
   return (
@@ -216,6 +227,7 @@ export default function SearchLinks() {
       {links.map((link: Link) => (
         <List.Item
           key={link.id}
+          id={link.id}
           icon={getFavicon(link.url, { fallback: Icon.Link })}
           title={link.title || link.url}
           subtitle={showDetail ? undefined : link.domain}
