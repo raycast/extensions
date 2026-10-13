@@ -152,8 +152,10 @@ export async function getLuciStatus(): Promise<LuciState> {
     const isPermError =
       errMsg.includes("not allowed to send keystrokes") ||
       errMsg.includes("Assistive") ||
-      errMsg.includes("1743") ||
-      errMsg.includes("System Events");
+      errMsg.includes("-1743") ||
+      errMsg.includes("(-1728)") ||
+      errMsg.includes("Not authorized") ||
+      errMsg.includes("not permitted");
 
     return {
       running: true,
@@ -193,14 +195,15 @@ export async function toggleLuciRecording(): Promise<{
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
     if (
-      errMsg.includes("1743") ||
+      errMsg.includes("-1743") ||
       errMsg.includes("Assistive") ||
-      errMsg.includes("System Events")
+      errMsg.includes("Not authorized") ||
+      errMsg.includes("not permitted")
     ) {
       return {
         success: false,
         error:
-          "Accessibility permission needed for System Events in System Settings",
+          "Accessibility permission needed for System Events in macOS System Settings",
       };
     }
     return {
