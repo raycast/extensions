@@ -183,14 +183,18 @@ function stashExistingCaptures() {
   return () => moved.forEach(([from, to]) => renameSync(from, to));
 }
 
+/**
+ * Window on a solid canvas. The Store check wants the same background on every
+ * screenshot and about 12% padding, so no gradient (windows of different sizes
+ * would show different parts of it) and a fixed window width.
+ */
 function compose(source, target) {
   const graph = [
-    "[1:v]scale=1640:-1,format=rgba,split[w][s]",
-    "[s]colorchannelmixer=rr=0:gg=0:bb=0:aa=0.45,pad=iw+200:ih+200:100:100:color=black@0,boxblur=luma_radius=40:luma_power=2:alpha_radius=40:alpha_power=2[sh]",
-    "[0:v][sh]overlay=(W-w)/2:(H-h)/2+18[bg]",
+    "[1:v]scale=1520:-1,format=rgba,split[w][s]",
+    "[s]colorchannelmixer=rr=0:gg=0:bb=0:aa=0.35,pad=iw+200:ih+200:100:100:color=black@0,boxblur=luma_radius=40:luma_power=2:alpha_radius=40:alpha_power=2[sh]",
+    "[0:v][sh]overlay=(W-w)/2:(H-h)/2+16[bg]",
     "[bg][w]overlay=(W-w)/2:(H-h)/2,format=rgb24",
   ].join(";");
-  const background = "gradients=s=2000x1250:c0=0x2b1055:c1=0xd53369:x0=0:y0=0:x1=2000:y1=1250:d=1,format=rgba";
   execFileSync(ffmpeg, [
     "-v",
     "error",
@@ -198,7 +202,7 @@ function compose(source, target) {
     "-f",
     "lavfi",
     "-i",
-    background,
+    "color=c=0x6b2d6b:s=2000x1250",
     "-i",
     source,
     "-filter_complex",
@@ -230,6 +234,16 @@ async function captureShots() {
 }
 
 mkdirSync(build, { recursive: true });
+
+// --compose-only: rebuild metadata/ from the last run's raw window captures, without Raycast.
+if (process.argv.includes("--compose-only")) {
+  for (const shot of SHOTS) {
+    compose(join(build, `raw-${shot.file}`), join(metadata, shot.file));
+  }
+  console.log(`Recomposed ${SHOTS.length} screenshots in ${metadata}.`);
+  process.exit(0);
+}
+
 let created = [];
 const restore = stashExistingCaptures();
 try {

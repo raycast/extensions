@@ -84,7 +84,7 @@ Before running it:
 3. Grant the terminal Screen Recording and Accessibility access, since it captures the Raycast window and sends key presses.
 4. Leave the Mac alone for about a minute. Raycast closes when focus moves, and typing lands in its search bar.
 
-GIFs are expected in `~/Downloads`; set `GIFCAP_OUTPUT_DIR` if you changed the "Save GIFs To" preference. To change what is shown, edit `CLIPS` and `SHOTS` at the top of the script.
+GIFs are expected in `~/Downloads`; set `GIFCAP_OUTPUT_DIR` if you changed the "Save GIFs To" preference. To change what is shown, edit `CLIPS` and `SHOTS` at the top of the script. The Store's `metadata-images` check requires the same background on every screenshot and about 12% padding, so keep the solid canvas. `npm run screenshots -- --compose-only` rebuilds `metadata/` from the last run's raw captures without touching Raycast.
 
 ## CI
 
