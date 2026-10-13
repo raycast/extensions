@@ -32,6 +32,19 @@ describe("fieldSpecFromForm", () => {
     });
   });
 
+  it("shows a description above a prefilled text or number field", () => {
+    for (const type of ["text", "number"] as const) {
+      const spec = fieldSpecFromForm(
+        field({ type, defaultValue: "3", description: "1 to 5" }),
+      );
+      expect(spec).toMatchObject({
+        defaultValue: "3",
+        description: "1 to 5",
+        placeholder: undefined,
+      });
+    }
+  });
+
   it("shows a description above a field that cannot take a placeholder", () => {
     const date = fieldSpecFromForm(
       field({ type: "date", description: "When it happened" }),
