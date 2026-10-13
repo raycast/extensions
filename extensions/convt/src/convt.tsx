@@ -10,6 +10,7 @@ import {
   openExtensionPreferences,
   showToast,
   Toast,
+  useNavigation,
 } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
@@ -95,6 +96,7 @@ function Converter({
   files: string[];
   setFiles: (files: string[]) => void;
 }) {
+  const { push } = useNavigation();
   const [formats, setFormats] = useState<Format[]>([]);
   const [target, setTarget] = useState("");
   const [outputDirectory, setOutputDirectory] = useState<string[]>([]);
@@ -104,7 +106,6 @@ function Converter({
   const [dpi, setDpi] = useState("");
   const [loadingTargets, setLoadingTargets] = useState(false);
   const [fileError, setFileError] = useState<string>();
-  const [results, setResults] = useState<ConversionResult[]>();
   const [progress, setProgress] = useState<ConversionProgress>();
   const [busy, setBusy] = useState(false);
   const controller = useRef<AbortController | null>(null);
@@ -179,7 +180,7 @@ function Converter({
           onProgress: setProgress,
         },
       );
-      setResults(converted);
+      push(<Results results={converted} />);
       const done = converted.filter((result) => result.status === "done").length;
       await showToast({
         style: done === converted.length ? Toast.Style.Success : Toast.Style.Failure,
@@ -195,26 +196,6 @@ function Converter({
     }
   }
 
-  if (results) return <Results results={results} onBack={() => setResults(undefined)} />;
-
-  if (busy) {
-    return (
-      <List isLoading searchBarPlaceholder="Converting files…">
-        <List.Item
-          title={progress ? path.basename(progress.input) : "Preparing conversion…"}
-          subtitle={progress ? `${progress.completed} of ${progress.total} completed` : undefined}
-          icon={Icon.ArrowClockwise}
-          accessories={progress?.fraction != null ? [{ text: `${Math.floor(progress.fraction * 100)}%` }] : []}
-          actions={
-            <ActionPanel>
-              <Action title="Cancel Conversion" icon={Icon.XMarkCircle} onAction={() => controller.current?.abort()} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
-
   const selectedFormat = formats.find((format) => format.id === target);
   const image = selectedFormat?.category === "image";
   const video = selectedFormat?.category === "video";
@@ -223,10 +204,14 @@ function Converter({
 
   return (
     <Form
-      isLoading={loadingTargets}
+      isLoading={loadingTargets || busy}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Convert Files" icon={Icon.ArrowRight} onSubmit={submit} />
+          {busy ? (
+            <Action title="Cancel Conversion" icon={Icon.XMarkCircle} onAction={() => controller.current?.abort()} />
+          ) : (
+            <Action.SubmitForm title="Convert Files" icon={Icon.ArrowRight} onSubmit={submit} />
+          )}
           {process.platform === "darwin" && (
             <Action
               title="Use Finder Selection"
@@ -246,6 +231,16 @@ function Converter({
       }
     >
       <Form.Description text="Convert files locally with Convt. Originals are preserved; existing output names receive a numbered suffix." />
+      {busy && (
+        <Form.Description
+          title="Converting"
+          text={
+            progress
+              ? `${path.basename(progress.input)} — ${progress.completed} of ${progress.total} completed${progress.fraction != null ? ` (${Math.floor(progress.fraction * 100)}%)` : ""}`
+              : "Preparing conversion…"
+          }
+        />
+      )}
       <Form.FilePicker
         id="files"
         title="Files"
@@ -326,7 +321,8 @@ function Converter({
   );
 }
 
-function Results({ results, onBack }: { results: ConversionResult[]; onBack: () => void }) {
+function Results({ results }: { results: ConversionResult[] }) {
+  const { pop } = useNavigation();
   const outputs = results.flatMap((result) => (result.status === "done" ? result.outputs : []));
   return (
     <List navigationTitle="Conversion Results" searchBarPlaceholder="Search converted files…">
@@ -355,7 +351,7 @@ function Results({ results, onBack }: { results: ConversionResult[]; onBack: () 
                       <Action.CopyToClipboard title="Copy File" content={{ file: output }} />
                       <Action.CopyToClipboard title="Copy Path" content={output} />
                       <Action.CopyToClipboard title="Copy All Output Paths" content={outputs.join("\n")} />
-                      <Action title="Convert More Files" icon={Icon.ArrowCounterClockwise} onAction={onBack} />
+                      <Action title="Convert More Files" icon={Icon.ArrowCounterClockwise} onAction={pop} />
                     </ActionPanel>
                   }
                 />
@@ -383,7 +379,7 @@ function Results({ results, onBack }: { results: ConversionResult[]; onBack: () 
                     }
                   />
                   <Action.CopyToClipboard title="Copy Error" content={result.message} />
-                  <Action title="Back to Conversion" icon={Icon.ArrowCounterClockwise} onAction={onBack} />
+                  <Action title="Back to Conversion" icon={Icon.ArrowCounterClockwise} onAction={pop} />
                   <Action.OpenInBrowser title="Open Convt Help" url="https://github.com/opencoredev/convt#engines" />
                 </ActionPanel>
               }
