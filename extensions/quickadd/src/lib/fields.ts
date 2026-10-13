@@ -4,6 +4,7 @@ interface FieldBase {
   id: string;
   label: string;
   optional: boolean;
+  /** Shown as a line above the field. A typed field without a placeholder shows it as the placeholder instead. */
   description?: string;
 }
 
@@ -78,12 +79,24 @@ function multiDefault(
   return picked;
 }
 
+// Raycast shows `info` only as an ⓘ icon that is easy to miss, so a field's
+// description is kept visible: as the placeholder of a text or number field
+// that has none, otherwise as a line above the field.
 export function fieldSpecFromForm(field: FormField): FieldSpec {
+  const spec = specFromForm(field);
+  const description = field.description?.trim();
+  if (!description) return spec;
+  if ((spec.kind === "text" || spec.kind === "number") && !spec.placeholder) {
+    return { ...spec, placeholder: description };
+  }
+  return { ...spec, description };
+}
+
+function specFromForm(field: FormField): FieldSpec {
   const base: FieldBase = {
     id: field.id,
     label: field.label,
     optional: field.optional === true,
-    description: field.description,
   };
   const options = (field.options ?? []).map((value, index) => ({
     value,

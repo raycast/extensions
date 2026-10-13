@@ -1,5 +1,9 @@
 # QuickAdd for Obsidian Changelog
 
+## [Field descriptions] - {PR_MERGE_DATE}
+
+- A field's description is now visible on the form: as the placeholder of a text or number field that has none, otherwise as a line above the field. Before, it hid behind the field's info icon. Thanks to @ievlevpn.
+
 ## [Initial Version] - 2026-10-13
 
 - Run any QuickAdd choice from Raycast and answer its prompts in native Raycast forms and lists.
