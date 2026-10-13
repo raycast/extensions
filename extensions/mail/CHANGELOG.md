@@ -1,6 +1,6 @@
 # Mail Changelog
 
-## [Skip Background Refresh When Mail Is Closed] - {PR_MERGE_DATE}
+## [Skip Background Refresh When Mail Is Closed] - 2026-10-13
 
 - The background Refresh Mail command no longer opens Mail when it is closed, so it no longer switches to Mail's assigned desktop ([#32202](https://github.com/raycast/extensions/issues/32202)). Running Refresh Mail manually still opens Mail.
 
