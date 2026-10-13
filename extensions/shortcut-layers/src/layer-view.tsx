@@ -9,6 +9,7 @@ import {
   closeMainWindow,
   confirmAlert,
   getPreferenceValues,
+  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -33,19 +34,55 @@ export function LayerView({ layerId }: { layerId: string }) {
   const isInstant = mode === "instant";
   // A key pressed before the layer finished loading, replayed once it arrives.
   const pending = useRef<string | null>(null);
+  // Set while an action is firing, so a second keypress cannot start it again.
+  const firing = useRef(false);
+  // Title of the shell action that is running, for the spinner and toast.
+  const [running, setRunning] = useState<string | null>(null);
 
   async function fire(entry: Entry) {
+    if (firing.current) return;
+    firing.current = true;
     setSearchText("");
-    // Run first: popping to root can end the command session, so anything
-    // awaited after it may never execute. Then reset the stack before hiding, so
-    // the next open is root search rather than this layer.
-    await runEntry(entry);
+
+    const isShell = entry.kind === "shell";
+    setRunning(isShell ? entry.title : null);
+    const toast = isShell
+      ? await showToast({ style: Toast.Style.Animated, title: `Running "${entry.title}"…` })
+      : undefined;
+
+    const { ok, error } = await runEntry(entry);
+    setRunning(null);
+
+    if (!ok) {
+      // Keep the panel open so the failure is readable; the user closes it. A
+      // toast created right before the window closes is dropped, so closing here
+      // would hide the very message we want to show.
+      firing.current = false;
+      if (toast) {
+        toast.style = Toast.Style.Failure;
+        toast.title = `Failed: ${entry.title}`;
+        toast.message = error;
+      } else {
+        await showToast({ style: Toast.Style.Failure, title: `Failed: ${entry.title}`, message: error });
+      }
+      return;
+    }
+
+    // Success: drop the running toast before closing, so it cannot resurface as a
+    // stale system notification.
+    if (toast) await toast.hide();
+
+    // The action has to finish before the panel closes: closing first suspends
+    // this code, so a shell command would never start. Running first also keeps
+    // the popped root search from stealing focus back from the target app.
     await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+
+    if (isShell) await showHUD(`Done: ${entry.title}`);
   }
 
   function runKey(key: string) {
     setSearchText("");
-    if (!layer) return;
+    if (!layer || firing.current) return;
     const entry = findEntry(layer.entries, key);
     if (!entry) {
       showToast({ style: Toast.Style.Failure, title: `No action for "${key}"` });
@@ -55,6 +92,7 @@ export function LayerView({ layerId }: { layerId: string }) {
   }
 
   function handleChange(text: string) {
+    if (firing.current) return;
     if (!isInstant) {
       setSearchText(text);
       return;
@@ -106,7 +144,7 @@ export function LayerView({ layerId }: { layerId: string }) {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || running !== null}
       filtering={!isInstant}
       searchText={searchText}
       onSearchTextChange={handleChange}

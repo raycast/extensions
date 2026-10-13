@@ -1,4 +1,4 @@
-import { open, showToast, Toast } from "@raycast/api";
+import { open } from "@raycast/api";
 import { spawn } from "child_process";
 import { homedir } from "os";
 import { getShellEnvironment, shellPath } from "./shell-env";
@@ -30,12 +30,18 @@ function runShellCommand(command: string, env: NodeJS.ProcessEnv): Promise<void>
   });
 }
 
+export interface RunResult {
+  ok: boolean;
+  error?: string;
+}
+
 /**
  * Runs a single entry. Mirrors the actions a Karabiner layer rule would fire:
  * open an app, open a file/folder, open a URL or deeplink (including
- * `raycast://`), or run a shell command.
+ * `raycast://`), or run a shell command. Reports failure instead of toasting, so
+ * the caller owns the one toast it shows.
  */
-export async function runEntry(entry: Entry): Promise<void> {
+export async function runEntry(entry: Entry): Promise<RunResult> {
   try {
     switch (entry.kind) {
       case "shell":
@@ -47,11 +53,8 @@ export async function runEntry(entry: Entry): Promise<void> {
       default:
         await open(entry.value);
     }
+    return { ok: true };
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: `Could not run "${entry.title}"`,
-      message: error instanceof Error ? error.message : String(error),
-    });
+    return { ok: false, error: error instanceof Error ? error.message : String(error) };
   }
 }
