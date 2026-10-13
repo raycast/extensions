@@ -1,6 +1,6 @@
 # Year in Progress Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-10-13
 
 - Added Windows support for inline progress and managing custom date ranges.
 - Added a dedicated Year in Progress command that can be added to Favorites to display the year's progress in Raycast.
