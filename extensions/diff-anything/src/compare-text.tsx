@@ -7,26 +7,42 @@ import {
   getApplications,
   showHUD,
 } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { failure } from "./failure";
+import { createLatestLoad } from "./latest-load";
 import { findApp, openInApp, planNotice, writeTextPair } from "./core";
 
 export default function Command() {
   const [left, setLeft] = useState("");
   const [right, setRight] = useState("");
   const [busy, setBusy] = useState(false);
+  const [clipboardLoads] = useState(() => ({
+    left: createLatestLoad<string>(),
+    right: createLatestLoad<string>(),
+  }));
+  useEffect(
+    () => () => {
+      clipboardLoads.left.invalidate();
+      clipboardLoads.right.invalidate();
+    },
+    [clipboardLoads],
+  );
   async function paste(side: "left" | "right") {
-    try {
-      const value = await Clipboard.readText();
-      if (value === undefined)
-        throw new Error("The clipboard contains no text.");
-      (side === "left" ? setLeft : setRight)(value);
-    } catch (error) {
-      await failure("Cannot read clipboard text", error);
-    }
+    await clipboardLoads[side].run(
+      async () => {
+        const value = await Clipboard.readText();
+        if (value === undefined)
+          throw new Error("The clipboard contains no text.");
+        return value;
+      },
+      side === "left" ? setLeft : setRight,
+      (error) => failure("Cannot read clipboard text", error),
+    );
   }
   async function submit() {
     if (busy) return;
+    clipboardLoads.left.invalidate();
+    clipboardLoads.right.invalidate();
     setBusy(true);
     try {
       const app = await findApp(await getApplications());
@@ -68,13 +84,19 @@ export default function Command() {
         id="left"
         title="Left Text"
         value={left}
-        onChange={setLeft}
+        onChange={(value) => {
+          clipboardLoads.left.invalidate();
+          setLeft(value);
+        }}
       />
       <Form.TextArea
         id="right"
         title="Right Text"
         value={right}
-        onChange={setRight}
+        onChange={(value) => {
+          clipboardLoads.right.invalidate();
+          setRight(value);
+        }}
       />
     </Form>
   );

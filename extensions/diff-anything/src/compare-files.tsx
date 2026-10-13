@@ -9,34 +9,44 @@ import {
 import { useEffect, useState } from "react";
 import { findApp, openInApp, planNotice, validatePaths } from "./core";
 import { failure } from "./failure";
+import { createLatestLoad } from "./latest-load";
 
 export default function Command() {
   const [left, setLeft] = useState("");
   const [right, setRight] = useState("");
   const [busy, setBusy] = useState(false);
+  const [finderLoad] = useState(() => createLatestLoad<[string, string]>());
   // Two items already selected in Finder fill the form; anything else leaves it for typing.
   useEffect(() => {
-    getSelectedFinderItems()
-      .then((items) => validatePaths(items.map((item) => item.path)))
-      .then(([first, second]) => {
-        setLeft((value) => value || first);
-        setRight((value) => value || second);
-      })
-      .catch(() => undefined);
-  }, []);
+    void finderLoad.run(
+      async () =>
+        validatePaths(
+          (await getSelectedFinderItems()).map((item) => item.path),
+        ),
+      ([first, second]) => {
+        setLeft(first);
+        setRight(second);
+      },
+      () => undefined,
+    );
+    return () => finderLoad.invalidate();
+  }, [finderLoad]);
   async function loadFinder() {
-    try {
-      const paths = await validatePaths(
-        (await getSelectedFinderItems()).map((file) => file.path),
-      );
-      setLeft(paths[0]);
-      setRight(paths[1]);
-    } catch (error) {
-      await failure("Select two items in Finder", error);
-    }
+    await finderLoad.run(
+      async () =>
+        validatePaths(
+          (await getSelectedFinderItems()).map((file) => file.path),
+        ),
+      ([first, second]) => {
+        setLeft(first);
+        setRight(second);
+      },
+      (error) => failure("Select two items in Finder", error),
+    );
   }
   async function submit() {
     if (busy) return;
+    finderLoad.invalidate();
     setBusy(true);
     try {
       const paths = await validatePaths([left, right]);
@@ -60,6 +70,7 @@ export default function Command() {
             title="Swap Left and Right"
             shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
             onAction={() => {
+              finderLoad.invalidate();
               setLeft(right);
               setRight(left);
             }}
@@ -72,14 +83,20 @@ export default function Command() {
         id="left"
         title="Left Path"
         value={left}
-        onChange={setLeft}
+        onChange={(value) => {
+          finderLoad.invalidate();
+          setLeft(value);
+        }}
         placeholder="/Users/you/Documents/before.txt"
       />
       <Form.TextField
         id="right"
         title="Right Path"
         value={right}
-        onChange={setRight}
+        onChange={(value) => {
+          finderLoad.invalidate();
+          setRight(value);
+        }}
         placeholder="/Users/you/Documents/after.txt"
       />
     </Form>
