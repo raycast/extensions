@@ -1,9 +1,0 @@
-node_modules/
-dist/
-raycast-env.d.ts
-.DS_Store
-*.upxs
-*.upx
-reports/
-assets/JSONEditor
-assets/editor/
