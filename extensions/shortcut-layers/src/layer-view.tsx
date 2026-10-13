@@ -5,6 +5,7 @@ import {
   Icon,
   Keyboard,
   List,
+  PopToRootType,
   closeMainWindow,
   confirmAlert,
   getPreferenceValues,
@@ -33,7 +34,9 @@ export function LayerView({ layerId }: { layerId: string }) {
 
   async function fire(entry: Entry) {
     setSearchText("");
-    await closeMainWindow();
+    // Reset the navigation stack before hiding, so the next open is root search
+    // rather than this layer.
+    await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
     await runEntry(entry);
   }
 
