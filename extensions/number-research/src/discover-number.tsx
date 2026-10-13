@@ -1,15 +1,44 @@
-import { Action, ActionPanel, Color, Detail, Form } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Form, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { useDiscovery } from "./use-discovery";
 
 import { checkNumber, formatDate } from "./api";
 
+function DiscoveryForm({ initialValue, onSubmit }: { initialValue: string; onSubmit: (next: string) => void }) {
+  const [draft, setDraft] = useState(initialValue);
+  const { pop } = useNavigation();
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Discover Number"
+            onSubmit={(values: { input: string }) => {
+              const next = values.input.trim();
+              if (!/^\d+$/.test(next)) return;
+              onSubmit(next);
+              pop();
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="input"
+        title="Number"
+        value={draft}
+        onChange={setDraft}
+        error={!/^\d+$/.test(draft.trim()) ? "Please enter a valid number (digits only)" : undefined}
+      />
+    </Form>
+  );
+}
+
 export default function Command({ arguments: args }: { arguments: { number: string } }) {
   const [input, setInput] = useState(args.number.trim());
-  const [draft, setDraft] = useState(input);
-  const [isEditing, setIsEditing] = useState(false);
+  const { push } = useNavigation();
   const isValid = /^\d+$/.test(input);
-  const { state, cancel, retry } = useDiscovery(checkNumber, input, isValid && !isEditing);
+  const { state, cancel, retry } = useDiscovery(checkNumber, input, isValid);
   const isLoading = isValid && state.kind === "loading";
   const result = state.kind === "success" ? state.result : undefined;
   const error = !isValid
@@ -18,9 +47,16 @@ export default function Command({ arguments: args }: { arguments: { number: stri
       ? state.message
       : undefined;
   const edit = () => {
-    cancel();
-    setDraft(input);
-    setIsEditing(true);
+    if (isLoading) cancel();
+    push(
+      <DiscoveryForm
+        initialValue={input}
+        onSubmit={(next) => {
+          setInput(next);
+          retry();
+        }}
+      />,
+    );
   };
   const discoveryActions = (
     <ActionPanel.Section>
@@ -28,35 +64,6 @@ export default function Command({ arguments: args }: { arguments: { number: stri
       {isValid && <Action title="Retry Discovery" onAction={retry} />}
     </ActionPanel.Section>
   );
-
-  if (isEditing) {
-    return (
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm
-              title="Discover Number"
-              onSubmit={(values: { input: string }) => {
-                const next = values.input.trim();
-                if (!/^\d+$/.test(next)) return;
-                setInput(next);
-                retry();
-                setIsEditing(false);
-              }}
-            />
-          </ActionPanel>
-        }
-      >
-        <Form.TextField
-          id="input"
-          title="Number"
-          value={draft}
-          onChange={setDraft}
-          error={!/^\d+$/.test(draft.trim()) ? "Please enter a valid number (digits only)" : undefined}
-        />
-      </Form>
-    );
-  }
 
   if (isLoading) {
     return (
