@@ -17,7 +17,7 @@ import { homedir } from "os";
 import { isAbsolute, join } from "path";
 import { useEffect, useRef, useState } from "react";
 import { runEntry } from "./actions";
-import { loadLayers, saveLayers, useLayers } from "./data";
+import { updateLayer, useLayers } from "./data";
 import { EntryForm } from "./form-entry";
 import { DEFAULT_KEY_COLOR, findEntry } from "./schema";
 import { SORT_OPTIONS, sortEntries, type SortOption } from "./sort";
@@ -242,11 +242,9 @@ async function deleteEntry(layerId: string, entry: Entry, mutate: () => void) {
     primaryAction: { style: Alert.ActionStyle.Destructive, title: "Delete" },
   });
   if (!confirmed) return;
-  const layers = await loadLayers();
-  const layer = layers.find((l) => l.id === layerId);
-  if (!layer) return;
-  layer.entries = layer.entries.filter((e) => e.id !== entry.id);
-  await saveLayers(layers);
+  await updateLayer(layerId, (layer) => {
+    layer.entries = layer.entries.filter((e) => e.id !== entry.id);
+  });
   mutate();
   showToast({ style: Toast.Style.Success, title: "Action deleted" });
 }
@@ -258,11 +256,9 @@ async function deleteAllEntries(layerId: string, mutate: () => void) {
     primaryAction: { style: Alert.ActionStyle.Destructive, title: "Delete All" },
   });
   if (!confirmed) return;
-  const layers = await loadLayers();
-  const layer = layers.find((l) => l.id === layerId);
-  if (!layer) return;
-  layer.entries = [];
-  await saveLayers(layers);
+  await updateLayer(layerId, (layer) => {
+    layer.entries = [];
+  });
   mutate();
   showToast({ style: Toast.Style.Success, title: "All actions deleted" });
 }

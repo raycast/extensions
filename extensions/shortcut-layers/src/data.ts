@@ -31,3 +31,16 @@ export function useLayers() {
   const { isLoading, data, revalidate } = usePromise(loadLayers);
   return { isLoading, layers: data ?? [], revalidate };
 }
+
+/**
+ * Applies `change` to a stored layer and saves it in one read-modify-write.
+ * Returns false when the layer no longer exists.
+ */
+export async function updateLayer(layerId: string, change: (layer: Layer) => void): Promise<boolean> {
+  const layers = await loadLayers();
+  const layer = layers.find((l) => l.id === layerId);
+  if (!layer) return false;
+  change(layer);
+  await saveLayers(layers);
+  return true;
+}
