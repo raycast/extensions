@@ -1,6 +1,6 @@
 # CodePen Changelog
 
-## [Update Author] - {PR_MERGE_DATE}
+## [Update Author] - 2026-10-13
 
 - Update the extension author from `ray.dhruv` to `0xdhrv`.
 
