@@ -1,6 +1,6 @@
 # Chinese Lunar Calendar Changelog
 
-## [Fix] - 2026-10-13
+## [Fix] - {PR_MERGE_DATE}
 
 - Fixed responsive theme color rendering when switching between Light and Dark mode.
 
