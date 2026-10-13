@@ -1,6 +1,7 @@
 import * as path from "path";
 import type { ExpiryTime } from "./api";
 import type { StoredUpload } from "./storage";
+import { validateUploadFiles } from "./validation";
 
 type UploadFileFn = (filePath: string, expiry: ExpiryTime) => Promise<string>;
 type AddRecentUploadFn = (upload: StoredUpload) => Promise<void>;
@@ -29,6 +30,7 @@ interface UploadBatchErrorOptions {
   clipboardCopied: boolean;
   failedFilename?: string;
   clipboardErrorMessage?: string;
+  historyErrorMessage?: string;
 }
 
 export class UploadBatchError extends Error {
@@ -37,6 +39,7 @@ export class UploadBatchError extends Error {
   clipboardCopied: boolean;
   failedFilename?: string;
   clipboardErrorMessage?: string;
+  historyErrorMessage?: string;
 
   constructor(options: UploadBatchErrorOptions) {
     super(options.message);
@@ -46,11 +49,12 @@ export class UploadBatchError extends Error {
     this.clipboardCopied = options.clipboardCopied;
     this.failedFilename = options.failedFilename;
     this.clipboardErrorMessage = options.clipboardErrorMessage;
+    this.historyErrorMessage = options.historyErrorMessage;
   }
 }
 
 function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Upload failed";
+  return error instanceof Error && error.message.trim() ? error.message : "Upload failed";
 }
 
 async function copyUploadedUrls(uploads: UploadedFile[], copyToClipboard: CopyToClipboardFn): Promise<void> {
@@ -79,52 +83,52 @@ export async function uploadFilesBatch(
   expiry: ExpiryTime,
   dependencies: UploadBatchDependencies,
 ): Promise<UploadBatchResult> {
+  await validateUploadFiles(filePaths);
   const uploads: UploadedFile[] = [];
+  let uploadError: string | undefined;
+  let failedFilename: string | undefined;
 
   for (const filePath of filePaths) {
     try {
       const url = await dependencies.uploadFile(filePath, expiry);
-      const filename = path.basename(filePath);
-
-      uploads.push({ filename, url });
+      uploads.push({ filename: path.basename(filePath), url });
     } catch (error) {
-      let clipboardCopied = false;
-      let clipboardErrorMessage: string | undefined;
-
-      if (uploads.length > 0) {
-        try {
-          await copyUploadedUrls(uploads, dependencies.copyToClipboard);
-          clipboardCopied = true;
-          await persistUploads(uploads, expiry, dependencies);
-        } catch (clipboardError) {
-          clipboardErrorMessage = getErrorMessage(clipboardError);
-        }
-      }
-
-      throw new UploadBatchError({
-        message: getErrorMessage(error),
-        uploads,
-        totalFiles: filePaths.length,
-        clipboardCopied,
-        failedFilename: path.basename(filePath),
-        clipboardErrorMessage,
-      });
+      uploadError = getErrorMessage(error);
+      failedFilename = path.basename(filePath);
+      break;
     }
   }
 
-  try {
-    await copyUploadedUrls(uploads, dependencies.copyToClipboard);
-  } catch (error) {
-    throw new UploadBatchError({
-      message: getErrorMessage(error),
-      uploads,
-      totalFiles: uploads.length,
-      clipboardCopied: false,
-      clipboardErrorMessage: getErrorMessage(error),
-    });
+  let historyErrorMessage: string | undefined;
+  let clipboardErrorMessage: string | undefined;
+  let clipboardCopied = false;
+  if (uploads.length > 0) {
+    // Keep successful links even when the clipboard is unavailable, and still
+    // attempt the clipboard if local history fails.
+    try {
+      await persistUploads(uploads, expiry, dependencies);
+    } catch (error) {
+      historyErrorMessage = getErrorMessage(error);
+    }
+    try {
+      await copyUploadedUrls(uploads, dependencies.copyToClipboard);
+      clipboardCopied = true;
+    } catch (error) {
+      clipboardErrorMessage = getErrorMessage(error);
+    }
   }
 
-  await persistUploads(uploads, expiry, dependencies);
+  if (uploadError !== undefined || historyErrorMessage !== undefined || clipboardErrorMessage !== undefined) {
+    throw new UploadBatchError({
+      message: uploadError ?? historyErrorMessage ?? clipboardErrorMessage ?? "Upload failed",
+      uploads,
+      totalFiles: filePaths.length,
+      clipboardCopied,
+      failedFilename,
+      clipboardErrorMessage,
+      historyErrorMessage,
+    });
+  }
 
   return { uploads };
 }
