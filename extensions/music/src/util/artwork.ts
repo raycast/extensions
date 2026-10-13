@@ -10,23 +10,25 @@ const execFileAsync = promisify(execFile);
 
 // Menu bar icons render at roughly 18pt, so 2x of that is plenty.
 const ICON_PX = 40;
-const MAX_CACHED_FILES = 50;
+// Covers are ~2-5 KB each, so this stays well under 1 MB on disk.
+const MAX_CACHED_FILES = 200;
 // Short on purpose: right after a skip Music often has not loaded the new
 // track's artwork yet, so a miss must not stick for long.
 const MISS_TTL_MS = 15 * 1000;
 // A leftover .raw or .tmp means an extraction was interrupted. Real ones finish in seconds.
 const STALE_TEMP_MS = 60 * 1000;
 // Reusing a cached cover refreshes its age so pruning drops the least recently
-// played albums first. Skipped when recent, to avoid a write on every poll.
+// played tracks first. Skipped when recent, to avoid a write on every poll.
 const TOUCH_AFTER_MS = 60 * 1000;
 
 const artworkDir = path.join(environment.supportPath, "artwork");
 const inFlight = new Map<string, Promise<string | undefined>>();
 
-// Keyed by artist + album rather than track id: streamed tracks don't have a
-// stable id, and one lookup then covers every track on the album.
+// Keyed per track by artist + album + name rather than track id, since streamed
+// tracks don't have a stable id. Per track (not per album) because tracks on
+// the same album can have different artwork.
 function cacheKey(artist: string, album: string, name: string): string {
-  const basis = album ? `${artist}|${album}` : `${artist}|${name}`;
+  const basis = `${artist}|${album}|${name}`;
   return createHash("sha1").update(basis.toLowerCase()).digest("hex").slice(0, 16);
 }
 
@@ -95,9 +97,8 @@ async function extract(key: string, artist: string, album: string, name: string)
   const tmpPath = path.join(artworkDir, `${key}.${tag}.tmp`);
 
   // Writes the artwork's original bytes to disk. Everything the cache key is
-  // built from must still match (artist + album, or artist + track name when
-  // there is no album): otherwise the track changed since the snapshot and we
-  // could cache the wrong cover under this key.
+  // built from (artist, album and name) must still match: otherwise the track
+  // changed since the snapshot and we could cache the wrong cover under this key.
   const result = await runAppleScript(
     `
     on run argv
@@ -114,7 +115,7 @@ async function extract(key: string, artist: string, album: string, name: string)
           return "mismatch"
         end try
         if (artist of t) is not expectedArtist or (album of t) is not expectedAlbum then return "mismatch"
-        if expectedAlbum is "" and (name of t) is not expectedName then return "mismatch"
+        if (name of t) is not expectedName then return "mismatch"
         if (count of artworks of t) is 0 then return "none"
         set d to raw data of artwork 1 of t
       end tell
