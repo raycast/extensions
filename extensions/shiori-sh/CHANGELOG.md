@@ -1,6 +1,6 @@
 # shiori.sh Changelog
 
-## [AI Tools and Pagination] - {PR_MERGE_DATE}
+## [AI Tools and Pagination] - 2026-10-13
 
 - Add AI tools to save bookmarks with confirmation, search saved links, and find unread links about a topic.
 - Support documented starred, tag, saved-since, read-status, and sort filters in AI search.
