@@ -1,6 +1,6 @@
 # Fake Data Generator Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-13
 
 - Generate IBAN (50 countries, national check digits, matching BIC)
 - Generate VAT Number (EU + GB, XI, CH, NO)
