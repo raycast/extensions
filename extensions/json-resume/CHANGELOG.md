@@ -1,6 +1,6 @@
 # Changelog
 
-## [Schema Rendering and AI Tool Fixes] - {PR_MERGE_DATE}
+## [Schema Rendering and AI Tool Fixes] - 2026-10-13
 
 - Share schema-compatible rendering across both resume commands, including projects, volunteer work, awards, certificates, publications, interests, and references.
 - Render URL, score, work name, education details, and complete skill lists while retaining legacy website, company, and GPA aliases.
