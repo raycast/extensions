@@ -1,4 +1,4 @@
-# The Insight Journal Changelog
+# Aryan Techie Blog Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 

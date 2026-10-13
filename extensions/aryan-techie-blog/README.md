@@ -1,6 +1,6 @@
-# The Insight Journal
+# Aryan Techie Blog
 
-Browse and search posts from [aryantechie.com/blog](https://aryantechie.com/blog) right from Raycast, and get notified when a new post is published.
+Browse and search posts from The Insight Journal ([aryantechie.com/blog](https://aryantechie.com/blog)) right from Raycast, and get notified when a new post is published.
 
 ## Commands
 

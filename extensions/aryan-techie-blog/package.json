@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "insight-journal",
-  "title": "The Insight Journal",
+  "name": "aryan-techie-blog",
+  "title": "Aryan Techie Blog",
   "description": "Browse and search Aryan Techie's blog posts from aryantechie.com, and get notified when a new post is published.",
   "icon": "icon.png",
   "author": "aryantechie",
