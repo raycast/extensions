@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [Compact Layout] - {PR_MERGE_DATE}
+## [Compact Layout] - 2026-10-13
 
 - Restructure the main view as a sectioned entity list (Overview / CPU / Memory / Disk / Power / Network) with colored percentage tags on the CPU, Memory, Disk and Power rows
 - Show every mounted volume as its own Disk row with a capacity tag; the boot volume's pane carries SMART status, physical-disk details and the live I/O rate (the "Disk" default tab opens on the boot volume)
