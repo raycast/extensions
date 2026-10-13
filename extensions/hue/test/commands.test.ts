@@ -28,6 +28,16 @@ describe("group toggle", () => {
     expect(offIds(hue)).toEqual(officeLights.map((light) => light.id));
   });
 
+  it("keeps a zone on while another of its rooms is on", async () => {
+    const bedroom = rooms.find((room) => room.metadata.name === "Bedroom")!;
+    const upstairs = zones.find((zone) => zone.metadata.name === "Upstairs")!;
+    const hue = fakeHue({ lights, scenes });
+    const bedroomLights = getLightsFromGroup(lights, bedroom);
+    await handleToggle(hue, canExecute, bedroomLights, getGroupedLightFromGroup(lights, bedroom)!, bedroom);
+    expect(getGroupedLightFromGroup(hue.lights, bedroom)?.on).toEqual({ on: false });
+    expect(getGroupedLightFromGroup(hue.lights, upstairs)?.on).toEqual({ on: true });
+  });
+
   it("reports the bridge's error and undoes the change", async () => {
     const hue = fakeHue({ lights, scenes });
     hue.hueClient!.updateGroupedLight.mockRejectedValue(new Error("Status 500 from Hue Bridge"));
