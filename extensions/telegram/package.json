@@ -33,14 +33,6 @@
       "link": "https://my.telegram.org/apps"
     },
     {
-      "name": "phoneNumber",
-      "type": "textfield",
-      "required": true,
-      "title": "Phone Number",
-      "description": "Your phone number with country code (e.g., +1234567890)",
-      "placeholder": "+1234567890"
-    },
-    {
       "name": "openRouterApiKey",
       "type": "password",
       "required": false,
@@ -172,11 +164,13 @@
     "@raycast/utils": "^1.17.0",
     "ai": "^5.0.118",
     "dedent": "^1.7.1",
+    "qrcode": "^1.5.4",
     "teleproto": "^1.229.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
@@ -189,7 +183,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish",
+    "publish": "npx -y @raycast/api@latest publish",
     "test": "vitest run",
     "test:watch": "vitest"
   }

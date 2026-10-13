@@ -1,15 +1,21 @@
-import { Clipboard, getSelectedText, showHUD } from "@raycast/api";
-import { getLayoutKeyMaps, selectLayout } from "swift:../swift";
+import { getSelectedText, showHUD } from "@raycast/api";
+import {
+  axSelectedText,
+  getLayoutKeyMaps,
+  selectLayout,
+  typeText,
+} from "swift:../swift";
 import {
   detectSourceLayout,
   getTargetOrder,
+  isWholeLineCopy,
   pickNextTarget,
   selectLine,
 } from "./utils";
 import { HistoryManager } from "./SessionManager";
 
 export default async function main() {
-  // 1. Load layouts + history BEFORE getSelectedText to minimize selection-to-paste gap
+  // 1. Load layouts + history BEFORE getSelectedText to minimize selection-to-type gap
   let layouts;
   let history;
   try {
@@ -29,14 +35,20 @@ export default async function main() {
     return;
   }
 
-  // 2. Get selected text — NOW, right before detection + paste
+  // 2. Get selected text — NOW, right before detection + typing
+  // Accessibility first (silent); Raycast's Cmd+C-based read only for apps
+  // without it, since that beeps when nothing is selected.
+  const readSelection = () => axSelectedText().catch(() => getSelectedText());
   let selectedText = "";
   try {
-    selectedText = await getSelectedText();
+    selectedText = await readSelection();
   } catch {
+    // nothing readable; fall through to selecting the line
+  }
+  if (!selectedText || isWholeLineCopy(selectedText)) {
     try {
       await selectLine();
-      selectedText = await getSelectedText();
+      selectedText = await readSelection();
     } catch {
       await showHUD("Please select text");
       return;
@@ -81,12 +93,12 @@ export default async function main() {
     return;
   }
 
-  // 5. Paste and switch keyboard layout
+  // 5. Type the result over the selection and switch keyboard layout
   try {
     await new Promise((r) => setTimeout(r, 50));
-    await Clipboard.paste(pick.transformed);
+    await typeText(pick.transformed);
     await selectLayout(pick.target.id);
-    await showHUD(`✅ ${pick.target.title}`);
+    await showHUD(pick.target.title);
   } catch (e) {
     await showHUD((e as Error).message);
     return;

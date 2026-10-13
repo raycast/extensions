@@ -5,6 +5,9 @@
 - Add paginated Inbox reading and Inbox-filtered email search.
 - Add AI tools to list mailboxes, reply or forward messages, manage message status and folders, and list or save attachments.
 - Improve email search and validation, message lookup, and attachment saving.
+## [Skip Background Refresh When Mail Is Closed] - 2026-10-13
+
+- The background Refresh Mail command no longer opens Mail when it is closed, so it no longer switches to Mail's assigned desktop ([#32202](https://github.com/raycast/extensions/issues/32202)). Running Refresh Mail manually still opens Mail.
 
 ## [Fix] - 2026-10-07
 

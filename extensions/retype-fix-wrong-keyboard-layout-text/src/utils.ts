@@ -10,6 +10,12 @@ export const selectLine = () =>
   end tell
 `);
 
+/**
+ * Sublime, VS Code etc. copy the whole line on Cmd+C with an empty selection,
+ * so getSelectedText returns "line\n" although nothing is selected.
+ */
+export const isWholeLineCopy = (text: string) => /^[^\n]*\n$/.test(text);
+
 export interface LayoutKeyMap {
   id: string;
   title: string;
