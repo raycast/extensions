@@ -12,6 +12,55 @@ function field(overrides: Partial<FormField>): FormField {
 }
 
 describe("fieldSpecFromForm", () => {
+  it("shows a description as the placeholder of a text or number field without one", () => {
+    for (const type of ["text", "textarea", "number"] as const) {
+      const spec = fieldSpecFromForm(
+        field({ type, description: "  Who you met  " }),
+      );
+      expect(spec).toMatchObject({ placeholder: "Who you met" });
+      expect(spec.description).toBeUndefined();
+    }
+  });
+
+  it("shows a description above a field that has a placeholder", () => {
+    const spec = fieldSpecFromForm(
+      field({ placeholder: "Ada", description: "Who you met" }),
+    );
+    expect(spec).toMatchObject({
+      placeholder: "Ada",
+      description: "Who you met",
+    });
+  });
+
+  it("shows a description above a prefilled text or number field", () => {
+    for (const type of ["text", "number"] as const) {
+      const spec = fieldSpecFromForm(
+        field({ type, defaultValue: "3", description: "1 to 5" }),
+      );
+      expect(spec).toMatchObject({
+        defaultValue: "3",
+        description: "1 to 5",
+        placeholder: undefined,
+      });
+    }
+  });
+
+  it("shows a description above a field that cannot take a placeholder", () => {
+    const date = fieldSpecFromForm(
+      field({ type: "date", description: "When it happened" }),
+    );
+    const select = fieldSpecFromForm(
+      field({ type: "dropdown", options: ["a"], description: "Pick one" }),
+    );
+    expect(date.description).toBe("When it happened");
+    expect(select.description).toBe("Pick one");
+  });
+
+  it("drops a blank description", () => {
+    const spec = fieldSpecFromForm(field({ type: "date", description: "  " }));
+    expect(spec.description).toBeUndefined();
+  });
+
   it("turns a file-picker suggester into a note picker titled by display names", () => {
     const spec = fieldSpecFromForm(
       field({

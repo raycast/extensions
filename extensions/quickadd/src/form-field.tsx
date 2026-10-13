@@ -32,8 +32,35 @@ export function FieldControl({
   error?: string;
   onChange: () => void;
 }) {
+  return (
+    <>
+      {spec.description && <Form.Description text={spec.description} />}
+      <Control
+        spec={spec}
+        vault={vault}
+        id={id}
+        error={error}
+        onChange={onChange}
+      />
+    </>
+  );
+}
+
+function Control({
+  spec,
+  vault,
+  id,
+  error,
+  onChange,
+}: {
+  spec: FieldSpec;
+  vault: Vault;
+  id: string;
+  error?: string;
+  onChange: () => void;
+}) {
   const title = spec.optional ? `${spec.label} (Optional)` : spec.label;
-  const common = { id, title, info: spec.description, error, onChange };
+  const common = { id, title, error, onChange };
 
   switch (spec.kind) {
     case "text":
@@ -121,7 +148,6 @@ function NumberControl({
   spec: Extract<FieldSpec, { kind: "number" }>;
   id: string;
   title: string;
-  info?: string;
   error?: string;
   onChange: () => void;
 }) {
@@ -149,7 +175,6 @@ function TextControl({
   vault: Vault;
   id: string;
   title: string;
-  info?: string;
   error?: string;
   onChange: () => void;
 }) {
