@@ -426,18 +426,18 @@ export async function fetchQueue(
   return parseQueue(config, data, await requiredChecksFor(queueBranch(config, data)));
 }
 
-export function checkKey(check: Check): string {
-  return `${check.workflow ?? ""}/${check.name}/${check.jobId ?? ""}`;
+export function checkIds(checks: Check[]): string[] {
+  const seen = new Map<string, number>();
+  return checks.map((check) => {
+    const id = `${check.workflow ?? ""}/${check.name}`;
+    const count = (seen.get(id) ?? 0) + 1;
+    seen.set(id, count);
+    return count === 1 ? id : `${id} #${count}`;
+  });
 }
 
-export function selectedCheckKey(checks: Check[], selected: string | undefined): string | undefined {
-  const keys = checks.map(checkKey);
-  if (selected && keys.includes(selected)) {
-    return selected;
-  }
-  const withoutJob = selected?.slice(0, selected.lastIndexOf("/"));
-  const sameCheck = checks.find((check) => `${check.workflow ?? ""}/${check.name}` === withoutJob);
-  return sameCheck ? checkKey(sameCheck) : keys[0];
+export function activeCheckId(ids: string[], selected: string | undefined): string | undefined {
+  return selected && ids.includes(selected) ? selected : ids[0];
 }
 
 export function failingRunIds(entry: QueueEntry): number[] {

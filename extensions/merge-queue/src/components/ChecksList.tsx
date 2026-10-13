@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useMergeQueue, useSelection } from "../data";
 import { truncate } from "../lib/format";
-import { Check, checkKey, QueueEntry, selectedCheckKey } from "../lib/queue";
+import { activeCheckId, Check, checkIds, QueueEntry } from "../lib/queue";
 import { buildCopyText, buildPreviewMarkdown } from "../lib/report";
 import { ListMetadata, metadataRows, useJobReport } from "./failure";
 import { JobDetail } from "./JobDetail";
@@ -133,10 +133,11 @@ export function ChecksList(props: { initialEntry: QueueEntry; initialCheck?: str
   const leftQueue = Boolean(data) && !live;
   const repo = data?.repo ?? (selection ? `${selection.owner}/${selection.name}` : "");
   const view: ViewActions = { revalidate };
-  const initialCheck = entry.checks.find((check) => check.name === props.initialCheck);
-  const initialSelection = initialCheck ? checkKey(initialCheck) : undefined;
+  const ids = checkIds(entry.checks);
+  const initialIndex = entry.checks.findIndex((check) => check.name === props.initialCheck);
+  const initialSelection = initialIndex >= 0 ? ids[initialIndex] : undefined;
   const [selectedId, setSelectedId] = useState(initialSelection);
-  const activeId = selectedCheckKey(entry.checks, selectedId);
+  const activeId = activeCheckId(ids, selectedId);
 
   useEffect(() => {
     const timer = setInterval(revalidate, POLL_MS);
@@ -173,15 +174,15 @@ export function ChecksList(props: { initialEntry: QueueEntry; initialCheck?: str
           }
         />
       ) : null}
-      {entry.checks.map((check) => (
+      {entry.checks.map((check, index) => (
         <CheckItem
-          key={checkKey(check)}
-          id={checkKey(check)}
+          key={ids[index]}
+          id={ids[index]}
           check={check}
           entry={entry}
           repo={repo}
           view={view}
-          selected={checkKey(check) === activeId}
+          selected={ids[index] === activeId}
         />
       ))}
     </List>

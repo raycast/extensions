@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest";
 import { DEMO_REPO, DEMO_REQUIRED_CHECKS, demoQueue } from "../src/lib/demo";
 import { GhError, parseRepository, setupCommand } from "../src/lib/gh";
 import {
+  activeCheckId,
+  checkIds,
   failingRunIds,
-  selectedCheckKey,
   parseQueue,
   primaryFailingJob,
   QueueResponse,
@@ -168,28 +169,24 @@ describe("requiredContexts", () => {
   it("is empty for an unprotected branch", () => expect(requiredContexts([], {})).toEqual([]));
 });
 
-describe("selectedCheckKey", () => {
-  const checks = [
-    { name: "lint", state: "success" as const, required: true, workflow: "CI", jobId: 1 },
-    { name: "e2e", state: "pending" as const, required: true, workflow: "CI", jobId: 7 },
-  ];
-
-  it("keeps the selected check", () => expect(selectedCheckKey(checks, "CI/e2e/7")).toBe("CI/e2e/7"));
-  it("follows a check whose job changed, as after a rerun", () =>
-    expect(selectedCheckKey(checks, "CI/e2e/3")).toBe("CI/e2e/7"));
-  it("follows a check that didn't have a job yet", () => expect(selectedCheckKey(checks, "CI/e2e/")).toBe("CI/e2e/7"));
-  it("falls back to the first check", () => {
-    expect(selectedCheckKey(checks, undefined)).toBe("CI/lint/1");
-    expect(selectedCheckKey(checks, "CI/gone/9")).toBe("CI/lint/1");
+describe("check ids", () => {
+  const check = (name: string, jobId: number, workflow = "CI") => ({
+    name,
+    state: "success" as const,
+    required: true,
+    workflow,
+    jobId,
   });
-  it("tells checks with slashes in their names apart", () =>
-    expect(
-      selectedCheckKey(
-        [
-          { name: "a", state: "success", required: true, workflow: "CI", jobId: 1 },
-          { name: "a/b", state: "success", required: true, workflow: "CI", jobId: 2 },
-        ],
-        "CI/a/b/9",
-      ),
-    ).toBe("CI/a/b/2"));
+
+  it("stay the same when a check's job changes, as after a rerun", () =>
+    expect(checkIds([check("e2e", 3)])).toEqual(checkIds([check("e2e", 7)])));
+  it("tell apart checks with the same name in different workflows", () =>
+    expect(checkIds([check("test", 1, "Unit"), check("test", 2, "E2E")])).toEqual(["Unit/test", "E2E/test"]));
+  it("stay unique when a workflow repeats a name", () =>
+    expect(checkIds([check("test", 1), check("test", 2)])).toEqual(["CI/test", "CI/test #2"]));
+  it("keep the selection while its check exists, otherwise pick the first", () => {
+    expect(activeCheckId(["CI/lint", "CI/e2e"], "CI/e2e")).toBe("CI/e2e");
+    expect(activeCheckId(["CI/lint", "CI/e2e"], "CI/gone")).toBe("CI/lint");
+    expect(activeCheckId(["CI/lint", "CI/e2e"], undefined)).toBe("CI/lint");
+  });
 });
