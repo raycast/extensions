@@ -34,10 +34,11 @@ export function LayerView({ layerId }: { layerId: string }) {
 
   async function fire(entry: Entry) {
     setSearchText("");
-    // Reset the navigation stack before hiding, so the next open is root search
-    // rather than this layer.
-    await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+    // Run first: popping to root can end the command session, so anything
+    // awaited after it may never execute. Then reset the stack before hiding, so
+    // the next open is root search rather than this layer.
     await runEntry(entry);
+    await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
   }
 
   function runKey(key: string) {
