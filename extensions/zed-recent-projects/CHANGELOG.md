@@ -1,5 +1,9 @@
 # Zed Recent Projects Changelog
 
+## [Open WSL Projects That Use the Default User] - {PR_MERGE_DATE}
+
+- Fix WSL projects opened with the distribution's default user showing as "SSH: null" and failing to open. They are now recognised as WSL projects and opened with `--wsl <distro>` ([#25742](https://github.com/raycast/extensions/issues/25742))
+
 ## [Dismiss Raycast During Project Launch] - 2026-10-05
 
 - Fix Search Recent Projects making Raycast appear unresponsive while waiting for Zed to launch. Raycast now dismisses immediately after selection, matching the Visual Studio Code extension's behavior.

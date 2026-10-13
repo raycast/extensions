@@ -217,7 +217,12 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
 
   // WSL support (Windows only)
   const openZedInWsl = () =>
-    execWindowsZed([...newWindowArgs, "--wsl", `${entry.wsl?.user}@${entry.wsl?.distro}`, `/${primaryPath}`]);
+    execWindowsZed([
+      ...newWindowArgs,
+      "--wsl",
+      entry.wsl?.user ? `${entry.wsl.user}@${entry.wsl.distro}` : `${entry.wsl?.distro}`,
+      `/${primaryPath}`,
+    ]);
 
   if (entry.wsl) {
     return <Action title={actionTitle} onAction={openZedInWsl} icon={zedIcon} />;
