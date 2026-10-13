@@ -58,6 +58,31 @@ import Testing
         #expect(try store.counts().vectors == 0)
     }
 
+    // A kind filter controls returned files, not the comparison population for semantic relevance.
+    @Test func kindKeepsSemanticMatches() throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: base) }
+        let store = try IndexStore(directory: base)
+        var query = [Float](repeating: 0, count: Vectors.dimension)
+        query[0] = 1
+        let wanted = "/docs/lease.txt"
+        for number in 0..<21 {
+            let path = number == 0 ? wanted : "/docs/picture\(number).png"
+            let id = try store.insert(Candidate(path: path, kind: number == 0 ? .doc : .image,
+                                                size: 10, mtime: 1, inode: UInt64(number), device: 1))
+            var vector = [Float](repeating: 0, count: Vectors.dimension)
+            vector[number == 0 ? 0 : 1] = 1
+            try store.addSegment(file: id, kind: .chunk, modality: .text, text: "unrelated wording", vector: vector)
+        }
+        let searcher = try Searcher(store: store)
+        let baseline = try searcher.search("domestic animals", queryVector: query)
+        #expect(baseline.first?.path == wanted)
+        let filtered = try searcher.search("domestic animals", queryVector: query, kinds: [.doc])
+        #expect(filtered.map(\.path) == [wanted])
+        #expect(filtered.first?.z == baseline.first?.z)
+        #expect(try searcher.search("domestic animals", queryVector: query, kinds: [.image]).isEmpty)
+    }
+
     // More excluded keyword rows than the native FTS limit must never hide an allowed match.
     @Test func scopePrecedesRanking() throws {
         let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)

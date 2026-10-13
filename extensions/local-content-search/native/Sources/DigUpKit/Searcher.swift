@@ -122,13 +122,17 @@ public final class Searcher {
         let wordWeight = wordWeight ?? (isCode ? Self.codeWordWeight : Self.wordWeight)
         if queryVector != nil, !vectorsLoaded { try reload() }
         let fileKind = self.fileKind
-        // Selection precedes both semantic normalization and FTS limits; excluded rows cannot displace matches.
-        // files -> allowed IDs -> vector scale / FTS -> ranking -> result limit
-        let allowedFiles = Set(fileKind.keys.filter { id in
-            guard let path = filePath[id], let kind = fileKind[id] else { return false }
-            return (kinds?.contains(kind) ?? true)
-                && (selection?.isSearched(path) ?? true)
+        // Folder/extension scope sets the comparison population; kind filters only admit result candidates.
+        // scoped files -> vector scale
+        // scoped files -> kind filter -> FTS / ranking -> result limit
+        let scaleFiles = Set(fileKind.keys.filter { id in
+            guard let path = filePath[id] else { return false }
+            return (selection?.isSearched(path) ?? true)
                 && !excludedExtensions.contains((path as NSString).pathExtension.lowercased())
+        })
+        let allowedFiles = Set(scaleFiles.filter { id in
+            guard let kind = fileKind[id] else { return false }
+            return kinds?.contains(kind) ?? true
         })
         guard !allowedFiles.isEmpty else { return [] }
         let allowed = { (file: Int64) -> Bool in allowedFiles.contains(file) }
@@ -139,7 +143,8 @@ public final class Searcher {
         var best: [Int64: (z: Double, cosine: Double, row: Int)] = [:]
         if let query = queryVector, query.count == Vectors.dimension, !rowFile.isEmpty {
             let scores = score(query)
-            let scale = rowFile.indices.map { rowSetsScale[$0] && allowed(rowFile[$0]) }
+            // Preserve comparison scores when --kind leaves one vector; centering it alone would force z = 0.
+            let scale = rowFile.indices.map { rowSetsScale[$0] && scaleFiles.contains(rowFile[$0]) }
             let meaning = Self.meaning(scores, rowModality, setsScale: scale)
             for row in 0..<scores.count where allowed(rowFile[row]) {
                 let z = meaning[row]
