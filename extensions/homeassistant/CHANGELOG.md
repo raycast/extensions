@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [AC Menu] - {PR_MERGE_DATE}
+## [AC Menu] - 2026-10-13
 
 - Add a menu bar command for cooling-capable climate entities with power, temperature, mode, fan, swing, and preset controls, plus a command to toggle menu visibility
 - Refresh device state after controls and manual refresh to keep the menu status in sync with Home Assistant integrations
