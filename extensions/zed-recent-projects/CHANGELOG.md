@@ -1,6 +1,6 @@
 # Zed Recent Projects Changelog
 
-## [Open WSL Projects That Use the Default User] - {PR_MERGE_DATE}
+## [Open WSL Projects That Use the Default User] - 2026-10-13
 
 - Fix WSL projects opened with the distribution's default user showing as "SSH: null" and failing to open. They are now recognised as WSL projects and opened with `--wsl <distro>` ([#25742](https://github.com/raycast/extensions/issues/25742))
 
