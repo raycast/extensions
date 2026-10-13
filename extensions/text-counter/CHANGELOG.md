@@ -1,6 +1,6 @@
 # Text Counter Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-13
 
 - **Fixed word counting for CJK text**: Chinese, Japanese, and Korean characters are now counted as words (previously any text without spaces counted as 1 word)
 - **Fixed sentence counting for CJK punctuation**: sentences ending with 。！？… are now recognized
