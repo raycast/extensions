@@ -1,6 +1,6 @@
 # Raycast Arcade Changelog
 
-## [Fix 2048 Board] - {PR_MERGE_DATE}
+## [Fix 2048 Board] - 2026-10-13
 
 - Fix the 2048 board not showing: the SVG was missing its `xmlns` namespace and had invalid `##` colours, so only stray text was rendered ([#30885](https://github.com/raycast/extensions/issues/30885))
 
