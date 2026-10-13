@@ -4,6 +4,7 @@ import { checkAuth, logout } from "./lib/pass-cli";
 import { PassCliError, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { LoginScreen, useBrowserLogin } from "./lib/login-view";
 import { platformShortcut } from "./lib/shortcuts";
+import { CliNotFoundView } from "./lib/error-views";
 
 type AuthState = "loading" | "not-installed" | "not-authenticated" | "authenticated";
 
@@ -81,20 +82,7 @@ export default function Command() {
   }
 
   if (authState === "not-installed") {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.XMarkCircle}
-          title="Proton Pass CLI Not Installed"
-          description="You need to install the Proton Pass CLI to use this extension. Click below to learn how to install it."
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser title="Open Installation Guide" url={PROTON_PASS_CLI_DOCS} icon={Icon.Globe} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
+    return <CliNotFoundView />;
   }
 
   if (authState === "not-authenticated") {
