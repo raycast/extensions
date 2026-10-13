@@ -1,5 +1,9 @@
 # CodePen Changelog
 
+## [Update Author] - 2026-10-13
+
+- Update the extension author from `ray.dhruv` to `0xdhrv`.
+
 ## [Initial Version] - 2026-10-13
 
 - Search, create, edit, and fork your Pens with CodePen API v2.
