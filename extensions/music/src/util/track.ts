@@ -51,11 +51,9 @@ export const formatTitle = ({
     return "";
   }
 
-  if (!name || !artistName) {
-    return "";
-  }
-
-  const filteredName = cleanupTitle ? cleanupSongTitle(name) : name;
+  // Build the title only from the parts that are shown and actually have text,
+  // so e.g. an artist-only title still works for a track with no name.
+  const filteredName = cleanupTitle && name ? cleanupSongTitle(name) : name;
   const title = [hideTrackTitle ? "" : filteredName, hideArtistName ? "" : artistName].filter(Boolean).join(" · ");
 
   if (title.length <= max) {
