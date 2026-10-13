@@ -1,0 +1,344 @@
+{
+    "Regions": [
+        {
+            "OptInStatus": "not-opted-in",
+            "Geography": [
+                {
+                    "Name": "India"
+                }
+            ],
+            "RegionName": "ap-south-2",
+            "Endpoint": "ec2.ap-south-2.amazonaws.com"
+        },
+        {
+            "OptInStatus": "opt-in-not-required",
+            "Geography": [
+                {
+                    "Name": "India"
+                }
+            ],
+            "RegionName": "ap-south-1",
+            "Endpoint": "ec2.ap-south-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "not-opted-in",
+            "Geography": [
+                {
+                    "Name": "Italy"
+                }
+            ],
+            "RegionName": "eu-south-1",
+            "Endpoint": "ec2.eu-south-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "not-opted-in",
+            "Geography": [
+                {
+                    "Name": "Spain"
+                }
+            ],
+            "RegionName": "eu-south-2",
+            "Endpoint": "ec2.eu-south-2.amazonaws.com"
+        },
+        {
+            "OptInStatus": "not-opted-in",
+            "Geography": [
+                {
+                    "Name": "United Arab Emirates"
+                }
+            ],
+            "RegionName": "me-central-1",
+            "Endpoint": "ec2.me-central-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "not-opted-in",
+            "Geography": [
+                {
+                    "Name": "Israel"
+                }
+            ],
+            "RegionName": "il-central-1",
+            "Endpoint": "ec2.il-central-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "opt-in-not-required",
+            "Geography": [
+                {
+                    "Name": "Canada"
+                }
+            ],
+            "RegionName": "ca-central-1",
+            "Endpoint": "ec2.ca-central-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "not-opted-in",
+            "Geography": [
+                {
+                    "Name": "Taiwan"
+                }
+            ],
+            "RegionName": "ap-east-2",
+            "Endpoint": "ec2.ap-east-2.amazonaws.com"
+        },
+        {
+            "OptInStatus": "not-opted-in",
+            "Geography": [
+                {
+                    "Name": "Mexico"
+                }
+            ],
+            "RegionName": "mx-central-1",
+            "Endpoint": "ec2.mx-central-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "opt-in-not-required",
+            "Geography": [
+                {
+                    "Name": "Germany"
+                }
+            ],
+            "RegionName": "eu-central-1",
+            "Endpoint": "ec2.eu-central-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "not-opted-in",
+            "Geography": [
+                {
+                    "Name": "Switzerland"
+                }
+            ],
+            "RegionName": "eu-central-2",
+            "Endpoint": "ec2.eu-central-2.amazonaws.com"
+        },
+        {
+            "OptInStatus": "opt-in-not-required",
+            "Geography": [
+                {
+                    "Name": "United States of America"
+                }
+            ],
+            "RegionName": "us-west-1",
+            "Endpoint": "ec2.us-west-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "opt-in-not-required",
+            "Geography": [
+                {
+                    "Name": "United States of America"
+                }
+            ],
+            "RegionName": "us-west-2",
+            "Endpoint": "ec2.us-west-2.amazonaws.com"
+        },
+        {
+            "OptInStatus": "not-opted-in",
+            "Geography": [
+                {
+                    "Name": "South Africa"
+                }
+            ],
+            "RegionName": "af-south-1",
+            "Endpoint": "ec2.af-south-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "opt-in-not-required",
+            "Geography": [
+                {
+                    "Name": "Sweden"
+                }
+            ],
+            "RegionName": "eu-north-1",
+            "Endpoint": "ec2.eu-north-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "opt-in-not-required",
+            "Geography": [
+                {
+                    "Name": "France"
+                }
+            ],
+            "RegionName": "eu-west-3",
+            "Endpoint": "ec2.eu-west-3.amazonaws.com"
+        },
+        {
+            "OptInStatus": "opt-in-not-required",
+            "Geography": [
+                {
+                    "Name": "United Kingdom"
+                }
+            ],
+            "RegionName": "eu-west-2",
+            "Endpoint": "ec2.eu-west-2.amazonaws.com"
+        },
+        {
+            "OptInStatus": "opt-in-not-required",
+            "Geography": [
+                {
+                    "Name": "Ireland"
+                }
+            ],
+            "RegionName": "eu-west-1",
+            "Endpoint": "ec2.eu-west-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "opt-in-not-required",
+            "Geography": [
+                {
+                    "Name": "Japan"
+                }
+            ],
+            "RegionName": "ap-northeast-3",
+            "Endpoint": "ec2.ap-northeast-3.amazonaws.com"
+        },
+        {
+            "OptInStatus": "opt-in-not-required",
+            "Geography": [
+                {
+                    "Name": "South Korea"
+                }
+            ],
+            "RegionName": "ap-northeast-2",
+            "Endpoint": "ec2.ap-northeast-2.amazonaws.com"
+        },
+        {
+            "OptInStatus": "not-opted-in",
+            "Geography": [
+                {
+                    "Name": "Bahrain"
+                }
+            ],
+            "RegionName": "me-south-1",
+            "Endpoint": "ec2.me-south-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "opt-in-not-required",
+            "Geography": [
+                {
+                    "Name": "Japan"
+                }
+            ],
+            "RegionName": "ap-northeast-1",
+            "Endpoint": "ec2.ap-northeast-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "opt-in-not-required",
+            "Geography": [
+                {
+                    "Name": "Brazil"
+                }
+            ],
+            "RegionName": "sa-east-1",
+            "Endpoint": "ec2.sa-east-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "not-opted-in",
+            "Geography": [
+                {
+                    "Name": "Hong Kong"
+                }
+            ],
+            "RegionName": "ap-east-1",
+            "Endpoint": "ec2.ap-east-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "not-opted-in",
+            "Geography": [
+                {
+                    "Name": "Canada"
+                }
+            ],
+            "RegionName": "ca-west-1",
+            "Endpoint": "ec2.ca-west-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "opt-in-not-required",
+            "Geography": [
+                {
+                    "Name": "Singapore"
+                }
+            ],
+            "RegionName": "ap-southeast-1",
+            "Endpoint": "ec2.ap-southeast-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "opt-in-not-required",
+            "Geography": [
+                {
+                    "Name": "Australia"
+                }
+            ],
+            "RegionName": "ap-southeast-2",
+            "Endpoint": "ec2.ap-southeast-2.amazonaws.com"
+        },
+        {
+            "OptInStatus": "not-opted-in",
+            "Geography": [
+                {
+                    "Name": "Indonesia"
+                }
+            ],
+            "RegionName": "ap-southeast-3",
+            "Endpoint": "ec2.ap-southeast-3.amazonaws.com"
+        },
+        {
+            "OptInStatus": "not-opted-in",
+            "Geography": [
+                {
+                    "Name": "Australia"
+                }
+            ],
+            "RegionName": "ap-southeast-4",
+            "Endpoint": "ec2.ap-southeast-4.amazonaws.com"
+        },
+        {
+            "OptInStatus": "opt-in-not-required",
+            "Geography": [
+                {
+                    "Name": "United States of America"
+                }
+            ],
+            "RegionName": "us-east-1",
+            "Endpoint": "ec2.us-east-1.amazonaws.com"
+        },
+        {
+            "OptInStatus": "not-opted-in",
+            "Geography": [
+                {
+                    "Name": "Malaysia"
+                }
+            ],
+            "RegionName": "ap-southeast-5",
+            "Endpoint": "ec2.ap-southeast-5.amazonaws.com"
+        },
+        {
+            "OptInStatus": "not-opted-in",
+            "Geography": [
+                {
+                    "Name": "New Zealand"
+                }
+            ],
+            "RegionName": "ap-southeast-6",
+            "Endpoint": "ec2.ap-southeast-6.amazonaws.com"
+        },
+        {
+            "OptInStatus": "opt-in-not-required",
+            "Geography": [
+                {
+                    "Name": "United States of America"
+                }
+            ],
+            "RegionName": "us-east-2",
+            "Endpoint": "ec2.us-east-2.amazonaws.com"
+        },
+        {
+            "OptInStatus": "not-opted-in",
+            "Geography": [
+                {
+                    "Name": "Thailand"
+                }
+            ],
+            "RegionName": "ap-southeast-7",
+            "Endpoint": "ec2.ap-southeast-7.amazonaws.com"
+        }
+    ]
+}

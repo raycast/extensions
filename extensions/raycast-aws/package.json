@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-aws",
+  "title": "AWS (Granted)",
+  "description": "Open the AWS Console or a CLI session for an AWS profile managed by Granted/assume.",
+  "icon": "icon.png",
+  "author": "rjmsilveira",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "open-console",
+      "title": "AWS Console",
+      "subtitle": "AWS (Granted)",
+      "description": "Pick an AWS profile and open it in the AWS web console",
+      "mode": "view"
+    },
+    {
+      "name": "open-cli",
+      "title": "AWS CLI",
+      "subtitle": "AWS (Granted)",
+      "description": "Pick an AWS profile and open a terminal session with it assumed",
+      "mode": "view"
+    },
+    {
+      "name": "sso-login",
+      "title": "AWS SSO Login",
+      "subtitle": "AWS (Granted)",
+      "description": "Log in via AWS SSO, pre-filled with your last-used region and start URL",
+      "mode": "view"
+    },
+    {
+      "name": "sso-populate",
+      "title": "AWS SSO Populate Profiles",
+      "subtitle": "AWS (Granted)",
+      "description": "Generate/update ~/.aws/config profiles from AWS SSO, with a choice of profile name templates",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "terminalApp",
+      "title": "Terminal Application",
+      "description": "The terminal app used to open an assumed CLI session",
+      "type": "dropdown",
+      "default": "iTerm",
+      "required": false,
+      "data": [
+        {
+          "title": "iTerm",
+          "value": "iTerm"
+        },
+        {
+          "title": "Terminal",
+          "value": "Terminal"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.98.3",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
