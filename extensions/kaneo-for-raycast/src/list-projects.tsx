@@ -49,7 +49,7 @@ import {
   resolveColumns,
 } from "./lib/task-helpers";
 import { useEffect, useMemo, useState } from "react";
-import { getApiUrl } from "./lib/get-api-url";
+import { resolveImageUrl } from "./lib/get-api-url";
 import { sortCustomFields } from "./lib/custom-field-helpers";
 
 function CreateProjectForm({ onProjectCreated }: { onProjectCreated: () => void }) {
@@ -591,7 +591,7 @@ function ProjectTasksList({ project }: { project: Project }) {
                                 : item.assigneeName) || "Unassigned",
                             icon: item.assigneeName
                               ? item.assigneeImage
-                                ? { source: getApiUrl(item.assigneeImage), mask: Image.Mask.Circle }
+                                ? { source: resolveImageUrl(item.assigneeImage), mask: Image.Mask.Circle }
                                 : getAvatarIcon(`${item.assigneeName}`)
                               : undefined,
                           },
