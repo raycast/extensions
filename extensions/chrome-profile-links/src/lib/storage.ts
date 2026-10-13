@@ -83,9 +83,19 @@ export function parseTags(input: string): string[] {
   ];
 }
 
-/** Treats "https://example.com" and "https://example.com/" as the same URL. */
+/**
+ * Treats "https://Example.com" and "https://example.com/" as the same URL.
+ * Only the scheme and host are case-insensitive: paths and queries can differ by case.
+ */
 export function comparableUrl(url: string): string {
-  return url.replace(/\/+$/, "").toLowerCase();
+  let normalized = url;
+  try {
+    // `URL` lowercases the scheme and host and leaves the rest as is.
+    normalized = new URL(url).href;
+  } catch {
+    // Keep unparsable URLs as they are.
+  }
+  return normalized.replace(/\/+$/, "");
 }
 
 /** Finds another saved link that opens the same URL in the same profile. */
