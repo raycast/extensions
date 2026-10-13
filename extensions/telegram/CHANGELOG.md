@@ -1,6 +1,6 @@
 # Telegram Changelog
 
-## [Switch to QR Code Authentication] - {PR_MERGE_DATE}
+## [Switch to QR Code Authentication] - 2026-10-13
 
 - Replace legacy phone number / SMS verification code login with Telegram QR code authentication
 - QR code is now the sole sign-in method, with 2-Step Verification password support when enabled
