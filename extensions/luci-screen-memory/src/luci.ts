@@ -3,8 +3,12 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
+export type LuciRecordingStatus =
+  "recording" | "paused" | "unknown" | "offline";
+
 export interface LuciState {
   running: boolean;
+  status: LuciRecordingStatus;
   recording: boolean;
   description: string;
 }
@@ -97,6 +101,8 @@ tell application "System Events"
         if newDesc is not initialDesc then exit repeat
       end repeat
       
+      if newDesc is initialDesc then return "TOGGLE_UNCONFIRMED"
+      
       set isRecordingNow to (newDesc starts with "Recording")
       return (isRecordingNow as string) & "::" & newDesc
     end tell
@@ -111,21 +117,52 @@ export async function getLuciStatus(): Promise<LuciState> {
       GET_STATUS_SCRIPT,
     ]);
     const trimmed = stdout.trim();
-    if (
-      trimmed === "NOT_RUNNING" ||
-      trimmed === "WINDOW_ABSENT" ||
-      trimmed === "BUTTON_NOT_FOUND"
-    ) {
+
+    if (trimmed === "NOT_RUNNING") {
       return {
-        running: trimmed !== "NOT_RUNNING",
+        running: false,
+        status: "offline",
         recording: false,
-        description: trimmed,
+        description: "Luci is not running",
       };
     }
+
+    if (trimmed === "WINDOW_ABSENT" || trimmed === "BUTTON_NOT_FOUND") {
+      return {
+        running: true,
+        status: "unknown",
+        recording: false,
+        description:
+          trimmed === "WINDOW_ABSENT"
+            ? "Window not open"
+            : "Controls not accessible",
+      };
+    }
+
     const [recStr, desc] = trimmed.split("::");
-    return { running: true, recording: recStr === "true", description: desc };
-  } catch {
-    return { running: false, recording: false, description: "Execution error" };
+    const isRecording = recStr === "true";
+    return {
+      running: true,
+      status: isRecording ? "recording" : "paused",
+      recording: isRecording,
+      description: desc,
+    };
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    const isPermError =
+      errMsg.includes("not allowed to send keystrokes") ||
+      errMsg.includes("Assistive") ||
+      errMsg.includes("1743") ||
+      errMsg.includes("System Events");
+
+    return {
+      running: true,
+      status: "unknown",
+      recording: false,
+      description: isPermError
+        ? "Accessibility permission needed"
+        : "Execution error",
+    };
   }
 }
 
@@ -144,13 +181,35 @@ export async function toggleLuciRecording(): Promise<{
       return { success: false, error: "Could not initialize Luci window" };
     if (trimmed === "BUTTON_NOT_FOUND")
       return { success: false, error: "Toggle button not located" };
+    if (trimmed === "TOGGLE_UNCONFIRMED") {
+      return {
+        success: false,
+        error: "Toggle state unconfirmed — Luci did not update in time",
+      };
+    }
 
     const [recStr] = trimmed.split("::");
     return { success: true, recording: recStr === "true" };
   } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    if (
+      errMsg.includes("1743") ||
+      errMsg.includes("Assistive") ||
+      errMsg.includes("System Events")
+    ) {
+      return {
+        success: false,
+        error:
+          "Accessibility permission needed for System Events in System Settings",
+      };
+    }
     return {
       success: false,
-      error: err instanceof Error ? err.message : String(err),
+      error: errMsg,
     };
   }
+}
+
+export async function openLuciApp(): Promise<void> {
+  await execFileAsync("open", ["-a", "Luci"]);
 }
