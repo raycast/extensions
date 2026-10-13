@@ -1,5 +1,7 @@
 # Notion Changelog
 
+## [Added new screenshots] - {PR_MERGE_DATE}
+
 ## [Fix Links, Search Results, and Connection Recovery] - 2026-09-25
 
 - Fix Copy Formatted URL pasting only the title into plain-text apps. It now includes a Markdown link while preserving the rich-text link.

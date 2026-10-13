@@ -1,5 +1,7 @@
 # 1Password Changelog
 
+## [Added new screenshots] - {PR_MERGE_DATE}
+
 ## [Fix Repeated Re-Authentication] - 2026-08-14
 
 - Fixed the "Authentication Required" screen appearing on macOS even though the 1Password desktop-app integration works. The `op account get` fallback added in the previous release only ran on Windows, so macOS still trusted `op whoami`, which reports "account is not signed in" without an `op signin` session.

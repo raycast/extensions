@@ -1,5 +1,7 @@
 # Spotify Player Changelog
 
+## [Added new screenshots] - {PR_MERGE_DATE}
+
 ## [Reduce Library and Playlist Memory Usage] - 2026-09-26
 
 - Verify the playlist is unchanged before reusing a completed check, and refresh the action if another app changed song membership.
