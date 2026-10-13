@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Added new screenshots] - {PR_MERGE_DATE}
+## [Added new screenshots] - 2026-10-13
 
 ## [AI Tools Improvements] - 2026-10-13
 

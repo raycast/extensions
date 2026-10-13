@@ -1,6 +1,6 @@
 # Visual Studio Code Changelog
 
-## [Added new screenshots] - {PR_MERGE_DATE}
+## [Added new screenshots] - 2026-10-13
 
 ## [Open Agents Window command and enhancements] - 2026-09-28
 

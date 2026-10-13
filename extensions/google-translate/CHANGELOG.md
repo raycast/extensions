@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Added new screenshots] - {PR_MERGE_DATE}
+## [Added new screenshots] - 2026-10-13
 
 ## [Use the built-in fetch client] - 2026-09-16
 

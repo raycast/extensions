@@ -1,6 +1,6 @@
 # 1Password Changelog
 
-## [Added new screenshots] - {PR_MERGE_DATE}
+## [Added new screenshots] - 2026-10-13
 
 ## [Fix Repeated Re-Authentication] - 2026-08-14
 

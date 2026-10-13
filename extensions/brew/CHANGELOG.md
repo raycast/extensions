@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Added new screenshots] - {PR_MERGE_DATE}
+## [Added new screenshots] - 2026-10-13
 
 ## [Remove Tap fix] - 2026-10-04
 

@@ -1,6 +1,6 @@
 # Kill Process Changelog
 
-## [Added new screenshots] - {PR_MERGE_DATE}
+## [Added new screenshots] - 2026-10-13
 
 ## [Fix] - 2026-09-16
 

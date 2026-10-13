@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Added new screenshots] - {PR_MERGE_DATE}
+## [Added new screenshots] - 2026-10-13
 
 ## [Reduce Library and Playlist Memory Usage] - 2026-09-26
 

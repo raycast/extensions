@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Added new screenshots] - {PR_MERGE_DATE}
+## [Added new screenshots] - 2026-10-13
 
 ## [Review Pull Requests Skill] - 2026-09-24
 

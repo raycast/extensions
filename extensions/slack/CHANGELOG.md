@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Added new screenshots] - {PR_MERGE_DATE}
+## [Added new screenshots] - 2026-10-13
 
 ## [Rename Channel AI Tool] - 2026-10-12
 

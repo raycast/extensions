@@ -1,6 +1,6 @@
 # Notion Changelog
 
-## [Added new screenshots] - {PR_MERGE_DATE}
+## [Added new screenshots] - 2026-10-13
 
 ## [Fix Links, Search Results, and Connection Recovery] - 2026-09-25
 

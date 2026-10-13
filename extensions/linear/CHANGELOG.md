@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Added new screenshots] - {PR_MERGE_DATE}
+## [Added new screenshots] - 2026-10-13
 
 ## [Simplify AI Tools] - 2026-10-07
 

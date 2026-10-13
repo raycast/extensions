@@ -1,6 +1,6 @@
 # Changelog
 
-## [Added new screenshots] - {PR_MERGE_DATE}
+## [Added new screenshots] - 2026-10-13
 
 ## [Keep Recent Turns in Long Conversations] - 2026-10-13
 

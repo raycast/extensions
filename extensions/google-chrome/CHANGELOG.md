@@ -1,6 +1,6 @@
 # Google Chrome Changelog
 
-## [Added new screenshots] - {PR_MERGE_DATE}
+## [Added new screenshots] - 2026-10-13
 
 ## [Sort Bookmarks by Frecency] - 2026-09-14
 
