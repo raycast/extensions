@@ -1,6 +1,6 @@
 # Browser Tabs Changelog
 
-## [Fix Safari Tabs Loading] - {PR_MERGE_DATE}
+## [Fix Safari Tabs Loading] - 2026-10-13
 
 - Fix all tabs of a browser disappearing when one tab has no URL (such as an empty Safari tab) ([#30675](https://github.com/raycast/extensions/issues/30675))
 
