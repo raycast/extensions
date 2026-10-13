@@ -1,5 +1,7 @@
 # GitHub Changelog
 
+## [Added new screenshots] - 2026-10-13
+
 ## [Review Pull Requests Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.

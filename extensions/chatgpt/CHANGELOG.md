@@ -1,5 +1,7 @@
 # Changelog
 
+## [Added new screenshots] - 2026-10-13
+
 ## [Keep Recent Turns in Long Conversations] - 2026-10-13
 
 - When a conversation is longer than the context budget, send the most recent turns instead of the oldest ones, so follow-up questions keep their context: [#32123](https://github.com/raycast/extensions/issues/32123)

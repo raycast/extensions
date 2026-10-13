@@ -1,5 +1,7 @@
 # Arc Changelog
 
+## [Added new screenshots] - 2026-10-13
+
 ## [AI Tools Improvements] - 2026-10-13
 
 - Added the `get-focused-tab` AI tool, which returns the active tab of the frontmost window along with its Space.

@@ -1,5 +1,7 @@
 # Slack Changelog
 
+## [Added new screenshots] - 2026-10-13
+
 ## [Rename Channel AI Tool] - 2026-10-12
 
 - Add a **Rename Channel** AI tool that renames a channel by ID after confirmation. Names are converted to Slack's format (lowercase, hyphens instead of spaces), and common errors such as a taken name or missing permission are explained.
