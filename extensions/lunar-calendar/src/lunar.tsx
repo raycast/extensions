@@ -190,9 +190,30 @@ export default function Command() {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action title="Next Month" shortcut={{ modifiers: ["cmd"], key: "arrowRight" }} onAction={nextMonth} />
-          <Action title="Previous Month" shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }} onAction={prevMonth} />
-          <Action title="Reset to Today" shortcut={{ modifiers: ["cmd"], key: "t" }} onAction={resetToday} />
+          <Action
+            title="Next Month"
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "arrowRight" },
+              windows: { modifiers: ["ctrl"], key: "arrowRight" },
+            }}
+            onAction={nextMonth}
+          />
+          <Action
+            title="Previous Month"
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "arrowLeft" },
+              windows: { modifiers: ["ctrl"], key: "arrowLeft" },
+            }}
+            onAction={prevMonth}
+          />
+          <Action
+            title="Reset to Today"
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "t" },
+              windows: { modifiers: ["ctrl"], key: "t" },
+            }}
+            onAction={resetToday}
+          />
         </ActionPanel>
       }
     />
