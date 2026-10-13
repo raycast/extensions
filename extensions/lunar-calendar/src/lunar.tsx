@@ -86,21 +86,22 @@ export default function Command() {
       // 2. 如果是未来年份或年底预热期，且距离上次探测超过 24 小时，允许每天探测 1 次
       const hasEmptyCache =
         !cachedWrapper || !cachedWrapper.holidays || Object.keys(cachedWrapper.holidays).length === 0;
-      const isExploringNextYear =
-        targetYear > realCurrentYear || (realCurrentYear === targetYear && realCurrentMonth >= 11);
+      const isFutureOrPreloadYear =
+        targetYear > realCurrentYear || (targetYear === realCurrentYear && realCurrentMonth >= 11);
 
       const now = Date.now();
       const lastAttemptTime = lastAttemptString ? parseInt(lastAttemptString, 10) : 0;
       const attemptAge = now - lastAttemptTime;
 
       // 核心修复逻辑：
-      // 如果没有有效缓存，且正处于探索期（未来年或年底），必须受到 24 小时探测频率的限制
-      // 即使上次没拿到数据（hasEmptyCache 为 true），只要尝试时间不到 24 小时，也不重复请求
-      const needsFetch = hasEmptyCache && (!isExploringNextYear || attemptAge > ONE_DAY_MS);
+      // 对于未来年份或年底预热期，即使有旧缓存，也允许每 24 小时自动刷新一次以获取最新官方调整
+      const needsFetch = hasEmptyCache || (isFutureOrPreloadYear && attemptAge > ONE_DAY_MS);
 
       console.log(`${prefix} Status Check -> Real Year: ${realCurrentYear}, Real Month: ${realCurrentMonth}`);
       console.log(`${prefix} Status Check -> Has Empty Cache (hasEmptyCache): ${hasEmptyCache}`);
-      console.log(`${prefix} Status Check -> Is Exploring Next Year (isExploringNextYear): ${isExploringNextYear}`);
+      console.log(
+        `${prefix} Status Check -> Is Future Or Preload Year (isFutureOrPreloadYear): ${isFutureOrPreloadYear}`
+      );
       console.log(`${prefix} Status Check -> Last attempt age (hours): ${(attemptAge / (1000 * 60 * 60)).toFixed(2)}`);
       console.log(`${prefix} Status Check -> Needs Fetch (needsFetch): ${needsFetch}`);
 
