@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [AI Tools Improvements] - {PR_MERGE_DATE}
+## [AI Tools Improvements] - 2026-10-13
 
 - Added the `get-focused-tab` AI tool, which returns the active tab of the frontmost window along with its Space.
 - `select-tab` and `close-tab` now wait for Arc to finish and return a clear error when the tab ID does not exist, instead of silently succeeding.
