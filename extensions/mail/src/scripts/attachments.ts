@@ -43,7 +43,8 @@ const reserveUniqueAttachmentName = async (name: string) => {
       continue;
     }
 
-    const lockName = `.mail-attachment-${createHash("sha256").update(candidate).digest("hex")}.lock`;
+    const lockKey = candidate.normalize("NFD").toLowerCase();
+    const lockName = `.mail-attachment-${createHash("sha256").update(lockKey).digest("hex")}.lock`;
     const lockPath = join(attachmentsDirectory, lockName);
     let lock;
     try {
