@@ -1,6 +1,6 @@
 # QuickAdd for Obsidian Changelog
 
-## [Field descriptions] - {PR_MERGE_DATE}
+## [Field descriptions] - 2026-10-13
 
 - A field's description is now visible on the form: as the placeholder of a text or number field that has none, otherwise as a line above the field. Before, it hid behind the field's info icon. Thanks to @ievlevpn.
 
