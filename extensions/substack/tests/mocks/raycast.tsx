@@ -94,6 +94,7 @@ function Dropdown(p: any) {
       >
         {p.children}
       </select>
+      {p.error && <span role="alert">{p.error}</span>}
     </label>
   );
 }

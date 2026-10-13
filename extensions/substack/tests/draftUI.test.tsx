@@ -180,16 +180,32 @@ test("final persistence failure shows recovery instead of a retryable creation f
   await screen.findByText(/A draft was created/);
   expect(screen.queryByLabelText("Title")).toBeNull();
 });
-test("account selection is explicit before creating", async () => {
+test.each(["", "missing"])("account selection %j must be corrected before creating", async (accountId) => {
   await saveAccount(account);
+  await saveAccount(other);
+  const fetchMock = serveCreation();
   const onChange = vi.fn();
-  render(<CreateDraftForm accounts={[account, other]} accountId="" onAccountChange={onChange} />);
-  change("Account", "second");
-  expect(onChange).toHaveBeenCalledWith("second");
+  const { rerender } = render(
+    <CreateDraftForm accounts={[account, other]} accountId={accountId} onAccountChange={onChange} />,
+  );
   fill();
   fireEvent.click(screen.getByRole("button", { name: "Create Draft" }));
-  await waitFor(() => expect(showToast).toHaveBeenCalled());
-  expect(fetch).not.toHaveBeenCalled();
+  expect((await screen.findByRole("alert")).textContent).toBe("Select an account before creating a draft.");
+  expect(fetchMock).not.toHaveBeenCalled();
+  expect(readFile).not.toHaveBeenCalled();
+  expect(showToast).not.toHaveBeenCalled();
+
+  change("Account", "second");
+  expect(onChange).toHaveBeenCalledWith("second");
+  rerender(<CreateDraftForm accounts={[account, other]} accountId="second" onAccountChange={onChange} />);
+  expect(screen.queryByRole("alert")).toBeNull();
+  expect((screen.getByLabelText("Title") as HTMLInputElement).value).toBe("Newsletter");
+  fireEvent.click(screen.getByRole("button", { name: "Create Draft" }));
+  await waitFor(() =>
+    expect(showToast).toHaveBeenCalledWith(expect.objectContaining({ title: "Draft saved in Substack" })),
+  );
+  expect(fetchMock.mock.calls.filter(([, options]) => options?.method === "POST")).toHaveLength(1);
+  expect(new Headers(fetchMock.mock.calls[0][1]?.headers).get("Cookie")).toContain("substack.sid=other");
 });
 test("draft list paginates remote results, merges recovery and refreshes", async () => {
   await saveAccount(account);

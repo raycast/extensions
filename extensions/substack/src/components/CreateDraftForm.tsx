@@ -36,6 +36,7 @@ export default function CreateDraftForm({
 }) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
+  const [accountError, setAccountError] = useState<string>();
   const submitting = useRef(false);
   const [incompleteDraft, setIncompleteDraft] = useState<DraftReference | null>(null);
   const { handleSubmit, itemProps } = useForm<Values>({
@@ -45,6 +46,10 @@ export default function CreateDraftForm({
     },
     async onSubmit(values) {
       if (submitting.current) return;
+      if (!accounts.some((account) => account.id === accountId)) {
+        setAccountError("Select an account before creating a draft.");
+        return;
+      }
       submitting.current = true;
       setIsLoading(true);
       try {
@@ -127,7 +132,16 @@ export default function CreateDraftForm({
           text={accounts.find((a) => a.id === accountId)?.label ?? "Selected account"}
         />
       ) : (
-        <AccountSelector form accounts={accounts} value={accountId} onChange={onAccountChange} />
+        <AccountSelector
+          form
+          accounts={accounts}
+          value={accountId}
+          error={accountError}
+          onChange={(id) => {
+            setAccountError(undefined);
+            onAccountChange(id);
+          }}
+        />
       )}
       <Form.TextField title="Title" placeholder="Newsletter title" {...itemProps.title} />
       <Form.TextField title="Subtitle" placeholder="Optional subtitle" {...itemProps.subtitle} />
