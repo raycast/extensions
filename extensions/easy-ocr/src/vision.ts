@@ -73,7 +73,7 @@ export default async function visionOcr(imagePath: string) {
     throw new Error(
       `Apple Vision on this Mac does not support: ${result.unsupportedLanguages.join(
         ", "
-      )}. Change the Vision languages or use Tesseract.`
+      )}. Change Apple Vision Languages or use Tesseract.`
     );
   }
 
@@ -98,7 +98,7 @@ function joinIntoLines(observations: VisionTextObservation[]) {
 
   return lines
     .map((line) => {
-      const isRightToLeftLine = /[\u0590-\u08FF\uFB1D-\uFEFC]/.test(
+      const isRightToLeftLine = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFC]/.test(
         line.map((observation) => observation.text).join("")
       );
       return line

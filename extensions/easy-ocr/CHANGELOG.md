@@ -3,7 +3,7 @@
 ## [Apple Vision Engine] - {PR_MERGE_DATE}
 
 - Added Apple Vision (the engine behind macOS Live Text) as an optional OCR engine that needs no Tesseract install
-- Added an "Apple Vision languages" preference, e.g. `ar-SA,en-US` for Arabic with English
+- Added an "Apple Vision Languages" preference, e.g. `ar-SA,en-US` for Arabic with English
 - Apple Vision reads small Arabic captures that Tesseract returns empty for
 
 ## [Bug Fixes] - 2026-06-23
