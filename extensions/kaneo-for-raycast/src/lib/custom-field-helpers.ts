@@ -39,9 +39,7 @@ export function formatCustomFieldValue(field: CustomFieldDefinition, raw: unknow
       const list = Array.isArray(parsed) ? parsed : [parsed];
       return list.length ? list.join(", ") : undefined;
     }
-    default: {
-      const parsed = parseMaybeJson(raw);
-      return Array.isArray(parsed) ? parsed.join(", ") : String(parsed);
-    }
+    default:
+      return Array.isArray(raw) ? raw.join(", ") : String(raw);
   }
 }
