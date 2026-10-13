@@ -26,6 +26,14 @@ interface CalendarCell {
   isWeekend: boolean;
 }
 
+// 缓存结构定义（带探测时间戳）
+interface CachedHolidayWrapper {
+  timestamp: number;
+  holidays: HolidayMap;
+}
+
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
 export default function Command() {
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [holidays, setHolidays] = useState<HolidayMap>({});
@@ -33,27 +41,51 @@ export default function Command() {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
 
-  // 1. 动态加载节假日数据（带 LocalStorage 缓存与防清理）
+  // 1. 动态加载节假日数据（应用智能缓存逻辑）
   useEffect(() => {
     let isMounted = true;
 
     async function loadHolidays() {
       const cacheKey = `holidays_${year}`;
+      const cachedString = await LocalStorage.getItem<string>(cacheKey);
 
-      // 先尝试从本地缓存读取
-      const cachedData = await LocalStorage.getItem<string>(cacheKey);
-      if (cachedData) {
+      let cachedWrapper: CachedHolidayWrapper | null = null;
+      if (cachedString) {
         try {
-          if (isMounted) {
-            setHolidays(JSON.parse(cachedData));
-          }
-          return;
+          cachedWrapper = JSON.parse(cachedString);
         } catch (e) {
           console.error("解析本地缓存失败", e);
         }
       }
 
-      // 从网络 API 获取最新数据并更新缓存
+      // 如果已有缓存数据，先直接渲染，保证秒开
+      if (cachedWrapper && cachedWrapper.holidays && isMounted) {
+        setHolidays(cachedWrapper.holidays);
+      }
+
+      // 计算是否需要触发网络探测
+      const realNow = new Date();
+      const realCurrentYear = realNow.getFullYear();
+      const realCurrentMonth = realNow.getMonth() + 1;
+
+      // 判定条件：
+      // 1. 查询的年份大于当前真实年份（查未来年）
+      // 2. 或者当前已是当年 11、12 月，且正在看下一年（准备迎接新政策）
+      const isExploringNextYear =
+        year > realCurrentYear || (realCurrentYear === year && realCurrentMonth >= 11 && year === realCurrentYear + 1);
+
+      // 判定是否需要重新请求：
+      // - 如果本地根本没有缓存，必然要请求。
+      // - 如果处于“探索/年底准备期”，并且距离上次请求已经超过 1 天，则允许每天最多探测 1 次。
+      // - 如果是历史年份或当年（非年底），一旦有缓存就直接永久使用，绝不重复请求。
+      const now = Date.now();
+      const needsFetch = !cachedWrapper || (isExploringNextYear && now - cachedWrapper.timestamp > ONE_DAY_MS);
+
+      if (!needsFetch) {
+        return;
+      }
+
+      // 从网络 API 获取最新数据
       try {
         const response = await fetch(`https://timor.tech/api/holiday/year/${year}/`);
         const json = (await response.json()) as {
@@ -73,7 +105,13 @@ export default function Command() {
           }
 
           setHolidays(normalized);
-          await LocalStorage.setItem(cacheKey, JSON.stringify(normalized));
+
+          // 写入带最新时间戳的缓存（一旦拿到数据，后续将长期锁定不再请求）
+          const newWrapper: CachedHolidayWrapper = {
+            timestamp: Date.now(),
+            holidays: normalized,
+          };
+          await LocalStorage.setItem(cacheKey, JSON.stringify(newWrapper));
         }
       } catch (error) {
         console.error(`获取 ${year} 年节假日数据失败:`, error);
@@ -171,7 +209,7 @@ export default function Command() {
     const isDark = environment.theme === "dark";
     const fullCalendarSvg = generateFullCalendarSvg(calendarData, isDark);
 
-    // Markdown 标题多语言适配（已移除旧的多语言判断，统一输出英文格式标题）
+    // Markdown 标题格式
     const monthName = new Date(year, month - 1).toLocaleString("en-US", {
       month: "long",
     });
