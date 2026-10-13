@@ -39,12 +39,14 @@ export function Dialog({
 
   const sizeClass =
     size === "wide" ? "fs-dialog-panel--wide" : size === "narrow" ? "fs-dialog-panel--narrow" : "";
+  const titleId = `${id ?? "fs-dialog"}-title`;
 
   return html`
     <dialog
       ref=${ref}
       id=${id}
       class="fs-dialog"
+      aria-labelledby=${titleId}
       onClick=${(event) => {
         if (event.target === ref.current) onOpenChange(false);
       }}
@@ -60,8 +62,7 @@ export function Dialog({
       >
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="min-w-0 flex-1">
-            <h2 class="text-base font-semibold">${title}</h2>
-            <p class="sr-only">${title}</p>
+            <h2 id=${titleId} class="text-base font-semibold">${title}</h2>
           </div>
           <div class="flex shrink-0 items-center gap-1.5">
             ${toolbar}

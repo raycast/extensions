@@ -82,6 +82,8 @@ export function App() {
         id="file-input"
         multiple
         hidden
+        aria-hidden="true"
+        tabindex=${-1}
         ref=${fileInput}
         onChange=${(event) => {
           actions.queueFiles(Array.from(event.target.files ?? []));

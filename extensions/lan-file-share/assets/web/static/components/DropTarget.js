@@ -60,6 +60,8 @@ export function DropTarget({ onDrop, children, className }) {
       ${active
         ? html`
             <div
+              role="status"
+              aria-live="assertive"
               class="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-accent bg-background/85 px-4 text-center backdrop-blur-sm"
             >
               <${CloudUpload} size=${28} className="text-accent" aria-hidden="true" />
