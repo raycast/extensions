@@ -1,0 +1,311 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ocr-to-clipboard",
+  "title": "OCR to Clipboard",
+  "description": "Select an area of the screen, recognize its text with Apple Vision, and copy it to the clipboard. Like CleanShot X's OCR, inside Raycast.",
+  "icon": "icon.png",
+  "author": "lucienklein",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "ocr",
+    "text recognition",
+    "screenshot",
+    "clipboard",
+    "vision"
+  ],
+  "commands": [
+    {
+      "name": "capture-text",
+      "title": "Capture Text",
+      "subtitle": "OCR",
+      "description": "Drag-select a screen area, OCR it and copy the text to the clipboard.",
+      "mode": "no-view",
+      "keywords": [
+        "ocr",
+        "screenshot",
+        "scan",
+        "text"
+      ]
+    },
+    {
+      "name": "clipboard-image-text",
+      "title": "Copy Text from Clipboard Image",
+      "subtitle": "OCR",
+      "description": "OCR the image currently on the clipboard and replace it with the recognized text.",
+      "mode": "no-view",
+      "keywords": [
+        "ocr",
+        "clipboard",
+        "image",
+        "text"
+      ]
+    },
+    {
+      "name": "finder-files-text",
+      "title": "Copy Text from Selected Files",
+      "subtitle": "OCR",
+      "description": "OCR the images or PDFs selected in Finder and copy the text.",
+      "mode": "no-view",
+      "keywords": [
+        "ocr",
+        "finder",
+        "pdf",
+        "image",
+        "text"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryLanguage",
+      "title": "Language",
+      "description": "Main language of the text you capture. Auto uses the languages your Mac is set up with.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto (your Mac's languages)",
+          "value": "auto"
+        },
+        {
+          "title": "French",
+          "value": "fr-FR"
+        },
+        {
+          "title": "English",
+          "value": "en-US"
+        },
+        {
+          "title": "German",
+          "value": "de-DE"
+        },
+        {
+          "title": "Spanish",
+          "value": "es-ES"
+        },
+        {
+          "title": "Italian",
+          "value": "it-IT"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt-BR"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl-NL"
+        },
+        {
+          "title": "Swedish",
+          "value": "sv-SE"
+        },
+        {
+          "title": "Polish",
+          "value": "pl-PL"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr-TR"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "uk-UA"
+        },
+        {
+          "title": "Russian",
+          "value": "ru-RU"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar-SA"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja-JP"
+        },
+        {
+          "title": "Korean",
+          "value": "ko-KR"
+        },
+        {
+          "title": "Chinese (Simplified)",
+          "value": "zh-Hans"
+        },
+        {
+          "title": "Chinese (Traditional)",
+          "value": "zh-Hant"
+        },
+        {
+          "title": "Thai",
+          "value": "th-TH"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "vi-VN"
+        }
+      ]
+    },
+    {
+      "name": "languages",
+      "title": "Additional Languages",
+      "description": "Advanced: extra BCP-47 codes, comma-separated (e.g. de-DE, it-IT), tried after the main language.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "de-DE, it-IT"
+    },
+    {
+      "name": "autoDetectLanguage",
+      "title": "Language Detection",
+      "label": "Automatically detect the language",
+      "description": "Let Vision detect the language of the text. Disable if results are wrong for your language and set Languages instead.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "lineMode",
+      "title": "Line Breaks",
+      "description": "Keep one line per recognized line, or merge lines into paragraphs (a blank line is kept between paragraphs).",
+      "type": "dropdown",
+      "required": false,
+      "default": "keep",
+      "data": [
+        {
+          "title": "Keep line breaks",
+          "value": "keep"
+        },
+        {
+          "title": "Merge into paragraphs",
+          "value": "merge"
+        }
+      ]
+    },
+    {
+      "name": "columnSeparator",
+      "title": "Columns",
+      "description": "What to put between text blocks that sit far apart on the same row, like table cells. Tab pastes into separate spreadsheet cells.",
+      "type": "dropdown",
+      "required": false,
+      "default": "tab",
+      "data": [
+        {
+          "title": "Tab (spreadsheet-friendly)",
+          "value": "tab"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        }
+      ]
+    },
+    {
+      "name": "pasteAfterCopy",
+      "title": "After Copy",
+      "label": "Also paste into the frontmost app",
+      "description": "Paste the recognized text into the active application right after copying it.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "confirmation",
+      "title": "Confirmation",
+      "description": "How to confirm that the text was copied. Failures always show a message.",
+      "type": "dropdown",
+      "required": false,
+      "default": "sound",
+      "data": [
+        {
+          "title": "Sound",
+          "value": "sound"
+        },
+        {
+          "title": "HUD message",
+          "value": "hud"
+        },
+        {
+          "title": "Sound and HUD message",
+          "value": "both"
+        },
+        {
+          "title": "Nothing",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "sound",
+      "title": "Sound",
+      "description": "Sound played when the text is copied. Chime and Blip ship with the extension; the others are macOS's own UI sounds.",
+      "type": "dropdown",
+      "required": false,
+      "default": "screenshot",
+      "data": [
+        {
+          "title": "macOS screenshot (default)",
+          "value": "screenshot"
+        },
+        {
+          "title": "Camera shutter",
+          "value": "shutter"
+        },
+        {
+          "title": "Click",
+          "value": "click"
+        },
+        {
+          "title": "Sent acknowledgment",
+          "value": "ack"
+        },
+        {
+          "title": "Accessibility capture",
+          "value": "capture"
+        },
+        {
+          "title": "Chime",
+          "value": "chime"
+        },
+        {
+          "title": "Blip",
+          "value": "blip"
+        }
+      ]
+    },
+    {
+      "name": "showPreview",
+      "title": "HUD Message",
+      "label": "Show a preview of the text in the HUD",
+      "description": "When the HUD message is enabled, show the first line of the recognized text instead of only the line count.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.12.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
