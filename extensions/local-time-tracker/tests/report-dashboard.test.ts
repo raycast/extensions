@@ -168,3 +168,28 @@ test("long Japanese names are abbreviated within title and project label widths"
   assert.match(svg, /<rect x="40"[^>]*width="274"/);
   assert.match(svg, /clip-path="url\(#dashboard-text-/);
 });
+
+test("both themes keep dashboard content and readable text contrast", () => {
+  const model = createDashboard("Overview", "today", logs, projects, null, now);
+  const luminance = (hex: string) => {
+    const rgb = hex
+      .slice(1)
+      .match(/../g)!
+      .map((part) => {
+        const channel = parseInt(part, 16) / 255;
+        return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+      });
+    return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722;
+  };
+  for (const theme of ["dark", "light"] as const) {
+    const svg = dashboardSvg(model, true, theme);
+    assert.ok(svg.includes("PROJECT MIX"));
+    assert.ok(svg.includes("35-DAY ACTIVITY"));
+    const background = svg.match(/rx="18" fill="(#[0-9a-f]+)"/)![1];
+    for (const match of svg.matchAll(/<text[^>]+fill="(#[0-9a-f]+)"/g)) {
+      const values = [luminance(background), luminance(match[1])].sort((a, b) => a - b);
+      assert.ok((values[1] + 0.05) / (values[0] + 0.05) >= 4.5, `${theme}: ${match[1]}`);
+    }
+  }
+  assert.equal(dashboardSvg(model), dashboardSvg(model, false, "dark"));
+});

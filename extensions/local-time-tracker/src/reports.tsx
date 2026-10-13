@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, environment, Icon, Keyboard, List } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { formatDuration } from "./lib/duration";
 import { getProjectGroupIcon, getProjectGroupName } from "./lib/project-groups";
@@ -100,7 +100,7 @@ export default function ReportsCommand() {
   const toggleProjects = () => setExpandedProjects((expanded) => !expanded);
   const detail = (
     <List.Item.Detail
-      markdown={dashboardMarkdown(dashboard, expandedProjects)}
+      markdown={dashboardMarkdown(dashboard, expandedProjects, environment.appearance)}
       metadata={
         hasMoreProjects ? (
           <List.Item.Detail.Metadata>

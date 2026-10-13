@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { getRecentDescriptions } from "./lib/descriptions";
-import { getProjectGroupIcon } from "./lib/project-groups";
+import { getProjectGroupIcon, getProjectGroupName } from "./lib/project-groups";
 import { launchWithFailure } from "./lib/command-actions";
 import { formatDuration, getDurationSeconds } from "./lib/duration";
 import { showFailure } from "./lib/errors";
@@ -291,6 +291,10 @@ export default function StartWorkCommand({
         </ActionPanel>
       }
     >
+      <Form.Description
+        title="Project Group"
+        text={getProjectGroupName(categories, findProject(projects, selectedProjectId)?.type ?? "")}
+      />
       <ProjectDropdown
         dropdownRef={projectDropdownRef}
         projects={activeProjects}

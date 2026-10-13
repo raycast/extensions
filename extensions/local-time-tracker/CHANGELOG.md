@@ -10,6 +10,8 @@
 - Combine simultaneous timer and Pomodoro reminders, retry failed notifications, and serialize timer changes with Pomodoro operations.
 - Add a Reports dashboard with tracked-time totals, session counts, project mix, 7-day bars, and 35-day activity, with project/group filtering and expandable project lists.
 - Rename project categories to project groups throughout the interface while preserving existing saved data.
+- Show the selected project’s group above the project picker in Start Work.
+- Match Reports visual summaries to Raycast’s light or dark appearance.
 
 ## [Initial Version] - 2026-10-09
 

@@ -7,19 +7,20 @@ Track project work entirely inside Raycast. Local Time Tracker uses no server, e
 - Manage client and internal projects
 - Mark one project as preferred for faster timer starts
 - Start and stop a single active timer
-- Choose from registered project groups
+- Organize related projects into named project groups
 - Keep task descriptions optional and reuse recent descriptions for each project
 - See elapsed time in the menu bar
 - Search, edit, delete, and manually add work logs
 - Review today, this week, or this month
-- Break totals down by project and project type
+- Break totals down by project and project group
+- View Reports charts in Raycast’s light or dark appearance
 - Split work accurately across day, week, and month boundaries
 
 ## Getting Started
 
 1. Open **Projects** and add the project groups and projects you work with.
 2. Optionally mark a project as preferred so it is selected first in **Start Work**.
-3. Open **Start Work**, choose a project, and optionally enter a task description.
+3. Open **Start Work**, choose a project, check its **Project Group**, and optionally enter a task description.
 4. Open **Menu Bar Timer** once to enable the menu bar item and background refresh.
 
 You can set global shortcuts for **Start Work** and **Stop Work** in Raycast Settings. Suggested shortcuts:
@@ -28,6 +29,18 @@ You can set global shortcuts for **Start Work** and **Stop Work** in Raycast Set
 Start Work  ⌥⌘T
 Stop Work   ⌥⌘S
 ```
+
+## Projects and Project Groups
+
+A **Project Group** is a named collection of related projects, such as Client, Internal, or Personal. Each project belongs to one group; a group can contain multiple projects. Work timers and logs belong to individual projects, and Reports can summarize time for either one project or its group.
+
+Create and manage groups in **Projects**. In **Start Work**, the selected project's group appears above the project picker. This is a read-only label that updates when you choose a different project; it does not select or change the project's group.
+
+## Reports
+
+Reports shows **Today**, **This Week**, or **This Month**, with totals and session counts for the overview, a project group, or an individual project. Today includes only today's time: a new day starts with zero until you track work. Earlier logs remain available in This Week, This Month, and **Work Logs**.
+
+The visual summary includes project mix, the last seven days, and 35-day activity. The daily charts keep their own rolling windows, so they can show earlier activity even when Today is zero. Expand the project list to see more than two projects. The card follows Raycast's light or dark appearance; after changing Raycast's theme while Reports is open, return to the root search and reopen Reports to refresh its appearance.
 
 ## Storage and Privacy
 
