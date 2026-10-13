@@ -1,6 +1,6 @@
 # PromptCast Changelog
 
-## [Add quota monitoring] - {PR_MERGE_DATE}
+## [Add quota monitoring] - 2026-10-13
 
 - Add visual gauges to the existing usage viewer.
 - Connect Claude Code's status line to read saved quota observations while preserving the existing status line.
