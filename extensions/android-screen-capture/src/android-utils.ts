@@ -1,7 +1,7 @@
 import { PreferenceValues, getPreferenceValues } from "@raycast/api";
 import * as fs from "fs";
 import untildify from "untildify";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 
 export function getAdbDir(): string {
   const preferences = getPreferenceValues<PreferenceValues>();
@@ -23,7 +23,7 @@ export function existsAdb(): boolean {
 
 export function getDevices() {
   const adbDir = getAdbDir();
-  const stdout = execSync(`${adbDir}/adb devices`).toString();
+  const stdout = execFileSync(`${adbDir}/adb`, ["devices"]).toString();
   const devices: string[] = [];
   stdout.split("\n").forEach((line, index) => {
     if (index != 0 && line.length > 0) {
@@ -31,6 +31,11 @@ export function getDevices() {
     }
   });
   return devices;
+}
+
+// Wraps a value in single quotes so a path with spaces stays one shell word
+export function shellQuote(value: string): string {
+  return `'${value.replace(/'/g, `'\\''`)}'`;
 }
 
 export function getScreenshotSaveLocation(): string {
