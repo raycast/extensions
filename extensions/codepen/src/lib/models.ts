@@ -112,8 +112,9 @@ export function buildIssueLines(build: Build | null | undefined): string[] {
   const seen = new Set<string>();
   const lines: string[] = [];
   for (const diagnostic of [...build.diagnostics, ...build.errors]) {
-    if (seen.has(diagnostic.message)) continue;
-    seen.add(diagnostic.message);
+    const key = JSON.stringify([diagnostic.message, diagnostic.path ?? null, diagnostic.type]);
+    if (seen.has(key)) continue;
+    seen.add(key);
     lines.push(`- **${diagnostic.type}**${diagnostic.path ? ` (${diagnostic.path})` : ""}: ${diagnostic.message}`);
   }
   return lines;

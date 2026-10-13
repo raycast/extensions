@@ -283,12 +283,13 @@ test("file writes carry the expected version and return compiler-adjusted source
   assert.deepEqual(structuredClone(result), result);
 });
 
-test("failed builds show errors and diagnostics without repeating the same message", () => {
+test("failed builds show errors and diagnostics without repeating identical issues", () => {
   const failed = {
     ...build,
     status: "Failed" as const,
     errors: [{ type: "Error", message: "Invalid CSS", path: "/style.css" }],
     diagnostics: [
+      { type: "Error", message: "Invalid CSS", path: "/style.css" },
       { type: "Error", message: "Invalid CSS", path: "/style.css" },
       { type: "Warning", message: "Unused variable", path: "/script.js" },
     ],
@@ -298,6 +299,48 @@ test("failed builds show errors and diagnostics without repeating the same messa
     "- **Warning** (/script.js): Unused variable",
   ]);
   assert.deepEqual(buildIssueLines({ ...build, diagnostics: [], errors: [] }), []);
+  assert.deepEqual(buildIssueLines(null), []);
+  assert.deepEqual(buildIssueLines(undefined), []);
+});
+
+test("build issues with the same message in different files remain visible", () => {
+  assert.deepEqual(
+    buildIssueLines({
+      ...build,
+      status: "Failed",
+      diagnostics: [{ type: "Error", message: "Unexpected token", path: "/script.js" }],
+      errors: [{ type: "Error", message: "Unexpected token", path: "/utils.js" }],
+    }),
+    ["- **Error** (/script.js): Unexpected token", "- **Error** (/utils.js): Unexpected token"],
+  );
+});
+
+test("build issues with the same message and path but different types remain visible", () => {
+  assert.deepEqual(
+    buildIssueLines({
+      ...build,
+      status: "Failed",
+      diagnostics: [{ type: "Warning", message: "Missing dependency", path: "/script.js" }],
+      errors: [{ type: "Error", message: "Missing dependency", path: "/script.js" }],
+    }),
+    ["- **Warning** (/script.js): Missing dependency", "- **Error** (/script.js): Missing dependency"],
+  );
+});
+
+test("duplicate build issues treat null and omitted paths alike but preserve file-specific issues", () => {
+  assert.deepEqual(
+    buildIssueLines({
+      ...build,
+      status: "Failed",
+      diagnostics: [{ type: "Error", message: "Missing dependency", path: null }],
+      errors: [
+        { type: "Error", message: "Missing dependency" },
+        { type: "Error", message: "Missing dependency", path: "/script.js" },
+        { type: "Error", message: "Missing dependency", path: "/script.js" },
+      ],
+    }),
+    ["- **Error**: Missing dependency", "- **Error** (/script.js): Missing dependency"],
+  );
 });
 
 test("build status distinguishes compiler follow-ups from terminal canceled builds", () => {
