@@ -1,0 +1,1987 @@
+{
+  "versao": 1,
+  "nota": "Nível 1 = cotidiano com armadilha ortográfica. Nível 2 = vocabulário culto. Nível 3 = erudito e raro.",
+  "palavras": [
+    {
+      "palavra": "exceção",
+      "classe": "substantivo",
+      "significado": "caso que escapa à regra geral",
+      "exemplo": "Ele nunca chega no horário; ontem foi a exceção.",
+      "nivel": 1
+    },
+    {
+      "palavra": "privilégio",
+      "classe": "substantivo",
+      "significado": "vantagem concedida a alguém e negada aos demais",
+      "exemplo": "Estudar em tempo integral ainda é privilégio de poucos.",
+      "nivel": 1
+    },
+    {
+      "palavra": "empecilho",
+      "classe": "substantivo",
+      "significado": "aquilo que atrapalha o andamento de algo",
+      "exemplo": "A chuva foi o único empecilho para a viagem.",
+      "nivel": 1
+    },
+    {
+      "palavra": "beneficência",
+      "classe": "substantivo",
+      "significado": "prática de fazer o bem sem esperar retorno",
+      "exemplo": "A renda do show foi toda para uma casa de beneficência.",
+      "nivel": 1
+    },
+    {
+      "palavra": "paralelepípedo",
+      "classe": "substantivo",
+      "significado": "bloco de pedra usado para calçar ruas",
+      "exemplo": "A rua de paralelepípedo sacode o carro inteiro.",
+      "nivel": 1
+    },
+    {
+      "palavra": "cabeleireiro",
+      "classe": "substantivo",
+      "significado": "profissional que corta e trata os cabelos",
+      "exemplo": "Marquei com o cabeleireiro para sexta à tarde.",
+      "nivel": 1
+    },
+    {
+      "palavra": "reivindicar",
+      "classe": "verbo",
+      "significado": "exigir aquilo a que se tem direito",
+      "exemplo": "Os moradores foram reivindicar o asfalto na prefeitura.",
+      "nivel": 1
+    },
+    {
+      "palavra": "hesitar",
+      "classe": "verbo",
+      "significado": "ficar em dúvida e adiar a ação",
+      "exemplo": "Não hesite em me chamar se o processo travar.",
+      "nivel": 1
+    },
+    {
+      "palavra": "obcecado",
+      "classe": "adjetivo",
+      "significado": "dominado por uma ideia fixa",
+      "exemplo": "Ele é obcecado por detalhe e revisa tudo três vezes.",
+      "nivel": 1
+    },
+    {
+      "palavra": "sucinto",
+      "classe": "adjetivo",
+      "significado": "dito em poucas palavras",
+      "exemplo": "Prefiro um relato sucinto a uma apresentação de uma hora.",
+      "nivel": 1
+    },
+    {
+      "palavra": "despercebido",
+      "classe": "adjetivo",
+      "significado": "que não foi notado por ninguém",
+      "exemplo": "O erro passou despercebido até a auditoria.",
+      "nivel": 1
+    },
+    {
+      "palavra": "desapercebido",
+      "classe": "adjetivo",
+      "significado": "desprevenido, sem os recursos necessários",
+      "exemplo": "A equipe foi desapercebida de plano B e pagou caro.",
+      "nivel": 2
+    },
+    {
+      "palavra": "iminente",
+      "classe": "adjetivo",
+      "significado": "que está prestes a acontecer",
+      "exemplo": "A queda do servidor era iminente e ninguém agiu.",
+      "nivel": 1
+    },
+    {
+      "palavra": "eminente",
+      "classe": "adjetivo",
+      "significado": "que se destaca dos demais; notável",
+      "exemplo": "Recebemos a visita de um eminente pesquisador da área.",
+      "nivel": 1
+    },
+    {
+      "palavra": "tráfego",
+      "classe": "substantivo",
+      "significado": "circulação de veículos, pessoas ou dados",
+      "exemplo": "O tráfego do site triplicou depois da reportagem.",
+      "nivel": 1
+    },
+    {
+      "palavra": "ratificar",
+      "classe": "verbo",
+      "significado": "confirmar, dar validade definitiva",
+      "exemplo": "O conselho ratificou a decisão por unanimidade.",
+      "nivel": 1
+    },
+    {
+      "palavra": "retificar",
+      "classe": "verbo",
+      "significado": "corrigir aquilo que estava errado",
+      "exemplo": "Precisei retificar a nota emitida com o CNPJ trocado.",
+      "nivel": 1
+    },
+    {
+      "palavra": "flagrante",
+      "classe": "adjetivo",
+      "significado": "tão evidente que não admite negação",
+      "exemplo": "A contradição entre os dois relatórios é flagrante.",
+      "nivel": 1
+    },
+    {
+      "palavra": "bússola",
+      "classe": "substantivo",
+      "significado": "instrumento que aponta o norte magnético",
+      "exemplo": "Sem bússola, a trilha vira chute.",
+      "nivel": 1
+    },
+    {
+      "palavra": "ínfimo",
+      "classe": "adjetivo",
+      "significado": "pequeno ao extremo; o menor de todos",
+      "exemplo": "A diferença de preço era ínfima, mas o frete pesou.",
+      "nivel": 1
+    },
+    {
+      "palavra": "exorbitante",
+      "classe": "adjetivo",
+      "significado": "que ultrapassa em muito o razoável",
+      "exemplo": "Cobraram um valor exorbitante pela troca da tela.",
+      "nivel": 1
+    },
+    {
+      "palavra": "imprescindível",
+      "classe": "adjetivo",
+      "significado": "de que não se pode abrir mão",
+      "exemplo": "Backup diário é imprescindível, não é opcional.",
+      "nivel": 1
+    },
+    {
+      "palavra": "corriqueiro",
+      "classe": "adjetivo",
+      "significado": "que acontece o tempo todo; banal",
+      "exemplo": "Erro de digitação é corriqueiro; erro de cálculo não.",
+      "nivel": 1
+    },
+    {
+      "palavra": "minucioso",
+      "classe": "adjetivo",
+      "significado": "que cuida de cada detalhe",
+      "exemplo": "Ela fez uma revisão minuciosa do contrato.",
+      "nivel": 1
+    },
+    {
+      "palavra": "perene",
+      "classe": "adjetivo",
+      "significado": "que dura sem interrupção",
+      "exemplo": "O riacho é perene: não seca nem na estiagem.",
+      "nivel": 1
+    },
+    {
+      "palavra": "efêmero",
+      "classe": "adjetivo",
+      "significado": "que dura muito pouco tempo",
+      "exemplo": "A fama viral é efêmera: some antes de virar memória.",
+      "nivel": 1
+    },
+    {
+      "palavra": "lúcido",
+      "classe": "adjetivo",
+      "significado": "que raciocina com clareza",
+      "exemplo": "Aos noventa anos, continuava lúcido e irônico.",
+      "nivel": 1
+    },
+    {
+      "palavra": "sagaz",
+      "classe": "adjetivo",
+      "significado": "esperto em perceber o que os outros não veem",
+      "exemplo": "Um negociador sagaz percebe a hesitação antes da fala.",
+      "nivel": 2
+    },
+    {
+      "palavra": "astúcia",
+      "classe": "substantivo",
+      "significado": "esperteza usada para conseguir o que se quer",
+      "exemplo": "Venceu a concorrência mais por astúcia que por preço.",
+      "nivel": 2
+    },
+    {
+      "palavra": "cerne",
+      "classe": "substantivo",
+      "significado": "a parte central e essencial de algo",
+      "exemplo": "O cerne do problema não é o prazo, é o escopo.",
+      "nivel": 1
+    },
+    {
+      "palavra": "âmago",
+      "classe": "substantivo",
+      "significado": "a parte mais íntima e profunda",
+      "exemplo": "No âmago, ele já sabia que a decisão estava errada.",
+      "nivel": 2
+    },
+    {
+      "palavra": "lacuna",
+      "classe": "substantivo",
+      "significado": "espaço que ficou vazio; falta",
+      "exemplo": "O relatório tem uma lacuna: ninguém explicou a queda de março.",
+      "nivel": 1
+    },
+    {
+      "palavra": "vislumbrar",
+      "classe": "verbo",
+      "significado": "entrever de forma ainda vaga",
+      "exemplo": "Já dá para vislumbrar o formato final do produto.",
+      "nivel": 2
+    },
+    {
+      "palavra": "deslumbrante",
+      "classe": "adjetivo",
+      "significado": "que encanta pela beleza",
+      "exemplo": "A vista do mirante ao amanhecer é deslumbrante.",
+      "nivel": 1
+    },
+    {
+      "palavra": "exuberante",
+      "classe": "adjetivo",
+      "significado": "abundante e cheio de vida",
+      "exemplo": "A mata exuberante engoliu a trilha em dois meses.",
+      "nivel": 1
+    },
+    {
+      "palavra": "paulatino",
+      "classe": "adjetivo",
+      "significado": "que acontece devagar e por partes",
+      "exemplo": "A migração foi paulatina, uma tabela por semana.",
+      "nivel": 2
+    },
+    {
+      "palavra": "alicerce",
+      "classe": "substantivo",
+      "significado": "base que sustenta uma construção ou uma ideia",
+      "exemplo": "Confiança é o alicerce de qualquer sociedade.",
+      "nivel": 1
+    },
+    {
+      "palavra": "premissa",
+      "classe": "substantivo",
+      "significado": "ideia aceita como ponto de partida de um raciocínio",
+      "exemplo": "A premissa está errada, então a conclusão também está.",
+      "nivel": 2
+    },
+    {
+      "palavra": "dicotomia",
+      "classe": "substantivo",
+      "significado": "divisão de um todo em duas partes opostas",
+      "exemplo": "A dicotomia entre velocidade e qualidade é quase sempre falsa.",
+      "nivel": 2
+    },
+    {
+      "palavra": "ambiguidade",
+      "classe": "substantivo",
+      "significado": "qualidade do que admite mais de um sentido",
+      "exemplo": "A ambiguidade da cláusula abriu espaço para o processo.",
+      "nivel": 1
+    },
+    {
+      "palavra": "coerência",
+      "classe": "substantivo",
+      "significado": "ligação lógica entre as partes de um discurso ou de uma conduta",
+      "exemplo": "Falta coerência entre o que ele promete e o que entrega.",
+      "nivel": 1
+    },
+    {
+      "palavra": "discrepância",
+      "classe": "substantivo",
+      "significado": "diferença que não deveria existir entre duas coisas",
+      "exemplo": "Havia discrepância entre o estoque físico e o sistema.",
+      "nivel": 1
+    },
+    {
+      "palavra": "abrangência",
+      "classe": "substantivo",
+      "significado": "alcance daquilo que algo cobre",
+      "exemplo": "A nova regra tem abrangência nacional.",
+      "nivel": 1
+    },
+    {
+      "palavra": "concisão",
+      "classe": "substantivo",
+      "significado": "arte de dizer muito com poucas palavras",
+      "exemplo": "A concisão do texto dele é o que o torna difícil de imitar.",
+      "nivel": 2
+    },
+    {
+      "palavra": "seção",
+      "classe": "substantivo",
+      "significado": "cada uma das partes em que algo se divide",
+      "exemplo": "A seção de eletrônicos fica no segundo andar.",
+      "nivel": 1
+    },
+    {
+      "palavra": "sessão",
+      "classe": "substantivo",
+      "significado": "período de tempo dedicado a uma atividade",
+      "exemplo": "A sessão de julgamento durou quatro horas.",
+      "nivel": 1
+    },
+    {
+      "palavra": "cessão",
+      "classe": "substantivo",
+      "significado": "ato de ceder um direito ou um bem a alguém",
+      "exemplo": "A cessão dos direitos autorais foi registrada em cartório.",
+      "nivel": 2
+    },
+    {
+      "palavra": "discrição",
+      "classe": "substantivo",
+      "significado": "qualidade de quem não chama atenção nem revela o que sabe",
+      "exemplo": "Ele conduziu a demissão com discrição.",
+      "nivel": 1
+    },
+    {
+      "palavra": "descrição",
+      "classe": "substantivo",
+      "significado": "relato detalhado de como algo é",
+      "exemplo": "A descrição do produto não batia com o que chegou.",
+      "nivel": 1
+    },
+    {
+      "palavra": "mandado",
+      "classe": "substantivo",
+      "significado": "ordem escrita expedida por autoridade judicial",
+      "exemplo": "A polícia chegou com mandado de busca.",
+      "nivel": 1
+    },
+    {
+      "palavra": "mandato",
+      "classe": "substantivo",
+      "significado": "período em que alguém exerce um cargo eletivo",
+      "exemplo": "O prefeito cumpre o segundo mandato.",
+      "nivel": 1
+    },
+    {
+      "palavra": "infligir",
+      "classe": "verbo",
+      "significado": "aplicar a alguém um castigo, um dano ou uma pena",
+      "exemplo": "O tribunal infligiu multa pesada à empresa.",
+      "nivel": 2
+    },
+    {
+      "palavra": "infringir",
+      "classe": "verbo",
+      "significado": "desrespeitar uma norma ou uma lei",
+      "exemplo": "Estacionar ali é infringir o código de trânsito.",
+      "nivel": 2
+    },
+    {
+      "palavra": "aferir",
+      "classe": "verbo",
+      "significado": "medir ou conferir com base em um padrão",
+      "exemplo": "Precisamos aferir a balança antes de pesar o lote.",
+      "nivel": 2
+    },
+    {
+      "palavra": "auferir",
+      "classe": "verbo",
+      "significado": "obter, colher como ganho",
+      "exemplo": "A empresa auferiu lucro recorde no trimestre.",
+      "nivel": 2
+    },
+    {
+      "palavra": "vultoso",
+      "classe": "adjetivo",
+      "significado": "de grande valor ou de grande volume",
+      "exemplo": "Foi um investimento vultoso para um mercado tão pequeno.",
+      "nivel": 2
+    },
+    {
+      "palavra": "viés",
+      "classe": "substantivo",
+      "significado": "inclinação que distorce um julgamento",
+      "exemplo": "A amostra tinha viés: só ouviu quem já era cliente.",
+      "nivel": 1
+    },
+    {
+      "palavra": "ínterim",
+      "classe": "substantivo",
+      "significado": "intervalo de tempo entre dois momentos",
+      "exemplo": "Nesse ínterim, o time inteiro foi trocado.",
+      "nivel": 2
+    },
+    {
+      "palavra": "lapso",
+      "classe": "substantivo",
+      "significado": "falha momentânea de atenção ou de memória",
+      "exemplo": "Foi um lapso: troquei o nome dela na apresentação.",
+      "nivel": 1
+    },
+    {
+      "palavra": "plausível",
+      "classe": "adjetivo",
+      "significado": "que parece aceitável e digno de crédito",
+      "exemplo": "A explicação é plausível, mas ainda não foi comprovada.",
+      "nivel": 1
+    },
+    {
+      "palavra": "verossímil",
+      "classe": "adjetivo",
+      "significado": "que parece verdadeiro, ainda que não seja",
+      "exemplo": "O roteiro é fantasioso, mas os diálogos são verossímeis.",
+      "nivel": 2
+    },
+    {
+      "palavra": "suscetível",
+      "classe": "adjetivo",
+      "significado": "que pode facilmente sofrer determinado efeito",
+      "exemplo": "Metal exposto é suscetível à corrosão.",
+      "nivel": 1
+    },
+    {
+      "palavra": "abstêmio",
+      "classe": "adjetivo",
+      "significado": "que se abstém de bebida alcoólica",
+      "exemplo": "É abstêmio há vinte anos e nem sente falta.",
+      "nivel": 2
+    },
+    {
+      "palavra": "inóspito",
+      "classe": "adjetivo",
+      "significado": "que não oferece condições para se viver",
+      "exemplo": "O terreno é inóspito: sem água, sem sombra, sem estrada.",
+      "nivel": 2
+    },
+    {
+      "palavra": "anuência",
+      "classe": "substantivo",
+      "significado": "concordância formal com algo",
+      "exemplo": "A obra só começa com a anuência do condomínio.",
+      "nivel": 2
+    },
+    {
+      "palavra": "escrutínio",
+      "classe": "substantivo",
+      "significado": "exame rigoroso e detalhado",
+      "exemplo": "O código passou pelo escrutínio de três revisores.",
+      "nivel": 2
+    },
+    {
+      "palavra": "arcabouço",
+      "classe": "substantivo",
+      "significado": "estrutura que sustenta um sistema ou uma ideia",
+      "exemplo": "O arcabouço jurídico mudou e o produto teve que mudar junto.",
+      "nivel": 2
+    },
+    {
+      "palavra": "quesito",
+      "classe": "substantivo",
+      "significado": "cada ponto a ser avaliado ou respondido",
+      "exemplo": "No quesito autonomia, o modelo antigo ainda ganha.",
+      "nivel": 1
+    },
+    {
+      "palavra": "óbice",
+      "classe": "substantivo",
+      "significado": "impedimento; aquilo que barra o caminho",
+      "exemplo": "O único óbice à aprovação é a falta de orçamento.",
+      "nivel": 3
+    },
+    {
+      "palavra": "paupérrimo",
+      "classe": "adjetivo",
+      "significado": "extremamente pobre",
+      "exemplo": "Cresceu num bairro paupérrimo e nunca escondeu isso.",
+      "nivel": 2
+    },
+    {
+      "palavra": "superávit",
+      "classe": "substantivo",
+      "significado": "sobra do que se arrecada em relação ao que se gasta",
+      "exemplo": "O ano fechou com superávit pela primeira vez desde 2019.",
+      "nivel": 2
+    },
+    {
+      "palavra": "déficit",
+      "classe": "substantivo",
+      "significado": "falta do que era necessário; saldo negativo",
+      "exemplo": "O déficit de profissionais na área já passa de dez mil.",
+      "nivel": 1
+    },
+    {
+      "palavra": "idôneo",
+      "classe": "adjetivo",
+      "significado": "confiável e adequado ao que se propõe",
+      "exemplo": "Só contratamos fornecedor idôneo, com certidão em dia.",
+      "nivel": 2
+    },
+    {
+      "palavra": "probidade",
+      "classe": "substantivo",
+      "significado": "honestidade rigorosa no trato com o que é dos outros",
+      "exemplo": "Espera-se probidade de quem administra dinheiro público.",
+      "nivel": 2
+    },
+    {
+      "palavra": "zelo",
+      "classe": "substantivo",
+      "significado": "cuidado atento e constante com algo",
+      "exemplo": "O zelo dele com a documentação salvou a auditoria.",
+      "nivel": 1
+    },
+    {
+      "palavra": "desídia",
+      "classe": "substantivo",
+      "significado": "descuido ou preguiça no cumprimento de um dever",
+      "exemplo": "A desídia do plantonista custou horas de indisponibilidade.",
+      "nivel": 3
+    },
+    {
+      "palavra": "negligência",
+      "classe": "substantivo",
+      "significado": "falta do cuidado que se deveria ter",
+      "exemplo": "A perda dos dados foi negligência, não azar.",
+      "nivel": 1
+    },
+    {
+      "palavra": "imperícia",
+      "classe": "substantivo",
+      "significado": "falta de conhecimento técnico para executar algo",
+      "exemplo": "O laudo apontou imperícia na instalação elétrica.",
+      "nivel": 2
+    },
+    {
+      "palavra": "imprudência",
+      "classe": "substantivo",
+      "significado": "ação precipitada, sem medir o risco",
+      "exemplo": "Foi imprudência subir sem verificar a corda.",
+      "nivel": 1
+    },
+    {
+      "palavra": "diligência",
+      "classe": "substantivo",
+      "significado": "cuidado e empenho em cumprir uma tarefa",
+      "exemplo": "Trate cada chamado com a diligência que você gostaria de receber.",
+      "nivel": 2
+    },
+    {
+      "palavra": "perspicaz",
+      "classe": "adjetivo",
+      "significado": "que percebe rápido aquilo que está oculto",
+      "exemplo": "Uma pergunta perspicaz derrubou a tese inteira.",
+      "nivel": 2
+    },
+    {
+      "palavra": "obtuso",
+      "classe": "adjetivo",
+      "significado": "lento em compreender",
+      "exemplo": "Não seja obtuso: ele estava sendo irônico.",
+      "nivel": 2
+    },
+    {
+      "palavra": "tácito",
+      "classe": "adjetivo",
+      "significado": "que se entende sem ter sido dito",
+      "exemplo": "Havia um acordo tácito de não falar de política ali.",
+      "nivel": 2
+    },
+    {
+      "palavra": "explícito",
+      "classe": "adjetivo",
+      "significado": "dito com todas as letras",
+      "exemplo": "Quero um aceite explícito por escrito, não um aceno.",
+      "nivel": 1
+    },
+    {
+      "palavra": "implícito",
+      "classe": "adjetivo",
+      "significado": "que está contido sem ter sido declarado",
+      "exemplo": "Na proposta havia um custo implícito de manutenção.",
+      "nivel": 1
+    },
+    {
+      "palavra": "subjacente",
+      "classe": "adjetivo",
+      "significado": "que está por baixo e sustenta aquilo que aparece",
+      "exemplo": "A causa subjacente da rotatividade é o salário, não o clima.",
+      "nivel": 2
+    },
+    {
+      "palavra": "latente",
+      "classe": "adjetivo",
+      "significado": "que existe mas ainda não se manifestou",
+      "exemplo": "Havia um conflito latente entre as duas áreas.",
+      "nivel": 2
+    },
+    {
+      "palavra": "patente",
+      "classe": "adjetivo",
+      "significado": "evidente a ponto de dispensar prova",
+      "exemplo": "O desconforto na sala era patente.",
+      "nivel": 2
+    },
+    {
+      "palavra": "notório",
+      "classe": "adjetivo",
+      "significado": "conhecido por todos",
+      "exemplo": "É de notório saber na área de tributos.",
+      "nivel": 2
+    },
+    {
+      "palavra": "nefasto",
+      "classe": "adjetivo",
+      "significado": "que traz desgraça ou prejuízo grave",
+      "exemplo": "A decisão teve efeito nefasto sobre os pequenos produtores.",
+      "nivel": 2
+    },
+    {
+      "palavra": "profícuo",
+      "classe": "adjetivo",
+      "significado": "que dá bom resultado; proveitoso",
+      "exemplo": "Foi um encontro profícuo: saímos com três decisões.",
+      "nivel": 3
+    },
+    {
+      "palavra": "pujante",
+      "classe": "adjetivo",
+      "significado": "cheio de força e de vigor",
+      "exemplo": "Uma indústria pujante mudou a cara da cidade em dez anos.",
+      "nivel": 3
+    },
+    {
+      "palavra": "incipiente",
+      "classe": "adjetivo",
+      "significado": "que está apenas começando",
+      "exemplo": "O mercado ainda é incipiente e sem regra clara.",
+      "nivel": 2
+    },
+    {
+      "palavra": "incisivo",
+      "classe": "adjetivo",
+      "significado": "direto e cortante naquilo que diz",
+      "exemplo": "Ele foi incisivo: ou entrega quinta, ou cancela.",
+      "nivel": 2
+    },
+    {
+      "palavra": "contundente",
+      "classe": "adjetivo",
+      "significado": "que atinge com força e não deixa dúvida",
+      "exemplo": "Apresentou prova contundente e o caso virou.",
+      "nivel": 2
+    },
+    {
+      "palavra": "categórico",
+      "classe": "adjetivo",
+      "significado": "que afirma sem deixar margem a dúvida",
+      "exemplo": "Foi categórico ao negar qualquer envolvimento.",
+      "nivel": 2
+    },
+    {
+      "palavra": "peremptório",
+      "classe": "adjetivo",
+      "significado": "que encerra a discussão; que não admite recurso",
+      "exemplo": "O prazo é peremptório: passou, perdeu o direito.",
+      "nivel": 3
+    },
+    {
+      "palavra": "irrefutável",
+      "classe": "adjetivo",
+      "significado": "que não pode ser contestado",
+      "exemplo": "O registro do log é irrefutável.",
+      "nivel": 2
+    },
+    {
+      "palavra": "falacioso",
+      "classe": "adjetivo",
+      "significado": "que engana com aparência de verdade",
+      "exemplo": "O argumento é falacioso: troca a causa pelo efeito.",
+      "nivel": 2
+    },
+    {
+      "palavra": "sofisma",
+      "classe": "substantivo",
+      "significado": "raciocínio errado construído para parecer certo",
+      "exemplo": "Isso é sofisma: você comparou dois períodos diferentes.",
+      "nivel": 3
+    },
+    {
+      "palavra": "axioma",
+      "classe": "substantivo",
+      "significado": "verdade aceita como ponto de partida, sem demonstração",
+      "exemplo": "Partimos do axioma de que o usuário sempre erra o formulário.",
+      "nivel": 3
+    },
+    {
+      "palavra": "corolário",
+      "classe": "substantivo",
+      "significado": "consequência que decorre naturalmente do que já foi provado",
+      "exemplo": "A queda nas vendas foi corolário do atraso na entrega.",
+      "nivel": 3
+    },
+    {
+      "palavra": "paradigma",
+      "classe": "substantivo",
+      "significado": "modelo que organiza uma forma de pensar",
+      "exemplo": "A busca por conversa quebrou o paradigma da palavra-chave.",
+      "nivel": 2
+    },
+    {
+      "palavra": "pressuposto",
+      "classe": "substantivo",
+      "significado": "aquilo que se admite antes de começar o raciocínio",
+      "exemplo": "O pressuposto era que o time dobraria; não dobrou.",
+      "nivel": 1
+    },
+    {
+      "palavra": "conjectura",
+      "classe": "substantivo",
+      "significado": "suposição feita sem prova",
+      "exemplo": "Enquanto não medirmos, tudo é conjectura.",
+      "nivel": 2
+    },
+    {
+      "palavra": "empírico",
+      "classe": "adjetivo",
+      "significado": "baseado na observação e na experiência, não na teoria",
+      "exemplo": "Temos dado empírico suficiente para encerrar o debate.",
+      "nivel": 2
+    },
+    {
+      "palavra": "heurística",
+      "classe": "substantivo",
+      "significado": "regra prática que leva a uma boa resposta sem garantir a melhor",
+      "exemplo": "A heurística é simples: quem reclamou duas vezes, ligue.",
+      "nivel": 3
+    },
+    {
+      "palavra": "taxonomia",
+      "classe": "substantivo",
+      "significado": "sistema de classificação em categorias",
+      "exemplo": "Antes do relatório, precisamos de uma taxonomia dos erros.",
+      "nivel": 3
+    },
+    {
+      "palavra": "nuance",
+      "classe": "substantivo",
+      "significado": "diferença sutil entre coisas parecidas",
+      "exemplo": "A nuance entre os dois termos muda a cláusula inteira.",
+      "nivel": 2
+    },
+    {
+      "palavra": "matiz",
+      "classe": "substantivo",
+      "significado": "tonalidade ou variação sutil",
+      "exemplo": "O texto tem um matiz irônico que se perde na tradução.",
+      "nivel": 3
+    },
+    {
+      "palavra": "idiossincrasia",
+      "classe": "substantivo",
+      "significado": "traço peculiar e próprio de uma pessoa",
+      "exemplo": "Revisar tudo em papel é uma idiossincrasia dele.",
+      "nivel": 3
+    },
+    {
+      "palavra": "excêntrico",
+      "classe": "adjetivo",
+      "significado": "que foge do comportamento comum",
+      "exemplo": "O fundador é excêntrico, mas nunca errou uma aposta.",
+      "nivel": 1
+    },
+    {
+      "palavra": "austero",
+      "classe": "adjetivo",
+      "significado": "rigoroso consigo mesmo e avesso a excessos",
+      "exemplo": "Levava uma vida austera, apesar da fortuna.",
+      "nivel": 2
+    },
+    {
+      "palavra": "parcimônia",
+      "classe": "substantivo",
+      "significado": "moderação no uso ou no gasto de algo",
+      "exemplo": "Use adjetivo com parcimônia; ele custa credibilidade.",
+      "nivel": 3
+    },
+    {
+      "palavra": "comedimento",
+      "classe": "substantivo",
+      "significado": "contenção no falar e no agir",
+      "exemplo": "Faltou comedimento na resposta pública.",
+      "nivel": 3
+    },
+    {
+      "palavra": "sobriedade",
+      "classe": "substantivo",
+      "significado": "ausência de exagero; equilíbrio",
+      "exemplo": "A sobriedade do design é o que o faz durar dez anos.",
+      "nivel": 2
+    },
+    {
+      "palavra": "ostentação",
+      "classe": "substantivo",
+      "significado": "exibição feita para impressionar",
+      "exemplo": "O relatório é ostentação de número, não de resultado.",
+      "nivel": 1
+    },
+    {
+      "palavra": "pompa",
+      "classe": "substantivo",
+      "significado": "aparato solene e caro",
+      "exemplo": "Inauguraram com pompa uma obra que já nasceu obsoleta.",
+      "nivel": 2
+    },
+    {
+      "palavra": "arroubo",
+      "classe": "substantivo",
+      "significado": "impulso repentino e passageiro",
+      "exemplo": "Num arroubo de entusiasmo, prometeu prazo que não tinha.",
+      "nivel": 3
+    },
+    {
+      "palavra": "ímpeto",
+      "classe": "substantivo",
+      "significado": "força súbita que empurra para a ação",
+      "exemplo": "Segurou o ímpeto de responder e ganhou a negociação.",
+      "nivel": 1
+    },
+    {
+      "palavra": "obstinação",
+      "classe": "substantivo",
+      "significado": "insistência que não cede nem diante do fracasso",
+      "exemplo": "Foi a obstinação dela que manteve o projeto vivo.",
+      "nivel": 2
+    },
+    {
+      "palavra": "resiliência",
+      "classe": "substantivo",
+      "significado": "capacidade de voltar à forma depois da pressão",
+      "exemplo": "Resiliência não é aguentar calado; é se recompor rápido.",
+      "nivel": 1
+    },
+    {
+      "palavra": "tenacidade",
+      "classe": "substantivo",
+      "significado": "firmeza em não largar aquilo que se começou",
+      "exemplo": "Venceu por tenacidade: tentou onze vezes.",
+      "nivel": 2
+    },
+    {
+      "palavra": "perseverança",
+      "classe": "substantivo",
+      "significado": "constância em seguir apesar da dificuldade",
+      "exemplo": "Sem perseverança, nenhum idioma passa do primeiro mês.",
+      "nivel": 1
+    },
+    {
+      "palavra": "abnegação",
+      "classe": "substantivo",
+      "significado": "renúncia ao próprio interesse em favor de outro",
+      "exemplo": "Cuidou do pai por anos com abnegação silenciosa.",
+      "nivel": 2
+    },
+    {
+      "palavra": "altruísmo",
+      "classe": "substantivo",
+      "significado": "cuidado com o outro acima de si mesmo",
+      "exemplo": "Não é altruísmo se você cobra reconhecimento por isso.",
+      "nivel": 1
+    },
+    {
+      "palavra": "empatia",
+      "classe": "substantivo",
+      "significado": "capacidade de sentir aquilo que o outro sente",
+      "exemplo": "Empatia é o que separa um bom suporte de um roteiro decorado.",
+      "nivel": 1
+    },
+    {
+      "palavra": "magnanimidade",
+      "classe": "substantivo",
+      "significado": "grandeza de espírito, sobretudo em perdoar",
+      "exemplo": "Tratou o antigo sócio com magnanimidade.",
+      "nivel": 3
+    },
+    {
+      "palavra": "mesquinhez",
+      "classe": "substantivo",
+      "significado": "estreiteza de espírito; falta de generosidade",
+      "exemplo": "Discutir centavo com quem entregou o dobro é mesquinhez.",
+      "nivel": 2
+    },
+    {
+      "palavra": "rancor",
+      "classe": "substantivo",
+      "significado": "mágoa guardada que não passa",
+      "exemplo": "Saiu sem rancor, e isso surpreendeu todo mundo.",
+      "nivel": 1
+    },
+    {
+      "palavra": "melancolia",
+      "classe": "substantivo",
+      "significado": "tristeza suave, muitas vezes sem causa definida",
+      "exemplo": "Domingo à tarde tem uma melancolia própria.",
+      "nivel": 1
+    },
+    {
+      "palavra": "saudade",
+      "classe": "substantivo",
+      "significado": "falta doída de algo ou de alguém que se ama",
+      "exemplo": "Bateu saudade da casa da avó no cheiro do café.",
+      "nivel": 1
+    },
+    {
+      "palavra": "nostalgia",
+      "classe": "substantivo",
+      "significado": "desejo do que ficou no passado",
+      "exemplo": "A trilha sonora joga direto na nostalgia dos anos noventa.",
+      "nivel": 1
+    },
+    {
+      "palavra": "angústia",
+      "classe": "substantivo",
+      "significado": "aperto interior diante daquilo que não se resolve",
+      "exemplo": "A angústia da véspera some no minuto em que começa.",
+      "nivel": 1
+    },
+    {
+      "palavra": "euforia",
+      "classe": "substantivo",
+      "significado": "alegria intensa e passageira",
+      "exemplo": "A euforia do lançamento durou até o primeiro relatório.",
+      "nivel": 1
+    },
+    {
+      "palavra": "desalento",
+      "classe": "substantivo",
+      "significado": "perda de ânimo",
+      "exemplo": "O terceiro adiamento trouxe desalento à equipe.",
+      "nivel": 2
+    },
+    {
+      "palavra": "apatia",
+      "classe": "substantivo",
+      "significado": "ausência de interesse ou de reação",
+      "exemplo": "A apatia na reunião era mais preocupante que a discordância.",
+      "nivel": 1
+    },
+    {
+      "palavra": "comoção",
+      "classe": "substantivo",
+      "significado": "abalo emocional forte e coletivo",
+      "exemplo": "A notícia causou comoção na cidade inteira.",
+      "nivel": 1
+    },
+    {
+      "palavra": "estupefato",
+      "classe": "adjetivo",
+      "significado": "paralisado de espanto",
+      "exemplo": "Ficou estupefato ao ver o valor da fatura.",
+      "nivel": 2
+    },
+    {
+      "palavra": "perplexo",
+      "classe": "adjetivo",
+      "significado": "confuso diante do inesperado",
+      "exemplo": "Saí perplexo: ninguém sabia explicar a decisão.",
+      "nivel": 1
+    },
+    {
+      "palavra": "assombro",
+      "classe": "substantivo",
+      "significado": "espanto misturado com admiração",
+      "exemplo": "Foi um assombro ver a máquina montar a peça sozinha.",
+      "nivel": 2
+    },
+    {
+      "palavra": "êxtase",
+      "classe": "substantivo",
+      "significado": "arrebatamento de prazer ou de contemplação",
+      "exemplo": "Ficou em êxtase diante do original de Van Gogh.",
+      "nivel": 2
+    },
+    {
+      "palavra": "fruição",
+      "classe": "substantivo",
+      "significado": "prazer de desfrutar algo plenamente",
+      "exemplo": "Cinema em casa não substitui a fruição da sala escura.",
+      "nivel": 3
+    },
+    {
+      "palavra": "deleite",
+      "classe": "substantivo",
+      "significado": "prazer tranquilo e refinado",
+      "exemplo": "O primeiro café da manhã é o deleite do dia.",
+      "nivel": 2
+    },
+    {
+      "palavra": "lassidão",
+      "classe": "substantivo",
+      "significado": "cansaço profundo, físico ou moral",
+      "exemplo": "Depois de três semanas de plantão, veio a lassidão.",
+      "nivel": 3
+    },
+    {
+      "palavra": "letargia",
+      "classe": "substantivo",
+      "significado": "estado de torpor e lentidão",
+      "exemplo": "O mercado saiu da letargia com o corte de juros.",
+      "nivel": 2
+    },
+    {
+      "palavra": "inércia",
+      "classe": "substantivo",
+      "significado": "tendência a permanecer como se está",
+      "exemplo": "A inércia do processo antigo custa mais que o sistema novo.",
+      "nivel": 1
+    },
+    {
+      "palavra": "marasmo",
+      "classe": "substantivo",
+      "significado": "estagnação sem energia nem movimento",
+      "exemplo": "O setor vive um marasmo desde a pandemia.",
+      "nivel": 2
+    },
+    {
+      "palavra": "estagnação",
+      "classe": "substantivo",
+      "significado": "parada no crescimento ou no movimento",
+      "exemplo": "Dois anos de estagnação na receita acenderam o alerta.",
+      "nivel": 1
+    },
+    {
+      "palavra": "ebulição",
+      "classe": "substantivo",
+      "significado": "agitação intensa",
+      "exemplo": "A cidade está em ebulição na semana do festival.",
+      "nivel": 2
+    },
+    {
+      "palavra": "efervescência",
+      "classe": "substantivo",
+      "significado": "agitação criativa e movimentada",
+      "exemplo": "Havia uma efervescência cultural na cidade naqueles anos.",
+      "nivel": 2
+    },
+    {
+      "palavra": "ubíquo",
+      "classe": "adjetivo",
+      "significado": "que está em todo lugar ao mesmo tempo",
+      "exemplo": "O celular virou um objeto ubíquo em menos de vinte anos.",
+      "nivel": 3
+    },
+    {
+      "palavra": "onipresente",
+      "classe": "adjetivo",
+      "significado": "presente em todos os lugares",
+      "exemplo": "A marca é onipresente: está até no ônibus da esquina.",
+      "nivel": 2
+    },
+    {
+      "palavra": "iníquo",
+      "classe": "adjetivo",
+      "significado": "profundamente injusto",
+      "exemplo": "É iníquo cobrar o mesmo de quem ganha dez e de quem ganha mil.",
+      "nivel": 3
+    },
+    {
+      "palavra": "equânime",
+      "classe": "adjetivo",
+      "significado": "que julga com equilíbrio e imparcialidade",
+      "exemplo": "Precisamos de um mediador equânime para fechar o acordo.",
+      "nivel": 3
+    },
+    {
+      "palavra": "imparcial",
+      "classe": "adjetivo",
+      "significado": "que não toma partido",
+      "exemplo": "O relatório precisa ser imparcial, mesmo que doa.",
+      "nivel": 1
+    },
+    {
+      "palavra": "fidedigno",
+      "classe": "adjetivo",
+      "significado": "digno de fé; que corresponde ao original",
+      "exemplo": "Preciso de uma cópia fidedigna do contrato.",
+      "nivel": 2
+    },
+    {
+      "palavra": "espúrio",
+      "classe": "adjetivo",
+      "significado": "falso, de origem ilegítima",
+      "exemplo": "O documento espúrio derrubou a defesa inteira.",
+      "nivel": 3
+    },
+    {
+      "palavra": "apócrifo",
+      "classe": "adjetivo",
+      "significado": "de autoria falsa ou não comprovada",
+      "exemplo": "A citação é apócrifa: ninguém acha a fonte.",
+      "nivel": 3
+    },
+    {
+      "palavra": "alvitre",
+      "classe": "substantivo",
+      "significado": "sugestão ou parecer que se oferece a alguém",
+      "exemplo": "Aceitou o alvitre do advogado e recuou a tempo.",
+      "nivel": 3
+    },
+    {
+      "palavra": "desiderato",
+      "classe": "substantivo",
+      "significado": "aquilo que se deseja alcançar",
+      "exemplo": "O desiderato do projeto é reduzir a fila pela metade.",
+      "nivel": 3
+    },
+    {
+      "palavra": "amiúde",
+      "classe": "advérbio",
+      "significado": "com frequência",
+      "exemplo": "Ele viaja amiúde e quase nunca dorme em casa.",
+      "nivel": 3
+    },
+    {
+      "palavra": "outrora",
+      "classe": "advérbio",
+      "significado": "em tempo passado",
+      "exemplo": "Outrora esta rua era o centro comercial da cidade.",
+      "nivel": 2
+    },
+    {
+      "palavra": "doravante",
+      "classe": "advérbio",
+      "significado": "de agora em diante",
+      "exemplo": "Doravante, todo pedido passa pela aprovação do gerente.",
+      "nivel": 2
+    },
+    {
+      "palavra": "mormente",
+      "classe": "advérbio",
+      "significado": "principalmente, sobretudo",
+      "exemplo": "O calor atrapalha, mormente no turno da tarde.",
+      "nivel": 3
+    },
+    {
+      "palavra": "conquanto",
+      "classe": "conjunção",
+      "significado": "ainda que, embora",
+      "exemplo": "Conquanto seja caro, o equipamento se paga em um ano.",
+      "nivel": 3
+    },
+    {
+      "palavra": "porquanto",
+      "classe": "conjunção",
+      "significado": "porque, visto que",
+      "exemplo": "Recusou o cargo, porquanto exigia mudança de país.",
+      "nivel": 3
+    },
+    {
+      "palavra": "destarte",
+      "classe": "advérbio",
+      "significado": "desse modo, assim sendo",
+      "exemplo": "Destarte, a proposta foi arquivada sem votação.",
+      "nivel": 3
+    },
+    {
+      "palavra": "exíguo",
+      "classe": "adjetivo",
+      "significado": "escasso, pequeno demais para o que se precisa",
+      "exemplo": "O prazo era exíguo e ninguém quis assinar.",
+      "nivel": 3
+    },
+    {
+      "palavra": "parco",
+      "classe": "adjetivo",
+      "significado": "escasso; que se dá com moderação",
+      "exemplo": "Sobreviveu com recursos parcos por dois anos.",
+      "nivel": 2
+    },
+    {
+      "palavra": "farto",
+      "classe": "adjetivo",
+      "significado": "que existe em abundância",
+      "exemplo": "Tivemos farto material para o relatório.",
+      "nivel": 1
+    },
+    {
+      "palavra": "profusão",
+      "classe": "substantivo",
+      "significado": "grande quantidade derramada de uma vez",
+      "exemplo": "Uma profusão de cores toma a praça no carnaval.",
+      "nivel": 2
+    },
+    {
+      "palavra": "escassez",
+      "classe": "substantivo",
+      "significado": "falta daquilo que seria necessário",
+      "exemplo": "A escassez de água mudou a rotina da fábrica.",
+      "nivel": 1
+    },
+    {
+      "palavra": "penúria",
+      "classe": "substantivo",
+      "significado": "pobreza extrema; falta do essencial",
+      "exemplo": "Viveram na penúria até a fábrica reabrir.",
+      "nivel": 3
+    },
+    {
+      "palavra": "opulência",
+      "classe": "substantivo",
+      "significado": "riqueza exibida em grande escala",
+      "exemplo": "A opulência do salão contrastava com o bairro.",
+      "nivel": 3
+    },
+    {
+      "palavra": "fausto",
+      "classe": "substantivo",
+      "significado": "luxo ostensivo",
+      "exemplo": "A recepção teve fausto de outro século.",
+      "nivel": 3
+    },
+    {
+      "palavra": "frugal",
+      "classe": "adjetivo",
+      "significado": "simples e sem excessos, sobretudo no comer",
+      "exemplo": "Almoço frugal: arroz, feijão e um ovo.",
+      "nivel": 2
+    },
+    {
+      "palavra": "austeridade",
+      "classe": "substantivo",
+      "significado": "rigor no uso dos recursos; corte de gastos",
+      "exemplo": "O plano de austeridade congelou toda contratação.",
+      "nivel": 2
+    },
+    {
+      "palavra": "chancela",
+      "classe": "substantivo",
+      "significado": "aprovação formal que dá autoridade a algo",
+      "exemplo": "O laudo saiu com a chancela do conselho federal.",
+      "nivel": 2
+    },
+    {
+      "palavra": "anuir",
+      "classe": "verbo",
+      "significado": "concordar, dar consentimento",
+      "exemplo": "O sócio anuiu à venda sem discutir o preço.",
+      "nivel": 3
+    },
+    {
+      "palavra": "acatar",
+      "classe": "verbo",
+      "significado": "aceitar e cumprir uma ordem ou uma opinião",
+      "exemplo": "Acatou a sugestão e refez a proposta em uma noite.",
+      "nivel": 1
+    },
+    {
+      "palavra": "refutar",
+      "classe": "verbo",
+      "significado": "provar que algo é falso",
+      "exemplo": "Ele refutou a acusação com três documentos.",
+      "nivel": 2
+    },
+    {
+      "palavra": "corroborar",
+      "classe": "verbo",
+      "significado": "reforçar com nova prova aquilo que já se afirmava",
+      "exemplo": "Os testes corroboraram a hipótese inicial.",
+      "nivel": 2
+    },
+    {
+      "palavra": "dirimir",
+      "classe": "verbo",
+      "significado": "resolver definitivamente uma dúvida ou um conflito",
+      "exemplo": "O contrato existe para dirimir esse tipo de disputa.",
+      "nivel": 3
+    },
+    {
+      "palavra": "elucidar",
+      "classe": "verbo",
+      "significado": "tornar claro aquilo que estava obscuro",
+      "exemplo": "Falta elucidar por que o pagamento saiu duas vezes.",
+      "nivel": 2
+    },
+    {
+      "palavra": "discorrer",
+      "classe": "verbo",
+      "significado": "falar ou escrever desenvolvendo um tema",
+      "exemplo": "Discorreu por vinte minutos sem citar um número.",
+      "nivel": 2
+    },
+    {
+      "palavra": "preconizar",
+      "classe": "verbo",
+      "significado": "recomendar como o melhor caminho",
+      "exemplo": "A norma preconiza revisão anual do equipamento.",
+      "nivel": 3
+    },
+    {
+      "palavra": "mitigar",
+      "classe": "verbo",
+      "significado": "reduzir a intensidade de algo ruim",
+      "exemplo": "Não dá para eliminar o risco, só mitigar.",
+      "nivel": 1
+    },
+    {
+      "palavra": "protelar",
+      "classe": "verbo",
+      "significado": "adiar de propósito",
+      "exemplo": "Protelar a conversa difícil só aumenta o custo dela.",
+      "nivel": 2
+    },
+    {
+      "palavra": "postergar",
+      "classe": "verbo",
+      "significado": "deixar para depois",
+      "exemplo": "Postergamos o lançamento para depois do feriado.",
+      "nivel": 1
+    },
+    {
+      "palavra": "tergiversar",
+      "classe": "verbo",
+      "significado": "desviar do assunto para não responder",
+      "exemplo": "Parou de tergiversar quando mostraram o e-mail.",
+      "nivel": 3
+    },
+    {
+      "palavra": "esmiuçar",
+      "classe": "verbo",
+      "significado": "examinar nos mínimos detalhes",
+      "exemplo": "Esmiuçamos a planilha linha por linha.",
+      "nivel": 2
+    },
+    {
+      "palavra": "escamotear",
+      "classe": "verbo",
+      "significado": "esconder com habilidade",
+      "exemplo": "O resumo escamoteia a perda do segundo semestre.",
+      "nivel": 3
+    },
+    {
+      "palavra": "dissimular",
+      "classe": "verbo",
+      "significado": "esconder a verdadeira intenção ou o sentimento",
+      "exemplo": "Dissimulou a surpresa e continuou a reunião.",
+      "nivel": 2
+    },
+    {
+      "palavra": "ludibriar",
+      "classe": "verbo",
+      "significado": "enganar aproveitando a confiança do outro",
+      "exemplo": "Foi ludibriado por um site clonado.",
+      "nivel": 3
+    },
+    {
+      "palavra": "usurpar",
+      "classe": "verbo",
+      "significado": "tomar para si aquilo que é de outro",
+      "exemplo": "Tentou usurpar o crédito de um trabalho coletivo.",
+      "nivel": 2
+    },
+    {
+      "palavra": "obliterar",
+      "classe": "verbo",
+      "significado": "apagar por completo",
+      "exemplo": "A enchente obliterou trinta anos de arquivo em papel.",
+      "nivel": 3
+    },
+    {
+      "palavra": "perscrutar",
+      "classe": "verbo",
+      "significado": "examinar com atenção profunda, atrás do que está oculto",
+      "exemplo": "Passou a tarde a perscrutar os logs atrás do padrão.",
+      "nivel": 3
+    },
+    {
+      "palavra": "conjuntura",
+      "classe": "substantivo",
+      "significado": "conjunto de circunstâncias de um momento",
+      "exemplo": "A conjuntura mudou e o plano de dois anos virou pó.",
+      "nivel": 2
+    },
+    {
+      "palavra": "contingência",
+      "classe": "substantivo",
+      "significado": "aquilo que pode ou não acontecer; imprevisto",
+      "exemplo": "Guardamos dez por cento do orçamento para contingência.",
+      "nivel": 2
+    },
+    {
+      "palavra": "vicissitude",
+      "classe": "substantivo",
+      "significado": "mudança de sorte; alternância entre bom e ruim",
+      "exemplo": "Atravessou as vicissitudes do setor sem demitir ninguém.",
+      "nivel": 3
+    },
+    {
+      "palavra": "percalço",
+      "classe": "substantivo",
+      "significado": "contratempo encontrado no caminho",
+      "exemplo": "Fora um percalço na alfândega, a entrega foi limpa.",
+      "nivel": 2
+    },
+    {
+      "palavra": "revés",
+      "classe": "substantivo",
+      "significado": "derrota ou golpe inesperado",
+      "exemplo": "O revés no tribunal atrasou a obra em dois anos.",
+      "nivel": 2
+    },
+    {
+      "palavra": "ressalva",
+      "classe": "substantivo",
+      "significado": "observação que limita ou corrige o que foi dito",
+      "exemplo": "Aprovo, com uma ressalva sobre o prazo de garantia.",
+      "nivel": 1
+    },
+    {
+      "palavra": "salvaguarda",
+      "classe": "substantivo",
+      "significado": "medida que protege contra um risco",
+      "exemplo": "A cópia em outro provedor é a nossa salvaguarda.",
+      "nivel": 2
+    },
+    {
+      "palavra": "corriqueiramente",
+      "classe": "advérbio",
+      "significado": "de forma habitual e sem novidade",
+      "exemplo": "Isso acontece corriqueiramente no fim do mês.",
+      "nivel": 2
+    },
+    {
+      "palavra": "invariavelmente",
+      "classe": "advérbio",
+      "significado": "sempre, sem uma única exceção",
+      "exemplo": "A fila invariavelmente estoura na primeira semana.",
+      "nivel": 1
+    },
+    {
+      "palavra": "assiduidade",
+      "classe": "substantivo",
+      "significado": "presença constante e regular",
+      "exemplo": "A assiduidade dele nas reuniões nunca falhou em cinco anos.",
+      "nivel": 2
+    },
+    {
+      "palavra": "pertinência",
+      "classe": "substantivo",
+      "significado": "qualidade daquilo que vem a propósito",
+      "exemplo": "Questionaram a pertinência do gasto, não o valor.",
+      "nivel": 2
+    },
+    {
+      "palavra": "iminência",
+      "classe": "substantivo",
+      "significado": "condição daquilo que está prestes a acontecer",
+      "exemplo": "Na iminência do corte, todo mundo virou produtivo.",
+      "nivel": 2
+    },
+    {
+      "palavra": "primazia",
+      "classe": "substantivo",
+      "significado": "condição de vir primeiro ou de ser superior",
+      "exemplo": "A primazia do idoso na fila está na lei.",
+      "nivel": 3
+    },
+    {
+      "palavra": "supremacia",
+      "classe": "substantivo",
+      "significado": "posição de domínio sobre os demais",
+      "exemplo": "A supremacia da empresa no setor durou uma década.",
+      "nivel": 2
+    },
+    {
+      "palavra": "hegemonia",
+      "classe": "substantivo",
+      "significado": "domínio de um grupo que se impõe como natural",
+      "exemplo": "A hegemonia do formato antigo caiu em dois anos.",
+      "nivel": 3
+    },
+    {
+      "palavra": "égide",
+      "classe": "substantivo",
+      "significado": "proteção ou amparo de alguém mais forte",
+      "exemplo": "O programa nasceu sob a égide do ministério.",
+      "nivel": 3
+    },
+    {
+      "palavra": "alçada",
+      "classe": "substantivo",
+      "significado": "limite do poder de decisão de alguém",
+      "exemplo": "Aprovar esse valor não é da minha alçada.",
+      "nivel": 2
+    },
+    {
+      "palavra": "prerrogativa",
+      "classe": "substantivo",
+      "significado": "direito exclusivo ligado a um cargo ou condição",
+      "exemplo": "Definir o preço é prerrogativa do dono, não do time.",
+      "nivel": 2
+    },
+    {
+      "palavra": "incumbência",
+      "classe": "substantivo",
+      "significado": "tarefa confiada a alguém",
+      "exemplo": "Ficou com a incumbência de fechar o inventário.",
+      "nivel": 2
+    },
+    {
+      "palavra": "desígnio",
+      "classe": "substantivo",
+      "significado": "intenção deliberada; propósito",
+      "exemplo": "Nada ali foi acaso: havia um desígnio claro.",
+      "nivel": 3
+    },
+    {
+      "palavra": "arbítrio",
+      "classe": "substantivo",
+      "significado": "decisão tomada apenas pela própria vontade",
+      "exemplo": "O corte ficou ao arbítrio do gerente, sem critério escrito.",
+      "nivel": 3
+    },
+    {
+      "palavra": "coadunar",
+      "classe": "verbo",
+      "significado": "combinar de forma harmônica",
+      "exemplo": "O discurso não se coaduna com a planilha.",
+      "nivel": 3
+    },
+    {
+      "palavra": "consubstanciar",
+      "classe": "verbo",
+      "significado": "reunir em uma forma concreta e única",
+      "exemplo": "O parecer consubstancia tudo o que foi discutido.",
+      "nivel": 3
+    },
+    {
+      "palavra": "salutar",
+      "classe": "adjetivo",
+      "significado": "que faz bem; benéfico",
+      "exemplo": "A discordância dela foi salutar para o projeto.",
+      "nivel": 2
+    },
+    {
+      "palavra": "escorreito",
+      "classe": "adjetivo",
+      "significado": "correto e sem falha",
+      "exemplo": "Entregou um texto escorreito, sem uma vírgula fora do lugar.",
+      "nivel": 3
+    },
+    {
+      "palavra": "impoluto",
+      "classe": "adjetivo",
+      "significado": "que permanece limpo, sem mancha",
+      "exemplo": "Saiu do cargo com o nome impoluto.",
+      "nivel": 3
+    },
+    {
+      "palavra": "inexorável",
+      "classe": "adjetivo",
+      "significado": "que não se pode deter nem comover",
+      "exemplo": "A queda do custo de armazenamento é inexorável.",
+      "nivel": 3
+    },
+    {
+      "palavra": "inelutável",
+      "classe": "adjetivo",
+      "significado": "de que não se pode escapar",
+      "exemplo": "A conversa sobre preço é inelutável neste estágio.",
+      "nivel": 3
+    },
+    {
+      "palavra": "prescindir",
+      "classe": "verbo",
+      "significado": "dispensar, passar sem algo",
+      "exemplo": "Podemos prescindir do relatório impresso.",
+      "nivel": 3
+    },
+    {
+      "palavra": "vindicar",
+      "classe": "verbo",
+      "significado": "reclamar como direito próprio",
+      "exemplo": "Vindicou a autoria da ideia com data e testemunha.",
+      "nivel": 3
+    },
+    {
+      "palavra": "granjear",
+      "classe": "verbo",
+      "significado": "conquistar aos poucos, pelo próprio mérito",
+      "exemplo": "Granjeou o respeito da equipe antes de pedir qualquer coisa.",
+      "nivel": 3
+    },
+    {
+      "palavra": "olvidar",
+      "classe": "verbo",
+      "significado": "esquecer",
+      "exemplo": "Não se pode olvidar quem sustentou a operação na crise.",
+      "nivel": 3
+    },
+    {
+      "palavra": "aquiescer",
+      "classe": "verbo",
+      "significado": "consentir sem resistência",
+      "exemplo": "Aquiesceu ao pedido só para encerrar a discussão.",
+      "nivel": 3
+    },
+    {
+      "palavra": "obstar",
+      "classe": "verbo",
+      "significado": "impedir que algo aconteça",
+      "exemplo": "Nada obsta que você recorra da decisão.",
+      "nivel": 3
+    },
+    {
+      "palavra": "ensejar",
+      "classe": "verbo",
+      "significado": "dar ocasião ou motivo a algo",
+      "exemplo": "A falha enseja pedido de reembolso integral.",
+      "nivel": 3
+    },
+    {
+      "palavra": "coibir",
+      "classe": "verbo",
+      "significado": "conter ou reprimir uma prática",
+      "exemplo": "A multa serve para coibir o descarte irregular.",
+      "nivel": 2
+    },
+    {
+      "palavra": "cercear",
+      "classe": "verbo",
+      "significado": "limitar indevidamente um direito ou uma liberdade",
+      "exemplo": "A regra nova cerceia o acesso de quem mais precisa.",
+      "nivel": 3
+    },
+    {
+      "palavra": "aviltar",
+      "classe": "verbo",
+      "significado": "rebaixar, tirar o valor ou a dignidade",
+      "exemplo": "Cobrar esse preço avilta o trabalho de todo o setor.",
+      "nivel": 3
+    },
+    {
+      "palavra": "enaltecer",
+      "classe": "verbo",
+      "significado": "elevar pelo elogio",
+      "exemplo": "Enalteceu o time em público e cobrou em particular.",
+      "nivel": 2
+    },
+    {
+      "palavra": "denodo",
+      "classe": "substantivo",
+      "significado": "coragem aliada a empenho",
+      "exemplo": "Defendeu a proposta com denodo até o último minuto.",
+      "nivel": 3
+    },
+    {
+      "palavra": "afinco",
+      "classe": "substantivo",
+      "significado": "empenho persistente em uma tarefa",
+      "exemplo": "Estudou com afinco e passou na primeira tentativa.",
+      "nivel": 2
+    },
+    {
+      "palavra": "esmero",
+      "classe": "substantivo",
+      "significado": "capricho no acabamento de algo",
+      "exemplo": "O esmero da encadernação faz o livro parecer outro.",
+      "nivel": 2
+    },
+    {
+      "palavra": "primor",
+      "classe": "substantivo",
+      "significado": "perfeição no detalhe",
+      "exemplo": "A tipografia do cartaz é um primor.",
+      "nivel": 2
+    },
+    {
+      "palavra": "acuidade",
+      "classe": "substantivo",
+      "significado": "precisão fina na percepção ou no julgamento",
+      "exemplo": "Revisa com uma acuidade que nenhum corretor alcança.",
+      "nivel": 3
+    },
+    {
+      "palavra": "argúcia",
+      "classe": "substantivo",
+      "significado": "agudeza de raciocínio",
+      "exemplo": "Resolveu o impasse com uma argúcia que ninguém esperava.",
+      "nivel": 3
+    },
+    {
+      "palavra": "discernimento",
+      "classe": "substantivo",
+      "significado": "capacidade de distinguir o que importa do que não importa",
+      "exemplo": "Falta discernimento para saber o que vai para a reunião.",
+      "nivel": 2
+    },
+    {
+      "palavra": "prudência",
+      "classe": "substantivo",
+      "significado": "cautela em avaliar antes de agir",
+      "exemplo": "Prudência não é lentidão; é medir antes de cortar.",
+      "nivel": 1
+    },
+    {
+      "palavra": "temperança",
+      "classe": "substantivo",
+      "significado": "domínio sobre os próprios impulsos",
+      "exemplo": "Conduziu a negociação com temperança e ganhou tempo.",
+      "nivel": 3
+    },
+    {
+      "palavra": "ojeriza",
+      "classe": "substantivo",
+      "significado": "antipatia forte e persistente",
+      "exemplo": "Tem ojeriza a reunião sem pauta.",
+      "nivel": 2
+    },
+    {
+      "palavra": "estigma",
+      "classe": "substantivo",
+      "significado": "marca negativa que acompanha alguém ou algo",
+      "exemplo": "O estigma do primeiro fracasso perseguiu o produto por anos.",
+      "nivel": 2
+    },
+    {
+      "palavra": "vitupério",
+      "classe": "substantivo",
+      "significado": "ofensa dita em voz alta",
+      "exemplo": "A reunião degringolou em vitupérios de parte a parte.",
+      "nivel": 3
+    },
+    {
+      "palavra": "lisura",
+      "classe": "substantivo",
+      "significado": "honestidade transparente no trato",
+      "exemplo": "Conduziu a concorrência com lisura e perdeu mesmo assim.",
+      "nivel": 2
+    },
+    {
+      "palavra": "quinquilharia",
+      "classe": "substantivo",
+      "significado": "objeto de pouco valor; miudeza",
+      "exemplo": "A gaveta está cheia de quinquilharia que nunca uso.",
+      "nivel": 2
+    },
+    {
+      "palavra": "engenhoso",
+      "classe": "adjetivo",
+      "significado": "que resolve com inventividade",
+      "exemplo": "Achou um jeito engenhoso de cortar o passo do meio.",
+      "nivel": 1
+    },
+    {
+      "palavra": "meticuloso",
+      "classe": "adjetivo",
+      "significado": "que trabalha com rigor e sem pressa",
+      "exemplo": "É meticuloso: numera cada versão do arquivo.",
+      "nivel": 1
+    },
+    {
+      "palavra": "criterioso",
+      "classe": "adjetivo",
+      "significado": "que decide segundo critérios claros",
+      "exemplo": "Foi criterioso na escolha e ainda assim errou.",
+      "nivel": 1
+    },
+    {
+      "palavra": "escrupuloso",
+      "classe": "adjetivo",
+      "significado": "que respeita rigorosamente o que é certo",
+      "exemplo": "É escrupuloso com prestação de contas até de café.",
+      "nivel": 2
+    },
+    {
+      "palavra": "inequívoco",
+      "classe": "adjetivo",
+      "significado": "que não deixa margem a interpretação",
+      "exemplo": "O gráfico mostra uma queda inequívoca.",
+      "nivel": 2
+    },
+    {
+      "palavra": "conspícuo",
+      "classe": "adjetivo",
+      "significado": "que se destaca à primeira vista",
+      "exemplo": "O erro estava em posição conspícua e ninguém viu.",
+      "nivel": 3
+    },
+    {
+      "palavra": "paroxismo",
+      "classe": "substantivo",
+      "significado": "ponto mais intenso de algo",
+      "exemplo": "A discussão chegou ao paroxismo e alguém saiu da sala.",
+      "nivel": 3
+    },
+    {
+      "palavra": "apogeu",
+      "classe": "substantivo",
+      "significado": "ponto mais alto de uma trajetória",
+      "exemplo": "A empresa estava no apogeu quando decidiu vender.",
+      "nivel": 2
+    },
+    {
+      "palavra": "declínio",
+      "classe": "substantivo",
+      "significado": "perda gradual de força ou de importância",
+      "exemplo": "O declínio começou dois anos antes de qualquer um notar.",
+      "nivel": 1
+    },
+    {
+      "palavra": "ocaso",
+      "classe": "substantivo",
+      "significado": "fim de um ciclo; pôr do sol",
+      "exemplo": "Foi o ocaso de uma indústria inteira em cinco anos.",
+      "nivel": 3
+    },
+    {
+      "palavra": "alvorecer",
+      "classe": "substantivo",
+      "significado": "começo do dia; início de algo novo",
+      "exemplo": "Estamos no alvorecer de um formato que ninguém domina.",
+      "nivel": 3
+    },
+    {
+      "palavra": "amálgama",
+      "classe": "substantivo",
+      "significado": "mistura de elementos diferentes em um só corpo",
+      "exemplo": "O time é um amálgama de perfis que não deveria funcionar.",
+      "nivel": 3
+    },
+    {
+      "palavra": "simbiose",
+      "classe": "substantivo",
+      "significado": "convivência em que os dois lados ganham",
+      "exemplo": "Existe uma simbiose entre a loja e a padaria vizinha.",
+      "nivel": 2
+    },
+    {
+      "palavra": "sinergia",
+      "classe": "substantivo",
+      "significado": "efeito conjunto maior que a soma das partes",
+      "exemplo": "Não houve sinergia nenhuma: viraram dois times no mesmo andar.",
+      "nivel": 1
+    },
+    {
+      "palavra": "antagonismo",
+      "classe": "substantivo",
+      "significado": "oposição declarada entre duas forças",
+      "exemplo": "O antagonismo entre as duas diretorias travou o orçamento.",
+      "nivel": 2
+    },
+    {
+      "palavra": "consenso",
+      "classe": "substantivo",
+      "significado": "acordo alcançado por todos os envolvidos",
+      "exemplo": "Saímos com consenso sobre o prazo e discórdia sobre o preço.",
+      "nivel": 1
+    },
+    {
+      "palavra": "dissenso",
+      "classe": "substantivo",
+      "significado": "desacordo entre as partes",
+      "exemplo": "O dissenso apareceu só na hora de assinar.",
+      "nivel": 3
+    },
+    {
+      "palavra": "cizânia",
+      "classe": "substantivo",
+      "significado": "discórdia semeada de propósito",
+      "exemplo": "Alguém plantou cizânia entre os dois times.",
+      "nivel": 3
+    },
+    {
+      "palavra": "conluio",
+      "classe": "substantivo",
+      "significado": "combinação secreta para prejudicar alguém",
+      "exemplo": "A investigação apontou conluio entre os dois fornecedores.",
+      "nivel": 3
+    },
+    {
+      "palavra": "estratagema",
+      "classe": "substantivo",
+      "significado": "manobra hábil para atingir um objetivo",
+      "exemplo": "Adiar a votação foi puro estratagema.",
+      "nivel": 2
+    },
+    {
+      "palavra": "subterfúgio",
+      "classe": "substantivo",
+      "significado": "desculpa usada para escapar de algo",
+      "exemplo": "Prazo de fornecedor virou subterfúgio para todo atraso.",
+      "nivel": 2
+    },
+    {
+      "palavra": "pretexto",
+      "classe": "substantivo",
+      "significado": "motivo falso apresentado no lugar do verdadeiro",
+      "exemplo": "A auditoria foi pretexto para trocar a chefia.",
+      "nivel": 1
+    },
+    {
+      "palavra": "intransigente",
+      "classe": "adjetivo",
+      "significado": "que não abre mão nem negocia",
+      "exemplo": "É intransigente com prazo e flexível com escopo.",
+      "nivel": 2
+    },
+    {
+      "palavra": "condescendente",
+      "classe": "adjetivo",
+      "significado": "que cede facilmente, às vezes com ar de superioridade",
+      "exemplo": "O tom condescendente irritou mais que a negativa.",
+      "nivel": 2
+    },
+    {
+      "palavra": "complacente",
+      "classe": "adjetivo",
+      "significado": "que tolera demais e deixa passar",
+      "exemplo": "Um revisor complacente não serve para nada.",
+      "nivel": 2
+    },
+    {
+      "palavra": "afável",
+      "classe": "adjetivo",
+      "significado": "de trato agradável e acolhedor",
+      "exemplo": "Recepção afável, processo cruel.",
+      "nivel": 2
+    },
+    {
+      "palavra": "ríspido",
+      "classe": "adjetivo",
+      "significado": "áspero no modo de falar",
+      "exemplo": "Respondeu ríspido e depois pediu desculpa por escrito.",
+      "nivel": 2
+    },
+    {
+      "palavra": "circunspecto",
+      "classe": "adjetivo",
+      "significado": "sério e cauteloso no que diz e faz",
+      "exemplo": "Manteve-se circunspecto enquanto todos especulavam.",
+      "nivel": 3
+    },
+    {
+      "palavra": "afoito",
+      "classe": "adjetivo",
+      "significado": "que age rápido demais, sem pensar",
+      "exemplo": "Foi afoito ao anunciar antes de testar.",
+      "nivel": 2
+    },
+    {
+      "palavra": "hercúleo",
+      "classe": "adjetivo",
+      "significado": "que exige força ou esforço enorme",
+      "exemplo": "Migrar tudo em um fim de semana foi hercúleo.",
+      "nivel": 3
+    },
+    {
+      "palavra": "titânico",
+      "classe": "adjetivo",
+      "significado": "de proporção gigantesca",
+      "exemplo": "Fizeram um esforço titânico para não perder o prazo.",
+      "nivel": 2
+    },
+    {
+      "palavra": "assaz",
+      "classe": "advérbio",
+      "significado": "bastante, suficientemente",
+      "exemplo": "O argumento é assaz convincente para quem já concordava.",
+      "nivel": 3
+    }
+  ]
+}

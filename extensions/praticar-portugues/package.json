@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "praticar-portugues",
+  "title": "Praticar Português",
+  "description": "Treino de digitação com vocabulário em português: cada palavra vem com significado e um exemplo de uso.",
+  "icon": "extension-icon.png",
+  "author": "luan_andrade",
+  "categories": ["Productivity", "Fun"],
+  "license": "MIT",
+  "platforms": ["Windows", "macOS"],
+  "commands": [
+    {
+      "name": "praticar",
+      "title": "Praticar Digitação",
+      "subtitle": "Praticar Português",
+      "description": "Digite a palavra que aparece. O significado e um exemplo de uso ficam à vista o tempo todo.",
+      "mode": "view"
+    },
+    {
+      "name": "vocabulario",
+      "title": "Vocabulário",
+      "subtitle": "Praticar Português",
+      "description": "Busque qualquer palavra do léxico e veja significado, exemplo e o seu histórico com ela.",
+      "mode": "view"
+    },
+    {
+      "name": "progresso",
+      "title": "Meu Progresso",
+      "subtitle": "Praticar Português",
+      "description": "Precisão, velocidade, sequência e as palavras que ainda escapam.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "modo",
+      "type": "dropdown",
+      "title": "O que digitar de cada palavra",
+      "description": "Digitar o significado e a frase é o que fixa a palavra. Só a palavra é o modo rápido.",
+      "required": false,
+      "default": "completo",
+      "data": [
+        { "title": "A palavra, o significado e a frase", "value": "completo" },
+        { "title": "A palavra e o significado", "value": "palavra-significado" },
+        { "title": "Só a palavra", "value": "palavra" }
+      ]
+    },
+    {
+      "name": "nivel",
+      "type": "dropdown",
+      "title": "Nível do vocabulário",
+      "description": "Filtra quais palavras entram no sorteio da sessão.",
+      "required": false,
+      "default": "todos",
+      "data": [
+        { "title": "Todos os níveis", "value": "todos" },
+        { "title": "1 · Cotidiano com armadilha ortográfica", "value": "1" },
+        { "title": "2 · Vocabulário culto", "value": "2" },
+        { "title": "3 · Erudito e raro", "value": "3" }
+      ]
+    },
+    {
+      "name": "tamanhoSessao",
+      "type": "dropdown",
+      "title": "Tamanho da sessão",
+      "description": "Quantas palavras até o resumo aparecer. Cada palavra são até três etapas.",
+      "required": false,
+      "default": "10",
+      "data": [
+        { "title": "5 palavras", "value": "5" },
+        { "title": "10 palavras", "value": "10" },
+        { "title": "15 palavras", "value": "15" },
+        { "title": "25 palavras", "value": "25" }
+      ]
+    },
+    {
+      "name": "exigirAcento",
+      "type": "checkbox",
+      "label": "Exigir acentuação e cedilha",
+      "description": "Desligado, \"efemero\" vale por \"efêmero\" e \"aco\" por \"aço\".",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "exigirCaixa",
+      "type": "checkbox",
+      "label": "Diferenciar maiúsculas de minúsculas",
+      "description": "Ligado, \"Efêmero\" não vale por \"efêmero\".",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "revisaoEspacada",
+      "type": "checkbox",
+      "label": "Priorizar o que você erra",
+      "description": "As palavras erradas voltam logo; as dominadas só voltam dias depois.",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.2.14",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node testes/executar.mjs",
+    "layout": "node testes/executar.mjs ver-layout.ts",
+    "publish": "ray publish"
+  }
+}
