@@ -48,21 +48,22 @@ export default function Command() {
     // 通用获取指定年份数据的异步函数
     async function fetchYearHolidays(targetYear: number, isPreload = false) {
       const cacheKey = `holidays_${targetYear}`;
+      const attemptKey = `last_attempt_${targetYear}`;
       const prefix = isPreload ? `[Lunar Preload ${targetYear}]` : `[Lunar Load ${targetYear}]`;
 
       console.log(`${prefix} ----------------------------------------`);
       console.log(`${prefix} Starting to load target year: ${targetYear}`);
 
-      const cachedString = await LocalStorage.getItem<string>(cacheKey);
+      const [cachedString, lastAttemptString] = await Promise.all([
+        LocalStorage.getItem<string>(cacheKey),
+        LocalStorage.getItem<string>(attemptKey),
+      ]);
 
       let cachedWrapper: CachedHolidayWrapper | null = null;
       if (cachedString) {
         try {
           cachedWrapper = JSON.parse(cachedString);
-          const cacheDate = new Date(cachedWrapper!.timestamp).toLocaleString();
-          console.log(
-            `${prefix} Cache hit, timestamp: ${cacheDate}, items count: ${Object.keys(cachedWrapper!.holidays || {}).length}`
-          );
+          console.log(`${prefix} Cache hit, items count: ${Object.keys(cachedWrapper!.holidays || {}).length}`);
         } catch (e) {
           console.error(`${prefix} Failed to parse local cache`, e);
         }
@@ -87,22 +88,31 @@ export default function Command() {
         !cachedWrapper || !cachedWrapper.holidays || Object.keys(cachedWrapper.holidays).length === 0;
       const isExploringNextYear =
         targetYear > realCurrentYear || (realCurrentYear === targetYear && realCurrentMonth >= 11);
-      const now = Date.now();
-      const cacheAge = cachedWrapper ? now - cachedWrapper.timestamp : null;
 
-      const needsFetch = hasEmptyCache || (isExploringNextYear && cacheAge !== null && cacheAge > ONE_DAY_MS);
+      const now = Date.now();
+      const lastAttemptTime = lastAttemptString ? parseInt(lastAttemptString, 10) : 0;
+      const attemptAge = now - lastAttemptTime;
+
+      // 核心修复逻辑：
+      // 如果没有有效缓存，且正处于探索期（未来年或年底），必须受到 24 小时探测频率的限制
+      // 即使上次没拿到数据（hasEmptyCache 为 true），只要尝试时间不到 24 小时，也不重复请求
+      const needsFetch = hasEmptyCache && (!isExploringNextYear || attemptAge > ONE_DAY_MS);
 
       console.log(`${prefix} Status Check -> Real Year: ${realCurrentYear}, Real Month: ${realCurrentMonth}`);
       console.log(`${prefix} Status Check -> Has Empty Cache (hasEmptyCache): ${hasEmptyCache}`);
       console.log(`${prefix} Status Check -> Is Exploring Next Year (isExploringNextYear): ${isExploringNextYear}`);
+      console.log(`${prefix} Status Check -> Last attempt age (hours): ${(attemptAge / (1000 * 60 * 60)).toFixed(2)}`);
       console.log(`${prefix} Status Check -> Needs Fetch (needsFetch): ${needsFetch}`);
 
       if (!needsFetch) {
-        console.log(`${prefix} Conclusion: Valid cache exists and no update needed, skipping network request.`);
+        console.log(`${prefix} Conclusion: Valid cache exists or within 24h retry limit, skipping network request.`);
         return;
       }
 
       console.log(`${prefix} Conclusion: Fetching from API -> https://timor.tech/api/holiday/year/${targetYear}/`);
+
+      // 记录本次尝试请求的时间戳（无论成功与否，24小时内不再频繁重试）
+      await LocalStorage.setItem(attemptKey, now.toString());
 
       try {
         const response = await fetch(`https://timor.tech/api/holiday/year/${targetYear}/`);
@@ -139,7 +149,7 @@ export default function Command() {
             setHolidays(normalized);
           }
         } else {
-          console.log(`${prefix} Official holiday data not yet published or empty, skipping cache write.`);
+          console.log(`${prefix} Official holiday data not yet published or empty.`);
         }
       } catch (error) {
         console.error(`${prefix} Network error fetching holiday data:`, error);
