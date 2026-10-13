@@ -1,6 +1,6 @@
 # paste.rs Changelog
 
-## [Language and Selected Text] - {PR_MERGE_DATE}
+## [Language and Selected Text] - 2026-10-13
 
 - Add supported language options for highlighted paste URLs and rendered Markdown, with plain text as the default.
 - Add Paste Selected Text with public-upload confirmation and empty/unavailable selection handling.
