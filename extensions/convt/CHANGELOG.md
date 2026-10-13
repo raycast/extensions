@@ -1,6 +1,6 @@
 # Convt Changelog
 
-## Initial Version - {PR_MERGE_DATE}
+## Initial Version - 2026-10-13
 
 - Convert local images, videos, audio, PDFs, and documents with Convt.
 - Use selected Finder files or choose multiple files in Raycast.
