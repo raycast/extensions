@@ -85,6 +85,8 @@ public final class Indexer {
     /// (no re-embedding), and files that are gone or newly excluded are removed.
     public func sync(_ roots: [URL]) throws -> SyncSummary {
         let crawl = Crawler.crawl(roots, options: options)
+        // Preserved cloud placeholders and unreadable subtrees must not be opened by either work pass.
+        try store.deferUnavailable(crawl.unreadable)
         // Match stored crawler paths; standardizedFileURL changes /private/var into /var on macOS.
         let existing = try store.files(under: roots.map { FolderSelection.realPath($0.path) })
         var byPath: [String: FileRecord] = [:]

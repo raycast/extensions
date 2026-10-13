@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { request } from "node:http";
 import { createService } from "../service/server";
+import { LocalClient } from "../service/client";
 import { paths } from "../service/paths";
 import { DEFAULT_CONFIG, Status } from "../service/protocol";
 
@@ -33,6 +34,14 @@ test("stale conditional configuration cannot undo newer folder choices", async (
       expectedConfig: snapshot,
     });
     assert.equal(stale.status, 409);
+    // The form displays the client error verbatim; recovery instructions must name its navigation action.
+    await assert.rejects(
+      new LocalClient(service.socket).configure(
+        { ...snapshot, paused: false },
+        snapshot,
+      ),
+      /reopen Choose Folders and Limits and reapply your edits/,
+    );
     assert.deepEqual(
       (await call(service.socket, "/status")).body.config,
       latest.body.config,

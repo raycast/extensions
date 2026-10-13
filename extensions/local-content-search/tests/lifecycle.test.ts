@@ -10,6 +10,7 @@ import {
   access,
   readFile,
   readdir,
+  realpath,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -133,6 +134,36 @@ test("failed empty-scope cleanup survives restart and retries", async () => {
   } finally {
     await controller.close();
     await restarted.close();
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+// A cleanup retry queued behind a folder save must recheck intent, not restore the old empty scope.
+test("queued cleanup preserves newer folder choices", async () => {
+  const { root, controller, content, marker } = await fixture(
+    "require('node:fs').writeFileSync(marker,'pruned');console.log('[]')",
+    JSON.stringify({ ...DEFAULT_CONFIG, paused: true, clearPending: true }),
+  );
+  try {
+    let release = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    Reflect.set(controller, "configQueue", gate);
+    const saving = controller.configure({
+      ...DEFAULT_CONFIG,
+      roots: [content],
+      paused: true,
+    });
+    const retry = Reflect.get(controller, "index").call(controller);
+    release();
+    await Promise.all([saving, retry]);
+    assert.deepEqual((await controller.status()).config.roots, [
+      await realpath(content),
+    ]);
+    await assert.rejects(access(marker), { code: "ENOENT" });
+  } finally {
+    await controller.close();
     await rm(root, { recursive: true, force: true });
   }
 });

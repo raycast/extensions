@@ -45,6 +45,36 @@ public final class IndexStore {
     private var scopeSQL = ""
     private var scopeValues: [SQLValue] = []
 
+    private var workSQL = ""
+
+    // Unavailable rows stay searchable; only extraction queues and their counts exclude them.
+    // crawl -> unavailable paths -> work queues (saved segments remain unchanged)
+    func deferUnavailable(_ paths: [String]) throws {
+        guard !paths.isEmpty else {
+            workSQL = ""
+            return
+        }
+
+        // Numeric database IDs avoid SQL parameter/expression limits when many cloud files are evicted.
+        let unavailable = Set(paths)
+        var ids: [Int64] = []
+        try db.query("SELECT id, path FROM files") { row in
+            var path = row.text(1) ?? ""
+            while !path.isEmpty {
+                if unavailable.contains(path) {
+                    ids.append(row.int(0))
+                    break
+                }
+                let parent = (path as NSString).deletingLastPathComponent
+                if parent == path {
+                    break
+                }
+                path = parent
+            }
+        }
+        workSQL = ids.isEmpty ? "" : " AND id NOT IN (\(ids.map(String.init).joined(separator: ",")))"
+    }
+
     /// The main index's file in the index folder.
     public static let mainFile = "index.sqlite"
     /// The code index (`IndexOptions.code`) is a file of its own beside it: code search never moves the rest (its
@@ -305,7 +335,7 @@ public final class IndexStore {
         if let ids, ids.isEmpty { return out }
         let filter = ids.map { " AND id IN (\($0.map(String.init).joined(separator: ",")))" } ?? ""
         try db.query("""
-            SELECT \(Self.fileColumns) FROM files WHERE state = 'pending'\(filter)\(scopeSQL)
+            SELECT \(Self.fileColumns) FROM files WHERE state = 'pending'\(filter)\(scopeSQL)\(workSQL)
             ORDER BY \(FileKind.indexingOrderSQL), mtime DESC LIMIT ?
             """, scopeValues + [.int(Int64(limit ?? -1))]) { out.append(Self.record($0)) }
         return out
@@ -313,7 +343,7 @@ public final class IndexStore {
 
     public func pendingCount() throws -> Int {
         var count = 0
-        try db.query("SELECT COUNT(*) FROM files WHERE state = 'pending'\(scopeSQL)", scopeValues) {
+        try db.query("SELECT COUNT(*) FROM files WHERE state = 'pending'\(scopeSQL)\(workSQL)", scopeValues) {
             count = Int($0.int(0))
         }
         return count
@@ -323,7 +353,7 @@ public final class IndexStore {
     public func unfinished() throws -> [FileRecord] {
         var out: [FileRecord] = []
         try db.query("""
-            SELECT \(Self.fileColumns) FROM files WHERE state = 'partial'\(scopeSQL)
+            SELECT \(Self.fileColumns) FROM files WHERE state = 'partial'\(scopeSQL)\(workSQL)
             ORDER BY \(FileKind.indexingOrderSQL), mtime DESC
             """, scopeValues) { out.append(Self.record($0)) }
         return out
@@ -335,7 +365,7 @@ public final class IndexStore {
         try db.query("""
             SELECT COUNT(*), SUM(MAX(0, CAST(json_extract(info, '$.read_end') AS INTEGER)
                                       - CAST(json_extract(info, '$.read_to') AS INTEGER)))
-            FROM files WHERE state = 'partial'\(scopeSQL)
+            FROM files WHERE state = 'partial'\(scopeSQL)\(workSQL)
             """, scopeValues) { count = (Int($0.int(0)), Int($0.int(1))) }
         return count
     }

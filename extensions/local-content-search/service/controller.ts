@@ -134,7 +134,7 @@ export class Controller {
         JSON.stringify(expected) !== JSON.stringify(this.config)
       ) {
         const conflict = new Error(
-          "Configuration changed; refresh settings and retry",
+          "Configuration changed; reopen Choose Folders and Limits and reapply your edits",
         );
         conflict.name = CONFIG_CONFLICT;
         throw conflict;
@@ -466,13 +466,37 @@ export class Controller {
     }
   }
 
+  // Queue cleanup without a captured config: a folder save ahead of it can cancel the intent.
+  // folder save -> queue -> recheck intent -> prune only if still empty
+  private async retryCleanup(): Promise<void> {
+    const retry = this.configQueue.then(async () => {
+      this.assertRunning();
+      if (!this.clearPending || this.config.roots.length !== 0) {
+        return;
+      }
+
+      await this.stopWorker();
+      this.assertRunning();
+      try {
+        await this.clearIndex();
+        this.clearPending = false;
+        await this.saveConfig(this.config);
+      } catch (error) {
+        this.clearPending = true;
+        this.error = `Folder settings saved; index cleanup pending: ${String(error)}`;
+      }
+    });
+    this.configQueue = retry.catch(() => {});
+    await retry;
+  }
+
   private async index(): Promise<void> {
     if (this.closed || this.querying || this.worker || !this.dirty) {
       return;
     }
     // Retry durable privacy cleanup before pause/power/model gates; it never loads an embedding model.
     if (this.clearPending && this.config.roots.length === 0) {
-      await this.configure(this.config);
+      await this.retryCleanup();
       return;
     }
     if (this.config.paused || this.blocked || this.config.roots.length === 0) {
