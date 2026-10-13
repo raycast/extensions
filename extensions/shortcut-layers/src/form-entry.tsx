@@ -3,10 +3,35 @@ import { usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { loadLayers, saveLayers } from "./data";
 import { fileTitle, searchFiles } from "./file-search";
-import { entryKindLabel, entryKindPlaceholder } from "./kinds";
 import { generateId, normalizeKey } from "./schema";
 import { ENTRY_KINDS } from "./types";
 import type { Entry, EntryKind } from "./types";
+
+function entryKindLabel(kind: EntryKind): string {
+  switch (kind) {
+    case "app":
+      return "Application";
+    case "file":
+      return "File / Folder";
+    case "url":
+      return "URL / Deeplink";
+    case "shell":
+      return "Shell Command";
+  }
+}
+
+function entryKindPlaceholder(kind: EntryKind): string {
+  switch (kind) {
+    case "app":
+      return "/Applications/Ghostty.app";
+    case "file":
+      return "~/Documents";
+    case "url":
+      return "raycast://extensions/…";
+    case "shell":
+      return "open -a Ghostty";
+  }
+}
 
 export function EntryForm({
   layerId,

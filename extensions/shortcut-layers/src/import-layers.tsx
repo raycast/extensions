@@ -5,16 +5,12 @@ import { useState } from "react";
 import { loadLayers, saveLayers } from "./data";
 import { mergeLayers, parseLayersJson } from "./transfer";
 
-export default function Command() {
-  return <ImportLayersForm />;
-}
-
 interface ImportValues {
   paste: string;
   files: string[];
 }
 
-export function ImportLayersForm() {
+export default function Command() {
   const [importing, setImporting] = useState(false);
   const { pop } = useNavigation();
   const { handleSubmit } = useForm<ImportValues>({
