@@ -25,6 +25,7 @@ export function useLinks(read: FetchLinksParams["read"], search: string) {
   const generation = useRef(0);
   const mutations = useRef(Promise.resolve());
   const pendingMutations = useRef(0);
+  const writeStates = useRef(new Map<string, { link: Link | null; index: number; nextId?: string }>());
   const [isMutating, setIsMutating] = useState(false);
 
   // Keep queued mutations in sync even before React renders their state changes.
@@ -82,42 +83,65 @@ export function useLinks(read: FetchLinksParams["read"], search: string) {
   /** Apply a confirmed update (or null for deletion) without discarding loaded pages. */
   const mutateLink = useCallback(
     (id: string, operation: (link: Link) => Promise<LinkChange>): Promise<boolean> => {
+      if (!mounted.current) return Promise.resolve(false);
       const current = query.current;
       const currentGeneration = generation.current;
+      if (!writeStates.current.has(id)) {
+        const index = latest.current.links.findIndex((item) => item.id === id);
+        if (index < 0) return Promise.resolve(false);
+        writeStates.current.set(id, { link: latest.current.links[index], index });
+      }
       pendingMutations.current += 1;
       if (mounted.current) setIsMutating(true);
       const mutation = mutations.current.then(async () => {
-        if (!mounted.current || generation.current !== currentGeneration || query.current.key !== current.key)
-          return false;
-        const link = latest.current.links.find((item) => item.id === id);
+        // Accepted writes survive Refresh, query changes, and closing the view.
+        // Only their local UI updates are tied to the original query generation.
+        const entry = writeStates.current.get(id)!;
+        const link = entry.link;
         if (!link) return false;
-        // A pending page may contain the old row or use an offset invalidated by deletion.
-        request.current?.abort();
-        request.current = null;
-        updateState({ ...latest.current, isLoading: false });
+        if (mounted.current && generation.current === currentGeneration && query.current.key === current.key) {
+          // A pending page may contain the old row or an invalidated offset.
+          request.current?.abort();
+          request.current = null;
+          updateState({ ...latest.current, isLoading: false });
+        }
         const change = await operation(link);
+        const updated = change === null ? null : { ...link, ...change };
+        entry.link = updated;
         if (!mounted.current || generation.current !== currentGeneration || query.current.key !== current.key)
           return true;
-        const updated = change === null ? null : { ...link, ...change };
         const remove =
           !updated ||
           (current.read === "unread" && Boolean(updated.read_at)) ||
           (current.read === "read" && !updated.read_at);
         const previous = latest.current;
+        const index = previous.links.findIndex((item) => item.id === id);
+        const delta = remove ? (index < 0 ? 0 : -1) : index < 0 ? 1 : 0;
+        let links = previous.links;
+        if (remove && index >= 0) {
+          entry.index = index;
+          entry.nextId = previous.links[index + 1]?.id;
+          links = previous.links.filter((item) => item.id !== id);
+        } else if (!remove && index >= 0) {
+          links = previous.links.map((item) => (item.id === id ? updated! : item));
+        } else if (!remove) {
+          // A repeated toggle may put a filtered row back in its original position.
+          const nextIndex = previous.links.findIndex((item) => item.id === entry.nextId);
+          const insertAt = nextIndex >= 0 ? nextIndex : Math.min(entry.index, previous.links.length);
+          links = [...previous.links.slice(0, insertAt), updated!, ...previous.links.slice(insertAt)];
+        }
         // Full-text membership depends on server-side content. Retain edited rows until
         // Refresh, and overlap one row on the next page in case this edit stops matching.
         const searchMayChange =
           Boolean(current.search.trim()) && change !== null && ("title" in change || "summary" in change);
         updateState({
           ...previous,
-          links: remove
-            ? previous.links.filter((item) => item.id !== id)
-            : previous.links.map((item) => (item.id === id ? updated! : item)),
-          total: remove ? Math.max(0, previous.total - 1) : previous.total,
+          links,
+          total: Math.max(0, previous.total + delta),
           nextOffset:
             previous.nextOffset === null
               ? null
-              : Math.max(0, previous.nextOffset - (remove || searchMayChange ? 1 : 0)),
+              : Math.max(0, previous.nextOffset + delta - (delta === 0 && !remove && searchMayChange ? 1 : 0)),
         });
         return true;
       });
@@ -128,6 +152,7 @@ export function useLinks(read: FetchLinksParams["read"], search: string) {
       );
       return mutation.finally(() => {
         pendingMutations.current -= 1;
+        if (pendingMutations.current === 0) writeStates.current.clear();
         if (mounted.current) setIsMutating(pendingMutations.current > 0);
       });
     },

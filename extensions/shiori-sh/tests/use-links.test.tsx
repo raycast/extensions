@@ -405,7 +405,7 @@ it("does not apply an old mutation to a new query and waits for the write before
   expect(state.nextOffset).toBeNull();
 });
 
-it("does not start queued mutations or fetch again after the view unmounts", async () => {
+it("finishes accepted queued writes after unmount without changing the view or refetching", async () => {
   await loadTwoPages();
   let finishWrite!: (response: Response) => void;
   fetchMock.mockImplementationOnce(
@@ -420,9 +420,65 @@ it("does not start queued mutations or fetch again after the view unmounts", asy
     first = state.mutateLink("151", toggle);
     queued = state.mutateLink("160", toggle);
   });
+  fetchMock.mockResolvedValueOnce(saved());
   await act(async () => renderer.unmount());
   finishWrite(saved());
   expect(await first).toBe(true);
-  expect(await queued).toBe(false);
-  expect(fetchMock).toHaveBeenCalledTimes(3);
+  expect(await queued).toBe(true);
+  expect(fetchMock).toHaveBeenCalledTimes(4);
+  expect(offsets()).toEqual(["0", "100"]);
 });
+
+it.each(["refresh", "search", "filter"])("finishes all accepted writes before %s reloads the view", async (action) => {
+  await loadTwoPages();
+  let finishWrite!: (response: Response) => void;
+  fetchMock.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finishWrite = resolve;
+      }),
+  );
+  let first!: Promise<boolean>;
+  let queued!: Promise<boolean>;
+  await act(async () => {
+    first = state.mutateLink("151", toggle);
+    queued = state.mutateLink("160", remove);
+  });
+  fetchMock.mockResolvedValueOnce(saved()).mockResolvedValueOnce(response([1], 1));
+  let refresh: Promise<void> | undefined;
+  await act(async () => {
+    if (action === "refresh") refresh = state.revalidate();
+    else
+      renderer.update(
+        <Probe search={action === "search" ? "new" : ""} read={action === "filter" ? "unread" : "all"} />,
+      );
+  });
+  expect(fetchMock).toHaveBeenCalledTimes(3);
+  await act(async () => {
+    finishWrite(saved());
+    expect(await first).toBe(true);
+    expect(await queued).toBe(true);
+    await refresh;
+  });
+  expect(fetchMock.mock.calls[3][1]?.method).toBe("DELETE");
+  expect(String(fetchMock.mock.calls[3][0])).toMatch(/\/api\/links\/160$/);
+  expect(state.links.map((item) => item.id)).toEqual(["1"]);
+  expect(state.total).toBe(1);
+  expect(offsets()).toEqual(["0", "100", "0"]);
+});
+
+it.each(["unread", "read"] as const)(
+  "restores a %s row's position and counts when queued toggles bring it back into the filter",
+  async (read) => {
+    await loadTwoPages(read);
+    fetchMock.mockResolvedValueOnce(saved()).mockResolvedValueOnce(saved());
+    await act(async () => {
+      await Promise.all([state.mutateLink("151", toggle), state.mutateLink("151", toggle)]);
+    });
+    expect(state.links.map((item) => item.id)).toEqual(ids(1, 200).map(String));
+    expect(Boolean(state.links[150].read_at)).toBe(read === "read");
+    expect(state.total).toBe(205);
+    expect(state.nextOffset).toBe(200);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+  },
+);
