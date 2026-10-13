@@ -374,13 +374,13 @@ export async function getActiveTab(options: LookupOptions): Promise<TabInfo> {
       const front = frontApp && isKnownBrowser(frontApp) ? frontApp : undefined;
       const tabs = await tabsFromRunningBrowsers(front);
       // The app in front is unknown and Firefox, Zen … is running: the user may
-      // be on its page, which only the browser extension can read. A background
-      // tab must not win just because it is the only one AppleScript sees.
-      if (!frontApp && tabs.length > 0 && useExtension && (await extensionOnlyBrowserRunning())) {
-        const all = [...tabs, ...(await activeTabsFromBrowserExtension())];
+      // be on its page. Nothing proves that page was read (the browser extension
+      // may be missing there, and its tabs carry no browser identity), so even
+      // matching URLs are no answer: the user always picks.
+      if (!frontApp && tabs.length > 0 && (await extensionOnlyBrowserRunning())) {
+        const all = [...tabs, ...(useExtension ? await activeTabsFromBrowserExtension() : [])];
         const key = (tab: TabInfo) => (options.urlOnly ? tab.url : `${tab.url}${UNIT_SEPARATOR}${tab.title}`);
         const distinct = all.filter((tab, index) => all.findIndex((other) => key(other) === key(tab)) === index);
-        if (distinct.length === 1) return distinct[0];
         throw new AmbiguousTabError(distinct, "front");
       }
       // One browser, or one in front: unambiguous. Several with none in front:
