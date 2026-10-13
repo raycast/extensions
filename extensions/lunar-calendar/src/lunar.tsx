@@ -41,84 +41,121 @@ export default function Command() {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
 
-  // 1. 动态加载节假日数据（应用智能缓存逻辑）
+  // 1. 动态加载节假日数据（带完整的英文缓存与网络请求日志）
   useEffect(() => {
     let isMounted = true;
 
-    async function loadHolidays() {
-      const cacheKey = `holidays_${year}`;
+    // 通用获取指定年份数据的异步函数
+    async function fetchYearHolidays(targetYear: number, isPreload = false) {
+      const cacheKey = `holidays_${targetYear}`;
+      const prefix = isPreload ? `[Lunar Preload ${targetYear}]` : `[Lunar Load ${targetYear}]`;
+
+      console.log(`${prefix} ----------------------------------------`);
+      console.log(`${prefix} Starting to load target year: ${targetYear}`);
+
       const cachedString = await LocalStorage.getItem<string>(cacheKey);
 
       let cachedWrapper: CachedHolidayWrapper | null = null;
       if (cachedString) {
         try {
           cachedWrapper = JSON.parse(cachedString);
+          const cacheDate = new Date(cachedWrapper!.timestamp).toLocaleString();
+          console.log(
+            `${prefix} Cache hit, timestamp: ${cacheDate}, items count: ${Object.keys(cachedWrapper!.holidays || {}).length}`
+          );
         } catch (e) {
-          console.error("解析本地缓存失败", e);
+          console.error(`${prefix} Failed to parse local cache`, e);
         }
+      } else {
+        console.log(`${prefix} Cache miss (no local cache found)`);
       }
 
-      // 如果已有缓存数据，先直接渲染，保证秒开
-      if (cachedWrapper && cachedWrapper.holidays && isMounted) {
+      // 如果是当前正在看的年份，且有缓存，先渲染保证秒开
+      if (!isPreload && cachedWrapper && cachedWrapper.holidays && isMounted) {
+        console.log(`${prefix} Rendering UI using local cache`);
         setHolidays(cachedWrapper.holidays);
       }
 
-      // 计算是否需要触发网络探测
       const realNow = new Date();
       const realCurrentYear = realNow.getFullYear();
       const realCurrentMonth = realNow.getMonth() + 1;
 
-      // 判定条件：
-      // 1. 查询的年份大于当前真实年份（查未来年）
-      // 2. 或者当前已是当年 11、12 月，且正在看下一年（准备迎接新政策）
+      // 判定是否需要发起网络请求：
+      // 1. 如果没有缓存，或者缓存里的数据是空的
+      // 2. 如果是未来年份或年底预热期，且距离上次探测超过 24 小时，允许每天探测 1 次
+      const hasEmptyCache =
+        !cachedWrapper || !cachedWrapper.holidays || Object.keys(cachedWrapper.holidays).length === 0;
       const isExploringNextYear =
-        year > realCurrentYear || (realCurrentYear === year && realCurrentMonth >= 11 && year === realCurrentYear + 1);
-
-      // 判定是否需要重新请求：
-      // - 如果本地根本没有缓存，必然要请求。
-      // - 如果处于“探索/年底准备期”，并且距离上次请求已经超过 1 天，则允许每天最多探测 1 次。
-      // - 如果是历史年份或当年（非年底），一旦有缓存就直接永久使用，绝不重复请求。
+        targetYear > realCurrentYear || (realCurrentYear === targetYear && realCurrentMonth >= 11);
       const now = Date.now();
-      const needsFetch = !cachedWrapper || (isExploringNextYear && now - cachedWrapper.timestamp > ONE_DAY_MS);
+      const cacheAge = cachedWrapper ? now - cachedWrapper.timestamp : null;
+
+      const needsFetch = hasEmptyCache || (isExploringNextYear && cacheAge !== null && cacheAge > ONE_DAY_MS);
+
+      console.log(`${prefix} Status Check -> Real Year: ${realCurrentYear}, Real Month: ${realCurrentMonth}`);
+      console.log(`${prefix} Status Check -> Has Empty Cache (hasEmptyCache): ${hasEmptyCache}`);
+      console.log(`${prefix} Status Check -> Is Exploring Next Year (isExploringNextYear): ${isExploringNextYear}`);
+      console.log(`${prefix} Status Check -> Needs Fetch (needsFetch): ${needsFetch}`);
 
       if (!needsFetch) {
+        console.log(`${prefix} Conclusion: Valid cache exists and no update needed, skipping network request.`);
         return;
       }
 
-      // 从网络 API 获取最新数据
+      console.log(`${prefix} Conclusion: Fetching from API -> https://timor.tech/api/holiday/year/${targetYear}/`);
+
       try {
-        const response = await fetch(`https://timor.tech/api/holiday/year/${year}/`);
+        const response = await fetch(`https://timor.tech/api/holiday/year/${targetYear}/`);
         const json = (await response.json()) as {
           code: number;
           holiday?: Record<string, HolidayItem>;
         };
 
-        if (json.code === 0 && json.holiday && isMounted) {
-          // 规范化 Key：双保险兼容 MM-DD 格式的 key 拼接或 item.date
+        console.log(`${prefix} API Response status code: ${json.code}`);
+
+        // 严格校验：必须 code 为 0 且 holiday 确实有内容
+        if (json.code === 0 && json.holiday && Object.keys(json.holiday).length > 0) {
           const normalized: HolidayMap = {};
           for (const [key, item] of Object.entries(json.holiday)) {
-            const dateStr = key.length === 5 ? `${year}-${key}` : item.date || key;
+            const dateStr = key.length === 5 ? `${targetYear}-${key}` : item.date || key;
             normalized[dateStr] = {
               ...item,
               date: dateStr,
             };
           }
 
-          setHolidays(normalized);
+          console.log(`${prefix} API request success, valid holiday items count: ${Object.keys(normalized).length}`);
 
-          // 写入带最新时间戳的缓存（一旦拿到数据，后续将长期锁定不再请求）
+          // 写入带最新时间戳的有效缓存
           const newWrapper: CachedHolidayWrapper = {
             timestamp: Date.now(),
             holidays: normalized,
           };
           await LocalStorage.setItem(cacheKey, JSON.stringify(newWrapper));
+          console.log(`${prefix} New data successfully written to LocalStorage cache`);
+
+          // 如果是当前正在看的年份，更新状态
+          if (!isPreload && isMounted) {
+            setHolidays(normalized);
+          }
+        } else {
+          console.log(`${prefix} Official holiday data not yet published or empty, skipping cache write.`);
         }
       } catch (error) {
-        console.error(`获取 ${year} 年节假日数据失败:`, error);
+        console.error(`${prefix} Network error fetching holiday data:`, error);
       }
     }
 
-    loadHolidays();
+    // A. 加载当前选中的年份数据
+    fetchYearHolidays(year, false);
+
+    // B. 如果当前真实时间是 11 月或 12 月，在后台静默预热加载下一年
+    const realNow = new Date();
+    const realCurrentYear = realNow.getFullYear();
+    const realCurrentMonth = realNow.getMonth() + 1;
+    if (realCurrentMonth >= 11 && year === realCurrentYear) {
+      fetchYearHolidays(realCurrentYear + 1, true);
+    }
 
     return () => {
       isMounted = false;
@@ -154,7 +191,6 @@ export default function Command() {
         dateStr,
         lunarText: getLunarText(solar, holidays[dateStr]),
         holidayStatus: getHolidayStatus(solar, holidays[dateStr]),
-        // 只要格子日期和真实今天相符，无论是否为当前主视月份，都显示“今”
         isToday: dateStr === todayStr,
         isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
       });
