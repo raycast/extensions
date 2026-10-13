@@ -1,11 +1,12 @@
 import { LocalStorage, environment, LaunchType, launchCommand } from "@raycast/api";
+import type { NetworkServiceStatus } from "./network-services";
 
 const VPN_STATUS_KEY = "vpn-connection-status";
 const MENUBAR_REFRESH_TIMESTAMP_KEY = "vpn-menubar-refresh-timestamp";
 
 export type VpnStatusUpdate = {
   serviceId: string;
-  status: "connected" | "disconnected" | "connecting" | "disconnecting" | "invalid";
+  status: NetworkServiceStatus;
   timestamp: number;
 };
 
@@ -13,17 +14,16 @@ export type VpnStatusUpdate = {
  * Updates the VPN status in shared storage
  */
 export async function updateVpnStatus(update: VpnStatusUpdate): Promise<void> {
-  await LocalStorage.setItem(VPN_STATUS_KEY, JSON.stringify(update));
-
-  // The menu bar polls this timestamp and refreshes every service when it changes, and each of
-  // those refreshes reports a status update of its own. Signalling from inside the menu bar would
-  // therefore never stop, and a command cannot launch itself either, so only the other commands
-  // signal. launchType would not do as the test here: it says how the command started, and opening
-  // the menu bar is a user launch rather than a background one.
-  if (environment.entryPointName === "menu-bar") return;
-
-  await updateMenuBarRefreshTimestamp();
-  await forceMenuBarRefresh();
+  try {
+    await LocalStorage.setItem(VPN_STATUS_KEY, JSON.stringify(update));
+    // A menu bar refresh must never trigger another refresh of itself.
+    if (environment.entryPointName === "menu-bar") return;
+    await updateMenuBarRefreshTimestamp();
+    await forceMenuBarRefresh();
+  } catch (error) {
+    // The network request already succeeded. A refresh failure must not invite a retry.
+    console.error("Unable to share VPN status:", error);
+  }
 }
 
 /**
@@ -31,7 +31,32 @@ export async function updateVpnStatus(update: VpnStatusUpdate): Promise<void> {
  */
 export async function getVpnStatus(): Promise<VpnStatusUpdate | null> {
   const status = await LocalStorage.getItem<string>(VPN_STATUS_KEY);
-  return status ? JSON.parse(status) : null;
+  if (!status) return null;
+  try {
+    const value: unknown = JSON.parse(status);
+    if (
+      typeof value !== "object" ||
+      value === null ||
+      !("serviceId" in value) ||
+      !("status" in value) ||
+      !("timestamp" in value)
+    )
+      return null;
+    if (typeof value.serviceId !== "string" || typeof value.timestamp !== "number" || !Number.isFinite(value.timestamp))
+      return null;
+    const state = value.status;
+    if (
+      state !== "connected" &&
+      state !== "disconnected" &&
+      state !== "connecting" &&
+      state !== "disconnecting" &&
+      state !== "invalid"
+    )
+      return null;
+    return { serviceId: value.serviceId, status: state, timestamp: value.timestamp };
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -47,7 +72,8 @@ export async function updateMenuBarRefreshTimestamp(): Promise<void> {
  */
 export async function getMenuBarRefreshTimestamp(): Promise<number> {
   const timestamp = await LocalStorage.getItem<string>(MENUBAR_REFRESH_TIMESTAMP_KEY);
-  return timestamp ? parseInt(timestamp, 10) : 0;
+  const value = Number(timestamp);
+  return Number.isFinite(value) ? value : 0;
 }
 
 /**
