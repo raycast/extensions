@@ -75,15 +75,15 @@
       "default": "auto",
       "data": [
         {
-          "title": "Automatic — AppleScript, then browser extension",
+          "title": "Automatic (AppleScript, Then Browser Extension)",
           "value": "auto"
         },
         {
-          "title": "AppleScript only",
+          "title": "AppleScript Only",
           "value": "applescript"
         },
         {
-          "title": "Raycast browser extension only",
+          "title": "Raycast Browser Extension Only",
           "value": "extension"
         }
       ]
@@ -104,15 +104,15 @@
       "default": "auto",
       "data": [
         {
-          "title": "Automatic — RTF, HTML and plain text together",
+          "title": "Automatic (RTF, HTML and Plain Text Together)",
           "value": "auto"
         },
         {
-          "title": "RTF only — the safest bet for Teams, Outlook, Word",
+          "title": "RTF Only (Safest for Teams, Outlook, Word)",
           "value": "rtf"
         },
         {
-          "title": "HTML only — for browsers, Notion and other web apps",
+          "title": "HTML Only (Browsers, Notion, Web Apps)",
           "value": "html"
         }
       ]
@@ -138,7 +138,7 @@
           "value": "titleUrl"
         },
         {
-          "title": "Markdown link",
+          "title": "Markdown Link",
           "value": "markdown"
         }
       ]
@@ -152,11 +152,11 @@
       "default": "titleUrl",
       "data": [
         {
-          "title": "URL only",
+          "title": "URL Only",
           "value": "url"
         },
         {
-          "title": "Title only",
+          "title": "Title Only",
           "value": "title"
         },
         {
@@ -164,7 +164,7 @@
           "value": "titleUrl"
         },
         {
-          "title": "Title, URL on the next line",
+          "title": "Title, URL on the Next Line",
           "value": "titleUrlNewline"
         }
       ]
@@ -194,11 +194,11 @@
       "default": "markdown",
       "data": [
         {
-          "title": "Markdown link",
+          "title": "Markdown Link",
           "value": "markdown"
         },
         {
-          "title": "URL only",
+          "title": "URL Only",
           "value": "url"
         },
         {
@@ -206,19 +206,19 @@
           "value": "titleUrl"
         },
         {
-          "title": "HTML link",
+          "title": "HTML Link",
           "value": "html"
         },
         {
-          "title": "Slack link",
+          "title": "Slack Link",
           "value": "slack"
         },
         {
-          "title": "Jira link",
+          "title": "Jira Link",
           "value": "jira"
         },
         {
-          "title": "Custom format",
+          "title": "Custom Format",
           "value": "custom"
         }
       ]
@@ -232,15 +232,15 @@
       "default": "bullet",
       "data": [
         {
-          "title": "Plain lines",
+          "title": "Plain Lines",
           "value": "none"
         },
         {
-          "title": "Bullet list",
+          "title": "Bullet List",
           "value": "bullet"
         },
         {
-          "title": "Numbered list",
+          "title": "Numbered List",
           "value": "number"
         }
       ]
@@ -314,11 +314,11 @@
       "default": "copy",
       "data": [
         {
-          "title": "Copy to clipboard",
+          "title": "Copy to Clipboard",
           "value": "copy"
         },
         {
-          "title": "Paste into the frontmost app",
+          "title": "Paste Into the Frontmost App",
           "value": "paste"
         }
       ]

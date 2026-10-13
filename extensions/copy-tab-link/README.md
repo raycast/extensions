@@ -36,7 +36,7 @@ By default the extension puts **all three on the clipboard at once** — RTF, HT
 alternative — so every app picks the flavour it understands. The plain text alternative is
 configurable: the URL, the title, both, or the Markdown link.
 
-If one app still refuses the link, switch **Rich Text Method** to `RTF only`, which is the route that
+If one app still refuses the link, switch **Rich Text Method** to `RTF Only`, which is the route that
 has always worked for Teams, Outlook and Word.
 
 ## Cleanup
