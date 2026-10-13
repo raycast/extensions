@@ -1,3 +1,4 @@
+import AppKit
 import Carbon
 import Foundation
 import InputMethodKit
@@ -53,6 +54,49 @@ private let numberKeyCodes: [UInt16] = [
     }
 
     throw "Layout '\(name)' not found"
+}
+
+/// Types `text` as Unicode key events into the focused app; replaces the
+/// selection like normal typing. No clipboard, no Cmd+V: Chrome drops many
+/// synthetic Cmd+V pastes but accepts typed text.
+@raycast func typeText(text: String) -> Bool {
+    // HID source + HID tap: events posted to the session tap never reached Chrome.
+    let source = CGEventSource(stateID: .hidSystemState)
+    let units = Array(text.utf16)
+    // macOS takes at most 20 UTF-16 units per event.
+    for start in stride(from: 0, to: units.count, by: 20) {
+        var chunk = Array(units[start..<min(start + 20, units.count)])
+        for down in [true, false] {
+            guard let event = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: down) else { return false }
+            event.keyboardSetUnicodeString(stringLength: chunk.count, unicodeString: &chunk)
+            // The hotkey's ⌥ can still be held; with it Safari ignores the typed text.
+            event.flags = []
+            event.post(tap: .cghidEventTap)
+            usleep(10_000)
+        }
+    }
+    return true
+}
+
+/// Selected text of the focused element via Accessibility ("" = nothing
+/// selected). Throws when the app doesn't expose a text selection (Chrome,
+/// Sublime): then the caller falls back to Raycast's Cmd+C-based reading,
+/// which beeps in apps like Safari when nothing is selected.
+@raycast func axSelectedText() throws -> String {
+    guard let app = NSWorkspace.shared.frontmostApplication else { throw "No frontmost app" }
+    var focused: CFTypeRef?
+    let err = AXUIElementCopyAttributeValue(AXUIElementCreateApplication(app.processIdentifier), kAXFocusedUIElementAttribute as CFString, &focused)
+    guard err == .success, let focused, CFGetTypeID(focused) == AXUIElementGetTypeID() else {
+        throw "No focused element (AXError \(err.rawValue), trusted: \(AXIsProcessTrusted()))"
+    }
+    let element = focused as! AXUIElement
+    var range: CFTypeRef?
+    guard AXUIElementCopyAttributeValue(element, kAXSelectedTextRangeAttribute as CFString, &range) == .success else {
+        throw "No text selection"
+    }
+    var text: CFTypeRef?
+    guard AXUIElementCopyAttributeValue(element, kAXSelectedTextAttribute as CFString, &text) == .success else { return "" }
+    return text as? String ?? ""
 }
 
 @raycast func getLayoutKeyMaps() -> [LayoutKeyMap] {
