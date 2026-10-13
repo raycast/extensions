@@ -13,11 +13,13 @@ final class EditorDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, W
 
     private let request: URL
     private let editorDirectory: URL
+    private let workerBundle: URL
     private let html: URL
 
-    init(request: URL, editorDirectory: URL, html: URL, input: EditorInput) {
+    init(request: URL, editorDirectory: URL, workerBundle: URL, html: URL, input: EditorInput) {
         self.request = request
         self.editorDirectory = editorDirectory
+        self.workerBundle = workerBundle
         self.html = html
         initialText = input.text
         initialIndent = input.indent == 4 ? 4 : 2
@@ -143,6 +145,7 @@ final class EditorDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, W
 
     func applicationWillTerminate(_ notification: Notification) {
         try? FileManager.default.removeItem(at: editorDirectory)
+        try? FileManager.default.removeItem(at: workerBundle)
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {

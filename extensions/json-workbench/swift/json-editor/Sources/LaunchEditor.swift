@@ -95,7 +95,7 @@ func runEditorWorker(requestPath: String) throws {
     MainActor.assumeIsolated {
         let application = NSApplication.shared
         application.setActivationPolicy(.regular)
-        let controller = EditorDelegate(request: request, editorDirectory: directory, html: directory.appendingPathComponent("index.html"), input: input)
+        let controller = EditorDelegate(request: request, editorDirectory: directory, workerBundle: workerBundle(for: request), html: directory.appendingPathComponent("index.html"), input: input)
         application.delegate = controller
         application.run()
         // NSApplication's delegate is weak; keep it alive for the whole run loop.

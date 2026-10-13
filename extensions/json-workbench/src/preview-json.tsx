@@ -218,7 +218,7 @@ function QueryForm({ value, input }: { value: JsonValue; input: string }) {
   );
 }
 
-export default function Command(props: LaunchProps<{ arguments: { input?: string } }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.PreviewJson }>) {
   const [source, setSource] = useState("");
   const [document, setDocument] = useState<Document>();
   const [error, setError] = useState<string>();

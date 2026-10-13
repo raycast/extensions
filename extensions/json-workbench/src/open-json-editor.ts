@@ -1,7 +1,7 @@
 import { closeMainWindow, LaunchProps, showToast, Toast } from "@raycast/api";
 import { initialInput, launchEditor } from "./lib/launch-editor";
 
-export default async function Command(props: LaunchProps<{ arguments: { input?: string } }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.OpenJsonEditor }>) {
   try {
     const text = await initialInput(props.arguments.input);
     await launchEditor(text);
