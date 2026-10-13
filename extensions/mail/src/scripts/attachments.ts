@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { existsSync } from "fs";
 import { open as openFile, unlink } from "fs/promises";
 import { homedir } from "os";
@@ -42,7 +43,8 @@ const reserveUniqueAttachmentName = async (name: string) => {
       continue;
     }
 
-    const lockPath = `${attachmentPath}.lock`;
+    const lockName = `.mail-attachment-${createHash("sha256").update(candidate).digest("hex")}.lock`;
+    const lockPath = join(attachmentsDirectory, lockName);
     let lock;
     try {
       lock = await openFile(lockPath, "wx");
