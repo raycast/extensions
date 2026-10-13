@@ -17,36 +17,42 @@
     {
       "name": "search-pens",
       "title": "Search Pens",
+      "subtitle": "CodePen",
       "description": "Search your Pens, browse source files and versions, edit, fork, and manage deployments",
       "mode": "view"
     },
     {
       "name": "create-pen",
       "title": "Create Pen",
+      "subtitle": "CodePen",
       "description": "Create a CodePen 2.0 Pen with starter files or your own HTML, CSS, and JavaScript",
       "mode": "view"
     },
     {
       "name": "search-collections",
       "title": "Search Collections",
+      "subtitle": "CodePen",
       "description": "Browse your collections and manage their Pens",
       "mode": "view"
     },
     {
       "name": "create-collection",
       "title": "Create Collection",
+      "subtitle": "CodePen",
       "description": "Create a collection to organize your Pens",
       "mode": "view"
     },
     {
       "name": "search-assets",
       "title": "Search Assets",
+      "subtitle": "CodePen",
       "description": "Browse, copy, rename, and delete your hosted assets",
       "mode": "view"
     },
     {
       "name": "upload-asset",
       "title": "Upload Asset",
+      "subtitle": "CodePen",
       "description": "Upload a file to CodePen Asset Hosting and copy its URL",
       "mode": "view"
     }
