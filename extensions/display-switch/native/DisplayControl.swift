@@ -24,6 +24,9 @@ struct SavedDisplay: Codable {
     var boot: String?
     var width: Int?
     var height: Int?
+    var vendor: UInt32?
+    var model: UInt32?
+    var serial: UInt32?
     var layoutPending: Bool?
     var warning: String?
 }
@@ -94,8 +97,14 @@ func allIDs() throws -> [CGDirectDisplayID] {
     return Array(ids.prefix(Int(count)))
 }
 func matchesRecovery(key: String, record: SavedDisplay, id: CGDirectDisplayID, identity: String?, builtIn: Bool, boot: String) -> Bool {
-    record.disabledByUs == true && record.boot == boot && record.cgID == id &&
-    record.builtIn == builtIn && identity?.caseInsensitiveCompare(key) == .orderedSame
+    guard record.disabledByUs == true, record.boot == boot, record.cgID == id, record.builtIn == builtIn else { return false }
+    if let identity { return identity.caseInsensitiveCompare(key) == .orderedSame }
+    // macOS can retain an offline display ID in SkyLight while temporarily
+    // withholding its UUID. Match the hardware fingerprint saved before the
+    // display was disabled so the current-session recovery path still works.
+    return record.vendor == CGDisplayVendorNumber(id) &&
+        record.model == CGDisplayModelNumber(id) &&
+        record.serial == CGDisplaySerialNumber(id)
 }
 func knownID(_ key: String) throws -> CGDirectDisplayID? {
     let ids = try online()
@@ -130,7 +139,7 @@ func snapshot(_ ids: [CGDirectDisplayID]) throws {
         let name = screens.first { ($0.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber)?.uint32Value == id }?.localizedName
         if enabled(id) {
             let rect = CGDisplayBounds(id)
-            saved[key] = snapshotRecord(previous: saved[key], current: SavedDisplay(name: name ?? saved[key]?.name ?? (CGDisplayIsBuiltin(id) != 0 ? "Built-in Display" : "Display \(CGDisplayVendorNumber(id))-\(CGDisplayModelNumber(id))"), x: Int32(rect.origin.x), y: Int32(rect.origin.y), mode: CGDisplayCopyDisplayMode(id)?.ioDisplayModeID, cgID: id, builtIn: CGDisplayIsBuiltin(id) != 0, disabledByUs: false, boot: bootIdentity(), width: Int(rect.width), height: Int(rect.height)), boot: bootIdentity())
+            saved[key] = snapshotRecord(previous: saved[key], current: SavedDisplay(name: name ?? saved[key]?.name ?? (CGDisplayIsBuiltin(id) != 0 ? "Built-in Display" : "Display \(CGDisplayVendorNumber(id))-\(CGDisplayModelNumber(id))"), x: Int32(rect.origin.x), y: Int32(rect.origin.y), mode: CGDisplayCopyDisplayMode(id)?.ioDisplayModeID, cgID: id, builtIn: CGDisplayIsBuiltin(id) != 0, disabledByUs: false, boot: bootIdentity(), width: Int(rect.width), height: Int(rect.height), vendor: CGDisplayVendorNumber(id), model: CGDisplayModelNumber(id), serial: CGDisplaySerialNumber(id)), boot: bootIdentity())
         }
     }
     try save()
