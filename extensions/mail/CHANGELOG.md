@@ -1,5 +1,11 @@
 # Mail Changelog
 
+## [Add AI Tools] - {PR_MERGE_DATE}
+
+- Add paginated Inbox reading and Inbox-filtered email search.
+- Add AI tools to list mailboxes, reply or forward messages, manage message status and folders, and list or save attachments.
+- Improve email search and validation, message lookup, and attachment saving.
+
 ## [Fix] - 2026-10-07
 
 - Refresh mailboxes sequentially to prevent spawning hundreds of concurrent osascript processes
