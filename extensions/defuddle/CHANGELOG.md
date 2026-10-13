@@ -1,6 +1,6 @@
 # Defuddle Changelog
 
-## [AI Tool and Browser Inputs] - {PR_MERGE_DATE}
+## [AI Tool and Browser Inputs] - 2026-10-13
 
 - Add an Extract Markdown AI tool that returns page content and metadata without clipboard, export, or history writes.
 - Preserve bare hostname inputs with numeric ports and show selected/clipboard suggestions before browser lookup finishes.
