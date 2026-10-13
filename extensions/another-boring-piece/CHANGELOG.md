@@ -1,6 +1,6 @@
 # Changelog
 
-## [Add Ask AI Support and Improve History] - {PR_MERGE_DATE}
+## [Add Ask AI Support and Improve History] - 2026-10-13
 
 - Added Ask Art Wallpapers support to browse artworks, read history, and set or download wallpapers through Raycast AI.
 - Added history search by artwork words, artist, creation year, usage dates, and action type, plus a tool to set a wallpaper directly from history.
