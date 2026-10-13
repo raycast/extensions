@@ -1,5 +1,10 @@
 # Visual Studio Code Changelog
 
+## [Open IDE] - {PR_MERGE_DATE}
+
+- Add `Open IDE` to open an editor window using the selected build’s CLI, with explicit IDE mode for Cursor.
+- Fix incorrectly quoted macOS CLI paths.
+
 ## [Open Agents Window command and enhancements] - 2026-09-28
 
 - Add `Open Agents Window` command: opens Agents Window for VSCode, opens Antigravity 2.0 for Antigravity IDE

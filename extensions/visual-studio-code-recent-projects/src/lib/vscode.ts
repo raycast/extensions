@@ -4,9 +4,14 @@ import * as fs from "fs";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
+import { promisify } from "node:util";
+import { VSCodeBuild } from "./types";
+
 import { fileExists, isMac, isWin } from "./utils";
 import { getEditorApplication } from "../utils/editor";
 import { build } from "./preferences";
+
+const execFile = promisify(child_process.execFile);
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
@@ -276,7 +281,8 @@ class VSCodeCLI {
   private cliFilename: string;
   private execOptions: child_process.ExecFileSyncOptions | undefined;
   constructor(cliFilename: string) {
-    this.cliFilename = `"${cliFilename}"`;
+    // Only shell execution on Windows needs quotes around the CLI path.
+    this.cliFilename = isWin ? `"${cliFilename}"` : cliFilename;
     this.execOptions = isWin ? { shell: true } : undefined;
   }
 
@@ -302,6 +308,11 @@ class VSCodeCLI {
       [reuseWindow ? "--reuse-window" : "--new-window", "--file-uri", uri],
       this.execOptions,
     );
+  }
+
+  async openIDE() {
+    const args = build === VSCodeBuild.Cursor ? ["--classic", "--new-window"] : ["--new-window"];
+    await execFile(this.cliFilename, args, { ...this.execOptions, timeout: 10_000, windowsHide: true });
   }
 
   openAgentsWindowSync() {

@@ -67,6 +67,12 @@
       "mode": "no-view"
     },
     {
+      "name": "open-ide",
+      "title": "Open IDE",
+      "description": "Open the editor window for the selected build, separate from Agents",
+      "mode": "no-view"
+    },
+    {
       "name": "open-new-window",
       "title": "Open New Window",
       "description": "Open a new VS Code window",
