@@ -25,7 +25,14 @@ import {
   AssignTask,
   Revalidate,
 } from "./shortcut";
-import { Project, Task, CreateProjectFormValues, CreateTaskFormValues, ProjectDetail } from "./types";
+import {
+  Project,
+  Task,
+  CreateProjectFormValues,
+  CreateTaskFormValues,
+  ProjectDetail,
+  CustomFieldDefinition,
+} from "./types";
 import { KaneoAPI } from "./api/kaneo";
 import { useAuthSession } from "./hooks/useAuthSession";
 import { TaskDetailView } from "./components/TaskDetailView";
@@ -41,7 +48,9 @@ import {
   dueDateColor,
   resolveColumns,
 } from "./lib/task-helpers";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getApiUrl } from "./lib/get-api-url";
+import { sortCustomFields } from "./lib/custom-field-helpers";
 
 function CreateProjectForm({ onProjectCreated }: { onProjectCreated: () => void }) {
   const { pop } = useNavigation();
@@ -103,6 +112,51 @@ function CreateProjectForm({ onProjectCreated }: { onProjectCreated: () => void 
   );
 }
 
+// ---------- Custom fields (helpers du formulaire de création) ----------
+
+type CustomValue = string | boolean | string[] | Date | null;
+
+// Les options peuvent arriver en string[] ou en JSON string selon l'API
+const getFieldOptions = (field: CustomFieldDefinition): string[] => {
+  const raw = (field as { options?: unknown }).options;
+  if (Array.isArray(raw)) return raw.map(String);
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed.map(String) : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
+const getInitialCustomValue = (field: CustomFieldDefinition): CustomValue => {
+  const def = (field as { defaultValue?: unknown }).defaultValue;
+  switch (field.type) {
+    case "checkbox":
+      return def === true || def === "true";
+    case "date": {
+      const d = def ? new Date(String(def)) : null;
+      return d && !Number.isNaN(d.getTime()) ? d : null;
+    }
+    case "multiselect":
+      return Array.isArray(def) ? def.map(String) : [];
+    default:
+      return def === undefined || def === null ? "" : String(def);
+  }
+};
+
+const isEmptyCustomValue = (v: CustomValue) => v === null || v === "" || (Array.isArray(v) && v.length === 0);
+
+// L'API Kaneo attend TOUJOURS des strings pour les valeurs de custom fields
+const serializeCustomValue = (v: CustomValue): string => {
+  if (v instanceof Date) return v.toISOString();
+  if (Array.isArray(v)) return JSON.stringify(v); // multiselect -> '["6","8","4"]'
+  if (typeof v === "boolean") return String(v); // checkbox -> "true" / "false"
+  return String(v ?? ""); // number, text, dropdown -> string
+};
+
 function CreateTaskForm({
   projectId,
   columnStatuses,
@@ -113,25 +167,72 @@ function CreateTaskForm({
   onTaskCreated: () => void;
 }) {
   const { pop } = useNavigation();
-  const kaneoApi = new KaneoAPI();
+  const kaneoApi = useMemo(() => new KaneoAPI(), []);
+
+  const { isLoading: isLoadingFields, data: rawFields } = usePromise(
+    (id: string) => kaneoApi.getCustomFields(id),
+    [projectId],
+  );
+  const customFields = useMemo(() => sortCustomFields(rawFields ?? []), [rawFields]);
+
+  const [customValues, setCustomValues] = useState<Record<string, CustomValue>>({});
+  const [customErrors, setCustomErrors] = useState<Record<string, string | undefined>>({});
+
+  const getCustomValue = (field: CustomFieldDefinition): CustomValue =>
+    field.id in customValues ? customValues[field.id] : getInitialCustomValue(field);
+
+  const setCustomValue = (fieldId: string, value: CustomValue) => {
+    setCustomValues((prev) => ({ ...prev, [fieldId]: value }));
+    setCustomErrors((prev) => ({ ...prev, [fieldId]: undefined }));
+  };
+
+  const validateCustomFields = () => {
+    const errors: Record<string, string> = {};
+    for (const field of customFields) {
+      const v = getCustomValue(field);
+      if (field.required && field.type !== "checkbox" && isEmptyCustomValue(v)) {
+        errors[field.id] = `${field.name} is required`;
+      } else if (field.type === "number" && !isEmptyCustomValue(v) && Number.isNaN(Number(v))) {
+        errors[field.id] = "Must be a number";
+      }
+    }
+    setCustomErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const { handleSubmit, itemProps } = useForm<CreateTaskFormValues>({
     async onSubmit(values) {
+      if (!validateCustomFields()) return;
+
       await showToast({
         style: Toast.Style.Animated,
         title: "Creating task...",
       });
 
       try {
+        // Ne pas envoyer les champs vides (checkbox : seulement si cochée ou modifiée)
+        const customFieldsPayload = customFields
+          .filter((field) => {
+            const v = getCustomValue(field);
+            if (field.type === "checkbox") return v === true || field.id in customValues;
+            return !isEmptyCustomValue(v);
+          })
+          .map((field) => ({
+            fieldId: field.id,
+            value: serializeCustomValue(getCustomValue(field)),
+          }));
+
+        // Une seule requête : la tâche et ses custom fields sont créés ensemble
         await kaneoApi.createTask(projectId, {
           title: values.title,
           description: values.description || "",
           status: values.status,
           priority: values.priority || "no-priority",
           ...(values.dueDate && { dueDate: values.dueDate.toISOString() }),
+          customFields: customFieldsPayload,
         });
 
-        showToast(Toast.Style.Success, "Task created successfully");
+        await showToast(Toast.Style.Success, "Task created successfully");
 
         onTaskCreated();
         pop();
@@ -161,8 +262,86 @@ function CreateTaskForm({
     { value: "urgent", title: "Urgent" },
   ];
 
+  const renderCustomField = (field: CustomFieldDefinition) => {
+    const id = `custom-${field.id}`;
+    const title = field.required ? `${field.name} *` : field.name;
+    const error = customErrors[field.id];
+    const value = getCustomValue(field);
+    const options = getFieldOptions(field);
+
+    switch (field.type) {
+      case "checkbox":
+        return (
+          <Form.Checkbox
+            key={field.id}
+            id={id}
+            title={title}
+            label=""
+            error={error}
+            value={value === true}
+            onChange={(v) => setCustomValue(field.id, v)}
+          />
+        );
+      case "date":
+        return (
+          <Form.DatePicker
+            key={field.id}
+            id={id}
+            title={title}
+            error={error}
+            value={value instanceof Date ? value : null}
+            onChange={(v) => setCustomValue(field.id, v)}
+          />
+        );
+      case "multiselect":
+        return (
+          <Form.TagPicker
+            key={field.id}
+            id={id}
+            title={title}
+            error={error}
+            value={Array.isArray(value) ? value : []}
+            onChange={(v) => setCustomValue(field.id, v)}
+          >
+            {options.map((o) => (
+              <Form.TagPicker.Item key={o} value={o} title={o} />
+            ))}
+          </Form.TagPicker>
+        );
+      case "dropdown":
+        return (
+          <Form.Dropdown
+            key={field.id}
+            id={id}
+            title={title}
+            error={error}
+            value={typeof value === "string" ? value : ""}
+            onChange={(v) => setCustomValue(field.id, v)}
+          >
+            <Form.Dropdown.Item value="" title="—" />
+            {options.map((o) => (
+              <Form.Dropdown.Item key={o} value={o} title={o} />
+            ))}
+          </Form.Dropdown>
+        );
+      default:
+        return (
+          <Form.TextField
+            key={field.id}
+            id={id}
+            title={title}
+            error={error}
+            placeholder={field.type === "number" ? "Enter a number" : `Enter ${field.name.toLowerCase()}`}
+            value={typeof value === "string" ? value : ""}
+            onChange={(v) => setCustomValue(field.id, v)}
+          />
+        );
+    }
+  };
+
   return (
     <Form
+      isLoading={isLoadingFields}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} />
@@ -182,6 +361,9 @@ function CreateTaskForm({
         ))}
       </Form.Dropdown>
       <Form.DatePicker title="Due Date" {...itemProps.dueDate} />
+
+      {customFields.length > 0 && <Form.Separator />}
+      {customFields.map(renderCustomField)}
     </Form>
   );
 }
@@ -189,13 +371,14 @@ function CreateTaskForm({
 function ProjectTasksList({ project }: { project: Project }) {
   const api = new KaneoAPI();
   const { sort, youAsAssignee } = getPreferenceValues<Preferences>();
-  const {
-    isLoading,
-    data: dProject,
-    revalidate,
-  } = usePromise((id: string) => api.getProjectTasks(id), [project.id.toString()]);
+  const projectId = project.id.toString();
+
+  const { isLoading, data: dProject, revalidate } = usePromise((id: string) => api.getProjectTasks(id), [projectId]);
   const { session } = useAuthSession();
   const [projectDetail, setProjectDetail] = useState<ProjectDetail | undefined>(dProject);
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
+
+  const refresh = () => revalidate();
 
   useEffect(() => {
     if (dProject) {
@@ -208,6 +391,7 @@ function ProjectTasksList({ project }: { project: Project }) {
   }
 
   const userId = session?.user?.id ?? null;
+
   const toggleAssignTask = async (task: Task) => {
     if (!userId) {
       await showToast({
@@ -364,12 +548,9 @@ function ProjectTasksList({ project }: { project: Project }) {
     isDone: col.isFinal,
   }));
 
-  if (isLoading || !projectDetail) {
-    return <List isLoading navigationTitle={`Tasks - ${project.name}`} />;
-  }
-
   return (
     <List
+      isShowingDetail={isShowingDetail}
       navigationTitle={`Tasks - ${project.name}`}
       searchBarPlaceholder="Search tasks..."
       actions={
@@ -378,13 +559,7 @@ function ProjectTasksList({ project }: { project: Project }) {
             title="Create Task"
             icon={Icon.Plus}
             shortcut={Keyboard.Shortcut.Common.New}
-            target={
-              <CreateTaskForm
-                projectId={project.id.toString()}
-                columnStatuses={columnStatuses}
-                onTaskCreated={revalidate}
-              />
-            }
+            target={<CreateTaskForm projectId={projectId} columnStatuses={columnStatuses} onTaskCreated={refresh} />}
           />
         </ActionPanel>
       }
@@ -403,41 +578,63 @@ function ProjectTasksList({ project }: { project: Project }) {
                   key={item.id}
                   icon={column.isFinal ? Icon.CircleProgress100 : Icon.Circle}
                   title={item.title}
-                  accessories={[
-                    {
-                      text:
-                        (youAsAssignee
-                          ? item.assigneeId === userId
-                            ? "You"
-                            : item.assigneeName
-                          : item.assigneeName) || "Unassigned",
-                      icon: item.assigneeName
-                        ? item.assigneeImage
-                          ? { source: item.assigneeImage, mask: Image.Mask.Circle }
-                          : getAvatarIcon(`${item.assigneeName}`)
-                        : undefined,
-                    },
-                    ...(item.dueDate
-                      ? [
+                  accessories={
+                    isShowingDetail
+                      ? []
+                      : [
                           {
-                            tag: {
-                              value: formatShortDate(item.dueDate),
-                              color: dueDateColor(item.dueDate),
-                            },
-                            tooltip: "Due Date",
+                            text:
+                              (youAsAssignee
+                                ? item.assigneeId === userId
+                                  ? "You"
+                                  : item.assigneeName
+                                : item.assigneeName) || "Unassigned",
+                            icon: item.assigneeName
+                              ? item.assigneeImage
+                                ? { source: getApiUrl(item.assigneeImage), mask: Image.Mask.Circle }
+                                : getAvatarIcon(`${item.assigneeName}`)
+                              : undefined,
+                          },
+                          ...(item.dueDate
+                            ? [
+                                {
+                                  tag: {
+                                    value: formatShortDate(item.dueDate),
+                                    color: dueDateColor(item.dueDate),
+                                  },
+                                  tooltip: "Due Date",
+                                },
+                              ]
+                            : []),
+                          {
+                            tag: priorityRaw
+                              ? {
+                                  value: capitalize(priorityRaw).replaceAll("-", " "),
+                                  color: priorityColor[priorityRaw],
+                                }
+                              : undefined,
+                            tooltip: "Priority",
                           },
                         ]
-                      : []),
-                    {
-                      tag: priorityRaw
-                        ? {
-                            value: capitalize(priorityRaw).replaceAll("-", " "),
-                            color: priorityColor[priorityRaw],
-                          }
-                        : undefined,
-                      tooltip: "Priority",
-                    },
-                  ]}
+                  }
+                  detail={
+                    <List.Item.Detail
+                      markdown={item.description ? cleanDescription(item.description) : undefined}
+                      metadata={
+                        <List.Item.Detail.Metadata>
+                          <List.Item.Detail.Metadata.Label title="Status" text={column.name} />
+                          <List.Item.Detail.Metadata.Label
+                            title="Priority"
+                            text={capitalize(priorityRaw).replaceAll("-", " ")}
+                          />
+                          <List.Item.Detail.Metadata.Label title="Assignee" text={item.assigneeName || "Unassigned"} />
+                          {item.dueDate && (
+                            <List.Item.Detail.Metadata.Label title="Due Date" text={formatShortDate(item.dueDate)} />
+                          )}
+                        </List.Item.Detail.Metadata>
+                      }
+                    />
+                  }
                   actions={
                     <ActionPanel>
                       <Action.Push
@@ -446,14 +643,21 @@ function ProjectTasksList({ project }: { project: Project }) {
                         target={
                           <TaskDetailView
                             taskId={item.id}
-                            projectId={project.id.toString()}
+                            projectId={projectId}
                             columnStatuses={columnStatuses}
                             columnPriorities={columnPriorities}
                             onStatusUpdate={updateTaskStatus}
                             onPriorityUpdate={updateTaskPriority}
                           />
                         }
-                        onPop={revalidate}
+                        onPop={refresh}
+                      />
+
+                      <Action
+                        title={isShowingDetail ? "Hide Details" : "Show Details"}
+                        icon={Icon.Sidebar}
+                        shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+                        onAction={() => setIsShowingDetail((v) => !v)}
                       />
 
                       <Action.Push
@@ -462,12 +666,12 @@ function ProjectTasksList({ project }: { project: Project }) {
                         shortcut={Keyboard.Shortcut.Common.New}
                         target={
                           <CreateTaskForm
-                            projectId={project.id.toString()}
+                            projectId={projectId}
                             columnStatuses={columnStatuses}
-                            onTaskCreated={revalidate}
+                            onTaskCreated={refresh}
                           />
                         }
-                        onPop={revalidate}
+                        onPop={refresh}
                       />
 
                       <Action
@@ -539,7 +743,7 @@ function ProjectTasksList({ project }: { project: Project }) {
                         title="Revalidate"
                         icon={Icon.RotateAntiClockwise}
                         shortcut={Revalidate}
-                        onAction={() => revalidate()}
+                        onAction={() => refresh()}
                       />
                     </ActionPanel>
                   }

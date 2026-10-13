@@ -1,5 +1,10 @@
 # Kaneo Changelog
 
+## [Custom Fields] - {PR_MERGE_DATE}
+
+- Added support for custom fields when creating tasks
+- Added custom fields display in the task details
+
 ## [My Tasks] - 2026-07-09
 
 - Added "My Tasks" command to list tickets assigned to you across all projects, grouped by status
