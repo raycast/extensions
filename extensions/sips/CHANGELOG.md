@@ -1,6 +1,6 @@
 # Image Modification Changelog
 
-## [Fix Output for Files Under a Home Folder on Another Volume] - {PR_MERGE_DATE}
+## [Fix Output for Files Under a Home Folder on Another Volume] - 2026-10-13
 
 - Fixed commands producing no output for images under `/Volumes/<drive>/Users/<name>` (for example when the home folder is on an external drive). Only a path that starts with `/Users/<name>` is now treated as a home path ([#29413](https://github.com/raycast/extensions/issues/29413)).
 
