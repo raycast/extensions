@@ -4,11 +4,17 @@ import { StringDecoder } from "node:string_decoder";
 import { mkdir, chmod, lstat, unlink } from "node:fs/promises";
 import { Paths } from "./paths";
 import { Controller } from "./controller";
-import { MAX_BODY_BYTES, validateQuery, validateConfig } from "./protocol";
+import {
+  MAX_BODY_BYTES,
+  validateQuery,
+  validateConfig,
+  CONFIG_CONFLICT,
+} from "./protocol";
 
 // Private Unix socket -> bounded protocol -> controller -> native worker.
 const HTTP_OK = 200;
 const HTTP_BAD_REQUEST = 400;
+const HTTP_CONFLICT = 409;
 const HTTP_FORBIDDEN = 403;
 const HTTP_NOT_FOUND = 404;
 const HTTP_TOO_LARGE = 413;
@@ -128,8 +134,13 @@ export async function createService(locations: Paths) {
         return;
       }
       if (req.method === "POST" && req.url === "/config") {
-        const config = validateConfig(await body(req));
-        await controller.configure(config);
+        const input = await body(req);
+        const config = validateConfig(input);
+        // Conditional UI writes retain compatibility with explicit unconditional installation/test clients.
+        await controller.configure(
+          config,
+          (input as { expectedConfig?: unknown }).expectedConfig,
+        );
         respond(res, HTTP_OK, await controller.status());
         return;
       }
@@ -165,7 +176,11 @@ export async function createService(locations: Paths) {
     })().catch((error) => {
       respond(
         res,
-        error instanceof RequestError ? error.status : HTTP_BAD_REQUEST,
+        error instanceof RequestError
+          ? error.status
+          : error instanceof Error && error.name === CONFIG_CONFLICT
+            ? HTTP_CONFLICT
+            : HTTP_BAD_REQUEST,
         { error: error instanceof Error ? error.message : String(error) },
       );
     });

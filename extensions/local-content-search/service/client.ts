@@ -20,8 +20,9 @@ export class LocalClient {
     return status;
   }
 
-  configure(config: Config): Promise<Status> {
-    return this.send("/config", config);
+  configure(config: Config, expectedConfig?: Config): Promise<Status> {
+    // UI callers send their displayed snapshot; the service rejects writes based on superseded settings.
+    return this.send("/config", { ...config, expectedConfig });
   }
   rescan(): Promise<Status> {
     return this.send("/rescan", {});

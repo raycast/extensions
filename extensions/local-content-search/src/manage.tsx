@@ -38,7 +38,7 @@ function Settings({ status, saved }: { status: Status; saved: () => void }) {
         powerMode: values.powerMode,
         memoryLimitMb: Number(values.memory),
       });
-      await client.configure(config);
+      await client.configure(config, status.config);
       saved();
       pop();
       await showToast({
@@ -144,10 +144,11 @@ export default function Manage() {
       clearInterval(timer);
     };
   }, []);
-  async function update(config: Config) {
+  async function update(config: Config, expected: Config) {
     try {
-      setStatus(await client.configure(config));
+      setStatus(await client.configure(config, expected));
     } catch (failure) {
+      refresh();
       await showToast({
         style: Toast.Style.Failure,
         title: "Control failed",
@@ -168,7 +169,10 @@ export default function Manage() {
             title={status.config.paused ? "Resume Indexing" : "Pause Indexing"}
             icon={status.config.paused ? Icon.Play : Icon.Pause}
             onAction={() =>
-              update({ ...status.config, paused: !status.config.paused })
+              update(
+                { ...status.config, paused: !status.config.paused },
+                status.config,
+              )
             }
           />
           <Action

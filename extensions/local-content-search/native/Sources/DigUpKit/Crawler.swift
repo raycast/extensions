@@ -105,6 +105,8 @@ public enum Crawler {
                     let dataless = info.st_flags & 0x4000_0000 != 0  // SF_DATALESS
                     let inCloud = values?.isUbiquitousItem == true && values?.ubiquitousItemDownloadingStatus != .current
                     if dataless || inCloud {
+                        // Eviction or cloud sync is temporary unavailability, not deletion; retain saved text/vectors.
+                        report.unreadable.append(FolderSelection.realPath(url.path))
                         report.skipped["in the cloud, not downloaded", default: 0] += 1
                         return
                     }

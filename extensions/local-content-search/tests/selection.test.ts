@@ -22,3 +22,16 @@ test("selection honors chosen descendants and their own exclusions", () => {
     false,
   );
 });
+
+// Match NSString.pathExtension for hidden and extensionless leaf names, not dots in parent folders.
+test("extension exclusions use the leaf filename extension", () => {
+  const config = {
+    ...DEFAULT_CONFIG,
+    roots: ["/docs"],
+    excludedExtensions: ["gitignore", "txt", "md"],
+  };
+  assert.equal(selectedPath(config, "/docs/.gitignore"), true);
+  assert.equal(selectedPath(config, "/docs/txt"), true);
+  assert.equal(selectedPath(config, "/docs/folder.md/README"), true);
+  assert.equal(selectedPath(config, "/docs/notes.TXT"), false);
+});

@@ -1,5 +1,6 @@
 import {
   access,
+  copyFile,
   readFile,
   realpath,
   readdir,
@@ -8,13 +9,14 @@ import {
   mkdir,
   stat,
 } from "node:fs/promises";
-import { watch, FSWatcher } from "node:fs";
+import { watch, FSWatcher, constants } from "node:fs";
 import { join } from "node:path";
 import { Paths } from "./paths";
 import { selectedPath } from "./selection";
 import { readResourceBlock, ResourceBlock } from "./resources";
 import {
   Config,
+  CONFIG_CONFLICT,
   DEFAULT_CONFIG,
   Hit,
   Status,
@@ -37,6 +39,8 @@ const POWER_POLL_MS = 10000;
 const DEBOUNCE_MS = 2000;
 const QUERY_IDLE_MS = 10000;
 const CACHE_LIMIT = 64;
+const COUNT_EVENTS = ["sync", "waiting", "idle"];
+const COUNT_FIELDS = ["files", "searchable", "pending", "vectors"];
 const PRUNE_TIMEOUT_MS = 30000;
 // A two-standard-deviation gate hides valid semantic matches in tiny indexes (including a single document).
 const MIN_SEMANTIC_Z = "0";
@@ -58,23 +62,34 @@ export class Controller {
   private dirty = true;
   private querying = false;
   private closed = false;
+  private configFailed = false;
+  private configEpoch = 0;
+  private clearPending = false;
+  private clearing = false;
+  private readonly stoppedWorkers = new WeakSet<WorkerRun>();
   private blocked: string | undefined;
   private cache = new Map<string, Hit[]>();
   private configQueue: Promise<unknown> = Promise.resolve();
 
-  constructor(private readonly locations: Paths) {}
+  constructor(
+    private readonly locations: Paths,
+    private readonly resourceCheck = readResourceBlock,
+  ) {}
 
   async initialize(): Promise<void> {
     await mkdir(this.locations.index, { recursive: true, mode: 0o700 });
     // Keep native temporary-file cleanup inside our own state, never another app's system temp folders.
     await mkdir(this.locations.scratch, { recursive: true, mode: 0o700 });
     try {
-      this.config = validateConfig(
-        JSON.parse(await readFile(this.locations.config, "utf8")),
-      );
+      const saved = JSON.parse(await readFile(this.locations.config, "utf8"));
+      this.config = validateConfig(saved);
+      // Cleanup intent is committed atomically with empty roots and survives interruption or restart.
+      this.clearPending =
+        saved.clearPending === true && this.config.roots.length === 0;
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
         this.config.paused = true;
+        this.configFailed = true;
         this.error = `Configuration could not be read; indexing paused: ${String(error)}`;
       }
     }
@@ -102,13 +117,30 @@ export class Controller {
     };
   }
 
-  async configure(value: unknown): Promise<void> {
-    // Serialize writes so competing UI actions cannot leave a partial or stale config file.
+  async configure(value: unknown, expectedValue?: unknown): Promise<void> {
+    // Serialize writes and compare UI snapshots inside the queue so stale controls cannot restore old folders.
     const next = validateConfig(value);
+    const expected =
+      expectedValue === undefined ? undefined : validateConfig(expectedValue);
     const update = this.configQueue.then(async () => {
-      if (this.closed) {
-        throw new Error("Service is stopping");
+      this.assertRunning();
+      if (this.configFailed && next.roots.length === 0) {
+        throw new Error(
+          "Saved configuration is unavailable; restore it or choose folders explicitly before changing controls",
+        );
       }
+      if (
+        expected &&
+        JSON.stringify(expected) !== JSON.stringify(this.config)
+      ) {
+        const conflict = new Error(
+          "Configuration changed; refresh settings and retry",
+        );
+        conflict.name = CONFIG_CONFLICT;
+        throw conflict;
+      }
+      // Invalidate queries still checking readiness or yielding an old worker before changing scope.
+      this.configEpoch += 1;
       const roots: string[] = [];
       for (const root of next.roots) {
         try {
@@ -129,18 +161,36 @@ export class Controller {
           realpath(folder).catch(() => folder),
         ),
       );
-      await writeFile(
-        `${this.locations.config}.tmp`,
-        JSON.stringify(next, null, 2),
-        { mode: 0o600 },
-      );
-      await rename(`${this.locations.config}.tmp`, this.locations.config);
-      this.config = next;
-      await this.stopWorker();
-      // Removing the last folder is an explicit index cleanup, not background inference; honor it even while paused.
-      if (next.roots.length === 0) {
-        await this.clearIndex();
+      this.assertRunning();
+      // Preserve unreadable saved settings before an explicit recovery replaces them.
+      if (this.configFailed) {
+        await copyFile(
+          this.locations.config,
+          `${this.locations.config}.invalid-${Date.now()}`,
+          constants.COPYFILE_EXCL,
+        );
       }
+      this.assertRunning();
+      this.clearPending =
+        next.roots.length === 0 &&
+        (this.clearPending || this.config.roots.length > 0);
+      await this.saveConfig(next);
+      this.config = next;
+      this.configFailed = false;
+      await this.stopWorker();
+      this.assertRunning();
+      // Cleanup is not inference; failures leave a durable retry rather than pretending the settings were not saved.
+      if (this.clearPending) {
+        try {
+          await this.clearIndex();
+          this.clearPending = false;
+          await this.saveConfig(next);
+        } catch (error) {
+          this.clearPending = true;
+          this.error = `Folder settings saved; index cleanup pending: ${String(error)}`;
+        }
+      }
+      this.assertRunning();
       this.resetWatchers();
       this.cache.clear();
       this.markDirty();
@@ -158,12 +208,13 @@ export class Controller {
     this.querying = true;
     let queryWorker: WorkerRun | undefined;
     try {
-      if (this.blocked === ResourceBlock.Memory) {
-        throw new Error(
-          "Search paused because macOS reports high memory pressure; close another app and retry",
-        );
-      }
-      if (!(await this.modelsReady())) {
+      await this.configQueue;
+      this.assertSearchAllowed();
+      const epoch = this.configEpoch;
+      const ready = await this.modelsReady();
+      // Readiness checks yield; shutdown, scope changes or memory pressure may arrive before they finish.
+      this.assertSearchAllowed(epoch);
+      if (!ready) {
         throw new Error(
           "EmbeddingGemma 2 is not installed. Run npm run download:models in the repository",
         );
@@ -176,6 +227,7 @@ export class Controller {
         return cached;
       }
       await this.stopWorker();
+      this.assertSearchAllowed(epoch);
       if (signal.aborted) {
         throw new Error("Search cancelled");
       }
@@ -186,6 +238,7 @@ export class Controller {
         [
           "search",
           ` ${query}`,
+          "--main-index",
           "--index",
           this.locations.index,
           "--json",
@@ -251,6 +304,40 @@ export class Controller {
       watcher.close();
     }
     await this.stopWorker();
+    // Drain writes already in flight; their late guards prevent new workers/watchers after shutdown.
+    await this.configQueue;
+    await this.stopWorker();
+  }
+
+  private assertRunning(): void {
+    if (this.closed) {
+      throw new Error("Service is stopping");
+    }
+  }
+
+  // Persist private cleanup intent alongside the public config using the same atomic rename.
+  private async saveConfig(config: Config): Promise<void> {
+    await writeFile(
+      `${this.locations.config}.tmp`,
+      JSON.stringify({ ...config, clearPending: this.clearPending }, null, 2),
+      { mode: 0o600 },
+    );
+    await rename(`${this.locations.config}.tmp`, this.locations.config);
+  }
+
+  // Recheck at every async query boundary so shutdown cannot leave an orphan inference worker.
+  private assertSearchAllowed(epoch?: number): void {
+    this.assertRunning();
+    if (epoch !== undefined && epoch !== this.configEpoch) {
+      throw new Error(
+        "Configuration changed during search; retry with the current folders",
+      );
+    }
+    if (this.blocked === ResourceBlock.Memory) {
+      throw new Error(
+        "Search paused because macOS reports high memory pressure; close another app and retry",
+      );
+    }
   }
 
   private async modelsReady(): Promise<boolean> {
@@ -325,13 +412,16 @@ export class Controller {
       },
     );
     this.worker = worker;
+    this.clearing = true;
     try {
       await worker.done;
+      this.counts = { files: 0, searchable: 0, pending: 0, vectors: 0 };
       this.progress = undefined;
       this.missingRoots = [];
       this.error = undefined;
       this.activity = "idle";
     } finally {
+      this.clearing = false;
       if (this.worker === worker) {
         this.worker = undefined;
       }
@@ -343,6 +433,7 @@ export class Controller {
     if (!worker) {
       return;
     }
+    this.stoppedWorkers.add(worker);
     worker.stop();
     await worker.done.catch(() => {});
     if (this.worker === worker) {
@@ -356,12 +447,13 @@ export class Controller {
       return;
     }
     try {
-      this.blocked = await readResourceBlock(
+      this.blocked = await this.resourceCheck(
         this.locations.engine,
         this.config.powerMode,
       );
       if (
         this.blocked &&
+        !this.clearing &&
         (!this.querying || this.blocked === ResourceBlock.Memory)
       ) {
         await this.stopWorker();
@@ -375,15 +467,15 @@ export class Controller {
   }
 
   private async index(): Promise<void> {
-    if (
-      this.closed ||
-      this.querying ||
-      this.worker ||
-      !this.dirty ||
-      this.config.paused ||
-      this.blocked ||
-      this.config.roots.length === 0
-    ) {
+    if (this.closed || this.querying || this.worker || !this.dirty) {
+      return;
+    }
+    // Retry durable privacy cleanup before pause/power/model gates; it never loads an embedding model.
+    if (this.clearPending && this.config.roots.length === 0) {
+      await this.configure(this.config);
+      return;
+    }
+    if (this.config.paused || this.blocked || this.config.roots.length === 0) {
       return;
     }
     if (!(await this.modelsReady())) {
@@ -439,7 +531,12 @@ export class Controller {
     try {
       await worker.done;
     } catch (error) {
-      if (!this.querying && !this.config.paused && !this.closed) {
+      if (
+        !this.stoppedWorkers.has(worker) &&
+        !this.querying &&
+        !this.config.paused &&
+        !this.closed
+      ) {
         this.error = String(error);
       }
     } finally {
@@ -464,7 +561,18 @@ export class Controller {
           path: event.path,
         };
       }
-      if (event.files !== undefined) {
+      // Only inventory events contain complete counts; pruned/rest use files for a different quantity.
+      if (
+        COUNT_EVENTS.includes(event.event) &&
+        COUNT_FIELDS.some((field) => event[field] !== undefined)
+      ) {
+        if (
+          !COUNT_FIELDS.every(
+            (field) => Number.isSafeInteger(event[field]) && event[field] >= 0,
+          )
+        ) {
+          throw new Error("Invalid native inventory counts");
+        }
         this.counts = {
           files: event.files,
           searchable: event.searchable,

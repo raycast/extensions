@@ -9,6 +9,7 @@ export const MAX_BODY_BYTES = 32 * 1024;
 export const MIN_MEMORY_MB = 1024;
 export const MAX_MEMORY_MB = 4096;
 export const PROTOCOL_VERSION = 1;
+export const CONFIG_CONFLICT = "ConfigurationConflict";
 
 export interface Config {
   roots: string[];

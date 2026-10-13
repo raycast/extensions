@@ -44,7 +44,7 @@ Selected folders -> native readers -> EmbeddingGemma 2 / Metal -> SQLite
                                +---- indexing yields -------+
 ```
 
-The per-user login service runs independently of Raycast. It reconciles changed files, coalesces watcher events, and rescans periodically. SQLite retains pending work across restarts. Disconnected folders retain their indexed records; deleted files in accessible folders are removed.
+The per-user login service runs independently of Raycast. It reconciles changed files, coalesces watcher events, and rescans periodically. SQLite retains pending work across restarts. Disconnected folders and files temporarily evicted to cloud storage retain their indexed records; deleted files in accessible folders are removed. Cloud placeholders are not downloaded to refresh their contents.
 
 - One native worker at a time; searches interrupt indexing.
 - Index workers use utility scheduling, reduced CPU priority, and at most four CPU threads. Builds use two compiler jobs.
@@ -58,7 +58,7 @@ Resource limits reduce risk; they cannot guarantee that macOS or a driver will n
 
 After setup, the extension and service require no network access. They make no remote inference requests, telemetry calls, or update checks. Files, queries, extracted content, and embeddings stay on the Mac. The service accepts requests through a private Unix socket, not a TCP port.
 
-State lives under `~/Library/Application Support/LocalSearch`. Its directory is user-private, but extracted text and vectors are not separately encrypted; use FileVault if you need disk encryption. Removing a folder hides its results immediately and prunes its records on the next indexing pass. Removing the final folder prunes records even while paused.
+State lives under `~/Library/Application Support/LocalSearch`. Its directory is user-private, but extracted text and vectors are not separately encrypted; use FileVault if you need disk encryption. Removing a folder hides its results immediately and prunes its records on the next indexing pass. Removing the final folder prunes records even while paused or power-blocked. Interrupted cleanup remains queued across restarts until it succeeds; the service reports cleanup failures.
 
 ## Test
 
@@ -81,6 +81,8 @@ npm run uninstall:service
 ```
 
 This stops and unregisters the login service while preserving models, settings, and the index. Disable/remove the three commands in Raycast's extension settings separately. Logs are under `~/Library/Application Support/LocalSearch/logs`.
+
+If saved configuration cannot be read, pause/resume cannot replace it with an empty folder list. Restore the configuration or explicitly choose folders; recovery preserves the original as `config.json.invalid-<timestamp>` in the state directory. If a Node upgrade removes the binary used by the login agent, rerun `npm run install:service` with the new Node installation.
 
 ## Boundaries
 

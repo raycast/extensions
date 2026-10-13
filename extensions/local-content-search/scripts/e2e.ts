@@ -9,6 +9,7 @@ import {
   rm,
   copyFile,
   realpath,
+  access,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -111,6 +112,16 @@ async function main(): Promise<void> {
     const hits = await client.search("restrictions on domestic animals");
     const latencyMs = Math.round(performance.now() - start);
     assert.equal(hits[0]?.path.split("/").pop(), "lease.txt");
+    // A content query containing code: must remain literal text, never switch to the unused source-code index.
+    assert.ok(
+      (await client.search("code: rental agreement")).some((hit) =>
+        hit.path.endsWith("lease.txt"),
+      ),
+    );
+    assert.ok(Array.isArray(await client.search("code:")));
+    await assert.rejects(access(join(locations.index, "code.sqlite")), {
+      code: "ENOENT",
+    });
     assert.ok(!hits.some((hit) => hit.path.endsWith("secret.txt")));
     console.log(
       `PASS semantic retrieval (${latencyMs} ms, real EmbeddingGemma 2)`,
@@ -325,6 +336,7 @@ async function main(): Promise<void> {
       checks: [
         "semantic retrieval",
         "flag safety",
+        "literal code-prefix content queries",
         "secret exclusions",
         "pause/resume",
         "watcher updates",

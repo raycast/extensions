@@ -1,12 +1,47 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
-import { mkdtemp, rm, stat } from "node:fs/promises";
+import { mkdtemp, mkdir, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { request } from "node:http";
 import { createService } from "../service/server";
 import { paths } from "../service/paths";
 import { DEFAULT_CONFIG, Status } from "../service/protocol";
+
+// A stale UI control must not restore folders replaced by a newer settings save.
+test("stale conditional configuration cannot undo newer folder choices", async () => {
+  const root = await mkdtemp(join(tmpdir(), "ls-config-race-"));
+  const original = join(root, "original");
+  const replacement = join(root, "replacement");
+  await mkdir(original);
+  await mkdir(replacement);
+  const service = await createService(paths(join(root, "state")));
+  try {
+    const first = await call(service.socket, "/config", {
+      ...DEFAULT_CONFIG,
+      roots: [original],
+      paused: true,
+    });
+    const snapshot = first.body.config;
+    const latest = await call(service.socket, "/config", {
+      ...snapshot,
+      roots: [replacement],
+    });
+    const stale = await call(service.socket, "/config", {
+      ...snapshot,
+      paused: false,
+      expectedConfig: snapshot,
+    });
+    assert.equal(stale.status, 409);
+    assert.deepEqual(
+      (await call(service.socket, "/status")).body.config,
+      latest.body.config,
+    );
+  } finally {
+    await service.close();
+    await rm(root, { recursive: true, force: true });
+  }
+});
 
 // Exercise real Unix-socket HTTP and persistence without running model inference.
 async function call(

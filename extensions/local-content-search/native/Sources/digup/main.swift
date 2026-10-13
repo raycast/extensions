@@ -25,6 +25,7 @@ let usage = """
       --code               estimate, index or show the code index of these folders (code.sqlite in the index
                            folder): source files, their repos' docs and notebooks, minus what git ignores
       --kind K,K           screenshot, image, pdf, doc, audio, video
+      --main-index         keep code: queries literal when searching file contents
       --include-code       also index loose source code and data files as documents (outside code projects)
       --include-datasets   don't skip folders that look like datasets
       --exclude DIR        don't index this folder (repeatable)
@@ -330,7 +331,8 @@ func queryVectors(_ queries: [String], store: IndexStore, searcher: Searcher,
 func search(_ args: Arguments) throws {
     var query = args.positional.joined(separator: " ")
     guard !query.isEmpty else { throw CLIError("search for what?") }
-    let code = CodeQuery.text(of: query)
+    // The content-search service never creates or queries the standalone source-code index.
+    let code = args.flags.contains("--main-index") ? nil : CodeQuery.text(of: query)
     if let code { query = code }
     guard !query.isEmpty else { throw CLIError("search the code for what?") }
     let store = try IndexStore(directory: args.indexFolder, file: code == nil ? IndexStore.mainFile : IndexStore.codeFile)
