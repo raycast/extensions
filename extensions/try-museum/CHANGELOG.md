@@ -1,5 +1,9 @@
 # Changelog
 
+## [Update Author] - {PR_MERGE_DATE}
+
+- Update the extension author from `ray.dhruv` to `0xdhrv`.
+
 ## Initial Version - 2026-10-01
 
 - Find public domain artworks by hex, CSS color name, RGB, or HSL, with museum filters and recent colors.
