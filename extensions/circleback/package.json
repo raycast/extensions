@@ -11,6 +11,9 @@
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "new-meeting",
@@ -29,19 +32,45 @@
       "title": "Search Meetings",
       "description": "Search your meetings in Circleback.",
       "mode": "view"
+    },
+    {
+      "name": "ask-circleback",
+      "title": "Ask Circleback",
+      "description": "Ask Circleback about your meetings and more.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "question",
+          "placeholder": "Question",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "chats",
+      "title": "Chats",
+      "description": "Browse and continue your chats.",
+      "mode": "view"
     }
   ],
   "dependencies": {
+    "@ai-sdk/react": "4.0.125",
     "@raycast/api": "^1.102.6",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "@resvg/resvg-wasm": "2.6.2",
+    "ai": "7.0.122",
+    "fast-xml-parser": "^5.11.2",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
+    "@types/node": "24.13.2",
     "@types/react": "~19.1.9",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "typescript7": "npm:typescript@7.0.2"
   },
   "scripts": {
     "build": "ray build",
@@ -50,8 +79,5 @@
     "fix-lint": "ray lint --fix",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }
