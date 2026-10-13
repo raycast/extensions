@@ -4,7 +4,6 @@ import {
   Icon,
   Keyboard,
   List,
-  Toast,
   closeMainWindow,
   getPreferenceValues,
   showToast,
@@ -14,7 +13,8 @@ import fs from "node:fs";
 import os from "node:os";
 import { useEffect, useMemo } from "react";
 import { NewTabMenuEntry, Profile, UnsupportedPatternError, resolveNewTabMenuOrder } from "./new-tab-menu";
-import { profilesPath, wtPath } from "./utils/constants";
+import { isIncorrectPortableConfig, profilesPath, wtPath } from "./utils/constants";
+import { showFailureToast } from "@raycast/utils";
 
 interface WindowsTerminalSettings {
   defaultProfile?: string;
@@ -174,6 +174,13 @@ function ProfileItem(props: { item: Profile; quake: boolean }) {
 export default function Command() {
   const { openProfilesInQuakeWindow: quake, useNewTabMenu } = getPreferenceValues<Preferences>();
 
+  if (isIncorrectPortableConfig) {
+    showToast({
+      title: "Missing settings folder.",
+      message: "Windows Terminal is in portable mode. Launch it to generate the settings folder.",
+    });
+  }
+
   // A matchProfiles pattern this extension can't evaluate (valid for Windows Terminal, but past
   // what the matcher implements or affords) means the resolved order can't be trusted — so fall
   // back to the default sections below and say which pattern, instead of quietly dropping or
@@ -193,11 +200,7 @@ export default function Command() {
 
   useEffect(() => {
     if (!unsupported) return;
-    showToast({
-      style: Toast.Style.Failure,
-      title: "New Tab Menu order not applied",
-      message: unsupported.message,
-    });
+    showFailureToast(unsupported.message, { title: "New Tab Menu order not applied" });
   }, [unsupported]);
 
   // The New Tab Menu can interleave regular, SSH, and WSL profiles, so honoring its order means

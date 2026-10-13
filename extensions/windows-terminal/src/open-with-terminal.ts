@@ -1,9 +1,10 @@
-import { closeMainWindow, getPreferenceValues, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues, getSelectedFinderItems, showToast } from "@raycast/api";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { getCurrentExplorerPath } from "./utils/win-scripts";
-import { wtPath } from "./utils/constants";
+import { isIncorrectPortableConfig, wtPath } from "./utils/constants";
+import { showFailureToast } from "@raycast/utils";
 
 function resolveDirectory(selectedPath: string): string {
   try {
@@ -34,6 +35,13 @@ export default async function main() {
   try {
     const { openProfilesInQuakeWindow: quake } = getPreferenceValues<Preferences>();
 
+    if (isIncorrectPortableConfig) {
+      showToast({
+        title: "Missing settings folder.",
+        message: "Windows Terminal is in portable mode. Launch it to generate the settings folder.",
+      });
+    }
+
     let selectedItems: { path: string }[] = [];
 
     selectedItems = await getSelectedFinderItems();
@@ -53,10 +61,6 @@ export default async function main() {
 
     await closeMainWindow();
   } catch (error) {
-    await showToast({
-      title: "Failed opening with Terminal",
-      style: Toast.Style.Failure,
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: "Failed opening with Terminal" });
   }
 }

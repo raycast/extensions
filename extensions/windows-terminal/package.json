@@ -41,9 +41,9 @@
     },
     {
       "name": "windowsTerminalPath",
-      "title": "Windows Terminal Path",
+      "title": "Windows Terminal Folder",
       "label": "Use a portable install of Windows Terminal",
-      "description": "When set the extension will use the portable version of Windows Terminal",
+      "description": "Folder that contains wt.exe for an unpackaged or portable install. Leave empty for the Microsoft Store version.",
       "type": "directory",
       "required": false
     }
@@ -79,7 +79,8 @@
   ],
   "contributors": [
     "artistro08",
-    "muhammadrizo"
+    "muhammadrizo",
+    "taken"
   ],
   "allowScripts": {
     "esbuild": true
