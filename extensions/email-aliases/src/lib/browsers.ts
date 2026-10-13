@@ -186,6 +186,23 @@ async function otherBrowsersRunning(target: string): Promise<boolean> {
   }
 }
 
+/** Whether a browser without AppleScript support (Firefox, Zen …) is running. Unknown counts as yes. */
+async function extensionOnlyBrowserRunning(): Promise<boolean> {
+  if (!isMac()) return false;
+  try {
+    const raw = await runAppleScript(
+      'tell application "System Events" to return displayed name of every application process whose background only is false',
+      { timeout: 10_000 },
+    );
+    return raw
+      .split(",")
+      .map((name) => name.trim())
+      .some((name) => isExtensionOnlyBrowser(name));
+  } catch {
+    return true;
+  }
+}
+
 /**
  * Picks the tab from the browser extension's candidates, or throws.
  *
@@ -236,7 +253,11 @@ async function runningBrowsers(): Promise<string[]> {
   }
 }
 
-/** The app in front, which is the one exact signal macOS does give us. */
+/**
+ * The app in front, which is the one exact signal macOS does give us.
+ * `undefined` means unknown: the lookup failed, or Raycast itself was still in
+ * front after the retry, so the app the user came from cannot be told.
+ */
 async function frontmostApp(): Promise<string | undefined> {
   if (!isMac()) return undefined;
   try {
@@ -246,7 +267,7 @@ async function frontmostApp(): Promise<string | undefined> {
       await new Promise((resolve) => setTimeout(resolve, 200));
       app = await getFrontmostApplication();
     }
-    return app.name;
+    return app.name === "Raycast" ? undefined : app.name;
   } catch {
     return undefined;
   }
@@ -291,14 +312,16 @@ export class NoTabError extends Error {
 export class AmbiguousTabError extends Error {
   readonly candidates: TabInfo[];
 
-  constructor(candidates: TabInfo[], reason: "windows" | "browsers" | "unattributed", target?: string) {
+  constructor(candidates: TabInfo[], reason: "windows" | "browsers" | "unattributed" | "front", target?: string) {
     const names = [...new Set(candidates.map((tab) => tab.source))].join(", ");
     super(
-      reason === "browsers"
-        ? `${names} are all open and none of them is in front, and macOS does not say which one you used last. Pick the site yourself, or set a preferred browser in the extension preferences.`
-        : reason === "unattributed"
-          ? `The browser extension does not say which browser a tab belongs to, and other browsers are running besides ${target ?? "yours"}. Pick the site yourself, or quit the other browsers.`
-          : `${candidates.length} browser windows report an active tab, and the browser extension does not say which one has the focus. Pick the site yourself, or close the windows you don't need.`,
+      reason === "front"
+        ? "Raycast was still in front, so it is not clear which browser you came from. Pick the site yourself."
+        : reason === "browsers"
+          ? `${names} are all open and none of them is in front, and macOS does not say which one you used last. Pick the site yourself, or set a preferred browser in the extension preferences.`
+          : reason === "unattributed"
+            ? `The browser extension does not say which browser a tab belongs to, and other browsers are running besides ${target ?? "yours"}. Pick the site yourself, or quit the other browsers.`
+            : `${candidates.length} browser windows report an active tab, and the browser extension does not say which one has the focus. Pick the site yourself, or close the windows you don't need.`,
     );
     this.name = "AmbiguousTabError";
     this.candidates = candidates;
@@ -306,9 +329,6 @@ export class AmbiguousTabError extends Error {
 }
 
 function noTabMessage(options: LookupOptions): string {
-  if (!isMac()) {
-    return "Could not read the current tab. On Windows this needs the Raycast browser extension.";
-  }
   if (options.preferredBrowser && !isKnownBrowser(options.preferredBrowser)) {
     return `${options.preferredBrowser} does not support AppleScript, so its tab is read through the Raycast browser extension. Is the extension installed and running in ${options.preferredBrowser}?`;
   }
@@ -353,6 +373,16 @@ export async function getActiveTab(options: LookupOptions): Promise<TabInfo> {
     } else {
       const front = frontApp && isKnownBrowser(frontApp) ? frontApp : undefined;
       const tabs = await tabsFromRunningBrowsers(front);
+      // The app in front is unknown and Firefox, Zen … is running: the user may
+      // be on its page, which only the browser extension can read. A background
+      // tab must not win just because it is the only one AppleScript sees.
+      if (!frontApp && tabs.length > 0 && useExtension && (await extensionOnlyBrowserRunning())) {
+        const all = [...tabs, ...(await activeTabsFromBrowserExtension())];
+        const key = (tab: TabInfo) => (options.urlOnly ? tab.url : `${tab.url}${UNIT_SEPARATOR}${tab.title}`);
+        const distinct = all.filter((tab, index) => all.findIndex((other) => key(other) === key(tab)) === index);
+        if (distinct.length === 1) return distinct[0];
+        throw new AmbiguousTabError(distinct, "front");
+      }
       // One browser, or one in front: unambiguous. Several with none in front:
       // ask rather than pick an arbitrary one.
       if (tabs.length === 1) return tabs[0];
@@ -428,7 +458,16 @@ export async function getAllTabs(options: LookupOptions): Promise<TabInfo[]> {
     if (tabs.length > 0) windows.push(tabs);
   }
 
-  if (windows.length === 1) return windows[0];
+  if (windows.length === 1) {
+    // The app in front is unknown and Firefox, Zen … is running: the user may be
+    // there, so the one AppleScript window is not necessarily the one meant.
+    if (!frontApp && (await extensionOnlyBrowserRunning())) {
+      throw new NoTabError(
+        "Raycast was still in front, so it is not clear which browser window you mean. Run the command again from the browser window.",
+      );
+    }
+    return windows[0];
+  }
   if (windows.length > 1) {
     throw new AmbiguousTabError(
       windows.map((tabs) => tabs[0]),
