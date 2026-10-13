@@ -39,18 +39,6 @@ A Raycast extension that instantly counts words, characters, lines, sentences, p
 
 All counting happens locally — your text never leaves your device. The only network request is an optional daily fetch of public model pricing from models.dev (no text or telemetry is sent).
 
-## Development
-
-```bash
-npm install      # Install dependencies
-npm run dev      # Run in development mode
-npm run build    # Build for production
-npm run test     # Run unit tests
-npm run lint     # Lint code
-```
-
-Requires Node.js 20+ and the Raycast app.
-
 ## License
 
 MIT

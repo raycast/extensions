@@ -2,9 +2,10 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "text-counter",
   "title": "Text Counter",
-  "description": "Count tokens, words, lines, and characters from clipboard text",
+  "description": "Count words, characters, sentences, reading time, and LLM tokens in selected or copied text",
   "icon": "icon.png",
   "author": "fernando_jacob",
+  "platforms": ["macOS"],
   "categories": [
     "Productivity",
     "Developer Tools"
