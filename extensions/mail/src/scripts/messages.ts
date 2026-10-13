@@ -64,11 +64,13 @@ export const getMessageById = async (
   { accountName = "", mailboxName = "" }: MessageLookupOptions = {},
 ): Promise<MessageLookupResult> => {
   const id = validateMessageId(messageId);
-  const accountFilter = escapeAppleScriptString(accountName);
-  const mailboxFilter = escapeAppleScriptString(mailboxName);
+  const accountFilter = escapeAppleScriptString(accountName.trim());
+  const mailboxFilter = escapeAppleScriptString(mailboxName.trim());
+  const delimiter = "@@MAIL_FIELD_SPLIT_9e7c1a@@";
 
   const script = `
     set targetId to ${id}
+    set delim to "${delimiter}"
     tell application "Mail"
       repeat with mailAccount in every account
         if "${accountFilter}" is "" or name of mailAccount is "${accountFilter}" then
@@ -79,7 +81,7 @@ export const getMessageById = async (
                 set senderName to extract name from sender of msg
                 set senderAddress to extract address from sender of msg
                 set numAttachments to count of mail attachments of msg
-                return (name of mailAccount) & "$break" & (name of box) & "$break" & (id of msg as string) & "$break" & (subject of msg) & "$break" & senderName & "$break" & senderAddress & "$break" & (date sent of msg) & "$break" & (read status of msg) & "$break" & numAttachments
+                return (name of mailAccount) & delim & (name of box) & delim & (id of msg as string) & delim & (subject of msg) & delim & senderName & delim & senderAddress & delim & (date sent of msg) & delim & (read status of msg) & delim & numAttachments
               end try
             end if
           end repeat
@@ -106,16 +108,20 @@ export const getMessageById = async (
     date,
     read,
     numAttachments,
-  ] = output.split("$break");
+  ] = output.split(delimiter);
 
   const accounts = await getAccounts();
-  const account = accounts?.find((account) => account.name === resolvedAccountName);
+  const account = accounts?.find(
+    (account) => account.name.trim().toLowerCase() === resolvedAccountName?.trim().toLowerCase(),
+  );
 
   if (!account) {
     throw new Error(`Account "${resolvedAccountName}" was not found`);
   }
 
-  const mailbox = account.mailboxes.find((mailbox) => mailbox.name === resolvedMailboxName) ?? {
+  const mailbox = account.mailboxes.find(
+    (mailbox) => mailbox.name.trim().toLowerCase() === resolvedMailboxName?.trim().toLowerCase(),
+  ) ?? {
     name: resolvedMailboxName,
     unreadCount: 0,
     type: getMailboxType(resolvedMailboxName),
@@ -146,8 +152,8 @@ export const tellMessage = async (message: Message, mailbox: Mailbox, script: st
 
   const scriptContainer = `
     tell application "Mail"
-      tell account "${message.account}"
-        set msg to (first message of (first mailbox whose name is "${mailbox.name}") whose id is "${message.id}")
+      tell account "${escapeAppleScriptString(message.account)}"
+        set msg to (first message of (first mailbox whose name is "${escapeAppleScriptString(mailbox.name)}") whose id is "${message.id}")
         ${script.trim()}
       end tell
     end tell
@@ -199,6 +205,23 @@ export const toggleMessageRead = async (
   }
 };
 
+export const setMessageReadStatus = async (message: Message, mailbox: Mailbox, read: boolean) => {
+  await tellMessage(message, mailbox, `tell msg to set read status to ${read}`);
+
+  const account = Cache.getAccount(message.account);
+  account?.mailboxes.forEach((innerMailbox) => {
+    Cache.updateMessage(
+      message.id,
+      {
+        ...message,
+        read,
+      },
+      account.id,
+      innerMailbox.name,
+    );
+  });
+};
+
 export const moveMessageTo = async (
   message: Message,
   mailbox: Mailbox,
@@ -206,12 +229,16 @@ export const moveMessageTo = async (
   options: MoveMessageOptions = {},
 ) => {
   try {
+    await tellMessage(
+      message,
+      mailbox,
+      `set mailbox of msg to first mailbox whose name is "${escapeAppleScriptString(target.name)}"`,
+    );
     updateMovedMessageCache(message, target);
 
     if (!options.silent) {
       await showToast(Toast.Style.Success, `Moved message to ${titleCase(target.name)}`);
     }
-    await tellMessage(message, mailbox, `set mailbox of msg to first mailbox whose name is "${target.name}"`);
   } catch (error) {
     if (!options.silent) {
       await showToast(Toast.Style.Failure, `Error moving message to ${titleCase(target.name)}`);
@@ -314,7 +341,11 @@ export const deleteMessage = async (message: Message, mailbox: Mailbox) => {
   }
 };
 
-export const getRecipients = async (message: Message, mailbox: Mailbox): Promise<string[]> => {
+export const getRecipients = async (
+  message: Message,
+  mailbox: Mailbox,
+  { strict = false }: { strict?: boolean } = {},
+): Promise<string[]> => {
   const script = `
     set output to ""
     repeat with r in recipients of msg
@@ -323,7 +354,12 @@ export const getRecipients = async (message: Message, mailbox: Mailbox): Promise
   `;
 
   try {
-    const response: string[] = (await tellMessage(message, mailbox, script)).split("$end");
+    const output = await tellMessage(message, mailbox, script);
+    if (strict && !output.trim()) {
+      throw new Error("No recipient data returned");
+    }
+
+    const response: string[] = output.split("$end");
     response.pop();
     const recipientNames: string[] = [];
     const recipientAddresses: string[] = [];
@@ -339,6 +375,9 @@ export const getRecipients = async (message: Message, mailbox: Mailbox): Promise
     return [message.senderAddress, ...recipientAddresses];
   } catch (error) {
     console.error(error);
+    if (strict) {
+      throw new Error("Unable to resolve reply-all recipients", { cause: error });
+    }
     return [message.senderAddress];
   }
 };
@@ -555,19 +594,18 @@ export const sendMessage = async (
 ) => {
   if (outgoingMessage.to.length === 0) {
     await showToast(Toast.Style.Failure, "No recipients specified");
-    return;
+    throw new Error("No recipients specified");
   }
 
   for (const recipient of outgoingMessage.to) {
     if (Validation.email(recipient)) {
       await showToast(Toast.Style.Failure, "Invalid email for recipient");
-      return;
+      throw new Error(`Invalid email for recipient: ${recipient}`);
     }
   }
 
   let attachments =
     outgoingMessage.attachments && outgoingMessage.attachments.length > 0 ? outgoingMessage.attachments : [];
-  attachments = attachments.map((attachment: string) => `Macintosh HD${attachment.replaceAll("/", ":")}`);
   attachments = attachments.map(escapeAppleScriptString);
 
   const messageAccount = message ? escapeAppleScriptString(message.account) : "";
@@ -581,6 +619,11 @@ export const sendMessage = async (
   const subject = escapeAppleScriptString(outgoingMessage.subject);
   const content = escapeAppleScriptString(outgoingMessage.content);
   const messageId = message ? escapeAppleScriptString(String(message.id)) : "";
+
+  const isReplyOrForward =
+    action === OutgoingMessageAction.Reply ||
+    action === OutgoingMessageAction.ReplyAll ||
+    action === OutgoingMessageAction.Forward;
 
   const actionScript = (() => {
     switch (action) {
@@ -614,11 +657,36 @@ export const sendMessage = async (
       set theAttachments to {"${attachments.join(`", "`)}"}
       set newMessage to ${actionScript}
       set senderValue to "${sender}"
+      ${
+        isReplyOrForward
+          ? `
+      set sender of newMessage to senderValue
+      if "${subject}" is not "" then
+        set subject of newMessage to "${subject}"
+      end if
+      set existingContent to (content of newMessage as string)
+      set content of newMessage to "${content}" & return & return & existingContent
+      `
+          : `
       set properties of newMessage to {sender: senderValue, subject: "${subject}", content: "${content}", visible: false}
+      `
+      }
       tell newMessage
+        ${
+          !isReplyOrForward
+            ? `
         repeat with theTo in theTos
           make new recipient at end of to recipients with properties {address:theTo}
         end repeat
+        `
+            : action === OutgoingMessageAction.Forward
+              ? `
+        repeat with theTo in theTos
+          make new recipient at end of to recipients with properties {address:theTo}
+        end repeat
+        `
+              : ""
+        }
         repeat with theCc in theCcs
           make new cc recipient at end of cc recipients with properties {address:theCc}
         end repeat
@@ -627,7 +695,8 @@ export const sendMessage = async (
         end repeat
         repeat with theAttachment in theAttachments
           try
-            make new attachment with properties {file name:theAttachment as alias} at after last paragraph
+            set attachFile to (POSIX file theAttachment) as alias
+            make new attachment with properties {file name:attachFile} at after last paragraph
             delay 1
           end try
         end repeat

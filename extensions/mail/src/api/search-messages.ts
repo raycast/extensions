@@ -11,8 +11,14 @@ import { parseMessage } from "../utils/parse-message";
 import { translateMailboxName } from "../utils/mailbox";
 
 const toUnixTimestamp = (date: string) => {
-  return new Date(date).getTime() / 1000;
+  const timestamp = new Date(date).getTime() / 1000;
+  if (Number.isNaN(timestamp)) {
+    throw new Error(`Invalid date format: "${date}". Expected format: YYYY-MM-DD HH:mm`);
+  }
+  return timestamp;
 };
+
+const toSqlStringLiteral = (value: string) => `'${value.replaceAll("'", "''")}'`;
 
 const getIdFromPath = (path: string) => {
   const filename = basename(path);
@@ -24,9 +30,12 @@ type SearchOptions = {
   before: string;
   after: string;
   from: string;
+  mailbox: "inbox";
   order: "asc" | "desc";
   limit: number;
+  offset: number;
   includeTrash: boolean;
+  includeBody: boolean;
 };
 
 const isTrashPath = (path: string) => {
@@ -35,6 +44,15 @@ const isTrashPath = (path: string) => {
     .some(
       (part) => part.toLowerCase().endsWith(".mbox") && translateMailboxName(part.replace(/\.mbox$/i, "")) === "trash",
     );
+};
+
+const isMailboxPath = (path: string, mailbox: NonNullable<SearchOptions["mailbox"]>) => {
+  const mailboxDirectory = path
+    .split("/")
+    .filter((part) => part.toLowerCase().endsWith(".mbox"))
+    .at(-1);
+
+  return mailboxDirectory !== undefined && translateMailboxName(mailboxDirectory.replace(/\.mbox$/i, "")) === mailbox;
 };
 
 const trashMailboxGlobs = [
@@ -50,15 +68,33 @@ export async function searchMessages({
   before,
   after,
   from,
+  mailbox,
   order = "desc",
   limit = 25,
+  offset = 0,
   includeTrash = false,
+  includeBody = false,
 }: Partial<SearchOptions>) {
+  if (order !== "asc" && order !== "desc") {
+    throw new Error("Order must be 'asc' or 'desc'");
+  }
+
+  if (!Number.isSafeInteger(limit) || limit < 1) {
+    throw new Error("Limit must be a positive integer");
+  }
+
+  if (!Number.isSafeInteger(offset) || offset < 0 || offset > 10000) {
+    throw new Error("Offset must be an integer between 0 and 10000");
+  }
+
+  if (mailbox && mailbox !== "inbox") {
+    throw new Error("Only Inbox mailbox filtering is supported");
+  }
+
   const persistenceInfo = await getPersistenceInfo();
   const version = persistenceInfo.LastUsedVersionDirectoryName;
   const basePath = resolve(homedir(), `Library/Mail/${version}`);
   const resultLimit = Math.min(limit, 50);
-  const candidateLimit = includeTrash ? resultLimit : resultLimit * 10;
 
   const rgPath = await ensureCLI();
 
@@ -73,7 +109,7 @@ export async function searchMessages({
   }
 
   if (from) {
-    filters.push(`addresses.address = "${from}"`);
+    filters.push(`addresses.address = ${toSqlStringLiteral(from)}`);
   }
 
   const query = `
@@ -84,8 +120,7 @@ export async function searchMessages({
     LEFT JOIN summaries ON messages.summary = summaries.ROWID
     LEFT JOIN mailboxes ON messages.mailbox = mailboxes.ROWID
     ${filters.length ? `WHERE ${filters.join(" AND ")}` : ""}
-    ORDER BY messages.date_sent ${order}
-    ${search ? "" : `LIMIT ${candidateLimit}`};
+    ORDER BY messages.date_sent ${order}, messages.ROWID ${order};
   `;
 
   const databasePath = await getDatabasePath();
@@ -96,35 +131,61 @@ export async function searchMessages({
     return [];
   }
 
-  const { stdout, stderr } = await execa({ reject: false })(rgPath, [
-    search || "(.*)",
-    "-g",
-    search ? "*.emlx" : `{${messageIds.join(",")}}.{emlx,partial.emlx}`,
-    ...(!includeTrash ? trashMailboxGlobs.flatMap((glob) => ["-g", glob]) : []),
-    "-i", // case insensitive
-    "-l", // only output file names
-    basePath,
-  ]);
+  const mailboxGlobs = mailbox === "inbox" ? ["-g", "*[iI][nN][bB][oO][xX].mbox/**"] : [];
+
+  const args = search
+    ? [
+        search,
+        "-g",
+        "*.emlx",
+        ...mailboxGlobs,
+        ...(!includeTrash ? trashMailboxGlobs.flatMap((glob) => ["-g", glob]) : []),
+        "-i",
+        "-l",
+        basePath,
+      ]
+    : [
+        "--files",
+        "-g",
+        "*.emlx",
+        ...mailboxGlobs,
+        ...(!includeTrash ? trashMailboxGlobs.flatMap((glob) => ["-g", glob]) : []),
+        basePath,
+      ];
+
+  const { stdout, stderr } = await execa({ reject: false })(rgPath, args);
 
   if (stderr) {
     throw new Error("Error searching messages");
   }
 
+  const messageOrder = new Map(messageIds.map((id, index) => [id, index]));
+  const matchedMessageIds = new Set<number>();
   const relativePaths = stdout
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean)
     .filter((path) => {
       const id = getIdFromPath(path);
-      return messageIds.includes(id);
+      return messageOrder.has(id);
     })
     .filter((path) => includeTrash || !isTrashPath(path))
+    .filter((path) => !mailbox || isMailboxPath(path, mailbox))
+    .filter((path) => {
+      const id = getIdFromPath(path);
+      if (matchedMessageIds.has(id)) {
+        return false;
+      }
+
+      matchedMessageIds.add(id);
+      return true;
+    })
     .toSorted((a, b) => {
       const aId = getIdFromPath(a);
       const bId = getIdFromPath(b);
-      return messageIds.indexOf(aId) - messageIds.indexOf(bId);
+      return messageOrder.get(aId)! - messageOrder.get(bId)!;
     })
-    .slice(0, resultLimit);
+    .slice(offset, offset + resultLimit);
 
   const absolutePaths = relativePaths.map((relativePath) => resolve(basePath, relativePath));
 
@@ -138,6 +199,7 @@ export async function searchMessages({
         from,
         subject,
         summary: text.substring(0, Math.min(text.length, 100)),
+        ...(includeBody ? { text } : {}),
       };
     }),
   );

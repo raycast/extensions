@@ -1,5 +1,6 @@
 import { existsSync } from "fs";
 import { homedir } from "os";
+import { extname, join } from "path";
 import { showToast, Toast, open, showInFinder, closeMainWindow, getPreferenceValues } from "@raycast/api";
 
 import { tellMessage } from "./messages";
@@ -8,13 +9,42 @@ import { formatFileSize, getMIMEtype } from "../utils/finder";
 
 const { saveDirectory } = getPreferenceValues<Preferences>();
 let downloadDirectory = saveDirectory.replace("~", homedir());
-const attachmentsDirectory = downloadDirectory;
 
 if (!existsSync(downloadDirectory)) {
   downloadDirectory = `${homedir()}/Downloads`;
 }
 
-downloadDirectory = "Macintosh HD" + downloadDirectory.replaceAll("/", ":");
+const attachmentsDirectory = downloadDirectory;
+
+const escapeAppleScriptString = (value: string) => value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+
+const sanitizeAttachmentName = (name: string) => {
+  const sanitized = [...name]
+    .map((character) => {
+      const codePoint = character.codePointAt(0) ?? 0;
+      return character === "/" || character === "\\" || character === ":" || codePoint < 32 || codePoint === 127
+        ? "_"
+        : character;
+    })
+    .join("")
+    .trim();
+  return sanitized && sanitized !== "." && sanitized !== ".." ? sanitized : "attachment";
+};
+
+const getUniqueAttachmentName = (name: string) => {
+  const extension = extname(name);
+  const baseName = extension ? name.slice(0, -extension.length) : name;
+  let candidate = name;
+  let suffix = 1;
+
+  while (existsSync(join(attachmentsDirectory, candidate))) {
+    candidate = `${baseName} (${suffix++})${extension}`;
+  }
+
+  return candidate;
+};
+
+export const getAttachmentSaveDirectory = () => attachmentsDirectory;
 
 export const getAttachments = async (message: Message, mailbox: Mailbox): Promise<Attachment[]> => {
   try {
@@ -46,73 +76,88 @@ export const getAttachments = async (message: Message, mailbox: Mailbox): Promis
   }
 };
 
-export const saveAttachment = async (message: Message, mailbox: Mailbox, attachment?: Attachment, name?: string) => {
+export const saveAttachment = async (
+  message: Message,
+  mailbox: Mailbox,
+  attachment?: Attachment,
+  name?: string,
+  { silent = false }: { silent?: boolean } = {},
+): Promise<string | undefined> => {
   let attachmentName: string;
   if (attachment) {
     attachmentName = attachment.name;
   } else {
     attachmentName = await tellMessage(message, mailbox, "tell msg to get name of first mail attachment");
     if (attachmentName === "missing value") {
-      await showToast(Toast.Style.Failure, "No attachments found");
+      if (!silent) {
+        await showToast(Toast.Style.Failure, "No attachments found");
+      }
       return;
     }
   }
 
   if (name) {
-    const extension = attachmentName.split(".").pop();
-    if (extension && !name.endsWith(extension)) {
-      name = `${name}.${extension}`;
+    const extension = extname(attachmentName);
+    if (extension && !name.toLowerCase().endsWith(extension.toLowerCase())) {
+      name = `${name}${extension}`;
     }
   } else {
     name = attachmentName;
   }
 
+  name = getUniqueAttachmentName(sanitizeAttachmentName(name));
+  const attachmentPath = join(attachmentsDirectory, name);
+
   const script = `
-    set attachmentsFolder to "${downloadDirectory}"
+    set targetFile to (POSIX file "${escapeAppleScriptString(attachmentPath)}")
     tell msg
-      set selectedAttachment to (first mail attachment${attachment ? ` whose id is "${attachment.id}"` : ""})
-      set attachmentName to "${name}"
-      set attachmentPath to attachmentsFolder & ":" & attachmentName
-      save selectedAttachment in attachmentPath
+      set selectedAttachment to (first mail attachment${attachment ? ` whose id is "${escapeAppleScriptString(attachment.id)}"` : ""})
+      save selectedAttachment in targetFile
     end tell
   `;
 
   try {
     await tellMessage(message, mailbox, script);
-    const options: Toast.Options = {
-      title: `Saved Attachment "${name}"`,
-      style: Toast.Style.Success,
-      primaryAction: {
-        title: "Open Attachment",
-        onAction: async (toast: Toast) => {
-          await open(`${attachmentsDirectory}/${name}`);
-          await toast.hide();
-          await closeMainWindow();
+    if (!silent) {
+      const options: Toast.Options = {
+        title: `Saved Attachment "${name}"`,
+        style: Toast.Style.Success,
+        primaryAction: {
+          title: "Open Attachment",
+          onAction: async (toast: Toast) => {
+            await open(attachmentPath);
+            await toast.hide();
+            await closeMainWindow();
+          },
         },
-      },
-      secondaryAction: {
-        title: "Show in Finder",
-        onAction: async (toast: Toast) => {
-          await showInFinder(`${attachmentsDirectory}/${name}`);
-          await toast.hide();
-          await closeMainWindow();
+        secondaryAction: {
+          title: "Show in Finder",
+          onAction: async (toast: Toast) => {
+            await showInFinder(attachmentPath);
+            await toast.hide();
+            await closeMainWindow();
+          },
         },
-      },
-    };
-    await showToast(options);
+      };
+      await showToast(options);
+    }
+    return attachmentPath;
   } catch (error) {
-    await showToast(Toast.Style.Failure, "Error saving attachment");
+    if (!silent) {
+      await showToast(Toast.Style.Failure, "Error saving attachment");
+    }
     console.error(error);
+    throw error;
   }
 };
 
 export const saveAllAttachments = async (message: Message, mailbox: Mailbox) => {
   const script = `
-    set attachmentsFolder to "${downloadDirectory}"
+    set destFolder to (POSIX file "${escapeAppleScriptString(attachmentsDirectory)}") as string
     tell msg 
       repeat with selectedAttachment in mail attachments
         set attachmentName to name of selectedAttachment
-        set attachmentPath to attachmentsFolder & ":" & attachmentName
+        set attachmentPath to destFolder & ":" & attachmentName
         save selectedAttachment in attachmentPath
       end repeat
     end tell
