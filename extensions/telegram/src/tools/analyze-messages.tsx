@@ -13,10 +13,6 @@ interface Arguments {
   limit?: number;
 }
 
-interface Preferences {
-  openRouterApiKey?: string;
-}
-
 export default async function AnalyzeMessages(args: Arguments) {
   try {
     const { chatId, query } = args;
