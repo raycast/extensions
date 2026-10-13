@@ -585,6 +585,7 @@
 /extensions/cron                                                    @astrit @ridemountainpig
 /extensions/cron-description                                        @niall-maloney @xmok
 /extensions/cron-manager                                            @TahaZahit
+/extensions/cronitor                                                @xmok
 /extensions/crossbell                                               @Songkeys @hyoban
 /extensions/crt-name                                                @0xdhrv
 /extensions/crunchbase                                              @qdequele
