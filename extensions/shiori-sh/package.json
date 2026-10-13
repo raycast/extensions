@@ -99,9 +99,12 @@
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "25.3.0",
     "@types/react": "19.2.14",
+    "@types/react-test-renderer": "^19.3.0",
     "eslint": "^10.0.1",
     "prettier": "^3.8.1",
-    "typescript": "^5.9.3"
+    "react-test-renderer": "^19.3.0",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.3"
   },
   "scripts": {
     "build": "ray build",
@@ -109,6 +112,25 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
-  }
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "tools": [
+    {
+      "name": "save-bookmark",
+      "title": "Save Bookmark",
+      "description": "Save a URL to Shiori after confirmation, with an optional title and read status."
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "Search or browse Shiori bookmarks with pagination and optional read, starred, tag, and saved-since filters."
+    },
+    {
+      "name": "find-unread-bookmarks",
+      "title": "Find Unread Bookmarks",
+      "description": "Find unread Shiori bookmarks about a topic without marking them read. Supports pagination."
+    }
+  ]
 }
