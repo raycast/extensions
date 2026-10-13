@@ -10,13 +10,13 @@ import { parse } from "tldts";
 export type DomainDepth = "auto" | "1" | "2" | "3" | "4" | "full" | "name";
 
 export const DOMAIN_DEPTH_OPTIONS: { value: DomainDepth; title: string }[] = [
-  { value: "auto", title: "Automatic — keeps a subdomain only when it means something" },
-  { value: "1", title: "Domain + suffix — example.com" },
-  { value: "2", title: "One level more — shop.example.com" },
-  { value: "3", title: "Two levels more — eu.shop.example.com" },
-  { value: "4", title: "Three levels more" },
-  { value: "full", title: "Full hostname" },
-  { value: "name", title: "Name only, without suffix — example" },
+  { value: "auto", title: "Automatic (Keeps a Subdomain Only When It Means Something)" },
+  { value: "1", title: "Domain + Suffix (example.com)" },
+  { value: "2", title: "One Level More (shop.example.com)" },
+  { value: "3", title: "Two Levels More (eu.shop.example.com)" },
+  { value: "4", title: "Three Levels More" },
+  { value: "full", title: "Full Hostname" },
+  { value: "name", title: "Name Only, Without Suffix (example)" },
 ];
 
 export function isDomainDepth(value: string): value is DomainDepth {
