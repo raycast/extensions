@@ -163,7 +163,15 @@ func recognizeText(inPDFAt path: String, options: OCROptions) throws -> OCRResul
       continue
     }
     let recognized = try recognizeText(in: image, options: options)
-    pages.append(recognized.text.count > layer.count ? recognized : layerResult)
+    if recognized.text.count > layer.count {
+      pages.append(recognized)
+    } else {
+      // The text layer wins, but codes only exist in the rendered page: keep them either way.
+      pages.append(
+        OCRResult(
+          text: layerResult.text, lineCount: layerResult.lineCount, confidence: 1, languages: [],
+          barcodes: recognized.barcodes, skippedFiles: []))
+    }
   }
 
   return merge(pages, skippedFiles: [])
