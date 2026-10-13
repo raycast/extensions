@@ -355,3 +355,38 @@ test("a late browser reply cannot update suggestions after leaving the command",
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(h.stateUpdates.length, 1);
 });
+
+test("labeled text still yields its embedded HTTP URL", () => {
+  const normalize = harness().load("src/lib/defuddle.ts").normalizeUrl;
+  for (const input of [
+    "Source: https://example.com/article",
+    "Link:https://example.com/article",
+    "URL: https://example.com/article",
+    "Source: read https://example.com/article",
+    "Link: (https://example.com/article)",
+    "Source: example.com/article",
+    "Read https://example.com/article for more information",
+  ]) {
+    assert.equal(normalize(input), url, input);
+  }
+  assert.equal(normalize("Link:http://example.com:8080/article"), "http://example.com:8080/article");
+});
+
+test("leading unsupported or dangerous schemes remain rejected even with embedded HTTP URLs", () => {
+  const normalize = harness().load("src/lib/defuddle.ts").normalizeUrl;
+  for (const input of [
+    "ftp://example.com/article",
+    "custom://example.com/article",
+    "ftp:example.com/article",
+    "https:example.com/article",
+    "javascript:https://example.com/article",
+    "javascript:alert('https://example.com/article')",
+    "data:text/plain,https://example.com/article",
+    "vbscript: https://example.com/article",
+    "file: https://example.com/article",
+    "mailto:user@example.com",
+    "blob:https://example.com/article",
+  ]) {
+    assert.equal(normalize(input), undefined, input);
+  }
+});

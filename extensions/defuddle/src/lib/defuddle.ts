@@ -165,8 +165,12 @@ export function normalizeUrl(value: string): string | undefined {
     return undefined;
   }
 
-  const isBareHostnameWithPort = /^(?:[a-z0-9-]+\.)+[a-z0-9-]+:\d+(?:[/?#]|$)/i.test(trimmed);
-  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed) && !isBareHostnameWithPort) {
+  // Labels such as "Source:" must fall through to embedded-URL matching.
+  // Keep explicit schemes and known non-hierarchical schemes on the validation path.
+  const startsWithScheme =
+    /^[a-z][a-z0-9+.-]*:\/\//i.test(trimmed) ||
+    /^(?:https?|ftp|sftp|file|data|javascript|vbscript|mailto|tel|about|blob):/i.test(trimmed);
+  if (startsWithScheme) {
     if (isLikelySvgNamespaceUrl(trimmed)) return undefined;
     try {
       return validateUrl(trimmed);
