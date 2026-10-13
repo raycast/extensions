@@ -128,7 +128,7 @@ Conversation context budget:
 
 | Changed behavior | Decision | Conditions / stop boundary | Layer |
 | ---------------- | -------- | -------------------------- | ----- |
-| History kept when over the token budget | test | Conversations past the 3,750-token budget send the newest turns in chronological order; short conversations are sent whole. Observed failing before the fix | Unit |
+| History kept when over the token budget | test | Conversations past the 3,750-token budget send the newest turns in chronological order; the newest turn is kept even when it alone exceeds the budget; short conversations are sent whole. Observed failing before the fix | Unit |
 
 Run `npm test`. On machines without the Raycast desktop runtime, the native integration cases report an explicit skip; set `RAYCAST_API_ROOT` to its `api` directory to enable them. Native macOS window rendering and keyboard hit testing are outside this JavaScript runtime harness.
 

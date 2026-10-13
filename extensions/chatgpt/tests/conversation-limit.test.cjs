@@ -29,6 +29,21 @@ test("kept turns stay in chronological order after the system prompt", () => {
   assert.deepEqual(messages.at(-1), { role: "assistant", content: "answer 24" });
 });
 
+test("an oversized newest turn is still sent", () => {
+  const longAnswer = Array.from({ length: 2800 }, (_, i) => `word${i}`).join(" ");
+  const messages = chatTransformer(
+    [
+      { id: "short", question: "short question", answer: "short answer", created_at: "2026-10-01T00:00:00.000Z" },
+      { id: "long", question: "explain in detail", answer: longAnswer, created_at: "2026-10-01T00:01:00.000Z" },
+    ],
+    "",
+  );
+  assert.deepEqual(
+    messages.map((message) => message.content),
+    ["explain in detail", longAnswer],
+  );
+});
+
 test("short conversations are sent whole", () => {
   const messages = chatTransformer(chats.slice(0, 3), "");
   assert.deepEqual(
