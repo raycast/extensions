@@ -1,6 +1,6 @@
 # Litterbox Changelog
 
-## [Finder Uploads and Safer History] - {PR_MERGE_DATE}
+## [Finder Uploads and Safer History] - 2026-10-13
 
 - Add Upload Selected Finder Files on macOS, with an editable file selection and expiry before uploading.
 - Check every selected file for readability, regular-file type, the 1 GB limit, and Litterbox’s prohibited extensions before starting a batch.
