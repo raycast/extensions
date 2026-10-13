@@ -16,6 +16,18 @@ export interface LuciState {
 const GET_STATUS_SCRIPT = `
 tell application "System Events"
   if not (exists process "Luci") then return "NOT_RUNNING"
+  
+  if (count of windows of process "Luci") is 0 then
+    do shell script "open -a Luci"
+    repeat 20 times
+      delay 0.05
+      if (count of windows of process "Luci") > 0 then exit repeat
+    end repeat
+    try
+      set visible of process "Luci" to false
+    end try
+  end if
+
   tell process "Luci"
     if (count of windows) is 0 then return "WINDOW_ABSENT"
     tell window 1
