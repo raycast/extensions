@@ -5,7 +5,9 @@
   "description": "Explore GEO analytics and manage Notra content directly from Raycast.",
   "icon": "extension-icon.png",
   "author": "dominikdev",
-  "contributors": ["janburzinski"],
+  "contributors": [
+    "janburzinski"
+  ],
   "platforms": [
     "macOS",
     "Windows"
@@ -72,8 +74,8 @@
       "type": "password",
       "required": true,
       "title": "API Key",
-      "description": "Your organization-scoped Notra API key with read and write access",
-      "placeholder": "Enter your organization-scoped Notra API key"
+      "description": "Your Notra API key with read and write access. Organization keys work in one workspace, account keys in every workspace you belong to",
+      "placeholder": "ntra_..."
     }
   ],
   "dependencies": {

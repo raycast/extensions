@@ -11,11 +11,15 @@ const streamlinkConfig = preferences.streamlinkConfig;
 export const primaryActionBrowser = preferences.primaryaction === "web";
 export const primaryActionStreamlink = preferences.primaryaction === "streamlink";
 
+export const watchStreamAction = (name: string) => {
+  watchStream(name, streamlinkLocation, quality, lowlatency, streamlinkConfig);
+};
+
 export const ActionWatchStream = ({ name, ...props }: { name: string } & ComponentProps<typeof Action>) => (
   <Action
     {...props}
     onAction={() => {
-      watchStream(name, streamlinkLocation, quality, lowlatency, streamlinkConfig);
+      watchStreamAction(name);
       props.onAction?.();
     }}
   />

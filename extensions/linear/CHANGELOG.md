@@ -1,5 +1,7 @@
 # Linear Changelog
 
+## [Added new screenshots] - 2026-10-13
+
 ## [Simplify AI Tools] - 2026-10-07
 
 - Remove 17 older AI tools that overlapped with the newer `list-*`, `get-*`, and `save-*` tools, so Raycast AI picks the right tool more reliably.

@@ -1,13 +1,25 @@
+import { createHash, randomUUID } from "crypto";
+import { categories, loadCategories } from "./categories";
 import { getPreferenceValues } from "@raycast/api";
 import { lstat, mkdir, mkdtemp, open, readdir, rm } from "fs/promises";
 import { tmpdir } from "os";
 import path from "path";
-import { copyRedactedImage, redactImage } from "swift:../swift/hide-details";
+import { copyRedactedImage, redactImage, updateReviewImage } from "swift:../swift/hide-details";
 
-const categories = ["email", "phone", "card", "secret", "ip", "name", "face"] as const;
 const kinds = [...categories, "custom"] as const;
 const expiry = 24 * 60 * 60 * 1000;
-const ownedDirectories = new WeakMap<Scan, string>();
+type Session = {
+  directory: string;
+  style: string;
+  reviewKey?: string;
+  width: number;
+  height: number;
+  current: Scan;
+  disposed: boolean;
+  pending?: Promise<Scan>;
+  copies: Set<Promise<void>>;
+};
+const sessions = new WeakMap<Scan, Session>();
 
 export type Hit = {
   kind: (typeof kinds)[number];
@@ -24,7 +36,25 @@ export type Report = {
   clipboardChangeCount: number;
 };
 
-export type Scan = Readonly<Report>;
+export type Detection = Hit & { id: string };
+export type Scan = Readonly<Omit<Report, "hits"> & { hits: Detection[]; excludedIds: readonly string[] }>;
+
+// Identity belongs to a scan and a detection's content/geometry, never its list position.
+function identifyHits(hits: Hit[], scope: string): Detection[] {
+  const unique = new Map<string, Detection>();
+  for (const hit of hits) {
+    const { x, y, width, height } = hit.box;
+    const id = createHash("sha256")
+      .update(JSON.stringify([scope, hit.kind, hit.text, hit.confidenceSource, x, y, width, height]))
+      .digest("hex");
+    unique.set(id, { ...hit, id });
+  }
+  return [...unique.values()];
+}
+
+function regionCount(hits: Hit[]) {
+  return new Set(hits.map(({ box }) => JSON.stringify([box.x, box.y, box.width, box.height]))).size;
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -160,22 +190,19 @@ async function runNative<T>(operation: () => Promise<T>): Promise<T> {
   }
 }
 
-export async function redactClipboard(options: { recognition?: "fast" | "accurate" } = {}): Promise<Scan> {
+export async function redactClipboard(
+  options: { recognition?: "fast" | "accurate"; forReview?: boolean } = {},
+): Promise<Scan> {
   const prefs = getPreferenceValues<Preferences>();
   const style = prefs.style || "blackout";
   const recognition = options.recognition || prefs.recognition || "fast";
   const padding = prefs.padding?.trim() || "4";
-  const selection = prefs.categories ?? categories.join(",");
+  const selection = (await loadCategories()).join(",");
   if (!["pixelate", "blur", "blackout"].includes(style)) throw new Error("Choose a valid Redaction Style.");
   if (!["fast", "accurate"].includes(recognition)) throw new Error("Choose Fast or Accurate Text Recognition.");
   if (!Number.isFinite(Number(padding)) || Number(padding) < 0 || Number(padding) > 1000) {
     throw new Error("Padding must be a finite number from 0 to 1000 pixels.");
   }
-  const unknown = selection
-    .split(",")
-    .map((value) => value.trim().toLowerCase())
-    .filter((value) => value && !categories.includes(value as (typeof categories)[number]));
-  if (unknown.length) throw new Error(`Unknown categories in What to Hide: ${unknown.join(", ")}.`);
 
   const base = path.join(tmpdir(), "hide-details");
   await mkdir(base, { recursive: true, mode: 0o700 });
@@ -193,11 +220,26 @@ export async function redactClipboard(options: { recognition?: "fast" | "accurat
         recognition,
         prefs.customRegex || "",
         null,
+        options.forReview ?? false,
       ),
     );
     const { width, height } = await imageDimensions(output);
-    const scan = parseReport(report, output, width, height);
-    ownedDirectories.set(scan, directory);
+    const parsed = parseReport(report, output, width, height);
+    const reviewKey = options.forReview && isRecord(report) ? report.reviewKey : undefined;
+    if (options.forReview && (typeof reviewKey !== "string" || Buffer.from(reviewKey, "base64").length !== 32)) {
+      throw new Error("The redaction helper returned an invalid review. Try scanning again.");
+    }
+    const scan: Scan = { ...parsed, hits: identifyHits(parsed.hits, randomUUID()), excludedIds: [] };
+    sessions.set(scan, {
+      directory,
+      style,
+      reviewKey: reviewKey as string | undefined,
+      width,
+      height,
+      current: scan,
+      disposed: false,
+      copies: new Set(),
+    });
     return scan;
   } catch (error) {
     await rm(directory, { recursive: true, force: true });
@@ -205,16 +247,84 @@ export async function redactClipboard(options: { recognition?: "fast" | "accurat
   }
 }
 
+// A pending render locks copying and further edits. The old preview remains valid if rendering fails.
+export async function updateRedactions(scan: Scan, excludedIds: readonly string[]): Promise<Scan> {
+  const session = sessions.get(scan);
+  if (!session || session.disposed || session.current !== scan || !session.reviewKey) {
+    throw new Error("This preview has expired. Scan the current clipboard again.");
+  }
+  if (session.pending) throw new Error("The preview is updating. Try again when it finishes.");
+  const ids = new Set(excludedIds);
+  if ([...ids].some((id) => !scan.hits.some((hit) => hit.id === id))) {
+    throw new Error("This detection belongs to a different scan. Scan the current clipboard again.");
+  }
+  const included = scan.hits.filter((hit) => !ids.has(hit.id));
+  const output = path.join(session.directory, `${randomUUID()}.png`);
+  const render = async () => {
+    try {
+      const count = await runNative(() =>
+        updateReviewImage(
+          path.join(session.directory, "source.sealed"),
+          session.reviewKey!,
+          JSON.stringify(included.map((hit) => hit.box)),
+          session.style,
+          output,
+        ),
+      );
+      const dimensions = await imageDimensions(output);
+      if (
+        count !== regionCount(included) ||
+        dimensions.width !== session.width ||
+        dimensions.height !== session.height
+      ) {
+        throw new Error("The redaction helper returned an invalid preview. Try again.");
+      }
+      // Copy helpers run in separate processes and may not have opened the old file yet.
+      // Pending edits block new copies, so this set contains every reader to preserve.
+      await Promise.allSettled(session.copies);
+      if (session.disposed) throw new Error("This preview has expired. Scan the current clipboard again.");
+      const next: Scan = { ...scan, output, regionCount: count, excludedIds: [...ids] };
+      sessions.set(next, session);
+      session.current = next;
+      // A fresh filename makes Raycast refresh its image cache.
+      await rm(scan.output, { force: true }).catch(() => undefined);
+      return next;
+    } catch (error) {
+      await rm(output, { force: true }).catch(() => undefined);
+      throw error;
+    }
+  };
+  session.pending = render();
+  try {
+    return await session.pending;
+  } finally {
+    session.pending = undefined;
+  }
+}
+
 export async function copyRedacted(scan: Scan, options: { requireOriginalClipboard?: boolean } = {}) {
-  if (!ownedDirectories.has(scan)) throw new Error("This preview has expired. Scan the current clipboard again.");
-  await runNative(() =>
+  const session = sessions.get(scan);
+  if (!session || session.disposed || session.current !== scan) {
+    throw new Error("This preview has expired. Scan the current clipboard again.");
+  }
+  if (session.pending) throw new Error("The preview is updating. Wait before copying.");
+  const copy = runNative(() =>
     copyRedactedImage(scan.output, options.requireOriginalClipboard ? scan.clipboardChangeCount : null),
   );
+  session.copies.add(copy);
+  try {
+    await copy;
+  } finally {
+    session.copies.delete(copy);
+  }
 }
 
 export async function disposeScan(scan: Scan) {
-  const directory = ownedDirectories.get(scan);
-  if (!directory) return;
-  ownedDirectories.delete(scan);
-  await rm(directory, { recursive: true, force: true });
+  const session = sessions.get(scan);
+  if (!session || session.disposed) return;
+  session.disposed = true;
+  await session.pending?.catch(() => undefined);
+  await Promise.allSettled(session.copies);
+  session.reviewKey = undefined;
+  await rm(session.directory, { recursive: true, force: true });
 }

@@ -1,0 +1,192 @@
+instructions: |
+  Use get-todays-wallpapers for today's featured artwork and its alternatives.
+  Use get-random-wallpaper to find a random artwork without changing the desktop.
+  Use get-wallpaper-history to answer questions about previously used artworks and
+  when they were selected, downloaded, or automatically switched. Each history
+  item contains all its events, newest first. Report an empty history honestly.
+  Use search-wallpaper-history when the user mentions artwork words, artists,
+  creation years, usage dates, or action types. Combine filters when requested.
+  Date filters refer to history actions, not artwork creation dates. Supply inclusive
+  YYYY-MM-DD local dates for fromDate and toDate. For a single day, set both dates.
+  When asked when a wallpaper was set or used, include both selected and
+  auto-switched events. Omit eventType in that search and exclude downloads from
+  the answer. Filter to selected only when the user explicitly asks about manual
+  selections, or to auto-switched only for explicit automatic-switch requests.
+  Search results contain only matching events. To show an artwork's complete
+  timeline after a filtered search, use get-wallpaper-history.
+  To restore an artwork from history, use set-wallpaper-from-history with its exact
+  wallpaper.id from search or listing. If several artworks match and the user has
+  not identified which one to use, ask them to choose. If no artwork matches, say
+  so and do not change the wallpaper. Never invent an ID.
+  Only call set-wallpaper or download-wallpaper when the user requests that action.
+  Pass the complete wallpaper object from a browsing or history tool unchanged.
+  Do not invent artwork IDs, image URLs, or artwork details. The service provides
+  today's artworks and random artworks, not a searchable catalog. For requests
+  about a particular artwork, check history and today's artworks; if it is absent,
+  explain that it was not found rather than guessing a wallpaper URL.
+  Include artwork titles and artists in responses. Link to websiteUrl when provided,
+  otherwise use https://anotherboring.day/art/{id}. Confirm an action succeeded only
+  after its tool returns successfully.
+
+evals:
+  - input: "@another-boring-piece What is today's wallpaper?"
+    mocks:
+      get-todays-wallpapers:
+        today: &wallpaper
+          id: starry-night
+          name: The Starry Night
+          url: https://example.com/starry-night.jpg
+          description: A night sky above a village.
+          artist: Vincent van Gogh
+          creationDate: "1889"
+          websiteUrl: https://anotherboring.day/art/starry-night
+        random: []
+    expected:
+      - callsTool: get-todays-wallpapers
+      - includes: The Starry Night
+      - includes: Vincent van Gogh
+      - not:
+          callsTool: set-wallpaper
+      - not:
+          callsTool: download-wallpaper
+
+  - input: "@another-boring-piece Show me a random artwork without changing my wallpaper."
+    mocks:
+      get-random-wallpaper: *wallpaper
+    expected:
+      - callsTool: get-random-wallpaper
+      - includes: The Starry Night
+      - not:
+          callsTool: set-wallpaper
+      - not:
+          callsTool: download-wallpaper
+
+  - input: "@another-boring-piece Set today's featured artwork as my desktop wallpaper."
+    mocks:
+      get-todays-wallpapers:
+        today: *wallpaper
+        random: []
+      set-wallpaper:
+        status: selected
+        wallpaper: *wallpaper
+    expected:
+      - callsTool: get-todays-wallpapers
+      - callsTool:
+          name: set-wallpaper
+          arguments:
+            wallpaper.id: starry-night
+            wallpaper.url: https://example.com/starry-night.jpg
+      - not:
+          callsTool: download-wallpaper
+
+  - input: "@another-boring-piece Download today's featured artwork to my Downloads folder."
+    mocks:
+      get-todays-wallpapers:
+        today: *wallpaper
+        random: []
+      download-wallpaper:
+        status: downloaded
+        wallpaper: *wallpaper
+        downloadPath: /Users/example/Downloads/The_Starry_Night_starry-night.jpg
+    expected:
+      - callsTool: get-todays-wallpapers
+      - callsTool:
+          name: download-wallpaper
+          arguments:
+            wallpaper.id: starry-night
+            wallpaper.url: https://example.com/starry-night.jpg
+      - not:
+          callsTool: set-wallpaper
+
+  - input: "@another-boring-piece List every time The Starry Night was set from my history, including manual selections and automatic switches. Use YYYY-MM-DD dates."
+    mocks:
+      search-wallpaper-history:
+        - wallpaper: *wallpaper
+          events:
+            - eventType: auto-switched
+              timestamp: "2026-01-03T10:00:00.000Z"
+            - eventType: selected
+              timestamp: "2026-01-01T10:00:00.000Z"
+    expected:
+      - callsTool: search-wallpaper-history
+      - includes: "2026-01-01"
+      - includes: "2026-01-03"
+      - matches: 'auto|automatic'
+      - not:
+          callsTool: set-wallpaper
+
+  - input: "@another-boring-piece What wallpapers have I used before?"
+    usedAsExample: false
+    mocks:
+      get-wallpaper-history: []
+    expected:
+      - callsTool: get-wallpaper-history
+      - matches: 'no .*history|history .*empty|no .*wallpapers|no .*record|haven.t .*wallpaper'
+      - not:
+          callsTool: set-wallpaper
+
+  - input: "@another-boring-piece Find van Gogh artworks in my history."
+    mocks:
+      search-wallpaper-history:
+        - wallpaper: *wallpaper
+          events:
+            - eventType: selected
+              timestamp: "2026-01-01T10:00:00.000Z"
+    expected:
+      - callsTool:
+          name: search-wallpaper-history
+          arguments:
+            query:
+              includes: Gogh
+      - includes: The Starry Night
+      - not:
+          callsTool: set-wallpaper-from-history
+
+  - input: "@another-boring-piece Show wallpapers I downloaded from 2026-01-01 through 2026-01-03."
+    mocks:
+      search-wallpaper-history:
+        - wallpaper: *wallpaper
+          events:
+            - eventType: downloaded
+              timestamp: "2026-01-02T10:00:00.000Z"
+    expected:
+      - callsTool:
+          name: search-wallpaper-history
+          arguments:
+            fromDate: "2026-01-01"
+            toDate: "2026-01-03"
+            eventType: downloaded
+      - includes: The Starry Night
+      - not:
+          callsTool: set-wallpaper-from-history
+
+  - input: "@another-boring-piece Find The Starry Night in my history and set it as my wallpaper again."
+    mocks:
+      search-wallpaper-history:
+        - wallpaper: *wallpaper
+          events:
+            - eventType: selected
+              timestamp: "2026-01-01T10:00:00.000Z"
+      set-wallpaper-from-history:
+        status: selected
+        wallpaper: *wallpaper
+    expected:
+      - callsTool: search-wallpaper-history
+      - callsTool:
+          name: set-wallpaper-from-history
+          arguments:
+            wallpaperId: starry-night
+      - not:
+          callsTool: set-wallpaper
+
+  - input: "@another-boring-piece Find Monet in my history and set it if you find a match."
+    usedAsExample: false
+    mocks:
+      search-wallpaper-history: []
+    expected:
+      - callsTool: search-wallpaper-history
+      - matches: 'no |not |couldn|didn'
+      - not:
+          callsTool: set-wallpaper-from-history
+      - not:
+          callsTool: set-wallpaper

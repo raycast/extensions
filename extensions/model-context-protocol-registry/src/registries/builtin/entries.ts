@@ -44,6 +44,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://www.a1.gallery/api/mcp",
   },
   {
+    name: "aggregate",
+    title: "Aggregate",
+    description:
+      "Every company's money in one ledger: cash, burn, runway, receivables, recurring spend, payroll and month-end close, from banks and cards (Plaid, Mercury, Brex, Ramp, Wise), payments (Stripe, Square, Shopify), QuickBooks, Xero and payroll. Read-only to banks, Stripe and other providers; it can't move money. AI writes (cash sales, paper bills, corrections) are labeled and undoable for 30 days, and closing books always waits for a person. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, you choose which companies and data each connection sees, no API key to paste. Open-sourcing (AGPL) at launch.",
+    icon: "https://app.aggregate.finance/icon-512.png",
+    homepage: "https://aggregate.finance",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.aggregate.finance/mcp"],
+    },
+    remoteUrl: "https://app.aggregate.finance/mcp",
+  },
+  {
     name: "aiapplyd",
     title: "AI Applyd",
     description:
@@ -121,6 +134,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://better-design.com/api/mcp"],
+    },
+  },
+  {
+    name: "blawgy",
+    title: "Blawgy",
+    description:
+      "Run your SEO blog from Raycast. Read Search Console traffic, rankings and indexing, run keyword research, manage the content plan, write, update and publish articles to WordPress, Shopify, Webflow, Wix, Framer, Ghost or Duda. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or an API key. Paid Blawgy plan required.",
+    icon: "https://blawgy.com/favicon-512.png",
+    homepage: "https://blawgy.com/mcp",
+    remoteUrl: "https://app.blawgy.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.blawgy.com/mcp"],
     },
   },
   {
@@ -296,7 +322,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "dc-hub",
     title: "DC Hub",
     description:
-      "Live data on the physical infrastructure behind AI: facility coverage in 170+ countries, 300+ markets scored daily (DCPI), 1,700+ tracked M&A deals, live grid, fiber, gas and interconnection-queue data, and Capacity Source: search available data-center capacity by size and location, get exact fits or multi-provider bundles, and request brokered intros. 94 tools; every answer carries its source. Hosted remote Streamable HTTP server through `mcp-remote`; free tier works with no API key and no sign-in.",
+      "DC Hub is the live data layer for data-center site selection. Its Data Center Power Index (DCPI) is a daily score of where data centers can get grid power, across 300+ markets. Also live grid, fiber, gas and interconnection-queue data, and Capacity Source: search available data-center capacity by size and location and request introductions. 94 tools; every answer carries its source. Hosted remote Streamable HTTP server through `mcp-remote`; free tier works with no API key and no sign-in.",
     icon: "https://raw.githubusercontent.com/azmartone67/dchub-mcp-server/main/dchub-logo.png",
     homepage: "https://dchub.cloud/connect",
     configuration: {
@@ -568,6 +594,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "keeploop",
+    title: "Keeploop",
+    description:
+      "Your Mac's Apple Mail and Calendar for Raycast AI. Search mail, read threads, see who is waiting on a reply and check your calendar; writes stay off until you allow them on your Mac. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs the Keeploop Mac app with Keeploop Pro or its free trial for remote use; local use is free.",
+    icon: "https://keeploop.app/assets/app-icon.svg",
+    homepage: "https://keeploop.app",
+    remoteUrl: "https://mcp.keeploop.app/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.keeploop.app/mcp"],
+    },
+  },
+  {
     name: "filesystem",
     title: "Filesystem",
     description:
@@ -601,6 +640,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.flightseatmap.com/mcp"],
+    },
+  },
+  {
+    name: "looot",
+    title: "looot",
+    description:
+      "One key and one prepaid balance for about 2,500 data API operations from 90+ providers: work emails and phone numbers, company and people search, Google results, web pages, news, LinkedIn profiles and local businesses. The agent searches the catalog, sees the price before it runs, and pays per call; a failed call costs nothing. 19 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or a Bearer API key. No subscription, top up from $5.",
+    icon: "https://raw.githubusercontent.com/loootai/looot-plugin/main/plugins/claude-code/looot/.claude-plugin/icon.png",
+    homepage: "https://docs.looot.ai",
+    remoteUrl: "https://api.looot.ai/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.looot.ai/mcp"],
     },
   },
   {
@@ -938,6 +990,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://www.socialfaktory.com/mcp"],
+    },
+  },
+  {
+    name: "solidping",
+    title: "SolidPing",
+    description:
+      "Open-source uptime and synthetic monitoring. Create, run and diagnose checks (HTTP, DNS, TLS, databases, queues and more), read results and incidents, manage status pages and maintenance windows. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. Self-hosted instances serve the same endpoint at <base URL>/api/v1/mcp.",
+    icon: "https://www.solidping.io/img/logo.png",
+    homepage: "https://www.solidping.io",
+    remoteUrl: "https://solidping.io/api/v1/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://solidping.io/api/v1/mcp"],
     },
   },
   {
@@ -2242,6 +2307,19 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://present.aitho.app/mcp"],
+    },
+  },
+  {
+    name: "flowra",
+    title: "Flowra",
+    description:
+      "One MCP server for your apps' tools and your own custom tools, plus hosted AI agents and workflows with approval gates and a run ledger.",
+    icon: "https://flowra.dev/icons/logo.svg",
+    homepage: "https://flowra.dev",
+    remoteUrl: "https://mcp.flowra.dev/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.flowra.dev/mcp"],
     },
   },
 ];

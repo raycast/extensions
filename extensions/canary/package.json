@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "canary",
+  "title": "PR Canary",
+  "description": "Your open PRs with one-key access to the preview URL that CI posts as a PR comment",
+  "icon": "extension-icon.png",
+  "author": "liran_mizrahi",
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "canaries",
+      "title": "My PR Canaries",
+      "description": "List my open PRs and open their preview environment",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.6.0",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "categories": [
+    "Developer Tools"
+  ],
+  "preferences": [
+    {
+      "name": "repo",
+      "title": "Repository",
+      "description": "GitHub repository as owner/name",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "my-org/my-repo"
+    },
+    {
+      "name": "urlPrefix",
+      "title": "Canary URL Prefix",
+      "description": "Use the newest URL in a PR comment that starts with this. Empty = the URL after a 'Canary \u2026 :' label",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://dashboard."
+    },
+    {
+      "name": "extraUrlPrefix",
+      "title": "Extra Link URL Prefix",
+      "description": "Optional second link from PR comments, e.g. your deploy dashboard",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://argocd."
+    },
+    {
+      "name": "commentAuthor",
+      "title": "CI Comment Author",
+      "description": "Optional. GitHub login of the account that posts the preview URL, e.g. your CI bot. Only its comments are trusted. If empty, comments from bot accounts and from repository owners, members and collaborators are used.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "platform-handler"
+    },
+    {
+      "name": "personalAccessToken",
+      "title": "Personal Access Token",
+      "description": "Optional. Use a GitHub token instead of signing in with OAuth, e.g. when your organization restricts third-party OAuth apps. Needs read access to pull requests; authorize it for SSO if required.",
+      "type": "password",
+      "required": false,
+      "placeholder": "ghp_\u2026 or github_pat_\u2026"
+    }
+  ]
+}

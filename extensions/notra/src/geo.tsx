@@ -1,20 +1,44 @@
 import { Action, ActionPanel, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
 import { GeoDashboard } from "./components/geo-dashboard";
+import { WorkspaceDropdown } from "./components/workspace-switcher";
 import { useGeoProjects } from "./hooks/use-geo";
-import { notraUrl } from "./utils";
+import { useWorkspace } from "./hooks/use-workspace";
+import { notraOrganizationUrl } from "./utils";
 
 export default function Command() {
-  const { data, error, isLoading, revalidate } = useGeoProjects();
+  const {
+    hasMultipleWorkspaces,
+    isLoading: isLoadingWorkspace,
+    switchWorkspace,
+    workspace,
+    workspaces,
+  } = useWorkspace();
+  const {
+    data,
+    error,
+    isLoading: isLoadingProjects,
+    revalidate,
+  } = useGeoProjects({ execute: !isLoadingWorkspace, organizationId: workspace?.id });
+  const isLoading = isLoadingWorkspace || isLoadingProjects;
   const projects = data?.projects ?? [];
   const organization = data?.organization ?? { id: "", logo: null, name: "", slug: "" };
   const onlyProject = projects.length === 1 ? projects[0] : undefined;
 
-  if (!isLoading && !error && onlyProject) {
+  // Jump straight into a single project only when there is no workspace to switch to from the project list.
+  if (!(isLoading || error || hasMultipleWorkspaces) && onlyProject) {
     return <GeoDashboard organization={organization} project={onlyProject} />;
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search GEO projects...">
+    <List
+      isLoading={isLoading}
+      searchBarAccessory={
+        hasMultipleWorkspaces ? (
+          <WorkspaceDropdown onChange={switchWorkspace} workspace={workspace} workspaces={workspaces} />
+        ) : undefined
+      }
+      searchBarPlaceholder="Search GEO projects..."
+    >
       {error ? (
         <List.EmptyView
           icon={Icon.Warning}
@@ -42,7 +66,7 @@ export default function Command() {
               <Action.OpenInBrowser
                 icon={Icon.Globe}
                 title="Open GEO in Notra"
-                url={notraUrl(`/${organization.slug}/geo`)}
+                url={notraOrganizationUrl("/geo", organization.slug || undefined)}
               />
             </ActionPanel>
           }

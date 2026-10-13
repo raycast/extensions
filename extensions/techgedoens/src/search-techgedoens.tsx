@@ -173,6 +173,7 @@ export default function SearchTechgedoensCommand({
       isLoading={isLoading || isLoadingMore}
       onSearchTextChange={setSearchText}
       pagination={{ hasMore, onLoadMore: loadMoreArticles, pageSize: ARTICLES_PER_FEED_PAGE }}
+      searchText={searchText}
       searchBarPlaceholder={translations.searchBlogArchivePlaceholder}
       searchBarAccessory={
         <List.Dropdown

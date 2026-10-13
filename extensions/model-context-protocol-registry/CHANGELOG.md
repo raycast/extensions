@@ -1,5 +1,33 @@
 # Model Context Protocol Registry Changelog
 
+## [Add SolidPing MCP Server] - 2026-10-12
+
+- Add SolidPing to the official registry: open-source uptime and synthetic monitoring. Create, run and diagnose checks, read results and incidents, manage status pages and maintenance windows. Hosted remote Streamable HTTP server with OAuth 2.1 sign-in. Direct HTTP connection in Raycast at https://solidping.io/api/v1/mcp.
+
+## [Update DC Hub MCP Server] - 2026-10-12
+
+- Update DC Hub's description to its current canonical wording.
+
+## [Add Keeploop MCP Server] - 2026-10-12
+
+- Add Keeploop to the official registry: your Mac's Apple Mail and Calendar for Raycast AI. Search mail, read threads, see who is waiting on a reply and check your calendar; writes stay off until you allow them on your Mac. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs the Keeploop Mac app with Keeploop Pro or its free trial for remote use; local use is free. Direct HTTP connection in Raycast at https://mcp.keeploop.app/mcp.
+
+## [Add Aggregate MCP Server] - 2026-10-12
+
+- Add Aggregate to the official registry: every company's money in one ledger (cash, burn, runway, receivables, payroll, month-end close) from banks, cards, Stripe, QuickBooks, Xero and payroll. Read-only to banks and Stripe; it can't move money. Hosted remote Streamable HTTP server at https://app.aggregate.finance/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration.
+
+## [Add looot MCP Server] - 2026-10-12
+
+- Add looot to the official registry: one key and one prepaid balance for about 2,500 data API operations (emails, phones, company and people search, SERP, web pages, news). 19 tools. Hosted remote Streamable HTTP server at https://api.looot.ai/mcp with direct HTTP connection in Raycast; OAuth 2.1 sign-in with dynamic client registration, or a Bearer API key.
+
+## [Add Flowra MCP Server] - 2026-10-11
+
+- Add Flowra to the community registry: one MCP server for your apps' tools and your own custom tools, plus hosted AI agents and workflows with approval gates and a run ledger. Hosted remote Streamable HTTP server at https://mcp.flowra.dev/mcp.
+
+## [Add Blawgy MCP Server] - 2026-10-11
+
+- Add Blawgy to the official registry: read Search Console traffic, rankings and indexing, run keyword research, manage the content plan, and write, update and publish SEO articles to WordPress, Shopify, Webflow, Wix, Framer, Ghost or Duda. Hosted remote Streamable HTTP server at https://app.blawgy.com/mcp with direct HTTP connection in Raycast; OAuth 2.1 sign-in with dynamic client registration and PKCE, or an API key. Paid Blawgy plan required.
+
 ## [Update LinkMCP MCP Server] - 2026-10-10
 
 - Add a listing tag to LinkMCP's server URL (https://app.linkmcp.io/api/mcp?ref=raycast), so LinkMCP can see which sign-ups come from Raycast. The server works the same way.
