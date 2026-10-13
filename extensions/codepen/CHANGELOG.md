@@ -1,6 +1,6 @@
 # CodePen Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-13
 
 - Search, create, edit, and fork your Pens with CodePen API v2.
 - Browse source files, saved versions, previews, and build diagnostics; edit text files and manage deployments.
