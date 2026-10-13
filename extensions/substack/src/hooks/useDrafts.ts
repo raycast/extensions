@@ -32,6 +32,7 @@ export default function useDrafts(account?: AccountSummary) {
         key,
         drafts: offset && previous.key === key ? previous.drafts : [],
         recovery: offset && previous.key === key ? previous.recovery : [],
+        nextOffset: offset && previous.key === key ? offset : undefined,
         isLoading: true,
       }));
       let recovery: RecoveryRecord[] = [];

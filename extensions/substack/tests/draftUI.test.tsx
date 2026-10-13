@@ -254,6 +254,46 @@ test("draft list paginates remote results, merges recovery and refreshes", async
   fireEvent.change(screen.getByLabelText("Search"), { target: { value: "no matching drafts" } });
   expect(screen.getAllByRole("button", { name: "Create Draft" }).length).toBeGreaterThan(0);
 });
+test("a failed draft page can retry without reloading earlier pages", async () => {
+  await saveAccount(account);
+  const mock = vi
+    .fn()
+    .mockResolvedValueOnce(
+      Response.json({
+        posts: [{ id: 42, draft_title: "First page", type: "newsletter", is_published: false }],
+        offset: 0,
+        limit: 25,
+        total: 26,
+      }),
+    )
+    .mockResolvedValueOnce(Response.json({}, { status: 500 }))
+    .mockResolvedValueOnce(
+      Response.json({
+        posts: [{ id: 43, draft_title: "Second page", type: "newsletter", is_published: false }],
+        offset: 25,
+        limit: 25,
+        total: 26,
+      }),
+    );
+  vi.stubGlobal("fetch", mock);
+  const { result } = renderHook(() => useDrafts(account));
+  await waitFor(() => expect(result.current.drafts.map((draft) => draft.id)).toEqual([42]));
+  await act(async () => {
+    await result.current.loadMore();
+  });
+  expect(result.current.error).toBeTruthy();
+  expect(result.current.isLoading).toBe(false);
+  expect(result.current.drafts.map((draft) => draft.id)).toEqual([42]);
+  expect(result.current.nextOffset).toBe(25);
+
+  await act(async () => {
+    await result.current.loadMore();
+  });
+  expect(result.current.error).toBeUndefined();
+  expect(result.current.drafts.map((draft) => draft.id)).toEqual([42, 43]);
+  expect(result.current.nextOffset).toBeUndefined();
+  expect(mock.mock.calls.map(([url]) => new URL(String(url)).searchParams.get("offset"))).toEqual(["0", "25", "25"]);
+});
 test("list empty, errors, no accounts and no default keep creation and setup reachable", async () => {
   render(<ListMyDrafts />);
   await screen.findByText(/import legacy preferences/);
