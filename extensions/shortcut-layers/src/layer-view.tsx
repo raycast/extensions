@@ -12,6 +12,8 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { homedir } from "os";
+import { isAbsolute, join } from "path";
 import { useEffect, useRef, useState } from "react";
 import { runEntry } from "./actions";
 import { loadLayers, saveLayers, useLayers } from "./data";
@@ -135,7 +137,7 @@ export function LayerView({ layerId }: { layerId: string }) {
         sortEntries(layer.entries, sort).map((entry) => (
           <List.Item
             key={entry.id}
-            icon={entry.icon ?? kindIcon(entry.kind)}
+            icon={entryIcon(entry)}
             title={entry.title}
             subtitle={entry.value}
             keywords={entry.keywords}
@@ -238,4 +240,20 @@ function kindIcon(kind: EntryKind): Icon {
     default:
       return Icon.Globe;
   }
+}
+
+/** Absolute local path for an app bundle or file entry, or undefined if not a path. */
+function localIconPath(value: string): string | undefined {
+  const path = value.startsWith("~/") ? join(homedir(), value.slice(2)) : value;
+  return isAbsolute(path) ? path : undefined;
+}
+
+/** Real icon for app and file entries; falls back to the kind's glyph. */
+function entryIcon(entry: Entry): string | { fileIcon: string } {
+  if (entry.icon) return entry.icon;
+  if (entry.kind === "app" || entry.kind === "file") {
+    const path = localIconPath(entry.value);
+    if (path) return { fileIcon: path };
+  }
+  return kindIcon(entry.kind);
 }
