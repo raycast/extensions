@@ -1,6 +1,6 @@
 # Retype Changelog
 
-## [Fix replacing text in Chrome, Safari and Sublime Text] - {PR_MERGE_DATE}
+## [Fix replacing text in Chrome, Safari and Sublime Text] - 2026-10-13
 
 - Retype now types the fixed text instead of pasting it, so it works reliably in Chrome and no longer changes your clipboard.
 - With no selection, Sublime Text no longer appends the fixed text to the line.
