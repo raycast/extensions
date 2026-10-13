@@ -1,6 +1,6 @@
 # Google Meet Changelog
 
-## [Safari Web App Support & Per-Profile Open In] - {PR_MERGE_DATE}
+## [Safari Web App Support & Per-Profile Open In] - 2026-10-13
 
 - Create meetings directly inside a Google Meet Safari web app (File → Add to Dock) when "Open Meetings In" is set to the PWA. The meeting link is read from the web app's window title ("Meet - <code>") through System Events, so no browser tab is opened and neither the preferred nor the default browser is consulted. A default browser that isn't a supported browser, such as a link router like Finicky, no longer causes "isn't a supported browser" in this mode.
 - Detect Safari web apps by their `com.apple.Safari.WebApp.` bundle identifier prefix, alongside the Chromium PWA prefixes.
