@@ -54,11 +54,11 @@ If you would rather decide yourself, the fixed settings are still there:
 
 | Setting | `eu.shop.example.co.uk` becomes |
 | --- | --- |
-| Domain + suffix | `example.co.uk` |
-| One level more | `shop.example.co.uk` |
-| Two levels more | `eu.shop.example.co.uk` |
-| Full hostname | `eu.shop.example.co.uk` |
-| Name only | `example` |
+| Domain + Suffix | `example.co.uk` |
+| One Level More | `shop.example.co.uk` |
+| Two Levels More | `eu.shop.example.co.uk` |
+| Full Hostname | `eu.shop.example.co.uk` |
+| Name Only | `example` |
 
 The **Build Email Alias** command lets you switch the depth per run, so you can override the
 automatic choice whenever it guesses wrong.

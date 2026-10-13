@@ -225,8 +225,8 @@ export default function Command() {
       >
         <Form.Dropdown.Item value="none" title="None" />
         <Form.Dropdown.Item value="date" title="Date" />
-        <Form.Dropdown.Item value="random" title="Random token" />
-        <Form.Dropdown.Item value="both" title="Date and random token" />
+        <Form.Dropdown.Item value="random" title="Random Token" />
+        <Form.Dropdown.Item value="both" title="Date and Random Token" />
       </Form.Dropdown>
 
       <Form.Separator />

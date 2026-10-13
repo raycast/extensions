@@ -64,31 +64,31 @@
       "default": "auto",
       "data": [
         {
-          "title": "Automatic — keeps a subdomain only when it means something",
+          "title": "Automatic (Keeps a Subdomain Only When It Means Something)",
           "value": "auto"
         },
         {
-          "title": "Domain + suffix — example.com",
+          "title": "Domain + Suffix (example.com)",
           "value": "1"
         },
         {
-          "title": "One level more — shop.example.com",
+          "title": "One Level More (shop.example.com)",
           "value": "2"
         },
         {
-          "title": "Two levels more — eu.shop.example.com",
+          "title": "Two Levels More (eu.shop.example.com)",
           "value": "3"
         },
         {
-          "title": "Three levels more",
+          "title": "Three Levels More",
           "value": "4"
         },
         {
-          "title": "Full hostname",
+          "title": "Full Hostname",
           "value": "full"
         },
         {
-          "title": "Name only, without suffix — example",
+          "title": "Name Only, Without Suffix (example)",
           "value": "name"
         }
       ]
@@ -127,11 +127,11 @@
           "value": "date"
         },
         {
-          "title": "Random token",
+          "title": "Random Token",
           "value": "random"
         },
         {
-          "title": "Date and random token",
+          "title": "Date and Random Token",
           "value": "both"
         }
       ]
@@ -202,15 +202,15 @@
       "default": "copyPaste",
       "data": [
         {
-          "title": "Copy to clipboard",
+          "title": "Copy to Clipboard",
           "value": "copy"
         },
         {
-          "title": "Copy and paste into the frontmost app",
+          "title": "Copy and Paste Into the Frontmost App",
           "value": "copyPaste"
         },
         {
-          "title": "Paste only",
+          "title": "Paste Only",
           "value": "paste"
         }
       ]
@@ -224,15 +224,15 @@
       "default": "auto",
       "data": [
         {
-          "title": "Automatic — AppleScript, then browser extension",
+          "title": "Automatic (AppleScript, Then Browser Extension)",
           "value": "auto"
         },
         {
-          "title": "AppleScript only",
+          "title": "AppleScript Only",
           "value": "applescript"
         },
         {
-          "title": "Raycast browser extension only",
+          "title": "Raycast Browser Extension Only",
           "value": "extension"
         }
       ]
