@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { ChangeStatus, ChangePriority, CopyTaskTitle, CopyTaskDescription, SubTask, ParentTask } from "../shortcut";
 import { KaneoAPI } from "../api/kaneo";
 import { formatDate, cleanDescription, statusKey, priorityKey } from "../lib/task-helpers";
-import { getApiUrl } from "../lib/get-api-url";
+import { resolveImageUrl } from "../lib/get-api-url";
 import { useTaskCustomFields } from "../hooks/useTaskCustomFields";
 
 type TaskDetailViewProps = {
@@ -123,7 +123,7 @@ ${createdAt}
             icon={
               assigneeName
                 ? task.assigneeImage
-                  ? { source: getApiUrl(task.assigneeImage), mask: Image.Mask.Circle }
+                  ? { source: resolveImageUrl(task.assigneeImage), mask: Image.Mask.Circle }
                   : getAvatarIcon(assigneeName)
                 : undefined
             }

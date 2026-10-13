@@ -9,3 +9,15 @@ export function getApiUrl(path: string) {
 
   return `${baseUrl}/${unprefixedPath}`;
 }
+
+/**
+ * Resolve an image reference for Raycast.
+ * Absolute URLs (http/https, protocol-relative, data URIs) are returned as-is;
+ * relative paths are resolved against the API base.
+ */
+export function resolveImageUrl(image: string): string {
+  if (/^(?:[a-z][a-z\d+\-.]*:|\/\/)/i.test(image)) {
+    return image;
+  }
+  return getApiUrl(image);
+}
