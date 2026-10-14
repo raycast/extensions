@@ -60,7 +60,7 @@ export async function fetchModels(): Promise<ModelList> {
       headers: { Authorization: `Bearer ${getApiKey()}` },
       signal: AbortSignal.timeout(15_000),
     });
-    if (!res.ok) throw new Error(await errorMessage(res));
+    if (!res.ok) throw new Error(await httpErrorMessage(res));
     const { data } = (await res.json()) as { data: ProviderModel[] };
     cache.set("models", JSON.stringify(data));
     return { models: data };
@@ -104,8 +104,26 @@ export const getModels: AI.GetModels = async () => {
   });
 };
 
-export const streamCompletion: AI.StreamCompletion = (model, request) =>
-  generate(model.id, { ...request, reasoningEffort: request.providerOptions?.raycast?.reasoningEffort });
+export const streamCompletion: AI.StreamCompletion = async function* (model, request) {
+  for await (const part of generate(model.id, {
+    ...request,
+    reasoningEffort: request.providerOptions?.raycast?.reasoningEffort,
+  })) {
+    // Raycast only receives an error's message and retries every failure, so a request that can't succeed
+    // (e.g. a model outside the user's plan) is shown as the reply instead of 10 silent retries.
+    // This conversion lives here only: the extension's own chat (streamAIResponse) does not retry,
+    // so it must keep errors as errors to avoid saving failures as successful answers.
+    if (part.type === "error") {
+      const status = (part.error as { statusCode?: number })?.statusCode;
+      if (isNonRetryable(status)) {
+        yield { type: "text-delta", id: "error", text: `⚠️ ${errorMessage(part.error)}` };
+        yield { type: "finish", finishReason: "stop" };
+        return;
+      }
+    }
+    yield part;
+  }
+};
 
 /** Each model lists the endpoints it answers on: Claude only on /messages, the rest on /chat/completions. */
 async function languageModel(modelId: string) {
@@ -147,15 +165,7 @@ export async function* generate(modelId: string, request: GenerateRequest): Asyn
   });
   for await (const part of result.fullStream) {
     if (part.type === "error") {
-      const status = (part.error as { statusCode?: number })?.statusCode;
-      // Raycast only receives an error's message and retries every failure, so a request that can't succeed
-      // (e.g. a model outside the user's plan) is shown as the reply instead of 10 silent retries.
-      if (status !== undefined && status >= 400 && status < 500 && status !== 408 && status !== 429) {
-        yield { type: "text-delta", id: "error", text: `⚠️ ${friendlyError(part.error)}` };
-        yield { type: "finish", finishReason: "stop" };
-        return;
-      }
-      yield { type: "error", error: friendlyError(part.error) };
+      yield { type: "error", error: toFriendlyError(part.error) };
       continue;
     }
     if ("toolName" in part && restoreName.has(part.toolName)) {
@@ -166,13 +176,25 @@ export async function* generate(modelId: string, request: GenerateRequest): Asyn
   }
 }
 
-function friendlyError(error: unknown): string {
+function isNonRetryable(status: number | undefined): boolean {
+  return status !== undefined && status >= 400 && status < 500 && status !== 408 && status !== 429;
+}
+
+function errorMessage(error: unknown): string {
   const status = (error as { statusCode?: number })?.statusCode;
   if (status === 401) return "Command Code rejected the API key. Check extension preferences or run `cmd login`.";
   return error instanceof Error ? error.message : String(error);
 }
 
-async function errorMessage(res: Response): Promise<string> {
+/** Friendly message that keeps the HTTP status so callers can decide whether a retry could succeed. */
+function toFriendlyError(error: unknown): Error & { statusCode?: number } {
+  const friendly = new Error(errorMessage(error)) as Error & { statusCode?: number };
+  const status = (error as { statusCode?: number })?.statusCode;
+  if (status !== undefined) friendly.statusCode = status;
+  return friendly;
+}
+
+async function httpErrorMessage(res: Response): Promise<string> {
   const text = await res.text().catch(() => "");
   try {
     const message = JSON.parse(text)?.error?.message;
