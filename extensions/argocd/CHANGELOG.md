@@ -1,4 +1,4 @@
-## [Dex sign-in] - {PR_MERGE_DATE}
+## [Dex sign-in] - 2026-10-14
 
 - Single sign-on now works on instances that log in through ArgoCD's bundled Dex (GitHub,
   LDAP, SAML connectors...), instead of reporting that the instance has no OIDC configuration.
