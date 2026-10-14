@@ -13,7 +13,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { detectFast, detectFull, maskText } from "swift:../swift/privmask-bridge";
+import { detectFast, detectFull, isWindowOnScreen, maskText } from "swift:../swift/privmask-bridge";
 
 type Finding = {
   id: string;
@@ -97,9 +97,12 @@ function copyQuietly(text: string) {
     const child = execFile("/usr/bin/pbcopy", { env: { ...process.env, LC_ALL: "en_US.UTF-8" } }, (error) =>
       error ? reject(error) : resolve(),
     );
+    child.stdin?.on("error", reject);
     child.stdin?.end(text);
   });
 }
+
+const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 /** Whether the masker substituted exactly this finding. */
 function isReplacementOf(replacement: Replacement, finding: Finding) {
@@ -186,6 +189,9 @@ export default function Command() {
   // last. Each is a separate process, and one started earlier can finish
   // later; the clipboard would then hold a result the user had moved on from.
   const copies = useRef<Promise<unknown>>(Promise.resolve());
+  // Bumped whenever the text changes, and on unmount, so a copy queued for an
+  // earlier text is dropped rather than landing, toast and all, on the next.
+  const generation = useRef(0);
 
   /** Starts over on `text`, as if the command had been opened with it. */
   function start(text: string) {
@@ -200,15 +206,21 @@ export default function Command() {
     // the same string, and the clipboard would then be left holding the next
     // text unmasked.
     lastCopied.current = null;
+    generation.current += 1;
   }
 
   useEffect(() => {
     let cancelled = false;
-    readInput().then((text) => {
-      if (!cancelled) start(text);
-    });
+    readInput()
+      .then((text) => {
+        if (!cancelled) start(text);
+      })
+      .catch((error) => {
+        if (!cancelled) setFailure(String(error));
+      });
     return () => {
       cancelled = true;
+      generation.current += 1;
     };
   }, []);
 
@@ -266,7 +278,7 @@ export default function Command() {
 
   useEffect(() => {
     let cancelled = false;
-    if (input === null) return;
+    if (input === null || input.trim().length === 0) return;
 
     (async () => {
       const result = (await maskText({ text: input, selected })) as { text: string; replacements: Replacement[] };
@@ -312,14 +324,13 @@ export default function Command() {
     });
   }
 
-  // The fast scan's "Looking for personal names…" is a promise; when the scan
-  // that would keep it threw, it is replaced by what happened instead.
-  const notices = nameScanFailed
-    ? [
-        ...(response?.notices ?? []).filter((notice) => notice !== "Looking for personal names…"),
-        `Name detection failed (${nameScanFailed}), so personal names were not looked for.`,
-      ]
-    : (response?.notices ?? []);
+  // The wait for names is said here rather than by the fast scan, so that the
+  // sentence to take back when the scan throws is this file's own.
+  const notices = [
+    ...(response?.notices ?? []),
+    ...(response && waitingForModel && !nameScanFailed ? ["Looking for personal names…"] : []),
+    ...(nameScanFailed ? [`Name detection failed (${nameScanFailed}), so personal names were not looked for.`] : []),
+  ];
   const previewText = masked?.text || input || "";
   /**
    * Where a finding is in the preview: its own placeholder, which every
@@ -346,22 +357,52 @@ export default function Command() {
   // came for, and ⏎ still copies it once they have read why.
   useEffect(() => {
     if (!ready || nameScanFailed || maskedText === lastCopied.current) return;
-    lastCopied.current = maskedText;
+    const text = maskedText;
+    const of = generation.current;
+    const title =
+      findings.length === 0
+        ? "Copied as it is, nothing personal found"
+        : replaced === 0
+          ? "Copied as it is, everything left alone"
+          : `Masked text copied, ${replaced} replaced`;
+    // Claimed before the write, so the same text is not queued twice; given
+    // back when the write does not happen, so it can be tried again.
+    lastCopied.current = text;
     copies.current = copies.current
-      .then(() => copyQuietly(maskedText))
-      .then(() =>
-        showToast({
-          style: Toast.Style.Success,
-          title: replaced > 0 ? `Masked text copied, ${replaced} replaced` : "Copied as it is, nothing personal found",
-          message: "⌘V here masks what you copy next.",
-        }),
-      )
-      .catch((error) => showFailureToast(error, { title: "Could not copy the masked text" }));
-  }, [ready, nameScanFailed, maskedText, replaced]);
+      .then(async () => {
+        // Held back while the window is hidden: the user may be copying
+        // something else meanwhile, and would see neither the toast nor the
+        // text it announces. Checked once a second until the window is back.
+        // ponytail: gives up after five minutes; a view left open with "Pop
+        // to Root Search" off would otherwise be checked forever.
+        let visible = false;
+        for (let tries = 0; !visible && tries < 300 && of === generation.current; tries++) {
+          visible = (await isWindowOnScreen()) as boolean;
+          if (!visible) await wait(1000);
+        }
+        if (of !== generation.current) return;
+        if (!visible) {
+          if (lastCopied.current === text) lastCopied.current = null;
+          return;
+        }
+        await copyQuietly(text);
+        await showToast({ style: Toast.Style.Success, title, message: "⌘V here masks what you copy next." });
+      })
+      .catch((error) => {
+        if (lastCopied.current === text) lastCopied.current = null;
+        return showFailureToast(error, { title: "Could not copy the masked text" });
+      });
+  }, [ready, nameScanFailed, maskedText, replaced, findings]);
 
   /** ⌘V: starts over on whatever is on the clipboard now. */
   async function maskClipboard() {
-    const text = (await Clipboard.readText()) ?? "";
+    let text: string;
+    try {
+      text = (await Clipboard.readText()) ?? "";
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not read the clipboard" });
+      return;
+    }
     if (text.trim().length === 0) {
       await showToast({ style: Toast.Style.Failure, title: "Nothing to mask", message: "The clipboard is empty." });
       return;

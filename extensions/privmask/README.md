@@ -42,7 +42,9 @@ it. Everything is selected by default; press `⌘T` to leave one alone.
 
 The masked text is on the clipboard as soon as it is ready, and follows every
 change you make, so switching back to the app you came from and pressing `⌘V`
-is all that is left. `↵` copies it and closes the window; `⌘⇧↵` pastes it
+is all that is left. Nothing is copied while the Raycast window is hidden; the
+copy waits until the window is back on screen, so a copy you make elsewhere in
+the meantime is left alone. `↵` copies it and closes the window; `⌘⇧↵` pastes it
 straight into that app.
 
 To mask the next thing, copy it and press `⌘V` here: the window starts over on
