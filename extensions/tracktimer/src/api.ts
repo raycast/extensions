@@ -21,10 +21,6 @@ export type TimeEntry = TimerBase & {
   durationSeconds: number | null;
   earnings: string | null;
 };
-export type DailySummary = {
-  trackedSeconds: number;
-  earnings: { currency: string; amount: string }[];
-};
 export type StartInput = { projectId: string; billable: boolean; note?: string };
 export type Operation = { id: string; path: string; body?: StartInput };
 export type MutationResult = { timer: ActiveTimer | null; stoppedTimerId: string | null };
@@ -187,25 +183,6 @@ export class TrackTimerApi {
       "TrackTimer returned an unexpected response. Update the extension or check the server.",
       mutation,
     );
-  }
-  async getSummary(timezone: string): Promise<DailySummary> {
-    const data = await this.request(`/summary?${new URLSearchParams({ timezone })}`);
-    if (
-      !record(data) ||
-      !amount(data.trackedSeconds) ||
-      !Array.isArray(data.earnings) ||
-      !data.earnings.every(
-        (item) =>
-          record(item) &&
-          text(item.currency) &&
-          /^[A-Z]{3}$/.test(item.currency) &&
-          text(item.amount) &&
-          /^\d+(\.\d+)?$/.test(item.amount) &&
-          Number.isFinite(Number(item.amount)),
-      )
-    )
-      return this.invalid();
-    return data as DailySummary;
   }
   async getTimer(): Promise<ActiveTimer | null> {
     const data = await this.request("/timer");

@@ -9,6 +9,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import type { Client, Project } from "./api";
 import { displayColor } from "./model";
@@ -126,9 +127,8 @@ export default function TimerForm({ onStarted }: { onStarted?: () => Promise<voi
         // not delay navigation or turn an accepted timer into a failed action.
         const refresh = onStarted();
         pop();
-        void refresh.catch(() =>
-          showToast({
-            style: Toast.Style.Failure,
+        void refresh.catch((error) =>
+          showFailureToast(error, {
             title: "Timer updated; could not refresh the list",
             message: "Refresh the timer list to load the latest state.",
           }),
@@ -146,7 +146,6 @@ export default function TimerForm({ onStarted }: { onStarted?: () => Promise<voi
   return (
     <Form
       isLoading={loading}
-      navigationTitle={startingAt !== undefined ? "Starting Timer…" : "Start Timer"}
       actions={
         <ActionPanel>
           <Action.SubmitForm

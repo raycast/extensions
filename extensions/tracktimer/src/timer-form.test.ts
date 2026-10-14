@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   cachedClients: vi.fn(),
   cachedProjects: vi.fn(),
   closeMainWindow: vi.fn(),
+  showFailureToast: vi.fn(),
 }));
 vi.mock("./session", () => ({
   session: () => ({
@@ -20,6 +21,7 @@ vi.mock("./session", () => ({
     baseUrl: "https://tracktimer.app",
   }),
 }));
+vi.mock("@raycast/utils", () => ({ showFailureToast: mocks.showFailureToast }));
 vi.mock("@raycast/api", () => {
   const Container = ({ children, actions }: { children?: ReactNode; actions?: ReactNode }) =>
     createElement("div", null, children, actions);

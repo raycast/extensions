@@ -1,20 +1,7 @@
-import {
-  type ActiveTimer,
-  ApiError,
-  type Client,
-  type DailySummary,
-  type Project,
-  type TrackTimerApi,
-} from "./api";
+import { type ActiveTimer, ApiError, type Client, type Project, type TrackTimerApi } from "./api";
 import type { QueryCache } from "./query-cache";
 
 type History = Awaited<ReturnType<TrackTimerApi["getEntries"]>>;
-type SummaryCache = { context: string; summary: DailySummary };
-
-function summaryContext(timezone: string) {
-  const day = new Intl.DateTimeFormat("en-CA", { timeZone: timezone }).format(new Date());
-  return `${timezone}:${day}`;
-}
 
 export function cachedApi(api: TrackTimerApi, cache: QueryCache) {
   const cachedTimer = () => {
@@ -29,10 +16,6 @@ export function cachedApi(api: TrackTimerApi, cache: QueryCache) {
         }
       : null;
   };
-  const cachedSummary = (timezone: string) => {
-    const saved = cache.read<SummaryCache>("summary");
-    return saved?.data.context === summaryContext(timezone) ? saved.data.summary : undefined;
-  };
   async function read<T>(key: string, ttl: number, loader: () => Promise<T>, force: boolean) {
     try {
       return await cache.fetch(key, ttl, loader, force);
@@ -43,23 +26,8 @@ export function cachedApi(api: TrackTimerApi, cache: QueryCache) {
     }
   }
   return {
-    async getSummary(timezone: string, force = false) {
-      const context = summaryContext(timezone);
-      const saved = cache.read<SummaryCache>("summary");
-      const result = await read(
-        "summary",
-        60_000,
-        async () => ({
-          context,
-          summary: await api.getSummary(timezone),
-        }),
-        force || saved?.data.context !== context,
-      );
-      return result.summary;
-    },
     cached: {
       timer: cachedTimer,
-      summary: cachedSummary,
       entries: () => cache.read<History>("entries")?.data,
       clients: () => cache.read<Client[]>("clients")?.data,
       projects: (clientId: string) => cache.read<Project[]>(`projects:${clientId}`)?.data,
@@ -79,12 +47,10 @@ export function cachedApi(api: TrackTimerApi, cache: QueryCache) {
     confirmTimer(timer: ActiveTimer | null) {
       cache.write("timer", timer);
       cache.invalidate("entries");
-      cache.invalidate("summary");
     },
     invalidateTimers() {
       cache.invalidate("timer");
       cache.invalidate("entries");
-      cache.invalidate("summary");
     },
   };
 }

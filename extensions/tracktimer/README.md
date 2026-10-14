@@ -2,17 +2,9 @@
 
 TrackTimer for Raycast supports macOS and connects to `https://www.tracktimer.app`. Enter your TrackTimer API token in the extension preferences; the server URL is not configurable.
 
-## Menu bar (macOS)
-
-Run **TrackTimer Menu Bar** once to enable it. In that command’s Raycast preferences, choose **Current timer**, **Today’s tracked time**, or **Today’s earnings**. Current timer mode falls back to today’s tracked time when idle. The dropdown shows the current project, today’s totals, Stop Timer, and shortcuts to start or manage timers.
-
-The active timer is polled every 10 seconds, including while the dropdown is open. Daily totals are cached for up to one minute; manual Refresh and successful timer actions in this extension refresh them immediately. macOS may delay background updates, particularly on battery; this is a minute-level display rather than a ticking seconds clock. Enable background refresh in Raycast if it is disabled.
-
-Today follows your Mac’s timezone, includes the portion of running timers since midnight, and keeps earnings in separate currencies. Earnings use recorded pay rates and represent tracked earnings, not payments received. This command requires the server’s `/api/v1/summary` endpoint and the existing `timers:read` permission. Failed refreshes show **Unavailable** instead of an apparently current total.
-
 ## Caching
 
-Raycast's native disk cache displays saved timers and project choices immediately. Cache namespaces separate each API key and server; tokens are never stored in query caches. Active timers stay fresh for 15 seconds, recent entries for one minute, and clients/projects for five minutes. The timer form displays cached clients and projects immediately and revalidates them whenever it opens or the selected client changes. Other cached queries avoid new requests within their freshness windows. Stale data refreshes in the background, and data older than 24 hours is discarded.
+Raycast's native disk cache displays saved timers, recent entries, and project choices immediately. Cache namespaces separate each API key and server; tokens are never stored in query caches. Active timers stay fresh for 15 seconds, recent entries for one minute, and clients/projects for five minutes. The timer form displays cached clients and projects immediately and revalidates them whenever it opens or the selected client changes. Other cached queries avoid new requests within their freshness windows. Stale data refreshes in the background, and data older than 24 hours is discarded.
 
 Manual Refresh and Reload Clients and Projects bypass freshness windows. Timer mutations invalidate timer/history caches. Authorization errors clear cached data; temporary network failures retain the previous snapshot. Running durations advance locally from the last confirmed value. Older history pages are fetched on demand without persistence.
 
@@ -20,11 +12,11 @@ Control your TrackTimer timers from Raycast. **Start/Stop Timer** shows your run
 
 ## Local development
 
-From this extension directory:
+Use the repository's Node and pnpm versions. From the monorepo root:
 
 ```sh
-npm install
-npm run dev
+pnpm install
+pnpm --dir apps/raycast dev
 ```
 
 Raycast must be installed to use the development extension. In its preferences, enter a TrackTimer API token created in TrackTimer Settings (the default key includes `clients:read`, `projects:read`, `timers:read`, and `timers:write`). The token is stored in Raycast's password preference; do not put it in source files or shell commands.
@@ -34,16 +26,16 @@ Workspace admins can select any active client, including clients without project
 The server is hardcoded in `TRACKTIMER_URL` in `src/session.ts`. To install a personal development build against a local server, temporarily change that constant to your localhost origin (for example `http://localhost:3001`), rebuild, and use a token created on that local server. Restore `https://www.tracktimer.app` before committing or exporting for the Store. Use the canonical www hostname because authenticated API requests reject redirects. Never use Production credentials against Local or Preview. Building this package does not deploy the API.
 
 ```sh
-npm run build
-npm run check-types
-npm run lint
+pnpm --dir apps/raycast build
+pnpm --dir apps/raycast check-types
+pnpm --dir apps/raycast lint
 ```
 
 The distribution build writes to `dist` without installing into Raycast. Use `dev` to load it in Raycast.
 
 Uncertain timer requests are saved locally with their original operation ID. Use **Retry pending timer action** before starting another timer. The saved action includes its description but never the API token. Recent entries refresh every minute while the command is open, and **Refresh** reloads current server state. Starting a timer completes any timer already running for the same user, including in another workspace.
 
-This package uses Raycast ESLint and Prettier. Unit tests are maintained in the TrackTimer source repository and run with its Vitest setup.
+The repository uses Biome for formatting and linting. The package also includes standalone Raycast ESLint and Prettier configuration for export. Run the repository's required checks before handing off changes.
 
 ## Standalone packaging and Store submission
 

@@ -42,8 +42,6 @@ function setup() {
   });
   const fetcher = vi.fn<typeof fetch>().mockImplementation(async (input) => {
     const url = new URL(String(input));
-    if (url.pathname.endsWith("/summary"))
-      return Response.json({ trackedSeconds: 60, earnings: [] });
     if (url.pathname.endsWith("/timer")) return Response.json({ timer });
     if (url.pathname.endsWith("/time-entries")) return Response.json(history);
     if (url.pathname.endsWith("/clients"))
@@ -168,24 +166,4 @@ describe("cached TrackTimer API", () => {
     await expect(api.getEntries(undefined, true)).rejects.toMatchObject({ status: 500 });
     expect(cached.entries()).toEqual(history);
   });
-});
-
-it("reuses daily totals during fast polling and refreshes on expiry, mutation, or timezone change", async () => {
-  const { getSummary, cached, invalidateTimers, fetcher } = setup();
-  await getSummary("UTC");
-  expect(cached.summary("UTC")).toEqual({ trackedSeconds: 60, earnings: [] });
-  expect(cached.summary("America/Panama")).toBeUndefined();
-  vi.advanceTimersByTime(10_000);
-  await getSummary("UTC");
-  expect(fetcher).toHaveBeenCalledTimes(1);
-  vi.advanceTimersByTime(50_000);
-  await getSummary("UTC");
-  expect(fetcher).toHaveBeenCalledTimes(2);
-  invalidateTimers();
-  await getSummary("UTC");
-  expect(fetcher).toHaveBeenCalledTimes(3);
-  await getSummary("America/Panama");
-  expect(fetcher).toHaveBeenCalledTimes(4);
-  await getSummary("America/Panama", true);
-  expect(fetcher).toHaveBeenCalledTimes(5);
 });

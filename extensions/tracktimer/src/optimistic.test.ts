@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   getEntries: vi.fn(),
   pending: vi.fn(),
   showToast: vi.fn(),
+  showFailureToast: vi.fn(),
   cachedTimer: vi.fn(),
   cachedEntries: vi.fn(),
 }));
@@ -23,6 +24,7 @@ vi.mock("./session", () => ({
   }),
 }));
 vi.mock("./timer-form", () => ({ default: () => null }));
+vi.mock("@raycast/utils", () => ({ showFailureToast: mocks.showFailureToast }));
 vi.mock("@raycast/api", () => {
   const Container = ({ children }: { children?: ReactNode }) =>
     createElement("div", null, children);
@@ -129,9 +131,9 @@ describe("optimistic timer actions", () => {
     expect(screen.queryByText("Existing work")).toBeNull();
     await act(async () => request.reject(new Error("Start rejected")));
     expect(screen.getByRole("region", { name: "Running" }).textContent).toContain("Existing work");
-    expect(mocks.showToast).toHaveBeenCalledWith(
-      expect.objectContaining({ style: "failure", message: "Start rejected" }),
-    );
+    expect(mocks.showFailureToast).toHaveBeenCalledWith(expect.any(Error), {
+      title: "Timer action failed",
+    });
   });
 
   it("removes a stopping timer immediately and restores it on failure", async () => {

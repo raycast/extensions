@@ -32,14 +32,6 @@ export function session() {
     const stored = await LocalStorage.getItem<string>(`${completionKey}-${id}`);
     return stored ? (JSON.parse(stored) as Completion) : null;
   };
-  async function refreshMenuBar() {
-    try {
-      if (await LocalStorage.getItem<boolean>("menu-bar-enabled"))
-        await launchCommand({ name: "menu-bar", type: LaunchType.Background });
-    } catch {
-      /* Disabled menu commands must not affect successful timer actions. */
-    }
-  }
   return {
     ...queries,
     baseUrl,
@@ -112,7 +104,6 @@ export function session() {
           throw failure;
         }
       });
-      await refreshMenuBar();
     },
     async execute(path?: string, body?: Operation["body"]) {
       const started = performance.now();
@@ -168,7 +159,7 @@ export function session() {
         durationMs: Math.round(performance.now() - started),
       });
       // This view may disappear at any point. The worker owns sending, recording
-      // confirmation, and refreshing the menu bar independently of this waiter.
+      // confirmation independently of this waiter.
       const deadline = Date.now() + 30_000;
       while (Date.now() < deadline) {
         const saved = await completion(operation.id);

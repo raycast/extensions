@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   getTimer: vi.fn(),
   getEntries: vi.fn(),
   showToast: vi.fn(),
+  showFailureToast: vi.fn(),
 }));
 vi.mock("./session", () => ({
   session: () => ({
@@ -19,6 +20,7 @@ vi.mock("./session", () => ({
   }),
 }));
 vi.mock("./timer-form", () => ({ default: () => null }));
+vi.mock("@raycast/utils", () => ({ showFailureToast: mocks.showFailureToast }));
 vi.mock("@raycast/api", () => {
   const Container = ({ children }: { children?: ReactNode }) =>
     createElement("div", null, children);

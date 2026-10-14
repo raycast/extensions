@@ -24,52 +24,21 @@
     {
       "name": "index",
       "title": "Start/Stop Timer",
+      "subtitle": "TrackTimer",
       "description": "See your running timer and restart recent work.",
       "mode": "view"
     },
     {
       "name": "create-timer",
       "title": "Start New Timer",
+      "subtitle": "TrackTimer",
       "description": "Start a timer with a description and project.",
       "mode": "view"
     },
     {
-      "name": "menu-bar",
-      "title": "TrackTimer Menu Bar",
-      "description": "Show your current timer, today\u2019s tracked time, or earnings in the menu bar.",
-      "mode": "menu-bar",
-      "interval": "10s",
-      "platforms": [
-        "macOS"
-      ],
-      "preferences": [
-        {
-          "name": "displayMode",
-          "title": "Menu Bar Display",
-          "description": "Choose the value shown in the menu bar. Today follows your Mac\u2019s timezone.",
-          "type": "dropdown",
-          "required": false,
-          "default": "timer",
-          "data": [
-            {
-              "title": "Current timer (today\u2019s time when idle)",
-              "value": "timer"
-            },
-            {
-              "title": "Today\u2019s tracked time",
-              "value": "today"
-            },
-            {
-              "title": "Today\u2019s earnings",
-              "value": "earnings"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "name": "process-timer",
       "title": "Finish Pending Timer Action",
+      "subtitle": "TrackTimer",
       "description": "Send a saved timer action independently of the timer window.",
       "mode": "no-view"
     }
@@ -84,7 +53,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "2.4.1"
+    "@raycast/api": "2.4.1",
+    "@raycast/utils": "2.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.2.0",

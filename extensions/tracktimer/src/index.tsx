@@ -8,6 +8,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type ActiveTimer, ApiError, type TimeEntry } from "./api";
 import { displayColor, duration, recentEntries } from "./model";
@@ -120,11 +121,7 @@ export default function Command() {
       setOptimistic(undefined);
       setPending(Boolean(await connection.pending()));
       setActionError(e instanceof Error ? e.message : "Try again.");
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Timer action failed",
-        message: e instanceof Error ? e.message : "Try again.",
-      });
+      await showFailureToast(e, { title: "Timer action failed" });
     } finally {
       setOptimistic(undefined);
       setMutating(false);
@@ -313,11 +310,8 @@ export default function Command() {
                     const page = await connection.api.getEntries(cursor);
                     setEntries((previous) => [...previous, ...page.entries]);
                     setCursor(page.nextCursor);
-                  } catch {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Could not load older timers",
-                    });
+                  } catch (error) {
+                    await showFailureToast(error, { title: "Could not load older timers" });
                   } finally {
                     busy.current = false;
                     setLoading(false);

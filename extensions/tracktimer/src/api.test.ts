@@ -122,23 +122,6 @@ describe("TrackTimer API", () => {
   });
 });
 
-it("requests today's summary in the device timezone", async () => {
-  const summary = { trackedSeconds: 3600, earnings: [{ currency: "USD", amount: "125.00" }] };
-  const { api, fetcher } = setup(Response.json(summary));
-  expect(await api.getSummary("America/Panama")).toEqual(summary);
-  expect(new URL(String(fetcher.mock.calls[0]?.[0])).searchParams.get("timezone")).toBe(
-    "America/Panama",
-  );
-});
-it.each([
-  { trackedSeconds: -1, earnings: [] },
-  { trackedSeconds: 1, earnings: [{ currency: "USD", amount: "NaN" }] },
-  { trackedSeconds: 1, earnings: [{ currency: "invalid", amount: "1.00" }] },
-])("rejects malformed summaries", async (summary) => {
-  const { api } = setup(Response.json(summary));
-  await expect(api.getSummary("UTC")).rejects.toThrow("unexpected response");
-});
-
 it("describes temporary service failures without claiming the key expired", async () => {
   const { api } = setup(new Response("provider details must stay private", { status: 503 }));
   await expect(api.getTimer()).rejects.toMatchObject({

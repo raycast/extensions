@@ -104,34 +104,6 @@ it("ignores legacy server preferences and keeps pending operations across token 
   expect(mocks.mutate.mock.calls[1][0]).toEqual(mocks.mutate.mock.calls[0][0]);
 });
 
-it("refreshes an enabled menu bar after a successful action", async () => {
-  mocks.store.set("menu-bar-enabled", "true");
-  mocks.mutate.mockResolvedValue({});
-  await session().execute("/timers/start", { projectId: "project", billable: true });
-  expect(mocks.launchCommand).toHaveBeenCalledWith({ name: "menu-bar", type: "background" });
-});
-it("does not report timer failure if the menu bar was disabled", async () => {
-  mocks.store.set("menu-bar-enabled", "true");
-  mocks.mutate.mockResolvedValue({});
-  mocks.launchCommand.mockImplementation(async ({ name, context }) => {
-    if (name === "menu-bar") throw new Error("Disabled");
-    await session()
-      .processPending(context.operationId, context.connectionId)
-      .catch(() => {});
-  });
-  await expect(
-    session().execute("/timers/start", { projectId: "project", billable: true }),
-  ).resolves.toEqual({});
-  expect(await session().pending()).toBeNull();
-});
-it("does not enable the menu bar when it has never been opened", async () => {
-  mocks.mutate.mockResolvedValue({});
-  await session().execute("/timers/start", { projectId: "project", billable: true });
-  expect(mocks.launchCommand).not.toHaveBeenCalledWith(
-    expect.objectContaining({ name: "menu-bar" }),
-  );
-});
-
 it("hands a saved operation to an independent session before waiting for confirmation", async () => {
   let context: { operationId: string; connectionId: string } | undefined;
   mocks.launchCommand.mockImplementation(async (args) => {
