@@ -1697,6 +1697,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "nitrosend",
+    title: "Nitrosend",
+    description:
+      "Compose email campaigns and automation flows, manage contacts and segments, send transactional email or SMS, and review delivery in Nitrosend. Hosted remote Streamable HTTP server; OAuth sign-in, no API key needed.",
+    icon: "https://raw.githubusercontent.com/nitrosend/cursor/main/assets/logo.png",
+    homepage: "https://docs.nitrosend.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.nitrosend.com/mcp"],
+    },
+    remoteUrl: "https://api.nitrosend.com/mcp",
+  },
+  {
     name: "shorty",
     title: "Shorty",
     description:
