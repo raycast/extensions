@@ -7,17 +7,25 @@ const mocks = vi.hoisted(() => {
   class Client {
     /** Set to make the next connect() call fail, simulating a network or auth failure on dial. */
     static connectFailure: unknown = null;
+    /** Set to hold every connect() call open, for overlapping-request scenarios. */
+    static connectGate: Promise<void> | null = null;
+    /** Set to hold every getDialogs() call open, for overlapping-request scenarios. */
+    static dialogGate: Promise<unknown> | null = null;
     connected = false;
     apiId = 12345;
     apiHash = "test";
     connect = vi.fn(async () => {
+      if (Client.connectGate) await Client.connectGate;
       if (Client.connectFailure) throw Client.connectFailure;
       this.connected = true;
     });
     destroy = vi.fn(async () => {
       this.connected = false;
     });
-    getDialogs = vi.fn(async () => []);
+    getDialogs = vi.fn(async () => {
+      if (Client.dialogGate) return Client.dialogGate;
+      return [];
+    });
     getMessages = vi.fn(async () => []);
     getEntity = vi.fn(async () => ({}));
     getMe = vi.fn(async () => ({ id: 42n }));
@@ -75,6 +83,16 @@ const savedStorage = {
 };
 const rpcError = (code: string) =>
   RPCMessageToError(new Api.RpcError({ errorMessage: code, errorCode: 401 }), new Api.updates.GetState());
+function deferred<T = void>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
+const settle = () => new Promise<void>((resolve) => setImmediate(resolve));
 const service = () => import("./telegram-client");
 const errors = () => import("../utils/errors");
 const client = () => mocks.clients[mocks.clients.length - 1];
@@ -84,6 +102,8 @@ beforeEach(() => {
   mocks.clients.length = 0;
   mocks.storage.clear();
   mocks.Client.connectFailure = null;
+  mocks.Client.connectGate = null;
+  mocks.Client.dialogGate = null;
   Object.entries(savedStorage).forEach(([key, value]) => mocks.storage.set(key, value));
   mocks.getItem.mockReset().mockImplementation(async (key) => mocks.storage.get(key));
   mocks.setItem.mockReset().mockImplementation(async (key, value) => {
@@ -188,6 +208,64 @@ describe("invalid Telegram sessions", () => {
     const next = await s.getClient(config);
     expect(next).not.toBe(old);
     expect((next.session as unknown as { value: string }).value).toBe("invalid-session");
+  });
+
+  it("clears the saved key when a late failure names the session a replacement client still uses", async () => {
+    const s = await service();
+    // Request 1 hangs in connect() on the client it created.
+    const connectingStale = deferred();
+    mocks.Client.connectGate = connectingStale.promise;
+    const first = s.getChats({ config });
+    await settle();
+    const stale = client();
+    // Request 2 replaces the still-connecting client with one built from the
+    // same saved key, and hangs in getDialogs().
+    const dialogGate = deferred<never[]>();
+    mocks.Client.dialogGate = dialogGate.promise;
+    mocks.Client.connectGate = null;
+    const second = s.getChats({ config });
+    await settle();
+    const current = client();
+    expect(current).not.toBe(stale);
+
+    // The stale client's connect is rejected first. The replacement has not
+    // signed in anew -- it carries the same key -- so the key must be dropped.
+    connectingStale.reject(rpcError("AUTH_KEY_UNREGISTERED"));
+    await expect(first).rejects.toBeInstanceOf((await errors()).TelegramAuthenticationError);
+    expect(await s.isAuthenticated()).toBe(false);
+    expect(mocks.storage.has("telegram_session")).toBe(false);
+    expect(mocks.storage.has("telegram_user_id")).toBe(false);
+    expect(current.destroy).not.toHaveBeenCalled();
+
+    // The replacement client performs the full cleanup when its own request fails.
+    dialogGate.reject(rpcError("SESSION_REVOKED"));
+    await expect(second).rejects.toBeInstanceOf((await errors()).TelegramAuthenticationError);
+    expect(current.destroy).toHaveBeenCalledOnce();
+
+    const next = await s.getClient(config);
+    expect((next.session as unknown as { value: string }).value).toBe("");
+  });
+
+  it("keeps a genuinely newer login when an older client fails late", async () => {
+    const s = await service();
+    // Request 1 hangs in connect() on the client it created.
+    const connectingStale = deferred();
+    mocks.Client.connectGate = connectingStale.promise;
+    const staleRequest = s.getChats({ config });
+    await settle();
+    const stale = client();
+
+    // A newer login replaces both the client and the saved session.
+    mocks.Client.connectGate = null;
+    mocks.storage.set("telegram_session", "fresh-session");
+    await s.getClient(config);
+
+    connectingStale.reject(rpcError("AUTH_KEY_UNREGISTERED"));
+    await expect(staleRequest).rejects.toBeInstanceOf((await errors()).TelegramAuthenticationError);
+    expect(mocks.storage.get("telegram_session")).toBe("fresh-session");
+    expect(await s.isAuthenticated()).toBe(true);
+    expect(client().destroy).not.toHaveBeenCalled();
+    expect(stale.destroy).not.toHaveBeenCalled();
   });
 });
 

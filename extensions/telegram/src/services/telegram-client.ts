@@ -162,8 +162,17 @@ export async function isAuthenticated(): Promise<boolean> {
 }
 
 async function clearAuthentication(client: TelegramClient): Promise<void> {
-  // A late failure from an old client must not discard a newer login.
-  if (clientInstance !== client) return;
+  if (clientInstance !== client) {
+    // A late failure from an older client must not discard a newer login -- but a
+    // replacement client built from the same rejected key is not a newer login.
+    // Drop the stored key so the authenticate page starts fresh; when the current
+    // client's own request is rejected it performs the full cleanup and disconnect.
+    const saved = await LocalStorage.getItem<string>(SESSION_KEY);
+    if (saved && saved !== (client.session.save() as unknown as string)) return;
+    await LocalStorage.removeItem(SESSION_KEY);
+    await LocalStorage.removeItem(USER_ID_KEY);
+    return;
+  }
   clientInstance = null;
   await LocalStorage.removeItem(SESSION_KEY);
   await LocalStorage.removeItem(USER_ID_KEY);
