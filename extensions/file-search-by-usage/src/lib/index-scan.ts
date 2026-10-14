@@ -344,7 +344,7 @@ export function fdArguments(
   // that way; both forms mean showHidden.
   const {
     showHidden = true,
-    useIgnoreFiles = false,
+    useIgnoreFiles = true,
     patterns = [],
     fdThreads,
     useSearchPath = false,
@@ -357,8 +357,7 @@ export function fdArguments(
     // fd only applies gitignore rules inside a repository unless told otherwise.
     args.push("--no-require-git");
   } else {
-    // fd's default respects .gitignore; an index of the user's own files must
-    // not, unless they ask for it.
+    // This is the explicit opt-out from the default ignore-file behavior.
     args.push("--no-ignore");
   }
   if (showHidden) args.push("--hidden");

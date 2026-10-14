@@ -28,7 +28,7 @@ In **Search Index Settings** you can:
 - Use **Include Cloud Storage** to detect all provider folders, even without the home-folder scope. Each appears as an automatically detected scope.
 - Add fd ignore patterns such as `*.tmp`, `build`, or `**/tmp/**`.
 - Turn on **Include Hidden Files** to index dot-prefixed names.
-- Turn on **Use Ignore Files** to respect `.gitignore`, `.ignore`, and `.fdignore`. This is off by default.
+- **Use Ignore Files** respects `.gitignore`, `.ignore`, and `.fdignore`. It is on by default; turn it off if you want to index files those rules exclude.
 
 Some exclusions always apply, including `.git`, `node_modules`, and CloudStorage's internal `.locator` folder. The settings screen lists them. `.locator` is also omitted from automatically detected scopes. Turning off automatic Cloud Storage inclusion does not exclude folders that sit under another scope, such as your home folder.
 
@@ -38,7 +38,7 @@ Changes take effect on the next rebuild. Settings edits are saved one at a time;
 
 **Scan Messages** in Search Index Settings keeps per-folder warnings with their timestamps, including unavailable folders and deadline-skipped scans. It refreshes while the screen is open. Select a message to read or copy its full text. Each rebuild replaces the previous run's diagnostics without changing retained file coverage.
 
-You can keep searching during a rebuild. New names may not be searchable until the final index write; change the query or press `⌘R` after it finishes. Large cloud folders can take minutes to scan and produce indexes of hundreds of megabytes. Each fully scanned scope can remove stale entries. An incomplete or unreachable scope—and a failed settings or cloud-provider discovery pass—keeps its previously indexed paths.
+You can keep searching during a rebuild. New names may not be searchable until the final index write; change the query or press `⌘R` after it finishes. Large cloud folders can take minutes to scan and produce indexes of hundreds of megabytes. A newly installed or recently mounted cloud provider may list folders very slowly during its first scan while macOS or the provider prepares its local metadata. Later scans are often much faster after this warm-up. Each fully scanned scope can remove stale entries. An incomplete or unreachable scope—and a failed settings or cloud-provider discovery pass—keeps its previously indexed paths.
 
 Search Index Settings shows the last scan's local start and end times, total duration, and a breakdown for enumeration and setup, metadata reads, database writes, FTS rebuilding, and other overhead. An unrecorded end means the scan is still running or was interrupted. Older indexes show “Not recorded” until the next rebuild.
 

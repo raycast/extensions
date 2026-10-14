@@ -103,7 +103,9 @@ export const DEFAULT_SETTINGS: IndexSettings = {
    * those findable.
    */
   includeHidden: false,
-  useIgnoreFiles: false,
+  // Respect project and folder ignore files on first use. Saved choices remain
+  // authoritative, so this changes only new installations and settings resets.
+  useIgnoreFiles: true,
 };
 
 /** The exclusions that always apply, shown in the editor as read-only. */

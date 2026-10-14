@@ -415,11 +415,12 @@ export async function indexChecks(assert: Assert) {
   // ----------------------------------------------------------- index settings
   assert(
     parseSettings(undefined).includeDrive &&
+      parseSettings(undefined).useIgnoreFiles &&
       parseSettings(undefined).scopes.join("|") ===
         DEFAULT_SETTINGS.scopes.join("|") &&
       parseSettings(undefined).patterns.join("|") ===
         DEFAULT_SETTINGS.patterns.join("|"),
-    "absent settings mean the defaults",
+    "a new installation uses the complete default exclusions and respects ignore files",
   );
   assert(
     parseSettingsResult(undefined).authoritative,
@@ -467,6 +468,10 @@ export async function indexChecks(assert: Assert) {
   assert(
     !DEFAULT_SETTINGS.includeHidden,
     "hidden files are off by default, which is what keeps the scan under 30 seconds",
+  );
+  assert(
+    DEFAULT_SETTINGS.useIgnoreFiles,
+    "ignore files are respected by default",
   );
   assert(
     DEFAULT_PATTERNS.every(
@@ -730,9 +735,10 @@ export async function indexChecks(assert: Assert) {
     args.includes("--print0") &&
       args.includes("--hidden") &&
       args.includes("--follow") &&
-      args.includes("--no-ignore") &&
+      args.includes("--no-require-git") &&
+      !args.includes("--no-ignore") &&
       args.includes("--absolute-path"),
-    "fd is asked for absolute, NUL-delimited, hidden, symlink-following output",
+    "fd defaults to absolute, NUL-delimited, hidden, symlink-following output that respects ignore files",
   );
   assert(
     args[args.length - 1] === "/some/root" && args[args.length - 2] === ".",
@@ -796,7 +802,7 @@ export async function indexChecks(assert: Assert) {
   );
   assert(
     fdArguments("/root", { useIgnoreFiles: false }).includes("--no-ignore"),
-    "the default still indexes files git would ignore",
+    "turning ignore files off indexes files git would ignore",
   );
   assert(
     fdArguments("/root", true).includes("--hidden") &&

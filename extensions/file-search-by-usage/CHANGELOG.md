@@ -2,6 +2,8 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Respect `.gitignore`, `.ignore`, and `.fdignore` by default on new installations and after resetting index settings, while preserving saved choices and exclusion lists.
+
 - Open a selected global result's containing folder with `⌥⌘↑`, keeping that item selected.
 
 - Keep current scan diagnostics separate from older coverage warnings, including when an offline symlink no longer resolves to its saved canonical path.
