@@ -1,6 +1,6 @@
 # Changelog
 
-## [Article Discovery and Personal AI] - {PR_MERGE_DATE}
+## [Article Discovery and Personal AI] - 2026-10-14
 
 - Find matching older posts live across the public blog archive using topics and meaningful terms.
 - Start Search Techgedöns with an optional search query entered directly in Raycast root search.
