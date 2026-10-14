@@ -1,0 +1,258 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rex",
+  "title": "Rex Sessions",
+  "description": "Find Rex sessions, tabs, and panes on this Mac and your remote hosts, see what runs in each, and jump straight to them",
+  "icon": "icon.png",
+  "author": "mike-the-brain",
+  "owner": "chasing-brains",
+  "access": "public",
+  "categories": [
+    "Developer Tools",
+    "Applications"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-panes",
+      "title": "Search Panes",
+      "subtitle": "Rex",
+      "description": "Find any terminal pane across all Rex sessions and hosts by title, running program, directory, or agent status, preview its screen, and jump to it",
+      "mode": "view",
+      "keywords": [
+        "rex",
+        "pane",
+        "terminal",
+        "block",
+        "split",
+        "agent",
+        "claude",
+        "multiplexer",
+        "superlogical"
+      ]
+    },
+    {
+      "name": "search-tabs",
+      "title": "Search Tabs",
+      "subtitle": "Rex",
+      "description": "Find a Rex tab by session, label, terminal title, running program, or directory, preview its screen, and jump to it",
+      "mode": "view",
+      "keywords": [
+        "rex",
+        "tab",
+        "window",
+        "session",
+        "terminal",
+        "multiplexer",
+        "superlogical"
+      ]
+    },
+    {
+      "name": "search-sessions",
+      "title": "Search Sessions",
+      "subtitle": "Rex",
+      "description": "Find a Rex session on this Mac or a remote host, see its tabs and running agents, and jump to it",
+      "mode": "view",
+      "keywords": [
+        "rex",
+        "session",
+        "project",
+        "host",
+        "remote",
+        "multiplexer",
+        "superlogical"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rexPath",
+      "title": "Rex CLI",
+      "description": "Path to the rex command-line tool or to the Rex app bundle. Leave empty to use Rex.app or Rex Beta.app from /Applications.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "activateApp",
+      "title": "After Jumping",
+      "label": "Bring Rex to the front",
+      "description": "Activate the Rex app after focusing the chosen tab or pane.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "liveRefresh",
+      "title": "Fallback Refresh",
+      "label": "Also poll every 15 seconds",
+      "description": "Changes arrive instantly from Rex's event stream; this adds a slow poll in case the stream drops.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "tabPills",
+      "title": "Tab Icons",
+      "description": "How many pane pills to stack on a tab's icon, like Rex's tab bar.",
+      "type": "dropdown",
+      "required": false,
+      "default": "3",
+      "data": [
+        {
+          "title": "1 pill (focused pane)",
+          "value": "1"
+        },
+        {
+          "title": "2 pills",
+          "value": "2"
+        },
+        {
+          "title": "3 pills",
+          "value": "3"
+        },
+        {
+          "title": "4 pills",
+          "value": "4"
+        }
+      ]
+    },
+    {
+      "name": "detailLevel",
+      "title": "Information",
+      "description": "How much each row shows: Normal has every accessory, Reduced keeps status and program, Minimal shows only titles and pills.",
+      "type": "dropdown",
+      "required": false,
+      "default": "normal",
+      "data": [
+        {
+          "title": "Normal",
+          "value": "normal"
+        },
+        {
+          "title": "Reduced",
+          "value": "reduced"
+        },
+        {
+          "title": "Minimal",
+          "value": "minimal"
+        }
+      ]
+    },
+    {
+      "name": "attentionStyle",
+      "title": "Blocked, Done, Error",
+      "description": "How a pane that needs you is marked on its pill. Dot is what Rex's tab bar shows.",
+      "type": "dropdown",
+      "required": false,
+      "default": "dot",
+      "data": [
+        {
+          "title": "Dot on the pill corner (Rex)",
+          "value": "dot"
+        },
+        {
+          "title": "Rex's status badge art on the pill",
+          "value": "badge"
+        },
+        {
+          "title": "Nothing on the pill",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "progressStyle",
+      "title": "Progress",
+      "description": "How a program reporting progress is shown. Pie replaces the glyph with Rex's progress ring.",
+      "type": "dropdown",
+      "required": false,
+      "default": "pie",
+      "data": [
+        {
+          "title": "Pie inside the pill (Rex)",
+          "value": "pie"
+        },
+        {
+          "title": "Progress accessory on the row",
+          "value": "accessory"
+        },
+        {
+          "title": "Pie and accessory",
+          "value": "both"
+        },
+        {
+          "title": "Nothing",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "workingStyle",
+      "title": "Working",
+      "description": "How a program that is busy without a known progress is shown. Rex animates three dots at the tab's edge.",
+      "type": "dropdown",
+      "required": false,
+      "default": "trailing-animated",
+      "data": [
+        {
+          "title": "Animated dots at the row's edge (Rex)",
+          "value": "trailing-animated"
+        },
+        {
+          "title": "Static dots at the row's edge",
+          "value": "trailing-static"
+        },
+        {
+          "title": "Animated dots on the pill corner",
+          "value": "pill-dots"
+        },
+        {
+          "title": "Spinner ring inside the pill",
+          "value": "spinner"
+        },
+        {
+          "title": "Nothing",
+          "value": "none"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2",
+    "pngjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/pngjs": "^6.0.5",
+    "@types/react": "19.0.10",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix && eslint tests --fix && prettier --write tests",
+    "lint": "ray lint && eslint tests && prettier --check tests",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsx --test tests/*.test.ts",
+    "check": "npm run build && npm run lint && npm test",
+    "bundle": "ray bundle --non-interactive --exit-on-error --output rex-sessions.rayext"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chasing-brains/rex-raycast.git"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}
