@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -143,28 +143,49 @@ export default function Command() {
   // excluded when the model's results arrive and the list is rebuilt.
   const [deselected, setDeselected] = useState<Set<string>>(new Set());
   const [waitingForModel, setWaitingForModel] = useState(true);
-  // The masked text, together with the selection it was computed from. Copying
-  // is offered only when that selection is the one on screen: a result from
-  // before the model returned, or from before the last ⌘T, is missing exactly
-  // what the user is trying to remove.
-  const [masked, setMasked] = useState<{ text: string; of: string; replacements: Replacement[] } | null>(null);
+  // The masked text, together with the input and the selection it was computed
+  // from. Copying is offered only when both are the ones on screen: a result
+  // from before the model returned, from before the last ⌘T, or from the text
+  // before the last ⌘V, is missing exactly what the user is trying to remove.
+  const [masked, setMasked] = useState<{
+    text: string;
+    input: string;
+    of: string;
+    replacements: Replacement[];
+  } | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
+  // What this command last put on the clipboard. Reading the clipboard back
+  // instead would not tell our own copy from the user's, and would re-mask
+  // the masked text when ⌘V is pressed out of habit.
+  const lastCopied = useRef<string | null>(null);
+
+  /** Starts over on `text`, as if the command had been opened with it. */
+  function start(text: string) {
+    setInput(text);
+    setResponse(null);
+    setDeselected(new Set());
+    setMasked(null);
+    setFailure(null);
+    setWaitingForModel(text.trim().length > 0);
+  }
 
   useEffect(() => {
     let cancelled = false;
+    readInput().then((text) => {
+      if (!cancelled) start(text);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (input === null || input.trim().length === 0) return;
+    let cancelled = false;
 
     (async () => {
-      const text = await readInput();
-      if (cancelled) return;
-      setInput(text);
-
-      if (text.trim().length === 0) {
-        setWaitingForModel(false);
-        return;
-      }
-
       const request = {
-        text,
+        text: input,
         dictionaryPath: preferences.dictionaryPath?.trim() || null,
         useModel: preferences.useModel,
         useNameModel: preferences.useNameModel,
@@ -196,10 +217,10 @@ export default function Command() {
     return () => {
       cancelled = true;
     };
-    // Deliberately runs once. The input is whatever was selected or on the
-    // clipboard when the command opened; re-reading it later would change the
-    // text out from under a review the user is in the middle of.
-  }, []);
+    // Runs again only when the input does, and the input changes only on ⌘V.
+    // It is never re-read on its own: that would change the text out from
+    // under a review the user is in the middle of.
+  }, [input]);
 
   // Memoised for its identity, not its cost: a fresh [] on every render would
   // make `selected` new too, re-running the masking effect, whose setState
@@ -215,7 +236,7 @@ export default function Command() {
 
     (async () => {
       const result = (await maskText({ text: input, selected })) as { text: string; replacements: Replacement[] };
-      if (!cancelled) setMasked({ text: result.text, of: selectionKey, replacements: result.replacements });
+      if (!cancelled) setMasked({ text: result.text, input, of: selectionKey, replacements: result.replacements });
     })().catch((error) => {
       if (!cancelled) setFailure(String(error));
     });
@@ -270,16 +291,61 @@ export default function Command() {
       previewText,
       masked?.replacements.find((replacement) => isReplacementOf(replacement, finding))?.placeholder ?? finding.text,
     );
-  // Both halves have to be current: the scan, and the masking of what it found.
-  const ready = !waitingForModel && masked?.of === selectionKey;
+  // All of it has to be current: the scan, and the masking of what it found.
+  const ready = !waitingForModel && masked?.input === input && masked?.of === selectionKey;
   const maskedText = masked?.text ?? "";
+  const replaced = masked?.replacements.length ?? 0;
   // Two different waits, and saying the wrong one is its own small lie.
   const waitingFor = waitingForModel ? "Still checking this text for names." : "Still applying your choices.";
+
+  // The clipboard follows the preview: whenever the masked text is current it
+  // is copied, so that ⌘V in the next app is all that is left to do. A toast,
+  // not a HUD, because a HUD closes the window the user may still be reading.
+  useEffect(() => {
+    if (!ready || maskedText === lastCopied.current) return;
+    lastCopied.current = maskedText;
+    Clipboard.copy(maskedText)
+      .then(() =>
+        showToast({
+          style: Toast.Style.Success,
+          title: replaced > 0 ? "Masked text copied" : "Copied as it is",
+          message: replaced > 0 ? `${replaced} replaced` : "Nothing personal was found.",
+        }),
+      )
+      .catch((error) => showFailureToast(error, { title: "Could not copy the masked text" }));
+  }, [ready, maskedText, replaced]);
+
+  /** ⌘V: starts over on whatever is on the clipboard now. */
+  async function maskClipboard() {
+    const text = (await Clipboard.readText()) ?? "";
+    if (text.trim().length === 0) {
+      await showToast({ style: Toast.Style.Failure, title: "Nothing to mask", message: "The clipboard is empty." });
+      return;
+    }
+    if (text === lastCopied.current || text === input) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Nothing new on the clipboard",
+        message: text === input ? "It holds the text on screen." : "It holds the text just masked.",
+      });
+      return;
+    }
+    start(text);
+  }
+
+  const maskClipboardAction = (
+    <Action
+      title="Mask the Clipboard"
+      icon={Icon.Clipboard}
+      shortcut={{ modifiers: ["cmd"], key: "v" }}
+      onAction={maskClipboard}
+    />
+  );
 
   const actions = (finding?: Finding) => (
     <ActionPanel>
       <ActionPanel.Section>
-        {ready && <Action.CopyToClipboard title="Copy Masked Text" content={maskedText} icon={Icon.Clipboard} />}
+        {ready && <Action.CopyToClipboard title="Copy Masked Text" content={maskedText} icon={Icon.CopyClipboard} />}
         {ready && (
           <Action.Paste
             title="Paste Masked Text"
@@ -288,7 +354,9 @@ export default function Command() {
             shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
           />
         )}
-        {!ready && <Action title="Copy Masked Text" icon={Icon.Clipboard} onAction={() => sayNotReady(waitingFor)} />}
+        {!ready && (
+          <Action title="Copy Masked Text" icon={Icon.CopyClipboard} onAction={() => sayNotReady(waitingFor)} />
+        )}
         {!ready && (
           <Action
             title="Paste Masked Text"
@@ -297,6 +365,7 @@ export default function Command() {
             onAction={() => sayNotReady(waitingFor)}
           />
         )}
+        {maskClipboardAction}
       </ActionPanel.Section>
       <ActionPanel.Section>
         {finding && (
@@ -326,7 +395,12 @@ export default function Command() {
   if (failure) {
     return (
       <List>
-        <List.EmptyView icon={Icon.Warning} title="Could not check this text" description={failure} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not check this text"
+          description={failure}
+          actions={<ActionPanel>{maskClipboardAction}</ActionPanel>}
+        />
       </List>
     );
   }
@@ -337,7 +411,8 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.Clipboard}
           title="Nothing to mask"
-          description="Select some text, or copy it, then run this command again."
+          description="Select some text, or copy it, then run this command again — or copy it now and press ⌘V."
+          actions={<ActionPanel>{maskClipboardAction}</ActionPanel>}
         />
       </List>
     );
@@ -413,6 +488,7 @@ export default function Command() {
           icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
           title="Nothing personal found"
           description="The text looks safe to share as it is."
+          actions={actions()}
         />
       )}
     </List>
