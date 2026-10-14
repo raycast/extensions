@@ -1,6 +1,6 @@
 # Tmux Sessioner Changelog
 
-## [Fix Save Tmux Sessions getting stuck] - {PR_MERGE_DATE}
+## [Fix Save Tmux Sessions getting stuck] - 2026-10-14
 
 ### Fixed
 
