@@ -31,6 +31,38 @@ const showToastKeepassxcCliErrors = (error: { message: string }): void => {
   showToast(Toast.Style.Failure, "Error", toastMessage);
 };
 
+/**
+ * Input for creating a new entry in the KeePass database
+ *
+ * The database path, key file, and master password are intentionally not part
+ * of this interface: they are private loader configuration established when the
+ * database is unlocked, and are snapshotted for the duration of the invocation
+ */
+export interface CreateEntryInput {
+  /** Relative group path such as `Internet` or `Internet/Banking`, or an empty string for the root group */
+  groupPath: string;
+  /** Title of the new entry. Must be nonblank and must not contain `/`, CR or LF */
+  title: string;
+  /** Optional username for the new entry */
+  username?: string;
+  /** Optional URL for the new entry */
+  url?: string;
+  /** Password for the new entry. Required, nonblank, must not contain CR or LF */
+  password: string;
+}
+
+/**
+ * Result of a confirmed entry creation
+ *
+ * `saved` is always `true` here: a failed or unconfirmed write rejects instead
+ * of resolving with a failure result. `cacheInvalidated` is `false` when the
+ * stale entry cache could not be removed after a successful save
+ */
+export interface CreateEntryResult {
+  saved: true;
+  cacheInvalidated: boolean;
+}
+
 class KeePassLoader {
   private static database: string = getPreferenceValues().database;
   private static databasePassword: string;
@@ -335,6 +367,183 @@ class KeePassLoader {
       LocalStorage.setItem("entries", entries);
       return this.parseCsvEntries(entries);
     });
+
+  /**
+   * Validates a group path for entry creation
+   *
+   * An empty string is the root group. Otherwise the path must be a relative
+   * nonempty segment path: no leading or trailing slash, no double slash, no
+   * CR/LF, and no blank segments. The UI is expected to select an existing
+   * visible group, so representability follows from that selection
+   *
+   * @param {string} groupPath - The group path from `CreateEntryInput`
+   * @returns {boolean} - `true` if the group path is valid, `false` otherwise
+   */
+  private static isValidGroupPath = (groupPath: string): boolean => {
+    if (groupPath.length === 0) return true; // root group
+    if (groupPath.startsWith("/") || groupPath.endsWith("/") || groupPath.includes("\n") || groupPath.includes("\r")) {
+      return false;
+    }
+    return groupPath.split("/").every((segment) => segment.length > 0);
+  };
+
+  /**
+   * Validates the fields of a `CreateEntryInput` before anything is spawned
+   *
+   * Secrets are never trimmed or normalized. The master password must be an
+   * initialized string (it may be explicitly empty, which is the keyfile-only
+   * configuration), and a nonempty master must not contain CR or LF. The new
+   * entry password is required and must not contain CR or LF, because the CLI
+   * reads it line by line
+   *
+   * @param {CreateEntryInput} input - The entry to validate
+   * @param {string | undefined} masterPassword - The snapshotted master password
+   * @returns {void} - Rejects with a sanitized message when validation fails
+   */
+  private static validateCreateEntryInput = (input: CreateEntryInput, masterPassword: string | undefined): void => {
+    if (
+      input.title.trim().length === 0 || // blank check only; the value itself is never trimmed
+      input.title.includes("/") ||
+      input.title.includes("\n") ||
+      input.title.includes("\r")
+    ) {
+      throw new Error("The entry title must be nonblank and must not contain slashes or line breaks.");
+    }
+    if (!this.isValidGroupPath(input.groupPath)) {
+      throw new Error("The selected group is not a valid target for a new entry.");
+    }
+    if (input.password.length === 0 || input.password.includes("\n") || input.password.includes("\r")) {
+      throw new Error("The entry password is required and must not contain line breaks.");
+    }
+    if (typeof masterPassword !== "string") {
+      throw new Error("The database must be unlocked before creating an entry.");
+    }
+    if (masterPassword.length > 0 && (masterPassword.includes("\n") || masterPassword.includes("\r"))) {
+      throw new Error("The database password must not contain line breaks.");
+    }
+  };
+
+  /**
+   * Creates a new entry in the KeePass database
+   *
+   * This is a dedicated write spawn path, separate from the read execution in
+   * `execKeepassxcCli`: the read path rejects early on stderr, which is unsafe
+   * for writes because the process may still succeed. The write path instead
+   * settles only when the process has fully closed and its final exit code is
+   * observed
+   *
+   * The database path, key file, and master password are snapshotted before
+   * the first asynchronous yield, so the invocation is unaffected by later
+   * `setCredentials` calls. The CLI path is resolved after `findApplication`
+   * (it cannot be snapshotted earlier because that lookup is asynchronous).
+   * The real CLI may re-authenticate internally.
+   * No secrets are placed on argv: the master password (unless explicitly
+   * empty, i.e. keyfile-only) and then the new entry password are written to
+   * stdin, each followed by a newline, and stdin is closed. There are no
+   * retries. This method never returns, logs, or adds separate persistence
+   * for the entry password; note that the pre-existing Search CSV cache (which
+   * contains passwords and lives in encrypted LocalStorage) is unchanged by
+   * this method apart from the post-save invalidation above
+   *
+   * On a confirmed save (exit code 0), the stale `entries` cache is removed so
+   * the next Search refreshes it through its normal mount behavior. If cache
+   * invalidation itself fails, the result still reports a successful save with
+   * `cacheInvalidated: false`
+   *
+   * @param {CreateEntryInput} input - The entry to create
+   * @returns {Promise<CreateEntryResult>} - Resolves on a confirmed save, rejects with a sanitized error otherwise
+   */
+  static createEntry = (input: CreateEntryInput): Promise<CreateEntryResult> => {
+    // Snapshot private configuration before any asynchronous yield
+    const database = this.database;
+    const keyFile = this.keyFile;
+    const masterPassword = this.databasePassword;
+    try {
+      this.validateCreateEntryInput(input, masterPassword);
+    } catch (validationError) {
+      return Promise.reject(validationError);
+    }
+    return KeePassLoader.findApplication().then(() => {
+      const cliPath = this.keepassxcCli;
+      if (cliPath === undefined) {
+        return Promise.reject(new Error("KeePassXC not found."));
+      }
+      const entryPath = `/${[input.groupPath, input.title].filter((part) => part.length > 0).join("/")}`;
+      const args: string[] = [
+        "add",
+        "-q",
+        "-p",
+        ...(input.username !== undefined && input.username.length > 0 ? ["--username", input.username] : []),
+        ...(input.url !== undefined && input.url.length > 0 ? ["--url", input.url] : []),
+        ...this.convertIntoKeyFileOption(keyFile),
+        ...(masterPassword === "" ? ["--no-password"] : []),
+        database,
+        entryPath,
+      ];
+      return new Promise<CreateEntryResult>((resolve, reject) => {
+        const uncertain = () =>
+          reject(new Error("Creation could not be confirmed. Check the database before trying again."));
+        const cli = this.spawn(`${cliPath}`, args);
+        let stderrData = "";
+        cli.stdin.on("error", () => {
+          // EPIPE and friends: the process may still have succeeded; the
+          // final exit code decides. Never propagate as an unhandled error
+        });
+        try {
+          // A synchronous write throw (e.g. an already-destroyed stdin) must
+          // not obscure the close outcome, so it is swallowed here
+          if (masterPassword !== "") {
+            cli.stdin.write(`${masterPassword}\n`);
+          }
+          cli.stdin.write(`${input.password}\n`);
+          cli.stdin.end();
+        } catch {
+          // stdin unavailable; the final exit code still decides the outcome
+        }
+        // Drain both streams so a large or chatty process cannot stall; the
+        // contents are diagnostics only and are never surfaced with secrets
+        cli.stdout.on("data", () => {});
+        cli.stderr.on("data", (chunk: Buffer) => {
+          stderrData += chunk.toString();
+        });
+        cli.on("error", () => {
+          // Only treat this as a failed spawn when no process was ever
+          // created (no pid). A ChildProcess "error" with a live pid can also
+          // mean kill/IPC/abort while the process actually ran, so in that
+          // case the event is only recorded and the final close still decides
+          if (cli.pid === undefined) {
+            reject(new Error("Failed to run the KeePassXC command line tool."));
+          }
+        });
+        cli.on("close", (code) => {
+          // Settles on the final observed exit code only, regardless of any
+          // earlier stdin or process error events
+          if (code === 0) {
+            LocalStorage.removeItem("entries")
+              .then(() => resolve({ saved: true, cacheInvalidated: true }))
+              .catch(() => resolve({ saved: true, cacheInvalidated: false }));
+            return;
+          }
+          if (code === null) {
+            // No exit code was reported (killed or lost), so the write
+            // outcome is unknown
+            uncertain();
+            return;
+          }
+          // A nonzero exit means the database rejected the write. Diagnostics
+          // (duplicate titles, missing groups, credential prompts) are
+          // intentionally NOT distinguished here: under `-q` they can look
+          // identical, so only a generic sanitized message is used
+          reject(
+            new Error(
+              "Could not create the entry. Verify the title and selected group, and make sure the database is unlocked.",
+            ),
+          );
+          void stderrData; // collected for debugging only; never logged
+        });
+      });
+    });
+  };
 
   /**
    * Sets the database password and key file path

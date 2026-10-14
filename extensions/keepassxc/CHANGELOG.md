@@ -1,5 +1,9 @@
 # KeePassXC Extension Changelog
 
+## [Create Entry] - {PR_MERGE_DATE}
+
+- New `Create Entry` command to add entries to a KeePass database (title and password required, optional username and URL, existing groups only).
+
 ## [1.10.0] - 2026-03-30
 
 ### Added

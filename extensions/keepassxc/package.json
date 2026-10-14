@@ -8,7 +8,8 @@
   "contributors": [
     "zkytech",
     "CT-7567",
-    "Ygnas"
+    "Ygnas",
+    "gustavo_caiano"
   ],
   "categories": [
     "Security"
@@ -20,6 +21,13 @@
       "title": "Search",
       "subtitle": "KeePassXC",
       "description": "Search in KeePassXC",
+      "mode": "view"
+    },
+    {
+      "name": "create-entry",
+      "title": "Create Entry",
+      "subtitle": "KeePassXC",
+      "description": "Create an entry in KeePassXC",
       "mode": "view"
     }
   ],
