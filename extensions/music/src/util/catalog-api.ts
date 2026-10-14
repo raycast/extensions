@@ -3,7 +3,7 @@ import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 
 import { appleMusicFetch, registerAccountCacheClearer } from "./apple-music-auth";
-import { CatalogAlbum, CatalogSong } from "./models";
+import { CatalogAlbum, CatalogPlaylist, CatalogSong } from "./models";
 
 // Shared Apple Music catalog client: storefront resolution, 429 backoff
 // honouring Retry-After, and a day cache for GETs (the catalog changes on
@@ -16,6 +16,11 @@ const MAX_RETRIES = 5;
 const RETRY_FLOOR_MS = 500;
 const RETRY_CEILING_MS = 60_000;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+// Recommendations rotate on Apple's side far faster than the catalog does.
+const RECOMMENDATIONS_TTL_MS = 60 * 60 * 1000;
+// Documented fetch limit for ids= on catalog resources is 100 for albums
+// (songs allow more); one conservative chunk size keeps both under it.
+const MEMBERSHIP_BATCH_SIZE = 100;
 
 const cache = new Cache({ namespace: "catalog-api" });
 const STOREFRONT_KEY = "catalog-storefront";
@@ -154,6 +159,27 @@ const parseAlbum = (a: AlbumData): CatalogAlbum => ({
   contentRating: asContentRating(a.attributes?.contentRating),
 });
 
+interface PlaylistData {
+  id: string;
+  attributes?: {
+    name?: string;
+    curatorName?: string;
+    url?: string;
+    artwork?: { url?: string };
+    playlistType?: string;
+  };
+}
+
+const parsePlaylist = (p: PlaylistData, fromLibrary = false): CatalogPlaylist => ({
+  id: p.id,
+  title: p.attributes?.name ?? "",
+  curator: p.attributes?.curatorName ?? (fromLibrary ? "Your Library" : ""),
+  artwork: p.attributes?.artwork?.url ?? null,
+  url: p.attributes?.url ?? null,
+  playlistType: p.attributes?.playlistType ?? null,
+  fromLibrary,
+});
+
 export interface CatalogSearchResults {
   songs: CatalogSong[];
   albums: CatalogAlbum[];
@@ -230,4 +256,76 @@ export const addToLibrary = (kind: "songs" | "albums" | "playlists", id: string)
       const body = await res.text().catch(() => "");
       throw new Error(`Apple Music API ${res.status}${body ? `: ${body.slice(0, 200)}` : ""}`);
     }
+  }, E.toError);
+
+/** Batched form of the `include=library` membership check: which of these
+ * catalog ids map into the user's library. One request per chunk of 100 ids;
+ * never cached for the same reason `isInLibrary` isn't. */
+export const getLibraryMembership = (kind: "albums" | "songs", ids: string[]): TE.TaskEither<Error, Set<string>> =>
+  TE.tryCatch(async () => {
+    const found = new Set<string>();
+    if (ids.length === 0) return found;
+    const storefront = await getStorefront();
+    for (let i = 0; i < ids.length; i += MEMBERSHIP_BATCH_SIZE) {
+      const group = ids.slice(i, i + MEMBERSHIP_BATCH_SIZE);
+      const res = await fetchWithRetry(
+        `/v1/catalog/${storefront}/${kind}?ids=${group.map(encodeURIComponent).join(",")}&include=library`,
+      );
+      if (!res.ok) throw new Error(`Apple Music API ${res.status}`);
+      const json = (await res.json()) as {
+        data?: { id: string; relationships?: { library?: { data?: unknown[] } } }[];
+      };
+      for (const item of json.data ?? []) {
+        if ((item.relationships?.library?.data?.length ?? 0) > 0) found.add(item.id);
+      }
+    }
+    return found;
+  }, E.toError);
+
+export interface RecommendationRoom {
+  id: string;
+  /** Apple's display title for the room, e.g. "Made for You" or "New Releases". */
+  title: string;
+  albums: CatalogAlbum[];
+  playlists: CatalogPlaylist[];
+  songs: CatalogSong[];
+}
+
+type RecommendationContent = { type?: string } & (SongData | AlbumData | PlaylistData);
+
+interface RecommendationsResponse {
+  data?: {
+    id: string;
+    attributes?: { title?: { stringForDisplay?: string } };
+    relationships?: { contents?: { data?: RecommendationContent[] } };
+  }[];
+}
+
+/** The user's personal recommendation rooms (the public slice of the app's
+ * Home tab). Which rooms come back — and their order — is entirely Apple's
+ * call and shifts over time; content types we can't render or add (stations,
+ * music videos) are dropped, and rooms left empty by that are omitted. The
+ * user's own playlists can appear as `library-playlists` (e.g. in Recently
+ * Played) and are kept, flagged so the UI skips Add to Library for them. */
+export const getRecommendations = (): TE.TaskEither<Error, RecommendationRoom[]> =>
+  TE.tryCatch(async () => {
+    const json = await cachedGet<RecommendationsResponse>("/v1/me/recommendations", RECOMMENDATIONS_TTL_MS);
+    const rooms: RecommendationRoom[] = [];
+    for (const rec of json.data ?? []) {
+      const room: RecommendationRoom = {
+        id: rec.id,
+        title: rec.attributes?.title?.stringForDisplay ?? "",
+        albums: [],
+        playlists: [],
+        songs: [],
+      };
+      for (const item of rec.relationships?.contents?.data ?? []) {
+        if (item.type === "albums") room.albums.push(parseAlbum(item as AlbumData));
+        else if (item.type === "playlists") room.playlists.push(parsePlaylist(item as PlaylistData));
+        else if (item.type === "library-playlists") room.playlists.push(parsePlaylist(item as PlaylistData, true));
+        else if (item.type === "songs") room.songs.push(parseSong(item as SongData));
+      }
+      if (room.albums.length + room.playlists.length + room.songs.length > 0) rooms.push(room);
+    }
+    return rooms;
   }, E.toError);
