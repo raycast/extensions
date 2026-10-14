@@ -94,15 +94,20 @@ function getSharedStateDatabasePath(): string | undefined {
 }
 
 function getSharedDataFolderName(): string | undefined {
-  const productJSONPath = "/Applications/IBM Bob.app/Contents/Resources/app/product.json";
-  if (fs.existsSync(productJSONPath)) {
-    try {
-      const productJSON = JSON.parse(fs.readFileSync(productJSONPath, "utf-8")) as { sharedDataFolderName?: string };
-      if (productJSON.sharedDataFolderName) {
-        return productJSON.sharedDataFolderName;
+  const candidates = [
+    "/Applications/IBM Bob.app/Contents/Resources/app/product.json",
+    path.join(homedir(), "Applications", "IBM Bob.app", "Contents", "Resources", "app", "product.json"),
+  ];
+  for (const productJSONPath of candidates) {
+    if (fs.existsSync(productJSONPath)) {
+      try {
+        const productJSON = JSON.parse(fs.readFileSync(productJSONPath, "utf-8")) as { sharedDataFolderName?: string };
+        if (productJSON.sharedDataFolderName) {
+          return productJSON.sharedDataFolderName;
+        }
+      } catch {
+        // Ignore malformed product.json.
       }
-    } catch {
-      // Ignore malformed product.json.
     }
   }
   return undefined;
