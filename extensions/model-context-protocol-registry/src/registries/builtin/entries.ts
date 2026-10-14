@@ -1105,6 +1105,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.tapetide.com/mcp",
   },
   {
+    name: "taplio",
+    title: "Taplio",
+    description: "Write, schedule and analyze LinkedIn posts, find inspiration, comment, like and connect via Taplio.",
+    icon: "https://cdn.prod.website-files.com/6939243f5769a4de787769c3/693fd25c10dab46c2d863cbd_taplio_webclip.png",
+    homepage: "https://taplio.com/taplio-linkedin-mcp",
+    remoteUrl: "https://mcp.taplio.com/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.taplio.com/"],
+    },
+  },
+  {
     name: "tavily",
     title: "Tavily",
     description:
