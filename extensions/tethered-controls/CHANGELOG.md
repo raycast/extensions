@@ -1,6 +1,6 @@
 # Tethered Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-14
 
 - Control Tethered power modes, Caffeinate, Topup, Sailing, and Heat Protection from Raycast.
 - Search saved profiles and Caffeinate presets.
