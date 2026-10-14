@@ -166,7 +166,6 @@ interface PlaylistData {
     curatorName?: string;
     url?: string;
     artwork?: { url?: string };
-    playlistType?: string;
   };
 }
 
@@ -176,7 +175,6 @@ const parsePlaylist = (p: PlaylistData, fromLibrary = false): CatalogPlaylist =>
   curator: p.attributes?.curatorName ?? (fromLibrary ? "Your Library" : ""),
   artwork: p.attributes?.artwork?.url ?? null,
   url: p.attributes?.url ?? null,
-  playlistType: p.attributes?.playlistType ?? null,
   fromLibrary,
 });
 
@@ -280,6 +278,47 @@ export const getLibraryMembership = (kind: "albums" | "songs", ids: string[]): T
       }
     }
     return found;
+  }, E.toError);
+
+export interface LibraryPlaylistLink {
+  /** The library-playlists id (p.…). */
+  libraryId: string;
+  /** True for the user's own playlists; false for Apple Music playlists
+   * (and other people's shared ones) added to the library. */
+  canEdit: boolean;
+}
+
+interface LibraryPlaylistsResponse {
+  next?: string;
+  data?: {
+    id: string;
+    attributes?: { canEdit?: boolean; playParams?: { globalId?: string } };
+    relationships?: { catalog?: { data?: { id: string }[] } };
+  }[];
+}
+
+/** Every library playlist that has a catalog counterpart, keyed by that
+ * catalog id (pl.…): Apple Music playlists the user added, and the user's
+ * own playlists that have been shared. Playlists have no `include=library`
+ * linkage on the catalog side, so this is the only way to answer "is this
+ * recommended playlist in the library?" — and, via `canEdit`, "is it the
+ * user's own?". Never cached, for the same reason the membership checks
+ * aren't. */
+export const getLibraryPlaylistLinks = (): TE.TaskEither<Error, Map<string, LibraryPlaylistLink>> =>
+  TE.tryCatch(async () => {
+    const links = new Map<string, LibraryPlaylistLink>();
+    let path: string | undefined = "/v1/me/library/playlists?limit=100&include=catalog";
+    while (path) {
+      const res = await fetchWithRetry(path);
+      if (!res.ok) throw new Error(`Apple Music API ${res.status}`);
+      const json = (await res.json()) as LibraryPlaylistsResponse;
+      for (const item of json.data ?? []) {
+        const catalogId = item.attributes?.playParams?.globalId ?? item.relationships?.catalog?.data?.[0]?.id;
+        if (catalogId) links.set(catalogId, { libraryId: item.id, canEdit: Boolean(item.attributes?.canEdit) });
+      }
+      path = json.next;
+    }
+    return links;
   }, E.toError);
 
 export interface RecommendationRoom {

@@ -3,7 +3,6 @@ import * as TE from "fp-ts/TaskEither";
 
 import { tell, runScript, createQueryString, escapeAppleScriptString, NOT_IN_LIBRARY_ERROR } from "../apple-script";
 import { PlaylistKind, ScriptError } from "../models";
-import { parseResult } from "../parser";
 
 import { general } from ".";
 
@@ -57,53 +56,26 @@ export const getPlaylists = (kind: PlaylistKind): TE.TaskEither<Error, string> =
 	return output
 `);
 
-export interface LocalPlaylist {
-  /** Music.app's own (per-launch) playlist id. */
-  id: string;
-  name: string;
-  kind: "subscription playlist" | "user playlist";
-}
-
-/** Ids and names of every Apple Music ("subscription") and user playlist in
- * Music.app. Fetched as bulk properties — four Apple events in total — rather
- * than walking playlists one at a time, which costs ~50ms each and would
- * blow the script timeout on a library of a hundred playlists. Folders and
- * the library root are excluded. */
-export const getLocalPlaylists = (): TE.TaskEither<ScriptError, readonly LocalPlaylist[]> =>
-  pipe(
-    runScript(`
-	set output to ""
-	tell application "Music"
-		set subIds to id of subscription playlists
-		set subNames to name of subscription playlists
-		set userIds to id of user playlists
-		set userNames to name of user playlists
-	end tell
-	repeat with i from 1 to count of subIds
-		set output to output & ${createQueryString({ id: "(item i of subIds)", name: "(item i of subNames)" })} & "$BREAKkind=subscription playlist" & linefeed
-	end repeat
-	repeat with i from 1 to count of userIds
-		set output to output & ${createQueryString({ id: "(item i of userIds)", name: "(item i of userNames)" })} & "$BREAKkind=user playlist" & linefeed
-	end repeat
-	return output
-`),
-    TE.map(parseResult<LocalPlaylist>()),
-  );
-
-/** Play a playlist by Music.app id, raising NOT_IN_LIBRARY_ERROR if it has
- * disappeared since the local index was built. */
-export const playLocal =
+/** Play a recommended playlist's copy in Music.app, matched by name within
+ * the right class: the user's own playlists are "user playlist", anything
+ * added from Apple Music (including other people's shared playlists) is
+ * "subscription playlist", and Music.app filters by exact class — so a
+ * same-named pair across the two can't be confused. Raises
+ * NOT_IN_LIBRARY_ERROR when Music.app hasn't synced the playlist yet. */
+export const playMatching =
   (shuffle = false) =>
-  (id: string) =>
-    pipe(
+  ({ name, own }: { name: string; own: boolean }) => {
+    const playlistClass = own ? "user playlist" : "subscription playlist";
+    return pipe(
       general.setShuffle(shuffle),
       TE.chain(() =>
         runScript(`
 	tell application "Music"
-		set matches to (every playlist whose id is "${escapeAppleScriptString(id)}")
+		set matches to (every ${playlistClass} whose name is "${escapeAppleScriptString(name)}")
 		if (count of matches) = 0 then error "Not found in library" number ${NOT_IN_LIBRARY_ERROR}
 		play (item 1 of matches)
 	end tell
 `),
       ),
     );
+  };

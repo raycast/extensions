@@ -76,10 +76,6 @@ export interface CatalogPlaylist {
   curator: string;
   artwork: string | null;
   url: string | null;
-  /** Apple's playlistType: "editorial", "personal-mix", "user-shared", … A
-   * user-shared playlist whose name matches one of the user's own playlists
-   * in Music.app is, in practice, that playlist. */
-  playlistType: string | null;
   /** A `library-playlists` resource (the user's own playlist surfaced in a
    * recommendation room) rather than a catalog playlist — nothing to add. */
   fromLibrary: boolean;

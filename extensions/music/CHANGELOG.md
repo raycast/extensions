@@ -2,7 +2,9 @@
 
 ## [View Recommendations Command] - {PR_MERGE_DATE}
 
-- Added a new "View Recommendations" command that shows your personal Apple Music recommendation rooms as a grid of albums, playlists, and songs — with In Library badges, Add to Library, album tracklists, Open in Music, and Play from Library for albums, songs, and playlists already in your library (plus a separate option to play one of your own playlists that shares a recommended playlist's name).
+- Added a new "View Recommendations" command that shows your personal Apple Music recommendation rooms as a grid of albums, playlists, and songs — with In Library badges, Add to Library, album tracklists, and Open in Music.
+- Albums, songs, and playlists that are already in your library can be played (or shuffled) straight from the grid.
+- Your own playlists are recognised when Apple recommends them back to you (for example in Recently Played) and play directly.
 
 ## [Fix Add to Playlist] - 2026-10-08
 

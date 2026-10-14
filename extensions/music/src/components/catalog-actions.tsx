@@ -160,27 +160,30 @@ export function PlayLibraryAlbumAction({ album, shuffle = false }: { album: Cata
   );
 }
 
-/** Play a recommended playlist's counterpart in Music.app, by Music.app id so
- * a same-named pair can't be confused. `own` targets the user's own playlist
- * sharing the name rather than the Apple Music one; that's a name-only
- * match, so the title says whose playlist it is. */
+/** Play a recommended playlist's copy in Music.app. `own` says whether it is
+ * one of the user's own playlists (per the API's library links) rather than
+ * an Apple Music playlist they added — the two live in different classes in
+ * Music.app, so the lookup can't pick the wrong one. */
 export function PlayLibraryPlaylistAction({
   playlist,
-  localId,
-  own = false,
+  own,
   shuffle = false,
 }: {
   playlist: CatalogPlaylist;
-  localId: string;
-  own?: boolean;
+  own: boolean;
   shuffle?: boolean;
 }) {
-  const verb = shuffle ? "Shuffle" : "Play";
   return (
     <Action
-      title={own ? `${verb} Your Playlist "${playlist.title}"` : `${verb} Playlist from Library`}
+      title={shuffle ? "Shuffle Playlist from Library" : "Play Playlist from Library"}
       icon={shuffle ? Icon.Shuffle : Icon.Play}
-      onAction={() => playFromLibrary("Playlist", playlist.title, music.playlists.playLocal(shuffle)(localId))}
+      onAction={() =>
+        playFromLibrary(
+          "Playlist",
+          playlist.title,
+          music.playlists.playMatching(shuffle)({ name: playlist.title, own }),
+        )
+      }
     />
   );
 }

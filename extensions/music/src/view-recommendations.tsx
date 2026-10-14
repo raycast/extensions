@@ -50,24 +50,15 @@ function AlbumTile({ album, membership }: { album: CatalogAlbum; membership: Lib
 }
 
 function PlaylistTile({ playlist, membership }: { playlist: CatalogPlaylist; membership: LibraryMembership }) {
-  const match = membership.playlistMatches.get(playlist.id);
-  // The user's own playlists reach the feed two ways: as library-playlists
-  // resources, or (e.g. in Recently Played) as catalog "user-shared"
-  // playlists curated under the user's name. Either way, a same-named user
-  // playlist in Music.app is the item itself, not a lookalike.
-  const isOwn = Boolean(match?.userId) && (playlist.fromLibrary || playlist.playlistType === "user-shared");
-  const ownPlay = match?.userId && (
-    <>
-      <PlayLibraryPlaylistAction playlist={playlist} localId={match.userId} own />
-      <PlayLibraryPlaylistAction playlist={playlist} localId={match.userId} own shuffle />
-    </>
-  );
-  // In Library (the item itself is in Music.app) outranks a mere name match
-  // on one of the user's own playlists.
-  const accessory = isOwn
+  // A library-playlists resource is in the library by definition; a catalog
+  // playlist is in it when the account's library playlists link to it. Both
+  // sources also say whether it's the user's own playlist, which decides
+  // which class of Music.app playlist to play and whether adding makes sense.
+  const inLibrary = playlist.fromLibrary || membership.inLibrary.has(playlist.id);
+  const own = playlist.fromLibrary || membership.ownPlaylistIds.has(playlist.id);
+  const accessory = playlist.fromLibrary
     ? { icon: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "In Library" }
-    : (membershipGridAccessory(playlist.id, membership) ??
-      (match?.userId ? { icon: Icon.PersonCircle, tooltip: `Matches your playlist "${playlist.title}"` } : undefined));
+    : membershipGridAccessory(playlist.id, membership);
   return (
     <Grid.Item
       content={artworkUrl(playlist.artwork, GRID_ART) ?? Icon.List}
@@ -76,19 +67,14 @@ function PlaylistTile({ playlist, membership }: { playlist: CatalogPlaylist; mem
       accessory={accessory}
       actions={
         <ActionPanel>
-          {match?.subscriptionId && (
+          {inLibrary && (
             <>
-              <PlayLibraryPlaylistAction playlist={playlist} localId={match.subscriptionId} />
-              <PlayLibraryPlaylistAction playlist={playlist} localId={match.subscriptionId} shuffle />
+              <PlayLibraryPlaylistAction playlist={playlist} own={own} />
+              <PlayLibraryPlaylistAction playlist={playlist} own={own} shuffle />
             </>
           )}
-          {/* The user's own playlist plays first; for a catalog playlist, a
-              same-named own playlist is a secondary option behind opening the
-              recommended one. */}
-          {isOwn && ownPlay}
           <OpenInMusicAction url={playlist.url} />
-          {!isOwn && ownPlay}
-          {!isOwn && (
+          {!own && (
             <AddToLibraryAction
               kind="playlists"
               id={playlist.id}
@@ -161,11 +147,11 @@ function ViewRecommendations() {
 
   const albumIds = useMemo(() => (rooms ?? []).flatMap((room) => room.albums.map((album) => album.id)), [rooms]);
   const songIds = useMemo(() => (rooms ?? []).flatMap((room) => room.songs.map((song) => song.id)), [rooms]);
-  const playlistRefs = useMemo(
-    () => (rooms ?? []).flatMap((room) => room.playlists.map(({ id, title }) => ({ id, title }))),
+  const playlistIds = useMemo(
+    () => (rooms ?? []).flatMap((room) => room.playlists.filter((p) => !p.fromLibrary).map((p) => p.id)),
     [rooms],
   );
-  const membership = useLibraryMembership(albumIds, songIds, playlistRefs);
+  const membership = useLibraryMembership(albumIds, songIds, playlistIds);
 
   return (
     <Grid isLoading={isLoading} columns={5} searchBarPlaceholder="Filter recommendations">
