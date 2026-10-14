@@ -575,6 +575,13 @@ function sortByUpdated(list: Issue[]): Issue[] {
   return [...list].sort((a, b) => b.updated_at.localeCompare(a.updated_at));
 }
 
+/** Applies the `limit` / `offset` query params the real API pages with. */
+function page<T>(list: T[], query: URLSearchParams): T[] {
+  const offset = Number(query.get("offset") ?? 0);
+  const limit = Number(query.get("limit") ?? 100);
+  return list.slice(offset, offset + limit);
+}
+
 function listIssues(workspaceId: string, query: URLSearchParams) {
   const categories = query.get("status_category")?.split(",");
   const assigneeId = query.get("assignee_id");
@@ -584,10 +591,10 @@ function listIssues(workspaceId: string, query: URLSearchParams) {
       (!categories || categories.includes(categoryOf(i.status))) &&
       (!assigneeId || i.assignee_id === assigneeId),
   );
-  return { issues: sortByUpdated(list), total: list.length };
+  return { issues: page(sortByUpdated(list), query), total: list.length };
 }
 
-function searchIssues(workspaceId: string, q: string) {
+function searchIssues(workspaceId: string, q: string, query: URLSearchParams) {
   const needle = q.toLowerCase();
   const matches = issues.filter(
     (i) =>
@@ -596,7 +603,7 @@ function searchIssues(workspaceId: string, q: string) {
         i.identifier.toLowerCase().includes(needle) ||
         i.description?.toLowerCase().includes(needle)),
   );
-  return { issues: sortByUpdated(matches) };
+  return { issues: page(sortByUpdated(matches), query) };
 }
 
 function createIssue(workspaceId: string, input: CreateIssueInput): Issue {
@@ -642,7 +649,7 @@ function route(req: DemoRequest): unknown {
     case "GET squads":
       return SQUADS;
     case "GET issues":
-      if (id === "search") return searchIssues(workspaceId, query.get("q") ?? "");
+      if (id === "search") return searchIssues(workspaceId, query.get("q") ?? "", query);
       if (id && sub === "comments") return comments.filter((c) => c.issue_id === findIssue(workspaceId, id).id);
       if (id) return findIssue(workspaceId, id);
       return listIssues(workspaceId, query);

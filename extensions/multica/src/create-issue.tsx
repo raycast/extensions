@@ -14,7 +14,7 @@ import {
 import { showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { MulticaApiError, createIssue, listProjects } from "./lib/api";
 import { PRIORITIES, actorIcon, issueUrl, statusIcon, statusOptions } from "./lib/format";
-import { useWorkspace, useWorkspaceContext } from "./lib/hooks";
+import { WorkspaceContext, useWorkspace, useWorkspaceContext } from "./lib/hooks";
 import type { ActorType, CreateIssueInput, Issue, Priority } from "./lib/types";
 import { workspaceIcon } from "./components/WorkspaceDropdown";
 
@@ -27,10 +27,16 @@ interface FormValues {
   project: string;
 }
 
-function parseAssignee(value: string): Pick<CreateIssueInput, "assignee_type" | "assignee_id"> {
+/** The picked assignee, if it still belongs to the selected workspace. */
+function parseAssignee(
+  value: string,
+  context: WorkspaceContext | undefined,
+): Pick<CreateIssueInput, "assignee_type" | "assignee_id"> {
   if (!value) return {};
   const [type, id] = value.split(":");
-  return { assignee_type: type as ActorType, assignee_id: id };
+  const exists =
+    type === "agent" ? context?.agents?.some((a) => a.id === id) : context?.members?.some((m) => m.user_id === id);
+  return exists ? { assignee_type: type as ActorType, assignee_id: id } : {};
 }
 
 export default function CreateIssue(props: LaunchProps<{ draftValues: FormValues }>) {
@@ -46,11 +52,11 @@ export default function CreateIssue(props: LaunchProps<{ draftValues: FormValues
     const input: CreateIssueInput = {
       title: values.title.trim(),
       description: values.description.trim() || undefined,
-      status: values.status || undefined,
+      status: statusOptions(context?.statuses).some((st) => st.key === values.status) ? values.status : undefined,
       priority: (values.priority || "none") as Priority,
-      project_id: values.project || undefined,
+      project_id: projects?.some((p) => p.id === values.project) ? values.project : undefined,
       allow_duplicate: allowDuplicate || undefined,
-      ...parseAssignee(values.assignee),
+      ...parseAssignee(values.assignee, context),
     };
 
     const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
@@ -95,7 +101,7 @@ export default function CreateIssue(props: LaunchProps<{ draftValues: FormValues
     return true;
   }
 
-  const { handleSubmit, itemProps, reset, focus } = useForm<FormValues>({
+  const { handleSubmit, itemProps, reset, focus, setValue } = useForm<FormValues>({
     initialValues: {
       title: draft?.title ?? "",
       description: draft?.description ?? "",
@@ -113,6 +119,14 @@ export default function CreateIssue(props: LaunchProps<{ draftValues: FormValues
     },
   });
 
+  // Projects and assignees belong to a workspace, so a switch clears them.
+  function switchWorkspace(id: string) {
+    if (id === workspace?.id) return;
+    setWorkspaceId(id);
+    setValue("project", "");
+    setValue("assignee", "");
+  }
+
   const agents = context?.agents?.filter((a) => !a.archived_at) ?? [];
   const members = context?.members ?? [];
 
@@ -127,7 +141,7 @@ export default function CreateIssue(props: LaunchProps<{ draftValues: FormValues
       }
     >
       {workspaces && workspaces.length > 1 && (
-        <Form.Dropdown id="workspace" title="Workspace" value={workspace?.id} onChange={setWorkspaceId}>
+        <Form.Dropdown id="workspace" title="Workspace" value={workspace?.id} onChange={switchWorkspace}>
           {workspaces.map((w) => (
             <Form.Dropdown.Item key={w.id} value={w.id} title={w.name} icon={workspaceIcon(w)} />
           ))}

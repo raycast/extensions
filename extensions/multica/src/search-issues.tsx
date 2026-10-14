@@ -9,16 +9,25 @@ import { statusName, statusRank } from "./lib/format";
 import { useWorkspace, useWorkspaceContext } from "./lib/hooks";
 import type { Issue, SearchIssue } from "./lib/types";
 
-async function fetchIssues(workspaceId: string, query: string): Promise<SearchIssue[]> {
-  if (query) return (await searchIssues(workspaceId, query)).issues;
-  return (
-    await listIssues(workspaceId, {
+const PAGE_SIZE = 50;
+
+/** Open issues by recent activity, or search results across all issues, a page at a time. */
+function fetchIssues(workspaceId: string, query: string) {
+  return async ({ page }: { page: number }): Promise<{ data: SearchIssue[]; hasMore: boolean }> => {
+    const offset = page * PAGE_SIZE;
+    if (query) {
+      const { issues } = await searchIssues(workspaceId, query, PAGE_SIZE, offset);
+      return { data: issues, hasMore: issues.length === PAGE_SIZE };
+    }
+    const { issues, total } = await listIssues(workspaceId, {
       status_category: "unstarted,started",
       sort: "updated_at",
       direction: "desc",
-      limit: 100,
-    })
-  ).issues;
+      limit: PAGE_SIZE,
+      offset,
+    });
+    return { data: issues, hasMore: offset + issues.length < total };
+  };
 }
 
 export default function SearchIssues() {
@@ -27,14 +36,13 @@ export default function SearchIssues() {
   const { workspaces, workspace, setWorkspaceId, isLoading: workspaceLoading, error } = useWorkspace();
   const { context, isLoading: contextLoading } = useWorkspaceContext(workspace);
 
-  const {
-    data: issues,
-    isLoading,
-    revalidate,
-  } = useCachedPromise(fetchIssues, [workspace?.id ?? "", query], {
+  const { data, isLoading, revalidate, pagination } = useCachedPromise(fetchIssues, [workspace?.id ?? "", query], {
     execute: Boolean(workspace),
     keepPreviousData: true,
   });
+  // keepPreviousData briefly holds the old workspace's results after a switch; never pair them
+  // with the new workspace's context, or their actions would target the wrong workspace.
+  const issues = data?.filter((issue) => issue.workspace_id === context?.workspace.id);
 
   if (error && !workspaces) {
     return (
@@ -62,6 +70,7 @@ export default function SearchIssues() {
       onSearchTextChange={setSearchText}
       filtering={false}
       throttle
+      pagination={pagination}
       searchBarAccessory={<WorkspaceDropdown workspaces={workspaces} value={workspace} onChange={setWorkspaceId} />}
     >
       {!loading && (

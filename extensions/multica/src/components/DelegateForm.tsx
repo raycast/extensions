@@ -107,7 +107,7 @@ export function DelegateForm(props: { parentIssue?: Issue; draftValues?: Delegat
         prompt: formValues.prompt.trim(),
         ...(type === "squad" ? { squad_id: id } : { agent_id: id }),
         priority: (formValues.priority || undefined) as Exclude<Priority, "none"> | undefined,
-        project_id: formValues.project || undefined,
+        project_id: projects?.some((p) => p.id === formValues.project) ? formValues.project : undefined,
         due_date: formValues.dueDate ? calendarDate(formValues.dueDate) : undefined,
         parent_issue_id: parentIssue?.id,
       };
@@ -146,6 +146,13 @@ export function DelegateForm(props: { parentIssue?: Issue; draftValues?: Delegat
     setValue("actor", remembered && actorValues.includes(remembered) ? remembered : fallback);
   }, [actorValues.join(","), workspaceId]);
 
+  // Projects belong to a workspace, so a switch clears the pick. The actor resets via the effect above.
+  function switchWorkspace(id: string) {
+    if (id === workspace?.id) return;
+    setWorkspaceId(id);
+    setValue("project", "");
+  }
+
   const selectedAgent = agents.find((a) => `agent:${a.id}` === values.actor);
 
   return (
@@ -164,7 +171,7 @@ export function DelegateForm(props: { parentIssue?: Issue; draftValues?: Delegat
       ) : (
         workspaces &&
         workspaces.length > 1 && (
-          <Form.Dropdown id="workspace" title="Workspace" value={workspace?.id} onChange={setWorkspaceId}>
+          <Form.Dropdown id="workspace" title="Workspace" value={workspace?.id} onChange={switchWorkspace}>
             {workspaces.map((w) => (
               <Form.Dropdown.Item key={w.id} value={w.id} title={w.name} icon={workspaceIcon(w)} />
             ))}

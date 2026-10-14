@@ -10,6 +10,8 @@ import { INBOX_SEVERITY, actorIcon, actorName, webUrl } from "./lib/format";
 import { WorkspaceContext, useWorkspace, useWorkspaceContext } from "./lib/hooks";
 import type { InboxItem } from "./lib/types";
 
+const PAGE_SIZE = 50;
+
 export interface InboxLaunchContext {
   workspaceId?: string;
 }
@@ -28,20 +30,24 @@ export default function Inbox(props: LaunchProps<{ launchContext?: InboxLaunchCo
 
   const inbox = useCachedPromise(listInbox, [workspaceId], { execute: Boolean(workspace) });
   const assigned = useCachedPromise(
-    async (wsId: string, userId: string) =>
-      (
-        await listIssues(wsId, {
+    (wsId: string, userId: string) =>
+      async ({ page }: { page: number }) => {
+        const offset = page * PAGE_SIZE;
+        const { issues, total } = await listIssues(wsId, {
           assignee_id: userId,
           assignee_types: "member",
           status_category: "unstarted,started",
           sort: "updated_at",
           direction: "desc",
-          limit: 100,
-        })
-      ).issues,
+          limit: PAGE_SIZE,
+          offset,
+        });
+        return { data: issues, hasMore: offset + issues.length < total };
+      },
     [workspaceId, myId ?? ""],
     { execute: Boolean(workspace && myId) },
   );
+  const assignedCount = assigned.data?.length ?? 0;
 
   if (error && !workspaces) {
     return (
@@ -59,6 +65,7 @@ export default function Inbox(props: LaunchProps<{ launchContext?: InboxLaunchCo
   return (
     <List
       isLoading={loading}
+      pagination={assigned.pagination}
       searchBarPlaceholder="Filter notifications and issues"
       searchBarAccessory={<WorkspaceDropdown workspaces={workspaces} value={workspace} onChange={setWorkspaceId} />}
     >
@@ -82,7 +89,10 @@ export default function Inbox(props: LaunchProps<{ launchContext?: InboxLaunchCo
               />
             ))}
           </List.Section>
-          <List.Section title="Assigned to Me" subtitle={String(assigned.data?.length ?? 0)}>
+          <List.Section
+            title="Assigned to Me"
+            subtitle={assigned.pagination?.hasMore ? `${assignedCount}+` : String(assignedCount)}
+          >
             {assigned.data?.map((issue) => (
               <IssueListItem key={issue.id} issue={issue} context={context} onChange={assigned.revalidate} />
             ))}
@@ -105,17 +115,38 @@ async function run(action: () => Promise<unknown>, success: string, onChange: ()
   }
 }
 
-/** Opens the issue a notification points at, marking the notification read on the way. */
+/** Opens the issue a notification points at, marking the notification read once it loads. */
 function NotificationIssue(props: { item: InboxItem; context: WorkspaceContext; onChange: () => void }) {
   const { item, context, onChange } = props;
-  const { data: issue } = useCachedPromise(getIssue, [context.workspace.id, item.issue_id ?? ""]);
+  const {
+    data: issue,
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(getIssue, [context.workspace.id, item.issue_id ?? ""], { onError: () => undefined });
 
   useEffect(() => {
-    if (!item.read) setInboxRead(context.workspace.id, item.id, true).then(onChange, () => undefined);
-  }, []);
+    if (issue && !item.read) setInboxRead(context.workspace.id, item.id, true).then(onChange, () => undefined);
+  }, [issue?.id]);
 
-  if (!issue) return <List isLoading navigationTitle={item.title} />;
-  return <IssueDetail issue={issue} context={context} />;
+  if (issue) return <IssueDetail issue={issue} context={context} />;
+  return (
+    <List isLoading={isLoading} navigationTitle={item.title}>
+      {error && !isLoading && (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't load the issue"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action.OpenInBrowser url={webUrl(context.workspace, "issues", item.issue_id ?? "")} />
+            </ActionPanel>
+          }
+        />
+      )}
+    </List>
+  );
 }
 
 function InboxListItem(props: {

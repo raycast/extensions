@@ -113,15 +113,16 @@ export interface ListIssuesParams {
   sort?: "updated_at" | "created_at" | "priority" | "status" | "last_activity" | "due_date";
   direction?: "asc" | "desc";
   limit?: number;
+  offset?: number;
 }
 
 export const listIssues = (workspaceId: string, params: ListIssuesParams) =>
   request<{ issues: Issue[]; total: number }>("/api/issues", { workspaceId, query: { ...params } });
 
-export const searchIssues = (workspaceId: string, q: string, limit = 50) =>
+export const searchIssues = (workspaceId: string, q: string, limit = 50, offset = 0) =>
   request<{ issues: SearchIssue[] }>("/api/issues/search", {
     workspaceId,
-    query: { q, limit, include_closed: true },
+    query: { q, limit, offset, include_closed: true },
   });
 
 export const getIssue = (workspaceId: string, idOrIdentifier: string) =>
