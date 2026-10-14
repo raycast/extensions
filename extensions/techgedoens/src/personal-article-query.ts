@@ -1,4 +1,5 @@
 import type { ArchivedArticle } from "./article-archive";
+import { translateCategory } from "./strings";
 
 const PERSONAL_ARTICLE_PAGE_SIZE = 5;
 
@@ -90,7 +91,9 @@ function rankMatchingArticles(articles: ArchivedArticle[], query: string): Archi
 
 function scoreArticle(article: ArchivedArticle, queryTerms: string[]): number {
   const titleTokens = tokenize(article.title);
-  const categoryTokens = tokenize(article.categories.join(" "));
+  const categoryTokens = tokenize(
+    article.categories.flatMap((category) => [category, translateCategory(category)]).join(" "),
+  );
   const excerptTokens = tokenize(article.excerpt ?? "");
   const contentTokens = tokenize(article.contentMarkdown ?? "");
 

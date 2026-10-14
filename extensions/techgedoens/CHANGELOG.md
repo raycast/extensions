@@ -1,5 +1,12 @@
 # Changelog
 
+## [Article State Reliability] - 2026-10-14
+
+- Select the next unread article only after the archive refresh completes.
+- Keep read and favorite actions in related-article details synchronized with their current state.
+- Respect the configured Return key action in related-article lists.
+- Match personal AI queries against both original and current topic names.
+
 ## [Article Discovery and Personal AI] - 2026-10-14
 
 - Find matching older posts live across the public blog archive using topics and meaningful terms.
