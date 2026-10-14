@@ -42,7 +42,7 @@ export function useRecentEntries() {
     }
 
     try {
-      await saveEntries(parsedEntries.filter((currentEntry) => !isSameEntry(currentEntry, entry)));
+      await saveEntries(dbPath, parsedEntries.filter((currentEntry) => !isSameEntry(currentEntry, entry)));
       await revalidate();
       showToast(Toast.Style.Success, "Entry removed", `Restart IBM Bob to sync the list in IBM Bob (optional)`);
     } catch {
@@ -67,7 +67,7 @@ export function useRecentEntries() {
           },
         })
       ) {
-        await saveEntries([]);
+        await saveEntries(dbPath, []);
         await revalidate();
         showToast(Toast.Style.Success, "All entries removed", `Restart IBM Bob to sync the list in IBM Bob (optional)`);
       }
@@ -111,9 +111,9 @@ function getSharedDataFolderName(): string | undefined {
   return undefined;
 }
 
-async function saveEntries(entries: EntryLike[]) {
+async function saveEntries(dbPath: string, entries: EntryLike[]) {
   const data = JSON.stringify({ entries });
   const escapedData = data.replace(/'/g, "''");
   const query = `INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('history.recentlyOpenedPathsList', '${escapedData}');`;
-  await execFilePromise("sqlite3", [getPath(), query]);
+  await execFilePromise("sqlite3", [dbPath, query]);
 }
