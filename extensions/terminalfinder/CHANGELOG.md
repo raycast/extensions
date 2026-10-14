@@ -1,6 +1,6 @@
 # Terminal Finder Changelog
 
-## [Add Tern Support] - {PR_MERGE_DATE}
+## [Add Tern Support] - 2026-10-14
 
 - Added support for [Tern](https://stencil.so/tern)
 - `Tern → Finder` reads the focused block's working directory with Tern's bundled CLI instead of typing into the terminal
