@@ -8,3 +8,4 @@
 - Open videos and recordings at the moment, PDFs with a word from the matching page, and code at the line
 - Choose the app that plays videos and recordings in the extension's settings (QuickTime Player by default)
 - Guidance when DigUp isn't installed, is out of date, has no index, or Raycast can't read a folder
+- Refresh search vectors after DigUp updates the index while the Raycast command is open

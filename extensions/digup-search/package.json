@@ -5,6 +5,7 @@
   "description": "Search your files by what's in them with DigUp: pictures, PDFs, documents, recordings, videos and code.",
   "icon": "icon.png",
   "author": "roy_jiang",
+  "contributors": ["crazybird"],
   "license": "MIT",
   "platforms": [
     "macOS"

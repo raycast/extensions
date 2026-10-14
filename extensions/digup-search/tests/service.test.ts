@@ -24,6 +24,87 @@ function started(options: ServiceOptions = {}) {
 
 const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const failedAs = (kind: string) => (error: unknown) => error instanceof ServiceError && error.kind === kind;
+const settled = () => new Promise((resolve) => setImmediate(resolve));
+
+test("semantic search refreshes a changed index; unchanged and keyword searches do not reload it", async () => {
+  let revision = "first";
+  const { service, child } = started({ readIndexRevision: async () => revision });
+  async function search(meaning: boolean, reload: boolean) {
+    const offset = child.requests.length;
+    const pending = service.search({ q: "vessel on water", code: false, meaning });
+    await settled();
+    if (reload) {
+      const request = child.requests[offset];
+      assert.equal(request.op, "reload");
+      child.say({ id: request.id, ok: true });
+      await settled();
+    }
+    const requests = child.requests.slice(offset);
+    assert.deepEqual(requests.map((r) => r.op), reload ? ["reload", "search"] : ["search"]);
+    const request = requests.at(-1)!;
+    child.say({ id: request.id, hits: [], strong: 0, meaning });
+    await pending;
+  }
+  await search(true, true);
+  await search(true, false);
+  revision = "after indexing";
+  await search(false, false);
+  await search(true, true);
+  service.stop();
+  child.exit(0);
+});
+
+test("a rejected reload prevents search and is retried on the next query", async () => {
+  const { service, child } = started({ readIndexRevision: async () => "changed" });
+  const pending = service.search({ q: "boat", code: false, meaning: true });
+  const rejection = assert.rejects(pending, /cannot read index/);
+  await settled();
+  child.say({ id: child.requests[0].id, ok: false, error: "cannot read index" });
+  await rejection;
+  assert.deepEqual(child.requests.map((r) => r.op), ["reload"]);
+  const next = service.search({ q: "boat", code: false, meaning: true });
+  await settled();
+  assert.equal(child.requests[1].op, "reload");
+  child.say({ id: child.requests[1].id, ok: true });
+  await settled();
+  child.say({ id: child.requests[2].id, hits: [], strong: 0, meaning: true });
+  await next;
+  service.stop();
+  child.exit(0);
+});
+
+test("simultaneous semantic queries share one reload", async () => {
+  const { service, child } = started({ readIndexRevision: async () => "changed" });
+  const first = service.search({ q: "boat", code: false, meaning: true });
+  const second = service.search({ q: "code", code: true, meaning: true });
+  await settled();
+  assert.deepEqual(child.requests.map((r) => r.op), ["reload"]);
+  child.say({ id: child.requests[0].id, ok: true });
+  await settled();
+  for (const request of child.requests.filter((r) => r.op === "search")) {
+    child.say({ id: request.id, hits: [], strong: 0, meaning: true });
+  }
+  await Promise.all([first, second]);
+  service.stop();
+  child.exit(0);
+});
+
+test("a replacement helper reloads even when the index revision has not changed", async () => {
+  const { service, children } = started({ readIndexRevision: async () => "unchanged" });
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const child = children[attempt];
+    const search = service.search({ q: "boat", code: false, meaning: true });
+    await settled();
+    assert.equal(child.requests[0].op, "reload");
+    child.say({ id: child.requests[0].id, ok: true });
+    await settled();
+    child.say({ id: child.requests[1].id, hits: [], strong: 0, meaning: true });
+    await search;
+    if (attempt === 0) child.exit(1);
+  }
+  service.stop();
+  children[1].exit(0);
+});
 
 test("replies are matched to requests by id, in any order", async () => {
   const { service, child } = started();

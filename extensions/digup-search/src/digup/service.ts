@@ -3,6 +3,7 @@ import { StringDecoder } from "node:string_decoder";
 // Node's own timers, by name: with the DOM library also in scope, the global ones are typed as returning a number.
 import { clearTimeout, setTimeout } from "node:timers";
 import type { Launch } from "./installation";
+import { indexRevision } from "./index-revision";
 import { parseLine, parseSearchReply, ServiceError, type SearchReply, type ServiceEvent } from "./protocol";
 
 /** As much of a child process as the service uses, so tests can stand in for the helper. */
@@ -35,6 +36,8 @@ export interface SearchParams {
 }
 
 export interface ServiceOptions {
+  /** Read the state of the SQLite files. Tests can supply an index revision without disk access. */
+  readIndexRevision?: (launch: Launch) => Promise<string | undefined>;
   spawner?: Spawner;
   onEvent?: (event: ServiceEvent) => void;
   /** The helper ended by itself and another was started in its place; its `ready` event follows. */
@@ -67,6 +70,8 @@ export class DigUpService {
   private failed = false;
   /** The warm-up (`prewarm`) is under way: the helper answers nothing else until the model and the vectors are in. */
   private warming = false;
+  private revision: string | undefined;
+  private refreshing: Promise<void> | undefined;
 
   constructor(
     private readonly launch: Launch,
@@ -137,6 +142,11 @@ export class DigUpService {
   }
 
   async search(params: SearchParams): Promise<SearchReply> {
+    // DigUp updates the on-disk index while this helper keeps a vector snapshot in memory.
+    // Refresh before a settled query if a database or WAL changed. Keyword searches still run while typing.
+    if (params.meaning && (this.options.readIndexRevision || this.launch.args.includes("--index"))) {
+      await this.refreshIndex();
+    }
     const body: Record<string, unknown> = {
       op: "search",
       q: params.q,
@@ -147,6 +157,31 @@ export class DigUpService {
     if (!params.meaning) body.prefix_last = true;
     if (params.kinds?.length) body.kinds = params.kinds;
     return parseSearchReply(await this.request(body, this.options.timeouts?.request ?? 10_000));
+  }
+
+  private async refreshIndex(): Promise<void> {
+    if (this.refreshing) return this.refreshing;
+    const child = this.child;
+    const refresh = async () => {
+      const revision = await (this.options.readIndexRevision ?? indexRevision)(this.launch);
+      if (child !== this.child) throw new ServiceError("DigUp's search helper stopped.", "exited");
+      if (revision === undefined || revision === this.revision) return;
+      const reply = await this.request({ op: "reload" }, this.options.timeouts?.request ?? 10_000);
+      if (reply.ok === false) {
+        throw new ServiceError(
+          typeof reply.error === "string" ? reply.error : "DigUp could not refresh its index.",
+          "request",
+        );
+      }
+      this.revision = revision;
+    };
+    const task = refresh();
+    this.refreshing = task;
+    try {
+      await task;
+    } finally {
+      if (this.refreshing === task) this.refreshing = undefined;
+    }
   }
 
   /** Embeds the text typed so far, so the vector is ready when typing pauses. */
@@ -214,6 +249,8 @@ export class DigUpService {
     if (this.child !== child) return;
     this.child = undefined;
     this.warming = false;
+    this.revision = undefined;
+    this.refreshing = undefined;
     for (const waiting of this.pending.values()) {
       clearTimeout(waiting.timer);
       waiting.reject(new ServiceError("DigUp's search helper stopped.", "exited"));

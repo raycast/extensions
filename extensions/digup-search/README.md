@@ -45,6 +45,8 @@ Open **Search Files** and describe what you're looking for:
 Exact words count too: invoice numbers, error codes and names are matched as written. While you type you see word
 matches; when you pause, matches by meaning replace them.
 
+If DigUp adds or updates files while the command is open, the next search after typing stops uses the updated index.
+
 Pick a file type from the dropdown to narrow the search. The Code item is there when code search is on in DigUp.
 
 | | |
