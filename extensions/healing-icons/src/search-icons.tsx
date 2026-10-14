@@ -6,7 +6,6 @@ const BASE = "https://healing-icons.vercel.app";
 const STYLES = ["outline", "outline-duo", "fill", "glyph-duo"];
 
 type Row = [name: string, category: string, svg: string, tags: string[]];
-type Preferences = { defaultAction: "copy-svg" | "paste-svg" | "copy-jsx" | "copy-name" };
 
 /** "arrow-left" -> "ArrowLeftIcon"; names starting with a digit become "Icon2fa" (same as the packages). */
 function componentName(name: string) {
@@ -27,11 +26,14 @@ export default function SearchIcons() {
   const [query, setQuery] = useState("");
 
   // The data files are content-hashed; the manifest says which ones are current.
-  const { data: manifest } = useFetch<Record<string, string>>(`${BASE}/data-manifest.json`, { keepPreviousData: true });
-  const { data: rows = [], isLoading } = useFetch<Row[]>(manifest ? BASE + manifest[style] : "", {
-    execute: !!manifest,
-    keepPreviousData: true,
-  });
+  const manifestFetch = useFetch<Record<string, string>>(`${BASE}/data-manifest.json`, { keepPreviousData: true });
+  const manifest = manifestFetch.data;
+  // No keepPreviousData here: while another style loads, the old rows would be copied under the new style's name.
+  const rowsFetch = useFetch<Row[]>(manifest ? BASE + manifest[style] : "", { execute: !!manifest });
+  const rows = rowsFetch.data ?? [];
+  const isLoading = manifestFetch.isLoading || rowsFetch.isLoading;
+  const error = manifestFetch.error ?? rowsFetch.error;
+  const retry = () => (manifestFetch.error ? manifestFetch.revalidate() : rowsFetch.revalidate());
 
   const icons = useMemo(() => {
     const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
@@ -51,7 +53,7 @@ export default function SearchIcons() {
     <Grid
       columns={8}
       inset={Grid.Inset.Large}
-      isLoading={isLoading || !manifest}
+      isLoading={isLoading}
       filtering={false}
       onSearchTextChange={setQuery}
       searchBarPlaceholder="Search icons by name or tag"
@@ -63,6 +65,18 @@ export default function SearchIcons() {
         </Grid.Dropdown>
       }
     >
+      {error && !isLoading && rows.length === 0 && (
+        <Grid.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+          title="Couldn't load icons"
+          description="Check your connection, then try again."
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={retry} />
+            </ActionPanel>
+          }
+        />
+      )}
       {icons.map(([name, category, svg, tags]) => {
         const component = componentName(name);
         const actions = {
