@@ -378,7 +378,7 @@
     {
       "name": "jamaatAsr",
       "title": "Asr Jamaat",
-      "description": "Same format as Fajr Jamaat.",
+      "description": "Same format as Fajr Jamaat, or dhuhr+N for N minutes after Dhuhr's jamaat (prayed together, Ja'fari).",
       "type": "textfield",
       "required": false,
       "default": "floor5+15"
@@ -394,7 +394,7 @@
     {
       "name": "jamaatIsha",
       "title": "Isha Jamaat",
-      "description": "Same format as Fajr Jamaat.",
+      "description": "Same format as Fajr Jamaat, or maghrib+N for N minutes after Maghrib's jamaat (prayed together, Ja'fari).",
       "type": "textfield",
       "required": false,
       "default": "floor5+15"

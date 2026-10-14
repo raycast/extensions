@@ -22,6 +22,9 @@ const MINUTE = 60_000;
 const EASTERN_REDNESS_ANGLE = 4;
 
 /** Everything needed to turn a calendar day into prayer slots. */
+/** The prayer a combined jamaat rule may follow: Asr after Dhuhr, Isha after Maghrib. */
+const COMBINES: Partial<Record<PrayerKey, "dhuhr" | "maghrib">> = { asr: "dhuhr", isha: "maghrib" };
+
 export interface ScheduleConfig {
   latitude: number;
   longitude: number;
@@ -239,14 +242,29 @@ export function getDaySchedule(day: Date, config: ScheduleConfig): PrayerSlot[] 
     ],
   };
 
-  return PRAYER_KEYS.map((key) => {
-    const [start, end, preferred] = bounds[key];
-    // A preferred end only counts when it falls inside the prayer's time (e.g. two shadows is Hanafi Asr's start).
-    const preferredEnd = preferred && preferred > start && preferred < end ? preferred : undefined;
+  const slots: PrayerSlot[] = [];
+  for (const key of PRAYER_KEYS) {
+    const [calculatedStart, end, preferred] = bounds[key];
+    let start = calculatedStart;
     const jumuah = key === "dhuhr" && isFriday;
     const ruleText = jumuah && config.jamaatJumuah.trim() ? config.jamaatJumuah : config.jamaat[key];
-    const jamaat = applyJamaatRule(parseJamaatRule(ruleText), start, end);
-    return {
+    const rule = parseJamaatRule(ruleText);
+    // `dhuhr+N` / `maghrib+N` follow that prayer's jamaat, on Asr / Isha only.
+    const combinedWith =
+      rule.kind === "after" && COMBINES[key] === rule.prayer
+        ? slots.find((slot) => slot.key === rule.prayer)
+        : undefined;
+    let jamaat = applyJamaatRule(rule, start, end, combinedWith && (combinedWith.jamaat ?? combinedWith.start));
+    if (jamaat && jamaat < start) {
+      // Prayed together before its own start: valid only where the earlier prayer's time runs into this one
+      // (Ja'fari: Dhuhr until sunset, Maghrib until midnight). The prayer's time then starts at the jamaat.
+      const shared = key === "asr" ? config.dhuhrEnd === "sunset" : config.maghribEnd === "midnight";
+      if (shared) start = jamaat;
+      else jamaat = undefined;
+    }
+    // A preferred end only counts when it falls inside the prayer's time (e.g. two shadows is Hanafi Asr's start).
+    const preferredEnd = preferred && preferred > start && preferred < end ? preferred : undefined;
+    slots.push({
       id: `${date}/${key}`,
       key,
       name: prayerName(key, jumuah, config),
@@ -257,8 +275,9 @@ export function getDaySchedule(day: Date, config: ScheduleConfig): PrayerSlot[] 
       preferredEnd,
       late: config.lateAt === "preferred" && preferredEnd ? preferredEnd : end,
       jamaat: jamaat && jamaat < end ? jamaat : undefined,
-    };
-  });
+    });
+  }
+  return slots;
 }
 
 /**

@@ -24,4 +24,12 @@ describe("jamaatWarnings", () => {
       'Isha Jamaat "25:00" isn\'t a valid rule',
     ]);
   });
+
+  it("allows combined rules only on Asr (after Dhuhr) and Isha (after Maghrib)", () => {
+    expect(jamaatWarnings({ jamaatAsr: "dhuhr+10", jamaatIsha: "maghrib+5" })).toEqual([]);
+    expect(jamaatWarnings({ jamaatFajr: "dhuhr+10", jamaatAsr: "maghrib+5" })).toEqual([
+      'Fajr Jamaat "dhuhr+10": only Asr can follow Dhuhr, and only Isha can follow Maghrib',
+      'Asr Jamaat "maghrib+5": only Asr can follow Dhuhr, and only Isha can follow Maghrib',
+    ]);
+  });
 });

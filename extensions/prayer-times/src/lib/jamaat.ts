@@ -7,6 +7,8 @@
  * - `"floor5+15"` round the start down to 5 minutes, then add 15 (5:01 -> 5:15)
  * - `"ceil5+10"`  round the start up to 5 minutes, then add 10
  * - `"end-30"`    30 minutes before the prayer time ends (e.g. before Asr starts, for Dhuhr)
+ * - `"dhuhr+10"`  10 minutes after Dhuhr's jamaat (Asr only), `"maghrib+5"` after Maghrib's (Isha only):
+ *                 combined prayers, as most Shia mosques pray them
  *
  * The step after floor/ceil is optional and defaults to 5.
  */
@@ -16,6 +18,7 @@ export type JamaatRule =
   | { kind: "offset"; minutes: number }
   | { kind: "round"; direction: "floor" | "ceil"; step: number; minutes: number }
   | { kind: "beforeEnd"; minutes: number }
+  | { kind: "after"; prayer: "dhuhr" | "maghrib"; minutes: number }
   | { kind: "invalid"; text: string };
 
 const MINUTE = 60_000;
@@ -41,6 +44,9 @@ export function parseJamaatRule(text: string | undefined): JamaatRule {
   const beforeEnd = value.match(/^end-(\d{1,3})$/);
   if (beforeEnd) return { kind: "beforeEnd", minutes: Number(beforeEnd[1]) };
 
+  const after = value.match(/^(dhuhr|maghrib)\+(\d{1,3})$/);
+  if (after) return { kind: "after", prayer: after[1] as "dhuhr" | "maghrib", minutes: Number(after[2]) };
+
   const offset = value.match(/^\+(\d{1,3})$/);
   if (offset) return { kind: "offset", minutes: Number(offset[1]) };
 
@@ -60,9 +66,11 @@ export function parseJamaatRule(text: string | undefined): JamaatRule {
  * @param rule - Parsed rule.
  * @param start - Prayer start time.
  * @param end - When the prayer time ends; needed for `end-N` rules.
- * @returns Jamaat time, or undefined when there is no valid jamaat at or after the start.
+ * @param earlier - Jamaat (or start) of the prayer an `after` rule follows.
+ * @returns Jamaat time, or undefined when there is no valid jamaat at or after the start. An `after` rule
+ *   can land before the start; the caller decides whether the prayers share their time.
  */
-export function applyJamaatRule(rule: JamaatRule, start: Date, end?: Date): Date | undefined {
+export function applyJamaatRule(rule: JamaatRule, start: Date, end?: Date, earlier?: Date): Date | undefined {
   switch (rule.kind) {
     case "none":
     case "invalid":
@@ -73,6 +81,8 @@ export function applyJamaatRule(rule: JamaatRule, start: Date, end?: Date): Date
     }
     case "offset":
       return new Date(start.getTime() + rule.minutes * MINUTE);
+    case "after":
+      return earlier && new Date(earlier.getTime() + rule.minutes * MINUTE);
     case "beforeEnd": {
       if (!end) return undefined;
       const at = new Date(end.getTime() - rule.minutes * MINUTE);

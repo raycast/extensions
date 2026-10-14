@@ -49,7 +49,15 @@ const JAMAAT_PREFS: [keyof Preferences, string][] = [
 export function jamaatWarnings(prefs: Partial<Record<string, unknown>>): string[] {
   return JAMAAT_PREFS.flatMap(([name, label]) => {
     const text = String(prefs[name] ?? "");
-    return parseJamaatRule(text).kind === "invalid" ? [`${label} "${text.trim()}" isn't a valid rule`] : [];
+    const rule = parseJamaatRule(text);
+    if (rule.kind === "invalid") return [`${label} "${text.trim()}" isn't a valid rule`];
+    const combines =
+      (name === "jamaatAsr" && rule.kind === "after" && rule.prayer === "dhuhr") ||
+      (name === "jamaatIsha" && rule.kind === "after" && rule.prayer === "maghrib");
+    if (rule.kind === "after" && !combines) {
+      return [`${label} "${text.trim()}": only Asr can follow Dhuhr, and only Isha can follow Maghrib`];
+    }
+    return [];
   });
 }
 

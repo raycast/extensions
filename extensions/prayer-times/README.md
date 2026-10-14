@@ -9,13 +9,17 @@ reminders in Apple Reminders, and tracks which prayers were prayed on time.
 
 - **Menu bar countdown**: `Asr -5` (until start), `Asr +12` (since start), mosque icon `Asr -5`
   (until jamaat), `Asr (-5)` in red (time left). Icon color shows the state. The dropdown lists every
-  prayer plus sunrise, midnight and tahajjud, color-coded as prayed, prayed late, current or missed.
+  prayer plus sunrise, midnight and tahajjud, color-coded as prayed, prayed late, current or missed,
+  with each prayer's preferred time. Click a prayer to mark it; hold ⌥ to mark a late one (or one
+  recorded late) as prayed on time.
 - **Next Prayer** command: live root-search subtitle. Add it to Favorites to keep it on top.
 - **Today's Prayers**: mark as prayed (on time or late is decided by the clock), override either way,
   and see the last 7 days.
 - **Apple Reminders**: one timed reminder per prayer, kept 14 days ahead, with heads-up, start,
   jamaat and ending alarms, so alerts fire even when Raycast isn't running.
 - **Jamaat rules** per prayer: `13:30`, `+10`, `floor5+15`, `ceil5+10`, `end-30`, plus a Jumu'ah rule.
+  Asr can follow Dhuhr's jamaat (`dhuhr+10`) and Isha Maghrib's (`maghrib+5`), as most Shia mosques pray
+  them together; with the Ja'fari school that prayer's time then starts at its jamaat.
 - **Schools of fiqh**: Hanafi, Shafi'i, Maliki, Hanbali or Ja'fari (Shia) decides when each prayer starts, when it ends, and when delaying it becomes disliked. See [Prayer times by school](#prayer-times-by-school).
 - **Location**: pick a country and city, or use your approximate current location, refreshed 30
   minutes before each prayer.

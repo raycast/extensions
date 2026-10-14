@@ -12,6 +12,8 @@ describe("parseJamaatRule", () => {
     expect(parseJamaatRule("CEIL10 + 5")).toEqual({ kind: "round", direction: "ceil", step: 10, minutes: 5 });
     expect(parseJamaatRule("floor+15")).toEqual({ kind: "round", direction: "floor", step: 5, minutes: 15 });
     expect(parseJamaatRule("end-30")).toEqual({ kind: "beforeEnd", minutes: 30 });
+    expect(parseJamaatRule("Dhuhr+10")).toEqual({ kind: "after", prayer: "dhuhr", minutes: 10 });
+    expect(parseJamaatRule("maghrib+5")).toEqual({ kind: "after", prayer: "maghrib", minutes: 5 });
   });
 
   it("flags nonsense as invalid", () => {
