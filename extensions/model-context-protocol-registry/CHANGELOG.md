@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Nitrosend MCP Server] - {PR_MERGE_DATE}
+
+- Add Nitrosend to the official registry: compose email campaigns and automation flows, manage contacts and segments, send transactional email or SMS, and review delivery. Hosted remote Streamable HTTP server at https://api.nitrosend.com/mcp with direct HTTP connection in Raycast and OAuth sign-in.
+
 ## [Add Bool MCP Server] - 2026-10-13
 
 - Add Bool to the official registry: make your own apps and tools from a conversation. Create projects, prompt the builder or edit files, define data, and publish working web apps to a live URL. Hosted remote Streamable HTTP server with OAuth 2.1 sign-in. Direct HTTP connection in Raycast at https://bool.com/api/mcp.
