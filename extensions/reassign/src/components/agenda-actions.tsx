@@ -273,7 +273,7 @@ export function AgendaActions(props: {
           title="Add Block…"
           icon={Icon.Plus}
           shortcut={Keyboard.Shortcut.Common.New}
-          onAction={() => launchCommand({ name: "add", type: LaunchType.UserInitiated })}
+          onAction={() => launchCommand({ name: "add", type: LaunchType.UserInitiated, context: { date } })}
         />
         {lastUndoToken && (
           <Action

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import type { ReactElement } from "react";
 import { blockDraft, type AiPreview } from "../src/lib/ai-draft";
-import { addDaysISO, todayISO } from "../src/lib/format";
+import { addDaysISO, localToDate, todayISO } from "../src/lib/format";
 
 const mock = vi.hoisted(() => ({
   slots: [] as unknown[],
@@ -59,7 +59,19 @@ vi.mock("@raycast/api", () => ({
 }));
 vi.mock("@raycast/utils", () => ({
   withAccessToken: () => (component: unknown) => component,
-  useCachedPromise: () => ({ data: { ok: true, data: { areas: [], activityTypes: [] } } }),
+  useCachedPromise: () => ({
+    data: {
+      ok: true,
+      data: {
+        areas: [],
+        activityTypes: [],
+        projects: [
+          { id: "launch", name: "Launch", areaId: null },
+          { id: "old", name: "Old", areaId: null, archived: true },
+        ],
+      },
+    },
+  }),
 }));
 vi.mock("../src/lib/oauth", () => ({ reassignProvider: {} }));
 // `mock.create` sees the single create op that the command sends to POST /events.
@@ -494,6 +506,25 @@ it("moves a window that has passed today to the same window tomorrow", () => {
     nextDay: false,
   });
 });
+
+it("rounds the 5-minute lead up to the next minute so no offered start falls short of it", () => {
+  expect(planWindow("2026-09-22", undefined, undefined, new Date(2026, 8, 22, 11, 58, 30)).earliest).toBe(
+    "2026-09-22T12:04",
+  );
+  expect(planWindow("2026-09-22", undefined, undefined, new Date(2026, 8, 22, 11, 58, 59)).earliest).toBe(
+    "2026-09-22T12:04",
+  );
+  expect(planWindow("2026-09-22", undefined, undefined, new Date(2026, 8, 22, 12, 0, 1)).earliest).toBe(
+    "2026-09-22T12:06",
+  );
+  expect(planWindow("2026-09-22", undefined, undefined, new Date(2026, 8, 22, 12)).earliest).toBe("2026-09-22T12:05");
+  expect(planWindow("2026-09-22", undefined, undefined, new Date(2026, 8, 22, 22, 30, 45))).toEqual({
+    earliest: "2026-09-23T08:00",
+    latest: "2026-09-23T22:00",
+    nextDay: true,
+  });
+});
+
 it("refuses a scheduled name over the server limit before it sends anything", async () => {
   await render()
     .find((n) => n.props.title === "Schedule Block")!
@@ -581,6 +612,15 @@ it("joins a gap split at midnight inside an overnight window", () => {
     { start: at("22:30"), end: at("00:30", "2026-09-23") },
     { start: at("23:00"), end: at("01:00", "2026-09-23") },
   ]);
+});
+
+it("offers a first slot from a lead-straddling free span that the server accepts", () => {
+  const now = new Date(2026, 8, 22, 11, 58, 30);
+  const window = planWindow("2026-09-22", undefined, undefined, now);
+  const free = [{ start: at("11:50"), end: at("14:00") }];
+  const first = slotStarts(free, window, 60)[0].start;
+  expect(first).toBe("2026-09-22T12:04");
+  expect(localToDate(first).getTime()).toBeGreaterThan(now.getTime() + 5 * 60_000);
 });
 
 it("books a picked slot at its exact start with the calendar fields of the exact path", async () => {
@@ -780,4 +820,136 @@ it("rounds the account clock offset to whole quarter hours", () => {
   expect(clockOffsetOf("2026-09-22T12:00", new Date(2026, 8, 22, 12, 0, 50).getTime())).toBe(0);
   // The account is 5 h 30 min behind the device.
   expect(clockOffsetOf("2026-09-22T06:30", new Date(2026, 8, 22, 12, 0, 40).getTime())).toBe(-330 * 60_000);
+});
+
+// The AI project and priority: an exact create, Find a Time and the Inbox send them.
+const refs = { projectId: "launch", priority: 4 };
+function fillWith(intent: Record<string, unknown>) {
+  const action = render().find((n) => n.props.title === "Fill with AI…")!;
+  const target = (action.props as unknown as { target: ReactElement<{ onFill: (draft: unknown) => void }> }).target;
+  target.props.onFill(blockDraft({ intents: [intent] }));
+}
+const exact = { op: "create", name: "Launch prep", start: "2026-09-22T09:00", end: "2026-09-22T11:00" };
+
+it("sends the AI project and priority on an exact create", async () => {
+  fillWith({ ...exact, ...refs });
+  const tree = render();
+  await tree
+    .find((n) => n.props.title === "Schedule Block")!
+    .props.onSubmit({
+      ...values,
+      name: "Launch prep",
+      start: tree.find((n) => n.props.id === "start")!.props.value as Date,
+      end: tree.find((n) => n.props.id === "end")!.props.value as Date,
+    });
+  expect(mock.create).toHaveBeenCalledWith(expect.objectContaining({ name: "Launch prep", ...refs }));
+});
+
+it("sends the AI project and priority on the capture_text op", async () => {
+  fillWith({ op: "park", name: "Launch prep", ...refs });
+  await render()
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({ ...values, name: "Launch prep" });
+  expect(mock.capture).toHaveBeenCalledWith({ op: "capture_text", text: "Launch prep", ...refs });
+});
+
+it("keeps the shown project and priority after a name edit", async () => {
+  fillWith({ op: "park", name: "Launch prep", ...refs });
+  await render()
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({ ...values, name: "Something else" });
+  expect(mock.capture).toHaveBeenCalledWith(expect.objectContaining(refs));
+});
+
+// The Priority and Project dropdowns show what the save sends, also with no AI fill.
+function pick(id: "priority" | "projectId", value: string) {
+  render()
+    .find((n) => n.props.id === "showDetails")!
+    .props.onChange(true);
+  render()
+    .find((n) => n.props.id === id)!
+    .props.onChange(value);
+}
+
+it("sends a project and a priority that the user picks", async () => {
+  pick("priority", "3");
+  pick("projectId", "launch");
+  await render()
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({ ...values, name: "Launch prep" });
+  expect(mock.capture).toHaveBeenCalledWith(expect.objectContaining({ projectId: "launch", priority: 3 }));
+});
+
+it("sends neither key after the user clears the AI project and priority", async () => {
+  fillWith({ op: "park", name: "Launch prep", ...refs });
+  pick("priority", "0");
+  pick("projectId", "");
+  await render()
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({ ...values, name: "Launch prep" });
+  const op = mock.capture.mock.calls[0][0];
+  expect(op).not.toHaveProperty("projectId");
+  expect(op).not.toHaveProperty("priority");
+});
+
+it("offers only live projects, and shows an archived or unknown AI project as its own choice", () => {
+  const titles = () =>
+    nodes(render().find((n) => n.props.id === "projectId")!.props.children).map((n) => n.props.title);
+  fillWith({ op: "park", name: "Launch prep" });
+  expect(titles()).toEqual(["None", "Launch"]);
+  fillWith({ op: "park", name: "Launch prep", projectId: "old" });
+  expect(titles()).toEqual(["None", "Old (archived)", "Launch"]);
+  fillWith({ op: "park", name: "Launch prep", projectId: "gone" });
+  expect(titles()).toEqual(["None", "Project from Reassign AI (not found)", "Launch"]);
+});
+
+it("stops a save with an archived project and points at the field", async () => {
+  fillWith({ op: "park", name: "Launch prep", projectId: "old" });
+  const tree = render();
+  expect(tree.find((n) => n.props.id === "projectId")!.props).toMatchObject({
+    error: expect.stringContaining("archived"),
+  });
+  await tree.find((n) => n.props.title === "Save to Inbox")!.props.onSubmit({ ...values, name: "Launch prep" });
+  expect(mock.capture).not.toHaveBeenCalled();
+  expect(mock.toast).toHaveBeenCalledWith(expect.objectContaining({ title: "Check the project" }));
+});
+
+it("sends the project and the priority on a Find a Time booking", async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(NOON);
+  fillWith({ op: "park", name: "Launch prep", durationMinutes: 90, ...refs });
+  const tree = render();
+  mock.free.mockResolvedValueOnce({ ok: true, data: { days: [{ date: "2026-09-22", freeSlots: [AFTERNOON] }] } });
+  await tree
+    .find((n) => n.props.title === "Find a Time")!
+    .props.onSubmit({ ...values, name: "Launch prep", duration: "90m" });
+  const list = mock.push.mock.calls[0][0] as ReactElement<Record<string, unknown>>;
+  mock.slots = [];
+  mock.cursor = 0;
+  const items = nodes((list.type as (props: unknown) => unknown)(list.props)) as unknown as ListNode[];
+  await items.find((n) => n.props.title === "Use This Slot")!.props.onAction!();
+  expect(mock.book.mock.calls[0][0]).toMatchObject({ name: "Launch prep", durationMinutes: 90, ...refs });
+});
+
+it("a draft without a project or a priority sends neither key", async () => {
+  fillWith(exact);
+  const tree = render();
+  await tree
+    .find((n) => n.props.title === "Schedule Block")!
+    .props.onSubmit({
+      ...values,
+      name: "Launch prep",
+      start: tree.find((n) => n.props.id === "start")!.props.value as Date,
+      end: tree.find((n) => n.props.id === "end")!.props.value as Date,
+    });
+  // A saved form takes no second submit, so start a new one for the Inbox.
+  mock.slots = [];
+  fillWith({ op: "park", name: "Launch prep" });
+  await render()
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({ ...values, name: "Launch prep" });
+  for (const op of [mock.create.mock.calls[0][0], mock.capture.mock.calls[0][0]]) {
+    expect(op).not.toHaveProperty("projectId");
+    expect(op).not.toHaveProperty("priority");
+  }
 });

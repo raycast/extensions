@@ -53,6 +53,10 @@ function render() {
     areas: [],
     activityTypes: [],
     calendars: [],
+    projects: [
+      { id: "launch", name: "Launch", areaId: null },
+      { id: "old", name: "Old", areaId: null, archived: true },
+    ],
     onFill: mock.fill,
   });
 }
@@ -144,4 +148,41 @@ it("hides the toast of a request that resolves after the form closes", async () 
   resolve(response);
   await pending;
   expect(mock.toast.hide).toHaveBeenCalled();
+});
+
+it("shows the project name and the priority label in the review", async () => {
+  mock.preview.mockResolvedValue({
+    ok: true,
+    data: { intents: [{ ...response.data.intents[0], projectId: "launch", priority: 3 }] },
+  });
+  await render().props.actions.props.children[1].props.onAction();
+  const rows = (render().props.children[2].props.children as { props?: { title?: string; text?: string } }[])
+    .filter(Boolean)
+    .map((n) => [n.props?.title, n.props?.text]);
+  expect(rows).toContainEqual(["Project", "Launch"]);
+  expect(rows).toContainEqual(["Priority", "High"]);
+});
+it("keeps an unknown project id in the draft but shows no name", async () => {
+  mock.preview.mockResolvedValue({
+    ok: true,
+    data: { intents: [{ ...response.data.intents[0], projectId: "gone" }] },
+  });
+  await render().props.actions.props.children[1].props.onAction();
+  const titles = (render().props.children[2].props.children as { props?: { title?: string } }[])
+    .filter(Boolean)
+    .map((n) => n.props?.title);
+  expect(titles).not.toContain("Project");
+  render().props.actions.props.children[0].props.onAction();
+  expect(mock.fill).toHaveBeenCalledWith(expect.objectContaining({ projectId: "gone" }));
+});
+it("marks an archived project in the review", async () => {
+  mock.preview.mockResolvedValue({
+    ok: true,
+    data: { intents: [{ ...response.data.intents[0], projectId: "old" }] },
+  });
+  await render().props.actions.props.children[1].props.onAction();
+  const rows = (render().props.children[2].props.children as { props?: { title?: string; text?: string } }[])
+    .filter(Boolean)
+    .map((n) => [n.props?.title, n.props?.text]);
+  expect(rows).toContainEqual(["Project", "Old (archived)"]);
 });

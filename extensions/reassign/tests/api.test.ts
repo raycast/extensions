@@ -43,6 +43,20 @@ it("loads all Inbox pages, retaining date and includeBacklog", async () => {
     backlogOffset: "50",
   });
 });
+it("sends the Inbox priority filter on every page and starts at the first page", async () => {
+  fetchMock
+    .mockResolvedValueOnce(Response.json({ backlog: [{ id: "first" }], nextBacklogOffset: 50 }))
+    .mockResolvedValueOnce(Response.json({ backlog: [{ id: "last" }], nextBacklogOffset: null }));
+  await getScheduleWithBacklog("2026-09-21", 3);
+  const [first, second] = fetchMock.mock.calls.map(([url]) => Object.fromEntries(new URL(url).searchParams));
+  expect(first).toEqual({ from: "2026-09-21", to: "2026-09-21", includeBacklog: "true", backlogMinPriority: "3" });
+  expect(second).toMatchObject({ backlogMinPriority: "3", backlogOffset: "50" });
+});
+it("does not send the Inbox priority filter for All (0)", async () => {
+  fetchMock.mockResolvedValueOnce(Response.json({ backlog: [], nextBacklogOffset: null }));
+  await getScheduleWithBacklog("2026-09-21", 0);
+  expect(new URL(fetchMock.mock.calls[0][0]).searchParams.has("backlogMinPriority")).toBe(false);
+});
 it("reports a failed later page instead of presenting an incomplete Inbox", async () => {
   fetchMock
     .mockResolvedValueOnce(Response.json({ backlog: [], nextBacklogOffset: 50 }))

@@ -4,12 +4,28 @@
 // account timezone. The end is after the start. Durations are computed here.
 
 import { clockPart, datePart, localMinutesBetween } from "./format";
-import { REFLECT_STATUSES, type EventKind, type MirrorStyle, type ReflectStatus } from "./wire";
+import {
+  isPriority,
+  type Priority,
+  PRIORITY_LABELS,
+  REFLECT_STATUSES,
+  type EventKind,
+  type MirrorStyle,
+  type ReflectStatus,
+} from "./wire";
 
 export interface Area {
   id: string;
   name: string;
   color: string;
+}
+
+// An archived project refuses a new link.
+export interface Project {
+  id: string;
+  name: string;
+  areaId: string | null;
+  archived?: true;
 }
 
 export interface ActivityType {
@@ -45,6 +61,8 @@ export interface ScheduleEvent {
   location?: { text?: string; url?: string };
   areaId?: string | null;
   activityTypeId?: string | null;
+  projectId?: string | null;
+  priority?: number; // 0 none to 4 urgent
   reflect?: ReflectState;
   [key: string]: unknown;
 }
@@ -77,6 +95,9 @@ export interface BacklogItem {
   kind?: EventKind; // the kind the block takes when scheduled
   areaId?: string | null;
   activityTypeId?: string | null;
+  // An older server omits both keys.
+  projectId?: string | null;
+  priority?: number; // 0 none to 4 urgent
   [key: string]: unknown;
 }
 
@@ -102,6 +123,7 @@ export interface ScheduleResponse {
   days: ScheduleDay[];
   areas: Area[];
   activityTypes: ActivityType[];
+  projects?: Project[];
   userPreferences?: { conflictPolicy?: string };
   // Only with `includeSeries`: each recurring master. Its span is the anchor occurrence.
   series?: { id: string; start: string; end: string }[];
@@ -180,6 +202,22 @@ export function homeCalendarId(event: { calendarId?: string | null }, defaultId?
 /** Resolve an area from its `areaId`. Works for events and backlog items. */
 export function resolveArea(item: { areaId?: string | null }, areas: Area[]): Area | null {
   return item.areaId ? (areas.find((a) => a.id === item.areaId) ?? null) : null;
+}
+
+/** Resolve a project from its `projectId`. An archived project still resolves. */
+export function resolveProject(item: { projectId?: string | null }, projects: Project[]): Project | null {
+  return item.projectId ? (projects.find((p) => p.id === item.projectId) ?? null) : null;
+}
+
+/** The priority of an item as 1 to 4, or null for none (0, absent, or a bad value). */
+export function itemPriority(item: { priority?: unknown }): Priority | null {
+  return isPriority(item.priority) ? item.priority : null;
+}
+
+/** The label of an item priority ("High"), or null for none. */
+export function priorityLabel(item: { priority?: unknown }): string | null {
+  const p = itemPriority(item);
+  return p ? PRIORITY_LABELS[p] : null;
 }
 
 // Known conferencing hosts, for the notes fallback when the API has no meeting.

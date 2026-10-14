@@ -1,10 +1,11 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { BlockDraft, blockDraft } from "../lib/ai-draft";
+import { PRIORITY_LABELS } from "../lib/wire";
 import { previewBlock } from "../lib/api";
 import { failToast } from "../lib/feedback";
 import { clockHM, todayISO } from "../lib/format";
-import type { ActivityType, Area, Calendar } from "../lib/schedule-model";
+import type { ActivityType, Area, Calendar, Project } from "../lib/schedule-model";
 
 export function AiFillForm(props: {
   initialText: string;
@@ -12,6 +13,8 @@ export function AiFillForm(props: {
   activityTypes: ActivityType[];
   // The writable calendars: a suggested home must be one of them.
   calendars: Calendar[];
+  // The GET /schedule projects. An unknown id shows no name, but the draft keeps it.
+  projects: Project[];
   onFill: (draft: BlockDraft) => void;
 }) {
   const { pop } = useNavigation();
@@ -96,6 +99,9 @@ export function AiFillForm(props: {
   const area = props.areas.find((a) => a.id === draft?.areaId)?.name;
   const activity = props.activityTypes.find((a) => a.id === draft?.activityTypeId)?.name;
   const calendar = props.calendars.find((c) => c.id === draft?.calendarId)?.name;
+  const projectRow = props.projects.find((p) => p.id === draft?.projectId);
+  const project = projectRow && (projectRow.archived ? `${projectRow.name} (archived)` : projectRow.name);
+  const priority = draft?.priority ? PRIORITY_LABELS[draft.priority] : undefined;
   return (
     <Form
       navigationTitle="Fill with Reassign AI"
@@ -144,6 +150,8 @@ export function AiFillForm(props: {
             title="Details"
             text={[area, activity, calendar, draft.kind, draft.notes].filter(Boolean).join(" · ")}
           />
+          {project && <Form.Description title="Project" text={project} />}
+          {priority && <Form.Description title="Priority" text={priority} />}
         </>
       )}
       {notices && <Form.Description title="From Reassign" text={notices} />}

@@ -1,6 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { ApiError, ApiResult, undo } from "./api";
-import { batchFailure, BatchResultRow, rowError } from "./envelope";
+import { batchFailure, BatchResultRow, ROW_REJECTED_MESSAGE, rowError } from "./envelope";
 
 // Toast and error helpers shared by the mutating commands.
 
@@ -23,10 +23,14 @@ export function describeError(error: ApiError): { title: string; message?: strin
         message: "The connection does not have a permission it needs. Sign in again.",
       };
     case "read_only":
-      return {
-        title: "This block is read-only",
-        message: "It comes from a calendar you do not own. Change it in that calendar.",
-      };
+      // The server reason names the cause: a calendar you do not own, a task app link, or a project move.
+      // The title stays general, because the item can be an Inbox idea.
+      return hasReason(error)
+        ? { title: "Reassign refused the change", message: error.message }
+        : {
+            title: "This block is read-only",
+            message: "It comes from a calendar you do not own. Change it in that calendar.",
+          };
     case "not_found":
       return { title: "Could not find that block", message: error.message };
     case "validation":
@@ -43,13 +47,18 @@ export function describeError(error: ApiError): { title: string; message?: strin
       // A bare 429 has only the generic "Request failed (429)." text.
       return {
         title: "Too many requests",
-        message: /^Request failed \(\d+\)\.$/.test(error.message) ? "Wait a moment, then try again." : error.message,
+        message: hasReason(error) ? error.message : "Wait a moment, then try again.",
       };
     case "network":
       return { title: "Could not reach Reassign", message: error.message };
     default:
       return { title: "Something went wrong", message: error.message };
   }
+}
+
+/** True when the error carries a server reason, not only a generic "Request failed (403)." or row text. */
+function hasReason(error: ApiError): boolean {
+  return !!error.message && error.message !== ROW_REJECTED_MESSAGE && !/^Request failed \(\d+\)\.$/.test(error.message);
 }
 
 /** Show a failure toast for an API error. */

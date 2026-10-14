@@ -29,8 +29,22 @@ it("fills an Inbox draft with its duration", () => {
     duration: "1h30",
   });
 });
+it("keeps the project and the priority of a new block and of an Inbox idea", () => {
+  const refs = { projectId: "launch", priority: 4 };
+  expect(blockDraft(preview({ ...event, ...refs }))).toMatchObject(refs);
+  expect(blockDraft(preview({ op: "park", name: "Research", ...refs }))).toMatchObject({
+    destination: "inbox",
+    ...refs,
+  });
+});
 it.each([
   { ...event, op: "delete", id: "existing" },
+  { ...event, priority: 0 },
+  { ...event, priority: 5 },
+  { ...event, priority: 1.5 },
+  { ...event, priority: "1" },
+  { ...event, projectId: "" },
+  { ...event, projectId: "launch", label: "urgent" },
   { ...event, recurrence: "daily" },
   { ...event, checklist: [{ text: "step" }] },
   { op: "park", name: "Research", calendarId: "calendar" },

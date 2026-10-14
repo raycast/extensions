@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { ApiError } from "../lib/api";
 import { SUBSCRIPTION_REQUIRED_MESSAGE, SUBSCRIPTION_REQUIRED_TITLE } from "../lib/feedback";
 import { signIn } from "../lib/oauth";
 import { PLAN_URL } from "../lib/wire";
 
 /** Pick the screen for an API refusal: re-auth, the subscription gate, or a retry. */
-export function refusalView(error: ApiError, onRecover: () => void) {
+export function refusalView(error: ApiError, onRecover: () => void, extraActions?: ReactNode) {
   // A retry repeats a `scope` 403. Only a new consent grants the missing scope.
   if (error.code === "signed_out" || error.code === "scope") {
     return <ReauthView onSignedIn={onRecover} automatic={false} />;
@@ -15,7 +15,7 @@ export function refusalView(error: ApiError, onRecover: () => void) {
     return <ReauthView onSignedIn={onRecover} />;
   }
   if (error.code === "permission") return <SubscriptionRequiredView />;
-  return <ErrorView message={error.message} onRetry={onRecover} />;
+  return <ErrorView message={error.message} onRetry={onRecover} extraActions={extraActions} />;
 }
 
 /** Re-run OAuth for session expiry; intentional logout waits for a user action. */
@@ -79,7 +79,7 @@ export function SubscriptionRequiredView() {
 }
 
 /** Shown for any other refusal. */
-function ErrorView(props: { message: string; onRetry: () => void }) {
+function ErrorView(props: { message: string; onRetry: () => void; extraActions?: ReactNode }) {
   return (
     <List>
       <List.EmptyView
@@ -89,6 +89,7 @@ function ErrorView(props: { message: string; onRetry: () => void }) {
         actions={
           <ActionPanel>
             <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={props.onRetry} />
+            {props.extraActions}
           </ActionPanel>
         }
       />

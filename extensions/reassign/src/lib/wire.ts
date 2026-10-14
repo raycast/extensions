@@ -69,6 +69,18 @@ export function isMirrorStyle(value: unknown): value is MirrorStyle {
   return (MIRROR_STYLES as readonly unknown[]).includes(value);
 }
 
+/** A set priority: 1 low to 4 urgent. The server stores 0 as none. */
+export type Priority = 1 | 2 | 3 | 4;
+
+export const PRIORITY_LABELS: Record<Priority, string> = { 1: "Low", 2: "Medium", 3: "High", 4: "Urgent" };
+
+// The set priorities, highest first, in the order that a menu shows them.
+export const PRIORITIES_DESC: readonly Priority[] = [4, 3, 2, 1];
+
+export function isPriority(value: unknown): value is Priority {
+  return typeof value === "number" && Number.isInteger(value) && value >= 1 && value <= 4;
+}
+
 export const PATHS = {
   schedule: "/schedule",
   schedulePlan: "/schedule/plan",

@@ -16,6 +16,7 @@ vi.mock("../src/lib/api", () => ({
 
 import type { Toast } from "@raycast/api";
 import type { ApiResult } from "../src/lib/api";
+import { ROW_REJECTED_MESSAGE } from "../src/lib/envelope";
 import { applyUndoToast, describeError, runMutation } from "../src/lib/feedback";
 
 type ToastState = {
@@ -252,6 +253,16 @@ it("rate_limited shows the server message and falls back for a bare 429", () => 
   expect(capped).toEqual({ title: "Too many requests", message: "Try again in an hour." });
   const bare = describeError({ ok: false, code: "rate_limited", message: "Request failed (429).", status: 429 });
   expect(bare).toEqual({ title: "Too many requests", message: "Wait a moment, then try again." });
+});
+
+// A read_only refusal has many causes (a calendar, a task app link, a project move).
+it("read_only shows the server reason and falls back to the calendar text", () => {
+  const moved = describeError({ ok: false, code: "read_only", message: "Set the list.", status: 403 });
+  expect(moved).toEqual({ title: "Reassign refused the change", message: "Set the list." });
+  const bare = describeError({ ok: false, code: "read_only", message: "Request failed (403).", status: 403 });
+  expect(bare.message).toBe("It comes from a calendar you do not own. Change it in that calendar.");
+  const row = describeError({ ok: false, code: "read_only", message: ROW_REJECTED_MESSAGE });
+  expect(row.title).toBe("This block is read-only");
 });
 
 it("runMutation reads the success title and message from the receipt", async () => {

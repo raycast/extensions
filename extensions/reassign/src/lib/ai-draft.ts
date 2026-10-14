@@ -1,6 +1,6 @@
 import { shiftWallMinutes } from "./block-timing";
 import { humanDuration, isLocalDateTime, localMinutesBetween, localToDate, toLocalDateTime } from "./format";
-import { isEventKind, MAX_DURATION_MINUTES, MIN_SPAN_MINUTES } from "./wire";
+import { isEventKind, isPriority, MAX_DURATION_MINUTES, MIN_SPAN_MINUTES, type Priority } from "./wire";
 
 export interface AiPreview {
   intents: Record<string, unknown>[];
@@ -21,7 +21,13 @@ export interface BlockDraft {
   activityTypeId: string;
   // The home calendar that the AI named ("... >Work"); absent = the default.
   calendarId?: string;
+  // The project and the priority that the line named ("#Launch", "p1"); absent = none.
+  projectId?: string;
+  priority?: Priority;
 }
+
+const UNREPRESENTABLE =
+  "This suggestion includes details this form cannot represent. Try a simpler block or use Reassign.";
 
 /** Accept only a single new block that this form can represent completely. */
 export function blockDraft(preview: AiPreview): BlockDraft {
@@ -46,11 +52,11 @@ export function blockDraft(preview: AiPreview): BlockDraft {
     "areaId",
     "activityTypeId",
     "calendarId",
+    "projectId",
+    "priority",
   ]);
   if (Object.entries(intent).some(([key, value]) => !supported.has(key) && value != null)) {
-    throw new Error(
-      "This suggestion includes details this form cannot represent. Try a simpler block or use Reassign.",
-    );
+    throw new Error(UNREPRESENTABLE);
   }
   if (typeof intent.name !== "string" || !intent.name.trim()) throw new Error("The suggestion needs a block name.");
   const draft: BlockDraft = {
@@ -65,11 +71,16 @@ export function blockDraft(preview: AiPreview): BlockDraft {
   };
   if (intent.calendarId != null) {
     // An Inbox idea has no calendar; a new block takes it as its home.
-    if (intent.op === "park" || typeof intent.calendarId !== "string")
-      throw new Error(
-        "This suggestion includes details this form cannot represent. Try a simpler block or use Reassign.",
-      );
+    if (intent.op === "park" || typeof intent.calendarId !== "string") throw new Error(UNREPRESENTABLE);
     draft.calendarId = intent.calendarId;
+  }
+  if (intent.projectId != null) {
+    if (typeof intent.projectId !== "string" || !intent.projectId) throw new Error(UNREPRESENTABLE);
+    draft.projectId = intent.projectId;
+  }
+  if (intent.priority != null) {
+    if (!isPriority(intent.priority)) throw new Error(UNREPRESENTABLE);
+    draft.priority = intent.priority;
   }
   if (!isEventKind(draft.kind)) throw new Error("The suggested block type is invalid.");
   if (intent.op === "park") {

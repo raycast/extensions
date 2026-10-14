@@ -62,7 +62,17 @@ import {
 } from "./components/calendar-fields";
 import { ScheduleContext } from "./lib/launch-context";
 import { type ParsedCapture, parseCapture } from "./lib/nl-parse";
-import { isEventKind, MAX_CAPTURE_TEXT_LENGTH, MAX_DURATION_MINUTES, WEB_BASE, type EventKind } from "./lib/wire";
+import {
+  isEventKind,
+  isPriority,
+  MAX_CAPTURE_TEXT_LENGTH,
+  MAX_DURATION_MINUTES,
+  type Priority,
+  PRIORITIES_DESC,
+  PRIORITY_LABELS,
+  WEB_BASE,
+  type EventKind,
+} from "./lib/wire";
 
 interface FormValues extends CalendarFormValues {
   name: string;
@@ -150,6 +160,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
   const parsed = argText ? parseCapture(argText, accountClock()) : null;
   const areas = taxonomy?.ok ? (taxonomy.data.areas ?? []) : [];
   const activityTypes = taxonomy?.ok ? (taxonomy.data.activityTypes ?? []) : [];
+  const projects = taxonomy?.ok ? (taxonomy.data.projects ?? []) : [];
   const { writable: calendars, defaultId: defaultCalendarId } = useCalendars();
   const [name, setName] = useState(ctx?.name ?? (parsed?.name && parsed.name !== "(untitled)" ? parsed.name : initial));
   // The raw text for the AI Inbox capture, and the name it seeded. A changed name wins.
@@ -191,6 +202,8 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
   });
   const [calendarRevision, setCalendarRevision] = useState(0);
   const [aiDestination, setAiDestination] = useState<"inbox" | "schedule" | null>(null);
+  // The project and the priority ("" and "0" are none).
+  const [refs, setRefs] = useState({ projectId: "", priority: "0" });
   const submitting = useRef(false);
   const saved = useRef(false);
   const timingEdited = useRef(false);
@@ -213,6 +226,18 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
   const showDuration = !(hasStartTime && hasEndTime);
   const primaryIsInbox = !hasStartTime && !hasEndTime && (aiDestination === "inbox" || !duration.trim());
   const timingFields = timingFieldsOf({ start, end, duration });
+  const findsTime = !hasStartTime && !hasEndTime && Boolean(duration.trim());
+  const chosenRefs = refsOf(refs);
+  // A project that the form cannot offer (archived, or not in the read) stays visible, so the user can clear it.
+  const refProject = projects.find((p) => p.id === refs.projectId);
+  const unlistedProject = refs.projectId && (!refProject || refProject.archived) ? refs.projectId : undefined;
+  // Judge the project only after a good read. Before it, the server decides at save.
+  const projectError =
+    !unlistedProject || !taxonomy?.ok
+      ? undefined
+      : refProject
+        ? "Reassign does not link an archived project. Choose another one or None."
+        : "Reassign did not find this project. Choose another one or None.";
   // A day from the text parse only is not sent: the Inbox AI reads it from the text.
   // A changed name replaces that text, so then the form day is sent.
   const dateChosen = timingEdited.current || Boolean(ctxDate) || name.trim() !== captureSeed.current.name;
@@ -261,6 +286,8 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
 
   function fillDraft(draft: BlockDraft) {
     timingEdited.current = true;
+    // A new fill replaces the old refs, also with none.
+    setRefs({ projectId: draft.projectId ?? "", priority: String(draft.priority ?? 0) });
     setName(draft.name);
     setStart(draft.start);
     const minutes = parseDuration(draft.duration)?.minutes;
@@ -294,6 +321,12 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
 
   async function submitOnce(values: SubmitValues, action: (values: FormValues) => Promise<void>) {
     if (submitting.current || saved.current) return;
+    // The server refuses the link, so stop here and point at the field.
+    if (projectError) {
+      setShowDetails(true);
+      await showToast({ style: Toast.Style.Failure, title: "Check the project", message: projectError });
+      return;
+    }
     submitting.current = true;
     try {
       await action({ ...details, ...calendarValues, ...values, duration: values.duration ?? duration });
@@ -317,6 +350,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
             {
               ...extras,
               ...calendar,
+              ...chosenRefs,
             },
           ),
         ]),
@@ -332,7 +366,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
         now: accountClock(),
         earliest: parsed?.earliest,
         latest: parsed?.latest,
-        fields: { ...extras, ...calendar },
+        fields: { ...extras, ...calendar, ...chosenRefs },
         push,
         onSaved,
       });
@@ -383,6 +417,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
         ? todayISO(timing.start)
         : (timing.date ?? (hasNamedDate ? planningDate : undefined));
     const { notes, areaId, activityTypeId, kind } = optionalFields(values);
+    const { projectId, priority } = chosenRefs;
     const result = await runMutation("Saving…", captureToast, () =>
       backlogCaptureText(
         captureTextOp(text, {
@@ -391,6 +426,8 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
           notes,
           areaId,
           activityTypeId,
+          projectId,
+          priority,
           // "blocking" is the form default, not a choice. Leave it to the AI.
           kind: kind === "blocking" ? undefined : kind,
         }),
@@ -428,7 +465,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
 
   const scheduleAction = (
     <Action.SubmitForm
-      title={!hasStartTime && !hasEndTime && duration.trim() ? "Find a Time" : "Schedule Block"}
+      title={findsTime ? "Find a Time" : "Schedule Block"}
       icon={Icon.Calendar}
       onSubmit={(values: SubmitValues) => submitOnce(values, handleSchedule)}
     />
@@ -468,6 +505,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
                 areas={areas}
                 activityTypes={activityTypes}
                 calendars={calendars}
+                projects={projects}
                 onFill={fillDraft}
               />
             }
@@ -508,13 +546,51 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
       )}
       <Form.Checkbox
         id="showDetails"
-        label="Show area, activity, calendar, and notes"
+        label="Show priority, project, area, calendar, and notes"
         value={showDetails}
         onChange={setShowDetails}
       />
       {showDetails && (
         <>
           <Form.Separator />
+          <Form.Dropdown
+            id="priority"
+            title="Priority"
+            value={refs.priority}
+            onChange={(priority) => setRefs((current) => ({ ...current, priority }))}
+          >
+            <Form.Dropdown.Item value="0" title="None" />
+            {PRIORITIES_DESC.map((value) => (
+              <Form.Dropdown.Item key={value} value={String(value)} title={PRIORITY_LABELS[value]} />
+            ))}
+          </Form.Dropdown>
+          <Form.Dropdown
+            id="projectId"
+            title="Project"
+            value={refs.projectId}
+            onChange={(projectId) => setRefs((current) => ({ ...current, projectId }))}
+            info="A project with an area also sets that area, unless you choose one."
+            error={projectError}
+          >
+            <Form.Dropdown.Item value="" title="None" />
+            {unlistedProject && (
+              <Form.Dropdown.Item
+                value={unlistedProject}
+                title={
+                  refProject
+                    ? `${refProject.name} (archived)`
+                    : taxonomy?.ok
+                      ? "Project from Reassign AI (not found)"
+                      : "Project from Reassign AI"
+                }
+              />
+            )}
+            {projects
+              .filter((p) => !p.archived)
+              .map((p) => (
+                <Form.Dropdown.Item key={p.id} value={p.id} title={p.name} />
+              ))}
+          </Form.Dropdown>
           <Form.Dropdown
             id="areaId"
             title="Area"
@@ -584,13 +660,25 @@ interface FlexibleArgs {
   now: Date;
   earliest?: string;
   latest?: string;
-  // The optional block fields and the calendar choice, the same as on an exact create.
-  fields: ReturnType<typeof optionalFields> & CalendarWriteFields;
+  // The optional block fields, the project and the priority, and the calendar choice, the same as on an exact create.
+  fields: ReturnType<typeof optionalFields> & AiRefs & CalendarWriteFields;
   push: (element: ReactNode) => void;
   onSaved: () => Promise<void>;
 }
 
 type CreateFields = FlexibleArgs["fields"];
+
+// The project and the priority. reassign#1665 lets /schedule/plan take them, as a create does.
+type AiRefs = { projectId?: string; priority?: Priority };
+
+/** The chosen project and priority as op fields; none is left out, never null. */
+function refsOf(refs: { projectId: string; priority: string }): AiRefs {
+  const out: AiRefs = {};
+  if (refs.projectId) out.projectId = refs.projectId;
+  const priority = Number(refs.priority);
+  if (isPriority(priority)) out.priority = priority;
+  return out;
+}
 
 /** The one create op of Add Block for an exact time. */
 function createOp(name: string, span: { start: string; end: string }, fields: CreateFields): CreateOp {
@@ -614,7 +702,8 @@ export function planWindow(
   const span = { earliest: `${date}T${from}`, latest: `${to > from ? date : addDaysISO(date, 1)}T${to}` };
   // Today offers no start before now + 5 minutes. When today's window has
   // passed, look at the same window tomorrow.
-  const soonest = toLocalDateTime(new Date(now.getTime() + 5 * 60_000));
+  const leadMs = now.getTime() + 5 * 60_000;
+  const soonest = toLocalDateTime(new Date(Math.ceil(leadMs / 60_000) * 60_000));
   if (date !== todayISO(now) || span.earliest >= soonest) return { ...span, nextDay: false };
   if (span.latest > soonest) return { ...span, earliest: soonest, nextDay: false };
   return {

@@ -23,12 +23,15 @@ export function batchFailure(receipt: { results?: BatchResultRow[] } | undefined
   return receipt?.results?.find((row) => row.status === "error");
 }
 
+/** The text of a failed row that has no server message. */
+export const ROW_REJECTED_MESSAGE = "The server rejected the change.";
+
 /** The ApiError for a rejected row inside a 2xx batch. */
 export function rowError(row: BatchResultRow): ApiError {
   return {
     ok: false,
     code: toClientCode(row.error?.code, 422),
-    message: row.error?.message ?? "The server rejected the change.",
+    message: row.error?.message ?? ROW_REJECTED_MESSAGE,
   };
 }
 

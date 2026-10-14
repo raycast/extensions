@@ -22,6 +22,14 @@
   is taken, the list shows the nearest open slots. After a failed reply, Find a
   Time checks the schedule before it books again, so the block is not booked
   twice.
+- Add Block has Priority and Project fields. Fill with AI sets them from the
+  line, and you can change or clear them before the save. A scheduled block,
+  a Find a Time slot and an Inbox save all keep them.
+- Inbox shows the priority and the project of each idea, and marks an
+  archived project. A dropdown shows only the ideas at a priority or higher.
+  Set Priority and Set Project change an idea. A new project with an area also
+  gives that area to the idea. When Reassign refuses a change, the toast
+  gives the reason from Reassign.
 - Check off Kept or Skipped on a block from a past day in Agenda. Reassign
   accepts a check-off only after the day ends, so Now has no check-off.
 - Save to Inbox uses your default Source, the same as the Reassign app. When the

@@ -134,6 +134,48 @@ it("keeps the minutes before a clock time", () => {
   });
 });
 
+// A spaced bare integer ("1h 30") stays minutes before a time token even when
+// chrono-node does not absorb the connector in front of it ("at noon", "until 6pm",
+// "before noon", ...). Only the literal connector "in the" was tolerated before, which
+// halved the duration to 60 and leaked the integer into the name.
+it.each([
+  ["gym 1h 30 at noon", "gym", "12:00", "13:30", 90],
+  ["gym 1h 30 at midnight", "gym", "00:00", "01:30", 90],
+  ["gym 1h 30 until 6pm", "gym until", "18:00", "19:30", 90],
+  ["gym 1h 30 before noon", "gym before", "12:00", "13:30", 90],
+  ["gym 1h 30 after 6pm", "gym after", "18:00", "19:30", 90],
+  ["gym 1h 30 around 6pm", "gym around", "18:00", "19:30", 90],
+  ["gym 1h 30 till 6pm", "gym till", "18:00", "19:30", 90],
+  ["gym 1h 30 by 6pm", "gym", "18:00", "19:30", 90],
+  ["gym 1h 30 at around 6pm", "gym around", "18:00", "19:30", 90],
+  ["gym 1h 30 in evening", "gym in", undefined, undefined, 90],
+])("keeps the minutes when a connector precedes the time for %s", (input, name, start, end, durationMinutes) => {
+  const expected: Record<string, unknown> = { kind: start ? "exact" : "flexible", name, durationMinutes };
+  if (start) {
+    expected.start = start;
+    expected.end = end;
+  }
+  expect(parseCapture(input, ref)).toMatchObject(expected);
+  // The bare integer must never leak into the committed name.
+  expect(parseCapture(input, ref).name).not.toMatch(/\b30\b/);
+});
+
+// A content word ("issues", a name) between the integer and the time keeps the integer
+// in the title, so the duration is the hours-only value and the count stays in the name.
+it.each([
+  ["review 1h 12 issues at noon", "review 12 issues", "12:00", "13:00", 60],
+  ["review 1h 12 issues tomorrow", "review 12 issues", undefined, undefined, 60],
+  ["review 1h 12 issues", "review 12 issues", undefined, undefined, 60],
+])("still keeps a title integer before content words for %s", (input, name, start, end, durationMinutes) => {
+  const expected: Record<string, unknown> = { name, durationMinutes };
+  if (start) {
+    expected.kind = "exact";
+    expected.start = start;
+    expected.end = end;
+  }
+  expect(parseCapture(input, ref)).toMatchObject(expected);
+});
+
 // Single-digit minutes stay part of the duration ("1h 5m" is 65 min, not 60).
 it("keeps single-digit minutes in a flexible capture", () => {
   expect(parseCapture("lunch 1h 5m", ref)).toMatchObject({ kind: "flexible", name: "lunch", durationMinutes: 65 });

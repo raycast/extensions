@@ -66,9 +66,14 @@ function Command() {
     onToggleNonBlocking: () => setHideNonBlocking(!hideNB),
     onToggleReference: () => setHideReference(!hideRef),
   };
-  // Pick no view until the stored values load. Else a stored Week first mounts
-  // DayView, which sends a fetch that the command then discards.
-  if (scopeStore.isLoading || nonBlockingStore.isLoading || referenceStore.isLoading) return <List isLoading />;
+  // Pick no view until the stored values load — once. Else a stored Week first
+  // mounts DayView, which sends a fetch that the command then discards. A plain
+  // gate re-checks isLoading on every render, and useLocalStorage.setValue
+  // re-enters isLoading on revalidation, so any toggle/scope change would unmount
+  // the live view and drop its state. Latch the gate to the first settled read.
+  const storedLoaded = useRef(false);
+  if (!(scopeStore.isLoading || nonBlockingStore.isLoading || referenceStore.isLoading)) storedLoaded.current = true;
+  if (!storedLoaded.current) return <List isLoading />;
   return scope === "day" ? (
     <DayView scope={scope} onToggleScope={onToggleScope} kind={kind} />
   ) : (
@@ -311,7 +316,7 @@ function DayView(props: { scope: AgendaScope; onToggleScope: () => void; kind: K
               <Action
                 title="Add Block…"
                 icon={Icon.Plus}
-                onAction={() => launchCommand({ name: "add", type: LaunchType.UserInitiated })}
+                onAction={() => launchCommand({ name: "add", type: LaunchType.UserInitiated, context: { date } })}
               />
               {backlogCount > 0 && (
                 <Action
@@ -434,7 +439,7 @@ function WeekView(props: { scope: AgendaScope; onToggleScope: () => void; kind: 
         <Action
           title="Add Block…"
           icon={Icon.Plus}
-          onAction={() => launchCommand({ name: "add", type: LaunchType.UserInitiated })}
+          onAction={() => launchCommand({ name: "add", type: LaunchType.UserInitiated, context: { date } })}
         />
         <Action.OpenInBrowser title="Open Day in Reassign" url={webDayUrl(date)} />
         {navSection()}

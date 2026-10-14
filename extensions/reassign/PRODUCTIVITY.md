@@ -6,7 +6,7 @@
 | Add Block     | Capture an idea or schedule a block, with optional Reassign AI assistance |
 | Inbox         | Schedule or remove saved ideas                                            |
 | Search Blocks | Direct search from Raycast root, with an optional query argument          |
-| Now           | Glance, join, check off, and launch Agenda to sign in                     |
+| Now           | Glance, join, and launch Agenda to sign in                     |
 
 Existing command identifiers remain stable; `search` is the new entry point.
 Detailed edits, moves and check-off actions stay inside Agenda.
@@ -17,7 +17,7 @@ on edits. Add Block uses native Start and End date-time pickers. Duration appear
 one or both times are missing; with both filled, the preview shows the calculated
 length. Date-only picker values are detected with `Form.DatePicker.isFullDay` and
 remain in Inbox;
-duration-only scheduling proposes concrete times for confirmation. It chooses its
+duration-only scheduling lists open slots to pick. It chooses its
 primary action from the current form and dismisses
 a successfully saved draft; failed saves keep the form open.
 

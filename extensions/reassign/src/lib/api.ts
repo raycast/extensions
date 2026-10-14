@@ -56,7 +56,16 @@ interface EventFields {
   mirrorStyles?: Record<string, MirrorStyle>;
 }
 
-export type CreateOp = { op: "create"; start: string; end: string; name: string } & EventFields;
+// `priority` is 0 none to 4 urgent. The server also takes both on an update.
+// This client sends them only on a create.
+export type CreateOp = {
+  op: "create";
+  start: string;
+  end: string;
+  name: string;
+  projectId?: string;
+  priority?: number;
+} & EventFields;
 // `start` / `end` move the block, also to another day; a lone `start` keeps the duration.
 export type UpdateOp = { op: "update"; id: string; scope?: Scope } & EventFields;
 
@@ -74,6 +83,9 @@ export interface BacklogOp {
   durationMinutes?: number;
   areaId?: string;
   activityTypeId?: string;
+  // A project with no areaId in the op gives the item the project area.
+  projectId?: string;
+  priority?: number; // 0 none to 4 urgent
   plannedDate?: string;
   kind?: EventKind; // omitted = "blocking"
 }
@@ -91,6 +103,8 @@ export interface CaptureTextOp {
   kind?: EventKind;
   areaId?: string;
   activityTypeId?: string;
+  projectId?: string;
+  priority?: number; // 0 none to 4 urgent
   plannedDate?: string;
 }
 
@@ -106,6 +120,9 @@ export type BacklogManageOp =
       durationMinutes?: number;
       plannedDate?: string;
       notes?: string;
+      // null clears the project and keeps the area. Priority 0 clears it; the server refuses null.
+      projectId?: string | null;
+      priority?: number;
     }
   | { op: "schedule"; id: string; start: string }
   | { op: "park"; id: string }
@@ -309,6 +326,7 @@ interface ScheduleParams {
   to: string;
   includeBacklog?: boolean;
   backlogOffset?: number;
+  backlogMinPriority?: number; // 1 to 4; 0 filters nothing, so it is not sent
   includeSeries?: boolean;
   minDuration?: number;
 }
@@ -318,6 +336,7 @@ function scheduleQuery(params: ScheduleParams): string {
   const q = new URLSearchParams({ from: params.from, to: params.to });
   if (params.includeBacklog) q.set("includeBacklog", "true");
   if (params.backlogOffset !== undefined) q.set("backlogOffset", String(params.backlogOffset));
+  if (params.backlogMinPriority) q.set("backlogMinPriority", String(params.backlogMinPriority));
   if (params.includeSeries) q.set("includeSeries", "true");
   if (params.minDuration !== undefined) q.set("minDuration", String(params.minDuration));
   return `?${q.toString()}`;
@@ -338,12 +357,13 @@ export function getFreeSlots(from: string, to: string, minDuration?: number): Pr
   return request<ScheduleResponse>("GET", PATHS.schedule + scheduleQuery({ from, to, minDuration }));
 }
 
-/** Read a day plus the parked-block inbox. The backlog needs includeBacklog=true. */
-export async function getScheduleWithBacklog(date: string): Promise<ApiResult<ScheduleResponse>> {
-  const first = await request<ScheduleResponse>(
-    "GET",
-    PATHS.schedule + scheduleQuery({ from: date, to: date, includeBacklog: true }),
-  );
+/**
+ * Read a day plus the parked-block inbox. The backlog needs includeBacklog=true.
+ * `minPriority` (1 to 4) keeps only the items of that priority or higher, on every page.
+ */
+export async function getScheduleWithBacklog(date: string, minPriority = 0): Promise<ApiResult<ScheduleResponse>> {
+  const base = { from: date, to: date, includeBacklog: true, backlogMinPriority: minPriority };
+  const first = await request<ScheduleResponse>("GET", PATHS.schedule + scheduleQuery(base));
   if (!first.ok) return first;
   const backlog = [...(first.data.backlog ?? [])];
   let offset = first.data.nextBacklogOffset;
@@ -354,7 +374,7 @@ export async function getScheduleWithBacklog(date: string): Promise<ApiResult<Sc
     }
     const page = await request<ScheduleResponse>(
       "GET",
-      PATHS.schedule + scheduleQuery({ from: date, to: date, includeBacklog: true, backlogOffset: offset }),
+      PATHS.schedule + scheduleQuery({ ...base, backlogOffset: offset }),
     );
     if (!page.ok) return page;
     backlog.push(...(page.data.backlog ?? []));
@@ -422,6 +442,8 @@ export interface PlanBooking extends Pick<
   name: string;
   start: string;
   durationMinutes: number;
+  projectId?: string;
+  priority?: number; // 0 none to 4 urgent
   // A retry with the same id within 60 s replays the first booking and does not book again.
   requestId: string;
 }

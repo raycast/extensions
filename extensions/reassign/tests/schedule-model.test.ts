@@ -9,8 +9,11 @@ import {
   homeCalendarId,
   isRecurring,
   isTailRow,
+  itemPriority,
   nowWallClock,
   occurrenceTarget,
+  priorityLabel,
+  resolveProject,
   type Now,
   type ScheduleEvent,
   type ScheduleResponse,
@@ -393,4 +396,16 @@ it.each([
 ])("eventMatchesFilter(%s) for %s is %s", (filter, id, expected) => {
   const event = filterEvents[id as keyof typeof filterEvents];
   expect(eventMatchesFilter(event, filterModel, filter)).toBe(expected);
+});
+
+it("reads the priority and the project of an Inbox item", () => {
+  const projects = [{ id: "p1", name: "Launch", areaId: null }];
+  expect(priorityLabel({ priority: 3 })).toBe("High");
+  expect(resolveProject({ projectId: "p1" }, projects)?.name).toBe("Launch");
+  // 0, an absent key, and a bad value are no priority.
+  for (const priority of [0, undefined, 5, 2.5, "3"]) expect(itemPriority({ priority })).toBeNull();
+  expect(priorityLabel({})).toBeNull();
+  // An older server sends neither key.
+  expect(resolveProject({}, projects)).toBeNull();
+  expect(resolveProject({ projectId: "gone" }, projects)).toBeNull();
 });

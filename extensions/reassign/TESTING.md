@@ -85,14 +85,29 @@ for the reviewed workflows. Compatibility fixes in this extension handle:
 - The `permission` gate opens `/settings/plan`. The old `/settings/billing`
   link gave a 404.
 
-Sync anchor: reassign `5b5115d93` (#1520). Apart from #1499 (`mirrorStyles` on
-`/schedule/plan`, handled in #88), reassign#1468–#1520 change no field, error
-code, or status that the extension uses. The billing checkout
+Sync anchor: reassign `f4a983a8d` (#1665, the head of origin/main). The
+reassign PRs on origin/main from #1468 to #1665 change no field, error code,
+or status that the extension uses. The exceptions are #1499 (`mirrorStyles` on
+`/schedule/plan`, handled in #88), #1541 and #1665 (see below). The billing checkout
 routes alone return `checkout_unlinked` (409, #1512), and the extension does
 not call them. `GET /settings` (`weekStart`, #1515) is first-party only, and
 `reassign-raycast` is not in `FIRST_PARTY_ROUTE_CLIENTS`. reassign#1500 sorts
 nested keys in the `/schedule/plan` replay fingerprint. The extension sends the
 same body on a retry, so this change has no effect on it.
+
+The `/command` additions are additive: `sourceUrl` and `created` (#1516),
+`written` (#1533), `writtenLines` (#1540), and a `scope` on the `delete` intent
+(#1632). `created`, `written` and `writtenLines` are reply keys that are absent
+when nothing is written, and the extension only previews. The extension does not
+send `sourceUrl` or `history`. A preview can return a `delete` intent with
+`scope`, but `blockDraft` refuses every op other than `create` and `park`. The
+OAuth responses do not change (#1612): a dead refresh grant still gives
+`400 invalid_grant`.
+
+reassign#1541 adds Inbox projects and priority (`projectId`, `priority`). Fill
+with AI, Add Block and Inbox use these fields. reassign#1665 adds them to
+`/schedule/plan`, so Find a Time sends them too. reassign#1663 changes only the
+MCP tool text, and #1664 changes only dependencies.
 
 The SDK is `@raycast/api` 2.4.1; the installed app is Raycast 2.4.1.
 The [OAuth docs](https://developers.raycast.com/api-reference/oauth) still recommend
@@ -113,6 +128,24 @@ and the browser callback remain part of the pending live checks.
   then edit and save. Verify no block is created by Suggest or Use Suggested Block.
 - Try an overnight AI suggestion and an Inbox suggestion with a duration. Try
   a multi-block or recurring request: unsupported suggestions must not be filled.
+- Fill with AI: describe `launch prep p1 #Launch` with a project of that name.
+  The preview and the Priority and Project fields must show them. Save to
+  Inbox and confirm Reassign shows the same project and priority. Clear both
+  fields before a save, and confirm that Reassign sets neither.
+- Fill with AI on a timed line with `p1 #Launch`, save with Schedule, and
+  confirm that Reassign keeps the project and the priority. Then book the same
+  draft with Find a Time, and confirm that Reassign keeps them too.
+- In Inbox, verify that each item shows its project and priority. Clear the
+  priority and the project on an item, and confirm Reassign clears them too.
+- In Inbox, set the priority filter to High+. Confirm that only High and
+  Urgent ideas show, also after a scroll to later pages. With no match, the
+  empty view must say "No ideas have this priority".
+- Link an idea to a project, then archive the project in Reassign. Confirm
+  that Inbox marks the project "(archived)", and that Set Project does not
+  list the archived project.
+- Move a task-linked idea to a project that has no list in its task app.
+  Confirm that the toast "Reassign refused the change" shows the reason from
+  Reassign, and that the idea keeps its project.
 - Change the description while AI is loading: the old response must not replace
   the current description's draft. AI errors must leave manual entry available.
 - Save from the compact form and from a Find a Time slot. Both should

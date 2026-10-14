@@ -130,10 +130,15 @@ function captureDuration(text: string, ref: Date): ReturnType<typeof parseDurati
   const d = parseDuration(text);
   if (!d || !/\s\d+\s*$/.test(d.match)) return d;
   // The Add form keeps "1h 30" as 90 min. In capture text, the integer is minutes only at the end or before a
-  // date or time ("gym 1h 30 tomorrow"). Before other words, it is part of the title.
+  // date or time ("gym 1h 30 tomorrow", "gym 1h 30 at noon"). Before other words, it is part of the title.
   const rest = text.slice(text.indexOf(d.match) + d.match.length).replace(/^[\s.,;:!?]+/, "");
   const next = rest && chrono.parse(rest, ref, { forwardDate: true })[0];
-  if (!rest || (next && /^(in\s+the\s+)?$/i.test(rest.slice(0, next.index)))) return d;
+  // Chrono-node matches many time tokens ("noon", "6pm") without absorbing the connector word in front of
+  // them, leaving "at"/"until"/"before"/... (and bare "in") in the prefix before `next.index`. Strip leading
+  // connectors so a bare integer before a time token stays minutes — not only "in the" before "evening".
+  const lead = next ? rest.slice(0, next.index) : "";
+  const onlyConnectors = lead.replace(/^((at|on|by|to|before|after|around|till|until|in(\s+the)?)\s+)+/i, "") === "";
+  if (!rest || (next && onlyConnectors)) return d;
   return parseDuration(d.match.replace(/\s+\d+\s*$/, ""));
 }
 
