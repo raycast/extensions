@@ -14,11 +14,11 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { formatLogDate, formatTime, isSameLocalDay } from "./lib/date";
-import { getCategoryIcon, getCategoryName } from "./lib/categories";
+import { getProjectGroupIcon, getProjectGroupName } from "./lib/project-groups";
 import { formatDuration, getDurationSeconds } from "./lib/duration";
 import { showFailure } from "./lib/errors";
 import { findProject, getProjectName, sortProjectsByPreference } from "./lib/projects";
-import { deleteWorkLog, getProjectCategories, getProjects, getWorkLogs, upsertWorkLog } from "./lib/storage";
+import { deleteWorkLog, getProjectGroups, getProjects, getWorkLogs, upsertWorkLog } from "./lib/storage";
 import type { Project, ProjectCategory, WorkLog } from "./lib/types";
 
 export default function WorkLogsCommand() {
@@ -32,7 +32,7 @@ export default function WorkLogsCommand() {
       const [savedLogs, savedProjects, savedCategories] = await Promise.all([
         getWorkLogs(),
         getProjects(),
-        getProjectCategories(),
+        getProjectGroups(),
       ]);
       setWorkLogs(savedLogs.sort((a, b) => b.startedAt.localeCompare(a.startedAt)));
       setProjects(savedProjects);
@@ -76,7 +76,7 @@ export default function WorkLogsCommand() {
             return (
               <List.Item
                 key={workLog.id}
-                icon={getCategoryIcon(categories, findProject(projects, workLog.projectId)?.type ?? "")}
+                icon={getProjectGroupIcon(categories, findProject(projects, workLog.projectId)?.type ?? "")}
                 title={projectName}
                 subtitle={workLog.description || "No description"}
                 keywords={[projectName, workLog.description].filter(Boolean)}
@@ -157,8 +157,8 @@ function WorkLogDetail({
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label
-            title="Category"
-            text={project ? getCategoryName(categories, project.type) : "Unknown"}
+            title="Project Group"
+            text={project ? getProjectGroupName(categories, project.type) : "Unknown"}
           />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Started" text={new Date(currentWorkLog.startedAt).toLocaleString()} />
@@ -328,7 +328,7 @@ function ProjectDropdown({
                 key={project.id}
                 value={project.id}
                 title={project.isActive ? project.name : `${project.name} (Disabled)`}
-                icon={getCategoryIcon(categories, category.id)}
+                icon={getProjectGroupIcon(categories, category.id)}
               />
             ))}
           </Form.Dropdown.Section>

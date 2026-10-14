@@ -2,6 +2,8 @@ import { LaunchType, launchCommand } from "@raycast/api";
 import { getDurationSeconds, isClockBeforeStart } from "./duration";
 import { clearActiveTimerIfMatches, getActiveTimer, getWorkLogs, saveActiveTimer, upsertWorkLog } from "./storage";
 import type { ActiveTimer, WorkLog } from "./types";
+import { markMenuBarDisplayRefresh } from "./menu-bar-refresh";
+import { endPomodoro, startPomodoroIntervalUnderLock, withReminderOperation } from "./reminder-service";
 
 export class ActiveTimerExistsError extends Error {
   constructor(public readonly activeTimer: ActiveTimer) {
@@ -10,7 +12,25 @@ export class ActiveTimerExistsError extends Error {
   }
 }
 
-export async function startTimer(projectId: string, description: string): Promise<ActiveTimer> {
+export async function startTimer(projectId: string, description: string, usePomodoro = false): Promise<ActiveTimer> {
+  const timer = await withReminderOperation(async () => {
+    const savedTimer = await saveNewTimer(projectId, description);
+    if (usePomodoro) {
+      try {
+        await startPomodoroIntervalUnderLock(savedTimer.id);
+      } catch (error) {
+        // No background refresh or other writer has seen this new timer yet.
+        await clearActiveTimerIfMatches(savedTimer.id);
+        throw error;
+      }
+    }
+    return savedTimer;
+  });
+  await refreshMenuBar();
+  return timer;
+}
+
+async function saveNewTimer(projectId: string, description: string): Promise<ActiveTimer> {
   const currentTimer = await getActiveTimer();
   if (currentTimer) {
     throw new ActiveTimerExistsError(currentTimer);
@@ -29,7 +49,6 @@ export async function startTimer(projectId: string, description: string): Promis
   }
 
   await saveActiveTimer(activeTimer);
-  await refreshMenuBar();
   return activeTimer;
 }
 
@@ -39,6 +58,15 @@ export type StopTimerResult =
   | { status: "stopped" | "recovered"; workLog: WorkLog; durationSeconds: number };
 
 export async function stopTimer(): Promise<StopTimerResult> {
+  const result = await withReminderOperation(stopCurrentTimer);
+  if (result.status === "stopped" || result.status === "recovered") {
+    await cleanupPomodoro(result.workLog.id);
+    await refreshMenuBar();
+  }
+  return result;
+}
+
+async function stopCurrentTimer(): Promise<StopTimerResult> {
   const activeTimer = await getActiveTimer();
   if (!activeTimer) {
     return { status: "none" };
@@ -49,7 +77,6 @@ export async function stopTimer(): Promise<StopTimerResult> {
 
   if (existingLog) {
     await clearActiveTimerIfMatches(activeTimer.id);
-    await refreshMenuBar();
     return {
       status: "recovered",
       workLog: existingLog,
@@ -77,14 +104,23 @@ export async function stopTimer(): Promise<StopTimerResult> {
 
   await upsertWorkLog(workLog);
   await clearActiveTimerIfMatches(activeTimer.id);
-  await refreshMenuBar();
   return { status: "stopped", workLog, durationSeconds };
 }
 
-export async function refreshMenuBar(): Promise<void> {
+export async function refreshMenuBar({ displayOnly = false }: { displayOnly?: boolean } = {}): Promise<void> {
   try {
+    if (displayOnly) await markMenuBarDisplayRefresh();
     await launchCommand({ name: "menu-bar", type: LaunchType.Background });
   } catch (error) {
     console.error("Failed to refresh menu bar", error);
+  }
+}
+
+async function cleanupPomodoro(timerId: string): Promise<void> {
+  try {
+    await endPomodoro(timerId);
+  } catch (error) {
+    // Stale state is ignored by timer ID; cleanup must not prevent saving work.
+    console.error("Failed to clear pomodoro state", error);
   }
 }
