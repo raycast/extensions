@@ -4,7 +4,7 @@ import { APP_URL } from "../../constants/raycast";
 import { INLINE_SOURCE_REGEX, PARTIAL_INLINE_SOURCE_REGEX, SAVED_SOURCE_REGEX } from "../../constants/assistant";
 import { getActionDisplay, getThinkingDurationText, getThinkingWord } from "./action";
 import { getChatSources, getTurns } from "./chat";
-import { canRenderText, loadRenderer, renderRow, renderSourcePill } from "./image";
+import { canRenderText, fitsRow, loadRenderer, renderRow, renderSourcePill } from "./image";
 
 type Turn = ReturnType<typeof getTurns>[number];
 type Source = ReturnType<typeof getChatSources>[number];
@@ -84,13 +84,17 @@ const getImageMarkdown = ({ frames, width, height }: ReturnType<typeof renderRow
 const getEmailDraftMarkdown = ({ to, subject, body }: TurnView["emailDrafts"][number]) =>
   [`**To:** ${to.join(", ")}`, `**Subject:** ${subject}`, body].filter(Boolean).join("\n\n");
 
+// A question too long for one row shows as text so it keeps its ending.
+const canRenderRow = (row: Row, renderer: Renderer) =>
+  canRenderText(row.text) && (row.tone === "status" || fitsRow(row.text, renderer));
+
 export const getTurnMarkdown = (
   { rows, answer, emailDrafts, notices, citedMeetings }: TurnView,
   renderer: Renderer | undefined,
   frameIndex: number,
 ) => {
   const rowsMarkdown = rows.map((row) =>
-    renderer && canRenderText(row.text) ? getImageMarkdown(renderRow(row, renderer), frameIndex) : `*${row.text}*`,
+    renderer && canRenderRow(row, renderer) ? getImageMarkdown(renderRow(row, renderer), frameIndex) : `*${row.text}*`,
   );
   // Raycast doesn't open app links like circleback:// from markdown, so pills
   // open the web app.

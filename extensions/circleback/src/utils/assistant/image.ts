@@ -100,6 +100,13 @@ const fitText = (text: string, maxWidth: number, size: number, renderer: Rendere
   return `${words.slice(0, Math.max(1, fittingWordCount + 1)).join(" ")}…`;
 };
 
+const fitsByText = new Map<string, boolean>();
+
+export const fitsRow = (text: string, renderer: Renderer) => {
+  if (!fitsByText.has(text)) fitsByText.set(text, measureText(text, TEXT_SIZE, renderer) <= ROW_WIDTH - CONTENT_X);
+  return fitsByText.get(text);
+};
+
 const getShimmerGradient = (color: string, frameIndex: number) => {
   const time = frameIndex / SHIMMER_FRAME_COUNT;
   const maskPosition = time < 0.25 ? 1 - 0.6 * time : 0.85 * (1 - (time - 0.25) / 0.75);
