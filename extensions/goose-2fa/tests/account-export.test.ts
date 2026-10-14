@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { accountQrDataUrl, accountSetupUri } from "../src/lib/account-export";
+import { accountExportHeadingDataUrl, accountQrDataUrl, accountSetupUri } from "../src/lib/account-export";
 import { parseOtpAuthUri } from "../vendor/lib/otp";
 import type { AccountData } from "../vendor/lib/types";
 
@@ -25,6 +25,20 @@ function otpFields(value: AccountData) {
 }
 
 describe("账户二维码与导入链接", () => {
+  test("居中标题转义用户文本，长 Unicode 名称不会注入 SVG 或超出边界", () => {
+    for (const theme of ["light", "dark"] as const) {
+      const input = account({ issuer: '& <image href="https://example.com/private"/> 中文', name: "😀".repeat(70) });
+      const url = accountExportHeadingDataUrl(input, theme);
+      const svg = Buffer.from(url.split(",")[1]!, "base64").toString();
+      expect(svg).not.toContain("<image");
+      expect(svg).toContain("&lt;image");
+      expect(svg).toContain("&amp;");
+      expect(svg).toContain("…</text>");
+      expect(svg).not.toContain("�");
+      expect(input.name).toBe("😀".repeat(70));
+    }
+  });
+
   test("默认 TOTP 可完整回导，且不泄露应用专用元数据", () => {
     const input = account({ note: "private note", remark: "private remark", groupId: "private-group" });
     const uri = accountSetupUri(input);

@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, environment } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { accountQrDataUrl, accountSetupUri } from "./lib/account-export";
+import { accountExportHeadingDataUrl, accountQrDataUrl, accountSetupUri } from "./lib/account-export";
 import { t } from "./lib/i18n";
 import { useVaultSnapshot } from "./lib/vault-store";
 
@@ -53,11 +53,13 @@ export default function ExportAccount({ accountId }: { accountId: string }) {
     );
   }
 
-  const heading = `# ${escapeMarkdown(account.issuer || account.name)}\n\n${account.issuer ? escapeMarkdown(account.name) : ""}`;
+  const heading = showText
+    ? `## ${escapeMarkdown(account.issuer || account.name)}\n\n${account.issuer ? escapeMarkdown(account.name) : ""}`
+    : `![${escapeMarkdown([account.issuer, account.name].filter(Boolean).join(" · "))}](${accountExportHeadingDataUrl(account, environment.theme)}?raycast-width=520&raycast-height=52)`;
   const body = showText
     ? `## ${t("Setup Link", "导入链接")}\n\n\`\`\`text\n${uri}\n\`\`\`\n\n## ${t("Base32 Secret", "Base32 密钥")}\n\n\`\`\`text\n${account.secret}\n\`\`\``
     : currentQr?.dataUrl
-      ? `![${t("Account QR Code", "账户二维码")}](${currentQr.dataUrl}?raycast-width=320&raycast-height=320)`
+      ? `![${t("Account QR Code", "账户二维码")}](${currentQr.dataUrl}?raycast-width=240&raycast-height=240)`
       : currentQr?.failed
         ? t(
             "QR code could not be generated. Copy the setup link or secret instead.",
