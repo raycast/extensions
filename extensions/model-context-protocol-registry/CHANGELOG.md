@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update AI Applyd MCP Server] - {PR_MERGE_DATE}
+## [Update AI Applyd MCP Server] - 2026-10-14
 
 - Update AI Applyd's description: it now submits applications on 34 hiring systems, up from 15.
 
