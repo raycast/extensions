@@ -203,3 +203,18 @@ test("retention never deletes a cached file selected as the current local input"
   assert.deepEqual(f.jobs, [input]);
   assert.equal(await fs.readFile(input, "utf8"), "selected media");
 });
+
+test("zero retention protects a cached recording selected through an external symlink", async (t) => {
+  const f = await fixture(t, { keep: "0" });
+  const directory = path.join(f.directory, "support/media/media-selected");
+  await fs.mkdir(directory, { recursive: true });
+  const target = path.join(directory, "download.mp3");
+  await fs.writeFile(target, "symlinked recording");
+  await fs.writeFile(path.join(directory, "completed.json"), JSON.stringify({ completedAt: 1 }));
+  const input = path.join(f.directory, "selected.mp3");
+  await fs.symlink(target, input);
+  await f.transcribeSource(input);
+  assert.deepEqual(f.jobs, [input]);
+  assert.equal(await fs.readFile(target, "utf8"), "symlinked recording");
+  assert.equal(await fs.readFile(input, "utf8"), "symlinked recording");
+});

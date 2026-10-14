@@ -74,3 +74,16 @@ test("job lease creates a valid marker and its stop function is idempotent", asy
   await stop();
   await stop();
 });
+
+test("canonical input protection works when the media root is itself a symlink", async (t) => {
+  const root = await fixture(t);
+  const directory = path.join(root, "media-selected");
+  await fs.mkdir(directory);
+  const input = path.join(directory, "download.mp3");
+  await fs.writeFile(input, "recording");
+  await fs.writeFile(path.join(directory, "completed.json"), JSON.stringify({ completedAt: 1 }));
+  const alias = path.join(root, "root-alias");
+  await fs.symlink(root, alias);
+  await applyRetention(alias, 0, await fs.realpath(input));
+  assert.equal(await fs.readFile(input, "utf8"), "recording");
+});

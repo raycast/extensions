@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
+import { readFile, readdir, realpath, rename, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 // A heartbeat separates a live job from a cancelled job whose Raycast process survives.
@@ -46,13 +46,17 @@ function processExists(pid: number): boolean {
 
 export async function applyRetention(root: string, keep: number, inputPath?: string): Promise<void> {
   try {
+    // Resolve both sides: macOS temp/support paths may themselves contain symlinks.
+    // If the selected input cannot be resolved, skip cleanup rather than risk its target.
+    const protectedInput = inputPath ? await realpath(inputPath) : undefined;
+    const canonicalRoot = protectedInput ? await realpath(root) : root;
     const completed: { directory: string; time: number }[] = [];
     const cutoff = Date.now() - abandonedAfterMs;
     for (const entry of await readdir(root, { withFileTypes: true })) {
       if (!entry.isDirectory() || !entry.name.startsWith("media-")) continue;
       const directory = path.join(root, entry.name);
       // A user may select a previously cached file as their local input.
-      if (inputPath && path.resolve(inputPath).startsWith(path.resolve(directory) + path.sep)) continue;
+      if (protectedInput && protectedInput.startsWith(path.join(canonicalRoot, entry.name) + path.sep)) continue;
       try {
         const marker = JSON.parse(await readFile(path.join(directory, "completed.json"), "utf8"));
         if (typeof marker?.completedAt === "number" && Number.isFinite(marker.completedAt)) {
