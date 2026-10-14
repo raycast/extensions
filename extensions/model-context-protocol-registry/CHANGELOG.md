@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update AI Applyd MCP Server] - {PR_MERGE_DATE}
+
+- Update AI Applyd's description: it now submits applications on 34 hiring systems, up from 15.
+
 ## [Add Nitrosend MCP Server] - 2026-10-14
 
 - Add Nitrosend to the official registry: compose email campaigns and automation flows, manage contacts and segments, send transactional email or SMS, and review delivery. Hosted remote Streamable HTTP server at https://api.nitrosend.com/mcp with direct HTTP connection in Raycast and OAuth sign-in.
