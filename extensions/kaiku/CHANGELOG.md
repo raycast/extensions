@@ -1,3 +1,3 @@
 # Kaiku Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-14
