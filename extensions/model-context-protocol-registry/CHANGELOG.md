@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Web3Juice MCP Server] - {PR_MERGE_DATE}
+
+- Add Web3Juice to the official registry: evidence-backed DeFi yield data. Market summaries, pool detail with base vs reward APY, 90-day history and side-by-side comparisons for ~17,000 pools. Read-only. Remote Streamable HTTP server with no sign-in for the research tools. Direct HTTP connection in Raycast at https://web3juice.com/api/mcp.
+
 ## [Add Latchkey MCP Server] - 2026-10-14
 
 - Add Latchkey to the official registry: read the CI failures its self-healing GitHub Actions runners could not repair, check run status and logs, dispatch workflows and run one-off commands on fresh ephemeral runners. Hosted Streamable HTTP server at https://latchkey.dev/mcp, connected through `mcp-remote` with a Latchkey API key as a bearer header.
