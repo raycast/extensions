@@ -59,7 +59,10 @@ function prayerStatus(slot: PrayerSlot, record: PrayerRecord | undefined, active
       ? { icon: { source: Icon.CheckCircle, tintColor: Color.Green }, subtitle: "Prayed" }
       : { icon: { source: Icon.CheckCircle, tintColor: Color.Orange }, subtitle: "Prayed late" };
   }
-  if (slot.start > now) return { icon: { source: Icon.Clock, tintColor: Color.SecondaryText }, subtitle: "" };
+  if (slot.start > now) {
+    const subtitle = slot.preferredEnd ? `Preferred until ${formatTime(slot.preferredEnd)}` : "";
+    return { icon: { source: Icon.Clock, tintColor: Color.SecondaryText }, subtitle };
+  }
   if (now >= slot.end) return { icon: { source: Icon.XMarkCircle, tintColor: Color.Red }, subtitle: "Missed" };
   if (active && slot.preferredEnd && now >= slot.preferredEnd) {
     return {
@@ -75,6 +78,13 @@ function prayerStatus(slot: PrayerSlot, record: PrayerRecord | undefined, active
     };
   }
   return { icon: { source: Icon.Circle, tintColor: Color.SecondaryText }, subtitle: "" };
+}
+
+/** Header for the current prayer's actions: when it ends, and its preferred end while that is still ahead. */
+function sectionTitle(slot: PrayerSlot, now: Date): string {
+  const preferred =
+    slot.preferredEnd && now < slot.preferredEnd ? ` · preferred until ${formatTime(slot.preferredEnd)}` : "";
+  return `${ltrName(slot.name)}${preferred} · ends ${formatTime(slot.end)}`;
 }
 
 export default function Command() {
@@ -146,12 +156,19 @@ function PrayerMenuBar({ settings }: { settings: Settings }) {
         <MenuBarExtra.Item key={warning} title={warning} icon={Icon.Warning} onAction={openExtensionPreferences} />
       ))}
       {shown && (
-        <MenuBarExtra.Section title={`${ltrName(shown.name)} · ends ${formatTime(shown.end)}`}>
+        <MenuBarExtra.Section title={sectionTitle(shown, now)}>
           <MenuBarExtra.Item
             title={`Mark ${ltrName(shown.name)} as Prayed`}
             icon={Icon.CheckCircle}
             onAction={() => run(`${ltrName(shown.name)} marked prayed`, () => setPrayed(shown, settings, true))}
           />
+          {now >= shown.late && (
+            <MenuBarExtra.Item
+              title={`Mark ${ltrName(shown.name)} as Prayed on Time`}
+              icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+              onAction={() => run(`${ltrName(shown.name)} marked on time`, () => setOnTime(shown, settings, true))}
+            />
+          )}
           {snoozeKind &&
             (settings.notify.banner || settings.notify.popup) &&
             [5, 10, 15].map((minutes) => (
@@ -181,14 +198,19 @@ function PrayerMenuBar({ settings }: { settings: Settings }) {
           const status = prayerStatus(slot, record, slot.id === current?.id, now);
           const jamaat = slot.jamaat ? ` · jamaat ${formatTime(slot.jamaat)}` : "";
           const started = slot.start <= now;
-          const ended = now >= slot.end;
+          // ⌥ marks on time: an unmarked prayer that is already late, or one recorded late.
+          const onTimeAction = started && (done ? !record?.onTime : now >= slot.late);
           return (
             <MenuBarExtra.Item
               key={slot.id}
               icon={status.icon}
               title={`${ltrName(slot.name)}  ${formatTime(slot.start)}${jamaat}`}
               subtitle={status.subtitle}
-              tooltip={started ? (done ? "Click to unmark" : "Click to mark prayed · ⌥ for on time") : undefined}
+              tooltip={
+                started
+                  ? `${done ? "Click to unmark" : "Click to mark prayed"}${onTimeAction ? " · ⌥ for on time" : ""}`
+                  : undefined
+              }
               onAction={
                 started
                   ? () =>
@@ -198,10 +220,14 @@ function PrayerMenuBar({ settings }: { settings: Settings }) {
                   : undefined
               }
               alternate={
-                started && ended && !done ? (
+                onTimeAction ? (
                   <MenuBarExtra.Item
                     icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
-                    title={`Mark ${ltrName(slot.name)} Prayed on Time`}
+                    title={
+                      done
+                        ? `Change ${ltrName(slot.name)} to Prayed on Time`
+                        : `Mark ${ltrName(slot.name)} Prayed on Time`
+                    }
                     onAction={() => run(`${ltrName(slot.name)} marked on time`, () => setOnTime(slot, settings, true))}
                   />
                 ) : undefined

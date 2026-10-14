@@ -182,7 +182,7 @@ export async function setPrayed(slot: PrayerSlot, settings: Settings, completed:
 
 /**
  * The completion time recorded when a prayer is marked on time or late after the fact.
- * On time: now if the prayer isn't late yet, else the jamaat (or start) time.
+ * On time: now if the prayer isn't late yet, else the jamaat if it was before the late boundary, else the start.
  * Late: the moment it became late (its `late` boundary), or now if that is later.
  *
  * @param slot - Prayer slot.
@@ -191,7 +191,7 @@ export async function setPrayed(slot: PrayerSlot, settings: Settings, completed:
  * @returns Completion time to store.
  */
 export function completionTimeFor(slot: PrayerSlot, onTime: boolean, now = new Date()): Date {
-  if (onTime) return now < slot.late ? now : (slot.jamaat ?? slot.start);
+  if (onTime) return now < slot.late ? now : slot.jamaat && slot.jamaat < slot.late ? slot.jamaat : slot.start;
   return now > slot.late ? now : slot.late;
 }
 

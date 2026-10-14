@@ -194,4 +194,47 @@ describe("the late boundary drives alerts, the menu bar and history", () => {
     const asr = day({ lateAt: "preferred" }).asr;
     expect(hm(completionTimeFor(asr, false, at(17, 0)))).toBe("17:52");
   });
+
+  it("records an on-time correction at the jamaat only when the jamaat was before the late boundary", () => {
+    const early = day({ lateAt: "preferred", jamaatAsr: "17:00" }).asr;
+    expect(hm(completionTimeFor(early, true, at(18, 5)))).toBe("17:00");
+    const afterPreferred = day({ lateAt: "preferred", jamaatAsr: "18:00" }).asr; // disliked time, before sunset
+    expect(hm(afterPreferred.jamaat)).toBe("18:00");
+    expect(hm(completionTimeFor(afterPreferred, true, at(18, 5)))).toBe("16:33");
+  });
+});
+
+describe("combined jamaat (dhuhr+N, maghrib+N)", () => {
+  it("Ja'fari: Asr after Dhuhr's jamaat and Isha after Maghrib's, each starting at its jamaat", () => {
+    const d = day({
+      school: "jafari",
+      jamaatDhuhr: "13:30",
+      jamaatAsr: "dhuhr+10",
+      jamaatMaghrib: "+5",
+      jamaatIsha: "maghrib+5",
+    });
+    expect([hm(d.asr.start), hm(d.asr.jamaat), hm(d.asr.end)]).toEqual(["13:40", "13:40", "18:12"]);
+    expect([hm(d.isha.start), hm(d.isha.jamaat)]).toEqual(["18:36", "18:36"]);
+    expect(hm(d.dhuhr.end)).toBe("18:12"); // Dhuhr stays valid until sunset
+  });
+
+  it("follows Dhuhr's start when Dhuhr has no jamaat", () => {
+    const d = day({ school: "jafari", jamaatDhuhr: "", jamaatAsr: "dhuhr+10" });
+    expect(d.asr.jamaat!.getTime() - d.dhuhr.start.getTime()).toBe(10 * 60_000);
+  });
+
+  it("drops a combined jamaat before the prayer's start where the times don't overlap (Sunni schools)", () => {
+    const d = day({ jamaatDhuhr: "13:30", jamaatAsr: "dhuhr+10", jamaatIsha: "maghrib+5" });
+    expect([hm(d.asr.start), d.asr.jamaat]).toEqual(["16:33", undefined]);
+    expect([hm(d.isha.start), d.isha.jamaat]).toEqual(["19:28", undefined]);
+  });
+
+  it("keeps a combined jamaat that falls after the prayer's own start", () => {
+    // Shafi'i Asr starts 15:41; Dhuhr's jamaat at 15:35 puts Asr's at 15:45.
+    expect(hm(day({ school: "shafi", jamaatDhuhr: "15:35", jamaatAsr: "dhuhr+10" }).asr.jamaat)).toBe("15:45");
+  });
+
+  it("ignores the rule on the wrong prayer", () => {
+    expect(day({ jamaatFajr: "dhuhr+10", jamaatAsr: "maghrib+5" }).asr.jamaat).toBeUndefined();
+  });
 });

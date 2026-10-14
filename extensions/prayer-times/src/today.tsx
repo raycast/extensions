@@ -94,7 +94,8 @@ function TodayList({ settings }: { settings: Settings }) {
   /** Mark/unmark and on-time/late actions for one prayer; nothing for prayers that haven't started. */
   const prayerActions = (slot: PrayerSlot, record: PrayerRecord | undefined) => {
     if (slot.start > now) return null;
-    const ended = now >= slot.end;
+    // Late by the same boundary history uses (the preferred end when Counts as Late After is Preferred).
+    const ended = now >= slot.late;
     if (record?.completed) {
       return (
         <>
