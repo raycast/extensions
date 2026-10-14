@@ -278,7 +278,7 @@ const AGENT_REGISTRY: AgentRegistry = {
     icon: "cursor-icon.svg",
     description: "Cursor AI Code Editor",
     isSupported: true,
-    settingsUrl: "https://grok.com/dashboard/usage",
+    settingsUrl: "https://cursor.com/dashboard?tab=usage",
     useUsage: useCursorUsage,
     renderDetail: renderCursorDetail,
     getAccessory: getCursorAccessory,
