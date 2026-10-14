@@ -1,5 +1,10 @@
 # Agent Usage Changelog
 
+## [Cursor sign-in on Windows] - {PR_MERGE_DATE}
+
+- Auto-detect active Cursor authentication from the Windows state database, with `%APPDATA%\Cursor\auth.json` as a fallback
+- Update the Open Cursor Settings destination to `https://grok.com/dashboard/usage`
+
 ## [Add Raycast AI credits] - 2026-10-05
 
 ### New Features
