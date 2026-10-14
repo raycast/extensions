@@ -12,7 +12,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createArticleDetailMarkdown } from "./article-detail";
 import { ArticleCopyActions } from "./article-copy-actions";
 import {
@@ -246,28 +246,41 @@ function RelatedArticleDetail({
   translations: Strings;
 }) {
   const [currentArticle, setCurrentArticle] = useState(article);
+  const statusUpdatePending = useRef(false);
+  const confirmedReadStatus = useRef(article.isRead);
+  const confirmedFavoriteStatus = useRef(article.isFavorite);
 
   async function updateReadStatus(isRead: boolean) {
-    const previousStatus = currentArticle.isRead;
-    setCurrentArticle({ ...currentArticle, isRead });
+    if (statusUpdatePending.current) return;
+
+    statusUpdatePending.current = true;
+    setCurrentArticle((latestArticle) => ({ ...latestArticle, isRead }));
 
     try {
       await onReadStatusChange(currentArticle, isRead);
+      confirmedReadStatus.current = isRead;
     } catch (error) {
-      setCurrentArticle((latestArticle) => ({ ...latestArticle, isRead: previousStatus }));
+      setCurrentArticle((latestArticle) => ({ ...latestArticle, isRead: confirmedReadStatus.current }));
       await showFailureToast(error, { title: translations.readStatusUpdateFailed });
+    } finally {
+      statusUpdatePending.current = false;
     }
   }
 
   async function updateFavoriteStatus(isFavorite: boolean) {
-    const previousStatus = currentArticle.isFavorite;
-    setCurrentArticle({ ...currentArticle, isFavorite });
+    if (statusUpdatePending.current) return;
+
+    statusUpdatePending.current = true;
+    setCurrentArticle((latestArticle) => ({ ...latestArticle, isFavorite }));
 
     try {
       await onFavoriteStatusChange(currentArticle, isFavorite);
+      confirmedFavoriteStatus.current = isFavorite;
     } catch (error) {
-      setCurrentArticle((latestArticle) => ({ ...latestArticle, isFavorite: previousStatus }));
+      setCurrentArticle((latestArticle) => ({ ...latestArticle, isFavorite: confirmedFavoriteStatus.current }));
       await showFailureToast(error, { title: translations.archiveUpdateFailed });
+    } finally {
+      statusUpdatePending.current = false;
     }
   }
 
