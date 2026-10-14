@@ -1,6 +1,6 @@
 # Command Code AI Changelog
 
-## [Fix Model Errors] - {PR_MERGE_DATE}
+## [Fix Model Errors] - 2026-10-14
 
 - Fix DeepSeek and other models failing when reasoning effort is set to "none"
 - Show errors that can't be retried, such as a model outside your plan, in the chat instead of retrying silently
