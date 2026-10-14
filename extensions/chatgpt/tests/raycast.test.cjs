@@ -779,6 +779,42 @@ test("Ask and Full Text Input list only base models and submit the selected base
   assert.equal(api.requests[0].messages[0].content, writer.prompt);
 });
 
+test("Ask renders streamed chunks before DONE and preserves the completed answer", native, async (t) => {
+  let response;
+  let requestBody;
+  const chunk = (content) => `data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`;
+  const server = http.createServer(async (req, res) => {
+    let text = "";
+    for await (const part of req) text += part;
+    requestBody = JSON.parse(text);
+    response = res;
+    res.writeHead(200, { "Content-Type": "text/event-stream" });
+    res.write(chunk("Streamed"));
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => {
+    server.closeAllConnections();
+    return new Promise((resolve) => server.close(resolve));
+  });
+  const app = await launch("ask", fixture, {
+    useStream: true,
+    useApiEndpoint: true,
+    apiEndpoint: `http://127.0.0.1:${server.address().port}/v1`,
+  });
+  t.after(app.close);
+  await app.waitFor(page("Ask"));
+  await action(app, "Full Text Input");
+  await app.waitFor((tree) => body(tree).kind === "Form" && field(tree, "question"));
+  await change(app, "question", "A streamed question");
+  await submit(app, "Submit");
+  await app.waitFor((tree) => body(tree).detail?.markdown?.includes("Streamed") && body(tree).isLoading);
+  assert.equal(requestBody.stream, true);
+  response.write(chunk(" answer"));
+  await app.waitFor((tree) => body(tree).detail?.markdown?.includes("Streamed answer") && body(tree).isLoading);
+  response.end('data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n');
+  await app.waitFor((tree) => body(tree).detail?.markdown?.includes("Streamed answer") && !body(tree).isLoading);
+});
+
 test("Ask without an explicit preset restores the last model across separate command launches", native, async (t) => {
   const support = cacheDirectory(t);
   const savedStorage = await rememberWriter(support);
