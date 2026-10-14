@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Nitrosend MCP Server] - {PR_MERGE_DATE}
+## [Add Nitrosend MCP Server] - 2026-10-14
 
 - Add Nitrosend to the official registry: compose email campaigns and automation flows, manage contacts and segments, send transactional email or SMS, and review delivery. Hosted remote Streamable HTTP server at https://api.nitrosend.com/mcp with direct HTTP connection in Raycast and OAuth sign-in.
 
