@@ -34,7 +34,7 @@ The extension sends the **whole local file path in one request** to FluidVoice. 
 
 Web media is downloaded to the extension's private support folder. HTML/player pages and manifests use yt-dlp, with playlists disabled. Authenticated/cookie-based downloads are not configured. Only download media you are entitled to access.
 
-**Downloaded Files to Keep** defaults to 5 completed jobs. Set it to 0 to remove temporary media after transcription. Original input files are never deleted. Failed jobs are cleaned up, and active jobs are excluded from pruning. Keep the Raycast command open during processing; closing it may interrupt transcription.
+**Downloaded Files to Keep** defaults to 5 completed jobs. Set it to 0 to remove temporary media after transcription. Original input files are never deleted. Retention is applied on every transcription run, including local files and a limit of 0. Live jobs carry a process/heartbeat lease and are excluded from cleanup. Jobs whose process has exited are recovered on the next run; expired leases and unmarked legacy folders are recovered after a 24-hour grace period. Failed jobs are cleaned up. A cached file selected as the current local input is protected. Keep the Raycast command open during processing; closing it may interrupt transcription.
 
 ## Troubleshooting
 

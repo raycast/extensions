@@ -41,10 +41,6 @@ function localRequest(
   });
 }
 
-interface Preferences {
-  fluidVoicePort?: string;
-}
-
 export interface HealthResponse {
   status: "ok";
   version: string;

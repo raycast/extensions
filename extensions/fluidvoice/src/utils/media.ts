@@ -1,7 +1,7 @@
 import { environment, getPreferenceValues } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { createWriteStream } from "node:fs";
-import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, stat, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { Readable } from "node:stream";
@@ -9,6 +9,7 @@ import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { FluidVoiceAPI } from "../api/fluidVoice";
+import { applyRetention, startJobLease } from "./retention";
 
 const run = promisify(execFile);
 const processEnvironment = {
@@ -36,18 +37,22 @@ export function normalizeSource(value: string): string {
 
 export async function transcribeSource(value: string, progress: (message: string) => void = () => {}) {
   const source = normalizeSource(value);
-  const { retainedDownloads = "5" } = getPreferenceValues<{ retainedDownloads?: string }>();
+  const { retainedDownloads = "5" } = getPreferenceValues<Preferences>();
   if (!/^\d+$/.test(retainedDownloads)) throw new Error("Downloaded Files to Keep must be a nonnegative integer.");
   const keep = Number(retainedDownloads);
   if (!Number.isSafeInteger(keep)) throw new Error("Downloaded Files to Keep is too large.");
+  const root = path.join(environment.supportPath, "media");
+  const inputPath = /^https?:\/\//i.test(source) ? undefined : source;
+  await applyRetention(root, keep, inputPath);
   progress("Checking FluidVoice connection");
   await FluidVoiceAPI.health();
-  const root = path.join(environment.supportPath, "media");
   let workDirectory: string | undefined;
+  let stopLease: (() => Promise<void>) | undefined;
   const getWorkDirectory = async () => {
     if (!workDirectory) {
       await mkdir(root, { recursive: true });
       workDirectory = await mkdtemp(path.join(root, "media-"));
+      stopLease = await startJobLease(workDirectory);
     }
     return workDirectory;
   };
@@ -80,40 +85,29 @@ export async function transcribeSource(value: string, progress: (message: string
     }
     progress("Transcribing with FluidVoice; this can take several minutes");
     const result = await FluidVoiceAPI.transcribeFile(audioPath);
-    if (workDirectory && keep > 0) {
+    if (stopLease) await stopLease();
+    if (workDirectory) {
       try {
         await writeFile(
           path.join(workDirectory, "completed.json"),
           JSON.stringify({ source, completedAt: Date.now() }),
         );
-        // Prune only completed directories created by this extension; active jobs are excluded.
-        const completed: { directory: string; time: number }[] = [];
-        for (const entry of await readdir(root, { withFileTypes: true })) {
-          if (!entry.isDirectory() || !entry.name.startsWith("media-")) continue;
-          const directory = path.join(root, entry.name);
-          try {
-            const marker = JSON.parse(await readFile(path.join(directory, "completed.json"), "utf8")) as {
-              completedAt: number;
-            };
-            if (Number.isFinite(marker.completedAt)) completed.push({ directory, time: marker.completedAt });
-          } catch {
-            /* Active downloads have no completion marker. */
-          }
-        }
-        completed.sort((a, b) => b.time - a.time);
-        for (const entry of completed.slice(keep)) await rm(entry.directory, { recursive: true, force: true });
       } catch (error) {
-        console.warn("Could not apply media download retention:", error);
+        console.warn("Could not mark completed media:", error);
+        await cleanupWorkDirectory(workDirectory);
       }
     }
+    await applyRetention(root, keep, inputPath);
     return result;
   } catch (error) {
+    if (stopLease) await stopLease();
     if (workDirectory) await cleanupWorkDirectory(workDirectory);
     const message = error instanceof Error ? error.message : String(error);
     if (message.includes("ENOENT") && /ffmpeg|ffprobe|yt-dlp/.test(message))
       throw new Error("Install the media tools with: brew install ffmpeg yt-dlp");
     throw error;
   } finally {
+    if (stopLease) await stopLease();
     if (workDirectory && keep === 0) await cleanupWorkDirectory(workDirectory);
   }
 }

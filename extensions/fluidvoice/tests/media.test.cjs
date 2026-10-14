@@ -14,6 +14,7 @@ async function fixture(t, options = {}) {
   const jobs = [];
   const result = { text: "first middle last", confidence: 0.9, sampleCount: 64000000, provider: "test" };
   const { transcribeSource, normalizeSource } = load("utils/media.ts", {
+    "./retention": load("utils/retention.ts"),
     "@raycast/api": {
       environment: { supportPath: path.join(directory, "support") },
       getPreferenceValues: () => ({ retainedDownloads: options.keep ?? "0" }),
@@ -173,4 +174,32 @@ test("missing media tools and absent audio produce actionable errors", async (t)
   await assert.rejects(missing.transcribeSource(missing.input), /brew install ffmpeg yt-dlp/);
   const silent = await fixture(t, { noAudio: true });
   await assert.rejects(silent.transcribeSource(silent.input), /no audio track/);
+});
+
+for (const keep of ["0", "1"]) {
+  test(`lowering retention to ${keep} prunes previous downloads on a compatible local-file run`, async (t) => {
+    const f = await fixture(t, { keep });
+    const media = path.join(f.directory, "support/media");
+    for (let index = 0; index < 3; index++) {
+      const directory = path.join(media, `media-old-${index}`);
+      await fs.mkdir(directory, { recursive: true });
+      await fs.writeFile(path.join(directory, "completed.json"), JSON.stringify({ completedAt: index + 1 }));
+    }
+    await f.transcribeSource(f.input);
+    assert.deepEqual(await fs.readdir(media), keep === "0" ? [] : ["media-old-2"]);
+    assert.deepEqual(f.jobs, [f.input]);
+    assert.equal(await fs.readFile(f.input, "utf8"), "entire original media");
+  });
+}
+
+test("retention never deletes a cached file selected as the current local input", async (t) => {
+  const f = await fixture(t, { keep: "0" });
+  const directory = path.join(f.directory, "support/media/media-selected");
+  await fs.mkdir(directory, { recursive: true });
+  const input = path.join(directory, "download.mp3");
+  await fs.writeFile(input, "selected media");
+  await fs.writeFile(path.join(directory, "completed.json"), JSON.stringify({ completedAt: 1 }));
+  await f.transcribeSource(input);
+  assert.deepEqual(f.jobs, [input]);
+  assert.equal(await fs.readFile(input, "utf8"), "selected media");
 });

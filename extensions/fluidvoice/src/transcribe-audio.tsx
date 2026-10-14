@@ -15,7 +15,7 @@ import {
 import { useEffect, useState } from "react";
 import { transcribeSource, normalizeSource } from "./utils/media";
 
-export default function Command(props: LaunchProps<{ arguments: { source?: string } }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.TranscribeAudio }>) {
   const [source, setSource] = useState(props.arguments.source ?? "");
   const [file, setFile] = useState<string[]>([]);
   const { push, pop } = useNavigation();
