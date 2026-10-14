@@ -182,6 +182,10 @@ export default function Command() {
   // instead would not tell our own copy from the user's, and would re-mask
   // the masked text when ⌘V is pressed out of habit.
   const lastCopied = useRef<string | null>(null);
+  // Copies are queued one after another, so the newest result is written
+  // last. Each is a separate process, and one started earlier can finish
+  // later; the clipboard would then hold a result the user had moved on from.
+  const copies = useRef<Promise<unknown>>(Promise.resolve());
 
   /** Starts over on `text`, as if the command had been opened with it. */
   function start(text: string) {
@@ -192,6 +196,10 @@ export default function Command() {
     setFailure(null);
     setNameScanFailed(null);
     setWaitingForModel(text.trim().length > 0);
+    // Forgotten with the text it was made from: the next text's result can be
+    // the same string, and the clipboard would then be left holding the next
+    // text unmasked.
+    lastCopied.current = null;
   }
 
   useEffect(() => {
@@ -339,7 +347,8 @@ export default function Command() {
   useEffect(() => {
     if (!ready || nameScanFailed || maskedText === lastCopied.current) return;
     lastCopied.current = maskedText;
-    copyQuietly(maskedText)
+    copies.current = copies.current
+      .then(() => copyQuietly(maskedText))
       .then(() =>
         showToast({
           style: Toast.Style.Success,
