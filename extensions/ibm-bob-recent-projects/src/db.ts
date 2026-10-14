@@ -3,6 +3,7 @@ import { useSQL } from "@raycast/utils";
 import fs from "fs";
 import { homedir } from "os";
 import path from "path";
+import { getBobAppName, getBobProductJSONPaths } from "./lib/bob";
 import { EntryLike, RecentEntries } from "./types";
 import { isSameEntry } from "./utils";
 import { execFilePromise } from "./utils/exec";
@@ -83,7 +84,8 @@ function getPath() {
   if (sharedPath && fs.existsSync(sharedPath)) {
     return sharedPath;
   }
-  return path.join(homedir(), "Library", "Application Support", "IBM Bob", "User", "globalStorage", "state.vscdb");
+  const appName = getBobAppName();
+  return path.join(homedir(), "Library", "Application Support", appName, "User", "globalStorage", "state.vscdb");
 }
 
 function getSharedStateDatabasePath(): string | undefined {
@@ -94,11 +96,7 @@ function getSharedStateDatabasePath(): string | undefined {
 }
 
 function getSharedDataFolderName(): string | undefined {
-  const candidates = [
-    "/Applications/IBM Bob.app/Contents/Resources/app/product.json",
-    path.join(homedir(), "Applications", "IBM Bob.app", "Contents", "Resources", "app", "product.json"),
-  ];
-  for (const productJSONPath of candidates) {
+  for (const productJSONPath of getBobProductJSONPaths()) {
     if (fs.existsSync(productJSONPath)) {
       try {
         const productJSON = JSON.parse(fs.readFileSync(productJSONPath, "utf-8")) as { sharedDataFolderName?: string };

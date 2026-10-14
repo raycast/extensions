@@ -1,8 +1,10 @@
 import * as child_process from "child_process";
+import * as fs from "fs";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
 import { fileExists } from "../utils";
+import { build } from "../preferences";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
@@ -65,8 +67,42 @@ function getNLSVariable(text: string | undefined): string | undefined {
   }
 }
 
+const buildConfigs: Record<string, { appName: string; cliName: string; appFileName: string }> = {
+  "IBM Bob": {
+    appName: "IBM Bob",
+    cliName: "bobide",
+    appFileName: "IBM Bob.app",
+  },
+  "IBM Bob - Insiders": {
+    appName: "IBM Bob - Insiders",
+    cliName: "bobide-insiders",
+    appFileName: "IBM Bob - Insiders.app",
+  },
+};
+
+export function getBuildConfig() {
+  return buildConfigs[build] ?? buildConfigs["IBM Bob"];
+}
+
+export function getBobAppName(): string {
+  return getBuildConfig().appName;
+}
+
+export function getBobProductJSONPaths(): string[] {
+  const { appFileName } = getBuildConfig();
+  return [
+    `/Applications/${appFileName}/Contents/Resources/app/product.json`,
+    path.join(os.homedir(), "Applications", appFileName, "Contents", "Resources", "app", "product.json"),
+  ];
+}
+
 export function getBobCLIFilename(): string {
-  return "/Applications/IBM Bob.app/Contents/Resources/app/bin/bobide";
+  const { appFileName, cliName } = getBuildConfig();
+  const candidates = [
+    `/Applications/${appFileName}/Contents/Resources/app/bin/${cliName}`,
+    path.join(os.homedir(), "Applications", appFileName, "Contents", "Resources", "app", "bin", cliName),
+  ];
+  return candidates.find((p) => fs.existsSync(p)) ?? candidates[0];
 }
 
 export class BobCLI {
