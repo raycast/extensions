@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "modelflare",
+  "title": "Modelflare",
+  "description": "Ask any text model and generate images with one Modelflare Smart API Key for every model available to your account.",
+  "icon": "icon.png",
+  "author": "modelflare",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask",
+      "title": "Ask Modelflare",
+      "description": "Ask a question to any text model your Modelflare key can call.",
+      "mode": "view"
+    },
+    {
+      "name": "generate-image",
+      "title": "Generate Image",
+      "description": "Generate an image with any image model your Modelflare key can call.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Modelflare Smart API Key",
+      "description": "One Smart API Key calls every model available to your account. Create one at https://modelflare.dev/keys."
+    },
+    {
+      "name": "baseUrl",
+      "type": "dropdown",
+      "required": false,
+      "title": "Base URL",
+      "description": "Global (default) or China endpoint.",
+      "default": "global",
+      "data": [
+        {
+          "title": "Global (https://modelflare.dev/v1)",
+          "value": "global"
+        },
+        {
+          "title": "China (https://origin.modelflare.dev/v1)",
+          "value": "china"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "2.7.3",
+    "@raycast/utils": "2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "25.9.1",
+    "@types/react": "19.3.0",
+    "eslint": "10.12.0",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3"
+  }
+}
