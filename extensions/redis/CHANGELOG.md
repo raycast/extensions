@@ -1,6 +1,6 @@
 # redis Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-10-14
 
 - Fix stale search results and loading state
 - Cancel searches when closing the command
