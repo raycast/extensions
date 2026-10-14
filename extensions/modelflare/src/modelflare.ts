@@ -1,15 +1,14 @@
 import { getPreferenceValues } from "@raycast/api";
 
-import { ModelDirectory, ModelflareClient, describeError, isModelflareError, type ModelKind } from "./core/index.js";
+import type { ModelKind } from "./core/classify.js";
+import { ModelflareClient } from "./core/client.js";
+import { isModelflareError } from "./core/errors.js";
+import { describeErrorEn } from "./core/messages-en.js";
+import { ModelDirectory } from "./core/models.js";
 
 // Raycast store extensions have no package version; bump this with every
 // store update so usage logs can tell releases apart.
 const VERSION = "0.1.0";
-
-interface Preferences {
-  apiKey: string;
-  baseUrl?: string;
-}
 
 export const UTM_SOURCE = "raycast";
 
@@ -43,8 +42,7 @@ export async function explain(error: unknown, modelId?: string): Promise<string>
       .directory.isListed(modelId)
       .catch(() => undefined);
   }
-  return describeError(error, {
-    locale: "en",
+  return describeErrorEn(error, {
     utmSource: UTM_SOURCE,
     ...(modelListed !== undefined ? { modelListed } : {}),
   });

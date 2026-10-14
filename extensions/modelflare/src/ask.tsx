@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail, Form, Icon, showToast, Toast, useNavigatio
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
-import { streamChatCompletion } from "./core/index.js";
+import { streamChatCompletion } from "./core/chat.js";
 import { explain, modelflare, modelIds } from "./modelflare";
 
 function Answer(props: { model: string; prompt: string }) {

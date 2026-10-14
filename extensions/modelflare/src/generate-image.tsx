@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -5,7 +6,7 @@ import path from "node:path";
 import { Action, ActionPanel, Detail, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-import { generateImage } from "./core/index.js";
+import { generateImage } from "./core/images.js";
 import { explain, modelflare } from "./modelflare";
 
 const EXTENSIONS: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
@@ -14,12 +15,34 @@ async function save(modelId: string, data: Uint8Array, mimeType: string): Promis
   const directory = path.join(os.homedir(), "Downloads", "Modelflare");
   await mkdir(directory, { recursive: true });
   const stamp = new Date().toISOString().replace(/[:.]/gu, "-");
+  const suffix = randomUUID().slice(0, 8);
   const file = path.join(
     directory,
-    `${modelId.replace(/[^a-zA-Z0-9._-]+/gu, "-")}-${stamp}.${EXTENSIONS[mimeType] ?? "png"}`,
+    `${modelId.replace(/[^a-zA-Z0-9._-]+/gu, "-")}-${stamp}-${suffix}.${EXTENSIONS[mimeType] ?? "png"}`,
   );
-  await writeFile(file, data);
+  // "wx" fails instead of overwriting if the name ever repeats.
+  await writeFile(file, data, { flag: "wx" });
   return file;
+}
+
+async function download(url: string): Promise<{ data: Uint8Array; mimeType: string }> {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Downloading the generated image failed with HTTP ${response.status}.`);
+  return {
+    data: new Uint8Array(await response.arrayBuffer()),
+    mimeType: response.headers.get("content-type")?.split(";")[0]?.trim() ?? "image/png",
+  };
+}
+
+function parseParameters(text: string): Record<string, unknown> | undefined {
+  if (!text.trim()) return {};
+  try {
+    const value: unknown = JSON.parse(text);
+    if (value !== null && typeof value === "object" && !Array.isArray(value)) return value as Record<string, unknown>;
+  } catch {
+    // Reported below like any other value that is not a JSON object.
+  }
+  return undefined;
 }
 
 function Result(props: { files: string[] }) {
@@ -54,14 +77,10 @@ export default function Command() {
   async function submit(values: { model: string; prompt: string; parameters: string }) {
     const model = models.find((candidate) => candidate.id === values.model);
     if (!model || !values.prompt.trim()) return;
-    let parameters: Record<string, unknown> = {};
-    if (values.parameters.trim()) {
-      try {
-        parameters = JSON.parse(values.parameters) as Record<string, unknown>;
-      } catch {
-        await showToast({ style: Toast.Style.Failure, title: "Parameters must be a JSON object" });
-        return;
-      }
+    const parameters = parseParameters(values.parameters);
+    if (!parameters) {
+      await showToast({ style: Toast.Style.Failure, title: "Parameters must be a JSON object" });
+      return;
     }
     const toast = await showToast({ style: Toast.Style.Animated, title: "Generating image…" });
     try {
@@ -72,14 +91,8 @@ export default function Command() {
           files.push(await save(model.id, Buffer.from(image.base64, "base64"), image.mimeType ?? "image/png"));
         } else if (image.url) {
           // Result URLs expire, so keep a local copy right away.
-          const response = await fetch(image.url);
-          files.push(
-            await save(
-              model.id,
-              new Uint8Array(await response.arrayBuffer()),
-              response.headers.get("content-type") ?? "image/png",
-            ),
-          );
+          const { data, mimeType } = await download(image.url);
+          files.push(await save(model.id, data, mimeType));
         }
       }
       toast.style = Toast.Style.Success;

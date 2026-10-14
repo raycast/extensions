@@ -1,5 +1,4 @@
 import type { ModelflareClient } from './client.js'
-import { DOCS_URL } from './config.js'
 import { ModelflareError } from './errors.js'
 import type { ClassifiedModel } from './models.js'
 
@@ -8,7 +7,7 @@ export interface ImageCall {
   prompt: string
   /**
    * Model-specific request fields, sent unchanged. The exact contract for each
-   * model is on its docs page; see {@link modelDocsUrl}.
+   * model is on its docs page (`modelDocsUrl` in `docs.ts`).
    */
   parameters?: Record<string, unknown>
   /** Use the edits route for models on the OpenAI-compatible Images API. */
@@ -21,13 +20,6 @@ export interface GeneratedImage {
   base64?: string
   mimeType?: string
   revisedPrompt?: string
-}
-
-/** Docs page with the request contract of a media model. */
-export function modelDocsUrl(model: ClassifiedModel, locale: 'en' | 'zh' = 'en'): string {
-  const slug = model.id.toLowerCase().replaceAll('.', '-')
-  const kind = model.kind === 'video' ? 'video' : 'image'
-  return `${DOCS_URL}${locale === 'zh' ? '/zh' : ''}/models/${kind}/${slug}/`
 }
 
 interface OpenAIImagesResponse {

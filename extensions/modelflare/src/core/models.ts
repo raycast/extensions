@@ -23,19 +23,31 @@ export async function listModels(client: ModelflareClient, signal?: AbortSignal)
   return Array.isArray(body.data) ? body.data : []
 }
 
+// The catalog only refines classification and is always read from the global
+// host, which China-entry users may reach slowly. It must not hold up the
+// key's own model list, so its request has its own deadline.
+const CATALOG_TIMEOUT_MS = 8_000
+
 /**
  * Public catalog from `GET https://modelflare.dev/api/pricing`. It needs no key
  * and is only served on the global host.
  */
 export async function fetchCatalog(fetchImpl: typeof fetch = fetch, signal?: AbortSignal): Promise<CatalogEntry[]> {
+  const deadline = AbortSignal.timeout(CATALOG_TIMEOUT_MS)
+  const requestSignal = signal ? AbortSignal.any([signal, deadline]) : deadline
   let response: Response
+  let body: { success?: boolean; data?: CatalogEntry[] }
   try {
-    response = await fetchImpl(CATALOG_URL, { method: 'GET', ...(signal ? { signal } : {}) })
+    response = await fetchImpl(CATALOG_URL, { method: 'GET', signal: requestSignal })
+    if (!response.ok) throw await errorFromResponse(response)
+    body = (await response.json()) as { success?: boolean; data?: CatalogEntry[] }
   } catch (error) {
-    throw new ModelflareError({ kind: 'network', message: 'Could not reach the Modelflare catalog' }, { cause: error })
+    if (error instanceof ModelflareError) throw error
+    throw new ModelflareError(
+      { kind: deadline.aborted ? 'timeout' : 'network', message: 'Could not reach the Modelflare catalog' },
+      { cause: error },
+    )
   }
-  if (!response.ok) throw await errorFromResponse(response)
-  const body = (await response.json()) as { success?: boolean; data?: CatalogEntry[] }
   if (body.success === false || !Array.isArray(body.data)) {
     throw new ModelflareError({ kind: 'upstream', message: 'The Modelflare catalog is unavailable', status: response.status })
   }
