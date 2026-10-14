@@ -1,6 +1,6 @@
 # time Changelog
 
-## [Fix Timer Cleanup] - {PR_MERGE_DATE}
+## [Fix Timer Cleanup] - 2026-10-14
 
 - Fix accumulating timers by clearing the interval when the command closes
 - Display the current time immediately when the command opens
