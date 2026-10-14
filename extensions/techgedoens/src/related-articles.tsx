@@ -1,5 +1,18 @@
-import { Action, ActionPanel, Color, Detail, Icon, Image, Keyboard, List, open, useNavigation } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  getPreferenceValues,
+  Icon,
+  Image,
+  Keyboard,
+  List,
+  open,
+  useNavigation,
+} from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 import { createArticleDetailMarkdown } from "./article-detail";
 import { ArticleCopyActions } from "./article-copy-actions";
 import {
@@ -15,6 +28,7 @@ import { translateCategory, type Strings } from "./strings";
 
 const LIVE_RELATED_CANDIDATE_LIMIT = 45;
 const LIVE_RELATED_SEARCH_OPTIONS = { maxPages: 1, maxQueries: 3 } as const;
+type ArticleEnterAction = "browser" | "reader";
 
 export function FindRelatedArticlesAction({ article, translations }: { article: Article; translations: Strings }) {
   return (
@@ -27,6 +41,8 @@ export function FindRelatedArticlesAction({ article, translations }: { article: 
 }
 
 function RelatedArticles({ sourceArticle, translations }: { sourceArticle: Article; translations: Strings }) {
+  const preferences = getPreferenceValues<Preferences>();
+  const enterAction: ArticleEnterAction = preferences.articleEnterAction === "browser" ? "browser" : "reader";
   const dateFormatter = new Intl.DateTimeFormat(translations.locale, { dateStyle: "medium" });
   const detailDateFormatter = new Intl.DateTimeFormat(translations.locale, {
     dateStyle: "long",
@@ -89,6 +105,7 @@ function RelatedArticles({ sourceArticle, translations }: { sourceArticle: Artic
             article={article}
             dateFormatter={dateFormatter}
             detailDateFormatter={detailDateFormatter}
+            enterAction={enterAction}
             onFavoriteStatusChange={updateFavoriteStatus}
             onReadStatusChange={updateReadStatus}
             translations={translations}
@@ -125,6 +142,7 @@ function RelatedArticleItem({
   article,
   dateFormatter,
   detailDateFormatter,
+  enterAction,
   onFavoriteStatusChange,
   onReadStatusChange,
   translations,
@@ -132,6 +150,7 @@ function RelatedArticleItem({
   article: ArchivedArticle;
   dateFormatter: Intl.DateTimeFormat;
   detailDateFormatter: Intl.DateTimeFormat;
+  enterAction: ArticleEnterAction;
   onFavoriteStatusChange: (article: ArchivedArticle, isFavorite: boolean) => Promise<void>;
   onReadStatusChange: (article: ArchivedArticle, isRead: boolean) => Promise<void>;
   translations: Strings;
@@ -181,8 +200,16 @@ function RelatedArticleItem({
       accessories={accessories}
       actions={
         <ActionPanel title={article.title}>
-          <Action title={translations.showArticle} icon={Icon.Document} onAction={showArticle} />
-          <Action title={translations.openInBrowser} icon={Icon.Globe} onAction={openInBrowser} />
+          {enterAction === "browser" ? (
+            <Action title={translations.openInBrowser} icon={Icon.Globe} onAction={openInBrowser} />
+          ) : (
+            <Action title={translations.showArticle} icon={Icon.Document} onAction={showArticle} />
+          )}
+          {enterAction === "browser" ? (
+            <Action title={translations.showArticle} icon={Icon.Document} onAction={showArticle} />
+          ) : (
+            <Action title={translations.openInBrowser} icon={Icon.Globe} onAction={openInBrowser} />
+          )}
           <Action
             title={article.isRead ? translations.markUnread : translations.markRead}
             icon={article.isRead ? Icon.EyeDisabled : Icon.Eye}
@@ -218,30 +245,56 @@ function RelatedArticleDetail({
   onReadStatusChange: (article: ArchivedArticle, isRead: boolean) => Promise<void>;
   translations: Strings;
 }) {
+  const [currentArticle, setCurrentArticle] = useState(article);
+
+  async function updateReadStatus(isRead: boolean) {
+    const previousStatus = currentArticle.isRead;
+    setCurrentArticle({ ...currentArticle, isRead });
+
+    try {
+      await onReadStatusChange(currentArticle, isRead);
+    } catch (error) {
+      setCurrentArticle((latestArticle) => ({ ...latestArticle, isRead: previousStatus }));
+      await showFailureToast(error, { title: translations.readStatusUpdateFailed });
+    }
+  }
+
+  async function updateFavoriteStatus(isFavorite: boolean) {
+    const previousStatus = currentArticle.isFavorite;
+    setCurrentArticle({ ...currentArticle, isFavorite });
+
+    try {
+      await onFavoriteStatusChange(currentArticle, isFavorite);
+    } catch (error) {
+      setCurrentArticle((latestArticle) => ({ ...latestArticle, isFavorite: previousStatus }));
+      await showFailureToast(error, { title: translations.archiveUpdateFailed });
+    }
+  }
+
   return (
     <Detail
-      navigationTitle={article.title}
-      markdown={createArticleDetailMarkdown(article, dateFormatter, translations)}
+      navigationTitle={currentArticle.title}
+      markdown={createArticleDetailMarkdown(currentArticle, dateFormatter, translations)}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title={translations.openInBrowser} url={article.url} />
-          <FindRelatedArticlesAction article={article} translations={translations} />
+          <Action.OpenInBrowser title={translations.openInBrowser} url={currentArticle.url} />
+          <FindRelatedArticlesAction article={currentArticle} translations={translations} />
           <Action
-            title={article.isRead ? translations.markUnread : translations.markRead}
-            icon={article.isRead ? Icon.EyeDisabled : Icon.Eye}
+            title={currentArticle.isRead ? translations.markUnread : translations.markRead}
+            icon={currentArticle.isRead ? Icon.EyeDisabled : Icon.Eye}
             shortcut={{
               macOS: { modifiers: ["cmd", "shift"], key: "u" },
               Windows: { modifiers: ["ctrl", "shift"], key: "u" },
             }}
-            onAction={() => onReadStatusChange(article, !article.isRead)}
+            onAction={() => updateReadStatus(!currentArticle.isRead)}
           />
           <Action
-            title={article.isFavorite ? translations.removeReadLater : translations.saveForLater}
-            icon={article.isFavorite ? Icon.StarDisabled : Icon.Star}
+            title={currentArticle.isFavorite ? translations.removeReadLater : translations.saveForLater}
+            icon={currentArticle.isFavorite ? Icon.StarDisabled : Icon.Star}
             shortcut={Keyboard.Shortcut.Common.Pin}
-            onAction={() => onFavoriteStatusChange(article, !article.isFavorite)}
+            onAction={() => updateFavoriteStatus(!currentArticle.isFavorite)}
           />
-          <ArticleCopyActions article={article} translations={translations} />
+          <ArticleCopyActions article={currentArticle} translations={translations} />
         </ActionPanel>
       }
     />

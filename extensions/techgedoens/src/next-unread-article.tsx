@@ -53,10 +53,10 @@ export default function NextUnreadArticleCommand() {
   const hasMarkedReaderArticle = useRef(false);
 
   useEffect(() => {
-    if (articles && article === undefined) {
+    if (!isLoading && articles && article === undefined) {
       setArticle(findNextUnreadArticle(articles, order) ?? null);
     }
-  }, [article, articles, order]);
+  }, [article, articles, isLoading, order]);
 
   useEffect(() => {
     if (!article || enterAction !== "reader" || hasMarkedReaderArticle.current) {
