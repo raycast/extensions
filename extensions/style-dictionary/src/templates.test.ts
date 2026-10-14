@@ -21,3 +21,9 @@ test("a group template does not apply to the group itself or siblings", () => {
   assert.deepEqual(renderTemplates(templates, { path: ["color", "brand"], value: "" }), []);
   assert.deepEqual(renderTemplates(templates, { path: ["color", "brandX", "1"], value: "" }), []);
 });
+
+test("names with leading, trailing, or doubled separators", () => {
+  const templates = parseTemplates("{camel-name} {kebab-name}");
+  assert.deepEqual(renderTemplates(templates, { path: ["sizing", "--na"], value: "0" }), ["sizingNa sizing-na"]);
+  assert.deepEqual(renderTemplates(templates, { path: ["body-", "_x"], value: "" }), ["bodyX body-x"]);
+});

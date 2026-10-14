@@ -19,7 +19,10 @@ export function renderTemplates(templates: Template[], token: Pick<Token, "path"
     .sort((a, b) => b.scope.length - a.scope.length)
     .map((t) => {
       const name = token.path.slice(t.scope.length);
-      const words = name.flatMap((p) => p.split(/[\s_-]+|(?<=[a-z0-9])(?=[A-Z])/)).map((w) => w.toLowerCase());
+      const words = name
+        .flatMap((p) => p.split(/[\s_-]+|(?<=[a-z0-9])(?=[A-Z])/))
+        .filter(Boolean)
+        .map((w) => w.toLowerCase());
       const values: Record<string, string> = {
         name: name.join("."),
         path: token.path.join("."),

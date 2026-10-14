@@ -48,10 +48,13 @@ export function preview(t: Token): Grid.Item.Props["content"] {
     case "shadow": {
       const layers = [t.raw].flat().filter((s) => !field(s, "inset"));
       const filters = layers
-        .map(
-          (s, i) =>
-            `<filter id="s${i}" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="${px(field(s, "offsetX")) * 2}" dy="${px(field(s, "offsetY")) * 2}" stdDeviation="${px(field(s, "blur"))}" flood-color="${esc(stringify(field(s, "color") ?? "#000", "color"))}"/></filter>`,
-        )
+        .map((s, i) => {
+          const spread = px(field(s, "spread")) * 2;
+          const morph = spread
+            ? `<feMorphology in="SourceAlpha" operator="${spread > 0 ? "dilate" : "erode"}" radius="${Math.abs(spread)}" result="m"/>`
+            : "";
+          return `<filter id="s${i}" x="-50%" y="-50%" width="200%" height="200%">${morph}<feGaussianBlur in="${spread ? "m" : "SourceAlpha"}" stdDeviation="${px(field(s, "blur"))}"/><feOffset dx="${px(field(s, "offsetX")) * 2}" dy="${px(field(s, "offsetY")) * 2}" result="o"/><feFlood flood-color="${esc(stringify(field(s, "color") ?? "#000", "color"))}"/><feComposite in2="o" operator="in"/></filter>`;
+        })
         .join("");
       const rects = layers.map(
         (_, i) => `<rect x="50" y="50" width="100" height="100" rx="12" fill="#fff" filter="url(#s${i})"/>`,

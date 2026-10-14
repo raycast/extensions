@@ -49,10 +49,11 @@ Use **Enter Copies** in the project settings to choose what <kbd>↵</kbd> copie
 | Shortcut                                                                            | Action                                         |
 | ----------------------------------------------------------------------------------- | ---------------------------------------------- |
 | <kbd>↵</kbd>                                                                        | Copy the value (or what **Enter Copies** says) |
-| <kbd>⌘</kbd> <kbd>↵</kbd>                                                           | Copy the name                                  |
+| <kbd>⌘</kbd> <kbd>↵</kbd>                                                           | Copy the name (the value if ↵ copies the name) |
 | <kbd>⌥</kbd> <kbd>⌘</kbd> <kbd>H</kbd> / <kbd>R</kbd> / <kbd>S</kbd> / <kbd>L</kbd> | Copy a color as HEX / RGB / HSL / OKLCH        |
 | <kbd>⌘</kbd> <kbd>1</kbd>–<kbd>9</kbd>                                              | Open a pinned group or copy a pinned token     |
 | <kbd>⌥</kbd> <kbd>⌘</kbd> <kbd>1</kbd>–<kbd>9</kbd>                                 | Pin the selected token or group to that slot   |
+| <kbd>⌘</kbd> <kbd>R</kbd>                                                           | Reload the token files                         |
 
 ## Development
 
