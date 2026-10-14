@@ -2,7 +2,7 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Keep an internal symlink's real target searchable when ignore rules hide the preferred link.
+- Keep an internal symlink's real target searchable when ignore rules hide the preferred link, without scanning separately configured children twice through external links.
 
 - Respect `.gitignore`, `.ignore`, and `.fdignore` by default on new installations and after resetting index settings, while preserving saved choices and exclusion lists.
 

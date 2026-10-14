@@ -647,6 +647,9 @@ export async function indexChecks(assert: Assert) {
   fs.writeFileSync(path.join(dupTarget, "doc.txt"), "d");
   const dupOutside = tempDir("dupOutside");
   fs.writeFileSync(path.join(dupOutside, "elsewhere.txt"), "e");
+  const dupOutsideChild = path.join(dupOutside, "docs");
+  fs.mkdirSync(dupOutsideChild);
+  fs.writeFileSync(path.join(dupOutsideChild, "owned.txt"), "o");
   // A link to somewhere already inside this root, the case that doubles a scan.
   fs.symlinkSync(path.join(dupDir, "cloud"), path.join(dupDir, "Cloud Link"));
   // A link out of the root: following it is the only way to reach those files.
@@ -688,6 +691,17 @@ export async function indexChecks(assert: Assert) {
       )
     ).join("|") === "/cloud|/Outside Link",
     "a link into another root is itself excluded, since that root's scan owns those files",
+  );
+  const externalChildLinks = await redundantLinks(
+    dupDir,
+    [dupDir, dupOutsideChild],
+    undefined,
+    undefined,
+    visibleLink,
+  );
+  assert(
+    externalChildLinks.includes("/Outside Link/docs"),
+    "an external link yields to a separately configured child of its target",
   );
   assert(
     (await redundantLinks(path.join(dupDir, "absent"), [dupDir])).length === 0,
@@ -738,6 +752,13 @@ export async function indexChecks(assert: Assert) {
     assert(
       dupDeduped.some((full) => full.includes("Outside Link")),
       "a link reaching outside every root is still followed",
+    );
+    const externalChildDeduped = await dupWalk(externalChildLinks);
+    assert(
+      !externalChildDeduped.some((full) =>
+        full.endsWith("Outside Link/docs/owned.txt"),
+      ),
+      "the parent scan does not emit a separately scanned child through an external link",
     );
 
     fs.writeFileSync(path.join(dupDir, ".gitignore"), "/Cloud Link\n");

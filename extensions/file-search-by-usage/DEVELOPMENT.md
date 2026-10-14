@@ -152,7 +152,7 @@ Ignore patterns apply relative to each scan root. With the home folder and Cloud
 
 Exclusions match traversed paths rather than resolved symlink targets. For example, a link at `~/Documents/Mail Archive` pointing into `~/Library/Mail` can still be crawled despite `**/Library/**`; exclude the alias path separately to omit it. Scope ownership exclusions prevent duplicate walks through root-level aliases, but are not a general resolved-target exclusion policy.
 
-Before a root-level link is preferred over its target, a depth-one fd preflight applies the same hidden-file, ignore-file, and exclusion settings as the full scan. The target is excluded only when that preflight emits the link. If the link is ignored or the preflight fails, the real target remains in scope so a completed rebuild cannot erase both routes.
+Before a root-level link is preferred over its target, a depth-one fd preflight applies the same hidden-file, ignore-file, and exclusion settings as the full scan. The target is excluded only when that preflight emits the link. If the link is ignored or the preflight fails, the real target remains in scope so a completed rebuild cannot erase both routes. A retained link still excludes any descendant owned by a separate scope, including when the link target is outside the current root.
 
 Stale cleanup covers the completed scope's path range as well as its recorded owner, excluding every configured child scope. This removes obsolete rows inherited from an older parent-only index, while a failed or partial child scan keeps its saved paths even if its parent completes. Removing a child scope lets a completed parent scan apply its exclusions again. Cleanup never treats a mere path-prefix match as containment.
 

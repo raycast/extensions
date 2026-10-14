@@ -313,14 +313,15 @@ export async function redundantLinks(
        * that case would leave neither route in the index.
        */
       const full = path.join(root, entry.name);
+      const children = nestedRoots(target, scopes);
+      const internalTarget = target !== root && containsPath(root, target);
       if (
-        target !== root &&
-        containsPath(root, target) &&
+        (internalTarget || children.length > 0) &&
         (await linkWillBeScanned(full))
       ) {
-        out.add(excludePath(root, target));
+        if (internalTarget) out.add(excludePath(root, target));
         // The retained alias must also yield independently scanned descendants.
-        for (const child of nestedRoots(target, scopes)) {
+        for (const child of children) {
           out.add(
             excludePath(
               root,
