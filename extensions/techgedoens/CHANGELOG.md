@@ -1,6 +1,6 @@
 # Changelog
 
-## [Article State Reliability] - {PR_MERGE_DATE}
+## [Article State Reliability] - 2026-10-14
 
 - Select the next unread article only after the archive refresh completes.
 - Keep read and favorite actions in related-article details synchronized with their current state.
