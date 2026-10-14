@@ -657,7 +657,18 @@ export async function indexChecks(assert: Assert) {
     recursive: true,
   });
 
-  const dupLinks = await redundantLinks(dupDir, [dupDir]);
+  const visibleLink = async () => true;
+  assert(
+    (await redundantLinks(dupDir, [dupDir])).length === 0,
+    "an unverified preferred link cannot suppress its real target",
+  );
+  const dupLinks = await redundantLinks(
+    dupDir,
+    [dupDir],
+    undefined,
+    undefined,
+    visibleLink,
+  );
   assert(
     dupLinks.join("|") === "/cloud",
     `a link inside the root wins and its target is excluded (${dupLinks.join("|") || "none"})`,
@@ -667,8 +678,15 @@ export async function indexChecks(assert: Assert) {
     "the exclusions are anchored, so a deeper entry of the same name survives",
   );
   assert(
-    (await redundantLinks(dupDir, [dupDir, dupOutside])).join("|") ===
-      "/cloud|/Outside Link",
+    (
+      await redundantLinks(
+        dupDir,
+        [dupDir, dupOutside],
+        undefined,
+        undefined,
+        visibleLink,
+      )
+    ).join("|") === "/cloud|/Outside Link",
     "a link into another root is itself excluded, since that root's scan owns those files",
   );
   assert(
@@ -721,6 +739,31 @@ export async function indexChecks(assert: Assert) {
       dupDeduped.some((full) => full.includes("Outside Link")),
       "a link reaching outside every root is still followed",
     );
+
+    fs.writeFileSync(path.join(dupDir, ".gitignore"), "/Cloud Link\n");
+    const ignoredLinkDbDir = tempDir("ignored-link-db");
+    const ignoredLinkDb = openWritable(ignoredLinkDbDir);
+    try {
+      const ignoredLinkScan = await scanRoots({
+        fd: dupFd.path,
+        roots: [dupDir],
+        db: ignoredLinkDb,
+        showHidden: false,
+        useIgnoreFiles: true,
+      });
+      const ignoredLinkPaths = rowPaths(ignoredLinkDb);
+      assert(
+        ignoredLinkScan.complete &&
+          ignoredLinkPaths.includes(path.join(dupTarget, "doc.txt")) &&
+          !ignoredLinkPaths.some((full) =>
+            full.includes("Cloud Link/inner/doc.txt"),
+          ),
+        "an ignored preferred link leaves its real target searchable",
+      );
+    } finally {
+      ignoredLinkDb.close();
+      fs.rmSync(ignoredLinkDbDir, { recursive: true, force: true });
+    }
   }
   fs.rmSync(dupDir, { recursive: true, force: true });
   fs.rmSync(dupOutside, { recursive: true, force: true });

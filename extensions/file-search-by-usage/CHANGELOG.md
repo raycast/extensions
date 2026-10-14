@@ -2,6 +2,8 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Keep an internal symlink's real target searchable when ignore rules hide the preferred link.
+
 - Respect `.gitignore`, `.ignore`, and `.fdignore` by default on new installations and after resetting index settings, while preserving saved choices and exclusion lists.
 
 - Open a selected global result's containing folder with `⌥⌘↑`, keeping that item selected.

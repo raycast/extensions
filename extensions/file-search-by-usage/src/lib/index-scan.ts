@@ -260,8 +260,9 @@ export async function resolveRoots(
  * Which spelling to keep is not arbitrary. `~/Shared Documents` is a
  * link the user made and recognises; `~/Library/CloudStorage/Dropbox-...` is
  * machinery. So when a link inside this root points somewhere else inside the
- * same scope, the link wins and the target is excluded. When an explicitly
- * configured nested scope owns the target, its own scan wins instead.
+ * same scope, the link wins only when the current scan rules include it; then
+ * the target is excluded. When an explicitly configured nested scope owns the
+ * target, its own scan wins instead.
  *
  * Returned as gitignore-anchored paths relative to the root: `/Name` or
  * `/Library/CloudStorage`. Anchoring matters twice over. It confines the
@@ -274,6 +275,7 @@ export async function redundantLinks(
   roots: readonly string[],
   signal?: AbortSignal,
   readPoolKey?: string,
+  linkWillBeScanned: (full: string) => Promise<boolean> = async () => false,
 ): Promise<string[]> {
   let entries;
   try {
@@ -305,18 +307,27 @@ export async function redundantLinks(
     if (owner !== undefined && owner !== root) {
       out.add(excludePath(root, path.join(root, entry.name)));
     } else {
-      // Keep the link the user made, drop the path it points at.
-      if (target !== root && containsPath(root, target)) {
+      /*
+       * Keep the link the user made only when fd will actually emit it. An
+       * ignore file or exclusion can hide the alias; suppressing its target in
+       * that case would leave neither route in the index.
+       */
+      const full = path.join(root, entry.name);
+      if (
+        target !== root &&
+        containsPath(root, target) &&
+        (await linkWillBeScanned(full))
+      ) {
         out.add(excludePath(root, target));
-      }
-      // The retained alias must also yield any independently scanned descendants.
-      for (const child of nestedRoots(target, scopes)) {
-        out.add(
-          excludePath(
-            root,
-            path.join(root, entry.name, path.relative(target, child)),
-          ),
-        );
+        // The retained alias must also yield independently scanned descendants.
+        for (const child of nestedRoots(target, scopes)) {
+          out.add(
+            excludePath(
+              root,
+              path.join(root, entry.name, path.relative(target, child)),
+            ),
+          );
+        }
       }
     }
   }
@@ -333,6 +344,12 @@ export type FdScanOptions = {
   fdThreads?: number;
   /** Omit the match-all regex and provide the root with --search-path. */
   useSearchPath?: boolean;
+  /** Disable link traversal for the root-level alias visibility preflight. */
+  followLinks?: boolean;
+  /** Bound a preflight without changing the production scan default. */
+  maxDepth?: number;
+  /** Restrict a preflight to one entry type. */
+  entryType?: "symlink";
 };
 
 /** fd arguments. Kept in one place so the effective scope stays auditable. */
@@ -348,11 +365,18 @@ export function fdArguments(
     patterns = [],
     fdThreads,
     useSearchPath = false,
+    followLinks = true,
+    maxDepth,
+    entryType,
   } = typeof options === "boolean" ? { showHidden: options } : options;
 
-  const args = ["--absolute-path", "--print0", "--follow", "--show-errors"];
+  const args = ["--absolute-path", "--print0", "--show-errors"];
+  if (followLinks) args.push("--follow");
   if (fdThreads !== undefined)
     args.push("--threads", String(Math.max(1, Math.trunc(fdThreads))));
+  if (maxDepth !== undefined)
+    args.push("--max-depth", String(Math.max(0, Math.trunc(maxDepth))));
+  if (entryType !== undefined) args.push("--type", entryType);
   if (useIgnoreFiles) {
     // fd only applies gitignore rules inside a repository unless told otherwise.
     args.push("--no-require-git");
@@ -370,6 +394,55 @@ export function fdArguments(
     args.push(".", root);
   }
   return args;
+}
+
+/**
+ * Root-level links that survive the same visibility rules as the full scan.
+ *
+ * This is loaded lazily only when `redundantLinks` finds an internal alias.
+ * Failure is non-authoritative: callers keep the real target rather than risk
+ * suppressing both routes.
+ */
+async function scannableRootLinks(
+  root: string,
+  options: ScanOptions,
+  signal: AbortSignal,
+): Promise<Set<string> | undefined> {
+  const args = fdArguments(root, {
+    showHidden: options.showHidden,
+    useIgnoreFiles: options.useIgnoreFiles,
+    patterns: options.patterns,
+    fdThreads: options.tuning?.fdThreads,
+    followLinks: false,
+    maxDepth: 1,
+    entryType: "symlink",
+  });
+  const decoder = new StringDecoder("utf8");
+  let buffered = "";
+  const links = new Set<string>();
+  const consume = () => {
+    let at: number;
+    while ((at = buffered.indexOf("\0")) >= 0) {
+      const emitted = buffered.slice(0, at);
+      buffered = buffered.slice(at + 1);
+      if (emitted !== "") links.add(path.resolve(emitted));
+    }
+  };
+  try {
+    const source =
+      options.spawnFd?.(args, signal) ??
+      spawnFdDefault(options.fd, args, signal);
+    for await (const chunk of source) {
+      if (signal.aborted) return undefined;
+      buffered += decoder.write(chunk);
+      consume();
+    }
+    buffered += decoder.end();
+    consume();
+    return signal.aborted ? undefined : links;
+  } catch {
+    return undefined;
+  }
 }
 
 /**
@@ -1185,12 +1258,23 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
       const cloudScope = cloudRoots.find((scope) => containsPath(scope, root));
       const readPoolKey =
         cloudScope === undefined ? undefined : `cloud:${cloudScope}`;
+      let scannableLinks: Promise<Set<string> | undefined> | undefined;
+      const linkWillBeScanned = async (full: string) => {
+        scannableLinks ??= scannableRootLinks(root, aggregated, signal);
+        return (await scannableLinks)?.has(path.resolve(full)) ?? false;
+      };
       const outcome = await scanRoot(
         root,
         { ...aggregated, readPoolKey },
         deadline,
         [
-          ...(await redundantLinks(root, ownershipRoots, signal, readPoolKey)),
+          ...(await redundantLinks(
+            root,
+            ownershipRoots,
+            signal,
+            readPoolKey,
+            linkWillBeScanned,
+          )),
           ...nestedRoots(root, ownershipRoots).map((child) =>
             excludePath(root, child),
           ),
