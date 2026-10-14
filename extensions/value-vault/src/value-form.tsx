@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { ValueEntry, detectType, parseValueType, VALUE_TYPE_OPTIONS } from "./types";
 
@@ -11,7 +11,7 @@ interface FormValues {
 
 interface Props {
   initialValues: FormValues;
-  navigationTitle: string;
+  navigationTitle?: string;
   submitTitle: string;
   onSubmit: (entry: Omit<ValueEntry, "id" | "createdAt" | "updatedAt">) => Promise<void>;
   onSuccess?: () => void;
@@ -24,7 +24,7 @@ export default function ValueForm({ initialValues, navigationTitle, submitTitle,
     onSubmit: async (formValues) => {
       const parsedType = parseValueType(formValues.type);
       if (!parsedType) {
-        showToast({ style: Toast.Style.Failure, title: "Invalid type selected" });
+        showFailureToast(new Error("Invalid type selected"), { title: "Invalid type selected" });
         return;
       }
       try {
@@ -37,11 +37,7 @@ export default function ValueForm({ initialValues, navigationTitle, submitTitle,
         onSuccess?.();
         pop();
       } catch (e) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to save value",
-          message: e instanceof Error ? e.message : String(e),
-        });
+        showFailureToast(e, { title: "Failed to save value" });
       }
     },
     validation: {

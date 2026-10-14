@@ -1,12 +1,13 @@
-import { Action, ActionPanel, Clipboard, Icon, Keyboard, List, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Color, Icon, Keyboard, List, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useState } from "react";
 import { ValueEntry } from "./types";
-import { formatRelativeTime, getErrorMessage, truncateValue } from "./utils";
+import { formatRelativeTime, truncateValue } from "./utils";
 import EditValueForm from "./edit-value";
 
 /** Metadata for each value type: icon, color, and display name. */
 export const TYPE_META: Record<ValueEntry["type"], { icon: Icon; color: string; name: string }> = {
-  string: { icon: Icon.Text, color: "#000000", name: "string" },
+  string: { icon: Icon.Text, color: Color.SecondaryText, name: "string" },
   number: { icon: Icon.Hashtag, color: "#007AFF", name: "number" },
   url: { icon: Icon.Link, color: "#007AFF", name: "URL" },
   email: { icon: Icon.Envelope, color: "#FF00FF", name: "email" },
@@ -58,10 +59,10 @@ export function ValueListItem({ entry, onDelete, onDuplicate, onUpdate }: ValueL
 
   const handleCopy = useCallback(async () => {
     try {
-      await Clipboard.copy(entry.value);
+      await Clipboard.copy(entry.value, { concealed: true });
       await showHUD("Copied!");
     } catch (e) {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to copy value", message: getErrorMessage(e) });
+      await showFailureToast(e, { title: "Failed to copy value" });
     }
   }, [entry.value]);
 
@@ -70,21 +71,17 @@ export function ValueListItem({ entry, onDelete, onDuplicate, onUpdate }: ValueL
       await Clipboard.paste(entry.value);
       await showHUD("Pasted!");
     } catch (e) {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to paste value", message: getErrorMessage(e) });
+      await showFailureToast(e, { title: "Failed to paste value" });
     }
   }, [entry.value]);
 
   const handleCopyAsJson = useCallback(async () => {
     try {
       const json = JSON.stringify({ label: entry.label, value: entry.value, type: entry.type }, null, 2);
-      await Clipboard.copy(json);
+      await Clipboard.copy(json, { concealed: true });
       await showHUD("Copied as JSON!");
     } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to copy as JSON",
-        message: getErrorMessage(e),
-      });
+      await showFailureToast(e, { title: "Failed to copy as JSON" });
     }
   }, [entry.label, entry.value, entry.type]);
 

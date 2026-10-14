@@ -40,29 +40,3 @@ You can override the detected type via the dropdown.
 ## Data
 
 All values are stored locally using Raycast's built-in `LocalStorage` API. Data is encrypted at rest and never leaves your machine. No cloud, no accounts, no subscriptions.
-
-## Installation
-
-### From the Raycast Store
-
-Search for **Value Vault** in the Raycast Store and install with one click.
-
-### Development / Manual
-
-```bash
-git clone https://github.com/seppealaerts/value-vault.ringtail.dev.git
-cd value-vault.ringtail.dev
-npm install
-npm run build
-```
-
-Then in Raycast:
-1. Open Raycast (`⌘Space`)
-2. Search for **Import Extension**
-3. Select the `value-vault.ringtail.dev` folder
-
-For development with hot-reload:
-
-```bash
-npm run dev
-```

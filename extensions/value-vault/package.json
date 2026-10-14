@@ -15,6 +15,7 @@
     {
       "name": "browse-values",
       "title": "Browse Values",
+      "subtitle": "Value Vault",
       "description": "Search your saved values and copy them to the clipboard",
       "mode": "view",
       "arguments": [
@@ -29,6 +30,7 @@
     {
       "name": "add-value",
       "title": "Add Value",
+      "subtitle": "Value Vault",
       "description": "Save a new value to your vault",
       "mode": "view"
     }

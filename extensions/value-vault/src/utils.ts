@@ -1,13 +1,4 @@
 /**
- * Extract a human-readable message from an unknown error value.
- * Prefers `error.message` when available, falls back to `String(error)`.
- */
-export function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
-
-/**
  * Truncate a string to a maximum length, appending "..." when truncated.
  */
 export function truncateValue(value: string, maxLength = 100): string {

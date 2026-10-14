@@ -6,13 +6,14 @@ import ValueForm from "./value-form";
 
 interface Props {
   onSave?: () => void;
+  isPushed?: boolean;
 }
 
-export default function AddValueForm({ onSave }: Props) {
+export default function AddValueForm({ onSave, isPushed = false }: Props) {
   return (
     <ValueForm
       initialValues={{ label: "", value: "", type: "string" }}
-      navigationTitle="Add Value"
+      navigationTitle={isPushed ? "Add Value" : undefined}
       submitTitle="Save Value"
       onSubmit={async (data) => {
         const now = Date.now();

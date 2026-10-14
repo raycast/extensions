@@ -1,21 +1,10 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Icon,
-  LaunchProps,
-  List,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, LaunchProps, List, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePromise } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { getAllEntries, deleteEntry, saveEntry } from "./storage";
 import { ValueEntry } from "./types";
-import { getErrorMessage } from "./utils";
 import { ValueListItem } from "./value-list-item";
 import AddValueForm from "./add-value";
 
@@ -26,11 +15,7 @@ export default function Command(props: LaunchProps<{ arguments: { query?: string
 
   useEffect(() => {
     if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load values",
-        message: getErrorMessage(error),
-      });
+      showFailureToast(error, { title: "Failed to load values" });
     }
   }, [error]);
 
@@ -42,11 +27,7 @@ export default function Command(props: LaunchProps<{ arguments: { query?: string
         await revalidate();
         showHUD(successMessage);
       } catch (e) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: failureTitle,
-          message: getErrorMessage(e),
-        });
+        showFailureToast(e, { title: failureTitle });
       } finally {
         setIsMutating(false);
       }
@@ -101,7 +82,7 @@ export default function Command(props: LaunchProps<{ arguments: { query?: string
             icon={Icon.Plus}
             title="Add Value"
             shortcut={{ modifiers: ["cmd"], key: "n" }}
-            target={<AddValueForm onSave={revalidate} />}
+            target={<AddValueForm onSave={revalidate} isPushed={true} />}
           />
         </ActionPanel>
       }
