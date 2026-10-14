@@ -12,11 +12,11 @@ Control your TrackTimer timers from Raycast. **Start/Stop Timer** shows your run
 
 ## Local development
 
-Use the repository's Node and pnpm versions. From the monorepo root:
+From this extension directory (`extensions/tracktimer` in the Raycast extensions repository):
 
 ```sh
-pnpm install
-pnpm --dir apps/raycast dev
+npm install
+npm run dev
 ```
 
 Raycast must be installed to use the development extension. In its preferences, enter a TrackTimer API token created in TrackTimer Settings (the default key includes `clients:read`, `projects:read`, `timers:read`, and `timers:write`). The token is stored in Raycast's password preference; do not put it in source files or shell commands.
@@ -25,17 +25,19 @@ Workspace admins can select any active client, including clients without project
 
 The server is hardcoded in `TRACKTIMER_URL` in `src/session.ts`. To install a personal development build against a local server, temporarily change that constant to your localhost origin (for example `http://localhost:3001`), rebuild, and use a token created on that local server. Restore `https://www.tracktimer.app` before committing or exporting for the Store. Use the canonical www hostname because authenticated API requests reject redirects. Never use Production credentials against Local or Preview. Building this package does not deploy the API.
 
+From `extensions/tracktimer`, run the package checks with:
+
 ```sh
-pnpm --dir apps/raycast build
-pnpm --dir apps/raycast check-types
-pnpm --dir apps/raycast lint
+npm run build
+npm run check-types
+npm run lint
 ```
 
 The distribution build writes to `dist` without installing into Raycast. Use `dev` to load it in Raycast.
 
 Uncertain timer requests are saved locally with their original operation ID. Use **Retry pending timer action** before starting another timer. The saved action includes its description but never the API token. Recent entries refresh every minute while the command is open, and **Refresh** reloads current server state. Starting a timer completes any timer already running for the same user, including in another workspace.
 
-The repository uses Biome for formatting and linting. The package also includes standalone Raycast ESLint and Prettier configuration for export. Run the repository's required checks before handing off changes.
+The package includes standalone Raycast ESLint and Prettier configuration. Run the checks above before handing off changes.
 
 ## Standalone packaging and Store submission
 
