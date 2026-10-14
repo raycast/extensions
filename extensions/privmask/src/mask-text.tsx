@@ -528,7 +528,6 @@ export default function Command() {
         <List.Item
           icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
           title="Nothing personal found"
-          subtitle="Safe to share as it is"
           detail={<List.Item.Detail markdown={renderPreview(previewText)} />}
           actions={actions()}
         />
