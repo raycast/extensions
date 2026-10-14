@@ -361,17 +361,58 @@ if ([string]::IsNullOrWhiteSpace($CacheDir)) {
 }
 
 $dll = Join-Path $CacheDir "audio-devices-v2.dll"
-if (-not (Test-Path $dll)) {
-  New-Item -ItemType Directory -Force -Path $CacheDir | Out-Null
-  Add-Type -TypeDefinition $source -OutputAssembly $dll -OutputType Library
+
+function Get-AudioDll {
+  param(
+    [string]$Dir,
+    [string]$Destination,
+    [string]$Code,
+    [switch]$Rebuild
+  )
+
+  New-Item -ItemType Directory -Force -Path $Dir | Out-Null
+  $mutex = New-Object System.Threading.Mutex($false, "Local\RCSTAudioDevicesV2")
+  $held = $false
+  try {
+    try {
+      $held = $mutex.WaitOne(20000)
+    } catch [System.Threading.AbandonedMutexException] {
+      $held = $true
+    }
+    if (-not $held) {
+      throw "Timed out waiting to build the audio helper"
+    }
+
+    if ($Rebuild) {
+      Remove-Item -LiteralPath $Destination -Force -ErrorAction SilentlyContinue
+    }
+    if (Test-Path -LiteralPath $Destination) {
+      return
+    }
+
+    $tmp = Join-Path $Dir ("audio-devices-v2." + [guid]::NewGuid().ToString("n") + ".dll")
+    try {
+      Add-Type -TypeDefinition $Code -OutputAssembly $tmp -OutputType Library
+      Move-Item -LiteralPath $tmp -Destination $Destination -Force
+    } finally {
+      if (Test-Path -LiteralPath $tmp) {
+        Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue
+      }
+    }
+  } finally {
+    if ($held) {
+      $mutex.ReleaseMutex()
+    }
+    $mutex.Dispose()
+  }
 }
 
 try {
+  Get-AudioDll -Dir $CacheDir -Destination $dll -Code $source
   try {
     Add-Type -Path $dll
   } catch {
-    Remove-Item -LiteralPath $dll -Force -ErrorAction SilentlyContinue
-    Add-Type -TypeDefinition $source -OutputAssembly $dll -OutputType Library
+    Get-AudioDll -Dir $CacheDir -Destination $dll -Code $source -Rebuild
     Add-Type -Path $dll
   }
 

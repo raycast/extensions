@@ -17,10 +17,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { failureMessage, listDevices, setDevice, setVolume, toggleMute } from "./audio";
 import { AudioDevice, Flow } from "./types";
 
-type Preferences = {
-  closeOnSwitch: boolean;
-};
-
 function label(flow: Flow): string {
   return flow === "output" ? "Output" : "Input";
 }
@@ -203,7 +199,8 @@ function VolumeForm({ flow, device, onDone }: { flow: Flow; device: AudioDevice;
           <Action.SubmitForm
             title="Set Volume"
             onSubmit={async (values: { volume: string }) => {
-              const level = Number(values.volume);
+              const raw = values.volume.trim();
+              const level = raw === "" ? NaN : Number(raw);
               if (!Number.isInteger(level) || level < 0 || level > 100) {
                 await showToast({ style: Toast.Style.Failure, title: "Enter a whole number from 0 to 100" });
                 return;
