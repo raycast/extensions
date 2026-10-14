@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "row-counter",
+  "title": "Row Counter",
+  "description": "Count your knitting rows with a single command.",
+  "icon": "icon.png",
+  "author": "cosmos",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "counter",
+      "title": "Add Row",
+      "subtitle": "Knitting",
+      "description": "Adds a row and shows the current row.",
+      "mode": "no-view"
+    },
+    {
+      "name": "counter-see",
+      "title": "Show Row Count",
+      "subtitle": "Knitting",
+      "description": "Shows which row you're on.",
+      "mode": "no-view"
+    },
+    {
+      "name": "counter-reset",
+      "title": "Reset Row Counter",
+      "subtitle": "Knitting",
+      "description": "Resets the row count to 0.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^10.12.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
