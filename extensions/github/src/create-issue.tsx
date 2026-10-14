@@ -86,7 +86,11 @@ export function IssueForm({ draftValues }: IssueFormProps) {
           };
 
           if (openInBrowserAfterCreate) {
-            await open(issue.url);
+            try {
+              await open(issue.url);
+            } catch {
+              // The issue was created, so failing to open the browser shouldn't mark it as failed
+            }
           }
         }
 
