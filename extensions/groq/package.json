@@ -749,7 +749,7 @@
   "dependencies": {
     "@raycast/api": "2.5.0",
     "gpt-tokenizer": "^2.2.1",
-    "openai": "^4.28.4",
+    "openai": "^7.33.0",
     "@ai-sdk/groq": "^4.0.41",
     "ai": "^7.0.0",
     "zod": "^4.6.5"
