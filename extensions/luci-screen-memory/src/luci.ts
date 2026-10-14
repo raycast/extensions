@@ -18,7 +18,7 @@ tell application "System Events"
   if not (exists process "Luci") then return "NOT_RUNNING"
   
   if (count of windows of process "Luci") is 0 then
-    do shell script "open -a Luci"
+    do shell script "open -g -a Luci"
     repeat 20 times
       delay 0.05
       if (count of windows of process "Luci") > 0 then exit repeat
@@ -54,7 +54,7 @@ tell application "System Events"
   if not (exists process "Luci") then return "NOT_RUNNING"
   
   if (count of windows of process "Luci") is 0 then
-    do shell script "open -a Luci"
+    do shell script "open -g -a Luci"
     repeat 20 times
       delay 0.05
       if (count of windows of process "Luci") > 0 then exit repeat
@@ -161,13 +161,15 @@ export async function getLuciStatus(): Promise<LuciState> {
     };
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
+    const errMsgLower = errMsg.toLowerCase();
     const isPermError =
-      errMsg.includes("not allowed to send keystrokes") ||
-      errMsg.includes("Assistive") ||
       errMsg.includes("-1743") ||
+      errMsg.includes("-25211") ||
       errMsg.includes("(-1728)") ||
-      errMsg.includes("Not authorized") ||
-      errMsg.includes("not permitted");
+      errMsgLower.includes("assistive") ||
+      errMsgLower.includes("not allowed to send keystrokes") ||
+      errMsgLower.includes("not authorized") ||
+      errMsgLower.includes("not permitted");
 
     return {
       running: true,
@@ -206,11 +208,13 @@ export async function toggleLuciRecording(): Promise<{
     return { success: true, recording: recStr === "true" };
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
+    const errMsgLower = errMsg.toLowerCase();
     if (
       errMsg.includes("-1743") ||
-      errMsg.includes("Assistive") ||
-      errMsg.includes("Not authorized") ||
-      errMsg.includes("not permitted")
+      errMsg.includes("-25211") ||
+      errMsgLower.includes("assistive") ||
+      errMsgLower.includes("not authorized") ||
+      errMsgLower.includes("not permitted")
     ) {
       return {
         success: false,
