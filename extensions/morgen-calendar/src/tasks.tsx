@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Alert, confirmAlert, Detail, Form, Icon, List, useNavigation } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { RequestSequence } from "./lib/request-sequence";
 import { closeTask, deleteTask, invalidateCache, listTasks, updateTask } from "./lib/morgen";
 import { showFailure, showSuccess } from "./lib/ui";
 import type { Task } from "./types";
@@ -87,21 +88,26 @@ function EditTask({ task, onSaved }: { task: Task; onSaved: () => void }) {
 export default function Tasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const requests = useRef(new RequestSequence());
 
   const load = useCallback(async (force = false) => {
+    const isCurrent = requests.current.begin();
     setLoading(true);
     try {
       if (force) invalidateCache();
-      setTasks(await listTasks());
+      const fetched = await listTasks();
+      if (isCurrent()) setTasks(fetched);
     } catch (error) {
-      await showFailure(error);
+      if (isCurrent()) await showFailure(error);
     } finally {
-      setLoading(false);
+      if (isCurrent()) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    const sequence = requests.current;
     void load();
+    return () => sequence.invalidate();
   }, [load]);
 
   const sorted = useMemo(() => [...tasks].sort((a, b) => (a.due || "9999").localeCompare(b.due || "9999")), [tasks]);

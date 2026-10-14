@@ -1,10 +1,13 @@
 import { getPreferenceValues } from "@raycast/api";
 import type { Calendar, Event, Task } from "../types";
 import { sendMorgenRequest } from "./transport";
+import { loadEventsByAccount, type EventListResult } from "./event-loader";
 
 const cache = new Map<string, { expires: number; value: unknown }>();
+let cacheRevision = 0;
 
 export function invalidateCache(): void {
+  cacheRevision++;
   cache.clear();
 }
 
@@ -17,13 +20,15 @@ async function request<T>(
   options: { method?: "GET" | "POST"; body?: unknown; ttlMs?: number } = {},
 ): Promise<T> {
   const method = options.method ?? "GET";
+  const revision = cacheRevision;
   const cacheKey = `${apiKey()}:${path}`;
   const cached = cache.get(cacheKey);
   if (method === "GET" && options.ttlMs && cached && cached.expires > Date.now()) return cached.value as T;
 
   const value = await sendMorgenRequest<T>(path, apiKey(), options);
-  if (method === "POST") cache.clear();
-  else if (options.ttlMs) cache.set(cacheKey, { expires: Date.now() + options.ttlMs, value });
+  if (method === "POST") invalidateCache();
+  else if (options.ttlMs && revision === cacheRevision)
+    cache.set(cacheKey, { expires: Date.now() + options.ttlMs, value });
   return value as T;
 }
 
@@ -32,23 +37,11 @@ export async function listCalendars(): Promise<Calendar[]> {
   return result.data.calendars;
 }
 
-export async function listEvents(calendars: Calendar[], start: Date, end: Date): Promise<Event[]> {
-  const groups = new Map<string, Calendar[]>();
-  for (const calendar of calendars)
-    groups.set(calendar.accountId, [...(groups.get(calendar.accountId) ?? []), calendar]);
-  const results = await Promise.all(
-    [...groups].map(async ([accountId, accountCalendars]) => {
-      const params = new URLSearchParams({
-        accountId,
-        calendarIds: accountCalendars.map((calendar) => calendar.id).join(","),
-        start: start.toISOString(),
-        end: end.toISOString(),
-      });
-      const result = await request<{ data: { events: Event[] } }>(`/events/list?${params}`, { ttlMs: 60_000 });
-      return result.data.events;
-    }),
-  );
-  return results.flat();
+export async function listEvents(calendars: Calendar[], start: Date, end: Date): Promise<EventListResult> {
+  return loadEventsByAccount(calendars, start, end, async (params) => {
+    const result = await request<{ data: { events: Event[] } }>(`/events/list?${params}`, { ttlMs: 60_000 });
+    return result.data.events;
+  });
 }
 
 export interface EventInput {

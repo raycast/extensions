@@ -110,7 +110,15 @@ export default function Events() {
       end.setDate(end.getDate() + requestedDays);
       const fetched = await listEvents(available, start, end);
       if (!isCurrent()) return;
-      setEvents(fetched.filter((event) => !event["morgen.so:metadata"]?.taskId));
+      setEvents(fetched.events.filter((event) => !event["morgen.so:metadata"]?.taskId));
+      if (fetched.failures.length) {
+        const firstError = fetched.failures[0].error;
+        const detail = firstError instanceof Error ? firstError.message : "Please check your calendar connections.";
+        const message = fetched.events.length
+          ? `Showing available events; ${fetched.failures.length} calendar account(s) could not be loaded. ${detail}`
+          : `Could not load events from ${fetched.failures.length} calendar account(s). ${detail}`;
+        await showFailure(new Error(message));
+      }
     } catch (error) {
       if (isCurrent()) await showFailure(error);
     } finally {

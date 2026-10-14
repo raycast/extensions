@@ -4,6 +4,7 @@ import { isoDuration, systemTimeZone, toLocalDateTime } from "./lib/dates";
 import { createEvent, listCalendars } from "./lib/morgen";
 import { showFailure, showSuccess } from "./lib/ui";
 import type { Calendar } from "./types";
+import { calendarKey } from "./lib/calendar-key";
 
 interface Values {
   title: string;
@@ -35,7 +36,7 @@ export default function CreateEvent() {
   const writable = calendars.filter((calendar) => calendar.myRights?.mayWriteAll || calendar.myRights?.mayWriteOwn);
 
   async function submit(values: Values) {
-    const calendar = writable.find((item) => item.id === values.calendar);
+    const calendar = writable.find((item) => calendarKey(item) === values.calendar);
     if (!calendar || !values.title.trim() || !values.start) {
       await showFailure(new Error("Enter a title, start time, and writable calendar."));
       return;
@@ -78,8 +79,8 @@ export default function CreateEvent() {
       <Form.Dropdown id="calendar" title="Calendar" info="Only calendars where you can create events are shown.">
         {writable.map((calendar) => (
           <Form.Dropdown.Item
-            key={calendar.id}
-            value={calendar.id}
+            key={calendarKey(calendar)}
+            value={calendarKey(calendar)}
             title={`${calendar["morgen.so:metadata"]?.overrideName || calendar.name} · ${calendar.integrationId || "Calendar"}`}
           />
         ))}

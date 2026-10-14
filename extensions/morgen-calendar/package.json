@@ -10,10 +10,10 @@
   "categories": ["Productivity"],
   "license": "MIT",
   "commands": [
-    { "name": "create-event", "title": "Create Event", "description": "Add an event to a connected Morgen calendar", "mode": "view" },
-    { "name": "events", "title": "View Events", "description": "Browse upcoming events across your Morgen calendars", "mode": "view" },
-    { "name": "create-task", "title": "Create Task", "description": "Add a native Morgen task", "mode": "view" },
-    { "name": "tasks", "title": "View Tasks", "description": "Browse and complete native Morgen tasks", "mode": "view" }
+    { "name": "create-event", "title": "Create Event", "subtitle": "Morgen Calendar", "description": "Add an event to a connected Morgen calendar", "mode": "view" },
+    { "name": "events", "title": "View Events", "subtitle": "Morgen Calendar", "description": "Browse upcoming events across your Morgen calendars", "mode": "view" },
+    { "name": "create-task", "title": "Create Task", "subtitle": "Morgen Calendar", "description": "Add a native Morgen task", "mode": "view" },
+    { "name": "tasks", "title": "View Tasks", "subtitle": "Morgen Calendar", "description": "Browse and complete native Morgen tasks", "mode": "view" }
   ],
   "preferences": [
     {
