@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { MulticaApiError, listProjects, listSquads, quickCreateIssue } from "../lib/api";
 import { PRIORITIES, actorIcon, avatarIcon } from "../lib/format";
 import { useWorkspace, useWorkspaceContext } from "../lib/hooks";
+import { verifyPicks } from "../lib/picks";
 import type { Agent, Issue, Priority, QuickCreateInput, Squad } from "../lib/types";
 import { workspaceIcon } from "./WorkspaceDropdown";
 
@@ -101,13 +102,19 @@ export function DelegateForm(props: { parentIssue?: Issue; draftValues?: Delegat
     },
     async onSubmit(formValues) {
       if (!workspace) return;
+      const picksOk = await verifyPicks<keyof DelegateFormValues>(
+        [{ field: "project", label: "project", value: formValues.project, options: projects?.map((p) => p.id) }],
+        workspace.name,
+        (field) => setValue(field, ""),
+      );
+      if (!picksOk) return;
       const [type, id] = formValues.actor.split(":");
       const name = actorLabel(formValues.actor);
       const input: QuickCreateInput = {
         prompt: formValues.prompt.trim(),
         ...(type === "squad" ? { squad_id: id } : { agent_id: id }),
         priority: (formValues.priority || undefined) as Exclude<Priority, "none"> | undefined,
-        project_id: projects?.some((p) => p.id === formValues.project) ? formValues.project : undefined,
+        project_id: formValues.project || undefined,
         due_date: formValues.dueDate ? calendarDate(formValues.dueDate) : undefined,
         parent_issue_id: parentIssue?.id,
       };

@@ -13,7 +13,8 @@ import {
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { MulticaApiError, createIssue, listProjects } from "./lib/api";
-import { PRIORITIES, actorIcon, issueUrl, statusIcon, statusOptions } from "./lib/format";
+import { BUILT_IN_STATUS_ORDER, PRIORITIES, actorIcon, issueUrl, statusIcon, statusOptions } from "./lib/format";
+import { verifyPicks } from "./lib/picks";
 import { WorkspaceContext, useWorkspace, useWorkspaceContext } from "./lib/hooks";
 import type { ActorType, CreateIssueInput, Issue, Priority } from "./lib/types";
 import { workspaceIcon } from "./components/WorkspaceDropdown";
@@ -27,16 +28,22 @@ interface FormValues {
   project: string;
 }
 
-/** The picked assignee, if it still belongs to the selected workspace. */
-function parseAssignee(
-  value: string,
-  context: WorkspaceContext | undefined,
-): Pick<CreateIssueInput, "assignee_type" | "assignee_id"> {
+function parseAssignee(value: string): Pick<CreateIssueInput, "assignee_type" | "assignee_id"> {
   if (!value) return {};
   const [type, id] = value.split(":");
-  const exists =
-    type === "agent" ? context?.agents?.some((a) => a.id === id) : context?.members?.some((m) => m.user_id === id);
-  return exists ? { assignee_type: type as ActorType, assignee_id: id } : {};
+  return { assignee_type: type as ActorType, assignee_id: id };
+}
+
+/** The assignee values valid in this workspace, or undefined until agents and members load. */
+function assigneeOptions(context: WorkspaceContext | undefined): string[] | undefined {
+  if (!context?.agents || !context?.members) return undefined;
+  return [...context.agents.map((a) => `agent:${a.id}`), ...context.members.map((m) => `member:${m.user_id}`)];
+}
+
+/** Built-in statuses are valid everywhere; custom ones need the workspace's list. */
+function statusKeys(context: WorkspaceContext | undefined, value: string): string[] | undefined {
+  if (context?.statuses) return statusOptions(context.statuses).map((s) => s.key);
+  return BUILT_IN_STATUS_ORDER.includes(value) ? [value] : undefined;
 }
 
 export default function CreateIssue(props: LaunchProps<{ draftValues: FormValues }>) {
@@ -49,14 +56,25 @@ export default function CreateIssue(props: LaunchProps<{ draftValues: FormValues
 
   async function submit(values: FormValues, allowDuplicate = false): Promise<boolean> {
     if (!workspace) return false;
+    const picksOk = await verifyPicks<keyof FormValues>(
+      [
+        { field: "status", label: "status", value: values.status, options: statusKeys(context, values.status) },
+        { field: "assignee", label: "assignee", value: values.assignee, options: assigneeOptions(context) },
+        { field: "project", label: "project", value: values.project, options: projects?.map((p) => p.id) },
+      ],
+      workspace.name,
+      (field) => setValue(field, field === "status" ? "todo" : ""),
+    );
+    if (!picksOk) return false;
+
     const input: CreateIssueInput = {
       title: values.title.trim(),
       description: values.description.trim() || undefined,
-      status: statusOptions(context?.statuses).some((st) => st.key === values.status) ? values.status : undefined,
+      status: values.status || undefined,
       priority: (values.priority || "none") as Priority,
-      project_id: projects?.some((p) => p.id === values.project) ? values.project : undefined,
+      project_id: values.project || undefined,
       allow_duplicate: allowDuplicate || undefined,
-      ...parseAssignee(values.assignee, context),
+      ...parseAssignee(values.assignee),
     };
 
     const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
