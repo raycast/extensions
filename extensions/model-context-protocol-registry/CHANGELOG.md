@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Latchkey MCP Server] - 2026-10-14
+
+- Add Latchkey to the official registry: read the CI failures its self-healing GitHub Actions runners could not repair, check run status and logs, dispatch workflows and run one-off commands on fresh ephemeral runners. Hosted Streamable HTTP server at https://latchkey.dev/mcp, connected through `mcp-remote` with a Latchkey API key as a bearer header.
+
 ## [Add Taplio MCP Server] - 2026-10-14
 
 - Add Taplio to the official registry: write, schedule and analyze LinkedIn posts, find inspiration, comment, like and connect. Hosted Streamable HTTP server at https://mcp.taplio.com/ with OAuth sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.

@@ -656,6 +656,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "latchkey",
+    title: "Latchkey",
+    description:
+      "CI your coding agents can run, read and fix. Read the GitHub Actions failures Latchkey's self-healing runners could not repair (root cause, failing file and secret-scrubbed logs), check run status and logs, dispatch workflows, and run one-off commands on fresh ephemeral Linux runners. Hosted remote Streamable HTTP server through `mcp-remote`; Latchkey API key as an `Authorization: Bearer` header (30-day trial, no card).",
+    icon: "https://avatars.githubusercontent.com/u/238924717?s=512&v=4",
+    homepage: "https://latchkey.dev/documentation/connect-your-ai-agent",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://latchkey.dev/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
+    },
+  },
+  {
     name: "looot",
     title: "looot",
     description:
