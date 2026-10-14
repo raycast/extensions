@@ -154,6 +154,10 @@ export default function Command() {
     replacements: Replacement[];
   } | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
+  // Why the name scan threw, when it did. The deterministic findings stay on
+  // screen then, but the text is not auto-copied: a toast is the only place
+  // the failure is reported, and the copy's own toast would replace it.
+  const [nameScanFailed, setNameScanFailed] = useState<string | null>(null);
   // What this command last put on the clipboard. Reading the clipboard back
   // instead would not tell our own copy from the user's, and would re-mask
   // the masked text when ⌘V is pressed out of habit.
@@ -166,6 +170,7 @@ export default function Command() {
     setDeselected(new Set());
     setMasked(null);
     setFailure(null);
+    setNameScanFailed(null);
     setWaitingForModel(text.trim().length > 0);
   }
 
@@ -207,6 +212,7 @@ export default function Command() {
         // The deterministic findings are already on screen; keep them and say
         // what was lost rather than replacing the list with an error.
         if (!cancelled) {
+          setNameScanFailed(String(error));
           await showFailureToast(error, { title: "Name detection failed" });
         }
       } finally {
@@ -278,7 +284,14 @@ export default function Command() {
     });
   }
 
-  const notices = response?.notices ?? [];
+  // The fast scan's "Looking for personal names…" is a promise; when the scan
+  // that would keep it threw, it is replaced by what happened instead.
+  const notices = nameScanFailed
+    ? [
+        ...(response?.notices ?? []).filter((notice) => notice !== "Looking for personal names…"),
+        `Name detection failed (${nameScanFailed}), so personal names were not looked for.`,
+      ]
+    : (response?.notices ?? []);
   const previewText = masked?.text || input || "";
   /**
    * Where a finding is in the preview: its own placeholder, which every
@@ -301,8 +314,10 @@ export default function Command() {
   // The clipboard follows the preview: whenever the masked text is current it
   // is copied, so that ⌘V in the next app is all that is left to do. A toast,
   // not a HUD, because a HUD closes the window the user may still be reading.
+  // Not when the name scan threw: that text is missing exactly what the user
+  // came for, and ⏎ still copies it once they have read why.
   useEffect(() => {
-    if (!ready || maskedText === lastCopied.current) return;
+    if (!ready || nameScanFailed || maskedText === lastCopied.current) return;
     lastCopied.current = maskedText;
     Clipboard.copy(maskedText)
       .then(() =>
@@ -313,7 +328,7 @@ export default function Command() {
         }),
       )
       .catch((error) => showFailureToast(error, { title: "Could not copy the masked text" }));
-  }, [ready, maskedText, replaced]);
+  }, [ready, nameScanFailed, maskedText, replaced]);
 
   /** ⌘V: starts over on whatever is on the clipboard now. */
   async function maskClipboard() {
