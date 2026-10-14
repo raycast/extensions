@@ -1,5 +1,12 @@
 # Changelog
 
+## [Article Discovery and Personal AI] - 2026-10-14
+
+- Find matching older posts live across the public blog archive using topics and meaningful terms.
+- Start Search Techgedöns with an optional search query entered directly in Raycast root search.
+- Ask Raycast AI for unread or favorite articles, optionally filtered by topic.
+- Open the oldest or newest unread article directly in Raycast or the default browser.
+
 ## [Live Menu Bar Preferences] - 2026-10-12
 
 - Keep all menu bar display options in the dedicated menu bar command settings and apply changes while it is running.
