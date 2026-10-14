@@ -1,6 +1,6 @@
 # HarborDrop Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-14
 
 - Search downloads shared by HarborDrop and show downloading counts, progress, transferred bytes, and speed.
 - Show finishing tasks separately and identify partial or stale shared lists.
