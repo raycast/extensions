@@ -4,6 +4,11 @@ const DEFAULT_RESULT_LIMIT = 5;
 const MAX_SEARCH_QUERIES = 5;
 const MAX_SEARCH_PAGES = 2;
 
+type ArticleSearchOptions = {
+  maxPages?: number;
+  maxQueries?: number;
+};
+
 const STOP_WORDS = new Set([
   "aber",
   "alle",
@@ -83,22 +88,28 @@ const STOP_WORDS = new Set([
   "you",
 ]);
 
-export async function searchRelevantArticles(question: string, limit = DEFAULT_RESULT_LIMIT): Promise<Article[]> {
+export async function searchRelevantArticles(
+  question: string,
+  limit = DEFAULT_RESULT_LIMIT,
+  options: ArticleSearchOptions = {},
+): Promise<Article[]> {
   const searchTerms = extractSearchTerms(question);
   if (searchTerms.length === 0) {
     return [];
   }
 
-  const candidates = await fetchSearchCandidates(createSearchQueries(searchTerms));
+  const maxQueries = clampSearchLimit(options.maxQueries, MAX_SEARCH_QUERIES);
+  const maxPages = clampSearchLimit(options.maxPages, MAX_SEARCH_PAGES);
+  const candidates = await fetchSearchCandidates(createSearchQueries(searchTerms).slice(0, maxQueries), maxPages);
 
   return rankArticles(candidates, searchTerms).slice(0, limit);
 }
 
-async function fetchSearchCandidates(searchQueries: string[]): Promise<Article[]> {
+async function fetchSearchCandidates(searchQueries: string[], maxPages = MAX_SEARCH_PAGES): Promise<Article[]> {
   const firstPages = await Promise.all(searchQueries.map((query) => fetchArticleSearchPage(query, 1)));
   const additionalPages = await Promise.all(
     firstPages.map((articles, index) =>
-      articles.length === ARTICLES_PER_FEED_PAGE && MAX_SEARCH_PAGES > 1
+      articles.length === ARTICLES_PER_FEED_PAGE && maxPages > 1
         ? fetchArticleSearchPage(searchQueries[index], 2)
         : Promise.resolve([]),
     ),
@@ -112,6 +123,14 @@ async function fetchSearchCandidates(searchQueries: string[]): Promise<Article[]
   }
 
   return [...uniqueArticles.values()];
+}
+
+function clampSearchLimit(value: number | undefined, maximum: number): number {
+  if (value === undefined || !Number.isFinite(value)) {
+    return maximum;
+  }
+
+  return Math.max(1, Math.min(maximum, Math.trunc(value)));
 }
 
 export async function findArticle(reference: string): Promise<Article | undefined> {

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>settingsProfiles</key>
+  <data>
+  W3siaWQiOiJzYW1wbGUtcHJvZmlsZSIsIm5hbWUiOiJIb21lIFtRdWlldF0ifV0=
+  </data>
+  <key>raycastStatus</key>
+  <data>
+  eyJyZXF1ZXN0IjoiZml4dHVyZS1yZXF1ZXN0IiwiYmF0dGVyeUxldmVsIjo3NSwi
+  YWN0aXZlUHJvZmlsZSI6IkhvbWUgW1F1aWV0XSJ9
+  </data>
+  <key>raycastCheckout</key>
+  <data>
+  eyJyZXF1ZXN0IjoiZml4dHVyZS1yZXF1ZXN0Iiwic3RhdGUiOiJzdGFydGluZyJ9
+  </data>
+</dict>
+</plist>

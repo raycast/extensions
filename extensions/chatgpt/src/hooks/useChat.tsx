@@ -24,6 +24,20 @@ function hasUnsupportedReasoningEffortError(error: unknown): boolean {
   );
 }
 
+function hasUnsupportedTemperatureError(error: unknown): boolean {
+  const message = (error instanceof Error ? error.message : String(error)).toLowerCase();
+  if (!message.includes("temperature")) {
+    return false;
+  }
+  return (
+    message.includes("unsupported") ||
+    message.includes("does not support") ||
+    message.includes("not allowed") ||
+    message.includes("not permitted") ||
+    message.includes("unrecognized")
+  );
+}
+
 export function useChat<T extends Chat>(props: T[]): ChatHook {
   const [data, setData] = useState<Chat[]>(props);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -96,11 +110,11 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     const selectedReasoningEffort =
       model.enableReasoningEffortChange && model.reasoningEffort !== "none" ? model.reasoningEffort : undefined;
 
-    const createCompletion = (includeReasoningEffort: boolean) =>
+    const createCompletion = (includeReasoningEffort: boolean, includeTemperature: boolean) =>
       chatGPT.chat.completions.create(
         {
           model: model.option,
-          temperature: Number(model.temperature),
+          ...(includeTemperature ? { temperature: Number(model.temperature) } : {}),
           ...(includeReasoningEffort && selectedReasoningEffort ? { reasoning_effort: selectedReasoningEffort } : {}),
           messages: [
             ...chatTransformer(
@@ -113,20 +127,34 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         },
         requestOptions,
       );
+    let includeReasoningEffort = Boolean(selectedReasoningEffort);
+    let includeTemperature = true;
     let retriedWithoutReasoningEffort = false;
+    let retriedWithoutTemperature = false;
 
     try {
       let res: ChatCompletion | Stream<ChatCompletionChunk>;
-      try {
-        res = await createCompletion(Boolean(selectedReasoningEffort));
-      } catch (error) {
-        if (selectedReasoningEffort && hasUnsupportedReasoningEffortError(error)) {
-          retriedWithoutReasoningEffort = true;
-          toast.title = "Reasoning effort not supported";
-          toast.message = "Retrying without effort setting...";
-          toast.style = Toast.Style.Animated;
-          res = await createCompletion(false);
-        } else {
+      for (;;) {
+        try {
+          res = await createCompletion(includeReasoningEffort, includeTemperature);
+          break;
+        } catch (error) {
+          if (includeReasoningEffort && hasUnsupportedReasoningEffortError(error)) {
+            includeReasoningEffort = false;
+            retriedWithoutReasoningEffort = true;
+            toast.title = "Reasoning effort not supported";
+            toast.message = "Retrying without effort setting...";
+            toast.style = Toast.Style.Animated;
+            continue;
+          }
+          if (includeTemperature && hasUnsupportedTemperatureError(error)) {
+            includeTemperature = false;
+            retriedWithoutTemperature = true;
+            toast.title = "Temperature not supported";
+            toast.message = "Retrying with the model's default temperature...";
+            toast.style = Toast.Style.Animated;
+            continue;
+          }
           throw error;
         }
       }
@@ -177,9 +205,13 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         setIsAborted(true);
       } else {
         toast.title = "Got your answer!";
-        toast.message = retriedWithoutReasoningEffort
-          ? "Provider ignored the reasoning effort setting for this response."
-          : undefined;
+        toast.message =
+          [
+            retriedWithoutReasoningEffort ? "Provider ignored the reasoning effort setting for this response." : null,
+            retriedWithoutTemperature ? "Provider ignored the temperature setting for this response." : null,
+          ]
+            .filter(Boolean)
+            .join(" ") || undefined;
         toast.style = Toast.Style.Success;
       }
 

@@ -163,6 +163,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "bool",
+    title: "Bool",
+    description:
+      "Make your own apps and tools from a conversation. Create Bool projects, prompt Bool's builder or edit files directly, define data entities and records, then publish working web apps to a live URL. Start from templates, remix projects and organize them across workspaces. Writes act only on your own Bool account, including creating, publishing and deleting projects. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Bool account, no API key to paste.",
+    icon: "https://bool.com/bool-mark.png",
+    homepage: "https://bool.com/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://bool.com/api/mcp"],
+    },
+    remoteUrl: "https://bool.com/api/mcp",
+  },
+  {
     name: "brave-search",
     title: "Brave Search",
     description:
@@ -1682,6 +1695,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://app.sendly.now/api/mcp"],
     },
+  },
+  {
+    name: "nitrosend",
+    title: "Nitrosend",
+    description:
+      "Compose email campaigns and automation flows, manage contacts and segments, send transactional email or SMS, and review delivery in Nitrosend. Hosted remote Streamable HTTP server; OAuth sign-in, no API key needed.",
+    icon: "https://raw.githubusercontent.com/nitrosend/cursor/main/assets/logo.png",
+    homepage: "https://docs.nitrosend.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.nitrosend.com/mcp"],
+    },
+    remoteUrl: "https://api.nitrosend.com/mcp",
   },
   {
     name: "shorty",
