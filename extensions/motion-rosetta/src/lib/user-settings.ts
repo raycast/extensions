@@ -45,15 +45,12 @@ export type ShortcutSettings = Record<string, string>;
 export const DEFAULT_SHORTCUTS: ShortcutSettings = Object.fromEntries(
   SHORTCUT_ACTIONS.map((a) => [a.id, a.default]),
 );
-export const SHORTCUT_STORAGE = "shortcuts-v1";
 export function preferenceName(id: string) {
   return `shortcut_${id.replace(/[^a-z0-9]/gi, "_").toLowerCase()}`;
 }
-// Preferences cannot be written through the SDK. Empty fields inherit the
-// previous saved binding (or default); "none" explicitly disables an action.
+// Empty fields use the default binding; "none" explicitly disables an action.
 export function resolveShortcuts(
   preferences: Record<string, string | undefined>,
-  legacy: ShortcutSettings = {},
 ) {
   return validateShortcuts(
     Object.fromEntries(
@@ -63,9 +60,7 @@ export function resolveShortcuts(
           action.id,
           configured?.toLowerCase() === "none"
             ? ""
-            : configured ||
-              legacy[action.id] ||
-              (legacy[action.id] === "" ? "" : action.default),
+            : configured || action.default,
         ];
       }),
     ),
@@ -89,9 +84,7 @@ export function parseShortcut(
     new Set(tokens).size !== tokens.length ||
     tokens.some((t) => !modifiers.includes(t as (typeof modifiers)[number]))
   )
-    throw new Error(
-      "Use modifiers + key, e.g. cmd+shift+3; blank disables it.",
-    );
+    throw new Error("Use modifiers + key, e.g. cmd+shift+3; none disables it.");
   const sorted = modifiers.filter((m) => tokens.includes(m));
   if (sorted.every((m) => m === "shift"))
     throw new Error("Include cmd, ctrl or opt.");
@@ -107,7 +100,12 @@ export function validateShortcuts(values: ShortcutSettings): ShortcutSettings {
   const normalized: ShortcutSettings = {},
     used = new Map<string, string>();
   for (const action of SHORTCUT_ACTIONS) {
-    const parsed = parseShortcut(values[action.id] ?? action.default);
+    let parsed: ReturnType<typeof parseShortcut>;
+    try {
+      parsed = parseShortcut(values[action.id] ?? action.default);
+    } catch (error) {
+      throw new Error(`${action.title}: ${(error as Error).message}`);
+    }
     const value = parsed ? [...parsed.modifiers, parsed.key].join("+") : "";
     if (value && used.has(value))
       throw new Error(`${action.title} conflicts with ${used.get(value)}.`);

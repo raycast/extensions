@@ -5,7 +5,7 @@
 - CSS keywords: https://www.w3.org/TR/css-easing-2/ . Existing parser values remain unchanged.
 - Motion Back Out: `motion-utils` 12.39.0 (resolved dependency of `motion` 12.23.24), `dist/es/easing/back.mjs`, `(0.33, 1.53, 0.69, 0.99)`. Back In reverses those control points, exactly as Motion's `reverseEasing`; tests compare 101 samples against the installed Motion implementation. Documentation: https://motion.dev/docs/easing-functions . Back In Out is not silently collapsed into a single cubic.
 - Rosetta physical springs are authored example configurations, not Apple/Figma/Motion named presets. Parameters live in `src/presets.ts`; their names describe intent, not universal suitability. Duration in the input is the Apple parameter; the preview reports the distinct settling window. Preview each on the intended component before adopting it.
-- Figma screenshot names alone do not establish numeric values. Its eleven pending presets remain hidden.
+- No Figma presets are included: names in Figma screenshots do not establish numeric values.
 
 ## Destination icons
 

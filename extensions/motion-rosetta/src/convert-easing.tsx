@@ -12,6 +12,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState, type ReactNode } from "react";
 import { performance } from "node:perf_hooks";
 import { join } from "node:path";
@@ -27,7 +28,6 @@ import {
   DEFAULT_SHORTCUTS,
   parseShortcut,
   resolveShortcuts,
-  SHORTCUT_STORAGE,
   durationSeconds,
   type ShortcutSettings,
 } from "./lib/user-settings.ts";
@@ -148,42 +148,38 @@ function CopyActions({
 export default function Command() {
   const [durationDraft, setDurationDraft] = useState<string>();
   const [curveDuration, setCurveDuration] = useState<number>();
-  const [shortcuts, setShortcuts] = useState<ShortcutSettings>({
-    ...DEFAULT_SHORTCUTS,
+  // Invalid or conflicting preferences keep the defaults active.
+  const [shortcutSetup] = useState<{
+    shortcuts: ShortcutSettings;
+    error?: string;
+  }>(() => {
+    try {
+      return { shortcuts: resolveShortcuts(getPreferenceValues()) };
+    } catch (error) {
+      return {
+        shortcuts: { ...DEFAULT_SHORTCUTS },
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
   });
+  const { shortcuts } = shortcutSetup;
   const convert = (input: string) => baseConvert(input, curveDuration);
   const previewDuration = (easing: Easing) =>
     basePreviewDuration(easing, curveDuration);
   const durationLabel = (easing: Easing) =>
     baseDurationLabel(easing, curveDuration);
   useEffect(() => {
-    let active = true;
-    void LocalStorage.getItem<string>(SHORTCUT_STORAGE)
-      .then((saved) => {
-        if (active)
-          setShortcuts(
-            resolveShortcuts(
-              getPreferenceValues(),
-              saved ? JSON.parse(saved) : {},
-            ),
-          );
-      })
-      .catch(() => {
-        void showToast({
-          style: Toast.Style.Failure,
-          title: "Check shortcut preferences",
-          message:
-            "Invalid or conflicting shortcuts. Defaults are active; saved settings are unchanged.",
-          primaryAction: {
-            title: "Open Preferences",
-            onAction: openExtensionPreferences,
-          },
-        });
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
+    if (!shortcutSetup.error) return;
+    void showToast({
+      style: Toast.Style.Failure,
+      title: "Check shortcut preferences",
+      message: `${shortcutSetup.error} Defaults are active.`,
+      primaryAction: {
+        title: "Open Preferences",
+        onAction: openExtensionPreferences,
+      },
+    });
+  }, [shortcutSetup]);
   const [activation] = useState(() => new InputActivation());
   const [state, setState] = useState<State>({ input: "" });
   const [selected, setSelected] = useState<string | null>("ease-out");
@@ -280,8 +276,7 @@ export default function Command() {
               ? error.message
               : "Showing the static preview.";
           setPreviewNote(message);
-          void showToast({
-            style: Toast.Style.Failure,
+          void showFailureToast(error, {
             title: "Animation preview unavailable",
             message,
           });
@@ -428,7 +423,7 @@ export default function Command() {
       void showToast({
         style: Toast.Style.Failure,
         title: "Invalid duration",
-        message: String(error),
+        message: error instanceof Error ? error.message : String(error),
       });
     }
   }

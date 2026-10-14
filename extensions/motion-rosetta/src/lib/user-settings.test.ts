@@ -14,26 +14,30 @@ import { fromDuration } from "./model.ts";
 import { previewKey } from "./preview-cache.ts";
 import { readFileSync } from "node:fs";
 
-it("preferences preserve legacy bindings, allow overrides and explicit disabling", () => {
-  const legacy = {
-    ...DEFAULT_SHORTCUTS,
-    "copy:figma": "cmd+opt+f",
-    "copy:swiftui": "",
-  };
-  expect(resolveShortcuts({}, legacy)).toEqual(legacy);
+it("preferences use defaults for blank fields, allow overrides and explicit disabling", () => {
+  expect(resolveShortcuts({})).toEqual(DEFAULT_SHORTCUTS);
   expect(
-    resolveShortcuts({ [preferenceName("copy:figma")]: "none" }, legacy)[
-      "copy:figma"
-    ],
+    resolveShortcuts({ [preferenceName("copy:figma")]: "  " })["copy:figma"],
+  ).toBe(DEFAULT_SHORTCUTS["copy:figma"]);
+  expect(
+    resolveShortcuts({ [preferenceName("copy:figma")]: "none" })["copy:figma"],
   ).toBe("");
   expect(
-    resolveShortcuts({ [preferenceName("copy:figma")]: "cmd+ctrl+f" }, legacy)[
+    resolveShortcuts({ [preferenceName("copy:figma")]: "cmd+ctrl+f" })[
       "copy:figma"
     ],
   ).toBe("cmd+ctrl+f");
   expect(() =>
     resolveShortcuts({ [preferenceName("copy:figma")]: "cmd+shift+6" }),
   ).toThrow("conflicts");
+  expect(() =>
+    resolveShortcuts({ [preferenceName("copy:figma")]: "cmd+k" }),
+  ).toThrow("Copy Figma: Reserved for Raycast or text editing.");
+  expect(() =>
+    resolveShortcuts({ [preferenceName("copy:figma")]: "shift" }),
+  ).toThrow(
+    "Copy Figma: Use modifiers + key, e.g. cmd+shift+3; none disables it.",
+  );
 });
 it("exposes all bindings as extension preferences without adding commands", () => {
   const manifest = JSON.parse(readFileSync("package.json", "utf8"));
