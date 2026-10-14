@@ -1,8 +1,12 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Taplio MCP Server] - 2026-10-14
+## [Add Taplio MCP Server] - {PR_MERGE_DATE}
 
 - Add Taplio to the official registry: write, schedule and analyze LinkedIn posts, find inspiration, comment, like and connect. Hosted Streamable HTTP server at https://mcp.taplio.com/ with OAuth sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Update AI Applyd MCP Server] - 2026-10-14
+
+- Update AI Applyd's description: it now submits applications on 34 hiring systems, up from 15.
 
 ## [Add Nitrosend MCP Server] - 2026-10-14
 

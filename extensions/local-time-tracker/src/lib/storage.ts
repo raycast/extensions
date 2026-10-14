@@ -1,5 +1,4 @@
 import { LocalStorage } from "@raycast/api";
-import { getLegacyProjectCategories } from "./project-categories";
 import { copyMissingLegacyWorkLogs } from "./storage-migration";
 import type { ActiveTimer, Project, ProjectCategory, WorkLog } from "./types";
 
@@ -45,17 +44,12 @@ export async function saveProjects(projects: Project[]): Promise<void> {
   await LocalStorage.setItem(STORAGE_KEYS.projects, JSON.stringify(projects));
 }
 
-export async function getProjectCategories(): Promise<ProjectCategory[]> {
+export async function getProjectGroups(): Promise<ProjectCategory[]> {
   await initializeStorage();
-  const rawValue = await LocalStorage.getItem<string>(STORAGE_KEYS.projectCategories);
-  if (rawValue === undefined) {
-    const projects = await getProjects();
-    return getLegacyProjectCategories(projects);
-  }
-  return readArray(STORAGE_KEYS.projectCategories, isProjectCategory, "project categories");
+  return readArray(STORAGE_KEYS.projectCategories, isProjectGroup, "project groups");
 }
 
-export async function saveProjectCategories(categories: ProjectCategory[]): Promise<void> {
+export async function saveProjectGroups(categories: ProjectCategory[]): Promise<void> {
   await initializeStorage();
   await LocalStorage.setItem(STORAGE_KEYS.projectCategories, JSON.stringify(categories));
 }
@@ -199,7 +193,7 @@ function isActiveTimer(value: unknown): value is ActiveTimer {
   );
 }
 
-function isProjectCategory(value: unknown): value is ProjectCategory {
+function isProjectGroup(value: unknown): value is ProjectCategory {
   if (!isRecord(value)) return false;
   return (
     isNonEmptyString(value.id) &&
