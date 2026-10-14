@@ -1,6 +1,6 @@
 # Changelog
 
-## [Pomodoro, Timer Alerts, and Improved Reports] - {PR_MERGE_DATE}
+## [Pomodoro, Timer Alerts, and Improved Reports] - 2026-10-14
 
 - Add a configurable work-timer alert, notified once per timer in a silent, persistent foreground Raycast window.
 - Add optional Pomodoro work, short-break, and long-break intervals with manual transitions.
