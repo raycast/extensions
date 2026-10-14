@@ -1,69 +1,68 @@
-import { MenuBarExtra, openExtensionPreferences } from "@raycast/api";
+import { MenuBarExtra, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { useLocalStorageProgress } from "./hooks/use-local-storage-progress";
 import { Progress } from "./types";
 import { getIcon } from "./utils/icon";
 import { getSubtitle } from "./utils/progress";
+import { selectMenuBar } from "./utils/progress-store";
 
 export default function Index() {
-  const [state, setState] = useLocalStorageProgress();
-  const currMenubarProgress = state.allProgress.find((p) => p.title === state.currMenubarProgressTitle);
+  const { state, reload } = useLocalStorageProgress();
+  const current = state.allProgress.find((progress) => progress.id === state.currMenubarProgressId);
 
-  const onUpdateCurrMenubarKey = (progress: Progress) => {
-    setState((prev) => ({ ...prev, currMenubarProgressTitle: progress.title }));
+  const selectProgress = async (progress: Progress) => {
+    try {
+      await selectMenuBar(progress.id);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could Not Save Menu Bar Selection",
+        message: error instanceof Error ? error.message : String(error),
+      });
+      try {
+        await reload();
+      } catch {
+        // The original storage failure is already displayed.
+      }
+      return;
+    }
+    try {
+      await reload();
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Selection Saved",
+        message: "The menu bar could not refresh. Reopen the command to refresh.",
+      });
+    }
   };
+
+  const renderProgress = (progress: Progress) => (
+    <MenuBarExtra.Item
+      key={progress.id}
+      title={progress.menubar.title}
+      tooltip={progress.title}
+      subtitle={getSubtitle(progress.progressNum)}
+      icon={getIcon(progress.progressNum)}
+      onAction={() => selectProgress(progress)}
+    />
+  );
 
   return (
     <MenuBarExtra
-      title={
-        currMenubarProgress
-          ? `${currMenubarProgress.menubar.title} ${currMenubarProgress.progressNum}%`
-          : "Nothing to show"
-      }
-      icon={currMenubarProgress ? getIcon(currMenubarProgress.progressNum) : undefined}
+      title={current ? `${current.menubar.title} ${current.progressNum}%` : "Nothing to Show"}
+      icon={current ? getIcon(current.progressNum) : undefined}
       isLoading={state.isLoading}
     >
-      {state.isLoading ? null : (
+      {!state.isLoading && (
         <>
-          <MenuBarExtra.Section title={`🟢 Pinned Progress`}>
-            {state.allProgress
-              .filter((p) => p.menubar.shown)
-              .filter((p) => p.pinned)
-              .map((progress) => (
-                <MenuBarExtra.Item
-                  key={progress.title}
-                  title={progress.menubar.title as string}
-                  subtitle={`${getSubtitle(progress.progressNum)}`}
-                  icon={getIcon(progress.progressNum)}
-                  onAction={() => {
-                    onUpdateCurrMenubarKey(progress);
-                  }}
-                />
-              ))}
+          <MenuBarExtra.Section title="Pinned Progress">
+            {state.allProgress.filter((progress) => progress.menubar.shown && progress.pinned).map(renderProgress)}
           </MenuBarExtra.Section>
-          <MenuBarExtra.Section title={`🔵 All Progress`}>
-            {state.allProgress
-              .filter((p) => p.menubar.shown)
-              .filter((p) => !p.pinned)
-              .map((progress) => (
-                <MenuBarExtra.Item
-                  key={progress.title}
-                  title={progress.menubar.title as string}
-                  tooltip={progress.title}
-                  subtitle={`${getSubtitle(progress.progressNum)}`}
-                  icon={getIcon(progress.progressNum)}
-                  onAction={() => {
-                    onUpdateCurrMenubarKey(progress);
-                  }}
-                />
-              ))}
+          <MenuBarExtra.Section title="All Progress">
+            {state.allProgress.filter((progress) => progress.menubar.shown && !progress.pinned).map(renderProgress)}
           </MenuBarExtra.Section>
           <MenuBarExtra.Section>
-            <MenuBarExtra.Item
-              key={"preferences"}
-              title="Open Preferences"
-              onAction={openExtensionPreferences}
-              shortcut={{ modifiers: ["cmd"], key: "," }}
-            />
+            <MenuBarExtra.Item title="Open Preferences" onAction={openExtensionPreferences} />
           </MenuBarExtra.Section>
         </>
       )}

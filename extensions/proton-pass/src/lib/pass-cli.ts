@@ -1,16 +1,25 @@
 import { environment, getPreferenceValues, open } from "@raycast/api";
 import { homedir } from "node:os";
-import { delimiter } from "node:path";
+import { delimiter, join } from "node:path";
 import { clearCache } from "./cache";
 import { ensureCli } from "./cli";
 import { createPassCliAdapter, PassCliAdapter } from "./core/adapter";
-import { runBrowserLogin } from "./core/login";
+import {
+  BrowserLoginStatus,
+  cancelDetachedLogin,
+  checkDetachedLogin,
+  forgetDetachedLogin,
+  isDetachedLoginRunning,
+  savedDetachedLogin,
+  startDetachedLogin,
+} from "./core/login";
 import { MOCK_ITEM_DETAILS, MOCK_ITEMS, MOCK_TOTP_CODES, MOCK_VAULTS } from "./mock-data";
-import { Item, ItemDetail, PassCliError, PasswordOptions, PasswordScore, Vault } from "./types";
+import { Item, ItemDetail, PassCliError, PasswordOptions, PasswordScore, Vault, VaultSharing } from "./types";
 
 const USE_MOCK_DATA = environment.isDevelopment;
 const DEFAULT_CLI_COMMAND = "pass-cli";
-const LOGIN_TIMEOUT_MS = 10 * 60_000;
+/** How long pass-cli may take to print the login URL. */
+const LOGIN_URL_TIMEOUT_MS = 30_000;
 type CliPathPreferenceValues = { cliPath?: string };
 
 let mockCacheCleared = false;
@@ -51,11 +60,19 @@ function getConfiguredCliPath(): string | undefined {
   return stripSurroundingQuotes(configured);
 }
 
-async function getCliPath(): Promise<string> {
+/** The pass-cli the extension runs: the CLI Path preference when set, otherwise the one it installed. */
+export async function getCliPath(): Promise<string> {
   return getConfiguredCliPath() ?? ensureCli();
 }
 
+/** Where the browser login keeps its state while it runs, so that it's found again after Raycast closed. */
+const loginDir = () => join(environment.supportPath, "login");
+
 async function getAdapter(): Promise<PassCliAdapter> {
+  // A pass-cli command running while a login saves its session can make pass-cli delete that session.
+  if (await isDetachedLoginRunning(loginDir())) {
+    throw new PassCliError("Finish logging in in your browser first.", "not_authenticated");
+  }
   const cliPath = await getCliPath();
   return createPassCliAdapter(
     { file: cliPath, args: [] },
@@ -65,22 +82,56 @@ async function getAdapter(): Promise<PassCliAdapter> {
   );
 }
 
-export async function loginWithBrowser(): Promise<void> {
+/**
+ * Starts a browser login and opens its page. The login keeps going if Raycast closes meanwhile: checkBrowserLogin()
+ * follows it. Returns the page's URL, or nothing when there's nothing to wait for.
+ */
+export async function startBrowserLogin(): Promise<string | undefined> {
   if (USE_MOCK_DATA) {
     await ensureMockCacheCleared();
-    return;
+    return undefined;
   }
 
-  const cliPath = await getCliPath();
-  await runBrowserLogin(
-    { file: cliPath, args: [] },
-    {
-      openUrl: (url) => open(url),
-      timeoutMs: LOGIN_TIMEOUT_MS,
-    },
-  );
-  // The new session may belong to another account, so don't show the previous session's cached items.
+  // The new session may belong to another account: no view may show the previous one's cached items, whichever
+  // view opens first once the login completes.
   await clearCache();
+  const cliPath = await getCliPath();
+  const url = await startDetachedLogin({ file: cliPath, args: [] }, loginDir(), LOGIN_URL_TIMEOUT_MS);
+  try {
+    await open(url);
+  } catch (error) {
+    // Nobody can finish this login, and while it runs, no other pass-cli command does.
+    await cancelDetachedLogin(loginDir());
+    throw error;
+  }
+  return url;
+}
+
+/** Where the browser login is: still waiting for the browser, logged in, or failed. */
+export async function checkBrowserLogin(): Promise<BrowserLoginStatus> {
+  if (USE_MOCK_DATA) return { state: "none" };
+
+  const status = await checkDetachedLogin(loginDir(), checkAuth);
+  if (status.state === "failed") console.error(`Browser login failed: ${status.error.message}`);
+  return status;
+}
+
+export async function cancelBrowserLogin(): Promise<void> {
+  if (!USE_MOCK_DATA) await cancelDetachedLogin(loginDir());
+}
+
+/**
+ * Ends the session, which pass-cli shares with the terminal, and clears the extension's cache. `force` only removes it
+ * from this computer, for when ending it on Proton's servers fails.
+ */
+export async function logout(force = false): Promise<void> {
+  if (USE_MOCK_DATA) return clearCache();
+  // A login running now stops Logout (see getAdapter), so this one is over. One started meanwhile must keep going.
+  const endedLogin = await savedDetachedLogin(loginDir());
+  await (await getAdapter()).logout(force);
+  await clearCache();
+  // Its result would otherwise show on the next login screen.
+  if (endedLogin) await forgetDetachedLogin(loginDir(), endedLogin);
 }
 
 export async function checkAuth(): Promise<boolean> {
@@ -177,6 +228,36 @@ export async function listVaultsAndItems(): Promise<{ vaults: Vault[]; items: It
   const vaults = await listVaults();
   if (USE_MOCK_DATA) return { vaults, items: await listItems(undefined, vaults), failedVaults: [] };
   return { vaults, ...(await listItemsOfVaults(vaults)) };
+}
+
+/**
+ * How each vault is shared, by share ID. Vaults the user doesn't own were shared with them; for the user's own
+ * vaults, the members are counted, one call per vault, in parallel like the item listing. A count that fails
+ * leaves `isShared` unknown.
+ */
+export async function listVaultSharing(): Promise<Map<string, VaultSharing>> {
+  if (USE_MOCK_DATA) {
+    await ensureMockCacheCleared();
+    return new Map(
+      MOCK_VAULTS.flatMap((vault) =>
+        vault.role ? [[vault.shareId, { role: vault.role, isShared: vault.role !== "owner" || vault.isShared }]] : [],
+      ),
+    );
+  }
+
+  const adapter = await getAdapter();
+  const roles = Array.from(await adapter.listVaultRoles());
+  return new Map(
+    await mapWithConcurrency(
+      roles,
+      VAULT_LIST_CONCURRENCY,
+      async ([shareId, role]): Promise<[string, VaultSharing]> => {
+        if (role !== "owner") return [shareId, { role, isShared: true }];
+        const members = await (await getAdapter()).countVaultMembers(shareId).catch(() => undefined);
+        return [shareId, { role, isShared: members === undefined ? undefined : members > 1 }];
+      },
+    ),
+  );
 }
 
 export async function getItem(shareId: string, itemId: string, vaultName?: string): Promise<ItemDetail> {

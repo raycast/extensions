@@ -15,20 +15,35 @@ export async function getHistory(): Promise<HistoryEntry[]> {
   }
 }
 
-export async function addHistory(entry: HistoryEntry): Promise<void> {
-  const history = await getHistory();
-  const updated = [entry, ...history].slice(0, MAX_HISTORY);
-  await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+// History writes are read-modify-write, so run them one at a time to avoid lost updates.
+let historyQueue: Promise<unknown> = Promise.resolve();
+
+function enqueueHistoryWrite(task: () => Promise<void>): Promise<void> {
+  const run = historyQueue.then(task);
+  historyQueue = run.catch(() => undefined);
+  return run;
 }
 
-export async function deleteHistory(id: string): Promise<void> {
-  const history = await getHistory();
-  const updated = history.filter((h) => h.id !== id);
-  await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+export function addHistory(entry: HistoryEntry): Promise<void> {
+  return enqueueHistoryWrite(async () => {
+    const history = await getHistory();
+    const updated = [entry, ...history].slice(0, MAX_HISTORY);
+    await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+  });
 }
 
-export async function clearHistory(): Promise<void> {
-  await LocalStorage.setItem(HISTORY_KEY, JSON.stringify([]));
+export function deleteHistory(id: string): Promise<void> {
+  return enqueueHistoryWrite(async () => {
+    const history = await getHistory();
+    const updated = history.filter((h) => h.id !== id);
+    await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+  });
+}
+
+export function clearHistory(): Promise<void> {
+  return enqueueHistoryWrite(async () => {
+    await LocalStorage.setItem(HISTORY_KEY, JSON.stringify([]));
+  });
 }
 
 export async function getSaved(): Promise<SavedWebhook[]> {

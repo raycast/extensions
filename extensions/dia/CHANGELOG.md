@@ -1,5 +1,20 @@
 # Dia Changelog
 
+## [AI Tools: Tabs, History and Bookmarks] - 2026-10-10
+
+- Added AI tools to list open tabs, get the focused tab, and search browsing history and bookmarks.
+- History and bookmark searches return 50 results by default, up to 100.
+
+## [AI Tool: Read Tab Contents] - 2026-10-10
+
+- Added an AI tool that reads the visible text of a tab or the focused tab, truncated to 20,000 characters by default.
+- Requires Dia to be launched with `--enable-applescript-javascript`; the tool explains how when it isn't.
+
+## [AI Tools: Open URLs and Manage Tabs] - 2026-10-10
+
+- Added AI tools to open a URL or web search, switch to a tab, and close a tab.
+- Closing a tab asks for confirmation first.
+
 ## [Security: Address dependabot alert] - 2026-08-19
 
 - Updated package-lock.json to fix https://github.com/raycast/extensions/security/dependabot/76383

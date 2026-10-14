@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Document, ErrorResult, Organization, SearchResult, Tag } from "./types";
+import { Document, ErrorResult, Organization, Tag } from "./types";
 
 const { papra_url, api_token } = getPreferenceValues<Preferences>();
 const API_HEADERS = {
@@ -47,8 +47,8 @@ export const papra = {
     list: (props: { organizationId: string }) =>
       makeRequest<{ documents: Document[] }>(`organizations/${props.organizationId}/documents`),
     search: (props: { organizationId: string; query: string }) =>
-      makeRequest<{ documents: SearchResult[] }>(
-        `organizations/${props.organizationId}/documents/search?searchQuery=${props.query}`,
+      makeRequest<{ documents: Document[] }>(
+        `organizations/${props.organizationId}/documents?${new URLSearchParams({ searchQuery: props.query }).toString()}`,
       ),
   },
   organizations: {

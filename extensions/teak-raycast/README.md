@@ -2,6 +2,10 @@
 
 Keyboard-first Teak workflows for capture and retrieval directly inside Raycast.
 
+## Sign in
+
+Run **Search Cards** and choose **Sign in with Browser**. Finish sign-in in your browser, then return to Raycast. If Teak changes its sign-in provider, connect again when prompted.
+
 ## Commands
 
 - **Quick Save**: Open an input form to type or paste text and URLs to save.
@@ -28,11 +32,15 @@ AI tools use the same sign-in as the extension — no extra setup required.
 
 ### Using an API key (optional)
 
-Prefer an API key? Open the extension preferences and paste a key from Teak Settings > **Manage API Keys**. A configured API key takes precedence over browser sign-in, so existing setups keep working unchanged.
+Prefer an API key? Open the extension preferences and paste a key from **Teak Settings → Security → API keys**. A configured API key takes precedence over browser sign-in.
 
 ## Troubleshooting
 
-- **Sign-in issues**: Use **Sign Out** from any command's action panel, then run a command again to re-authorize.
-- **Invalid key errors** (API key users): regenerate the key in Teak Settings > Manage API Keys, then update extension preferences.
+- **Connection unavailable**: Check your connection and choose **Retry Connection**. Your saved sign-in stays available, including when a sign-in response cannot be read.
+- **Sign-in issues**: Open **Search Cards**, use **Sign Out**, then sign in again. If sign-out fails, your credentials stay saved so you can retry.
+- **Invalid key errors**: Update the API key in extension preferences using **Teak Settings → Security → API keys**.
 - **Rate limited errors**: wait briefly and retry.
 - **Network errors**: verify connectivity to `app.teakvault.com` and `teakvault.com/api`.
+
+To disconnect a connection from Teak, open **Settings → Security → Connected apps**.
+With WorkOS, a confirmed disconnect signs out Raycast across all its installations. Reconnecting can take about five minutes. If WorkOS rejects your saved sign-in, or Teak has switched away from its provider, Raycast signs out only this Mac and tells you that other installations may remain connected. Manage those in **Settings → Security → Connected apps**.

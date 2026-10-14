@@ -1,12 +1,21 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, useNavigation } from "@raycast/api";
 import React, { useCallback, useState } from "react";
+import { MonthCalendarView } from "../components/MonthCalendar";
 import { TaskList } from "../components/TaskList";
 import { useCalendars } from "../hooks/useCalendars";
 import { useTasks } from "../hooks/useTasks";
 import { TaskFilterState } from "../types";
 
-export default function DashboardCommand() {
+/** Classic task-list dashboard (grouped by Overdue / Today / This Week…). */
+function TaskListDashboard({
+  initialCalendarId,
+  onCalendarChange,
+}: {
+  initialCalendarId?: string;
+  onCalendarChange?: (calId: string) => void;
+}) {
   const prefs = getPreferenceValues<Preferences>();
+  const { push } = useNavigation();
 
   const {
     calendars,
@@ -17,7 +26,7 @@ export default function DashboardCommand() {
     isLoading: isCalendarsLoading,
     isOffline: isCalendarsOffline,
     refreshCalendars,
-  } = useCalendars();
+  } = useCalendars(initialCalendarId);
 
   const {
     tasks,
@@ -70,6 +79,19 @@ export default function DashboardCommand() {
     await Promise.all([refreshCalendars(), refreshTasks()]);
   }, [refreshCalendars, refreshTasks]);
 
+  const handleOpenMonthView = useCallback(() => {
+    push(
+      <MonthCalendarView
+        calendars={calendars}
+        initialCalendarId={activeCalendarId}
+        customColors={customColors}
+      />,
+      () => {
+        void refreshTasks();
+      },
+    );
+  }, [push, calendars, activeCalendarId, customColors, refreshTasks]);
+
   return (
     <TaskList
       calendars={calendars}
@@ -83,6 +105,7 @@ export default function DashboardCommand() {
       selectedTaskIds={selectedTaskIds}
       onSelectCalendar={(calId) => {
         setActiveCalendarId(calId);
+        onCalendarChange?.(calId);
         handleUpdateFilter({ calendarId: calId, somedayListId: "all" });
       }}
       onUpdateFilter={handleUpdateFilter}
@@ -99,6 +122,58 @@ export default function DashboardCommand() {
       onBulkComplete={bulkComplete}
       onBulkUpdate={bulkUpdate}
       onBulkDelete={bulkDelete}
+      onOpenMonthView={handleOpenMonthView}
+    />
+  );
+}
+
+/** Monthly calendar as the dashboard's root view (see `defaultToMonthView`). */
+function MonthDashboard({
+  initialCalendarId,
+  onCalendarChange,
+  onShowTaskList,
+}: {
+  initialCalendarId?: string;
+  onCalendarChange?: (calId: string) => void;
+  onShowTaskList: (calendarId: string) => void;
+}) {
+  const { calendars, customColors, activeCalendarId, isLoading } =
+    useCalendars(initialCalendarId);
+
+  return (
+    <MonthCalendarView
+      calendars={calendars}
+      initialCalendarId={activeCalendarId}
+      customColors={customColors}
+      isLoadingCalendars={isLoading}
+      onCalendarChange={onCalendarChange}
+      onShowTaskList={onShowTaskList}
+    />
+  );
+}
+
+export default function DashboardCommand() {
+  const prefs = getPreferenceValues<Preferences>();
+  const [view, setView] = useState<"month" | "list">(
+    prefs.defaultToMonthView ? "month" : "list",
+  );
+  const [selectedCalendarId, setSelectedCalendarId] = useState<
+    string | undefined
+  >(undefined);
+
+  return view === "month" ? (
+    <MonthDashboard
+      initialCalendarId={selectedCalendarId}
+      onCalendarChange={setSelectedCalendarId}
+      onShowTaskList={(calId) => {
+        setSelectedCalendarId(calId);
+        setView("list");
+      }}
+    />
+  ) : (
+    <TaskListDashboard
+      initialCalendarId={selectedCalendarId}
+      onCalendarChange={setSelectedCalendarId}
     />
   );
 }

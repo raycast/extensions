@@ -2,7 +2,6 @@ import { useState } from "react";
 import AppShortcuts from "./app-shortcuts";
 import { useApps } from "./load/apps-provider";
 import { useAppShortcuts } from "./load/app-shortcuts-provider";
-import { exitWithMessage } from "./view/exit-action";
 import { getPlatform } from "./load/platform";
 import { getApplications } from "@raycast/api";
 import { getDesktopTarget } from "./engine/desktop-target";
@@ -45,7 +44,7 @@ jest.mock("./load/apps-provider", () => ({ useApps: jest.fn() }));
 jest.mock("./load/app-shortcuts-provider", () => ({ useAppShortcuts: jest.fn() }));
 jest.mock("./load/platform", () => ({ getPlatform: jest.fn() }));
 jest.mock("./view/shortcuts-list", () => ({ ShortcutsList: "ShortcutsList" }));
-jest.mock("./view/exit-action", () => ({ exitWithMessage: jest.fn() }));
+jest.mock("./view/unsupported-app", () => ({ UnsupportedApp: "UnsupportedApp" }));
 
 const publicApp = { name: "Visual Studio Code", slug: "vscode", windowsProcessName: "Code", keymaps: ["Default"] };
 const customApp = { ...publicApp, name: "My Editor", slug: "custom-my-editor", customAppId: "custom-app" };
@@ -79,7 +78,6 @@ it.each(["vscode", "custom-my-editor"])(
       "Visual Studio Code",
       "My Editor",
     ]);
-    expect(exitWithMessage).not.toHaveBeenCalled();
     expect(setSlug).not.toHaveBeenCalled();
     const item = choice.props.children.find((item: React.JSX.Element) => item.key === slug);
     item.props.actions.props.children.props.onAction();
@@ -96,7 +94,6 @@ it.each(["vscode", "custom-my-editor"])(
     expect(shortcuts.type).toBe("ShortcutsList");
     expect(useAppShortcuts).toHaveBeenLastCalledWith(slug);
     expect(shortcuts.props.executionTarget).toEqual({ kind: "desktop", windowsProcessName: "Code" });
-    expect(exitWithMessage).not.toHaveBeenCalled();
   }
 );
 
@@ -109,9 +106,9 @@ it("automatically opens a unique matching collection", () => {
   });
   const setSlug = jest.fn();
   jest.mocked(useState).mockImplementationOnce(() => [undefined, setSlug]);
-  AppShortcuts();
+  const view = AppShortcuts() as React.JSX.Element;
   expect(setSlug).toHaveBeenCalledWith("custom-my-editor");
-  expect(exitWithMessage).not.toHaveBeenCalled();
+  expect(view.type).toBe("ShortcutsList");
 });
 
 it.each([
@@ -167,8 +164,9 @@ it.each([
 
 it("reports an unavailable app only when no collection matches", () => {
   jest.mocked(useApps).mockReturnValueOnce({ data: [], isLoading: false, favorites: [], toggleFavorite: jest.fn() });
-  AppShortcuts();
-  expect(exitWithMessage).toHaveBeenCalledWith("Shortcuts not available for application Visual Studio Code");
+  const view = AppShortcuts() as React.JSX.Element;
+  expect(view.type).toBe("UnsupportedApp");
+  expect(view.props).toMatchObject({ title: "No shortcuts for Visual Studio Code yet", identifier: "Code" });
 });
 
 it("offers the collection picker for matching public and custom macOS apps", () => {
@@ -187,5 +185,4 @@ it("offers the collection picker for matching public and custom macOS apps", () 
     "My Editor",
   ]);
   expect(setSlug).not.toHaveBeenCalled();
-  expect(exitWithMessage).not.toHaveBeenCalled();
 });

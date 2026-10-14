@@ -133,7 +133,7 @@
       "name": "mint-undo",
       "title": "Undo Mint Action",
       "subtitle": "Mint",
-      "description": "Put back files from a recent cleanup, uninstall or organize run",
+      "description": "Restore eligible files from recent Mint operations while files and recovery records remain available",
       "mode": "view",
       "keywords": [
         "restore",

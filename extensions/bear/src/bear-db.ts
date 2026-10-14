@@ -80,6 +80,11 @@ export class BearDb {
 
   constructor(database: Database) {
     this.database = database;
+    // SQLite's built-in lower() only folds ASCII, so non-Latin (e.g. Cyrillic) search was case-sensitive.
+    // Final sigma (ς) is folded to σ so a query ending in Σ still matches text where Σ is mid-word.
+    this.database.create_function("lower", (value: unknown) =>
+      value == null ? null : String(value).toLocaleLowerCase().replace(/ς/g, "σ"),
+    );
   }
 
   close() {

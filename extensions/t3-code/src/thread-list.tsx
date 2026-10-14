@@ -167,7 +167,11 @@ export function ErrorView({
       <List.EmptyView
         icon={{ source: Icon.Plug, tintColor: Color.Red }}
         title={
-          unreachable ? "T3 Code is not running" : "T3 Code request failed"
+          unreachable
+            ? "T3 Code is not running"
+            : error instanceof T3Error && error.kind === "unsupported"
+              ? "Not supported on this T3 Code version"
+              : "T3 Code request failed"
         }
         description={error.message}
         actions={

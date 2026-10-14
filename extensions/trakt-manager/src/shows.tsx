@@ -9,6 +9,8 @@ import { initTraktClient } from "./lib/client";
 import { getPosterUrl } from "./lib/helper";
 import { markFirstEpisodeWatched } from "./lib/media-mutations";
 import { TraktShowListItem } from "./lib/schema";
+import { useRatingsSync } from "./lib/use-ratings";
+import { useWatchedState, useWatchedSync } from "./lib/use-watched";
 import { useWatchlistSync } from "./lib/use-watchlist-ids";
 import { abortSearch, createSearchFetcher } from "./lib/search";
 
@@ -18,6 +20,9 @@ export default function Command() {
   const [actionLoading, setActionLoading] = useState(false);
   const traktClient = initTraktClient();
   useWatchlistSync();
+  useRatingsSync();
+  useWatchedSync();
+  const { setWatched } = useWatchedState();
   const {
     isLoading,
     data: shows,
@@ -45,6 +50,9 @@ export default function Command() {
   const markFirstEpisodeWatchedAction = useCallback(
     async (show: TraktShowListItem) => {
       await markFirstEpisodeWatched(traktClient, show.show.ids.trakt, { signal: abortable.current?.signal });
+      const showId = show.show.ids.trakt;
+      setWatched({ type: "show", traktId: showId }, true);
+      setWatched({ type: "episode", showId, season: 1, number: 1 }, true);
     },
     [traktClient],
   );

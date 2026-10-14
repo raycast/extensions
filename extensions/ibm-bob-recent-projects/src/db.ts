@@ -2,6 +2,7 @@ import { Alert, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import fs from "fs";
 import { homedir } from "os";
+import path from "path";
 import { EntryLike, RecentEntries } from "./types";
 import { isSameEntry } from "./utils";
 import { execFilePromise } from "./utils/exec";
@@ -12,9 +13,9 @@ export type RemoveMethods = {
 };
 
 export function useRecentEntries() {
-  const path = getPath();
+  const dbPath = getPath();
 
-  if (!fs.existsSync(path)) {
+  if (!fs.existsSync(dbPath)) {
     return {
       data: [],
       isLoading: false,
@@ -26,7 +27,7 @@ export function useRecentEntries() {
   }
 
   const { data, isLoading, revalidate } = useSQL<RecentEntries>(
-    path,
+    dbPath,
     "SELECT json_extract(value, '$.entries') as entries FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList'",
   );
 
@@ -78,7 +79,38 @@ export function useRecentEntries() {
 }
 
 function getPath() {
-  return `${homedir()}/Library/Application Support/IBM Bob/User/globalStorage/state.vscdb`;
+  const sharedPath = getSharedStateDatabasePath();
+  if (sharedPath && fs.existsSync(sharedPath)) {
+    return sharedPath;
+  }
+  return path.join(homedir(), "Library", "Application Support", "IBM Bob", "User", "globalStorage", "state.vscdb");
+}
+
+function getSharedStateDatabasePath(): string | undefined {
+  const sharedDataFolderName = getSharedDataFolderName();
+  if (!sharedDataFolderName) return undefined;
+  // sharedDataFolderName (e.g. ".bobide-shared") lives directly in the home directory.
+  return path.join(homedir(), sharedDataFolderName, "sharedStorage", "state.vscdb");
+}
+
+function getSharedDataFolderName(): string | undefined {
+  const candidates = [
+    "/Applications/IBM Bob.app/Contents/Resources/app/product.json",
+    path.join(homedir(), "Applications", "IBM Bob.app", "Contents", "Resources", "app", "product.json"),
+  ];
+  for (const productJSONPath of candidates) {
+    if (fs.existsSync(productJSONPath)) {
+      try {
+        const productJSON = JSON.parse(fs.readFileSync(productJSONPath, "utf-8")) as { sharedDataFolderName?: string };
+        if (productJSON.sharedDataFolderName) {
+          return productJSON.sharedDataFolderName;
+        }
+      } catch {
+        // Ignore malformed product.json.
+      }
+    }
+  }
+  return undefined;
 }
 
 async function saveEntries(entries: EntryLike[]) {

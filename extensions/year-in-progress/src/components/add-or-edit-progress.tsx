@@ -1,178 +1,99 @@
 import { Action, ActionPanel, Form } from "@raycast/api";
-import { useState } from "react";
-import { useLocalStorageProgress } from "../hooks/use-local-storage-progress";
-import { Progress } from "../types";
-
-type FormError = {
-  titleError: string | undefined;
-  menubarTitleError: string | undefined;
-  startDateError: string | undefined;
-  endDateError: string | undefined;
-  showInMenubarError: string | undefined;
-};
+import { useRef, useState } from "react";
+import { Progress, ProgressFormErrors, ProgressFormValues } from "../types";
+import { supportsMenuBar } from "../utils/platform";
+import { createProgressFormValues, validateProgressForm } from "../utils/validation";
 
 type AddOrEditProgressProps = {
-  progress?: Progress;
-  onSubmit: (values: FormValues) => Promise<void>;
+  progress?: Extract<Progress, { type: "user" }>;
+  allProgress: readonly Progress[];
+  onSubmit: (values: ProgressFormValues) => Promise<void>;
 };
 
-export type FormValues = {
-  title: string | undefined;
-  menubarTitle: string | undefined;
-  startDate: Date;
-  endDate: Date;
-  showInMenubar: boolean;
-  showAsCommand: boolean;
-};
+export default function AddOrEditProgress({ progress, allProgress, onSubmit }: AddOrEditProgressProps) {
+  const [values, setValues] = useState<ProgressFormValues>(() => createProgressFormValues(progress));
+  const [errors, setErrors] = useState<ProgressFormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitPending = useRef(false);
 
-export default function AddOrEditProgress(props: AddOrEditProgressProps) {
-  const [state] = useLocalStorageProgress();
-
-  const [formValue, setFormValue] = useState<FormValues>(
-    props.progress
-      ? {
-          title: props.progress.title,
-          menubarTitle: props.progress.menubar.title,
-          startDate: new Date(props.progress.startDate),
-          endDate: new Date(props.progress.endDate),
-          showInMenubar: props.progress.menubar.shown ?? false,
-          showAsCommand: props.progress.showAsCommand ?? false,
-        }
-      : {
-          title: undefined,
-          menubarTitle: undefined,
-          startDate: new Date(),
-          endDate: new Date(),
-          showInMenubar: false,
-          showAsCommand: false,
-        }
-  );
-  const [error, setError] = useState<FormError>({
-    titleError: undefined,
-    menubarTitleError: undefined,
-    startDateError: undefined,
-    endDateError: undefined,
-    showInMenubarError: undefined,
-  });
+  const updateValues = (change: Partial<ProgressFormValues>) => {
+    const nextValues = { ...values, ...change };
+    setValues(nextValues);
+    setErrors(validateProgressForm(nextValues, allProgress, progress?.id));
+  };
 
   return (
     <Form
+      isLoading={isSubmitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" onSubmit={props.onSubmit} />
+          <Action.SubmitForm<ProgressFormValues>
+            title="Save Progress"
+            onSubmit={async (submitted) => {
+              if (submitPending.current) return;
+              const nextValues = { ...values, ...submitted };
+              const nextErrors = validateProgressForm(nextValues, allProgress, progress?.id);
+              setValues(nextValues);
+              setErrors(nextErrors);
+              if (Object.keys(nextErrors).length) return;
+              submitPending.current = true;
+              setIsSubmitting(true);
+              try {
+                await onSubmit(nextValues);
+              } finally {
+                submitPending.current = false;
+                setIsSubmitting(false);
+              }
+            }}
+          />
         </ActionPanel>
       }
     >
-      {props.progress ? (
-        // edit mode
-        <Form.Description title="title" text={props.progress?.title as string} />
-      ) : (
-        // creation mode
-        <Form.TextField
-          id="title"
-          title="Progress Title"
-          placeholder="Enter the progress title"
-          value={formValue.title}
-          onBlur={(event) => {
-            const title = event.target.value;
-            if (!title) {
-              setError({ ...error, titleError: "The field should't be empty!" });
-            } else if (!props.progress && state.allProgress.findIndex((progress) => progress.title === title) > -1) {
-              setError({ ...error, titleError: "The progress already exists!" });
-            } else {
-              setError({ ...error, titleError: undefined });
-            }
-            setFormValue({ ...formValue, title });
-          }}
-          onChange={(title) => {
-            if (!title) {
-              setError({ ...error, titleError: "The field should't be empty!" });
-            } else if (!props.progress && state.allProgress.findIndex((progress) => progress.title === title) > -1) {
-              setError({ ...error, titleError: "The progress already exists!" });
-            } else {
-              setError({ ...error, titleError: undefined });
-            }
-            setFormValue({ ...formValue, title });
-          }}
-          error={error.titleError}
-        />
-      )}
-
+      <Form.TextField
+        id="title"
+        title="Progress Title"
+        placeholder="Enter the progress title"
+        value={values.title}
+        onChange={(title) => updateValues({ title })}
+        error={errors.title}
+      />
       <Form.TextField
         id="menubarTitle"
-        title="Title In Menu Bar"
-        placeholder="Enter the title In Menu Bar"
-        value={formValue.menubarTitle}
-        onBlur={(event) => {
-          const title = event.target.value;
-          if (!title) {
-            setError({ ...error, menubarTitleError: "The field should't be empty!" });
-          } else {
-            setError({ ...error, menubarTitleError: undefined });
-          }
-          setFormValue({ ...formValue, menubarTitle: title });
-        }}
-        onChange={(title) => {
-          if (!title) {
-            setError({ ...error, menubarTitleError: "The field should't be empty!" });
-          } else {
-            setError({ ...error, menubarTitleError: undefined });
-          }
-          setFormValue({ ...formValue, menubarTitle: title });
-        }}
-        error={error.menubarTitleError}
+        title={supportsMenuBar ? "Title in Menu Bar" : "Progress Label"}
+        placeholder="Enter a short progress label"
+        value={values.menubarTitle}
+        onChange={(menubarTitle) => updateValues({ menubarTitle })}
+        error={errors.menubarTitle}
       />
       <Form.DatePicker
         id="startDate"
         title="Start Date"
-        value={formValue.startDate ? new Date(formValue.startDate) : new Date()}
-        onChange={(startDate) => {
-          if (!startDate) {
-            setError({ ...error, startDateError: "The field should't be empty!" });
-          } else if (new Date(startDate).getTime() >= new Date(formValue.endDate).getTime()) {
-            setError({ ...error, startDateError: "The start date must earlier than end date!" });
-          } else {
-            setError({ ...error, startDateError: undefined, endDateError: undefined });
-          }
-          setFormValue({ ...formValue, startDate: startDate as Date });
-        }}
-        error={error.startDateError}
+        value={values.startDate}
+        onChange={(startDate) => updateValues({ startDate })}
+        error={errors.startDate}
       />
       <Form.DatePicker
         id="endDate"
         title="End Date"
-        value={formValue.endDate ? new Date(formValue.endDate) : new Date()}
-        onChange={(endDate) => {
-          if (!endDate) {
-            setError({ ...error, endDateError: "The field should't be empty!" });
-          } else if (!formValue.startDate) {
-            setError({ ...error, startDateError: "The field should't be empty!", endDateError: undefined });
-          } else if (new Date(endDate).getTime() <= new Date(formValue.startDate).getTime()) {
-            setError({ ...error, endDateError: "The start date must earlier than end date!" });
-          } else {
-            setError({ ...error, endDateError: undefined, startDateError: undefined });
-          }
-          setFormValue({ ...formValue, endDate: endDate as Date });
-        }}
-        error={error.endDateError}
+        value={values.endDate}
+        onChange={(endDate) => updateValues({ endDate })}
+        error={errors.endDate}
       />
-      <Form.Checkbox
-        id="showInMenubar"
-        title="Show in Menu Bar"
-        label="Yes"
-        value={formValue.showInMenubar}
-        onChange={(value) => {
-          setFormValue({ ...formValue, showInMenubar: value });
-        }}
-      />
+      {supportsMenuBar && (
+        <Form.Checkbox
+          id="showInMenubar"
+          title="Show in Menu Bar"
+          label="Show This Progress"
+          value={values.showInMenubar}
+          onChange={(showInMenubar) => updateValues({ showInMenubar })}
+        />
+      )}
       <Form.Checkbox
         id="showAsCommand"
         title="Show in Command Subtitle"
-        label="Yes"
-        value={formValue.showAsCommand}
-        onChange={(value) => {
-          setFormValue({ ...formValue, showAsCommand: value });
-        }}
+        label="Use for the Progress Command"
+        value={values.showAsCommand}
+        onChange={(showAsCommand) => updateValues({ showAsCommand })}
       />
     </Form>
   );

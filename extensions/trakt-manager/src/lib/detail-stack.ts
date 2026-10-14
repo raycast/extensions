@@ -17,3 +17,14 @@ export function registerDetail(close: () => void) {
 export function closeTopDetail() {
   closers.at(-1)?.();
 }
+
+/**
+ * Captures the detail open when an action starts. The returned function closes it only if it is
+ * still the innermost detail: after an await, the user may have left it or opened another one.
+ */
+export function captureTopDetail() {
+  const close = closers.at(-1);
+  return () => {
+    if (close && closers.at(-1) === close) close();
+  };
+}

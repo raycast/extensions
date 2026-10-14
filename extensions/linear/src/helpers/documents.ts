@@ -1,6 +1,6 @@
 import { Color, Icon } from "@raycast/api";
 
-import { DocumentResult } from "../tools/get-documents";
+import { DocumentResult } from "../api/getDocuments";
 
 import { getIcon } from "./icons";
 

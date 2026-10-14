@@ -1,5 +1,7 @@
 # Visual Studio Code Changelog
 
+## [Added new screenshots] - 2026-10-13
+
 ## [Open Agents Window command and enhancements] - 2026-09-28
 
 - Add `Open Agents Window` command: opens Agents Window for VSCode, opens Antigravity 2.0 for Antigravity IDE

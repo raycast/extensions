@@ -78,7 +78,8 @@ export default function Command() {
 
   async function loadTotpItems() {
     const isLatest = loads.start();
-    setError(null);
+    // The login screen stays while loading after a login or Check Again, until there's something to show.
+    if (error !== "not_authenticated") setError(null);
     setIsLoading(true);
 
     try {
@@ -94,6 +95,7 @@ export default function Command() {
           }));
           setItems(itemsWithPlaceholder);
           itemsRef.current = itemsWithPlaceholder;
+          setError(null);
           setIsLoading(false);
 
           const itemsWithTotp = await Promise.all(cachedTotpItems.map(loadCode));
@@ -125,6 +127,7 @@ export default function Command() {
 
       setItems(itemsWithTotp);
       itemsRef.current = itemsWithTotp;
+      setError(null);
       if (codeTimeStep !== getTotpTimeStep()) refreshTotpCodes();
       if (failureMessage) throw new Error(failureMessage);
       if (failedVaults.length > 0) {
@@ -139,7 +142,8 @@ export default function Command() {
       if (!isLatest()) return;
       if (e instanceof PassCliError && e.type === "not_authenticated") {
         await resetSession();
-      } else if (itemsRef.current.length === 0) {
+      } else if (itemsRef.current.length === 0 || (e instanceof PassCliError && e.type === "not_installed")) {
+        // Without pass-cli, no code can load: the screen saying how to fix it comes first.
         if (e instanceof PassCliError) {
           setError(e.type);
         } else {

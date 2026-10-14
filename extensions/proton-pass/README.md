@@ -33,6 +33,8 @@ pass-cli login
 
 This uses web login by default: `pass-cli` prints a URL, you complete authentication in your browser, and the session is saved locally.
 
+You can also log in from Raycast, with the Login command or Login with Browser on the Not Logged In screen. The login keeps going if Raycast closes while you're in the browser, and the extension picks it up when you come back. After a login done elsewhere, such as in the terminal, Check Again (⌘R) picks up the new session. To log out, use Logout in the Login command.
+
 Optional: use terminal prompts with interactive login:
 
 ```bash
@@ -49,7 +51,7 @@ pass-cli vault list
 
 ## Preferences
 
-- **CLI Path**: Path to the `pass-cli` executable (defaults to `pass-cli` in PATH)
+- **CLI Path**: Path to your own `pass-cli` executable. The default, `pass-cli`, uses the one the extension installs
 - **Primary Action**: What Enter does on an item: view its details (default), copy the password, or fill the login (macOS)
 - **Fill Login**: Press Return after the password, to submit the login form (off by default)
 - **Transient Clipboard**: Keep copied secrets (passwords, 2FA codes, notes and hidden fields) out of clipboard history

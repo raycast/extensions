@@ -1,5 +1,14 @@
 # Home Assistant Changelog
 
+## [AC Menu] - 2026-10-13
+
+- Add a menu bar command for cooling-capable climate entities with power, temperature, mode, fan, swing, and preset controls, plus a command to toggle menu visibility
+- Refresh device state after controls and manual refresh to keep the menu status in sync with Home Assistant integrations
+
+## [Fix crash on unpressed input buttons] - 2026-10-08
+
+- Fix "Invalid time value" crash in entity lists when an `input_button` has never been pressed or is unavailable
+
 ## [Fix Quicklink search filtering] - 2026-09-25
 
 - Fix "Save as Quicklink" opening entity list commands (including Cameras and Zones) without applying the entity filter, requiring an extra keystroke before the intended entity showed up

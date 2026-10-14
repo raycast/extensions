@@ -1,4 +1,4 @@
-import { selectTab } from "../arc";
+import { getTabs, selectTab } from "../arc";
 
 type Input = {
   /**
@@ -11,7 +11,14 @@ type Input = {
 };
 
 const tool = async (input: Input) => {
-  selectTab(input.tabId);
+  const tabs = await getTabs();
+  if (!tabs?.some((tab) => tab.id === input.tabId)) {
+    throw new Error(
+      `No tab with ID "${input.tabId}" found in the front Arc window. Use get-tabs to list the open tabs.`,
+    );
+  }
+
+  await selectTab(input.tabId);
 };
 
 export default tool;

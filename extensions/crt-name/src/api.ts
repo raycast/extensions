@@ -1,5 +1,9 @@
 import { Cache } from "@raycast/api";
 
+import { normalizeRecords, SubdomainRecord } from "./subdomains";
+
+export type { SubdomainRecord } from "./subdomains";
+
 const API_URL = "https://crt.name/v1/search";
 const CACHE_TTL_MS = 15 * 60 * 1000;
 const searchCache = new Cache({ namespace: "apex-search", capacity: 25 * 1024 * 1024 });
@@ -7,11 +11,6 @@ const searchCache = new Cache({ namespace: "apex-search", capacity: 25 * 1024 * 
 type ApiResult = {
   first_seen: string | null;
   sub: string;
-};
-
-export type SubdomainRecord = {
-  firstSeen: string | null;
-  subdomain: string;
 };
 
 export type SearchResponse = {
@@ -79,7 +78,7 @@ function isSearchResponse(value: unknown): value is SearchResponse {
 }
 
 function cacheKey(apex: string): string {
-  return `v1:${apex}`;
+  return `v2:${apex}`;
 }
 
 function getCachedSearch(apex: string): SearchResponse | undefined {
@@ -95,7 +94,7 @@ function getCachedSearch(apex: string): SearchResponse | undefined {
     if (typeof cachedAt !== "number" || !isSearchResponse(response)) throw new Error("Invalid cache entry");
     if (Date.now() - cachedAt >= CACHE_TTL_MS) return undefined;
 
-    return response;
+    return { ...response, results: normalizeRecords(response.results) };
   } catch {
     searchCache.remove(key);
     return undefined;
@@ -129,10 +128,12 @@ export async function searchApex(input: string): Promise<SearchResponse> {
 
   const result = {
     apex,
-    results: payload.map((result) => ({
-      firstSeen: result.first_seen,
-      subdomain: result.sub,
-    })),
+    results: normalizeRecords(
+      payload.map((result) => ({
+        firstSeen: result.first_seen,
+        subdomain: result.sub,
+      })),
+    ),
   };
 
   searchCache.set(cacheKey(apex), JSON.stringify({ cachedAt: Date.now(), response: result }));
