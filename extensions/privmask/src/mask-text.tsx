@@ -1,3 +1,4 @@
+import { execFile } from "node:child_process";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Action,
@@ -79,6 +80,25 @@ async function readInput(): Promise<string> {
     // Nothing selected, or the front app does not expose a selection.
   }
   return (await Clipboard.readText()) ?? "";
+}
+
+/**
+ * Puts text on the clipboard and leaves the window alone.
+ *
+ * Not `Clipboard.copy`: since Raycast 2.4.1 that dismisses the main window
+ * (raycast/extensions#31273), which would close the review the moment it
+ * became readable. `pbcopy` writes the same pasteboard, so Clipboard History
+ * still records it, and Raycast never hears about it. The locale is set
+ * because `pbcopy` in the C locale mangles anything beyond ASCII.
+ * ponytail: back to Clipboard.copy once #31273 is fixed.
+ */
+function copyQuietly(text: string) {
+  return new Promise<void>((resolve, reject) => {
+    const child = execFile("/usr/bin/pbcopy", { env: { ...process.env, LC_ALL: "en_US.UTF-8" } }, (error) =>
+      error ? reject(error) : resolve(),
+    );
+    child.stdin?.end(text);
+  });
 }
 
 /** Whether the masker substituted exactly this finding. */
@@ -319,7 +339,7 @@ export default function Command() {
   useEffect(() => {
     if (!ready || nameScanFailed || maskedText === lastCopied.current) return;
     lastCopied.current = maskedText;
-    Clipboard.copy(maskedText)
+    copyQuietly(maskedText)
       .then(() =>
         showToast({
           style: Toast.Style.Success,
