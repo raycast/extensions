@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Open Created Issue in Browser] - {PR_MERGE_DATE}
+## [Open Created Issue in Browser] - 2026-10-14
 
 - Create Issue: Add an **Open issue in browser** preference to open newly created issues in your default browser.
 
