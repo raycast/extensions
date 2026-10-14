@@ -15,7 +15,11 @@ import {
   setSocketPath,
 } from "../src/fsearch.ts";
 import { appleScriptString } from "../src/applescript.ts";
-import { installCommand } from "../src/install.ts";
+import {
+  HAS_RELEASE_BUILD,
+  RELEASE_INSTALL_COMMAND,
+  installCommand,
+} from "../src/install.ts";
 
 // Never touch a real daemon: every request goes through the mock executables.
 setSocketPath(null);
@@ -325,28 +329,42 @@ test("finds the executable in the usual install locations when no path is set", 
   );
 });
 
-test("install command runs the found cargo by path, adds Rust only when it is missing, and quotes for AppleScript", () => {
+test("install command builds with the found cargo by path, adds Rust only when it is missing, and quotes for AppleScript", () => {
   assert.equal(
-    installCommand("cargo"),
+    installCommand("cargo", false),
     "cargo install --git https://github.com/noahdunnagan/fsearch",
   );
   assert.equal(
-    installCommand("/opt/homebrew/bin/cargo"),
+    installCommand("/opt/homebrew/bin/cargo", false),
     "/opt/homebrew/bin/cargo install --git https://github.com/noahdunnagan/fsearch",
   );
   assert.equal(
-    installCommand("/Users/Jo O'Neil/.cargo/bin/cargo"),
+    installCommand("/Users/Jo O'Neil/.cargo/bin/cargo", false),
     "'/Users/Jo O'\\''Neil/.cargo/bin/cargo' install --git https://github.com/noahdunnagan/fsearch",
   );
   assert.match(
-    installCommand(undefined),
+    installCommand(undefined, false),
     /^curl .*sh\.rustup\.rs \| sh -s -- -y && \. "\$HOME\/\.cargo\/env" && cargo install --git/,
   );
   assert.equal(
-    appleScriptString(installCommand(undefined)),
-    `"${installCommand(undefined).replace(/"/g, '\\"')}"`,
+    appleScriptString(installCommand(undefined, false)),
+    `"${installCommand(undefined, false).replace(/"/g, '\\"')}"`,
   );
   assert.equal(appleScriptString('a\\b "c"'), '"a\\\\b \\"c\\""');
+});
+
+test("install command on Apple Silicon downloads the release build, checks its checksum, and installs it", () => {
+  for (const cargo of ["cargo", undefined]) {
+    assert.equal(installCommand(cargo, true), RELEASE_INSTALL_COMMAND);
+  }
+  assert.equal(
+    RELEASE_INSTALL_COMMAND,
+    'cd "$(mktemp -d)" && curl -fsSLO https://github.com/noahdunnagan/fsearch/releases/latest/download/fsearch-aarch64-apple-darwin.tar.gz && curl -fsSLO https://github.com/noahdunnagan/fsearch/releases/latest/download/fsearch-aarch64-apple-darwin.tar.gz.sha256 && shasum -a 256 -c fsearch-aarch64-apple-darwin.tar.gz.sha256 && tar xzf fsearch-aarch64-apple-darwin.tar.gz && ./fsearch install',
+  );
+  assert.equal(
+    installCommand("cargo"),
+    installCommand("cargo", HAS_RELEASE_BUILD),
+  );
 });
 
 test("content searches are the ones that read inside files", () => {

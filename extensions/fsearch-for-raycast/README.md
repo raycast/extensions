@@ -4,7 +4,13 @@ Instant, typo-tolerant search of every file on your Mac, powered by [noahdunnaga
 
 ## Install
 
-fsearch has no prebuilt binaries yet, so it is built from source once. The command's home screen offers **Install FSearch in Terminal**, which runs this in a Terminal window (installing Rust with rustup first if needed):
+The command's home screen offers **Install FSearch in Terminal**, which runs one command in a Terminal window. On Apple Silicon it downloads the latest [fsearch release](https://github.com/noahdunnagan/fsearch/releases), checks it against its published SHA-256 checksum, and installs it to `~/.local/bin`:
+
+```sh
+cd "$(mktemp -d)" && curl -fsSLO https://github.com/noahdunnagan/fsearch/releases/latest/download/fsearch-aarch64-apple-darwin.tar.gz && curl -fsSLO https://github.com/noahdunnagan/fsearch/releases/latest/download/fsearch-aarch64-apple-darwin.tar.gz.sha256 && shasum -a 256 -c fsearch-aarch64-apple-darwin.tar.gz.sha256 && tar xzf fsearch-aarch64-apple-darwin.tar.gz && ./fsearch install
+```
+
+Releases ship an Apple Silicon build only, so on an Intel Mac it builds from source instead (installing Rust with rustup first if needed):
 
 ```sh
 cargo install --git https://github.com/noahdunnagan/fsearch

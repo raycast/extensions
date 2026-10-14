@@ -4,12 +4,21 @@ import { join } from "node:path";
 import { appleScriptString, runAppleScript } from "./applescript";
 
 export const FSEARCH_REPO = "https://github.com/noahdunnagan/fsearch";
-/** Builds fsearch from source and puts it in ~/.cargo/bin, where the extension finds it. */
+/** Builds fsearch from source and puts it in ~/.cargo/bin, where the extension finds it (Intel Macs). */
 export const FSEARCH_INSTALL_COMMAND = `cargo install --git ${FSEARCH_REPO}`;
 /** The same build, with `cargo` named by its path so it runs on a shell whose PATH lacks it. */
 export function fsearchInstallCommand(cargo = "cargo"): string {
   return `${shellQuote(cargo)} install --git ${FSEARCH_REPO}`;
 }
+const RELEASE_ASSET = "fsearch-aarch64-apple-darwin.tar.gz";
+const RELEASE_URL = `${FSEARCH_REPO}/releases/latest/download/${RELEASE_ASSET}`;
+/**
+ * Downloads the latest release build in a fresh folder, checks it against its
+ * published SHA-256, and lets it install itself to ~/.local/bin.
+ */
+export const RELEASE_INSTALL_COMMAND = `cd "$(mktemp -d)" && curl -fsSLO ${RELEASE_URL} && curl -fsSLO ${RELEASE_URL}.sha256 && shasum -a 256 -c ${RELEASE_ASSET}.sha256 && tar xzf ${RELEASE_ASSET} && ./fsearch install`;
+/** Releases ship an Apple Silicon build only; Intel Macs build from source. */
+export const HAS_RELEASE_BUILD = process.arch === "arm64";
 /** rustup's official installer, non-interactive, then the new toolchain on this shell's PATH. */
 export const RUST_INSTALL_COMMAND = `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && . "$HOME/.cargo/env"`;
 
@@ -37,10 +46,15 @@ export async function findCargo(): Promise<string | undefined> {
 }
 
 /**
- * The whole install as one shell line: with the found cargo when there is
- * one, or Rust first when it is missing (rustup puts cargo on this shell's PATH).
+ * The whole install as one shell line: the release build when there is one
+ * for this Mac; otherwise a build with the found cargo, or Rust first when it
+ * is missing (rustup puts cargo on this shell's PATH).
  */
-export function installCommand(cargo: string | undefined): string {
+export function installCommand(
+  cargo: string | undefined,
+  release = HAS_RELEASE_BUILD,
+): string {
+  if (release) return RELEASE_INSTALL_COMMAND;
   return cargo
     ? fsearchInstallCommand(cargo)
     : `${RUST_INSTALL_COMMAND} && ${FSEARCH_INSTALL_COMMAND}`;

@@ -71,6 +71,7 @@ import {
 } from "./fsearch";
 import {
   FSEARCH_REPO,
+  HAS_RELEASE_BUILD,
   findCargo,
   installCommand,
   runInTerminal,
@@ -212,7 +213,7 @@ Whole-disk file search for Raycast. Type a filename, add a filter, or search ins
 
 ## Install
 
-Choose **Install FSearch in Terminal** from the actions. It runs \`cargo install --git https://github.com/noahdunnagan/fsearch\` in Terminal, installing Rust first if needed. The executable is found in \`~/.local/bin\`, \`~/.cargo/bin\`, and Homebrew's bin folders. The daemon starts on your first search; the first crawl takes about 20 seconds.
+Choose **Install FSearch in Terminal** from the actions. On Apple Silicon it downloads the latest FSearch release in Terminal, checks its SHA-256 checksum, and installs it to \`~/.local/bin\`. Intel Macs build it with \`cargo install --git https://github.com/noahdunnagan/fsearch\`, installing Rust first if needed. The executable is found in \`~/.local/bin\`, \`~/.cargo/bin\`, and Homebrew's bin folders. The daemon starts on your first search; the first crawl takes about 20 seconds.
 
 ## Queries
 
@@ -1181,9 +1182,11 @@ export default function Search(
       await showToast({
         style: Toast.Style.Success,
         title: "Installing FSearch in Terminal",
-        message: cargo
-          ? "About a minute. This screen updates when it finishes."
-          : "Rust first, then FSearch. This screen updates when it finishes.",
+        message: HAS_RELEASE_BUILD
+          ? "A few seconds. This screen updates when it finishes."
+          : cargo
+            ? "About a minute. This screen updates when it finishes."
+            : "Rust first, then FSearch. This screen updates when it finishes.",
       });
     } catch (cause) {
       await Clipboard.copy(command);
@@ -1346,7 +1349,7 @@ export default function Search(
             icon: Icon.Download,
             tint: Color.Orange,
             title: "FSearch Not Installed",
-            description: `${error.message}\n\nInstall it with one Terminal command${cargo ? "" : " (Rust is installed first)"}, or point the extension at an existing executable in preferences.`,
+            description: `${error.message}\n\nInstall it with one Terminal command${HAS_RELEASE_BUILD || cargo ? "" : " (Rust is installed first)"}, or point the extension at an existing executable in preferences.`,
           };
         case "indexing":
           return {
@@ -1510,9 +1513,11 @@ export default function Search(
               <List.Item
                 title="Install FSearch"
                 subtitle={
-                  cargo
-                    ? "One Terminal command, about a minute"
-                    : "Installs Rust, then FSearch, in Terminal"
+                  HAS_RELEASE_BUILD
+                    ? "One Terminal command, a few seconds"
+                    : cargo
+                      ? "One Terminal command, about a minute"
+                      : "Installs Rust, then FSearch, in Terminal"
                 }
                 icon={{ source: Icon.Download, tintColor: Color.Orange }}
                 actions={
