@@ -8,6 +8,7 @@ import { compactNumberFormat, padStart, replaceAll } from "../../utils";
 import {
   DeleteTweetAction,
   BookmarkTweetAction,
+  CopyTweetUrlAction,
   LikeTweetAction,
   LogoutAction,
   OpenTweetInBrowerAction,
@@ -242,6 +243,7 @@ export function TweetListItem(props: {
           <ActionPanel.Section>
             <ShowDetailV2Action tweet={t} fetcher={fetcher} canModerateReply={props.canModerateReply} />
             <OpenTweetInBrowerAction tweet={t} />
+            <CopyTweetUrlAction tweet={t} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <LikeTweetAction tweet={t} fetcher={fetcher} />

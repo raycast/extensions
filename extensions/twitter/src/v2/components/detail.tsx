@@ -5,6 +5,7 @@ import { clientV2, Fetcher, useRefresher } from "../lib/twitterapi_v2";
 import {
   DeleteTweetAction,
   BookmarkTweetAction,
+  CopyTweetUrlAction,
   LikeTweetAction,
   OpenTweetInBrowerAction,
   OpenUserProfileInBrowserAction,
@@ -81,6 +82,7 @@ export function TweetDetail(props: { tweet: Tweet; fetcher?: Fetcher; canModerat
             <ReplyTweetAction tweet={t} />
             <QuoteTweetAction tweet={t} />
             <OpenTweetInBrowerAction tweet={t} />
+            <CopyTweetUrlAction tweet={t} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <LikeTweetAction tweet={t} />
