@@ -522,11 +522,14 @@ export default function Command() {
         })}
       </List.Section>
 
+      {/* A row, not List.EmptyView: that takes the whole window, and the text
+          itself is what the user wants to see beside the verdict. */}
       {!waitingForModel && findings.length === 0 && (
-        <List.EmptyView
+        <List.Item
           icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
           title="Nothing personal found"
-          description="The text looks safe to share as it is. ⌘V here masks what you copy next."
+          subtitle="Safe to share as it is"
+          detail={<List.Item.Detail markdown={renderPreview(previewText)} />}
           actions={actions()}
         />
       )}
