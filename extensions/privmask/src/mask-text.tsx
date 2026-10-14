@@ -343,8 +343,8 @@ export default function Command() {
       .then(() =>
         showToast({
           style: Toast.Style.Success,
-          title: replaced > 0 ? "Masked text copied" : "Copied as it is",
-          message: replaced > 0 ? `${replaced} replaced` : "Nothing personal was found.",
+          title: replaced > 0 ? `Masked text copied, ${replaced} replaced` : "Copied as it is, nothing personal found",
+          message: "⌘V here masks what you copy next.",
         }),
       )
       .catch((error) => showFailureToast(error, { title: "Could not copy the masked text" }));
@@ -522,7 +522,7 @@ export default function Command() {
         <List.EmptyView
           icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
           title="Nothing personal found"
-          description="The text looks safe to share as it is."
+          description="The text looks safe to share as it is. ⌘V here masks what you copy next."
           actions={actions()}
         />
       )}
