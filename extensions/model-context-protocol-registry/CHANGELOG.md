@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Latchkey MCP Server] - {PR_MERGE_DATE}
+## [Add Latchkey MCP Server] - 2026-10-14
 
 - Add Latchkey to the official registry: read the CI failures its self-healing GitHub Actions runners could not repair, check run status and logs, dispatch workflows and run one-off commands on fresh ephemeral runners. Hosted Streamable HTTP server at https://latchkey.dev/mcp, connected through `mcp-remote` with a Latchkey API key as a bearer header.
 
