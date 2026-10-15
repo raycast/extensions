@@ -16,7 +16,15 @@ import { ChatView } from "./components/ChatView";
 import { ConversationItem, RefreshAction, ToggleUnreadOnlyAction } from "./components/ConversationItem";
 import { showChatError } from "./helpers/feedback";
 import { latestDate, namesFor, parseView, resolveView, splitSections, type HomeView } from "./helpers/my-messages";
-import { countMentions, parseLookbackDays, unreadSubtitle, unreadSummary, withoutSpaces } from "./helpers/unread";
+import {
+  countMentions,
+  MarkReadError,
+  parseLookbackDays,
+  unreadEmptyView,
+  unreadSubtitle,
+  unreadSummary,
+  withoutSpaces,
+} from "./helpers/unread";
 import { useReadConversations, useUnreadExtras } from "./hooks/useHome";
 import { useUnread } from "./hooks/useUnread";
 
@@ -74,9 +82,17 @@ function MyMessages({ launchView }: { launchView?: string }) {
     if (targets.length === 0) return;
     const names = targets.map((t) => t.spaceName);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Marking as read" });
+    const before = unread;
+    let marked: string[] = [];
+    const write = markRead(names).catch((error: unknown) => {
+      if (error instanceof MarkReadError) marked = error.marked;
+      throw error;
+    });
     try {
-      await unreadState.mutate(markRead(names), {
+      await unreadState.mutate(write, {
         optimisticUpdate: (current) => (current ? withoutSpaces(current, names) : current),
+        // Put back only the conversations that couldn't be marked.
+        rollbackOnError: (current) => (before ? withoutSpaces(before, marked) : current),
         // Past the cap there may be unread conversations that weren't loaded yet.
         shouldRevalidateAfter: !!unread?.capped,
       });
@@ -98,10 +114,9 @@ function MyMessages({ launchView }: { launchView?: string }) {
   };
 
   const isLoading = unreadState.isLoading || (!unreadOnly && reads.isLoading);
+  const unreadEmpty = unreadEmptyView(unread, lookbackDays);
   const emptyDescription = unreadOnly
-    ? unread?.source === "readState"
-      ? `Nothing after your read position in spaces active in the last ${lookbackDays} days.`
-      : `Nothing unread from the last ${lookbackDays} days. Muted spaces aren't counted.`
+    ? unreadEmpty.description
     : "Conversations you're in show here once Google Chat returns them.";
 
   return (
@@ -124,7 +139,7 @@ function MyMessages({ launchView }: { launchView?: string }) {
               ? "Checking for unread messages…"
               : "Loading conversations…"
             : unreadOnly
-              ? "No unread messages"
+              ? unreadEmpty.title
               : "No conversations"
         }
         description={isLoading ? undefined : emptyDescription}

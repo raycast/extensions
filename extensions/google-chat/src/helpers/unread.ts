@@ -13,9 +13,17 @@ import { spaceUrl } from "./links";
 import { spaceNameOf } from "./recipient";
 
 export const DEFAULT_LOOKBACK_DAYS = 14;
-/** Stop paging search results after this many messages; the total then shows as "500+". */
+/**
+ * Stop paging search results after this many raw results once at least one of them counts as unread;
+ * the total then shows as "N+".
+ */
 export const UNREAD_CAP = 500;
-/** `SearchMessagesRequest.pageSize` maximum. */
+/**
+ * When none of the first {@link UNREAD_CAP} raw results count as unread (all older than the read position or
+ * replies in threads the user doesn't follow), keep paging up to this many before giving up, so a zero is real.
+ */
+export const UNREAD_SCAN_LIMIT = 1000;
+/** `SearchMessagesRequest.pageSize` maximum. Divides {@link UNREAD_CAP} and {@link UNREAD_SCAN_LIMIT}. */
 export const UNREAD_PAGE_SIZE = 100;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -69,6 +77,65 @@ export function countsAsUnread(
 /** The space a message is in: `message.space.name`, else the prefix of its resource name. */
 export function messageSpaceName(message: Pick<Message, "name" | "space">): string {
   return message.space?.name || spaceNameOf(message.name);
+}
+
+/** One page of `messages:search` results. */
+export interface UnreadSearchPage {
+  messages: Message[];
+  nextPageToken?: string;
+}
+
+export interface CollectUnreadOptions {
+  /** Loads one page of `is_unread()` results, newest first. */
+  fetchPage: (pageToken: string | undefined) => Promise<UnreadSearchPage>;
+  /** Read positions (`lastReadTime`) of spaces; a space left out of the map has no known position. */
+  readPositions: (spaceNames: string[]) => Promise<Map<string, string | undefined>>;
+  /** The signed-in user, `users/{id}`. */
+  me: string | undefined;
+  /** Called when a page after the first fails; the earlier pages are kept. */
+  onPageError?: (error: unknown) => void;
+  cap?: number;
+  scanLimit?: number;
+}
+
+/**
+ * Pages unread search results and keeps the messages Chat's Home counts (see {@link countsAsUnread}), without
+ * the user's own. Stops after `cap` raw results once one of them counts; while none do, keeps going up to
+ * `scanLimit`. Read positions are loaded once per space, as new spaces turn up. `capped` means results were
+ * left unchecked (more pages, or a later page failed), so the count is a lower bound and a zero isn't certain.
+ * A failure on the first page is thrown, so the caller can fall back.
+ */
+export async function collectUnread(options: CollectUnreadOptions): Promise<{ messages: Message[]; capped: boolean }> {
+  const { fetchPage, readPositions, me, onPageError, cap = UNREAD_CAP, scanLimit = UNREAD_SCAN_LIMIT } = options;
+  const visible: Message[] = [];
+  const positions = new Map<string, string | undefined>();
+  const looked = new Set<string>();
+  let scanned = 0;
+  let pages = 0;
+  let pageToken: string | undefined;
+  do {
+    let page: UnreadSearchPage;
+    try {
+      page = await fetchPage(pageToken);
+    } catch (error) {
+      // Google sometimes fails a later page with "Internal error encountered". Results are newest first, so the
+      // pages already loaded hold the messages that matter; keep them and mark the total as a lower bound.
+      if (pages === 0) throw error;
+      onPageError?.(error);
+      return { messages: visible, capped: true };
+    }
+    pages++;
+    scanned += page.messages.length;
+    const others = excludeOwnMessages(page.messages, me);
+    const newSpaces = [...new Set(others.map(messageSpaceName))].filter((name) => !looked.has(name));
+    if (newSpaces.length > 0) {
+      newSpaces.forEach((name) => looked.add(name));
+      for (const [name, position] of await readPositions(newSpaces)) positions.set(name, position);
+    }
+    visible.push(...others.filter((m) => countsAsUnread(m, positions.get(messageSpaceName(m)), me)));
+    pageToken = page.nextPageToken || undefined;
+  } while (pageToken && scanned < (visible.length > 0 ? cap : scanLimit));
+  return { messages: visible, capped: !!pageToken };
 }
 
 /** Unread messages in one space. */
@@ -127,10 +194,42 @@ export function countLabel(count: number, capped: boolean): string {
   return capped ? `${count}+` : `${count}`;
 }
 
-/** `37 unread in 6 spaces`, `1 unread in 1 space`, or `No unread messages`. */
+/** Said instead of "No unread messages" when the search stopped before checking every result. */
+export const UNREAD_CHECK_INCOMPLETE = "Unread check incomplete";
+
+/** `No unread messages`, or {@link UNREAD_CHECK_INCOMPLETE} when results were left unchecked. */
+function noUnread(capped: boolean): string {
+  return capped ? UNREAD_CHECK_INCOMPLETE : "No unread messages";
+}
+
+/**
+ * `37 unread in 6 spaces`, `1 unread in 1 space`, `500+ unread in 40 spaces` at the cap, `No unread messages`,
+ * or `Unread check incomplete` when none counted but results were left unchecked.
+ */
 export function unreadSummary(total: number, capped: boolean, spaces: number): string {
-  if (total <= 0) return "No unread messages";
+  if (total <= 0) return noUnread(capped);
   return `${countLabel(total, capped)} unread in ${spaces} ${spaces === 1 ? "space" : "spaces"}`;
+}
+
+/** Title and description of My Messages' empty Unread Only view, once the check has finished. */
+export function unreadEmptyView(
+  unread: { capped: boolean; source: "search" | "readState" } | undefined,
+  lookbackDays: number,
+): { title: string; description: string } {
+  if (unread?.capped) {
+    return {
+      title: UNREAD_CHECK_INCOMPLETE,
+      description:
+        "The check stopped before it reached every result, and none so far count as unread. Refresh, or open Google Chat to see the rest.",
+    };
+  }
+  return {
+    title: "No unread messages",
+    description:
+      unread?.source === "readState"
+        ? `Nothing after your read position in spaces active in the last ${lookbackDays} days.`
+        : `Nothing unread from the last ${lookbackDays} days. Muted spaces aren't counted.`,
+  };
 }
 
 /** Unread groups plus totals. */
@@ -143,7 +242,53 @@ export interface UnreadResult<T extends Pick<UnreadGroup, "spaceName" | "count" 
   source: "search" | "readState";
 }
 
-/** Removes spaces (after Mark as Read) and recomputes the totals. */
+/** Some conversations couldn't be marked read; `marked` lists the ones that were. */
+export class MarkReadError extends Error {
+  readonly marked: string[];
+  readonly failed: string[];
+  /** The first failure. */
+  readonly reason: unknown;
+
+  constructor(marked: string[], failed: string[], reason: unknown) {
+    const detail = reason instanceof Error ? reason.message : String(reason);
+    const total = marked.length + failed.length;
+    super(`Couldn't mark ${failed.length} of ${total} conversations as read: ${detail}`);
+    this.name = "MarkReadError";
+    this.marked = marked;
+    this.failed = failed;
+    this.reason = reason;
+  }
+}
+
+/**
+ * Splits `Promise.allSettled` results of marking `names` read into the ones marked and the error to throw:
+ * none when all succeeded, the first failure itself when none did, else a {@link MarkReadError}.
+ */
+export function settleMarkRead(
+  names: string[],
+  results: PromiseSettledResult<unknown>[],
+): { marked: string[]; error?: unknown } {
+  const marked = names.filter((_, i) => results[i]?.status === "fulfilled");
+  const failures = names.flatMap((name, i) => {
+    const result = results[i];
+    return result?.status === "rejected" ? [{ name, reason: result.reason as unknown }] : [];
+  });
+  if (failures.length === 0) return { marked };
+  if (marked.length === 0) return { marked, error: failures[0].reason };
+  return {
+    marked,
+    error: new MarkReadError(
+      marked,
+      failures.map((f) => f.name),
+      failures[0].reason,
+    ),
+  };
+}
+
+/**
+ * Removes spaces (after Mark as Read) and recomputes the totals. A capped result stays capped: results past
+ * the cap were never checked, so marking everything loaded as read doesn't make the total zero.
+ */
 export function withoutSpaces<T extends Pick<UnreadGroup, "spaceName" | "count" | "mentioned">>(
   result: UnreadResult<T>,
   spaceNames: Iterable<string>,
@@ -155,7 +300,6 @@ export function withoutSpaces<T extends Pick<UnreadGroup, "spaceName" | "count" 
     ...result,
     spaces,
     total: Math.max(0, result.total - countUnread(removed)),
-    capped: spaces.length > 0 && result.capped,
   };
 }
 
@@ -190,9 +334,23 @@ export function isSpaceUnread(space: Pick<Space, "lastActiveTime">, readState: S
   return active > read;
 }
 
-/** Fallback only: the `spaces.messages.list` filter for messages after the last read time. */
-export function unreadMessagesFilter(readState: SpaceReadState | undefined): string | undefined {
-  return readState?.lastReadTime ? `create_time > "${readState.lastReadTime}"` : undefined;
+/**
+ * Fallback only: the `spaces.messages.list` filter for messages after the last read time, or after the
+ * lookback start when that's later (a read position can be months old).
+ */
+export function unreadMessagesFilter(
+  readState: SpaceReadState | undefined,
+  lookbackDays?: number,
+  now: number = Date.now(),
+): string | undefined {
+  const lastRead = readState?.lastReadTime;
+  if (!lastRead) return undefined;
+  if (lookbackDays && lookbackDays > 0) {
+    const since = now - lookbackDays * DAY_MS;
+    const read = time(lastRead);
+    if (read === undefined || read < since) return `create_time > "${new Date(since).toISOString()}"`;
+  }
+  return `create_time > "${lastRead}"`;
 }
 
 // --- Root search subtitle and the shared result ------------------------------------------------
@@ -210,11 +368,11 @@ function plural(count: number, word: string): string {
 }
 
 /**
- * Root search subtitle of My Messages and Unread Chat: `12 unread · 4 spaces · 2 mentions`,
- * `500+ unread` at the cap, or `No unread messages`.
+ * Root search subtitle of My Messages and Unread Chat: `12 unread · 4 spaces · 2 mentions`, `3+ unread` at the
+ * cap, `No unread messages`, or `Unread check incomplete` when none counted but results were left unchecked.
  */
 export function unreadSubtitle(total: number, capped: boolean, spaces: number, mentions: number): string {
-  if (total <= 0) return "No unread messages";
+  if (total <= 0) return noUnread(capped);
   const parts = capped ? [`${countLabel(total, true)} unread`] : [`${total} unread`, plural(spaces, "space")];
   if (mentions > 0) parts.push(plural(mentions, "mention"));
   return parts.join(" · ");

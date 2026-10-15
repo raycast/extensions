@@ -1,7 +1,7 @@
 /**
  * Unread messages, from Chat's own per-message read state: `spaces.messages.search` with `is_unread()`
- * (100 per page, up to 500). If search is rejected, falls back to comparing each recently active
- * space's `spaceReadState.lastReadTime` with its messages.
+ * (100 per page, up to 500, or up to 1,000 while none of them count as unread). If search is rejected, falls
+ * back to comparing each recently active space's `spaceReadState.lastReadTime` with its messages.
  *
  * One result is shared through the Raycast cache by Unread Chat (which runs every 5 minutes), My Messages
  * and the AI tool, so background runs within 2 minutes of another search reuse its result.
@@ -11,13 +11,14 @@ import { Cache, environment, launchCommand, LaunchType } from "@raycast/api";
 
 import { defaultSleep, mapLimit } from "../helpers/backoff";
 import {
+  collectUnread,
   countUnread,
   freshSharedUnread,
   groupUnreadBySpace,
   isSpaceUnread,
   recentlyActiveSpaces,
+  settleMarkRead,
   shouldFallBackFromSearch,
-  UNREAD_CAP,
   UNREAD_PAGE_SIZE,
   unreadMessagesFilter,
   unreadSearchFilter,
@@ -27,7 +28,6 @@ import {
   type UnreadResult,
   countsAsUnread,
   excludeOwnMessages,
-  messageSpaceName,
 } from "../helpers/unread";
 import { getSpace, getSpaceReadState, listMessages, markSpaceAsRead, searchMessages } from "./chat";
 import { getMe } from "./people";
@@ -55,26 +55,24 @@ export interface UnreadSpace extends UnreadGroup {
 
 export type Unread = UnreadResult<UnreadSpace>;
 
-/** Unread messages from `messages:search`, newest first, paging until there are no more or the cap is hit. */
-async function searchUnread(lookbackDays: number): Promise<{ messages: Message[]; capped: boolean }> {
+/**
+ * Unread messages from `messages:search` that Chat's Home counts, newest first, paging until there are no
+ * more or the cap is hit (see `collectUnread`). The filter is built once, as every page must send the same one.
+ */
+async function searchUnread(lookbackDays: number, me: string): Promise<{ messages: Message[]; capped: boolean }> {
   const filter = unreadSearchFilter(lookbackDays);
-  const messages: Message[] = [];
-  let pageToken: string | undefined;
-  do {
-    let page;
-    try {
-      page = await searchMessages({ filter, pageSize: UNREAD_PAGE_SIZE, pageToken, orderBy: "create_time desc" });
-    } catch (error) {
-      // Google sometimes fails a later page with "Internal error encountered". Results are newest first, so the
-      // pages already loaded hold the messages that matter; keep them and mark the total as a lower bound.
-      if (messages.length === 0) throw error;
-      console.error("Unread search page failed; keeping earlier pages", error);
-      return { messages, capped: true };
-    }
-    for (const result of page.results ?? []) if (result.message) messages.push(result.message);
-    pageToken = page.nextPageToken || undefined;
-  } while (pageToken && messages.length < UNREAD_CAP);
-  return { messages: messages.slice(0, UNREAD_CAP), capped: !!pageToken || messages.length > UNREAD_CAP };
+  return collectUnread({
+    fetchPage: async (pageToken) => {
+      const page = await searchMessages({ filter, pageSize: UNREAD_PAGE_SIZE, pageToken, orderBy: "create_time desc" });
+      return {
+        messages: (page.results ?? []).flatMap((result) => (result.message ? [result.message] : [])),
+        nextPageToken: page.nextPageToken,
+      };
+    },
+    readPositions,
+    me,
+    onPageError: (error) => console.error("Unread search page failed; keeping earlier pages", error),
+  });
 }
 
 /** Read positions (`spaceReadState.lastReadTime`) of the given spaces, 5 at a time. Failures leave a space out. */
@@ -90,7 +88,10 @@ async function readPositions(spaceNames: string[]): Promise<Map<string, string |
   return positions;
 }
 
-/** Fallback: messages after `lastReadTime` in recently active spaces. Spaces without a read time are skipped. */
+/**
+ * Fallback: messages after `lastReadTime` (or the lookback start, when later) in recently active spaces.
+ * Spaces without a read time are skipped.
+ */
 async function readStateUnread(
   spaces: Space[],
   lookbackDays: number,
@@ -101,7 +102,7 @@ async function readStateUnread(
     .map((space, i) => ({ space, readState: states[i] }))
     .filter(({ space, readState }) => isSpaceUnread(space, readState));
   const pages = await mapLimit(candidates, CONCURRENCY, ({ space, readState }) =>
-    listMessages(space.name, { pageSize: UNREAD_PAGE_SIZE, filter: unreadMessagesFilter(readState) }),
+    listMessages(space.name, { pageSize: UNREAD_PAGE_SIZE, filter: unreadMessagesFilter(readState, lookbackDays) }),
   );
   return {
     // Search results carry only `space.name`; list results may not, so set it for grouping.
@@ -119,23 +120,23 @@ async function readStateUnread(
 export async function loadUnread(lookbackDays: number): Promise<Unread> {
   const [spaces, me] = await Promise.all([listSpacesSorted(), getMe()]);
   let source: Unread["source"] = "search";
+  // Only what Chat's Home counts as unread (see `countsAsUnread`).
   let found: { messages: Message[]; capped: boolean };
   try {
-    found = await searchUnread(lookbackDays);
+    found = await searchUnread(lookbackDays, me.userName);
   } catch (error) {
     if (!shouldFallBackFromSearch(error)) throw error;
     console.error("Unread search failed; falling back to read state", error);
     source = "readState";
-    found = await readStateUnread(spaces, lookbackDays);
+    const fallback = await readStateUnread(spaces, lookbackDays);
+    // Already after each space's read position, so no positions are needed.
+    const visible = excludeOwnMessages(fallback.messages, me.userName).filter((message) =>
+      countsAsUnread(message, undefined, me.userName),
+    );
+    found = { messages: visible, capped: fallback.capped };
   }
 
-  // Keep only what Chat's Home counts as unread (see `countsAsUnread`).
-  const others = excludeOwnMessages(found.messages, me.userName);
-  const positions = source === "search" ? await readPositions([...new Set(others.map(messageSpaceName))]) : new Map();
-  const visible = others.filter((message) =>
-    countsAsUnread(message, positions.get(messageSpaceName(message)), me.userName),
-  );
-  const groups = groupUnreadBySpace(visible, me.userName);
+  const groups = groupUnreadBySpace(found.messages, me.userName);
   const byName = new Map(spaces.map((space) => [space.name, space]));
   const groupSpaces = await mapLimit(
     groups,
@@ -211,14 +212,19 @@ export async function getUnread(lookbackDays: number, options: { maxAgeMs: numbe
   return result;
 }
 
-/** Marks spaces read (`updateSpaceReadState`), removes them from the shared result, and refreshes Unread Chat's subtitle. */
+/**
+ * Marks spaces read (`updateSpaceReadState`), removes the ones that succeeded from the shared result, and
+ * refreshes Unread Chat's subtitle. Throws when any failed: the error itself when none succeeded, else a
+ * `MarkReadError` listing the spaces that were marked.
+ */
 export async function markRead(spaceNames: string | string[]): Promise<void> {
   const names = Array.isArray(spaceNames) ? spaceNames : [spaceNames];
-  try {
-    await Promise.all(names.map((name) => markSpaceAsRead(name)));
-  } finally {
+  const results = await Promise.allSettled(names.map((name) => markSpaceAsRead(name)));
+  const { marked, error } = settleMarkRead(names, results);
+  if (marked.length > 0) {
     const entry = readShared();
-    if (entry) writeShared({ ...entry, result: withoutSpaces(entry.result, names) });
+    if (entry) writeShared({ ...entry, result: withoutSpaces(entry.result, marked) });
     await refreshUnreadSurfaces();
   }
+  if (error) throw error;
 }

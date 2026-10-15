@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { Message, Space } from "../src/api/types";
 import { GoogleApiError } from "../src/helpers/errors";
 import {
+  collectUnread,
   countLabel,
   countMentions,
   countUnread,
@@ -11,10 +12,14 @@ import {
   excludeOwnMessages,
   groupUnreadBySpace,
   isSpaceUnread,
+  MarkReadError,
   messageSpaceName,
   parseLookbackDays,
   recentlyActiveSpaces,
+  settleMarkRead,
   shouldFallBackFromSearch,
+  UNREAD_CHECK_INCOMPLETE,
+  unreadEmptyView,
   unreadMessagesFilter,
   unreadSearchFilter,
   UNREAD_CHECK_FAILED,
@@ -127,6 +132,148 @@ describe("unreadSummary", () => {
     expect(unreadSummary(500, true, 40)).toBe("500+ unread in 40 spaces");
     expect(unreadSummary(0, false, 0)).toBe("No unread messages");
   });
+
+  it("doesn't claim zero when the search stopped before checking every result", () => {
+    expect(unreadSummary(0, true, 0)).toBe(UNREAD_CHECK_INCOMPLETE);
+    expect(unreadSummary(3, true, 2)).toBe("3+ unread in 2 spaces");
+  });
+});
+
+describe("unreadEmptyView", () => {
+  it("says the check is incomplete when capped", () => {
+    expect(unreadEmptyView({ capped: true, source: "search" }, 14).title).toBe("Unread check incomplete");
+  });
+
+  it("says there's nothing unread otherwise", () => {
+    expect(unreadEmptyView({ capped: false, source: "search" }, 14)).toEqual({
+      title: "No unread messages",
+      description: "Nothing unread from the last 14 days. Muted spaces aren't counted.",
+    });
+    expect(unreadEmptyView({ capped: false, source: "readState" }, 7).description).toBe(
+      "Nothing after your read position in spaces active in the last 7 days.",
+    );
+    expect(unreadEmptyView(undefined, 14).title).toBe("No unread messages");
+  });
+});
+
+describe("collectUnread", () => {
+  /** `count` messages in spaces/A, newest first, from someone else; `reply` makes them thread replies. */
+  const batch = (page: number, count: number, reply: boolean): Message[] =>
+    Array.from({ length: count }, (_, i) =>
+      message(`spaces/A/messages/${page}-${i}`, "2026-10-14T10:00:00Z", "users/222", { threadReply: reply }),
+    );
+  function pager(pages: Message[][], failAt?: number) {
+    const calls: (string | undefined)[] = [];
+    const fetchPage = async (token: string | undefined) => {
+      calls.push(token);
+      const index = token ? Number(token) : 0;
+      if (index === failAt) throw new Error("Internal error encountered");
+      return { messages: pages[index], nextPageToken: index + 1 < pages.length ? String(index + 1) : undefined };
+    };
+    return { calls, fetchPage };
+  }
+  const positionCalls: string[][] = [];
+  const readPositions = async (names: string[]) => {
+    positionCalls.push(names);
+    return new Map(names.map((name): [string, string | undefined] => [name, "2026-10-14T09:00:00Z"]));
+  };
+
+  it("keeps paging past the cap while nothing counts, and stops once something does", async () => {
+    // 5 pages of ignored thread replies, then a page with a top-level message.
+    const pages = [0, 1, 2, 3, 4].map((p) => batch(p, 100, true));
+    pages.push([...batch(5, 1, false), ...batch(55, 99, true)], batch(6, 100, false), batch(7, 100, false));
+    const { calls, fetchPage } = pager(pages);
+    positionCalls.length = 0;
+    const found = await collectUnread({ fetchPage, readPositions, me: ME, cap: 500, scanLimit: 1000 });
+    expect(found.messages.map((m) => m.name)).toEqual(["spaces/A/messages/5-0"]);
+    expect(found.capped).toBe(true);
+    expect(calls).toHaveLength(6);
+    // Read positions are loaded once per space.
+    expect(positionCalls).toEqual([["spaces/A"]]);
+  });
+
+  it("stops at the scan limit when nothing counts, and reports the check as incomplete", async () => {
+    const pages = Array.from({ length: 12 }, (_, p) => batch(p, 100, true));
+    const { calls, fetchPage } = pager(pages);
+    const found = await collectUnread({ fetchPage, readPositions, me: ME, cap: 500, scanLimit: 1000 });
+    expect(found).toEqual({ messages: [], capped: true });
+    expect(calls).toHaveLength(10);
+    expect(unreadSubtitle(found.messages.length, found.capped, 0, 0)).toBe("Unread check incomplete");
+  });
+
+  it("stops at the cap when messages count, and isn't capped when the results end", async () => {
+    const many = Array.from({ length: 7 }, (_, p) => batch(p, 100, false));
+    const capped = await collectUnread({ ...pager(many), readPositions, me: ME, cap: 500, scanLimit: 1000 });
+    expect(capped.messages).toHaveLength(500);
+    expect(capped.capped).toBe(true);
+    const few = await collectUnread({ ...pager([batch(0, 3, true)]), readPositions, me: ME });
+    expect(few).toEqual({ messages: [], capped: false });
+  });
+
+  it("drops messages older than the read position and your own", async () => {
+    const pages = [
+      [
+        message("spaces/A/messages/old", "2026-10-14T08:00:00Z"),
+        message("spaces/A/messages/mine", "2026-10-14T10:00:00Z", ME),
+        message("spaces/A/messages/new", "2026-10-14T10:00:00Z"),
+      ],
+    ];
+    const found = await collectUnread({ ...pager(pages), readPositions, me: ME });
+    expect(found.messages.map((m) => m.name)).toEqual(["spaces/A/messages/new"]);
+  });
+
+  it("throws when the first page fails, and keeps earlier pages when a later one does", async () => {
+    const pages = [batch(0, 100, false), batch(1, 100, false)];
+    await expect(collectUnread({ ...pager(pages, 0), readPositions, me: ME })).rejects.toThrow("Internal error");
+    const errors: unknown[] = [];
+    const found = await collectUnread({
+      ...pager(pages, 1),
+      readPositions,
+      me: ME,
+      onPageError: (error) => errors.push(error),
+    });
+    expect(found.messages).toHaveLength(100);
+    expect(found.capped).toBe(true);
+    expect(errors).toHaveLength(1);
+  });
+});
+
+describe("settleMarkRead", () => {
+  const ok = (): PromiseSettledResult<unknown> => ({ status: "fulfilled", value: {} });
+  const failed = (reason: unknown): PromiseSettledResult<unknown> => ({ status: "rejected", reason });
+
+  it("marks everything when every write succeeds", () => {
+    expect(settleMarkRead(["spaces/A", "spaces/B"], [ok(), ok()])).toEqual({ marked: ["spaces/A", "spaces/B"] });
+  });
+
+  it("throws the failure itself when nothing was marked", () => {
+    const error = new GoogleApiError("Permission denied", { status: 403 });
+    expect(settleMarkRead(["spaces/A"], [failed(error)])).toEqual({ marked: [], error });
+  });
+
+  it("lists the marked spaces when only some writes failed", () => {
+    const result = settleMarkRead(["spaces/A", "spaces/B", "spaces/C"], [ok(), failed(new Error("boom")), ok()]);
+    expect(result.marked).toEqual(["spaces/A", "spaces/C"]);
+    expect(result.error).toBeInstanceOf(MarkReadError);
+    const error = result.error as MarkReadError;
+    expect(error.marked).toEqual(["spaces/A", "spaces/C"]);
+    expect(error.failed).toEqual(["spaces/B"]);
+    expect(error.message).toBe("Couldn't mark 1 of 3 conversations as read: boom");
+  });
+
+  it("removes only the marked spaces from the result", () => {
+    const result: UnreadResult<{ spaceName: string; count: number; mentioned: boolean }> = {
+      spaces: [
+        { spaceName: "spaces/A", count: 2, mentioned: false },
+        { spaceName: "spaces/B", count: 1, mentioned: false },
+      ],
+      total: 3,
+      capped: false,
+      source: "search",
+    };
+    const { marked } = settleMarkRead(["spaces/A", "spaces/B"], [ok(), failed(new Error("boom"))]);
+    expect(withoutSpaces(result, marked).spaces.map((s) => s.spaceName)).toEqual(["spaces/B"]);
+  });
 });
 
 describe("withoutSpaces", () => {
@@ -147,8 +294,9 @@ describe("withoutSpaces", () => {
     expect(next.capped).toBe(true);
   });
 
-  it("clears the cap when nothing is left", () => {
-    expect(withoutSpaces(result, ["spaces/A", "spaces/B"])).toMatchObject({ spaces: [], total: 0, capped: false });
+  it("keeps the cap when nothing is left, as results past it were never checked", () => {
+    expect(withoutSpaces(result, ["spaces/A", "spaces/B"])).toMatchObject({ spaces: [], total: 0, capped: true });
+    expect(withoutSpaces({ ...result, capped: false }, ["spaces/A", "spaces/B"]).capped).toBe(false);
   });
 });
 
@@ -204,6 +352,16 @@ describe("read-state fallback", () => {
     expect(unreadMessagesFilter(undefined)).toBeUndefined();
   });
 
+  it("unreadMessagesFilter starts at the lookback start when the read position is older", () => {
+    expect(unreadMessagesFilter({ lastReadTime: "2026-06-01T09:00:00Z" }, 14, NOW)).toBe(
+      'create_time > "2026-09-30T12:00:00.000Z"',
+    );
+    expect(unreadMessagesFilter({ lastReadTime: "2026-10-14T09:00:00Z" }, 14, NOW)).toBe(
+      'create_time > "2026-10-14T09:00:00Z"',
+    );
+    expect(unreadMessagesFilter(undefined, 14, NOW)).toBeUndefined();
+  });
+
   it("recentlyActiveSpaces keeps spaces active within the window, newest first", () => {
     const spaces = [
       space("old", "2026-09-01T00:00:00Z"),
@@ -227,6 +385,11 @@ describe("unreadSubtitle", () => {
     expect(unreadSubtitle(500, true, 40, 3)).toBe("500+ unread · 3 mentions");
     expect(unreadSubtitle(0, false, 0, 0)).toBe("No unread messages");
     expect(UNREAD_CHECK_FAILED).toBe("Couldn't check unread");
+  });
+
+  it("says N+ when capped, and doesn't claim zero when nothing counted before the cap", () => {
+    expect(unreadSubtitle(3, true, 2, 0)).toBe("3+ unread");
+    expect(unreadSubtitle(0, true, 0, 0)).toBe("Unread check incomplete");
   });
 
   it("counts mentioning messages across spaces", () => {
