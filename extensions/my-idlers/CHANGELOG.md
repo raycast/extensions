@@ -1,5 +1,9 @@
 # MyIdlers Changelog
 
+## [Show Domain Provider] - {PR_MERGE_DATE}
+
+- Domain provider is now mentioned in `Detail`
+
 ## [Add Server] - 2025-09-01
 
 ## [Separate Active and Inactive Items] - 2025-06-23
