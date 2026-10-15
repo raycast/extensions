@@ -1,63 +1,40 @@
 # TrackTimer for Raycast
 
-TrackTimer for Raycast supports macOS and connects to `https://www.tracktimer.app`. Enter your TrackTimer API token in the extension preferences; the server URL is not configurable.
+[TrackTimer](https://www.tracktimer.app) helps freelancers, consultants, and agencies track client work. Start and stop timers, find recent work, and switch between projects without leaving Raycast.
 
-## Caching
+## Features
 
-Raycast's native disk cache displays saved timers, recent entries, and project choices immediately. Cache namespaces separate each API key and server; tokens are never stored in query caches. Active timers stay fresh for 15 seconds, recent entries for one minute, and clients/projects for five minutes. The timer form displays cached clients and projects immediately and revalidates them whenever it opens or the selected client changes. Other cached queries avoid new requests within their freshness windows. Stale data refreshes in the background, and data older than 24 hours is discarded.
+- **See what's running.** Check your current timer and stop it when you're done.
+- **Pick up recent work.** Search by description, project, or client, then start a new timer with the same project and billable setting.
+- **Start something new.** Choose a client and project, add a description, and mark the time as billable or non-billable.
 
-Manual Refresh and Reload Clients and Projects bypass freshness windows. Timer mutations invalidate timer/history caches. Authorization errors clear cached data; temporary network failures retain the previous snapshot. Running durations advance locally from the last confirmed value. Older history pages are fetched on demand without persistence.
+Your timers stay in sync with TrackTimer on the web, Mac, and iPhone. Starting a timer finishes the one already running for your account, including in another workspace. Restarting recent work creates a new time entry and leaves the original record intact.
 
-Control your TrackTimer timers from Raycast. **Start/Stop Timer** shows your running timer and recent work; **Start New Timer** opens a description and project form. Restarting recent work creates a new timer rather than editing historical entries.
+## Get started
 
-## Local development
+You need macOS and a TrackTimer account.
 
-From this extension directory (`extensions/tracktimer` in the Raycast extensions repository):
+1. Sign in to [TrackTimer](https://www.tracktimer.app/app) and select the workspace you want to track time in.
+2. Open your account menu, choose **API keys**, select **Create key**, and copy the key.
+3. Paste the key into **TrackTimer API Token** in the extension preferences.
+4. Open **Start/Stop Timer** to pick up recent work, or **Start New Timer** to choose a project and description.
 
-```sh
-npm install
-npm run dev
-```
+The key is stored in Raycast's password preference. The extension needs `clients:read`, `projects:read`, `timers:read`, and `timers:write`; keys created in TrackTimer include these permissions. Each key stays connected to the workspace selected when it was created.
 
-Raycast must be installed to use the development extension. In its preferences, enter a TrackTimer API token created in TrackTimer Settings (the default key includes `clients:read`, `projects:read`, `timers:read`, and `timers:write`). The token is stored in Raycast's password preference; do not put it in source files or shell commands.
+## Using the extension
 
-Workspace admins can select any active client, including clients without projects. Select an existing assigned project to start a timer. Client and project searches filter names without offering creation or selectable placeholder rows. Use **Manage Projects in TrackTimer** to manage projects, then reload the choices. Raycast does not require `projects:write`.
+**Start/Stop Timer** shows your running timer and recent work. Type part of a description, project name, or client name to filter the loaded recent timers, then press Return to start the selected timer again. Clear the search to see the full list.
 
-The server is hardcoded in `TRACKTIMER_URL` in `src/session.ts`. To install a personal development build against a local server, temporarily change that constant to your localhost origin (for example `http://localhost:3001`), rebuild, and use a token created on that local server. Restore `https://www.tracktimer.app` before committing or exporting for the Store. Use the canonical www hostname because authenticated API requests reject redirects. Never use Production credentials against Local or Preview. Building this package does not deploy the API.
+**Start New Timer** lets you select an existing client and assigned project, write a description, and choose whether the time is billable. Use **Manage Projects in TrackTimer** to manage projects, then reload the choices in Raycast.
 
-From `extensions/tracktimer`, run the package checks with:
+Recent timers refresh every minute while the command is open. Use **Refresh** to load the latest changes immediately. If an action needs another attempt, choose **Retry pending timer action** to finish it.
 
-```sh
-npm run build
-npm run check-types
-npm run lint
-```
+Learn more about [time tracking for client work with TrackTimer](https://www.tracktimer.app), or read the [API documentation](https://www.tracktimer.app/docs).
 
-The distribution build writes to `dist` without installing into Raycast. Use `dev` to load it in Raycast.
+## Development and attribution
 
-Uncertain timer requests are saved locally with their original operation ID. Use **Retry pending timer action** before starting another timer. The saved action includes its description but never the API token. Recent entries refresh every minute while the command is open, and **Refresh** reloads current server state. Starting a timer completes any timer already running for the same user, including in another workspace.
+See the [development and packaging notes](https://github.com/raycast/extensions/blob/main/extensions/tracktimer/DEVELOPMENT.md) for local setup, caching, checks, and Store submission.
 
-The package includes standalone Raycast ESLint and Prettier configuration. Run the checks above before handing off changes.
+The recent-timer list and quick-start flow are adapted from the [Toggl Track extension](https://www.raycast.com/franzwilhelm/toggl-track), by Franz Wilhelm and contributors, at [commit `fa8b3874b6f49776570e4291d8ed74b532164013`](https://github.com/raycast/extensions/tree/fa8b3874b6f49776570e4291d8ed74b532164013/extensions/toggl-track). TrackTimer replaces its Toggl-specific service integration and branding. The upstream repository's MIT license and copyright notice are preserved in `LICENSE`.
 
-## Standalone packaging and Store submission
-
-This directory is self-contained: its dependencies use exact npm versions, with no workspace or catalog dependencies. It can be copied into `extensions/tracktimer` in a fork of [raycast/extensions](https://github.com/raycast/extensions). Keep `src`, `assets`, the manifest, configuration, README, changelog, and MIT license together.
-
-For a clean export, copy the tracked package files into a fresh directory, excluding `node_modules`, generated output, and `raycast-env.d.ts`. In that exported directory run:
-
-```sh
-npm install
-npm run build
-npm run check-types
-npm run lint
-```
-
-`npm install` creates the standalone `package-lock.json`; include that lockfile in the Store contribution. Do not generate a second dependency lockfile inside the pnpm monorepo. The manifest is public and includes the `publish` script required by Raycast’s publishing CLI.
-
-The registered Raycast author handle is `pfista`. Before submitting, capture up to six 2000 × 1250 PNG screenshots using the running extension (Raycast recommends at least three), with no credentials or other applications visible. Validate the production endpoint and API permissions with an actual account. From the exported directory, run `npm run publish`; Raycast authenticates with GitHub and opens a draft pull request against `raycast/extensions`. Complete the PR description and submit it for review. After Raycast merges it, the extension is automatically published to the Store. The changelog date placeholder is replaced at merge time.
-
-## Upstream provenance
-
-The recent-timer list and quick-start flow are adapted from the [Toggl Track extension](https://www.raycast.com/franzwilhelm/toggl-track), by Franz Wilhelm and contributors, at the user-selected [commit `fa8b3874b6f49776570e4291d8ed74b532164013`](https://github.com/raycast/extensions/tree/fa8b3874b6f49776570e4291d8ed74b532164013/extensions/toggl-track). TrackTimer replaces its Toggl-specific service integration and branding. Unrelated Toggl management commands and integrations are outside this initial package.
-
-The upstream repository's MIT license and copyright notice are preserved in `LICENSE`. The icon is a vector rendition of TrackTimer's existing orange-circle, white-T mark in `apps/web/src/components/public-shell.tsx`, rendered to a 512 × 512 PNG. It contains no Toggl artwork.
+The icon reuses TrackTimer's 3D sundial app artwork: an orange fin above a brushed-metal dial and stone base. It is the 512 × 512 PNG from the macOS app icon and contains no Toggl artwork.
