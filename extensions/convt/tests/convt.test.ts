@@ -1,9 +1,40 @@
 import assert from "node:assert/strict";
+import childProcess from "node:child_process";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { createRequire, syncBuiltinESMExports } from "node:module";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { test, type TestContext } from "node:test";
-import {
+import { after, test, type TestContext } from "node:test";
+import { promisify } from "node:util";
+
+const fixturePaths = new Set<string>();
+const originalExecFile = childProcess.execFile;
+const originalSpawn = childProcess.spawn;
+const fixtureLauncher = {
+  apply(target: (...args: never[]) => unknown, thisArg: unknown, args: unknown[]) {
+    const [file, argv, ...options] = args;
+    if (typeof file === "string" && fixturePaths.has(file) && Array.isArray(argv)) {
+      return Reflect.apply(target, thisArg, [process.execPath, [file, ...argv], ...options]);
+    }
+    return Reflect.apply(target, thisArg, args);
+  },
+};
+
+// Launch registered fixtures with Node on every platform; keep real subprocesses and taskkill.
+childProcess.execFile = new Proxy<typeof originalExecFile>(originalExecFile.bind(childProcess), fixtureLauncher);
+Object.defineProperty(childProcess.execFile, promisify.custom, {
+  value: new Proxy(promisify(originalExecFile), fixtureLauncher),
+});
+childProcess.spawn = new Proxy<typeof originalSpawn>(originalSpawn, fixtureLauncher);
+syncBuiltinESMExports();
+after(() => {
+  childProcess.execFile = originalExecFile;
+  childProcess.spawn = originalSpawn;
+  syncBuiltinESMExports();
+});
+
+// Load after installing the launcher so the module captures the forwarded promisified execFile.
+const {
   conversionArgs,
   convertFiles,
   getTargets,
@@ -13,12 +44,11 @@ import {
   resolveBinary,
   validateFiles,
   validateOptions,
-} from "../src/lib/convt";
+}: typeof import("../src/lib/convt") = createRequire(__filename)("../src/lib/convt");
 
 // A real subprocess fixture exercises argv, streaming, exit codes, and cancellation.
 // Format/event shapes match convt-cli's public protocol (Convt 0.4.0).
-const fixtureSource = `#!/usr/bin/env node
-const fs = require("node:fs");
+const fixtureSource = `const fs = require("node:fs");
 const path = require("node:path");
 const args = process.argv.slice(2);
 const record = (entry) => fs.appendFileSync(path.join(path.dirname(process.argv[1]), "queries.log"), entry + "\\n");
@@ -87,8 +117,10 @@ process.exitCode = failed ? 1 : 0;
 async function fixture(t: TestContext, names: string[]) {
   const directory = await mkdtemp(path.join(tmpdir(), "convt test "));
   t.after(() => rm(directory, { recursive: true, force: true }));
-  const binary = path.join(directory, "convt fixture");
-  await writeFile(binary, fixtureSource, { mode: 0o755 });
+  const binary = path.join(directory, "convt fixture.cjs");
+  fixturePaths.add(binary);
+  t.after(() => fixturePaths.delete(binary));
+  await writeFile(binary, fixtureSource);
   const files = names.map((name) => path.join(directory, name));
   for (const file of files) await writeFile(file, "input");
   return { directory, binary, files };
@@ -134,8 +166,8 @@ test("passes literal arguments and separates filenames from flags", () => {
 });
 
 test("resolves explicit executables and does not silently fall back from a bad preference", async (t) => {
-  const { binary, directory } = await fixture(t, []);
-  assert.equal(await resolveBinary(binary), binary);
+  const { directory } = await fixture(t, []);
+  assert.equal(await resolveBinary(process.execPath), process.execPath);
   await assert.rejects(resolveBinary(path.join(directory, "missing")), /No executable found/);
   await assert.rejects(resolveBinary("convt"), /absolute path/);
   await assert.rejects(resolveBinary(directory), /No executable found/);
@@ -291,7 +323,7 @@ test("surfaces licensing errors instead of claiming success or losing the messag
   const { binary, files } = await fixture(t, ["blocked.png"]);
   const [result] = await convertFiles(binary, { files, target: "jpeg" });
   assert.equal(result.status, "failed");
-  if (result.status !== "done") assert.match(result.message, /trial has ended/);
+  assert.match(result.message, /trial has ended/);
 });
 
 test("does not invent outputs when a process exits successfully with malformed output", async (t) => {
