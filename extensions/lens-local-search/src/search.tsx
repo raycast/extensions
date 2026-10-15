@@ -905,15 +905,20 @@ export default function Command() {
       {service && strong.length > 0 && (
         <View.Section
           title={
-            interpreting
-              ? "Keyword Preview"
-              : result.literal
-                ? "Filtered"
-                : visual
-                  ? "Images"
-                  : "Matches"
+            error
+              ? "Search Interrupted"
+              : interpreting
+                ? "Keyword Preview"
+                : result.literal
+                  ? "Filtered"
+                  : visual
+                    ? "Images"
+                    : "Matches"
           }
-          subtitle={`${strong.length} ${strong.length === 1 ? "file" : "files"}${visual && result.queryDescription ? ` · ${result.queryDescription.length > 60 ? result.queryDescription.slice(0, 59) + "…" : result.queryDescription}` : ""}`}
+          subtitle={
+            error ??
+            `${strong.length} ${strong.length === 1 ? "file" : "files"}${visual && result.queryDescription ? ` · ${result.queryDescription.length > 60 ? result.queryDescription.slice(0, 59) + "…" : result.queryDescription}` : ""}`
+          }
         >
           {strong.map((hit) => (
             <Result
@@ -931,8 +936,10 @@ export default function Command() {
       )}
       {service && weaker.length > 0 && (
         <View.Section
-          title="Weaker Matches"
-          subtitle={`${weaker.length} files`}
+          title={
+            error && !strong.length ? "Search Interrupted" : "Weaker Matches"
+          }
+          subtitle={error && !strong.length ? error : `${weaker.length} files`}
         >
           {!showWeaker &&
             (visual ? (

@@ -492,3 +492,28 @@ test("a stopped native search stays visible as an error after interpretation", {
     assert.doesNotMatch(text, /Using local search/);
   } finally { cleanup(); }
 });
+
+test("native failure remains visible with retained strong or weak-only matches in lists and grids", { skip: !build }, async () => {
+  for (const filter of ["image", "documents"]) for (const strong of [0, 1]) {
+    const app = command();
+    const retained = filter === "image" ? hit : { ...hit, path: "/files/notes.md", kind: "doc", segment: "chunk" };
+    const values = state("search topic", filter, { hits: [], strong: 0, meaning: false }, {
+      search: async (_q: string, _kind: string, _plan: unknown, meaning: boolean) => {
+        if (meaning) throw new Error("Lens search stopped unexpectedly.");
+        return { hits: [retained], strong, meaning: false };
+      },
+    });
+    app.render(app.Command, {}, values);
+    const cleanup = app.effects()[1]() as unknown as () => void;
+    try {
+      await new Promise(resolve => setTimeout(resolve, 450));
+      const view = app.render(app.Command, {}, values);
+      const surface = filter === "image" ? app.api.Grid : app.api.List;
+      assert.equal(view.type, surface);
+      assert.equal((values[4] as { result: SearchResult }).result.hits[0].path, retained.path);
+      const section = elements(view).find(node => node.type === surface.Section)!;
+      assert.equal(section.props.title, "Search Interrupted");
+      assert.match(String(section.props.subtitle), /stopped unexpectedly/);
+    } finally { cleanup(); }
+  }
+});
