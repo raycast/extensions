@@ -7,6 +7,7 @@ import {
   conversionArgs,
   convertFiles,
   getTargets,
+  inspectFiles,
   parseEvent,
   parseFormats,
   resolveBinary,
@@ -22,20 +23,28 @@ const path = require("node:path");
 const args = process.argv.slice(2);
 const record = (entry) => fs.appendFileSync(path.join(path.dirname(process.argv[1]), "queries.log"), entry + "\\n");
 const formats = [
-  {id: "jpeg", name: "JPEG", category: "image", extensions: ["jpg", "jpeg"]},
+  {id: "jpeg", name: "JPEG", category: "image", extensions: ["jpg", "jpeg", "jfif"]},
   {id: "png", name: "PNG", category: "image", extensions: ["png"]},
   {id: "webp", name: "WebP", category: "image", extensions: ["webp"]},
+  {id: "pdf", name: "PDF", category: "document", extensions: ["pdf"]},
+  {id: "wav", name: "WAV", category: "audio", extensions: ["wav"]},
+  {id: "mp3", name: "MP3", category: "audio", extensions: ["mp3"]},
 ];
 const emit = value => process.stdout.write(JSON.stringify(value) + "\\n");
 if (args[0] === "formats") { record("formats"); emit(formats); process.exit(0); }
 if (args[0] === "targets") {
-  record("targets " + path.basename(args[1]));
-  if (path.basename(args[1]).startsWith("stall")) {
+  const menu = args.includes("--menu");
+  record("targets " + path.basename(args[1]) + (menu ? " --menu" : ""));
+  if (path.basename(args[1]).startsWith("stall.") || (path.basename(args[1]).startsWith("stallmenu.") && menu)) {
     setInterval(() => {}, 1000);
     return;
   }
-  if (args[1].endsWith(".pdf")) console.log("png\\njpeg");
-  else if (args[1].endsWith(".png")) console.log("jpeg\\nwebp");
+  const extension = path.extname(args[1]).toLowerCase();
+  if (extension === ".pdf") console.log(menu ? "jpeg\\npng" : "png\\njpeg");
+  else if (extension === ".png") console.log(menu ? "webp\\njpeg\\npng\\nunknown\\nwebp" : "jpeg\\nwebp\\nunknown");
+  else if ([".jpg", ".jpeg", ".jfif"].includes(extension)) console.log(menu ? "webp\\npng" : "png\\nwebp");
+  else if (extension === ".wav") console.log("mp3");
+  else if (extension === ".webp") console.log(menu ? "" : "jpeg\\npng");
   else { console.error("unknown format"); process.exit(1); }
   process.exit(0);
 }
@@ -148,6 +157,118 @@ test("intersects available targets across all source formats", async (t) => {
     ["jpeg"],
   );
   await assert.rejects(convertFiles(binary, { files, target: "webp" }), /cannot all convert/);
+});
+
+test("identifies aliases and queries repeated extensions once while retaining menu order", async (t) => {
+  const { binary, files, directory } = await fixture(t, ["one.JFIF", "two.jfif", "three.JPG"]);
+  const inspection = await inspectFiles(binary, files);
+  assert.deepEqual(
+    inspection.sources.map(({ file, extension, format }) => [file, extension, format?.id]),
+    [
+      [files[0], "jfif", "jpeg"],
+      [files[1], "jfif", "jpeg"],
+      [files[2], "jpg", "jpeg"],
+    ],
+  );
+  assert.deepEqual(
+    inspection.targets.map((format) => format.id),
+    ["png", "webp"],
+  );
+  assert.deepEqual(inspection.suggestedTargetIds, ["webp", "png"]);
+  assert.deepEqual(structuredClone(inspection), inspection);
+  const queries = (await readFile(path.join(directory, "queries.log"), "utf8")).trim().split("\n");
+  assert.equal(queries.filter((line) => line.startsWith("targets")).length, 4);
+  assert.equal(queries.filter((line) => line === "formats").length, 1);
+});
+
+test("suggestions keep CLI order and exclude unsupported, duplicate, and unknown target IDs", async (t) => {
+  const { binary, files } = await fixture(t, ["one.PNG"]);
+  const inspection = await inspectFiles(binary, files);
+  assert.equal(inspection.sources[0].format?.id, "png");
+  assert.deepEqual(
+    inspection.targets.map((format) => format.id),
+    ["jpeg", "webp"],
+  );
+  assert.deepEqual(inspection.suggestedTargetIds, ["webp", "jpeg"]);
+});
+
+test("mixed inputs suggest only common menu targets and retain all common outputs", async (t) => {
+  const { binary, files } = await fixture(t, ["image.png", "report.pdf", "image.webp", "audio.wav"]);
+  const inspection = await inspectFiles(binary, files.slice(0, 2));
+  assert.deepEqual(
+    inspection.targets.map((format) => format.id),
+    ["jpeg"],
+  );
+  assert.deepEqual(inspection.suggestedTargetIds, ["jpeg"]);
+  const noSuggestions = await inspectFiles(binary, [files[1], files[2]]);
+  assert.deepEqual(
+    noSuggestions.targets.map((format) => format.id),
+    ["jpeg", "png"],
+  );
+  assert.deepEqual(noSuggestions.suggestedTargetIds, []);
+  const noCommon = await inspectFiles(binary, [files[0], files[3]]);
+  assert.deepEqual(noCommon.targets, []);
+  assert.deepEqual(noCommon.suggestedTargetIds, []);
+});
+
+test("unknown and extensionless sources remain explicit and do not query targets", async (t) => {
+  const { binary, files, directory } = await fixture(t, ["one.xyz", "README", "one.png"]);
+  const inspection = await inspectFiles(binary, files);
+  assert.deepEqual(
+    inspection.sources.map(({ extension, format }) => [extension, format?.id ?? null]),
+    [
+      ["xyz", null],
+      ["", null],
+      ["png", "png"],
+    ],
+  );
+  assert.deepEqual(inspection.targets, []);
+  assert.deepEqual(inspection.suggestedTargetIds, []);
+  assert.equal(await readFile(path.join(directory, "queries.log"), "utf8"), "formats\n");
+});
+
+test("conversion target validation does not request suggestions", async (t) => {
+  const { binary, files, directory } = await fixture(t, ["one.png"]);
+  await convertFiles(binary, { files, target: "jpeg" });
+  assert.doesNotMatch(await readFile(path.join(directory, "queries.log"), "utf8"), /--menu/);
+});
+
+test("pre-cancelled inspection does not query the CLI", async (t) => {
+  const { binary, files, directory } = await fixture(t, ["one.png"]);
+  await assert.rejects(inspectFiles(binary, files, AbortSignal.abort()), { name: "AbortError" });
+  await assert.rejects(readFile(path.join(directory, "queries.log")), { code: "ENOENT" });
+});
+
+test("cancelling inspection stops the menu query and prevents later source checks", { timeout: 10_000 }, async (t) => {
+  const { binary, files, directory } = await fixture(t, ["stallmenu.png", "report.pdf"]);
+  const controller = new AbortController();
+  const pending = inspectFiles(binary, files, controller.signal);
+  const logPath = path.join(directory, "queries.log");
+  const started = Date.now();
+  while (Date.now() - started < 5_000) {
+    if ((await readFile(logPath, "utf8").catch(() => "")).includes("--menu")) break;
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+  controller.abort();
+  await assert.rejects(pending, { name: "AbortError" });
+  const log = await readFile(logPath, "utf8");
+  assert.match(log, /stallmenu\.png --menu/);
+  assert.doesNotMatch(log, /report\.pdf/);
+});
+
+test("rejects invalid output folders with friendly validation before conversion", async (t) => {
+  const { binary, files, directory } = await fixture(t, ["one.png"]);
+  for (const outputDirectory of [
+    "relative",
+    files[0],
+    path.join(directory, "missing"),
+    path.join(files[0], "nested"),
+  ]) {
+    await assert.rejects(convertFiles(binary, { files, target: "jpeg", outputDirectory }), {
+      message: "Choose an existing output folder.",
+    });
+  }
+  await assert.rejects(readFile(path.join(directory, "argv.json")), { code: "ENOENT" });
 });
 
 test("keeps actual multi-page output paths and successful files when another file fails", async (t) => {

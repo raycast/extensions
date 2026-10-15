@@ -10,17 +10,18 @@ import {
   openExtensionPreferences,
   showToast,
   Toast,
+  useNavigation,
 } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import path from "node:path";
 import {
   convertFiles,
-  getTargets,
+  inspectFiles,
   validateOptions,
   type ConversionProgress,
   type ConversionResult,
-  type Format,
+  type FileInspection,
 } from "./lib/convt";
 import { getBinary } from "./lib/preferences";
 
@@ -86,6 +87,10 @@ type FormValues = {
   dpi?: string;
 };
 
+type Discovery = { files: string[]; binary: string } & (
+  { status: "ready"; inspection: FileInspection } | { status: "error"; message: string }
+);
+
 function Converter({
   binary,
   files,
@@ -95,49 +100,66 @@ function Converter({
   files: string[];
   setFiles: (files: string[]) => void;
 }) {
-  const [formats, setFormats] = useState<Format[]>([]);
-  const [target, setTarget] = useState("");
+  const { push } = useNavigation();
+  const [discovery, setDiscovery] = useState<Discovery>();
+  const [manualTarget, setManualTarget] = useState("");
   const [outputDirectory, setOutputDirectory] = useState<string[]>([]);
   const [quality, setQuality] = useState("");
   const [maxSize, setMaxSize] = useState("");
   const [pages, setPages] = useState("");
   const [dpi, setDpi] = useState("");
-  const [loadingTargets, setLoadingTargets] = useState(false);
-  const [fileError, setFileError] = useState<string>();
-  const [results, setResults] = useState<ConversionResult[]>();
+  const [requiredError, setRequiredError] = useState(false);
   const [progress, setProgress] = useState<ConversionProgress>();
   const [busy, setBusy] = useState(false);
   const controller = useRef<AbortController | null>(null);
+  const current = discovery?.files === files && discovery.binary === binary ? discovery : undefined;
+  const inspection = current?.status === "ready" ? current.inspection : undefined;
+  const formats = inspection?.targets ?? [];
+  const loadingTargets = files.length > 0 && !current;
+  // Removing the selected ID during loading makes Raycast select the first new option.
+  const target =
+    loadingTargets || formats.some((format) => format.id === manualTarget)
+      ? manualTarget
+      : (inspection?.suggestedTargetIds[0] ?? formats[0]?.id ?? "");
+  const fileError = !files.length
+    ? requiredError
+      ? "Choose at least one file."
+      : undefined
+    : current?.status === "error"
+      ? current.message
+      : inspection?.sources.some((source) => !source.format)
+        ? "Convt does not recognize every file extension. Choose supported files."
+        : inspection && !formats.length
+          ? "No shared output format. Choose compatible files and check that Convt's required engines are installed."
+          : undefined;
 
   useEffect(() => {
     let active = true;
-    setFormats([]);
-    setFileError(undefined);
+    const abort = new AbortController();
+    setDiscovery(undefined);
+    setRequiredError(false);
     if (!files.length) {
-      setLoadingTargets(false);
+      setManualTarget("");
       return;
     }
-    setLoadingTargets(true);
-    getTargets(binary, files)
-      .then((available) => {
+    inspectFiles(binary, files, abort.signal)
+      .then((inspection) => {
         if (!active) return;
-        setFormats(available);
-        setTarget((previous) =>
-          available.some((format) => format.id === previous) ? previous : available[0]?.id || "",
-        );
-        if (!available.length)
-          setFileError(
-            "No shared output format. Choose compatible files and check that Convt's required engines are installed.",
-          );
+        setDiscovery({ files, binary, status: "ready", inspection });
+        setManualTarget((previous) => (inspection.targets.some((format) => format.id === previous) ? previous : ""));
       })
       .catch((error: unknown) => {
-        if (active) setFileError(error instanceof Error ? error.message : String(error));
-      })
-      .finally(() => {
-        if (active) setLoadingTargets(false);
+        if (active)
+          setDiscovery({
+            files,
+            binary,
+            status: "error",
+            message: error instanceof Error ? error.message : String(error),
+          });
       });
     return () => {
       active = false;
+      abort.abort();
     };
   }, [binary, files]);
 
@@ -146,7 +168,7 @@ function Converter({
   async function submit(values: FormValues) {
     if (controller.current || loadingTargets) return;
     if (!files.length) {
-      setFileError("Choose at least one file.");
+      setRequiredError(true);
       return;
     }
     if (!formats.some((format) => format.id === values.target)) {
@@ -179,7 +201,7 @@ function Converter({
           onProgress: setProgress,
         },
       );
-      setResults(converted);
+      push(<Results results={converted} />);
       const done = converted.filter((result) => result.status === "done").length;
       await showToast({
         style: done === converted.length ? Toast.Style.Success : Toast.Style.Failure,
@@ -195,38 +217,47 @@ function Converter({
     }
   }
 
-  if (results) return <Results results={results} onBack={() => setResults(undefined)} />;
-
-  if (busy) {
-    return (
-      <List isLoading searchBarPlaceholder="Converting files…">
-        <List.Item
-          title={progress ? path.basename(progress.input) : "Preparing conversion…"}
-          subtitle={progress ? `${progress.completed} of ${progress.total} completed` : undefined}
-          icon={Icon.ArrowClockwise}
-          accessories={progress?.fraction != null ? [{ text: `${Math.floor(progress.fraction * 100)}%` }] : []}
-          actions={
-            <ActionPanel>
-              <Action title="Cancel Conversion" icon={Icon.XMarkCircle} onAction={() => controller.current?.abort()} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
-
   const selectedFormat = formats.find((format) => format.id === target);
   const image = selectedFormat?.category === "image";
   const video = selectedFormat?.category === "video";
   const hasPdf = files.some((file) => path.extname(file).toLowerCase() === ".pdf");
   const hasSvg = files.some((file) => path.extname(file).toLowerCase() === ".svg");
+  const sourceCounts = new Map<string, number>();
+  for (const source of inspection?.sources ?? []) {
+    const label = source.format
+      ? source.format.name.toLowerCase() === source.format.category.toLowerCase()
+        ? source.format.name
+        : `${source.format.name} ${source.format.category}`
+      : source.extension
+        ? `Unknown (.${source.extension})`
+        : "No file extension";
+    sourceCounts.set(label, (sourceCounts.get(label) ?? 0) + 1);
+  }
+  const sourceSummary = [...sourceCounts]
+    .map(([label, count]) => `${label} · ${count} file${count === 1 ? "" : "s"}`)
+    .join("; ");
+  const suggested = (inspection?.suggestedTargetIds ?? []).flatMap((id) =>
+    formats.filter((format) => format.id === id),
+  );
+  const others = formats.filter((format) => !inspection?.suggestedTargetIds.includes(format.id));
+  const sections = [
+    { title: "Suggested", formats: suggested },
+    ...[...new Set(others.map((format) => format.category))].map((category) => ({
+      title: category.charAt(0).toUpperCase() + category.slice(1),
+      formats: others.filter((format) => format.category === category),
+    })),
+  ].filter((section) => section.formats.length);
 
   return (
     <Form
-      isLoading={loadingTargets}
+      isLoading={loadingTargets || busy}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Convert Files" icon={Icon.ArrowRight} onSubmit={submit} />
+          {busy ? (
+            <Action title="Cancel Conversion" icon={Icon.XMarkCircle} onAction={() => controller.current?.abort()} />
+          ) : (
+            <Action.SubmitForm title="Convert Files" icon={Icon.ArrowRight} onSubmit={submit} />
+          )}
           {process.platform === "darwin" && (
             <Action
               title="Use Finder Selection"
@@ -246,6 +277,16 @@ function Converter({
       }
     >
       <Form.Description text="Convert files locally with Convt. Originals are preserved; existing output names receive a numbered suffix." />
+      {busy && (
+        <Form.Description
+          title="Converting"
+          text={
+            progress
+              ? `${path.basename(progress.input)} — ${progress.completed} of ${progress.total} completed${progress.fraction != null ? ` (${Math.floor(progress.fraction * 100)}%)` : ""}`
+              : "Preparing conversion…"
+          }
+        />
+      )}
       <Form.FilePicker
         id="files"
         title="Files"
@@ -255,27 +296,49 @@ function Converter({
         canChooseDirectories={false}
         allowMultipleSelection
       />
+      {!!files.length && (
+        <Form.Description
+          title="Detected File Types"
+          text={
+            loadingTargets
+              ? "Checking file extensions…"
+              : sourceSummary
+                ? `${sourceSummary}. Based on file extensions.`
+                : "Could not identify file types."
+          }
+        />
+      )}
       <Form.Dropdown
         id="target"
         title="Output Format"
         value={target}
-        onChange={setTarget}
-        info="Only formats available for every selected file are shown."
+        onChange={(value) => {
+          if (!loadingTargets && value !== target && formats.some((format) => format.id === value))
+            setManualTarget(value);
+        }}
+        info="All formats work for every selected file. Suggestions come from Convt."
       >
         {!formats.length && (
-          <Form.Dropdown.Item value="" title={loadingTargets ? "Finding available formats…" : "Choose files first"} />
+          <Form.Dropdown.Item
+            value={target}
+            title={
+              loadingTargets
+                ? "Finding available formats…"
+                : files.length
+                  ? "No available formats"
+                  : "Choose files first"
+            }
+          />
         )}
-        {[...new Set(formats.map((format) => format.category))].map((category) => (
-          <Form.Dropdown.Section key={category} title={category.charAt(0).toUpperCase() + category.slice(1)}>
-            {formats
-              .filter((format) => format.category === category)
-              .map((format) => (
-                <Form.Dropdown.Item
-                  key={format.id}
-                  value={format.id}
-                  title={`${format.name} (.${format.extensions[0] || format.id})`}
-                />
-              ))}
+        {sections.map((section) => (
+          <Form.Dropdown.Section key={section.title} title={section.title}>
+            {section.formats.map((format) => (
+              <Form.Dropdown.Item
+                key={format.id}
+                value={format.id}
+                title={`${format.name} (.${format.extensions[0] || format.id})`}
+              />
+            ))}
           </Form.Dropdown.Section>
         ))}
       </Form.Dropdown>
@@ -326,7 +389,8 @@ function Converter({
   );
 }
 
-function Results({ results, onBack }: { results: ConversionResult[]; onBack: () => void }) {
+function Results({ results }: { results: ConversionResult[] }) {
+  const { pop } = useNavigation();
   const outputs = results.flatMap((result) => (result.status === "done" ? result.outputs : []));
   return (
     <List navigationTitle="Conversion Results" searchBarPlaceholder="Search converted files…">
@@ -355,7 +419,7 @@ function Results({ results, onBack }: { results: ConversionResult[]; onBack: () 
                       <Action.CopyToClipboard title="Copy File" content={{ file: output }} />
                       <Action.CopyToClipboard title="Copy Path" content={output} />
                       <Action.CopyToClipboard title="Copy All Output Paths" content={outputs.join("\n")} />
-                      <Action title="Convert More Files" icon={Icon.ArrowCounterClockwise} onAction={onBack} />
+                      <Action title="Convert More Files" icon={Icon.ArrowCounterClockwise} onAction={pop} />
                     </ActionPanel>
                   }
                 />
@@ -383,7 +447,7 @@ function Results({ results, onBack }: { results: ConversionResult[]; onBack: () 
                     }
                   />
                   <Action.CopyToClipboard title="Copy Error" content={result.message} />
-                  <Action title="Back to Conversion" icon={Icon.ArrowCounterClockwise} onAction={onBack} />
+                  <Action title="Back to Conversion" icon={Icon.ArrowCounterClockwise} onAction={pop} />
                   <Action.OpenInBrowser title="Open Convt Help" url="https://github.com/opencoredev/convt#engines" />
                 </ActionPanel>
               }
