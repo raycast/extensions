@@ -1,5 +1,5 @@
 import { Clipboard, getSelectedText, showHUD } from "@raycast/api";
-import { randomizePreservingShape } from "./randomize";
+import { containsReplaceableCharacters, randomizePreservingShape } from "./randomize";
 
 // Time for the target app to process the simulated paste before the clipboard is restored
 const PASTE_SETTLE_DELAY_MS = 300;
@@ -8,6 +8,10 @@ export default async function Command(): Promise<void> {
   const selectedText = await readSelectedText();
   if (!selectedText) {
     await showHUD("No text selected");
+    return;
+  }
+  if (!containsReplaceableCharacters(selectedText)) {
+    await showHUD("Nothing to replace: no letters or digits selected");
     return;
   }
   await pastePreservingClipboard(randomizePreservingShape(selectedText));

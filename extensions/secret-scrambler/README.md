@@ -16,9 +16,11 @@ Select a token, password, login or any other sensitive value, press your hotkey,
 ## How it works
 
 - Uppercase letters, lowercase letters and digits are replaced with random characters of the same class.
+- Cyrillic letters are replaced with Cyrillic letters; letters and digits of other scripts are replaced with ASCII ones, so no part of the secret is left unchanged.
 - Separators and special characters (`-`, `_`, `.`, `@`, `:`, `/`, `!` and others) stay in place.
 - Well-known token prefixes are preserved: `sk-`, `sk-ant-`, `sk-proj-`, `ghp_`, `gho_`, `ghs_`, `github_pat_`, `glpat-`, `xoxb-`, `xoxp-`, `AKIA`, `eyJ`.
-- Hex strings (UUIDs, hashes, keys) remain valid hex.
+- Hex strings (UUIDs, hashes, keys) remain valid hex, including mixed-case ones.
+- If the selection has no letters or digits, nothing is replaced and you get a notification.
 - Randomness comes from Node's cryptographically secure `crypto.randomInt`.
 
 ## Setup
