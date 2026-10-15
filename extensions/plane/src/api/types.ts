@@ -79,6 +79,64 @@ export type RawActivity = {
   created_at?: string;
 };
 
+export type RawCycle = {
+  id: string;
+  name: string;
+  description?: string;
+  start_date?: string | null;
+  end_date?: string | null;
+  project?: string;
+  total_issues?: number;
+  completed_issues?: number;
+  cancelled_issues?: number;
+  started_issues?: number;
+  unstarted_issues?: number;
+  backlog_issues?: number;
+};
+
+/** IntakeIssue.status values, verified in plane/db/models/intake.py at v1.3.1. */
+export const IntakeStatus = {
+  Pending: -2,
+  Rejected: -1,
+  Snoozed: 0,
+  Accepted: 1,
+  Duplicate: 2,
+} as const;
+export type IntakeStatus = (typeof IntakeStatus)[keyof typeof IntakeStatus];
+
+export type RawIntakeItem = {
+  id: string;
+  issue?: string;
+  status?: IntakeStatus;
+  snoozed_till?: string | null;
+  duplicate_to?: string | null;
+  source?: string | null;
+  created_at?: string;
+  issue_detail?: {
+    id: string;
+    name: string;
+    sequence_id?: number;
+    priority?: PriorityEnum;
+    description_html?: string;
+    created_at?: string;
+    state?: RawStateLite | null;
+  };
+};
+
+export type RawPage = {
+  id: string;
+  name?: string | null;
+  description_html?: string | null;
+  description_stripped?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  owned_by?: string;
+  projects?: string[];
+  archived_at?: string | null;
+  is_locked?: boolean;
+  access?: number;
+};
+
 /**
  * A work item row from Plane API v2. Relations are ids (`state_id`, `assignee_ids`, `label_ids`); `?expand=`
  * adds objects next to them without replacing the ids (developers.plane.so/api-reference/v2/expanding-relations).
@@ -102,6 +160,20 @@ export type V2WorkItem = {
   description_html?: string;
   /** With `?expand=state`. */
   state?: RawStateLite | null;
+};
+
+/** A page row from the v2 workspace or project pages list. */
+export type V2Page = {
+  id: string;
+  name?: string | null;
+  description_html?: string | null;
+  description_stripped?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  archived_at?: string | null;
+  is_locked?: boolean;
+  access?: number;
+  owned_by_id?: string | null;
 };
 
 /**

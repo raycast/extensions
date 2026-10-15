@@ -1,5 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
-import { getProject, getProjects } from "../api/projects";
+import { getMemberProjects, getProject, getProjects } from "../api/projects";
 import { PaginationOptions } from "@raycast/utils/dist/types";
 import { Project } from "@makeplane/plane-node-sdk";
 import { planeClient } from "../api/auth";
@@ -28,6 +28,17 @@ export function useProjects(config: { perPage?: number; execute?: boolean }) {
     pagination,
     revalidate,
   };
+}
+
+/** Projects the user is a member of (all pages), for dropdowns. */
+export function useMemberProjects(config: { execute?: boolean } = {}) {
+  const { data, error, isLoading, revalidate } = useCachedPromise(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the slug only scopes the cache key
+    (_workspaceSlug?: string) => getMemberProjects(),
+    [planeClient?.workspaceSlug],
+    { keepPreviousData: true, execute: config.execute !== false },
+  );
+  return { projects: data ?? [], error, isLoading, revalidate };
 }
 
 export function useProject(projectId: string) {

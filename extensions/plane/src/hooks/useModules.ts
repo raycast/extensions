@@ -1,6 +1,7 @@
 import { useCachedPromise } from "@raycast/utils";
 import { getModules } from "../api/modules";
 import { PaginationOptions } from "@raycast/utils/dist/types";
+import { errorShownInline } from "../helpers/errors";
 
 export function useModules(projectId: string, config: { execute?: boolean }) {
   const { data, error, isLoading, mutate, pagination } = useCachedPromise(
@@ -9,6 +10,7 @@ export function useModules(projectId: string, config: { execute?: boolean }) {
     {
       initialData: [],
       keepPreviousData: true,
+      onError: errorShownInline,
       execute: config.execute !== false,
     },
   );

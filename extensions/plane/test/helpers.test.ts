@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { mapWithConcurrency } from "../src/helpers/concurrency";
 import { deriveCycleAndModules } from "../src/helpers/activities";
+import { formatCycleProgress, isCycleActive } from "../src/helpers/cycles";
 import { describePlaneError } from "../src/helpers/errors";
 import { applyWorkItemChange, toggleAssignee, toWorkItemSummary } from "../src/helpers/work-item-summary";
 
@@ -42,6 +43,19 @@ describe("deriveCycleAndModules", () => {
         { id: "1", field: "cycles", verb: "created", new_identifier: "c1", new_value: "Sprint 1" },
       ]).cycle,
     ).toBeUndefined();
+  });
+});
+
+describe("cycles", () => {
+  const now = new Date("2026-10-14T12:00:00Z");
+  it("detects active cycles", () => {
+    expect(isCycleActive({ start_date: "2026-10-07T00:00:00Z", end_date: "2026-10-20T23:59:00Z" }, now)).toBe(true);
+    expect(isCycleActive({ start_date: "2026-10-15T00:00:00Z", end_date: "2026-10-20T00:00:00Z" }, now)).toBe(false);
+    expect(isCycleActive({ start_date: null, end_date: null }, now)).toBe(false);
+  });
+  it("formats progress", () => {
+    expect(formatCycleProgress({ total_issues: 8, completed_issues: 3, cancelled_issues: 1 })).toBe("4/8 done · 50%");
+    expect(formatCycleProgress({ total_issues: 0 })).toBe("No work items");
   });
 });
 

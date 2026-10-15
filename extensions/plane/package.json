@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "plane",
   "title": "Plane",
-  "description": "Explore work items in Plane and take actions on it",
+  "description": "Search, triage, and update Plane work items, cycles, modules, and intake from Raycast",
   "icon": "plane-icon.png",
   "author": "saurabhkmr98",
   "owner": "makeplane",
@@ -145,6 +145,34 @@
           "default": true
         }
       ]
+    },
+    {
+      "name": "active-cycles",
+      "title": "Active Cycles",
+      "subtitle": "Plane",
+      "description": "Cycles running today across your projects, with progress",
+      "mode": "view"
+    },
+    {
+      "name": "search-modules",
+      "title": "Search Modules",
+      "subtitle": "Plane",
+      "description": "Browse a project's modules and their work items",
+      "mode": "view"
+    },
+    {
+      "name": "intake",
+      "title": "Intake",
+      "subtitle": "Plane",
+      "description": "Triage intake items: accept, decline, snooze, or mark as duplicate",
+      "mode": "view"
+    },
+    {
+      "name": "search-pages",
+      "title": "Search Pages",
+      "subtitle": "Plane",
+      "description": "Browse workspace and project pages (Plane Cloud and Commercial)",
+      "mode": "view"
     }
   ],
   "dependencies": {

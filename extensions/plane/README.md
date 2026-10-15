@@ -15,6 +15,10 @@ A powerful Raycast extension for managing work items in [Plane](https://plane.so
 - **Quick Add Comment** - Comment on a work item by ID without opening it
 - **Assigned Work Items** (menu bar) - Count and list of your open assigned work items, refreshed every 15 minutes
 - **My Open Work Items** - Your open assigned count in root search, e.g. "12 open · 2 urgent · 1 overdue · 3 due today", without opening anything. Refreshes every 15 minutes (run it once to start); opening it shows My Work Items
+- **Active Cycles** - Cycles running today across your projects, with progress
+- **Search Modules** - A project's modules and their work items
+- **Intake** - Triage intake items: accept, decline, snooze, or mark as duplicate
+- **Search Pages** - Workspace and project pages (Plane Cloud and Commercial, see below)
 
 ### ✨ Work Item Management
 
@@ -93,6 +97,7 @@ For both **Plane Cloud** and **Self-Hosted** instances:
 
 - Plane Community Edition only has the v1 API. It has no "assigned to me" filter, so **My Work Items** and the menu bar scan your projects' most recently updated work items (up to 20 projects × 300 items, 3 requests at a time) and filter locally, unless the server offers one of the faster backends below. Results are cached.
 - Plane allows 60 API requests per minute per key. If you hit the limit, wait a minute and retry.
+- Community Edition has no public pages API, so **Search Pages** shows a notice instead of a list.
 - If a command reports "Check API Base Path", make sure the preference points at your Plane host (e.g. `https://plane.example.com`).
 
 ## Backends
@@ -103,7 +108,7 @@ For both **Plane Cloud** and **Self-Hosted** instances:
 2. **Server-side v1 filters** (a Community Edition patched to add them): used only when `GET /api/v1/workspaces/{slug}/work-items/` answers with the header `X-Plane-Work-Item-Filters: 1`. Adds the **Subscribed** and **Mentions** views; only the filters the server lists in `X-Plane-Work-Item-Filter-Params` are sent.
 3. **Project scan**: the stock v1 fallback described above. Assigned and Created only.
 
-Detection results are cached per server and workspace: 24 hours when a faster backend is found, 1 hour when it isn't, so a server that gains API v2 or the filters is picked up within the hour. Rate limits and network errors during detection aren't cached, and every failure falls back silently. If a fast backend later answers 404 or 400, its cached result is dropped and the next backend is used.
+Detection results are cached per server and workspace: 24 hours when a faster backend is found, 1 hour when it isn't, so a server that gains API v2 or the filters is picked up within the hour. Rate limits and network errors during detection aren't cached, and every failure falls back silently. If a fast backend later answers 404 or 400, its cached result is dropped and the next backend is used. With API v2, **Search Pages** uses the v2 pages endpoints; other commands stay on v1, which Plane Cloud also serves.
 
 With a filtered backend, open work items are listed workspace-wide (up to 500 per view) plus the 50 most recently updated completed or cancelled ones.
 

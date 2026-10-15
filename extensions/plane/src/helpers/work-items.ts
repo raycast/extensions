@@ -25,3 +25,17 @@ export const getCycleUrl = (slug: string, projectId: string, cycleId: string) =>
 export const getModuleUrl = (slug: string, projectId: string, moduleId: string) => {
   return `${getAppBaseUrl()}/${slug}/projects/${projectId}/modules/${moduleId}`;
 };
+
+export const getIntakeUrl = (slug: string, projectId: string) => {
+  return `${getAppBaseUrl()}/${slug}/projects/${projectId}/intake`;
+};
+
+export const getPageUrl = (slug: string, pageId: string, projectId?: string) => {
+  return projectId
+    ? `${getAppBaseUrl()}/${slug}/projects/${projectId}/pages/${pageId}`
+    : `${getAppBaseUrl()}/${slug}/pages/${pageId}`;
+};
+
+export const getPagesUrl = (slug: string, projectId?: string) => {
+  return projectId ? `${getAppBaseUrl()}/${slug}/projects/${projectId}/pages` : `${getAppBaseUrl()}/${slug}/pages`;
+};
