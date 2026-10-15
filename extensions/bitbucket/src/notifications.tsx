@@ -43,8 +43,14 @@ async function loadDismissed(): Promise<string[]> {
   }
 }
 
-async function fetchNotifications(): Promise<{ notifications: PullRequestNotification[]; dismissed: string[] }> {
-  const [myUuid, { values }, events, dismissed] = await Promise.all([
+interface NotificationsData {
+  notifications: PullRequestNotification[];
+  dismissed: string[];
+  failedRepoCount: number;
+}
+
+async function fetchNotifications(): Promise<NotificationsData> {
+  const [myUuid, pullRequests, events, savedDismissed] = await Promise.all([
     getCurrentUserUuid(),
     getMyOpenPullRequests(),
     getNotificationEvents(),
@@ -52,7 +58,7 @@ async function fetchNotifications(): Promise<{ notifications: PullRequestNotific
   ]);
 
   const notifications: PullRequestNotification[] = [];
-  for (const pr of values) {
+  for (const pr of pullRequests.values) {
     const repo = pr.destination.repository;
     const url = `https://bitbucket.org/${repo.full_name}/pull-requests/${pr.id}`;
     const base = `${repo.full_name}#${pr.id}`;
@@ -94,7 +100,20 @@ async function fetchNotifications(): Promise<{ notifications: PullRequestNotific
   // Newest activity first; PR-state notifications have no timestamp and stay on top.
   notifications.sort((a, b) => (b.createdOn ?? "9").localeCompare(a.createdOn ?? "9"));
 
-  return { notifications, dismissed };
+  const failedRepoCount = pullRequests.failedRepoCount + events.failedRepoCount;
+
+  // Forget read keys whose notification is gone, but only after a complete scan: with
+  // failed repos their keys are merely missing, and dropping them would resurface them.
+  let dismissed = savedDismissed;
+  if (failedRepoCount === 0) {
+    const live = new Set(notifications.map((n) => n.key));
+    dismissed = savedDismissed.filter((key) => live.has(key));
+    if (dismissed.length !== savedDismissed.length) {
+      await LocalStorage.setItem(DISMISSED_KEY, JSON.stringify(dismissed));
+    }
+  }
+
+  return { notifications, dismissed, failedRepoCount };
 }
 
 export default function Command() {
@@ -105,10 +124,7 @@ export default function Command() {
   const unread = (data?.notifications ?? []).filter((n) => !dismissedSet.has(n.key));
 
   async function dismiss(keys: string[]) {
-    const current = await loadDismissed();
-    // Keep only keys that are still relevant so the list doesn't grow forever.
-    const live = new Set((data?.notifications ?? []).map((n) => n.key));
-    const next = [...new Set([...current, ...keys])].filter((k) => live.has(k));
+    const next = [...new Set([...(await loadDismissed()), ...keys])];
     await mutate(LocalStorage.setItem(DISMISSED_KEY, JSON.stringify(next)), {
       optimisticUpdate: (prev) => (prev ? { ...prev, dismissed: next } : prev),
       shouldRevalidateAfter: false,
@@ -151,6 +167,15 @@ export default function Command() {
               }
             />
           ))}
+        </MenuBarExtra.Section>
+      )}
+      {!error && data && data.failedRepoCount > 0 && (
+        <MenuBarExtra.Section>
+          <MenuBarExtra.Item
+            title="Some repositories failed to load"
+            subtitle="Notifications may be incomplete"
+            icon={Icon.Warning}
+          />
         </MenuBarExtra.Section>
       )}
       <MenuBarExtra.Section>
