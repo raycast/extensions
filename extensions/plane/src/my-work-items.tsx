@@ -40,16 +40,18 @@ function MyWorkItems({ handoffMaxAgeMs }: { handoffMaxAgeMs?: number }) {
   const items = data?.view === effectiveView ? data.items : [];
 
   // The live count lives in "My Open Work Items" (a no-view command on a 15-minute timer). Clear any count this
-  // list showed in earlier versions, and refresh that command whenever fresh assigned data arrives; it reuses
-  // this result, so it costs no extra requests.
+  // list showed in earlier versions.
   useEffect(() => {
     updateCommandMetadata({ subtitle: null }).catch(() => undefined);
   }, []);
-  const assignedFetchedAt = data?.view === "assigned" ? data.fetchedAt : undefined;
+  // Refresh My Open Work Items' count after every fresh load, whichever view is showing: opening that command
+  // lands here, and a saved Created/Subscribed/Mentions view would otherwise leave its count stale. The count
+  // reuses a recent assigned result (the project scan serves every view), so this rarely costs a request.
+  const fetchedAt = data?.fetchedAt;
   useEffect(() => {
-    if (!assignedFetchedAt) return;
+    if (!fetchedAt) return;
     launchCommand({ name: "work-items-count", type: LaunchType.Background }).catch(() => undefined);
-  }, [assignedFetchedAt]);
+  }, [fetchedAt]);
 
   const supportedKey = data?.supportedViews?.join(",");
   useEffect(() => {
