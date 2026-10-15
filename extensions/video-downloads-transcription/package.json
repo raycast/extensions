@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "video-downloads-transcription",
   "title": "Video Downloads & Transcription",
   "description": "Download audio and video from YouTube, Instagram, X and hundreds of sites, save subtitles, and dictate or transcribe locally with whisper.cpp",
@@ -188,7 +189,7 @@
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
-    "eslint": "^9.0.0",
+    "eslint": "^9.22.0",
     "prettier": "^3.0.0",
     "typescript": "^5.8.0"
   }

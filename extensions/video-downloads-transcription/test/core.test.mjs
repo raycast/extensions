@@ -22,7 +22,7 @@ const compiled = join(temporary, "core.cjs");
 require("esbuild").buildSync({
   stdin: {
     contents:
-      'export * from "./src/core"; export * from "./src/whisper"; export * from "./src/whisper-server"; export * from "./src/dictation"; export * from "./src/dictation-appearance"; export * from "./src/updates"; export * from "./src/playlists"; export { queueSummary } from "./src/jobs"; export * from "./src/models"; export * from "./src/setup";',
+      'export * from "./src/core"; export * from "./src/whisper"; export * from "./src/whisper-server"; export * from "./src/dictation"; export * from "./src/dictation-appearance"; export * from "./src/updates"; export * from "./src/playlists"; export { queueSummary } from "./src/jobs"; export * from "./src/lock"; export * from "./src/models"; export * from "./src/setup";',
     resolveDir: process.cwd(),
     loader: "ts",
   },
@@ -1286,6 +1286,39 @@ test("summarizes a finished queue", () => {
     core.queueSummary([media("done"), media("failed"), file("done")]),
     "1 transcription saved\n1 of 2 downloads saved, 1 failed",
   );
+  assert.equal(
+    core.queueSummary([
+      { ...media("done"), skipped: [{ title: "Item 2 of 2", reason: "x" }] },
+    ]),
+    "1 download saved, 1 video skipped",
+  );
+});
+
+test("lists the videos in a post that yt-dlp didn't save", () => {
+  const post = core.postErrors({});
+  for (const line of [
+    "[download] Downloading item 1 of 3",
+    "[download] Destination: dl/1-1284162716018413568.mp4",
+    "[download] Downloading item 2 of 3",
+    "ERROR: [Instagram] C1a2b3: No video formats found!",
+    "[download] Downloading item 3 of 3",
+    "ERROR: [vimeo] 551578322: Unable to download webpage: HTTP Error 401: Unauthorized (caused by <HTTPError 401: Unauthorized>)",
+  ])
+    post.read(line);
+  assert.deepEqual(post.missing(2, 1), [
+    {
+      title: "Item 3 of 3",
+      reason: "Unable to download webpage: HTTP Error 401: Unauthorized",
+    },
+  ]);
+  assert.deepEqual(post.missing(2, 2), []);
+  assert.deepEqual(post.missing(3, 1)[1], {
+    title: "Video in this post",
+    reason: "yt-dlp didn't save this video.",
+  });
+  const privatePost = core.postErrors({});
+  privatePost.read("ERROR: [youtube] jNQXAC9IVRw: Private video. Sign in");
+  assert.match(privatePost.missing(1, 0)[0].reason, /^This video is private\./);
 });
 
 test("recognizes links from other video sites", () => {
@@ -1566,4 +1599,45 @@ test("describes tools, Homebrew output and model downloads", () => {
       (model) => /^[0-9a-f]{64}$/.test(model.sha256) && model.size > 1e7,
     ),
   );
+});
+
+test("lets one process at a time hold a lock, even after a crash", async () => {
+  const path = join(temporary, "worker.lock");
+  const lock = core.tryLock(path);
+  assert.ok(lock);
+  assert.equal(readFileSync(path, "utf8"), String(process.pid));
+  assert.equal(core.tryLock(path), undefined);
+  lock.release();
+  assert.equal(existsSync(path), false);
+
+  // A file left by a process that stopped doesn't block the next one.
+  writeFileSync(path, "999999");
+  const recovered = core.tryLock(path);
+  assert.ok(recovered);
+  recovered.release();
+
+  const holder = spawn(
+    process.execPath,
+    [
+      "-e",
+      `require("fs").openSync(process.argv[1], require("fs").constants.O_RDWR | require("fs").constants.O_CREAT | 0x20); console.log("locked"); setInterval(() => {}, 1000);`,
+      path,
+    ],
+    { stdio: ["ignore", "pipe", "inherit"] },
+  );
+  await new Promise((done) => holder.stdout.once("data", done));
+  assert.equal(core.tryLock(path), undefined);
+  const controller = new AbortController();
+  const waiting = core.waitForLock(path, controller.signal);
+  holder.kill("SIGKILL");
+  const taken = await waiting;
+  assert.equal(readFileSync(path, "utf8"), String(process.pid));
+  taken.release();
+
+  const busy = core.tryLock(path);
+  controller.abort();
+  await assert.rejects(core.waitForLock(path, controller.signal), {
+    name: "AbortError",
+  });
+  busy.release();
 });

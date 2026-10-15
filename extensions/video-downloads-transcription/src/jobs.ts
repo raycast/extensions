@@ -26,6 +26,7 @@ import {
   downloadPlaylistMedia,
   downloadPlaylistSubtitles,
 } from "./playlists";
+import { tryLock } from "./lock";
 import { downloadEncoder, downloadModel } from "./models";
 import { installWithHomebrew } from "./setup";
 import {
@@ -291,28 +292,6 @@ export function startWorker(folder: string, bundle = __filename) {
   closeSync(output);
 }
 
-function acquireLock(folder: string): boolean {
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      writeFileSync(lockFile(folder), String(process.pid), { flag: "wx" });
-      return true;
-    } catch {
-      if (workerProcess(folder)) return false;
-      rmSync(lockFile(folder), { force: true });
-    }
-  }
-  return false;
-}
-
-function releaseLock(folder: string) {
-  try {
-    if (Number(readFileSync(lockFile(folder), "utf8")) === process.pid)
-      rmSync(lockFile(folder));
-  } catch {
-    /* already released */
-  }
-}
-
 /**
  * How many jobs of a kind run at once. Transcriptions share the GPU and run
  * one at a time, playlists one at a time so sites don't limit them, and a few
@@ -391,15 +370,13 @@ async function perform(
         outputs: await downloadImages(spec.video, settings, onProgress, signal),
       };
     case "media":
-      return {
-        outputs: await downloadMedia(
-          spec.video,
-          spec.format,
-          settings,
-          onProgress,
-          signal,
-        ),
-      };
+      return await downloadMedia(
+        spec.video,
+        spec.format,
+        settings,
+        onProgress,
+        signal,
+      );
   }
 }
 
@@ -518,11 +495,15 @@ export function queueSummary(jobs: Job[]): string | undefined {
         0,
       );
     const failed = group.filter((job) => job.status === "failed").length;
+    const skipped = group
+      .filter((job) => job.status === "done")
+      .reduce((total, job) => total + (job.skipped?.length ?? 0), 0);
+    const missed = skipped ? `, ${count(skipped, "video")} skipped` : "";
     if (done && failed)
       parts.push(
-        `${done} of ${done + failed} ${noun}s saved, ${failed} failed`,
+        `${done} of ${done + failed} ${noun}s saved, ${failed} failed${missed}`,
       );
-    else if (done) parts.push(`${count(done, noun)} saved`);
+    else if (done) parts.push(`${count(done, noun)} saved${missed}`);
     else if (failed) parts.push(`${count(failed, noun)} failed`);
   }
   for (const job of jobs)
@@ -553,7 +534,9 @@ export function queueSummary(jobs: Job[]): string | undefined {
  */
 export async function runQueueWorker(folder: string) {
   const finished: Job[] = [];
-  while (acquireLock(folder)) {
+  for (;;) {
+    const lock = tryLock(lockFile(folder));
+    if (!lock) break;
     const running = new Map<
       string,
       { lane: keyof typeof laneLimits; done: Promise<void> }
@@ -592,7 +575,7 @@ export async function runQueueWorker(folder: string) {
         ]);
       }
     } finally {
-      releaseLock(folder);
+      lock.release();
     }
     // A job added while the lock was being released would otherwise wait.
     if (!readJobs(folder).some((job) => job.status === "queued")) break;

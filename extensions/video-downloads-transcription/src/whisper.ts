@@ -29,6 +29,7 @@ import {
   isCanceled,
   localFileInfo,
   outputDirectory,
+  postErrors,
   rawCaptionText,
   run,
   safeName,
@@ -681,6 +682,7 @@ export async function transcribeVideo(
     onProgress?.("Downloading audio…");
     let item = "";
     let failure: unknown;
+    const post = postErrors(settings);
     try {
       await runYtDlp(
         settings,
@@ -696,6 +698,7 @@ export async function transcribeVideo(
           video.url,
         ],
         (line) => {
+          post.read(line);
           const next = /^\[download\] Downloading item (\d+) of (\d+)/.exec(
             line,
           );
@@ -751,6 +754,7 @@ export async function transcribeVideo(
       }
     }
     if (!outputs.length) throw new Error(skipped[0].reason);
+    skipped.push(...post.missing(video.items ?? 1, files.length));
     return { outputs, skipped };
   } catch (error) {
     // Canceling keeps the transcripts saved so far, for the queue to show.

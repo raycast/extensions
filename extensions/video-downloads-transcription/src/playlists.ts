@@ -360,7 +360,7 @@ export async function downloadPlaylistMedia(
       continue;
     }
     try {
-      const files = await downloadMedia(
+      const { outputs: files } = await downloadMedia(
         { id: entry.id, title: entry.title, url: entry.url },
         format,
         settings,

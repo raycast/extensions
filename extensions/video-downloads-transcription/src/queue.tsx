@@ -117,6 +117,15 @@ export function useQueue(settings: Settings, onFinish?: (job: Job) => void) {
     let restarted = 0;
     const timer = setInterval(() => {
       const next = readJobs(folder);
+      // Jobs left waiting after a restart look unchanged, so check first.
+      if (
+        next.some((job) => job.status === "queued") &&
+        !workerProcess(folder) &&
+        Date.now() - restarted > 10_000
+      ) {
+        restarted = Date.now();
+        startWorker(folder);
+      }
       const text = JSON.stringify(next);
       if (text === last.current) return;
       const previous = new Map(
@@ -127,14 +136,6 @@ export function useQueue(settings: Settings, onFinish?: (job: Job) => void) {
       for (const job of next)
         if (!isActive(job) && previous.get(job.id)?.status === "running")
           finish.current?.(job);
-      if (
-        next.some((job) => job.status === "queued") &&
-        !workerProcess(folder) &&
-        Date.now() - restarted > 10_000
-      ) {
-        restarted = Date.now();
-        startWorker(folder);
-      }
     }, 1000);
     return () => clearInterval(timer);
   }, [folder]);
@@ -276,7 +277,8 @@ export function jobToast(job: Job, showQueue?: () => void) {
       ? {
           style: Toast.Style.Success,
           title: doneTitle(job),
-          message: isPlaylist(job) ? jobSubtitle(job) : output,
+          message:
+            isPlaylist(job) || job.skipped?.length ? jobSubtitle(job) : output,
           primaryAction: !output
             ? undefined
             : savesTranscripts(job)

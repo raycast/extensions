@@ -1552,10 +1552,55 @@ export function mediaProgress(
   return undefined;
 }
 
+/** A video that wasn't saved, and why. */
+export type Skipped = { title: string; reason: string };
+
+/** The reason in a yt-dlp `ERROR:` line, without the site, ID and cause. */
+function errorReason(line: string, settings: Settings): string {
+  const { message } = explainYtDlpError(new Error(line), settings) as Error;
+  return message
+    .replace(/^ERROR: (\[[^\]]+\] )?([\w-]+: )?/, "")
+    .replace(/ \(caused by .*\)$/, "");
+}
+
+/**
+ * Follows yt-dlp's output for a post with several videos, such as an X post or
+ * Instagram carousel, to list the videos it didn't save. With `--ignore-errors`
+ * it prints an `ERROR:` line for each item it skips; photos in a carousel fail
+ * with "No video formats found" and are left out.
+ */
+export function postErrors(settings: Settings) {
+  let item = "";
+  const errors: Skipped[] = [];
+  return {
+    read(line: string) {
+      const next = /^\[download\] Downloading item (\d+) of (\d+)/.exec(line);
+      if (next) item = `${next[1]} of ${next[2]}`;
+      else if (/^ERROR: /.test(line) && !/No video formats found/i.test(line))
+        errors.push({
+          title: item ? `Item ${item}` : "Video in this post",
+          reason: errorReason(line, settings),
+        });
+    },
+    /** The videos missing when `saved` of the post's `expected` videos were saved. */
+    missing(expected: number, saved: number): Skipped[] {
+      return Array.from(
+        { length: Math.max(0, expected - saved) },
+        (_, index) =>
+          errors[index] ?? {
+            title: "Video in this post",
+            reason: "yt-dlp didn't save this video.",
+          },
+      );
+    },
+  };
+}
+
 /**
  * Downloads a video's audio or video and returns the saved files: one file,
  * or one per video for posts with several, such as X posts and Instagram
- * carousels. Files are saved in the download folder unless `directory` is set.
+ * carousels. Videos in a post that fail are skipped when others are saved.
+ * Files are saved in the download folder unless `directory` is set.
  */
 export async function downloadMedia(
   video: VideoRef,
@@ -1564,7 +1609,7 @@ export async function downloadMedia(
   onProgress?: (message: string) => void,
   signal?: AbortSignal,
   directory?: string,
-): Promise<string[]> {
+): Promise<{ outputs: string[]; skipped: Skipped[] }> {
   if (video.isLive)
     throw new Error(
       "This is a live stream. It can be downloaded after the stream ends.",
@@ -1601,11 +1646,13 @@ export async function downloadMedia(
     onProgress?.(`Downloading ${format.toUpperCase()}…`);
     let item = "";
     let failure: unknown;
+    const post = postErrors(settings);
     try {
       await runYtDlp(
         settings,
         args,
         (line) => {
+          post.read(line);
           const message = mediaProgress(line, format);
           if (!message) return;
           if (/^Downloading \d+ of \d+…$/.test(message))
@@ -1646,7 +1693,10 @@ export async function downloadMedia(
       await copyFile(join(temporary, file), target, constants.COPYFILE_EXCL);
       targets.push(target);
     }
-    return targets;
+    return {
+      outputs: targets,
+      skipped: post.missing(video.items ?? 1, files.length),
+    };
   } finally {
     await rm(temporary, { recursive: true, force: true });
   }

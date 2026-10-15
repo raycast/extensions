@@ -11,5 +11,5 @@
     "noEmit": true,
     "types": ["node", "@raycast/api"]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "raycast-env.d.ts"]
 }

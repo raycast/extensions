@@ -4,7 +4,7 @@ import { Settings } from "./core";
 /** Extension preferences, plus the support folder for downloaded models. */
 export function preferences(): Settings {
   return {
-    ...getPreferenceValues<Settings>(),
+    ...getPreferenceValues<Preferences>(),
     supportPath: environment.supportPath,
   };
 }

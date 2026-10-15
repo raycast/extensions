@@ -3,6 +3,7 @@ import { createReadStream, existsSync } from "node:fs";
 import { mkdir, open, rename, rm, stat, statfs } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { formatSize, run } from "./core";
+import { waitForLock } from "./lock";
 
 /** A whisper.cpp model on Hugging Face, with its checksum. */
 export type CatalogModel = {
@@ -233,14 +234,23 @@ export async function downloadModel(
   if (!model) throw new Error(`${name} can't be downloaded.`);
   const target = join(folder, `ggml-${name}.bin`);
   if (existsSync(target)) return target;
-  await downloadFile(
-    `${repository}/ggml-${name}.bin`,
-    target,
-    model,
-    progressMessage(name, onProgress),
-    signal,
+  await mkdir(folder, { recursive: true });
+  const lock = await waitForLock(`${target}.lock`, signal, () =>
+    onProgress?.(`Waiting for another download of ${name}…`),
   );
-  return target;
+  try {
+    if (existsSync(target)) return target;
+    await downloadFile(
+      `${repository}/ggml-${name}.bin`,
+      target,
+      model,
+      progressMessage(name, onProgress),
+      signal,
+    );
+    return target;
+  } finally {
+    lock.release();
+  }
 }
 
 /**
@@ -261,22 +271,40 @@ export async function downloadEncoder(
   const folder = dirname(modelPath);
   const target = join(folder, `ggml-${encoder.name}-encoder.mlmodelc`);
   if (existsSync(target)) return target;
-  const zip = `${target}.zip`;
-  await downloadFile(
-    `${repository}/ggml-${encoder.name}-encoder.mlmodelc.zip`,
-    zip,
-    encoder,
-    progressMessage(`Core ML encoder for ${encoder.name}`, onProgress),
-    signal,
+  // A transcription and an encoder download in the queue, or dictation, can
+  // ask for the same encoder at once.
+  const lock = await waitForLock(`${target}.lock`, signal, () =>
+    onProgress?.("Waiting for another download of this Core ML encoder…"),
   );
-  onProgress?.("Unpacking Core ML encoder…");
-  const unpacked = join(folder, `.ggml-${encoder.name}-encoder.${process.pid}`);
   try {
-    await run("/usr/bin/ditto", ["-x", "-k", zip, unpacked], undefined, signal);
-    await rename(join(unpacked, basename(target)), target);
-    await rm(zip, { force: true });
+    if (existsSync(target)) return target;
+    const zip = `${target}.zip`;
+    await downloadFile(
+      `${repository}/ggml-${encoder.name}-encoder.mlmodelc.zip`,
+      zip,
+      encoder,
+      progressMessage(`Core ML encoder for ${encoder.name}`, onProgress),
+      signal,
+    );
+    onProgress?.("Unpacking Core ML encoder…");
+    const unpacked = join(
+      folder,
+      `.ggml-${encoder.name}-encoder.${process.pid}`,
+    );
+    try {
+      await run(
+        "/usr/bin/ditto",
+        ["-x", "-k", zip, unpacked],
+        undefined,
+        signal,
+      );
+      await rename(join(unpacked, basename(target)), target);
+      await rm(zip, { force: true });
+    } finally {
+      await rm(unpacked, { recursive: true, force: true });
+    }
+    return target;
   } finally {
-    await rm(unpacked, { recursive: true, force: true });
+    lock.release();
   }
-  return target;
 }

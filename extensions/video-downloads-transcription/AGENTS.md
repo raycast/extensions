@@ -30,12 +30,13 @@ transcription accuracy in Serbian matter more than average.
 | `src/models.ts`      | Whisper model catalog, checksummed downloads, Core ML encoders                                                    |
 | `src/setup.ts`       | Tool detection and Homebrew installs                                                                              |
 | `src/playlists.ts`   | Playlist and channel listing and downloads                                                                        |
+| `src/lock.ts`        | macOS file locks for the queue worker and model downloads                                                         |
 | `src/jobs.ts`        | Job types, the queue folder, and the background worker                                                            |
 | `src/queue.tsx`      | Queue list, toasts, and the hooks other commands use                                                              |
 | `src/*.tsx` commands | `download-video`, `transcribe-selected-files`, `transcription-queue`, `manage-tools-and-models`, `queue-menu-bar` |
 
 Keep React out of the modules the worker uses (`core`, `whisper`, `models`, `setup`, `playlists`,
-`jobs`), and keep pure, testable functions there rather than in components.
+`lock`, `jobs`), and keep pure, testable functions there rather than in components.
 
 ## The background queue
 
