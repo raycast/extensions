@@ -2,7 +2,8 @@ import { LocalStorage, OAuth, getPreferenceValues } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 import { PlaneClient } from "./client";
 import {
-  LEGACY_STORAGE_WORKSPACE_SLUG_KEY,
+  findStoredWorkspaceSlug,
+  legacyWorkspaceSlugKeys,
   STORAGE_OAUTH_WORKSPACE_SLUG_KEY,
   STORAGE_WORKSPACE_SLUG_KEY,
 } from "../helpers/keys";
@@ -31,31 +32,13 @@ function createClient(workspaceSlug: string, token: string) {
 }
 
 /**
- * Reads the stored workspace slug. Earlier versions stored it under a key that contained the raw token;
- * that key is read once, moved to the hashed key, and removed.
+ * Reads the stored workspace slug. Earlier versions stored it under a key that contained the raw token
+ * (untrimmed, for keys saved before trimming); such a key is read once, moved to the hashed key, and removed.
  */
 export async function getStoredWorkspaceSlug(token: string): Promise<string | undefined> {
-  const key = getSlugStorageKey(token);
-  const stored = await LocalStorage.getItem<string>(key);
-  if (stored) return stored;
-
-  // Saved before keys were trimmed: the hashed key was built from the untrimmed value.
-  if (isApiKeyAuth() && token === API_KEY && RAW_API_KEY !== API_KEY) {
-    const untrimmed = await LocalStorage.getItem<string>(STORAGE_WORKSPACE_SLUG_KEY(RAW_API_KEY));
-    if (untrimmed) {
-      await LocalStorage.setItem(key, untrimmed);
-      return untrimmed;
-    }
-  }
-
-  const legacyKey = LEGACY_STORAGE_WORKSPACE_SLUG_KEY(token);
-  const legacy = await LocalStorage.getItem<string>(legacyKey);
-  if (legacy) {
-    await LocalStorage.setItem(key, legacy);
-    await LocalStorage.removeItem(legacyKey);
-    return legacy;
-  }
-  return undefined;
+  // Only the API key can have been saved untrimmed; OAuth tokens never came from the preference.
+  const rawToken = isApiKeyAuth() && token === API_KEY ? RAW_API_KEY : token;
+  return findStoredWorkspaceSlug(LocalStorage, getSlugStorageKey(token), legacyWorkspaceSlugKeys(token, rawToken));
 }
 
 const client = new OAuth.PKCEClient({
