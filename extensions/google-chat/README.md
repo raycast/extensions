@@ -1,6 +1,6 @@
 # Google Chat
 
-Search spaces and direct messages, and read and reply to messages in Google Chat from Raycast.
+Search spaces and direct messages, read and reply to messages, and send messages in Google Chat from Raycast.
 
 The Google Chat API only works for **Google Workspace** (Business or Enterprise) accounts. Personal `@gmail.com` accounts can't use it.
 
@@ -26,10 +26,22 @@ If your Workspace admin restricts third-party apps under **Security → API cont
 
 ## Commands
 
-| Command             | What it does                                                                                                                                        |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Search Spaces & DMs | Your spaces, group chats and DMs in sections, most-used first. View messages, open in Google Chat, copy the link. Filter by type with the dropdown. |
-| Find Person         | Search your organization's directory, then open a DM or copy the email.                                                                             |
+| Command             | What it does                                                                                                                                                                                                                                                                                                         |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Search Spaces & DMs | Your spaces, group chats and DMs in sections, most-used first. View messages, send a message, open in Google Chat, copy the link. Filter by type with the dropdown.                                                                                                                                                  |
+| Send Message        | One **To** field: search your DMs, spaces and group chats by name, or people in your directory (from 2 letters). Type any email to message someone new. Then pick **Thread**: a new message, one of the recent threads in that conversation, or a pasted thread link. Keeps drafts and remembers the last recipient. |
+| Quick Message       | `to` and `message` arguments from root search. `to` is an email, a Chat link, `spaces/…`, or the exact title of a space or DM.                                                                                                                                                                                       |
+| Find Person         | Search your organization's directory, then open a DM, send a message, or copy the email.                                                                                                                                                                                                                             |
+
+### Mentions in Send Message
+
+When **To** is a space or group chat, a **Mention** field lists its members (not you) and **@all (everyone in this space)**. For each person you pick:
+
+- If the message has `@` followed by their full or first name (any case, whole word), the first one becomes the mention. A first name shared by two picked people isn't used; type the full name.
+- Otherwise the mention goes at the start of the message, in the order you picked.
+- `@all` and `@everyone` in the text become the everyone mention the same way.
+
+Text in `` `code` `` and ` ``` ` blocks is left alone, and people already mentioned aren't mentioned twice. A **Preview** under the message shows what will be sent. Changing **To** clears the picked mentions. Mentions use Chat's `<users/{id}>` and `<users/all>` syntax; a space's permission settings can limit who may use `@all`.
 
 In message lists you can reply in a thread, add a reaction, copy the text or the message link, and open the message in Google Chat.
 
@@ -40,6 +52,8 @@ In message lists you can reply in a thread, add a reaction, copy the text or the
 
 ## Limits
 
+- **Threads in DMs.** Google documents replying in a thread for named spaces. In DMs and group chats, Send Message only lists threads that already have replies; if replying isn't possible, the message starts a new thread.
 - **No presence or status.** The API only exposes your own availability, not other people's, so there is no "online" indicator.
+- **Rate limits.** Google allows 1 message per second per space and 300 searches per minute per project. The extension spaces out sends and retries rate-limited requests up to 3 times.
 - **Names.** Chat doesn't always return names for people outside your shared spaces; the extension then looks them up in your directory and caches them.
 - **Text only.** Messages are sent as text with Chat formatting (`*bold*`, `_italic_`, `~strike~`, `` `code` ``). Attachments and cards aren't supported.

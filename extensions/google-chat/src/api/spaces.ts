@@ -7,7 +7,9 @@ import { Cache } from "@raycast/api";
 
 import { mapLimit } from "../helpers/backoff";
 import { buildSpaceItem, namesFromMembers, usersNeedingLookup, type PeopleByUser } from "../helpers/dm-names";
-import { listAllSpaces, listMembers } from "./chat";
+import { mentionMembers, type MentionMember } from "../helpers/mentions";
+import { findSpacesByTitle, parseRecipient } from "../helpers/recipient";
+import { findDirectMessage, findOrCreateDirectMessage, getSpace, listAllSpaces, listMembers } from "./chat";
 import { getCachedPeople, getMe, lookUpPeople } from "./people";
 import type { Membership, Space, SpaceItem } from "./types";
 
@@ -94,4 +96,42 @@ export async function loadUserNames(space: Space): Promise<Record<string, string
   const lookups = usersNeedingLookup(members, undefined, people);
   if (lookups.length > 0) people = await lookUpPeople(lookups);
   return namesFromMembers(members, people);
+}
+
+/**
+ * People who can be @mentioned in a space: its human members other than the signed-in user, with names,
+ * emails and photos from Chat or the People API (cached). Sorted by name.
+ */
+export async function loadMentionMembers(space: Space): Promise<MentionMember[]> {
+  const [members, me] = await Promise.all([getMembersCached(space), getMe()]);
+  let people = getCachedPeople();
+  const lookups = usersNeedingLookup(members, me.userName, people);
+  if (lookups.length > 0) people = await lookUpPeople(lookups);
+  return mentionMembers(members, me.userName, people);
+}
+
+/**
+ * Resolves what the user typed (email, `users/{id}`, `spaces/{id}`, Chat link, or exact title)
+ * to a space. Emails and user names open the DM, creating it if needed (unless `createDm` is false).
+ */
+export async function resolveRecipient(input: string, options: { createDm?: boolean } = {}): Promise<SpaceItem> {
+  const { createDm = true } = options;
+  const recipient = parseRecipient(input);
+  if (recipient.kind === "email" || recipient.kind === "user") {
+    const id = recipient.kind === "email" ? recipient.email : recipient.name;
+    const space = createDm ? await findOrCreateDirectMessage(id) : await findDirectMessage(id);
+    if (!space) throw new Error(`You don't have a direct message with ${id} yet`);
+    const [item] = await resolveSpaceItems([space]);
+    return { ...item, email: item.email ?? (recipient.kind === "email" ? recipient.email : undefined) };
+  }
+  if (recipient.kind === "space") {
+    const [item] = await resolveSpaceItems([await getSpace(recipient.name)]);
+    return item;
+  }
+  const matches = findSpacesByTitle(await loadSpaceItems(), recipient.title);
+  if (matches.length === 0) throw new Error(`No space or direct message is called "${recipient.title}"`);
+  if (matches.length > 1) {
+    throw new Error(`"${recipient.title}" matches ${matches.length} conversations; use an email or a space link`);
+  }
+  return matches[0];
 }

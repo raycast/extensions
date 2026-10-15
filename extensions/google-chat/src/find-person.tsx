@@ -5,6 +5,7 @@ import { useState } from "react";
 import { findOrCreateDirectMessage } from "./api/chat";
 import type { Person } from "./api/types";
 import { ChatView } from "./components/ChatView";
+import { SendMessageForm } from "./components/SendMessageForm";
 import { personInfo } from "./helpers/dm-names";
 import { openInChat, showChatError } from "./helpers/feedback";
 import { spaceUrl } from "./helpers/links";
@@ -40,6 +41,12 @@ function PersonItem({ person }: { person: Person }) {
               title="Open DM"
               icon={Icon.SpeechBubble}
               onAction={() => openDirectMessage(info.email as string, name)}
+            />
+            <Action.Push
+              title="Send Message"
+              icon={Icon.Message}
+              shortcut={Keyboard.Shortcut.Common.New}
+              target={<SendMessageForm email={info.email} recipientTitle={name} />}
             />
             <Action.CopyToClipboard title="Copy Email" content={info.email} shortcut={Keyboard.Shortcut.Common.Copy} />
           </ActionPanel>

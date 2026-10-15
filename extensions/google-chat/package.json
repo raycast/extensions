@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-chat",
   "title": "Google Chat",
-  "description": "Search spaces and direct messages, and read and reply to messages in Google Chat.",
+  "description": "Search spaces and direct messages, read and reply to messages, and send messages in Google Chat.",
   "icon": "google-chat-icon.png",
   "author": "smrehan",
   "license": "MIT",
@@ -25,14 +25,42 @@
       "name": "search-spaces",
       "title": "Search Spaces & DMs",
       "subtitle": "Google Chat",
-      "description": "Search your spaces, group chats and direct messages, and read their messages.",
+      "description": "Search your spaces, group chats and direct messages, read their messages, and send to them.",
       "mode": "view"
+    },
+    {
+      "name": "send-message",
+      "title": "Send Message",
+      "subtitle": "Google Chat",
+      "description": "Send a message to a space, group chat, direct message, or anyone in your directory, optionally in a thread.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-message",
+      "title": "Quick Message",
+      "subtitle": "Google Chat",
+      "description": "Send a message from root search to a person's email or a space name.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "to",
+          "placeholder": "Email or space",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "message",
+          "placeholder": "Message",
+          "type": "text",
+          "required": true
+        }
+      ]
     },
     {
       "name": "find-person",
       "title": "Find Person",
       "subtitle": "Google Chat",
-      "description": "Search your organization's directory and open a direct message.",
+      "description": "Search your organization's directory and open or send a direct message.",
       "mode": "view"
     }
   ],

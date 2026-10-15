@@ -9,6 +9,7 @@ import { useMessages } from "../hooks/useMessages";
 import { useUserNames } from "../hooks/useUserNames";
 import { MessageActions } from "./MessageActions";
 import { OpenInChatAction } from "./OpenInChatAction";
+import { SendMessageAction } from "./SpaceActions";
 
 function senderIcon(message: Message, name: string): Image.ImageLike {
   return message.sender?.avatarUrl
@@ -34,6 +35,7 @@ export function SpaceMessages({ item }: { item: SpaceItem }) {
         actions={
           <ActionPanel>
             <OpenInChatAction url={spaceUrl(item.space)} />
+            <SendMessageAction item={item} />
           </ActionPanel>
         }
       />
@@ -55,7 +57,9 @@ export function SpaceMessages({ item }: { item: SpaceItem }) {
                   spaceTitle={item.title}
                   names={names}
                   onChange={revalidate}
-                />
+                >
+                  <SendMessageAction item={item} />
+                </MessageActions>
               </ActionPanel>
             }
           />
