@@ -8,6 +8,7 @@ import type {
   Fixture,
   LeagueStandings,
   Live,
+  LiveFixtureStats,
   LiveStats,
   Picks,
   Player,
@@ -140,9 +141,35 @@ export const fetchEntry = (entryId: number) => get<Entry>(`/entry/${entryId}/`);
 export const fetchEntryHistory = (entryId: number) => get<EntryHistory>(`/entry/${entryId}/history/`);
 export const fetchPicks = (entryId: number, event: number) => get<Picks>(`/entry/${entryId}/event/${event}/picks/`);
 export const fetchTransfers = (entryId: number) => get<Transfer[]>(`/entry/${entryId}/transfers/`);
+/** The live endpoint's per-fixture breakdown of a player's points. */
+interface LiveExplain {
+  fixture: number;
+  stats: { identifier: string; points: number; value: number }[];
+}
+
+const fixtureStats = ({ fixture, stats }: LiveExplain): LiveFixtureStats => {
+  const value = (identifier: string) => stats.find((s) => s.identifier === identifier)?.value ?? 0;
+  return {
+    fixture,
+    minutes: value("minutes"),
+    goals_scored: value("goals_scored"),
+    assists: value("assists"),
+    bonus: value("bonus"),
+    total_points: stats.reduce((sum, s) => sum + s.points, 0),
+  };
+};
+
 export const fetchLive = async (event: number): Promise<Live> => {
-  const raw = await get<Live>(`/event/${event}/live/`);
-  return { elements: raw.elements.map((e) => ({ id: e.id, stats: pick(e.stats, LIVESTATS_KEYS) })) };
+  const raw = await get<{ elements: { id: number; stats: LiveStats; explain: LiveExplain[] }[] }>(
+    `/event/${event}/live/`,
+  );
+  return {
+    elements: raw.elements.map((e) => ({
+      id: e.id,
+      stats: pick(e.stats, LIVESTATS_KEYS),
+      fixtures: e.explain.map(fixtureStats),
+    })),
+  };
 };
 export const fetchFixtures = (event?: number) => get<Fixture[]>(event ? `/fixtures/?event=${event}` : "/fixtures/");
 export const fetchElementSummary = (playerId: number) => get<ElementSummary>(`/element-summary/${playerId}/`);

@@ -18,7 +18,13 @@ export function FixtureDetail({ fixture, index, squad }: Props) {
   const { data: live, isLoading } = useCachedPromise(fetchLive, [fixture.event ?? 0], {
     execute: started && fixture.event != null,
   });
-  const points = new Map(live?.elements.map((e) => [e.id, e.stats]) ?? []);
+  // In a double gameweek a player's stats cover both matches, so take this match's share from FPL's breakdown
+  const points = new Map(
+    live?.elements.map((e) => [
+      e.id,
+      e.fixtures.length > 1 ? e.fixtures.find((f) => f.fixture === fixture.id) : e.stats,
+    ]) ?? [],
+  );
 
   const playersOf = (teamId: number) =>
     [...index.players.values()]

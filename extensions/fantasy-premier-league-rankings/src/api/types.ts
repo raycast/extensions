@@ -181,8 +181,18 @@ export interface LiveStats {
   total_points: number;
 }
 
+/** A player's stats in one fixture; a double gameweek has two per player. */
+export interface LiveFixtureStats {
+  fixture: number;
+  minutes: number;
+  goals_scored: number;
+  assists: number;
+  bonus: number;
+  total_points: number;
+}
+
 export interface Live {
-  elements: { id: number; stats: LiveStats }[];
+  elements: { id: number; stats: LiveStats; fixtures: LiveFixtureStats[] }[];
 }
 
 export interface Fixture {
