@@ -216,6 +216,14 @@
       "label": "Prevent disk sleep"
     },
     {
+      "name": "preventSleepOnAC",
+      "description": "Keep the system awake while on AC power, for example with the lid closed (caffeinate -s). This option is not supported on Windows and will have no effect",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Prevent system sleep on AC power"
+    },
+    {
       "name": "icon",
       "description": "Select icon set for Menu Bar. macOS only",
       "type": "dropdown",
