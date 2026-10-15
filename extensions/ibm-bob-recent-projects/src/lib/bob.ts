@@ -98,7 +98,7 @@ export function getBobProductJSONPaths(): string[] {
   ];
 }
 
-function readProductJSON(): { applicationName?: string; urlProtocol?: string; sharedDataFolderName?: string } {
+export function readProductJSON(): { applicationName?: string; urlProtocol?: string; sharedDataFolderName?: string } {
   for (const productJSONPath of getBobProductJSONPaths()) {
     if (fs.existsSync(productJSONPath)) {
       try {

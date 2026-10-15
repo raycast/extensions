@@ -3,7 +3,7 @@ import { useSQL } from "@raycast/utils";
 import fs from "fs";
 import { homedir } from "os";
 import path from "path";
-import { getBobAppName, getBobProductJSONPaths } from "./lib/bob";
+import { getBobAppName, readProductJSON } from "./lib/bob";
 import { EntryLike, RecentEntries } from "./types";
 import { isSameEntry } from "./utils";
 import { execFilePromise } from "./utils/exec";
@@ -92,26 +92,10 @@ function getPath() {
 }
 
 function getSharedStateDatabasePath(): string | undefined {
-  const sharedDataFolderName = getSharedDataFolderName();
+  const sharedDataFolderName = readProductJSON().sharedDataFolderName;
   if (!sharedDataFolderName) return undefined;
   // sharedDataFolderName (e.g. ".bobide-shared") lives directly in the home directory.
   return path.join(homedir(), sharedDataFolderName, "sharedStorage", "state.vscdb");
-}
-
-function getSharedDataFolderName(): string | undefined {
-  for (const productJSONPath of getBobProductJSONPaths()) {
-    if (fs.existsSync(productJSONPath)) {
-      try {
-        const productJSON = JSON.parse(fs.readFileSync(productJSONPath, "utf-8")) as { sharedDataFolderName?: string };
-        if (productJSON.sharedDataFolderName) {
-          return productJSON.sharedDataFolderName;
-        }
-      } catch {
-        // Ignore malformed product.json.
-      }
-    }
-  }
-  return undefined;
 }
 
 async function saveEntries(dbPath: string, entries: EntryLike[]) {
