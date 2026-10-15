@@ -245,16 +245,22 @@ export interface SharedUnread {
  * result. When the unread-mentions search couldn't tell, a mention the shared result doesn't list is read only
  * if that result is complete; otherwise it is unknown (`undefined`, no dot). Unread Only keeps the unread and
  * unknown ones, so a mention never disappears just because its state couldn't be checked.
+ *
+ * `stale`: the latest mentions refresh failed, so the rows (and their saved flags) are from an earlier load. Their
+ * flags are then ignored and the state comes from the shared result alone, so a mention read since then doesn't
+ * keep its dot.
  */
 export function visibleMentions<R extends { message: Pick<Message, "name">; unread?: boolean }>(
   rows: R[],
   shared: SharedUnread | undefined,
   unreadOnly: boolean,
+  stale = false,
 ): (R & { unread: boolean | undefined })[] {
   const marked = rows.map((row) => {
+    const saved = stale ? undefined : row.unread;
     let unread: boolean | undefined;
-    if (row.unread === true || shared?.names.has(row.message.name)) unread = true;
-    else if (row.unread === false) unread = false;
+    if (saved === true || shared?.names.has(row.message.name)) unread = true;
+    else if (saved === false) unread = false;
     else unread = shared && !shared.capped ? false : undefined;
     return { ...row, unread };
   });

@@ -302,6 +302,21 @@ describe("mentionRows", () => {
 
 describe("visibleMentions", () => {
   const row = (name: string, unread?: boolean) => ({ message: { name }, unread });
+
+  it("after a failed refresh, ignores saved flags and follows a complete shared result", () => {
+    const rows = [row("m/read-since", true), row("m/still-unread", true)];
+    const shared = { names: new Set(["m/still-unread"]), capped: false };
+    const shown = visibleMentions(rows, shared, false, true);
+    expect(shown.map((r) => r.unread)).toEqual([false, true]);
+    expect(visibleMentions(rows, shared, true, true).map((r) => r.message.name)).toEqual(["m/still-unread"]);
+  });
+
+  it("after a failed refresh with a capped shared result, leaves unlisted mentions unknown and visible", () => {
+    const rows = [row("m/a", true), row("m/b", false)];
+    const shared = { names: new Set<string>(), capped: true };
+    expect(visibleMentions(rows, shared, false, true).map((r) => r.unread)).toEqual([undefined, undefined]);
+    expect(visibleMentions(rows, shared, true, true)).toHaveLength(2);
+  });
   // The shared unread result stopped at its cap and lists only spaces/A/messages/2.
   const cappedShared = {
     names: unreadMessageNames([{ messages: [message("spaces/A/messages/2", "2026-10-15T08:00:00Z")] }]),

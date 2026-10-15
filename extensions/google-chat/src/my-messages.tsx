@@ -74,8 +74,10 @@ function MyMessages({ launchView }: { launchView?: string }) {
   // Ignore cached data in another shape.
   const mentionsData = Array.isArray(mentions.data?.rows) ? mentions.data : undefined;
   const sharedUnread = unread ? { names: unreadMessageNames(unreadEntries), capped: unread.capped } : undefined;
-  const allMentions = visibleMentions(mentionsData?.rows ?? [], sharedUnread, false);
-  const shownMentions = visibleMentions(mentionsData?.rows ?? [], sharedUnread, unreadOnly);
+  // After a failed refresh the rows are from an earlier load, so their saved unread flags may be out of date.
+  const mentionsStale = !!mentions.error;
+  const allMentions = visibleMentions(mentionsData?.rows ?? [], sharedUnread, false, mentionsStale);
+  const shownMentions = visibleMentions(mentionsData?.rows ?? [], sharedUnread, unreadOnly, mentionsStale);
   const unreadByName = new Map(unreadEntries.map((entry) => [entry.spaceName, entry]));
 
   // Wait for an unread result so the Read pages don't spend requests on conversations it lists. Which rows
