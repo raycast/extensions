@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Recordist entry] - {PR_MERGE_DATE}
+
+- Correct the Recordist description: it can also control recording, and what it returns goes to the assistant you connect.
+
 ## [Add Web3Juice MCP Server] - 2026-10-15
 
 - Add Web3Juice to the official registry: evidence-backed DeFi yield data. Market summaries, pool detail with base vs reward APY, 90-day history and side-by-side comparisons for ~17,000 pools. Read-only. Remote Streamable HTTP server with no sign-in for the research tools. Direct HTTP connection in Raycast at https://web3juice.com/api/mcp.
