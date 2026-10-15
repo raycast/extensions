@@ -267,7 +267,7 @@ function Intake() {
     isLoading: isLoadingProjects,
     error: projectsError,
     revalidate: revalidateProjects,
-  } = useMemberProjects();
+  } = useMemberProjects({ showsErrorInline: true });
   const [projectId, setProjectId] = useState("");
   const [showClosed, setShowClosed] = useCachedState<boolean>("show-closed:intake", false);
   const [showDetail, setShowDetail] = useCachedState<boolean>("show-detail:intake", false);

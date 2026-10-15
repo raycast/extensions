@@ -5,7 +5,7 @@ import ProjectItemListItem from "./components/ProjectItemListItem";
 import ErrorEmptyView from "./components/ErrorEmptyView";
 
 function SearchProjects() {
-  const { isLoading, projects, pagination, error, revalidate } = useProjects({});
+  const { isLoading, projects, pagination, error, revalidate } = useProjects({ showsErrorInline: true });
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search projects" pagination={pagination}>

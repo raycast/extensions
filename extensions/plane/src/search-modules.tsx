@@ -19,11 +19,14 @@ function SearchModules() {
     isLoading: isLoadingProjects,
     error: projectsError,
     revalidate: revalidateProjects,
-  } = useMemberProjects();
+  } = useMemberProjects({ showsErrorInline: true });
   const moduleProjects = projects.filter((project) => project.moduleView !== false);
   const [projectId, setProjectId] = useState("");
   const project = moduleProjects.find((item) => item.id === projectId) ?? moduleProjects[0];
-  const { modules, isLoading, error, pagination, mutate } = useModules(project?.id ?? "", { execute: !!project?.id });
+  const { modules, isLoading, error, pagination, mutate } = useModules(project?.id ?? "", {
+    execute: !!project?.id,
+    showsErrorInline: true,
+  });
   const slug = planeClient?.workspaceSlug ?? "";
   const listError = projectsError ?? error;
 

@@ -98,3 +98,11 @@ export function describePlaneError(error: unknown): PlaneErrorDescription {
 export function errorShownInline(): void {
   // Intentionally empty: the view renders the error.
 }
+
+/**
+ * `onError` for hooks shared by lists and forms: silent only for a caller that renders the error itself
+ * (`showsErrorInline`). Otherwise undefined, so `useCachedPromise` shows its failure toast.
+ */
+export function inlineErrorHandler(showsErrorInline: boolean | undefined): (() => void) | undefined {
+  return showsErrorInline ? errorShownInline : undefined;
+}

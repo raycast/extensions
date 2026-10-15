@@ -2,12 +2,13 @@ import { useCachedPromise } from "@raycast/utils";
 import { getWorkItem } from "../api/work-items";
 import { getWorkItemComments } from "../api/comments";
 import { getWorkItemCycleAndModules } from "../api/activities";
-import { errorShownInline } from "../helpers/errors";
+import { inlineErrorHandler } from "../helpers/errors";
 
-export function useWorkItemDetail(workItemId: string, projectId: string) {
+/** `showsErrorInline`: the caller renders `error` (the detail view), so no toast. The edit form keeps the toast. */
+export function useWorkItemDetail(workItemId: string, projectId: string, config: { showsErrorInline?: boolean } = {}) {
   return useCachedPromise(getWorkItem, [workItemId, projectId], {
     keepPreviousData: true,
-    onError: errorShownInline,
+    onError: inlineErrorHandler(config.showsErrorInline),
   });
 }
 

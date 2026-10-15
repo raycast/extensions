@@ -66,7 +66,7 @@ export default function WorkItemDetail({ slug, projectId, workItemId, mutateWork
     mutate,
     revalidate,
     error,
-  } = useWorkItemDetail(workItemId, projectId);
+  } = useWorkItemDetail(workItemId, projectId, { showsErrorInline: true });
   const {
     data: commentData,
     isLoading: isLoadingComments,
