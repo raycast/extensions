@@ -386,4 +386,16 @@ describe("review feedback regressions", () => {
     );
     expect(result.rewritten).toBe(src);
   });
+
+  it("accepts a correction that restores some, but not all, negations", async () => {
+    let n = 0;
+    const provider = fakeProvider(() =>
+      n++ === 0
+        ? "Open the valve; open the pump; open the tank."
+        : "Do not open the valve. Do not open the pump. Open the tank.",
+    );
+    const result = await run("Do not open the valve. Do not open the pump. Do not open the tank.", provider);
+    expect(result.repaired).toBe(true);
+    expect(result.rewritten).toContain("Do not open the pump.");
+  });
 });

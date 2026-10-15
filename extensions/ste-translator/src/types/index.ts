@@ -31,6 +31,10 @@ export interface ReviewWarning {
   message: string;
   /** Wording safe to send to an AI provider: refers to protected content by token ID, never by value. */
   repairMessage?: string;
+  /** Identifies the underlying problem, independent of the displayed message (counts, wording). */
+  key?: string;
+  /** How far the result is from the source for this problem. Defaults to 1. A smaller value is better. */
+  magnitude?: number;
 }
 
 export interface ConversionResult {

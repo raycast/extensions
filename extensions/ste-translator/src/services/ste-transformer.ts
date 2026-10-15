@@ -155,14 +155,25 @@ function evaluate(raw: string, protectedOriginal: string, tokens: string[]): Eva
 /** Lower is better. Lost or altered protected content outweighs meaning warnings, which outweigh style violations. */
 function score(e: Evaluation): number {
   const errors = e.validation.filter((w) => w.severity === "error").length;
-  const meaning = e.validation.filter((w) => w.severity === "warning").length;
+  const meaning = e.validation.filter((w) => w.severity === "warning").reduce((sum, w) => sum + magnitude(w), 0);
   return errors * 100 + meaning * 10 + hardFindings(e.lint).length;
 }
 
-/** True when the candidate has an error or meaning warning that the current result does not have. */
+function magnitude(w: ReviewWarning): number {
+  return w.magnitude ?? 1;
+}
+
+/**
+ * True when the candidate has an error or meaning warning that is new, or worse than the same
+ * problem in the current result. Problems are compared by key, not by their displayed message.
+ */
 function introducesProblem(candidate: Evaluation, current: Evaluation): boolean {
-  const known = new Set(current.validation.map((w) => w.message));
-  return candidate.validation.some((w) => w.severity !== "info" && !known.has(w.message));
+  const known = new Map(current.validation.filter((w) => w.key).map((w) => [w.key, magnitude(w)]));
+  return candidate.validation.some((w) => {
+    if (w.severity === "info") return false;
+    const before = w.key === undefined ? undefined : known.get(w.key);
+    return before === undefined || magnitude(w) > before;
+  });
 }
 
 function describeFinding(f: LintFinding): string {

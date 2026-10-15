@@ -44,6 +44,7 @@ export function validateConversion(input: ValidationInput): ReviewWarning[] {
       severity: "error",
       message: `Protected content is missing from the result: ${preview(tokens[id])}`,
       repairMessage: `Token [[P${id}]] is missing from the result. Put it back exactly once, unchanged.`,
+      key: `missing:${id}`,
     });
   }
   for (const id of check.duplicated) {
@@ -51,12 +52,14 @@ export function validateConversion(input: ValidationInput): ReviewWarning[] {
       severity: "warning",
       message: `Protected content appears more than once in the result: ${preview(tokens[id])}`,
       repairMessage: `Token [[P${id}]] appears more than once in the result. Keep it exactly once.`,
+      key: `duplicated:${id}`,
     });
   }
   if (check.unknown.length > 0) {
     warnings.push({
       severity: "error",
       message: "The result contains unresolved placeholders. Do not use it without editing.",
+      key: "unknown-placeholder",
     });
   }
 
@@ -67,6 +70,7 @@ export function validateConversion(input: ValidationInput): ReviewWarning[] {
         severity: "error",
         message: `Protected content was altered: ${preview(token)}`,
         repairMessage: `Token [[P${id}]] was altered. Copy it unchanged.`,
+        key: `altered:${id}`,
       });
     }
   }
@@ -77,6 +81,8 @@ export function validateConversion(input: ValidationInput): ReviewWarning[] {
     warnings.push({
       severity: "warning",
       message: `Negation count changed (${negBefore} before, ${negAfter} after). Check that no warning or prohibition changed.`,
+      key: "negation",
+      magnitude: Math.abs(negBefore - negAfter),
     });
   }
 
@@ -86,6 +92,7 @@ export function validateConversion(input: ValidationInput): ReviewWarning[] {
     warnings.push({
       severity: "warning",
       message: "Conditional wording (if/unless) was removed. Check the conditions.",
+      key: "condition",
     });
   }
 
@@ -93,7 +100,11 @@ export function validateConversion(input: ValidationInput): ReviewWarning[] {
   for (const n of numbersIn(protectedOriginal)) {
     const at = remaining.indexOf(n);
     if (at === -1) {
-      warnings.push({ severity: "warning", message: `The number ${n} from the original is not in the result.` });
+      warnings.push({
+        severity: "warning",
+        message: `The number ${n} from the original is not in the result.`,
+        key: `number:${n}`,
+      });
     } else {
       remaining.splice(at, 1);
     }
