@@ -48,6 +48,7 @@ import {
   applyFailure,
   applySuccess,
   Cached,
+  changedProviders,
   cooldownEnds,
   cooldownsOf,
   credentialFingerprints,
@@ -60,6 +61,7 @@ import {
   startRefresh,
   toFailure,
   Transition,
+  withChanged,
 } from "./lib/usage-state";
 import { ProviderId, Settings } from "./lib/types";
 
@@ -153,12 +155,19 @@ function useUsage(onKeychainDenied: () => void) {
     async (settings: Settings, options: { force: boolean; only?: ProviderId[] }) => {
       // Saved results from other credentials are dropped before anything is chosen to refresh, so they are never shown.
       const current = credentialFingerprints(settings, PROVIDER_IDS);
-      if (PROVIDER_IDS.some((id) => fingerprintsRef.current[id] !== current[id])) {
+      const changed = changedProviders(fingerprintsRef.current, current, PROVIDER_IDS);
+      if (changed.length > 0) {
         commit(dropChanged(storeRef.current, fingerprintsRef.current, current, PROVIDER_IDS));
         fingerprintsRef.current = current;
         writeFingerprints(current);
       }
-      const ids = providersToRefresh(storeRef.current.states, PROVIDER_IDS, Date.now(), options);
+      // A changed provider was just emptied, so it is fetched even when `only` names others. Otherwise it would show
+      // an empty row with no loading state until a manual refresh.
+      const ids = withChanged(
+        providersToRefresh(storeRef.current.states, PROVIDER_IDS, Date.now(), options),
+        changed,
+        PROVIDER_IDS,
+      );
       if (ids.length === 0) {
         return;
       }

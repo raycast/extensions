@@ -5,6 +5,7 @@ import {
   applySuccess,
   Cached,
   cooldownEnds,
+  changedProviders,
   cooldownsOf,
   credentialFingerprints,
   dropChanged,
@@ -18,6 +19,7 @@ import {
   startRefresh,
   States,
   toFailure,
+  withChanged,
 } from "../src/lib/usage-state";
 import { ProviderError, ProviderUsage, Settings } from "../src/lib/types";
 
@@ -363,6 +365,24 @@ describe("dropChanged", () => {
     );
     expect(result.cached).toEqual({});
     expect(result.states.claude).toEqual({ loading: false });
+  });
+});
+
+describe("changedProviders and withChanged", () => {
+  it("lists the providers whose fingerprint differs, including one with no saved fingerprint", () => {
+    const changed = changedProviders({ claude: "a", codex: "b" }, { claude: "a", codex: "c", copilot: "d" }, IDS);
+    expect(changed).toEqual(["codex", "copilot"]);
+  });
+
+  it("adds a changed provider to an `only` refresh of another, so its emptied row is fetched", () => {
+    const states = initialStates(IDS, {});
+    const chosen = providersToRefresh(states, IDS, NOW, { force: true, only: ["claude"] });
+    expect(withChanged(chosen, ["codex"], IDS)).toEqual(["claude", "codex"]);
+  });
+
+  it("keeps the chosen providers when nothing changed, and does not repeat a provider chosen and changed", () => {
+    expect(withChanged(["copilot"], [], IDS)).toEqual(["copilot"]);
+    expect(withChanged(["codex"], ["codex"], IDS)).toEqual(["codex"]);
   });
 });
 

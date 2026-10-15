@@ -43,8 +43,13 @@ export function credentialFingerprints(settings: Settings, ids: readonly Provide
   return fingerprints;
 }
 
-// Drops the saved result and cooldown of each provider whose credentials differ from the ones they were saved with. A
-// provider with no saved fingerprint differs as well, so results saved before fingerprints were kept are not trusted.
+// The providers whose credentials differ from the ones they were saved with. A provider with no saved fingerprint
+// differs as well, so results saved before fingerprints were kept are not trusted.
+export function changedProviders(saved: Fingerprints, current: Fingerprints, ids: readonly ProviderId[]): ProviderId[] {
+  return ids.filter((id) => saved[id] !== current[id]);
+}
+
+// Drops the saved result and cooldown of each provider whose credentials changed, and keeps the others.
 export function dropChanged(
   transition: Transition,
   saved: Fingerprints,
@@ -53,14 +58,21 @@ export function dropChanged(
 ): Transition {
   const states = { ...transition.states };
   const cached = { ...transition.cached };
-  for (const id of ids) {
-    if (saved[id] === current[id]) {
-      continue;
-    }
+  for (const id of changedProviders(saved, current, ids)) {
     states[id] = { loading: false };
     delete cached[id];
   }
   return { states, cached };
+}
+
+// Adds the providers whose credentials changed to the ones chosen for fetching. Their saved results were just dropped,
+// so they are fetched even when `only` names other providers, which gives them a loading state and a new request.
+export function withChanged(
+  chosen: readonly ProviderId[],
+  changed: readonly ProviderId[],
+  ids: readonly ProviderId[],
+): ProviderId[] {
+  return ids.filter((id) => chosen.includes(id) || changed.includes(id));
 }
 
 // Saved results from the cache of an earlier session are used as long as they're this recent. Opening the command again
