@@ -1,6 +1,6 @@
 # Goose 2FA Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-15
 
 - Export individual accounts as locally generated QR codes, standard otpauth setup links, or Base32 secret text for another authenticator.
 - Keep exported OTP parameters current without advancing HOTP counters; use confidential clipboard copies.
