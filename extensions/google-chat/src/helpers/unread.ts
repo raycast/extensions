@@ -9,7 +9,6 @@
 import type { Message, Space, SpaceReadState } from "../api/types";
 import { mentionsUser } from "./chat-format";
 import { GoogleApiError, isAuthError, isScopeError } from "./errors";
-import { spaceUrl } from "./links";
 import { spaceNameOf } from "./recipient";
 
 export const DEFAULT_LOOKBACK_DAYS = 14;
@@ -396,13 +395,4 @@ export function freshSharedUnread<T>(
   if (!entry || maxAgeMs <= 0 || entry.lookbackDays !== lookbackDays) return undefined;
   const age = now - entry.at;
   return age >= 0 && age < maxAgeMs ? entry.result : undefined;
-}
-
-/** What running Unread Chat opens: the conversation itself when exactly one has unread messages, else My Messages. */
-export type UnreadLaunchTarget = { action: "open"; url: string } | { action: "list" };
-
-export function unreadLaunchTarget(
-  spaces: { item: { space: Pick<Space, "name" | "spaceUri" | "spaceType"> } }[],
-): UnreadLaunchTarget {
-  return spaces.length === 1 ? { action: "open", url: spaceUrl(spaces[0].item.space) } : { action: "list" };
 }

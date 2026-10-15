@@ -24,7 +24,6 @@ import {
   unreadSearchFilter,
   UNREAD_CHECK_FAILED,
   unreadSubtitle,
-  unreadLaunchTarget,
   unreadSummary,
   withoutSpaces,
   type UnreadResult,
@@ -410,26 +409,6 @@ describe("freshSharedUnread", () => {
     expect(freshSharedUnread(entry, 14, 0, NOW)).toBeUndefined();
     expect(freshSharedUnread(undefined, 14, 2 * 60_000, NOW)).toBeUndefined();
     expect(freshSharedUnread({ ...entry, at: NOW + 60_000 }, 14, 2 * 60_000, NOW)).toBeUndefined();
-  });
-});
-
-describe("unreadLaunchTarget", () => {
-  const entry = (name: string, extra: Partial<Space> = {}) => ({ item: { space: { name, ...extra } } });
-
-  it("opens the conversation when exactly one has unread messages, using its spaceUri", () => {
-    expect(unreadLaunchTarget([entry("spaces/A", { spaceUri: "https://chat.google.com/room/A?cls=7" })])).toEqual({
-      action: "open",
-      url: "https://chat.google.com/room/A?cls=7",
-    });
-    expect(unreadLaunchTarget([entry("spaces/D", { spaceType: "DIRECT_MESSAGE" })])).toEqual({
-      action: "open",
-      url: "https://chat.google.com/dm/D",
-    });
-  });
-
-  it("opens My Messages for none or several", () => {
-    expect(unreadLaunchTarget([])).toEqual({ action: "list" });
-    expect(unreadLaunchTarget([entry("spaces/A"), entry("spaces/B")])).toEqual({ action: "list" });
   });
 });
 
