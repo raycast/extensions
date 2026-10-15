@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { FormValidation, useForm, usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { leaf, showLeafError } from "../lib/leaf";
+import { describeError, leaf, showLeafError } from "../lib/leaf";
 import {
   DAY_DURATIONS,
   durationToApi,
@@ -42,6 +42,31 @@ const sameEmails = (a: Person[], b: Person[]) =>
 export default function EditEventForm({ event, onSaved }: Props) {
   const detail = usePromise((id: string) => leaf().call("events.get", { id }), [event.id], { onError: showLeafError });
   const calendars = usePromise(() => leaf().call("calendars.list"), [], { onError: showLeafError });
+
+  // Loading Failed, So Say Why And Offer A Retry
+  const error = detail.error ?? calendars.error;
+  if (error && !detail.isLoading && !calendars.isLoading) {
+    const { title, message } = describeError(error);
+    return (
+      <Form
+        navigationTitle={`Edit ${event.title || "Event"}`}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Try Again"
+              icon={Icon.ArrowClockwise}
+              onAction={() => {
+                detail.revalidate();
+                calendars.revalidate();
+              }}
+            />
+          </ActionPanel>
+        }
+      >
+        <Form.Description title={title} text={message} />
+      </Form>
+    );
+  }
 
   if (!detail.data || !calendars.data) {
     return <Form isLoading navigationTitle={`Edit ${event.title || "Event"}`} />;

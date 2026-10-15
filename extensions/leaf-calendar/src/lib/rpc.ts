@@ -62,6 +62,14 @@ export class LeafClient {
     this.socket?.end();
     this.socket = undefined;
     this.connecting = undefined;
+
+    // Fail What's Waiting, Since No Answer Can Arrive Now
+    this.buffer = "";
+    for (const [id, pending] of this.pending) {
+      clearTimeout(pending.timer);
+      pending.reject(new LeafError("disconnected", "Leaf Calendar closed the connection."));
+      this.pending.delete(id);
+    }
   }
 
   private connect(): Promise<void> {
@@ -81,7 +89,11 @@ export class LeafClient {
 
     // Lines In, Failures Out
     socket.setEncoding("utf8");
-    socket.on("data", (chunk: string) => this.receive(chunk));
+    socket.on("data", (chunk: string) => {
+      if (this.socket === socket) {
+        this.receive(chunk);
+      }
+    });
     socket.on("error", () => undefined);
     socket.on("close", () => this.dropped(socket));
     this.socket = socket;
@@ -140,17 +152,10 @@ export class LeafClient {
     }
   }
 
+  // An Old Connection Closing Late Leaves The Current One Alone
   private dropped(socket: net.Socket): void {
     if (this.socket === socket) {
-      this.socket = undefined;
-      this.connecting = undefined;
-    }
-
-    this.buffer = "";
-    for (const [id, pending] of this.pending) {
-      clearTimeout(pending.timer);
-      pending.reject(new LeafError("disconnected", "Leaf Calendar closed the connection."));
-      this.pending.delete(id);
+      this.close();
     }
   }
 }

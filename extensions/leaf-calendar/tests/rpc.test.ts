@@ -209,6 +209,27 @@ describe("LeafClient", () => {
     expect(leaf.received.filter((r) => r.method === "leaf.hello")).toHaveLength(2);
   });
 
+  it("ignores an old connection closing after a retry has started", async () => {
+    let refuse = true;
+    const { client } = await connect(
+      {
+        "leaf.hello": () => {
+          if (refuse) {
+            refuse = false;
+            throw new RpcFailure(-32000, "Not now.");
+          }
+
+          return HELLO;
+        },
+        "scheduling.links": () => SILENT,
+      },
+      { timeoutMs: 300 },
+    );
+
+    await expect(client.call("calendars.list")).rejects.toMatchObject({ code: "failed" });
+    await expect(client.call("scheduling.links")).rejects.toMatchObject({ code: "timeout" });
+  });
+
   it("reads replies split across chunks and several replies in one chunk", async () => {
     const { client } = await connect({ "events.get": (p) => ({ id: p.id, title: "x".repeat(200_000) }) });
 
