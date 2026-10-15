@@ -67,18 +67,23 @@ function getNLSVariable(text: string | undefined): string | undefined {
   }
 }
 
-const buildConfigs: Record<string, { appName: string; cliName: string; urlProtocol: string; appFileName: string }> = {
+const buildConfigs: Record<
+  string,
+  { appName: string; cliName: string; urlProtocol: string; appFileName: string; dataFolderName: string }
+> = {
   "IBM Bob": {
     appName: "IBM Bob",
     cliName: "bobide",
     urlProtocol: "ibm-bob",
     appFileName: "IBM Bob.app",
+    dataFolderName: ".bobide",
   },
   "IBM Bob - Insiders": {
     appName: "IBM Bob - Insiders",
     cliName: "bobide-insiders",
     urlProtocol: "bobide-insiders",
     appFileName: "IBM Bob - Insiders.app",
+    dataFolderName: ".bobide-insiders",
   },
 };
 
@@ -98,7 +103,12 @@ export function getBobProductJSONPaths(): string[] {
   ];
 }
 
-export function readProductJSON(): { applicationName?: string; urlProtocol?: string; sharedDataFolderName?: string } {
+export function readProductJSON(): {
+  applicationName?: string;
+  urlProtocol?: string;
+  dataFolderName?: string;
+  sharedDataFolderName?: string;
+} {
   for (const productJSONPath of getBobProductJSONPaths()) {
     if (fs.existsSync(productJSONPath)) {
       try {
@@ -184,7 +194,8 @@ async function getPackageJSONInfo(filename: string): Promise<PackageJSONInfo | u
 }
 
 export async function getLocalExtensions(): Promise<Extension[] | undefined> {
-  const extensionsRootFolder = path.join(os.homedir(), ".bobide/extensions");
+  const dataFolderName = readProductJSON().dataFolderName ?? getBuildConfig().dataFolderName;
+  const extensionsRootFolder = path.join(os.homedir(), dataFolderName, "extensions");
   const extensionsManifrestFilename = path.join(extensionsRootFolder, "extensions.json");
   if (await fileExists(extensionsManifrestFilename)) {
     const data = await afs.readFile(extensionsManifrestFilename, {
