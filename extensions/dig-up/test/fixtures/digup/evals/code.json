@@ -1,0 +1,294 @@
+{
+ "base": "~/DigUpTestbed/code",
+ "queries": [
+  {
+   "q": "code: retry a failed call with exponential backoff and random jitter",
+   "expect": [
+    "billing-service/billing/retry.py@8-29"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: stop calling a service that keeps failing and try again after a cool-down",
+   "expect": [
+    "billing-service/billing/retry.py@36-63"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: retry_with_backoff",
+   "expect": [
+    "billing-service/billing/retry.py@8-29"
+   ],
+   "tag": "code-name"
+  },
+  {
+   "q": "code: charge a customer's card and handle the bank declining it",
+   "expect": [
+    "billing-service/billing/gateway.py@30-45"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: give a customer their money back",
+   "expect": [
+    "billing-service/billing/gateway.py@47-51"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: PaymentDeclined",
+   "expect": [
+    "billing-service/billing/gateway.py"
+   ],
+   "tag": "code-name"
+  },
+  {
+   "q": "code: check that a webhook really came from the payment provider",
+   "expect": [
+    "billing-service/billing/webhooks.py@11-20"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: turn an amount in cents into a price with the currency symbol",
+   "expect": [
+    "billing-service/billing/money.py@5-12"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: divide a total between people so the leftover cents go somewhere",
+   "expect": [
+    "billing-service/billing/money.py@15-17"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: invoice numbers that start counting again every year",
+   "expect": [
+    "billing-service/billing/invoices.py@9-14"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: when is the invoice due, skipping weekends",
+   "expect": [
+    "billing-service/billing/invoices.py@21-26"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: which database and redis does the billing service connect to",
+   "expect": [
+    "billing-service/config/settings.yaml"
+   ],
+   "tag": "code-doc"
+  },
+  {
+   "q": "code: how do I run the tests",
+   "expect": [
+    "billing-service/README.md@12-19",
+    "billing-service/Makefile@1-2"
+   ],
+   "tag": "code-doc"
+  },
+  {
+   "q": "code: read the date a photo was taken",
+   "expect": [
+    "photo-organizer/Sources/PhotoOrganizer/ExifDate.swift@7-16"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: find photos that look the same",
+   "expect": [
+    "photo-organizer/Sources/PhotoOrganizer/DuplicateFinder.swift"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: hamming distance",
+   "expect": [
+    "photo-organizer/Sources/PhotoOrganizer/DuplicateFinder.swift@28-29"
+   ],
+   "tag": "code-name"
+  },
+  {
+   "q": "code: DuplicateFinder",
+   "expect": [
+    "photo-organizer/Sources/PhotoOrganizer/DuplicateFinder.swift"
+   ],
+   "tag": "code-name"
+  },
+  {
+   "q": "code: make a small preview of a big photo",
+   "expect": [
+    "photo-organizer/Sources/PhotoOrganizer/Thumbnailer.swift@10-21"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: notice when new files show up in a folder",
+   "expect": [
+    "photo-organizer/Sources/PhotoOrganizer/FolderWatcher.swift"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: rename pictures by when they were taken without overwriting any",
+   "expect": [
+    "photo-organizer/Sources/PhotoOrganizer/Renamer.swift@13-22"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: which city is this GPS position in",
+   "expect": [
+    "photo-organizer/Sources/PhotoOrganizer/PlaceNames.swift"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: wait until the user stops typing before using what they typed",
+   "expect": [
+    "todo-web/src/hooks/useDebounce.ts"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: useDebounce",
+   "expect": [
+    "todo-web/src/hooks/useDebounce.ts"
+   ],
+   "tag": "code-name"
+  },
+  {
+   "q": "code: cancel the network request when the component goes away",
+   "expect": [
+    "todo-web/src/hooks/useFetch.ts"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: get a new access token when the old one expires",
+   "expect": [
+    "todo-web/src/api/auth.ts@21-34",
+    "todo-web/src/api/auth.ts@37-47"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: refreshAccessToken",
+   "expect": [
+    "todo-web/src/api/auth.ts@21-34"
+   ],
+   "tag": "code-name"
+  },
+  {
+   "q": "code: reorder the list by dragging items",
+   "expect": [
+    "todo-web/src/components/TodoList.tsx"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: show how long ago something happened",
+   "expect": [
+    "todo-web/src/utils/relativeTime.ts"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: limit how many requests one IP address can make",
+   "expect": [
+    "todo-web/src/server/rateLimit.ts"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: accept a profile picture upload and check its type and size",
+   "expect": [
+    "todo-web/src/server/upload.ts"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: training loop with mixed precision and gradient clipping",
+   "expect": [
+    "ml-experiments/train.py@30-58"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: stop training early when the validation loss stops improving",
+   "expect": [
+    "ml-experiments/train.py@30-58"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: learning rate that warms up and then follows a cosine",
+   "expect": [
+    "ml-experiments/train.py@9-13"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: resume training from a saved checkpoint",
+   "expect": [
+    "ml-experiments/train.py@22-27"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: drop duplicate rows and rows that have no label",
+   "expect": [
+    "ml-experiments/data/clean.py@12-16"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: split the data keeping the same class proportions",
+   "expect": [
+    "ml-experiments/data/clean.py@19-20"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: precision and recall for each class",
+   "expect": [
+    "ml-experiments/eval/metrics.py@13-20"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: plot how many examples each class has",
+   "expect": [
+    "ml-experiments/notebooks/explore.ipynb"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: fine-tune a model with LoRA adapters",
+   "expect": [
+    "ml-experiments/notebooks/finetune_lora.ipynb"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: copy my photos to the external drive",
+   "expect": [
+    "scripts/backup_photos.sh"
+   ],
+   "tag": "code"
+  },
+  {
+   "q": "code: move screenshots from the desktop into folders by month",
+   "expect": [
+    "scripts/tidy_screenshots.py"
+   ],
+   "tag": "code"
+  }
+ ]
+}

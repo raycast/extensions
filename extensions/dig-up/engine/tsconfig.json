@@ -1,0 +1,32 @@
+{
+  "include": [
+    "./**/*.ts",
+    "../scripts/**/*.ts",
+    "../test/**/*.ts"
+  ],
+  "compilerOptions": {
+    "lib": [
+      "ES2023"
+    ],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "ES2023",
+    "types": [
+      "node"
+    ],
+    "strict": true,
+    "noUnusedLocals": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "noEmit": true
+  },
+  "exclude": [
+    "../test/fixtures/**",
+    "../.testbed/**",
+    "../.vendor/**",
+    "../node_modules/**"
+  ]
+}

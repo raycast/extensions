@@ -1,0 +1,276 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dig-up",
+  "title": "Dig Up",
+  "description": "Search your files by what's in them: photos, screenshots, PDFs, notes, recordings, videos and code. Runs on your Mac with Google DeepMind's EmbeddingGemma 2.",
+  "icon": "icon.png",
+  "author": "ladislav_husty",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Dig Up",
+      "subtitle": "Search Files by Meaning",
+      "description": "Describe a file in your own words and find it: a scene in a photo, a moment in a recording or video, a page of a PDF, or code by what it does (start with \"code:\").",
+      "mode": "view",
+      "keywords": [
+        "semantic",
+        "search",
+        "find",
+        "files",
+        "photo",
+        "pdf",
+        "video",
+        "audio",
+        "code"
+      ]
+    },
+    {
+      "name": "search-pictures",
+      "title": "Dig Up Pictures",
+      "subtitle": "Search Files in a Grid",
+      "description": "The same search in a picture grid, with kind filters.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Describe it",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "folders",
+      "title": "Dig Up Folders",
+      "subtitle": "Choose What Dig Up Searches",
+      "description": "Pick the folders to search and the code folders, see how long the first pass takes, and skip folders or file types.",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Dig Up Status",
+      "subtitle": "Indexing Progress in the Menu Bar",
+      "description": "Shows how indexing is going, and lets you pause it or index now.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "index-now",
+      "title": "Dig Up: Index Now",
+      "description": "Look for new and changed files in your folders now.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-pause",
+      "title": "Dig Up: Pause or Resume Indexing",
+      "description": "Pause indexing until you resume it.",
+      "mode": "no-view"
+    },
+    {
+      "name": "rebuild-index",
+      "title": "Dig Up: Rebuild Index",
+      "description": "Embed every file again (search by name keeps working meanwhile).",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "codeEditor",
+      "title": "Code Editor",
+      "description": "Where code results open, at the line.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "First Installed Editor",
+          "value": "auto"
+        },
+        {
+          "title": "The File's Default App",
+          "value": "default"
+        },
+        {
+          "title": "Zed",
+          "value": "dev.zed.Zed"
+        },
+        {
+          "title": "Zed Preview",
+          "value": "dev.zed.Zed-Preview"
+        },
+        {
+          "title": "Cursor",
+          "value": "com.todesktop.230313mzl4w4u92"
+        },
+        {
+          "title": "Visual Studio Code",
+          "value": "com.microsoft.VSCode"
+        },
+        {
+          "title": "VS Code Insiders",
+          "value": "com.microsoft.VSCodeInsiders"
+        },
+        {
+          "title": "Windsurf",
+          "value": "com.exafunction.windsurf"
+        },
+        {
+          "title": "VSCodium",
+          "value": "com.vscodium"
+        },
+        {
+          "title": "Sublime Text",
+          "value": "com.sublimetext.4"
+        },
+        {
+          "title": "Sublime Text 3",
+          "value": "com.sublimetext.3"
+        },
+        {
+          "title": "PyCharm",
+          "value": "com.jetbrains.pycharm"
+        },
+        {
+          "title": "PyCharm CE",
+          "value": "com.jetbrains.pycharm.ce"
+        },
+        {
+          "title": "IntelliJ IDEA",
+          "value": "com.jetbrains.intellij"
+        },
+        {
+          "title": "IntelliJ IDEA CE",
+          "value": "com.jetbrains.intellij.ce"
+        },
+        {
+          "title": "WebStorm",
+          "value": "com.jetbrains.WebStorm"
+        },
+        {
+          "title": "CLion",
+          "value": "com.jetbrains.CLion"
+        },
+        {
+          "title": "GoLand",
+          "value": "com.jetbrains.goland"
+        },
+        {
+          "title": "RustRover",
+          "value": "com.jetbrains.rustrover"
+        },
+        {
+          "title": "PhpStorm",
+          "value": "com.jetbrains.PhpStorm"
+        },
+        {
+          "title": "RubyMine",
+          "value": "com.jetbrains.rubymine"
+        },
+        {
+          "title": "Android Studio",
+          "value": "com.google.android.studio"
+        },
+        {
+          "title": "Xcode",
+          "value": "com.apple.dt.Xcode"
+        },
+        {
+          "title": "BBEdit",
+          "value": "com.barebones.bbedit"
+        },
+        {
+          "title": "TextMate",
+          "value": "com.macromates.TextMate"
+        }
+      ]
+    },
+    {
+      "name": "mediaPlayer",
+      "title": "Recordings and Videos",
+      "description": "Where audio and video results open. QuickTime Player and IINA start at the matching moment.",
+      "type": "dropdown",
+      "required": false,
+      "default": "default",
+      "data": [
+        {
+          "title": "The File's Default App",
+          "value": "default"
+        },
+        {
+          "title": "QuickTime Player",
+          "value": "com.apple.QuickTimePlayerX"
+        },
+        {
+          "title": "IINA",
+          "value": "com.colliderli.iina"
+        }
+      ]
+    },
+    {
+      "name": "indexOnBattery",
+      "title": "Indexing",
+      "label": "Index on battery power",
+      "description": "Off: the first pass waits for the charger. New files are always read.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "indexHours",
+      "title": "Index Hours",
+      "description": "Only index between these hours, e.g. 22-7. Empty: any time. Search works at any time.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "llamaServerPath",
+      "title": "llama-server",
+      "description": "Optional: a llama.cpp llama-server (build b11452 or newer). Empty: Dig Up downloads llama.cpp b11624.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "modelFolder",
+      "title": "Model Folder",
+      "description": "Optional: a folder with embeddinggemma-2-Q8_0.gguf and mmproj-embeddinggemma-2-Q8_0.gguf. Empty: Dig Up uses DigUp's or the Hugging Face cache's copy, or downloads them.",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.8.0",
+    "@raycast/utils": "2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.15.0",
+    "@types/react": "19.0.10",
+    "esbuild": "0.28.2",
+    "eslint": "^9.39.4",
+    "prettier": "^3.5.3",
+    "tsx": "4.23.15",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build:helper": "bash scripts/build-helper.sh",
+    "build:engine": "node scripts/build-daemon.mjs",
+    "prebuild": "npm run build:engine",
+    "build": "ray build",
+    "dev": "npm run build:helper && npm run build:engine && ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p engine/tsconfig.json",
+    "test": "bash scripts/test.sh",
+    "eval": "bash scripts/run-node.sh scripts/cli.ts eval",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

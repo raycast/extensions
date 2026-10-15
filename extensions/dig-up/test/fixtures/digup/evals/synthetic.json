@@ -1,0 +1,283 @@
+{
+ "base": "~/DigUpTestbed",
+ "queries": [
+  {
+   "q": "a penguin",
+   "expect": [
+    "synthetic/img/Animals-Penguin.jpg",
+    "traps/duplicates/penguin.jpg",
+    "traps/duplicates/penguin copy.jpg",
+    "synthetic/video/penguin_zebra_parrot_18s.mp4@0-6",
+    "traps/real-mpeg-ts/zoo clip.ts@0-6"
+   ],
+   "tag": "image"
+  },
+  {
+   "q": "black and white striped animal",
+   "expect": [
+    "synthetic/img/Animals-Zebra.jpg"
+   ],
+   "tag": "image"
+  },
+  {
+   "q": "bird of prey",
+   "expect": [
+    "synthetic/img/Animals-Eagle.jpg",
+    "synthetic/img/Animals-Owl.jpg"
+   ],
+   "tag": "image"
+  },
+  {
+   "q": "string instrument",
+   "expect": [
+    "synthetic/img/Instruments-Violin.jpg",
+    "synthetic/img/Instruments-Guitar.jpg"
+   ],
+   "tag": "image"
+  },
+  {
+   "q": "planet earth from space",
+   "expect": [
+    "synthetic/img/Nature-Earth.jpg"
+   ],
+   "tag": "image"
+  },
+  {
+   "q": "thunderstorm",
+   "expect": [
+    "synthetic/img/Nature-Lightning.jpg"
+   ],
+   "tag": "image"
+  },
+  {
+   "q": "yellow flower",
+   "expect": [
+    "synthetic/img/Flowers-Sunflower.jpg",
+    "synthetic/img/Flowers-Yellow Daisy.jpg",
+    "traps/Names with spaces & ünïcödé/Café menü — 日本語.jpg",
+    "synthetic/img/Flowers-Dandelion.jpg"
+   ],
+   "tag": "image"
+  },
+  {
+   "q": "christmas cookie",
+   "expect": [
+    "synthetic/img/Fun-Gingerbread Man.jpg"
+   ],
+   "tag": "image"
+  },
+  {
+   "q": "desert plant",
+   "expect": [
+    "synthetic/img/Nature-Cactus.jpg"
+   ],
+   "tag": "image"
+  },
+  {
+   "q": "payment declined error",
+   "expect": [
+    "synthetic/screenshots/shot_payment_error.png"
+   ],
+   "tag": "screenshot"
+  },
+  {
+   "q": "python package not installed",
+   "expect": [
+    "synthetic/screenshots/shot_python_traceback.png"
+   ],
+   "tag": "screenshot"
+  },
+  {
+   "q": "my flight to Japan",
+   "expect": [
+    "synthetic/screenshots/shot_flight_booking.png",
+    "synthetic/docs/Tokyo itinerary.md"
+   ],
+   "tag": "screenshot"
+  },
+  {
+   "q": "chat about moving the design review",
+   "expect": [
+    "synthetic/screenshots/shot_chat_meeting.png",
+    "traps/Names with spaces & ünïcödé/Screenshot 2026-10-05 at 9.41.07 PM.png",
+    "synthetic/docs/Meeting notes.rtf"
+   ],
+   "tag": "screenshot"
+  },
+  {
+   "q": "rainy weather forecast",
+   "expect": [
+    "synthetic/screenshots/shot_weather.png",
+    "traps/MyProject/screenshots/Screenshot 2026-10-02 at 8.15.40 AM.png"
+   ],
+   "tag": "screenshot"
+  },
+  {
+   "q": "swift code for vector search",
+   "expect": [
+    "synthetic/screenshots/shot_swift_code.png",
+    "synthetic/docs/Vector search notes.docx"
+   ],
+   "tag": "screenshot"
+  },
+  {
+   "q": "climbing mount fuji",
+   "expect": [
+    "synthetic/docs/Annual notes 2026.pdf@2-2"
+   ],
+   "tag": "pdf-page"
+  },
+  {
+   "q": "how to bake bread at home",
+   "expect": [
+    "synthetic/docs/Annual notes 2026.pdf@3-3"
+   ],
+   "tag": "pdf-page"
+  },
+  {
+   "q": "company revenue growth",
+   "expect": [
+    "synthetic/docs/Annual notes 2026.pdf@1-1",
+    "synthetic/audio/speech_revenue.wav"
+   ],
+   "tag": "pdf-page"
+  },
+  {
+   "q": "coffee shop receipt",
+   "expect": [
+    "synthetic/docs/Scan 2026-09-14.pdf"
+   ],
+   "tag": "pdf-page"
+  },
+  {
+   "q": "grocery list",
+   "expect": [
+    "synthetic/docs/Groceries.txt",
+    "synthetic/audio/speech_groceries.wav"
+   ],
+   "tag": "doc"
+  },
+  {
+   "q": "day trip to see the great buddha",
+   "expect": [
+    "synthetic/docs/Tokyo itinerary.md"
+   ],
+   "tag": "doc"
+  },
+  {
+   "q": "reminder to pick up milk and eggs",
+   "expect": [
+    "synthetic/audio/speech_groceries.wav",
+    "synthetic/docs/Groceries.txt"
+   ],
+   "tag": "audio"
+  },
+  {
+   "q": "airport announcement about a delay",
+   "expect": [
+    "synthetic/audio/speech_flight_delay.wav"
+   ],
+   "tag": "audio"
+  },
+  {
+   "q": "chocolate cake recipe explained out loud",
+   "expect": [
+    "synthetic/audio/speech_cake_recipe.wav"
+   ],
+   "tag": "audio"
+  },
+  {
+   "q": "zebra in a video",
+   "expect": [
+    "synthetic/video/penguin_zebra_parrot_18s.mp4@5-12",
+    "traps/real-mpeg-ts/zoo clip.ts@5-12"
+   ],
+   "tag": "video-moment"
+  },
+  {
+   "q": "parrot in a video",
+   "expect": [
+    "synthetic/video/penguin_zebra_parrot_18s.mp4@11-18",
+    "traps/real-mpeg-ts/zoo clip.ts@11-18"
+   ],
+   "tag": "video-moment"
+  },
+  {
+   "q": "card_declined",
+   "expect": [
+    "synthetic/screenshots/shot_payment_error.png"
+   ],
+   "tag": "exact"
+  },
+  {
+   "q": "INV-2041",
+   "expect": [
+    "synthetic/screenshots/shot_payment_error.png"
+   ],
+   "tag": "exact"
+  },
+  {
+   "q": "K7Q2LM",
+   "expect": [
+    "synthetic/screenshots/shot_flight_booking.png"
+   ],
+   "tag": "exact"
+  },
+  {
+   "q": "externally-managed-environment",
+   "expect": [
+    "synthetic/screenshots/shot_python_traceback.png"
+   ],
+   "tag": "exact"
+  },
+  {
+   "q": "Yoshida trail",
+   "expect": [
+    "synthetic/docs/Annual notes 2026.pdf@2-2"
+   ],
+   "tag": "exact"
+  },
+  {
+   "q": "the boat engine broke down and we fixed it",
+   "expect": [
+    "synthetic/long/Sailing log 2025.pdf@41-41"
+   ],
+   "tag": "long"
+  },
+  {
+   "q": "dolphins swimming alongside the boat at sunset",
+   "expect": [
+    "synthetic/long/Sailing log 2025.pdf@66-66"
+   ],
+   "tag": "long"
+  },
+  {
+   "q": "sailing blind in thick fog",
+   "expect": [
+    "synthetic/long/Sailing log 2025.pdf@100-100"
+   ],
+   "tag": "long"
+  },
+  {
+   "q": "moving the team to an office in Portugal",
+   "expect": [
+    "synthetic/long/Team notes 2026.md@41-1000"
+   ],
+   "tag": "long"
+  },
+  {
+   "q": "M-417",
+   "expect": [
+    "synthetic/long/Sailing log 2025.pdf@88-88"
+   ],
+   "tag": "long-exact"
+  },
+  {
+   "q": "4815162342",
+   "expect": [
+    "synthetic/long/sensor readings.txt@139-139"
+   ],
+   "tag": "long-exact"
+  }
+ ]
+}

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+raycast-env.d.ts
+.testbed/
+.dashboard/
+assets/daemon.js.map
+.build/
+*.log
+.vendor/
