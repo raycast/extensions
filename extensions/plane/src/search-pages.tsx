@@ -17,7 +17,9 @@ function SearchPages() {
   const [projectId, setProjectId] = useState<string | undefined>(undefined);
   const { data, isLoading, error, revalidate } = usePages(projectId, { execute: projectId !== undefined });
   // Pages of the previously selected project stay in `data` while this one loads; never show them under it.
-  const pages = rowsFromProject(data, projectId);
+  const pages = rowsFromProject(data?.pages, projectId);
+  // Only once this project's rows are showing, so the previous project's notice isn't shown under it.
+  const coverage = pages.length > 0 && data?.truncated ? data.coverage : undefined;
   const slug = planeClient?.workspaceSlug ?? "";
   const notAvailable = getErrorStatus(error) === 404;
 
@@ -88,6 +90,27 @@ function SearchPages() {
           />
         );
       })}
+      {coverage ? (
+        <List.Section title="Coverage">
+          <List.Item
+            icon={Icon.Info}
+            title="Older pages may be missing"
+            subtitle={coverage}
+            detail={<List.Item.Detail markdown={`${coverage}. Open Plane in the browser to browse the rest.`} />}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser title="Open Pages in Browser" url={getPagesUrl(slug, projectId || undefined)} />
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  onAction={revalidate}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      ) : null}
     </List>
   );
 }

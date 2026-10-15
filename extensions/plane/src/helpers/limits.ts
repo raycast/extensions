@@ -23,3 +23,8 @@ export const MAX_FILTERED_OPEN_PAGES = 5;
 export const MAX_FILTERED_CLOSED_ITEMS = 50;
 /** How long the AI tool reuses the result the command or menu bar fetched. */
 export const SHARED_RESULT_MAX_AGE_MS = 2 * 60 * 1000;
+
+/** Pages Search Pages lists at most per workspace or project (10 requests of 100). */
+export const MAX_LISTED_PAGES = 1000;
+/** Rows per request when listing pages. */
+export const PAGES_PER_REQUEST = 100;

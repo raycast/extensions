@@ -29,7 +29,7 @@
 - AI tools: list projects, search, get, list my work items, create, update, comment, list states, list members, get current user
 - **Faster My Work Items**: uses Plane API v2 (`assignee_id`) on Cloud and Commercial, or server-side v1 filters on servers that advertise `X-Plane-Work-Item-Filters: 1`, and falls back to the project scan otherwise. Detection is cached per server and workspace (24 hours when supported, 1 hour when not) and never shows an error; the active backend appears in the list's section subtitle and the menu bar tooltip
 - **Subscribed** and **Mentions** views in My Work Items and the `list-my-work-items` AI tool, on servers with server-side filters
-- **Search Pages** uses the API v2 pages endpoints when the server has v2
+- **Search Pages** uses the API v2 pages endpoints when the server has v2, and follows the pagination on v2 and v1 to list up to 1,000 pages per workspace or project instead of the first 100, with a notice when older pages are left out
 - API v2 errors (RFC 9457 problem+json) show their detail and field errors; rate-limited GETs wait out a short `Retry-After` once, and longer waits are reported
 
 ## [Show State Color in Search Projects > Work Items] - 2026-01-23

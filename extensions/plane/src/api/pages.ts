@@ -1,8 +1,18 @@
 import { planeRequest, planeRequestV2, toResults, workspacePath } from "./request";
 import { getCapabilities, invalidateBackend } from "./work-item-backend";
 import type { RawPage, RawPaginated, V2Page } from "./types";
-import type { V2Envelope } from "../helpers/work-item-queries";
+import { nextV2Page, V2Envelope } from "../helpers/work-item-queries";
 import { shouldFallBack } from "../helpers/work-item-backends";
+import { collectPages, CollectedRows, nextV1Cursor } from "../helpers/paging";
+import { MAX_LISTED_PAGES, PAGES_PER_REQUEST } from "../helpers/limits";
+
+export type PagesResult = {
+  pages: RawPage[];
+  /** True when more than `MAX_LISTED_PAGES` pages exist, so older ones are missing. */
+  truncated: boolean;
+  /** What was listed, shown when `truncated`. */
+  coverage: string;
+};
 
 /** v2 list rows leave out descriptions unless `?fields=` names them. */
 const V2_PAGE_FIELDS = [
@@ -32,20 +42,32 @@ export function fromV2Page(page: V2Page): RawPage {
   };
 }
 
-/** `GET /api/v2/workspaces/{slug}/pages/` or `.../projects/{project_id}/pages/` (first 100, newest first). */
-async function getPagesV2(projectId?: string): Promise<RawPage[]> {
+/**
+ * `GET /api/v2/workspaces/{slug}/pages/` or `.../projects/{project_id}/pages/`, newest first, following
+ * the pagination (offset or cursor, per `pagination.style`) up to `MAX_LISTED_PAGES`.
+ */
+async function getPagesV2(projectId?: string): Promise<CollectedRows<RawPage>> {
   const path = projectId ? workspacePath("projects", projectId, "pages") : workspacePath("pages");
-  const envelope = await planeRequestV2<V2Envelope<V2Page>>(path, {
-    query: { per_page: 100, order_by: "-updated_at", fields: V2_PAGE_FIELDS },
-  });
-  return (envelope.data ?? []).map(fromV2Page);
+  return collectPages(async (position: { cursor: string } | { offset: number } | undefined) => {
+    const envelope = await planeRequestV2<V2Envelope<V2Page>>(path, {
+      query: { per_page: PAGES_PER_REQUEST, order_by: "-updated_at", fields: V2_PAGE_FIELDS, ...position },
+    });
+    return { rows: (envelope.data ?? []).map(fromV2Page), next: nextV2Page(envelope) };
+  }, MAX_LISTED_PAGES);
 }
 
-/** v1 pages: Plane Cloud serves them; Community Edition 1.3.1 has no public pages route, so these 404 there. */
-async function getPagesV1(projectId?: string): Promise<RawPage[]> {
+/**
+ * v1 pages, following `next_cursor` up to `MAX_LISTED_PAGES`. Plane Cloud serves them; Community Edition 1.3.1
+ * has no public pages route, so these 404 there.
+ */
+async function getPagesV1(projectId?: string): Promise<CollectedRows<RawPage>> {
   const path = projectId ? workspacePath("projects", projectId, "pages") : workspacePath("pages");
-  const response = await planeRequest<RawPage[] | RawPaginated<RawPage>>(path, { query: { per_page: 100 } });
-  return toResults(response);
+  return collectPages(async (cursor: string | undefined) => {
+    const response = await planeRequest<RawPage[] | RawPaginated<RawPage>>(path, {
+      query: { per_page: PAGES_PER_REQUEST, cursor },
+    });
+    return { rows: toResults(response), next: nextV1Cursor(response) };
+  }, MAX_LISTED_PAGES);
 }
 
 /**
@@ -53,18 +75,25 @@ async function getPagesV1(projectId?: string): Promise<RawPage[]> {
  * its cached capability is dropped and v1 is tried once. On Community Edition the v1 call 404s and
  * Search Pages shows its "not available" notice.
  */
-export async function getPages({ projectId }: { projectId?: string }): Promise<RawPage[]> {
-  let pages: RawPage[];
+export async function getPages({ projectId }: { projectId?: string }): Promise<PagesResult> {
+  let listed: CollectedRows<RawPage>;
+  let ordered = false;
   if ((await getCapabilities()).v2) {
     try {
-      pages = await getPagesV2(projectId);
+      listed = await getPagesV2(projectId);
+      ordered = true;
     } catch (error) {
       if (!shouldFallBack(error)) throw error;
       invalidateBackend("v2");
-      pages = await getPagesV1(projectId);
+      listed = await getPagesV1(projectId);
     }
   } else {
-    pages = await getPagesV1(projectId);
+    listed = await getPagesV1(projectId);
   }
-  return pages.filter((page) => !page.archived_at);
+  const count = MAX_LISTED_PAGES.toLocaleString("en-US");
+  return {
+    pages: listed.rows.filter((page) => !page.archived_at),
+    truncated: listed.truncated,
+    coverage: ordered ? `Showing the ${count} most recently updated pages` : `Showing the first ${count} pages`,
+  };
 }
