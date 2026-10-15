@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Recordist entry] - 2026-10-15
+
+- Correct the Recordist description: it can also control recording, and what it returns goes to the assistant you connect.
+
 ## [Add MoltNode by Chord MCP Server] - 2026-10-15
 
 - Add MoltNode by Chord to the official registry: read 31 blockchains over JSON-RPC and get best-route DEX swap quotes with unsigned transactions via Chord, then broadcast a transaction you signed yourself. Non-custodial: it never holds keys or signs. Remote Streamable HTTP server with no sign-in and no API key. Direct HTTP connection in Raycast at https://moltnode.ag/mcp.
