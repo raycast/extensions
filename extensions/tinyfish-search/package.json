@@ -134,7 +134,10 @@
     "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.20"
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.3.2",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
