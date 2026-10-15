@@ -11,11 +11,6 @@ import {
 import { useAI } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
-interface Preferences {
-  primaryLanguage: string;
-  secondaryLanguage: string;
-}
-
 function buildPrompt(
   primary: string,
   secondary: string,
@@ -70,9 +65,15 @@ export default function Command() {
         // No selection or the app doesn't support it.
       }
 
-      const clip = await Clipboard.read();
-      const clipText = clip.text?.trim() ?? "";
-      const clipHtml = clip.html?.trim() ?? "";
+      let clipText = "";
+      let clipHtml = "";
+      try {
+        const clip = await Clipboard.read();
+        clipText = clip.text?.trim() ?? "";
+        clipHtml = clip.html?.trim() ?? "";
+      } catch {
+        // Clipboard unavailable — fall back to the selection only.
+      }
 
       // Plain selections lose their layout, so prefer the clipboard's rich HTML
       // whenever it holds the content we're translating.
@@ -109,7 +110,7 @@ export default function Command() {
     {
       execute: hasAI && input.length > 0,
       creativity: "low",
-      model: AI.Model["Anthropic_Claude_Haiku_5.5"],
+      model: AI.Model["Anthropic_Claude_Haiku_4.5"],
       stream: true,
     },
   );
@@ -148,7 +149,7 @@ export default function Command() {
       isLoading={isLoading}
       markdown={markdown}
       actions={
-        data && data.length > 0 ? (
+        !isTranslating && data && data.length > 0 ? (
           <ActionPanel>
             <Action.Paste title="Paste Translation" content={data} />
             <Action.CopyToClipboard title="Copy Translation" content={data} />
