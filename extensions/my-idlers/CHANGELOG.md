@@ -1,6 +1,6 @@
 # MyIdlers Changelog
 
-## [Show Domain Provider] - {PR_MERGE_DATE}
+## [Show Domain Provider] - 2026-10-15
 
 - Domain provider is now mentioned in `Detail`
 
