@@ -1,6 +1,6 @@
 # Visual Studio Code Changelog
 
-## [Fix Open Agents Window on macOS] - {PR_MERGE_DATE}
+## [Fix Open Agents Window on macOS] - 2026-10-15
 
 - Fix `Open Agents Window` failing on macOS with `spawnSync ENOENT` by not quoting the CLI executable path when spawning without a shell. Fixes [#32324](https://github.com/raycast/extensions/issues/32324).
 
