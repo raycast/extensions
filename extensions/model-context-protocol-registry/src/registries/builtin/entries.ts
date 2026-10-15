@@ -216,6 +216,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "chord",
+    title: "Chord",
+    description:
+      "DEX swap quotes and unsigned transactions on 7 EVM chains (Monad, Base, BNB Chain, Avalanche, Arbitrum, Robinhood Chain and Arc), plus token boards, token search, recent trades, candles, wallet PnL and smart money from Chord's own index of on-chain trades, with holders and LP pools on the chains that keep them and Solana for market data. Non-custodial: the swap tool returns an unsigned transaction with the approval it needs and a simulation run as your wallet, and your own wallet signs and sends it. Hosted remote Streamable HTTP server at https://api.getchord.xyz/v1/mcp; no sign-in and no API key for the data and swap tools, only the optional analyst tool needs a Chord API key.",
+    icon: "https://getchord.xyz/chord/pwa-512x512.png",
+    homepage: "https://getchord.xyz",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.getchord.xyz/v1/mcp"],
+    },
+    remoteUrl: "https://api.getchord.xyz/v1/mcp",
+  },
+  {
     name: "chroma",
     title: "Chroma",
     description:
