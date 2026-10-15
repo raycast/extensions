@@ -1,3 +1,4 @@
+import { withAPIKey } from "./views/api-key-gate";
 import { Action, ActionPanel, Icon, Keyboard, List, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { DestructiveAction, PinAction } from "./actions";
@@ -16,7 +17,7 @@ import { EditModelAction } from "./actions/edit-model";
 import { CommandManagementActions, RunCommandAction } from "./actions/command";
 import Ask from "./ask";
 
-export default function Model() {
+function Model() {
   const models = useModel();
   const commands = useCommand();
   const { catalog } = useModelCatalog();
@@ -212,3 +213,5 @@ export default function Model() {
     </List>
   );
 }
+
+export default withAPIKey(Model);

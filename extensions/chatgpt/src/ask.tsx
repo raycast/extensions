@@ -1,3 +1,4 @@
+import { withAPIKey } from "./views/api-key-gate";
 import { ActionPanel, getPreferenceValues, List, useNavigation } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -20,7 +21,7 @@ import { CacheAdapter } from "./utils/cache";
 import { availableChatModels, initialModelId, selectedChatModel } from "./utils/model-selection";
 import { isCommandModel } from "./utils/model-catalog";
 
-export default function Ask(props: { conversation?: Conversation; initialQuestion?: string; initialModel?: Model }) {
+function Ask(props: { conversation?: Conversation; initialQuestion?: string; initialModel?: Model }) {
   const conversations = useConversations();
   const snapshot = useModelCatalog();
   const modelsLoading = snapshot.isLoading;
@@ -190,3 +191,5 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
     </List>
   );
 }
+
+export default withAPIKey(Ask);

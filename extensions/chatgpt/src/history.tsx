@@ -1,3 +1,4 @@
+import { withAPIKey } from "./views/api-key-gate";
 import { ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { DestructiveAction, TextToSpeechAction } from "./actions";
@@ -9,7 +10,7 @@ import { useSavedChat } from "./hooks/useSavedChat";
 import { Chat } from "./type";
 import { AnswerDetailView } from "./views/answer-detail";
 
-export default function History() {
+function History() {
   const savedChat = useSavedChat();
   const history = useHistory();
   const [searchText, setSearchText] = useState<string>("");
@@ -98,3 +99,5 @@ export default function History() {
     </List>
   );
 }
+
+export default withAPIKey(History);

@@ -1,3 +1,4 @@
+import { withAPIKey } from "./views/api-key-gate";
 import { ActionPanel, Action, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { DestructiveAction, PinAction, PrimaryAction } from "./actions";
@@ -9,7 +10,7 @@ import { ConversationListView } from "./views/conversation-list";
 import { ExportData, ImportData } from "./utils/import-export";
 import { ImportForm } from "./views/import-form";
 
-export default function Conversation() {
+function Conversation() {
   const conversations = useConversations();
   const { push } = useNavigation();
 
@@ -169,3 +170,5 @@ export default function Conversation() {
     </List>
   );
 }
+
+export default withAPIKey(Conversation);

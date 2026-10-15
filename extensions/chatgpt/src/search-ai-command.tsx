@@ -1,3 +1,4 @@
+import { withAPIKey } from "./views/api-key-gate";
 import { Action, ActionPanel, Icon, Keyboard, LaunchType, List, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { DestructiveAction } from "./actions";
@@ -7,7 +8,7 @@ import { DEFAULT_COMMANDS, useCommand } from "./hooks/useCommand";
 import { CommandForm, iconsByContentSource } from "./views/command/from";
 import CommandView, { CommandLaunchProps } from "./views/command/command-view";
 
-export default function EntryPoint(props: CommandLaunchProps) {
+function EntryPoint(props: CommandLaunchProps) {
   const requestModelId = props.launchContext?.commandId;
   if (requestModelId) {
     return <CommandView {...props} />;
@@ -180,3 +181,5 @@ function SearchAiCommand() {
     </List>
   );
 }
+
+export default withAPIKey(EntryPoint);

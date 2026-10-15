@@ -1,5 +1,12 @@
 # Changelog
 
+## [Local Codex CLI Chat] - {PR_MERGE_DATE}
+
+- Add Ask ChatGPT (Local Codex CLI) to the existing extension, using an already installed and signed-in CLI without an API key.
+- Support streaming Markdown and LaTeX, remembered model/effort choices, follow-ups, steering, local history, and resuming compatible CLI sessions.
+- Keep existing API commands and saved settings; show their API-key setup before mounting API clients when no key is configured.
+- Keep new model actions after existing chat actions, and isolate CLI preferences from API credentials during optional desktop handoff.
+
 ## [Fix] - 2026-10-14
 
 - Fix: `Fix Spelling and Grammar` and `Improve Writing` shipped with a `temperature` of `0.7` on `gpt-5-nano`, a reasoning model that only supports the default temperature, causing every run to fail with a 400 error. Default temperature for these commands is now `1`.

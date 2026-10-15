@@ -1,3 +1,4 @@
+import { withAPIKey } from "./views/api-key-gate";
 import { canAccessBrowserExtension } from "./utils/browser";
 import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
@@ -13,7 +14,7 @@ import { PrimaryAction } from "./actions";
 import { useBrowserContent } from "./hooks/useBrowser";
 import { CacheAdapter } from "./utils/cache";
 
-export default function Summarize() {
+function Summarize() {
   if (!canAccessBrowserExtension()) {
     return (
       <List
@@ -136,3 +137,5 @@ export default function Summarize() {
     </Form>
   );
 }
+
+export default withAPIKey(Summarize);

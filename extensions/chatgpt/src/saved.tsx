@@ -1,3 +1,4 @@
+import { withAPIKey } from "./views/api-key-gate";
 import { ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { DestructiveAction, TextToSpeechAction } from "./actions";
@@ -7,7 +8,7 @@ import { useSavedChat } from "./hooks/useSavedChat";
 import { Chat } from "./type";
 import { AnswerDetailView } from "./views/answer-detail";
 
-export default function Saved() {
+function Saved() {
   const savedChat = useSavedChat();
   const [searchText, setSearchText] = useState<string>("");
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
@@ -94,3 +95,5 @@ export default function Saved() {
     </List>
   );
 }
+
+export default withAPIKey(Saved);
