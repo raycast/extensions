@@ -6,13 +6,13 @@ import { getConfig, ensureAuthenticated } from "../utils/auth";
 import { getFileFromClipboard } from "../utils/clipboard";
 import { handleTelegramError } from "../utils/errors";
 
-interface Arguments {
+type Input = {
   chatId: string;
   message: string;
   useClipboardFile?: boolean;
-}
+};
 
-export default async function SendMessage(args: Arguments) {
+export default async function SendMessage(args: Input) {
   try {
     const { chatId, message, useClipboardFile } = args;
 
@@ -49,7 +49,7 @@ export default async function SendMessage(args: Arguments) {
   }
 }
 
-export const confirmation: Tool.Confirmation<Arguments> = async (input) => {
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const config = getConfig();
   const chat = await getChatById(config, input.chatId);
 
