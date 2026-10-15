@@ -1,6 +1,6 @@
 # MOCO Changelog
 
-## [v1.2.0] - {PR_MERGE_DATE}
+## [v1.2.0] - 2026-10-15
 
 - Added today's total time and timer controls to the menu bar by @TheFRedFox
 - Added favorites, a "Today" list (add, edit and delete activities) and task actions to the menu bar by @TheFRedFox
