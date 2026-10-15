@@ -16,6 +16,11 @@ export class ConvtNotFoundError extends Error {
 }
 
 export type Format = { id: string; name: string; category: string; extensions: string[] };
+export type FileInspection = {
+  sources: { file: string; extension: string; format: Format | null }[];
+  targets: Format[];
+  suggestedTargetIds: string[];
+};
 export type ConversionOptions = {
   quality?: number;
   maxSize?: number;
@@ -173,20 +178,59 @@ export async function getTargets(binary: string, files: string[], signal?: Abort
   // Targets depend on the source format and installed engines, not file contents.
   const byExtension = new Map<string, string>();
   for (const file of inputs) byExtension.set(path.extname(file).toLowerCase(), file);
-  let common = new Set(formats.map((format) => format.id));
+  const targets: string[][] = [];
   for (const file of byExtension.values()) {
-    if (signal?.aborted) throw abortError(signal);
-    const targets = new Set(
-      (await query(binary, ["targets", file], signal))
-        .split(/\r?\n/)
-        .map((line) => line.trim())
-        .filter(Boolean),
-    );
-    common = new Set([...common].filter((id) => targets.has(id)));
+    targets.push(await queryTargetIds(binary, file, false, signal));
   }
+  return commonFormats(formats, targets);
+}
+
+async function queryTargetIds(binary: string, file: string, menu: boolean, signal?: AbortSignal): Promise<string[]> {
+  return (await query(binary, ["targets", file, ...(menu ? ["--menu"] : [])], signal))
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function commonTargetIds(lists: string[][]): Set<string> {
+  let common = new Set(lists[0]);
+  for (const list of lists.slice(1)) {
+    const ids = new Set(list);
+    common = new Set([...common].filter((id) => ids.has(id)));
+  }
+  return common;
+}
+
+function commonFormats(formats: Format[], lists: string[][]): Format[] {
+  const common = commonTargetIds(lists);
   return formats
     .filter((format) => common.has(format.id))
     .sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
+}
+
+export async function inspectFiles(binary: string, files: string[], signal?: AbortSignal): Promise<FileInspection> {
+  const inputs = await validateFiles(files);
+  if (signal?.aborted) throw abortError(signal);
+  const formats = await getFormats(binary, signal);
+  const sources = inputs.map((file) => {
+    const extension = path.extname(file).slice(1).toLowerCase();
+    const format =
+      formats.find((format) => format.extensions.some((alias) => alias.toLowerCase() === extension)) ?? null;
+    return { file, extension, format };
+  });
+  if (sources.some((source) => source.format === null)) return { sources, targets: [], suggestedTargetIds: [] };
+
+  const byExtension = new Map(sources.map((source) => [source.extension, source.file]));
+  const targetLists: string[][] = [];
+  const menus: string[][] = [];
+  for (const file of byExtension.values()) {
+    targetLists.push(await queryTargetIds(binary, file, false, signal));
+    menus.push(await queryTargetIds(binary, file, true, signal));
+  }
+  const targets = commonFormats(formats, targetLists);
+  const supported = new Set(targets.map((format) => format.id));
+  const suggestedTargetIds = [...commonTargetIds(menus)].filter((id) => supported.has(id));
+  return { sources, targets, suggestedTargetIds };
 }
 
 export function validateOptions(options: ConversionOptions): void {
