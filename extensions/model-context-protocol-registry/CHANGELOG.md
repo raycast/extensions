@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Kolect Creator Search MCP Server] - {PR_MERGE_DATE}
+## [Add Kolect Creator Search MCP Server] - 2026-10-15
 
 - Add Kolect Creator Search to the official registry: search 300M+ TikTok, Instagram and YouTube creators from a plain-language brief, look up creators by link or @handle, check fake followers, get public contact emails and save shortlists. Hosted Streamable HTTP server at https://app.kolect.ai/mcp, connected through `mcp-remote` with a Kolect API key as a bearer header.
 
