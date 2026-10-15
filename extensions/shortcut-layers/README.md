@@ -1,71 +1,95 @@
 # Shortcut Layers
 
-Layered keyboard shortcuts for Raycast. One hotkey opens a layer, then a single key
-runs an action. It's the Karabiner layer model without Karabiner.
+Layered keyboard shortcuts for Raycast. One hotkey opens a layer, then a single key runs
+an action.
 
 ```
-✦A     open the Applications layer
-b      open the browser
+✦A   open the Applications layer
+b    Open Browser
 ```
+
+`✦` stands for the Hyper key (⌃⌥⌘). Any free hotkey works.
+
+## What a layer looks like
+
+```
+Apps layer
+  F  Open Finder
+  B  Open Browser
+  O  Open Obsidian
+
+Obsidian layer
+  N  New note
+  D  Daily note
+  O  Open vault
+  F  Search notes
+```
+
+Activating a layer opens a panel that lists every action with the key that runs it, so you
+can look at what is available instead of remembering it. Type a key and the action runs.
+In Instant mode one key runs its action. In Search mode you type to filter and press enter.
+Pick the starting mode in the extension settings.
 
 ## Why layers
 
-A layer groups `key → action` bindings. Pick letters that remind you of the action:
-`O` for Obsidian, `n` for New note, `d` for Daily note. A handful of layers is
-easier to keep in your head than dozens of flat global hotkeys, and each layer
-scopes its letters, so `d` can mean Daily note in Notes layer and Downloads in
-Files/Directories layer.
-
-Opening a layer shows a panel listing every action and the key that runs it, so you
-don't have to remember the letters. The panel stays in front while the layer is
-active.
+A layer groups related shortcuts behind one hotkey. `✦O` opens the Obsidian layer, and
+inside it `N` writes a new note while `D` opens the Daily note. The keys are mnemonic, so
+they are easy to recall, and the same letter can do something else in another layer.
 
 ## Commands
 
-| Command       | Description                                                                |
-| ------------- | -------------------------------------------------------------------------- |
-| Run Layer     | The runner. Press a key to fire an action. Opens a picker if run directly.  |
-| Manage Layers | Create and edit layers and their single-key actions.                       |
-| Import Layers | Merge layers from a JSON file or pasted text.                              |
-| Export Layers | Write all layers to a timestamped JSON file in `~/Downloads`.            |
+| Command       | What it does                                                                               |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| Run Layer     | Opens a layer and runs its actions. Shows the layer picker when launched without a layer.  |
+| Manage Layers | Create, edit, and delete layers and their actions.                                         |
+| Import Layers | Merge layers from a JSON file or pasted text.                                              |
+| Export Layers | Write every layer to a timestamped JSON file in `~/Downloads`.                             |
 
-## Setup
+## Set up a layer
 
-1. Run Manage Layers and choose Create Layer. Name it, for example `Obsidian`.
-2. Choose Open Layer, then add actions with a single key:
-   - Application: a searchable list of installed apps, or type a path
-   - File / Folder: Spotlight search, or type a path
-   - URL / Deeplink: `raycast://extensions/...`, `notes://`, or `https://mail.google.com`
-   - Shell Command: `open -a Ghostty`
+1. In Manage Layers, choose Create Layer. Give it a name, an icon, and optionally a key
+   color. The key color tints the key tags inside that layer.
+2. Choose Open Layer and add actions. Each action needs a title, a type, a target, and a
+   single trigger key.
+3. Choose Create Quicklink. It creates a Raycast Quicklink pointing at Run Layer with the
+   layer preselected. Save the prefilled form. You only do this once per layer.
+4. Choose Set or Update Hotkey and assign the Quicklink a hotkey, for example `✦O`.
 
-   The Key is one character, and case-sensitive, so `d` and `D` can be different
-   actions.
-3. Choose Create Quicklink (first time only). It makes a Quicklink pointing at Run
-   Layer with the layer already set. Save the prefilled form. You need one
-   Quicklink per layer.
-4. Choose Set or Update Hotkey. It opens Raycast's Search Quicklinks filtered to
-   that Quicklink, where you set the hotkey, for example `⌃⌥⌘O`.
+Pressing that hotkey opens the layer. A single key runs the action and the panel closes.
 
-Pressing the hotkey now opens the layer. A single key runs the action and the panel
-closes.
+## Action types
 
-> Raycast gives extensions no API to read or modify Quicklinks. `Action.CreateQuicklink`
-> also has no callback after saving, so step 4 takes a couple of clicks instead of
-> happening automatically.
+| Type           | Target                                                                       |
+| -------------- | ---------------------------------------------------------------------------- |
+| Application    | a searchable list of installed apps, or a typed path                          |
+| File / Folder  | Spotlight search, or a typed path                                            |
+| URL / Deeplink | `raycast://extensions/...`, `notes://`, or `https://mail.google.com`         |
+| Shell Command  | `killall Dock`                                                              |
 
-## Import / export
+Shell commands cover anything the other types do not, for example `killall Dock` restarts
+the Dock when it hangs.
 
-The Export Layers command writes `~/Downloads/shortcut-layers-<date>-<time>.json`. Turn
-on Copy Exported JSON in the extension preferences to also copy the JSON to the
-clipboard. If the file cannot be written, the clipboard is used regardless so the
-export is not lost.
+Keys are one character and case sensitive, so `d` and `D` can be different actions. A key
+must be unique inside its layer, and the layer list flags duplicates.
 
-The Import Layers command merges a pasted or picked JSON file. Layers match by `id`
-and actions by `key`. New layers are appended. In a matched layer an action is added
-only if its key is unused, so import never overwrites or removes existing actions.
+## Settings
 
-A file is rejected, naming the offending rows, when it repeats a layer id, repeats a
-key within a layer, or contains an action with no key.
+- Default Key Mode: whether a layer starts in instant mode, where one key runs its action,
+  or in search mode, where you type to filter and press enter.
+- Copy Exported JSON: also copy an export to the clipboard, in addition to writing the
+  file.
+
+## Import and export
+
+Export Layers writes `~/Downloads/shortcut-layers-<date>-<time>.json`. With Copy Exported
+JSON on, the same JSON also goes to the clipboard. If the file cannot be written it goes to
+the clipboard regardless of that setting.
+
+Import Layers merges a pasted or picked JSON file. Layers that share the same `id` merge
+into one, and actions match by their key. An action is added only when its key is free, so
+import never overwrites or removes an existing action. A file is rejected, naming the
+offending rows, when it repeats a layer id, repeats a key inside a layer, or contains an
+action with no key.
 
 ```json
 [
@@ -79,30 +103,40 @@ key within a layer, or contains an action with no key.
 ]
 ```
 
-`id` is optional on import, where it is derived from `name`. Action `kind` is one of
-`app`, `file`, `url`, `shell`.
+`id` is optional and derived from `name`. `kind` is one of `app`, `file`, `url`, `shell`.
 
-## How it works
+## Limitations
 
-Raycast can't register commands or hotkeys at runtime, so one command (Run Layer)
-opens whichever layer its launch context names. Each layer's Quicklink carries that
-in the deeplink:
+- The hotkey on each Quicklink is assigned by hand, because Raycast gives extensions no API
+  to set one.
+- Opening a layer shows and focuses the Raycast panel, so there is a brief flash. It cannot
+  run invisibly.
+- File and folder search uses the Spotlight index, so an unindexed path will not appear.
+  Type the path and pick it instead.
+- Shell commands run invisibly. Output is discarded and the panel stays open until the
+  command finishes, so a long command keeps it on screen. A failure shows a toast and
+  leaves the panel open.
+- macOS only.
+
+## How the hotkey works
+
+Raycast cannot register commands or hotkeys at runtime, so Run Layer reads the layer from
+its launch context, which each Quicklink carries:
 
 ```
 raycast://extensions/rhrabun/shortcut-layers/run-layer?context={"layer":"obsidian"}
 ```
 
-Running Run Layer from Root Search with no context opens the layer picker.
+That launch context is why setup has the extra Quicklink step. It is the only way to give
+a layer you create its own hotkey.
 
-Inside a layer, keystrokes go to a controlled search bar. A single key matches an
-action and fires it, and `esc` closes the layer.
+## Development
 
-## Limitations
+```sh
+npm install
+npm run dev     # hot reload in Raycast
+npm test        # unit tests
+npm run build
+```
 
-- Each Quicklink's hotkey is assigned by hand. Raycast has no API to set it. This is
-  true of every extension.
-- Opening a layer shows and focuses the Raycast panel, so there is a brief flash. It
-  can't run invisibly.
-- File and folder search uses the Spotlight index, so an unindexed path won't show
-  up in the list. Type the path instead and pick it.
-- macOS only for now.
+`mise run check` runs lint, tests, and the build in one go.
