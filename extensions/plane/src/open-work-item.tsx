@@ -5,7 +5,7 @@ import AuthorizedView from "./components/AuthorizedView";
 import WorkItemDetail from "./components/WorkItemDetail";
 import ChangeWorkspaceAction from "./components/actions/ChangeWorkspaceAction";
 import { getWorkItemByIdentifier } from "./api/work-items";
-import { parseWorkItemReference } from "./helpers/identifiers";
+import { assertReferenceInWorkspace, parseWorkItemReference } from "./helpers/identifiers";
 import { describePlaneError, getErrorStatus } from "./helpers/errors";
 import { planeClient } from "./api/auth";
 
@@ -17,6 +17,8 @@ async function resolveWorkItem(text: string): Promise<Resolved> {
   if (!reference) {
     throw new Error(`"${text.trim().slice(0, 60)}" is not a work item ID like ENG-123 or a Plane work item URL.`);
   }
+  // A link from another workspace would otherwise resolve ENG-123 (or fail) in the current one.
+  assertReferenceInWorkspace(reference, planeClient?.workspaceSlug);
   if (reference.type === "uuid") {
     return { projectId: reference.projectId, workItemId: reference.workItemId };
   }
@@ -65,7 +67,7 @@ function OpenWorkItemForm({
         error={fieldError}
         onChange={() => setFieldError(undefined)}
       />
-      {error ? <Form.Description title="Not found" text={error} /> : null}
+      {error ? <Form.Description title="Can't Open" text={error} /> : null}
     </Form>
   );
 }

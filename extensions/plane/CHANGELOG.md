@@ -18,7 +18,7 @@
 
 - **Change Workspace** (⌘⇧W) in every list: type a new slug (API key) or pick any workspace that installed the app (OAuth)
 - **My Work Items**: assigned to me / created by me, grouped by state (Triage → In Progress → Todo → Backlog), completed and cancelled behind ⌘⇧H
-- **Open Work Item**: open `ENG-123` or a Plane URL from the argument or clipboard
+- **Open Work Item**: open `ENG-123` or a Plane URL from the argument or clipboard (a link from another workspace asks you to switch workspace first)
 - **Quick Create Work Item** (no-view, default project and assign-to-me preferences) and **Quick Add Comment** (no-view, Markdown)
 - **Assigned Work Items** menu bar command with the count of open assigned work items; hold ⌥ to open in the browser
 - **My Open Work Items**: your open assigned count, with urgent, overdue and due-today counts, in root search, refreshed every 15 minutes; opening it shows My Work Items

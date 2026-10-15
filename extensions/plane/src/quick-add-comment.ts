@@ -1,9 +1,9 @@
 import { LaunchProps, showToast, Toast } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
-import { plane, requirePlaneClient } from "./api/auth";
+import { plane, planeClient, requirePlaneClient } from "./api/auth";
 import { getWorkItemByIdentifier } from "./api/work-items";
 import { addWorkItemComment } from "./api/comments";
-import { parseWorkItemIdentifier } from "./helpers/identifiers";
+import { checkReferenceWorkspace, parseWorkItemIdentifier } from "./helpers/identifiers";
 import { getWorkItemUrlWithIdentifier } from "./helpers/work-items";
 import { showNoViewFailure, showWorkItemSuccess } from "./helpers/no-view";
 
@@ -16,6 +16,12 @@ async function command(props: LaunchProps<{ arguments: Arguments.QuickAddComment
       title: "Invalid work item ID",
       message: `Use an ID such as ENG-123 (got "${rawIdentifier}")`,
     });
+    return;
+  }
+  // A browse URL from another workspace would otherwise comment on the same ID in the current one.
+  const problem = checkReferenceWorkspace(parsed, planeClient?.workspaceSlug);
+  if (problem) {
+    await showToast({ style: Toast.Style.Failure, title: "Can't use this link", message: problem });
     return;
   }
   const identifier = `${parsed.projectIdentifier}-${parsed.sequenceId}`;

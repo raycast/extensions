@@ -26,7 +26,7 @@ import { getIntakeStatusLabel, IntakeUpdate, updateIntakeItem } from "./api/inta
 import { getWorkItemByIdentifier } from "./api/work-items";
 import { IntakeStatus, RawIntakeItem } from "./api/types";
 import { getIntakeUrl, getProjectUrl, getWorkItemUrlWithIdentifier } from "./helpers/work-items";
-import { formatWorkItemIdentifier, parseWorkItemIdentifier } from "./helpers/identifiers";
+import { checkReferenceWorkspace, formatWorkItemIdentifier, parseWorkItemIdentifier } from "./helpers/identifiers";
 import { describePlaneError } from "./helpers/errors";
 import { priorityToIcon } from "./helpers/icons";
 import { parseHtmlToMarkdown } from "./helpers/parser";
@@ -85,6 +85,11 @@ function MarkDuplicateForm({ project, item, mutate }: { project: Project; item: 
     const parsed = parseWorkItemIdentifier(values.identifier);
     if (!parsed) {
       setError("Enter an ID such as ENG-123");
+      return;
+    }
+    const problem = checkReferenceWorkspace(parsed, planeClient?.workspaceSlug);
+    if (problem) {
+      setError(problem);
       return;
     }
     try {

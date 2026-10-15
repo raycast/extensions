@@ -4,7 +4,7 @@ import { getMemberProjects, matchProject } from "./projects";
 import { getMe } from "./users";
 import { planeRequest, workspacePath } from "./request";
 import type { RawUserLite, RawWorkItem } from "./types";
-import { parseWorkItemReference } from "../helpers/identifiers";
+import { assertReferenceInWorkspace, parseWorkItemReference } from "../helpers/identifiers";
 import { matchMember } from "../helpers/members";
 import { parseHtmlToMarkdown } from "../helpers/parser";
 import { getWorkItemUrlWithIdentifier } from "../helpers/work-items";
@@ -135,6 +135,7 @@ export async function fetchWorkItem(
 ): Promise<{ raw: RawWorkItem; project: Project & { id: string } }> {
   const parsed = parseWorkItemReference(reference);
   if (!parsed) throw new Error(`"${reference}" is not a work item ID like ENG-123 or a Plane work item URL.`);
+  assertReferenceInWorkspace(parsed, requirePlaneClient().workspaceSlug);
   const query = { expand: "state,assignees,labels" };
   const raw =
     parsed.type === "identifier"
