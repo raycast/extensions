@@ -1,0 +1,209 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ste-translator",
+  "title": "STE Translator",
+  "description": "Rewrite English text as Simplified Technical English (ASD-STE100 principles) using AI, with protected technical content.",
+  "icon": "extension-icon.png",
+  "author": "rajasimman_s",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "convert-selected",
+      "title": "Convert Selected Text to STE",
+      "description": "Rewrite the selected text in the frontmost application as Simplified Technical English.",
+      "mode": "view"
+    },
+    {
+      "name": "convert-clipboard",
+      "title": "Convert Clipboard Text to STE",
+      "description": "Read the clipboard, edit it, and rewrite it as Simplified Technical English.",
+      "mode": "view"
+    },
+    {
+      "name": "convert-text",
+      "title": "Convert Text to STE",
+      "description": "Type or paste text and rewrite it as Simplified Technical English.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultContentType",
+      "title": "Default Content Type",
+      "description": "Content type used when none is chosen.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto-detect",
+          "value": "auto"
+        },
+        {
+          "title": "Email",
+          "value": "email"
+        },
+        {
+          "title": "Chat Message",
+          "value": "chat"
+        },
+        {
+          "title": "Technical Document",
+          "value": "technical-document"
+        },
+        {
+          "title": "SOP/Runbook",
+          "value": "sop"
+        },
+        {
+          "title": "Incident Report",
+          "value": "incident-report"
+        }
+      ]
+    },
+    {
+      "name": "defaultMode",
+      "title": "Default Conversion Mode",
+      "description": "Conversion mode used when none is chosen.",
+      "type": "dropdown",
+      "required": false,
+      "default": "standard",
+      "data": [
+        {
+          "title": "Standard STE Rewrite",
+          "value": "standard"
+        },
+        {
+          "title": "Minimal Changes",
+          "value": "minimal"
+        },
+        {
+          "title": "Strict Technical Review",
+          "value": "strict"
+        }
+      ]
+    },
+    {
+      "name": "provider",
+      "title": "AI Provider",
+      "description": "Raycast AI (default) or an OpenAI-compatible endpoint. Text is sent to the provider and is subject to its data policy.",
+      "type": "dropdown",
+      "required": false,
+      "default": "raycast",
+      "data": [
+        {
+          "title": "Raycast AI",
+          "value": "raycast"
+        },
+        {
+          "title": "OpenAI-compatible endpoint",
+          "value": "openai-compatible"
+        }
+      ]
+    },
+    {
+      "name": "raycastModel",
+      "title": "Raycast AI Model",
+      "description": "Model used with Raycast AI. A stronger model follows the STE rules more reliably. Raycast's own default (GPT-4o mini) is weaker at this task.",
+      "type": "dropdown",
+      "required": false,
+      "default": "Anthropic_Claude_4.6_Sonnet",
+      "data": [
+        {
+          "title": "Claude 4.6 Sonnet (recommended)",
+          "value": "Anthropic_Claude_4.6_Sonnet"
+        },
+        {
+          "title": "Claude 4.7 Opus",
+          "value": "Anthropic_Claude_4.7_Opus"
+        },
+        {
+          "title": "GPT-5.4",
+          "value": "OpenAI_GPT-5.4"
+        },
+        {
+          "title": "GPT-4.1",
+          "value": "OpenAI_GPT-4.1"
+        },
+        {
+          "title": "Gemini 3.1 Pro",
+          "value": "Google_Gemini_3.1_Pro"
+        },
+        {
+          "title": "GPT-4o mini (Raycast default)",
+          "value": "OpenAI_GPT-4o_mini"
+        }
+      ]
+    },
+    {
+      "name": "externalBaseUrl",
+      "title": "External Provider Base URL",
+      "description": "For example https://api.openai.com/v1. Used only with the OpenAI-compatible provider.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://api.openai.com/v1"
+    },
+    {
+      "name": "externalModel",
+      "title": "External Provider Model",
+      "description": "Model name sent to the external provider.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "gpt-4.1"
+    },
+    {
+      "name": "externalApiKey",
+      "title": "External Provider API Key",
+      "description": "Stored by Raycast. Never written to disk by this extension.",
+      "type": "password",
+      "required": false,
+      "placeholder": "Paste API key"
+    },
+    {
+      "name": "customInstructions",
+      "title": "Custom Instructions",
+      "description": "Optional extra rules, such as preferred terms. They cannot override the preservation rules.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Example: Use 'shut down', not 'power off'."
+    },
+    {
+      "name": "timeoutSeconds",
+      "title": "Timeout (seconds)",
+      "description": "Maximum wait for the AI provider.",
+      "type": "textfield",
+      "required": false,
+      "default": "60",
+      "placeholder": "60"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.0",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,80 @@
+export type ContentType = "auto" | "email" | "chat" | "technical-document" | "sop" | "incident-report";
+
+export type ConversionMode = "standard" | "minimal" | "strict";
+
+export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
+  auto: "Auto-detect",
+  email: "Email",
+  chat: "Chat Message",
+  "technical-document": "Technical Document",
+  sop: "SOP/Runbook",
+  "incident-report": "Incident Report",
+};
+
+export const MODE_LABELS: Record<ConversionMode, string> = {
+  standard: "Standard STE Rewrite",
+  minimal: "Minimal Changes",
+  strict: "Strict Technical Review",
+};
+
+export interface ConversionRequest {
+  text: string;
+  contentType: ContentType;
+  mode: ConversionMode;
+  customInstructions?: string;
+}
+
+export type WarningSeverity = "error" | "warning" | "info";
+
+export interface ReviewWarning {
+  severity: WarningSeverity;
+  message: string;
+}
+
+export interface ConversionResult {
+  original: string;
+  rewritten: string;
+  contentType: ContentType;
+  mode: ConversionMode;
+  warnings: ReviewWarning[];
+  /** True when a second pass fixed validation or STE lint problems found in the first rewrite. */
+  repaired: boolean;
+  /** True when any warning has severity "error" or the model asked for human review. */
+  needsReview: boolean;
+}
+
+export type ConversionErrorKind =
+  "empty-input" | "input-too-long" | "unavailable" | "auth" | "timeout" | "empty-response" | "failed";
+
+export class ConversionError extends Error {
+  constructor(
+    public readonly kind: ConversionErrorKind,
+    message: string,
+  ) {
+    super(message);
+    this.name = "ConversionError";
+  }
+}
+
+export interface CompletionRequest {
+  system: string;
+  user: string;
+  signal?: AbortSignal;
+}
+
+export interface AiProvider {
+  readonly name: string;
+  complete(request: CompletionRequest): Promise<string>;
+}
+
+export interface StePreferences {
+  defaultContentType?: ContentType;
+  defaultMode?: ConversionMode;
+  provider?: "raycast" | "openai-compatible";
+  externalBaseUrl?: string;
+  externalModel?: string;
+  raycastModel?: string;
+  externalApiKey?: string;
+  customInstructions?: string;
+  timeoutSeconds?: string;
+}
