@@ -234,13 +234,6 @@ export async function api<K extends keyof Routes>(
   }
 }
 
-interface Preferences {
-  indexOnBattery?: boolean;
-  indexHours?: string;
-  llamaServerPath?: string;
-  modelFolder?: string;
-}
-
 /** One end of the hours: "22", "7", "22:00", "07:00", "10pm", "7 am" → the hour (0-24), or null. */
 function hourOf(digits: string, minutes: string | undefined, half: string | undefined): number | null {
   if (minutes !== undefined && Number(minutes) !== 0) return null; // whole hours only, as DigUp's picker

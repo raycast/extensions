@@ -74,6 +74,8 @@ export interface ResultRow {
   group: ResultGroupKind;
   segment: SegmentKind;
   segmentId: number;
+  /** Search session and file indexing version, for preview cache invalidation. */
+  previewVersion?: string;
   /** PDF page, seconds into audio or video, chunk number, or a stretch of code's first line. */
   loc: number | null;
   locEnd: number | null;
@@ -262,6 +264,7 @@ export function makeRow(hit: Hit, terms: string[] = [], home?: string): ResultRo
     group: groupOf(hit.kind),
     segment: hit.segment,
     segmentId: hit.segmentId,
+    previewVersion: hit.previewVersion,
     loc,
     locEnd,
     focus: hit.focus ?? null,

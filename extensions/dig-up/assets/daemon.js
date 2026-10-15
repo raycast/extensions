@@ -1934,7 +1934,7 @@ var Policy = class {
 };
 
 // engine/service.ts
-var import_node_crypto4 = require("node:crypto");
+var import_node_crypto5 = require("node:crypto");
 var import_node_fs14 = require("node:fs");
 var import_node_os10 = require("node:os");
 var import_node_path12 = require("node:path");
@@ -3501,6 +3501,7 @@ async function crawl(roots, options, deps) {
     home,
     code: options.code
   });
+  if (walk.failedPaths?.length) report.failedPaths = walk.failedPaths;
   for (const [reason, count] of Object.entries(walk.skipped)) {
     add(FILE_REASONS.has(reason) ? report.skipped : report.skippedFolders, reason, count);
   }
@@ -3793,8 +3794,9 @@ var Indexer = class _Indexer {
       this.store.transaction(() => this.syncSlice(slice, byPath, byInode, seen, movedFrom, summary2));
     }
     const vanished = rootPaths.filter((root) => !(0, import_node_fs9.existsSync)(root)).map((root) => root.endsWith("/") ? root : root + "/");
+    const incomplete = report.failedPaths ?? [];
     const gone = existing.filter(
-      (row) => !seen.has(row.path) && !movedFrom.has(row.path) && !vanished.some((prefix) => row.path.startsWith(prefix))
+      (row) => !seen.has(row.path) && !movedFrom.has(row.path) && !vanished.some((prefix) => row.path.startsWith(prefix)) && !incomplete.some((path) => row.path === path || row.path.startsWith(path.endsWith("/") ? path : path + "/"))
     );
     for (let start = 0; start < gone.length; start += SYNC_SLICE) {
       if (start > 0 || report.candidates.length > 0) await yieldToLoop();
@@ -5072,6 +5074,7 @@ function copyHalvesInto(matrix, row, blob) {
 }
 
 // engine/store.ts
+var import_node_crypto3 = require("node:crypto");
 var import_node_fs11 = require("node:fs");
 var import_node_os8 = require("node:os");
 var import_node_path9 = require("node:path");
@@ -5207,6 +5210,9 @@ var Store = class _Store {
   file;
   code;
   home;
+  /** Distinguishes reused SQLite row ids after the database is reopened or replaced. */
+  previewSession = (0, import_node_crypto3.randomUUID)();
+  lastIndexedAt = 0;
   db;
   statements = /* @__PURE__ */ new Map();
   /** Statements that read integers as bigints: the file rows, whose inode and device may pass 2^53. */
@@ -5537,12 +5543,13 @@ var Store = class _Store {
   }
   /** A file's outcome: its state, why (or how far a long file got), what was learned, and when (DigUp: finish). */
   finish(id, state, detail = null, info = {}) {
+    this.lastIndexedAt = Math.max(Date.now() / 1e3, this.lastIndexedAt + 1e-6);
     this.run(
       "UPDATE files SET state = ?, detail = ?, info = ?, indexed_at = ? WHERE id = ?",
       state,
       detail,
       infoJSON(info),
-      Date.now() / 1e3,
+      this.lastIndexedAt,
       id
     );
   }
@@ -5969,6 +5976,15 @@ var Searcher = class _Searcher {
       const kind = fileKind.get(file);
       return kind !== void 0 && kinds.has(kind);
     };
+    const accepted = /* @__PURE__ */ new Map();
+    const available = (file) => {
+      if (!o.acceptPath) return true;
+      if (!accepted.has(file)) {
+        const path = str2(this.store.get("SELECT path FROM files WHERE id = ?", file)?.path);
+        accepted.set(file, path !== null && o.acceptPath(path));
+      }
+      return accepted.get(file) === true;
+    };
     const best = /* @__PURE__ */ new Map();
     if (queryVector !== null && queryVector.length === DIMENSION && this.rows > 0) {
       const scores = this.score(Float32Array.from(queryVector));
@@ -5993,11 +6009,12 @@ var Searcher = class _Searcher {
     }
     if (patterns.length > 0) {
       const seen = /* @__PURE__ */ new Set();
-      const sql = "SELECT s.file, s.id, snippet(fts, 1, '\xAB', '\xBB', '\u2026', 12) AS snippet, fts.original FROM fts JOIN segments s ON s.id = fts.rowid WHERE fts MATCH ? ORDER BY bm25(fts, 3.0, 1.0) LIMIT 1000";
-      for (const row of this.store.iterate(sql, patterns.join(" OR "))) {
+      const kindClause = kinds ? ` AND f.kind IN (${[...kinds].map(() => "?").join(",")})` : "";
+      const sql = "SELECT s.file, s.id, snippet(fts, 1, '\xAB', '\xBB', '\u2026', 12) AS snippet, fts.original FROM fts JOIN segments s ON s.id = fts.rowid JOIN files f ON f.id = s.file WHERE fts MATCH ?" + kindClause + " ORDER BY bm25(fts, 3.0, 1.0)";
+      for (const row of this.store.iterate(sql, patterns.join(" OR "), ...kinds ?? [])) {
         if (words2.length >= 100) break;
         const file = num2(row.file);
-        if (!allowed(file) || seen.has(file)) continue;
+        if (!allowed(file) || seen.has(file) || !available(file)) continue;
         seen.add(file);
         const original = str2(row.original);
         const fromOriginal = original === null ? null : snippet(original, terms);
@@ -6034,7 +6051,9 @@ var Searcher = class _Searcher {
       if (!wordRank.has(match.file)) wordRank.set(match.file, { rank: index2 + 1, match });
     });
     const hits = [];
-    for (const { file, score } of scored.slice(0, limit)) {
+    for (const { file, score } of scored) {
+      if (hits.length >= limit) break;
+      if (!available(file)) continue;
       const rank = hits.length;
       const semantic = best.get(file);
       const keyword = wordRank.get(file);
@@ -6052,7 +6071,7 @@ var Searcher = class _Searcher {
           keyword?.match.segment === segmentId || identifier2 !== null
         );
       }
-      const fileRow = this.store.get("SELECT path, kind, mtime, size, info FROM files WHERE id = ?", file);
+      const fileRow = this.store.get("SELECT path, kind, mtime, size, info, indexed_at FROM files WHERE id = ?", file);
       const segmentRow = this.store.get("SELECT kind, loc, loc_end, excerpt FROM segments WHERE id = ?", segmentId);
       const fileKindName = str2(fileRow?.kind) ?? "";
       const segmentKind = str2(segmentRow?.kind) ?? "";
@@ -6079,6 +6098,7 @@ var Searcher = class _Searcher {
         locEnd,
         excerpt: quoted ?? storedExcerpt,
         modified: num2(fileRow?.mtime),
+        previewVersion: `${this.store.previewSession}:${fileRow?.indexed_at ?? "pending"}`,
         size: num2(fileRow?.size),
         info: parseInfo(str2(fileRow?.info)),
         focus
@@ -6440,7 +6460,7 @@ async function estimateFolder(folder, options, costs, helper, signal) {
 }
 
 // engine/service-thumbs.ts
-var import_node_crypto3 = require("node:crypto");
+var import_node_crypto4 = require("node:crypto");
 var import_node_fs13 = require("node:fs");
 var import_node_path11 = require("node:path");
 var KEEP = 4e3;
@@ -6523,7 +6543,7 @@ var ThumbCache = class {
     const key = [r.path, mtime, r.kind, r.loc ?? "", r.locEnd ?? "", (r.words ?? []).join(" "), r.maxPixel ?? ""].join(
       "|"
     );
-    const out = (0, import_node_path11.join)(this.folder, (0, import_node_crypto3.createHash)("sha1").update(key).digest("hex") + (png ? ".png" : ".jpg"));
+    const out = (0, import_node_path11.join)(this.folder, (0, import_node_crypto4.createHash)("sha1").update(key).digest("hex") + (png ? ".png" : ".jpg"));
     const cached = imageSize(out);
     if (cached) return { path: out, ...cached };
     let drawing = this.inFlight.get(out);
@@ -6656,6 +6676,8 @@ var Service = class _Service {
   restartRequested = false;
   pruneWanted;
   deleteCodeIndex = false;
+  /** Rebuilds hold new passes until the previous pass has ended and all resets finish. */
+  rebuilding = 0;
   yieldAt = 0;
   stopped = false;
   started = false;
@@ -6845,7 +6867,7 @@ var Service = class _Service {
         if (!this.embedders) return Promise.reject(new Error("the model isn't there"));
         return this.embedders.index();
       },
-      scratch: (0, import_node_path12.join)(this.paths.scratch, (0, import_node_crypto4.randomUUID)()),
+      scratch: (0, import_node_path12.join)(this.paths.scratch, (0, import_node_crypto5.randomUUID)()),
       costsFolder: this.paths.indexDir,
       onReset: (indexed, now) => {
         this.log.info(
@@ -6867,6 +6889,7 @@ var Service = class _Service {
     const types = !sameList2(before.excludedExtensions, next2.excludedExtensions);
     const folders = types || !sameList2(before.folders, next2.folders) || !sameList2(before.skipped, next2.skipped);
     const code = types || !sameList2(before.codeFolders, next2.codeFolders) || !sameList2(before.codeSkipped, next2.codeSkipped);
+    if (next2.codeFolders.length > 0) this.deleteCodeIndex = false;
     if (code && this.main) {
       if (next2.codeFolders.length > 0 && !this.code) {
         try {
@@ -7065,7 +7088,7 @@ var Service = class _Service {
   }
   /** Starts a pass unless one runs or indexing is held (DigUp: startHelper). A pass syncs first. */
   kick() {
-    if (this.stopped || !this.main || this.serving) return;
+    if (this.stopped || !this.main || this.serving || this.rebuilding > 0) return;
     if (this.indexingHeld()) return;
     if (this.config.folders.length === 0 && this.config.codeFolders.length === 0 && !this.pruneWanted) {
       this.removeCodeIndexIfAsked();
@@ -7232,6 +7255,11 @@ var Service = class _Service {
     this.activity = { state: "syncing", index: part.code ? "code" : "main" };
     try {
       const summary2 = await part.indexer.sync(this.availableRoots(part));
+      if (summary2.crawl.failedPaths?.length) {
+        const problem2 = `Couldn't read ${summary2.crawl.failedPaths.length} paths; their indexed files were kept`;
+        this.log.warn(`${problem2}: ${summary2.crawl.failedPaths.join(", ")}`);
+        this.lastError = { at: Date.now(), message: problem2 };
+      }
       if (summary2.queued.length <= this.deps.newFilesLimit) for (const id of summary2.queued) into.add(id);
       this.log.info(
         `${part.code ? "code sync" : "sync"}: ${summary2.added} new \xB7 ${summary2.changed} changed \xB7 ${summary2.moved} moved \xB7 ${summary2.removed} removed \xB7 ${summary2.unchanged} unchanged in ${Date.now() - started} ms`
@@ -7404,14 +7432,27 @@ var Service = class _Service {
   /** Drops everything embedded (names stay) and reads it all again: after a model or settings change by hand. */
   async reindex(code) {
     const which = typeof code === "boolean" ? code : code.code === true;
-    const part = which ? this.code : this.main;
-    if (!part) return;
-    part.store.resetAll();
-    part.searcher.release();
-    part.searcher.reloadFiles();
-    part.countsStale = true;
-    this.log.info(`engine: ${which ? "the code index" : "the index"} is read again from scratch`);
-    this.requestSync(which ? "code" : "main");
+    this.rebuilding++;
+    try {
+      const running2 = this.serving;
+      if (running2) {
+        this.endPass(false);
+        await running2;
+      }
+      if (this.stopped) return;
+      const part = which ? this.code : this.main;
+      if (!part) return;
+      part.store.resetAll();
+      part.searcher.release();
+      part.searcher.reloadFiles();
+      part.countsStale = true;
+      this.summaries = null;
+      this.log.info(`engine: ${which ? "the code index" : "the index"} is read again from scratch`);
+      this.requestSync(which ? "code" : "main");
+    } finally {
+      this.rebuilding--;
+      this.kick();
+    }
   }
   // MARK: Status
   countsOf(part) {
@@ -7548,7 +7589,7 @@ var Service = class _Service {
   /**
    * Hybrid search (DigUp: Engine.search). Keyword results come at once (`meaning: false`, which also starts embedding
    * the text); the final search adds meaning. A "code:" query searches the code index alone. Results are only files
-   * still searched (chosen and not skipped, a type not left out) that are still there; the limit (40) applies first.
+   * still searched (chosen and not skipped, a type not left out) that are still there. Unavailable files do not consume the result limit.
    */
   async search(r, signal) {
     const began = performance.now();
@@ -7595,8 +7636,9 @@ var Service = class _Service {
     const hits = part.searcher.search(text, vector, {
       kinds: isCode ? null : r.kinds ?? null,
       limit: r.limit ?? 40,
-      prefixLast: r.prefixLast ?? false
-    }).filter((hit) => this.stillSearched(hit.path, isCode));
+      prefixLast: r.prefixLast ?? false,
+      acceptPath: (path) => this.stillSearched(path, isCode)
+    });
     return {
       hits,
       strong: strongCount(hits.map((hit) => hit.score)),

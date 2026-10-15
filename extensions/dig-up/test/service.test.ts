@@ -17,6 +17,7 @@ import { Service, type Embedders, type ServiceDeps, type ServiceHelper } from ".
 import { ThumbCache, imageSize, thumbArgs } from "../engine/service-thumbs";
 import type { Searcher } from "../engine/searcher";
 import type { Store } from "../engine/store";
+import { chunks } from "../engine/text";
 import { DIMENSION } from "../engine/types";
 
 const repo = resolve(import.meta.dirname, "..");
@@ -167,6 +168,8 @@ async function until(check: () => boolean, what: string, ms = 20_000): Promise<v
   }
 }
 
+const passEnded = (service: Service) => () =>
+  (service as unknown as { serving: Promise<void> | null }).serving === null;
 const idle = (service: Service) => () => service.status().activity.state === "idle";
 const sleep = (ms: number) => new Promise((done) => setTimeout(done, ms));
 /** The index the service has open (to make it fail on purpose). */
@@ -379,6 +382,76 @@ describe("indexing passes", { skip: noHelper }, () => {
     service.requestSync();
     await until(() => reloads === 1 && idle(service)(), "a full reload after the removal");
     assert.equal(searcher.vectorCount, 3);
+  });
+
+  it("rebuild waits for an in-flight final batch before clearing earlier chunks", async () => {
+    const root = tempDir();
+    const body = Array.from({ length: 20_000 }, (_, i) => `word${i % 89}`).join(" ");
+    write(root, "long.md", body);
+    const { service, embedders } = make({ root, config: { folders: [root] } });
+    const embed = embedders.index_.embedTexts.bind(embedders.index_);
+    let release = () => {};
+    let blocked = false;
+    const gate = new Promise<void>((done) => {
+      release = done;
+    });
+    embedders.index_.embedTexts = async (texts) => {
+      if (!blocked && mainStore(service).files([root])[0]?.state === "partial") {
+        blocked = true;
+        await gate;
+      }
+      return embed(texts);
+    };
+    service.start();
+    try {
+      await until(() => blocked, "the final chunk batch");
+      const rebuilding = service.reindex(false);
+      await sleep(20);
+      release();
+      await rebuilding;
+      await until(passEnded(service), "rebuilt all chunks");
+      assert.equal(
+        Number(mainStore(service).get("SELECT COUNT(*) AS n FROM segments WHERE kind = 'chunk'")?.n),
+        chunks(body, Infinity).length,
+      );
+    } finally {
+      release();
+    }
+  });
+
+  it("restoring code folders cancels deletion while the old pass stops", async () => {
+    const root = tempDir();
+    const code = tempDir();
+    write(root, "note.txt", "a main index note");
+    write(code, "retry.py", "def retry():\n    return 1\n");
+    const cfg = config({ folders: [root], codeFolders: [code] });
+    const { service, embedders } = make({ root, config: cfg });
+    const embed = embedders.index_.embedTexts.bind(embedders.index_);
+    let blocked = false;
+    let release = () => {};
+    const gate = new Promise<void>((done) => {
+      release = done;
+    });
+    embedders.index_.embedTexts = async (texts) => {
+      if (!blocked) {
+        blocked = true;
+        await gate;
+      }
+      return embed(texts);
+    };
+    service.start();
+    try {
+      await until(() => blocked, "a running pass");
+      service.setConfig({ ...cfg, codeFolders: [] });
+      service.setConfig(cfg);
+      release();
+      await until(passEnded(service), "the replacement pass");
+      assert.ok(service.status().code, "restored code index must remain open");
+      const result = await service.search({ query: "code: retry", meaning: false });
+      assert.equal(result.hits[0]?.path, join(code, "retry.py"));
+    } finally {
+      release();
+    }
   });
 
   it("reindex drops the vectors and reads everything again", async () => {
@@ -616,6 +689,20 @@ describe("search", { skip: noHelper }, () => {
     service.setConfig(config({ folders: [service.status().folders[0]], codeFolders: [] }));
     const off = await service.search({ query: "code: retry" });
     assert.deepEqual([off.code, off.note], [true, "code-off"]);
+  });
+
+  it("unavailable files do not fill the keyword candidate or result limits", async () => {
+    const files: Record<string, string> = {};
+    for (let i = 0; i < 110; i++) files[`offline/${i}.txt`] = "ZXQ123";
+    files["connected.txt"] = "ZXQ123 is the code on the connected disk";
+    const { service, root } = await ready({ files });
+    service.setHeld("paused");
+    rmSync(join(root, "offline"), { recursive: true });
+    const result = await service.search({ query: "ZXQ123", meaning: false, limit: 1 });
+    assert.deepEqual(
+      result.hits.map((hit) => hit.path),
+      [join(root, "connected.txt")],
+    );
   });
 
   it("leaves out files no longer searched, skipped types and deleted files", async () => {

@@ -164,6 +164,61 @@ describe("rules", () => {
 });
 
 describe("keyword search", () => {
+  test("unavailable semantic hits do not consume the final result limit", () => {
+    const store = freshStore();
+    const query = fakeVector("visual query");
+    for (let i = 0; i < 42; i++) {
+      const file = store.insert(candidate(`/images/${i}.jpg`, "image"));
+      store.addSegment({ file, kind: "image", modality: "image", vector: query });
+    }
+    const searcher = new Searcher(store);
+    const hits = searcher.search("visual query", query, {
+      limit: 1,
+      zGate: -1,
+      acceptPath: (path) => path === "/images/41.jpg",
+    });
+    assert.equal(hits[0]?.path, "/images/41.jpg");
+    assert.equal(hits[0]?.keywordRank, null);
+  });
+
+  test("preview versions change on same-millisecond reindex and a new index session", () => {
+    const store = freshStore();
+    const id = store.insert(candidate("/note.txt", "doc"));
+    store.addSegment({ file: id, kind: "chunk", modality: "text", text: "ZXQ123" });
+    const searcher = new Searcher(store, { loadVectors: false });
+    store.finish(id, "done");
+    const first = searcher.search("ZXQ123", null)[0].previewVersion;
+    store.finish(id, "done");
+    const second = searcher.search("ZXQ123", null)[0].previewVersion;
+    const sameIndex = new Searcher(store, { loadVectors: false }).search("ZXQ123", null)[0].previewVersion;
+    assert.ok(first);
+    assert.notEqual(first, second);
+    assert.equal(second, sameIndex);
+    assert.notEqual(store.previewSession, freshStore().previewSession);
+  });
+
+  test("kind filters and distinct files survive thousands of matching segments", () => {
+    const store = freshStore();
+    const book = store.insert(candidate("/book.pdf", "pdf"));
+    store.transaction(() => {
+      for (let i = 0; i < 1100; i++)
+        store.addSegment({ file: book, kind: "page", modality: "text", loc: i + 1, text: "ZXQ123" });
+    });
+    const shot = store.insert(candidate("/screen.png", "screenshot"));
+    store.addSegment({ file: shot, kind: "ocr", modality: "text", text: "ZXQ123 appears in this screenshot" });
+    const otherBook = store.insert(candidate("/other.pdf", "pdf"));
+    store.addSegment({ file: otherBook, kind: "page", modality: "text", loc: 1, text: "ZXQ123 appears on this page" });
+    const searcher = new Searcher(store, { loadVectors: false });
+    assert.deepEqual(
+      searcher.search("ZXQ123", null, { kinds: ["screenshot"] }).map((hit) => hit.path),
+      ["/screen.png"],
+    );
+    assert.deepEqual(
+      new Set(searcher.search("ZXQ123", null, { kinds: ["pdf"] }).map((hit) => hit.path)),
+      new Set(["/book.pdf", "/other.pdf"]),
+    );
+  });
+
   test("Bengali and Arabic words stay whole (DigUp: bengaliAndArabicWordsStayWhole)", () => {
     const store = freshStore();
     const id = store.insert(candidate("/notes/trip.txt", "doc"));
@@ -282,6 +337,7 @@ describe("keyword search", () => {
         keywordRank: 1,
         segment: "chunk",
         segmentId: segment,
+        previewVersion: hit.previewVersion,
         loc: 3,
         locEnd: null,
         excerpt: null,

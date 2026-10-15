@@ -60,13 +60,15 @@ export function imageMarkdown(file: string, size?: Box | null, box: Box = PANE_B
 }
 
 export interface ThumbSpec extends ThumbRequest {
+  /** File and index version; used only to key the UI cache. */
+  version?: string;
   /** Audio: the end of the matched stretch (the waveform lights it); asked of the daemon as `locEnd`. */
   locEnd?: number | null;
 }
 
 /** The picture to ask the daemon for: the page with its words marked, the frame at the moment, the waveform. */
 export function thumbSpec(row: ResultRow, maxPixel: number, marking: boolean): ThumbSpec {
-  const spec: ThumbSpec = { path: row.path, kind: row.kind, maxPixel };
+  const spec: ThumbSpec = { path: row.path, kind: row.kind, maxPixel, version: previewFileKey(row) };
   if (row.kind === "pdf" && row.page !== null) {
     spec.loc = row.page;
     if (marking) spec.words = [...new Set([...row.foundWords, ...row.terms])].filter((w) => [...w].length >= 2);
@@ -82,6 +84,7 @@ export function thumbSpec(row: ResultRow, maxPixel: number, marking: boolean): T
 /** What a picture depends on: the file, the page or moment, the words marked on a page, the size. */
 export function thumbKey(spec: ThumbSpec): string {
   return [
+    spec.version ?? "",
     spec.path,
     spec.kind,
     spec.loc ?? "",
@@ -194,4 +197,13 @@ export function previewMarkdown(row: ResultRow, parts: PreviewParts = {}): strin
   if (row.excerpt && row.kind !== "code" && row.segment !== "chunk") blocks.push(excerptMarkdown(row.excerpt));
   if (blocks.length === 0) blocks.push(`*${escapeMarkdown(row.name)}*`);
   return blocks.join("\n\n");
+}
+
+/** A file can be edited, reindexed, or replaced while its path and segment id stay the same. */
+export function previewFileKey(row: ResultRow): string {
+  return JSON.stringify([row.kind === "code" ? "code" : "main", row.path, row.modified, row.size, row.previewVersion]);
+}
+
+export function segmentTextKey(row: ResultRow): string {
+  return JSON.stringify([previewFileKey(row), row.segmentId]);
 }

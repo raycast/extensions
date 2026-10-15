@@ -22,6 +22,8 @@ import type { Candidate } from "./store";
 import type { IndexOptions } from "./types";
 
 export interface CrawlReport {
+  /** Incomplete subtrees or unreadable entries; not evidence of deletion. */
+  failedPaths?: string[];
   candidates: Candidate[];
   /** Reason → files left out. */
   skipped: Record<string, number>;
@@ -68,6 +70,7 @@ export async function crawl(roots: readonly string[], options: IndexOptions, dep
     home,
     code: options.code,
   });
+  if (walk.failedPaths?.length) report.failedPaths = walk.failedPaths;
   for (const [reason, count] of Object.entries(walk.skipped)) {
     add(FILE_REASONS.has(reason) ? report.skipped : report.skippedFolders, reason, count);
   }

@@ -127,6 +127,8 @@ export interface Hit {
   keywordRank: number | null;
   segment: SegmentKind;
   segmentId: number;
+  /** Search session and file indexing version, for preview cache invalidation. */
+  previewVersion?: string;
   /** PDF page (1-based), start second (audio/video), chunk number (1-based), or first line/cell of code. */
   loc: number | null;
   /** End second, or last line/cell. */

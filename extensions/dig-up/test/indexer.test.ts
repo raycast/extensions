@@ -3,6 +3,7 @@
 
 import assert from "node:assert/strict";
 import {
+  chmodSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -176,6 +177,25 @@ const state = (store: Store, path: string) => {
 };
 
 describe("sync", { skip: noHelper }, () => {
+  it("keeps indexed content when a child folder becomes unreadable", async () => {
+    const { dir, store, indexer } = setup();
+    const root = join(dir, "docs");
+    const path = write(root, "blocked/keep.txt", "indexed words to preserve");
+    await indexer.sync([root]);
+    await indexer.run();
+    const before = store.counts();
+    chmodSync(dirname(path), 0);
+    try {
+      const summary = await indexer.sync([root]);
+      assert.deepEqual(summary.crawl.failedPaths, [dirname(path)]);
+      assert.equal(summary.removed, 0);
+      assert.deepEqual(store.counts(), before);
+      assert.equal(store.fileAt(path)?.state, "done");
+    } finally {
+      chmodSync(dirname(path), 0o700);
+    }
+  });
+
   it("adds new files, leaves unchanged ones, requeues changed ones, follows moves and drops deleted ones", async () => {
     const { dir, store, indexer, embedder } = setup();
     const root = join(dir, "docs");

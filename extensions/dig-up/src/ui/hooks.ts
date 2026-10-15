@@ -5,7 +5,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { searchRevision } from "../lib/search-refresh";
 import type { Status } from "../../engine/api";
 import { DaemonError, api } from "../lib/client";
-import { thumbKey, type Picture, type ThumbSpec } from "../lib/preview";
+import { segmentTextKey, thumbKey, type Picture, type ThumbSpec } from "../lib/preview";
 import type { ResultRow } from "../lib/results";
 import { downloadRate, downloadSecondsLeft, isBusy } from "../lib/status-text";
 import { momentPlayer, resolveEditor } from "./open";
@@ -202,7 +202,7 @@ const texts = new Map<string, string | null>();
 
 /** A segment's full text (a passage, a stretch of code) for the preview; undefined while it's being read. */
 export function useSegmentText(row: ResultRow | undefined, needed: boolean): string | null | undefined {
-  const key = row && needed ? `${row.kind === "code" ? "code" : "main"}:${row.segmentId}` : null;
+  const key = row && needed ? segmentTextKey(row) : null;
   const [, redraw] = useReducer((n: number) => n + 1, 0);
   useEffect(() => {
     if (!key || !row || texts.has(key)) return;

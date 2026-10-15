@@ -34,6 +34,8 @@ export interface SearchOptions {
   /** Only files of these kinds; null = all. Meaning is still scaled over every vector. */
   kinds?: readonly FileKind[] | null;
   limit?: number;
+  /** Availability and folder selection, checked before candidate/result limits. */
+  acceptPath?: (path: string) => boolean;
   zGate?: number;
   /** How much the query's words count against meaning; by default 2.0, or 1.0 in the code index. */
   wordWeight?: number;
@@ -273,6 +275,16 @@ export class Searcher {
       return kind !== undefined && kinds.has(kind);
     };
 
+    const accepted = new Map<number, boolean>();
+    const available = (file: number) => {
+      if (!o.acceptPath) return true;
+      if (!accepted.has(file)) {
+        const path = str(this.store.get("SELECT path FROM files WHERE id = ?", file)?.path);
+        accepted.set(file, path !== null && o.acceptPath(path));
+      }
+      return accepted.get(file) === true;
+    };
+
     // Meaning: score every vector on this query's scale, keep each file's best segment (by z).
     const best = new Map<number, Meaning>();
     if (queryVector !== null && queryVector.length === DIMENSION && this.rows > 0) {
@@ -303,13 +315,17 @@ export class Searcher {
     }
     if (patterns.length > 0) {
       const seen = new Set<number>();
+      const kindClause = kinds ? ` AND f.kind IN (${[...kinds].map(() => "?").join(",")})` : "";
       const sql =
         "SELECT s.file, s.id, snippet(fts, 1, '«', '»', '…', 12) AS snippet, fts.original FROM fts " +
-        "JOIN segments s ON s.id = fts.rowid WHERE fts MATCH ? ORDER BY bm25(fts, 3.0, 1.0) LIMIT 1000";
-      for (const row of this.store.iterate(sql, patterns.join(" OR "))) {
+        "JOIN segments s ON s.id = fts.rowid JOIN files f ON f.id = s.file WHERE fts MATCH ?" +
+        kindClause +
+        " ORDER BY bm25(fts, 3.0, 1.0)";
+      // Limit distinct, available files. A long document must not consume a segment limit.
+      for (const row of this.store.iterate(sql, patterns.join(" OR "), ...(kinds ?? []))) {
         if (words.length >= 100) break;
         const file = num(row.file);
-        if (!allowed(file) || seen.has(file)) continue;
+        if (!allowed(file) || seen.has(file) || !available(file)) continue;
         seen.add(file);
         // Text that normalizing changed is quoted as it's written (with its hamza, harakat, joiners).
         const original = str(row.original);
@@ -354,7 +370,9 @@ export class Searcher {
       if (!wordRank.has(match.file)) wordRank.set(match.file, { rank: index + 1, match });
     });
     const hits: Hit[] = [];
-    for (const { file, score } of scored.slice(0, limit)) {
+    for (const { file, score } of scored) {
+      if (hits.length >= limit) break;
+      if (!available(file)) continue;
       const rank = hits.length;
       const semantic = best.get(file);
       const keyword = wordRank.get(file);
@@ -375,7 +393,7 @@ export class Searcher {
           keyword?.match.segment === segmentId || identifier !== null,
         );
       }
-      const fileRow = this.store.get("SELECT path, kind, mtime, size, info FROM files WHERE id = ?", file);
+      const fileRow = this.store.get("SELECT path, kind, mtime, size, info, indexed_at FROM files WHERE id = ?", file);
       const segmentRow = this.store.get("SELECT kind, loc, loc_end, excerpt FROM segments WHERE id = ?", segmentId);
       const fileKindName = str(fileRow?.kind) ?? "";
       const segmentKind = str(segmentRow?.kind) ?? "";
@@ -405,6 +423,7 @@ export class Searcher {
         locEnd,
         excerpt: quoted ?? storedExcerpt,
         modified: num(fileRow?.mtime),
+        previewVersion: `${this.store.previewSession}:${fileRow?.indexed_at ?? "pending"}`,
         size: num(fileRow?.size),
         info: parseInfo(str(fileRow?.info)),
         focus,

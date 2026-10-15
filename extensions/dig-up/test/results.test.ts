@@ -36,6 +36,8 @@ import {
   passageMarkdown,
   previewMarkdown,
   previewNeeds,
+  previewFileKey,
+  segmentTextKey,
   thumbKey,
   thumbSpec,
 } from "../src/lib/preview";
@@ -333,13 +335,21 @@ describe("previews (DigUp Previews.swift)", () => {
     assert.deepEqual(thumbSpec(page, 820, true), {
       path: "/d/a.pdf",
       kind: "pdf",
+      version: previewFileKey(page),
       maxPixel: 820,
       loc: 2,
       words: ["Yoshida", "yoshida"],
     });
     assert.equal(thumbSpec(page, 96, false).words, undefined);
     const audio = row({ path: "/a.wav", kind: "audio", segment: "audio", loc: 25, locEnd: 55 });
-    assert.deepEqual(thumbSpec(audio, 96, false), { path: "/a.wav", kind: "audio", maxPixel: 96, loc: 25, locEnd: 55 });
+    assert.deepEqual(thumbSpec(audio, 96, false), {
+      path: "/a.wav",
+      kind: "audio",
+      version: previewFileKey(audio),
+      maxPixel: 96,
+      loc: 25,
+      locEnd: 55,
+    });
     assert.notEqual(thumbKey(thumbSpec(page, 820, true)), thumbKey(thumbSpec(page, 96, false)));
   });
 
@@ -900,4 +910,19 @@ test("first-pass progress counts the whole library after a sync restarts the bat
   assert.equal(statusLine(indexed), "Indexing 80% · 70 searchable");
   assert.equal(menuBarTitle(indexed), "80%");
   assert.match(resultsCaveat(indexed)!, /80%/);
+});
+
+test("preview caches distinguish edited files, reused segment ids and index sessions", () => {
+  const original = row({ path: "/a.txt", kind: "doc", segment: "chunk", segmentId: 7, previewVersion: "session:1" });
+  for (const changed of [
+    { ...original, modified: original.modified + 1 },
+    { ...original, size: original.size + 1 },
+    { ...original, path: "/b.txt" },
+    { ...original, previewVersion: "session:2" },
+    { ...original, previewVersion: "other-session:1" },
+  ]) {
+    assert.notEqual(segmentTextKey(original), segmentTextKey(changed));
+    assert.notEqual(thumbKey(thumbSpec(original, 820, false)), thumbKey(thumbSpec(changed, 820, false)));
+  }
+  assert.notEqual(segmentTextKey(original), segmentTextKey({ ...original, segmentId: 8 }));
 });

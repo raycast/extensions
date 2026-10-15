@@ -835,6 +835,19 @@ describe("digup-helper", { skip: missing }, () => {
     const file = (result: WalkResult, path: string) =>
       result.files.find((entry) => entry.path.normalize("NFC") === path.normalize("NFC"));
 
+    it("reports incomplete subtrees when a child folder cannot be read", async () => {
+      const root = tempDir();
+      const child = join(root, "blocked");
+      mkdirSync(child);
+      writeFileSync(join(child, "keep.txt"), "already indexed content");
+      chmodSync(child, 0);
+      try {
+        assert.deepEqual((await walk({ roots: [root] })).failedPaths, [child]);
+      } finally {
+        chmodSync(child, 0o700);
+      }
+    });
+
     it("walks the traps as DigUp's crawler does", skip, async () => {
       const result = await walk({ roots: [traps] });
       assert.deepEqual(under(result, join(traps, "Fake.app")), []);

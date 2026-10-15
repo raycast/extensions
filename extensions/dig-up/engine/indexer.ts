@@ -259,9 +259,13 @@ export class Indexer {
     const vanished = rootPaths
       .filter((root) => !existsSync(root))
       .map((root) => (root.endsWith("/") ? root : root + "/"));
+    const incomplete = report.failedPaths ?? [];
     const gone = existing.filter(
       (row) =>
-        !seen.has(row.path) && !movedFrom.has(row.path) && !vanished.some((prefix) => row.path.startsWith(prefix)),
+        !seen.has(row.path) &&
+        !movedFrom.has(row.path) &&
+        !vanished.some((prefix) => row.path.startsWith(prefix)) &&
+        !incomplete.some((path) => row.path === path || row.path.startsWith(path.endsWith("/") ? path : path + "/")),
     );
     for (let start = 0; start < gone.length; start += SYNC_SLICE) {
       if (start > 0 || report.candidates.length > 0) await yieldToLoop();

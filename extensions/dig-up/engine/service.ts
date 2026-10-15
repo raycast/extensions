@@ -241,6 +241,8 @@ export class Service {
   private restartRequested = false;
   private pruneWanted: boolean;
   private deleteCodeIndex = false;
+  /** Rebuilds hold new passes until the previous pass has ended and all resets finish. */
+  private rebuilding = 0;
   private yieldAt = 0;
   private stopped = false;
   private started = false;
@@ -474,6 +476,7 @@ export class Service {
     const folders = types || !sameList(before.folders, next.folders) || !sameList(before.skipped, next.skipped);
     const code =
       types || !sameList(before.codeFolders, next.codeFolders) || !sameList(before.codeSkipped, next.codeSkipped);
+    if (next.codeFolders.length > 0) this.deleteCodeIndex = false;
     if (code && this.main) {
       if (next.codeFolders.length > 0 && !this.code) {
         try {
@@ -694,7 +697,7 @@ export class Service {
 
   /** Starts a pass unless one runs or indexing is held (DigUp: startHelper). A pass syncs first. */
   private kick(): void {
-    if (this.stopped || !this.main || this.serving) return;
+    if (this.stopped || !this.main || this.serving || this.rebuilding > 0) return;
     if (this.indexingHeld()) return;
     if (this.config.folders.length === 0 && this.config.codeFolders.length === 0 && !this.pruneWanted) {
       this.removeCodeIndexIfAsked();
@@ -886,6 +889,11 @@ export class Service {
     this.activity = { state: "syncing", index: part.code ? "code" : "main" };
     try {
       const summary = await part.indexer!.sync(this.availableRoots(part));
+      if (summary.crawl.failedPaths?.length) {
+        const problem = `Couldn't read ${summary.crawl.failedPaths.length} paths; their indexed files were kept`;
+        this.log.warn(`${problem}: ${summary.crawl.failedPaths.join(", ")}`);
+        this.lastError = { at: Date.now(), message: problem };
+      }
       if (summary.queued.length <= this.deps.newFilesLimit) for (const id of summary.queued) into.add(id);
       this.log.info(
         `${part.code ? "code sync" : "sync"}: ${summary.added} new · ${summary.changed} changed · ${summary.moved} moved · ` +
@@ -1081,14 +1089,28 @@ export class Service {
   /** Drops everything embedded (names stay) and reads it all again: after a model or settings change by hand. */
   async reindex(code: boolean | { code?: boolean }): Promise<void> {
     const which = typeof code === "boolean" ? code : code.code === true;
-    const part = which ? this.code : this.main;
-    if (!part) return;
-    part.store.resetAll();
-    part.searcher.release();
-    part.searcher.reloadFiles();
-    part.countsStale = true;
-    this.log.info(`engine: ${which ? "the code index" : "the index"} is read again from scratch`);
-    this.requestSync(which ? "code" : "main");
+    this.rebuilding++;
+    try {
+      const running = this.serving;
+      if (running) {
+        this.endPass(false);
+        await running;
+      }
+      if (this.stopped) return;
+      // Config may have changed while the pass stopped (including deleting the code index).
+      const part = which ? this.code : this.main;
+      if (!part) return;
+      part.store.resetAll();
+      part.searcher.release();
+      part.searcher.reloadFiles();
+      part.countsStale = true;
+      this.summaries = null;
+      this.log.info(`engine: ${which ? "the code index" : "the index"} is read again from scratch`);
+      this.requestSync(which ? "code" : "main");
+    } finally {
+      this.rebuilding--;
+      this.kick();
+    }
   }
 
   // MARK: Status
@@ -1249,7 +1271,7 @@ export class Service {
   /**
    * Hybrid search (DigUp: Engine.search). Keyword results come at once (`meaning: false`, which also starts embedding
    * the text); the final search adds meaning. A "code:" query searches the code index alone. Results are only files
-   * still searched (chosen and not skipped, a type not left out) that are still there; the limit (40) applies first.
+   * still searched (chosen and not skipped, a type not left out) that are still there. Unavailable files do not consume the result limit.
    */
   async search(r: SearchRequest, signal?: AbortSignal): Promise<SearchResponse> {
     const began = performance.now();
@@ -1294,13 +1316,12 @@ export class Service {
       note = "unavailable";
     }
     const searchStarted = performance.now();
-    const hits = part.searcher
-      .search(text, vector, {
-        kinds: isCode ? null : (r.kinds ?? null),
-        limit: r.limit ?? 40,
-        prefixLast: r.prefixLast ?? false,
-      })
-      .filter((hit) => this.stillSearched(hit.path, isCode));
+    const hits = part.searcher.search(text, vector, {
+      kinds: isCode ? null : (r.kinds ?? null),
+      limit: r.limit ?? 40,
+      prefixLast: r.prefixLast ?? false,
+      acceptPath: (path) => this.stillSearched(path, isCode),
+    });
     return {
       hits,
       strong: strongCount(hits.map((hit) => hit.score)),

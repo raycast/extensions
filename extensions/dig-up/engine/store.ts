@@ -2,6 +2,7 @@
 // vectors, and an FTS5 table, in one SQLite file. Vectors live beside the rows that describe them, so a crash never
 // leaves them out of step; at this scale brute-force search over an in-memory copy needs no vector database.
 
+import { randomUUID } from "node:crypto";
 import { mkdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname } from "node:path";
@@ -196,6 +197,9 @@ export function infoJSON(info: Record<string, string>): string | null {
 }
 
 export class Store {
+  /** Distinguishes reused SQLite row ids after the database is reopened or replaced. */
+  readonly previewSession = randomUUID();
+  private lastIndexedAt = 0;
   readonly db: DatabaseSync;
   private readonly statements = new Map<string, StatementSync>();
   /** Statements that read integers as bigints: the file rows, whose inode and device may pass 2^53. */
@@ -619,12 +623,14 @@ export class Store {
 
   /** A file's outcome: its state, why (or how far a long file got), what was learned, and when (DigUp: finish). */
   finish(id: number, state: FileState, detail: string | null = null, info: Record<string, string> = {}): void {
+    // Keep consecutive rewrites distinct even when they finish in the same millisecond.
+    this.lastIndexedAt = Math.max(Date.now() / 1000, this.lastIndexedAt + 0.000001);
     this.run(
       "UPDATE files SET state = ?, detail = ?, info = ?, indexed_at = ? WHERE id = ?",
       state,
       detail,
       infoJSON(info),
-      Date.now() / 1000,
+      this.lastIndexedAt,
       id,
     );
   }

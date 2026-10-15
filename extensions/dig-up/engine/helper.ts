@@ -95,6 +95,8 @@ export interface WalkDir {
 }
 
 export interface WalkResult {
+  /** Paths whose listing or metadata could not be read. Their existing rows must be retained. */
+  failedPaths?: string[];
   files: WalkFile[];
   /** Every folder (roots included) that is a project root or has a `.git`; other folders are left out. */
   dirs: WalkDir[];

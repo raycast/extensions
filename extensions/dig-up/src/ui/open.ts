@@ -21,11 +21,6 @@ import { searchWords, type ResultRow } from "../lib/results";
 export const QUICKTIME = "com.apple.QuickTimePlayerX";
 export const IINA = "com.colliderli.iina";
 
-interface Preferences {
-  codeEditor?: string;
-  mediaPlayer?: string;
-}
-
 function preferences(): Preferences {
   return getPreferenceValues<Preferences>();
 }

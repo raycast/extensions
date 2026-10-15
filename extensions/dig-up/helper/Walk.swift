@@ -52,6 +52,7 @@ enum Walk {
         let names = Set(a.strings("skipNames")), suffixes = a.strings("skipSuffixes"), excluded = a.strings("excluded")
         var files: [JSON] = [], dirs: [JSON] = []
         var skipped: [String: Int] = [:]
+        var failedPaths = Set<String>()
         var seenFiles = Set<String>(), seenDirs = Set<String>()   // a folder inside another root is walked twice
 
         func note(directory path: String) {
@@ -75,10 +76,19 @@ enum Walk {
             note(directory: root.path)
             guard let walker = FileManager.default.enumerator(
                 at: root, includingPropertiesForKeys: crawlKeys, options: [.skipsHiddenFiles, .skipsPackageDescendants],
-                errorHandler: { _, _ in true }) else { continue }
+                errorHandler: { url, _ in failedPaths.insert(url.path); return true }) else {
+                failedPaths.insert(root.path)
+                continue
+            }
 
             func visit(_ url: URL) {
-                let values = try? url.resourceValues(forKeys: Set(crawlKeys))
+                let values: URLResourceValues?
+                do { values = try url.resourceValues(forKeys: Set(crawlKeys)) }
+                catch {
+                    failedPaths.insert(url.path)
+                    walker.skipDescendants()
+                    return
+                }
                 let isPackage = values?.isPackage == true
                 if values?.isDirectory == true, !isPackage {
                     if let reason = rules.skipReason(url) {
@@ -103,7 +113,8 @@ enum Walk {
                 autoreleasepool { visit(url) }
             }
         }
-        return ["files": .array(files), "dirs": .array(dirs), "skipped": .object(skipped.mapValues { .int($0) })]
+        return ["files": .array(files), "dirs": .array(dirs), "skipped": .object(skipped.mapValues { .int($0) }),
+                "failedPaths": .array(failedPaths.sorted().map { .string($0) })]
     }
 
     /// One file's facts: lstat (never follows a link), the placeholder flags, and the kind of file.
