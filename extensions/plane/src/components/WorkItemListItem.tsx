@@ -2,6 +2,7 @@ import { IssueSearchItem } from "@makeplane/plane-node-sdk";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { getWorkItemUrlWithIdentifier } from "../helpers/work-items";
 import WorkItemDetail from "./WorkItemDetail";
+import ChangeWorkspaceAction from "./actions/ChangeWorkspaceAction";
 
 type WorkItemListItemProps = {
   workItem: IssueSearchItem;
@@ -40,6 +41,7 @@ export default function WorkItemListItem({ workItem, mutateWorkItemList }: WorkI
             }
           />
           <Action.OpenInBrowser url={getWorkItemUrlWithIdentifier(workItem.workspaceSlug, workItemIdentifier)} />
+          <ChangeWorkspaceAction />
         </ActionPanel>
       }
     />

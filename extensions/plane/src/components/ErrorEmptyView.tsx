@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { describePlaneError } from "../helpers/errors";
+import ChangeWorkspaceAction from "./actions/ChangeWorkspaceAction";
 
 type ErrorEmptyViewProps = {
   error: unknown;
@@ -31,6 +32,7 @@ export function ErrorActions({ onRetry }: { onRetry?: () => void }) {
           onAction={onRetry}
         />
       ) : null}
+      <ChangeWorkspaceAction />
     </ActionPanel>
   );
 }

@@ -2,6 +2,7 @@ import { NetworkEnum, Project } from "@makeplane/plane-node-sdk";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { getProjectIcon } from "../helpers/icons";
 import ProjectWorkItemsList from "./ProjectWorkItemsList";
+import ChangeWorkspaceAction from "./actions/ChangeWorkspaceAction";
 
 type ProjectItemListItemProps = {
   projectItem: Project;
@@ -39,6 +40,7 @@ export default function ProjectItemListItem({ projectItem }: ProjectItemListItem
             title="Open Work Items"
             target={<ProjectWorkItemsList projectItem={projectItem} />}
           />
+          <ChangeWorkspaceAction />
         </ActionPanel>
       }
     />

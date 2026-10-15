@@ -1,4 +1,4 @@
-import { Icon, List } from "@raycast/api";
+import { ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
 
 import { useWorkItems } from "./hooks/useWorkItems";
@@ -7,6 +7,7 @@ import AuthorizedView from "./components/AuthorizedView";
 import { useProjects } from "./hooks/useProjects";
 import { getProjectIcon } from "./helpers/icons";
 import ErrorEmptyView from "./components/ErrorEmptyView";
+import ChangeWorkspaceAction from "./components/actions/ChangeWorkspaceAction";
 
 function SearchWorkItems() {
   const [query, setQuery] = useState("");
@@ -53,6 +54,11 @@ function SearchWorkItems() {
             hasQuery
               ? "Plane matches titles, sequence numbers, and project identifiers."
               : "Type a title or an ID such as ENG-123."
+          }
+          actions={
+            <ActionPanel>
+              <ChangeWorkspaceAction />
+            </ActionPanel>
           }
         />
       )}

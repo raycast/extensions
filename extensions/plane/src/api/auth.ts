@@ -7,6 +7,7 @@ import {
   STORAGE_WORKSPACE_SLUG_KEY,
 } from "../helpers/keys";
 import { getAppInstallations } from "./installations";
+import { emitWorkspaceChange } from "../helpers/workspace-events";
 
 const preferences = getPreferenceValues<Preferences>();
 /** Raw preference value, used only to find a workspace slug saved before keys were trimmed. */
@@ -107,7 +108,10 @@ export function initializePlaneClient(workspaceSlug: string, accessToken?: strin
   return planeClient;
 }
 
-/** Persists the slug for the current credentials (under the hashed key) and re-creates the client. */
+/**
+ * Persists the slug for the current credentials, re-creates the client, and notifies `AuthorizedView`.
+ * Workspace-level hooks include the slug in their cache key, so data never leaks across workspaces.
+ */
 export async function selectWorkspace(workspaceSlug: string) {
   const token = currentToken ?? API_KEY;
   if (!token) {
@@ -115,6 +119,11 @@ export async function selectWorkspace(workspaceSlug: string) {
   }
   await LocalStorage.setItem(getSlugStorageKey(token), workspaceSlug);
   planeClient = createClient(workspaceSlug, token);
+  emitWorkspaceChange(workspaceSlug);
+}
+
+export function getCurrentAccessToken() {
+  return currentToken ?? API_KEY;
 }
 
 /** Returns the client or throws a message that tells the user what to do. */

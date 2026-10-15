@@ -34,6 +34,7 @@ A powerful Raycast extension for managing work items in [Plane](https://plane.so
   - Update state (⌘⇧S)
   - Update priority (⌘⇧P)
   - View detailed work item information
+  - Change workspace (⌘⇧W)
 
 ### 🔍 Search & Discovery
 
@@ -79,6 +80,7 @@ For both **Plane Cloud** and **Self-Hosted** instances:
    - Run any Plane command
    - Enter your **workspace slug** when prompted
    - You can find your workspace slug in your Plane URL: `plane.so/your-workspace-slug` (pasting the URL works too)
+   - To switch later, use **Change Workspace** (⌘⇧W) from any list. OAuth users can pick any workspace that installed the Raycast app.
 
 ### Self-Hosted (Community Edition) Notes
 

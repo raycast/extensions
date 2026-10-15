@@ -12,6 +12,10 @@
 - **Search Work Items** no longer sends a request for an empty query
 - The API key is no longer part of the LocalStorage key name (now a SHA-256 hash; the old key is migrated once)
 
+### Added
+
+- **Change Workspace** (⌘⇧W) in every list: type a new slug (API key) or pick any workspace that installed the app (OAuth)
+
 ## [Show State Color in Search Projects > Work Items] - 2026-01-23
 
 - In "Search Projects" > "Work Items", the `Icon` is colored and has `tooltip` of the _state_ name

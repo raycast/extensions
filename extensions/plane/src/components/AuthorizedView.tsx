@@ -1,24 +1,31 @@
 import { isApiKeyAuth, plane, planeClient, selectWorkspace } from "../api/auth";
 import { withAccessToken } from "@raycast/utils";
 import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@raycast/api";
-import { useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import WorkspaceSlugForm from "./WorkspaceSlugForm";
+import { onWorkspaceChange } from "../helpers/workspace-events";
 
 /**
  * Renders children once a workspace is selected.
  * `withAccessToken` runs `onAuthorize` first, which restores the stored slug into `planeClient`.
+ * "Change Workspace" (⌘⇧W) emits a change event; children remount with the new workspace.
  */
 function AuthorizedView({ children }: { children: React.ReactNode }) {
   const [workspaceSlug, setWorkspaceSlug] = useState<string | undefined>(planeClient?.workspaceSlug);
+  const [generation, setGeneration] = useState(0);
 
-  async function handleWorkspaceSlugSubmit(slug: string) {
-    await selectWorkspace(slug);
-    setWorkspaceSlug(slug);
-  }
+  useEffect(
+    () =>
+      onWorkspaceChange((slug) => {
+        setWorkspaceSlug(slug);
+        setGeneration((value) => value + 1);
+      }),
+    [],
+  );
 
   if (!workspaceSlug) {
     if (isApiKeyAuth()) {
-      return <WorkspaceSlugForm onWorkspaceSlugSubmit={handleWorkspaceSlugSubmit} />;
+      return <WorkspaceSlugForm onWorkspaceSlugSubmit={selectWorkspace} />;
     }
     return (
       <List>
@@ -36,7 +43,7 @@ function AuthorizedView({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return <>{children}</>;
+  return <Fragment key={`${workspaceSlug}:${generation}`}>{children}</Fragment>;
 }
 
 export default withAccessToken(plane)(AuthorizedView);
