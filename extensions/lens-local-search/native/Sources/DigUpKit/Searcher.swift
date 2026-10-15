@@ -501,6 +501,24 @@ public final class Searcher {
         return text
     }
 
+    /// Verify identity and read both passages in one SQLite snapshot; segment IDs may be reused after reindexing.
+    public func passage(id: Int64, path: String, modified: Double, size: Int64, kind: String,
+                        loc: Double?) throws -> (text: String?, context: String?)? {
+        var result: (text: String?, context: String?)?
+        try store.db.query("""
+            SELECT coalesce(fts.original, fts.body),
+              (SELECT coalesce(opening.original, opening.body) FROM segments first
+               JOIN fts opening ON opening.rowid = first.id
+               WHERE first.file = f.id AND f.kind IN ('pdf', 'doc') AND first.kind != 'name'
+               ORDER BY first.loc, first.id LIMIT 1)
+            FROM segments s JOIN files f ON f.id = s.file LEFT JOIN fts ON fts.rowid = s.id
+            WHERE s.id = ? AND f.path = ? AND f.mtime = ? AND f.size = ? AND s.kind = ? AND s.loc IS ?
+            """, [.int(id), .text(path), .double(modified), .int(size), .text(kind), .optional(loc)]) { row in
+                result = (row.text(0), row.text(1).map { String($0.prefix(700)) })
+            }
+        return result
+    }
+
     public func text(ofSegment id: Int64) throws -> String? {
         var text: String?
         try store.db.query("SELECT coalesce(original, body) FROM fts WHERE rowid = ?", [.int(id)]) { text = $0.text(0) }

@@ -310,6 +310,7 @@ export class QueryInterpreter {
           AbortSignal.timeout(12_000),
         ]),
         onSemantic,
+        this.provider !== "local",
       ).then(
         (plan) => ({ plan }),
         (error: unknown) => ({ error }),

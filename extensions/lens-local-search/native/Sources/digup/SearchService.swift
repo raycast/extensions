@@ -16,7 +16,7 @@ import Foundation
 ///         size and info.
 ///   {"op":"embed_ahead","q":…,"code":bool}   → {"ok":true}: embeds and caches the text (the panel sends what's typed so
 ///                                               far on every keystroke, so the pause's vector is usually ready)
-///   {"op":"text","segment":id,"code":bool}    → {"text":…}: the part of a file a hit points at, for the preview
+///   {"op":"text","segment":id,"path":…, "modified":…, "size":…, "segment_kind":…, "loc":…, "code":bool}    → {"text":…}: the part of a file a hit points at, for the preview
 ///   {"op":"render","path":…,"kind":"pdf|video|image","loc":n,"pixels":n} → {"image":path}: a JPEG for a preview or a
 ///                                               thumbnail (a PDF's page `loc`, a video's frame at `loc` seconds, or a
 ///                                               picture a web view can't show, such as HEIC), made beside the requests
@@ -51,7 +51,7 @@ final class SearchService: @unchecked Sendable {   // its state is guarded by `l
     private let previews: URL
     private var rendered: [String: String] = [:]
     private let renderLock = NSLock()
-    private let renderSlots = DispatchSemaphore(value: 2)
+    private let renderQueue = PreviewQueue()
 
     init(index: URL, roots: [String], skipped: [String], types: Set<String>, codeRoots: [String],
          codeSkipped: [String], idleSeconds: Double, catalog: Bool = false) throws {
@@ -95,23 +95,27 @@ final class SearchService: @unchecked Sendable {   // its state is guarded by `l
             var reply: [String: Any]
             do {
                 guard let op = request["op"] as? String else { throw CLIError("no op") }
+                if op == "cancel_render" {
+                    if let target = request["target"] as? Int { renderQueue.cancel(target) }
+                    continue
+                }
                 guard !catalog || ["files", "stat", "status", "reload", "quit"].contains(op) else { throw CLIError("unsupported catalog operation") }
                 if op == "quit" {
                     write(["id": id, "ok": true])
+                    renderQueue.cancelAll()
                     lock.withLock { stopEncoder() }
                     return 0
                 }
                 if op == "render" {
-                    renderSlots.wait()
+                    guard let renderID = request["id"] as? Int else { throw CLIError("missing render id") }
                     let request = UncheckedSendable(request)
-                    Thread.detachNewThread { [self] in
-                        defer { renderSlots.signal() }
+                    renderQueue.submit(renderID) { [self] operation in
                         var reply: [String: Any]
                         do { reply = try render(request.value) } catch {
                             reply = ["ok": false, "error": String("\(error)".prefix(500))]
                         }
                         reply["id"] = request.value["id"] ?? NSNull()
-                        write(reply)
+                        if !operation.isCancelled { write(reply) }
                     }
                     continue
                 }
@@ -122,6 +126,7 @@ final class SearchService: @unchecked Sendable {   // its state is guarded by `l
             reply["id"] = id
             write(reply)
         }
+        renderQueue.cancelAll()
         lock.withLock { stopEncoder() }
         return 0
     }
@@ -214,11 +219,16 @@ final class SearchService: @unchecked Sendable {   // its state is guarded by `l
             _ = vector(for: request["q"] as? String ?? "", code: request["code"] as? Bool ?? false)
             return ["ok": true]
         case "text":
-            guard let segment = (request["segment"] as? NSNumber)?.int64Value else { throw CLIError("which segment?") }
-            let code = request["code"] as? Bool ?? false
-            let source = code ? codeSearcher : searcher
-            return ["text": try source?.text(ofSegment: segment) ?? NSNull(),
-                    "context": try source?.context(ofSegment: segment) ?? NSNull()]
+            guard let segment = (request["segment"] as? NSNumber)?.int64Value,
+                  let path = request["path"] as? String,
+                  let modified = request["modified"] as? Double,
+                  let size = (request["size"] as? NSNumber)?.int64Value,
+                  let kind = request["segment_kind"] as? String else { throw CLIError("missing passage identity") }
+            let source = request["code"] as? Bool ?? false ? codeSearcher : searcher
+            guard let passage = try source?.passage(id: segment, path: path, modified: modified,
+                                                   size: size, kind: kind, loc: request["loc"] as? Double)
+            else { throw CLIError("This result changed during indexing. Search again for its current text.") }
+            return ["text": passage.text ?? NSNull(), "context": passage.context ?? NSNull()]
         case "reload":
             let hadVectors = searcher.vectorsLoaded
             searcher = try Searcher(store: store, loadVectors: hadVectors)

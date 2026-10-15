@@ -30,7 +30,7 @@ import { escapeMarkdown, previewText, previewHint } from "./preview";
 import { readConfiguration } from "./settings";
 import ConfigureFolders from "./configure";
 import ReviewScope from "./review-scope";
-import { QueryInterpreter, type DecisionPreferences } from "./decision";
+import { QueryInterpreter } from "./decision";
 import { rankResults } from "./ranking";
 import { describePlan } from "./plan";
 
@@ -201,7 +201,15 @@ function ResultDetail({
           content = `![Preview](${pathToFileURL(response.image).href})`;
         if (hit.kind === "pdf" && hit.segment !== "name") {
           const text = await service.request(
-            { op: "text", segment: hit.segment_id },
+            {
+              op: "text",
+              segment: hit.segment_id,
+              path: hit.path,
+              modified: hit.modified,
+              size: hit.size,
+              segment_kind: hit.segment,
+              loc: hit.loc ?? null,
+            },
             15_000,
             controller.signal,
           );
@@ -210,7 +218,16 @@ function ResultDetail({
         }
       } else if (hit.kind === "doc" || hit.kind === "code") {
         const response = await service.request(
-          { op: "text", segment: hit.segment_id, code: hit.kind === "code" },
+          {
+            op: "text",
+            segment: hit.segment_id,
+            path: hit.path,
+            modified: hit.modified,
+            size: hit.size,
+            segment_kind: hit.segment,
+            loc: hit.loc ?? null,
+            code: hit.kind === "code",
+          },
           15_000,
           controller.signal,
         );
@@ -549,7 +566,7 @@ export default function Command() {
   const [interpreter] = useState(
     () =>
       new QueryInterpreter(
-        getPreferenceValues<DecisionPreferences>(),
+        getPreferenceValues<Preferences.Search>(),
         environment.supportPath,
       ),
   );
@@ -590,8 +607,7 @@ export default function Command() {
   // Publish real native moves once; repeated selection echoes must not trigger another render.
   const [, setSelection] = useState(0);
   const localContentRanking =
-    getPreferenceValues<{ localContentRanking?: boolean }>()
-      .localContentRanking !== false;
+    getPreferenceValues<Preferences.Search>().localContentRanking !== false;
   const reloadFolders = () => setFolderVersion((version) => version + 1);
 
   useEffect(() => {
@@ -739,13 +755,13 @@ export default function Command() {
                     ? `Interpreted by ${interpreter.label}`
                     : decision.notice),
           });
-      } catch {
-        if (active) {
+      } catch (error) {
+        if (active && !controller.signal.aborted) {
           preview = false;
+          setError(errorText(error));
           setResponse({
             ...initial,
             result: service.feedback.apply(effectiveQuery, best),
-            notice: "Using local search",
           });
         }
       } finally {

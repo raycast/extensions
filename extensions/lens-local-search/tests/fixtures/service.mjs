@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 import { createInterface } from "node:readline";
 const send = (value) => process.stdout.write(JSON.stringify(value) + "\n");
+const targets = [];
 let lastSearch; let prewarms = 0; let pages = false; let repeatPage = false; let wrongKindFirst = false;
 send({ event: "ready" });
 createInterface({ input: process.stdin }).on("line", (line) => {
   const request = JSON.parse(line);
+  if (request.op === "cancel_render") { targets.push(request.target); return; }
+  if (request.op === "cancelled-renders") return send({ id: request.id, targets });
   if (request.op === "hang") return;
   if (request.op === "invalid") return process.stdout.write("not json\n");
   if (request.op === "exit") return process.exit(1);

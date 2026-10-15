@@ -230,6 +230,7 @@ export async function indexFolders(
       (event) => {
         if (event.event === "sync")
           changed ||= [
+            event.scanned_directories,
             event.added,
             event.changed,
             event.moved,

@@ -201,3 +201,19 @@ test('long-query semantic spans use the selected start and end tokens when mergi
  },signal());
  assert.equal(plan.semantic,words.slice(3,11).join(' '));
 });
+
+test("choice-only local models can compose explicit filename constraints without invented confidence", async () => {
+  const steps = [{ op: "ext_is", value: "pdf", source: "PDFs" }, { op: "name_prefix", value: "RE" }, { op: "and" }, { op: "done" }];
+  const scored = replay(steps);
+  const choices = async (state: string, questions: Record<string, Question>) => Object.fromEntries(
+    Object.entries(await scored(state, questions)).map(([name, answer]) => [name, { choice: answer.choice }])
+  );
+  const plan = await compilePlan("PDFs whose name starts with RE", "auto", choices, signal(), undefined, false);
+  assert.deepEqual(plan.filter, { op: "and", args: [{ op: "ext_is", value: "pdf" }, { op: "name_prefix", value: "RE" }] });
+  assert.equal(plan.uncertain, true);
+  const descriptive = replay([{ op: "semantic", value: "kth exam" }, { op: "done", value: "exam" }]);
+  const broad = await compilePlan("kth exam", "auto", async (state, questions) => Object.fromEntries(
+    Object.entries(await descriptive(state, questions)).map(([name, answer]) => [name, { choice: answer.choice }])
+  ), signal(), undefined, false);
+  assert.equal(broad.filter, undefined); assert.equal(broad.semantic, "kth exam");
+});

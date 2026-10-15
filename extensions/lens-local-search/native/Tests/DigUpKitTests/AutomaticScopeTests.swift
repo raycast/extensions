@@ -114,5 +114,11 @@ import Testing
         #expect(manifest == [b.path])
         let report = try JSONDecoder().decode(AutomaticScope.Report.self, from: Data(contentsOf: root.appendingPathComponent("index/scope-report.json")))
         #expect(report.version == 1 && report.groups[0].canonical == main.path)
+        try store.db.run("DELETE FROM segments WHERE file = (SELECT id FROM files WHERE path = ?)", [.text(b.path)])
+        try store.db.run("DELETE FROM files WHERE path = ?", [.text(b.path)])
+        _ = try file(copy, "same.py", "my later edit")
+        #expect(try scope.update() == 0)
+        let refreshed = try JSONDecoder().decode([String].self, from: Data(contentsOf: root.appendingPathComponent("index/scope-excluded.json")))
+        #expect(!refreshed.contains(b.path))
     }
 }

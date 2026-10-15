@@ -403,3 +403,31 @@ test('singleton choices are resolved locally, including mixed batches, without i
  assert.equal(calls,1);assert.equal(mixed.forced.choice,'only');assert.equal(mixed.choice.choice,'a');
  const abort=new AbortController();abort.abort();await assert.rejects(model.request('synthetic',{forced:only},abort.signal),/abort/i);assert.equal(calls,1);
 });
+
+test("local adapter carries choice-only filename plans through interpretation", async (t) => {
+  const steps = ["ext_is", "name_prefix", "and", "done"];
+  let turn = 0, value = "PDFs", calls = 0;
+  t.mock.method(globalThis, "fetch", async (url: string, options: RequestInit) => {
+    assert.equal(url, "http://127.0.0.1:11434/v1/chat/completions");
+    calls++;
+    const body = JSON.parse(String(options.body));
+    const system = body.messages[0].content as string;
+    const questions = JSON.parse(system.split("fixed questions: ")[1].split(". Return JSON")[0]);
+    const answers: Record<string, string> = {};
+    for (const [name, question] of Object.entries(questions) as [string, { criteria: Record<string, string> }][]) {
+      if (name === "operation") { answers[name] = steps[turn++]; value = answers[name] === "ext_is" ? "PDFs" : "RE"; }
+      else if (name === "filename_scope") answers[name] = "explicit";
+      else if (name === "value") answers[name] = Object.keys(question.criteria).find(key => question.criteria[key] === value)!;
+      else if (name === "normalized") answers[name] = "pdf";
+      else if (name === "supported") answers[name] = "yes";
+      else if (name === "coverage") answers[name] = "complete";
+      else answers[name] = name === "file_type" ? "documents" : Object.keys(question.criteria)[0];
+      assert.ok(Object.hasOwn(question.criteria, answers[name]), `invalid fixture choice for ${name}`);
+    }
+    return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify(answers) } }] }));
+  });
+  const result = await new QueryInterpreter({ decisionProvider: "local", localDecisionModel: "fixture" }).interpret("PDFs whose name starts with RE", "auto", signal());
+  assert.deepEqual(result.plan?.filter, { op: "and", args: [{ op: "ext_is", value: "pdf" }, { op: "name_prefix", value: "RE" }] }, JSON.stringify({result,turn,calls}));
+  assert.equal(result.plan?.uncertain, true);
+  assert.ok(calls > 1);
+});

@@ -286,25 +286,28 @@ export class SearchService {
     if (this.failure) return Promise.reject(this.failure);
     const id = ++this.sequence;
     return new Promise((resolve, reject) => {
-      const timer = setTimeout(
-        () =>
-          this.fail(
-            new Error(
-              "Lens took too long to respond. Reopen the command to retry.",
-            ),
-          ),
-        timeout,
+      const timeoutError = new Error(
+        "Lens took too long to respond. Reopen the command to retry.",
       );
+      const timer = setTimeout(() => {
+        if (request.op === "render") cancel(timeoutError);
+        else this.fail(timeoutError);
+      }, timeout);
       const cleanup = () => {
         clearTimeout(timer);
-        signal?.removeEventListener("abort", cancel);
+        signal?.removeEventListener("abort", abort);
       };
-      const cancel = () => {
+      const cancel = (reason: unknown) => {
         this.pending.delete(id);
         cleanup();
-        reject(signal!.reason);
+        if (request.op === "render" && !this.child.stdin.destroyed)
+          this.child.stdin.write(
+            JSON.stringify({ op: "cancel_render", target: id }) + "\n",
+          );
+        reject(reason);
       };
-      signal?.addEventListener("abort", cancel, { once: true });
+      const abort = () => cancel(signal!.reason);
+      signal?.addEventListener("abort", abort, { once: true });
       this.pending.set(id, { resolve, reject, cleanup });
       this.child.stdin.write(JSON.stringify({ ...request, id }) + "\n");
     });

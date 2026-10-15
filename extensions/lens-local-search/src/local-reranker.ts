@@ -266,6 +266,11 @@ export async function rerankLocally(
               {
                 op: "text",
                 segment: hit.segment_id,
+                path: hit.path,
+                modified: hit.modified,
+                size: hit.size,
+                segment_kind: hit.segment,
+                loc: hit.loc ?? null,
                 code: hit.kind === "code",
               },
               15_000,

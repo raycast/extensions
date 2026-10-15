@@ -134,7 +134,7 @@ test("real DigUp searches meaning, filters kinds and previews text", { skip: !pr
   assert.ok(result.hits.every((hit) => hit.kind === "doc" || hit.kind === "pdf"));
   const hit = result.hits.find((hit) => hit.path.endsWith("Glass material.md"));
   assert.ok(hit, "semantic search finds the glass description");
-  const text = await service.request({ op: "text", segment: hit.segment_id, code: false });
+  const text = await service.request({ op: "text", segment: hit.segment_id, path: hit.path, modified: hit.modified, size: hit.size, segment_kind: hit.segment, loc: hit.loc ?? null, code: false });
   assert.match(String(text.text), /refraction/);
   assert.deepEqual((await service.search("glass", "video")).hits, []);
   const status = await service.request({ op: "status" });
@@ -218,4 +218,16 @@ test('All Files preserves reciprocal-rank evidence through later scoring instead
  const result=await service.search('topic','all');
  assert.equal(result.hits[0].path,target.path);assert.ok(result.localScores!.get(result.hits[0])!>result.localScores!.get(video)!);
  assert.equal(rankCandidates(result,{c0:.1}).hits[0].path,target.path,'a later stage cannot undo rank fusion with incompatible raw scales');
+});
+
+test("cancelled and timed-out previews do not stop search requests", async (t) => {
+  const service = fake(); t.after(() => service.close());
+  const controller = new AbortController();
+  const preview = service.request({ op: "render", delay: 150 }, 1000, controller.signal);
+  controller.abort(new Error("preview moved"));
+  await assert.rejects(preview, /preview moved/);
+  await assert.rejects(service.request({ op: "render", delay: 150 }, 40), /too long/);
+  assert.equal((await service.request({ op: "echo" })).ok, true);
+  const targets = (await service.request({ op: "cancelled-renders" })).targets;
+  assert.equal((targets as number[]).length, 2);
 });

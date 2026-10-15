@@ -154,6 +154,7 @@ export async function compilePlan(
   ask: Ask,
   signal: AbortSignal,
   onSemantic?: () => void,
+  calibrated = true,
 ): Promise<SearchPlan> {
   const tokens = [...query.matchAll(/\S+/g)].map((m, i) => ({
     id: `t${i}`,
@@ -314,14 +315,16 @@ export async function compilePlan(
       const probability = answer.probabilities?.explicit;
       filenameScope =
         intent === "explicit" &&
-        typeof answer.confidence === "number" &&
-        answer.confidence >= 0.8 &&
-        typeof probability === "number" &&
-        Number.isFinite(probability) &&
-        probability >= 0.8 &&
-        probability <= 1
+        (!calibrated ||
+          (typeof answer.confidence === "number" &&
+            answer.confidence >= 0.8 &&
+            typeof probability === "number" &&
+            Number.isFinite(probability) &&
+            probability >= 0.8 &&
+            probability <= 1))
           ? "explicit"
           : "descriptive";
+      if (!calibrated && filenameScope === "explicit") uncertain = true;
       if (
         filenameScope === "descriptive" &&
         String(answers.operation?.choice).startsWith("name_")

@@ -97,7 +97,7 @@ test("standalone engine downloads from cache, indexes, and recovers search witho
   assert.ok((await search.search("soft translucent glass reflections", "documents")).hits.some((hit) => hit.path.endsWith("Glass renamed.md")));
   const changedCode = (await search.search("code: commit_transaction database", "code")).hits.find((hit) => hit.path.endsWith("retry.py"));
   assert.ok(changedCode);
-  assert.match(String((await search.request({ op: "text", segment: changedCode.segment_id, code: true })).text), /commit_transaction/);
+  assert.match(String((await search.request({ op: "text", segment: changedCode.segment_id, path: changedCode.path, modified: changedCode.modified, size: changedCode.size, segment_kind: changedCode.segment, loc: changedCode.loc ?? null, code: true })).text), /commit_transaction/);
   unlinkSync(join(docs, "Ocean notes.md")); unlinkSync(join(code, "retry.py"));
   await indexFolders(local, () => {});
   assert.ok((await search.search("ocean tides and waves", "documents")).hits.every((hit) => !hit.path.endsWith("Ocean notes.md")));
@@ -165,5 +165,26 @@ ${mode === "success" ? 'console.log(JSON.stringify({event:"done"}));' : mode ===
     }
     assert.equal(progress, true);
     assert.equal(JSON.parse(readFileSync(join(local.models,"reranker","request.json"),"utf8"))[3], join(local.models,"reranker"));
+  }
+});
+
+test("filesystem events refresh exclusions even when all indexed deltas are zero; idle ticks skip comparison", async (t) => {
+  const root = mkdtempSync(join(tmpdir(), "lens-edited-scope-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const binary = join(root, "engine.mjs");
+  writeFileSync(binary, `#!/usr/bin/env node
+import {readFileSync} from 'node:fs';
+const op=process.argv[2];
+console.log(JSON.stringify(op==='index-service'?{event:'sync',scanned_directories:Number(readFileSync(${JSON.stringify(join(root, "scanned"))},'utf8')),added:0,changed:0,moved:0,removed:0}:{event:op==='scope-service'?'scope':'done'}));
+`, { mode: 0o755 });
+  const local = { ...configurationFromPreferences({ codeRoots: [root] }, assets, root), binary };
+  mkdirSync(local.index, { recursive: true });
+  writeFileSync(join(local.index, "scope-excluded.json"), "[]");
+  writeFileSync(join(local.index, "scope-configuration.json"), JSON.stringify([local.roots, local.codeRoots, local.excluded, local.codeExcluded, local.types]));
+  for (const scanned of [0, 1, 0]) {
+    writeFileSync(join(root, "scanned"), String(scanned));
+    const events: string[] = [];
+    await indexFolders(local, event => events.push(String(event.event)));
+    assert.equal(events.includes("scope"), scanned > 0);
   }
 });

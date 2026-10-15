@@ -355,7 +355,7 @@ test("failed strict retrieval never falls back to unfiltered keyword files", { s
     await new Promise((resolve) => setTimeout(resolve, 380));
     const view = app.render(app.Command, {}, values);
     assert.equal(elements(view).some((node) => node.props.hit), false);
-    assert.match(String(elements(view).find((node) => node.type === app.api.List.EmptyView)?.props.description), /starts with.*RE/);
+    assert.match(String(elements(view).find((node) => node.type === app.api.List.EmptyView)?.props.description), /Retrieval failed/);
   } finally { cleanup(); }
 });
 
@@ -475,3 +475,20 @@ test('automatic selection follows the new top result while a deliberate choice s
   values[7]=true;view=app.render(app.Command,{},values);
   assert.equal(view.props.selectedItemId,a.path);assert.ok(!elements(view).some(n=>n.props.id==='lens:show-weaker'));
  });
+
+test("a stopped native search stays visible as an error after interpretation", { skip: !build }, async () => {
+  const app = command();
+  const values = state("kth exam", "auto", { hits: [], strong: 0, meaning: false }, {
+    search: async () => { throw new Error("Lens search stopped unexpectedly. Reopen the command."); },
+  });
+  app.render(app.Command, {}, values);
+  const cleanup = app.effects()[1]() as unknown as () => void;
+  try {
+    await new Promise(resolve => setTimeout(resolve, 450));
+    const view = app.render(app.Command, {}, values);
+    const text = JSON.stringify(view);
+    assert.match(text, /Unable to Search/);
+    assert.match(text, /stopped unexpectedly/);
+    assert.doesNotMatch(text, /Using local search/);
+  } finally { cleanup(); }
+});

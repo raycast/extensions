@@ -3,6 +3,27 @@ import Testing
 @testable import DigUpKit
 
 @Suite struct DocumentSearchTests {
+    @Test func stalePassageIdentityNeverReturnsAnotherFilesTextOrContext() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("LensIdentity-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = try IndexStore(directory: root)
+        let a = try store.insert(Candidate(path: "/a.pdf", kind: .pdf, size: 1, mtime: 1, inode: 1, device: 1))
+        try store.addSegment(file: a, kind: .page, modality: .none, loc: 2, text: "old text")
+        let searcher = try Searcher(store: store, loadVectors: false)
+        let old = try #require(try searcher.search("old", queryVector: nil).first)
+        #expect(try searcher.passage(id: old.segmentID, path: old.path, modified: 1, size: 1, kind: "page", loc: 2)?.text == "old text")
+        let b = try store.insert(Candidate(path: "/b.pdf", kind: .pdf, size: 1, mtime: 1, inode: 2, device: 1))
+        try store.db.run("DELETE FROM fts WHERE rowid = ?", [.int(old.segmentID)])
+        try store.db.run("UPDATE segments SET file = ? WHERE id = ?", [.int(b), .int(old.segmentID)])
+        try store.db.run("INSERT INTO fts(rowid, body) VALUES(?, ?)", [.int(old.segmentID), .text("new text")])
+        #expect(try searcher.passage(id: old.segmentID, path: old.path, modified: 1, size: 1, kind: "page", loc: 2)?.text == nil)
+        #expect(try searcher.passage(id: old.segmentID, path: "/b.pdf", modified: 2, size: 1, kind: "page", loc: 2)?.text == nil)
+        #expect(try searcher.passage(id: old.segmentID, path: "/b.pdf", modified: 1, size: 2, kind: "page", loc: 2)?.text == nil)
+        #expect(try searcher.passage(id: old.segmentID, path: "/b.pdf", modified: 1, size: 1, kind: "page", loc: 3)?.text == nil)
+        let current = try searcher.passage(id: old.segmentID, path: "/b.pdf", modified: 1, size: 1, kind: "page", loc: 2)
+        #expect(current?.text == "new text" && current?.context == "new text")
+    }
+
     @Test func preservesIndependentContentPassagesAndNeverUsesFolderNamesAsContent() throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent("LensPassages-\(UUID())")
         defer { try? FileManager.default.removeItem(at: root) }

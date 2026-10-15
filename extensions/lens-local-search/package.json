@@ -143,7 +143,7 @@
     "dev": "ray develop",
     "build": "ray build -e dist -o dist",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "test": "npm run build && DIGUP_TEST_SEARCH=dist/search.js DIGUP_TEST_CONFIGURE=dist/configure.js DIGUP_TEST_COMMAND=dist/index-files.js node --experimental-strip-types --test tests/*.test.ts",
     "lint": "ray lint",
     "publish": "ray publish"
   },
