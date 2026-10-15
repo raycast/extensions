@@ -8,7 +8,7 @@
 - **Errors are shown**: lists show what went wrong (401/403 → check your API key, 404 → check API Base Path) with "Open Extension Preferences" and "Retry" actions instead of an empty list
 - **API key errors say what's wrong**: Plane's reason is shown (an invalid or expired key now reads "API key not valid" instead of a generic 403), and a pasted key's stray spaces or newline are trimmed
 - Lists no longer show a second error toast on top of the error screen
-- The menu bar and My Work Items no longer run the project scan at the same time; the second one waits for the first one's result, and a background menu bar refresh reuses a result from the last 5 minutes
+- The menu bar, My Work Items and the AI tool no longer run the project scan at the same time, even for different views or after falling back from the server filters: one scan per server, workspace and account serves both Assigned and Created, the second caller waits for it, and a background menu bar refresh reuses a result from the last 5 minutes
 - **Start and due dates** keep the day you picked: east of UTC, the form used to save the previous day
 - **Search Work Items** no longer sends a request for an empty query
 - **Search Projects → Work Items**: stable keys, `PROJ-12` identifiers, and full row actions

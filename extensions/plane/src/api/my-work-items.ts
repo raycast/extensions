@@ -27,7 +27,7 @@ import {
 } from "../helpers/my-work-items";
 import { accountKey } from "../helpers/keys";
 import { getApiBasePath } from "../helpers/urls";
-import { withScanLease } from "../helpers/scan-lease";
+import { getSharedScan, sharedScanKey } from "../helpers/shared-scan";
 import {
   BackendKind,
   backendChain,
@@ -69,8 +69,6 @@ export type MyWorkItemsResult = {
 
 type Me = { id: string; displayName?: string };
 type BackendResult = Pick<MyWorkItemsResult, "me" | "items" | "truncated" | "coverage">;
-
-const SCAN_MEMO_MS = 60 * 1000;
 
 /**
  * The last result per base URL, workspace, account and view, shared by the command, the menu bar and the list-my-work-items tool.
@@ -289,10 +287,6 @@ type ScanResult = {
 
 type ScanState = { project: Project; cursor?: string; done: boolean; pages: number };
 
-let scanMemo:
-  | { scope: ResultScope; at: number; promise: Promise<ScanResult>; served: Set<MyWorkItemsView> }
-  | undefined;
-
 /**
  * Work items assigned to or created by the current user, across member projects.
  *
@@ -351,32 +345,16 @@ async function scanProjects(): Promise<ScanResult> {
   };
 }
 
-/**
- * One scan serves both Assigned and Created, so switching views within a minute doesn't scan again.
- * Asking for a view the scan already served is a refresh (e.g. after an edit) and scans again.
- */
-function scanProjectsMemoized(view: MyWorkItemsView, scope: ResultScope): Promise<ScanResult> {
-  const now = Date.now();
-  if (
-    scanMemo &&
-    isSameScope(scanMemo.scope, scope) &&
-    now - scanMemo.at < SCAN_MEMO_MS &&
-    !scanMemo.served.has(view)
-  ) {
-    scanMemo.served.add(view);
-    return scanMemo.promise;
-  }
-  const promise = scanProjects();
-  scanMemo = { scope, at: now, promise, served: new Set([view]) };
-  promise.catch(() => {
-    if (scanMemo?.promise === promise) scanMemo = undefined;
-  });
-  return promise;
-}
-
 async function runScan(view: MyWorkItemsView, scope: ResultScope): Promise<BackendResult> {
   if (view !== "assigned" && view !== "created") throw new Error(`The project scan can't find ${view} work items.`);
-  const scan = await scanProjectsMemoized(view, scope);
+  // Shared per scope, not per view, and reached here whether the scan is first in the chain or a fallback.
+  const scan = await getSharedScan({
+    store: resultStore,
+    key: sharedScanKey(scope),
+    view,
+    run: scanProjects,
+    canStore: () => isSameScope(scope, currentScopeOrUndefined()),
+  });
   const items = scan.items.filter((item) =>
     view === "assigned" ? isAssignedTo(item, scan.me.id) : isCreatedBy(item, scan.me.id),
   );
@@ -419,43 +397,30 @@ export async function getMyWorkItems(
     throw new Error(`This Plane server can't list ${view} work items.`);
   }
 
-  const fetchFresh = async (): Promise<MyWorkItemsResult> => {
-    const { value, backend } = await runWithFallback(
-      chain,
-      (kind) =>
-        kind === "v2"
-          ? runV2(view, capabilities)
-          : kind === "custom"
-            ? runCustom(view, capabilities)
-            : runScan(view, scope),
-      (kind) => {
-        invalidateBackend(kind);
-        if (kind === "v2") capabilities.v2 = false;
-        if (kind === "custom") capabilities.custom = undefined;
-      },
-    );
-
-    const result: MyWorkItemsResult = {
-      ...value,
-      view,
-      backend,
-      supportedViews: supportedViews(capabilities),
-      fetchedAt: new Date().toISOString(),
-      scope,
-    };
-    writeSharedResult(result);
-    return result;
-  };
-
-  // v2 and the server filters cost a few requests; only the project scan needs coordinating.
-  if (chain[0] !== "scan") return fetchFresh();
-  return withScanLease({
-    store: resultStore,
-    leaseKey: `${sharedResultKey(scope, view)}|scan-lease`,
-    readResult: () => {
-      const shared = readSharedResult(view, scope);
-      return shared ? { value: shared, fetchedAt: new Date(shared.fetchedAt).getTime() } : undefined;
+  // v2 and the server filters cost a few requests; the project scan coordinates itself in `runScan`.
+  const { value, backend } = await runWithFallback(
+    chain,
+    (kind) =>
+      kind === "v2"
+        ? runV2(view, capabilities)
+        : kind === "custom"
+          ? runCustom(view, capabilities)
+          : runScan(view, scope),
+    (kind) => {
+      invalidateBackend(kind);
+      if (kind === "v2") capabilities.v2 = false;
+      if (kind === "custom") capabilities.custom = undefined;
     },
-    run: fetchFresh,
-  });
+  );
+
+  const result: MyWorkItemsResult = {
+    ...value,
+    view,
+    backend,
+    supportedViews: supportedViews(capabilities),
+    fetchedAt: new Date().toISOString(),
+    scope,
+  };
+  writeSharedResult(result);
+  return result;
 }
