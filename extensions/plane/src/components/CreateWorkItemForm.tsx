@@ -7,6 +7,7 @@ import useMe from "../hooks/useMe";
 import { useProjects } from "../hooks/useProjects";
 import { useCycles } from "../hooks/useCycles";
 import { useModules } from "../hooks/useModules";
+import { rowsFromProject } from "../helpers/project-scoped";
 import { useStates } from "../hooks/useStates";
 import { useLabels } from "../hooks/useLabels";
 import { useWorkspace } from "../hooks/useWorkspaces";
@@ -236,7 +237,7 @@ export default function CreateWorkItemForm(props: CreateWorkItemFormProps) {
 
       <Form.Dropdown title="Module" {...itemProps.moduleId} isLoading={isModulesLoading} placeholder="Select Module">
         <Form.Dropdown.Item key={"none"} value={""} title={"No Module"} />
-        {modules?.map((module) => (
+        {rowsFromProject(modules, values.projectId).map((module) => (
           <Form.Dropdown.Item key={module.id} value={module.id || ""} title={module.name || ""} />
         ))}
       </Form.Dropdown>

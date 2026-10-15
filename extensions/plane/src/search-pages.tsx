@@ -9,13 +9,15 @@ import { usePages } from "./hooks/usePages";
 import { getErrorStatus } from "./helpers/errors";
 import { getPagesUrl, getPageUrl } from "./helpers/work-items";
 import { parseHtmlToMarkdown } from "./helpers/parser";
+import { rowsFromProject } from "./helpers/project-scoped";
 import { planeClient } from "./api/auth";
 
 function SearchPages() {
   const { projects, isLoading: isLoadingProjects } = useMemberProjects();
   const [projectId, setProjectId] = useState<string | undefined>(undefined);
   const { data, isLoading, error, revalidate } = usePages(projectId, { execute: projectId !== undefined });
-  const pages = data ?? [];
+  // Pages of the previously selected project stay in `data` while this one loads; never show them under it.
+  const pages = rowsFromProject(data, projectId);
   const slug = planeClient?.workspaceSlug ?? "";
   const notAvailable = getErrorStatus(error) === 404;
 

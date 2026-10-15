@@ -11,6 +11,7 @@ import { useModules } from "./hooks/useModules";
 import { formatCycleProgress, getCycleProgress } from "./helpers/cycles";
 import { getModuleUrl } from "./helpers/work-items";
 import { capitalizeString } from "./helpers/strings";
+import { rowsFromProject } from "./helpers/project-scoped";
 import { planeClient } from "./api/auth";
 
 function SearchModules() {
@@ -23,10 +24,18 @@ function SearchModules() {
   const moduleProjects = projects.filter((project) => project.moduleView !== false);
   const [projectId, setProjectId] = useState("");
   const project = moduleProjects.find((item) => item.id === projectId) ?? moduleProjects[0];
-  const { modules, isLoading, error, pagination, mutate } = useModules(project?.id ?? "", {
+  const {
+    modules: allModules,
+    isLoading,
+    error,
+    pagination,
+    mutate,
+  } = useModules(project?.id ?? "", {
     execute: !!project?.id,
     showsErrorInline: true,
   });
+  // Modules of the previously selected project stay in `data` while this one loads; never show them under it.
+  const modules = rowsFromProject(allModules, project?.id);
   const slug = planeClient?.workspaceSlug ?? "";
   const listError = projectsError ?? error;
 

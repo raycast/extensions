@@ -30,6 +30,7 @@ import { checkReferenceWorkspace, formatWorkItemIdentifier, parseWorkItemIdentif
 import { describePlaneError } from "./helpers/errors";
 import { priorityToIcon } from "./helpers/icons";
 import { parseHtmlToMarkdown } from "./helpers/parser";
+import { FromProject, rowsFromProject } from "./helpers/project-scoped";
 import { planeClient } from "./api/auth";
 
 const OPEN_STATUSES: number[] = [IntakeStatus.Pending, IntakeStatus.Snoozed];
@@ -42,9 +43,11 @@ const STATUS_ICONS: Record<number, { source: Icon; tintColor: Color }> = {
   [IntakeStatus.Duplicate]: { source: Icon.Duplicate, tintColor: Color.SecondaryText },
 };
 
+type IntakeRow = FromProject<RawIntakeItem>;
+
 type IntakeMutate = (
   request: Promise<unknown>,
-  options: { optimisticUpdate: (data: RawIntakeItem[] | undefined) => RawIntakeItem[] },
+  options: { optimisticUpdate: (data: IntakeRow[] | undefined) => IntakeRow[] },
 ) => Promise<unknown>;
 
 async function applyIntakeUpdate({
@@ -276,7 +279,8 @@ function Intake() {
   const { data, isLoading, error, revalidate, mutate, pagination } = useIntakeItems(project?.id, {
     execute: !!project?.id && intakeEnabled,
   });
-  const items = intakeEnabled ? (data ?? []) : [];
+  // Rows of the previously selected project stay in `data` while this one loads; never show them under it.
+  const items = intakeEnabled ? rowsFromProject(data, project?.id) : [];
   const visible = items.filter((item) => showClosed || OPEN_STATUSES.includes(item.status ?? IntakeStatus.Pending));
   const pending = visible.filter((item) => (item.status ?? IntakeStatus.Pending) === IntakeStatus.Pending);
   const others = visible.filter((item) => (item.status ?? IntakeStatus.Pending) !== IntakeStatus.Pending);
