@@ -1,6 +1,7 @@
 import { requirePlaneClient } from "./auth";
 import { buildApiUrl, getApiBasePath, QueryValue } from "../helpers/urls";
 import { extractErrorMessage, parseProblem, parseRetryAfter } from "../helpers/problem";
+import type { RawPaginated } from "./types";
 import { PlaneApiError } from "../helpers/plane-api-error";
 
 export { PlaneApiError };
@@ -76,4 +77,19 @@ export async function planeRequest<T>(path: string, options: PlaneRequestOptions
 export function workspacePath(...segments: string[]): string {
   const slug = requirePlaneClient().workspaceSlug;
   return ["workspaces", slug, ...segments].map((segment) => encodeURIComponent(segment)).join("/");
+}
+
+/** Some v1 endpoints return a bare array, others a paginated object. */
+export function toResults<T>(response: T[] | RawPaginated<T> | undefined): T[] {
+  if (!response) return [];
+  return Array.isArray(response) ? response : (response.results ?? []);
+}
+
+/** Maps a paginated v1 response to the shape `useCachedPromise` pagination expects. */
+export function toPage<T, R>(response: RawPaginated<T>, map: (item: T) => R) {
+  return {
+    data: (response.results ?? []).map(map),
+    hasMore: !!response.next_page_results,
+    cursor: response.next_cursor,
+  };
 }

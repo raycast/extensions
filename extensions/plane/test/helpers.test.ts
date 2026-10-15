@@ -1,5 +1,32 @@
 import { describe, expect, it } from "vitest";
+import { deriveCycleAndModules } from "../src/helpers/activities";
 import { describePlaneError } from "../src/helpers/errors";
+import { applyWorkItemChange, toggleAssignee, toWorkItemSummary } from "../src/helpers/work-item-summary";
+
+describe("deriveCycleAndModules", () => {
+  it("replays cycle and module activity (newest first input)", () => {
+    const newestFirst = [
+      { id: "5", field: "modules", verb: "deleted", old_identifier: "m1" },
+      { id: "4", field: "cycles", verb: "updated", old_identifier: "c1", new_identifier: "c2", new_value: "Sprint 2" },
+      { id: "3", field: "modules", verb: "created", new_identifier: "m2", new_value: "Billing" },
+      { id: "2", field: "modules", verb: "created", new_identifier: "m1", new_value: "Auth" },
+      { id: "1", field: "cycles", verb: "created", new_identifier: "c1", new_value: "Sprint 1" },
+    ];
+    expect(deriveCycleAndModules(newestFirst)).toEqual({
+      cycle: { id: "c2", name: "Sprint 2" },
+      modules: [{ id: "m2", name: "Billing" }],
+    });
+  });
+
+  it("clears the cycle when removed", () => {
+    expect(
+      deriveCycleAndModules([
+        { id: "2", field: "cycles", verb: "deleted", old_identifier: "c1" },
+        { id: "1", field: "cycles", verb: "created", new_identifier: "c1", new_value: "Sprint 1" },
+      ]).cycle,
+    ).toBeUndefined();
+  });
+});
 
 describe("describePlaneError", () => {
   it("maps statuses to hints", () => {
@@ -17,5 +44,39 @@ describe("describePlaneError", () => {
     expect(describePlaneError({ status: 404 }).title).toBe("Check API Base Path");
     expect(describePlaneError({ status: 429 }).title).toBe("Plane rate limit reached");
     expect(describePlaneError(new Error("boom")).message).toBe("boom");
+  });
+});
+
+describe("work item summaries", () => {
+  const summary = toWorkItemSummary(
+    {
+      id: "wi",
+      name: "Fix",
+      sequence_id: 12,
+      project: "p",
+      state: { id: "s1", name: "Todo", color: "#fff", group: "unstarted" },
+      assignees: ["u1", { id: "u2", display_name: "b" }],
+      priority: "high",
+    },
+    { projectIdentifier: "ENG", workspaceSlug: "acme" },
+  );
+
+  it("normalizes expanded and plain fields", () => {
+    expect(summary.stateId).toBe("s1");
+    expect(summary.assigneeIds).toEqual(["u1", "u2"]);
+  });
+
+  it("applies optimistic changes", () => {
+    const changed = applyWorkItemChange(summary, {
+      stateId: "s2",
+      state: { id: "s2", name: "Done", color: "#0f0", group: "completed" },
+    });
+    expect(changed.state?.group).toBe("completed");
+    expect(changed.priority).toBe("high");
+  });
+
+  it("toggles assignees", () => {
+    expect(toggleAssignee(["a"], "b")).toEqual(["a", "b"]);
+    expect(toggleAssignee(["a", "b"], "b")).toEqual(["a"]);
   });
 });

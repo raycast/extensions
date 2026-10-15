@@ -6,15 +6,18 @@ import WorkItemListItem from "./components/WorkItemListItem";
 import AuthorizedView from "./components/AuthorizedView";
 import { useProjects } from "./hooks/useProjects";
 import { getProjectIcon } from "./helpers/icons";
+import { searchItemToSummary } from "./api/work-items";
 import ErrorEmptyView from "./components/ErrorEmptyView";
 import ChangeWorkspaceAction from "./components/actions/ChangeWorkspaceAction";
+import useMe from "./hooks/useMe";
 
 function SearchWorkItems() {
   const [query, setQuery] = useState("");
   const [projectId, setProjectId] = useState("");
 
   const { projects } = useProjects({});
-  const { isLoading, workItems, error, mutate, revalidate } = useWorkItems(query, projectId);
+  const { isLoading, workItems, error, revalidate } = useWorkItems(query, projectId);
+  const { me } = useMe();
   const hasQuery = query.trim().length > 0;
 
   const workItemsSectionSubtitle = workItems?.length === 1 ? "1 work item" : `${workItems?.length} work items`;
@@ -64,7 +67,12 @@ function SearchWorkItems() {
       )}
       <List.Section title="Work Items" subtitle={workItemsSectionSubtitle}>
         {workItems?.map((workItem) => (
-          <WorkItemListItem workItem={workItem} key={workItem.id} mutateWorkItemList={mutate} />
+          <WorkItemListItem
+            workItem={searchItemToSummary(workItem)}
+            key={workItem.id}
+            mutateWorkItemList={revalidate}
+            currentUserId={me?.id}
+          />
         ))}
       </List.Section>
     </List>

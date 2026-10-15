@@ -3,6 +3,8 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { getProjectIcon } from "../helpers/icons";
 import ProjectWorkItemsList from "./ProjectWorkItemsList";
 import ChangeWorkspaceAction from "./actions/ChangeWorkspaceAction";
+import { getProjectUrl } from "../helpers/work-items";
+import { planeClient } from "../api/auth";
 
 type ProjectItemListItemProps = {
   projectItem: Project;
@@ -39,6 +41,14 @@ export default function ProjectItemListItem({ projectItem }: ProjectItemListItem
             icon={Icon.BullsEye}
             title="Open Work Items"
             target={<ProjectWorkItemsList projectItem={projectItem} />}
+          />
+          {projectItem.id && planeClient ? (
+            <Action.OpenInBrowser url={getProjectUrl(planeClient.workspaceSlug, projectItem.id)} />
+          ) : null}
+          <Action.CopyToClipboard
+            title="Copy Project Identifier"
+            content={projectItem.identifier}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           />
           <ChangeWorkspaceAction />
         </ActionPanel>

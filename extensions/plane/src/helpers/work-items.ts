@@ -13,3 +13,15 @@ export const getWorkItemBrowseUrl = (slug: string, project: Project, workItem: I
 export const getWorkItemUrlWithIdentifier = (slug: string, workItemIdentifier: string) => {
   return `${getAppBaseUrl()}/${slug}/browse/${workItemIdentifier}`;
 };
+
+export const getProjectUrl = (slug: string, projectId: string) => {
+  return `${getAppBaseUrl()}/${slug}/projects/${projectId}/issues`;
+};
+
+export const getCycleUrl = (slug: string, projectId: string, cycleId: string) => {
+  return `${getAppBaseUrl()}/${slug}/projects/${projectId}/cycles/${cycleId}`;
+};
+
+export const getModuleUrl = (slug: string, projectId: string, moduleId: string) => {
+  return `${getAppBaseUrl()}/${slug}/projects/${projectId}/modules/${moduleId}`;
+};

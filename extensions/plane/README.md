@@ -29,12 +29,13 @@ A powerful Raycast extension for managing work items in [Plane](https://plane.so
   - Markdown support in descriptions
   - Start date and due date selection
 
-- **Quick Actions** on work items:
+- **Quick Actions** on every work item row and in the detail view:
   - Edit work item (⌘⇧E)
-  - Update state (⌘⇧S)
-  - Update priority (⌘⇧P)
-  - View detailed work item information
+  - Update state (⌘⇧S) and priority (⌘⇧P), applied optimistically
+  - Assign to me (⌘⇧A) and add a comment (⌘⇧M)
+  - Copy identifier (⌘⇧I), URL (⌘⇧C), or Markdown link (⌘⇧L)
   - Change workspace (⌘⇧W)
+- **Work item detail** shows assignees, labels, cycle, module, dates, and the latest comments
 
 ### 🔍 Search & Discovery
 

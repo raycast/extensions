@@ -34,6 +34,7 @@ export function useProject(projectId: string) {
   const { data, error, isLoading, mutate } = useCachedPromise(
     (projectId: string) => getProject({ projectId }),
     [projectId],
+    { execute: !!projectId },
   );
 
   return {

@@ -10,11 +10,14 @@
 - Lists no longer show a second error toast on top of the error screen
 - **Start and due dates** keep the day you picked: east of UTC, the form used to save the previous day
 - **Search Work Items** no longer sends a request for an empty query
+- **Search Projects → Work Items**: stable keys, `PROJ-12` identifiers, and full row actions
 - The API key is no longer part of the LocalStorage key name (now a SHA-256 hash; the old key is migrated once)
 
 ### Added
 
 - **Change Workspace** (⌘⇧W) in every list: type a new slug (API key) or pick any workspace that installed the app (OAuth)
+- Row actions everywhere: open detail, open in browser, copy identifier / URL / Markdown link, update state and priority (optimistic), assign to me, add comment, edit
+- Work item detail shows assignees, labels, cycle, module, created/updated dates, and the latest comments
 
 ## [Show State Color in Search Projects > Work Items] - 2026-01-23
 

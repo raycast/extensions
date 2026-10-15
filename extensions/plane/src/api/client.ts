@@ -9,6 +9,7 @@ import {
   WorkItemsApi,
   MembersApi,
   WorkItemTypesApi,
+  WorkItemCommentsApi,
   type Middleware,
 } from "@makeplane/plane-node-sdk";
 import { getApiBasePath } from "../helpers/urls";
@@ -46,6 +47,7 @@ export class PlaneClient {
   workspaceSlug: string;
   workItemsApi: WorkItemsApi;
   workItemTypesApi: WorkItemTypesApi;
+  workItemCommentsApi: WorkItemCommentsApi;
   projectsApi: ProjectsApi;
   labelsApi: LabelsApi;
   statesApi: StatesApi;
@@ -67,6 +69,7 @@ export class PlaneClient {
     this.workspaceSlug = workspaceSlug;
     this.workItemsApi = new WorkItemsApi(this.config);
     this.workItemTypesApi = new WorkItemTypesApi(this.config);
+    this.workItemCommentsApi = new WorkItemCommentsApi(this.config);
     this.projectsApi = new ProjectsApi(this.config);
     this.labelsApi = new LabelsApi(this.config);
     this.statesApi = new StatesApi(this.config);
