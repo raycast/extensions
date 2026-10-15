@@ -1,7 +1,9 @@
-import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import type { JSX } from "react";
 
 import type { SpaceItem } from "../api/types";
+import { markRead } from "../api/unread";
+import { showChatError } from "../helpers/feedback";
 import { spaceUrl } from "../helpers/links";
 import { OpenInChatAction } from "./OpenInChatAction";
 import { SendMessageForm } from "./SendMessageForm";
@@ -19,6 +21,29 @@ export function SendMessageAction({ item, onSent }: { item: SpaceItem; onSent?: 
   );
 }
 
+/** Marks the space read (`updateSpaceReadState`). */
+export function MarkAsReadAction({ item, onMarked }: { item: SpaceItem; onMarked?: () => void }) {
+  return (
+    <Action
+      title="Mark as Read"
+      icon={Icon.CheckCircle}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+      onAction={async () => {
+        const toast = await showToast({ style: Toast.Style.Animated, title: "Marking as read" });
+        try {
+          await markRead(item.space.name);
+          toast.style = Toast.Style.Success;
+          toast.title = `Marked ${item.title} as read`;
+          onMarked?.();
+        } catch (error) {
+          await toast.hide();
+          await showChatError(error);
+        }
+      }}
+    />
+  );
+}
+
 interface SpaceActionsProps {
   item: SpaceItem;
   onVisit?: () => void;
@@ -26,8 +51,8 @@ interface SpaceActionsProps {
   children?: JSX.Element | JSX.Element[] | null;
 }
 
-/** View Messages, Send Message, Open and Copy Link for a space. */
-export function SpaceActions({ item, onVisit, children }: SpaceActionsProps) {
+/** View Messages, Send Message, Open, Copy Link and Mark as Read for a space. */
+export function SpaceActions({ item, onVisit, onChange, children }: SpaceActionsProps) {
   const url = spaceUrl(item.space);
   return (
     <ActionPanel title={item.title}>
@@ -37,6 +62,7 @@ export function SpaceActions({ item, onVisit, children }: SpaceActionsProps) {
         <OpenInChatAction url={url} />
       </ActionPanel.Section>
       <ActionPanel.Section>
+        <MarkAsReadAction item={item} onMarked={onChange} />
         <Action.CopyToClipboard title="Copy Link" content={url} shortcut={Keyboard.Shortcut.Common.Copy} />
         {item.email ? (
           <Action.CopyToClipboard

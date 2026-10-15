@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-chat",
   "title": "Google Chat",
-  "description": "Search spaces and direct messages, read and reply to messages, and send messages in Google Chat.",
+  "description": "Search spaces and direct messages, read and reply to messages, see your unread chats, and send messages in Google Chat.",
   "icon": "google-chat-icon.png",
   "author": "smrehan",
   "license": "MIT",
@@ -25,8 +25,43 @@
       "name": "search-spaces",
       "title": "Search Spaces & DMs",
       "subtitle": "Google Chat",
-      "description": "Search your spaces, group chats and direct messages, read their messages, and send to them.",
+      "description": "Search your spaces, group chats and direct messages, read their messages, and send or mark them as read.",
       "mode": "view"
+    },
+    {
+      "name": "my-messages",
+      "title": "My Messages",
+      "subtitle": "Google Chat",
+      "description": "Your conversations, like Google Chat's Home: unread ones first with counts and mentions, then the rest by latest activity, each with the latest message from someone else. Switch to Unread only with the dropdown or ⌘U.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultView",
+          "title": "Default View",
+          "description": "What My Messages shows the first time you open it. Afterwards it remembers your last choice.",
+          "type": "dropdown",
+          "required": false,
+          "default": "all",
+          "data": [
+            {
+              "title": "All",
+              "value": "all"
+            },
+            {
+              "title": "Unread only",
+              "value": "unread"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "unread-count",
+      "title": "Unread Chat",
+      "subtitle": "Google Chat",
+      "description": "Shows your unread Google Chat total in root search, checked every 5 minutes after you run it once. Running it opens the conversation when only one has unread messages, else My Messages' unread view.",
+      "mode": "no-view",
+      "interval": "5m"
     },
     {
       "name": "send-message",
@@ -79,6 +114,14 @@
       "description": "Browser or app that opens Google Chat links. Empty uses your default browser.",
       "type": "appPicker",
       "required": false
+    },
+    {
+      "name": "unreadLookbackDays",
+      "title": "Unread Lookback (Days)",
+      "description": "Only unread messages from this many recent days are counted.",
+      "type": "textfield",
+      "required": false,
+      "default": "14"
     }
   ],
   "dependencies": {
