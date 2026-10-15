@@ -1,6 +1,6 @@
 # Morgen Calendar Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-15
 
 - Create timed and all-day events in connected calendars.
 - Browse, inspect, edit, and delete upcoming events.
