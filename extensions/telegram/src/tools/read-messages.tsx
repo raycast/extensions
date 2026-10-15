@@ -2,12 +2,12 @@ import { getChatMessages } from "../services/telegram-client";
 import { getConfig, ensureAuthenticated } from "../utils/auth";
 import { handleTelegramError } from "../utils/errors";
 
-interface Arguments {
+type Input = {
   chatId: string;
   limit?: number;
-}
+};
 
-export default async function ReadMessages(args: Arguments) {
+export default async function ReadMessages(args: Input) {
   try {
     const { chatId, limit = 20 } = args;
 

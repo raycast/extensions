@@ -153,6 +153,7 @@
 /extensions/array-this                                              @matheus-depaula
 /extensions/ars-technica                                            @edwin-dd-ong
 /extensions/arxiv                                                   @koayon @pernielsentikaer @osteele
+/extensions/aryan-techie-blog                                       @Aryan-Techie
 /extensions/asafamos-accessibility-scanner                          @asafamos
 /extensions/asana                                                   @thomaslombart @spaceDolph1n @tuzemec @xmok @abcd-ca @nulltrope @0xdhrv
 /extensions/ascii-art-wallpaper                                     @theodaguier @alexibuild
@@ -178,6 +179,7 @@
 /extensions/auto-quit-app                                           @koinzhang @alejandrot96
 /extensions/autumn                                                  @xmok
 /extensions/avatar                                                  @koinzhang @madza91
+/extensions/aven                                                    @Infonautica
 /extensions/average-saham-indonesia                                 @uluumbch
 /extensions/awesome-mac                                             @ViGeng
 /extensions/awork                                                   @Malte-Hypercode @Malte-Hypercode @Malte-Hypercode @Malte-Hypercode
@@ -413,7 +415,7 @@
 /extensions/cilium-docs                                             @darox @pernielsentikaer
 /extensions/cinemas-nos                                             @DiogoFerrer
 /extensions/circle-ci                                               @qeude @kudrykv @jesse-c
-/extensions/circleback                                              @arguiot
+/extensions/circleback                                              @arguiot @byigitt
 /extensions/citation-generator                                      @AbhinavPalacharla
 /extensions/cl-indicators                                           @rodrigoherera
 /extensions/cl1p                                                    @meslva
@@ -645,6 +647,7 @@
 /extensions/datetime-format-converter                               @yangxyo @yisshengyouni @pernielsentikaer @hemangkinra @jose-elias-alvarez @bestemic @ridemountainpig @shanto462
 /extensions/dawa                                                    @SimonJ @pernielsentikaer
 /extensions/day-one                                                 @AntonNiklasson @bestemic @Fizzbow
+/extensions/daycal-google-calendar                                  @JonahTweed
 /extensions/days-until-christmas                                    @MEGApixel23 @erics118 @jacpd @pernielsentikaer
 /extensions/days2                                                   @superment
 /extensions/daytona                                                 @stefanicjuraj
@@ -1143,7 +1146,7 @@
 /extensions/google-scholar                                          @llfmaia
 /extensions/google-search                                           @mblode @VBenny42 @ridemountainpig @jlokos @YourMCGeek @alexibuild @tofrankie @chrismessina
 /extensions/google-tasks                                            @elliotdes @pernielsentikaer @erikvdp @ridemountainpig @AviralSaxena
-/extensions/google-translate                                        @gebeto @FezVrasta @ickas @metakirby5 @tangerine1202 @nirtamir2 @pernielsentikaer @rasitayaz @Popalay @LitoMore @channingkuo @likid1412 @xmok @brucemakes012 @alexibuild @ridemountainpig
+/extensions/google-translate                                        @gebeto @FezVrasta @ickas @metakirby5 @tangerine1202 @nirtamir2 @pernielsentikaer @rasitayaz @Popalay @LitoMore @channingkuo @likid1412 @xmok @brucemakes012 @alexibuild @ridemountainpig @Anoninz
 /extensions/google-trends                                           @kkange
 /extensions/google-workspace                                        @thomaslombart @mathieudutour @marcmagn1 @mepearso @jbjanot @ridemountainpig @ViGeng @xilopaint @faridrashidi @anupchavan
 /extensions/goose-2fa                                               @eachann1024
@@ -1764,7 +1767,7 @@
 /extensions/mobile-provisions                                       @Ernest0-Production
 /extensions/mobius-materials                                        @tjwds
 /extensions/mochi                                                   @kawamataryo
-/extensions/moco                                                    @eviscares @el-schneider
+/extensions/moco                                                    @eviscares @el-schneider @TheFRedFox
 /extensions/modbus-toolkit                                          @TwoMental
 /extensions/model-context-protocol-registry                         @thomaspaulmann @nagauta @pernielsentikaer @porenes
 /extensions/models-dev                                              @carlesandres
@@ -1792,6 +1795,7 @@
 /extensions/moodist                                                 @chandlervdw @pernielsentikaer
 /extensions/moon-mansions                                           @minhaajre
 /extensions/moon-phrase                                             @bucketfish
+/extensions/morgen-calendar                                         @Maxaccurate
 /extensions/morning-coffee                                          @olimynameis
 /extensions/motion-rosetta                                          @gersonsebastianx
 /extensions/mound-for-pile                                          @cr34t1ve
@@ -3296,7 +3300,7 @@
 /extensions/windows-domain                                          @tonka3000
 /extensions/windows-environment-variables                           @devohmycode
 /extensions/windows-screenshot                                      @afaanbhat-9
-/extensions/windows-terminal                                        @theycallhermax @artistro08 @muhammadrizo-y
+/extensions/windows-terminal                                        @theycallhermax @artistro08 @muhammadrizo-y @TakenMC
 /extensions/windows-to-linux-path                                   @Showtc
 /extensions/windsurf                                                @vikasbnsl
 /extensions/winget                                                  @ercaneray @ilia-glushchenko @Net-zen
