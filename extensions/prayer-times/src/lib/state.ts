@@ -90,7 +90,8 @@ export function alertsForSlot(slot: PrayerSlot, windows: AlertWindows): PrayerAl
       id: `${slot.id}:jamaat`,
       slot,
       kind: "jamaat",
-      at: at < slot.start ? slot.start : at,
+      // Wait for the start, unless jamaat is the start (combined prayers), which would leave no window.
+      at: at < slot.start && slot.start < slot.jamaat ? slot.start : at,
       expires: slot.jamaat,
     });
   }

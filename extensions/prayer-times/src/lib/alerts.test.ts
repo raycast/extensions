@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { describeAlert } from "./alerts";
-import { alertsForSlot } from "./state";
+import { alertsForSlot, dueAlerts } from "./state";
 import { PrayerSlot } from "./prayers";
 
 vi.mock("@raycast/api", () => ({ launchCommand: vi.fn(), LaunchType: {} }));
@@ -34,5 +34,21 @@ describe("heads-up alert", () => {
   it("falls back to the start for a prayer without jamaat", () => {
     const noJamaat = { ...asr, jamaat: undefined };
     expect(describeAlert(noJamaat, "headsUp", at(16, 18), "jamaat").title).toBe("Asr in 15m");
+  });
+});
+
+describe("jamaat warning", () => {
+  it("fires before the start for a combined prayer whose time starts at its jamaat", () => {
+    // Ja'fari Asr combined with Dhuhr: start and jamaat are both 13:40.
+    const combined: PrayerSlot = { ...asr, start: at(13, 40), jamaat: at(13, 40) };
+    const w = { ...windows, headsUpMinutes: 0, jamaatReminderMinutes: 10, dueAt: "start" as const };
+    const jamaat = alertsForSlot(combined, w).find((alert) => alert.kind === "jamaat")!;
+    expect([jamaat.at, jamaat.expires]).toEqual([at(13, 30), at(13, 40)]);
+    expect(dueAlerts([combined], at(13, 30), new Set(), new Set(), w).map((alert) => alert.kind)).toEqual(["jamaat"]);
+  });
+
+  it("still waits for the start when the jamaat is after it", () => {
+    const w = { ...windows, jamaatReminderMinutes: 20, dueAt: "start" as const };
+    expect(alertsForSlot(asr, w).find((alert) => alert.kind === "jamaat")?.at).toEqual(asr.start);
   });
 });
