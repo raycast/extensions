@@ -4,6 +4,7 @@ import { plane, requirePlaneClient } from "./api/auth";
 import { getMyWorkItems } from "./api/my-work-items";
 import { describePlaneError } from "./helpers/errors";
 import { countWorkItems, formatWorkItemsSubtitle, localDateString } from "./helpers/work-item-counts";
+import { HANDOFF_MAX_AGE_MS, MyWorkItemsLaunchContext } from "./helpers/my-work-items";
 
 /** A background run reuses a result My Work Items fetched in the last 5 minutes. */
 const BACKGROUND_MAX_AGE_MS = 5 * 60 * 1000;
@@ -12,8 +13,11 @@ function isUserInitiated() {
   return environment.launchType === LaunchType.UserInitiated;
 }
 
-async function openMyWorkItems() {
-  if (isUserInitiated()) await launchCommand({ name: "my-work-items", type: LaunchType.UserInitiated });
+/** `handOff`: the assigned items were just fetched, so My Work Items reuses them instead of loading again. */
+async function openMyWorkItems(handOff = false) {
+  if (!isUserInitiated()) return;
+  const context: MyWorkItemsLaunchContext | undefined = handOff ? { reuseResultMs: HANDOFF_MAX_AGE_MS } : undefined;
+  await launchCommand({ name: "my-work-items", type: LaunchType.UserInitiated, context });
 }
 
 /**
@@ -29,16 +33,18 @@ async function command() {
     return;
   }
 
+  let fetched = false;
   try {
     const result = await getMyWorkItems("assigned", {
       maxAgeMs: isUserInitiated() ? undefined : BACKGROUND_MAX_AGE_MS,
     });
+    fetched = true;
     const counts = countWorkItems(result.items, result.me?.id, localDateString());
     await updateCommandMetadata({ subtitle: formatWorkItemsSubtitle(counts, result.truncated) });
   } catch (error) {
     await updateCommandMetadata({ subtitle: `Couldn't check: ${describePlaneError(error).title}` });
   }
-  await openMyWorkItems();
+  await openMyWorkItems(fetched);
 }
 
 const authorized = withAccessToken(plane)(command);

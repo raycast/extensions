@@ -1,4 +1,13 @@
-import { Action, ActionPanel, Icon, launchCommand, LaunchType, List, updateCommandMetadata } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  launchCommand,
+  LaunchProps,
+  LaunchType,
+  List,
+  updateCommandMetadata,
+} from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import AuthorizedView from "./components/AuthorizedView";
@@ -8,6 +17,7 @@ import { getCachedCapabilities } from "./api/work-item-backend";
 import { applyWorkItemChange } from "./helpers/work-item-summary";
 import { WorkItemMutator } from "./components/actions/WorkItemActions";
 import { BACKEND_LABELS, MyWorkItemsView, supportedViews } from "./helpers/work-item-backends";
+import { getHandoffMaxAgeMs, MyWorkItemsLaunchContext } from "./helpers/my-work-items";
 
 const VIEW_OPTIONS: Record<MyWorkItemsView, { title: string; icon: Icon; empty: string }> = {
   assigned: { title: "Assigned to Me", icon: Icon.Person, empty: "Nothing assigned to you" },
@@ -16,12 +26,15 @@ const VIEW_OPTIONS: Record<MyWorkItemsView, { title: string; icon: Icon; empty: 
   mentions: { title: "Mentioning Me", icon: Icon.AtSymbol, empty: "No open work items mention you" },
 };
 
-function MyWorkItems() {
+function MyWorkItems({ handoffMaxAgeMs }: { handoffMaxAgeMs?: number }) {
   const [view, setView] = useCachedState<MyWorkItemsView>("my-work-items:view", "assigned");
   // Subscribed and Mentions need the server-side filters; the project scan can't serve them.
   const [available, setAvailable] = useState<MyWorkItemsView[]>(() => supportedViews(getCachedCapabilities()));
   const effectiveView = available.includes(view) ? view : "assigned";
-  const { data, isLoading, error, revalidate, mutate } = useMyWorkItems(effectiveView);
+  // Opened from My Open Work Items, which just fetched the assigned items: the first load reuses that result.
+  const { data, isLoading, error, revalidate, mutate } = useMyWorkItems(effectiveView, {
+    initialMaxAgeMs: handoffMaxAgeMs,
+  });
   const meId = data?.me?.id;
   // With keepPreviousData, `data` can still belong to the previous view while the new one loads.
   const items = data?.view === effectiveView ? data.items : [];
@@ -105,10 +118,10 @@ function MyWorkItems() {
   );
 }
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ launchContext?: MyWorkItemsLaunchContext }>) {
   return (
     <AuthorizedView>
-      <MyWorkItems />
+      <MyWorkItems handoffMaxAgeMs={getHandoffMaxAgeMs(props.launchContext)} />
     </AuthorizedView>
   );
 }

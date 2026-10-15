@@ -66,3 +66,30 @@ export function parseSharedResult<T extends { view: string; items: unknown; scop
     return undefined;
   }
 }
+
+/** Launch context My Open Work Items passes to My Work Items after fetching the assigned items itself. */
+export type MyWorkItemsLaunchContext = { reuseResultMs?: number };
+
+/** How long My Work Items reuses the result My Open Work Items fetched right before opening it. */
+export const HANDOFF_MAX_AGE_MS = 60 * 1000;
+
+/** The hand-off window from a launch context, ignoring anything that isn't a positive number. */
+export function getHandoffMaxAgeMs(context: unknown): number | undefined {
+  const value = (context as MyWorkItemsLaunchContext | undefined)?.reuseResultMs;
+  return typeof value === "number" && Number.isFinite(value) && value > 0
+    ? Math.min(value, HANDOFF_MAX_AGE_MS)
+    : undefined;
+}
+
+/**
+ * Returns the `maxAgeMs` for each successive load: `initialMaxAgeMs` for the first one only (so a hand-off is
+ * reused once), `maxAgeMs` after that (so Refresh fetches fresh unless the caller always allows reuse).
+ */
+export function firstLoadMaxAge(initialMaxAgeMs?: number, maxAgeMs?: number): () => number | undefined {
+  let first = true;
+  return () => {
+    const value = first && initialMaxAgeMs !== undefined ? initialMaxAgeMs : maxAgeMs;
+    first = false;
+    return value;
+  };
+}
