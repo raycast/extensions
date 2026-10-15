@@ -30,6 +30,7 @@ export type CodexModel = {
 
 const RESPONSE_FORMAT = [
   "Use readable Markdown for replies in this chat UI.",
+  "For ordinary chat, prefer compact sections with short bold labels or level-three headings; avoid oversized decorative headings.",
   "Separate natural paragraphs with blank lines. For long answers, use meaningful sections or lists where useful; avoid one dense wall of text.",
   "Keep code in fenced code blocks. Use \\( ... \\) for inline math and \\[ ... \\] for display math.",
   "Do not wrap an entire ordinary reply in a code block. Honor the user's explicitly requested output format.",

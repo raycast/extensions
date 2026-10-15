@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ask-codex-raycast",
-  "title": "Ask ChatGPT",
-  "description": "Ask ChatGPT/OpenAI through your locally authenticated Codex CLI, with streaming answers, follow-ups, steering, and local history.",
+  "title": "Codex in Raycast",
+  "description": "Keep a conversation with your signed-in local Codex CLI directly inside Raycast, with streaming Markdown, follow-ups, steering, and model selection.",
   "icon": "command-icon.png",
   "author": "bbfss",
   "license": "MIT",
@@ -17,9 +17,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "Ask ChatGPT",
-      "subtitle": "Continuous Local Chat",
-      "description": "Ask ChatGPT/OpenAI through your local Codex CLI and continue the conversation.",
+      "title": "Codex in Raycast",
+      "subtitle": "Chat with Local CLI",
+      "description": "Continue chatting with your local Codex CLI without leaving Raycast.",
       "mode": "view",
       "keywords": [
         "chat",
@@ -39,24 +39,6 @@
     }
   ],
   "preferences": [
-    {
-      "name": "chatWindow",
-      "type": "dropdown",
-      "title": "聊天窗口 / Chat Window",
-      "description": "选择在 Raycast 内聊天，或打开已安装的 Ask ChatGPT 独立窗口（macOS 试用版）。",
-      "required": false,
-      "default": "raycast",
-      "data": [
-        {
-          "title": "Raycast 内聊天",
-          "value": "raycast"
-        },
-        {
-          "title": "独立聊天窗口（试用）",
-          "value": "desktop"
-        }
-      ]
-    },
     {
       "name": "liveSearch",
       "type": "checkbox",

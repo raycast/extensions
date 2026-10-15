@@ -21,14 +21,9 @@ import {
   type ModelSelection,
 } from "./codex";
 import { useSessionHistory, type Page } from "./history";
-import {
-  DesktopWindowLauncher,
-  openDesktopWindow,
-  returnFromDesktopWindow,
-} from "./desktop-window";
 import { conversationMarkdown } from "./chat-text";
 import { ModelMenu, MODEL_SELECTION_KEY } from "./model-menu";
-import { ChatDropdown } from "./chat-dropdown";
+import { MessageComposer } from "./message-composer";
 import {
   asRecord,
   asString,
@@ -47,23 +42,9 @@ import {
   type ConversationLibrary,
 } from "./conversations";
 
-export default function AskChatGPT(
+export default function CodexInRaycast(
   props: LaunchProps<{ arguments: Arguments.Index }>,
 ) {
-  const preferences = getPreferenceValues<Preferences>();
-  const [useNative, setUseNative] = useState(false);
-  if (preferences.chatWindow === "desktop" && !useNative)
-    return (
-      <DesktopWindowLauncher
-        preferences={preferences}
-        launch={props}
-        onNative={() => setUseNative(true)}
-      />
-    );
-  return <NativeChat {...props} />;
-}
-
-function NativeChat(props: LaunchProps<{ arguments: Arguments.Index }>) {
   const preferences = getPreferenceValues<Preferences>();
   const initialPrompt =
     props.fallbackText?.trim() || props.arguments?.prompt?.trim() || "";
@@ -75,7 +56,6 @@ function NativeChat(props: LaunchProps<{ arguments: Arguments.Index }>) {
   const [status, setStatus] = useState("正在连接 Codex…");
   const [error, setError] = useState("");
   const [page, setPage] = useState<Page>("chat");
-  const [chatLayout, setChatLayout] = useState<"compact" | "input">("compact");
   const [sessions, setSessions] = useState<StoredConversation[]>([]);
   const [connectionAttempt, setConnectionAttempt] = useState(0);
   const [switching, setSwitching] = useState(false);
@@ -351,31 +331,10 @@ function NativeChat(props: LaunchProps<{ arguments: Arguments.Index }>) {
       if (disposed) return;
       modelSelectionRef.current = selection;
       setModelSelection(selection);
-      const desktop = await returnFromDesktopWindow();
-      let library = parseLibrary(
+      const library = parseLibrary(
         await LocalStorage.getItem<string>(LIBRARY_KEY),
         await LocalStorage.getItem<string>(LEGACY_KEY),
       );
-      if (
-        desktop.conversation?.threadId &&
-        (desktop.conversation.messages.length || desktop.conversation.draft)
-      ) {
-        const active = library.sessions.find(
-          (session) => session.threadId === library.activeId,
-        );
-        if ((desktop.conversation.updatedAt || 0) > (active?.updatedAt || 0)) {
-          library = upsertConversation(library, desktop.conversation);
-          if (desktop.selection) {
-            selection = desktop.selection;
-            modelSelectionRef.current = selection;
-            setModelSelection(selection);
-            await LocalStorage.setItem(
-              MODEL_SELECTION_KEY,
-              JSON.stringify(selection),
-            );
-          }
-        }
-      }
       if (disposed) return;
       libraryRef.current = library;
       storageReadyRef.current = true;
@@ -591,7 +550,6 @@ function NativeChat(props: LaunchProps<{ arguments: Arguments.Index }>) {
     setDraft("");
     try {
       await enqueue(text);
-      setChatLayout("compact");
       return true;
     } catch (reason) {
       await reportFailure(reason, text);
@@ -701,19 +659,6 @@ function NativeChat(props: LaunchProps<{ arguments: Arguments.Index }>) {
     }
   }
 
-  function updateSession(session: StoredConversation) {
-    if (session.threadId === conversation.threadId) {
-      // Rename must not replace newer streaming text with an old form snapshot.
-      const next = {
-        ...(persistedRef.current || conversation),
-        title: session.title,
-        archived: session.archived,
-      };
-      setConversation(next);
-      save(next);
-    } else save(session, false);
-  }
-
   function changePage(value: string) {
     if (switching) return;
     if (value === "new") {
@@ -722,7 +667,7 @@ function NativeChat(props: LaunchProps<{ arguments: Arguments.Index }>) {
     }
     if (persistedRef.current)
       save({ ...persistedRef.current, draft: draftRef.current });
-    setPage(value as Page);
+    if (value === "chat" || value === "recent") setPage(value);
   }
 
   function reconnect() {
@@ -747,38 +692,6 @@ function NativeChat(props: LaunchProps<{ arguments: Arguments.Index }>) {
     error.includes("未找到 Codex CLI") || error.includes("找不到指定的 Codex");
   const secondaryActions = (
     <>
-      <Action
-        title="打开专用聊天窗口（试用）"
-        icon={Icon.AppWindow}
-        onAction={async () => {
-          if (busy || requestPendingRef.current || switching) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "请先停止当前回答，再打开独立窗口",
-            });
-            return;
-          }
-          try {
-            await initRef.current.catch(() => undefined);
-            await openDesktopWindow({
-              preferences,
-              conversation: persistedRef.current || conversation,
-              selection: modelSelection,
-              beforeOpen: () => {
-                clientRef.current?.close();
-                readyRef.current = false;
-                setReady(false);
-              },
-            });
-          } catch (reason) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "独立窗口未能打开",
-              message: messageOf(reason),
-            });
-          }
-        }}
-      />
       {codexNotFound && (
         <Action.OpenInBrowser
           title="安装 Codex CLI"
@@ -790,6 +703,10 @@ function NativeChat(props: LaunchProps<{ arguments: Arguments.Index }>) {
         <Action
           title="停止回答"
           icon={Icon.Stop}
+          shortcut={{
+            modifiers: [process.platform === "darwin" ? "cmd" : "ctrl"],
+            key: ".",
+          }}
           onAction={async () => {
             try {
               await clientRef.current?.interrupt();
@@ -801,18 +718,28 @@ function NativeChat(props: LaunchProps<{ arguments: Arguments.Index }>) {
         />
       )}
       <Action
-        title="历史会话"
+        title="最近对话"
         icon={Icon.Clock}
         shortcut={{
           modifiers: [process.platform === "darwin" ? "cmd" : "ctrl", "shift"],
           key: "h",
         }}
-        onAction={() => changePage("history")}
+        onAction={() => changePage("recent")}
       />
-      {answer && <Action.CopyToClipboard title="复制回答" content={answer} />}
+      {answer && (
+        <Action.CopyToClipboard
+          title="复制回答"
+          content={answer}
+          shortcut={Keyboard.Shortcut.Common.Copy}
+        />
+      )}
       <Action.CopyToClipboard
         title="复制当前对话"
         content={transcript(conversation.messages)}
+        shortcut={{
+          modifiers: [process.platform === "darwin" ? "cmd" : "ctrl", "shift"],
+          key: "c",
+        }}
       />
       <Action
         title="新建对话"
@@ -827,32 +754,28 @@ function NativeChat(props: LaunchProps<{ arguments: Arguments.Index }>) {
       />
     </>
   );
-  const visibleMessages = conversation.messages.filter(
-    (message) => message.content.trim() || message.status === "streaming",
+  const visibleMessages = useMemo(
+    () =>
+      conversation.messages.filter(
+        (message) => message.content.trim() || message.status === "streaming",
+      ),
+    [conversation.messages],
   );
-  const accessory = (
-    <ChatDropdown
-      page={page}
-      onPageChange={changePage}
-      models={models}
-      selection={modelSelection}
-      current={currentModel}
-      loading={modelsLoading}
-      error={modelsError}
-      ready={ready}
-      onRefresh={() => void refreshModels().catch(() => undefined)}
-      onSelect={selectModel}
-    />
+  const chatMarkdown = useMemo(
+    () =>
+      conversationMarkdown(
+        visibleMessages,
+        environment.assetsPath,
+        !ready && !error ? status : "",
+        error,
+      ),
+    [visibleMessages, ready, error, status],
   );
   const historyProps = useSessionHistory({
     page,
     sessions,
     activeId: conversation.threadId,
-    client: clientRef.current,
-    ready,
-    accessory,
     onSelect: resumeSession,
-    onUpdate: updateSession,
     onBack: () => changePage("chat"),
     onNew: newChat,
   });
@@ -872,25 +795,15 @@ function NativeChat(props: LaunchProps<{ arguments: Arguments.Index }>) {
           onAction={reconnect}
         />
       ) : (
-        <Action
-          title={
-            chatLayout === "compact"
-              ? busy
-                ? "输入补充要求"
-                : "输入追问"
-              : busy
-                ? "发送补充要求"
-                : "发送消息"
-          }
-          icon={chatLayout === "compact" ? Icon.Pencil : Icon.ArrowRight}
-          shortcut={{ modifiers: [], key: "return" }}
-          onAction={() =>
-            chatLayout === "compact"
-              ? setChatLayout("input")
-              : void sendPrompt(draft)
-          }
+        <MessageComposer
+          draft={draft}
+          busy={busy}
+          ready={ready}
+          onChange={setDraft}
+          onSend={sendPrompt}
         />
       )}
+      {secondaryActions}
       <ModelMenu
         models={models}
         selection={modelSelection}
@@ -901,79 +814,25 @@ function NativeChat(props: LaunchProps<{ arguments: Arguments.Index }>) {
         onRefresh={() => void refreshModels().catch(() => undefined)}
         onSelect={selectModel}
       />
-      {chatLayout === "input" && (
-        <Action
-          title="返回全宽回复"
-          icon={Icon.ArrowLeft}
-          onAction={() => setChatLayout("compact")}
-        />
-      )}
-      {secondaryActions}
     </ActionPanel>
   );
   if (page === "chat") {
-    if (chatLayout === "compact") {
-      return (
-        <Detail
-          navigationTitle="Ask ChatGPT"
-          markdown={conversationMarkdown(
-            visibleMessages,
-            environment.assetsPath,
-            ready
-              ? `${status.split(" · ")[0]} · 按 Enter 输入${busy ? "补充要求" : "追问"}`
-              : status,
-            error,
-          )}
-          isLoading={(!ready && !error) || busy || switching}
-          actions={chatActions()}
-        />
-      );
-    }
     return (
-      <List
-        navigationTitle="Ask ChatGPT"
-        searchBarAccessory={accessory}
-        searchText={draft}
-        onSearchTextChange={setDraft}
-        searchBarPlaceholder={
-          busy
-            ? "继续输入补充要求，按 Enter 发送…"
-            : "输入问题或追问，按 Enter 发送…"
-        }
-        filtering={false}
-        throttle={false}
-        isShowingDetail
-        selectedItemId="chat"
+      <Detail
+        navigationTitle="Codex in Raycast"
+        markdown={chatMarkdown}
         isLoading={(!ready && !error) || busy || switching}
-      >
-        <List.Item
-          id="chat"
-          title="当前对话"
-          icon="command-icon.png"
-          detail={
-            <List.Item.Detail
-              markdown={conversationMarkdown(
-                visibleMessages,
-                environment.assetsPath,
-                status,
-                error,
-              )}
-            />
-          }
-          actions={chatActions()}
-        />
-      </List>
+        actions={chatActions()}
+      />
     );
   }
   return (
     <List
-      navigationTitle="Ask ChatGPT"
-      searchBarAccessory={accessory}
+      navigationTitle="Codex in Raycast"
       filtering={false}
       throttle={false}
-      isShowingDetail
+      isShowingDetail={false}
       isLoading={(!ready && !error) || busy || switching}
-      selectedItemId="current"
       {...historyProps}
     >
       {historyProps.children}

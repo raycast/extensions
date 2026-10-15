@@ -20,18 +20,18 @@ test("conversation renders code blocks with their original language and indentat
 
 test("streaming reply retains a thinking placeholder", () => {
   const output = conversationMarkdown([{ id: "1", role: "assistant", content: "", status: "streaming" }], "/assets", "", "");
-  assert.match(output, /ChatGPT/);
+  assert.match(output, /Codex/);
   assert.match(output, /正在思考…/);
 });
 
 test("empty conversation explains the Enter input action", () => {
   const output = conversationMarkdown([], "/assets", "", "");
-  assert.match(output, /开始新对话/);
-  assert.match(output, /按 Enter 输入问题/);
+  assert.match(output, /Codex in Raycast/);
+  assert.match(output, /按 Enter 打开输入浮层/);
 });
 
 test("connection errors take precedence over stale status", () => {
   const output = conversationMarkdown([], "/assets", "已连接", "连接失败\n请重试");
-  assert.match(output, /^> 连接提示：连接失败 请重试/);
+  assert.match(output, /^\*\*连接提示\*\* · 连接失败 请重试/);
   assert.ok(!output.includes("已连接"));
 });

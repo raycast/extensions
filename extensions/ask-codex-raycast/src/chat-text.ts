@@ -12,7 +12,7 @@ export function conversationMarkdown(
   const cards = [...messages].reverse().map((message) => {
     const speaker =
       message.role === "assistant"
-        ? "ChatGPT"
+        ? "Codex"
         : message.kind === "steer"
           ? "你 · 补充要求"
           : "你";
@@ -23,11 +23,13 @@ export function conversationMarkdown(
     const body = renderMarkdown(message.content) || "正在思考…";
     return `![${speaker}](<${avatarURL.href}>) **${speaker}**\n\n${body}`;
   });
-  const notice = error ? `连接提示：${error}` : status;
-  const header = notice ? `> ${notice.replace(/\r?\n/g, " ")}\n\n` : "";
+  const notice = error || status;
+  const header = notice
+    ? `${error ? "**连接提示** · " : ""}${notice.replace(/\r?\n/g, " ")}\n\n`
+    : "";
   return (
     header +
     (cards.join("\n\n---\n\n") ||
-      "## 开始新对话\n\n按 Enter 输入问题，发送后会显示回复。")
+      "**Codex in Raycast**\n\n按 Enter 打开输入浮层，输入消息后再按 Enter 发送。回复与追问会保留在同一对话里。")
   );
 }
