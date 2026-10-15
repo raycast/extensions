@@ -4,7 +4,6 @@
 
 - Add My Team, Price Changes, Search Players, Fixtures, Gameweek History, Live Points in Menu Bar and Open My Team commands
 - Replace View My Rankings with Mini-Leagues: every classic league with rank movement, paginated standings and any rival's team
-- Make the Team ID optional, so commands that do not need it work without one
 - Read the FPL API with `fetch` and drop axios
 
 ## [Maintenance] - 2026-03-16

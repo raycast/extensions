@@ -119,7 +119,7 @@
       "title": "Team ID",
       "description": "Found in the URL of your Points page: fantasy.premierleague.com/entry/<Team ID>/event/…",
       "type": "textfield",
-      "required": false,
+      "required": true,
       "placeholder": "1234567"
     }
   ],
