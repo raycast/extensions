@@ -1,6 +1,6 @@
 # Everything Search Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-10-15
 - Fixed long and cut-off error message when Everything app is not running ([#32381](https://github.com/raycast/extensions/issues/32381))
 
 ## [Fix] - 2026-09-23
