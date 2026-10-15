@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { createApiClient, type HttpClient } from "../src/lib/client";
 import { searchLibrary } from "../src/lib/library";
@@ -119,6 +119,37 @@ describe("searchLibrary", () => {
       id: "abc123",
       title: "Attention Is All You Need",
     });
+  });
+
+  it.each(["API request", "file write"])("keeps live results when the snapshot %s fails", async (failure) => {
+    const files = { "/tmp/paperlib-cache.json": JSON.stringify(SAMPLE) };
+    const fs = memoryFs(files);
+    const apiClient = createApiClient(
+      "http://paperlib.test",
+      fakeHttp(() => JSON.stringify(SAMPLE)),
+    );
+    vi.spyOn(apiClient, "isAvailable").mockResolvedValue(true);
+    vi.spyOn(apiClient, "getPreference").mockResolvedValue("/data/paperlib");
+    const search = vi.spyOn(apiClient, "searchPapers").mockResolvedValue([normalizePaper(SAMPLE[0])]);
+    const write = vi.spyOn(fs, "writeFile");
+    if (failure === "API request") {
+      search.mockResolvedValueOnce([normalizePaper(SAMPLE[0])]).mockRejectedValueOnce(new Error("Host disconnected"));
+    } else {
+      write.mockRejectedValueOnce(new Error("Disk full"));
+    }
+
+    const result = await searchLibrary("attention", prefs, {
+      apiClient,
+      fs,
+      cacheFile: "/tmp/paperlib-cache.json",
+    });
+
+    expect(result.source).toBe("api");
+    expect(result.papers).toEqual([normalizePaper(SAMPLE[0])]);
+    expect(result.libraryFolder).toBe("/data/paperlib");
+    expect(search.mock.calls).toEqual([["attention", prefs.resultLimit], [""]]);
+    expect(write).toHaveBeenCalledTimes(failure === "API request" ? 0 : 1);
+    expect(files["/tmp/paperlib-cache.json"]).toBe(JSON.stringify(SAMPLE));
   });
 
   it("falls back to a local JSON export", async () => {

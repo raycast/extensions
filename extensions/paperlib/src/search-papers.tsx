@@ -14,7 +14,7 @@ import {
   open,
   showToast,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
 import { resolveAbstract } from "./lib/abstracts";
@@ -62,7 +62,6 @@ export default function Command() {
       onSelectionChange={(id) => setSelectedId(id ?? undefined)}
       throttle
       filtering={false}
-      navigationTitle={result ? `Paperlib · ${sourceBadge(result)}` : "Paperlib"}
     >
       {error ? (
         <List.EmptyView
@@ -91,19 +90,21 @@ export default function Command() {
           }
         />
       ) : (
-        papers.map((paper) => (
-          <PaperItem
-            key={paper.id}
-            paper={paper}
-            result={result}
-            citationStyle={preferences.citationStyle}
-            fetchRemoteAbstracts={preferences.fetchRemoteAbstracts}
-            selected={selectedId === paper.id}
-            showingDetail={showingDetail}
-            libraryFolder={result?.libraryFolder ?? preferences.libraryFolder}
-            onToggleDetail={() => setShowingDetail((value) => !value)}
-          />
-        ))
+        <List.Section title="Papers" subtitle={result ? sourceBadge(result) : undefined}>
+          {papers.map((paper) => (
+            <PaperItem
+              key={paper.id}
+              paper={paper}
+              result={result}
+              citationStyle={preferences.citationStyle}
+              fetchRemoteAbstracts={preferences.fetchRemoteAbstracts}
+              selected={selectedId === paper.id}
+              showingDetail={showingDetail}
+              libraryFolder={result?.libraryFolder ?? preferences.libraryFolder}
+              onToggleDetail={() => setShowingDetail((value) => !value)}
+            />
+          ))}
+        </List.Section>
       )}
     </List>
   );
@@ -211,10 +212,8 @@ function PaperItem(props: {
               shortcut={{ modifiers: ["cmd"], key: "d" }}
               onAction={async () => {
                 if (!paper.doi) {
-                  await showToast({
-                    style: Toast.Style.Failure,
+                  await showFailureToast("This Paperlib record does not include a DOI.", {
                     title: "No DOI",
-                    message: "This Paperlib record does not include a DOI.",
                   });
                   return;
                 }
@@ -281,15 +280,13 @@ async function copied(message: string) {
 async function openLocalPdf(paper: PaperEntity, libraryFolder?: string) {
   const resolved = resolveLocalPdf(paper, libraryFolder);
   if (!resolved.ok) {
-    await showToast({ style: Toast.Style.Failure, title: "No local PDF", message: resolved.error });
+    await showFailureToast(resolved.error, { title: "No local PDF" });
     return;
   }
 
   if (!existsSync(resolved.path)) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(`The library record points at ${resolved.path}, but that file is not on disk.`, {
       title: "PDF not found",
-      message: `The library record points at ${resolved.path}, but that file is not on disk.`,
     });
     return;
   }
@@ -300,7 +297,7 @@ async function openLocalPdf(paper: PaperEntity, libraryFolder?: string) {
 async function openPaperWebLink(paper: PaperEntity) {
   const url = paperWebUrl(paper);
   if (!url) {
-    await showToast({ style: Toast.Style.Failure, title: "No web link", message: missingWebLinkMessage(paper) });
+    await showFailureToast(missingWebLinkMessage(paper), { title: "No web link" });
     return;
   }
   await open(url);
@@ -309,7 +306,7 @@ async function openPaperWebLink(paper: PaperEntity) {
 async function copyPaperWebLink(paper: PaperEntity) {
   const url = paperWebUrl(paper);
   if (!url) {
-    await showToast({ style: Toast.Style.Failure, title: "No web link", message: missingWebLinkMessage(paper) });
+    await showFailureToast(missingWebLinkMessage(paper), { title: "No web link" });
     return;
   }
   await Clipboard.copy(url);

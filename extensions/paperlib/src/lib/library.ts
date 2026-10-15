@@ -37,7 +37,11 @@ export async function searchLibrary(
 
   if (await api.isAvailable()) {
     const papers = await api.searchPapers(query, limit);
-    await refreshOfflineCache(api, deps.fs, deps.cacheFile);
+    try {
+      await refreshOfflineCache(api, deps.fs, deps.cacheFile);
+    } catch {
+      // A failed offline snapshot must not discard successful live results.
+    }
     const appLibFolder = (await api.getPreference("appLibFolder")) || preferences.libraryFolder;
     return {
       papers: papers.slice(0, limit),
