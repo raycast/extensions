@@ -1,5 +1,9 @@
 # Meme generator Changelog
 
+## [Fix Meme Download on Windows] - {PR_MERGE_DATE}
+
+- Fix meme download failing on Windows when template titles contain forbidden filename characters ([#32320](https://github.com/raycast/extensions/issues/32320))
+
 ## [Live Meme Preview] - 2026-09-01
 
 - Selecting a template now opens a live editor that renders the meme while you type
