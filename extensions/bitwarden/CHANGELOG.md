@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Fix File Resource Cleanup] - {PR_MERGE_DATE}
+## [Fix File Resource Cleanup] - 2026-10-15
 
 - Clear the file-wait timeout when the file becomes available
 - Close ZIP archives even when extraction fails
