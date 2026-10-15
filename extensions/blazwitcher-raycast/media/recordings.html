@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Blazwitcher Raycast 演示素材</title>
+    <style>
+      body {
+        margin: 0;
+        background: #f5f6f8;
+        color: #202530;
+        font:
+          16px/1.7 -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+      }
+      main {
+        max-width: 1100px;
+        margin: 45px auto;
+        padding: 0 24px;
+      }
+      h1 {
+        font-size: 30px;
+      }
+      h2 {
+        font-size: 22px;
+      }
+      p {
+        color: #687080;
+      }
+      article {
+        padding: 24px;
+        background: white;
+        border-radius: 16px;
+        margin: 24px 0;
+      }
+      video {
+        display: block;
+        width: 100%;
+        max-height: 650px;
+        background: #f4f5f7;
+        border-radius: 10px;
+      }
+      a {
+        color: #3e60df;
+      }
+      .status {
+        display: inline-block;
+        margin-left: 8px;
+        padding: 2px 8px;
+        border-radius: 6px;
+        background: #e8f5ec;
+        color: #25603b;
+        font-size: 13px;
+        vertical-align: middle;
+      }
+      .notice {
+        padding: 14px 18px;
+        border-radius: 10px;
+        background: #fff1cf;
+        color: #79570b;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Blazwitcher for Raycast</h1>
+      <p>
+        2026-10-15–16 · Raycast 英文开发版本 · raycast-blaz · 15 个公开页面 · 6
+        个 Chrome 分组
+      </p>
+      <p class="notice">
+        六组演示均使用当前英文界面，来自 raycast-blaz 的公开页面。
+        搜索配置演示将历史显示数量从 10 改为 5，再恢复为 10；录制与检查范围见
+        <a href="recording-manifest.json">录制记录</a>。
+      </p>
+      <article data-status="ready">
+        <h2>拼音首字母 <span class="status">已录制</span></h2>
+        <p>
+          sxw → sxwcj → sxw → sxwlx：从相近的“上下文”文档中逐步定位层级和类型。
+        </p>
+        <video
+          controls
+          loop
+          muted
+          playsinline
+          preload="metadata"
+          poster="pinyin-search.gif"
+        >
+          <source src="pinyin-search.mp4" type="video/mp4" />
+          当前浏览器无法播放视频，可使用下方 MP4 链接。
+        </video>
+        <p>
+          <a href="pinyin-search.gif">GIF</a> ·
+          <a href="pinyin-search.mp4">MP4</a>
+        </p>
+      </article>
+      <article data-status="ready">
+        <h2>英文项目关键词 <span class="status">已录制</span></h2>
+        <p>
+          /t skills → /t skills openai：从 3 个相近结果缩小到 2
+          个，openai/skills 排在首位。 对照 GitHub 标题和网址识别项目。
+        </p>
+        <video
+          controls
+          loop
+          muted
+          playsinline
+          preload="metadata"
+          poster="english-search.gif"
+        >
+          <source src="english-search.mp4" type="video/mp4" />
+          当前浏览器无法播放视频，可使用下方 MP4 链接。
+        </video>
+        <p>
+          <a href="english-search.gif">GIF</a> ·
+          <a href="english-search.mp4">MP4</a>
+        </p>
+      </article>
+      <article data-status="ready">
+        <h2>域名与空格分词 <span class="status">已录制</span></h2>
+        <p>
+          kuaisu → kuaisu rm → kuaisu rm claude.com → rm claude.com
+          kuaisu：从多个入门页逐步收窄到同一篇 Claude 文档。
+        </p>
+        <video
+          controls
+          loop
+          muted
+          playsinline
+          preload="metadata"
+          poster="domain-search.gif"
+        >
+          <source src="domain-search.mp4" type="video/mp4" />
+          当前浏览器无法播放视频，可使用下方 MP4 链接。
+        </video>
+        <p>
+          <a href="domain-search.gif">GIF</a> ·
+          <a href="domain-search.mp4">MP4</a>
+        </p>
+      </article>
+      <article data-status="ready">
+        <h2>来源筛选 <span class="status">已录制</span></h2>
+        <p>
+          /b zhishi zl 查“示例：知识蒸馏”，/h openviking.ai zhibiao 查“指标与
+          Metrics”，展示书签与历史来源筛选。
+        </p>
+        <video
+          controls
+          loop
+          muted
+          playsinline
+          preload="metadata"
+          poster="source-filters.gif"
+        >
+          <source src="source-filters.mp4" type="video/mp4" />
+          当前浏览器无法播放视频，可使用下方 MP4 链接。
+        </video>
+        <p>
+          <a href="source-filters.gif">GIF</a> ·
+          <a href="source-filters.mp4">MP4</a>
+        </p>
+      </article>
+      <article data-status="ready">
+        <h2>网页正文预览 <span class="status">已录制</span></h2>
+        <p>
+          需安装并启用官方 Raycast Browser Extension。选中文档后按 ⌘D，
+          展开已提取的正文与表格；本段展示缓存中的实际页面内容。
+        </p>
+        <video
+          controls
+          loop
+          muted
+          playsinline
+          preload="metadata"
+          poster="page-preview.gif"
+        >
+          <source src="page-preview.mp4" type="video/mp4" />
+          当前浏览器无法播放视频，可使用下方 MP4 链接。
+        </video>
+        <p>
+          <a href="page-preview.gif">GIF</a> ·
+          <a href="page-preview.mp4">MP4</a>
+        </p>
+      </article>
+      <article data-status="ready">
+        <h2>搜索配置 <span class="status">已录制</span></h2>
+        <p>
+          在 Extension Preferences 中将 History Result Count 从 10 改为
+          5，再恢复为 10。
+          这段演示展示设置编辑与恢复，不包含重新进入搜索后的结果数量验证。
+        </p>
+        <video
+          controls
+          loop
+          muted
+          playsinline
+          preload="metadata"
+          poster="search-settings.gif"
+        >
+          <source src="search-settings.mp4" type="video/mp4" />
+          当前浏览器无法播放视频，可使用下方 MP4 链接。
+        </video>
+        <p>
+          <a href="search-settings.gif">GIF</a> ·
+          <a href="search-settings.mp4">MP4</a>
+        </p>
+      </article>
+      <p>
+        素材均来自实际操作，保留真实界面与查询结果；导出方式和验证结果以录制记录为准。
+      </p>
+      <p>
+        <a href="../docs/media-guide.md">素材录制清单</a> ·
+        <a href="../README.zh-CN.md">中文 README</a> ·
+        <a href="../README.md">English README</a>
+      </p>
+    </main>
+  </body>
+</html>

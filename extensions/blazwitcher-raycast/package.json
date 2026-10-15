@@ -1,0 +1,153 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "blazwitcher-raycast",
+  "title": "Blazwitcher",
+  "description": "Search Chrome tabs, bookmarks, and history with Chinese, Pinyin, initials, and English.",
+  "icon": "extension-icon.png",
+  "author": "julian0197",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "commands": [
+    {
+      "name": "search-all",
+      "title": "Search Browser",
+      "subtitle": "Blazwitcher",
+      "description": "Search Chrome tabs, bookmarks, and history with fuzzy Pinyin matching.",
+      "mode": "view",
+      "keywords": [
+        "chrome",
+        "pinyin",
+        "blazwitcher",
+        "tabs",
+        "bookmarks",
+        "history"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "searchStrategy",
+      "title": "Search Mode",
+      "description": "Match titles and domains using the Blazwitcher Chrome extension's ranking. Full URL Search also includes paths, query parameters, and fragments, while keeping title matches first.",
+      "type": "dropdown",
+      "default": "chrome",
+      "required": false,
+      "data": [
+        {
+          "title": "Match Chrome Blaz",
+          "value": "chrome"
+        },
+        {
+          "title": "Full URL Search",
+          "value": "full-url"
+        }
+      ]
+    },
+    {
+      "name": "historyDays",
+      "title": "History Date Range (Days)",
+      "description": "Read the last 14 days by default, matching the Blazwitcher Chrome extension. Enter 0 to include all dates.",
+      "type": "textfield",
+      "default": "14",
+      "required": false
+    },
+    {
+      "name": "historyLimit",
+      "title": "History Reading Limit",
+      "description": "Read the most recently visited records first. The default is 1,000, matching the Blazwitcher Chrome extension. Maximum: 100,000.",
+      "type": "textfield",
+      "default": "1000",
+      "required": false
+    },
+    {
+      "name": "historyDisplayCount",
+      "title": "History Result Count",
+      "description": "Maximum history results per search, including Top Suggestions. Range: 1–20. Default: 10.",
+      "type": "textfield",
+      "default": "10",
+      "required": false
+    },
+    {
+      "name": "bookmarkDisplayCount",
+      "title": "Bookmark Result Count",
+      "description": "Maximum bookmark results per search, including Top Suggestions. Range: 1–20. Default: 10.",
+      "type": "textfield",
+      "default": "10",
+      "required": false
+    },
+    {
+      "name": "topSuggestionsCount",
+      "title": "Top Suggestions",
+      "description": "Move the highest-ranked matches into Top Suggestions when a query is entered. Range: 1–10. Default: 2. This does not add results.",
+      "type": "textfield",
+      "default": "2",
+      "required": false
+    },
+    {
+      "name": "enableConsecutiveSearch",
+      "title": "Strict Search (Consecutive English Matches)",
+      "label": "Require consecutive English-character matches",
+      "description": "Off by default. When enabled, rct no longer matches React. Chinese Pinyin and initials are still supported.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "startupPreview",
+      "title": "Startup Cache",
+      "label": "Show cached results while fresh data loads",
+      "description": "Cache up to 100 bookmarks and 100 history records per Chrome profile locally for five minutes. Tabs and incognito data are excluded. Disable to stop using the cache.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "includeIncognito",
+      "title": "Incognito Tabs",
+      "label": "Include tabs from incognito windows",
+      "description": "Read incognito tabs in memory only. They are never written to history or the startup cache.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint && eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "check": "npm run typecheck && npm test && npm run lint && npm run build",
+    "test:local": "tsx scripts/inspect-local.ts",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "node -e \"console.error('Publish this extension through the Raycast CLI. Use npm run publish instead of npm publish.'); process.exit(1)\""
+  },
+  "dependencies": {
+    "@raycast/api": "^2.8.0",
+    "text-search-engine": "1.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-test-renderer": "^19.1.0",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "react": "^19.2.0",
+    "react-test-renderer": "^19.2.0",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "text-search-engine": {
+      "react": "$react"
+    }
+  }
+}

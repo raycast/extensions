@@ -1,0 +1,365 @@
+{
+  "capture_dates": ["2026-10-15", "2026-10-16"],
+  "timezone": "Asia/Shanghai",
+  "profile": "raycast-blaz",
+  "ui_language": "en-US",
+  "source_branch": "codex/store-ready",
+  "capture_commit": "72401b373aed8bdb02bf12bb97fca33da1238aa5",
+  "base_commit": "890bebdec939b20a73731553b735aaa2426c2288",
+  "status": "ready",
+  "path_base": "repository_root",
+  "fixtures": {
+    "open_tabs": 15,
+    "chrome_groups": 6,
+    "content": "Public AI project repositories and Chinese documentation, with bookmark and history fixtures."
+  },
+  "editing": {
+    "playback_speed": 1,
+    "static_pauses_removed": true,
+    "ui_altered": false,
+    "cropping": "Real Raycast command or settings window; original pixel size retained.",
+    "page_preview_end_hold": {
+      "seconds": 2,
+      "source": "Real final captured preview frame",
+      "reason": "Keep the rendered cached content readable."
+    }
+  },
+  "recordings": [
+    "pinyin-search",
+    "domain-search",
+    "english-search",
+    "source-filters",
+    "page-preview",
+    "search-settings"
+  ],
+  "recording_details": {
+    "pinyin-search": {
+      "files": {
+        "gif": "media/pinyin-search.gif",
+        "mp4": "media/pinyin-search.mp4"
+      },
+      "retained_source_ranges_seconds": [
+        [23.5, 29.5],
+        [55.5, 60.65]
+      ],
+      "crop_pixels": [780, 500, 498, 418],
+      "gif_fps": 15,
+      "mp4_fps": 30,
+      "freeze_end_seconds": 0,
+      "media": {
+        "gif": {
+          "width": 780,
+          "height": 500,
+          "bytes": 430750,
+          "sha256": "8067c0add1a90e35cbaaa3357c142480005df92d4e3270a2ed91128f87e76d16",
+          "duration_seconds": 11.2
+        },
+        "mp4": {
+          "width": 780,
+          "height": 500,
+          "bytes": 77565,
+          "sha256": "a487e303da24916acf7ebbc5b30f2f01eef8e706c16e5d1eed329d9b5c59f3da",
+          "duration_seconds": 11.166667
+        }
+      }
+    },
+    "domain-search": {
+      "files": {
+        "gif": "media/domain-search.gif",
+        "mp4": "media/domain-search.mp4"
+      },
+      "retained_source_ranges_seconds": [
+        [8, 13],
+        [75, 81],
+        [101, 107.2]
+      ],
+      "crop_pixels": [780, 500, 498, 418],
+      "gif_fps": 15,
+      "mp4_fps": 30,
+      "freeze_end_seconds": 0,
+      "media": {
+        "gif": {
+          "width": 780,
+          "height": 500,
+          "bytes": 384547,
+          "sha256": "81be0f07f93238c0fac9605cb683828150a85909b903413d17ef41579cb0ef09",
+          "duration_seconds": 17.14
+        },
+        "mp4": {
+          "width": 780,
+          "height": 500,
+          "bytes": 99716,
+          "sha256": "e44c46b73944ebfe93459adb343f2eb2e8ede5ca7431dd2322c667eb79a34f3a",
+          "duration_seconds": 17.133333
+        }
+      }
+    },
+    "english-search": {
+      "files": {
+        "gif": "media/english-search.gif",
+        "mp4": "media/english-search.mp4"
+      },
+      "retained_source_ranges_seconds": [[6, 11.133333]],
+      "crop_pixels": [780, 500, 498, 418],
+      "gif_fps": 15,
+      "mp4_fps": 30,
+      "freeze_end_seconds": 0,
+      "media": {
+        "gif": {
+          "width": 780,
+          "height": 500,
+          "bytes": 215482,
+          "sha256": "cfd0204648a42b23251f684ffda0e22791d039c4e35d91d157460c2296b6a04d",
+          "duration_seconds": 5.14
+        },
+        "mp4": {
+          "width": 780,
+          "height": 500,
+          "bytes": 46413,
+          "sha256": "ca2da649a6ac36aeada0d9744246dffc6caae549434d15c5ae50bf0027423a59",
+          "duration_seconds": 5.133333
+        }
+      }
+    },
+    "source-filters": {
+      "files": {
+        "gif": "media/source-filters.gif",
+        "mp4": "media/source-filters.mp4"
+      },
+      "retained_source_ranges_seconds": [[55, 61.638333]],
+      "crop_pixels": [780, 500, 498, 418],
+      "gif_fps": 15,
+      "mp4_fps": 30,
+      "freeze_end_seconds": 0,
+      "media": {
+        "gif": {
+          "width": 780,
+          "height": 500,
+          "bytes": 188766,
+          "sha256": "318a98f9a7fd4f2c9a176b66858783d23dc2dd3a68e7013601a87626a5b57f3d",
+          "duration_seconds": 6.67
+        },
+        "mp4": {
+          "width": 780,
+          "height": 500,
+          "bytes": 35394,
+          "sha256": "d3ebdc4fda13e0747f189443755328c00ed8915b9e4df210f7286adcba69fa76",
+          "duration_seconds": 6.633333
+        }
+      }
+    },
+    "page-preview": {
+      "files": {
+        "gif": "media/page-preview.gif",
+        "mp4": "media/page-preview.mp4"
+      },
+      "retained_source_ranges_seconds": [[7, 10.426667]],
+      "crop_pixels": [780, 500, 498, 418],
+      "gif_fps": 15,
+      "mp4_fps": 30,
+      "freeze_end_seconds": 2,
+      "media": {
+        "gif": {
+          "width": 780,
+          "height": 500,
+          "bytes": 217379,
+          "sha256": "34468e4ae5bb444bd5c7040d0f0cecbb5e3976cc4a161685c6a6daaa707ebd0f",
+          "duration_seconds": 5.4
+        },
+        "mp4": {
+          "width": 780,
+          "height": 500,
+          "bytes": 47704,
+          "sha256": "305e3a1b191e5a15a0f952d05849e05c3855088337546670b24de8909b0525ab",
+          "duration_seconds": 5.4
+        }
+      }
+    },
+    "search-settings": {
+      "files": {
+        "gif": "media/search-settings.gif",
+        "mp4": "media/search-settings.mp4"
+      },
+      "retained_source_ranges_seconds": [
+        [29, 34],
+        [41, 45],
+        [104, 109],
+        [114, 118.15]
+      ],
+      "crop_pixels": [800, 786, 464, 82],
+      "gif_fps": 15,
+      "mp4_fps": 30,
+      "freeze_end_seconds": 0,
+      "media": {
+        "gif": {
+          "width": 800,
+          "height": 786,
+          "bytes": 1194387,
+          "sha256": "baf538dd8a9998c2aac9200daa757a7854b79e134899d90bfa4d31489b889234",
+          "duration_seconds": 18.14
+        },
+        "mp4": {
+          "width": 800,
+          "height": 786,
+          "bytes": 300139,
+          "sha256": "7b9ad667680091d913be5809bc9ccae760c94db280634c01f17c7e1705e3c8c2",
+          "duration_seconds": 18.133333
+        }
+      }
+    }
+  },
+  "native_checks": {
+    "pinyin-search": {
+      "description": "Pinyin initials progressively narrow public Chinese AI documentation.",
+      "queries": [
+        {
+          "query": "/t sxw",
+          "result_count": 4
+        },
+        {
+          "query": "/t sxwcj",
+          "result_count": 1,
+          "result": "上下文层级（L0/L1/L2）"
+        },
+        {
+          "query": "/t sxwlx",
+          "result_count": 1,
+          "result": "上下文类型"
+        }
+      ]
+    },
+    "domain-search": {
+      "description": "Pinyin tokens, domains and unordered words narrow similar quickstart titles.",
+      "queries": [
+        {
+          "query": "/t kuaisu",
+          "result_count": 3
+        },
+        {
+          "query": "/t kuaisu rm",
+          "result_count": 2
+        },
+        {
+          "query": "/t kuaisu rm claude.com",
+          "result_count": 1,
+          "result": "快速入门 - Claude Code Docs"
+        },
+        {
+          "query": "/t rm claude.com kuaisu",
+          "result_count": 1,
+          "result": "快速入门 - Claude Code Docs"
+        }
+      ]
+    },
+    "english-search": {
+      "description": "English tokens narrow public AI repositories from three results to two.",
+      "queries": [
+        {
+          "query": "/t skills",
+          "result_count": 3
+        },
+        {
+          "query": "/t skills openai",
+          "result_count": 2,
+          "first_result": "openai/skills"
+        }
+      ],
+      "result_note": "openai/skills is first among two results."
+    },
+    "source-filters": {
+      "description": "Bookmark and history source filters with Pinyin queries.",
+      "queries": [
+        {
+          "query": "/b zhishi zl",
+          "result_count": 1,
+          "result": "示例：知识蒸馏"
+        },
+        {
+          "query": "/h openviking.ai zhibiao",
+          "result_count": 1,
+          "result": "指标与 Metrics"
+        }
+      ]
+    },
+    "page-preview": {
+      "description": "Command-D opens real extracted page text and a Markdown table.",
+      "query": "/t sxwcj",
+      "page": "上下文层级（L0/L1/L2）",
+      "extraction_state": "cached",
+      "requires": "Official Raycast Browser Extension",
+      "verification_scope": "Cached page preview expansion and visible extracted content."
+    },
+    "search-settings": {
+      "description": "History Result Count changes from 10 to 5 and is restored to 10.",
+      "history_result_count_sequence": [10, 5, 10],
+      "commit_action": "Tab moved focus to the next field after each change.",
+      "restored_history_result_count": 10,
+      "unchanged_shown_settings": {
+        "history_reading_limit": 1000,
+        "history_date_range_days": 14,
+        "bookmark_result_count": 10,
+        "top_suggestions": 2,
+        "strict_search": false
+      },
+      "verification_scope": "Settings fields and Tab commits were observed. Command results were not reopened for this recording."
+    }
+  },
+  "export_checks": {
+    "file_count": 12,
+    "gif_count": 6,
+    "mp4_count": 6,
+    "decode": "all_12_passed",
+    "review": "Source and final contact sheets were visually reviewed; exported media contains only public demonstration content.",
+    "worktree_hashes": "matched_reviewed_exports"
+  },
+  "store_screenshots": [
+    {
+      "file": "metadata/blazwitcher-raycast-1.png",
+      "width": 2000,
+      "height": 1250,
+      "bytes": 2271450,
+      "sha256": "3465a454cd5fcec4259f573ab1f587eab3f028d070e0801f77ce83bb55aebd99",
+      "review": "English Raycast UI, public AI fixtures and consistent native capture background; no private content."
+    },
+    {
+      "file": "metadata/blazwitcher-raycast-2.png",
+      "width": 2000,
+      "height": 1250,
+      "bytes": 2241464,
+      "sha256": "7496e3d575869f31cb54ef0b4e907ccb6f0f7a1c85ff8fc65f6dc7eadea6e75f",
+      "review": "English Raycast UI, public AI fixtures and consistent native capture background; no private content."
+    },
+    {
+      "file": "metadata/blazwitcher-raycast-3.png",
+      "width": 2000,
+      "height": 1250,
+      "bytes": 2299852,
+      "sha256": "757885af9c13036edc9ba6002fe3ac8e41e942ed3969f543c76271783eff5f55",
+      "review": "English Raycast UI, public AI fixtures and consistent native capture background; no private content."
+    }
+  ],
+  "documentation_screenshots": [
+    {
+      "file": "media/search-overview.png",
+      "width": 2000,
+      "height": 1250,
+      "bytes": 2271450,
+      "sha256": "3465a454cd5fcec4259f573ab1f587eab3f028d070e0801f77ce83bb55aebd99"
+    },
+    {
+      "file": "media/page-preview.png",
+      "width": 2000,
+      "height": 1250,
+      "bytes": 2299852,
+      "sha256": "757885af9c13036edc9ba6002fe3ac8e41e942ed3969f543c76271783eff5f55"
+    },
+    {
+      "file": "media/search-settings.png",
+      "width": 1600,
+      "height": 1572,
+      "bytes": 596750,
+      "sha256": "cd90a556f8e742b01ed6eaaefa95e5b39615ac5b589af05e2b0e73e9e01d6a64"
+    }
+  ],
+  "pending": []
+}
