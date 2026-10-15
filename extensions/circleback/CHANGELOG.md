@@ -1,6 +1,6 @@
 # Circleback Changelog
 
-## [Ask Circleback and Chats] - {PR_MERGE_DATE}
+## [Ask Circleback and Chats] - 2026-10-15
 
 - **Ask Circleback**: Ask Circleback about your meetings and more.
 - **Chats**: Browse and continue your chats.
