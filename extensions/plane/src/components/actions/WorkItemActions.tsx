@@ -14,28 +14,10 @@ import { getWorkItemUrlWithIdentifier } from "../../helpers/work-items";
 import { formatWorkItemIdentifier } from "../../helpers/identifiers";
 import { capitalizeString } from "../../helpers/strings";
 import { describePlaneError } from "../../helpers/errors";
-import { applyWorkItemChange } from "../../helpers/work-item-summary";
+import { sendWorkItemUpdate, WorkItemMutator } from "../../helpers/work-item-updates";
 
-/** Applies a change optimistically to whatever data the list holds, then awaits `request`. */
-export type WorkItemMutator = (
-  workItemId: string,
-  request: Promise<unknown>,
-  change: WorkItemChange,
-) => Promise<unknown>;
-
-type ArrayMutate = (
-  asyncUpdate?: Promise<unknown>,
-  options?: { optimisticUpdate?: (data: WorkItemSummary[] | undefined) => WorkItemSummary[] },
-) => Promise<unknown>;
-
-/** Builds a `WorkItemMutator` for hooks whose data is a `WorkItemSummary[]`. */
-export function arrayMutator(mutate: ArrayMutate): WorkItemMutator {
-  return (workItemId, request, change) =>
-    mutate(request, {
-      optimisticUpdate: (data) =>
-        (data ?? []).map((item) => (item.id === workItemId ? applyWorkItemChange(item, change) : item)),
-    });
-}
+export { arrayMutator, OPTIMISTIC_ONLY } from "../../helpers/work-item-updates";
+export type { WorkItemMutator } from "../../helpers/work-item-updates";
 
 export interface UpdateWorkItem {
   updatePayload: Partial<PatchedIssueRequest>;
@@ -46,9 +28,9 @@ export interface UpdateWorkItem {
 
 type WorkItemActionsProps = {
   workItem: WorkItemSummary;
-  /** Optimistic list update. Without it, the request is awaited and `onChanged` refreshes. */
+  /** Optimistic list update, without a reload of its own. Without it, the request is just awaited. */
   mutate?: WorkItemMutator;
-  /** Called after a successful update or comment. */
+  /** Called after a successful update or comment: the one reload after a change. */
   onChanged?: () => void;
   /** Passed to the pushed detail view so it can refresh the list. */
   mutateWorkItemList?: () => void;
@@ -86,14 +68,10 @@ export default function WorkItemActions({
         projectId: workItem.projectId,
         patchWorkItemRequest: patch,
       });
-      if (mutate) {
-        await mutate(workItem.id, request, change);
-      } else {
-        await request;
-      }
+      // The optimistic change shows at once; `onChanged` then reloads once (the mutator doesn't reload).
+      await sendWorkItemUpdate({ workItemId: workItem.id, request, change, mutate, reload: onChanged });
       toast.style = Toast.Style.Success;
       toast.title = update.successMessage;
-      onChanged?.();
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = update.errorMessage;

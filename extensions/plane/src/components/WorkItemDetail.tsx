@@ -8,7 +8,7 @@ import { getStateIcon, priorityToIcon } from "../helpers/icons";
 import { useStates } from "../hooks/useStates";
 import { parseHtmlToMarkdown } from "../helpers/parser";
 import { useWorkItemComments, useWorkItemCycleAndModules, useWorkItemDetail } from "../hooks/useWorkItemDetail";
-import WorkItemActions, { WorkItemMutator } from "./actions/WorkItemActions";
+import WorkItemActions, { OPTIMISTIC_ONLY, WorkItemMutator } from "./actions/WorkItemActions";
 import { ErrorActions, getErrorMarkdown } from "./ErrorEmptyView";
 import { capitalizeString } from "../helpers/strings";
 import { RawComment, RawUserLite, WorkItemSummary } from "../api/types";
@@ -126,6 +126,7 @@ export default function WorkItemDetail({ slug, projectId, workItemId, mutateWork
 
   const detailMutator: WorkItemMutator = (_id, request, change) =>
     mutate(request, {
+      ...OPTIMISTIC_ONLY,
       optimisticUpdate: (data) =>
         data && {
           ...data,

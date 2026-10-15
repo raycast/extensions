@@ -15,7 +15,7 @@ import WorkItemsByStateList from "./components/WorkItemsByStateList";
 import { useMyWorkItems } from "./hooks/useMyWorkItems";
 import { getCachedCapabilities } from "./api/work-item-backend";
 import { applyWorkItemChange } from "./helpers/work-item-summary";
-import { WorkItemMutator } from "./components/actions/WorkItemActions";
+import { OPTIMISTIC_ONLY, WorkItemMutator } from "./components/actions/WorkItemActions";
 import { BACKEND_LABELS, MyWorkItemsView, supportedViews } from "./helpers/work-item-backends";
 import { getHandoffMaxAgeMs, MyWorkItemsLaunchContext } from "./helpers/my-work-items";
 
@@ -58,6 +58,7 @@ function MyWorkItems({ handoffMaxAgeMs }: { handoffMaxAgeMs?: number }) {
 
   const mutator: WorkItemMutator = (workItemId, request, change) =>
     mutate(request, {
+      ...OPTIMISTIC_ONLY,
       optimisticUpdate: (current) =>
         current && {
           ...current,
