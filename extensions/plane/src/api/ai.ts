@@ -5,6 +5,7 @@ import { getMe } from "./users";
 import { planeRequest, workspacePath } from "./request";
 import type { RawUserLite, RawWorkItem } from "./types";
 import { parseWorkItemReference } from "../helpers/identifiers";
+import { matchMember } from "../helpers/members";
 import { parseHtmlToMarkdown } from "../helpers/parser";
 import { getWorkItemUrlWithIdentifier } from "../helpers/work-items";
 import { getExpandedAssignees, getExpandedLabels, getExpandedState } from "../helpers/work-item-summary";
@@ -100,7 +101,7 @@ export async function getMembers(projectId?: string): Promise<ToolMember[]> {
   return users.map(toToolMember).filter((member) => member.id && !isBot(member));
 }
 
-/** Resolves "me", an id, email, display name, or full name to a member id. */
+/** Resolves "me", an id, email, display name, or full name to a member id. Ambiguous names throw. */
 export async function resolveMemberIds(projectId: string, queries: string[]): Promise<string[]> {
   if (queries.length === 0) return [];
   const members = await getMembers(projectId);
@@ -112,25 +113,7 @@ export async function resolveMemberIds(projectId: string, queries: string[]): Pr
       if (me.id) ids.push(me.id);
       continue;
     }
-    const exact = members.find(
-      (member) =>
-        member.id === query.trim() ||
-        member.email?.toLowerCase() === needle ||
-        member.displayName?.toLowerCase() === needle ||
-        member.name?.toLowerCase() === needle,
-    );
-    const partial = members.filter(
-      (member) => member.name?.toLowerCase().includes(needle) || member.displayName?.toLowerCase().includes(needle),
-    );
-    const match = exact ?? (partial.length === 1 ? partial[0] : undefined);
-    if (!match) {
-      throw new Error(
-        partial.length > 1
-          ? `"${query}" matches several members: ${partial.map((member) => member.displayName).join(", ")}. Be more specific.`
-          : `Member "${query}" not found in this project.`,
-      );
-    }
-    ids.push(match.id);
+    ids.push(matchMember(members, query).id);
   }
   return [...new Set(ids)];
 }
