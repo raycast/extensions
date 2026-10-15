@@ -12,7 +12,6 @@ import {
   showToast,
 } from "@raycast/api";
 import { runAppleScript, useCachedPromise, useCachedState } from "@raycast/utils";
-import Fuse from "fuse.js";
 import { useEffect, useMemo, useState } from "react";
 
 import PermissionErrorScreen from "./components/PermissionErrorScreen";
@@ -55,6 +54,7 @@ import {
 } from "./utils/browserOpening";
 import { getInitialBrowserSelection } from "./utils/browsers";
 // Note: frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
+import { createBookmarkSearch } from "./utils/bookmarkSearch";
 import { getBookmarkIcon } from "./utils/icons";
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
 
@@ -453,24 +453,10 @@ export default function Command() {
     });
   }, [bookmarks, selectedFolderId, folders]);
 
-  const fuse = useMemo(() => {
-    return new Fuse(folderBookmarks, {
-      keys: [
-        { name: "title", weight: 3 },
-        { name: "domain", weight: 1 },
-        {
-          name: "folder",
-          weight: 0.5,
-          // The root folder (e.g. Chromium's "Bookmarks Bar") can't be renamed and is shared by most bookmarks,
-          // so fuzzy-matching it (e.g. "board") returns nearly everything. Search the subfolders only.
-          getFn: (item) => item.searchFolder ?? item.folder,
-        },
-      ],
-      threshold: Number(searchStrictness),
-      includeScore: true,
-      ignoreLocation: true,
-    });
-  }, [folderBookmarks, searchStrictness]);
+  const fuse = useMemo(
+    () => createBookmarkSearch(folderBookmarks, Number(searchStrictness)),
+    [folderBookmarks, searchStrictness],
+  );
 
   // Limit display to 100 bookmarks to avoid heap memory errors
   // Use custom filtering instead of native filtering

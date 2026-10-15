@@ -5,6 +5,7 @@ import { promisify } from "util";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
+import { getSearchFolder } from "../utils/bookmarkSearch";
 import { loadChromiumFavicons } from "../utils/chromiumFavicons";
 import { getChromiumFaviconSignature, getChromiumSourceSignature } from "../utils/chromiumSourceSignature";
 
@@ -56,10 +57,9 @@ function getBookmarks(bookmark: BookmarkFolder | BookmarkItem, hierarchy = "") {
   return bookmarks;
 }
 
-// Folder path without the browser's root folder (e.g. "Bookmarks Bar"), whose name is shared by most bookmarks.
 function getBookmarksWithSearchFolder(root: BookmarkFolder | undefined) {
   return root
-    ? getBookmarks(root).map((bookmark) => ({ ...bookmark, searchFolder: bookmark.folder.slice(root.name.length + 1) }))
+    ? getBookmarks(root).map((bookmark) => ({ ...bookmark, searchFolder: getSearchFolder(root.name, bookmark.folder) }))
     : [];
 }
 
