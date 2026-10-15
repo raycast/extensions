@@ -612,7 +612,7 @@ async function serveZip(response, entryIds, relatives) {
   response.writeHead(200, {
     "Content-Type": "application/zip",
     "Cache-Control": "no-store",
-    "Content-Disposition": contentDisposition(`file-share-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.zip`),
+    "Content-Disposition": contentDisposition(`lan-file-share-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.zip`),
   });
   await streamZip(response, files);
 }
@@ -789,7 +789,7 @@ async function streamZip(response, files) {
 /* -------------------------------------------------------------------------------------------- uploads */
 
 function partsRoot(config) {
-  return path.join(receiveDirectoryOf(config), ".file-share-parts");
+  return path.join(receiveDirectoryOf(config), ".lan-file-share-parts");
 }
 
 function partDirectory(config, uploadId) {
