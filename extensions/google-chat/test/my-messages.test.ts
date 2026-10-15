@@ -14,6 +14,7 @@ import {
   READ_PAGE_SIZE,
   resolveView,
   splitSections,
+  withLatestDetails,
   youReplied,
 } from "../src/helpers/my-messages";
 
@@ -185,5 +186,59 @@ describe("latestDate", () => {
   it("returns the newest valid time", () => {
     expect(latestDate("2026-10-14T10:00:00Z", "2026-10-14T11:00:00Z")?.toISOString()).toBe("2026-10-14T11:00:00.000Z");
     expect(latestDate(undefined, "not a date")).toBeUndefined();
+  });
+});
+
+describe("withLatestDetails", () => {
+  const unreadPreview = message("unread", "2026-10-14T09:00:00Z", "users/222");
+  const fromUnread = {
+    item: { space: { name: "spaces/a" } },
+    preview: unreadPreview,
+    youReplied: false,
+    latestTime: "2026-10-14T09:00:00Z",
+    names: { "users/222": "Ann" },
+    fromUnread: true,
+  };
+
+  it("keeps You replied and the newest preview from someone else once the latest messages load", () => {
+    const newerReply = message("thread-reply", "2026-10-14T10:00:00Z", "users/333");
+    const row = withLatestDetails(fromUnread, {
+      preview: newerReply,
+      youReplied: true,
+      latestTime: "2026-10-14T11:00:00Z",
+      names: { "users/333": "Bo" },
+    });
+    expect(row.preview?.name).toBe("thread-reply");
+    expect(row.names).toEqual({ "users/333": "Bo" });
+    expect(row.youReplied).toBe(true);
+    expect(row.latestTime).toBe("2026-10-14T11:00:00Z");
+    expect(row.item).toBe(fromUnread.item);
+  });
+
+  it("keeps the unread preview when the latest messages hold none from someone else, or an older one", () => {
+    expect(withLatestDetails(fromUnread, { youReplied: true, names: {} })).toMatchObject({
+      preview: unreadPreview,
+      names: { "users/222": "Ann" },
+      youReplied: true,
+      latestTime: "2026-10-14T09:00:00Z",
+    });
+    const older = message("older", "2026-10-14T08:00:00Z", "users/333");
+    const row = withLatestDetails(fromUnread, {
+      preview: older,
+      youReplied: false,
+      latestTime: "2026-10-14T08:00:00Z",
+      names: { "users/333": "Bo" },
+    });
+    expect(row.preview?.name).toBe("unread");
+    expect(row.names).toEqual({ "users/222": "Ann" });
+    expect(row.latestTime).toBe("2026-10-14T09:00:00Z");
+  });
+
+  it("carries You replied from the Unread section before the latest messages load", () => {
+    expect(withLatestDetails(fromUnread, { youReplied: true })).toMatchObject({
+      preview: unreadPreview,
+      youReplied: true,
+      names: { "users/222": "Ann" },
+    });
   });
 });

@@ -25,7 +25,7 @@ import {
   unreadSummary,
   withoutSpaces,
 } from "./helpers/unread";
-import { useReadConversations, useUnreadExtras } from "./hooks/useHome";
+import { useMovedReadRows, useReadConversations, useUnreadExtras } from "./hooks/useHome";
 import { useUnread } from "./hooks/useUnread";
 
 interface LaunchContext {
@@ -62,6 +62,8 @@ function MyMessages({ launchView }: { launchView?: string }) {
   // show under Read is decided here, against the latest unread result.
   const reads = useReadConversations(!unreadOnly && !!unread, unreadEntries);
   const sections = splitSections(unreadEntries, unreadOnly ? [] : (reads.data ?? []));
+  // Rows that moved from Unread to Read load their newest messages once, so they match a normal Read row.
+  const readRows = useMovedReadRows(sections.read, replied);
 
   // Raycast can't refresh a list command in the background, so this command's root search subtitle shows
   // the unread total from its last load, refresh or mark-as-read. Unread Chat keeps its own subtitle current.
@@ -179,7 +181,7 @@ function MyMessages({ launchView }: { launchView?: string }) {
       </List.Section>
       {unreadOnly ? null : (
         <List.Section title="Read">
-          {sections.read.map((row) => (
+          {readRows.map((row) => (
             <ConversationItem
               key={row.item.space.name}
               {...common}

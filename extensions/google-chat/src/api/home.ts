@@ -9,6 +9,7 @@ import { isAuthError, isScopeError } from "../helpers/errors";
 import {
   choosePreview,
   LATEST_MAX_PAGES,
+  type LatestDetails,
   LATEST_PAGE_SIZE,
   namesFor,
   needsLatestCheck,
@@ -26,23 +27,16 @@ import type { UnreadSpace } from "./unread";
 const CONCURRENCY = 5;
 
 /** A conversation in the Read section. */
-export interface HomeRow {
+export interface HomeRow extends LatestDetails {
   item: SpaceItem;
-  /** Newest message not sent by the user, if one was found. */
-  preview?: Message;
-  /** The newest message in the conversation is the user's own. */
-  youReplied: boolean;
-  /** Create time of the newest message (anyone's). */
-  latestTime?: string;
-  /** Names of the preview's sender and the people it mentions. */
-  names: UserNames;
+  /**
+   * Built from the unread result (the conversation was unread when its page loaded), so its preview and
+   * "You replied" cover only the unread messages until {@link loadLatestDetails} fills them in.
+   */
+  fromUnread?: boolean;
 }
 
-interface LatestMessages {
-  preview?: Message;
-  youReplied: boolean;
-  latestTime?: string;
-}
+type LatestMessages = Omit<LatestDetails, "names">;
 
 /** Errors that mean every request will fail, so the page should fail rather than show rows without previews. */
 function isFatal(error: unknown): boolean {
@@ -110,7 +104,34 @@ function rowFromUnread(entry: UnreadSpace, names: UserNames): HomeRow {
     youReplied: false,
     latestTime: entry.latestTime ?? entry.item.space.lastActiveTime,
     names: namesFor(preview, names),
+    fromUnread: true,
   };
+}
+
+/**
+ * The newest messages of conversations that moved from Unread to Read since their page loaded (marked as
+ * read, or read elsewhere), so their rows match what a Read page shows. Conversations whose messages fail
+ * to load are left out.
+ */
+export async function loadLatestDetails(spaceNames: string[]): Promise<Record<string, LatestDetails>> {
+  if (spaceNames.length === 0) return {};
+  const me = await getMe();
+  const latest = await mapLimit(spaceNames, CONCURRENCY, async (name): Promise<LatestMessages | undefined> => {
+    try {
+      return await loadLatestMessages(name, me.userName);
+    } catch (error) {
+      if (isFatal(error)) throw error;
+      console.error(`Latest messages failed for ${name}`, error);
+      return undefined;
+    }
+  });
+  const names = await loadPreviewNames(latest.flatMap((entry) => (entry?.preview ? [entry.preview] : [])));
+  return Object.fromEntries(
+    spaceNames.flatMap((name, i) => {
+      const entry = latest[i];
+      return entry ? [[name, { ...entry, names: namesFor(entry.preview, names) }]] : [];
+    }),
+  );
 }
 
 /**

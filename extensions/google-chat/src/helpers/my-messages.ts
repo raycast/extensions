@@ -59,6 +59,39 @@ export function needsLatestCheck(lastActiveTime: string | undefined, latestUnrea
   return active !== undefined && (unread === undefined || active > unread);
 }
 
+/** What a Read row shows of a conversation, from its newest messages. */
+export interface LatestDetails {
+  /** Newest message not sent by the user, if one was found. */
+  preview?: Message;
+  /** The newest message in the conversation is the user's own. */
+  youReplied: boolean;
+  /** Create time of the newest message (anyone's). */
+  latestTime?: string;
+  /** Names of the preview's sender and the people it mentions. */
+  names: UserNames;
+}
+
+/**
+ * A Read row built from unread data (a conversation that moved from Unread to Read), brought up to date with
+ * what's known since: its newest messages once loaded, or until then only whether the user replied last. The
+ * newer of the two previews wins, with its names, so a newer reply that wasn't counted as unread shows.
+ */
+export function withLatestDetails<R extends LatestDetails>(
+  row: R,
+  latest: Pick<LatestDetails, "youReplied"> & Partial<LatestDetails>,
+): R {
+  const preview = newestFirst([row.preview, latest.preview].filter((m): m is Message => !!m))[0];
+  const fromLatest = !!preview && preview === latest.preview;
+  const newer = (time(latest.latestTime) ?? -Infinity) > (time(row.latestTime) ?? -Infinity);
+  return {
+    ...row,
+    preview,
+    names: fromLatest ? (latest.names ?? {}) : row.names,
+    youReplied: latest.youReplied,
+    latestTime: newer ? latest.latestTime : row.latestTime,
+  };
+}
+
 /** The newest of several timestamps, as a Date. */
 export function latestDate(...values: (string | undefined)[]): Date | undefined {
   const times = values.map(time).filter((t): t is number => t !== undefined);
