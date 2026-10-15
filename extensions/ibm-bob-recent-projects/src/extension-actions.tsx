@@ -1,5 +1,5 @@
-import { Action, Alert, Color, confirmAlert, Icon, Keyboard, showHUD, showToast, Toast } from "@raycast/api";
-import { getBobCLI } from "./lib/bob";
+import { Action, Alert, Color, confirmAlert, Icon, Keyboard, open, showHUD, showToast, Toast } from "@raycast/api";
+import { getBobAppName, getBobCLI } from "./lib/bob";
 import { getErrorMessage } from "./utils";
 
 export function InstallExtensionByIDAction(props: { extensionID: string; afterInstall?: () => void }) {
@@ -75,12 +75,13 @@ export function UninstallExtensionByIDAction(props: { extensionID: string; after
 }
 
 export function OpenExtensionByIDInBobAction(props: { extensionID: string; onOpen?: (url: string) => void }) {
+  const url = `bobide:extension/${props.extensionID}`;
   return (
-    <Action.OpenInBrowser
+    <Action
       title="Open in IBM Bob"
-      url={`bobide:extension/${props.extensionID}`}
       icon={"icon.png"}
-      onOpen={(url) => {
+      onAction={() => {
+        open(url, getBobAppName());
         showHUD("Open IBM Bob Extension");
         if (props.onOpen) {
           props.onOpen(url);
