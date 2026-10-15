@@ -175,6 +175,58 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "description": "List the Plane projects the user is a member of, with their identifiers (e.g. ENG)."
+    },
+    {
+      "name": "search-work-items",
+      "title": "Search Work Items",
+      "description": "Search work items by title, sequence number, or project identifier. Optionally limit to one project."
+    },
+    {
+      "name": "get-work-item",
+      "title": "Get Work Item",
+      "description": "Get one work item by identifier (e.g. ENG-123) or Plane URL, including description, state, assignees, labels, dates, and latest comments."
+    },
+    {
+      "name": "list-my-work-items",
+      "title": "List My Work Items",
+      "description": "List work items assigned to (default), created by, subscribed to, or mentioning the current user, open ones by default, sorted by state and priority. Subscribed and mentions need server-side filters."
+    },
+    {
+      "name": "create-work-item",
+      "title": "Create Work Item",
+      "description": "Create a work item in a project. State, priority, assignees, and dates accept names; assignees accept \"me\"."
+    },
+    {
+      "name": "update-work-item",
+      "title": "Update Work Item",
+      "description": "Update a work item's title, description, state, priority, assignees, or dates. States and assignees accept names or ids."
+    },
+    {
+      "name": "add-comment",
+      "title": "Add Comment",
+      "description": "Add a Markdown comment to a work item by identifier (e.g. ENG-123)."
+    },
+    {
+      "name": "list-states",
+      "title": "List States",
+      "description": "List the workflow states of a project (states are project-specific)."
+    },
+    {
+      "name": "list-members",
+      "title": "List Members",
+      "description": "List members of a project, or of the workspace when no project is given."
+    },
+    {
+      "name": "get-me",
+      "title": "Get Current User",
+      "description": "Get the current Plane user and the selected workspace."
+    }
+  ],
   "dependencies": {
     "@makeplane/plane-node-sdk": "0.1.3",
     "@raycast/api": "^1.104.3",

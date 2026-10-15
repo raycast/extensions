@@ -62,7 +62,7 @@ type BackendResult = Pick<MyWorkItemsResult, "me" | "items" | "truncated" | "cov
 
 const SCAN_MEMO_MS = 60 * 1000;
 
-/** The last result per base URL, workspace and view, shared by the command and the menu bar. */
+/** The last result per base URL, workspace and view, shared by the command, the menu bar and the AI tool. */
 const resultStore = new Cache({ namespace: "plane-my-work-items" });
 
 function resultKey(view: MyWorkItemsView) {

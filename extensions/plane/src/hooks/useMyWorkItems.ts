@@ -7,7 +7,8 @@ import { errorShownInline } from "../helpers/errors";
 
 /**
  * Shared by the My Work Items command and the menu bar, so both use the same cache entry per view.
- * A result either of them fetched seeds this hook when the hook has nothing cached yet.
+ * The AI tool reads the same result through `getMyWorkItems(view, { maxAgeMs })`, and a result it fetched
+ * seeds this hook when the hook has nothing cached yet.
  */
 export function useMyWorkItems(
   view: MyWorkItemsView = "assigned",

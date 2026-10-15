@@ -21,3 +21,5 @@ export const FILTERED_PAGE_SIZE = 100;
 export const MAX_FILTERED_OPEN_PAGES = 5;
 /** Most recently updated completed or cancelled work items per view. */
 export const MAX_FILTERED_CLOSED_ITEMS = 50;
+/** How long the AI tool reuses the result the command or menu bar fetched. */
+export const SHARED_RESULT_MAX_AGE_MS = 2 * 60 * 1000;

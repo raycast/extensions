@@ -20,6 +20,10 @@ A powerful Raycast extension for managing work items in [Plane](https://plane.so
 - **Intake** - Triage intake items: accept, decline, snooze, or mark as duplicate
 - **Search Pages** - Workspace and project pages (Plane Cloud and Commercial, see below)
 
+### 🤖 AI Tools
+
+Ask `@plane` in Raycast AI to list your work items, search, show `ENG-123`, create or update work items (state, priority, assignees, dates by name), add comments, and list projects, states, or members. Every write asks for confirmation first.
+
 ### ✨ Work Item Management
 
 - **Create Work Items** with:
@@ -95,14 +99,14 @@ For both **Plane Cloud** and **Self-Hosted** instances:
 
 ### Self-Hosted (Community Edition) Notes
 
-- Plane Community Edition only has the v1 API. It has no "assigned to me" filter, so **My Work Items** and the menu bar scan your projects' most recently updated work items (up to 20 projects × 300 items, 3 requests at a time) and filter locally, unless the server offers one of the faster backends below. Results are cached.
+- Plane Community Edition only has the v1 API. It has no "assigned to me" filter, so **My Work Items**, the menu bar, and the `list-my-work-items` AI tool scan your projects' most recently updated work items (up to 20 projects × 300 items, 3 requests at a time) and filter locally, unless the server offers one of the faster backends below. Results are cached.
 - Plane allows 60 API requests per minute per key. If you hit the limit, wait a minute and retry.
 - Community Edition has no public pages API, so **Search Pages** shows a notice instead of a list.
 - If a command reports "Check API Base Path", make sure the preference points at your Plane host (e.g. `https://plane.example.com`).
 
 ## Backends
 
-**My Work Items** and the **Assigned Work Items** menu bar pick the fastest way your server offers, per API base path and workspace. The list shows which one it used in the section subtitle (e.g. "via API v2"); the menu bar shows it in its tooltip.
+**My Work Items**, the **Assigned Work Items** menu bar, and the `list-my-work-items` AI tool pick the fastest way your server offers, per API base path and workspace. The list shows which one it used in the section subtitle (e.g. "via API v2"); the menu bar shows it in its tooltip.
 
 1. **Plane API v2** (Plane Cloud, Commercial): detected with `GET /api/v2/users/me/`. Uses `GET /api/v2/workspaces/{slug}/work-items/?assignee_id=…` for **Assigned**. v2 has no created-by filter, so **Created** uses the next backend.
 2. **Server-side v1 filters** (a Community Edition patched to add them): used only when `GET /api/v1/workspaces/{slug}/work-items/` answers with the header `X-Plane-Work-Item-Filters: 1`. Adds the **Subscribed** and **Mentions** views; only the filters the server lists in `X-Plane-Work-Item-Filter-Params` are sent.

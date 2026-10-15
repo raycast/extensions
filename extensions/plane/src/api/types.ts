@@ -177,7 +177,7 @@ export type V2Page = {
 };
 
 /**
- * Normalized work item used by list rows and the menu bar.
+ * Normalized work item used by list rows, the menu bar, and AI tools.
  * Dates are ISO strings so the object survives `useCachedPromise` JSON caching.
  */
 export type WorkItemSummary = {

@@ -26,8 +26,9 @@
 - **Search Pages** (Plane Cloud; Community Edition has no public pages API and says so)
 - Row actions everywhere: open detail, open in browser, copy identifier / URL / Markdown link, update state and priority (optimistic), assign to me, add comment, edit
 - Work item detail shows assignees, labels, cycle, module, created/updated dates, and the latest comments
+- AI tools: list projects, search, get, list my work items, create, update, comment, list states, list members, get current user
 - **Faster My Work Items**: uses Plane API v2 (`assignee_id`) on Cloud and Commercial, or server-side v1 filters on servers that advertise `X-Plane-Work-Item-Filters: 1`, and falls back to the project scan otherwise. Detection is cached per server and workspace (24 hours when supported, 1 hour when not) and never shows an error; the active backend appears in the list's section subtitle and the menu bar tooltip
-- **Subscribed** and **Mentions** views in My Work Items, on servers with server-side filters
+- **Subscribed** and **Mentions** views in My Work Items and the `list-my-work-items` AI tool, on servers with server-side filters
 - **Search Pages** uses the API v2 pages endpoints when the server has v2
 - API v2 errors (RFC 9457 problem+json) show their detail and field errors; rate-limited GETs wait out a short `Retry-After` once, and longer waits are reported
 

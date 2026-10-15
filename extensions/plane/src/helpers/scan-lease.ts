@@ -1,7 +1,7 @@
 /**
- * Coordinates the project scan across commands. The menu bar and My Work Items run in separate
- * processes, so only Raycast's on-disk `Cache` is shared. Without coordination both can scan at once
- * and spend up to 80 of the server's 60 requests per minute.
+ * Coordinates the project scan across commands. The menu bar, My Work Items and the AI tool run in
+ * separate processes, so only Raycast's on-disk `Cache` is shared. Without coordination two of them can
+ * scan at once and spend up to 80 of the server's 60 requests per minute.
  *
  * The first caller writes a lease and scans; a caller that finds a live lease waits for the shared
  * result to appear instead of scanning too. A stale lease (crashed or killed process) is ignored.

@@ -29,7 +29,7 @@ export function parseWorkItemReference(text: string | undefined | null): WorkIte
   return { type: "identifier", projectIdentifier: match[1].toUpperCase(), sequenceId };
 }
 
-/** Parses only the `PROJ-123` form (used by command arguments). */
+/** Parses only the `PROJ-123` form (used by arguments and AI tools). */
 export function parseWorkItemIdentifier(
   text: string | undefined | null,
 ): { projectIdentifier: string; sequenceId: number } | undefined {
