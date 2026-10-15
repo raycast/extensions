@@ -28,7 +28,7 @@ evals:
             messages:
               - name: spaces/AAAA/messages/m1.m1
                 sender: Sara Khan
-                text: "@Rehan can you review the pipeline PR?"
+                text: "@Alex can you review the pipeline PR?"
                 createTime: "2026-10-14T09:00:00Z"
                 thread: spaces/AAAA/threads/m1
                 mentionsMe: true

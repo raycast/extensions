@@ -94,7 +94,7 @@ export function ConversationItem(props: ConversationItemProps) {
   );
 }
 
-/** Switches between All and Unread only (⌘U). */
+/** Switches between All and Unread Only (⌘U). */
 export function ToggleUnreadOnlyAction({ unreadOnly, onToggle }: { unreadOnly: boolean; onToggle: () => void }) {
   return (
     <Action

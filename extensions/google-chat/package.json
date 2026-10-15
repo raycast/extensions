@@ -32,7 +32,7 @@
       "name": "my-messages",
       "title": "My Messages",
       "subtitle": "Google Chat",
-      "description": "Your conversations, like Google Chat's Home: unread ones first with counts and mentions, then the rest by latest activity, each with the latest message from someone else. Switch to Unread only with the dropdown or ⌘U.",
+      "description": "Your Google Chat conversations like Chat's Home, with unread ones first.",
       "mode": "view",
       "preferences": [
         {
@@ -48,7 +48,7 @@
               "value": "all"
             },
             {
-              "title": "Unread only",
+              "title": "Unread Only",
               "value": "unread"
             }
           ]
@@ -59,7 +59,7 @@
       "name": "unread-count",
       "title": "Unread Chat",
       "subtitle": "Google Chat",
-      "description": "Shows your unread Google Chat total in root search, checked every 5 minutes after you run it once. Running it opens the conversation when only one has unread messages, else My Messages' unread view.",
+      "description": "Shows your unread Google Chat total in root search, refreshed every 5 minutes.",
       "mode": "no-view",
       "interval": "5m"
     },
@@ -169,7 +169,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.7.1",
+    "@raycast/api": "^2.8.0",
     "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {

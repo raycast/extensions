@@ -77,8 +77,8 @@ describe("previewText", () => {
       text: "*Heads up* <users/111> see <https://example.com|the doc>",
       annotations: [{ type: "USER_MENTION", userMention: { user: { name: ME } } }],
     });
-    const names = { "users/222": "Sara Khan", [ME]: "Rehan" };
-    expect(previewText(m, names)).toBe("Sara Khan: Heads up @Rehan see the doc");
+    const names = { "users/222": "Sara Khan", [ME]: "Alex" };
+    expect(previewText(m, names)).toBe("Sara Khan: Heads up @Alex see the doc");
   });
 
   it("uses the DM's person when the sender's name is unknown", () => {

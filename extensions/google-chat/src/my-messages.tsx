@@ -21,7 +21,7 @@ import { useReadConversations, useUnreadExtras } from "./hooks/useHome";
 import { useUnread } from "./hooks/useUnread";
 
 interface LaunchContext {
-  /** `unread` opens Unread only for this launch (Unread Chat passes it). */
+  /** `unread` opens Unread Only for this launch (Unread Chat passes it). */
   view?: string;
 }
 
@@ -32,7 +32,7 @@ function MyMessages({ launchView }: { launchView?: string }) {
     "my-messages-view",
     parseView(preferences.defaultView) ?? "all",
   );
-  // A launch context forces Unread only for this launch, without changing the remembered view.
+  // A launch context forces Unread Only for this launch, without changing the remembered view.
   const [launchOverride, setLaunchOverride] = useState(launchView);
   const view = resolveView({ launch: launchOverride, stored: storedView, preference: preferences.defaultView });
   const unreadOnly = view === "unread";
@@ -115,7 +115,7 @@ function MyMessages({ launchView }: { launchView?: string }) {
       searchBarAccessory={
         <List.Dropdown tooltip="View" value={view} onChange={(value) => setView(parseView(value) ?? "all")}>
           <List.Dropdown.Item title="All" value="all" icon={Icon.List} />
-          <List.Dropdown.Item title="Unread only" value="unread" icon={Icon.Envelope} />
+          <List.Dropdown.Item title="Unread Only" value="unread" icon={Icon.Envelope} />
         </List.Dropdown>
       }
     >

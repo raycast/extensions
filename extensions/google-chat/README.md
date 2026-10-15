@@ -29,7 +29,7 @@ If your Workspace admin restricts third-party apps under **Security → API cont
 | Command             | What it does                                                                                                                                                                                                                                                                                                         |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Search Spaces & DMs | Your spaces, group chats and DMs in sections, most-used first. View messages, send a message, open in Google Chat, copy the link, mark as read. Filter by type with the dropdown.                                                                                                                                    |
-| My Messages         | Your conversations like Google Chat's Home: **Unread** first, then **Read** by latest activity, each with the latest message from someone else. Switch between All and Unread only with the dropdown or ⌘U. See [My Messages](#my-messages).                                                                         |
+| My Messages         | Your conversations like Google Chat's Home: **Unread** first, then **Read** by latest activity, each with the latest message from someone else. Switch between All and Unread Only with the dropdown or ⌘U. See [My Messages](#my-messages).                                                                         |
 | Unread Chat         | Your unread total in root search (`12 unread · 4 spaces · 2 mentions`), refreshed every 5 minutes. Opens the conversation when only one is unread, else My Messages' unread view. See [Unread Chat](#unread-chat).                                                                                                   |
 | Send Message        | One **To** field: search your DMs, spaces and group chats by name, or people in your directory (from 2 letters). Type any email to message someone new. Then pick **Thread**: a new message, one of the recent threads in that conversation, or a pasted thread link. Keeps drafts and remembers the last recipient. |
 | Quick Message       | `to` and `message` arguments from root search. `to` is an email, a Chat link, `spaces/…`, or the exact title of a space or DM.                                                                                                                                                                                       |
@@ -53,7 +53,7 @@ In message lists you can reply in a thread, add a reaction, copy the text or the
 - **Google OAuth Client ID** (required): the iOS client from Setup.
 - **Open With**: browser or installed Chat web app for every "Open in Google Chat" action. Empty uses your default browser.
 - **Unread Lookback (Days)**: only unread messages from this many days are counted (default 14, at most 90).
-- **Default View** (My Messages): All or Unread only, for the first time you open it. After that it remembers your last choice.
+- **Default View** (My Messages): All or Unread Only, for the first time you open it. After that it remembers your last choice.
 
 ### AI
 
@@ -72,7 +72,7 @@ Two sections:
 - **Unread**: conversations with unread messages from others, newest first, with counts and mentions. The preview is the newest unread message.
 - **Read**: every other conversation, most recently active first, 25 at a time; scroll to load more. For each page the extension lists the newest few messages of each conversation (5 per request, at most 3 requests) until it finds one from someone else.
 
-The **View** dropdown switches between **All** and **Unread only** (⌘U toggles it); Unread only shows just the Unread section. The choice is remembered; **Default View** sets the first one.
+The **View** dropdown switches between **All** and **Unread Only** (⌘U toggles it); Unread Only shows just the Unread section. The choice is remembered; **Default View** sets the first one.
 
 Actions: View Messages, Open in Google Chat (uses **Open With**), Send Message, Mark as Read and Mark All as Read (on unread rows), Copy Link, Toggle Unread Only (⌘U) and Refresh (⌘R). The command's root search subtitle shows the unread total from its last load, refresh or mark-as-read.
 
@@ -82,7 +82,7 @@ A background command that shows your unread total as its root search subtitle, e
 
 - **Run it once to start.** Raycast only runs it every 5 minutes after you've run it yourself once (and signed in).
 - **Every 5 minutes** it updates the subtitle. If My Messages or the AI checked in the last 2 minutes, it reuses that result instead of asking Google again. If the check fails, the subtitle says `Couldn't check unread`.
-- **Running it** checks again, then opens the conversation in Google Chat when exactly one has unread messages (using **Open With**), or else My Messages in Unread only.
+- **Running it** checks again, then opens the conversation in Google Chat when exactly one has unread messages (using **Open With**), or else My Messages in Unread Only.
 
 ## How unread works
 

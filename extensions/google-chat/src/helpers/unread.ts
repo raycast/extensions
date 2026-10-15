@@ -51,7 +51,7 @@ export function excludeOwnMessages(messages: Message[], me: string | undefined):
 
 /**
  * Whether Chat's Home would show a message as unread. Google's `is_unread()` also counts every unopened reply in
- * threads you don't follow, which Home never shows (on Rehan's account 100 of 100 such results were thread
+ * threads you don't follow, which Home never shows (in a real account, 100 of 100 such results were thread
  * replies, 99 older than the space's read position). So a message counts only when it's newer than the space's
  * read position and is either a top-level message or a reply that mentions you.
  */

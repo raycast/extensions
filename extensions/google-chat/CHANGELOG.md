@@ -3,7 +3,7 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Search Spaces & DMs with frecency sorting, message view, reply in thread, reactions and mark as read
-- My Messages, a conversation list like Google Chat's Home: Unread (counts, mentions) and Read (paginated, by latest activity) sections, a preview of the latest message from others, "You replied" and thread markers, an All / Unread only switch (⌘U, Default View preference), and Mark as Read / Mark All as Read
+- My Messages, a conversation list like Google Chat's Home: Unread (counts, mentions) and Read (paginated, by latest activity) sections, a preview of the latest message from others, "You replied" and thread markers, an All / Unread Only switch (⌘U, Default View preference), and Mark as Read / Mark All as Read
 - Send Message form with one searchable To field (DMs, spaces, group chats, directory people or any email), a Thread picker with recent threads, and drafts; Quick Message from root search
 - @mentions in Send Message for spaces and group chats: pick members or @all, mentions go where the text says `@Name` (or at the start), with a preview; the send-message AI tool takes `mentions` by name or email
 - My Messages shows the unread total in its root search subtitle, updated on every load, refresh and mark-as-read
