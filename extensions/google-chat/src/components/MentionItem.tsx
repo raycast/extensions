@@ -12,8 +12,8 @@ import { SpaceMessages } from "./SpaceMessages";
 
 interface MentionItemProps {
   row: MentionRow;
-  /** The message is unread (listed in the shared unread result). */
-  unread: boolean;
+  /** The message is unread; undefined when that couldn't be checked (no dot). */
+  unread?: boolean;
   /** Shown while the conversation is unread. */
   onMarkRead?: () => void;
   onSent?: () => void;

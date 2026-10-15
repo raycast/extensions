@@ -22,6 +22,7 @@ import {
   parseMentionsLimit,
   unreadMessageNames,
   visibleMentions,
+  withMentionsRead,
 } from "./helpers/my-mentions";
 import { latestDate, namesFor, parseView, resolveView, splitSections, type HomeView } from "./helpers/my-messages";
 import {
@@ -66,14 +67,15 @@ function MyMessages({ launchView }: { launchView?: string }) {
   const extras = useUnreadExtras(unreadEntries);
   const replied = new Set(extras.replied);
 
-  // Mentions load alongside unread; whether each is unread comes from the shared unread result.
+  // Mentions load alongside unread, with their own unread-mentions search; the shared unread result is the
+  // fallback when that search fails.
   const mentionsDays = parseMentionsDays(preferences.mentionsDays);
   const mentions = useMentions(mentionsDays, parseMentionsLimit(preferences.mentionsLimit));
   // Ignore cached data in another shape.
   const mentionsData = Array.isArray(mentions.data?.rows) ? mentions.data : undefined;
-  const unreadMessages = unreadMessageNames(unreadEntries);
-  const allMentions = visibleMentions(mentionsData?.rows ?? [], unreadMessages, false);
-  const shownMentions = visibleMentions(mentionsData?.rows ?? [], unreadMessages, unreadOnly);
+  const sharedUnread = unread ? { names: unreadMessageNames(unreadEntries), capped: unread.capped } : undefined;
+  const allMentions = visibleMentions(mentionsData?.rows ?? [], sharedUnread, false);
+  const shownMentions = visibleMentions(mentionsData?.rows ?? [], sharedUnread, unreadOnly);
   const unreadByName = new Map(unreadEntries.map((entry) => [entry.spaceName, entry]));
 
   // Wait for an unread result so the Read pages don't spend requests on conversations it lists. Which rows
@@ -104,19 +106,28 @@ function MyMessages({ launchView }: { launchView?: string }) {
     const names = targets.map((t) => t.spaceName);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Marking as read" });
     const before = unread;
+    const mentionsBefore = mentionsData;
     let marked: string[] = [];
     const write = markRead(names).catch((error: unknown) => {
       if (error instanceof MarkReadError) marked = error.marked;
       throw error;
     });
     try {
-      await unreadState.mutate(write, {
-        optimisticUpdate: (current) => (current ? withoutSpaces(current, names) : current),
-        // Put back only the conversations that couldn't be marked.
-        rollbackOnError: (current) => (before ? withoutSpaces(before, marked) : current),
-        // Past the cap there may be unread conversations that weren't loaded yet.
-        shouldRevalidateAfter: !!unread?.capped,
-      });
+      await Promise.all([
+        unreadState.mutate(write, {
+          optimisticUpdate: (current) => (current ? withoutSpaces(current, names) : current),
+          // Put back only the conversations that couldn't be marked.
+          rollbackOnError: (current) => (before ? withoutSpaces(before, marked) : current),
+          // Past the cap there may be unread conversations that weren't loaded yet.
+          shouldRevalidateAfter: !!unread?.capped,
+        }),
+        // Mentions in these conversations are read too.
+        mentions.mutate(write, {
+          optimisticUpdate: (current) => withMentionsRead(current, names),
+          rollbackOnError: (current) => (mentionsBefore ? withMentionsRead(mentionsBefore, marked) : current),
+          shouldRevalidateAfter: false,
+        }),
+      ]);
       toast.style = Toast.Style.Success;
       toast.title = targets.length === 1 ? `Marked ${targets[0].item.title} as read` : "Marked all as read";
     } catch (error) {
@@ -173,15 +184,7 @@ function MyMessages({ launchView }: { launchView?: string }) {
         }
       />
       {shownMentions.length > 0 ? (
-        <List.Section
-          title="Mentions"
-          subtitle={mentionsSubtitle(
-            allMentions.length,
-            !!mentionsData?.capped,
-            allMentions.filter((row) => row.unread).length,
-            mentionsDays,
-          )}
-        >
+        <List.Section title="Mentions" subtitle={mentionsSubtitle(allMentions, !!mentionsData?.capped, mentionsDays)}>
           {shownMentions.map((row) => {
             const entry = unreadByName.get(row.item.space.name);
             return (

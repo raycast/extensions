@@ -3,16 +3,19 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Message, SpaceItem } from "../src/api/types";
 import {
   collectMentions,
+  collectMentionsWithUnread,
   DEFAULT_MENTIONS_DAYS,
   DEFAULT_MENTIONS_LIMIT,
   mentionRows,
-  mentionsSearchFilter,
+  mentionsSearchFilters,
   mentionsSubtitle,
+  mentionUnread,
   parseMentionsDays,
   parseMentionsLimit,
   selectMentions,
   unreadMessageNames,
   visibleMentions,
+  withMentionsRead,
   type MentionsPageRequest,
 } from "../src/helpers/my-mentions";
 
@@ -49,12 +52,14 @@ describe("parseMentionsDays and parseMentionsLimit", () => {
   });
 });
 
-describe("mentionsSearchFilter", () => {
-  it("asks for mentions of the caller from the last N days", () => {
-    expect(mentionsSearchFilter(7, NOW)).toBe(
-      'annotations.user_mentions.user.name:users/me AND create_time >= "2026-10-08T12:00:00.000Z"',
-    );
-    expect(mentionsSearchFilter(1, NOW)).toBe(
+describe("mentionsSearchFilters", () => {
+  it("asks for mentions of the caller from the last N days, and the unread ones with the same cutoff", () => {
+    expect(mentionsSearchFilters(7, NOW)).toEqual({
+      mentions: 'annotations.user_mentions.user.name:users/me AND create_time >= "2026-10-08T12:00:00.000Z"',
+      unreadMentions:
+        'annotations.user_mentions.user.name:users/me AND is_unread() AND create_time >= "2026-10-08T12:00:00.000Z"',
+    });
+    expect(mentionsSearchFilters(1, NOW).mentions).toBe(
       'annotations.user_mentions.user.name:users/me AND create_time >= "2026-10-14T12:00:00.000Z"',
     );
   });
@@ -85,32 +90,30 @@ describe("selectMentions", () => {
   });
 });
 
+/** Serves `all` in pages of the requested size, recording each request. */
+function pager(all: Message[], options: { failOnPage?: number } = {}) {
+  const requests: MentionsPageRequest[] = [];
+  const fetchPage = async (request: MentionsPageRequest) => {
+    requests.push(request);
+    const start = Number(request.pageToken ?? 0);
+    if (options.failOnPage !== undefined && requests.length - 1 === options.failOnPage) {
+      throw new Error("Internal error encountered");
+    }
+    const end = start + request.pageSize;
+    return { messages: all.slice(start, end), nextPageToken: end < all.length ? String(end) : undefined };
+  };
+  return { requests, fetchPage };
+}
+
+const FILTERS = mentionsSearchFilters(7, NOW);
+
 describe("collectMentions", () => {
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  /** Serves `all` in pages of the requested size, recording each request. */
-  function pager(all: Message[], options: { failOnPage?: number } = {}) {
-    const requests: MentionsPageRequest[] = [];
-    const fetchPage = async (request: MentionsPageRequest) => {
-      requests.push(request);
-      const start = Number(request.pageToken ?? 0);
-      if (options.failOnPage !== undefined && requests.length - 1 === options.failOnPage) {
-        throw new Error("Internal error encountered");
-      }
-      const end = start + request.pageSize;
-      return { messages: all.slice(start, end), nextPageToken: end < all.length ? String(end) : undefined };
-    };
-    return { requests, fetchPage };
-  }
-
   it("sends the same filter on every page and pages past your own messages", async () => {
     const all = [...mentions("spaces/A", 3, 0, ME), ...mentions("spaces/A", 4, 3)];
     const { requests, fetchPage } = pager(all);
-    const found = await collectMentions({ fetchPage, days: 7, limit: 3, me: ME, now: NOW });
+    const found = await collectMentions({ fetchPage, filter: FILTERS.mentions, limit: 3, me: ME });
     expect(requests).toHaveLength(2);
-    expect(requests.map((r) => r.filter)).toEqual([mentionsSearchFilter(7, NOW), mentionsSearchFilter(7, NOW)]);
+    expect(requests.map((r) => r.filter)).toEqual([FILTERS.mentions, FILTERS.mentions]);
     expect(requests.map((r) => [r.pageSize, r.pageToken])).toEqual([
       [3, undefined],
       [3, "3"],
@@ -124,57 +127,138 @@ describe("collectMentions", () => {
     expect(found.capped).toBe(true);
   });
 
-  it("builds the filter once, so later pages don't pick up a newer time", async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(NOW);
-    // Each page takes a minute; your own messages fill the first two pages.
-    const own = pager([...mentions("spaces/A", 4, 0, ME), ...mentions("spaces/A", 2, 4)]);
-    const ownSlow = async (request: MentionsPageRequest) => {
-      vi.setSystemTime(Date.now() + 60_000);
-      return own.fetchPage(request);
-    };
-    await collectMentions({ fetchPage: ownSlow, days: 7, limit: 2, me: ME });
-    expect(own.requests).toHaveLength(3);
-    expect(new Set(own.requests.map((r) => r.filter)).size).toBe(1);
-    expect(own.requests[0].filter).toBe(mentionsSearchFilter(7, NOW));
-  });
-
   it("stops at the first page when it fills the limit, and isn't capped when nothing is left", async () => {
     const full = pager(mentions("spaces/A", 25));
-    const capped = await collectMentions({ fetchPage: full.fetchPage, days: 7, limit: 20, me: ME, now: NOW });
+    const capped = await collectMentions({ fetchPage: full.fetchPage, filter: FILTERS.mentions, limit: 20, me: ME });
     expect(full.requests).toHaveLength(1);
     expect(capped.messages).toHaveLength(20);
     expect(capped.capped).toBe(true);
 
     const few = pager(mentions("spaces/A", 4));
-    const all = await collectMentions({ fetchPage: few.fetchPage, days: 7, limit: 20, me: ME, now: NOW });
+    const all = await collectMentions({ fetchPage: few.fetchPage, filter: FILTERS.mentions, limit: 20, me: ME });
     expect(all.messages).toHaveLength(4);
     expect(all.capped).toBe(false);
   });
 
   it("stops after the page limit", async () => {
     const { requests, fetchPage } = pager(mentions("spaces/A", 10, 0, ME));
-    const found = await collectMentions({ fetchPage, days: 7, limit: 2, me: ME, now: NOW, maxPages: 3 });
+    const found = await collectMentions({ fetchPage, filter: FILTERS.mentions, limit: 2, me: ME, maxPages: 3 });
     expect(requests).toHaveLength(3);
     expect(found).toEqual({ messages: [], capped: true });
   });
 
   it("throws on a first-page failure and keeps earlier pages on a later one", async () => {
     const first = pager(mentions("spaces/A", 5), { failOnPage: 0 });
-    await expect(collectMentions({ fetchPage: first.fetchPage, days: 7, limit: 2, me: ME })).rejects.toThrow();
+    await expect(
+      collectMentions({ fetchPage: first.fetchPage, filter: FILTERS.mentions, limit: 2, me: ME }),
+    ).rejects.toThrow();
 
     const errors: unknown[] = [];
     const later = pager([...mentions("spaces/A", 2, 0, ME), ...mentions("spaces/A", 3, 2)], { failOnPage: 1 });
     const found = await collectMentions({
       fetchPage: later.fetchPage,
-      days: 7,
+      filter: FILTERS.mentions,
       limit: 2,
       me: ME,
-      now: NOW,
       onPageError: (error) => errors.push(error),
     });
     expect(found).toEqual({ messages: [], capped: true });
     expect(errors).toHaveLength(1);
+  });
+});
+
+describe("collectMentionsWithUnread", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  /** Answers both searches: unread-mentions requests from `unread`, the rest from `all`. */
+  function twoSearches(all: Message[], unread: Message[], options: { unreadFailOnPage?: number } = {}) {
+    const mentionsPager = pager(all);
+    const unreadPager = pager(unread, { failOnPage: options.unreadFailOnPage });
+    const fetchPage = (request: MentionsPageRequest) =>
+      (request.filter.includes("is_unread()") ? unreadPager : mentionsPager).fetchPage(request);
+    return { fetchPage, mentionsRequests: mentionsPager.requests, unreadRequests: unreadPager.requests };
+  }
+
+  it("builds both filters once, with the same cutoff, so later pages don't pick up a newer time", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+    // Your own messages fill the first two pages of each search; each page takes a minute.
+    const own = mentions("spaces/A", 4, 0, ME);
+    const searches = twoSearches([...own, ...mentions("spaces/A", 2, 4)], [...own, ...mentions("spaces/A", 2, 4)]);
+    const slow = async (request: MentionsPageRequest) => {
+      vi.setSystemTime(Date.now() + 60_000);
+      return searches.fetchPage(request);
+    };
+    await collectMentionsWithUnread({ fetchPage: slow, days: 7, limit: 2, me: ME });
+    expect(searches.mentionsRequests).toHaveLength(3);
+    expect(searches.unreadRequests).toHaveLength(3);
+    expect(new Set(searches.mentionsRequests.map((r) => r.filter))).toEqual(new Set([FILTERS.mentions]));
+    expect(new Set(searches.unreadRequests.map((r) => r.filter))).toEqual(new Set([FILTERS.unreadMentions]));
+    expect(searches.unreadRequests.map((r) => r.pageSize)).toEqual([2, 2, 2]);
+  });
+
+  it("lists the unread mentions from the second search", async () => {
+    const all = mentions("spaces/A", 5);
+    const searches = twoSearches(all, [all[1], all[4]]);
+    const found = await collectMentionsWithUnread({
+      fetchPage: searches.fetchPage,
+      days: 7,
+      limit: 3,
+      me: ME,
+      now: NOW,
+    });
+    expect(found.messages.map((m) => m.name)).toEqual(all.slice(0, 3).map((m) => m.name));
+    expect(found.capped).toBe(true);
+    expect(found.unread).toEqual({ names: [all[1].name, all[4].name], complete: true });
+  });
+
+  it("leaves unread unknown when the unread-mentions search fails, and keeps the mentions", async () => {
+    const all = mentions("spaces/A", 3);
+    const errors: unknown[] = [];
+    const failed = twoSearches(all, all, { unreadFailOnPage: 0 });
+    const found = await collectMentionsWithUnread({
+      fetchPage: failed.fetchPage,
+      days: 7,
+      limit: 5,
+      me: ME,
+      now: NOW,
+      onUnreadError: (error) => errors.push(error),
+    });
+    expect(found.messages).toHaveLength(3);
+    expect(found.unread).toBeUndefined();
+    expect(errors).toHaveLength(1);
+
+    // A later page failing keeps what loaded, but a mention it doesn't list is no longer known to be read.
+    const own = mentions("spaces/A", 2, 0, ME);
+    const partial = twoSearches(all, [...own, all[0]], { unreadFailOnPage: 1 });
+    const later = await collectMentionsWithUnread({
+      fetchPage: partial.fetchPage,
+      days: 7,
+      limit: 2,
+      me: ME,
+      now: NOW,
+    });
+    expect(later.unread).toEqual({ names: [], complete: false });
+  });
+
+  it("throws when the mentions search fails", async () => {
+    const searches = twoSearches([], []);
+    const fetchPage = async (request: MentionsPageRequest) => {
+      if (!request.filter.includes("is_unread()")) throw new Error("Internal error encountered");
+      return searches.fetchPage(request);
+    };
+    await expect(collectMentionsWithUnread({ fetchPage, days: 7, limit: 2, me: ME })).rejects.toThrow();
+  });
+});
+
+describe("mentionUnread", () => {
+  it("is true when listed, false when the search was complete, and unknown otherwise", () => {
+    expect(mentionUnread("m1", { names: ["m1"], complete: false })).toBe(true);
+    expect(mentionUnread("m2", { names: ["m1"], complete: true })).toBe(false);
+    expect(mentionUnread("m2", { names: ["m1"], complete: false })).toBeUndefined();
+    expect(mentionUnread("m1", undefined)).toBeUndefined();
   });
 });
 
@@ -200,40 +284,92 @@ describe("mentionRows", () => {
     expect(rows[1].names).toEqual({ "users/222": "Priya", [ME]: "Alex" });
   });
 
+  it("marks each row unread from the unread-mentions search", () => {
+    const messages = [
+      message("spaces/A/messages/1", "2026-10-15T09:00:00Z"),
+      message("spaces/A/messages/2", "2026-10-15T08:00:00Z"),
+    ];
+    const unread = { names: ["spaces/A/messages/2"], complete: true };
+    expect(mentionRows(messages, new Map(), {}, unread).map((r) => r.unread)).toEqual([false, true]);
+    expect(mentionRows(messages, new Map(), {}).map((r) => r.unread)).toEqual([undefined, undefined]);
+  });
+
   it("gives a conversation it can't resolve a placeholder title", () => {
     const rows = mentionRows([message("spaces/Z/messages/1", "2026-10-15T08:00:00Z")], new Map(), {});
     expect(rows[0].item).toEqual({ space: { name: "spaces/Z" }, title: "Conversation", kind: "space" });
   });
 });
 
-describe("unread flag and Unread Only", () => {
-  const rows = [
-    { message: { name: "spaces/A/messages/1" } },
-    { message: { name: "spaces/A/messages/2" } },
-    { message: { name: "spaces/B/messages/3" } },
-  ];
-  const groups = [
-    { messages: [message("spaces/A/messages/2", "2026-10-15T08:00:00Z")] },
-    { messages: [message("spaces/C/messages/9", "2026-10-15T08:00:00Z")] },
-  ];
+describe("visibleMentions", () => {
+  const row = (name: string, unread?: boolean) => ({ message: { name }, unread });
+  // The shared unread result stopped at its cap and lists only spaces/A/messages/2.
+  const cappedShared = {
+    names: unreadMessageNames([{ messages: [message("spaces/A/messages/2", "2026-10-15T08:00:00Z")] }]),
+    capped: true,
+  };
+  const completeShared = { ...cappedShared, capped: false };
 
-  it("marks a mention unread when the shared unread result lists the message", () => {
-    const names = unreadMessageNames(groups);
-    expect(visibleMentions(rows, names, false).map((r) => r.unread)).toEqual([false, true, false]);
-  });
-
-  it("keeps only unread mentions in Unread Only, and none when nothing is unread", () => {
-    expect(visibleMentions(rows, unreadMessageNames(groups), true).map((r) => r.message.name)).toEqual([
+  it("marks a mention unread from the unread-mentions search, even when the capped shared result misses it", () => {
+    const rows = [
+      row("spaces/A/messages/1", true),
+      row("spaces/A/messages/2", false),
+      row("spaces/B/messages/3", false),
+    ];
+    expect(visibleMentions(rows, cappedShared, false).map((r) => r.unread)).toEqual([true, true, false]);
+    expect(visibleMentions(rows, cappedShared, true).map((r) => r.message.name)).toEqual([
+      "spaces/A/messages/1",
       "spaces/A/messages/2",
     ]);
-    expect(visibleMentions(rows, unreadMessageNames([]), true)).toEqual([]);
+  });
+
+  it("falls back to the shared result when the unread-mentions search failed", () => {
+    const rows = [row("spaces/A/messages/1"), row("spaces/A/messages/2")];
+    expect(visibleMentions(rows, completeShared, false).map((r) => r.unread)).toEqual([false, true]);
+    expect(visibleMentions(rows, completeShared, true).map((r) => r.message.name)).toEqual(["spaces/A/messages/2"]);
+  });
+
+  it("leaves the state unknown, and the row visible in Unread Only, when neither can tell", () => {
+    const rows = [row("spaces/A/messages/1"), row("spaces/A/messages/2")];
+    expect(visibleMentions(rows, cappedShared, false).map((r) => r.unread)).toEqual([undefined, true]);
+    expect(visibleMentions(rows, cappedShared, true).map((r) => r.message.name)).toEqual([
+      "spaces/A/messages/1",
+      "spaces/A/messages/2",
+    ]);
+    expect(visibleMentions(rows, undefined, true).map((r) => r.unread)).toEqual([undefined, undefined]);
+  });
+
+  it("shows none in Unread Only when every mention is read", () => {
+    expect(visibleMentions([row("spaces/B/messages/3", false)], cappedShared, true)).toEqual([]);
+  });
+});
+
+describe("withMentionsRead", () => {
+  it("marks the rows in the conversations marked as read as read", () => {
+    const rows = mentionRows(
+      [message("spaces/A/messages/1", "2026-10-15T09:00:00Z"), message("spaces/B/messages/2", "2026-10-15T08:00:00Z")],
+      new Map(),
+      {},
+      { names: ["spaces/A/messages/1", "spaces/B/messages/2"], complete: true },
+    );
+    const after = withMentionsRead({ rows, capped: false }, ["spaces/A"]);
+    expect(after?.rows.map((r) => r.unread)).toEqual([false, true]);
+    expect(withMentionsRead(undefined, ["spaces/A"])).toBeUndefined();
   });
 });
 
 describe("mentionsSubtitle", () => {
+  const rows = (...states: (boolean | undefined)[]) => states.map((unread) => ({ unread }));
+
   it("counts mentions in the window and the unread ones", () => {
-    expect(mentionsSubtitle(5, false, 2, 7)).toBe("5 in the last 7 days · 2 unread");
-    expect(mentionsSubtitle(1, false, 0, 1)).toBe("1 in the last day");
-    expect(mentionsSubtitle(20, true, 3, 14)).toBe("20+ in the last 14 days · 3 unread");
+    expect(mentionsSubtitle(rows(true, true, false, false, false), false, 7)).toBe("5 in the last 7 days · 2 unread");
+    expect(mentionsSubtitle(rows(false), false, 1)).toBe("1 in the last day");
+    expect(mentionsSubtitle([...rows(true, true, true), ...rows(...Array<boolean>(17).fill(false))], true, 14)).toBe(
+      "20+ in the last 14 days · 3 unread",
+    );
+  });
+
+  it("marks the unread count as a minimum when some states are unknown", () => {
+    expect(mentionsSubtitle(rows(true, undefined, false), false, 7)).toBe("3 in the last 7 days · 1+ unread");
+    expect(mentionsSubtitle(rows(undefined, false), false, 7)).toBe("2 in the last 7 days");
   });
 });

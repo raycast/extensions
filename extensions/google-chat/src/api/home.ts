@@ -6,7 +6,7 @@
 import { mapLimit } from "../helpers/backoff";
 import type { UserNames } from "../helpers/chat-format";
 import { isAuthError, isScopeError } from "../helpers/errors";
-import { collectMentions, mentionRows, type MentionRow } from "../helpers/my-mentions";
+import { collectMentionsWithUnread, mentionRows, type MentionRow } from "../helpers/my-mentions";
 import {
   choosePreview,
   LATEST_MAX_PAGES,
@@ -240,7 +240,7 @@ export async function loadUnreadExtras(entries: UnreadPreviewInput[]): Promise<U
   return { names, replied: toCheck.filter((_, i) => checks[i]).map((entry) => entry.spaceName) };
 }
 
-/** The Mentions section: messages that mention the user, newest first. */
+/** The Mentions section: messages that mention the user, newest first, each with whether it is unread. */
 export interface MentionsResult {
   rows: MentionRow[];
   /** More mentions may exist than the rows hold. */
@@ -250,13 +250,14 @@ export interface MentionsResult {
 /**
  * Messages from the last `days` days that mention the user (`messages:search` with
  * `annotations.user_mentions.user.name:users/me`), newest first, at most `limit`, without the user's own.
- * Conversation titles are resolved like the Unread section's, and preview names like every row's.
+ * A second search, the same with `is_unread()`, runs alongside and tells which are unread (unknown if it
+ * fails). Conversation titles are resolved like the Unread section's, and preview names like every row's.
  */
 export async function loadMentions(days: number, limit: number): Promise<MentionsResult> {
   const me = await getMe();
   const [spaces, found] = await Promise.all([
     listSpacesSorted(),
-    collectMentions({
+    collectMentionsWithUnread({
       days,
       limit,
       me: me.userName,
@@ -268,6 +269,7 @@ export async function loadMentions(days: number, limit: number): Promise<Mention
         };
       },
       onPageError: (error) => console.error("Mentions search page failed; keeping earlier pages", error),
+      onUnreadError: (error) => console.error("Unread mentions search failed; unread state unknown", error),
     }),
   ]);
   if (found.messages.length === 0) return { rows: [], capped: found.capped };
@@ -281,5 +283,5 @@ export async function loadMentions(days: number, limit: number): Promise<Mention
   const items = await resolveSpaceItems(mentionSpaces);
   const names = await loadPreviewNames(found.messages);
   const itemsByName = new Map(items.map((item) => [item.space.name, item]));
-  return { rows: mentionRows(found.messages, itemsByName, names), capped: found.capped };
+  return { rows: mentionRows(found.messages, itemsByName, names, found.unread), capped: found.capped };
 }
