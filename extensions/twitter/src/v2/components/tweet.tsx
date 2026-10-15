@@ -243,7 +243,6 @@ export function TweetListItem(props: {
           <ActionPanel.Section>
             <ShowDetailV2Action tweet={t} fetcher={fetcher} canModerateReply={props.canModerateReply} />
             <OpenTweetInBrowerAction tweet={t} />
-            <CopyTweetUrlAction tweet={t} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <LikeTweetAction tweet={t} fetcher={fetcher} />
@@ -271,6 +270,9 @@ export function TweetListItem(props: {
               <ToggleDetailsAction isShowingDetail={Boolean(withDetail)} onToggle={props.onToggleDetails} />
             )}
             <LogoutAction />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <CopyTweetUrlAction tweet={t} />
           </ActionPanel.Section>
         </ActionPanel>
       }

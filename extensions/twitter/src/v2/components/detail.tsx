@@ -82,7 +82,6 @@ export function TweetDetail(props: { tweet: Tweet; fetcher?: Fetcher; canModerat
             <ReplyTweetAction tweet={t} />
             <QuoteTweetAction tweet={t} />
             <OpenTweetInBrowerAction tweet={t} />
-            <CopyTweetUrlAction tweet={t} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <LikeTweetAction tweet={t} />
@@ -101,6 +100,9 @@ export function TweetDetail(props: { tweet: Tweet; fetcher?: Fetcher; canModerat
           </ActionPanel.Section>
           <ActionPanel.Section title="Destructive">
             <DeleteTweetAction tweet={t} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <CopyTweetUrlAction tweet={t} />
           </ActionPanel.Section>
         </ActionPanel>
       }

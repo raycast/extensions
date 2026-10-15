@@ -1,6 +1,6 @@
 # X Changelog
 
-## [Copy Post URL] - {PR_MERGE_DATE}
+## [Copy Post URL] - 2026-10-15
 
 - Add a Copy Post URL action to bookmarks and other post lists and to the post detail view
 
