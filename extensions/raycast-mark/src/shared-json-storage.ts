@@ -51,7 +51,9 @@ export async function hasSharedSourceChoice() {
   );
 }
 export async function sharedJsonPath() {
-  const source = storage ? ((await storage.getItem<string>(PATH_KEY)) ?? "") : "";
+  const source = storage
+    ? ((await storage.getItem<string>(PATH_KEY)) ?? "")
+    : "";
   if (source) {
     const stat = await fs.lstat(source).catch(() => undefined);
     if (stat?.isFile()) {
