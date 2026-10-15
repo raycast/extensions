@@ -1,312 +1,197 @@
 import {
   Action,
   ActionPanel,
-  Detail,
   Icon,
   LaunchProps,
+  LaunchType,
   List,
   getPreferenceValues,
-  showToast,
-  Toast,
+  launchCommand,
 } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import { withAccessToken } from "@raycast/utils";
+import { useMemo, useState } from "react";
+import { tinyfish } from "./auth";
+import { FetchedPages } from "./components/fetched-pages";
+import { SearchFiltersForm } from "./components/search-filters";
+import { filterSummary, formatSearchResult, hostname } from "./content";
+import { FetchPagesForm } from "./components/fetch-pages-form";
+import { useSearch } from "./hooks/use-search";
+import { DEFAULT_SEARCH_FILTERS, type SearchFilters } from "./tinyfish";
+import { SaveReadingAction, SaveSearchForm } from "./components/library-actions";
+import { searchRecipeSchema } from "./library-store";
 
-type SearchResult = {
-  position: number;
-  site_name?: string;
-  title: string;
-  snippet?: string;
-  url: string;
-};
+function Command(props: LaunchProps<{ arguments: Arguments.Search; launchContext: Record<string, unknown> }>) {
+  const [recipe] = useState(() => searchRecipeSchema.safeParse(props.launchContext));
+  const preferences = useMemo(
+    () => ({
+      ...getPreferenceValues<Preferences.Search>(),
+      ...(recipe.success ? { location: recipe.data.location, language: recipe.data.language } : {}),
+    }),
+    [recipe],
+  );
+  const [query, setQuery] = useState(recipe.success ? recipe.data.query : (props.arguments.query ?? ""));
+  const [filters, setFilters] = useState<SearchFilters>(recipe.success ? recipe.data.filters : DEFAULT_SEARCH_FILTERS);
+  const { results, isLoading, hasMore, error, loadMore, retry } = useSearch(query.trim(), filters, preferences);
+  const summary = filterSummary(filters);
 
-type SearchResponse = {
-  query: string;
-  results: SearchResult[];
-  total_results: number;
-};
-
-type FetchResult = {
-  url: string;
-  final_url?: string;
-  title?: string;
-  description?: string;
-  language?: string;
-  author?: string;
-  published_date?: string;
-  text: string;
-  latency_ms?: number;
-  format?: string;
-};
-
-type FetchError = {
-  url: string;
-  error: string;
-  status?: number;
-};
-
-type FetchResponse = {
-  results: FetchResult[];
-  errors: FetchError[];
-};
-
-export default function Command(props: LaunchProps<{ arguments: Arguments.Search }>) {
-  const preferences = useMemo(() => getPreferenceValues<Preferences.Search>(), []);
-  const [query, setQuery] = useState(props.arguments.query ?? "");
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const trimmedQuery = query.trim();
-  const emptyView = useMemo(() => {
-    if (isLoading) {
-      return <List.EmptyView icon={Icon.MagnifyingGlass} title="Searching TinyFish" />;
-    }
-
-    if (!trimmedQuery) {
-      return (
-        <List.EmptyView
-          icon={Icon.MagnifyingGlass}
-          title="Search the web"
-          description="Type a query to find results."
-        />
-      );
-    }
-
-    return <List.EmptyView icon={Icon.MagnifyingGlass} title="No results found" description="Try a different query." />;
-  }, [isLoading, trimmedQuery]);
-
-  useEffect(() => {
-    if (!trimmedQuery) {
-      setResults([]);
-      setIsLoading(false);
-      return;
-    }
-
-    const controller = new AbortController();
-    const timeout = setTimeout(async () => {
-      setIsLoading(true);
-
-      try {
-        const data = await searchTinyFish(trimmedQuery, preferences, controller.signal);
-        setResults(data.results ?? []);
-      } catch (error) {
-        if (controller.signal.aborted) {
-          return;
-        }
-
-        setResults([]);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Search failed",
-          message: error instanceof Error ? error.message : "Unknown error",
-        });
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-        }
-      }
-    }, 350);
-
-    return () => {
-      controller.abort();
-      clearTimeout(timeout);
+  function changeSearchType(type: string) {
+    const domains = {
+      includeDomains: filters.includeDomains,
+      excludeDomains: filters.excludeDomains,
+      purpose: filters.purpose,
     };
-  }, [preferences.apiKey, preferences.language, preferences.location, trimmedQuery]);
+    if (type === "research_paper") setFilters({ type, ...domains });
+    else if (type === "web" || type === "news")
+      setFilters({ type, ...domains, time: filters.type === "research_paper" ? { kind: "any" } : filters.time });
+  }
+
+  const searchActions = (
+    <>
+      {hasMore && !isLoading ? (
+        <Action
+          title={error ? "Retry Loading More" : "Load More Results"}
+          icon={Icon.ArrowDown}
+          onAction={loadMore}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "l" }, Windows: { modifiers: ["ctrl"], key: "l" } }}
+        />
+      ) : null}
+      <Action.Push
+        title="Edit Search Filters"
+        icon={Icon.Filter}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "f" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+        }}
+        target={<SearchFiltersForm filters={filters} onApply={setFilters} />}
+      />
+      <Action
+        title="Reset Filters"
+        icon={Icon.ArrowCounterClockwise}
+        onAction={() => setFilters(DEFAULT_SEARCH_FILTERS)}
+      />
+      <Action.Push title="Fetch Pages" icon={Icon.Document} target={<FetchPagesForm />} />
+      {query.trim() ? (
+        <Action.Push
+          title="Save Search"
+          icon={Icon.Bookmark}
+          target={
+            <SaveSearchForm
+              recipe={{ query: query.trim(), filters, location: preferences.location, language: preferences.language }}
+            />
+          }
+        />
+      ) : null}
+      <Action
+        title="Saved Searches and History"
+        icon={Icon.Clock}
+        onAction={() => launchCommand({ name: "saved-searches", type: LaunchType.UserInitiated })}
+      />
+      <Action
+        title="Reading List"
+        icon={Icon.Bookmark}
+        onAction={() => launchCommand({ name: "reading-list", type: LaunchType.UserInitiated })}
+      />
+      {results.length ? (
+        <Action.CopyToClipboard
+          title="Copy All Results as Markdown"
+          content={results
+            .map((result) => `[${result.title}](${result.url})${result.snippet ? `\n${result.snippet}` : ""}`)
+            .join("\n\n")}
+        />
+      ) : null}
+    </>
+  );
 
   return (
     <List
       isLoading={isLoading}
-      isShowingDetail
-      searchBarPlaceholder="Search with TinyFish..."
+      isShowingDetail={results.length > 0}
+      searchText={query}
+      searchBarPlaceholder="Search with TinyFish…"
       onSearchTextChange={setQuery}
       throttle
       filtering={false}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Search Type" value={filters.type} onChange={changeSearchType}>
+          <List.Dropdown.Item title="Web" value="web" />
+          <List.Dropdown.Item title="News" value="news" />
+          <List.Dropdown.Item title="Research Papers" value="research_paper" />
+        </List.Dropdown>
+      }
     >
-      {results.length === 0 ? (
-        emptyView
-      ) : (
-        <List.Section title="Results" subtitle={`${results.length}`}>
-          {results.map((result) => (
-            <List.Item
-              key={`${result.position}-${result.url}`}
-              icon={Icon.Globe}
-              title={result.title}
-              subtitle={result.site_name}
-              accessories={[{ text: getUrlAccessoryText(result.url) }]}
-              detail={<List.Item.Detail markdown={formatResultMarkdown(result)} />}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser url={result.url} />
-                  <Action.Push
-                    icon={Icon.Document}
-                    title="Fetch Content"
-                    shortcut={{
-                      macOS: { modifiers: ["cmd"], key: "f" },
-                      Windows: { modifiers: ["ctrl"], key: "f" },
-                    }}
-                    target={<FetchedContent result={result} preferences={preferences} />}
-                  />
-                  <Action.CopyToClipboard title="Copy URL" content={result.url} />
-                  <Action.CopyToClipboard title="Copy Markdown Link" content={`[${result.title}](${result.url})`} />
-                </ActionPanel>
-              }
+      <List.EmptyView
+        icon={error ? Icon.ExclamationMark : Icon.MagnifyingGlass}
+        title={
+          isLoading
+            ? "Searching TinyFish"
+            : error
+              ? "Search failed"
+              : query.trim()
+                ? "No results found"
+                : "Search the web"
+        }
+        description={
+          error || (query.trim() ? "Try another query or adjust the filters." : "Type a query to find results.")
+        }
+        actions={
+          <ActionPanel>
+            {error ? <Action title="Retry Search" icon={Icon.ArrowClockwise} onAction={retry} /> : null}
+            {searchActions}
+          </ActionPanel>
+        }
+      />
+      <List.Section title={summary} subtitle={`${results.length} results`}>
+        {results.map((result) => (
+          <List.Item
+            key={result.url}
+            icon={filters.type === "research_paper" ? Icon.Book : Icon.Globe}
+            title={result.title}
+            subtitle={result.publisher || result.site_name || hostname(result.url)}
+            accessories={
+              result.year != null ? [{ text: String(result.year) }] : result.date ? [{ text: result.date }] : []
+            }
+            detail={<List.Item.Detail markdown={formatSearchResult(result)} />}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url={result.url} />
+                <Action.Push
+                  title="Fetch Content"
+                  icon={Icon.Document}
+                  shortcut={{ macOS: { modifiers: ["cmd"], key: "f" }, Windows: { modifiers: ["ctrl"], key: "f" } }}
+                  target={<FetchedPages options={{ urls: [result.url], links: true }} />}
+                />
+                {result.pdf_url ? <Action.OpenInBrowser title="Open PDF" url={result.pdf_url} /> : null}
+                <Action.CopyToClipboard title="Copy URL" content={result.url} />
+                <SaveReadingAction url={result.url} title={result.title} />
+                <Action.CopyToClipboard title="Copy Markdown Link" content={`[${result.title}](${result.url})`} />
+                <Action.Push
+                  title="Fetch with Options"
+                  icon={Icon.Gear}
+                  target={<FetchPagesForm initialURL={result.url} />}
+                />
+                <ActionPanel.Section>{searchActions}</ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+      {results.length && hasMore ? (
+        <List.Item
+          id="load-more"
+          title={
+            isLoading ? "Loading more results…" : error ? "Could not load more results — retry" : "Load More Results"
+          }
+          icon={Icon.ArrowDown}
+          detail={
+            <List.Item.Detail
+              markdown={error ? `# Could not load more results\n\n${error}` : "Load the next page of search results."}
             />
-          ))}
-        </List.Section>
-      )}
+          }
+          actions={<ActionPanel>{searchActions}</ActionPanel>}
+        />
+      ) : null}
     </List>
   );
 }
 
-function FetchedContent({ result, preferences }: { result: SearchResult; preferences: Preferences.Search }) {
-  const [page, setPage] = useState<FetchResult>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>();
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function fetchPage() {
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const data = await fetchTinyFishContent(result.url, preferences, controller.signal);
-        const fetchedPage = data.results?.[0];
-        const fetchError = data.errors?.[0];
-
-        if (fetchedPage) {
-          setPage(fetchedPage);
-          return;
-        }
-
-        throw new Error(
-          fetchError
-            ? `${fetchError.error}${fetchError.status ? ` (${fetchError.status})` : ""}`
-            : "No content returned",
-        );
-      } catch (error) {
-        if (controller.signal.aborted) {
-          return;
-        }
-
-        setPage(undefined);
-        setError(error instanceof Error ? error.message : "Unknown error");
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchPage();
-
-    return () => controller.abort();
-  }, [preferences.apiKey, result.url]);
-
-  const markdown = page
-    ? formatFetchedContentMarkdown(page, result)
-    : `# ${result.title}\n\n${error ? `Fetch failed: ${error}` : result.url}`;
-
-  return (
-    <Detail
-      isLoading={isLoading}
-      markdown={markdown}
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="URL" text={page?.final_url ?? result.url} />
-          {page?.author ? <Detail.Metadata.Label title="Author" text={page.author} /> : null}
-          {page?.published_date ? <Detail.Metadata.Label title="Published" text={page.published_date} /> : null}
-          {page?.language ? <Detail.Metadata.Label title="Language" text={page.language} /> : null}
-          {page?.latency_ms ? <Detail.Metadata.Label title="Latency" text={`${page.latency_ms} ms`} /> : null}
-        </Detail.Metadata>
-      }
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser url={page?.final_url ?? result.url} />
-          <Action.CopyToClipboard title="Copy Content" content={page?.text ?? ""} />
-          <Action.CopyToClipboard title="Copy URL" content={page?.final_url ?? result.url} />
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-async function searchTinyFish(
-  query: string,
-  preferences: Preferences.Search,
-  signal: AbortSignal,
-): Promise<SearchResponse> {
-  const url = new URL("https://api.search.tinyfish.ai");
-  url.searchParams.set("query", query);
-
-  if (preferences.location?.trim()) {
-    url.searchParams.set("location", preferences.location.trim());
-  }
-
-  if (preferences.language?.trim()) {
-    url.searchParams.set("language", preferences.language.trim());
-  }
-
-  const response = await fetch(url, {
-    headers: {
-      "X-API-Key": preferences.apiKey,
-    },
-    signal,
-  });
-
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}`);
-  }
-
-  return (await response.json()) as SearchResponse;
-}
-
-async function fetchTinyFishContent(
-  url: string,
-  preferences: Preferences.Search,
-  signal: AbortSignal,
-): Promise<FetchResponse> {
-  const response = await fetch("https://api.fetch.tinyfish.ai", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-API-Key": preferences.apiKey,
-    },
-    body: JSON.stringify({
-      urls: [url],
-      format: "markdown",
-      links: false,
-      image_links: false,
-    }),
-    signal,
-  });
-
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}`);
-  }
-
-  return (await response.json()) as FetchResponse;
-}
-
-function formatResultMarkdown(result: SearchResult) {
-  const snippet = result.snippet ? `\n\n${result.snippet}` : "";
-  const siteName = result.site_name ? `\n\n**Site:** ${result.site_name}` : "";
-
-  return `# ${result.title}\n\n${result.url}${siteName}${snippet}`;
-}
-
-function getUrlAccessoryText(url: string) {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return url || "Unknown URL";
-  }
-}
-
-function formatFetchedContentMarkdown(page: FetchResult, fallback: SearchResult) {
-  const title = page.title ?? fallback.title;
-  const description = page.description ? `\n\n${page.description}` : "";
-  const source = page.final_url ?? page.url;
-
-  return `# ${title}\n\n${source}${description}\n\n---\n\n${page.text}`;
-}
+export default withAccessToken(tinyfish)(Command);
