@@ -10,6 +10,7 @@ import {
   fetchPicks,
   FplError,
 } from "./api/fpl";
+import type { Fixture, Pick } from "./api/types";
 import { indexBootstrap } from "./lib/bootstrap";
 import { provisionalBonus } from "./lib/bonus";
 
@@ -82,6 +83,28 @@ export function useTeam(entryId: number, initialEvent?: number) {
   const bonus = useMemo(() => provisionalBonus(fixtures ?? []), [fixtures]);
   const autoSubsIn = useMemo(() => new Set(picks?.automatic_subs.map((s) => s.element_in) ?? []), [picks]);
   const autoSubsOut = useMemo(() => new Set(picks?.automatic_subs.map((s) => s.element_out) ?? []), [picks]);
+  const liveById = new Map(live?.elements.map((e) => [e.id, e]) ?? []);
+  const eventInfo = index?.events.find((e) => e.id === event);
+
+  /** A player's fixtures this gameweek: their club's, unless FPL scored them in others because they have moved since. */
+  const fixturesOf = (playerId: number): Fixture[] => {
+    const club = index?.players.get(playerId)?.team;
+    const own = (fixtures ?? []).filter((f) => f.team_h === club || f.team_a === club);
+    const scoredIn = liveById.get(playerId)?.fixtures.map((f) => f.fixture) ?? [];
+    const moved = scoredIn.some((id) => !own.some((f) => f.id === id));
+    return moved ? (fixtures ?? []).filter((f) => scoredIn.includes(f.id)) : own;
+  };
+  /** Live points for a pick before its multiplier, with provisional bonus, or undefined until its match kicks off. */
+  const scored = (pick: Pick): number | undefined => {
+    const stats = liveById.get(pick.element)?.stats;
+    if (!stats || !fixturesOf(pick.element).some((f) => f.started || f.finished)) return undefined;
+    return stats.total_points + (bonus.get(pick.element) ?? 0);
+  };
+  const history = picks?.entry_history;
+  const anyLive = picks?.picks.some((p) => scored(p) != null) ?? false;
+  // Multiplier is 0 for the bench unless Bench Boost is active, so summing every pick is correct.
+  const liveTotal = (picks?.picks ?? []).reduce((sum, p) => sum + (scored(p) ?? 0) * p.multiplier, 0);
+
   const firstEvent = entry?.started_event ?? 1;
   const currentEvent = entry?.current_event ?? 0;
   return {
@@ -91,10 +114,13 @@ export function useTeam(entryId: number, initialEvent?: number) {
     event,
     setEvent: setSelected,
     gameweeks: Array.from({ length: Math.max(0, currentEvent - firstEvent + 1) }, (_, i) => currentEvent - i),
-    eventInfo: index?.events.find((e) => e.id === event),
+    eventInfo,
     picks,
+    /** FPL's own gameweek points once the gameweek is finished, else the live total less any hit */
+    points: history && anyLive && !eventInfo?.finished ? liveTotal - history.event_transfers_cost : history?.points,
     livePoints: new Map(live?.elements.map((e) => [e.id, e.stats]) ?? []),
-    fixtures: fixtures ?? [],
+    fixturesOf,
+    scored,
     /** Provisional bonus per player for fixtures still in play */
     bonus,
     autoSubsIn,

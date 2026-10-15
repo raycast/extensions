@@ -41,8 +41,9 @@ export function PitchView({ entryId, initialEvent }: Props) {
     gameweeks,
     eventInfo,
     picks,
+    points,
     livePoints,
-    fixtures,
+    fixturesOf,
     bonus,
     autoSubsIn,
     autoSubsOut,
@@ -67,9 +68,7 @@ export function PitchView({ entryId, initialEvent }: Props) {
       const player = index.players.get(pick.element);
       const team = player && index.teams.get(player.team);
       if (!player || !team) return undefined;
-      const started = fixtures.some(
-        (f) => (f.team_h === player.team || f.team_a === player.team) && (f.started || f.finished),
-      );
+      const started = fixturesOf(player.id).some((f) => f.started || f.finished);
       const stats = livePoints.get(player.id);
       return {
         name: player.web_name,
@@ -114,14 +113,14 @@ export function PitchView({ entryId, initialEvent }: Props) {
         },
       ],
       highlight: {
-        value: String(history.points),
+        value: String(points),
         label: "Total Points",
         chip: chipLabel(picks.active_chip) || undefined,
       },
       lines: [line(1), line(2), line(3), line(4)],
       bench,
     });
-  }, [index, entry, picks, fixtures, livePoints, bonus, autoSubsIn, autoSubsOut, shirts, eventInfo, event]);
+  }, [index, entry, picks, points, fixturesOf, livePoints, bonus, autoSubsIn, autoSubsOut, shirts, eventInfo, event]);
 
   if (entryError instanceof FplError && entryError.status === 404) return <EntryNotFound entryId={entryId} />;
 

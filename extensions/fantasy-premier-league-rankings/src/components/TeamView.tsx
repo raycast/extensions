@@ -24,8 +24,9 @@ export function TeamView({ entryId, initialEvent }: Props) {
     gameweeks,
     eventInfo,
     picks,
+    points,
     livePoints,
-    fixtures,
+    fixturesOf,
     bonus,
     autoSubsIn,
     autoSubsOut,
@@ -58,7 +59,7 @@ export function TeamView({ entryId, initialEvent }: Props) {
           <List.Item
             icon={Icon.Trophy}
             title="Gameweek points"
-            subtitle={String(history.points)}
+            subtitle={String(points)}
             accessories={[
               ...(history.event_transfers_cost
                 ? [{ tag: { value: `-${history.event_transfers_cost} hit`, color: Color.Red } }]
@@ -106,7 +107,7 @@ export function TeamView({ entryId, initialEvent }: Props) {
                 index={index}
                 entryId={entryId}
                 event={event}
-                fixtures={fixtures}
+                fixtures={fixturesOf(pick.element)}
                 points={livePoints.get(pick.element)?.total_points}
                 minutes={livePoints.get(pick.element)?.minutes}
                 bonus={bonus.get(pick.element)}
@@ -122,7 +123,7 @@ export function TeamView({ entryId, initialEvent }: Props) {
                 index={index}
                 entryId={entryId}
                 event={event}
-                fixtures={fixtures}
+                fixtures={fixturesOf(pick.element)}
                 points={livePoints.get(pick.element)?.total_points}
                 minutes={livePoints.get(pick.element)?.minutes}
                 bonus={bonus.get(pick.element)}
@@ -151,6 +152,7 @@ interface PickItemProps {
   index: BootstrapIndex;
   entryId: number;
   event?: number;
+  /** The pick's own fixtures this gameweek */
   fixtures: Fixture[];
   points?: number;
   minutes?: number;
@@ -162,9 +164,8 @@ function PickItem({ pick, index, entryId, event, fixtures, points, minutes, bonu
   const player = index.players.get(pick.element);
   if (!player) return null;
   const team = index.teams.get(player.team);
-  const opponents = fixtures.filter((f) => f.team_h === player.team || f.team_a === player.team);
   const multiplier = pick.multiplier || 1;
-  const started = opponents.some((f) => f.started || f.finished);
+  const started = fixtures.some((f) => f.started || f.finished);
   const scored = points != null && started ? (points + (bonus ?? 0)) * multiplier : undefined;
 
   return (
@@ -190,9 +191,19 @@ function PickItem({ pick, index, entryId, event, fixtures, points, minutes, bonu
         ...(bonus
           ? [{ tag: { value: `+${bonus} bonus`, color: Color.Yellow }, tooltip: "Provisional bonus from BPS" }]
           : []),
-        ...(opponents.length
-          ? opponents.map((f) => {
+        ...(fixtures.length
+          ? fixtures.map((f) => {
               const home = f.team_h === player.team;
+              // After a transfer, an older fixture involves neither side of the player's current club
+              if (!home && f.team_a !== player.team) {
+                return {
+                  tag: {
+                    value: `${teamShort(index, f.team_h)} v ${teamShort(index, f.team_a)}`,
+                    color: Color.SecondaryText,
+                  },
+                  tooltip: "Played for a previous club",
+                };
+              }
               return {
                 tag: {
                   value: `${teamShort(index, home ? f.team_a : f.team_h)} (${home ? "H" : "A"})`,
