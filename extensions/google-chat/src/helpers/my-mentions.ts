@@ -238,6 +238,18 @@ export interface SharedUnread {
   names: ReadonlySet<string>;
   /** It stopped before every unread message was checked, so one it doesn't list may still be unread. */
   capped: boolean;
+  /**
+   * Start of the window it searched (ms since epoch; the Unread Lookback). A mention older than this was never
+   * checked, so not being listed says nothing about it.
+   */
+  since?: number;
+}
+
+/** Whether the shared unread search covered this message's time, so its absence there means read. */
+function checkedByShared(message: Pick<Message, "createTime">, shared: SharedUnread): boolean {
+  if (shared.since === undefined) return true;
+  const created = Date.parse(message.createTime ?? "");
+  return !Number.isNaN(created) && created >= shared.since;
 }
 
 /**
@@ -248,9 +260,9 @@ export interface SharedUnread {
  *
  * `stale`: the latest mentions refresh failed, so the rows (and their saved flags) are from an earlier load. Their
  * flags are then ignored and the state comes from the shared result alone, so a mention read since then doesn't
- * keep its dot.
+ * keep its dot. A mention older than the shared result's window (`since`) is never marked read by it: unknown.
  */
-export function visibleMentions<R extends { message: Pick<Message, "name">; unread?: boolean }>(
+export function visibleMentions<R extends { message: Pick<Message, "name" | "createTime">; unread?: boolean }>(
   rows: R[],
   shared: SharedUnread | undefined,
   unreadOnly: boolean,
@@ -261,7 +273,7 @@ export function visibleMentions<R extends { message: Pick<Message, "name">; unre
     let unread: boolean | undefined;
     if (saved === true || shared?.names.has(row.message.name)) unread = true;
     else if (saved === false) unread = false;
-    else unread = shared && !shared.capped ? false : undefined;
+    else unread = shared && !shared.capped && checkedByShared(row.message, shared) ? false : undefined;
     return { ...row, unread };
   });
   return unreadOnly ? marked.filter((row) => row.unread !== false) : marked;

@@ -303,6 +303,16 @@ describe("mentionRows", () => {
 describe("visibleMentions", () => {
   const row = (name: string, unread?: boolean) => ({ message: { name }, unread });
 
+  it("leaves mentions older than the shared result's window unknown instead of read", () => {
+    const since = Date.parse("2026-10-14T00:00:00Z");
+    const older = { message: { name: "m/old", createTime: "2026-10-13T12:00:00Z" }, unread: true };
+    const recent = { message: { name: "m/new", createTime: "2026-10-14T12:00:00Z" }, unread: true };
+    const shared = { names: new Set<string>(), capped: false, since };
+    const shown = visibleMentions([older, recent], shared, false, true);
+    expect(shown.map((r) => r.unread)).toEqual([undefined, false]);
+    expect(visibleMentions([older, recent], shared, true, true).map((r) => r.message.name)).toEqual(["m/old"]);
+  });
+
   it("after a failed refresh, ignores saved flags and follows a complete shared result", () => {
     const rows = [row("m/read-since", true), row("m/still-unread", true)];
     const shared = { names: new Set(["m/still-unread"]), capped: false };

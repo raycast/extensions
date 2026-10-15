@@ -73,7 +73,14 @@ function MyMessages({ launchView }: { launchView?: string }) {
   const mentions = useMentions(mentionsDays, parseMentionsLimit(preferences.mentionsLimit));
   // Ignore cached data in another shape.
   const mentionsData = Array.isArray(mentions.data?.rows) ? mentions.data : undefined;
-  const sharedUnread = unread ? { names: unreadMessageNames(unreadEntries), capped: unread.capped } : undefined;
+  // The shared result only covers the Unread Lookback window; older mentions aren't judged by it.
+  const sharedUnread = unread
+    ? {
+        names: unreadMessageNames(unreadEntries),
+        capped: unread.capped,
+        since: Date.now() - lookbackDays * 24 * 60 * 60 * 1000,
+      }
+    : undefined;
   // After a failed refresh the rows are from an earlier load, so their saved unread flags may be out of date.
   const mentionsStale = !!mentions.error;
   const allMentions = visibleMentions(mentionsData?.rows ?? [], sharedUnread, false, mentionsStale);
