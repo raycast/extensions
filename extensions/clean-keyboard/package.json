@@ -39,6 +39,52 @@
       ],
       "preferences": [
         {
+          "name": "defaultDuration",
+          "title": "Default Duration",
+          "description": "Lock the keyboard immediately for the chosen duration, or choose Always Ask to pick each time.",
+          "type": "dropdown",
+          "default": "always-ask",
+          "required": false,
+          "data": [
+            {
+              "title": "Always Ask",
+              "value": "always-ask"
+            },
+            {
+              "title": "15 seconds",
+              "value": "15"
+            },
+            {
+              "title": "30 seconds",
+              "value": "30"
+            },
+            {
+              "title": "1 minute",
+              "value": "60"
+            },
+            {
+              "title": "2 minutes",
+              "value": "120"
+            },
+            {
+              "title": "5 minutes",
+              "value": "300"
+            },
+            {
+              "title": "1 hour",
+              "value": "3600"
+            },
+            {
+              "title": "24 hours",
+              "value": "86400"
+            },
+            {
+              "title": "Forever",
+              "value": "0"
+            }
+          ]
+        },
+        {
           "name": "lockFnKeys",
           "title": "Lock Function Row Keys",
           "description": "Also block function row keys while cleaning. Original setting is restored on unlock. macOS Tahoe (26+) only.",
