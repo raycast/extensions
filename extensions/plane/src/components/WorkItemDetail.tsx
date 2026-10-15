@@ -3,6 +3,7 @@ import { PriorityEnum } from "@makeplane/plane-node-sdk";
 import { useProject } from "../hooks/useProjects";
 import { getStateIcon, priorityToIcon } from "../helpers/icons";
 import { format } from "date-fns";
+import { fromPlaneDate } from "../helpers/dates";
 import { getWorkItemBrowseUrl } from "../helpers/work-items";
 import { getWorkItemIdentifier } from "../helpers/work-items";
 import { useStates } from "../hooks/useStates";
@@ -32,6 +33,9 @@ export default function WorkItemDetail({ slug, projectId, workItemId, mutateWork
 
   // derived values
   const state = states?.find((state) => state.id === workItem?.state);
+  // Plane stores calendar dates; read them as local days so they don't shift west of UTC.
+  const startDate = fromPlaneDate(workItem?.startDate);
+  const targetDate = fromPlaneDate(workItem?.targetDate);
 
   const mutateWorkItemDetail = () => {
     mutate();
@@ -62,18 +66,18 @@ export default function WorkItemDetail({ slug, projectId, workItemId, mutateWork
                   icon={priorityToIcon(workItem.priority as PriorityEnum)}
                 />
 
-                {workItem.startDate ? (
+                {startDate ? (
                   <Detail.Metadata.Label
                     title="Start Date"
-                    text={format(new Date(workItem.startDate), "dd-MMM-yyyy")}
+                    text={format(startDate, "dd-MMM-yyyy")}
                     icon={Icon.Calendar}
                   />
                 ) : null}
 
-                {workItem.targetDate ? (
+                {targetDate ? (
                   <Detail.Metadata.Label
                     title="Due Date"
-                    text={format(new Date(workItem.targetDate), "dd-MMM-yyyy")}
+                    text={format(targetDate, "dd-MMM-yyyy")}
                     icon={Icon.Calendar}
                   />
                 ) : null}

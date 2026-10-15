@@ -8,6 +8,7 @@
 - **Errors are shown**: lists show what went wrong (401/403 → check your API key, 404 → check API Base Path) with "Open Extension Preferences" and "Retry" actions instead of an empty list
 - **API key errors say what's wrong**: Plane's reason is shown (an invalid or expired key now reads "API key not valid" instead of a generic 403), and a pasted key's stray spaces or newline are trimmed
 - Lists no longer show a second error toast on top of the error screen
+- **Start and due dates** keep the day you picked: east of UTC, the form used to save the previous day
 - **Search Work Items** no longer sends a request for an empty query
 - The API key is no longer part of the LocalStorage key name (now a SHA-256 hash; the old key is migrated once)
 

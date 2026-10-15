@@ -2,6 +2,7 @@
 import { IssueRequest, PriorityEnum } from "@makeplane/plane-node-sdk";
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 // file imports
+import { toPlaneDate } from "../helpers/dates";
 import useMe from "../hooks/useMe";
 import { useProjects } from "../hooks/useProjects";
 import { useCycles } from "../hooks/useCycles";
@@ -55,8 +56,8 @@ export default function CreateWorkItemForm(props: CreateWorkItemFormProps) {
           state: values.stateId,
           priority: values.priorityName as PriorityEnum,
           assignees: values.assigneeIds,
-          startDate: values.startDate,
-          targetDate: values.targetDate,
+          startDate: toPlaneDate(values.startDate),
+          targetDate: toPlaneDate(values.targetDate),
         });
 
         if (values?.moduleId && workItem?.id) {
