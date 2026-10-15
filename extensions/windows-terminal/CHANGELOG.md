@@ -1,6 +1,6 @@
 # Windows Terminal Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-10-15
 
 - Uses static path for `wt.exe` in case the alias is not in the path
 - Removed macOS logic since it's not needed
