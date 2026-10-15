@@ -1,5 +1,8 @@
+import { useState } from "react";
+
 import { Action, ActionPanel, Clipboard, Icon, Keyboard, List, open } from "@raycast/api";
 
+import type { AccountSummary } from "@/lib/accounts";
 import type { DraftReference } from "@/lib/createDraft";
 
 import useAccounts from "@/hooks/useAccounts";
@@ -9,6 +12,28 @@ import AccountSelector from "@/components/AccountSelector";
 import AccountSetup from "@/components/AccountSetup";
 import CreateDraftForm from "@/components/CreateDraftForm";
 import EditDraftForm from "@/components/EditDraftForm";
+
+function CreateDraftView({
+  accounts,
+  initialAccountId,
+  onAccountChange,
+}: {
+  accounts: AccountSummary[];
+  initialAccountId: string;
+  onAccountChange: (id: string) => void;
+}) {
+  const [accountId, setAccountId] = useState(initialAccountId);
+  return (
+    <CreateDraftForm
+      accounts={accounts}
+      accountId={accountId}
+      onAccountChange={(id) => {
+        setAccountId(id);
+        onAccountChange(id);
+      }}
+    />
+  );
+}
 
 export default function ListMyDrafts() {
   const { accounts, selectedId, setSelectedId, isLoading, error, reload } = useAccounts();
@@ -35,7 +60,7 @@ export default function ListMyDrafts() {
     <Action.Push
       title="Create Draft"
       shortcut={Keyboard.Shortcut.Common.New}
-      target={<CreateDraftForm accounts={accounts} accountId={selectedId} onAccountChange={setSelectedId} />}
+      target={<CreateDraftView accounts={accounts} initialAccountId={selectedId} onAccountChange={setSelectedId} />}
       onPop={() => {
         void refresh();
       }}

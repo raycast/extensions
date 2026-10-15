@@ -207,6 +207,37 @@ test.each(["", "missing"])("account selection %j must be corrected before creati
   expect(fetchMock.mock.calls.filter(([, options]) => options?.method === "POST")).toHaveLength(1);
   expect(new Headers(fetchMock.mock.calls[0][1]?.headers).get("Cookie")).toContain("substack.sid=other");
 });
+test.each(["first", ""])("pushed creation can select another account from %j", async (defaultId) => {
+  await saveAccount(account);
+  await saveAccount(other);
+  if (defaultId) await setDefaultAccount(defaultId);
+  const creation = serveCreation();
+  vi.stubGlobal("fetch", (url: RequestInfo | URL, options?: RequestInit) =>
+    String(url).includes("post_management/drafts")
+      ? Promise.resolve(Response.json({ posts: [], offset: 0, limit: 25, total: 0, isCapped: false }))
+      : creation(url, options),
+  );
+  render(<ListMyDrafts />);
+  const selector = screen.getByLabelText("Select a Substack account");
+  await waitFor(() => expect(within(selector).getByRole("option", { name: "Second (example)" })).toBeTruthy());
+  fireEvent.click(screen.getAllByRole("button", { name: "Create Draft" })[0]);
+  const draftForm = within(screen.getByLabelText("form"));
+  fireEvent.change(draftForm.getByLabelText("Account"), { target: { value: "second" } });
+  expect((draftForm.getByLabelText("Account") as HTMLSelectElement).value).toBe("second");
+  expect((selector as HTMLSelectElement).value).toBe("second");
+  fireEvent.change(draftForm.getByLabelText("Title"), { target: { value: "Newsletter" } });
+  fireEvent.change(draftForm.getByLabelText("Markdown"), { target: { value: "Body" } });
+  fireEvent.click(draftForm.getByRole("button", { name: "Create Draft" }));
+  await waitFor(() =>
+    expect(showToast).toHaveBeenCalledWith(expect.objectContaining({ title: "Draft saved in Substack" })),
+  );
+  expect(creation.mock.calls.filter(([, options]) => options?.method === "POST")).toHaveLength(1);
+  for (const [, options] of creation.mock.calls) {
+    expect(new Headers(options?.headers).get("Cookie")).toContain("substack.sid=other");
+  }
+  expect(await listRecovery("first")).toHaveLength(0);
+  expect(await listRecovery("second")).toEqual([expect.objectContaining({ id: 41, verified: true })]);
+});
 test("draft list paginates remote results, merges recovery and refreshes", async () => {
   await saveAccount(account);
   await rememberDraft("first", "Remote", { id: 42, editorUrl: "https://example.substack.com/publish/post/42" }, false);
@@ -420,4 +451,16 @@ test("corrupt account storage displays recovery message and setup actions", asyn
   render(<AccountSetup message="Setup" onRefresh={vi.fn()} />);
   fireEvent.click(screen.getByRole("button", { name: "Import Legacy Preferences" }));
   expect(launchCommand).toHaveBeenCalledWith(expect.objectContaining({ name: "create-substack-draft" }));
+});
+test("legacy import launch failures show a toast without retrying", async () => {
+  launchCommand.mockRejectedValueOnce(new Error("Command unavailable"));
+  const setup = AccountSetup({ message: "Setup", onRefresh: vi.fn() });
+  const importAction = setup.props.actions.props.children[1];
+  await expect(importAction.props.onAction()).resolves.toBeUndefined();
+  expect(launchCommand).toHaveBeenCalledTimes(1);
+  expect(showToast).toHaveBeenCalledWith({
+    style: "failure",
+    title: "Could not open Create Draft",
+    message: "Try opening Create Draft from Raycast.",
+  });
 });

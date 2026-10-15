@@ -53,24 +53,24 @@ export const Action = Object.assign(Button, {
   OpenInBrowser: (p: any) => <button onClick={() => open(p.url)}>{p.title}</button>,
   CopyToClipboard: (p: any) => <button data-content={p.content}>{p.title}</button>,
   Push: (p: any) => {
-    const [shown, setShown] = useState(false);
+    const [pushed, setPushed] = useState<{ target: React.ReactNode; onPop?: () => void } | null>(null);
     return (
       <>
         <button
           onClick={() => {
             push(p.target);
-            setShown(true);
+            setPushed({ target: p.target, onPop: p.onPop });
           }}
         >
           {p.title}
         </button>
-        {shown && (
+        {pushed && (
           <div>
-            {p.target}
+            {pushed.target}
             <button
               onClick={() => {
-                setShown(false);
-                p.onPop?.();
+                setPushed(null);
+                pushed.onPop?.();
               }}
             >
               Back
