@@ -1,0 +1,497 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bricks-builder",
+  "title": "Bricks Builder",
+  "description": "Open pages and templates in Bricks Builder, search classes, colors and elements, and manage all your Bricks sites.",
+  "icon": "icon.png",
+  "author": "matejmohar",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-shortcuts",
+      "title": "Search Bricks Shortcuts",
+      "description": "Search Bricks Builder keyboard shortcuts, copy them, or press them in the builder.",
+      "mode": "view",
+      "keywords": [
+        "bricks",
+        "shortcuts",
+        "wordpress",
+        "builder"
+      ],
+      "preferences": [
+        {
+          "name": "keyStyle",
+          "title": "Key Style",
+          "description": "How shortcuts are displayed and copied.",
+          "type": "dropdown",
+          "required": false,
+          "default": "auto",
+          "data": [
+            {
+              "title": "Match This Computer",
+              "value": "auto"
+            },
+            {
+              "title": "Mac (⌘ ⇧ ⌥)",
+              "value": "mac"
+            },
+            {
+              "title": "Windows (Ctrl + Shift + Alt)",
+              "value": "windows"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "open-in-bricks",
+      "title": "Open in Bricks",
+      "description": "Search pages, posts and Bricks templates on your sites and open them in the builder, or create new ones.",
+      "mode": "view",
+      "keywords": [
+        "bricks",
+        "edit",
+        "page",
+        "template",
+        "wordpress",
+        "create",
+        "new",
+        "draft"
+      ]
+    },
+    {
+      "name": "edit-current-page",
+      "title": "Edit Current Page in Bricks",
+      "description": "Open the page in your browser's current tab in Bricks, or go back to the live page from the builder.",
+      "mode": "no-view",
+      "keywords": [
+        "bricks",
+        "toggle",
+        "builder",
+        "live",
+        "frontend"
+      ]
+    },
+    {
+      "name": "search-global-classes",
+      "title": "Search Global Classes",
+      "description": "Search the global classes of a Bricks site and copy or paste their names.",
+      "mode": "view",
+      "keywords": [
+        "bricks",
+        "css",
+        "class",
+        "classes"
+      ]
+    },
+    {
+      "name": "search-colors-variables",
+      "title": "Search Colors and Variables",
+      "description": "Search a Bricks site's color palettes and global CSS variables.",
+      "mode": "view",
+      "keywords": [
+        "bricks",
+        "color",
+        "palette",
+        "variable",
+        "css",
+        "tokens"
+      ]
+    },
+    {
+      "name": "search-dynamic-data",
+      "title": "Search Dynamic Data",
+      "description": "Every dynamic data tag on a Bricks site: Bricks, ACF, Meta Box, JetEngine and more. Paste one into the builder.",
+      "mode": "view",
+      "keywords": [
+        "bricks",
+        "dynamic data",
+        "tags",
+        "acf",
+        "meta box",
+        "jetengine",
+        "custom fields"
+      ]
+    },
+    {
+      "name": "search-elements",
+      "title": "Search Bricks Elements",
+      "description": "Search every Bricks element on a site, across pages, templates and components, by text, class, color, CSS or element type.",
+      "mode": "view",
+      "keywords": [
+        "bricks",
+        "search",
+        "elements",
+        "find",
+        "where used",
+        "class",
+        "form"
+      ]
+    },
+    {
+      "name": "site-info",
+      "title": "Bricks Site Info",
+      "description": "Show breakpoints with their media queries, theme styles and their conditions, states, CSS loading method and Bricks version of your site.",
+      "mode": "view"
+    },
+    {
+      "name": "site-audit",
+      "title": "Bricks Site Audit",
+      "description": "Unused global classes (trash and restore), templates without conditions, Code elements, images without alt text and the heaviest pages.",
+      "mode": "view",
+      "keywords": [
+        "bricks",
+        "audit",
+        "cleanup",
+        "unused classes",
+        "alt text",
+        "performance",
+        "security"
+      ],
+      "preferences": [
+        {
+          "name": "largeImageKb",
+          "title": "Large Image Threshold",
+          "description": "Images whose served file is bigger than this many KB count as large.",
+          "type": "textfield",
+          "default": "300",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "template-library",
+      "title": "Bricks Template Library",
+      "description": "Browse a site's Bricks templates and global components with a structure preview, and paste them into the builder on any site.",
+      "mode": "view",
+      "keywords": [
+        "bricks",
+        "templates",
+        "sections",
+        "components",
+        "library",
+        "paste"
+      ]
+    },
+    {
+      "name": "form-submissions",
+      "title": "Bricks Form Submissions",
+      "description": "Browse the form submissions a Bricks site saved, by form, and reply, copy or delete them.",
+      "mode": "view",
+      "keywords": [
+        "bricks",
+        "forms",
+        "submissions",
+        "entries",
+        "leads",
+        "contact"
+      ]
+    },
+    {
+      "name": "form-submissions-menu-bar",
+      "title": "New Bricks Form Submissions",
+      "description": "Shows new form submissions on all your Bricks sites in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "keywords": [
+        "bricks",
+        "forms",
+        "submissions",
+        "menu bar",
+        "notifications"
+      ]
+    },
+    {
+      "name": "bricks-snippets",
+      "title": "Search Bricks Snippets",
+      "description": "Your library of Bricks elements, CSS, JS and HTML snippets to paste into the builder.",
+      "mode": "view",
+      "keywords": [
+        "bricks",
+        "snippet",
+        "library",
+        "elements",
+        "paste"
+      ]
+    },
+    {
+      "name": "save-clipboard-snippet",
+      "title": "Save Clipboard as Bricks Snippet",
+      "description": "Save what's on the clipboard, such as elements copied in Bricks with ⌘C, as a snippet.",
+      "mode": "view",
+      "keywords": [
+        "bricks",
+        "snippet",
+        "save",
+        "copy",
+        "elements"
+      ],
+      "disabledByDefault": true
+    },
+    {
+      "name": "search-docs",
+      "title": "Search Bricks Docs",
+      "description": "Search Bricks Academy articles and read them in Raycast.",
+      "mode": "view",
+      "keywords": [
+        "bricks",
+        "docs",
+        "academy",
+        "documentation",
+        "help"
+      ]
+    },
+    {
+      "name": "press-shortcut",
+      "title": "Press Bricks Shortcut",
+      "description": "Presses one Bricks shortcut in the builder. Used for hotkeys made with ⌘⇧K in Search Bricks Shortcuts.",
+      "mode": "no-view",
+      "keywords": [
+        "bricks",
+        "shortcut",
+        "press"
+      ],
+      "arguments": [
+        {
+          "name": "shortcut",
+          "type": "dropdown",
+          "placeholder": "Shortcut",
+          "required": true,
+          "data": [
+            {
+              "title": "Save Changes",
+              "value": "save"
+            },
+            {
+              "title": "Force Save All Data",
+              "value": "force-save"
+            },
+            {
+              "title": "Undo",
+              "value": "undo"
+            },
+            {
+              "title": "Redo",
+              "value": "redo"
+            },
+            {
+              "title": "Show History Panel",
+              "value": "history"
+            },
+            {
+              "title": "Open Command Palette",
+              "value": "command-palette"
+            },
+            {
+              "title": "Toggle Style Manager",
+              "value": "style-manager"
+            },
+            {
+              "title": "Toggle Builder Browser",
+              "value": "builder-browser"
+            },
+            {
+              "title": "Open Builder Browser on Templates",
+              "value": "templates"
+            },
+            {
+              "title": "Show Elements Panel",
+              "value": "elements-panel"
+            },
+            {
+              "title": "Show Components Panel",
+              "value": "components-panel"
+            },
+            {
+              "title": "Show Structure Panel",
+              "value": "structure-panel"
+            },
+            {
+              "title": "Focus Element Settings Search",
+              "value": "settings-search"
+            },
+            {
+              "title": "Copy Selected Element(s)",
+              "value": "copy"
+            },
+            {
+              "title": "Paste Copied Element(s)",
+              "value": "paste"
+            },
+            {
+              "title": "Duplicate Selected Element",
+              "value": "duplicate"
+            },
+            {
+              "title": "Delete Active Element (and Children)",
+              "value": "delete"
+            },
+            {
+              "title": "Wrap in Configured Wrapper Element",
+              "value": "wrap"
+            },
+            {
+              "title": "Toggle Element Classes UI",
+              "value": "classes-ui"
+            },
+            {
+              "title": "Edit Next Element (Same Level)",
+              "value": "next-element"
+            },
+            {
+              "title": "Edit Previous Element (Same Level)",
+              "value": "previous-element"
+            },
+            {
+              "title": "Edit First Child Element",
+              "value": "first-child"
+            },
+            {
+              "title": "Edit Parent Element (Container)",
+              "value": "parent-element"
+            },
+            {
+              "title": "Focus Toolbar",
+              "value": "toolbar-focus"
+            },
+            {
+              "title": "Toggle Preview Mode",
+              "value": "preview"
+            },
+            {
+              "title": "Switch Responsive Editing Mode",
+              "value": "breakpoints"
+            },
+            {
+              "title": "View on Frontend",
+              "value": "frontend"
+            },
+            {
+              "title": "Close Popup",
+              "value": "close-popup"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "site-health",
+      "title": "Bricks Site Health",
+      "description": "All your Bricks sites at a glance: Bricks, helper, WordPress and PHP versions, available updates, maintenance mode and connection problems.",
+      "mode": "view",
+      "keywords": [
+        "bricks",
+        "health",
+        "sites",
+        "updates",
+        "versions",
+        "status"
+      ]
+    },
+    {
+      "name": "toggle-maintenance-mode",
+      "title": "Toggle Bricks Maintenance Mode",
+      "description": "Turns Bricks maintenance mode on or off on the selected site, after asking.",
+      "mode": "no-view",
+      "keywords": [
+        "bricks",
+        "maintenance",
+        "coming soon",
+        "offline"
+      ]
+    },
+    {
+      "name": "regenerate-css",
+      "title": "Regenerate Bricks CSS Files",
+      "description": "Regenerates Bricks' CSS files on the selected site.",
+      "mode": "no-view",
+      "keywords": [
+        "bricks",
+        "css",
+        "regenerate",
+        "files"
+      ]
+    },
+    {
+      "name": "clear-caches",
+      "title": "Clear Bricks Site Caches",
+      "description": "Flushes the object cache and page cache plugins (LiteSpeed, WP Rocket, W3TC, WP Super Cache, SiteGround, FlyingPress and more) on the selected site.",
+      "mode": "no-view",
+      "keywords": [
+        "bricks",
+        "cache",
+        "purge",
+        "clear",
+        "flush"
+      ]
+    },
+    {
+      "name": "regenerate-code-signatures",
+      "title": "Regenerate Bricks Code Signatures",
+      "description": "Signs every Code element, SVG and query editor again on the selected site, after asking.",
+      "mode": "no-view",
+      "keywords": [
+        "bricks",
+        "code",
+        "signatures",
+        "regenerate",
+        "security"
+      ]
+    },
+    {
+      "name": "bricks-pro",
+      "title": "Bricks Raycast Pro",
+      "description": "Add your Bricks Raycast Pro license key, see which sites have Pro, and activate it on one site or all of them.",
+      "mode": "view",
+      "keywords": [
+        "bricks",
+        "license",
+        "pro",
+        "key",
+        "activate",
+        "buy",
+        "upgrade"
+      ]
+    },
+    {
+      "name": "manage-sites",
+      "title": "Manage Bricks Sites",
+      "description": "Add, edit or remove the WordPress sites used by Open in Bricks.",
+      "mode": "view",
+      "keywords": [
+        "bricks",
+        "sites",
+        "wordpress",
+        "application password"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.2.0",
+    "fuse.js": "^7.5.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.12.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "node scripts/check-screenshots.js && node scripts/helper-zip.js --check && npx @raycast/api@latest publish",
+    "helper-zip": "node scripts/helper-zip.js"
+  }
+}
