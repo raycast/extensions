@@ -646,6 +646,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "kolect",
+    title: "Kolect Creator Search",
+    description:
+      "Find TikTok, Instagram and YouTube creators for influencer marketing. Describe a campaign in plain language to search 300M+ creators, look up creators by link or @handle, check fake followers, get public contact emails and save shortlists. Hosted remote Streamable HTTP server through `mcp-remote`; Kolect API key as an `Authorization: Bearer` header (free account, 90 credits on sign-up).",
+    icon: "https://app.kolect.ai/kolect-logo-mark.png",
+    homepage: "https://www.kolect.ai/ai-assistant",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.kolect.ai/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
+    },
+  },
+  {
     name: "filesystem",
     title: "Filesystem",
     description:
