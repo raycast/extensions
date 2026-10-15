@@ -117,9 +117,9 @@
     {
       "name": "userTeamId",
       "title": "Team ID",
-      "description": "Found in the URL of your Points page: fantasy.premierleague.com/entry/<Team ID>/event/…",
+      "description": "Found in the URL of your Points page: fantasy.premierleague.com/entry/<Team ID>/event/…. When empty, the commands ask for it.",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "placeholder": "1234567"
     }
   ],

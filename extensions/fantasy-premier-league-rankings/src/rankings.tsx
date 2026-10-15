@@ -2,15 +2,13 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { entryUrl, fetchLeagueStandings, FplError, leagueUrl } from "./api/fpl";
 import type { ClassicLeagueSummary } from "./api/types";
-import { EntryNotFound, MissingTeamId, PreferencesAction } from "./components/MissingTeamId";
+import { EntryNotFound, PreferencesAction, RequireTeamId } from "./components/MissingTeamId";
 import { TeamView } from "./components/TeamView";
-import { getTeamId, useEntry } from "./hooks";
+import { useEntry } from "./hooks";
 import { formatNumber, formatRankMove } from "./lib/format";
 
 export default function Command() {
-  const teamId = getTeamId();
-  if (!teamId) return <MissingTeamId />;
-  return <Leagues entryId={teamId} />;
+  return <RequireTeamId>{(teamId) => <Leagues entryId={teamId} />}</RequireTeamId>;
 }
 
 function Leagues({ entryId }: { entryId: number }) {

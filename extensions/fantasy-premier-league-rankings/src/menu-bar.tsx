@@ -1,4 +1,5 @@
 import { Icon, LaunchType, MenuBarExtra, launchCommand, open, openExtensionPreferences } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { entryUrl, FplError, transfersUrl } from "./api/fpl";
 import type { Pick } from "./api/types";
 import { getTeamId, useTeam } from "./hooks";
@@ -6,11 +7,12 @@ import { BootstrapIndex, positionShort, teamBadgeUrl, teamShort } from "./lib/bo
 import { formatDeadline, formatNumber } from "./lib/format";
 
 export default function Command() {
-  const teamId = getTeamId();
+  const { data: teamId, isLoading } = usePromise(getTeamId);
   if (!teamId) {
+    // The menu bar cannot show a form, so My Team asks for the Team ID instead.
     return (
-      <MenuBarExtra icon={Icon.SoccerBall} title="FPL" tooltip="Set your FPL Team ID">
-        <MenuBarExtra.Item title="Set Team ID" icon={Icon.Gear} onAction={openExtensionPreferences} />
+      <MenuBarExtra icon={Icon.SoccerBall} title="FPL" tooltip="Set your FPL Team ID" isLoading={isLoading}>
+        <MenuBarExtra.Item title="Set Team ID" icon={Icon.Gear} onAction={showCommand("my-team")} />
       </MenuBarExtra>
     );
   }

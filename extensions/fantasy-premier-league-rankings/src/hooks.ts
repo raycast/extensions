@@ -1,5 +1,5 @@
-import { getPreferenceValues } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import {
   fetchBootstrap,
@@ -13,12 +13,21 @@ import {
 import { indexBootstrap } from "./lib/bootstrap";
 import { provisionalBonus } from "./lib/bonus";
 
-/** Team ID from preferences, or undefined when it is not a positive integer. */
-export function getTeamId(): number | undefined {
-  const { userTeamId } = getPreferenceValues<Preferences>();
-  const parsed = Number(userTeamId?.trim());
+const TEAM_ID_KEY = "teamId";
+
+/** A Team ID typed as a number or pasted as an FPL URL, or undefined when it is not a positive integer. */
+export function parseTeamId(value: string | undefined): number | undefined {
+  const parsed = Number(value?.match(/entry\/(\d+)/)?.[1] ?? value?.trim());
   return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
+
+/** Team ID from the preferences, or else the one saved from the Team ID form. */
+export async function getTeamId(): Promise<number | undefined> {
+  const { userTeamId } = getPreferenceValues<Preferences>();
+  return parseTeamId(userTeamId) ?? parseTeamId(await LocalStorage.getItem<string>(TEAM_ID_KEY));
+}
+
+export const saveTeamId = (teamId: number) => LocalStorage.setItem(TEAM_ID_KEY, String(teamId));
 
 export function useBootstrap() {
   const result = useCachedPromise(fetchBootstrap, [], { keepPreviousData: true });
@@ -51,7 +60,7 @@ export function usePicks(entryId: number | undefined, event: number | undefined)
 
 /** The set of player IDs in the user's squad for the current gameweek. */
 export function useMySquad(): Set<number> | undefined {
-  const teamId = getTeamId();
+  const { data: teamId } = usePromise(getTeamId);
   const { data: entry } = useEntry(teamId);
   const { data: picks } = usePicks(teamId, entry?.current_event ?? undefined);
   return useMemo(() => (picks ? new Set(picks.picks.map((p) => p.element)) : undefined), [picks]);

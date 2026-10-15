@@ -1,16 +1,14 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { entryUrl, fetchTransfers, FplError } from "./api/fpl";
-import { EntryNotFound, MissingTeamId, PreferencesAction } from "./components/MissingTeamId";
+import { EntryNotFound, PreferencesAction, RequireTeamId } from "./components/MissingTeamId";
 import { TeamView } from "./components/TeamView";
-import { getTeamId, useBootstrap, useEntryHistory } from "./hooks";
+import { useBootstrap, useEntryHistory } from "./hooks";
 import { playerName } from "./lib/bootstrap";
 import { chipLabel, formatNumber, formatPrice, formatRankMove } from "./lib/format";
 
 export default function Command() {
-  const teamId = getTeamId();
-  if (!teamId) return <MissingTeamId />;
-  return <History entryId={teamId} />;
+  return <RequireTeamId>{(teamId) => <History entryId={teamId} />}</RequireTeamId>;
 }
 
 function History({ entryId }: { entryId: number }) {

@@ -1,6 +1,6 @@
 # Fantasy Premier League
 
-Your FPL team without leaving the keyboard. Everything is read from the public FPL API, so no login is needed. Set your Team ID once in the extension preferences: open [fantasy.premierleague.com](https://fantasy.premierleague.com), go to **Points**, and copy the number after `/entry/` in the URL.
+Your FPL team without leaving the keyboard. Everything is read from the public FPL API, so no login is needed. The first command that needs your Team ID asks for it: open [fantasy.premierleague.com](https://fantasy.premierleague.com), go to **Points**, and copy the number after `/entry/` in the URL, or paste the whole URL. A Team ID set in the extension preferences takes precedence.
 
 ## Commands
 
