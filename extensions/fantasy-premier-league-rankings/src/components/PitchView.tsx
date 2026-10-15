@@ -70,6 +70,8 @@ export function PitchView({ entryId, initialEvent }: Props) {
       if (!player || !team) return undefined;
       const started = fixturesOf(player.id).some((f) => f.started || f.finished);
       const stats = livePoints.get(player.id);
+      // Doubled for the captain like the points beside it, so the two add up to the list's score
+      const provisional = bonus.get(player.id);
       return {
         name: player.web_name,
         points: stats && started ? String(stats.total_points * (pick.multiplier || 1)) : undefined,
@@ -78,7 +80,7 @@ export function PitchView({ entryId, initialEvent }: Props) {
         tripleCaptain: pick.multiplier === 3,
         vice: pick.is_vice_captain,
         flagged: player.status !== "a",
-        provisionalBonus: started ? bonus.get(player.id) : undefined,
+        provisionalBonus: started && provisional ? provisional * (pick.multiplier || 1) : undefined,
         autoSub: autoSubsIn.has(player.id) ? "in" : autoSubsOut.has(player.id) ? "out" : undefined,
         label,
       };
