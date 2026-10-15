@@ -748,6 +748,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "moltnode",
+    title: "MoltNode by Chord",
+    description:
+      "Read 31 blockchains over JSON-RPC and get best-route DEX swap quotes with unsigned transactions via Chord. No API key. List the chains, call any JSON-RPC method (`eth_*` on EVM chains, native methods on Solana and Sui), read the latest block and native balances, find tokens and get a swap quote with the unsigned transaction, the approval it needs and a simulation on the 7 chains Chord trades on, then broadcast a transaction you signed yourself. Non-custodial: it never holds keys or signs. Hosted remote Streamable HTTP server at https://moltnode.ag/mcp; no sign-in and no API key.",
+    icon: "https://raw.githubusercontent.com/tuantqse90/moltnode-mcp/main/assets/logo.png",
+    homepage: "https://moltnode.ag",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://moltnode.ag/mcp"],
+    },
+    remoteUrl: "https://moltnode.ag/mcp",
+  },
+  {
     name: "paddle",
     title: "Paddle",
     description:

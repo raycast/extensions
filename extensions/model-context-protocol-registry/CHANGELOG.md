@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add MoltNode by Chord MCP Server] - 2026-10-15
+
+- Add MoltNode by Chord to the official registry: read 31 blockchains over JSON-RPC and get best-route DEX swap quotes with unsigned transactions via Chord, then broadcast a transaction you signed yourself. Non-custodial: it never holds keys or signs. Remote Streamable HTTP server with no sign-in and no API key. Direct HTTP connection in Raycast at https://moltnode.ag/mcp.
+
 ## [Add Chord MCP Server] - 2026-10-15
 
 - Add Chord to the official registry: DEX swap quotes and unsigned transactions on 7 EVM chains, plus token boards, candles, wallet PnL and smart money from Chord's index of on-chain trades. Non-custodial: tools return unsigned transactions for your own wallet to sign. Remote Streamable HTTP server with no sign-in and no API key for the data and swap tools. Direct HTTP connection in Raycast at https://api.getchord.xyz/v1/mcp.
