@@ -60,11 +60,11 @@
           "default": "query",
           "data": [
             {
-              "title": "Query, filenames and technical metadata",
+              "title": "Query, Filenames and Technical Metadata",
               "value": "filenames"
             },
             {
-              "title": "Query only",
+              "title": "Query Only",
               "value": "query"
             }
           ]
