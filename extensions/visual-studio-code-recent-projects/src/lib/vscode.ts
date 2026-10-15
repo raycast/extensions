@@ -276,7 +276,7 @@ class VSCodeCLI {
   private cliFilename: string;
   private execOptions: child_process.ExecFileSyncOptions | undefined;
   constructor(cliFilename: string) {
-    this.cliFilename = `"${cliFilename}"`;
+    this.cliFilename = isWin ? `"${cliFilename}"` : cliFilename;
     this.execOptions = isWin ? { shell: true } : undefined;
   }
 
