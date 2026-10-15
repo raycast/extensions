@@ -1,6 +1,6 @@
 # Motion Rosetta Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-15
 
 - Detect pasted easing curves and springs and copy platform-specific equivalents.
 - Explain exact, sampled, lossy and unavailable conversions.
