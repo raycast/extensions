@@ -56,6 +56,13 @@ function getBookmarks(bookmark: BookmarkFolder | BookmarkItem, hierarchy = "") {
   return bookmarks;
 }
 
+// Folder path without the browser's root folder (e.g. "Bookmarks Bar"), whose name is shared by most bookmarks.
+function getBookmarksWithSearchFolder(root: BookmarkFolder | undefined) {
+  return root
+    ? getBookmarks(root).map((bookmark) => ({ ...bookmark, searchFolder: bookmark.folder.slice(root.name.length + 1) }))
+    : [];
+}
+
 function getBookmarkCount(bookmarksRoot: BookmarksRoot) {
   return Object.values(bookmarksRoot.roots).reduce((count, root) => count + (root ? getBookmarks(root).length : 0), 0);
 }
@@ -244,8 +251,8 @@ export default function useChromiumBookmarks(
   const otherRoot = data?.roots.other;
 
   const rawBookmarks = useMemo(() => {
-    const toolbarBookmarks = toolbarRoot ? getBookmarks(toolbarRoot) : [];
-    const otherBookmarks = otherRoot ? getBookmarks(otherRoot) : [];
+    const toolbarBookmarks = getBookmarksWithSearchFolder(toolbarRoot);
+    const otherBookmarks = getBookmarksWithSearchFolder(otherRoot);
 
     return [...toolbarBookmarks, ...otherBookmarks].map((bookmark) => {
       return {

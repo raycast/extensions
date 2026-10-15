@@ -64,6 +64,7 @@ type Bookmark = {
   title: string;
   url: string;
   folder: string;
+  searchFolder?: string;
   domain: string;
   favicon?: string;
   bookmarkFrecency?: BookmarkFrecency;
@@ -165,7 +166,8 @@ export default function Command() {
   const { data: availableBrowsers, isLoading: isLoadingAvailableBrowsers } = useAvailableBrowsers();
   const availableBrowserIdsKey = availableBrowsers?.map((browser) => browser.browserId).join("|") ?? "__pending__";
 
-  const { showDomain, openBookmarkBrowser, replaceCurrentTab, copyLinkShortcut } = getPreferenceValues<Preferences>();
+  const { showDomain, openBookmarkBrowser, replaceCurrentTab, copyLinkShortcut, searchStrictness } =
+    getPreferenceValues<Preferences>();
 
   const {
     data: storedBrowsers,
@@ -456,13 +458,19 @@ export default function Command() {
       keys: [
         { name: "title", weight: 3 },
         { name: "domain", weight: 1 },
-        { name: "folder", weight: 0.5 },
+        {
+          name: "folder",
+          weight: 0.5,
+          // The root folder (e.g. Chromium's "Bookmarks Bar") can't be renamed and is shared by most bookmarks,
+          // so fuzzy-matching it (e.g. "board") returns nearly everything. Search the subfolders only.
+          getFn: (item) => item.searchFolder ?? item.folder,
+        },
       ],
-      threshold: 0.4,
+      threshold: Number(searchStrictness),
       includeScore: true,
       ignoreLocation: true,
     });
-  }, [folderBookmarks]);
+  }, [folderBookmarks, searchStrictness]);
 
   // Limit display to 100 bookmarks to avoid heap memory errors
   // Use custom filtering instead of native filtering
