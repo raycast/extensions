@@ -1,6 +1,6 @@
 # LAN File Share Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-15
 
 - Open a share list over the local network: files, folders and text in one list that both sides can add to and remove from
 - Keep the service running after the command closes, and stop it automatically when Raycast quits
