@@ -4,18 +4,26 @@ import { agentDisplayNameToId, KNOWN_AGENT_NAMES } from "./skills-cli-agents";
 import {
   InvalidCustomNpxPathError,
   NpxResolutionError,
+  SkillsCliBusyError,
   isInvalidCustomNpxPathError,
   isNpxResolutionError,
+  isSkillsCliBusyError,
   runSkillsCli,
+  stripAnsiEscapes,
+  type SkillsCliRunner,
 } from "./skills-cli-runner";
 
 const home = homedir();
 
+const MAX_UNEXPECTED_OUTPUT_CHARS = 500;
+
 export {
   InvalidCustomNpxPathError,
   NpxResolutionError,
+  SkillsCliBusyError,
   isInvalidCustomNpxPathError,
   isNpxResolutionError,
+  isSkillsCliBusyError,
   KNOWN_AGENT_NAMES,
 };
 
@@ -40,12 +48,18 @@ function parseSkillsListJson(stdout: string): InstalledSkill[] {
   }));
 }
 
-export async function listInstalledSkills(): Promise<InstalledSkill[]> {
-  const stdout = await runSkillsCli(["list", "-g", "--json"], { readOnly: true });
+export async function listInstalledSkills(runCli: SkillsCliRunner = runSkillsCli): Promise<InstalledSkill[]> {
+  const stdout = await runCli(["list", "-g", "--json"], { readOnly: true });
   try {
     return parseSkillsListJson(stdout);
-  } catch {
-    throw new Error("Failed to parse skills list: unexpected output from `skills list --json`");
+  } catch (error) {
+    const output = stripAnsiEscapes(stdout).trim();
+    const excerpt =
+      output.length > MAX_UNEXPECTED_OUTPUT_CHARS ? `${output.slice(0, MAX_UNEXPECTED_OUTPUT_CHARS)}…` : output;
+    throw new Error(
+      `Failed to parse skills list: unexpected output from \`skills list --json\`\n${excerpt || "(no output)"}`,
+      { cause: error },
+    );
   }
 }
 

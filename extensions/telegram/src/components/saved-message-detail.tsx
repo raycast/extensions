@@ -8,7 +8,7 @@ interface SavedMessageDetailProps {
 
 export function SavedMessageDetail({ message }: SavedMessageDetailProps) {
   const markdown = buildMarkdownWithMedia({
-    text: message.text,
+    text: message.markdown ?? message.text,
     media: message.media,
   });
 

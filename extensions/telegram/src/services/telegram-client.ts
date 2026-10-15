@@ -1,14 +1,17 @@
-import { TelegramClient } from "telegram";
-import { StringSession } from "telegram/sessions";
+import { TelegramClient, Rich, events } from "teleproto";
+import { StringSession } from "teleproto/sessions";
 import { LocalStorage, environment } from "@raycast/api";
-import { Api } from "telegram/tl";
-import { computeCheck } from "telegram/Password";
+import { Api } from "teleproto/tl";
+import { computeCheck } from "teleproto/Password";
 import * as fs from "fs";
 import * as path from "path";
+import QRCode from "qrcode";
+
+const QR_CODE_TIMEOUT = 30000;
 
 const SESSION_KEY = "telegram_session";
+const AUTH_SESSION_KEY = "telegram_auth_session";
 const USER_ID_KEY = "telegram_user_id";
-const PHONE_CODE_HASH_KEY = "telegram_phone_code_hash";
 const MEDIA_CACHE_DIR = path.join(environment.supportPath, "media");
 
 export type MediaType =
@@ -43,6 +46,8 @@ export interface MessageMedia {
 export interface SavedMessage {
   id: number;
   text: string;
+  /** Rendered Markdown, set only for rich messages (layer 228+). */
+  markdown?: string;
   date: Date;
   media?: MessageMedia;
 }
@@ -50,6 +55,8 @@ export interface SavedMessage {
 export interface ChatMessage {
   id: number;
   text: string;
+  /** Rendered Markdown, set only for rich messages (layer 228+). */
+  markdown?: string;
   date: Date;
   media?: MessageMedia;
   senderId?: string;
@@ -70,7 +77,6 @@ export interface Chat {
 export interface TelegramConfig {
   apiId: number;
   apiHash: string;
-  phoneNumber: string;
 }
 
 export interface GetChatsOptions {
@@ -102,26 +108,50 @@ export interface SendMessageOptions {
 }
 
 export interface AuthenticationResult {
-  needsCode: boolean;
   needsPassword: boolean;
+  success?: boolean;
 }
 
 let clientInstance: TelegramClient | null = null;
 
 export async function getClient(config: TelegramConfig): Promise<TelegramClient> {
   if (clientInstance && clientInstance.connected) {
-    return clientInstance;
+    if (clientInstance.apiId === config.apiId && clientInstance.apiHash === config.apiHash) {
+      return clientInstance;
+    }
+    try {
+      await clientInstance.disconnect();
+    } catch {
+      // Disconnect failed, allow recreation
+    }
+    clientInstance = null;
   }
 
-  const sessionString = await LocalStorage.getItem<string>(SESSION_KEY);
+  const sessionString =
+    (await LocalStorage.getItem<string>(SESSION_KEY)) || (await LocalStorage.getItem<string>(AUTH_SESSION_KEY));
   const session = new StringSession(sessionString || "");
 
   const client = new TelegramClient(session, config.apiId, config.apiHash, {
     connectionRetries: 5,
+    deviceModel: "Raycast",
+    systemVersion: process.platform === "win32" ? "Windows" : "macOS",
+    appVersion: "1.0.0",
   });
 
   clientInstance = client;
   return client;
+}
+
+export async function clearPendingAuthSession(): Promise<void> {
+  if (clientInstance) {
+    try {
+      await clientInstance.disconnect();
+    } catch {
+      // Disconnect failed, allow recreation
+    }
+    clientInstance = null;
+  }
+  await LocalStorage.removeItem(AUTH_SESSION_KEY);
 }
 
 export async function isAuthenticated(): Promise<boolean> {
@@ -129,98 +159,254 @@ export async function isAuthenticated(): Promise<boolean> {
   return !!sessionString;
 }
 
-async function completeAuthentication(client: TelegramClient): Promise<AuthenticationResult> {
+export interface LogOutResult {
+  remoteRevoked: boolean;
+  sessionExpired: boolean;
+  error?: Error;
+}
+
+export async function logOut(config?: TelegramConfig): Promise<LogOutResult> {
+  let client: TelegramClient | null = null;
+  let remoteRevoked = false;
+  let sessionExpired = false;
+  let logoutError: Error | undefined;
+  try {
+    client = clientInstance || (config ? await getClient(config) : null);
+    if (client) {
+      if (!client.connected) {
+        await client.connect();
+      }
+      if (await client.isUserAuthorized()) {
+        await client.invoke(new Api.auth.LogOut());
+        remoteRevoked = true;
+      } else {
+        sessionExpired = true;
+      }
+    }
+  } catch (err) {
+    logoutError = err instanceof Error ? err : new Error(String(err));
+  } finally {
+    if (client) {
+      try {
+        await client.disconnect();
+      } catch {
+        // Disconnect failed, ignore
+      }
+    }
+    clientInstance = null;
+    await LocalStorage.removeItem(SESSION_KEY);
+    await LocalStorage.removeItem(AUTH_SESSION_KEY);
+    await LocalStorage.removeItem(USER_ID_KEY);
+  }
+  return { remoteRevoked, sessionExpired, error: logoutError };
+}
+
+async function completeAuthentication(
+  client: TelegramClient,
+  isAborted?: () => boolean,
+): Promise<AuthenticationResult> {
+  if (isAborted?.()) return { needsPassword: false, success: false };
   const session = client.session.save() as unknown as string;
   await LocalStorage.setItem(SESSION_KEY, session);
 
+  if (isAborted?.()) return { needsPassword: false, success: false };
   const me = await client.getMe();
   await LocalStorage.setItem(USER_ID_KEY, me.id.toString());
 
-  await LocalStorage.removeItem(PHONE_CODE_HASH_KEY);
+  await LocalStorage.removeItem(AUTH_SESSION_KEY);
 
-  return { needsCode: false, needsPassword: false };
+  return { needsPassword: false, success: true };
 }
 
-export async function authenticate(
+export async function authenticateWithPassword(
   config: TelegramConfig,
-  options?: { code?: string; password?: string; forceResendCode?: boolean },
+  password: string,
 ): Promise<AuthenticationResult> {
   const client = await getClient(config);
-  const code = options?.code;
-  const password = options?.password;
-  const forceResendCode = options?.forceResendCode ?? false;
+
+  if (!client.connected) {
+    await client.connect();
+  }
+
+  const accountPassword = await client.invoke(new Api.account.GetPassword());
+  await client.invoke(
+    new Api.auth.CheckPassword({
+      password: await computeCheck(accountPassword, password),
+    }),
+  );
+
+  return completeAuthentication(client);
+}
+
+export interface QrCodeAuthCallbacks {
+  onQrCode: (qrData: { tgUrl: string; dataUrl: string }) => void | Promise<void>;
+  abortSignal?: AbortSignal;
+}
+
+async function handleLoginTokenResult(
+  client: TelegramClient,
+  result: Api.auth.TypeLoginToken,
+  isAborted?: () => boolean,
+): Promise<AuthenticationResult> {
+  if (result instanceof Api.auth.LoginTokenSuccess && result.authorization instanceof Api.auth.Authorization) {
+    if (isAborted?.()) return { needsPassword: false, success: false };
+    return completeAuthentication(client, isAborted);
+  }
+
+  if (result instanceof Api.auth.LoginTokenMigrateTo) {
+    if (isAborted?.()) return { needsPassword: false, success: false };
+    await (client as unknown as { _switchDC: (dcId: number) => Promise<void> })._switchDC(result.dcId);
+    if (isAborted?.()) return { needsPassword: false, success: false };
+    const migratedResult = await client.invoke(
+      new Api.auth.ImportLoginToken({
+        token: result.token,
+      }),
+    );
+    if (isAborted?.()) return { needsPassword: false, success: false };
+    if (
+      migratedResult instanceof Api.auth.LoginTokenSuccess &&
+      migratedResult.authorization instanceof Api.auth.Authorization
+    ) {
+      return completeAuthentication(client, isAborted);
+    }
+  }
+
+  throw new Error(`Unexpected login token result: ${(result as { className?: string })?.className || "unknown"}`);
+}
+
+export async function authenticateWithQr(
+  config: TelegramConfig,
+  callbacks: QrCodeAuthCallbacks,
+): Promise<AuthenticationResult> {
+  await clearPendingAuthSession();
+  const client = await getClient(config);
 
   if (!client.connected) {
     await client.connect();
   }
 
   if (await client.isUserAuthorized()) {
-    return { needsCode: false, needsPassword: false };
-  }
-
-  if (!code && !password) {
-    if (forceResendCode) {
-      await LocalStorage.removeItem(PHONE_CODE_HASH_KEY);
-    }
-
-    const phoneCodeHash = await LocalStorage.getItem<string>(PHONE_CODE_HASH_KEY);
-    if (!phoneCodeHash) {
-      const result = await client.sendCode(
-        {
-          apiId: config.apiId,
-          apiHash: config.apiHash,
-        },
-        config.phoneNumber,
-      );
-      await LocalStorage.setItem(PHONE_CODE_HASH_KEY, result.phoneCodeHash);
-      return { needsCode: true, needsPassword: false };
-    }
-    return { needsCode: true, needsPassword: false };
-  }
-
-  if (password) {
-    const accountPassword = await client.invoke(new Api.account.GetPassword());
-    await client.invoke(
-      new Api.auth.CheckPassword({
-        password: await computeCheck(accountPassword, password),
-      }),
-    );
-
     return completeAuthentication(client);
   }
 
-  const phoneCodeHash = await LocalStorage.getItem<string>(PHONE_CODE_HASH_KEY);
-  if (!phoneCodeHash) {
-    throw new Error("Phone code hash not found. Please restart authentication.");
+  const { abortSignal } = callbacks;
+  const isAborted = () => !!abortSignal?.aborted;
+  if (isAborted()) {
+    return { needsPassword: false, success: false };
   }
+
+  let scanDetected = false;
+  let resolveScanWait: (() => void) | undefined;
+
+  const rawEvent = new events.Raw({});
+  const onUpdate = (update: unknown) => {
+    if (update instanceof Api.UpdateLoginToken) {
+      scanDetected = true;
+      resolveScanWait?.();
+    }
+  };
+  client.addEventHandler(onUpdate, rawEvent);
 
   try {
-    await client.invoke(
-      new Api.auth.SignIn({
-        phoneNumber: config.phoneNumber,
-        phoneCodeHash: phoneCodeHash,
-        phoneCode: code!,
-      }),
-    );
-  } catch (error) {
-    const errorText =
-      error instanceof Error
-        ? error.message
-        : String((error as { errorMessage?: string } | undefined)?.errorMessage || "");
-    const normalizedErrorText = errorText.toUpperCase();
+    while (!isAborted()) {
+      let result: Api.auth.TypeLoginToken;
+      try {
+        result = await client.invoke(
+          new Api.auth.ExportLoginToken({
+            apiId: config.apiId,
+            apiHash: config.apiHash,
+            exceptIds: [],
+          }),
+        );
 
-    if (normalizedErrorText.includes("SESSION_PASSWORD_NEEDED")) {
-      return { needsCode: false, needsPassword: true };
+        if (isAborted()) {
+          return { needsPassword: false, success: false };
+        }
+
+        if (result instanceof Api.auth.LoginTokenSuccess || result instanceof Api.auth.LoginTokenMigrateTo) {
+          return await handleLoginTokenResult(client, result, isAborted);
+        }
+      } catch (err: unknown) {
+        if (isAborted()) {
+          return { needsPassword: false, success: false };
+        }
+
+        const errorText =
+          err instanceof Error ? err.message : String((err as { errorMessage?: string })?.errorMessage || err);
+        const upper = errorText.toUpperCase();
+
+        if (upper.includes("SESSION_PASSWORD_NEEDED") || upper.includes("ACCOUNT HAS 2FA ENABLED")) {
+          await LocalStorage.setItem(AUTH_SESSION_KEY, client.session.save() as unknown as string);
+          return { needsPassword: true, success: false };
+        }
+
+        if (upper.includes("AUTH_TOKEN_ALREADY_ACCEPTED")) {
+          if (await client.isUserAuthorized()) {
+            return completeAuthentication(client, isAborted);
+          }
+          await LocalStorage.setItem(AUTH_SESSION_KEY, client.session.save() as unknown as string);
+          return { needsPassword: true, success: false };
+        }
+
+        throw err;
+      }
+
+      if (result instanceof Api.auth.LoginToken) {
+        if (scanDetected) {
+          scanDetected = false;
+          continue;
+        }
+
+        const base64Url = Buffer.from(result.token).toString("base64url");
+        const tgUrl = `tg://login?token=${base64Url}`;
+        const dataUrl = await QRCode.toDataURL(tgUrl, {
+          margin: 1,
+          width: 200,
+        });
+
+        if (isAborted()) {
+          return { needsPassword: false, success: false };
+        }
+
+        await callbacks.onQrCode({ tgUrl, dataUrl });
+
+        if (!scanDetected && !isAborted()) {
+          await new Promise<void>((resolve) => {
+            let timer: NodeJS.Timeout | undefined;
+            let onAbort: (() => void) | undefined;
+
+            const cleanup = () => {
+              if (timer !== undefined) {
+                clearTimeout(timer);
+                timer = undefined;
+              }
+              if (onAbort && abortSignal) {
+                abortSignal.removeEventListener("abort", onAbort);
+              }
+              resolveScanWait = undefined;
+            };
+
+            const done = () => {
+              cleanup();
+              resolve();
+            };
+
+            resolveScanWait = done;
+            timer = setTimeout(done, QR_CODE_TIMEOUT);
+
+            if (abortSignal) {
+              onAbort = done;
+              abortSignal.addEventListener("abort", onAbort, { once: true });
+            }
+          });
+        }
+      }
     }
 
-    if (normalizedErrorText.includes("PHONE_CODE_EXPIRED")) {
-      await LocalStorage.removeItem(PHONE_CODE_HASH_KEY);
-    }
-
-    throw error;
+    return { needsPassword: false, success: false };
+  } finally {
+    client.removeEventHandler(onUpdate, rawEvent);
   }
-
-  return completeAuthentication(client);
 }
 
 function ensureMediaCacheDir(): void {
@@ -326,7 +512,102 @@ async function downloadProfilePhoto(
   return undefined;
 }
 
-function parseMessageMedia(msg: Api.Message): MessageMedia | undefined {
+/**
+ * Works out who authored a message, and their id.
+ *
+ * Telegram fills this in three different ways, and only one of them sets `fromId`:
+ * group members set `fromId` to a user, channel posts and anonymous group admins set
+ * it to a channel, and both broadcast posts and private chats may omit it entirely --
+ * in which case the author is whatever the message is attached to.
+ *
+ * Kept free of network calls so the attribution rules can be unit tested.
+ */
+export function resolveMessageAuthor(
+  msg: Api.Message,
+  chatEntity?: Api.User | Api.Chat | Api.Channel,
+): { senderId?: string; entity?: Api.User | Api.Channel } {
+  if (msg.fromId instanceof Api.PeerUser) {
+    // Prefer the entity the library already attached to the message: it comes from the
+    // users map on the same response. client.getEntity() needs a populated entity cache,
+    // and StringSession does not persist one, so in a fresh Raycast command process it
+    // throws "Could not find the input entity" for anyone we have not just fetched.
+    return {
+      senderId: msg.fromId.userId.toString(),
+      entity: msg.sender instanceof Api.User ? msg.sender : undefined,
+    };
+  }
+
+  if (msg.fromId instanceof Api.PeerChannel) {
+    return {
+      senderId: msg.fromId.channelId.toString(),
+      entity: msg.sender instanceof Api.Channel ? msg.sender : undefined,
+    };
+  }
+
+  if (!msg.fromId) {
+    const author = msg.sender ?? chatEntity;
+    if (author instanceof Api.Channel || author instanceof Api.User) {
+      return { senderId: author.id.toString(), entity: author };
+    }
+  }
+
+  return {};
+}
+
+/**
+ * Reads a message's text.
+ *
+ * Bots can send rich messages (layer 228), whose content lives in `richMessage`
+ * as a block tree rather than in the flat `message` string. Older clients are not
+ * shown these at all -- the server substitutes messageMediaUnsupported -- so any
+ * code that only reads `msg.message` silently loses every rich message.
+ */
+export function renderMessageContent(msg: Api.Message): { text: string; markdown?: string } {
+  if (msg.message) {
+    return { text: msg.message };
+  }
+
+  if (msg.richMessage) {
+    const plain = Rich.toPlainText(msg.richMessage);
+    return {
+      // List titles are single-line, so collapse the block structure for display.
+      text: plain.replace(/\s+/g, " ").trim(),
+      markdown: Rich.toMarkdown(msg.richMessage),
+    };
+  }
+
+  return { text: "" };
+}
+
+/** True when a message carries anything worth rendering. */
+export function hasRenderableContent(msg: Api.Message): boolean {
+  return Boolean(msg.message || msg.media || msg.richMessage);
+}
+
+/** Display name and avatar for a user, matching how getChats titles a private chat. */
+async function describeUser(
+  client: TelegramClient,
+  user: Api.User,
+  skipPhotoDownload: boolean,
+): Promise<{ name: string; photo?: string }> {
+  let name = user.firstName || "";
+  if (user.lastName) name += ` ${user.lastName}`;
+
+  if (user.deleted) {
+    name = "Deleted Account";
+  } else if (!name.trim()) {
+    name = "Unknown User";
+  }
+
+  let photo: string | undefined;
+  if (!skipPhotoDownload && user.photo && "photoId" in user.photo) {
+    photo = await downloadProfilePhoto(client, user, user.id.toString(), "profile");
+  }
+
+  return { name, photo };
+}
+
+export function parseMessageMedia(msg: Api.Message): MessageMedia | undefined {
   if (!msg.media) return undefined;
 
   const mediaClassName = msg.media.className;
@@ -434,9 +715,12 @@ async function processSavedMessage(
     }
   }
 
+  const { text, markdown } = renderMessageContent(msg);
+
   return {
     id: msg.id,
-    text: msg.message || "",
+    text,
+    markdown,
     date: new Date(msg.date * 1000),
     media,
   };
@@ -455,53 +739,39 @@ async function processChatMessage(
     if (filePath && media) media.filePath = filePath;
   }
 
-  let senderId: string | undefined;
   let senderName: string | undefined;
   let senderPhoto: string | undefined;
 
-  // Try to get sender info from fromId
-  if (msg.fromId && msg.fromId instanceof Api.PeerUser) {
-    senderId = msg.fromId.userId.toString();
+  const { senderId, entity } = resolveMessageAuthor(msg, chatEntity);
+
+  // Fall back to a lookup only when the response did not carry the user with it.
+  let author = entity;
+  if (!author && msg.fromId instanceof Api.PeerUser) {
     try {
       const user = await client.getEntity(msg.fromId.userId);
-      if (user instanceof Api.User) {
-        senderName = user.firstName || "";
-        if (user.lastName) senderName += ` ${user.lastName}`;
-
-        if (user.deleted) {
-          senderName = "Deleted Account";
-        } else if (!senderName.trim()) {
-          senderName = "Unknown User";
-        }
-
-        if (!skipMediaDownload && user.photo && "photoId" in user.photo) {
-          senderPhoto = await downloadProfilePhoto(client, user, user.id.toString(), "profile");
-        }
-      }
+      if (user instanceof Api.User) author = user;
     } catch (error) {
-      console.error("Failed to get sender info:", error);
-      senderName = "Unknown User";
-    }
-  } else if (!msg.fromId && chatEntity instanceof Api.User) {
-    // For private chats, if there's no fromId, assume it's from the chat partner
-    senderId = chatEntity.id.toString();
-    senderName = chatEntity.firstName || "";
-    if (chatEntity.lastName) senderName += ` ${chatEntity.lastName}`;
-
-    if (chatEntity.deleted) {
-      senderName = "Deleted Account";
-    } else if (!senderName.trim()) {
-      senderName = "Unknown User";
-    }
-
-    if (!skipMediaDownload && chatEntity.photo && "photoId" in chatEntity.photo) {
-      senderPhoto = await downloadProfilePhoto(client, chatEntity, chatEntity.id.toString(), "profile");
+      console.error(`Failed to resolve sender ${senderId}:`, error);
     }
   }
 
+  if (author instanceof Api.User) {
+    const { name, photo } = await describeUser(client, author, skipMediaDownload);
+    senderName = name;
+    senderPhoto = photo;
+  } else if (author instanceof Api.Channel) {
+    senderName = author.title;
+    if (!skipMediaDownload && author.photo && "photoId" in author.photo) {
+      senderPhoto = await downloadProfilePhoto(client, author, author.id.toString(), "channel");
+    }
+  }
+
+  const { text, markdown } = renderMessageContent(msg);
+
   return {
     id: msg.id,
-    text: msg.message || "",
+    text,
+    markdown,
     date: new Date(msg.date * 1000),
     media,
     senderId,
@@ -529,7 +799,7 @@ export async function getSavedMessages(options: GetSavedMessagesOptions): Promis
     search: searchQuery || undefined,
   });
 
-  const filteredMessages = messages.filter((msg) => msg.message || msg.media);
+  const filteredMessages = messages.filter(hasRenderableContent);
 
   const processedMessages = await Promise.all(
     filteredMessages.map((msg) => processSavedMessage(client, msg, skipMediaDownload)),
@@ -552,7 +822,7 @@ export async function getChatMessages(options: GetMessagesOptions): Promise<Chat
     search: searchQuery || undefined,
   });
 
-  const filteredMessages = messages.filter((msg) => msg.message || msg.media);
+  const filteredMessages = messages.filter(hasRenderableContent);
 
   // Get the chat entity to know who the chat partner is
   const entity = await client.getEntity(chatId);

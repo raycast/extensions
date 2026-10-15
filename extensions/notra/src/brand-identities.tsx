@@ -1,14 +1,36 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Keyboard } from "@raycast/api";
 import { BrandIdentityDetail } from "./components/brand-identity-detail";
 import { CreateBrandIdentityForm } from "./components/create-brand-identity-form";
+import { WorkspaceDropdown } from "./components/workspace-switcher";
 import { useBrandIdentities } from "./hooks/use-brand-identities";
-import { notraUrl } from "./utils";
+import { useWorkspace } from "./hooks/use-workspace";
+import { notraOrganizationUrl } from "./utils";
 
 export default function Command() {
-  const { data: brandIdentities, isLoading, revalidate } = useBrandIdentities();
+  const {
+    hasMultipleWorkspaces,
+    isLoading: isLoadingWorkspace,
+    switchWorkspace,
+    workspace,
+    workspaces,
+  } = useWorkspace();
+  const {
+    data: brandIdentities,
+    isLoading,
+    revalidate,
+  } = useBrandIdentities({ execute: !isLoadingWorkspace, organizationId: workspace?.id });
+  const brandUrl = notraOrganizationUrl("/brand/identity", workspace?.slug);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search brand identities...">
+    <List
+      isLoading={isLoadingWorkspace || isLoading}
+      searchBarAccessory={
+        hasMultipleWorkspaces ? (
+          <WorkspaceDropdown onChange={switchWorkspace} workspace={workspace} workspaces={workspaces} />
+        ) : undefined
+      }
+      searchBarPlaceholder="Search brand identities..."
+    >
       <List.EmptyView
         actions={
           <ActionPanel>
@@ -17,7 +39,7 @@ export default function Command() {
               target={<CreateBrandIdentityForm onCreated={revalidate} />}
               title="Create Brand Identity"
             />
-            <Action.OpenInBrowser icon={Icon.Globe} title="View on Notra" url={notraUrl("/settings/brand")} />
+            <Action.OpenInBrowser icon={Icon.Globe} title="View on Notra" url={brandUrl} />
           </ActionPanel>
         }
         description="Create your first brand identity from a website URL."
@@ -38,15 +60,15 @@ export default function Command() {
               />
               <Action.Push
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 target={<CreateBrandIdentityForm onCreated={revalidate} />}
                 title="Create Brand Identity"
               />
               <Action.OpenInBrowser
                 icon={Icon.Globe}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                shortcut={Keyboard.Shortcut.Common.OpenWith}
                 title="View on Notra"
-                url={notraUrl("/settings/brand")}
+                url={brandUrl}
               />
             </ActionPanel>
           }

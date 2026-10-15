@@ -1,15 +1,18 @@
-import { getSelectedText, LaunchProps, showToast, Toast, List, LocalStorage } from "@raycast/api";
+import { getSelectedText, LaunchProps, List, LocalStorage } from "@raycast/api";
 import { ColorConvertListItem } from "./components/ColorConvert";
 import { useEffect, useState, useRef } from "react";
+import { ColorFormatType } from "./lib/types";
+import { getFormattedColor } from "./lib/utils";
 
-export default function ConvertColor(props: LaunchProps) {
-  const [colorText, setColorText] = useState<string | null>(props.arguments.text || null);
+export default function ConvertColor(props: LaunchProps<{ arguments: Arguments.ConvertColor }>) {
+  const [colorText, setColorText] = useState(props.arguments.text ?? "");
   const [lastConvertedColorFormat, setLastConvertedColorFormat] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   // For Windows since strict mode causes useEffect to run twice,
   // we need to make sure it only runs once to avoid flicker.
   // Can be removed once strict mode option is added in Windows.
   const hasInitialized = useRef(false);
+  const hasEditedColor = useRef(false);
 
   useEffect(() => {
     if (hasInitialized.current) return;
@@ -17,19 +20,13 @@ export default function ConvertColor(props: LaunchProps) {
 
     async function getLastFormatAndText() {
       setIsLoading(true);
-      const lastFormat = await LocalStorage.getItem<string>("lastConvertedColorFormat");
+      const lastFormat = await LocalStorage.getItem<string>("lastConvertedColorFormat").catch(() => undefined);
       setLastConvertedColorFormat(lastFormat);
 
       if (!colorText) {
-        try {
-          const selectedText = await getSelectedText();
+        const selectedText = await getSelectedText().catch(() => "");
+        if (!hasEditedColor.current) {
           setColorText(selectedText);
-        } catch {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "No text found.",
-            message: "Select a color in any app, or provide it as an argument, then try again.",
-          });
         }
       }
       setIsLoading(false);
@@ -38,7 +35,7 @@ export default function ConvertColor(props: LaunchProps) {
     getLastFormatAndText();
   }, []);
 
-  const format = [
+  const format: { title: string; subtitle: string; value: ColorFormatType }[] = [
     { title: "HEX", subtitle: "#FF6363", value: "hex" },
     { title: "HEX Lower Case", subtitle: "#ff6363", value: "hex-lower-case" },
     { title: "HEX No Prefix", subtitle: "FF6363", value: "hex-no-prefix" },
@@ -61,15 +58,35 @@ export default function ConvertColor(props: LaunchProps) {
     }
   }
 
+  let convertedColors: { title: string; value: ColorFormatType; convertedColor: string }[] = [];
+  if (colorText.trim()) {
+    try {
+      convertedColors = format.map((item) => ({
+        ...item,
+        convertedColor: getFormattedColor(colorText.trim(), item.value),
+      }));
+    } catch {
+      // Incomplete input is expected while typing; show the empty view until it is valid.
+    }
+  }
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search color formats...">
-      {colorText &&
-        format.map((item) => (
-          <ColorConvertListItem key={item.value} text={colorText} title={item.title} value={item.value} />
-        ))}
+    <List
+      isLoading={isLoading}
+      filtering={false}
+      searchText={colorText}
+      onSearchTextChange={(text) => {
+        hasEditedColor.current = true;
+        setColorText(text);
+      }}
+      searchBarPlaceholder="Type or paste a color..."
+    >
+      {convertedColors.map((item) => (
+        <ColorConvertListItem key={item.value} {...item} />
+      ))}
       <List.EmptyView
-        title="No color found"
-        description="Select a valid color in any app, or provide it as an argument, then try again."
+        title={colorText.trim() ? "Invalid color" : "Enter a color"}
+        description="Type or paste a CSS color, such as #FF6363, rgb(255 99 99), or color(display-p3 1 0 0)."
       />
     </List>
   );

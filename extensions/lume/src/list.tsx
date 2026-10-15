@@ -13,7 +13,7 @@ import {
 import { useFetch } from "@raycast/utils";
 import { useEffect } from "react";
 
-const { port } = getPreferenceValues<Preferences>();
+const { port } = getPreferenceValues<Preferences.List>();
 const API_BASE = `http://localhost:${port}`;
 
 type VM = {
@@ -30,7 +30,9 @@ function emptyView(fetchError: Error | undefined) {
       <List.EmptyView
         icon={Icon.Warning}
         title="Lume is not running or not installed"
-        description={"Make sure Lume is installed and the server is running:\nlume serve"}
+        description={
+          "Make sure Lume is installed and the server is running:\nlume serve"
+        }
       />
     );
   }
@@ -55,7 +57,11 @@ export default function Command() {
 
   useEffect(() => {
     if (error) {
-      showToast({ style: Toast.Style.Failure, title: "Failed to load VMs", message: error.message });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load VMs",
+        message: error.message,
+      });
     }
   }, [error]);
 
@@ -74,7 +80,10 @@ export default function Command() {
               icon:
                 vm.status === "running"
                   ? { source: Icon.CircleFilled, tintColor: Color.Green }
-                  : { source: Icon.CircleFilled, tintColor: Color.SecondaryText },
+                  : {
+                      source: Icon.CircleFilled,
+                      tintColor: Color.SecondaryText,
+                    },
               text: vm.status,
             },
           ]}
@@ -85,18 +94,30 @@ export default function Command() {
                   title="Start"
                   icon={Icon.Play}
                   onAction={async () => {
-                    const toast = await showToast({ style: Toast.Style.Animated, title: `Starting ${vm.name}…` });
+                    const toast = await showToast({
+                      style: Toast.Style.Animated,
+                      title: `Starting ${vm.name}…`,
+                    });
                     try {
                       await mutate(
-                        fetch(`${API_BASE}/lume/vms/${vm.name}/run`, { method: "POST" }).then(async (r) => {
+                        fetch(`${API_BASE}/lume/vms/${vm.name}/run`, {
+                          method: "POST",
+                        }).then(async (r) => {
                           if (!r.ok) {
                             const body = await r.json().catch(() => ({}));
-                            throw new Error((body as { message?: string }).message ?? `${r.status} ${r.statusText}`);
+                            throw new Error(
+                              (body as { message?: string }).message ??
+                                `${r.status} ${r.statusText}`,
+                            );
                           }
                         }),
                         {
                           optimisticUpdate: (current) =>
-                            current?.map((v) => (v.name === vm.name ? { ...v, status: "running" } : v)),
+                            current?.map((v) =>
+                              v.name === vm.name
+                                ? { ...v, status: "running" }
+                                : v,
+                            ),
                         },
                       );
                       toast.style = Toast.Style.Success;
@@ -104,7 +125,8 @@ export default function Command() {
                     } catch (e) {
                       toast.style = Toast.Style.Failure;
                       toast.title = "Failed to start";
-                      toast.message = e instanceof Error ? e.message : String(e);
+                      toast.message =
+                        e instanceof Error ? e.message : String(e);
                     }
                   }}
                 />
@@ -114,18 +136,30 @@ export default function Command() {
                   title="Stop"
                   icon={Icon.Stop}
                   onAction={async () => {
-                    const toast = await showToast({ style: Toast.Style.Animated, title: `Stopping ${vm.name}…` });
+                    const toast = await showToast({
+                      style: Toast.Style.Animated,
+                      title: `Stopping ${vm.name}…`,
+                    });
                     try {
                       await mutate(
-                        fetch(`${API_BASE}/lume/vms/${vm.name}/stop`, { method: "POST" }).then(async (r) => {
+                        fetch(`${API_BASE}/lume/vms/${vm.name}/stop`, {
+                          method: "POST",
+                        }).then(async (r) => {
                           if (!r.ok) {
                             const body = await r.json().catch(() => ({}));
-                            throw new Error((body as { message?: string }).message ?? `${r.status} ${r.statusText}`);
+                            throw new Error(
+                              (body as { message?: string }).message ??
+                                `${r.status} ${r.statusText}`,
+                            );
                           }
                         }),
                         {
                           optimisticUpdate: (current) =>
-                            current?.map((v) => (v.name === vm.name ? { ...v, status: "stopped" } : v)),
+                            current?.map((v) =>
+                              v.name === vm.name
+                                ? { ...v, status: "stopped" }
+                                : v,
+                            ),
                         },
                       );
                       toast.style = Toast.Style.Success;
@@ -133,7 +167,8 @@ export default function Command() {
                     } catch (e) {
                       toast.style = Toast.Style.Failure;
                       toast.title = "Failed to stop";
-                      toast.message = e instanceof Error ? e.message : String(e);
+                      toast.message =
+                        e instanceof Error ? e.message : String(e);
                     }
                   }}
                 />
@@ -146,22 +181,35 @@ export default function Command() {
                 onAction={async () => {
                   const confirmed = await confirmAlert({
                     title: `Delete ${vm.name}?`,
-                    message: "This will permanently delete the VM and its files.",
-                    primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+                    message:
+                      "This will permanently delete the VM and its files.",
+                    primaryAction: {
+                      title: "Delete",
+                      style: Alert.ActionStyle.Destructive,
+                    },
                   });
                   if (!confirmed) return;
 
-                  const toast = await showToast({ style: Toast.Style.Animated, title: `Deleting ${vm.name}…` });
+                  const toast = await showToast({
+                    style: Toast.Style.Animated,
+                    title: `Deleting ${vm.name}…`,
+                  });
                   try {
                     await mutate(
-                      fetch(`${API_BASE}/lume/vms/${vm.name}`, { method: "DELETE" }).then(async (r) => {
+                      fetch(`${API_BASE}/lume/vms/${vm.name}`, {
+                        method: "DELETE",
+                      }).then(async (r) => {
                         if (!r.ok) {
                           const body = await r.json().catch(() => ({}));
-                          throw new Error((body as { message?: string }).message ?? `${r.status} ${r.statusText}`);
+                          throw new Error(
+                            (body as { message?: string }).message ??
+                              `${r.status} ${r.statusText}`,
+                          );
                         }
                       }),
                       {
-                        optimisticUpdate: (current) => current?.filter((v) => v.name !== vm.name),
+                        optimisticUpdate: (current) =>
+                          current?.filter((v) => v.name !== vm.name),
                       },
                     );
                     toast.style = Toast.Style.Success;

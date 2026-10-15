@@ -15,6 +15,7 @@ import {
   User,
 } from "./types";
 import { isHttpUrl } from "../utils/url";
+import { arenaReference, channelReferences } from "../utils/references";
 
 interface ApiErrorPayload {
   error?: string;
@@ -266,6 +267,29 @@ function mapBlock(raw: unknown): Block {
   };
 }
 
+function mapContent(item: unknown): Block {
+  const itemType = String(toRecord(item).type ?? "");
+  if (itemType === "Channel") {
+    const channel = mapChannel(item);
+    return {
+      ...channel,
+      class: "Channel",
+      base_class: "Channel",
+      state: "available",
+      generated_title: channel.title,
+      comment_count: 0,
+      content: null,
+      content_html: null,
+      description: channel.description,
+      description_html: null,
+      source: null,
+      image: null,
+      visibility: channel.status === "private" ? "private" : "public",
+    } as Block;
+  }
+  return mapBlock(item);
+}
+
 function parseMeta(meta: unknown): ApiMeta {
   const value = toRecord(meta);
   return {
@@ -273,8 +297,8 @@ function parseMeta(meta: unknown): ApiMeta {
     per_page: Number(value.per_page ?? 24),
     total_pages: Number(value.total_pages ?? 1),
     total_count: Number(value.total_count ?? 0),
-    next_page: value.next_page === null ? null : Number(value.next_page ?? null),
-    prev_page: value.prev_page === null ? null : Number(value.prev_page ?? null),
+    next_page: value.next_page == null ? null : Number(value.next_page),
+    prev_page: value.prev_page == null ? null : Number(value.prev_page),
     has_more_pages: Boolean(value.has_more_pages),
   };
 }
@@ -366,8 +390,7 @@ export class Arena {
     const queryValue = query?.trim() || "*";
     const buildResponse = async (filters: SearchFilters | undefined, scopeType: string): Promise<SearchResponse> => {
       const { type: subtypeOrScope, ...restFilters } = filters ?? {};
-      const searchType =
-        scopeType === "Block" && subtypeOrScope && subtypeOrScope !== "Block" ? subtypeOrScope : scopeType;
+      const searchType = (scopeType === "Block" || scopeType === "All") && subtypeOrScope ? subtypeOrScope : scopeType;
       const response = await this.getList<unknown>("search", { query: queryValue, ...restFilters, type: searchType });
       const users = response.items.filter((item) => toRecord(item).type === "User").map(mapUser);
       const channels = response.items.filter((item) => toRecord(item).type === "Channel").map(mapChannel);
@@ -411,7 +434,24 @@ export class Arena {
   }
 
   user(identifier: string | number) {
+    identifier = arenaReference(String(identifier), "user");
     return {
+      contents: async (params?: SearchFilters) => {
+        const response = await this.getList<unknown>(`users/${identifier}/contents`, {
+          ...params,
+          sort: contentSortForUserChannels(params?.sort),
+        });
+        return { items: response.items.map(mapContent), meta: response.meta };
+      },
+      channelsPage: async (params?: SearchFilters) => {
+        const response = await this.getList<unknown>(`users/${identifier}/contents`, {
+          page: params?.page,
+          per: params?.per,
+          sort: contentSortForUserChannels(params?.sort),
+          type: "Channel",
+        });
+        return { items: response.items.map(mapChannel), meta: response.meta };
+      },
       get: async () =>
         this.request<unknown>("GET", `users/${identifier}`).then((response) => mapUser(unwrapEnvelopeData(response))),
       channels: async (params?: SearchFilters) => {
@@ -442,7 +482,7 @@ export class Arena {
   }
 
   channel(identifier?: string | number) {
-    const channelIdentifier = identifier ?? "";
+    const channelIdentifier = identifier == null ? "" : arenaReference(String(identifier), "channel");
     return {
       get: async () =>
         this.request<unknown>("GET", `channels/${channelIdentifier}`).then((response) =>
@@ -454,40 +494,20 @@ export class Arena {
       },
       contents: async (params?: SearchFilters) => {
         const response = await this.getList<unknown>(`channels/${channelIdentifier}/contents`, params);
-        const items = response.items.map((item) => {
-          const itemType = String(toRecord(item).type ?? "");
-          if (itemType === "Channel") {
-            const channel = mapChannel(item);
-            return {
-              ...channel,
-              class: "Channel",
-              base_class: "Channel",
-              state: "available",
-              generated_title: channel.title,
-              comment_count: 0,
-              content: null,
-              content_html: null,
-              description: null,
-              description_html: null,
-              source: null,
-              image: null,
-              visibility: channel.status === "private" ? "private" : "public",
-            } as Block;
-          }
-          return mapBlock(item);
-        });
+        const items = response.items.map(mapContent);
         return {
           items,
           hasMorePages: response.meta.has_more_pages,
+          meta: response.meta,
         };
       },
       collaborators: async () => {
         const channel = unwrapEnvelopeData(await this.request<unknown>("GET", `channels/${channelIdentifier}`));
         return ensureArray<unknown>(toRecord(channel).collaborators).map(mapUser);
       },
-      create: async (title: string, status: ChannelStatus) =>
-        this.request<unknown>("POST", "channels", { body: { title, visibility: status } }).then((response) =>
-          mapChannel(unwrapEnvelopeData(response)),
+      create: async (title: string, status: ChannelStatus, description?: string) =>
+        this.request<unknown>("POST", "channels", { body: { title, visibility: status, description } }).then(
+          (response) => mapChannel(unwrapEnvelopeData(response)),
         ),
       update: async (opts: { title?: string; status?: ChannelStatus; description?: string }) =>
         this.request<unknown>("PUT", `channels/${channelIdentifier}`, {
@@ -510,26 +530,42 @@ export class Arena {
           body: { collaborator_ids: userIDs },
         }).then((result) => ensureArray<unknown>(toRecord(result).data).map(mapUser)),
       createBlock: async (opts: { content: string; source?: string; title?: string; description?: string }) =>
-        this.request<unknown>("POST", "blocks", {
-          body: {
-            value: opts.content,
-            source: opts.source,
-            title: opts.title,
-            description: opts.description,
-            channel_ids: [channelIdentifier],
-          },
-        }).then((response) => mapBlock(unwrapEnvelopeData(response))),
+        this.createBlock({ ...opts, channelIds: [channelIdentifier] }),
       deleteBlock: async (blockID: string) => {
         await this.request<void>("DELETE", `blocks/${blockID}`);
       },
     };
   }
 
+  async createBlock(opts: {
+    content: string;
+    channelIds: string[];
+    title?: string;
+    description?: string;
+    source?: string;
+  }) {
+    if (!opts.content.trim()) throw new Error("Block content or URL is required.");
+    const response = await this.request<unknown>("POST", "blocks", {
+      body: {
+        value: opts.content,
+        original_source_url: opts.source,
+        channel_ids: channelReferences(opts.channelIds),
+        title: opts.title,
+        description: opts.description,
+      },
+    });
+    return mapBlock(unwrapEnvelopeData(response));
+  }
+
   block(id?: string | number) {
-    const blockId = id ?? "";
+    const blockId = id == null ? "" : arenaReference(String(id), "block");
     return {
       get: async () =>
         this.request<unknown>("GET", `blocks/${blockId}`).then((response) => mapBlock(unwrapEnvelopeData(response))),
+      connections: async (params?: SearchFilters) => {
+        const response = await this.getList<unknown>(`blocks/${blockId}/connections`, params);
+        return { items: response.items.map(mapChannel), meta: response.meta };
+      },
       channels: async (params?: SearchFilters) => {
         const response = await this.getList<unknown>(`blocks/${blockId}/connections`, params);
         return response.items.map(mapChannel);
@@ -539,7 +575,7 @@ export class Arena {
       update: async (opts: { content?: string; title?: string; description?: string }) =>
         this.request<unknown>("PUT", `blocks/${blockId}`, {
           body: {
-            value: opts.content,
+            content: opts.content,
             title: opts.title,
             description: opts.description,
           },

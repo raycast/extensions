@@ -16,6 +16,7 @@ import {
   isBrewLockError,
   getErrorMessage,
   brewLogger,
+  copyLogsAction,
 } from "../utils";
 
 /**
@@ -26,7 +27,7 @@ import {
  * - Fetches fresh data in background
  * - Loading state is true until data is available
  *
- * The cached value is the serialisable `InstallableResults` rather than the
+ * The cached value is the serializable `InstallableResults` rather than the
  * `InstalledMap` consumers want: useCachedPromise persists through a JSON
  * cache, and `JSON.stringify(new Map())` is `{}`, so caching the mapped form
  * loses every package. The lookup maps are rebuilt on read instead.
@@ -62,6 +63,7 @@ export function useBrewInstalled() {
               result.revalidate();
             },
           },
+          secondaryAction: copyLogsAction(message, { hideToast: true }),
         });
       },
     },

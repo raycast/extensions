@@ -1,11 +1,12 @@
 import { withAccessToken } from "@raycast/utils";
-import { normalizeMoverItems } from "../lib/movers";
 import { schwabOAuth } from "../lib/oauth";
 import { getMovers } from "../lib/schwab-client";
+import { normalizeMovers } from "../lib/movers";
 import type { MoverItem } from "../types/quotes";
 
 function summarize(items: MoverItem[]) {
-  return normalizeMoverItems(items)
+  return items
+    .filter((item) => item.symbol)
     .slice(0, 10)
     .map((item) => ({
       symbol: item.symbol,
@@ -25,8 +26,9 @@ export default withAccessToken(schwabOAuth)(async () => {
     getMovers("$SPX", "PERCENT_CHANGE_UP"),
     getMovers("$SPX", "PERCENT_CHANGE_DOWN"),
   ]);
+  const normalized = normalizeMovers([...(gainers.screeners ?? []), ...(losers.screeners ?? [])]);
   return {
-    gainers: summarize(gainers.screeners ?? []),
-    losers: summarize(losers.screeners ?? []),
+    gainers: summarize(normalized.gainers),
+    losers: summarize(normalized.losers),
   };
 });

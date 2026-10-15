@@ -1,6 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { SummaryStyle, SupportedLanguage } from "../types/summary";
 import { aiLog } from "./logger";
+import { DEFAULT_SUMMARY_MODEL, SummaryModelKey } from "../config/ai";
 
 /**
  * Cached summary entry
@@ -41,10 +42,13 @@ function hashUrl(url: string): string {
 
 /**
  * Build cache key for a URL + style + language combination
- * Language is always included in the key to support per-language caching
+ * Language is always included in the key to support per-language caching.
+ * A non-default model is appended, so switching models doesn't serve another model's summary;
+ * the default model keeps the original key, so existing caches stay valid.
  */
-function buildCacheKey(url: string, style: SummaryStyle, language: SupportedLanguage): string {
-  return `${CACHE_PREFIX}${hashUrl(url)}:${style}:${language}`;
+function buildCacheKey(url: string, style: SummaryStyle, language: SupportedLanguage, model?: SummaryModelKey): string {
+  const suffix = model && model !== DEFAULT_SUMMARY_MODEL ? `:${model}` : "";
+  return `${CACHE_PREFIX}${hashUrl(url)}:${style}:${language}${suffix}`;
 }
 
 /**
@@ -61,8 +65,9 @@ export async function getCachedSummary(
   url: string,
   style: SummaryStyle,
   language: SupportedLanguage,
+  model?: SummaryModelKey,
 ): Promise<string | undefined> {
-  const key = buildCacheKey(url, style, language);
+  const key = buildCacheKey(url, style, language, model);
   try {
     const cached = await LocalStorage.getItem<string>(key);
     if (cached) {
@@ -86,8 +91,9 @@ export async function setCachedSummary(
   style: SummaryStyle,
   summary: string,
   language: SupportedLanguage,
+  model?: SummaryModelKey,
 ): Promise<void> {
-  const key = buildCacheKey(url, style, language);
+  const key = buildCacheKey(url, style, language, model);
   const lastStyleKey = buildLastStyleKey(url);
 
   const entry: CachedSummary = {
@@ -99,7 +105,7 @@ export async function setCachedSummary(
   try {
     await LocalStorage.setItem(key, JSON.stringify(entry));
     await LocalStorage.setItem(lastStyleKey, style);
-    aiLog.log("cache:set", { url, style, summaryLength: summary.length });
+    aiLog.log("cache:set", { url, style, model, summaryLength: summary.length });
   } catch (error) {
     aiLog.error("cache:setError", { url, style, error: String(error) });
   }

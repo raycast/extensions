@@ -81,9 +81,13 @@
       "type": "dropdown",
       "required": false,
       "title": "Search Engine",
-      "description": "Search Engine for query (default: Google).",
-      "default": "Google",
+      "description": "Search engine for queries, or Browser Default to use Zen's default search engine.",
+      "default": "Default",
       "data": [
+        {
+          "title": "Browser Default",
+          "value": "Default"
+        },
         {
           "title": "Google",
           "value": "Google"

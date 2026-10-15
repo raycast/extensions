@@ -2,7 +2,8 @@ import { MenuBarExtra } from "@raycast/api";
 import { PullRequestShort } from "../types";
 
 type PullRequestItemParams = {
-  pull: PullRequestShort;
+  /** Only these fields are rendered, so both pull shapes fit. */
+  pull: Pick<PullRequestShort, "id" | "title" | "repo" | "user">;
   onAction: () => void;
   index?: number;
 };

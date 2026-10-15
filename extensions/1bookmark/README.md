@@ -2,12 +2,15 @@
 
 One Bookmark Solution for Teams and Personal Use.
 
-We support Raycast extension as our top priority client and are developing a web version for cross-platform support.
+The Raycast extension focuses on searching and adding bookmarks. The 1bookmark Desktop app is the main client and covers the rest, including space management and importing bookmarks from browsers.
 
 ## Commands
 
-- Search Bookmarks: Search bookmarks and open them. You can also manage all 1bookmark features in this command.
+- Search Bookmarks: Search bookmarks and open them.
 - Add Bookmark: Create a new bookmark.
+- Import Bookmarks: Points you to the 1bookmark Desktop app.
+
+Space details, members, tags, invitation links and member auth policies are managed in the 1bookmark Desktop app, along with creating, leaving and deleting a space. The **Manage Space** and **Add New Space** actions in the Spaces view point you there. Signing in with more than one account is also done in the Desktop app, from **My Account** -> **Add Account**.
 
 ## What can you do in 1Bookmark?
 
@@ -44,7 +47,7 @@ You can sign out by **'My Account'** -> **'Sign Out'** Action in Action Panel.
 - Add new bookmarks by one shortcut key
 - Share bookmarks with your team
 - Filter bookmarks by tags, spaces, and creators
-- Import bookmarks from browsers
+- Choose which spaces are searched
 
 ## Advanced Search Pattern
 

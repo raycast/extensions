@@ -99,7 +99,7 @@ export default async function Command() {
     await showToast({
       style: Toast.Style.Failure,
       title: "Core not found",
-      message: `Install: ${CORE_INSTALL_URL}. Run the bootstrap command shown in the core repo.`,
+      message: `${core.error ?? "Check your core installation."} Install: ${CORE_INSTALL_URL}`,
     });
     await popToRoot({ clearSearchBar: true });
     return;

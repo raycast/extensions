@@ -11,7 +11,8 @@
     "pomdtr",
     "xmok",
     "alexi.build",
-    "degouville"
+    "degouville",
+    "massimiliano_pasquini"
   ],
   "commands": [
     {
@@ -34,6 +35,16 @@
       "subtitle": "RSS",
       "description": "Get the latest from all your favourite sources at once",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showSubtitle",
+      "type": "checkbox",
+      "default": true,
+      "label": "Show Subtitle",
+      "description": "Uncheck if you want to hide subtitle on stories",
+      "required": false
     }
   ],
   "tools": [

@@ -1,11 +1,28 @@
-// 북마크 URL로부터 페이지 <title>을 resolve한다.
-// 서버가 내부망에 접근할 수 없기 때문에 클라이언트(Raycast = Node)에서 직접 fetch.
+// Resolves the page <title> from a bookmark URL.
+// The server cannot reach internal networks, so the client (Raycast = Node) fetches directly.
 
 const FETCH_TIMEOUT_MS = 5000;
 
-// 일부 사이트는 Node 기본 UA로 오면 403/봇차단 → 브라우저 UA로 위장.
+// Some sites return 403 / block bots when hit with Node's default UA → disguise as a browser UA.
 const BROWSER_UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
+type PageTitleFetchFailure = "timeout" | "redirect" | "network";
+
+function getErrorText(error: unknown): string {
+  if (!(error instanceof Error)) return String(error);
+
+  const cause = "cause" in error ? (error as Error & { cause?: unknown }).cause : undefined;
+  return `${error.name} ${error.message} ${cause ? getErrorText(cause) : ""}`.toLowerCase();
+}
+
+function classifyFetchFailure(error: unknown): PageTitleFetchFailure {
+  const errorText = getErrorText(error);
+
+  if ((error instanceof Error && error.name === "AbortError") || errorText.includes("timeout")) return "timeout";
+  if (errorText.includes("redirect")) return "redirect";
+  return "network";
+}
 
 const HTML_ENTITIES: Record<string, string> = {
   amp: "&",
@@ -23,9 +40,9 @@ function decodeHtmlEntities(s: string): string {
     .replace(/&([a-z]+);/gi, (m, name) => HTML_ENTITIES[name.toLowerCase()] ?? m);
 }
 
-// og:title 이 있으면 우선 사용. 사이트 owner가 sharing 용으로 명시한 더 깔끔한
-// 카피라 보통 사이트명 접미사가 없다. 예) YouTube 는 <title>이 "<영상제목> - YouTube"
-// 인데 og:title 은 "<영상제목>"만. 폴백으로 <title> 사용.
+// Prefer og:title when present. It is the cleaner copy the site owner explicitly set for
+// sharing, so it usually lacks the site-name suffix. E.g. YouTube's <title> is "<video title> - YouTube"
+// while og:title is just "<video title>". Fall back to <title>.
 function extractTitle(html: string): string | null {
   const ogPatterns = [
     /<meta[^>]*\bproperty\s*=\s*["']og:title["'][^>]*\bcontent\s*=\s*["']([^"']*)["']/i,
@@ -45,7 +62,7 @@ function extractTitle(html: string): string | null {
 }
 
 export async function fetchPageTitle(pageUrl: string): Promise<string | null> {
-  // http(s) 외 스킴(slack:, mailto: 등)은 fetch 불가.
+  // Non-http(s) schemes (slack:, mailto:, etc.) cannot be fetched.
   let parsed: URL;
   try {
     parsed = new URL(pageUrl);
@@ -70,7 +87,9 @@ export async function fetchPageTitle(pageUrl: string): Promise<string | null> {
     if (!ct.includes("text/html") && !ct.includes("application/xhtml")) return null;
     const html = await res.text();
     return extractTitle(html);
-  } catch {
+  } catch (error) {
+    // The full URL may contain sensitive info (query string, etc.), so log only the hostname.
+    console.warn(`Page title fetch failed (${classifyFetchFailure(error)}): ${parsed.hostname}`);
     return null;
   } finally {
     clearTimeout(timer);

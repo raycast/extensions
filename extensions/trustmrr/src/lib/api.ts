@@ -1,13 +1,14 @@
 import { getPreferenceValues } from "@raycast/api";
+import type { CategoryValue, SortValue } from "./startup-filters";
 
 const API_BASE = "https://trustmrr.com/api/v1";
 
 type ListParams = {
   page?: number;
   limit?: number;
-  sort?: string;
+  sort?: SortValue;
   onSale?: "true" | "false";
-  category?: string;
+  category?: CategoryValue;
   xHandle?: string;
   minRevenue?: number;
   maxRevenue?: number;
@@ -131,6 +132,6 @@ export function formatUsd(value: number | null): string {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
+    maximumFractionDigits: 2,
+  }).format(value / 100);
 }

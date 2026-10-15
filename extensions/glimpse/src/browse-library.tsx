@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Color, Icon, List, showInFinder, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, showInFinder, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { ErrorEmptyView } from "./error-view";
 import { glimpse } from "./glimpse";
 
 interface LibraryItem {
@@ -14,20 +15,27 @@ interface LibraryItem {
   duration_seconds: number | null;
   speech_model: string | null;
   created_at: string | null;
+  // "import" or "recording"; older CLIs omit both fields.
+  kind?: string;
+  tracks?: number | null;
 }
 
 const FORMATS = ["txt", "md", "srt", "vtt"] as const;
 
 export default function Command() {
-  const { data, isLoading, revalidate } = useCachedPromise(async () => {
-    const res = await glimpse<{ items: LibraryItem[] }>(["library", "list", "--limit", "50"]);
-    return res.items;
-  });
+  const { data, error, isLoading, revalidate } = useCachedPromise(
+    async () => {
+      const res = await glimpse<{ items: LibraryItem[] }>(["library", "list", "--limit", "50"]);
+      return res.items;
+    },
+    [],
+    { onError: () => undefined },
+  );
 
   async function exportItem(item: LibraryItem, format: string) {
     const toast = await showToast({ style: Toast.Style.Animated, title: `Exporting ${format}…` });
     try {
-      const stem = item.name.replace(/\.[^/.]+$/, "") || item.name;
+      const stem = fileStem(item.name);
       const out = join(homedir(), "Downloads", `${stem}.${format}`);
       const res = await glimpse<{ output: string }>(["library", "export", item.id, "--to", format, "--output", out]);
       toast.style = Toast.Style.Success;
@@ -43,20 +51,29 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search library">
-      {(data ?? []).map((item) => {
+      {(error ? [] : (data ?? [])).map((item) => {
         const done = item.status === "complete";
+        const recording = item.kind === "recording";
         return (
           <List.Item
             key={item.id}
             title={item.name}
-            icon={iconFor(item.status)}
-            accessories={[{ tag: { value: item.status, color: done ? Color.Green : Color.SecondaryText } }]}
+            icon={iconFor(item)}
+            accessories={[
+              ...(recording && item.tracks === 2 ? [{ text: "2 tracks", tooltip: "Microphone and system audio" }] : []),
+              done
+                ? { icon: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "Complete" }
+                : { tag: { value: item.status, color: Color.SecondaryText } },
+            ]}
             detail={
               <List.Item.Detail
                 markdown={done ? item.transcript || "_(empty)_" : statusMarkdown(item)}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Status" text={item.status} />
+                    {recording && item.tracks ? (
+                      <List.Item.Detail.Metadata.Label title="Tracks" text={String(item.tracks)} />
+                    ) : null}
                     {item.speech_model ? (
                       <List.Item.Detail.Metadata.Label title="Model" text={item.speech_model} />
                     ) : null}
@@ -88,22 +105,46 @@ export default function Command() {
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={() => revalidate()}
+                />
+                <Action
+                  title="Open Record Screen"
+                  icon={Icon.Microphone}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "r" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+                  }}
+                  onAction={() => openRecord()}
                 />
               </ActionPanel>
             }
           />
         );
       })}
-      <List.EmptyView title="Library is empty" description="Add files to see them here." />
+      {error ? (
+        <ErrorEmptyView error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          title="Library is empty"
+          description="Add files or make a recording to see them here."
+          actions={
+            <ActionPanel>
+              <Action title="Open Record Screen" icon={Icon.Microphone} onAction={() => openRecord()} />
+            </ActionPanel>
+          }
+        />
+      )}
     </List>
   );
 }
 
-function iconFor(status: string) {
-  if (status === "complete") return { source: Icon.CheckCircle, tintColor: Color.Green };
-  if (status === "error") return { source: Icon.ExclamationMark, tintColor: Color.Red };
+function iconFor(item: LibraryItem) {
+  if (item.status === "error") return { source: Icon.ExclamationMark, tintColor: Color.Red };
+  if (item.kind === "recording") {
+    return { source: Icon.Microphone, tintColor: item.status === "complete" ? Color.Green : undefined };
+  }
+  if (item.status === "complete") return { source: Icon.CheckCircle, tintColor: Color.Green };
   return Icon.Clock;
 }
 
@@ -112,6 +153,15 @@ function statusMarkdown(item: LibraryItem): string {
     return `# ${item.name}\n\nError: ${item.error ?? "unknown"}`;
   }
   return `# ${item.name}\n\n${item.status}… ${Math.round((item.progress ?? 0) * 100)}%`;
+}
+
+// Recording names contain characters like ":" that Windows can't use in file names.
+function fileStem(name: string): string {
+  const stem = name.replace(/\.[^/.]+$/, "") || name;
+  // eslint-disable-next-line no-control-regex
+  const safe = stem.replace(/[<>:"/\\|?*\x00-\x1f]/g, "-").trim() || "Transcript";
+  // Windows also refuses device names like CON or COM1, even with an extension.
+  return safe.replace(/^(con|prn|aux|nul|com\d|lpt\d)(?=\.|$)/i, "$1-transcript");
 }
 
 function formatDuration(seconds: number): string {
@@ -123,6 +173,14 @@ function formatDuration(seconds: number): string {
 async function openLibrary() {
   try {
     await glimpse(["open", "library"]);
+  } catch (error) {
+    await showFailureToast(error, { title: "Couldn't open Glimpse" });
+  }
+}
+
+async function openRecord() {
+  try {
+    await glimpse(["open", "record"]);
   } catch (error) {
     await showFailureToast(error, { title: "Couldn't open Glimpse" });
   }

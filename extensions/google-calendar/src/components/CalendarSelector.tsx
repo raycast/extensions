@@ -1,5 +1,6 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { UseCalendarsData } from "../hooks/useCalendars";
+import { BIRTHDAYS_VIEW_CALENDAR_ID, isContactsBirthdaysCalendar, resolvePickerCalendarId } from "../lib/event-types";
 
 const CalendarSelector = ({
   calendars,
@@ -12,31 +13,38 @@ const CalendarSelector = ({
   storeValue?: boolean;
   defaultValue?: string;
 }) => {
+  const visibleCalendars = calendars.selected.filter((calendar) => !isContactsBirthdaysCalendar(calendar.id));
+  const hiddenCalendars = calendars.unselected.filter((calendar) => !isContactsBirthdaysCalendar(calendar.id));
+  const pickerDefaultValue = resolvePickerCalendarId(defaultValue);
+
   return (
     <List.Dropdown
       tooltip="Select Calendar"
-      onChange={onCalendarChange}
+      onChange={(calendarId) => onCalendarChange(resolvePickerCalendarId(calendarId) ?? null)}
       storeValue={storeValue}
-      defaultValue={defaultValue}
+      defaultValue={pickerDefaultValue}
     >
       <List.Dropdown.Section title="Visible Calendars">
-        {calendars.selected.map((calendar) => (
+        {visibleCalendars.map((calendar) => (
           <List.Dropdown.Item
             key={calendar.id}
             value={calendar.id}
             title={calendar.summaryOverride ?? calendar.summary ?? "(Untitled Calendar)"}
           />
         ))}
+        <List.Dropdown.Item value={BIRTHDAYS_VIEW_CALENDAR_ID} title="Birthdays" icon={Icon.Gift} />
       </List.Dropdown.Section>
-      <List.Dropdown.Section title="Hidden Calendars">
-        {calendars.unselected.map((calendar) => (
-          <List.Dropdown.Item
-            key={calendar.id}
-            value={calendar.id}
-            title={calendar.summaryOverride ?? calendar.summary ?? "(Untitled Calendar)"}
-          />
-        ))}
-      </List.Dropdown.Section>
+      {hiddenCalendars.length > 0 && (
+        <List.Dropdown.Section title="Hidden Calendars">
+          {hiddenCalendars.map((calendar) => (
+            <List.Dropdown.Item
+              key={calendar.id}
+              value={calendar.id}
+              title={calendar.summaryOverride ?? calendar.summary ?? "(Untitled Calendar)"}
+            />
+          ))}
+        </List.Dropdown.Section>
+      )}
     </List.Dropdown>
   );
 };

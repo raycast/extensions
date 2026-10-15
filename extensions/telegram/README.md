@@ -35,15 +35,13 @@ Before using this extension, you need to obtain API credentials from Telegram:
 3. Enter your credentials:
    - **API ID**: The numeric ID from step 1
    - **API Hash**: The 32-character hash from step 1
-   - **Phone Number**: Your phone number with country code (e.g., +1234567890)
 
 ### 3. Authenticate
 
 1. Run the "Authenticate with Telegram" command in Raycast
-2. Click "Send Verification Code"
-3. Check your Telegram app for the verification code
-4. Enter the code in Raycast
-5. You're all set! 🎉
+2. Open Telegram on your phone: **Settings > Devices > Link Desktop Device**
+3. Scan the QR code displayed in Raycast (enter your 2-Step Verification password if prompted)
+4. You're all set! 🎉
 
 The extension will remember your session, so you only need to authenticate once.
 

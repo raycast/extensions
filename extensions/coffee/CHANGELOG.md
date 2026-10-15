@@ -1,5 +1,62 @@
 # Coffee Changelog
 
+## [Fix] - 2026-09-29
+
+- Use cache API to prevent menu bar icon flicker on background update cycles.
+- Keep menu bar item visible until caffeination cache is initialized on startup to avoid flicker.
+
+## [Fix, Enhancement] - 2026-09-26
+
+- Keep the empty pot icon visible in the menu bar for 5 seconds after decaffeinating before hiding, preserving the decaffeinated state across Raycast restarts.
+- Fix 1-frame blanking flicker when transitioning to decaffeinated state in the menu bar.
+- Fix menu bar command not displaying the item when launched from Raycast root search while decaffeinated.
+- Prevent a transient empty pot icon glitch in the menu bar when calling `decaffeinate` while already decaffeinated.
+
+## [Fix] - 2026-09-21
+
+- Close the `Caffeinate for ...` / `Caffeinate Until` window as soon as `caffeinate` is spawned, instead of holding an empty view open while the menu bar and status commands refresh.
+
+## [Fix] - 2026-09-17
+
+- Fix `Caffeinate for ...` and `Caffeinate Until` showing the HUD without actually starting `caffeinate` — the work now runs before the HUD closes the view command.
+
+## [Fix] - 2026-09-15
+
+- Restore inline hours, minutes, and seconds arguments for `Caffeinate for ...` and use an invisible view to reset command state after submission.
+## [Fix] - 2026-09-14
+
+- Converted the `Caffeinate for ...` command from inline arguments back to a Form so its state isn't persisted between invocations.
+
+## [Enhancement] - 2026-08-30
+
+- Add reason to `Caffeinate Status`, showing 4 types, examples: 
+  - `Caffeinate Until`: until 2:00 PM
+  - `Caffeinate For ...`: 42m left
+  - `Caffeinate While`: while Slack is running
+  - `Schedule Caffeination`: schedule: Mondays from 11:00 to 15:00
+- Add `Decaffeinate pauses running schedules` preference
+- Add app icons to `Caffeinate While` command
+
+## [Windows support] - 2026-08-25
+
+- Add support for Windows platform
+- Add app picker support to the "Caffeinate While" command on Windows
+- Stop caffeination when the selected app window closes
+- Filter out utility and system windows from the app picker
+- Use platform-neutral wording in tools, AI instructions, README, preferences, and HUDs
+
+## [Fix] - 2026-08-21
+
+- Reduced background status refreshes to once per minute.
+
+## [Fix] - 2026-08-20
+
+- Fixed future caffeination schedules not activating automatically and ensured they stop at the configured end time.
+
+## [Enhancement] - 2026-08-14
+
+- Added an "instant on" feature: when the new _Start caffeination when Raycast starts_ preference is enabled, Coffee automatically keeps your Mac awake (indefinitely) shortly after Raycast launches. Manual decaffeination persists until the next Raycast restart.
+
 ## [AI Extension] - 2026-07-22
 
 - Added AI tools to caffeinate until a specific date and time.

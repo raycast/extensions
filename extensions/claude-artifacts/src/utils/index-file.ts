@@ -18,7 +18,19 @@ import type { Artifact, ArtifactOwner, IndexProblem, IndexResult } from "../type
  */
 export const INDEX_PATH = path.join(homedir(), ".claude", "artifacts.json");
 
-const ARTIFACT_URL_PREFIX = "https://claude.ai/code/artifact/";
+/**
+ * Rebuild an artifact URL from its id, for a row that somehow lost its `url`.
+ *
+ * Two schemes are in play and the id says which: everything published up to
+ * ~2026-09-10 has a UUID and lives under `/code/artifact/`; everything since
+ * has a short opaque slug and lives under `/artifact/`. Assuming one scheme for
+ * both — as this did until the change — produces a plausible-looking link that
+ * 404s, which is worse than an obviously missing one.
+ */
+function urlForId(id: string): string {
+  const isLegacyUuid = /^[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$/.test(id);
+  return isLegacyUuid ? `https://claude.ai/code/artifact/${id}` : `https://claude.ai/artifact/${id}`;
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -46,7 +58,7 @@ function parseArtifact(raw: unknown): Artifact | null {
   if (!id) return null;
 
   // A row missing its URL is still usable: the id determines it.
-  const url = asOptionalString(raw.url) ?? `${ARTIFACT_URL_PREFIX}${id}`;
+  const url = asOptionalString(raw.url) ?? urlForId(id);
   // An untitled artifact is real (several seeded rows are lowercase slugs), so
   // fall back to the id rather than dropping the row.
   const title = asOptionalString(raw.title) ?? id;

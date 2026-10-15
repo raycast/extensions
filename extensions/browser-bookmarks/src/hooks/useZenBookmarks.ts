@@ -9,11 +9,14 @@ import ini from "ini";
 import { useMemo, useEffect } from "react";
 import initSqlJs, { Database } from "sql.js";
 
-import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
+import { BROWSERS_BUNDLE_ID, getBrowserDataPath } from "./useAvailableBrowsers";
 
 const read = promisify(readFile);
 
-const ZEN_FOLDER = path.join(process.env.HOME || "", "Library", "Application Support", "zen");
+const ZEN_FOLDER = getBrowserDataPath(
+  BROWSERS_BUNDLE_ID.zen,
+  path.join(process.env.HOME || "", "Library", "Application Support", "zen"),
+);
 
 const folderNames: Record<string, string> = {
   menu: "Bookmark Menu",

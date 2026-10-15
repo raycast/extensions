@@ -38,6 +38,7 @@ import {
   installPackage,
   installPackageVersion,
   isModifiedPortableFailure,
+  isRetryableFailure,
   pinPackage,
   repairPackage,
   uninstallPackage,
@@ -53,7 +54,9 @@ import {
   bumpMutationEpoch,
   currentMutationEpoch,
   loadIndex,
+  markMutableStale,
   markUpdateNotApplicable,
+  markUpgradeFailed,
   packageKey,
   patchMutable,
   type IndexPaths,
@@ -147,18 +150,31 @@ function statusFromResult(result: WingetOperationResult): OperationStatus {
 
 /**
  * Upgrade All's target list, derived from the index: every upgradable package
- * that is not pinned and whose offered version is not marked not-applicable —
- * the same exclusions the upgradable view applies.
+ * that is not pinned, whose offered version is not marked not-applicable, and
+ * whose offered version did not already fail — the same exclusions the
+ * upgradable view's Upgrade All applies. `previouslyFailed` counts the
+ * last exclusion so bulk results can disclose it.
  */
-function upgradableTargets(indexPaths: IndexPaths): PackageTarget[] {
+function upgradableTargets(indexPaths: IndexPaths): { targets: PackageTarget[]; previouslyFailed: number } {
   const index = loadIndex(indexPaths);
   if (!index) {
-    return [];
+    return { targets: [], previouslyFailed: 0 };
   }
   const pinnedKeys = new Set(index.pinned.map((p) => packageKey(p)));
-  return index.upgradable
-    .filter((u) => !pinnedKeys.has(packageKey(u)) && index.notApplicable[packageKey(u)] !== u.available)
-    .map((u) => ({ id: u.id, name: u.name, source: u.source }));
+  let previouslyFailed = 0;
+  const targets: PackageTarget[] = [];
+  for (const u of index.upgradable) {
+    const key = packageKey(u);
+    if (pinnedKeys.has(key) || index.notApplicable[key] === u.available) {
+      continue;
+    }
+    if (index.failedUpgrades[key]?.version === u.available) {
+      previouslyFailed++;
+      continue;
+    }
+    targets.push({ id: u.id, name: u.name, source: u.source });
+  }
+  return { targets, previouslyFailed };
 }
 
 /**
@@ -177,6 +193,24 @@ function markNotApplicableIfListed(indexPaths: IndexPaths, target: PackageTarget
   }
   markUpdateNotApplicable(indexPaths, DEFAULT_ENV, target, row.available);
   return row.available;
+}
+
+/**
+ * Record a failed upgrade against the version winget currently offers, so
+ * bulk runs stop retrying exactly that version (the marker reconciles away
+ * when a different version appears; explicit single retries stay allowed).
+ * Environment-caused failures are excluded — they can succeed on a later
+ * attempt with the same version.
+ */
+function markUpgradeFailedIfListed(indexPaths: IndexPaths, target: PackageTarget, result: WingetOperationResult): void {
+  if (result.success || isRetryableFailure(result)) {
+    return;
+  }
+  const row = loadIndex(indexPaths)?.upgradable.find((u) => packageKey(u) === packageKey(target));
+  if (!row) {
+    return;
+  }
+  markUpgradeFailed(indexPaths, DEFAULT_ENV, target, { version: row.available, message: result.message });
 }
 
 /**
@@ -347,6 +381,10 @@ async function runOperation(request: OperationRequest): Promise<OperationState |
     // post-operation refresh: any that winget immediately re-offers get
     // hidden as not-applicable.
     const succeededTargets: PackageTarget[] = [];
+    // Set when the bulk preflight changed the target list — the count the
+    // user saw in the view differs from what actually ran, which reads as a
+    // bug unless disclosed (surfaces in the terminal toast and history).
+    let targetsNote: string | undefined;
     try {
       switch (request.kind) {
         case "upgrade-all":
@@ -366,12 +404,25 @@ async function runOperation(request: OperationRequest): Promise<OperationState |
                 signal: controller.signal,
               });
               if (refreshed.outcome !== "fenced") {
-                request.targets = upgradableTargets(indexPaths);
+                const snapshotCount = request.targets?.length ?? 0;
+                request.targets = upgradableTargets(indexPaths).targets;
+                if (request.targets.length !== snapshotCount) {
+                  targetsNote = `the update list was refreshed: ${snapshotCount} → ${request.targets.length} packages`;
+                }
               }
             } catch (error) {
               // Preflight is an upgrade in accuracy, not a gate: proceed with
               // the snapshot targets (stale rows fail per-package, honestly).
               console.error("upgrade-all preflight refresh failed", error);
+            }
+          }
+          {
+            // Targets everywhere are derived with failed-version exclusion;
+            // without disclosure the missing rows would read as a bug.
+            const { previouslyFailed } = upgradableTargets(indexPaths);
+            if (previouslyFailed > 0) {
+              const note = `${previouslyFailed} skipped: the offered version already failed before`;
+              targetsNote = targetsNote ? `${targetsNote}; ${note}` : note;
             }
           }
         // fall through
@@ -414,6 +465,9 @@ async function runOperation(request: OperationRequest): Promise<OperationState |
           registerWingetPid(lockPath, opId, null); // child exited
           if (result.success && !result.noop && (request.kind === "upgrade" || request.kind === "install")) {
             succeededTargets.push(request.target);
+          }
+          if (!fenced && request.kind === "upgrade") {
+            markUpgradeFailedIfListed(indexPaths, request.target, result);
           }
           if (!fenced && PATCHABLE_KINDS.has(request.kind)) {
             // Optimistic patch: open views update on their next tick.
@@ -461,6 +515,9 @@ async function runOperation(request: OperationRequest): Promise<OperationState |
           result.message = `Version ${hidden} does not apply to this system and is hidden until a newer version appears`;
         }
       }
+    }
+    if (targetsNote) {
+      result.message = result.message ? `${result.message} (${targetsNote})` : `Note: ${targetsNote}`;
     }
     publish(
       {
@@ -537,6 +594,11 @@ async function runOperation(request: OperationRequest): Promise<OperationState |
         ) {
           state.message =
             "winget reported success, but the package is still installed. The uninstaller may have opened a window in the background";
+          // The observed state is mid-transition (registration typically
+          // clears once the uninstaller finishes); drop the freshness stamp
+          // so the next view mount re-queries instead of trusting it for
+          // the full staleness window.
+          markMutableStale(indexPaths, DEFAULT_ENV);
         }
       } catch (error) {
         console.error("post-operation refresh failed", error);
@@ -646,6 +708,9 @@ async function runBulkOperation(
       failed++;
       failedNames.push(target.name);
       failedDetails.push(`${target.name}: ${result.message ?? "Unknown error"}`);
+      if (perPackageKind === "upgrade" && !shouldStop()) {
+        markUpgradeFailedIfListed(indexPaths, target, result);
+      }
     }
     publish({
       bulk: {
@@ -704,6 +769,7 @@ async function runDirectUpgradeAll(): Promise<void> {
   });
 
   let targets: PackageTarget[];
+  let previouslyFailed = 0;
   try {
     const startEpoch = currentMutationEpoch(indexPaths);
     // Batch fetch, not incremental commits: the target list must come from
@@ -726,7 +792,7 @@ async function runDirectUpgradeAll(): Promise<void> {
 
     // The commit above published this snapshot (markers reconciled), so the
     // index is now the single derivation source for both preflight paths.
-    targets = upgradableTargets(indexPaths);
+    ({ targets, previouslyFailed } = upgradableTargets(indexPaths));
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Could not check for updates";
@@ -737,8 +803,9 @@ async function runDirectUpgradeAll(): Promise<void> {
 
   if (targets.length === 0) {
     toast.style = Toast.Style.Success;
-    toast.title = "All packages are up to date";
-    toast.message = undefined;
+    toast.title = previouslyFailed > 0 ? "Nothing to upgrade" : "All packages are up to date";
+    toast.message =
+      previouslyFailed > 0 ? `${previouslyFailed} skipped: the offered version already failed before` : undefined;
     await toast.show();
     return;
   }

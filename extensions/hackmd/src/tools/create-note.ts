@@ -14,11 +14,11 @@ type CreateNoteArgs = {
   /**
    * Read permission level (defaults to "guest")
    */
-  readPermission?: SingleNote["readPermission"];
+  readPermission?: "owner" | "signed_in" | "guest";
   /**
    * Write permission level (defaults to "signed_in")
    */
-  writePermission?: SingleNote["writePermission"];
+  writePermission?: "owner" | "signed_in" | "guest";
 };
 
 export const confirmation: Tool.Confirmation<CreateNoteArgs> = async (input) => {
@@ -39,7 +39,7 @@ export default async function tool(args: CreateNoteArgs): Promise<SingleNote> {
 
   // If teamPath is provided, create a team note, otherwise create a personal note
   if (teamPath) {
-    return api.createTeamNote(teamPath, noteData);
+    return api.createTeamNote(teamPath, noteData as Parameters<typeof api.createTeamNote>[1]);
   }
-  return api.createNote(noteData);
+  return api.createNote(noteData as Parameters<typeof api.createNote>[0]);
 }

@@ -72,7 +72,7 @@ export function useSearchBookmarks(searchKind: SearchKind) {
         });
       }
     },
-    [searchKind]
+    [searchKind],
   );
 
   useEffect(() => {

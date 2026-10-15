@@ -2,7 +2,15 @@ import { execa } from "execa";
 import fs from "node:fs";
 import path from "path";
 import { Video } from "./types.js";
-import { downloadPath, getffmpegPath, getytdlPath, getCommonArgs, sanitizeVideoTitle } from "./utils.js";
+import {
+  downloadPath,
+  getffmpegPath,
+  getytdlPath,
+  getCommonArgs,
+  isLiveStream,
+  normalizeVideoUrl,
+  sanitizeVideoTitle,
+} from "./utils.js";
 import SRTParser from "srt-parser-2";
 
 export default async function extractTranscript(url: string, language: string = "en") {
@@ -18,12 +26,16 @@ export default async function extractTranscript(url: string, language: string = 
   }
 
   // First get video info to get the title
-  const videoInfo = await execa(ytdlPath, [...getCommonArgs({ throttle: true }), "--dump-json", url]);
+  const videoInfo = await execa(ytdlPath, [
+    ...getCommonArgs({ throttle: true }),
+    "--dump-json",
+    normalizeVideoUrl(url),
+  ]);
 
   const video = JSON.parse(videoInfo.stdout) as Video;
 
   // Check if it's a live stream
-  if (video.live_status !== "not_live" && video.live_status !== undefined) {
+  if (isLiveStream(video)) {
     throw new Error("Live streams are not supported");
   }
 
@@ -48,7 +60,7 @@ export default async function extractTranscript(url: string, language: string = 
       ffmpegPath,
       "-o", // Output template
       path.join(tmpDir, "%(id)s.%(ext)s"),
-      url,
+      normalizeVideoUrl(url),
     ]);
 
     if (subtitleResult.failed) {

@@ -25,7 +25,19 @@ export const LocalStorage = {
   setItem: async () => {},
 };
 
-export const AI = {};
+export const AI = {
+  Model: {
+    "OpenAI_GPT-5.4_nano": "openai-gpt-5.4-nano",
+    "OpenAI_GPT-5.5_Instant": "openai-gpt-5.5-instant",
+    "OpenAI_GPT-5.4_mini": "openai-gpt-5.4-mini",
+    "OpenAI_GPT-6_Luna": "openai-gpt-6-luna",
+    "Anthropic_Claude_Haiku_4.5": "anthropic-claude-4-5-haiku",
+    "Anthropic_Claude_Sonnet_5.5": "anthropic-claude-sonnet-5-5",
+    "Google_Gemini_3.8_Flash": "google-gemini-3.8-flash",
+    "Google_Gemini_3.1_Pro": "google-gemini-3.1-pro",
+    "xAI_Grok-4.7": "xai-grok-4.7",
+  },
+};
 
 export const Keyboard = {
   Shortcut: { Common: { Copy: {}, Open: {}, Save: {}, Refresh: {} } },
@@ -39,13 +51,16 @@ export async function showToast() {
   return { hide: () => {} };
 }
 
+/** Mutable so a test can set a preference; reset it in the same test. */
+export const stubPreferences: Record<string, unknown> = {
+  skipPreCheck: true,
+  enablePaywallHopper: true,
+  showArticleImage: true,
+  verboseLogging: false,
+};
+
 export function getPreferenceValues() {
-  return {
-    skipPreCheck: true,
-    enablePaywallHopper: true,
-    showArticleImage: true,
-    verboseLogging: false,
-  };
+  return stubPreferences;
 }
 
 export async function getSelectedText(): Promise<string> {

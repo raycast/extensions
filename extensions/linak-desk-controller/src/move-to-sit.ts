@@ -1,8 +1,5 @@
-import { getPreferenceValues } from "@raycast/api";
-import { moveTo } from "./common";
+import { moveToPreset } from "./desk";
 
 export default async function moveToSit() {
-  const preferences = getPreferenceValues<Preferences>();
-  const { sitHeight } = preferences;
-  await moveTo(+sitHeight * 10);
+  await moveToPreset("sit");
 }

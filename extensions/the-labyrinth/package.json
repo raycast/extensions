@@ -1,0 +1,138 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "the-labyrinth",
+  "title": "The Labyrinth",
+  "description": "Descend through endless labyrinth levels rendered as SVG — collect keys and gems, dodge ghosts, and warp through portals.",
+  "icon": "labyrinth-icon.png",
+  "author": "luarmr",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "maze",
+      "title": "Play the Labyrinth",
+      "subtitle": "Maze Game",
+      "description": "Escape level after level of randomly generated mazes: unlock doors with keys, collect gems, dodge the ghost, and survive the fog.",
+      "mode": "view"
+    },
+    {
+      "name": "custom",
+      "title": "Custom Labyrinth",
+      "subtitle": "Sandbox",
+      "description": "Play a labyrinth with a chosen level size and any mix of modifiers. Disabled until you enable it in extension settings.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "level",
+          "type": "textfield",
+          "required": false,
+          "title": "Level",
+          "description": "Maze size and intensity (1–99). Width and height cap at 26×15.",
+          "placeholder": "5",
+          "default": "5"
+        },
+        {
+          "name": "key",
+          "type": "checkbox",
+          "required": false,
+          "title": "Modifiers",
+          "label": "Key — locked exit",
+          "description": "Place a key and keep the exit locked until you find it.",
+          "default": false
+        },
+        {
+          "name": "ghost",
+          "type": "checkbox",
+          "required": false,
+          "label": "Ghost",
+          "description": "A ghost patrols the maze.",
+          "default": false
+        },
+        {
+          "name": "portals",
+          "type": "checkbox",
+          "required": false,
+          "label": "Portals",
+          "description": "Two portals warp you across the maze.",
+          "default": false
+        },
+        {
+          "name": "fog",
+          "type": "checkbox",
+          "required": false,
+          "label": "Fog",
+          "description": "Darkness hides the maze until you find the candle.",
+          "default": false
+        },
+        {
+          "name": "ice",
+          "type": "checkbox",
+          "required": false,
+          "label": "Ice",
+          "description": "Icy floors — you slide until you hit a wall.",
+          "default": false
+        },
+        {
+          "name": "shifting",
+          "type": "checkbox",
+          "required": false,
+          "label": "Shifting walls",
+          "description": "Walls open and close every few moves.",
+          "default": false
+        },
+        {
+          "name": "footprints",
+          "type": "dropdown",
+          "required": false,
+          "title": "Footprints",
+          "description": "How long the trail of visited cells stays visible.",
+          "default": "permanent",
+          "data": [
+            {
+              "title": "Permanent",
+              "value": "permanent"
+            },
+            {
+              "title": "Fading",
+              "value": "fading"
+            },
+            {
+              "title": "None",
+              "value": "none"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "prettier": "^3.8.5",
+    "tsx": "^4.23.13",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

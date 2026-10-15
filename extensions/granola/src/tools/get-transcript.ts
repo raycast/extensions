@@ -1,3 +1,4 @@
+import getAccessToken from "../utils/getAccessToken";
 import { getTranscriptSegments, formatDurationVerbose, calculateDurationFromSegments } from "../utils/fetchData";
 import { findDocumentById } from "../utils/toolHelpers";
 import { showFailureToast } from "@raycast/utils";
@@ -34,6 +35,7 @@ type Output = {
  * Use this when the user specifically asks for transcript content, conversation details, or what was said in a meeting.
  */
 export default async function tool(input: Input): Promise<Output> {
+  await getAccessToken();
   if (!input.noteId) {
     return {
       transcript: "",

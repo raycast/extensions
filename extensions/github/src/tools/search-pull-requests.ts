@@ -27,7 +27,7 @@ export default withGitHubClient(async ({ query }: Input) => {
   const { github } = getGitHubClient();
 
   const result = await github.searchPullRequests({
-    numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
+    numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 25 }),
     query: `is:pr archived:false ${query}`,
   });
 

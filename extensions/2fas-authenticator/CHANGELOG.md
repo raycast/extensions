@@ -1,5 +1,16 @@
 # Changelog
 
+## [Add Windows Support] - 2026-09-17
+
+- Add Windows support to 2FAS Authenticator.
+- Protect the vault encryption key with Windows DPAPI using the `CurrentUser` scope.
+- Keep the existing macOS Keychain implementation unchanged.
+- Update the README and security documentation for macOS and Windows.
+
+## [Fix Import Crash] - 2026-08-14
+
+- Importing a 2FAS export where a service omits the `algorithm` field no longer aborts the entire import. It now falls through to the SHA1 default, matching the RFC 6238 default.
+
 ## [Fix Author Attribution] - 2026-07-01
 
 - Correct the extension author handle so it is credited to the right Raycast account

@@ -1,16 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import * as errors from "./errors";
-import { getExitCodeInfo, getExitCodeMessage, StaleProcessError, toUnsignedHResult } from "./errors";
-
-describe("StaleProcessError", () => {
-  it("has correct name and message", () => {
-    const err = new StaleProcessError("no output for 5 minutes");
-    expect(err.name).toBe("StaleProcessError");
-    expect(err.message).toBe("no output for 5 minutes");
-    expect(err).toBeInstanceOf(Error);
-  });
-});
+import { getExitCodeInfo, getExitCodeMessage, toUnsignedHResult } from "./errors";
 
 describe("toUnsignedHResult", () => {
   it("converts signed 32-bit exit codes to unsigned HRESULTs", () => {

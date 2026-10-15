@@ -1,5 +1,42 @@
 # Safari Changelog
 
+## [Contributors] - 2026-10-10
+
+- Added Berenger to the contributors, for the AI tools improvements.
+
+## [AI Tools Improvements] - 2026-10-10
+
+- Added the `select-tab` AI tool, which switches to a tab by window and index and brings its window to the front.
+- `search-history`, `search-bookmarks` and `search-reading-list` return 50 results by default, up to 100 with `searchLimit`, and report `truncated` when more matches exist. `searchText` is now optional.
+- `search-history`, `search-bookmarks` and `search-reading-list` explain how to grant Full Disk Access when Raycast cannot read Safari's data.
+- `open-url` accepts bare hosts with a port (`example.com:8080`), local addresses (`localhost:3000`, `[::1]:3000`) and intranet URLs with an explicit scheme (`http://intranet/`), and rejects other schemes. It returns the new tab that shows the page, with `verified: true` only when exactly one new tab appeared (found by comparing Safari's tabs before and after opening) and it shows the requested site. An existing tab on the same site is never reported as the new one: if any window can't be read, or if the change is ambiguous (several new tabs, or a new tab with the same URL as its neighbour), the result is `verified: false` with a reason, including when the new tab has no address yet.
+- `close-tab` asks for confirmation with the tab's title and URL, then closes exactly that tab. It fails without closing anything when the tab does not exist, when it moved or changed page after the confirmation, or when there is no matching confirmation for the call.
+- `get-tab-contents` returns at most 20,000 characters by default, up to 50,000 with `maxLength`, and reports `truncated` when the page is longer. It waits up to 5 seconds for a loading page while reading exactly the same tab, and fails clearly when the page has no text, the tab does not exist, or the tab changed page during the wait. The returned window position is read at the end of the wait.
+- Fixed `get-focused-tab` returning malformed values (comma-padded title and URL, no tab index). It now returns the window's position (1 for the front window) instead of Safari's internal window ID, matching the other tools. Tab titles and URLs are read as JSON, so titles containing separators such as `:::` are returned intact.
+- Moved the AI evals from `package.json` to `ai.yaml`, fixed the three that could not pass, and added AI instructions and evals covering all 10 tools.
+
+## [New Command] - 2026-09-17
+
+- Add a `New Private Window` command that opens a new private window of the selected Safari browser. Requires Accessibility access for Raycast, as the window is opened through Safari's File menu.
+
+## [New Command] - 2026-09-16
+
+- Add `Reopen Last Session` command to relaunch Safari and reopen all windows from the last session — for when you accidentally hit ⌘Q. Requires Accessibility access for Raycast, as the session is restored through Safari's History menu.
+
+## [New Command] - 2026-09-09
+
+- Add a `New Window` command that opens a new window of the selected Safari browser.
+
+## [Fix] - 2026-08-12
+
+- Handle large Safari bookmark libraries without parser limit errors.
+
+## [Fix] - 2026-08-12
+
+- Restore fast, complete local tab loading while preserving tabs with empty titles or URLs.
+- Avoid querying iCloud tabs when they are disabled.
+- Handle `blob:` tab favicons without invalid URL errors.
+
 ## [New Command] - 2026-07-24
 
 - Add `Search Tabs, Bookmarks and History` command to search open tabs, bookmarks and history in one place.

@@ -11,7 +11,7 @@ interface BlockedPageViewProps {
   onFetchFromBrowser: () => void;
 }
 
-/** The Refresh shortcut, written the way the reader's own keyboard is labelled. */
+/** The Refresh shortcut, written the way the reader's own keyboard is labeled. */
 const REFRESH_KEYS = isWindows ? "Ctrl + R" : "⌘ + R";
 
 function buildBlockedMarkdown(hasBrowserExtension: boolean, foundTab: BrowserTab | null): string {

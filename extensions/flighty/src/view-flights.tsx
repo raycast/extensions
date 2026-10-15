@@ -1,4 +1,4 @@
-import {List, ActionPanel, Action, Icon, Color} from '@raycast/api'
+import {List, ActionPanel, Action, Icon, Color, Keyboard} from '@raycast/api'
 import {useState} from 'react'
 import dayjs, {type Dayjs} from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -46,7 +46,9 @@ export default function () {
                     </List.Dropdown.Section>
 
                     <List.Dropdown.Section title="Past Flights">
-                        {allYears?.map((year) => <List.Dropdown.Item key={year} title={year.toString()} value={year.toString()} />)}
+                        {allYears?.map((year) => (
+                            <List.Dropdown.Item key={year} title={year.toString()} value={year.toString()} />
+                        ))}
                     </List.Dropdown.Section>
                 </List.Dropdown>
             }
@@ -79,8 +81,8 @@ export default function () {
                             key={flight.id}
                             icon={{
                                 source: {
-                                    light: `https://live.flighty.app/content/airlines:light_${flight.airlineIcao.toLowerCase()}.svg`,
-                                    dark: `https://live.flighty.app/content/airlines:dark_${flight.airlineIcao.toLowerCase()}.svg`,
+                                    light: `https://live.flighty.app/airline/${flight.airlineId}/logo/LIGHT`,
+                                    dark: `https://live.flighty.app/airline/${flight.airlineId}/logo/DARK`,
                                 },
                                 fallback: Icon.Airplane,
                             }}
@@ -111,7 +113,7 @@ export default function () {
                                     <Action.CopyToClipboard
                                         title="Copy Flight Number"
                                         content={`${flight.airlineIata} ${flight.number}`}
-                                        shortcut={{modifiers: ['cmd'], key: '.'}}
+                                        shortcut={Keyboard.Shortcut.Common.CopyName}
                                     />
                                     {flight.pnr && <Action.CopyToClipboard title="Copy Booking Code" content={flight.pnr} />}
                                 </ActionPanel>

@@ -1,7 +1,7 @@
 import { closeMainWindow, Clipboard, LaunchProps, showToast, Toast, open } from "@raycast/api";
 import { getSearchUrl } from "./search-engines";
 
-const DIA_BUNDLE_ID = "company.thebrowser.dia";
+export const DIA_BUNDLE_ID = "company.thebrowser.dia";
 
 function isLikelyURL(str: string): boolean {
   if (/^\S+:\/\//.test(str)) return true;
@@ -14,6 +14,11 @@ function normalizeURL(input: string): string {
   const trimmed = input.trim();
   if (/^\S+:\/\//.test(trimmed)) return trimmed;
   return `https://${trimmed}`;
+}
+
+/** Turns a URL-like input into a URL, and anything else into a search with the configured engine. */
+export function toDiaURL(target: string): string {
+  return isLikelyURL(target) ? normalizeURL(target) : getSearchUrl(target);
 }
 
 export default async function Command(props: LaunchProps<{ arguments: { url?: string } }>) {
@@ -36,7 +41,7 @@ export default async function Command(props: LaunchProps<{ arguments: { url?: st
       return;
     }
 
-    const url = isLikelyURL(target) ? normalizeURL(target) : getSearchUrl(target);
+    const url = toDiaURL(target);
 
     await closeMainWindow();
     await open(url, DIA_BUNDLE_ID);

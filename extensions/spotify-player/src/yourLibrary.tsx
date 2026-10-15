@@ -24,10 +24,11 @@ type FilterValue = keyof typeof filters;
 
 function YourLibraryCommand() {
   const [searchText, setSearchText] = useState("");
-  const [searchFilter, setSearchFilter] = useState<FilterValue>(getPreferenceValues()["Default-View"] ?? filters.all);
+  const [searchFilter, setSearchFilter] = useState<FilterValue>(
+    (getPreferenceValues()["Default-View"]?.toLowerCase() as FilterValue) ?? "all",
+  );
   const { myLibraryData, myLibraryIsLoading } = useYourLibrary({
     category: searchFilter,
-    keepPreviousData: true,
   });
 
   const sharedProps: ComponentProps<typeof List> = {

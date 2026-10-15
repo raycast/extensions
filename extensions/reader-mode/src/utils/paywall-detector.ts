@@ -77,7 +77,7 @@ const SUSPICIOUSLY_SHORT_ARTICLE = 900;
  * conclusive on its own: no publisher ships an element named `--paywall-inline-barrier`
  * around an article they intend you to read.
  */
-const BARRIER_SELECTORS = [
+export const BARRIER_SELECTORS = [
   ...PAYWALL_SELECTORS,
   '[class*="barrier"]',
   '[class*="regwall"]',
@@ -220,7 +220,7 @@ const INERT_TAGS = new Set(["TEMPLATE", "HEAD", "SCRIPT", "STYLE", "NOSCRIPT"]);
  * Class and id selectors that a page's own stylesheets hide (`display:none` / `visibility:hidden`).
  *
  * Only simple `.class` / `#id` selectors are collected — the shapes actually used to toggle a
- * paywall template, and enough to recognise the common case Greptile flagged. A compound or
+ * paywall template, and enough to recognize the common case Greptile flagged. A compound or
  * descendant selector we can't cheaply evaluate is skipped, which errs toward treating the
  * element as visible (a possible missed positive, never a false one).
  */
@@ -338,7 +338,7 @@ function isElementHidden(element: MinimalElement, rules: HidingRules): boolean {
  * and the previous regex matcher was case-insensitive — without this, moving to the DOM would
  * silently start missing them.
  */
-function caseInsensitive(selector: string): string {
+export function caseInsensitive(selector: string): string {
   return selector.replace(/(=["'][^"']*["'])\]/g, "$1 i]");
 }
 

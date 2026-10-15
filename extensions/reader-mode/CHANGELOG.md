@@ -1,5 +1,31 @@
 # Reader Mode Changelog
 
+## [Choose a Summary Model] - 2026-10-06
+
+### Added
+
+- A "Summary Model" preference to pick which Raycast AI model writes summaries, including Claude, Gemini, and Grok models. Summaries are cached per model, so switching models generates a fresh summary.
+- "Regenerate" (⌘R) rewrites the current summary with the same model, and "Regenerate with Model…" (⇧⌘R) rewrites it with a different one. The summary heading names the model when it isn't the default.
+- A "Strict Redaction" preference that also hides URL query strings and fragments in debug logs. Turn it on before reproducing an issue you plan to share.
+
+### Changed
+
+- AI summaries now use GPT-5.4 nano, replacing GPT-5 nano, which Raycast has deprecated.
+- Updated to the latest Raycast API.
+- "Import from Browser Tab" no longer has a keyboard shortcut; ⌘R now regenerates the summary, as in Raycast AI Chat.
+
+### Fixed
+
+- The Paywall Hopper could throw away a full article from an archive when the page still carried a leftover subscription meter or overlay. Those prompts are now removed before the article is checked, so the full text comes through.
+- Articles that mark their body text as "subscriber-only" no longer lose that text.
+
+## [Fix Paywall Extraction] - 2026-09-01
+
+### Fixed
+
+- The New Yorker and other Condé Nast sites (Wired, Vanity Fair) showed only the opening paragraph and the cartoons instead of the article. Reader was discarding the article body, which these sites tag with the same CSS class as their paywall overlay. The full article now renders.
+- The Paywall Hopper could stop at the first source that returned a page — including a "subscribe to read" wall — and never try the archive services that had the real text. It now checks each source's result and keeps going until it finds the full article.
+
 ## [Fix Crashes and Improve Performance] - 2026-07-15
 
 ### Fixed

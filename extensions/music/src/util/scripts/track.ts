@@ -1,4 +1,4 @@
-import { createQueryString, runScript, tell } from "../apple-script";
+import { createQueryString, escapeAppleScriptString, runScript, tell } from "../apple-script";
 
 export const search = (search: string) => {
   const outputQuery = createQueryString({
@@ -12,7 +12,7 @@ export const search = (search: string) => {
   return runScript(`
 		set output to ""
 			tell application "Music"
-				set results to (search (library playlist 1) for "${search}")
+				set results to (search (library playlist 1) for "${escapeAppleScriptString(search)}")
 				repeat with selectedTrack in results
 					set trackId to the id of selectedTrack
 					set trackName to the name of selectedTrack
@@ -43,11 +43,11 @@ export const getAll = () =>
     return output
   `);
 
-export const play = (track: string) => tell("Music", `play track "${track}" of playlist 1`);
+export const play = (track: string) => tell("Music", `play track "${escapeAppleScriptString(track)}" of playlist 1`);
 
 export const playById = (id: string) =>
   runScript(`
 	tell application "Music"
-		play (every track whose id is "${id}")
+		play (every track whose id is "${escapeAppleScriptString(id)}")
 	end tell
 `);

@@ -118,3 +118,5 @@ Raycast List pagination is wired directly via the `pagination` object returned f
 
 - [Raycast Extensions](https://developers.raycast.com/)
 - [Karakeep API](https://docs.karakeep.app/api/)
+- `docs/solutions/` — documented solutions to past problems (bugs, best practices, workflow patterns), organized by category with YAML frontmatter (`module`, `tags`, `problem_type`). Relevant when implementing or debugging in documented areas.
+- `CONCEPTS.md` — shared domain vocabulary (entities, named processes, status concepts). Relevant when orienting to the codebase or discussing domain concepts.

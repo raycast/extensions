@@ -83,7 +83,7 @@ interface FallbackContent {
  * Grabs the best direct-extraction candidate, for use if Readability comes back empty.
  *
  * Must be called BEFORE `Readability.parse()`, which strips the document it is given —
- * afterwards these selectors match nothing and the fallback can never fire.
+ * afterward these selectors match nothing and the fallback can never fire.
  */
 function captureFallbackContent(document: LinkedomDocument, url: string): FallbackContent | null {
   // A site-configured selector is the best guess for that site, but it must still hold

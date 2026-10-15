@@ -12,6 +12,49 @@ export interface Contact {
   favorited: boolean;
   recent: boolean;
   status: ContactStatus;
+  /** Present when the CLI exposes a busy contact’s call. */
+  call?: ContactCall | null;
+}
+
+export interface Machine {
+  id: string;
+  platform: string;
+  device_name?: string;
+  call_id?: string;
+}
+
+export function machineCallAction(machine: Machine): "start" | "none" {
+  return machine.call_id ? "none" : "start";
+}
+
+/**
+ * The call a busy contact is on. `joinable` is the CLI's own derivation of the
+ * predicate the engine enforces before letting anyone in, so consumers branch
+ * on it rather than reproducing the participant/capacity arithmetic.
+ */
+export interface ContactCall {
+  id: string;
+  participant_ids: number[];
+  capacity: number;
+  sfu_backed: boolean;
+  personal_room?: { owner: number; auto_join_behavior: string } | null;
+  joinable: boolean;
+}
+
+export type Joinability = "joinable" | "not-joinable" | "unknown";
+
+export function callJoinability(contact: Contact | undefined): Joinability {
+  if (typeof contact?.call?.joinable !== "boolean") return "unknown";
+  return contact.call.joinable ? "joinable" : "not-joinable";
+}
+
+export type ContactCallAction = "start" | "join" | "none";
+
+export function contactCallAction(contact: Contact): ContactCallAction {
+  if (contact.status === "busy") {
+    return callJoinability(contact) === "joinable" ? "join" : "none";
+  }
+  return contact.status === "online" || contact.status === "available" ? "start" : "none";
 }
 
 export interface CallParticipant {
@@ -20,7 +63,17 @@ export interface CallParticipant {
   email: string;
 }
 
-/** A stored (recorded) call, from `tuple transcription list`. */
+export interface OngoingCall {
+  id: string;
+  participants: CallParticipant[];
+  unknown_participants: number;
+  anonymous: boolean;
+  capacity: number;
+  joinable: boolean;
+  room: { slug: string; name: string } | null;
+  current: boolean;
+}
+
 export interface StoredCall {
   call_id: string;
   title: string;
@@ -33,14 +86,12 @@ export interface StoredCall {
 }
 
 /**
- * The active call, normalized by `tuple call current --format json`. The CLI
+ * The active call, normalized by `tuple state --format json`. The CLI
  * reconciles the direct-call and room-based shapes into one flat roster:
  * `participants` is the other people (the local user is already excluded),
  * `muted` is the local mic state, `transcribing` is whether the local user is
  * recording the call, and `active_room_slug` is the room slug for room-based
- * calls (null for direct calls). The command exits non-zero when there is no
- * active call, so consumers handle absence via the NoActiveCall error rather
- * than a null payload.
+ * calls (null for direct calls). The state summary sets `in_call: false` and `call: null` when idle.
  */
 export interface CallView {
   call_id: string;
@@ -79,14 +130,29 @@ export interface Room {
   slug: string;
   name: string;
   http_value: string;
+  /** RFC 3339 creation time; empty when the server has no timestamp. */
+  created_at?: string;
   favorited: boolean;
   members: RoomMember[];
   kind: RoomKind;
   active_call: boolean;
 }
 
-/** One full-text search hit, from `tuple transcription search --format json`. */
-export interface TranscriptMatch {
+export function primaryPersonalRoom(rooms: Room[]): Room | undefined {
+  const personalRooms = rooms.filter((room) => room.kind === "personal");
+  if (personalRooms.length <= 1) {
+    return personalRooms[0];
+  }
+  if (personalRooms.some((room) => !room.created_at)) {
+    return undefined;
+  }
+  return personalRooms.reduce((primary, room) => (room.created_at! > primary.created_at! ? room : primary));
+}
+
+export interface CaptureMatch {
+  kind: "spoken" | "content";
+  app_name?: string;
+  url?: string;
   call_id: string;
   time: string;
   user_id: number;
@@ -101,14 +167,31 @@ export enum TupleErrorKind {
   NotInstalled = "not_installed",
   /** A call-scoped command ran while no call was active. Often a normal state, not a failure. */
   NoActiveCall = "no_active_call",
-  /** Tried to join a call/room while already in one — the CLI rejects this rather than switching. */
+  /** Tried to join a call/room while already in one without asking the CLI to switch. */
   AlreadyInCall = "already_in_call",
   /** The Tuple app/daemon is not running, so the CLI could not reach it. */
   DaemonDown = "daemon_down",
-  /** The transcript store doesn't exist yet — transcription has never run on this machine. */
-  TranscriptionUnavailable = "transcription_unavailable",
+  /** The Capture store doesn't exist yet because Capture has never run on this machine. */
+  CaptureUnavailable = "transcription_unavailable",
+  /** `call start` refused: the target is offline. The app offers no start action for them either. */
+  ContactOffline = "contact_offline",
+  /** `call start` refused: the target is already on a call. Join it instead. */
+  ContactBusy = "contact_busy",
+  /** `call join` refused: the target isn't on a call anyone can join. */
+  NotJoinable = "not_joinable",
   /** Anything else — surfaced to the user verbatim. */
   Unknown = "unknown",
+}
+
+/**
+ * The error envelope `--format json` writes to stderr (with exit 1) on
+ * current CLIs. `kind` is the daemon's or command's stable identifier;
+ * `error_code` is the HTTP status when the failure came from the daemon.
+ */
+export interface TupleErrorPayload {
+  error?: string;
+  error_code?: number;
+  kind?: string;
 }
 
 export class TupleError extends Error {
@@ -122,4 +205,44 @@ export class TupleError extends Error {
     this.kind = kind;
     this.detail = detail;
   }
+}
+
+export interface CanonicalCall {
+  id: string;
+  state: "active" | "ended";
+  title: string | null;
+  summary: string | null;
+  started_at: string | null;
+  ended_at: string | null;
+  participants: CallParticipant[];
+}
+
+export interface StateSummary {
+  in_call: boolean;
+  call: CallView | null;
+}
+
+export interface CaptureRecord {
+  id: number;
+  type: string;
+  time: string;
+  category?: "transcript" | "events" | "content";
+  data: {
+    user?: { id: number; full_name: string; email?: string };
+    participants?: CallParticipant[];
+    user_id?: number;
+    text?: string;
+    start?: string;
+    veiled?: boolean;
+    [key: string]: unknown;
+  };
+}
+
+export interface ExportReceipt {
+  file: string;
+  format: string;
+  calls: number;
+  records: number;
+  bytes: number;
+  replaced: boolean;
 }

@@ -37,30 +37,48 @@ const appBundleIds: { [key in TerminalApp]: string } = {
   wezterm: "com.github.wez.wezterm",
 };
 
-const runCommandInTermAppleScript = (c: string, terminalApp: string): string => `
-    tell application "${terminalApp}" to activate
-    tell application "System Events" to tell process "${terminalApp}"
+/**
+ * Escape a string for use inside an AppleScript `"…"` literal: backslash first,
+ * then the quote. A brew-recommended command is not always quote-free — `brew
+ * doctor` hands back `git -C "/opt/homebrew" …` — and an unescaped quote closes
+ * the literal and makes the whole script a syntax error.
+ */
+const escapeAppleScriptString = (s: string): string => s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+
+/** Escape for a single-quoted shell word: close, escape, reopen. */
+const escapeSingleQuoted = (s: string): string => s.replace(/'/g, `'\\''`);
+
+const runCommandInTermAppleScript = (c: string, terminalApp: string): string => {
+  const app = escapeAppleScriptString(terminalApp);
+  return `
+    tell application "${app}" to activate
+    tell application "System Events" to tell process "${app}"
         keystroke "t" using command down
         delay 0.5
-        keystroke "${c}"
+        keystroke "${escapeAppleScriptString(c)}"
         keystroke return
     end tell
   `;
+};
 
 const appleScripts: { [key in TerminalApp]: (c: string) => string } = {
   alacritty: (c: string) => runCommandInTermAppleScript(c, names.alacritty),
   ghostty: (c: string) => runCommandInTermAppleScript(c, names.ghostty),
   hyper: (c: string) => runCommandInTermAppleScript(c, names.hyper),
+  // c is inside `bash -c '…'` inside an AppleScript literal: shell quoting first,
+  // then AppleScript quoting, since the `'\''` escape must survive as written.
   iterm: (c: string) => `
     tell application "iTerm"
-      set newWindow to create window with default profile command "bash -c '${c}; read -n 1 -s -r -p \\"Press any key to exit - will not quit\\" ; echo' ; exit"
+      set newWindow to create window with default profile command "bash -c '${escapeAppleScriptString(escapeSingleQuoted(c))}; read -n 1 -s -r -p \\"Press any key to exit - will not quit\\" ; echo' ; exit"
     end tell
     `,
   kitty: (c: string) => runCommandInTermAppleScript(c, names.kitty),
+  // c is a bare command line inside the AppleScript literal `do script` runs —
+  // no shell quoting wraps it, so only the AppleScript literal needs escaping.
   terminal: (c: string) => `
     tell application "Terminal"
       do shell script "open -a 'Terminal'"
-      do script "echo ; ${c} ; bash -c 'read -n 1 -s -r -p \\"Press any key to exit - will not quit\\"' ; exit" in selected tab of the front window
+      do script "echo ; ${escapeAppleScriptString(c)} ; bash -c 'read -n 1 -s -r -p \\"Press any key to exit - will not quit\\"' ; exit" in selected tab of the front window
     end tell
   `,
   warp: (c: string) => runCommandInTermAppleScript(c, names.warp),

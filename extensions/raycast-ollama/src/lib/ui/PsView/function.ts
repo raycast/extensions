@@ -20,7 +20,11 @@ export async function GetModels(server: string | undefined): Promise<Types.UiMod
     await Promise.all(
       [...s.entries()].map(async (s): Promise<Types.UiModel[]> => {
         const ps = await s[1].OllamaApiPs().catch(async (e: Error) => {
-          await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
+          await showToast({
+            style: Toast.Style.Failure,
+            title: `'${s[0]}' Server`,
+            message: e.message,
+          });
           return undefined;
         });
         if (!ps) return await Promise.resolve([] as Types.UiModel[]);
@@ -65,5 +69,12 @@ export async function UnloadModel(model: Types.UiModel, revalidate: CallableFunc
       });
       revalidate();
     })
-    .catch(async (e) => await showToast({ style: Toast.Style.Failure, title: "Error", message: e }));
+    .catch(
+      async (e) =>
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message: e,
+        }),
+    );
 }

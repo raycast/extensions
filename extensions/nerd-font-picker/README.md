@@ -20,7 +20,7 @@
 - **Live SVG previews** — each glyph is rendered on the fly from the actual font outlines via `opentype.js`; no image assets required
 - **Rich detail panel** — shows a large preview alongside name, codepoint, Unicode escape, HTML entity, and the raw glyph character
 - **Multiple copy actions** — copy the glyph character, codepoint, name, or Unicode escape sequence, with an option to close Raycast immediately after copying
-- **Configurable icon colour** — choose white or black rendering to suit your Raycast theme
+- **Adaptive icon colour** — The icon colour automatically adapts to the current Raycast theme (light/dark) for optimal contrast.
 - **Local-only, no network** — reads fonts directly from `~/Library/Fonts` and caches metadata in `~/.cache/nerd-font-picker/glyphs.json`; nothing leaves your machine
 - **One-command cache refresh** — rebuild the glyph index at any time from the action panel if you install a new font
 
@@ -84,9 +84,9 @@ Selecting any glyph opens a split detail view showing:
 
 Open Raycast Preferences → Extensions → Nerd Font Picker to configure:
 
-| Preference  | Values       | Default |
-| ----------- | ------------ | ------- |
-| Icon Colour | White, Black | White   |
+| Preference | Values                                           | Default |
+| ---------- | ------------------------------------------------ | ------- |
+| Font Name  | Name of the locally-installed Nerd Font typeface |         |
 
 ---
 

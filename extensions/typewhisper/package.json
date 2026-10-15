@@ -22,22 +22,16 @@
   ],
   "commands": [
     {
-      "name": "search-history",
-      "title": "Search History",
-      "description": "Search and browse TypeWhisper transcription history",
-      "mode": "view"
-    },
-    {
-      "name": "switch-profile",
-      "title": "Switch Profile",
-      "description": "View and toggle TypeWhisper profiles",
-      "mode": "view"
-    },
-    {
       "name": "start-dictation",
       "title": "Start Dictation",
       "description": "Start or stop voice dictation",
       "mode": "no-view"
+    },
+    {
+      "name": "dictate-with-workflow",
+      "title": "Dictate with Workflow",
+      "description": "Start a dictation that uses a specific TypeWhisper workflow",
+      "mode": "view"
     },
     {
       "name": "show-last-transcription",
@@ -46,9 +40,59 @@
       "mode": "no-view"
     },
     {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search and browse TypeWhisper transcription history",
+      "mode": "view"
+    },
+    {
       "name": "transcribe-file",
       "title": "Transcribe File",
       "description": "Transcribe an audio file using TypeWhisper",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-recording",
+      "title": "Toggle Recording",
+      "description": "Start or stop a TypeWhisper recording, for example of a meeting",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-last-recording",
+      "title": "Show Last Recording",
+      "description": "Show the transcript of the last recording started from Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "add-dictionary-term",
+      "title": "Add Dictionary Term",
+      "description": "Add the selected text or a typed word to the TypeWhisper dictionary",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "term",
+          "placeholder": "Term",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "manage-dictionary",
+      "title": "Manage Dictionary",
+      "description": "Browse, add, edit, and delete dictionary terms and corrections",
+      "mode": "view"
+    },
+    {
+      "name": "switch-profile",
+      "title": "Manage Workflows",
+      "description": "Enable or disable TypeWhisper workflows and dictate with one",
+      "mode": "view"
+    },
+    {
+      "name": "switch-model",
+      "title": "Switch Model",
+      "description": "Choose the transcription engine and model TypeWhisper uses",
       "mode": "view"
     }
   ],

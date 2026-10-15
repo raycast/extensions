@@ -1,11 +1,12 @@
-import { LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
+import { LaunchProps, showToast, Toast } from "@raycast/api";
 import { ChromeTarget, openGoogleChrome } from "./util/util";
-import { getSelectedBrowser, Profile } from "./util/types";
+import { getSelectedBrowser, showDoneHUD, Profile } from "./util/types";
 
 export default async function Command(props: LaunchProps) {
   const browser = getSelectedBrowser();
   const profileDirectory = props.launchContext?.directory;
   const profileName = props.launchContext?.name;
+  const profileGivenName = props.launchContext?.givenName;
   const action = props.launchContext?.action ?? "newTab";
   const url = props.launchContext?.url;
 
@@ -43,12 +44,16 @@ export default async function Command(props: LaunchProps) {
       break;
   }
 
-  const profile: Profile = { directory: profileDirectory, name: profileName };
+  const profile: Profile = {
+    directory: profileDirectory,
+    name: profileName,
+    givenName: profileGivenName,
+  };
   await openGoogleChrome(
     profile,
     target,
     async () => {
-      await showHUD(processName);
+      await showDoneHUD(processName);
     },
     browser,
   );

@@ -102,6 +102,33 @@ async function loadSprite(): Promise<string> {
   return sprite;
 }
 
+// Square canvas every icon is drawn onto.
+const CANVAS = 32;
+
+function renderIcon(viewBox: string, inner: string): string {
+  const header = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CANVAS} ${CANVAS}" style="transform: translate(-12.5%, -12.5%);">`;
+
+  const [x, y, width, height] = viewBox
+    .trim()
+    .split(/[\s,]+/)
+    .map(Number);
+  if (![x, y, width, height].every((value) => Number.isFinite(value)) || width <= 0 || height <= 0) {
+    return `${header}${inner}</svg>`;
+  }
+
+  // Keep the icon at its natural size, only shrinking it if it would not fit.
+  const scale = Math.min(1, CANVAS / Math.max(width, height));
+  const translateX = round((CANVAS - width * scale) / 2 - x * scale);
+  const translateY = round((CANVAS - height * scale) / 2 - y * scale);
+  const resize = scale === 1 ? "" : ` scale(${round(scale)})`;
+
+  return `${header}<g transform="translate(${translateX} ${translateY})${resize}">${inner}</g></svg>`;
+}
+
+function round(value: number): number {
+  return Math.round(value * 1000) / 1000;
+}
+
 function parseSprite(sprite: string): Icon[] {
   const icons: Icon[] = [];
   const symbolRegex = /<symbol\b([^>]*)>([\s\S]*?)<\/symbol>/g;
@@ -118,9 +145,7 @@ function parseSprite(sprite: string): Icon[] {
     const name = idMatch[1];
 
     const viewBoxMatch = attributes.match(/viewBox="([^"]+)"/);
-    const viewBox = viewBoxMatch ? viewBoxMatch[1] : "0 0 16 16";
-
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" fill="#000000">${inner}</svg>`;
+    const svg = renderIcon(viewBoxMatch ? viewBoxMatch[1] : "0 0 16 16", inner);
     const dataUri = `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 
     // Allow searching with spaces (or no separator) for hyphenated names,

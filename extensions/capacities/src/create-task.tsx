@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Form, Icon, closeMainWindow, showToast, Toast, showHUD } from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, PopToRootType, showToast, Toast, showHUD } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useRef } from "react";
 import { getInitialSpaceId, setStoredSpaceId } from "./helpers/spaces";
@@ -84,12 +84,10 @@ export default function Command() {
           return;
         }
 
-        showToast({
-          style: Toast.Style.Success,
-          title: "Saved",
+        await showHUD("Task created", {
+          clearRootSearch: true,
+          popToRootType: PopToRootType.Immediate,
         });
-        showHUD("Task created");
-        closeMainWindow();
       } catch (e) {
         if (e instanceof Error) {
           handleUnexpectedError(e);

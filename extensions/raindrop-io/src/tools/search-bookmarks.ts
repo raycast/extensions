@@ -8,9 +8,9 @@ type Input = {
    */
   query?: string;
   /**
-   * Tags to narrow the search.
+   * Comma-separated tags to narrow the search, e.g. "performance, typescript".
    */
-  tags?: string[];
+  tags?: string;
   /**
    * Raindrop collection id. Defaults to `0` (All bookmarks).
    */
@@ -63,8 +63,9 @@ export default async function searchBookmarks(input: Input = {}) {
   if (input.query) {
     tokens.push(input.query);
   }
-  if (input.tags?.length) {
-    tokens.push(...input.tags.filter(Boolean).map((tag) => `#"${tag}"`));
+  const tags = splitTags(input.tags);
+  if (tags.length) {
+    tokens.push(...tags.map((tag) => `#"${tag}"`));
   }
   if (tokens.length) {
     url.searchParams.set("search", tokens.join(" ").trim());
@@ -89,6 +90,13 @@ export default async function searchBookmarks(input: Input = {}) {
   }
 
   return items.map((bookmark) => mapBookmarkToResult(bookmark, collectionTitleMap));
+}
+
+function splitTags(value?: string) {
+  return (value ?? "")
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
 }
 
 function clamp(value: number, min: number, max: number) {

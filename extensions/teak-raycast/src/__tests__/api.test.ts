@@ -30,6 +30,12 @@ describe("raycast api helpers", () => {
     );
   });
 
+  test("buildCardsSearchParams includes full-card fields on request", () => {
+    expect(
+      buildCardsSearchParams({ include: "content,metadata", limit: 10 }),
+    ).toBe("include=content%2Cmetadata&limit=10");
+  });
+
   test("normalizeLimit clamps limits to backend contract", () => {
     expect(normalizeLimit(0)).toBe(1);
     expect(normalizeLimit(101)).toBe(100);
@@ -70,14 +76,14 @@ describe("raycast api helpers", () => {
     expect(getUserFacingErrorMessage(error)).toContain(
       "missing required configuration",
     );
-    expect(getRecoveryHint(error)).toContain("CONVEX_HTTP_BASE_URL");
+    expect(getRecoveryHint(error)).toContain("dev:convex");
   });
 
-  test("maps missing local api gateway errors to dev guidance", () => {
+  test("maps missing local API errors to dev guidance", () => {
     const error = new RaycastApiError("DEV_API_UNAVAILABLE", 404);
 
-    expect(getUserFacingErrorMessage(error)).toContain("API gateway");
-    expect(getRecoveryHint(error)).toContain("bun run dev:api");
+    expect(getUserFacingErrorMessage(error)).toContain("API");
+    expect(getRecoveryHint(error)).toContain("bun run dev:convex");
   });
 
   test("maps not found errors without implying a card was deleted", () => {

@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { getGithubToken } from "../preferences";
 import { stripGitSuffix, type InstalledSkill, type SkillLockEntry } from "../shared";
 import { listInstalledSkills } from "./skills-cli";
+import { withSkillsCliLock } from "./skills-cli-runner";
 
 const LOCK_FILE = ".skill-lock.json";
 const AGENTS_DIR = ".agents";
@@ -28,7 +29,21 @@ async function readSkillLock(): Promise<Record<string, SkillLockEntry>> {
 }
 
 export async function getInstalledSkillsWithLock(): Promise<InstalledSkill[]> {
-  const [skills, lockEntries] = await Promise.all([listInstalledSkills(), readSkillLock()]);
+  return (await getInstalledSkillsSnapshot()).skills;
+}
+
+async function getInstalledSkillsSnapshot(): Promise<{
+  skills: InstalledSkill[];
+  lockEntries: Record<string, SkillLockEntry>;
+}> {
+  return withSkillsCliLock(async (runLocked) => {
+    const skills = await listInstalledSkills(runLocked);
+    const lockEntries = await readSkillLock();
+    return { skills: mergeLockEntries(skills, lockEntries), lockEntries };
+  });
+}
+
+function mergeLockEntries(skills: InstalledSkill[], lockEntries: Record<string, SkillLockEntry>): InstalledSkill[] {
   return skills.map((skill) => {
     const lock = lockEntries[skill.name];
     if (!lock) return skill;
@@ -77,8 +92,7 @@ async function fetchRepoTree(source: string, token: string | undefined): Promise
  * Implemented against the GitHub Trees API rather than `npx skills check` because
  * the CLI's check command reinstalls outdated skills as a side effect since v1.5.0.
  */
-export async function checkForUpdates(): Promise<string[]> {
-  const lock = await readSkillLock();
+async function checkForUpdates(lock: Record<string, SkillLockEntry>): Promise<string[]> {
   const byRepo = new Map<string, Array<{ name: string; skillPath: string; expectedHash: string }>>();
 
   for (const [name, entry] of Object.entries(lock)) {
@@ -108,4 +122,11 @@ export async function checkForUpdates(): Promise<string[]> {
     }),
   );
   return results.flat();
+}
+
+export async function getInstalledSkillsWithUpdateStatus(): Promise<InstalledSkill[]> {
+  const { skills, lockEntries } = await getInstalledSkillsSnapshot();
+  const updatable = await checkForUpdates(lockEntries).catch((): string[] => []);
+  const updatableSet = new Set(updatable);
+  return skills.map((skill) => ({ ...skill, hasUpdate: updatableSet.has(skill.name) }));
 }

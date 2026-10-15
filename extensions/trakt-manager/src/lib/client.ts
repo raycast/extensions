@@ -27,7 +27,10 @@ export const initTraktClient = () => {
           body,
           ...fetchOptions,
         });
-        const json = await response.json();
+        // DELETE answers 204 with an empty body; parsing it as JSON would turn a success into a 500.
+        // Any other unparseable body still throws and lands in the catch below, as before.
+        const text = await response.text();
+        const json: unknown = text ? JSON.parse(text) : undefined;
 
         // Uncomment this line to log API requests
         // console.log(

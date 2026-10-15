@@ -4,7 +4,8 @@
   "compilerOptions": {
     "lib": ["ES2023"],
     "module": "commonjs",
-    "target": "ES2022",
+    "moduleResolution": "bundler",
+    "target": "ES2023",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,

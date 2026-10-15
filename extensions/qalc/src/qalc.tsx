@@ -1,33 +1,37 @@
 import {
-  ActionPanel,
   Action,
-  List,
+  ActionPanel,
   Detail,
-  getPreferenceValues,
-  openExtensionPreferences,
   environment,
+  getPreferenceValues,
+  List,
+  openExtensionPreferences,
+  Keyboard,
 } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
+import extractZip from "extract-zip";
 import { ChildProcess, ChildProcessWithoutNullStreams, spawn } from "node:child_process";
+import { createHash } from "node:crypto";
+import { accessSync, copyFileSync, createWriteStream } from "node:fs";
+import { mkdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
-import { accessSync, copyFileSync } from "node:fs";
-import { readFile } from "node:fs/promises";
+import { Transform, Writable } from "node:stream";
+import { useEffect, useRef, useState } from "react";
 
 // TODO
 // - better parse result
-// - autmate: ask user perm to download & install qalc ?
 // -x persistent qalc + restart ?
 // -x out colors + fmt
 
 // --------  os interface
 
+const onWindows = process.platform == "win32";
+
 function ensureCfg() {
-  const cfgFile = "qalc.cfg";
-  const cfgPath = path.join(environment.supportPath, cfgFile);
+  const cfgPath = path.join(environment.supportPath, "qalc.cfg");
   try {
     accessSync(cfgPath);
   } catch {
-    const cfgAsset = path.join(environment.assetsPath, cfgFile);
+    const cfgAsset = path.join(environment.assetsPath, onWindows ? "qalc-win.cfg" : "qalc.cfg");
     copyFileSync(cfgAsset, cfgPath);
   }
 }
@@ -141,7 +145,8 @@ function ActualCommand(props: { rerender: () => void }) {
       preferences["qalcPath"],
       preferences["qalcPathText"],
       preferences["qalcPathText"] + (preferences["qalcPathText"].endsWith("/") ? "qalc" : "/qalc"),
-    ];
+    ].filter((s) => s && !s.endsWith("/"));
+    if (onWindows) pathsToTry.unshift(path.join(environment.supportPath, "qalc", "qalculate", "qalc"));
     const isDead: [0 | 1] = [0];
     let destructor = () => (isDead[0] = 1) as unknown;
     ensureCfg();
@@ -176,7 +181,10 @@ function ActualCommand(props: { rerender: () => void }) {
     }
   }, [searchText, qalcProcess]);
 
-  if (err404) return Qalc404(err404, props.rerender);
+  if (err404) {
+    if (onWindows) return <Qalc404Windows rerender={props.rerender} />;
+    else return Qalc404(err404, props.rerender);
+  }
   const universalActions = (
     <Action title="Execute" shortcut={{ modifiers: ["alt"], key: "enter" }} onAction={onExecute} />
   );
@@ -209,7 +217,7 @@ function ActualCommand(props: { rerender: () => void }) {
                         <Action.CopyToClipboard
                           title="Copy"
                           content={line.slice(2)} // TODO better parse
-                          shortcut={{ modifiers: ["cmd"], key: "." }}
+                          shortcut={Keyboard.Shortcut.Common.Pin}
                         />
                         {universalActions}
                       </ActionPanel>
@@ -269,6 +277,95 @@ Press \`Enter\` to open settings or \`Alt\` \`Enter\` to try searching again.
         <ActionPanel>
           <Action title="Open Settings" onAction={openExtensionPreferences} />
           <Action title="Try Again!" shortcut={{ modifiers: ["alt"], key: "enter" }} onAction={rerender} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function Qalc404Windows(props: { rerender: () => void }) {
+  const [err, setErr] = useState("");
+  const [msg, setMsg] = useState("");
+  const [lock, setLock] = useState(false);
+  async function install() {
+    if (lock) return;
+    setLock(true);
+    try {
+      setErr("");
+      setMsg("Connecting...");
+      const connection = await fetch(
+        "https://github.com/Qalculate/libqalculate/releases/download/v5.12.0/qalculate-5.12.0-x64.zip",
+      );
+      const sha256exp = "baf4f9612277c7e4ec5e4bdf0ff0a0487b25b5b7c159224bd910fe6f2957d4a2";
+      if (!connection?.body) {
+        setMsg("");
+        setErr("Failed to connect to github.com");
+        return;
+      }
+      const [stream1, stream2] = connection.body.tee();
+      const zipPath = path.join(environment.supportPath, "qalc.zip");
+      const unzipDir = path.join(environment.supportPath, "qalc");
+
+      setMsg("Downloading...");
+      const sha256act = (
+        await Promise.all([
+          stream1.pipeTo(Writable.toWeb(createWriteStream(zipPath))),
+          stream2
+            .pipeThrough(Transform.toWeb(createHash("sha256")))
+            .getReader()
+            .read(),
+        ])
+      )[1];
+
+      const sha256actHex = Buffer.from(sha256act.value).toString("hex");
+      if (sha256actHex != sha256exp) {
+        setMsg("");
+        setErr("Failed to verify file integrity: expected " + sha256exp + " got " + sha256actHex);
+        return;
+      }
+
+      setMsg("Extracting...");
+      await mkdir(unzipDir, { recursive: true });
+      await extractZip(zipPath, { dir: unzipDir });
+
+      setMsg("Cleaning up...");
+      await rm(zipPath);
+
+      setMsg("Done");
+      props.rerender();
+    } catch (e: unknown) {
+      setErr((e as Error)?.message ?? "");
+    }
+    setLock(false);
+  }
+  let message = "You are seing this because you ran the extension for the first time.";
+  if (msg) message += "\n\n" + msg;
+  if (err)
+    message +=
+      "\n\nThere was an error downloading or installing qalc. Please try again later or pick a different option: " +
+      "\n\n" +
+      "**" +
+      err +
+      "**";
+  return (
+    <Detail
+      markdown={
+        message +
+        `
+
+Press \`Enter\` to download and install \`qalc\` or
+\`Alt\` \`Enter\` to open settings and configure path to \`qalc\` manually
+if you have it already installed.
+`
+      }
+      actions={
+        <ActionPanel>
+          <Action title="Install Qalc" onAction={install} />
+          <Action
+            title="Open Settings"
+            shortcut={{ modifiers: ["alt"], key: "enter" }}
+            onAction={openExtensionPreferences}
+          />
         </ActionPanel>
       }
     />

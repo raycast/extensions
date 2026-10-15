@@ -1,5 +1,58 @@
 # Obsidian Bookmarks Changelog
 
+## [Safer Bookmark Editing] - 2026-10-05
+
+- Keep frontmatter fields the extension doesn't manage, such as `aliases` or `cssclasses`, when editing, favoriting or marking a bookmark as read. They used to be dropped.
+- "Fetch Page Content" now reads the tab that matches the bookmark, even when it isn't in the focused window, instead of whatever tab happened to be in front.
+- Query parameters now count when comparing URLs, so two YouTube videos are no longer mistaken for the same page, and no longer flagged as duplicates. Tracking parameters such as `utm_*` are still ignored.
+- Report a bookmark as saved only once it has actually been written to disk, and show an error if the write fails.
+- Fix editing a bookmark whose URL contains parentheses, as Wikipedia's often do, leaving part of the link in Notes.
+
+## [Save From Little Arc] - 2026-10-05
+
+- Fix the save form prefilling the page of the full Arc window behind when invoked from a Little Arc window. Arc doesn't expose Little Arc windows to scripting, so reading the right page relies on the [Raycast Browser Extension](https://www.raycast.com/browser-extension) when it is installed; without it, the previous behaviour remains.
+- When several browser windows are open, the Browser Extension path now picks the tab of the window actually in front instead of the first active tab it finds.
+
+## [Fix Notes Gaining a Copy of Their Frontmatter] - 2026-10-05
+
+- Fix saving a bookmark — marking it as read, favoriting it — writing a copy of the note's own frontmatter into its body. The body was cut from the note using `bodyBegin`, which counts lines, as if it were a character offset. Run "Clear Cache" once after updating, as cached bookmarks still hold the broken body.
+- Re-read the note body from disk before favoriting, reordering favorites or toggling read state, so a stale cached body — including one holding that duplicated frontmatter — is never written back.
+
+## [Favorite Bookmarks] - 2026-10-05
+
+- Add any number of bookmarks to a favorites section with <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>F</kbd>. Favorites are pinned above the rest of the search results, in the order you put them in.
+- Reorder favorites with <kbd>⌥</kbd>+<kbd>⇧</kbd>+<kbd>↑</kbd> and <kbd>⌥</kbd>+<kbd>⇧</kbd>+<kbd>↓</kbd>.
+- Store the position in a `favorite` frontmatter field, so favorites live in the vault rather than in the Raycast cache.
+
+## [Open Links in the Current Browser] - 2026-10-05
+
+- Add an "Open Link in Current Window" action (<kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>O</kbd>) that opens a bookmark as a tab of the browser window already in front, instead of letting the system decide — which, in Arc, means a Little Arc window every time. Falls back to the default browser when the frontmost app isn't one.
+- The action is available on search results and on the save form, and can be picked as the default action for either in preferences. "Open Link" keeps its existing behaviour.
+
+## [Smarter Bookmark Search] - 2026-10-05
+
+- Rank URL matches (ignoring query parameters) ahead of title, tag and note matches when searching bookmarks
+- Filter results by tag with `#tag` tokens, on their own or alongside search terms (for example `raycast #dev`)
+- Suggest matching tags while typing `#`, completed by selecting the suggestion and pressing Enter
+- Match more strictly, so a search stops returning nearly every bookmark: the default fuzziness matches almost anything on a field as long as a note body
+- Fix bookmark search not matching titles, tags and URLs: those keys pointed at fields that don't exist on the indexed object, so only note contents were searched
+
+## [Edit Bookmarks] - 2026-10-05
+
+- Add an "Edit Bookmark" action (<kbd>⌘</kbd>+<kbd>E</kbd>) to search results. It reopens the save form, prefilled with the bookmark's URL, title, favicon, tags and notes, and writes the changes back to the same note — its filename, save date and read state are left untouched.
+- "Fetch Page Content" on the edit form only pulls from the active browser tab when it is the bookmarked page, instead of grabbing whatever tab is in front.
+
+## [Favicons] - 2026-10-05
+
+- Show the favicon of each bookmarked website in search results, instead of a generic link icon. Falls back to the link icon when no favicon can be found.
+- Allow overriding that favicon from a frontmatter field (configurable via the new "Favicon Field" preference; default is `favicon`). The value can be another website URL or a direct image URL.
+- Add an optional "Favicon" dropdown to the save bookmark form. Typing a URL in its search field turns it into a selectable option showing the icon it resolves to, so the resulting icon is visible before saving.
+
+## [Fixed bookmark deletion] - 2026-09-29
+
+- Close the bookmark list after successful deletion and show a confirmation
+- Show an error message when deletion fails
+
 ## [1.0.5] - 2024-11-26
 
 - Search for bookmarks in subfolders below the configured Bookmarks subfolder. This option is configurable via a new preferences checkbox; default is true (enabled subfolder search).

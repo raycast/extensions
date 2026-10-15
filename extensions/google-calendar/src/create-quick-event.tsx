@@ -1,42 +1,17 @@
 import { Action, ActionPanel, Form, Icon, Toast, getPreferenceValues, open, showToast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useGoogleAPIs, withGoogleAPIs } from "./lib/google";
+import { buildAllDayDateRange } from "./lib/events";
+import { parseQuickEventInput, type QuickEventParseResult } from "./lib/quick-event";
 import { calendar_v3 } from "@googleapis/calendar";
 import { useEffect, useState } from "react";
 import { format, formatRelative } from "date-fns";
-import * as chrono from "chrono-node";
 
 type FormValues = {
   input: string;
 };
 
 const preferences = getPreferenceValues();
-
-type ParseInputReturn = {
-  title?: string;
-  startTime?: Date;
-  error?: string;
-  input: string;
-};
-
-function parseInput(input: string): ParseInputReturn {
-  if (!input.trim()) {
-    return { input };
-  }
-  const results = chrono.parse(input);
-  if (results.length === 0) {
-    return { input, title: input, error: `No time detected – try adding "at 3pm"` };
-  }
-
-  const title = input.replace(results[0].text, "").trim();
-  const startTime = results[0].start.date();
-
-  if (title === "") {
-    return { input, error: "Title cannot be empty" };
-  }
-
-  return { input, title, startTime };
-}
 
 function Command() {
   const { calendar } = useGoogleAPIs();
@@ -68,18 +43,17 @@ function Command() {
       const startTime = parsed.startTime;
       const defaultDuration = preferences.defaultEventDuration;
       const durationMs = (defaultDuration ? Number(defaultDuration) : 15) * 60 * 1000;
-
-      const requestBody: calendar_v3.Schema$Event = {
-        summary: parsed.title,
-        start: {
-          dateTime: startTime.toISOString(),
-        },
-        end: {
-          dateTime: new Date(startTime.getTime() + durationMs).toISOString(),
-        },
-      };
-
       try {
+        const schedule = parsed.allDay
+          ? buildAllDayDateRange(startTime, parsed.endTime)
+          : {
+              start: { dateTime: startTime.toISOString() },
+              end: { dateTime: new Date(startTime.getTime() + durationMs).toISOString() },
+            };
+        const requestBody: calendar_v3.Schema$Event = {
+          summary: parsed.title,
+          ...schedule,
+        };
         const event = await calendar.events.insert({
           calendarId: "primary",
           requestBody,
@@ -104,14 +78,14 @@ function Command() {
     },
   });
 
-  const [parsed, setParsed] = useState<ParseInputReturn>({
+  const [parsed, setParsed] = useState<QuickEventParseResult>({
     title: "",
     startTime: undefined,
     input: "",
   });
   useEffect(() => {
     const timeout = setTimeout(() => {
-      setParsed(parseInput(values.input));
+      setParsed(parseQuickEventInput(values.input));
     }, 200);
     return () => clearTimeout(timeout);
   }, [values.input]);
@@ -126,7 +100,7 @@ function Command() {
     >
       <Form.TextField
         title="Title and Date/Time"
-        placeholder="Team meeting tomorrow at 3pm, 10/01 14:30, next Mon 9am"
+        placeholder="Team meeting tomorrow at 3pm, Vacation tomorrow, Offsite Aug 3 all day"
         {...itemProps.input}
       />
       <Form.Description title="Parsed error" text={parsed.error || " "} />
@@ -134,7 +108,11 @@ function Command() {
         title="Preview"
         text={`${parsed.title || ""} \n${
           parsed.startTime
-            ? `${formatRelative(parsed.startTime, new Date())} (${format(parsed.startTime, "PPPp")})`
+            ? parsed.allDay
+              ? `All day: ${format(parsed.startTime, "PPP")}${
+                  parsed.endTime ? ` – ${format(parsed.endTime, "PPP")}` : ""
+                }`
+              : `${formatRelative(parsed.startTime, new Date())} (${format(parsed.startTime, "PPPp")})`
             : ""
         }`}
       />

@@ -15,8 +15,9 @@ type Input = {
   vaultName?: string;
   /**
    * Whether to search inside note content and enable tag filtering.
-   * Set to false for faster title/path-only search.
-   * Defaults to true.
+   * Set to true only when the user needs full-text or tag search.
+   * Defaults to false (title/path only) so a single oversized Markdown
+   * file cannot OOM the extension worker.
    */
   searchContent?: boolean;
 };
@@ -43,7 +44,7 @@ export default async function tool(input: Input) {
     return `Vault "${input.vaultName}" not found. Available vaults: ${vaults.map((v) => v.name).join(", ")}`;
   }
 
-  const useContentSearch = input.searchContent !== false;
+  const useContentSearch = input.searchContent === true;
 
   logger.info(`Searching with ${useContentSearch ? "content search" : "title/path only"} for "${input.searchTerm}"`);
 

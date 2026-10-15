@@ -67,7 +67,10 @@ function ToggleViewAction({ mode, toggle }: { mode: "list" | "grid"; toggle: () 
     <Action
       icon={mode === "list" ? Icon.AppWindowGrid2x2 : Icon.List}
       title={mode === "list" ? "View as Grid" : "View as List"}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "v" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+      }}
       onAction={toggle}
     />
   );
@@ -225,7 +228,7 @@ function Command() {
             {uniqueItems.map((block, index) => (
               <Grid.Item
                 key={block.id != null ? String(block.id) : `block-${index}`}
-                content={getIconSource(block)}
+                content={getIconSource(block, true)}
                 title={block.title?.trim() || block.generated_title || "Untitled"}
                 subtitle={[block.class, block.user?.full_name].filter(Boolean).join(" · ")}
                 actions={<BlockItemActions block={block} mode={mode} toggle={toggle} />}

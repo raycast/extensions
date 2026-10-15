@@ -1,12 +1,21 @@
 import { Action, Icon, List, useNavigation } from "@raycast/api";
 import { AddressLineByAddress } from "./components/AddressLine";
 import { getAddresses } from "./shared/utils";
-import { usePromise } from "@raycast/utils";
+import { usePromise, withAccessToken } from "@raycast/utils";
 import { AddressView } from "./components/AddressView";
+import { zerionOAuth } from "./shared/oauth";
+import { useApiErrorGate } from "./components/ApiKeyGate";
+import { useState } from "react";
 
-export default function Command() {
+function Command() {
   const { data: addresses, isLoading, revalidate } = usePromise(getAddresses);
   const { push } = useNavigation();
+  const [apiError, setApiError] = useState<unknown>();
+
+  const errorGate = useApiErrorGate(apiError);
+  if (errorGate) {
+    return errorGate;
+  }
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter Wallets">
@@ -29,9 +38,12 @@ export default function Command() {
               />
             }
             onChangeSavedStatus={revalidate}
+            onApiError={setApiError}
           />
         ))
       )}
     </List>
   );
 }
+
+export default withAccessToken(zerionOAuth)(Command);

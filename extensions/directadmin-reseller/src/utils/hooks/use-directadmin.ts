@@ -3,6 +3,7 @@ import { BodyRequest } from "../../types";
 import { DIRECTADMIN_URL } from "../constants";
 import { showToast, Toast } from "@raycast/api";
 import { generateApiToken } from "../functions";
+import { Panel } from "../../types/panel";
 
 type UseDirectAdminOptions<T> = {
   params?: { [key: string]: string };
@@ -29,16 +30,17 @@ type JsonError = {
 function useDirectAdmin<T>(
   endpoint: string,
   options: UseDirectAdminOptions<T> = { params: {}, animatedToastMessage: "", userToImpersonate: "" },
+  panel?: Panel,
 ) {
   const API_PARAMS = new URLSearchParams({
     ...options.params,
   });
   const isLegacyApi = endpoint.includes("CMD_API");
-  const API_URL = new URL(endpoint, DIRECTADMIN_URL) + `?${API_PARAMS}`;
+  const API_URL = new URL(endpoint, panel?.directadmin_url || DIRECTADMIN_URL) + `?${API_PARAMS}`;
 
   const { animatedToastMessage, userToImpersonate } = options;
 
-  const token = generateApiToken(userToImpersonate);
+  const token = generateApiToken(userToImpersonate, panel);
   const headers = { Authorization: `Basic ${token}`, Accept: "application/json", "Content-Type": "application/json" };
 
   const method = !options.body ? "GET" : "POST";
@@ -77,14 +79,19 @@ function useDirectAdmin<T>(
 export function useLegacyDirectAdmin<T>(
   cmd: string,
   options: UseDirectAdminOptions<T> = { params: {}, animatedToastMessage: "", userToImpersonate: "" },
+  panel?: Panel,
 ) {
-  return useDirectAdmin<T>(`CMD_API_${cmd}`, {
-    ...options,
-    params: {
-      ...options.params,
-      json: "yes",
+  return useDirectAdmin<T>(
+    `CMD_API_${cmd}`,
+    {
+      ...options,
+      params: {
+        ...options.params,
+        json: "yes",
+      },
     },
-  });
+    panel,
+  );
 }
 
 export function useJsonDirectAdmin<T>(

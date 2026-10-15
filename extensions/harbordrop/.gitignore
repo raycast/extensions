@@ -1,0 +1,5 @@
+node_modules/
+dist/
+raycast-env.d.ts
+*.rayext
+build-output-audit.json

@@ -5,6 +5,7 @@ import { adaptPullRequest, type TruncationReport } from "./graphql-adapter";
 import type { PRWithActivity, SeenMap, SeenState } from "./types";
 import { prKey } from "./types";
 import type { EventFilters } from "./event-filters";
+import { matchesPrFilter, type CompiledPrFilter } from "./pr-filter-query";
 import { getUnseenActivity } from "./utils";
 import { apiLog as log, safeUrl } from "./logger";
 
@@ -248,6 +249,7 @@ async function fetchMetadataForRepo(
 export interface GraphQLFetchOptions {
   seen: SeenMap;
   filters: EventFilters;
+  prFilter?: CompiledPrFilter;
   maxUnread: number;
   maxScan: number;
 }
@@ -341,7 +343,7 @@ export async function fetchPRsWithActivityGraphQL(opts: GraphQLFetchOptions): Pr
       const unseen = getUnseenActivity(adapted.pr, opts.seen[prKey(adapted.pr)]).filter(
         (item) => opts.filters[item.type],
       );
-      if (unseen.length > 0) {
+      if (unseen.length > 0 && (!opts.prFilter || matchesPrFilter(adapted.pr, opts.prFilter))) {
         // Preserve the existing output contract: only unread PRs are retained in memory/cache.
         prs.push(adapted.pr);
       } else if (adapted.truncations.length > 0) {

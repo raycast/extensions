@@ -166,7 +166,7 @@
     "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.16.0",
     "dub": "^0.61.5",
-    "undici": "^6.19.2"
+    "undici": "^6.29.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
@@ -182,5 +182,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9"
   }
 }

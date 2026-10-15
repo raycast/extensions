@@ -38,6 +38,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "tsc --project tsconfig.json --outDir .test-dist --noEmit false && node --test test/appleSearch.test.js",
     "publish": "ray publish"
   },
   "platforms": [

@@ -16,7 +16,10 @@ function ToggleViewAction({ mode, toggle }: { mode: "list" | "grid"; toggle: () 
     <Action
       icon={mode === "list" ? Icon.AppWindowGrid2x2 : Icon.List}
       title={mode === "list" ? "View as Grid" : "View as List"}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "v" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+      }}
       onAction={toggle}
     />
   );
@@ -100,7 +103,7 @@ function ChannelItemActions({
           <Action.CopyToClipboard
             title="Copy Link"
             content={`https://www.are.na/${channel.owner_slug}/${channel.slug}`}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "." }, Windows: { modifiers: ["ctrl"], key: "." } }}
           />
         )}
       </ActionPanel.Section>

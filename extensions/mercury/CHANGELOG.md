@@ -1,15 +1,45 @@
 # Mercury Changelog
 
-## [Initial Version] - 2023-08-29
+## [Safer Statement Downloads] - 2026-10-05
 
-- View Mercury accounts and balances
-- View recent transactions
-- Filter transactions by type
-- Copy account and routing numbers
+- Downloading a statement no longer writes your Mercury API token to temporary files on disk
+- A statement Mercury hasn't finished preparing now fails with a message saying so, instead of saving an unreadable PDF
 
-## [AI Account Summary] - 2024-08-01
+## [Multiple Accounts, Statements, and Menu Bar] - 2026-09-28
 
-- Get an AI-generated summary of your accounts
+- Connect more than one Mercury account, such as personal and business, from the new Manage Accounts command. Your existing API key is imported automatically
+- Balances load instantly from an encrypted cache, then refresh in the background
+- Added Search Transactions: search all your accounts at once, with a detail sidebar, categories, receipts, and export to CSV, Markdown, or plain text
+- Each account's transactions can be filtered by status (pending, failed) or category
+- Added View Statements: download statements, open them as PDFs, or download a whole year at once
+- Added a Mercury Balance menu bar command. Hold ⌥ to choose which accounts count toward the total
+- Added wire details you can view, copy, or save as a text file
+- Added your Treasury account, with its transactions, and credit balances for business accounts
+- Added a View Cards command, with each card's transactions
+- Added AI tools for Treasury and cards; `@mercury` can now search transactions across all accounts and report your largest transactions
+- Removed the AI Account Summary command. Ask `@mercury` in Raycast AI instead, which supports follow-up questions and your chosen model
+- Added Debug Logging and Strict Redaction preferences for troubleshooting
+- Fixed missing counterparty icons in the transactions list
+- Invalid API tokens now show why Mercury rejected them, with an action to update the token
+- Error toasts now include an action to copy the error
+- Updated keyboard shortcuts to standard Raycast conventions
+- Migrated to Raycast API v2 and removed the `node-fetch` dependency
+- Added setup help for finding your Mercury API token
+
+## [Integration of AI-Driven Financial Tools] - 2025-02-28
+
+- Introduced AI tools for account balance inquiries, transaction insights, and comprehensive financial analyses
+- Improved AI eval tests for reliable behavior assessments
+
+## [Bug Fixes and Performance Improvements] - 2024-10-28
+
+- Fixed crash when retrying summary generation by replacing browser-specific `window.location.reload()` with Raycast-native navigation methods.
+
+## [Interactive AI Assistant with Follow-up Questions] - 2024-10-17
+
+- Follow-up Question Capability:
+  - Introduced the ability to ask follow-up questions to the AI-generated account summary.
+  - Users can interact with the AI assistant to gain deeper insights and clarifications about their financial data.
 
 ## [Enhanced AI Account Summary with Detailed Metadata] - 2024-10-16
 
@@ -32,17 +62,14 @@
   - Improved data fetching and state management for smoother performance.
   - Fixed variable scope issues to prevent reference errors.
   
-## [Interactive AI Assistant with Follow-up Questions] - 2024-10-17
 
-- Follow-up Question Capability:
-  - Introduced the ability to ask follow-up questions to the AI-generated account summary.
-  - Users can interact with the AI assistant to gain deeper insights and clarifications about their financial data.
+## [AI Account Summary] - 2024-08-01
 
-## [Bug Fixes and Performance Improvements] - 2024-10-28
+- Get an AI-generated summary of your accounts
 
-- Fixed crash when retrying summary generation by replacing browser-specific `window.location.reload()` with Raycast-native navigation methods.
+## [Initial Version] - 2023-08-29
 
-## [Integration of AI-Driven Financial Tools] - 2025-02-28
-
-- Introduced AI tools for account balance inquiries, transaction insights, and comprehensive financial analyses
-- Improved AI eval tests for reliable behavior assessments
+- View Mercury accounts and balances
+- View recent transactions
+- Filter transactions by type
+- Copy account and routing numbers

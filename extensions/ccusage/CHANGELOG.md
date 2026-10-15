@@ -1,5 +1,24 @@
 # Claude Usage (ccusage) Changelog
 
+## [Fix npx failure with missing npm prefix and surface CLI errors] - 2026-09-07
+
+### Fixed
+
+- Only set `npm_config_prefix` to `~/.npm-global` when that directory exists — pointing npm at a missing prefix made npx fail with ENOENT on nvm/Homebrew installs, breaking every command
+- Report the actual failure reason (spawn error, exit code, signal, or timeout, with stderr) when the ccusage CLI fails, instead of a misleading "No output received"
+
+## [Fable support and per-model limits] - 2026-08-29
+
+### Added
+
+- **Frontier model tier:** Model Statistics now groups Fable into a Frontier tier above Premium, so its higher per-token pricing stays separate from Opus. Tiers also render in a fixed order rather than in whatever order the models arrive.
+- **Per-model limits everywhere:** The Usage Limits detail view and the `get-usage-limits` AI tool now show per-model windows alongside the 5-hour and 7-day totals. Previously these appeared only in the menu bar.
+
+### Changed
+
+- Per-model limits are read from the usage endpoint's self-describing `limits` array, so a window for any model shows up under its own name and period without an extension update. The older `seven_day_sonnet` and `seven_day_opus` fields still supply any window the array does not carry.
+- The menu bar and Usage Limits view render every limit window through one path instead of hardcoding a block per window, so the 5-hour, 7-day, and per-model rows stay consistent with each other.
+
 ## [Rename to Claude Usage] - 2026-07-29
 
 ### Changed

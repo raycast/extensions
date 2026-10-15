@@ -1,13 +1,17 @@
-import { Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { Grid, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useCallback, useRef, useState } from "react";
 import { GenericGrid } from "./components/generic-grid";
 import { ShowActionPanel } from "./components/media-actions";
+import { ShowSearchActions } from "./components/search-item-actions";
 import { useActionRunner } from "./lib/action-runner";
 import { initTraktClient } from "./lib/client";
 import { getPosterUrl } from "./lib/helper";
-import { addShowToHistory, addShowToWatchlist, checkInFirstEpisodeToHistory } from "./lib/media-mutations";
+import { markFirstEpisodeWatched } from "./lib/media-mutations";
 import { TraktShowListItem } from "./lib/schema";
+import { useRatingsSync } from "./lib/use-ratings";
+import { useWatchedState, useWatchedSync } from "./lib/use-watched";
+import { useWatchlistSync } from "./lib/use-watchlist-ids";
 import { abortSearch, createSearchFetcher } from "./lib/search";
 
 export default function Command() {
@@ -15,6 +19,10 @@ export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
   const [actionLoading, setActionLoading] = useState(false);
   const traktClient = initTraktClient();
+  useWatchlistSync();
+  useRatingsSync();
+  useWatchedSync();
+  const { setWatched } = useWatchedState();
   const {
     isLoading,
     data: shows,
@@ -39,23 +47,12 @@ export default function Command() {
     },
   );
 
-  const addShowToWatchlistAction = useCallback(
+  const markFirstEpisodeWatchedAction = useCallback(
     async (show: TraktShowListItem) => {
-      await addShowToWatchlist(traktClient, show, { signal: abortable.current?.signal });
-    },
-    [traktClient],
-  );
-
-  const addShowToHistoryAction = useCallback(
-    async (show: TraktShowListItem) => {
-      await addShowToHistory(traktClient, show, { signal: abortable.current?.signal });
-    },
-    [traktClient],
-  );
-
-  const checkInFirstEpisodeToHistoryAction = useCallback(
-    async (show: TraktShowListItem) => {
-      await checkInFirstEpisodeToHistory(traktClient, show, { signal: abortable.current?.signal });
+      await markFirstEpisodeWatched(traktClient, show.show.ids.trakt, { signal: abortable.current?.signal });
+      const showId = show.show.ids.trakt;
+      setWatched({ type: "show", traktId: showId }, true);
+      setWatched({ type: "episode", showId, season: 1, number: 1 }, true);
     },
     [traktClient],
   );
@@ -82,23 +79,18 @@ export default function Command() {
       actions={(item) => (
         <ShowActionPanel
           item={item}
-          onCheckInFirstEpisode={(show) =>
-            runShowAction(show, checkInFirstEpisodeToHistoryAction, "First episode checked-in")
+          onMarkFirstEpisodeWatched={(show) =>
+            runShowAction(show, markFirstEpisodeWatchedAction, "First episode marked as watched")
           }
-          actions={[
-            {
-              title: "Add to Watchlist",
-              icon: Icon.Bookmark,
-              shortcut: Keyboard.Shortcut.Common.Edit,
-              onAction: (show) => runShowAction(show, addShowToWatchlistAction, "Show added to watchlist"),
-            },
-            {
-              title: "Add to History",
-              icon: Icon.Clock,
-              shortcut: Keyboard.Shortcut.Common.Duplicate,
-              onAction: (show) => runShowAction(show, addShowToHistoryAction, "Show added to history"),
-            },
-          ]}
+          actions={[]}
+          actionItems={
+            <ShowSearchActions
+              item={item}
+              client={traktClient}
+              signal={() => abortable.current?.signal}
+              run={runShowAction}
+            />
+          }
         />
       )}
     />

@@ -36,6 +36,9 @@ interface DbRow {
 
 const DB_PATH = join(homedir(), "Library/KeyboardServices/TextReplacements.db");
 
+// The JSON dump of a large replacement set exceeds Node's default 1 MiB stdout buffer
+const MAX_BUFFER = 64 * 1024 * 1024;
+
 // Resolve Z_ENT dynamically so we're not fragile against CoreData schema changes
 function getZEnt(): number {
   const result = execFileSync(
@@ -82,7 +85,7 @@ function loadReplacements(): Replacement[] {
          AND ZSHORTCUT IS NOT NULL AND ZSHORTCUT != ''
        ORDER BY ZSHORTCUT ASC;`,
     ],
-    { encoding: "utf8", timeout: 5000 },
+    { encoding: "utf8", timeout: 5000, maxBuffer: MAX_BUFFER },
   ).trim();
 
   const rows = JSON.parse(output || "[]") as DbRow[];

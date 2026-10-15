@@ -22,6 +22,7 @@ export function getAdapterForBrowser(browserName: SupportedBrowsers): MeetingUrl
     case "Brave Browser":
     case "Microsoft Edge":
     case "Opera":
+    case "Aside":
     case "QQ":
     case "Sogou Explorer":
     case "Vivaldi":

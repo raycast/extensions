@@ -1,137 +1,108 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, Color, getPreferenceValues } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
-import { listVaults, listItems, checkAuth, loginWithBrowser } from "./lib/pass-cli";
-import { Vault, Item, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
-import { getItemIcon } from "./lib/utils";
-import { getCachedVaults, setCachedVaults, getCachedItemsForVault, setCachedItemsForVault } from "./lib/cache";
-import { openTerminalForLogin } from "./lib/terminal";
+import { List, ActionPanel, Action, Icon, getPreferenceValues, Keyboard } from "@raycast/api";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { listVaultSharing, listVaultsAndItems } from "./lib/pass-cli";
+import { Vault, PassCliError, PROTON_PASS_CLI_DOCS } from "./lib/types";
+import { SearchItemsView } from "./lib/search-items-view";
+import { NotLoggedInView } from "./lib/login-view";
+import {
+  getCachedItems,
+  getCachedSharing,
+  getCachedVaults,
+  setCachedItems,
+  setCachedSharing,
+  setCachedVaults,
+} from "./lib/cache";
+import { countItemsByVault, formatItemCount, refreshItemCounts } from "./lib/item-counts";
+import { createListingSaves, createRequestTracker, listingSaves } from "./lib/refresh";
+import { platformShortcut } from "./lib/shortcuts";
+import { mergeSharing, sharedVaultTooltip, withSharing } from "./lib/vault-sharing";
+import { CliNotFoundView } from "./lib/error-views";
 
-function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgroundRefreshEnabled: boolean }) {
-  const [items, setItems] = useState<Item[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const hasLoadedFromCache = useRef(false);
+/** Only List Vaults lists sharing: overlapping loads, e.g. a refresh and Retry, save it in the order they started. */
+const sharingSaves = createListingSaves();
 
-  useEffect(() => {
-    loadVaultItems();
-  }, []);
-
-  async function loadVaultItems() {
-    const cachedItems = await getCachedItemsForVault(vault.shareId);
-    if (cachedItems && !hasLoadedFromCache.current) {
-      setItems(cachedItems);
-      setIsLoading(false);
-      hasLoadedFromCache.current = true;
-
-      if (!backgroundRefreshEnabled) {
-        return;
-      }
-    }
-
-    try {
-      const freshItems = await listItems(vault.shareId);
-      setItems(freshItems);
-      await setCachedItemsForVault(vault.shareId, freshItems);
-    } catch (error: unknown) {
-      if (!hasLoadedFromCache.current) {
-        const message = error instanceof Error ? error.message : "An unknown error occurred";
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load items",
-          message,
-        });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  return (
-    <List isLoading={isLoading} navigationTitle={vault.name} searchBarPlaceholder="Search items...">
-      {items.length === 0 && !isLoading ? (
-        <List.EmptyView
-          icon={Icon.Folder}
-          title="No Items in This Vault"
-          description="This vault is empty or contains no visible items."
-        />
-      ) : (
-        items.map((item) => (
-          <List.Item
-            key={`${item.shareId}-${item.itemId}`}
-            icon={getItemIcon(item.type)}
-            title={item.title}
-            subtitle={item.username || item.email}
-            accessories={[item.hasTotp ? { icon: Icon.Clock, tooltip: "Has TOTP" } : {}, { text: item.type }].filter(
-              (acc) => Object.keys(acc).length > 0,
-            )}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Title"
-                  content={item.title}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
-                />
-                {item.username && (
-                  <Action.CopyToClipboard
-                    title="Copy Username"
-                    content={item.username}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
-                  />
-                )}
-                {item.email && (
-                  <Action.CopyToClipboard
-                    title="Copy Email"
-                    content={item.email}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-                  />
-                )}
-              </ActionPanel>
-            }
-          />
-        ))
-      )}
-    </List>
-  );
+/** Marks shared vaults, whether you shared them or they were shared with you. */
+function sharedAccessory(vault: Vault): List.Item.Accessory | undefined {
+  const tooltip = sharedVaultTooltip(vault);
+  return tooltip === undefined ? undefined : { icon: Icon.TwoPeople, tooltip };
 }
 
 export default function Command() {
   const [vaults, setVaults] = useState<Vault[]>([]);
+  const [itemCounts, setItemCounts] = useState<Map<string, number>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<PassCliError | null>(null);
   const preferences = getPreferenceValues<Preferences>();
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const hasLoadedFromCache = useRef(false);
+  // Loads can overlap, e.g. Check Again while a browser login reloads: only the latest one updates the view.
+  const loads = useMemo(createRequestTracker, []);
 
   useEffect(() => {
     loadVaults();
   }, []);
 
   async function loadVaults() {
-    setError(null);
+    const isLatest = loads.start();
+    // The login screen stays while loading after a login or Check Again, until there's something to show.
+    if (error?.type !== "not_authenticated") setError(null);
+    setIsLoading(true);
 
-    const cachedVaults = await getCachedVaults();
+    const [cachedVaults, cachedItems, cachedSharing] = await Promise.all([
+      getCachedVaults(),
+      getCachedItems(),
+      getCachedSharing(),
+    ]);
+    if (!isLatest()) return;
     if (cachedVaults && !hasLoadedFromCache.current) {
-      setVaults(cachedVaults);
-      setIsLoading(false);
+      setVaults(withSharing(cachedVaults.data, cachedSharing?.data ?? {}));
+      // The items cache only holds complete listings, so every cached vault gets a count.
+      if (cachedItems) setItemCounts(countItemsByVault(cachedVaults.data, cachedItems.data));
       hasLoadedFromCache.current = true;
 
-      if (!backgroundRefreshEnabled) {
+      // Search Items renews the vaults it saves, but only List Vaults lists sharing, so its age counts too.
+      if (!cachedVaults.isStale && cachedSharing?.isStale === false && !backgroundRefreshEnabled) {
+        setIsLoading(false);
         return;
       }
     }
 
     try {
-      const isAuth = await checkAuth();
-      if (!isAuth) {
-        setError(new PassCliError("Not authenticated. Please log in to Proton Pass.", "not_authenticated"));
-        setIsLoading(false);
-        return;
+      // Items are listed too, for their number per vault; the listing also refreshes Search Items' cache.
+      const listing = listingSaves.start();
+      const sharingListing = sharingSaves.start();
+      // Sharing only adds an icon: don't hold up the vaults or items while its member commands run.
+      const freshSharing = listVaultSharing().catch(() => undefined);
+      const { vaults: freshVaults, items, failedVaults } = await listVaultsAndItems();
+      if (!isLatest()) return;
+      setVaults(withSharing(freshVaults, cachedSharing?.data ?? {}));
+      setError(null);
+      const failed = new Set(failedVaults.map(({ vault }) => vault.shareId));
+      setItemCounts((previous) => refreshItemCounts(previous, freshVaults, items, failed));
+      // Add and save optional sharing when ready, only if this is still the latest load.
+      void freshSharing
+        .then(async (fresh) => {
+          if (!fresh || !isLatest()) return;
+          const sharing = mergeSharing(fresh, cachedSharing?.data);
+          setVaults(withSharing(freshVaults, sharing));
+          await sharingSaves.save(sharingListing, () => setCachedSharing(sharing));
+        })
+        .catch(() => undefined);
+      // Vaults and items are saved together, from complete listings only: a saved vault missing from the saved
+      // items would count 0 items. Saves follow the order listings started, also across Search Items.
+      if (failed.size === 0 && isLatest()) {
+        await listingSaves.save(listing, () =>
+          Promise.all([setCachedItems(items, true), setCachedVaults(freshVaults)]),
+        );
       }
-
-      const freshVaults = await listVaults();
-      setVaults(freshVaults);
-      await setCachedVaults(freshVaults);
     } catch (err: unknown) {
-      if (!hasLoadedFromCache.current) {
+      if (!isLatest()) return;
+      // The vaults and counts of an ended session must not show up again, e.g. while Check Again runs.
+      if (err instanceof PassCliError && err.type === "not_authenticated") {
+        setVaults([]);
+        setItemCounts(new Map());
+      }
+      if (!hasLoadedFromCache.current || (err instanceof PassCliError && err.type === "not_authenticated")) {
         if (err instanceof PassCliError) {
           setError(err);
         } else {
@@ -140,100 +111,21 @@ export default function Command() {
         }
       }
     } finally {
-      setIsLoading(false);
+      if (isLatest()) setIsLoading(false);
     }
   }
 
-  async function handleBrowserLogin() {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Starting Proton Pass login",
-      message: "Complete authentication in your browser",
-    });
-
-    try {
-      await loginWithBrowser();
-      toast.style = Toast.Style.Success;
-      toast.title = "Logged in";
-      toast.message = "Reloading vaults";
-      await loadVaults();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Failed to login";
-      toast.style = Toast.Style.Failure;
-      toast.title = "Login failed";
-      toast.message = message;
-    }
-  }
-
-  function getRoleIcon(role: VaultRole): Icon {
-    switch (role) {
-      case "owner":
-        return Icon.Crown;
-      case "manager":
-        return Icon.PersonCircle;
-      case "editor":
-        return Icon.Pencil;
-      case "viewer":
-        return Icon.Eye;
-      default:
-        return Icon.Eye;
-    }
-  }
-
-  function getRoleColor(role: VaultRole): Color {
-    switch (role) {
-      case "owner":
-        return Color.Yellow;
-      case "manager":
-        return Color.Blue;
-      case "editor":
-        return Color.Green;
-      case "viewer":
-        return Color.SecondaryText;
-      default:
-        return Color.SecondaryText;
-    }
-  }
+  const shownVaults = useMemo(
+    () => vaults.map((vault) => ({ ...vault, itemCount: itemCounts.get(vault.shareId) ?? vault.itemCount })),
+    [vaults, itemCounts],
+  );
 
   if (error?.type === "not_installed") {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.XMarkCircle}
-          title="Proton Pass CLI Not Installed"
-          description="You need to install the Proton Pass CLI to use this extension. Click below to learn how to install it."
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser title="Open Installation Guide" url={PROTON_PASS_CLI_DOCS} icon={Icon.Globe} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
+    return <CliNotFoundView />;
   }
 
   if (error?.type === "not_authenticated") {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.Lock}
-          title="Not Logged In"
-          description="Use browser login (default pass-cli flow). Terminal login remains available as a fallback."
-          actions={
-            <ActionPanel>
-              <Action title="Login with Browser" icon={Icon.Globe} onAction={handleBrowserLogin} />
-              <Action title="Open Terminal Login (Fallback)" icon={Icon.Terminal} onAction={openTerminalForLogin} />
-              <Action.OpenInBrowser
-                title="View CLI Documentation"
-                url={PROTON_PASS_CLI_DOCS}
-                icon={Icon.Globe}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
-              />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
+    return <NotLoggedInView reload={loadVaults} />;
   }
 
   if (error?.type === "keyring_error") {
@@ -315,38 +207,27 @@ export default function Command() {
           description="You don't have any vaults yet or they couldn't be loaded."
         />
       ) : (
-        vaults.map((vault) => (
+        shownVaults.map((vault) => (
           <List.Item
             key={vault.shareId}
             icon={Icon.Folder}
             title={vault.name}
             accessories={[
-              { text: `${vault.itemCount} ${vault.itemCount === 1 ? "item" : "items"}` },
-              {
-                tag: {
-                  value: vault.role,
-                  color: getRoleColor(vault.role),
-                },
-                icon: getRoleIcon(vault.role),
-                tooltip: `Role: ${vault.role}`,
-              },
-            ]}
+              sharedAccessory(vault),
+              vault.itemCount === undefined ? undefined : { text: formatItemCount(vault.itemCount) },
+            ].filter((accessory) => accessory !== undefined)}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="View Items"
-                  icon={Icon.List}
-                  target={<VaultItems vault={vault} backgroundRefreshEnabled={backgroundRefreshEnabled} />}
-                />
+                <Action.Push title="View Items" icon={Icon.List} target={<SearchItemsView initialVault={vault} />} />
                 <Action.CopyToClipboard
                   title="Copy Vault Name"
                   content={vault.name}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                 />
                 <Action.CopyToClipboard
                   title="Copy Share ID"
                   content={vault.shareId}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                  shortcut={platformShortcut(["cmd", "shift"], "i")}
                 />
               </ActionPanel>
             }

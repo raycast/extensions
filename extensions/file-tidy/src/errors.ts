@@ -11,7 +11,13 @@ interface CoreError extends Error {
   label?: string;
   segment?: string;
   destDir?: string;
+  report?: string;
 }
+
+const REPORT_LABEL: Record<string, string> = {
+  duplicates: "Duplicate details",
+  similar: "Look-alike report",
+};
 
 export function describeError(err: unknown, fallbackTitle: string): { title: string; message: string } {
   const e = err as CoreError;
@@ -38,6 +44,13 @@ export function describeError(err: unknown, fallbackTitle: string): { title: str
       return {
         title: "Invalid tidy record",
         message: `${e.manifestPath} is unusable, so this run can't be undone`,
+      };
+    // Not a failed run: this one only ever describes an append that happened
+    // after every file had already moved.
+    case "REPORT_WRITE":
+      return {
+        title: `${REPORT_LABEL[e.report ?? ""] ?? "Record"} not written`,
+        message: `Every file was moved as planned; only ${e.path} could not be updated: ${cause ?? ""}`,
       };
     default:
       return { title: fallbackTitle, message: err instanceof Error ? err.message : String(err) };

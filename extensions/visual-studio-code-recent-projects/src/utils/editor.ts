@@ -6,7 +6,12 @@ import path from "path";
 const cachedGetApplications = cacheFunc(getApplications);
 
 const bundleIdMap: Record<string, { macos: string; windows: { name: string; exe: string } }> = {
-  Antigravity: { macos: "com.google.antigravity", windows: { name: "Antigravity", exe: "Antigravity.exe" } },
+  // Preference value stays "Antigravity" for backward compat (see getBuildNamePreference),
+  // but the installed app was rebranded to "Antigravity IDE".
+  "Antigravity IDE": {
+    macos: "com.google.antigravity-ide",
+    windows: { name: "Antigravity IDE", exe: "Antigravity IDE.exe" },
+  },
   Code: { macos: "com.microsoft.VSCode", windows: { name: "Visual Studio Code", exe: "Code.exe" } },
   "Code - Insiders": {
     macos: "com.microsoft.VSCodeInsiders",
@@ -37,8 +42,11 @@ const bundleIdMap: Record<string, { macos: string; windows: { name: string; exe:
 export async function getEditorApplication(buildName: string): Promise<Application | undefined> {
   const apps = await cachedGetApplications();
 
+  // Migrate legacy preference value to the rebranded app name.
+  const normalizedBuildName = buildName === "Antigravity" ? "Antigravity IDE" : buildName;
+
   // Find the app by bundle ID
-  const bundleId = bundleIdMap[buildName];
+  const bundleId = bundleIdMap[normalizedBuildName];
   if (isMac) {
     if (bundleId) {
       const app = apps.find((app) => {
@@ -46,7 +54,7 @@ export async function getEditorApplication(buildName: string): Promise<Applicati
 
         // Special case for Windsurf and Devin where the bundle ID is the same for both builds
         if (app.bundleId === "com.exafunction.windsurf") {
-          return app.path.toLowerCase().includes(`${buildName.toLowerCase()}.app`);
+          return app.path.toLowerCase().includes(`${normalizedBuildName.toLowerCase()}.app`);
         }
 
         return true;
@@ -54,13 +62,16 @@ export async function getEditorApplication(buildName: string): Promise<Applicati
       if (app) return app;
     }
   } else {
+    if (!bundleId) return undefined;
+    const wantedName = bundleId.windows.name.toLowerCase();
+    const wantedExe = bundleId.windows.exe.toLowerCase();
     const app = apps.find((app) => {
-      const isNameMatch = app.name === bundleId.windows.name;
+      if (app.name.toLowerCase() === wantedName) return true;
 
-      const exeFromPath = path.basename(app.path);
-      const isExeMatch = exeFromPath === bundleId.windows.exe;
+      const exeFromPath = path.win32.basename(app.path).toLowerCase();
+      if (exeFromPath === wantedExe) return true;
 
-      return isNameMatch || isExeMatch;
+      return false;
     });
     if (app) return app;
   }

@@ -1,3 +1,4 @@
+export { default as CleanUpRepository } from "./clean-up-repository.js";
 export { default as CreateExtension } from "./create-extension.js";
 export { default as Diagnostics } from "./diagnostics.js";
 export { default as ManageSparseCheckout } from "./manage-sparse-checkout.js";

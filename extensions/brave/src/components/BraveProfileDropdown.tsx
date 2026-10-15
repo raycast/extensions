@@ -34,8 +34,9 @@ export default function BraveProfileDropDown({ onProfileSelected }: Props) {
   useEffect(() => {
     if (loadedProfiles) {
       setProfiles(loadedProfiles);
-      if (!selectedProfile) {
-        setSelectedProfile(profiles[0].id);
+      const selectedProfileExists = loadedProfiles.some((profile) => profile.id === selectedProfile);
+      if (!selectedProfile || !selectedProfileExists) {
+        setSelectedProfile(loadedProfiles[0]?.id ?? DEFAULT_BRAVE_PROFILE_ID);
       }
     }
   }, [loadedProfiles]);

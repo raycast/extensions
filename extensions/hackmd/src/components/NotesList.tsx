@@ -1,6 +1,6 @@
 import type { Note } from "@hackmd/api/dist/type";
 import { type ReactElement, useMemo } from "react";
-import { List } from "@raycast/api";
+import { ActionPanel, List } from "@raycast/api";
 import NoteListItem from "./NoteListItem";
 import { usePinnedNotes } from "../hooks/usePinnedNotes";
 
@@ -28,6 +28,8 @@ export default function NotesList({
   searchBarAccessory,
   sortByCategory,
   unpinnedSectionTitle,
+  additionalActions,
+  showProfileAction,
 }: {
   notes?: Note[];
   mutate?: () => void;
@@ -35,6 +37,8 @@ export default function NotesList({
   searchBarAccessory?: ReactElement<List.Dropdown.Props, string>;
   sortByCategory?: boolean;
   unpinnedSectionTitle?: string;
+  additionalActions?: ActionPanel.Props["children"];
+  showProfileAction?: boolean;
 }) {
   const { isPinned, pinnedNotesMap } = usePinnedNotes();
 
@@ -106,10 +110,17 @@ export default function NotesList({
 
   return (
     <List isLoading={isLoading} searchBarAccessory={searchBarAccessory}>
+      {additionalActions && <List.EmptyView actions={<ActionPanel>{additionalActions}</ActionPanel>} />}
       {pinnedNotes.length > 0 && (
         <List.Section title="Pinned" subtitle={`${pinnedNotes.length}`}>
           {pinnedNotes.map((note) => (
-            <NoteListItem note={note} key={note.id} mutate={mutate} />
+            <NoteListItem
+              note={note}
+              key={note.id}
+              mutate={mutate}
+              additionalActions={additionalActions}
+              showProfileAction={showProfileAction}
+            />
           ))}
         </List.Section>
       )}
@@ -118,21 +129,39 @@ export default function NotesList({
         groupedNotesByCategory.map(([category, notes]) => (
           <List.Section key={category} title={category}>
             {notes.map((note) => (
-              <NoteListItem note={note} key={note.id} mutate={mutate} />
+              <NoteListItem
+                note={note}
+                key={note.id}
+                mutate={mutate}
+                additionalActions={additionalActions}
+                showProfileAction={showProfileAction}
+              />
             ))}
           </List.Section>
         ))
       ) : unpinnedSectionTitle ? (
         <List.Section title={unpinnedSectionTitle}>
           {unpinnedNotes.map((note) => (
-            <NoteListItem note={note} key={note.id} mutate={mutate} />
+            <NoteListItem
+              note={note}
+              key={note.id}
+              mutate={mutate}
+              additionalActions={additionalActions}
+              showProfileAction={showProfileAction}
+            />
           ))}
         </List.Section>
       ) : (
         groupedNotesByWorkspace.map(([workspace, notes]) => (
           <List.Section key={workspace} title={workspace === "Personal Workspace" ? workspace : `Team: ${workspace}`}>
             {notes.map((note) => (
-              <NoteListItem note={note} key={note.id} mutate={mutate} />
+              <NoteListItem
+                note={note}
+                key={note.id}
+                mutate={mutate}
+                additionalActions={additionalActions}
+                showProfileAction={showProfileAction}
+              />
             ))}
           </List.Section>
         ))

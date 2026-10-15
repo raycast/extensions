@@ -135,6 +135,7 @@ export const {
   ytdlPath: ytdlPathPreference,
   ffmpegPath: ffmpegPathPreference,
   ffprobePath: ffprobePathPreference,
+  fastRemux = true,
 } = getPreferenceValues<ExtensionPreferences>();
 
 // The directory preference can hold a literal "~/..." path (its default is
@@ -280,6 +281,26 @@ export function isValidHHMM(input: string) {
   }
 }
 
+// Unlisted Vimeo share links (vimeo.com/<id>/<hash>) make yt-dlp use Vimeo's web
+// client, which fails with "The web client only works when logged-in". The same
+// video is public through the player URL with the hash passed as `h`.
+export function normalizeVideoUrl(url: string): string {
+  const match = /^(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(\d+)\/([0-9a-f]+)(?:[/?#]|$)/i.exec(url.trim());
+  return match ? `https://player.vimeo.com/video/${match[1]}?h=${match[2]}` : url;
+}
+
+// yt-dlp sets `live_status` to null when the extractor can't tell (e.g. Vimeo),
+// so only reject streams that are actually live or scheduled.
+export function isLiveStream(video: { live_status?: string | null }): boolean {
+  return video.live_status === "is_live" || video.live_status === "is_upcoming";
+}
+
+// Harmless yt-dlp warnings that would only confuse users in the form.
+export function isNoisyWarning(line: string): boolean {
+  // Vimeo's DASH manifest isn't XML; yt-dlp falls back to HLS and downloads fine.
+  return /Failed to parse XML/.test(line);
+}
+
 export function isValidUrl(url: string) {
   return validator.isURL(url, { require_protocol: false });
 }
@@ -349,9 +370,18 @@ export const getFormats = (video?: Video) => {
 
 export const getFormatValue = (format: Format) => {
   const { hasAcodec } = hasCodec(format);
-  const audio = hasAcodec ? "" : "+bestaudio";
+  const id = format.format_id;
   const targetExt = `#${format.ext}`;
-  return format.format_id + audio + targetExt;
+  if (hasAcodec) {
+    return `${id}${targetExt}`;
+  }
+
+  const downloadFormat =
+    format.ext === "webm"
+      ? `${id}+ba[ext=webm]/${id}+ba[acodec^=opus]/${id}+ba[acodec^=vorbis]/${id}+bestaudio`
+      : `${id}+bestaudio`;
+
+  return `${downloadFormat}${targetExt}`;
 };
 
 export const getFormatTitle = (format: Format) =>
