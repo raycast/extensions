@@ -16,6 +16,7 @@ import {
 } from "./grid-or-list";
 import type { LaunchContext } from "./integrations/types";
 import { usePinnedEntries } from "./pinned";
+import { getBobAppName } from "./lib/bob";
 import { closeOtherWindows, gitBranchColor, keepSectionOrder, layout, showGitBranch, terminalApp } from "./preferences";
 import type { EntryLike, PinMethods } from "./types";
 import { EntryType } from "./types";
@@ -238,6 +239,7 @@ function RemoteItem(
     RemoveMethods,
 ) {
   const remotePath = decodeURI(basename(props.uri));
+  const appName = getBobAppName();
 
   const uri = props.uri.replace("vscode-remote://", "bobide://vscode-remote/");
 
@@ -245,7 +247,7 @@ function RemoteItem(
     return `Open in IBM Bob ${closeOtherWindows !== revert ? "and Close Other" : ""}`;
   };
 
-  const getUrl = (uri: string, revert = false) => {
+  const getUrl = (revert = false) => {
     const url = new URL(uri);
     if (closeOtherWindows !== revert) {
       url.searchParams.delete("windowId");
@@ -265,11 +267,11 @@ function RemoteItem(
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title={getTitle()} icon="icon.png" url={getUrl(uri)} />
-            <Action.OpenInBrowser
+            <Action title={getTitle()} icon="icon.png" onAction={() => open(getUrl(), appName)} />
+            <Action
               title={getTitle(true)}
               icon="icon.png"
-              url={getUrl(uri, true)}
+              onAction={() => open(getUrl(true), appName)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
             />
           </ActionPanel.Section>
