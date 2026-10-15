@@ -21,8 +21,7 @@ const run = promisify(execFile);
  * downloaded and verified on first use.
  */
 export async function helperPath(): Promise<string> {
-  // Typed here rather than via the generated raycast-env.d.ts, so CI can type-check without Raycast.
-  const { helperPath: own } = getPreferenceValues<{ helperPath?: string }>();
+  const { helperPath: own } = getPreferenceValues<Preferences>();
   if (own) {
     if (!existsSync(own)) throw new Error(`No Wave helper at ${own} (Helper Path in the extension's preferences)`);
     return own;

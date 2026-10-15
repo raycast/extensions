@@ -77,7 +77,11 @@ export function readLastLines(path: string, count: number): string {
     const length = Math.min(size, 64 * 1024);
     const buffer = Buffer.alloc(length);
     readSync(fd, buffer, 0, length, size - length);
-    return buffer.toString("utf8").trimEnd().split("\n").slice(-count).join("\n");
+    const lines = buffer.toString("utf8").trimEnd().split("\n");
+    // Starting mid-file, the first line is a fragment: it may hold part of a transcript
+    // without the `"text":"` that diagnostics redact by, so it's never kept.
+    if (length < size) lines.shift();
+    return lines.slice(-count).join("\n");
   } finally {
     closeSync(fd);
   }
