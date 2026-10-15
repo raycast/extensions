@@ -1,6 +1,6 @@
 # Clean Keyboard Changelog
 
-## [Default Duration] - {PR_MERGE_DATE}
+## [Default Duration] - 2026-10-15
 
 - Added a default duration preference to lock the keyboard immediately on open ([#30864](https://github.com/raycast/extensions/issues/30864))
 
