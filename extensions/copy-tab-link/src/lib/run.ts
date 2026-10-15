@@ -65,10 +65,15 @@ export async function deliver(payload: Payload, mode: Mode, label: string, setti
 /**
  * Whether the page title ends up in what this format copies. Formats that only
  * use the URL can treat windows showing the same address as the same tab.
+ *
+ * The probe titles skip the title cleanup on purpose: cleanup can make any two
+ * titles equal (a short maximum length, say), which would wrongly mark the
+ * format as URL-only and let a background window's title through.
  */
 function usesTitle(formatId: FormatId, settings: Settings): boolean {
+  const base = toCleanTab("https://example.com/", "", settings.clean);
   const probe = (title: string) => {
-    const payload = toPayload(formatId, toCleanTab("https://example.com/", title, settings.clean), settings);
+    const payload = toPayload(formatId, { ...base, title }, settings);
     return `${payload.html ?? ""}\n${payload.text}`;
   };
   return probe("Title A") !== probe("Title B");

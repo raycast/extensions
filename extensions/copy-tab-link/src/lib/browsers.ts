@@ -87,6 +87,26 @@ tell application "${app}"
 end tell`;
 }
 
+function activeTabsScript(app: string, flavour: ScriptFlavour): string {
+  const body =
+    flavour === "chromium"
+      ? `repeat with w in windows
+    set t to active tab of w
+    set out to out & (URL of t) & fs & (title of t) & rs
+  end repeat`
+      : `repeat with d in documents
+    set out to out & (URL of d) & fs & (name of d) & rs
+  end repeat`;
+  return `set fs to (ASCII character 31)
+set rs to (ASCII character 30)
+set out to ""
+if application "${app}" is not running then return ""
+tell application "${app}"
+  ${body}
+end tell
+return out`;
+}
+
 function allTabsScript(app: string, flavour: ScriptFlavour): string {
   const body =
     flavour === "chromium"
@@ -132,6 +152,21 @@ export async function tabFromAppleScript(appName: string): Promise<TabInfo | und
   }
 }
 
+/** The active tab of every window, or `undefined` when the browser can't be read. */
+async function activeTabsFromAppleScript(appName: string): Promise<TabInfo[] | undefined> {
+  const flavour = APPLESCRIPT_BROWSERS[appName];
+  if (!isMac() || !flavour) return undefined;
+  try {
+    const raw = await runAppleScript(activeTabsScript(appName, flavour), { timeout: 10_000 });
+    return raw
+      .split(RECORD_SEPARATOR)
+      .map((line) => parseTab(line.replace(/^[\r\n]+/, ""), appName))
+      .filter((tab): tab is TabInfo => tab !== undefined);
+  } catch {
+    return undefined;
+  }
+}
+
 export async function allTabsFromAppleScript(appName: string): Promise<TabInfo[]> {
   const flavour = APPLESCRIPT_BROWSERS[appName];
   if (!isMac() || !flavour) return [];
@@ -163,15 +198,9 @@ export async function activeTabsFromBrowserExtension(): Promise<TabInfo[]> {
   }
 }
 
-/**
- * Whether any browser other than `target` is running. Unknown counts as yes.
- *
- * Compares displayed names, the same names the app picker and the frontmost
- * application report, so a browser whose process has another internal name
- * (Tor Browser runs as "firefox") is recognised as the target itself.
- */
-async function otherBrowsersRunning(target: string): Promise<boolean> {
-  if (!isMac()) return false;
+/** Displayed names of the running apps, or `undefined` when System Events can't tell. */
+async function runningAppNames(): Promise<string[] | undefined> {
+  if (!isMac()) return [];
   try {
     const raw = await runAppleScript(
       'tell application "System Events" to return displayed name of every application process whose background only is false',
@@ -180,10 +209,33 @@ async function otherBrowsersRunning(target: string): Promise<boolean> {
     return raw
       .split(",")
       .map((name) => name.trim())
-      .some((name) => name && name !== target && (isKnownBrowser(name) || isExtensionOnlyBrowser(name)));
+      .filter(Boolean);
   } catch {
-    return true;
+    return undefined;
   }
+}
+
+/**
+ * Whether the tab the browser extension reported must come from `target`, a
+ * browser without AppleScript (Firefox, Zen …).
+ *
+ * The extension API carries no browser identity, so this works by exclusion,
+ * comparing displayed names (Tor Browser runs as "firefox" but is shown as
+ * itself): no other browser without AppleScript may be running, and no window
+ * of a scriptable browser may show the same address. Anything that can't be
+ * read counts as a possible match.
+ */
+async function onlyTargetCanHaveTab(tab: TabInfo, target: string): Promise<boolean> {
+  const names = await runningAppNames();
+  if (!names) return false;
+  for (const name of names) {
+    if (name === target) continue;
+    if (isExtensionOnlyBrowser(name)) return false;
+    if (!isKnownBrowser(name)) continue;
+    const tabs = await activeTabsFromAppleScript(name);
+    if (!tabs || tabs.some((other) => other.url === tab.url)) return false;
+  }
+  return true;
 }
 
 /** Whether a browser without AppleScript support (Firefox, Zen …) is running. Unknown counts as yes. */
@@ -212,8 +264,8 @@ async function extensionOnlyBrowserRunning(): Promise<boolean> {
  * caller only uses the URL. Anything else is ambiguous.
  *
  * When the tab must come from a browser without AppleScript (Firefox, Zen …),
- * a candidate is only taken if no other browser is running that could have
- * reported it. Otherwise the user picks.
+ * a candidate is only taken if no other running browser could have reported
+ * it. Otherwise the user picks.
  */
 async function pickExtensionTab(
   candidates: TabInfo[],
@@ -224,7 +276,7 @@ async function pickExtensionTab(
   const key = (tab: TabInfo) => (urlOnly ? tab.url : `${tab.url}${UNIT_SEPARATOR}${tab.title}`);
   const distinct = new Set(candidates.map(key));
   if (distinct.size > 1) throw new AmbiguousTabError(candidates, "windows");
-  if (target && (await otherBrowsersRunning(target))) {
+  if (target && !(await onlyTargetCanHaveTab(candidates[0], target))) {
     throw new AmbiguousTabError(candidates, "unattributed", target);
   }
   return candidates[0];
