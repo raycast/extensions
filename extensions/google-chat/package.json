@@ -22,6 +22,13 @@
   ],
   "commands": [
     {
+      "name": "search-spaces",
+      "title": "Search Spaces & DMs",
+      "subtitle": "Google Chat",
+      "description": "Search your spaces, group chats and direct messages, and read their messages.",
+      "mode": "view"
+    },
+    {
       "name": "find-person",
       "title": "Find Person",
       "subtitle": "Google Chat",

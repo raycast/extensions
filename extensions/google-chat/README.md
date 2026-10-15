@@ -26,9 +26,12 @@ If your Workspace admin restricts third-party apps under **Security → API cont
 
 ## Commands
 
-| Command     | What it does                                                            |
-| ----------- | ----------------------------------------------------------------------- |
-| Find Person | Search your organization's directory, then open a DM or copy the email. |
+| Command             | What it does                                                                                                                                        |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Search Spaces & DMs | Your spaces, group chats and DMs in sections, most-used first. View messages, open in Google Chat, copy the link. Filter by type with the dropdown. |
+| Find Person         | Search your organization's directory, then open a DM or copy the email.                                                                             |
+
+In message lists you can reply in a thread, add a reaction, copy the text or the message link, and open the message in Google Chat.
 
 ### Preferences
 
@@ -39,3 +42,4 @@ If your Workspace admin restricts third-party apps under **Security → API cont
 
 - **No presence or status.** The API only exposes your own availability, not other people's, so there is no "online" indicator.
 - **Names.** Chat doesn't always return names for people outside your shared spaces; the extension then looks them up in your directory and caches them.
+- **Text only.** Messages are sent as text with Chat formatting (`*bold*`, `_italic_`, `~strike~`, `` `code` ``). Attachments and cards aren't supported.
