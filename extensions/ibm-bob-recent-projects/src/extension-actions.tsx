@@ -1,5 +1,5 @@
 import { Action, Alert, Color, confirmAlert, Icon, Keyboard, open, showHUD, showToast, Toast } from "@raycast/api";
-import { getBobAppName, getBobCLI } from "./lib/bob";
+import { getBobAppName, getBobCLI, getBobUrlProtocol } from "./lib/bob";
 import { getErrorMessage } from "./utils";
 
 export function InstallExtensionByIDAction(props: { extensionID: string; afterInstall?: () => void }) {
@@ -75,7 +75,7 @@ export function UninstallExtensionByIDAction(props: { extensionID: string; after
 }
 
 export function OpenExtensionByIDInBobAction(props: { extensionID: string; onOpen?: (url: string) => void }) {
-  const url = `bobide:extension/${props.extensionID}`;
+  const url = `${getBobUrlProtocol()}:extension/${props.extensionID}`;
   return (
     <Action
       title="Open in IBM Bob"

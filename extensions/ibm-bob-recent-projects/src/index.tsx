@@ -16,7 +16,7 @@ import {
 } from "./grid-or-list";
 import type { LaunchContext } from "./integrations/types";
 import { usePinnedEntries } from "./pinned";
-import { getBobAppName } from "./lib/bob";
+import { getBobAppName, getBobUrlProtocol } from "./lib/bob";
 import { closeOtherWindows, gitBranchColor, keepSectionOrder, layout, showGitBranch, terminalApp } from "./preferences";
 import type { EntryLike, PinMethods } from "./types";
 import { EntryType } from "./types";
@@ -241,7 +241,7 @@ function RemoteItem(
   const remotePath = decodeURI(basename(props.uri));
   const appName = getBobAppName();
 
-  const uri = props.uri.replace("vscode-remote://", "bobide://vscode-remote/");
+  const uri = props.uri.replace("vscode-remote://", `${getBobUrlProtocol()}://vscode-remote/`);
 
   const getTitle = (revert = false) => {
     return `Open in IBM Bob ${closeOtherWindows !== revert ? "and Close Other" : ""}`;

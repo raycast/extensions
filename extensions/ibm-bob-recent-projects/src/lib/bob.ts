@@ -67,15 +67,17 @@ function getNLSVariable(text: string | undefined): string | undefined {
   }
 }
 
-const buildConfigs: Record<string, { appName: string; cliName: string; appFileName: string }> = {
+const buildConfigs: Record<string, { appName: string; cliName: string; urlProtocol: string; appFileName: string }> = {
   "IBM Bob": {
     appName: "IBM Bob",
     cliName: "bobide",
+    urlProtocol: "ibm-bob",
     appFileName: "IBM Bob.app",
   },
   "IBM Bob - Insiders": {
     appName: "IBM Bob - Insiders",
     cliName: "bobide-insiders",
+    urlProtocol: "bobide-insiders",
     appFileName: "IBM Bob - Insiders.app",
   },
 };
@@ -96,8 +98,26 @@ export function getBobProductJSONPaths(): string[] {
   ];
 }
 
+function readProductJSON(): { applicationName?: string; urlProtocol?: string; sharedDataFolderName?: string } {
+  for (const productJSONPath of getBobProductJSONPaths()) {
+    if (fs.existsSync(productJSONPath)) {
+      try {
+        return JSON.parse(fs.readFileSync(productJSONPath, "utf-8"));
+      } catch {
+        // Ignore malformed product.json.
+      }
+    }
+  }
+  return {};
+}
+
+export function getBobUrlProtocol(): string {
+  return readProductJSON().urlProtocol ?? getBuildConfig().urlProtocol;
+}
+
 export function getBobCLIFilename(): string {
-  const { appFileName, cliName } = getBuildConfig();
+  const { appFileName } = getBuildConfig();
+  const cliName = readProductJSON().applicationName ?? getBuildConfig().cliName;
   const candidates = [
     `/Applications/${appFileName}/Contents/Resources/app/bin/${cliName}`,
     path.join(os.homedir(), "Applications", appFileName, "Contents", "Resources", "app", "bin", cliName),
