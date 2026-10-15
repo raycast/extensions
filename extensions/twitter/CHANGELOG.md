@@ -1,5 +1,9 @@
 # X Changelog
 
+## [Copy Post URL] - 2026-10-15
+
+- Add a Copy Post URL action to bookmarks and other post lists and to the post detail view
+
 ## [Fix Long Post Reading] - 2026-09-23
 
 - Read full long posts in commands and AI tools instead of shortened previews

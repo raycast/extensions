@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "connect-to-vpn",
   "title": "Connect to VPN",
-  "description": "Connect to/disconnect from VPN",
+  "description": "Control your macOS VPN connections from Raycast and the menu bar, with favorites and a hotkey to toggle your last-used VPN.",
   "icon": "command-icon.png",
   "author": "rasmusbe",
   "contributors": [
@@ -11,29 +11,30 @@
     "vyacheslav",
     "yshmeel",
     "borzov",
-    "andrei_hudalla"
+    "andrei_hudalla",
+    "0xdhrv"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "toggle",
       "title": "Toggle Last Used",
-      "subtitle": "VPN",
-      "description": "Toggle your Last Used VPN",
+      "subtitle": "Connect to VPN",
+      "description": "Connect to or disconnect from the VPN most recently selected or used in this extension. Assign a hotkey for quick access.",
       "mode": "no-view"
     },
     {
       "name": "index",
       "title": "Show Network Services",
-      "subtitle": "VPN",
-      "description": "Shortcut to your Network Preferences",
+      "subtitle": "Connect to VPN",
+      "description": "View VPN connection status, connect or disconnect, organize favorites, and choose the VPN used by Toggle Last Used.",
       "mode": "view"
     },
     {
       "name": "menu-bar",
       "title": "Network Services",
-      "subtitle": "VPN",
-      "description": "View your Network Services at a glance",
+      "subtitle": "Connect to VPN",
+      "description": "View VPN connection status and connect or disconnect from the menu bar. Status refreshes automatically every 30 seconds.",
       "mode": "menu-bar",
       "interval": "30s"
     }
@@ -41,9 +42,9 @@
   "preferences": [
     {
       "name": "hideInvalidDevices",
-      "title": "Filter Non-VPN Services",
-      "description": "Tick this to hide non-VPN services from the list.",
-      "label": "Hide non-VPN services",
+      "title": "Filter Services",
+      "description": "Show only available VPN services. Turn off to include disabled VPNs and other network services.",
+      "label": "Hide unavailable and non-VPN services",
       "type": "checkbox",
       "required": false,
       "default": true
@@ -51,39 +52,42 @@
     {
       "name": "sortBy",
       "title": "Sort By",
-      "description": "Choose how to sort the services",
+      "description": "Sort services by name or type. Active services appear first; favorites keep their manual order.",
       "type": "dropdown",
       "required": false,
       "default": "ascService",
       "data": [
         {
-          "title": "Ascending by Name",
+          "title": "Name (A–Z)",
           "value": "ascService"
         },
         {
-          "title": "Descending by Name",
+          "title": "Name (Z–A)",
           "value": "descService"
         },
         {
-          "title": "Ascending by Type",
+          "title": "Type (A–Z)",
           "value": "ascType"
         },
         {
-          "title": "Descending by Type",
+          "title": "Type (Z–A)",
           "value": "descType"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.4.0"
+    "@raycast/api": "^2.4.0",
+    "proper-lockfile": "^4.1.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
     "@types/node": "22.19.17",
+    "@types/proper-lockfile": "^4.1.4",
     "@types/react": "19.0.10",
     "eslint": "^10.10.0",
     "prettier": "^3.9.6",
+    "react-test-renderer": "19.0.0",
     "typescript": "^5.9.3"
   },
   "scripts": {
@@ -91,7 +95,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test tests/*.test.cjs"
   },
   "platforms": [
     "macOS"

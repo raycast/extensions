@@ -1,4 +1,10 @@
-import { extractCode, extractVerificationLink, extractTextFromBinaryData, escapeSqlLikePattern } from "./utils";
+import {
+  extractCode,
+  extractVerificationLink,
+  extractTextFromBinaryData,
+  escapeSqlLikePattern,
+  stripHtmlTags,
+} from "./utils";
 
 describe("Testing matching logic", () => {
   test("Alphanumeric codes", () => {
@@ -363,5 +369,32 @@ describe("Testing SQL LIKE pattern escaping", () => {
     expect(escapeSqlLikePattern("normal text")).toBe("normal text");
     expect(escapeSqlLikePattern("123456")).toBe("123456");
     expect(escapeSqlLikePattern("test@example.com")).toBe("test@example.com");
+  });
+});
+
+describe("Testing HTML stripping", () => {
+  test("drops CSS so hex colours are not read as codes (#30102)", () => {
+    const html =
+      "<html><head><style>.muted { color: #999999; }</style></head>" +
+      "<body><!--[if mso]><style>td { color: #888888; }</style><![endif]-->" +
+      '<p class="muted">Your one-time code is 482913</p></body></html>';
+    const text = stripHtmlTags(html);
+    expect(text).not.toContain("999999");
+    expect(text).not.toContain("888888");
+    expect(extractCode(text)).toBe("482913");
+  });
+
+  test.each([
+    ["comment", "<!--[if mso]><table><tr><td>777777</td></tr></table><![endif]--><p>Your code is 482913</p>", "777777"],
+    ["head", "<head><title>Ref 555555</title></head><p>Your code is 482913</p>", "555555"],
+    ["script", "<script>var id = 666666;</script><p>Your code is 482913</p>", "666666"],
+  ])("drops %s content before extracting the code", (_, html, decoy) => {
+    const text = stripHtmlTags(html);
+    expect(text).not.toContain(decoy);
+    expect(extractCode(text)).toBe("482913");
+  });
+
+  test("keeps body text and line breaks", () => {
+    expect(stripHtmlTags("<p>Hello&nbsp;there<br/>Code: 1234</p>")).toBe("Hello there\nCode: 1234");
   });
 });

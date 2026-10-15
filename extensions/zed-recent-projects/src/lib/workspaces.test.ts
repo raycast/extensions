@@ -205,7 +205,7 @@ describe("parseZedWorkspace", () => {
     ).toMatchSnapshot();
   });
 
-  it("skips WSL workspace without user", () => {
+  it("parse WSL workspace without user (distribution default user)", () => {
     expect(
       parseZedWorkspace({
         id: 1,

@@ -20,9 +20,10 @@ interface EditBrandIdentityFormValues {
 interface EditBrandIdentityFormProps {
   brandIdentity: BrandIdentity;
   onUpdated?: () => Promise<void> | void;
+  organizationId?: string;
 }
 
-export function EditBrandIdentityForm({ brandIdentity, onUpdated }: EditBrandIdentityFormProps) {
+export function EditBrandIdentityForm({ brandIdentity, onUpdated, organizationId }: EditBrandIdentityFormProps) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -43,17 +44,21 @@ export function EditBrandIdentityForm({ brandIdentity, onUpdated }: EditBrandIde
     setIsLoading(true);
 
     try {
-      await updateBrandIdentity(brandIdentity.id, {
-        name,
-        websiteUrl: values.websiteUrl.trim() || brandIdentity.websiteUrl,
-        companyName: values.companyName.trim() || null,
-        companyDescription: values.companyDescription.trim() || null,
-        toneProfile: values.toneProfile || null,
-        customTone: values.customTone.trim() || null,
-        customInstructions: values.customInstructions.trim() || null,
-        audience: values.audience.trim() || null,
-        language: values.language.trim() || null,
-      });
+      await updateBrandIdentity(
+        brandIdentity.id,
+        {
+          name,
+          websiteUrl: values.websiteUrl.trim() || brandIdentity.websiteUrl,
+          companyName: values.companyName.trim() || null,
+          companyDescription: values.companyDescription.trim() || null,
+          toneProfile: values.toneProfile || null,
+          customTone: values.customTone.trim() || null,
+          customInstructions: values.customInstructions.trim() || null,
+          audience: values.audience.trim() || null,
+          language: values.language.trim() || null,
+        },
+        organizationId,
+      );
       await onUpdated?.();
       toast.style = Toast.Style.Success;
       toast.title = "Brand identity updated";

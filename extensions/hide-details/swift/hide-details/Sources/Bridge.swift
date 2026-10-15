@@ -7,14 +7,14 @@ private struct BridgeError: Error, CustomStringConvertible {
 
 @raycast func redactImage(
   outputPath: String, style: String, padding: String, categories: String,
-  extraWords: String, recognition: String, customRegex: String, inputPath: String?
+  extraWords: String, recognition: String, customRegex: String, inputPath: String?, forReview: Bool
 ) throws -> Report {
   do {
     let configuration = try parseConfiguration(
       inputPath: inputPath, outputPath: outputPath, style: style, padding: padding,
       categories: categories, extraWords: extraWords, recognition: recognition, customRegex: customRegex
     )
-    return try redact(configuration)
+    return try redact(configuration, forReview: forReview)
   } catch {
     throw BridgeError(description: error.localizedDescription)
   }
@@ -26,6 +26,14 @@ private struct BridgeError: Error, CustomStringConvertible {
       throw RedactionError(message: "Invalid clipboard change count. Scan the current clipboard again.")
     }
     try copyClipboardImage(outputURL: URL(fileURLWithPath: outputPath), expectedChangeCount: expectedChangeCount)
+  } catch {
+    throw BridgeError(description: error.localizedDescription)
+  }
+}
+
+@raycast func updateReviewImage(sourcePath: String, key: String, boxesJSON: String, style: String, outputPath: String) throws -> Int {
+  do {
+    return try renderReview(sourcePath: sourcePath, key: key, boxesJSON: boxesJSON, style: style, outputPath: outputPath)
   } catch {
     throw BridgeError(description: error.localizedDescription)
   }

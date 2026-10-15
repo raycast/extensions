@@ -84,8 +84,8 @@
     },
     {
       "name": "categories",
-      "title": "What to Hide",
-      "description": "Comma-separated: email, phone, card, secret, ip, name, face. Leave empty to use only Custom Regex.",
+      "title": "Legacy Categories",
+      "description": "Previous category selection, used until you save Configure What to Hide in Redact Clipboard Image. The checkbox form replaces this field and can restore it.",
       "type": "textfield",
       "required": false,
       "default": "email,phone,card,secret,ip,name,face"

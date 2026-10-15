@@ -24,6 +24,15 @@ The Forest is a Raycast extension that opens a random website from [theforest.li
 - **Clear Walk History** clears saved discoveries after user confirmation.
 - **Plant Website** submits a URL after showing exactly what may become publicly discoverable.
 
+## Website Addresses
+
+Plant a Website and the Plant Website AI tool accept bare domains (`example.com`) and domains with paths or ports (`example.com:8443/blog`). Bare addresses use HTTPS; explicit `http://` and `https://` addresses keep their scheme. Surrounding whitespace is trimmed. Addresses with internal whitespace, backslashes, embedded login credentials, unsafe schemes, or malformed hosts/ports are rejected. Localhost and IPv6 addresses are also supported.
+
+## Development Checks
+
+Run `npm ci`, `npm test`, `npm run lint`, `npx tsc --noEmit`, and `npm run build`.
+Tests cover normalization, form validation/submission, AI confirmation, and the encoded planting request using fixtures and mocked HTTPS. They send no real planting requests. Native Raycast UI and live service behavior require separate validation.
+
 ## Product plan
 
 ### Version 1

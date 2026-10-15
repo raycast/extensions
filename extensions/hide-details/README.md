@@ -4,6 +4,11 @@
     <img src="./assets/extension-icon.png" alt="Hide Details" width="100"/>
     <h3>Hide Details</h3>
     <p>Redact sensitive details from clipboard images</p>
+    <p align="center">
+        <a href="https://buymeacoffee.com/0xdhrv"><img alt="Buy Me a Coffee" src="https://shieldcn.dev/badge/buymecoffee-FFDD04.svg?size=default&amp;theme=neutral&amp;logo=buymeacoffee" /></a>
+        <a href="https://github.com/0xdhrv"><img alt="GitHub" src="https://shieldcn.dev/badge/github-181717.svg?size=default&amp;theme=neutral&amp;logo=github" /></a>
+        <a href="https://x.com/0xdhrv"><img alt="Twitter" src="https://shieldcn.dev/badge/twitter-1DA1F2.svg?size=default&amp;theme=neutral&amp;logo=x" /></a>
+    </p>
     <br/>
     <br/>
 </div>
@@ -32,7 +37,7 @@ Use **Scan Current Clipboard Again** to retry with your saved preferences. Use *
 
 ## Review results
 
-The **Redacted Image** row shows the output and the number of distinct masked regions. Detection labels mask the recognized text so it stays hidden while screen sharing. Each detection row shows the same image and offers **Copy Redacted Image**. One OCR line can match more than one category. These appear as separate detections but share one masked region.
+The **Redacted Image** row shows the output and the number of distinct masked regions. Detection labels mask the recognized text so it stays hidden while screen sharing. Each detection row shows the image, its numbered category, and the region’s position in pixels from the top-left corner. It offers **Copy Redacted Image** and **Don’t Redact** (`⌘D`) for false positives. **Redact** reverses that choice; **Redact All Detections** restores every mask. Copy is unavailable while the preview updates, and a failed update keeps the previous preview and selection. One OCR line can match more than one category. These appear as separate detections but share one masked region. Excluding one does not remove masks required by another overlapping detection. Exclusions apply only to this scan; every rescan starts with all detected details masked. Detection labels remain hidden even when a region is excluded, but the preview and copied image can reveal that region.
 
 The **OCR** and **Face** percentages describe recognition confidence. They do not measure whether every sensitive detail was found. Turn off **Show OCR Confidence** in extension preferences to hide the OCR percentages. **Custom word match** identifies a literal rule from Always Hide These Words.
 
@@ -63,7 +68,7 @@ Text Recognition defaults to **Fast** for clear screenshots. Fast recognition ca
 | Text Recognition        | Choose Fast or Accurate OCR.                                                                            | Fast           |
 | OCR Confidence          | Show OCR confidence percentages in the detection list.                                                  | On             |
 | Redaction Style         | Choose Blackout, Pixelate, or Smooth Blur.                                                              | Blackout       |
-| What to Hide            | Comma-separated categories: `email`, `phone`, `card`, `secret`, `ip`, `name`, `face`.                   | All categories |
+| What to Hide            | Choose categories with the checkboxes in **Configure What to Hide** in the review action menu.          | All categories |
 | Always Hide These Words | Comma-separated names or strings to detect as names. Keep the `name` category enabled to use this list. | Empty          |
 | Custom Regex            | Optional regex applied to each OCR line, independently of the built-in categories.                      | Empty          |
 | Padding                 | Extra pixels around each detected region, from `0` to `1000`.                                           | `4`            |
@@ -72,13 +77,17 @@ Use Blackout when sensitive content must be unreadable. Blur and pixelation can 
 
 Blackout is the default when no style has been saved. An existing Pixelate or Smooth Blur preference stays selected until you change it in **Open Extension Preferences**.
 
-Unknown category names and invalid padding stop processing with an error. Category names are case-insensitive. Padding accepts fractional values as well as whole pixels within the allowed range.
+Open **Configure What to Hide** from the review action menu (also available when a scan fails). Check or uncheck the categories, then **Save and Scan Current Clipboard**. The saved selection applies to both commands. **Select All Categories** selects every built-in category; uncheck all categories to use only Custom Regex. Leaving the form without saving keeps the previous selection.
+
+Existing installations start with their previous comma-separated selection, including an empty selection. The previous selection remains available as **Legacy Categories** in extension preferences during migration. After saving the checkbox form, that legacy field is ignored. **Use Legacy Category Settings** removes the checkbox override and scans with the previous preference again. Other preferences are unchanged. Unknown legacy categories or malformed saved selections stop the scan; save a valid checkbox selection to repair them.
+
+Invalid padding stops processing with an error. Padding accepts fractional values as well as whole pixels within the allowed range.
 
 ## Custom rules
 
 Use **Always Hide These Words** for names or literal strings. For patterns such as invoice numbers, internal IDs, or file paths, set **Custom Regex** in the extension preferences.
 
-Literal word matching is case-insensitive, ignores whitespace, and matches substrings within an OCR line. Entries shorter than two characters are ignored. Keep `name` in **What to Hide** to enable these rules.
+Literal word matching is case-insensitive, ignores whitespace, and matches substrings within an OCR line. Entries shorter than two characters are ignored. Keep **Names and Custom Words** checked in **What to Hide** to enable these rules.
 
 Enter a pattern directly, without JavaScript-style `/` delimiters:
 
@@ -94,13 +103,13 @@ Combine rules with `|`. Use `(?i)` for case-insensitive matching:
 
 The pattern uses [Apple's regular expression syntax](https://developer.apple.com/documentation/foundation/nsregularexpression). It runs against each original OCR line, including spaces. For example, `Project\s*Nebula` also matches a space introduced by OCR between those words. A match redacts the entire line and appears as **Custom Regex** in the detection list.
 
-Custom Regex applies independently of **What to Hide**. Clear that category field to use only your regex. Leave Custom Regex empty to disable it. Matches that contain no characters are ignored. Invalid patterns or patterns that take too long stop redaction with an error, leaving the clipboard unchanged.
+Custom Regex applies independently of **What to Hide**. Uncheck all categories in **Configure What to Hide** to use only your regex. Leave Custom Regex empty to disable it. Matches that contain no characters are ignored. Invalid patterns or patterns that take too long stop redaction with an error, leaving the clipboard unchanged.
 
 ## Privacy
 
-Images are processed on your Mac without uploads. Clipboard images are read directly into memory. The extension does not write unredacted clipboard images to disk.
+Images are processed on your Mac without uploads. Clipboard images are read directly into memory. The extension does not write unencrypted originals to disk. To let you reverse exclusions without rereading a changed clipboard, an active review retains an AES-GCM encrypted snapshot in its private temporary directory. Its random key stays in command memory. The immediate command does not create this snapshot.
 
-Each scan owns a redacted output image in a private temporary directory. The immediate command removes it after copying or a copy failure. The review command removes it when the result is replaced or the view closes. Output files abandoned by a stopped process are removed after 24 hours on a later run. Live review results are preserved. Temporary files from older versions use a 24-hour cleanup threshold.
+Each scan owns an output image (which may reveal explicitly excluded detections) in a private temporary directory. The immediate command removes it after copying or a copy failure. The review command removes its output and encrypted snapshot when the scan is replaced or the view closes, and discards the snapshot key. Each successful edit removes the previous output. Output files abandoned by a stopped process are removed after 24 hours on a later run. Live review results are preserved. Temporary files from older versions use a 24-hour cleanup threshold.
 
 The output is a flattened PNG with no editable layers.
 
@@ -111,7 +120,7 @@ The output is a flattened PNG with no editable layers.
 | Clipboard has no image                      | Copy the image itself, then choose **Scan Current Clipboard Again**. A text-only clipboard cannot be redacted.                                         |
 | Clipboard changed while scanning            | The scan or automatic copy stopped. Run the command again for the image currently on your clipboard.                                                   |
 | Small or difficult text was missed          | Use **Scan Current Clipboard with Accurate OCR** and inspect the new preview. The first Accurate scan can take longer while macOS prepares its models. |
-| Unknown category or invalid padding         | Open extension preferences. Use the category names listed above and a padding value from `0` to `1000`.                                                |
+| Unknown category or invalid padding         | Open **Configure What to Hide** to save a valid category selection, or set padding from `0` to `1000` in extension preferences.                        |
 | Custom Regex is invalid or takes too long   | Correct or simplify the pattern in extension preferences, then scan again.                                                                             |
 | Preview expired or output could not be read | Scan the current clipboard again to create a new result.                                                                                               |
 
@@ -139,7 +148,7 @@ npm test
 
 Run `npm run publish` to build the extension and start Raycast's publishing flow. No manual native build or checked-in executable is required.
 
-`npm test` builds the extension and its Swift bindings before running the regression suite. The tests cover mask pixels and crop direction, Fast and Accurate OCR, dotted cards with only card detection enabled, cards and phones beside other numbers, masked review labels, face detection, small text, preference validation, and scan cleanup. Native clipboard tests use an isolated pasteboard and check PNG/TIFF input, copied output, restoration after rejected writes, and protection against stale copies without replacing your clipboard.
+`npm test` builds the extension and its Swift bindings before running the regression suite. The tests cover mask pixels and crop direction, Fast and Accurate OCR, dotted cards with only card detection enabled, cards and phones beside other numbers, masked review labels, face detection, small text, preference validation, scan cleanup, category migration, reversible exclusions, overlapping detections, stale identities, render failures, and preview/copy synchronization. Synthetic pixel tests verify encrypted snapshot round-trips and restoring masks in all three styles. Native clipboard tests use an isolated pasteboard and check PNG/TIFF input, copied output, restoration after rejected writes, and protection against stale copies without replacing your clipboard.
 
 ## License
 

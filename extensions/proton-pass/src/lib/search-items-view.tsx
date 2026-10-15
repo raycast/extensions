@@ -220,7 +220,8 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
         setVaults([]);
         setItemCounts(new Map());
       }
-      if (itemsRef.current.length === 0) {
+      // Without pass-cli, passwords, notes and details can't load: the screen saying how to fix it comes first.
+      if (itemsRef.current.length === 0 || type === "not_installed") {
         setError({ type, message });
       } else {
         setLoadFailureMessage(message);

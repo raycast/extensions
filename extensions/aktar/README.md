@@ -20,8 +20,8 @@ Prefer to set it up by hand? Turn on **Allow local connections** in Aktar > Sett
 
 - **Upload Clipboard**: uploads the copied file or screenshot and copies its link.
 - **Upload Selected Files**: uploads the files selected in Finder (or File Explorer on Windows) to your default destination.
-- **Upload File**: pick files, a destination (or Automatic, which follows each destination's Use For in Aktar), an optional folder, and when to delete them. With a single file, the optional **Name** field uploads it under a different name (its extension is kept unless you type one); it's what replaces `{filename}` in the destination's path template.
-- **Search Uploads**: search your upload history with previews, copy links as URL, Markdown, HTML, or your custom template, jump to a file's folder, show a QR code for the link, replace an upload's file while its link stays the same, and delete uploads. Uploads set to auto-delete show the day they go away.
+- **Upload File**: pick files, a destination (or Automatic, which follows each destination's Use For in Aktar), an optional folder, when to delete them, and whether to make a short link. With a single file, the optional **Name** field uploads it under a different name (its extension is kept unless you type one); it's what replaces `{filename}` in the destination's path template.
+- **Search Uploads**: search your upload history with previews, copy links as URL, Markdown, HTML, or your custom template, make or copy a short link and see its clicks, jump to a file's folder, show a QR code for the link, replace an upload's file while its link stays the same, and delete uploads. Uploads set to auto-delete show the day they go away.
 - **Browse Buckets**: browse every folder and file in your buckets (not only what Aktar uploaded), copy public links or temporary links that also work for private buckets, show QR codes for either, rename, move, replace a file in place, delete, create folders, and upload into any folder.
 - **Watched Folders**: see the folders Aktar uploads from automatically and what each one is doing, enable or disable them, and pause or resume watching.
 - **Toggle Watching**: pauses all watched folders until you resume them, or resumes them.
@@ -32,6 +32,16 @@ Prefer to set it up by hand? Turn on **Allow local connections** in Aktar > Sett
 **Show QR Code** (⌘⇧Q, Ctrl+Shift+Q on Windows) in Search Uploads or Browse Buckets shows a QR code for the file's link, to open it on your phone or put it on a slide. Copy the QR code image to paste it anywhere, or save it as a PNG in your Downloads folder. In Browse Buckets you can also show a QR code for a temporary link (1 hour, 1 day, or 7 days), which works even for private buckets. **Create New Link** (⌘R on Mac) makes a fresh one when it has expired.
 
 The QR code is made on your computer. The link is never sent to a QR service. The QR images of temporary links are removed from the extension's support folder once those links expire.
+
+## Short Links
+
+When a destination has a link shortener set up in Aktar (Shlink, YOURLS, Kutt, Dub, Short.io, or your own HTTP request; Aktar for Mac 0.17.0 or Aktar for Windows 0.10.0), uploads get a short link and that's what the extension copies, pastes, and shows as a QR code.
+
+- **Search Uploads** shows an upload's short link with its shortener, clicks, and last click, when the shortener reports them. **Copy Short Link** (⌘⇧L, Ctrl+Shift+L on Windows) and **Copy Original Link** copy either one; for an upload without one, **Create Short Link** makes it with the destination's shortener and copies it.
+- **Upload File** has a **Short Link** choice: the destination's setting (its "Only shorten links longer than" rule decides), always make one, or keep the original link.
+- When a short link can't be made, the upload still works: the original link is copied and the message says why.
+- Renaming or moving a file in Browse Buckets points its short link at the new key when the shortener can. When it can't, the message says what happened to the link.
+- Deleting an upload deletes its short link too.
 
 ## Watched Folders
 
@@ -65,13 +75,14 @@ Uploads can delete themselves after 1, 7, 14, or 30 days, handy for screenshots 
 
 ## Raycast AI
 
-Mention `@aktar` to search your uploads, list what's in a bucket, or create a temporary link:
+Mention `@aktar` to search your uploads, list what's in a bucket, or create a temporary or short link:
 
 - `@aktar find the invoice PDF I uploaded`
 - `@aktar what's in the design folder of my Demo bucket?`
 - `@aktar give me a 2-hour link to design/hero-background.jpg`
+- `@aktar make a short link for the launch video I uploaded`
 
-The AI tools only read. They never upload, move, or delete anything. A temporary link lets anyone who has it download the file, even from a private bucket, so Raycast asks you before the AI creates one. AI links last 1 hour unless you ask for longer, and 24 hours at most; for up to 7 days, use Browse Buckets. Name destinations exactly as Aktar shows them.
+The AI tools never upload, move, or delete anything. A temporary link lets anyone who has it download the file, even from a private bucket, so Raycast asks you before the AI creates one. AI links last 1 hour unless you ask for longer, and 24 hours at most; for up to 7 days, use Browse Buckets. A short link is made by the link shortener set up for the destination, which may be a hosted service that sees the link and its clicks, so Raycast asks you before the AI makes one. Name destinations exactly as Aktar shows them.
 
 ## Preferences
 

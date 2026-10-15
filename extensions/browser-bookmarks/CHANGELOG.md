@@ -1,5 +1,10 @@
 # Browser Bookmarks Changelog
 
+## [Search Matching] - 2026-10-15
+
+- Stopped the root folder name of Chromium browsers (such as "Bookmarks Bar") from fuzzy-matching searches such as "board"
+- Added a Search Strictness preference so short queries such as "erp" can skip loose matches
+
 ## [Support for DuckDuckGo Browser] - 2026-10-01
 
 - Added support for the `DuckDuckGo` browser on macOS

@@ -233,6 +233,43 @@
       ]
     },
     {
+      "name": "next-unread-article",
+      "title": "Next Unread Article",
+      "subtitle": "Techgedöns.de",
+      "description": "Opens the next unread Techgedöns article",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "nextUnreadArticleOrder",
+          "title": "Unread Article Order",
+          "description": "Selects whether the oldest or newest unread article opens first.",
+          "type": "dropdown",
+          "required": false,
+          "default": "oldest",
+          "data": [
+            {
+              "title": "Oldest First",
+              "value": "oldest"
+            },
+            {
+              "title": "Newest First",
+              "value": "newest"
+            }
+          ]
+        }
+      ],
+      "keywords": [
+        "tchgdns",
+        "techgedoens",
+        "techgedöns",
+        "artikel",
+        "ungelesen",
+        "nächster",
+        "next",
+        "unread"
+      ]
+    },
+    {
       "name": "all-articles",
       "title": "All Articles",
       "subtitle": "Techgedöns.de",
@@ -287,6 +324,14 @@
       "subtitle": "Techgedöns.de",
       "description": "Searches the complete Techgedöns.de article archive",
       "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search query",
+          "type": "text",
+          "required": false
+        }
+      ],
       "keywords": [
         "tchgdns",
         "techgedoens",
@@ -363,6 +408,16 @@
       "name": "get-article",
       "title": "Get Article",
       "description": "Loads a specific Techgedöns.de article by its exact title or URL"
+    },
+    {
+      "name": "get-unread-articles",
+      "title": "Get Unread Articles",
+      "description": "Returns unread articles from the user's local Techgedöns archive, optionally filtered by topic; use nextOffset to continue through longer lists"
+    },
+    {
+      "name": "get-favorite-articles",
+      "title": "Get Favorite Articles",
+      "description": "Returns favorite articles from the user's local Techgedöns archive, optionally filtered by topic; use nextOffset to continue through longer lists"
     }
   ],
   "dependencies": {

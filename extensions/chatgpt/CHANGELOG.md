@@ -1,5 +1,16 @@
 # Changelog
 
+## [Fix] - 2026-10-14
+
+- Fix: `Fix Spelling and Grammar` and `Improve Writing` shipped with a `temperature` of `0.7` on `gpt-5-nano`, a reasoning model that only supports the default temperature, causing every run to fail with a 400 error. Default temperature for these commands is now `1`.
+- Automatically retry without the `temperature` parameter when the API rejects it as unsupported for the selected model, mirroring the existing fallback for an unsupported `reasoning_effort`, so commands with a stale or incompatible saved temperature still complete instead of failing outright.
+
+## [Added new screenshots] - 2026-10-13
+
+## [Keep Recent Turns in Long Conversations] - 2026-10-13
+
+- When a conversation is longer than the context budget, send the most recent turns instead of the oldest ones, so follow-up questions keep their context: [#32123](https://github.com/raycast/extensions/issues/32123)
+
 ## [Separate Chat Models and AI Commands] - 2026-09-17
 
 - Show base models in Ask Question, Full Text Input and Summarize Website. Add Ask with This Command in Models to start a command conversation.

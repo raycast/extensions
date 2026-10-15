@@ -3,7 +3,7 @@ import { Tool } from "@raycast/api";
 import { normalizeWebsiteUrl, plantWebsite } from "../the-forest";
 
 type Input = {
-  /** Full HTTP or HTTPS address of the website to submit, such as https://example.com/. */
+  /** Domain or HTTP/HTTPS address to submit, such as example.com. Bare domains use HTTPS. */
   website: string;
 };
 

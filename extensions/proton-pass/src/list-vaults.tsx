@@ -16,6 +16,7 @@ import { countItemsByVault, formatItemCount, refreshItemCounts } from "./lib/ite
 import { createListingSaves, createRequestTracker, listingSaves } from "./lib/refresh";
 import { platformShortcut } from "./lib/shortcuts";
 import { mergeSharing, sharedVaultTooltip, withSharing } from "./lib/vault-sharing";
+import { CliNotFoundView } from "./lib/error-views";
 
 /** Only List Vaults lists sharing: overlapping loads, e.g. a refresh and Retry, save it in the order they started. */
 const sharingSaves = createListingSaves();
@@ -120,20 +121,7 @@ export default function Command() {
   );
 
   if (error?.type === "not_installed") {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.XMarkCircle}
-          title="Proton Pass CLI Not Installed"
-          description="You need to install the Proton Pass CLI to use this extension. Click below to learn how to install it."
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser title="Open Installation Guide" url={PROTON_PASS_CLI_DOCS} icon={Icon.Globe} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
+    return <CliNotFoundView />;
   }
 
   if (error?.type === "not_authenticated") {

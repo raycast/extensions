@@ -1,0 +1,78 @@
+{
+  "version": 3,
+  "domain": "github.com",
+  "credentials": {
+    "gh_pat": {
+      "type": "bearer",
+      "label": "GitHub personal access token (fine-grained or classic)",
+      "generateUrl": "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens",
+      "setup": ""
+    },
+    "gh_app": {
+      "type": "app",
+      "label": "GitHub App credentials and derived access tokens",
+      "generateUrl": "https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app",
+      "setup": ""
+    },
+    "gh_oauth_app": {
+      "type": "oauth2",
+      "label": "GitHub OAuth app client credentials and user access tokens",
+      "generateUrl": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+      "setup": ""
+    }
+  },
+  "surfaces": [
+    {
+      "type": "cli",
+      "packages": [
+        {
+          "registryType": "homebrew",
+          "identifier": "gh"
+        }
+      ],
+      "command": "gh",
+      "slug": "github-cli",
+      "name": "GitHub CLI",
+      "docs": "https://docs.github.com/en/github-cli/github-cli",
+      "auth": {
+        "status": "required",
+        "entries": [
+          {
+            "use": [
+              {
+                "id": "gh_pat"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "mcp",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "transports": ["streamable-http"],
+      "slug": "github-mcp-server",
+      "name": "GitHub MCP server",
+      "docs": "https://docs.github.com/en/copilot/how-tos/provide-context/use-mcp-in-your-ide/use-the-github-mcp-server",
+      "auth": {
+        "status": "required",
+        "entries": [
+          {
+            "use": [
+              {
+                "id": "gh_pat"
+              }
+            ]
+          },
+          {
+            "use": [
+              {
+                "id": "gh_oauth_app"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

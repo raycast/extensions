@@ -195,11 +195,11 @@
           "type": "dropdown",
           "data": [
             {
-              "title": "Nothing",
+              "title": "Icon Only",
               "value": "nothing"
             },
             {
-              "title": "Count",
+              "title": "Number of Reminders",
               "value": "count"
             },
             {
@@ -209,81 +209,223 @@
           ],
           "default": "count",
           "required": false,
-          "title": "Title",
-          "description": "Choose what you want to see next to the menu bar icon."
-        },
-        {
-          "name": "view",
-          "type": "dropdown",
-          "data": [
-            {
-              "title": "Today",
-              "value": "today"
-            },
-            {
-              "title": "Upcoming",
-              "value": "upcoming"
-            },
-            {
-              "title": "All",
-              "value": "all"
-            }
-          ],
-          "default": "today",
-          "required": false,
-          "title": "View",
-          "description": "Choose which view you want to see in your menu bar."
+          "title": "Menu Bar Text",
+          "description": "What appears next to the icon. An upcoming reminder (see below) replaces it while it's shown."
         },
         {
           "name": "countType",
           "type": "dropdown",
           "data": [
             {
-              "title": "Today",
+              "title": "Due Today or Overdue",
               "value": "today"
             },
             {
-              "title": "Upcoming",
+              "title": "Reminders with a Due Date",
               "value": "upcoming"
             },
             {
-              "title": "All",
+              "title": "All Open Reminders",
               "value": "all"
             }
           ],
           "default": "today",
           "required": false,
-          "title": "Count",
-          "description": "Choose which count you want to see in your menu bar."
+          "title": "Number Counts",
+          "description": "Which reminders the number counts, when Menu Bar Text is set to Number of reminders."
         },
         {
           "name": "hideMenuBarCountWhenEmpty",
           "type": "checkbox",
-          "label": "Hide menu bar count when empty",
-          "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
+          "label": "Hide the number when it's 0",
+          "description": "Show only the icon when there's nothing to count.",
           "default": false,
           "required": false
         },
         {
+          "name": "nextReminderShowBefore",
+          "title": "Upcoming Reminder",
+          "description": "Show the next reminder that has a time, with a countdown such as \"Call mom · in 8m\", the way Raycast shows calendar events.",
+          "type": "dropdown",
+          "required": false,
+          "default": "never",
+          "data": [
+            {
+              "title": "Never",
+              "value": "never"
+            },
+            {
+              "title": "At Its Due Time",
+              "value": "0"
+            },
+            {
+              "title": "From 5 Minutes Before",
+              "value": "5"
+            },
+            {
+              "title": "From 10 Minutes Before",
+              "value": "10"
+            },
+            {
+              "title": "From 15 Minutes Before",
+              "value": "15"
+            },
+            {
+              "title": "From 30 Minutes Before",
+              "value": "30"
+            },
+            {
+              "title": "From 1 Hour Before",
+              "value": "60"
+            },
+            {
+              "title": "Always Show the Next One",
+              "value": "always"
+            }
+          ]
+        },
+        {
+          "name": "nextReminderHideAfter",
+          "title": "Keep It Shown",
+          "description": "How long an upcoming reminder stays in the menu bar once its time has passed.",
+          "type": "dropdown",
+          "required": false,
+          "default": "completed",
+          "data": [
+            {
+              "title": "Until I Complete It (or the Day Ends)",
+              "value": "completed"
+            },
+            {
+              "title": "5 Minutes After It's Due",
+              "value": "5"
+            },
+            {
+              "title": "15 Minutes After It's Due",
+              "value": "15"
+            },
+            {
+              "title": "1 Hour After It's Due",
+              "value": "60"
+            }
+          ]
+        },
+        {
+          "name": "hideWhenNothingDue",
+          "label": "Only show the menu bar item for an upcoming reminder",
+          "description": "Hide the icon the rest of the time. Needs Upcoming Reminder set to something other than Never.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "Visibility"
+        },
+        {
+          "name": "view",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Today and Overdue",
+              "value": "today"
+            },
+            {
+              "title": "Today, Tomorrow and Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "All, Including No Due Date",
+              "value": "all"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "Reminders in Menu",
+          "description": "Which reminders the dropdown lists."
+        },
+        {
           "name": "sortMenuBarRemindersByDueDate",
           "type": "checkbox",
-          "label": "Sort menu bar reminders by time",
-          "description": "When enabled, the reminders in the menu bar will be sorted by time.",
+          "label": "Sort by due time",
+          "description": "Order the reminders in the dropdown by due time instead of list order.",
           "default": false,
           "required": false,
-          "title": "Sort"
+          "title": "Menu"
         },
         {
           "name": "displayListTitleForMenuBarReminders",
           "type": "checkbox",
-          "label": "Display the name of the list",
-          "description": "When enabled, the name of the list from which the reminder originates will be displayed in the menu bar next to the reminder’s name.",
+          "label": "Show the list name",
+          "description": "Add the list name after each reminder, e.g. \"Call mom [Work]\".",
           "default": false,
-          "required": false,
-          "title": "Extra"
+          "required": false
         }
       ],
-      "interval": "10m"
+      "interval": "1m"
+    },
+    {
+      "name": "next-reminder",
+      "title": "Next Reminder",
+      "subtitle": "Apple Reminders",
+      "description": "Shows your next timed reminder in its root search subtitle. Add it to Favorites to keep it at the top.",
+      "mode": "no-view",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "showWithin",
+          "title": "Look Ahead",
+          "description": "How far ahead to look for the next reminder that has a time.",
+          "type": "dropdown",
+          "required": false,
+          "default": "60",
+          "data": [
+            {
+              "title": "15 Minutes",
+              "value": "15"
+            },
+            {
+              "title": "30 Minutes",
+              "value": "30"
+            },
+            {
+              "title": "1 Hour",
+              "value": "60"
+            },
+            {
+              "title": "2 Hours",
+              "value": "120"
+            },
+            {
+              "title": "Any Time (Always Show the Next One)",
+              "value": "always"
+            }
+          ]
+        },
+        {
+          "name": "keepShown",
+          "title": "Keep It Shown",
+          "description": "How long a reminder stays in the subtitle once its time has passed.",
+          "type": "dropdown",
+          "required": false,
+          "default": "completed",
+          "data": [
+            {
+              "title": "Until I Complete It (or the Day Ends)",
+              "value": "completed"
+            },
+            {
+              "title": "5 Minutes After It's Due",
+              "value": "5"
+            },
+            {
+              "title": "15 Minutes After It's Due",
+              "value": "15"
+            },
+            {
+              "title": "1 Hour After It's Due",
+              "value": "60"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "quick-add-reminder",

@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "paste-rs",
-  "title": "paste.rs - Quick Pastes",
-  "description": "Create anonymous paste.rs links from typed text or your clipboard, and browse recent pastes.",
+  "title": "paste.rs",
+  "description": "Create anonymous paste.rs links from typed, selected, or clipboard text, and browse recent pastes.",
   "icon": "icon.png",
   "author": "0xdhrv",
   "platforms": [
@@ -26,6 +26,13 @@
       "title": "Create Paste from Clipboard",
       "subtitle": "paste.rs",
       "description": "Create a paste from clipboard text and copy the URL",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-selected-text",
+      "title": "Paste Selected Text",
+      "subtitle": "paste.rs",
+      "description": "Upload selected text from the frontmost app after confirmation and copy the URL",
       "mode": "no-view"
     },
     {
@@ -148,6 +155,135 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
-  }
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test tests/*.test.cjs"
+  },
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Default Language",
+      "description": "Language used for clipboard, selected-text, and AI pastes; Create Paste can override it. Markdown renders as HTML.",
+      "type": "dropdown",
+      "required": false,
+      "default": "",
+      "data": [
+        {
+          "title": "Plain Text",
+          "value": ""
+        },
+        {
+          "title": "Bash",
+          "value": "bash"
+        },
+        {
+          "title": "C",
+          "value": "c"
+        },
+        {
+          "title": "C++",
+          "value": "cpp"
+        },
+        {
+          "title": "C#",
+          "value": "cs"
+        },
+        {
+          "title": "Clojure",
+          "value": "clj"
+        },
+        {
+          "title": "CSS",
+          "value": "css"
+        },
+        {
+          "title": "Diff",
+          "value": "diff"
+        },
+        {
+          "title": "Erlang",
+          "value": "erl"
+        },
+        {
+          "title": "Go",
+          "value": "go"
+        },
+        {
+          "title": "Haskell",
+          "value": "hs"
+        },
+        {
+          "title": "HTML",
+          "value": "html"
+        },
+        {
+          "title": "Java",
+          "value": "java"
+        },
+        {
+          "title": "JavaScript",
+          "value": "js"
+        },
+        {
+          "title": "JSON",
+          "value": "json"
+        },
+        {
+          "title": "Lua",
+          "value": "lua"
+        },
+        {
+          "title": "Markdown",
+          "value": "md"
+        },
+        {
+          "title": "OCaml",
+          "value": "ml"
+        },
+        {
+          "title": "Perl",
+          "value": "pl"
+        },
+        {
+          "title": "PHP",
+          "value": "php"
+        },
+        {
+          "title": "Python",
+          "value": "py"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "Ruby",
+          "value": "rb"
+        },
+        {
+          "title": "Rust",
+          "value": "rs"
+        },
+        {
+          "title": "Scala",
+          "value": "scala"
+        },
+        {
+          "title": "Shell",
+          "value": "sh"
+        },
+        {
+          "title": "SQL",
+          "value": "sql"
+        },
+        {
+          "title": "XML",
+          "value": "xml"
+        },
+        {
+          "title": "YAML",
+          "value": "yaml"
+        }
+      ]
+    }
+  ]
 }

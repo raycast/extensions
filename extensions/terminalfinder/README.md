@@ -13,9 +13,14 @@ Open currently selected Finder (or Path Finder) window in **Terminal**<sup>*</su
 - [iTerm2](https://iterm2.com/)
 - [kitty](https://sw.kovidgoyal.net/kitty/)
 - Terminal
+- [Tern](https://stencil.so/tern)
 - [Warp](https://www.warp.dev/)
 - [WezTerm](https://wezterm.org/index.html)
 
 ### cmux note
 
 `cmux` support uses the bundled `cmux` CLI. In `cmux`, open `Settings -> Automation` and set `Socket Mode` to `Allow all local processes` or `Password`; the default external-control mode blocks Raycast from opening new cmux workspaces or reading the active working directory.
+
+### Tern note
+
+`Tern → Finder` asks the bundled `tern` CLI for the focused block's working directory, so nothing is typed into your shell. When several Tern windows are open, the CLI reports the first one, which may not be the window in front.

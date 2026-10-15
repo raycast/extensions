@@ -15,6 +15,7 @@ function loadSource(entry, preferences = {}, storage = new Map(), modules = {}) 
     platform: "node",
     format: "cjs",
     packages: "external",
+    external: Object.keys(modules).filter((name) => name.startsWith(".")),
   });
   const api = {
     Color: Object.fromEntries(["Blue", "Green", "Magenta", "Orange", "Purple", "Red", "Yellow"].map((name) => [name, name])),
@@ -31,9 +32,10 @@ function loadSource(entry, preferences = {}, storage = new Map(), modules = {}) 
       },
     },
   };
+  Object.assign(api, modules["@raycast/api"]);
   const loaded = new Module(filename, module);
   loaded.paths = module.paths;
-  loaded.require = (name) => modules[name] ?? (name === "@raycast/api" ? api : require(name));
+  loaded.require = (name) => (name === "@raycast/api" ? api : (modules[name] ?? require(name)));
   loaded._compile(outputFiles[0].text, filename);
   return loaded.exports;
 }
@@ -98,6 +100,86 @@ function openAIResponseStream() {
     { type: "response.completed", response: { usage: { input_tokens: 11, output_tokens: 7, total_tokens: 18 } } },
   ]);
 }
+
+test("action Quicklinks encode the saved ID as launch context", () => {
+  const { createActionDeepLink } = loadSource("src/utils.ts");
+  for (const id of ["test-action", 'action "quoted" & ? # + / \\ 日本語']) {
+    const link = new URL(createActionDeepLink(id));
+    assert.equal(link.hostname, "extensions");
+    assert.equal(link.pathname, "/quiknull/alice-ai/commands");
+    assert.deepEqual(JSON.parse(link.searchParams.get("context")), { id });
+    assert.equal(link.searchParams.has("arguments"), false);
+  }
+});
+
+for (const [entry, selectedView, listView] of [
+  ["commands", "./views/CommandExecute", "./views/CommandList"],
+  ["history", "./views/HistoryView", "./views/HistoryList"],
+]) {
+  test(`${entry} routes launch context after hydration and keeps ordinary and legacy launches`, () => {
+    let ready = false;
+    const SelectedView = () => null;
+    const ListView = () => null;
+    const LoadingView = () => null;
+    const { default: Command } = loadSource(`src/${entry}.tsx`, {}, new Map(), {
+      "@raycast/api": { Detail: LoadingView },
+      "./store/actions": { useActionsAreReady: () => ready },
+      [selectedView]: SelectedView,
+      [listView]: ListView,
+    });
+    const { createActionDeepLink } = loadSource("src/utils.ts");
+    const link = new URL(createActionDeepLink("selected-item"));
+    const props = { arguments: {}, launchContext: JSON.parse(link.searchParams.get("context")) };
+    assert.equal(Command(props).type, LoadingView);
+    ready = true;
+    assert.equal(Command(props).type, SelectedView);
+    assert.equal(Command(props).props.id, "selected-item");
+    assert.equal(Command({ arguments: {} }).type, ListView);
+    assert.equal(Command({ arguments: { id: "legacy-item" } }).props.id, "legacy-item");
+    assert.equal(Command({ launchContext: { id: "context-item" } }).props.id, "context-item");
+    assert.equal(Command({ arguments: { id: "legacy-item" }, launchContext: { id: "context-item" } }).props.id, "context-item");
+  });
+}
+
+test("menu-bar action and history launches pass item IDs through context", () => {
+  const calls = [];
+  const MenuItem = () => null;
+  const MenuBarExtra = Object.assign(() => null, { Item: MenuItem, Section: () => null, Submenu: () => null });
+  const favorite = { ...action(), name: "Favorite Action" };
+  const regular = { ...action(), id: "regular-action", name: "Regular Action", favorite: false };
+  const history = { id: "history-item", prompt: "Past run", result: "Result", action: favorite, timestamp: 1 };
+  const { default: MenuBar } = loadSource("src/menubar.tsx", {}, new Map(), {
+    "@raycast/api": {
+      Icon: {},
+      MenuBarExtra,
+      LaunchType: { UserInitiated: "userInitiated" },
+      launchCommand: async (options) => calls.push(options),
+    },
+    "./store/actions": { useActionsAreReady: () => true, useActionsState: (selector) => selector({ actions: [favorite, regular] }) },
+    "./store/history": { useHistoryState: (selector) => selector({ history: [history] }) },
+  });
+  const items = [];
+  const collectItems = (element) => {
+    if (Array.isArray(element)) {
+      element.forEach(collectItems);
+    } else if (element && typeof element === "object") {
+      if (element.type === MenuItem) items.push(element.props);
+      collectItems(element.props?.children);
+    }
+  };
+  collectItems(MenuBar());
+  for (const title of [favorite.name, regular.name, history.prompt, "Create Action"]) {
+    const item = items.find((item) => item.title === title);
+    assert.ok(item, `Missing menu item: ${title}`);
+    item.onAction();
+  }
+  assert.deepEqual(calls, [
+    { name: "commands", type: "userInitiated", context: { id: favorite.id } },
+    { name: "commands", type: "userInitiated", context: { id: regular.id } },
+    { name: "history", type: "userInitiated", context: { id: history.id } },
+    { name: "create", type: "userInitiated", context: undefined },
+  ]);
+});
 
 test("built-in actions initially use GPT-6 Luna", async () => {
   const { useActionsState } = loadSource("src/store/actions.ts");

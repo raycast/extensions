@@ -1,6 +1,5 @@
-import { searchApex, SubdomainRecord } from "../api";
-
-type SortOrder = "first-seen-ascending" | "first-seen-descending" | "alphabetical";
+import { searchApex } from "../api";
+import { filterSubdomains, sortSubdomains, SortOrder, SubdomainRecord } from "../subdomains";
 
 type Input = {
   /**
@@ -35,12 +34,9 @@ type ToolResult = {
  */
 export default async function searchSubdomains(input: Input): Promise<ToolResult> {
   const { apex, results } = await searchApex(input.apex);
-  const contains = input.contains?.trim().toLowerCase();
   const limit = Math.min(100, Math.max(1, input.limit ?? 25));
-  const matchingResults = contains
-    ? results.filter((result) => result.subdomain.toLowerCase().includes(contains))
-    : results;
-  const sortedResults = [...matchingResults].sort(sorter(input.sort ?? "first-seen-ascending"));
+  const matchingResults = filterSubdomains(results, input.contains ?? "");
+  const sortedResults = sortSubdomains(matchingResults, input.sort ?? "first-seen-ascending");
   const returnedResults = sortedResults.slice(0, limit);
 
   return {
@@ -50,20 +46,5 @@ export default async function searchSubdomains(input: Input): Promise<ToolResult
     returnedCount: returnedResults.length,
     truncated: returnedResults.length < matchingResults.length,
     results: returnedResults,
-  };
-}
-
-function sorter(sort: SortOrder): (left: SubdomainRecord, right: SubdomainRecord) => number {
-  if (sort === "alphabetical") {
-    return (left, right) => left.subdomain.localeCompare(right.subdomain);
-  }
-
-  const direction = sort === "first-seen-descending" ? -1 : 1;
-  return (left, right) => {
-    if (!left.firstSeen && !right.firstSeen) return left.subdomain.localeCompare(right.subdomain);
-    if (!left.firstSeen) return 1;
-    if (!right.firstSeen) return -1;
-
-    return direction * left.firstSeen.localeCompare(right.firstSeen) || left.subdomain.localeCompare(right.subdomain);
   };
 }

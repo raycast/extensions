@@ -3,6 +3,8 @@ import { uploadClipboard } from "./api/client";
 import { showAktarFailure } from "./lib/errors";
 import { expiryWarning, preferredExpiry } from "./lib/expiry";
 import { fetchFormat, formatUploads } from "./lib/output";
+import { shortLinkWarning } from "./lib/short-links";
+import { joinWarnings } from "./lib/upload";
 
 /** Aktar reads the clipboard itself, so files copied in Finder or File Explorer and raw screenshots both work. */
 export default async function Command() {
@@ -11,7 +13,7 @@ export default async function Command() {
     const expires = preferredExpiry();
     const upload = await uploadClipboard({ expires });
     await Clipboard.copy(formatUploads([upload], await fetchFormat()));
-    const warning = expiryWarning([upload], expires);
+    const warning = joinWarnings(expiryWarning([upload], expires), shortLinkWarning([upload]));
     if (warning) {
       toast.style = Toast.Style.Failure;
       toast.title = upload.reused ? "Already uploaded" : `Uploaded ${upload.filename}`;
@@ -20,7 +22,9 @@ export default async function Command() {
     }
     await toast.hide();
     await showHUD(
-      upload.reused ? "Already uploaded, copied the existing link" : `Uploaded ${upload.filename}, link copied`,
+      upload.reused
+        ? "Already uploaded, copied the existing link"
+        : `Uploaded ${upload.filename}, ${upload.shortUrl ? "short link" : "link"} copied`,
     );
   } catch (error) {
     await showAktarFailure(error, "Couldn't upload the clipboard");

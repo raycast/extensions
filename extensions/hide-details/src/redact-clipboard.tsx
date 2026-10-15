@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Color,
   Icon,
   Keyboard,
   List,
@@ -10,7 +11,16 @@ import {
   showToast,
 } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { copyRedacted, disposeScan, redactClipboard, type Hit, type Scan } from "./redaction";
+import { CategorySettings } from "./category-settings";
+import {
+  copyRedacted,
+  disposeScan,
+  redactClipboard,
+  updateRedactions,
+  type Detection,
+  type Hit,
+  type Scan,
+} from "./redaction";
 
 const kindIcon: Record<Hit["kind"], Icon> = {
   email: Icon.Envelope,
@@ -31,17 +41,21 @@ export default function Command() {
   const { showOCRConfidence = true } = getPreferenceValues<Preferences>();
   const [scan, setScan] = useState<Scan | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [updating, setUpdating] = useState(false);
+  const editing = useRef(false);
   const generation = useRef(0);
   const current = useRef<Scan | null>(null);
 
   const rescan = useCallback(async (recognition?: "accurate") => {
     const request = ++generation.current;
+    editing.current = false;
+    setUpdating(false);
     release(current.current);
     current.current = null;
     setScan(null);
     setError(null);
     try {
-      const result = await redactClipboard({ recognition });
+      const result = await redactClipboard({ recognition, forReview: true });
       if (generation.current !== request) {
         release(result);
         return;
@@ -62,14 +76,37 @@ export default function Command() {
     };
   }, [rescan]);
 
-  function actions() {
+  async function changeExclusions(excludedIds: readonly string[]) {
+    if (!scan || editing.current) return;
+    const request = generation.current;
+    editing.current = true;
+    setUpdating(true);
+    try {
+      const next = await updateRedactions(scan, excludedIds);
+      if (generation.current !== request) return;
+      current.current = next;
+      setScan(next);
+    } catch (failure) {
+      if (generation.current === request) {
+        await showToast({ style: Toast.Style.Failure, title: "Could Not Update Preview", message: String(failure) });
+      }
+    } finally {
+      if (generation.current === request) {
+        editing.current = false;
+        setUpdating(false);
+      }
+    }
+  }
+
+  function actions(hit?: Detection) {
     return (
       <ActionPanel>
-        {scan && (
+        {scan && !updating && (
           <Action
             title="Copy Redacted Image"
             icon={Icon.Clipboard}
             onAction={async () => {
+              if (editing.current || current.current !== scan) return;
               try {
                 await copyRedacted(scan);
                 await showToast({
@@ -87,6 +124,28 @@ export default function Command() {
             }}
           />
         )}
+        {scan && hit && !updating && (
+          <Action
+            title={scan.excludedIds.includes(hit.id) ? "Redact" : "Don't Redact"}
+            icon={scan.excludedIds.includes(hit.id) ? Icon.EyeDisabled : Icon.Eye}
+            shortcut={{ modifiers: ["cmd"], key: "d" }}
+            onAction={() =>
+              changeExclusions(
+                scan.excludedIds.includes(hit.id)
+                  ? scan.excludedIds.filter((id) => id !== hit.id)
+                  : [...scan.excludedIds, hit.id],
+              )
+            }
+          />
+        )}
+        {scan && scan.excludedIds.length > 0 && !updating && (
+          <Action title="Redact All Detections" icon={Icon.Undo} onAction={() => changeExclusions([])} />
+        )}
+        <Action.Push
+          title="Configure What to Hide"
+          icon={Icon.CheckList}
+          target={<CategorySettings onSave={() => void rescan()} />}
+        />
         <Action
           title="Scan Current Clipboard Again"
           icon={Icon.ArrowClockwise}
@@ -113,32 +172,37 @@ export default function Command() {
   }
 
   const hits = scan?.hits ?? [];
-  const preview = scan ? (
-    <List.Item.Detail
-      markdown={`![Redacted clipboard image](<${scan.output}>)\n\nReview this image before sharing. Automatic detection can miss details. Copy replaces the current clipboard with this preview.`}
-    />
-  ) : undefined;
+  const preview = (hit?: Detection) =>
+    scan ? (
+      <List.Item.Detail
+        markdown={`![Redacted clipboard image](<${scan.output}>)\n\n${updating ? "Updating preview… Copy is unavailable until it finishes.\n\n" : ""}Review this image before sharing. Automatic detection can miss details.${scan.excludedIds.length ? ` ${scan.excludedIds.length} detection(s) excluded. Other detections may still mask overlapping regions.` : ""}${hit ? `\n\nSelected detection: ${hit.kind}. Region from top left: x ${hit.box.x}, y ${hit.box.y}, width ${hit.box.width}, height ${hit.box.height} pixels. Status: ${scan.excludedIds.includes(hit.id) ? "Don’t redact" : "Redact"}.` : ""} Copy replaces the current clipboard with this preview.`}
+      />
+    ) : undefined;
   return (
-    <List isLoading={!scan} isShowingDetail={!!scan} searchBarPlaceholder="Review detections">
+    <List isLoading={!scan || updating} isShowingDetail={!!scan} searchBarPlaceholder="Review detections">
       {scan && (
         <List.Item
           key="preview"
           icon={Icon.Image}
           title="Redacted Image"
           subtitle={`${scan.regionCount} masked region${scan.regionCount === 1 ? "" : "s"}`}
-          detail={preview}
+          detail={preview()}
           actions={actions()}
         />
       )}
       <List.Section title={scan ? `${hits.length} detections` : "Scanning on device"}>
         {hits.map((hit, i) => (
           <List.Item
-            key={`${hit.kind}-${i}`}
+            key={hit.id}
+            id={hit.id}
             icon={kindIcon[hit.kind]}
-            title={hit.kind === "custom" ? "Custom Regex" : hit.kind}
-            subtitle={hit.kind === "face" ? "Face masked" : "••••••••"}
-            accessories={
-              hit.confidenceSource === "ocr" && !showOCRConfidence
+            title={`${hit.kind === "custom" ? "Custom Regex" : hit.kind} ${i + 1}`}
+            subtitle={
+              hit.kind === "face" ? (scan?.excludedIds.includes(hit.id) ? "Face excluded" : "Face masked") : "••••••••"
+            }
+            accessories={[
+              ...(scan?.excludedIds.includes(hit.id) ? [{ tag: { value: "Don't Redact", color: Color.Orange } }] : []),
+              ...(hit.confidenceSource === "ocr" && !showOCRConfidence
                 ? []
                 : [
                     {
@@ -151,10 +215,10 @@ export default function Command() {
                           ? "Matched an Always Hide These Words rule."
                           : "Recognition confidence does not measure redaction completeness.",
                     },
-                  ]
-            }
-            detail={preview}
-            actions={actions()}
+                  ]),
+            ]}
+            detail={preview(hit)}
+            actions={actions(hit)}
           />
         ))}
       </List.Section>
