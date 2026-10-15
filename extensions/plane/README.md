@@ -9,9 +9,12 @@ A powerful Raycast extension for managing work items in [Plane](https://plane.so
 - **Create Work Item** - Create new work items with comprehensive details
 - **Search Work Items** - Search work items across all projects by title or ID
 - **Search Projects** - View projects and their work items
+- **My Work Items** - Work items assigned to you or created by you, grouped by state
 - **Open Work Item** - Open `ENG-123` or a Plane URL (argument, or read from the clipboard)
 - **Quick Create Work Item** - Create a work item from the root search with a title and optional description
 - **Quick Add Comment** - Comment on a work item by ID without opening it
+- **Assigned Work Items** (menu bar) - Count and list of your open assigned work items, refreshed every 15 minutes
+- **My Open Work Items** - Your open assigned count in root search, e.g. "12 open · 2 urgent · 1 overdue · 3 due today", without opening anything. Refreshes every 15 minutes (run it once to start); opening it shows My Work Items
 
 ### ✨ Work Item Management
 
@@ -88,6 +91,7 @@ For both **Plane Cloud** and **Self-Hosted** instances:
 
 ### Self-Hosted (Community Edition) Notes
 
+- Plane Community Edition only has the v1 API. It has no "assigned to me" filter, so **My Work Items** and the menu bar scan your projects' most recently updated work items (up to 20 projects × 300 items, 3 requests at a time) and filter locally. Results are cached.
 - Plane allows 60 API requests per minute per key. If you hit the limit, wait a minute and retry.
 - If a command reports "Check API Base Path", make sure the preference points at your Plane host (e.g. `https://plane.example.com`).
 

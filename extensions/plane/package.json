@@ -39,6 +39,21 @@
       "mode": "view"
     },
     {
+      "name": "my-work-items",
+      "title": "My Work Items",
+      "subtitle": "Plane",
+      "description": "Work items assigned to you or created by you, grouped by state",
+      "mode": "view"
+    },
+    {
+      "name": "work-items-count",
+      "title": "My Open Work Items",
+      "subtitle": "Plane",
+      "description": "Shows how many open work items are assigned to you, and how many are urgent, overdue or due today, in root search. Refreshes every 15 minutes (run it once to start); opening it shows My Work Items.",
+      "mode": "no-view",
+      "interval": "15m"
+    },
+    {
       "name": "open-work-item",
       "title": "Open Work Item",
       "subtitle": "Plane",
@@ -110,6 +125,24 @@
           "placeholder": "Comment",
           "type": "text",
           "required": true
+        }
+      ]
+    },
+    {
+      "name": "assigned-work-items-menu-bar",
+      "title": "Assigned Work Items",
+      "subtitle": "Plane",
+      "description": "Show your open assigned work items in the menu bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "alwaysShow",
+          "label": "Always Show",
+          "description": "Show the menu bar item even when nothing is assigned to you",
+          "type": "checkbox",
+          "required": false,
+          "default": true
         }
       ]
     }

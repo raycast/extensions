@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, launchCommand, LaunchType, List } from "@raycast/api";
 import { useState } from "react";
 
 import { useWorkItems } from "./hooks/useWorkItems";
@@ -56,10 +56,15 @@ function SearchWorkItems() {
           description={
             hasQuery
               ? "Plane matches titles, sequence numbers, and project identifiers."
-              : "Type a title or an ID such as ENG-123."
+              : "Type a title or an ID such as ENG-123. Press ↵ to see the work items assigned to you."
           }
           actions={
             <ActionPanel>
+              <Action
+                title="Open My Work Items"
+                icon={Icon.Person}
+                onAction={() => launchCommand({ name: "my-work-items", type: LaunchType.UserInitiated })}
+              />
               <ChangeWorkspaceAction />
             </ActionPanel>
           }

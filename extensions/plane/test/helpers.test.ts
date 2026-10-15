@@ -1,7 +1,24 @@
 import { describe, expect, it } from "vitest";
+import { mapWithConcurrency } from "../src/helpers/concurrency";
 import { deriveCycleAndModules } from "../src/helpers/activities";
 import { describePlaneError } from "../src/helpers/errors";
 import { applyWorkItemChange, toggleAssignee, toWorkItemSummary } from "../src/helpers/work-item-summary";
+
+describe("mapWithConcurrency", () => {
+  it("keeps order and never exceeds the limit", async () => {
+    let active = 0;
+    let peak = 0;
+    const result = await mapWithConcurrency([5, 1, 4, 2, 3], 2, async (value) => {
+      active++;
+      peak = Math.max(peak, active);
+      await new Promise((resolve) => setTimeout(resolve, value));
+      active--;
+      return value * 10;
+    });
+    expect(result).toEqual([50, 10, 40, 20, 30]);
+    expect(peak).toBeLessThanOrEqual(2);
+  });
+});
 
 describe("deriveCycleAndModules", () => {
   it("replays cycle and module activity (newest first input)", () => {

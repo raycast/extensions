@@ -80,7 +80,7 @@ export type RawActivity = {
 };
 
 /**
- * Normalized work item used by list rows and the detail view's actions.
+ * Normalized work item used by list rows and the menu bar.
  * Dates are ISO strings so the object survives `useCachedPromise` JSON caching.
  */
 export type WorkItemSummary = {

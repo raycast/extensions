@@ -8,6 +8,7 @@
 - **Errors are shown**: lists show what went wrong (401/403 → check your API key, 404 → check API Base Path) with "Open Extension Preferences" and "Retry" actions instead of an empty list
 - **API key errors say what's wrong**: Plane's reason is shown (an invalid or expired key now reads "API key not valid" instead of a generic 403), and a pasted key's stray spaces or newline are trimmed
 - Lists no longer show a second error toast on top of the error screen
+- The menu bar and My Work Items no longer run the project scan at the same time; the second one waits for the first one's result, and a background menu bar refresh reuses a result from the last 5 minutes
 - **Start and due dates** keep the day you picked: east of UTC, the form used to save the previous day
 - **Search Work Items** no longer sends a request for an empty query
 - **Search Projects → Work Items**: stable keys, `PROJ-12` identifiers, and full row actions
@@ -16,8 +17,11 @@
 ### Added
 
 - **Change Workspace** (⌘⇧W) in every list: type a new slug (API key) or pick any workspace that installed the app (OAuth)
+- **My Work Items**: assigned to me / created by me, grouped by state (Triage → In Progress → Todo → Backlog), completed and cancelled behind ⌘⇧H
 - **Open Work Item**: open `ENG-123` or a Plane URL from the argument or clipboard
 - **Quick Create Work Item** (no-view, default project and assign-to-me preferences) and **Quick Add Comment** (no-view, Markdown)
+- **Assigned Work Items** menu bar command with the count of open assigned work items; hold ⌥ to open in the browser
+- **My Open Work Items**: your open assigned count, with urgent, overdue and due-today counts, in root search, refreshed every 15 minutes; opening it shows My Work Items
 - Row actions everywhere: open detail, open in browser, copy identifier / URL / Markdown link, update state and priority (optimistic), assign to me, add comment, edit
 - Work item detail shows assignees, labels, cycle, module, created/updated dates, and the latest comments
 

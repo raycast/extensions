@@ -10,6 +10,23 @@ import {
   toWorkItemSummary,
 } from "../helpers/work-item-summary";
 
+/** Fields requested when scanning many work items (keeps payloads small). */
+export const WORK_ITEM_SCAN_FIELDS = [
+  "id",
+  "name",
+  "sequence_id",
+  "project",
+  "state",
+  "priority",
+  "assignees",
+  "labels",
+  "created_by",
+  "created_at",
+  "updated_at",
+  "start_date",
+  "target_date",
+].join(",");
+
 export async function createWorkItem(projectId: string, workItemRequest: IssueRequest) {
   const response = await planeClient?.workItemsApi.createWorkItem({
     projectId,
