@@ -159,6 +159,11 @@ function readShared(): SharedUnreadEntry<Unread> | undefined {
   }
 }
 
+/** The last shared unread result if it's younger than `maxAgeMs`, without any request. */
+export function peekSharedUnread(lookbackDays: number, maxAgeMs: number): Unread | undefined {
+  return freshSharedUnread(readShared(), lookbackDays, maxAgeMs);
+}
+
 function writeShared(entry: SharedUnreadEntry<Unread>) {
   cache.set(RESULT_KEY, JSON.stringify(entry));
 }
