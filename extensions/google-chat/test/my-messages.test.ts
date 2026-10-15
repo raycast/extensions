@@ -10,8 +10,8 @@ import {
   parseView,
   previewText,
   previewUsers,
+  planReadPage,
   READ_PAGE_SIZE,
-  readPage,
   resolveView,
   splitSections,
   youReplied,
@@ -117,23 +117,44 @@ describe("splitSections", () => {
   it("moves a conversation to Read once it's no longer unread", () => {
     expect(splitSections([], [row("spaces/B")]).read).toHaveLength(1);
   });
+
+  it("shows a conversation read elsewhere under Read when the fresh unread result drops it", () => {
+    // The Read page loaded while B and D were unread; the fresh unread result lists only D.
+    const page = planReadPage(
+      [{ name: "spaces/A" }, { name: "spaces/B" }, { name: "spaces/D" }],
+      0,
+      new Set(["spaces/B", "spaces/D"]),
+    );
+    const rows = page.items.map((space) => row(space.name));
+    const split = splitSections([{ spaceName: "spaces/D" }], rows);
+    expect(split.read.map((r) => r.item.space.name)).toEqual(["spaces/A", "spaces/B"]);
+  });
 });
 
-describe("readPage", () => {
-  const items = Array.from({ length: 60 }, (_, i) => i);
+describe("planReadPage", () => {
+  const spaces = Array.from({ length: 60 }, (_, i) => ({ name: `spaces/${i}` }));
+  const none = new Set<string>();
 
-  it("slices 25 per page and says whether more follow", () => {
+  it("takes 25 per page and says whether more follow", () => {
     expect(READ_PAGE_SIZE).toBe(25);
-    expect(readPage(items, 0)).toEqual({ items: items.slice(0, 25), hasMore: true });
-    expect(readPage(items, 1)).toEqual({ items: items.slice(25, 50), hasMore: true });
-    expect(readPage(items, 2)).toEqual({ items: items.slice(50, 60), hasMore: false });
-    expect(readPage(items, 3)).toEqual({ items: [], hasMore: false });
+    expect(planReadPage(spaces, 0, none)).toEqual({ items: spaces.slice(0, 25), nextOffset: 25, hasMore: true });
+    expect(planReadPage(spaces, 25, none)).toEqual({ items: spaces.slice(25, 50), nextOffset: 50, hasMore: true });
+    expect(planReadPage(spaces, 50, none)).toEqual({ items: spaces.slice(50, 60), nextOffset: 60, hasMore: false });
+    expect(planReadPage(spaces, 60, none)).toEqual({ items: [], nextOffset: 60, hasMore: false });
   });
 
   it("has no more pages when the list ends exactly on a page boundary", () => {
-    expect(readPage(items.slice(0, 50), 1).hasMore).toBe(false);
-    expect(readPage([], 0)).toEqual({ items: [], hasMore: false });
-    expect(readPage(items, 0, 10).items).toHaveLength(10);
+    expect(planReadPage(spaces.slice(0, 50), 25, none).hasMore).toBe(false);
+    expect(planReadPage([], 0, none)).toEqual({ items: [], nextOffset: 0, hasMore: false });
+    expect(planReadPage(spaces, 0, none, 10).items).toHaveLength(10);
+  });
+
+  it("keeps unread conversations in the page without counting them toward its size", () => {
+    const unread = new Set(["spaces/1", "spaces/3"]);
+    const page = planReadPage(spaces, 0, unread, 5);
+    expect(page.items.map((s) => s.name)).toEqual([0, 1, 2, 3, 4, 5, 6].map((i) => `spaces/${i}`));
+    expect(page.nextOffset).toBe(7);
+    expect(planReadPage(spaces, page.nextOffset, unread, 5).items[0].name).toBe("spaces/7");
   });
 });
 

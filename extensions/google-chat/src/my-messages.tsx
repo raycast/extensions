@@ -50,11 +50,9 @@ function MyMessages({ launchView }: { launchView?: string }) {
   const extras = useUnreadExtras(unreadEntries);
   const replied = new Set(extras.replied);
 
-  // Wait for the unread result so the Read pages can leave unread conversations out before paging.
-  const reads = useReadConversations(
-    !unreadOnly && !!unread,
-    unreadEntries.map((entry) => entry.spaceName),
-  );
+  // Wait for an unread result so the Read pages don't spend requests on conversations it lists. Which rows
+  // show under Read is decided here, against the latest unread result.
+  const reads = useReadConversations(!unreadOnly && !!unread, unreadEntries);
   const sections = splitSections(unreadEntries, unreadOnly ? [] : (reads.data ?? []));
 
   // Raycast can't refresh a list command in the background, so this command's root search subtitle shows

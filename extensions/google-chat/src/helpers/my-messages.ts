@@ -108,14 +108,28 @@ export function splitSections<U extends { spaceName: string }, R extends { item:
   return { unread, read };
 }
 
-/** One page (zero-based) of `items`, and whether more pages follow. */
-export function readPage<T>(
-  items: T[],
-  page: number,
+/**
+ * The next page of the Read section from `offset` in every conversation (most recently active first): it runs
+ * until it holds `pageSize` conversations that aren't currently unread, and also keeps the unread ones it
+ * passes. Those stay in the page (their rows come from the unread result, at no request cost) so that the
+ * Unread/Read split is made at render time against the latest unread result: a conversation read elsewhere
+ * or marked as read moves to Read without reloading the pages.
+ */
+export function planReadPage<T extends { name: string }>(
+  spaces: T[],
+  offset: number,
+  unreadNames: ReadonlySet<string>,
   pageSize: number = READ_PAGE_SIZE,
-): { items: T[]; hasMore: boolean } {
-  const start = Math.max(0, page) * pageSize;
-  return { items: items.slice(start, start + pageSize), hasMore: start + pageSize < items.length };
+): { items: T[]; nextOffset: number; hasMore: boolean } {
+  const items: T[] = [];
+  let read = 0;
+  let index = Math.max(0, offset);
+  while (index < spaces.length && read < pageSize) {
+    const space = spaces[index++];
+    items.push(space);
+    if (!unreadNames.has(space.name)) read++;
+  }
+  return { items, nextOffset: index, hasMore: index < spaces.length };
 }
 
 /** `all` or `unread`, else undefined. */

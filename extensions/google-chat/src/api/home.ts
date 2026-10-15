@@ -13,8 +13,8 @@ import {
   namesFor,
   needsLatestCheck,
   newestFirst,
+  planReadPage,
   previewUsers,
-  readPage,
   youReplied,
 } from "../helpers/my-messages";
 import { listMessages } from "./chat";
@@ -92,30 +92,45 @@ export async function loadPreviewNames(messages: Message[]): Promise<UserNames> 
   return names;
 }
 
-/** Cursor of the Read pagination: every conversation, most recently active first, from the first page's `spaces.list`. */
+/**
+ * Cursor of the Read pagination: every conversation, most recently active first, from the first page's
+ * `spaces.list`, and where the next page starts.
+ */
 export interface ReadCursor {
   spaces: Space[];
+  offset: number;
+}
+
+/** A Read row for a conversation that was unread when its page loaded, from the unread result. */
+function rowFromUnread(entry: UnreadSpace, names: UserNames): HomeRow {
+  const preview = entry.messages[0];
+  return {
+    item: entry.item,
+    preview,
+    youReplied: false,
+    latestTime: entry.latestTime ?? entry.item.space.lastActiveTime,
+    names: namesFor(preview, names),
+  };
 }
 
 /**
- * One page of conversations for the Read section, most recently active first (25 per page). The first
- * page lists every space once (`spaces.list`); each page then resolves titles and lists the newest
- * messages of its conversations, 5 at a time. Conversations that were unread when the first page loaded are
- * left out; one marked as read joins Read on the next refresh.
+ * One page of conversations for the Read section, most recently active first (25 that aren't unread per
+ * page). The first page lists every space once (`spaces.list`); each page then resolves titles and lists
+ * the newest messages of its conversations, 5 at a time. Conversations unread when the page loads keep a
+ * row built from the unread result, without requests; My Messages hides them while the latest unread result
+ * lists them, so one read elsewhere or marked as read shows under Read straight away.
  */
 export async function loadReadPage(
   page: number,
   cursor: ReadCursor | undefined,
-  unreadSpaceNames: ReadonlySet<string> = new Set(),
+  unread: UnreadSpace[] = [],
 ): Promise<{ data: HomeRow[]; hasMore: boolean; cursor: ReadCursor }> {
-  // Unread conversations are left out before paging, so every page holds 25 Read rows and no preview
-  // requests are spent on conversations the Unread section already shows.
-  const spaces =
-    page === 0 || !cursor
-      ? (await listSpacesSorted()).filter((space) => !unreadSpaceNames.has(space.name))
-      : cursor.spaces;
-  const slice = readPage(spaces, page);
-  const [me, items] = await Promise.all([getMe(), resolveSpaceItems(slice.items)]);
+  const first = page === 0 || !cursor;
+  const spaces = first ? await listSpacesSorted() : cursor.spaces;
+  const unreadByName = new Map(unread.map((entry) => [entry.spaceName, entry]));
+  const slice = planReadPage(spaces, first ? 0 : cursor.offset, new Set(unreadByName.keys()));
+  const toLoad = slice.items.filter((space) => !unreadByName.has(space.name));
+  const [me, items] = await Promise.all([getMe(), resolveSpaceItems(toLoad)]);
   const latest = await mapLimit(items, CONCURRENCY, async (item): Promise<LatestMessages> => {
     try {
       return await loadLatestMessages(item.space.name, me.userName);
@@ -125,17 +140,30 @@ export async function loadReadPage(
       return { youReplied: false };
     }
   });
-  const names = await loadPreviewNames(latest.flatMap((entry) => (entry.preview ? [entry.preview] : [])));
+  const fromUnread = slice.items.flatMap((space) => unreadByName.get(space.name) ?? []);
+  const previews = [...latest.map((entry) => entry.preview), ...fromUnread.map((entry) => entry.messages[0])];
+  const names = await loadPreviewNames(previews.filter((message): message is Message => !!message));
+  const loaded = new Map(
+    items.map((item, i): [string, HomeRow] => [
+      item.space.name,
+      {
+        item,
+        preview: latest[i].preview,
+        youReplied: latest[i].youReplied,
+        latestTime: latest[i].latestTime ?? item.space.lastActiveTime,
+        names: namesFor(latest[i].preview, names),
+      },
+    ]),
+  );
   return {
-    data: items.map((item, i) => ({
-      item,
-      preview: latest[i].preview,
-      youReplied: latest[i].youReplied,
-      latestTime: latest[i].latestTime ?? item.space.lastActiveTime,
-      names: namesFor(latest[i].preview, names),
-    })),
+    data: slice.items.flatMap((space) => {
+      const entry = unreadByName.get(space.name);
+      if (entry) return [rowFromUnread(entry, names)];
+      const row = loaded.get(space.name);
+      return row ? [row] : [];
+    }),
     hasMore: slice.hasMore,
-    cursor: { spaces },
+    cursor: { spaces, offset: slice.nextOffset },
   };
 }
 

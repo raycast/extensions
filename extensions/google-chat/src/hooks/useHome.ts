@@ -7,16 +7,18 @@ import { showChatError } from "../helpers/feedback";
 
 /**
  * Read conversations for My Messages, most recently active first, 25 per page via the List `pagination` prop.
- * Only runs when `execute` is true (the All view, once the unread result is known).
+ * Only runs when `execute` is true (the All view, once an unread result is known). The rows include the
+ * conversations unread when each page loaded, so the caller splits Unread from Read against the latest
+ * unread result (`splitSections`).
  */
-export function useReadConversations(execute: boolean, unreadSpaceNames: string[]) {
-  // Read through a ref so marking a conversation read doesn't reload every page; the next refresh picks it up.
-  const unreadRef = useRef(unreadSpaceNames);
-  unreadRef.current = unreadSpaceNames;
+export function useReadConversations(execute: boolean, unread: UnreadSpace[]) {
+  // Read through a ref: a new unread result changes only which rows show (at render), so it doesn't reload pages.
+  const unreadRef = useRef(unread);
+  unreadRef.current = unread;
   const result = useCachedPromise(
     () =>
       ({ page, cursor }: { page: number; cursor?: ReadCursor }) =>
-        loadReadPage(page, cursor, new Set(unreadRef.current)),
+        loadReadPage(page, cursor, unreadRef.current),
     [],
     {
       execute,
