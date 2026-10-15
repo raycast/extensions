@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Contributors] - {PR_MERGE_DATE}
+## [Contributors] - 2026-10-15
 
 - Added smrehan to the contributors, for the Next Reminder command, the calendar-style menu bar and multi-list selection.
 
