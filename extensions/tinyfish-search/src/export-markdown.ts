@@ -7,9 +7,18 @@ export function markdownFilename(title: string) {
       .join("")
       .replace(/[<>:"/\\|?*]/g, "-")
       .replace(/[. ]+$/g, "")
-      .trim()
-      .slice(0, 100) || "page";
-  return `${/^(con|prn|aux|nul|com[0-9]|lpt[0-9])(?:\.|$)/i.test(safe) ? `_${safe}` : safe}.md`;
+      .trim() || "page";
+  const name = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(?:\.|$)/i.test(safe) ? `_${safe}` : safe;
+  let base = "";
+  let bytes = 0;
+  // A 100-byte basename leaves room for .md and numbered collision suffixes.
+  for (const character of name) {
+    const size = Buffer.byteLength(character, "utf8");
+    if (bytes + size > 100) break;
+    base += character;
+    bytes += size;
+  }
+  return `${base}.md`;
 }
 
 export async function exportMarkdown(directory: string, title: string, markdown: string) {

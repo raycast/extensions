@@ -154,16 +154,16 @@ function Command(props: LaunchProps<{ arguments: Arguments.Search; launchContext
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={result.url} />
+                {result.pdf_url ? <Action.OpenInBrowser title="Open PDF" url={result.pdf_url} /> : null}
                 <Action.Push
                   title="Fetch Content"
                   icon={Icon.Document}
                   shortcut={{ macOS: { modifiers: ["cmd"], key: "f" }, Windows: { modifiers: ["ctrl"], key: "f" } }}
                   target={<FetchedPages options={{ urls: [result.url], links: true }} />}
                 />
-                {result.pdf_url ? <Action.OpenInBrowser title="Open PDF" url={result.pdf_url} /> : null}
                 <Action.CopyToClipboard title="Copy URL" content={result.url} />
-                <SaveReadingAction url={result.url} title={result.title} />
                 <Action.CopyToClipboard title="Copy Markdown Link" content={`[${result.title}](${result.url})`} />
+                <SaveReadingAction url={result.url} title={result.title} />
                 <Action.Push
                   title="Fetch with Options"
                   icon={Icon.Gear}

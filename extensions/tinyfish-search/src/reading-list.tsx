@@ -27,7 +27,14 @@ export default function ReadingList() {
         () => void revalidate(),
       );
     } else {
-      push(<FetchedPages options={{ urls: [item.url], links: true }} saveToReadingList />, () => void revalidate());
+      push(
+        <FetchedPages
+          options={{ urls: [item.url], links: true }}
+          saveToReadingList
+          onFetched={() => update(() => library.markRead(item.id, true))}
+        />,
+        () => void revalidate(),
+      );
     }
   }
   const visible = data.filter(

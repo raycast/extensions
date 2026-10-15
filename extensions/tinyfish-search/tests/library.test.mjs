@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, dirname } from "node:path";
+import { join, dirname, basename } from "node:path";
 import { createLibraryStore, getReadingRefreshOptions } from "../src/library-store.ts";
 import { fetchTinyFishPages } from "../src/tinyfish.ts";
 import { exportMarkdown, markdownFilename } from "../src/export-markdown.ts";
@@ -217,6 +217,22 @@ test("Markdown exports stay in the selected folder and never overwrite an existi
   assert.equal(await readFile(first, "utf8"), "First");
   assert.equal(await readFile(second, "utf8"), "Second");
   assert.equal(markdownFilename("CON"), "_CON.md");
+});
+
+test("Unicode Markdown filenames fit byte limits without splitting characters, including numbered exports", async (t) => {
+  const folder = await mkdtemp(join(tmpdir(), "tinyfish-unicode-export-"));
+  t.after(() => rm(folder, { recursive: true, force: true }));
+  for (const title of ["中".repeat(100), "😀".repeat(100), `${"a".repeat(99)}😀`]) {
+    const filename = markdownFilename(title);
+    assert.ok(Buffer.byteLength(filename, "utf8") <= 255);
+    assert.equal(Buffer.from(filename).toString("utf8"), filename);
+    for (let index = 0; index < 12; index++) {
+      const file = await exportMarkdown(folder, title, String(index));
+      assert.ok(Buffer.byteLength(basename(file), "utf8") <= 255);
+      assert.equal(basename(file), index ? filename.replace(/\.md$/, ` (${index}).md`) : filename);
+      assert.equal(await readFile(file, "utf8"), String(index));
+    }
+  }
 });
 
 test("AI search maps filters without dropping intent and rejects incompatible requests", () => {

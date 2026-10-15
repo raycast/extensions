@@ -11,9 +11,11 @@ import { ExportForm } from "./export-form";
 function FetchedPagesView({
   options,
   saveToReadingList = false,
+  onFetched,
 }: {
   options: FetchOptions;
   saveToReadingList?: boolean;
+  onFetched?: () => Promise<void>;
 }) {
   const abortable = useRef<AbortController | null>(null);
   const { data, isLoading, error, revalidate } = usePromise(
@@ -36,6 +38,7 @@ function FetchedPagesView({
           await showFailureToast(error, { title: "Fetched page could not be saved offline" });
         }
       }
+      if (response.results.length && !signal.aborted) await onFetched?.();
       return response;
     },
     [options],
@@ -65,6 +68,7 @@ function FetchedPagesView({
                   <FetchedPages
                     options={{ ...options, include_selectors: undefined, exclude_selectors: undefined }}
                     saveToReadingList={saveToReadingList}
+                    onFetched={onFetched}
                   />
                 }
               />
@@ -143,7 +147,11 @@ function FetchedPagesView({
                   title="Retry Page"
                   icon={Icon.ArrowClockwise}
                   target={
-                    <FetchedPages options={{ ...options, urls: [failure.url] }} saveToReadingList={saveToReadingList} />
+                    <FetchedPages
+                      options={{ ...options, urls: [failure.url] }}
+                      saveToReadingList={saveToReadingList}
+                      onFetched={onFetched}
+                    />
                   }
                 />
                 <Action.OpenInBrowser url={failure.url} />
