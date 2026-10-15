@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Recordist entry] - {PR_MERGE_DATE}
+## [Update Recordist entry] - 2026-10-15
 
 - Correct the Recordist description: it can also control recording, and what it returns goes to the assistant you connect.
 
