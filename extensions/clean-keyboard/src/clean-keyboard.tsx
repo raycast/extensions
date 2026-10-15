@@ -51,11 +51,15 @@ const durations: Duration[] = [
 ];
 
 export default function Command(props: LaunchProps<{ launchContext?: { durationSeconds: number } }>) {
+  const { defaultDuration } = getPreferenceValues<Preferences.CleanKeyboard>();
   const [isRunning, setIsRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [icon, setIcon] = useState<string | null>(null);
   const savedFnState = useRef<boolean | null>(null);
   const autoLockStarted = useRef(false);
+
+  // "0" is Forever, matching how the duration list treats a missing `seconds`
+  const defaultSeconds = defaultDuration && defaultDuration !== "always-ask" ? Number(defaultDuration) : undefined;
 
   useEffect(() => {
     return () => {
@@ -123,7 +127,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { durationS
   }, []);
 
   useEffect(() => {
-    const seconds = props.launchContext?.durationSeconds;
+    const seconds = props.launchContext?.durationSeconds ?? defaultSeconds;
     if (seconds === undefined || autoLockStarted.current) return;
     const duration =
       durations.find((item) => (item.seconds ?? 0) === seconds) ??
@@ -134,7 +138,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { durationS
         showToast({ title: "Failed to lock keyboard", message: String(error), style: Toast.Style.Failure });
       });
     }
-  }, [lockAction, props.launchContext?.durationSeconds]);
+  }, [defaultSeconds, lockAction, props.launchContext?.durationSeconds]);
 
   const unlockAction = async () => {
     let stopHandler: () => Promise<void>;
