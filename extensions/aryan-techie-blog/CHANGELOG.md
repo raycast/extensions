@@ -1,6 +1,6 @@
 # Aryan Techie Blog Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-15
 
 - Search and browse blog posts from aryantechie.com
 - Menu bar command with background checks and notifications for new posts
