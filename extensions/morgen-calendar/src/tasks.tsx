@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Alert, confirmAlert, Detail, Form, Icon, List, useNavigation } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { RequestSequence } from "./lib/request-sequence";
 import { closeTask, deleteTask, invalidateCache, listTasks, updateTask } from "./lib/morgen";
 import { showFailure, showSuccess } from "./lib/ui";
+import { RequestSequence } from "./lib/request-sequence";
 import type { Task } from "./types";
 
 function escapeMarkdown(value: string): string {
@@ -26,6 +26,7 @@ function TaskDetails({ task }: { task: Task }) {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Due" text={task.due?.replace("T", " ") || "No due date"} />
+          <Detail.Metadata.Label title="Timezone" text={task.timeZone || "Floating / not specified"} />
           <Detail.Metadata.Label title="Estimated Time" text={task.estimatedDuration || "Not set"} />
           <Detail.Metadata.Label title="Priority" text={String(task.priority ?? 0)} />
           <Detail.Metadata.Label title="Status" text={task.progress || "needs-action"} />
@@ -38,17 +39,20 @@ function TaskDetails({ task }: { task: Task }) {
 function EditTask({ task, onSaved }: { task: Task; onSaved: () => void }) {
   const [saving, setSaving] = useState(false);
   const { pop } = useNavigation();
+  const submitting = useRef(false);
 
   async function submit(values: { title: string; description: string; priority: string }) {
+    if (submitting.current) return;
     if (!values.title.trim()) {
       await showFailure(new Error("Enter a task title."));
       return;
     }
+    submitting.current = true;
     setSaving(true);
     try {
       await updateTask(task, {
         title: values.title.trim(),
-        description: values.description.trim(),
+        description: values.description,
         priority: Number(values.priority),
       });
       await showSuccess("Task updated");
@@ -57,6 +61,7 @@ function EditTask({ task, onSaved }: { task: Task; onSaved: () => void }) {
     } catch (error) {
       await showFailure(error);
     } finally {
+      submitting.current = false;
       setSaving(false);
     }
   }
@@ -88,17 +93,24 @@ function EditTask({ task, onSaved }: { task: Task; onSaved: () => void }) {
 export default function Tasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const requests = useRef(new RequestSequence());
+  const mutating = useRef(false);
 
   const load = useCallback(async (force = false) => {
     const isCurrent = requests.current.begin();
     setLoading(true);
+    setHasError(false);
+    setTasks([]);
     try {
       if (force) invalidateCache();
-      const fetched = await listTasks();
-      if (isCurrent()) setTasks(fetched);
+      const result = await listTasks();
+      if (isCurrent()) setTasks(result);
     } catch (error) {
-      if (isCurrent()) await showFailure(error);
+      if (isCurrent()) {
+        setHasError(true);
+        await showFailure(error).catch(() => {});
+      }
     } finally {
       if (isCurrent()) setLoading(false);
     }
@@ -113,37 +125,60 @@ export default function Tasks() {
   const sorted = useMemo(() => [...tasks].sort((a, b) => (a.due || "9999").localeCompare(b.due || "9999")), [tasks]);
 
   async function complete(task: Task) {
+    if (mutating.current) return;
+    mutating.current = true;
     try {
       await closeTask(task);
       await showSuccess("Task completed");
       await load(true);
     } catch (error) {
       await showFailure(error);
+    } finally {
+      mutating.current = false;
     }
   }
 
   async function remove(task: Task) {
-    const confirmed = await confirmAlert({
-      title: `Delete “${task.title}”?`,
-      message: "This task and any subtasks will be deleted from Morgen.",
-      primaryAction: {
-        title: "Delete Task",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-    if (!confirmed) return;
+    if (mutating.current) return;
+    mutating.current = true;
     try {
+      const confirmed = await confirmAlert({
+        title: `Delete “${task.title}”?`,
+        message: "This task and any subtasks will be deleted from Morgen.",
+        primaryAction: {
+          title: "Delete Task",
+          style: Alert.ActionStyle.Destructive,
+        },
+      });
+      if (!confirmed) return;
       await deleteTask(task);
       await showSuccess("Task deleted");
       await load(true);
     } catch (error) {
       await showFailure(error);
+    } finally {
+      mutating.current = false;
     }
   }
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search Morgen tasks">
-      <List.EmptyView title="No Open Tasks" description="Morgen returns up to 100 native open tasks here." />
+    <List
+      isLoading={loading}
+      searchBarPlaceholder="Search Morgen tasks"
+      actions={
+        <ActionPanel>
+          <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void load(true)} />
+        </ActionPanel>
+      }
+    >
+      <List.EmptyView
+        title={hasError ? "Unable to Load Tasks" : "No Open Tasks"}
+        description={
+          hasError
+            ? "Task status is unknown. Refresh to try again."
+            : "Morgen returns up to 100 native open tasks here."
+        }
+      />
       {sorted.map((task) => (
         <List.Item
           key={task.id}
