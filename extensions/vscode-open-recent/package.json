@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vscode-open-recent",
+  "title": "VS Code Open Recent",
+  "description": "Open recent VS Code projects (minimal, Raycast v1 compatible)",
+  "icon": "icon.png",
+  "author": "kaho",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open Recent Project",
+      "description": "Search and open recent VS Code projects",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "build",
+      "type": "dropdown",
+      "title": "Editor",
+      "required": false,
+      "default": "Code",
+      "description": "Which VS Code build to read recent projects from and open them with",
+      "data": [
+        {
+          "title": "Visual Studio Code",
+          "value": "Code"
+        },
+        {
+          "title": "Visual Studio Code - Insiders",
+          "value": "Code - Insiders"
+        },
+        {
+          "title": "Cursor",
+          "value": "Cursor"
+        },
+        {
+          "title": "VSCodium",
+          "value": "VSCodium"
+        },
+        {
+          "title": "Windsurf",
+          "value": "Windsurf"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.8",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "publish": "ray publish"
+  },
+  "allowScripts": {
+    "esbuild": false
+  }
+}
