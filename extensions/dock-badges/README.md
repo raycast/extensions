@@ -12,12 +12,24 @@ If you auto-hide your Dock, the red badges on Slack, Messages, Mail, etc. are in
 - Optionally hide the menu bar item entirely while everything is clear
 - Choose a **Circle**, **Bell** or **App** symbol, in **Filled** or **Outline** style; it turns red when notifications are waiting
 - Monochrome icon that matches your menu bar, light or dark
+- **View Notifications** command lists the apps with badges in Raycast, so you can jump to one without the mouse
+- Ignore apps whose badges you don't care about; they're left out of the menu bar count and listed separately
 
 ## Setup
 
 Dock Badges reads badge counts through macOS Accessibility, so Raycast needs to be allowed under
 **System Settings → Privacy & Security → Accessibility**. If permission is missing, the menu bar item
 will say so and take you straight to the setting.
+
+## View Notifications
+
+| Shortcut | Action |
+| --- | --- |
+| `↵` | Open the app |
+| `⌘⇧H` | Ignore / stop ignoring the app |
+| `⌘R` | Refresh |
+
+It can also be opened from the menu bar dropdown with **View in Raycast** (`⌘L`).
 
 ## Preferences
 

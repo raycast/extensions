@@ -9,3 +9,5 @@
 - Background refresh every 10 seconds
 - Only application tiles are counted, so the Handoff tile's device identifier is never misread as a badge count
 - Show a HUD message when an app can't be opened from the dropdown, instead of failing silently
+- View Notifications command lists badged Dock apps in Raycast for keyboard access (thanks to @yianL's Read Me Maybe for the idea)
+- Ignore apps to leave their badges out of the menu bar count

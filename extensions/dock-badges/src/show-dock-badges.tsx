@@ -1,5 +1,4 @@
 import {
-  Application,
   Color,
   Icon,
   Image,
@@ -9,19 +8,13 @@ import {
   environment,
   getApplications,
   getPreferenceValues,
+  launchCommand,
   open,
   openCommandPreferences,
-  showHUD,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import {
-  AccessibilityError,
-  DockTile,
-  clickDockTile,
-  isAccessibilityError,
-  readDockTiles,
-  readSystemDarkMode,
-} from "./dock";
+import { ACCESSIBILITY_SETTINGS, openDockApp, resolvePaths, useIgnoredApps } from "./apps";
+import { AccessibilityError, DockTile, readDockTiles, readSystemDarkMode } from "./dock";
 
 // Built-in icons in the dropdown are tinted against Raycast's app theme rather than the menu's
 // appearance, so tint them explicitly for the system Light/Dark appearance the menu actually uses.
@@ -33,8 +26,6 @@ const menuIcon = (source: Icon, darkMode: boolean) => ({
 
 /** macOS system red, as used for Dock badges. */
 const BADGE_RED = "#FF3B30";
-
-const ACCESSIBILITY_SETTINGS = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
 
 /**
  * Menu bar glyph for the chosen symbol and style. Circle uses Raycast's built-in icons; Bell and App use
@@ -50,25 +41,7 @@ function iconSource(
 }
 
 function notificationLabel(total: number): string {
-  return `${total} notification${total === 1 ? "" : "s"}`;
-}
-
-function sameName(a: string, b: string): boolean {
-  return a.localeCompare(b, undefined, { sensitivity: "accent" }) === 0;
-}
-
-/**
- * Installed apps matching the tile's name. The first match supplies the icon. Opening by path only
- * happens when the match is unique: if several bundles share the name, `open` would succeed on
- * whichever came first, so the tile is clicked in the Dock instead (by name and ordinal), which
- * activates exactly what it shows.
- */
-function resolvePaths(
-  tile: DockTile,
-  applications: Application[] | undefined,
-): { iconPath?: string; openPath?: string } {
-  const matches = applications?.filter((application) => sameName(application.name, tile.name)) ?? [];
-  return { iconPath: matches[0]?.path, openPath: matches.length === 1 ? matches[0].path : undefined };
+  return `${total} Notification${total === 1 ? "" : "s"}`;
 }
 
 export default function Command() {
@@ -81,13 +54,14 @@ export default function Command() {
     onError: () => undefined,
   });
   const { data: applications } = useCachedPromise(getApplications, [], { keepPreviousData: true });
+  const { ignored, isLoading: ignoredLoading } = useIgnoredApps();
   const { data: darkMode = false } = useCachedPromise(readSystemDarkMode, [], {
     keepPreviousData: true,
     execute: menuOpen,
   });
 
   const badged = (data ?? [])
-    .filter((tile) => tile.count > 0)
+    .filter((tile) => tile.count > 0 && !ignored.has(tile.name))
     .map((tile) => ({ tile, ...resolvePaths(tile, applications) }));
   const total = badged.reduce((sum, { tile }) => sum + tile.count, 0);
   const hasBadges = total > 0;
@@ -95,7 +69,7 @@ export default function Command() {
   // Returning null ends a menu-bar run (there is no isLoading to wait on), so only hide after
   // a completed read. Otherwise a cached empty list can tear the command down before a new badge
   // is seen, and Hide When Clear would stay blank until the user opens it by hand.
-  if (preferences.hideWhenClear && !isLoading && data && !error && !hasBadges) {
+  if (preferences.hideWhenClear && !isLoading && !ignoredLoading && data && !error && !hasBadges) {
     return null;
   }
 
@@ -111,11 +85,11 @@ export default function Command() {
     <MenuBarExtra
       icon={icon}
       title={preferences.showCount && hasBadges ? String(total) : undefined}
-      tooltip={error ? error.message : hasBadges ? notificationLabel(total) : "No notifications"}
-      isLoading={isLoading}
+      tooltip={error ? error.message : hasBadges ? notificationLabel(total) : "No Notifications"}
+      isLoading={isLoading || ignoredLoading}
     >
       {accessibilityDenied ? (
-        <MenuBarExtra.Section title="Accessibility permission required">
+        <MenuBarExtra.Section title="Accessibility Permission Required">
           <MenuBarExtra.Item
             title="Allow Raycast in Privacy & Security → Accessibility"
             icon={menuIcon(Icon.Lock, darkMode)}
@@ -132,7 +106,7 @@ export default function Command() {
           />
         </MenuBarExtra.Section>
       ) : (
-        <MenuBarExtra.Section title={hasBadges ? notificationLabel(total) : "No notifications"}>
+        <MenuBarExtra.Section title={hasBadges ? notificationLabel(total) : "No Notifications"}>
           {badged.map(({ tile, iconPath, openPath }) => (
             <AppItem
               key={`${tile.name}-${tile.ordinal}`}
@@ -145,6 +119,12 @@ export default function Command() {
         </MenuBarExtra.Section>
       )}
       <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="View in Raycast"
+          icon={menuIcon(Icon.List, darkMode)}
+          shortcut={{ modifiers: ["cmd"], key: "l" }}
+          onAction={viewNotifications}
+        />
         <MenuBarExtra.Item
           title="Refresh"
           icon={menuIcon(Icon.ArrowClockwise, darkMode)}
@@ -161,27 +141,8 @@ export default function Command() {
   );
 }
 
-/**
- * Open the uniquely matched app bundle; if there is none or it fails, click its Dock tile instead.
- * Menu bar commands have no Raycast window for a toast, so a failed fallback is reported via HUD.
- */
-async function openDockApp(tile: DockTile, path?: string): Promise<void> {
-  if (path) {
-    try {
-      await open(path);
-      return;
-    } catch {
-      // Fall through to the Dock tile.
-    }
-  }
-  try {
-    await clickDockTile(tile.name, tile.ordinal);
-  } catch (error) {
-    const reason = isAccessibilityError(error)
-      ? "Raycast needs Accessibility permission"
-      : "its Dock tile could not be clicked";
-    await showHUD(`Couldn't open ${tile.name}: ${reason}`);
-  }
+function viewNotifications() {
+  return launchCommand({ name: "view-notifications", type: LaunchType.UserInitiated });
 }
 
 function AppItem({

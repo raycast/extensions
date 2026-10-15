@@ -16,7 +16,6 @@
     {
       "name": "show-dock-badges",
       "title": "Show Dock Badges",
-      "subtitle": "Dock Badges",
       "description": "Menu bar item showing the summed notification badge count of every app in your Dock.",
       "mode": "menu-bar",
       "interval": "10s",
@@ -80,6 +79,12 @@
           "title": "Visibility"
         }
       ]
+    },
+    {
+      "name": "view-notifications",
+      "title": "View Notifications",
+      "description": "List the Dock apps with notification badges and open one from the keyboard. Ignore an app to leave its badge out of the menu bar count.",
+      "mode": "view"
     }
   ],
   "tools": [],
