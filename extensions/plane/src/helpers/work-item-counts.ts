@@ -1,4 +1,5 @@
 import { getOpenAssignedWorkItems } from "./my-work-items";
+import { isOpenStateGroup } from "./state-groups";
 
 type Countable = {
   assigneeIds?: string[];
@@ -21,18 +22,31 @@ export function localDateString(date: Date = new Date()): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
+/** The calendar day (`YYYY-MM-DD`) of a Plane due date, or undefined without one. */
+export function dueDay(targetDate: string | null | undefined): string | undefined {
+  return targetDate ? targetDate.slice(0, 10) : undefined;
+}
+
+/**
+ * True when an open work item's due day is before `today` (from `localDateString`). Compares calendar days,
+ * so an item due today is not overdue until tomorrow. Completed and cancelled items are never overdue.
+ */
+export function isOverdue(
+  item: { targetDate?: string | null; state?: { group?: string } | null },
+  today: string,
+): boolean {
+  const day = dueDay(item.targetDate);
+  return !!day && day < today && isOpenStateGroup(item.state?.group);
+}
+
 /** Counts the user's open assigned work items, and how many are urgent, overdue or due today. */
 export function countWorkItems(items: Countable[], userId: string | undefined, today: string): WorkItemCounts {
   const open = getOpenAssignedWorkItems(items, userId);
-  const due = (item: Countable) => item.targetDate?.slice(0, 10);
   return {
     open: open.length,
     urgent: open.filter((item) => item.priority === "urgent").length,
-    overdue: open.filter((item) => {
-      const date = due(item);
-      return !!date && date < today;
-    }).length,
-    dueToday: open.filter((item) => due(item) === today).length,
+    overdue: open.filter((item) => isOverdue(item, today)).length,
+    dueToday: open.filter((item) => dueDay(item.targetDate) === today).length,
   };
 }
 

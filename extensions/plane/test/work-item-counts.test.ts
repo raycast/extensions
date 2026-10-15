@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countWorkItems, formatWorkItemsSubtitle, localDateString } from "../src/helpers/work-item-counts";
+import { countWorkItems, formatWorkItemsSubtitle, isOverdue, localDateString } from "../src/helpers/work-item-counts";
 
 const ME = "me";
 const TODAY = "2026-10-15";
@@ -40,6 +40,33 @@ describe("countWorkItems", () => {
 
   it("returns zeros without a user", () => {
     expect(countWorkItems([item()], undefined, TODAY).open).toBe(0);
+  });
+});
+
+describe("isOverdue", () => {
+  it("doesn't mark a work item due today as overdue", () => {
+    expect(isOverdue(item({ targetDate: "2026-10-15" }), TODAY)).toBe(false);
+  });
+
+  it("marks a work item due yesterday as overdue", () => {
+    expect(isOverdue(item({ targetDate: "2026-10-14" }), TODAY)).toBe(true);
+  });
+
+  it("never marks completed or cancelled work items as overdue", () => {
+    expect(isOverdue(item({ targetDate: "2026-10-01", state: { group: "completed" } }), TODAY)).toBe(false);
+    expect(isOverdue(item({ targetDate: "2026-10-01", state: { group: "cancelled" } }), TODAY)).toBe(false);
+  });
+
+  it("ignores work items without a due date, and future ones", () => {
+    expect(isOverdue(item({ targetDate: null }), TODAY)).toBe(false);
+    expect(isOverdue(item({ targetDate: "2026-10-16" }), TODAY)).toBe(false);
+  });
+
+  it("agrees with the count late in the evening, when local midnight of the due day has long passed", () => {
+    const today = localDateString(new Date(2026, 9, 15, 23, 59));
+    const dueToday = item({ targetDate: "2026-10-15" });
+    expect(isOverdue(dueToday, today)).toBe(false);
+    expect(countWorkItems([dueToday], ME, today)).toMatchObject({ overdue: 0, dueToday: 1 });
   });
 });
 

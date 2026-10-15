@@ -6,8 +6,8 @@ import { WorkItemSummary } from "../api/types";
 import { priorityToIcon } from "../helpers/icons";
 import { formatWorkItemIdentifier } from "../helpers/identifiers";
 import { capitalizeString } from "../helpers/strings";
-import { isOpenStateGroup } from "../helpers/state-groups";
 import { fromPlaneDate } from "../helpers/dates";
+import { isOverdue, localDateString } from "../helpers/work-item-counts";
 import WorkItemActions, { WorkItemMutator } from "./actions/WorkItemActions";
 
 type WorkItemListItemProps = {
@@ -51,7 +51,8 @@ export default function WorkItemListItem({
     // `fromPlaneDate` keeps the stored calendar day; `new Date("YYYY-MM-DD")` is the day before west of UTC.
     const due = fromPlaneDate(workItem.targetDate);
     if (due) {
-      const overdue = due.getTime() < Date.now() && isOpenStateGroup(workItem.state?.group);
+      // Calendar days, as in the count: a work item due today isn't overdue until tomorrow.
+      const overdue = isOverdue(workItem, localDateString());
       accessories.push({
         icon: { source: Icon.Calendar, tintColor: overdue ? Color.Red : undefined },
         text: format(due, "MMM d"),
