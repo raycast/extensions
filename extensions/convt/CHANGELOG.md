@@ -1,6 +1,6 @@
 # Convt Changelog
 
-## Suggested Output Formats - {PR_MERGE_DATE}
+## Suggested Output Formats - 2026-10-15
 
 - Show file types identified from filename extensions before choosing an output format.
 - Suggest common output formats using Convt's recommendations while keeping all supported formats available.
