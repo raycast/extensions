@@ -1,0 +1,177 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-limits",
+  "title": "AI Limits",
+  "description": "See usage limits, reset times and credits for Claude, Codex, Cursor, Gemini, Copilot and AI API keys.",
+  "icon": "extension-icon.png",
+  "author": "o101k",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "preferences": [
+    {
+      "name": "displayMode",
+      "type": "dropdown",
+      "title": "Show Limits As",
+      "description": "Show how much of each limit is used, or how much is left",
+      "required": false,
+      "default": "used",
+      "data": [
+        {
+          "title": "Percent Used",
+          "value": "used"
+        },
+        {
+          "title": "Percent Left",
+          "value": "remaining"
+        }
+      ]
+    },
+    {
+      "name": "showNotConnected",
+      "type": "checkbox",
+      "title": "Providers",
+      "label": "Show providers that aren't connected",
+      "description": "List providers with no credentials found, with a Connect action for each",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "claudeSessionKey",
+      "type": "password",
+      "title": "Claude Session Key",
+      "description": "Optional. Choose Connect Claude Code instead. A claude.ai sessionKey cookie, used when Claude Code isn't signed in on this Mac",
+      "placeholder": "sk-ant-sid01-…",
+      "required": false
+    },
+    {
+      "name": "cursorCookie",
+      "type": "password",
+      "title": "Cursor Session Cookie",
+      "description": "Optional. Choose Connect Cursor instead. The WorkosCursorSessionToken cookie from cursor.com, used when the Cursor app isn't signed in on this Mac",
+      "placeholder": "user_…%3A%3AeyJ…",
+      "required": false
+    },
+    {
+      "name": "githubToken",
+      "type": "password",
+      "title": "GitHub Token for Copilot",
+      "description": "Optional. Choose Connect GitHub on the Copilot item instead. A GitHub token, for example from `gh auth token`",
+      "placeholder": "gho_… or ghp_…",
+      "required": false
+    },
+    {
+      "name": "openrouterApiKey",
+      "type": "password",
+      "title": "OpenRouter API Key",
+      "placeholder": "sk-or-v1-…",
+      "required": false,
+      "description": "Optional. Choose Connect OpenRouter instead. An OpenRouter API key, to show its credit balance and spending limit"
+    },
+    {
+      "name": "zaiApiKey",
+      "type": "password",
+      "title": "z.ai API Key",
+      "description": "Optional. Choose Connect z.ai instead. A GLM Coding Plan API key",
+      "required": false
+    },
+    {
+      "name": "zaiRegion",
+      "type": "dropdown",
+      "title": "z.ai Region",
+      "required": false,
+      "default": "global",
+      "data": [
+        {
+          "title": "Global (api.z.ai)",
+          "value": "global"
+        },
+        {
+          "title": "China (open.bigmodel.cn)",
+          "value": "china"
+        }
+      ],
+      "description": "Where your z.ai key was issued"
+    },
+    {
+      "name": "kimiApiKey",
+      "type": "password",
+      "title": "Kimi Code API Key",
+      "description": "Optional. Choose Connect Kimi Code instead. A Kimi Code (coding plan) API key",
+      "required": false
+    },
+    {
+      "name": "deepseekApiKey",
+      "type": "password",
+      "title": "DeepSeek API Key",
+      "placeholder": "sk-…",
+      "required": false,
+      "description": "Optional. Choose Connect DeepSeek instead. A DeepSeek API key, to show its balance"
+    },
+    {
+      "name": "moonshotApiKey",
+      "type": "password",
+      "title": "Moonshot API Key",
+      "placeholder": "sk-…",
+      "required": false,
+      "description": "Optional. Choose Connect Moonshot instead. A Moonshot (Kimi API platform) key, to show its balance"
+    },
+    {
+      "name": "moonshotRegion",
+      "type": "dropdown",
+      "title": "Moonshot Region",
+      "required": false,
+      "default": "global",
+      "data": [
+        {
+          "title": "Global (api.moonshot.ai)",
+          "value": "global"
+        },
+        {
+          "title": "China (api.moonshot.cn)",
+          "value": "china"
+        }
+      ],
+      "description": "Where your Moonshot key was issued"
+    }
+  ],
+  "commands": [
+    {
+      "name": "usage",
+      "title": "Show AI Usage",
+      "description": "See usage limits, reset times and credits for your AI tools and API keys",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "typecheck": "ray build && tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.8.0",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3"
+  }
+}
