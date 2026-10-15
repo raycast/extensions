@@ -80,11 +80,19 @@ export function OpenExtensionByIDInBobAction(props: { extensionID: string; onOpe
     <Action
       title="Open in IBM Bob"
       icon={"icon.png"}
-      onAction={() => {
-        open(url, getBobAppName());
-        showHUD("Open IBM Bob Extension");
-        if (props.onOpen) {
-          props.onOpen(url);
+      onAction={async () => {
+        try {
+          await open(url, getBobAppName());
+          await showHUD("Open IBM Bob Extension");
+          if (props.onOpen) {
+            props.onOpen(url);
+          }
+        } catch (error) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Error",
+            message: getErrorMessage(error),
+          });
         }
       }}
     />

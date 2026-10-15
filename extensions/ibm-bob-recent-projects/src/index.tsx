@@ -257,6 +257,9 @@ function RemoteItem(
     return url.toString();
   };
 
+  const handleOpenRemote = (revert = false) =>
+    open(getUrl(revert), appName).catch(() => showToast(Toast.Style.Failure, `Failed to open in ${appName}`));
+
   return (
     <ListOrGridItem
       id={props.pinned ? remotePath : undefined}
@@ -267,11 +270,11 @@ function RemoteItem(
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title={getTitle()} icon="icon.png" onAction={() => open(getUrl(), appName)} />
+            <Action title={getTitle()} icon="icon.png" onAction={() => handleOpenRemote()} />
             <Action
               title={getTitle(true)}
               icon="icon.png"
-              onAction={() => open(getUrl(true), appName)}
+              onAction={() => handleOpenRemote(true)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
             />
           </ActionPanel.Section>
