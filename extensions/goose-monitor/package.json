@@ -15,8 +15,7 @@
   "commands": [
     {
       "name": "manage-processes",
-      "title": "Manage Processes",
-      "subtitle": "Goose Monitor",
+      "title": "Goose Monitor",
       "description": "Find and quit apps by name, PID, or port",
       "mode": "view",
       "keywords": [

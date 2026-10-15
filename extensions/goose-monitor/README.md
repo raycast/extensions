@@ -50,14 +50,14 @@ Other scripts:
 
 ## Usage
 
-1. Run **Manage Processes** from Raycast (the extension's single command).
+1. Run **Goose Monitor** from Raycast (the extension's single command).
 2. Filter by app name, PID, or port number (`8101` or `:8101`).
 3. Switch categories via the dropdown (**All**, **Apps**, **CPU**, **Memory**, **Network**, **Background**).
 4. Press **Enter** to **Quit** the selected app (SIGTERM with exit verification).
 5. Use **Force Quit** (`Cmd+Enter` or the secondary action) to send SIGKILL if an app hangs.
 6. Open **Show Helpers** (`Cmd+Shift+H` or the secondary action) to inspect or terminate individual child helpers.
 
-Open **Settings & Data Transfer** from the process list or an action panel to import/export settings and configure shared settings. The CPU and Memory menu bar commands are not registered; **Manage Processes** is the only command.
+Open **Settings & Data Transfer** from the process list or an action panel to import/export settings and configure shared settings. The CPU and Memory menu bar commands are not registered; **Goose Monitor** is the only command.
 
 ## How this differs from Kill Process
 
