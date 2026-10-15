@@ -139,7 +139,6 @@ export default function Command() {
       filtering={false}
       onSearchTextChange={setSearch}
       searchBarPlaceholder="Search companies or enter a domain…"
-      navigationTitle="Company Logos"
     >
       <Grid.EmptyView
         icon={Icon.MagnifyingGlass}
