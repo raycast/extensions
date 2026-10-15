@@ -10,12 +10,19 @@ import { scoped, type DigupHit, type FsearchHit } from "./query";
 // ("meaning.*" ops). It starts on the first `truffle` command if it isn't running (or at login, after
 // `truffle install --login`).
 
-type Preferences = { trufflePath?: string; nameFilters?: string };
-
 const home = os.homedir();
 const expand = (p: string) => (p.startsWith("~/") ? path.join(home, p.slice(2)) : p);
 const prefs = getPreferenceValues<Preferences>();
-export const truffleBin = expand(prefs.trufflePath || "~/.local/bin/truffle");
+// Where `truffle install` and Homebrew put it, unless the preference names another.
+const CANDIDATES = [
+  "~/.local/bin/truffle",
+  "/opt/homebrew/bin/truffle",
+  "/usr/local/bin/truffle",
+  "~/.homebrew/bin/truffle",
+];
+export const truffleBin = prefs.trufflePath
+  ? expand(prefs.trufflePath)
+  : (CANDIDATES.map(expand).find((p) => fs.existsSync(p)) ?? expand(CANDIDATES[0]));
 
 const SOCKET = path.join(home, "Library/Application Support/Truffle/truffle.sock");
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

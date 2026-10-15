@@ -22,15 +22,15 @@
   "preferences": [
     {
       "name": "trufflePath",
-      "title": "truffle binary",
-      "description": "Path to the truffle CLI.",
+      "title": "Truffle Binary",
+      "description": "Path to the truffle CLI. Empty: ~/.local/bin, then Homebrew.",
       "type": "textfield",
       "required": false,
-      "default": "~/.local/bin/truffle"
+      "default": ""
     },
     {
       "name": "nameFilters",
-      "title": "Default name filters",
+      "title": "Default Name Filters",
       "description": "Added to name searches that have no in: of their own. Clear it to search the whole disk.",
       "type": "textfield",
       "required": false,

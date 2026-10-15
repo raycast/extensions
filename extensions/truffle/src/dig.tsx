@@ -14,6 +14,7 @@ import {
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { useEffect, useRef, useState, type ReactElement } from "react";
 import {
   truffleBin,
@@ -61,15 +62,24 @@ export default function Command() {
     return () => clearInterval(timer);
   }, [waitingForAccess]);
   const duStatus = usePromise(digupStatus, [], { onError: () => {} });
+  // While meaning search isn't ready (no folders, no model, first indexing), look again every 5 s.
+  const meaningPending =
+    duStatus.data !== undefined &&
+    (duStatus.data.folders.length === 0 || duStatus.data.encoder === "unavailable" || duStatus.data.vectors === 0);
+  useEffect(() => {
+    if (!meaningPending) return;
+    const timer = setInterval(() => duStatus.revalidate(), 5000);
+    return () => clearInterval(timer);
+  }, [meaningPending]);
 
   useEffect(() => {
     const run = ++seq.current;
     const fresh = () => run === seq.current;
     const p = plan(text);
-    const fail = (engine: string) => (error: unknown) => {
+    const fail = (key: "fsearch" | "digup", title: string) => (error: unknown) => {
       if (!fresh()) return;
-      setBusy((b) => ({ ...b, [engine]: false }));
-      showToast({ style: Toast.Style.Failure, title: `${engine} failed`, message: String(error) });
+      setBusy((b) => ({ ...b, [key]: false }));
+      showToast({ style: Toast.Style.Failure, title: `${title} failed`, message: String(error) });
     };
 
     setBusy({ fsearch: true, digup: p.digup !== null });
@@ -80,7 +90,7 @@ export default function Command() {
         setFsearch(hits);
         setBusy((b) => ({ ...b, fsearch: false }));
       })
-      .catch(fail("truffle"));
+      .catch(fail("fsearch", "Truffle"));
 
     if (p.digup === null) {
       setDigup({ q: "", hits: [], strong: 0, meaning: false });
@@ -101,16 +111,21 @@ export default function Command() {
           setBusy((b) => ({ ...b, digup: false }));
           if (r.warning) showToast({ style: Toast.Style.Failure, title: "Meaning", message: r.warning });
         })
-        .catch(fail("meaning search"));
+        .catch(fail("digup", "Meaning search"));
     }, PAUSE_MS);
     return () => clearTimeout(timer);
   }, [text]);
 
   const p = plan(text);
-  const merged = merge(digup.hits, fsearch);
+  // Only the meaning hits shown (the strong ones, then eight weaker) take a file away from the names list.
   const strongPaths = new Set(digup.hits.slice(0, Math.max(digup.strong, 0)).map((h) => h.path));
+  const shown = [
+    ...digup.hits.filter((h) => strongPaths.has(h.path)),
+    ...digup.hits.filter((h) => !strongPaths.has(h.path)).slice(0, 8),
+  ];
+  const merged = merge(shown, fsearch);
   const strong = merged.digup.filter((h) => strongPaths.has(h.path));
-  const weaker = merged.digup.filter((h) => !strongPaths.has(h.path)).slice(0, 8);
+  const weaker = merged.digup.filter((h) => !strongPaths.has(h.path));
   const isGrep = merged.fsearch.some((h) => h.lines);
 
   const meaningSection = strong.length > 0 && (
@@ -289,7 +304,7 @@ function FileActions({
   );
 }
 
-const fileUrl = (file: string) => "file://" + encodeURI(file).replace(/\(/g, "%28").replace(/\)/g, "%29");
+const fileUrl = (file: string) => pathToFileURL(file).href.replace(/\(/g, "%28").replace(/\)/g, "%29");
 const fence = (text: string, lang = "") => "```" + lang + "\n" + text.replace(/```/g, "ˋˋˋ") + "\n```";
 
 function DigupDetail({ hit }: { hit: DigupHit }) {
@@ -374,9 +389,7 @@ function Setup(props: {
         subtitle={props.fs?.message ?? props.fsError?.message}
         accessories={[{ text: tilde(truffleBin, home) }]}
         actions={
-          <ActionPanel>
-            {copy("Copy Install Command", "cargo install --path crates/truffle && truffle install --login")}
-          </ActionPanel>
+          <ActionPanel>{copy("Copy Install Command", "brew install azilone/tap/truffle && truffle setup")}</ActionPanel>
         }
       />,
     );

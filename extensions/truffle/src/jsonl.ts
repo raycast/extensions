@@ -55,6 +55,8 @@ export class JsonLinesClient {
       });
       socket.on("close", () => {
         this.socket = undefined;
+        // A reply cut off by the daemon going away must not prefix the next connection's first line.
+        this.buffer = "";
         this.fail(new Error("connection closed"));
       });
       socket.on("data", (chunk: string) => this.read(chunk));
