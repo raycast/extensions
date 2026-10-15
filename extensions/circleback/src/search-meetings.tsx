@@ -6,8 +6,7 @@ import { oauthService } from "./utils/oauth";
 import { APP_URL, DEFAULT_MEETING_NAME } from "./constants/raycast";
 
 type MeetingSearchResult = {
-  id: number;
-  linkId: string;
+  id: string;
   name: string;
   createdAt: string | Date;
 };
@@ -55,8 +54,8 @@ const SearchMeetings = () => {
           accessories={meeting.createdAt ? [{ text: new Date(meeting.createdAt).toLocaleDateString() }] : []}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url={`${APP_URL}/meetings/${meeting.linkId}`} />
-              <Action.CopyToClipboard content={`${APP_URL}/meetings/${meeting.linkId}`} title="Copy Link" />
+              <Action.OpenInBrowser url={`${APP_URL}/meetings/${meeting.id}`} />
+              <Action.CopyToClipboard content={`${APP_URL}/meetings/${meeting.id}`} title="Copy Link" />
             </ActionPanel>
           }
         />
