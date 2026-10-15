@@ -92,6 +92,13 @@
       ]
     },
     {
+      "name": "search-messages",
+      "title": "Search Messages",
+      "subtitle": "Google Chat",
+      "description": "Search messages across your spaces and direct messages, filtered by unread, mentions or links.",
+      "mode": "view"
+    },
+    {
       "name": "find-person",
       "title": "Find Person",
       "subtitle": "Google Chat",
