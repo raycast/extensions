@@ -40,6 +40,16 @@ export async function getWorkItem(workItemId: string, projectId: string): Promis
   };
 }
 
+/** `GET workspaces/{slug}/issues/{PROJ}-{N}/` via the SDK. */
+export async function getWorkItemByIdentifier(projectIdentifier: string, sequenceId: number): Promise<Issue> {
+  const client = requirePlaneClient();
+  return client.workItemsApi.getWorkspaceWorkItem({
+    slug: client.workspaceSlug,
+    projectIdentifier: projectIdentifier.toUpperCase(),
+    issueIdentifier: sequenceId,
+  });
+}
+
 export async function listProjectWorkItemsRaw({
   projectId,
   cursor,

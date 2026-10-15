@@ -16,6 +16,8 @@
 ### Added
 
 - **Change Workspace** (⌘⇧W) in every list: type a new slug (API key) or pick any workspace that installed the app (OAuth)
+- **Open Work Item**: open `ENG-123` or a Plane URL from the argument or clipboard
+- **Quick Create Work Item** (no-view, default project and assign-to-me preferences) and **Quick Add Comment** (no-view, Markdown)
 - Row actions everywhere: open detail, open in browser, copy identifier / URL / Markdown link, update state and priority (optimistic), assign to me, add comment, edit
 - Work item detail shows assignees, labels, cycle, module, created/updated dates, and the latest comments
 

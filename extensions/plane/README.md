@@ -9,6 +9,9 @@ A powerful Raycast extension for managing work items in [Plane](https://plane.so
 - **Create Work Item** - Create new work items with comprehensive details
 - **Search Work Items** - Search work items across all projects by title or ID
 - **Search Projects** - View projects and their work items
+- **Open Work Item** - Open `ENG-123` or a Plane URL (argument, or read from the clipboard)
+- **Quick Create Work Item** - Create a work item from the root search with a title and optional description
+- **Quick Add Comment** - Comment on a work item by ID without opening it
 
 ### ✨ Work Item Management
 

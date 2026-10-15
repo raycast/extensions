@@ -37,6 +37,81 @@
       "subtitle": "Plane",
       "description": "Browse projects and their work items",
       "mode": "view"
+    },
+    {
+      "name": "open-work-item",
+      "title": "Open Work Item",
+      "subtitle": "Plane",
+      "description": "Open a work item by ID (e.g. ENG-123) or Plane URL, or from the clipboard",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "identifier",
+          "placeholder": "ENG-123",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "quick-create-work-item",
+      "title": "Quick Create Work Item",
+      "subtitle": "Plane",
+      "description": "Create a work item in your default project without opening a form",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "description",
+          "placeholder": "Description",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "defaultProject",
+          "title": "Default Project",
+          "description": "Project identifier to create work items in, e.g. ENG",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "ENG"
+        },
+        {
+          "name": "assignToMe",
+          "label": "Assign to me",
+          "description": "Assign new work items to yourself",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "quick-add-comment",
+      "title": "Quick Add Comment",
+      "subtitle": "Plane",
+      "description": "Add a Markdown comment to a work item by ID",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "identifier",
+          "placeholder": "ENG-123",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "comment",
+          "placeholder": "Comment",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
