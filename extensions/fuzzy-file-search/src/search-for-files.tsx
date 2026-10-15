@@ -324,6 +324,7 @@ export default function Command() {
             title={filepath.startsWith(os.homedir()) ? filepath.replace(os.homedir(), "~") : filepath}
             subtitle={filename}
             quickLook={{ path: filepath, name: filename }}
+            icon={{ fileIcon: filepath }}
             actions={
               <ActionPanel>
                 <Action.Open title="Open" target={filepath} />
