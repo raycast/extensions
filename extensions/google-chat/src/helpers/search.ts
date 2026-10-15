@@ -30,3 +30,23 @@ export function buildSearchFilter(
   }
   return parts.join(" AND ");
 }
+
+/** Search pagination cursor: the next page token and the filter the search started with. */
+export interface SearchCursor {
+  filter: string;
+  pageToken: string;
+}
+
+/**
+ * The filter for one page of a search. The first page builds it; later pages reuse the one in their cursor,
+ * because Google rejects a `pageToken` sent with a different filter (and a filter without keywords holds the
+ * time it was built).
+ */
+export function searchPageFilter(
+  query: string,
+  mode: SearchMode,
+  cursor?: SearchCursor,
+  now: Date = new Date(),
+): string {
+  return cursor?.filter ?? buildSearchFilter(query, mode, now);
+}
