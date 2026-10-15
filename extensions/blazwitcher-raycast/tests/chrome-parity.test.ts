@@ -176,6 +176,103 @@ test("默认保留所有有效标签；非标签按输入顺序以标题或完�
   ]);
 });
 
+for (const [label, title] of [
+  ["空", ""],
+  ["空白", " \t "],
+] as const) {
+  test(`默认保留不同 URL 的${label}标题历史与书签`, async () => {
+    const index = new SearchIndex([
+      row("history-old", title, "https://example.com/old", "history", 10),
+      row("history-new", title, "https://example.com/new", "history", 20),
+      row("bookmark-first", title, "https://example.com/first", "bookmark"),
+      row("bookmark-second", title, "https://example.com/second", "bookmark"),
+    ]);
+    for (const query of ["", "example.com"]) {
+      assert.deepEqual(ids(await index.search(query, "all")), [
+        "history-new",
+        "history-old",
+        "bookmark-first",
+        "bookmark-second",
+      ]);
+      assert.deepEqual(ids(await index.search(query, "history")), [
+        "history-new",
+        "history-old",
+      ]);
+      assert.deepEqual(ids(await index.search(query, "bookmark")), [
+        "bookmark-first",
+        "bookmark-second",
+      ]);
+    }
+  });
+}
+
+test("空白标题标签不占用标题去重键，完整 URL 仍排除跨来源重复", async () => {
+  const entries = [
+    row("tab-space", " \t ", "https://example.com/tab", "tab"),
+    row("tab-copy", " \t ", "https://example.com/tab", "tab"),
+    row("history-tab-url", "其他标题", "https://example.com/tab"),
+    row("history-space", " \t ", "https://example.com/space", "history", 20),
+    row("history-empty", "", "https://example.com/empty", "history", 10),
+    row(
+      "bookmark-history-url",
+      "重复网址",
+      "https://example.com/space",
+      "bookmark",
+    ),
+    row(
+      "bookmark-space",
+      " \t ",
+      "https://example.com/bookmark-space",
+      "bookmark",
+    ),
+    row("bookmark-empty", "", "https://example.com/bookmark-empty", "bookmark"),
+  ];
+  for (const query of ["", "example.com"]) {
+    assert.deepEqual(ids(await new SearchIndex(entries).search(query, "all")), [
+      "tab-space",
+      "tab-copy",
+      "history-space",
+      "history-empty",
+      "bookmark-space",
+      "bookmark-empty",
+    ]);
+  }
+});
+
+test("非空标题继续按原始文本去重，完整 URL 仍跨来源去重", async () => {
+  const entries = [
+    row("tab-padded", "  公共记录  ", "https://example.com/tab", "tab"),
+    row("history-tab-title", "  公共记录  ", "https://example.com/tab-copy"),
+    row("history-trimmed", "公共记录", "https://example.com/history"),
+    row("history-title-copy", "公共记录", "https://example.com/history-copy"),
+    row(
+      "bookmark-title-copy",
+      "公共记录",
+      "https://example.com/bookmark-copy",
+      "bookmark",
+    ),
+    row(
+      "bookmark-url-copy",
+      "独立标题",
+      "https://example.com/history",
+      "bookmark",
+    ),
+    row(
+      "bookmark-distinct",
+      "公共记录 ",
+      "https://example.com/bookmark",
+      "bookmark",
+    ),
+  ];
+  for (const query of ["", "example.com"]) {
+    assert.deepEqual(ids(await new SearchIndex(entries).search(query, "all")), [
+      "tab-padded",
+      "history-trimmed",
+      "bookmark-distinct",
+    ]);
+  }
+});
+
 test("默认单来源和空查询同样只展示各 10 条历史与书签", async () => {
   const entries = ["history", "bookmark"].flatMap((source) =>
     Array.from({ length: 15 }, (_, i) =>

@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Use subagent-driven implementation with separate UI copy, browser messages, and release metadata responsibilities. Parent verifies integration and captures native screenshots.
 
-**Goal:** Submit Blazwitcher to the official Raycast Store review under julian0197 with English controls, real Store screenshots, and refreshed bilingual demos. The user has authorized the official submission; current delivery status is pending submission. Store publication remains dependent on the official review and merge.
+**Goal:** Submit Blazwitcher to the official Raycast Store review under julian0197 with English controls, real Store screenshots, and refreshed bilingual demos. The authorized official submission is [raycast/extensions #32402](https://github.com/raycast/extensions/pull/32402); GitHub is the authority for its current review status. Store publication remains dependent on the official review and merge.
 
 **Architecture:** Keep current search, data access, preferences keys, keyboard bindings, and privacy boundaries. Translate user-facing text directly; keep Chinese page titles and Pinyin search fixtures unchanged. Use the official Raycast CLI and Window Capture rather than adding a localization layer or screenshot compositor.
 
@@ -54,13 +54,21 @@ Files: metadata/blazwitcher-raycast-1.png, metadata/blazwitcher-raycast-2.png, m
 
 ## Task 5: Verification and delivery
 
-- [x] Run Node 22.22.2 typecheck and 127 tests; pass official Raycast lint, ESLint, Prettier and build after formatting the plan.
+- [x] Run Node 22.22.2 typecheck and 136 tests; pass official Raycast lint, ESLint, Prettier and build after formatting the plan.
 - [x] Verify real Pinyin/English search, source changes and page preview in Raycast.
 - [x] Record History Result Count changing from 10 to 5 and back to 10; confirm the restored setting. This recording does not recheck the result count after reopening the command.
 - [x] Remove the older open-actions clip from the current README and gallery. Existing-tab and new-tab actions have earlier-version verification only; no fresh Enter/Command-Enter acceptance is claimed for this round, and rerecording this optional demo is not a submission blocker.
-- [ ] Check English UI literals, links, manifests, public registry lock URLs, screenshots and staged scope.
+- [x] Check English UI literals, links, manifests, public registry lock URLs, screenshots and staged scope.
 - [x] Commit and push the English interface and release configuration; create and attach preparation PR #18 to cjinhuo/blazwitcher-raycast.
-- [ ] Commit the refreshed media and docs, push codex/store-ready, and update PR #18 with final verification.
-- [ ] Sync a clean publishing checkout to the final commit and verify that no local diagnostics or credentials will be copied.
-- [ ] Run interactive `npm run publish`, complete the official GitHub authorization flow, inspect the generated raycast/extensions draft PR, and mark it Ready for review.
-- [ ] Attach and verify the official PR URL, head commit, changed files and review state. Report submitted for review; only the official merge establishes Store publication.
+- [x] Commit the refreshed media and docs, push codex/store-ready, and update PR #18 with final verification.
+- [x] Sync a clean publishing checkout to the final commit and verify that no local diagnostics or credentials will be copied.
+- [x] Run interactive `npm run publish`, complete the official GitHub authorization flow, and inspect the generated raycast/extensions PR #32402.
+- [x] Attach and verify the official PR URL and initial published payload against the clean checkout. Use the official PR for the latest head, checks and Ready for review state; only the official merge establishes Store publication.
+
+## Initial Store review follow-up
+
+- Re-selecting the active Chrome profile is a no-op, preserving valid result actions; changing profiles still cancels old searches.
+- Empty or whitespace-only titles no longer collapse unrelated history/bookmark URLs. Existing non-empty title and URL deduplication remains unchanged.
+- Native keyboard selection is observed for previews without feeding each change back through `List.selectedItemId`. Preferences use the generated `Preferences` type.
+- Nine added regressions passed after reproducing the prior failures. Final Node 22.22.2 `npm run check`: 136 tests, TypeScript, official lint, ESLint, Prettier and distribution build passed.
+- The installed distribution build returned the public `trycua/cua` tab for `/t trycua`; keyboard selection exposed `Switch to Tab`. The component tests establish preview/action tracking, not native scroll behavior.

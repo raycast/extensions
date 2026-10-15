@@ -198,7 +198,7 @@ function orderChromeResults(
   const tabs = matches.filter(({ row }) => row.entry.source === "tab");
   const seen = new Set<string>();
   for (const { row } of tabs) {
-    seen.add(row.originalTitle);
+    if (row.title) seen.add(row.originalTitle);
     seen.add(row.originalUrl);
   }
   const histories: IndexedResult[] = [];
@@ -207,7 +207,7 @@ function orderChromeResults(
     const { row } = match;
     if (row.entry.source === "tab") continue;
     if (seen.has(row.originalTitle) || seen.has(row.originalUrl)) continue;
-    seen.add(row.originalTitle);
+    if (row.title) seen.add(row.originalTitle);
     seen.add(row.originalUrl);
     (row.entry.source === "history" ? histories : bookmarks).push(match);
   }

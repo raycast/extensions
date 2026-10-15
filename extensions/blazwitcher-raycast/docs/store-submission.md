@@ -31,7 +31,7 @@ npm run check
 
 `npm run check` 包括类型检查、测试、官方 `ray lint`、ESLint、Prettier 和构建。另在真实 Raycast 内确认搜索、来源筛选、打开标签、配置与正文预览；仅有构建通过不足以证明实际功能可用。
 
-本次已获维护者授权完成官方送审，当前状态为**待送审**。项目自身的 [上架准备 PR #18](https://github.com/cjinhuo/blazwitcher-raycast/pull/18) 汇总英文界面、发布配置、截图和验证结果；官方审核 PR 创建后再记录链接，不提前标记已发布。
+官方发布申请已创建：[raycast/extensions #32402](https://github.com/raycast/extensions/pull/32402)。项目自身的 [上架准备 PR #18](https://github.com/cjinhuo/blazwitcher-raycast/pull/18) 汇总英文界面、发布配置、截图和验证结果。审核与合并状态以官方 PR 为准；创建 PR 不代表已上架。
 
 确认最终文件和验证记录后，提交所有发布文件，在同步到最终提交的干净 checkout 中执行以下命令。不要从含 `.local`、`.env` 或其他本地诊断文件的开发目录直接发布，因为官方 CLI 复制文件时不完整遵循 `.gitignore`。使用交互终端，不传 `--non-interactive` 或 `--verbose`：
 

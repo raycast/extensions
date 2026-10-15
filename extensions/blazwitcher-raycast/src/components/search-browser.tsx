@@ -50,17 +50,7 @@ export default function SearchBrowser() {
       (error: unknown) => ({ error }),
     ),
   );
-  const preferences = getPreferenceValues<{
-    historyLimit?: string;
-    includeIncognito?: boolean;
-    startupPreview?: boolean;
-    searchStrategy?: string;
-    historyDays?: string;
-    historyDisplayCount?: string;
-    bookmarkDisplayCount?: string;
-    topSuggestionsCount?: string;
-    enableConsecutiveSearch?: boolean;
-  }>();
+  const preferences = getPreferenceValues<Preferences>();
   const options = useMemo(
     () => ({
       scope: "all" as const,
@@ -237,7 +227,6 @@ export default function SearchBrowser() {
         setSelectedId(undefined);
         setInput(text);
       }}
-      selectedItemId={activeId}
       onSelectionChange={setSelectedId}
       searchBarPlaceholder="Search tabs, bookmarks, and history with Pinyin…"
       searchBarAccessory={

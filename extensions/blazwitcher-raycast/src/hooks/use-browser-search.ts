@@ -114,7 +114,7 @@ export function useBrowserSearch(
     loadMore,
     searching: current?.requestId !== request.requestId && !error,
     selectProfile: (id: string) => {
-      if (id !== profileId) {
+      if (id !== (snapshot?.profileId ?? profileId)) {
         cancel();
         setProfileId(id);
       }

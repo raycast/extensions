@@ -121,6 +121,47 @@ test("数据版本变化后不保留旧配置的显示结果", async (t) => {
   assert.equal(state.page, undefined);
 });
 
+test("重复选择已选中的默认配置不会使当前结果失效", async (t) => {
+  const ui = await mount(t);
+  const page = state.page;
+  const cancel = t.mock.method(state.service, "cancel");
+  const configure = t.mock.method(state.service, "configure");
+  assert.equal(state.snapshot?.profileId, "Default");
+
+  await act(async () => state.selectProfile("Default"));
+  await ui.advance(80);
+
+  assert.equal(cancel.mock.callCount(), 0);
+  assert.equal(configure.mock.callCount(), 0);
+  assert.equal(pendingSearches.length, 1);
+  assert.equal(state.page, page);
+  assert.equal(state.searching, false);
+});
+
+test("切换其他配置仍会取消旧请求并搜索新版本", async (t) => {
+  const ui = await mount(t);
+  const previous = state.page!;
+  const cancel = t.mock.method(state.service, "cancel");
+  const configure = t.mock.method(state.service, "configure", async () => {
+    currentService.refreshSnapshot();
+  });
+
+  await act(async () => state.selectProfile("Profile 1"));
+  assert.equal(configure.mock.calls[0].arguments[1], "Profile 1");
+  assert.ok(
+    cancel.mock.calls.some((call) => call.arguments[0] > previous.requestId),
+  );
+  const loadingPage = state.page;
+  assert.equal(loadingPage, undefined);
+  await ui.advance(80);
+  const next = pendingSearches[1];
+  assert.ok(next.request.version > previous.version);
+  assert.ok(next.request.requestId > previous.requestId);
+  await act(async () => resolveSearch(next, "profile-result"));
+  assert.equal(state.page?.results[0].entry.id, "profile-result");
+  assert.equal(state.searching, false);
+});
+
 test("较早查询的迟到响应不能覆盖最新结果", async (t) => {
   const ui = await mount(t);
   await ui.update("demo old");
