@@ -216,6 +216,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "chord",
+    title: "Chord",
+    description:
+      "DEX swap quotes and unsigned transactions on 7 EVM chains (Monad, Base, BNB Chain, Avalanche, Arbitrum, Robinhood Chain and Arc), plus token boards, token search, recent trades, candles, wallet PnL and smart money from Chord's own index of on-chain trades, with holders and LP pools on the chains that keep them and Solana for market data. Non-custodial: the swap tool returns an unsigned transaction with the approval it needs and a simulation run as your wallet, and your own wallet signs and sends it. Hosted remote Streamable HTTP server at https://api.getchord.xyz/v1/mcp; no sign-in and no API key for the data and swap tools, only the optional analyst tool needs a Chord API key.",
+    icon: "https://getchord.xyz/chord/pwa-512x512.png",
+    homepage: "https://getchord.xyz",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.getchord.xyz/v1/mcp"],
+    },
+    remoteUrl: "https://api.getchord.xyz/v1/mcp",
+  },
+  {
     name: "chroma",
     title: "Chroma",
     description:
@@ -501,6 +514,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "janction-render",
+    title: "JANCTION Render",
+    description:
+      "Render Blender scenes and 3D models on cloud GPUs from Raycast AI: send a bpy script, a .blend or a GLB / glTF / FBX / USD / OBJ / STL file, get a tiled preview with a critic verdict in seconds, then product shots, 360-degree turntables, animations or stills as PNG frames or an MP4. No local Blender or GPU. 12 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration creates a key with free GPU time, then 0.1 JPY per GPU-second from prepaid credit.",
+    icon: "https://raw.githubusercontent.com/JasmyLab-JANCTION/janction-render/main/assets/logo-400.png",
+    homepage: "https://render.janction.jp/?src=raycast",
+    remoteUrl: "https://render.janction.jp/mcp?src=raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://render.janction.jp/mcp?src=raycast"],
+    },
+  },
+  {
     name: "jetbrains",
     title: "JetBrains",
     description: "The server proxies requests from client to JetBrains IDE.",
@@ -732,6 +758,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         MNEMOVERSE_API_KEY: "mk_live_YOUR_KEY",
       },
     },
+  },
+  {
+    name: "moltnode",
+    title: "MoltNode by Chord",
+    description:
+      "Read 31 blockchains over JSON-RPC and get best-route DEX swap quotes with unsigned transactions via Chord. No API key. List the chains, call any JSON-RPC method (`eth_*` on EVM chains, native methods on Solana and Sui), read the latest block and native balances, find tokens and get a swap quote with the unsigned transaction, the approval it needs and a simulation on the 7 chains Chord trades on, then broadcast a transaction you signed yourself. Non-custodial: it never holds keys or signs. Hosted remote Streamable HTTP server at https://moltnode.ag/mcp; no sign-in and no API key.",
+    icon: "https://raw.githubusercontent.com/tuantqse90/moltnode-mcp/main/assets/logo.png",
+    homepage: "https://moltnode.ag",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://moltnode.ag/mcp"],
+    },
+    remoteUrl: "https://moltnode.ag/mcp",
   },
   {
     name: "paddle",
@@ -2252,7 +2291,7 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     name: "recordist",
     title: "Recordist",
     description:
-      "Search and read the meetings recorded by Recordist on your own computer: transcripts, action items and notes. Talks only to the app's loopback API or its local database; nothing leaves the machine.",
+      "Read, search and act on the meetings Recordist recorded on your own computer: transcripts, notes, action items and recording controls. Talks only to the Recordist app on 127.0.0.1; what it returns goes to the AI assistant you connect.",
     icon: "https://recordist.app/brand/mark.svg",
     homepage: "https://github.com/recordist-app/gateway",
     configuration: {
