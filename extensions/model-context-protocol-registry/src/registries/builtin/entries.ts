@@ -1230,6 +1230,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "web3juice",
+    title: "Web3Juice",
+    description:
+      "Evidence-backed DeFi yield data for AI assistants. See what ~17,000 pools across 100+ chains pay, where the yield comes from (base vs reward-token APY), how rates have moved over 90 days, and compare pools side by side; every number dated and linked. Read-only: no wallet access, signing or transactions. Remote Streamable HTTP server at https://web3juice.com/api/mcp; no sign-in and no API key for the research tools, optional API key for higher limits.",
+    icon: "https://raw.githubusercontent.com/jimbob1414/web3juice-mcp/main/icon.png",
+    homepage: "https://web3juice.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://web3juice.com/api/mcp"],
+    },
+    remoteUrl: "https://web3juice.com/api/mcp",
+  },
+  {
     name: "xero",
     title: "Xero",
     description:
