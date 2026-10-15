@@ -1,8 +1,11 @@
 import { captureException, closeMainWindow, getApplications, open, showToast, Toast } from "@raycast/api";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 
 const ZOOMER_BUNDLE_ID = "studio.zoomer.desktop";
 const ZOOMER_WEBSITE_URL = "https://zoomer.studio";
 const ZOOMER_DOWNLOAD_URL = "https://zoomer.studio/downloads/latest";
+const execFileAsync = promisify(execFile);
 
 const SCREENSHOT_OUTPUTS = ["default", "copy", "save", "upload"] as const;
 const SETTINGS_SECTIONS = ["app", "recording", "screenshot"] as const;
@@ -57,7 +60,8 @@ export async function openZoomerUrl(url: string): Promise<void> {
   await closeMainWindow({ clearRootSearch: true }).catch(() => undefined);
 
   try {
-    await open(url, ZOOMER_BUNDLE_ID);
+    // Zoomer decides which commands show its main window; URL delivery must not activate it.
+    await execFileAsync("/usr/bin/open", ["-g", "-b", ZOOMER_BUNDLE_ID, url]);
   } catch (error: unknown) {
     captureException(error);
     await showToast({
