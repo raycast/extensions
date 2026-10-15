@@ -16,8 +16,6 @@ npm run dev          # ray develop: load the development extension in Raycast
 npm run build        # ray build: distribution build, including type checking
 npm test             # node:test and assert against synthetic directories
 npm run typecheck    # tsc --noEmit
-npm run lint:code    # ESLint and Prettier check
-npm run lint         # Raycast lint; its result is not implied by a build
 ```
 
 To import the source extension, use **Raycast → Import Extension** (a Raycast account is required) and select this directory. No verified free-plan extension-count limit is asserted here.
