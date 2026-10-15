@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Fix translation with an HTTP proxy] - {PR_MERGE_DATE}
+## [Fix translation with an HTTP proxy] - 2026-10-15
 
 - Fixed translations failing with a constructor error when an HTTP proxy is configured
 
