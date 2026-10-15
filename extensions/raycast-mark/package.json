@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-mark",
   "title": "Goose Mark",
-  "description": "Grid-based local bookmark management with multi-location categories, template URLs, and portable JSON backups",
-  "version": "0.1.0",
+  "description": "Raycast companion for the Goose Mark uTools plugin, sharing one synchronized bookmark data folder",
+  "version": "0.1.4",
   "private": false,
   "license": "MIT",
   "author": "eachann_",
@@ -14,83 +14,33 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search Marks",
+      "title": "Goose Mark",
       "description": "Search local bookmarks",
       "mode": "view"
     }
   ],
   "preferences": [
     {
+      "name": "dataFile",
+      "title": "Shared Data Folder",
+      "description": "Select a folder containing bookmarks.json and assets/icons.",
+      "type": "directory",
+      "required": false
+    },
+    {
       "name": "dataDirectory",
-      "title": "Dedicated Data Directory",
-      "description": "Dedicated data directory. Leave blank to use supportPath/marks-library.",
-      "type": "textfield",
-      "required": false
-    },
-    {
-      "name": "aiProtocol",
-      "title": "AI Protocol",
-      "description": "Optional direct BYOK service",
-      "type": "dropdown",
-      "required": false,
-      "default": "openai-responses",
-      "data": [
-        {
-          "title": "OpenAI Responses",
-          "value": "openai-responses"
-        },
-        {
-          "title": "OpenAI Compatible Chat",
-          "value": "openai-compatible"
-        },
-        {
-          "title": "Anthropic",
-          "value": "anthropic"
-        }
-      ]
-    },
-    {
-      "name": "aiBaseUrl",
-      "title": "AI Base URL",
-      "description": "HTTPS endpoint including API prefix, e.g. https://api.openai.com/v1",
-      "type": "textfield",
-      "required": false
-    },
-    {
-      "name": "aiModel",
-      "title": "AI Model",
-      "description": "Model supported by your selected service",
-      "type": "textfield",
-      "required": false
-    },
-    {
-      "name": "openaiResponsesKey",
-      "title": "Responses API Key",
-      "description": "Only sent to your selected endpoint",
-      "type": "password",
-      "required": false
-    },
-    {
-      "name": "openaiCompatibleKey",
-      "title": "Chat API Key",
-      "description": "Only sent to your selected endpoint",
-      "type": "password",
-      "required": false
-    },
-    {
-      "name": "anthropicKey",
-      "title": "Anthropic API Key",
-      "description": "Only sent to your selected endpoint",
-      "type": "password",
+      "title": "Dedicated Data Directory (Advanced)",
+      "description": "Optional directory for the local event library. This selects a folder, not a JSON file. Leave blank to use the default local library.",
+      "type": "directory",
       "required": false
     }
   ],
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test tests/core.test.ts",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
     "lint:code": "eslint src tests && prettier --check src tests"
   },
   "dependencies": {

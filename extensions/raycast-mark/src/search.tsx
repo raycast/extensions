@@ -1,126 +1,82 @@
+import { t } from "./i18n.ts";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Action,
   ActionPanel,
-  Alert,
   Detail,
-  Form,
   Grid,
   Icon,
   Keyboard,
+  List,
   LocalStorage,
   Toast,
-  confirmAlert,
   environment,
   getPreferenceValues,
   open,
   openExtensionPreferences,
   showToast,
-  useNavigation,
 } from "@raycast/api";
-import { resolveLaunchUrl, templateFields } from "./bookmark-utils.ts";
-import {
-  BookmarkForm,
-  failureMessage,
-  locationOptions,
-  locationValue,
-  parseLocationValue,
-} from "./bookmark-form.tsx";
-import {
-  bookmarkMutation,
-  deleteBookmark,
-  restoreBookmark,
-  categoryTitle,
-  TRASH_LOCATION,
-} from "./model.ts";
+import { resolveLaunchUrl } from "./bookmark-utils.ts";
+import { failureMessage } from "./bookmark-form.tsx";
 import type { Bookmark, LibraryState, Mutation, Visit } from "./model.ts";
-import { ensureIconForBookmark, iconImageSource } from "./icon-service.ts";
-import { commit, configureDirectory, readLibrary } from "./repository.ts";
-import { aiConfigFromPreferences, suggestMetadata } from "./ai.ts";
+import { commit } from "./repository.ts";
+import {
+  loadConfiguredLibrary,
+  refreshVisibleLibrary,
+} from "./library-source.ts";
 import ManageData from "./manage-data.tsx";
-import { refreshSharedJson } from "./shared-json.tsx";
-import { setSharedJsonStorage } from "./shared-json-storage.ts";
+import SharedJsonForm from "./shared-json.tsx";
+import { ExportForm } from "./manage-data/export-form.tsx";
+import {
+  disconnectSharedSource,
+  setSharedJsonStorage,
+} from "./shared-json-storage.ts";
+import { inScope, matches } from "./search/query.ts";
+import {
+  BookmarkGridItem,
+  BookmarkListItem,
+} from "./search/bookmark-grid-item.tsx";
+import { ScopeDropdown } from "./search/scope-dropdown.tsx";
+import { SearchEmptyView } from "./search/empty-view.tsx";
 
 setSharedJsonStorage(LocalStorage);
 
-function listIcon(bookmark: Bookmark) {
-  const bound = iconImageSource(bookmark.icon);
-  if (bound) return bound;
-  return bookmark.pinned ? Icon.Star : Icon.Bookmark;
-}
-
-function hostOf(url: string): string {
-  return url.replace(/^https?:\/\//i, "").split(/[/?#]/)[0] || url;
-}
-
-function looksLikeHttpUrl(value: string): boolean {
-  const trimmed = value.trim();
-  if (!/^https?:\/\//i.test(trimmed)) return false;
-  try {
-    const u = new URL(trimmed);
-    return u.protocol === "http:" || u.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-function matches(bookmark: Bookmark, needle: string): boolean {
-  const query = needle.trim().toLowerCase();
-  if (!query) return true;
-  return [
-    bookmark.title,
-    bookmark.url,
-    bookmark.desc ?? "",
-    ...bookmark.tags,
-  ].some((value) => value.toLowerCase().includes(query));
-}
-
-function inScope(bookmark: Bookmark, scope: string): boolean {
-  if (scope === "trash") return bookmark.isDeleted === true;
-  if (bookmark.isDeleted === true) return false;
-  if (scope === "favorites") return bookmark.pinned === true;
-  if (scope === "all" || scope === "recent") return true;
-  return bookmark.locations.some((l) => locationValue(l) === scope);
-}
-
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const { push } = useNavigation();
   const [root, setRoot] = useState<string>();
   const [state, setState] = useState<LibraryState>();
   const [failure, setFailure] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
   const [scope, setScope] = useState("all");
   const [query, setQuery] = useState("");
+  const [view, setView] = useState<"list" | "grid">("list");
+  const toggleView = () =>
+    setView((current) => (current === "list" ? "grid" : "list"));
   const sharedError = useRef("");
 
   const load = useCallback(async () => {
     setIsLoading(true);
     try {
-      const directory = await configureDirectory(
-        preferences.dataDirectory,
-        environment.supportPath,
-      );
-      let library = await readLibrary(directory);
+      const {
+        root: directory,
+        state: library,
+        sourceError,
+      } = await loadConfiguredLibrary(preferences, environment.supportPath);
       setRoot(directory);
       setState(library);
-      if (library.status === "ready")
-        library = await refreshSharedJson(directory, library);
-      setRoot(directory);
-      setState(library);
-      setFailure(undefined);
+      setFailure(sourceError);
       sharedError.current = "";
       if (library.status === "conflicted")
         await showToast({
           style: Toast.Style.Failure,
-          title: "Unresolved conflicts; read-only for now",
-          message: "Resolve conflicts in Settings & Data before writing",
+          title: t("存在未解决冲突，本次只读"),
+          message: t("请在设置与数据中解决冲突后才能写入"),
         });
     } catch (error) {
       setFailure(failureMessage(error));
     }
     setIsLoading(false);
-  }, [preferences.dataDirectory]);
+  }, [preferences.dataDirectory, preferences.dataFile]);
 
   useEffect(() => {
     void load();
@@ -131,10 +87,8 @@ export default function Command() {
     const timer = setInterval(() => {
       void (async () => {
         try {
-          const current = await readLibrary(root);
-          if (current.status !== "ready") return;
-          const next = await refreshSharedJson(root, current);
-          if (next !== current) setState(next);
+          const next = await refreshVisibleLibrary(root, state);
+          if (next !== state) setState(next);
           if (sharedError.current) {
             sharedError.current = "";
             setFailure(undefined);
@@ -143,7 +97,7 @@ export default function Command() {
           const message = failureMessage(error);
           if (sharedError.current !== message) {
             sharedError.current = message;
-            setFailure(`Shared JSON sync paused: ${message}`);
+            setFailure(t`共享 JSON 同步已暂停：${message}`);
           }
         }
       })();
@@ -166,14 +120,16 @@ export default function Command() {
       });
       setState(result.state);
       await showToast({
-        style: Toast.Style.Success,
-        title,
+        style: result.sharedSyncPaused
+          ? Toast.Style.Failure
+          : Toast.Style.Success,
+        title: result.sharedSyncPaused ? t("本地已保存，同步暂停") : title,
         message: result.warning ?? message,
       });
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Not saved",
+        title: t("未写入"),
         message: failureMessage(error),
       });
     }
@@ -190,7 +146,7 @@ export default function Command() {
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Unable to open",
+        title: t("无法打开"),
         message: failureMessage(error),
       });
       return false;
@@ -200,7 +156,7 @@ export default function Command() {
     } catch {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Unable to open link",
+        title: t("无法打开链接"),
         message: bookmark.title,
       });
       return false;
@@ -215,13 +171,13 @@ export default function Command() {
       if (result.warning)
         await showToast({
           style: Toast.Style.Success,
-          title: "Opened and recorded visit; attention needed",
+          title: t("已打开并记录访问，请注意"),
           message: result.warning,
         });
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Opened, but could not record visit",
+        title: t("已打开，但未能记录访问"),
         message: failureMessage(error),
       });
     }
@@ -250,26 +206,63 @@ export default function Command() {
   if (failure) {
     return (
       <Detail
-        markdown={`# Cannot Read Local Library
-
-${failure}
-
-Ensure the data directory exists and is dedicated (empty or containing only \`events\`), or change it in extension preferences. Changing directories does not move or delete the old library.`}
+        markdown={t`# 无法读取本地库\n\n${failure}\n\n请在扩展设置中确认“Shared Data Folder”指向包含 bookmarks.json 与 assets/icons 的文件夹。`}
         actions={
           <ActionPanel>
-            <Action title="Reload" icon={Icon.ArrowClockwise} onAction={load} />
             <Action
-              title="Open Extension Preferences"
+              title={t("重新加载")}
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={load}
+            />
+            {root && state && (
+              <>
+                <Action.Push
+                  title={t("导出数据文件夹")}
+                  target={<ExportForm root={root} />}
+                />
+                <Action.Push
+                  title={t("备份本地事件库（恢复用）")}
+                  target={<ExportForm root={root} recovery />}
+                />
+                <Action.Push
+                  title={t("共享数据文件夹")}
+                  target={
+                    <SharedJsonForm
+                      root={root}
+                      state={state}
+                      onSaved={(next) => {
+                        setState(next);
+                        void load();
+                      }}
+                    />
+                  }
+                />
+                <Action
+                  title={t("断开并保留本地")}
+                  onAction={async () => {
+                    await disconnectSharedSource();
+                    await load();
+                  }}
+                />
+                <Action.Push
+                  title={t("设置与数据")}
+                  target={
+                    <ManageData
+                      onSaved={setState}
+                      onClose={() => {
+                        void load();
+                      }}
+                    />
+                  }
+                />
+              </>
+            )}
+            <Action
+              title={t("打开扩展设置")}
               icon={Icon.Gear}
               onAction={openExtensionPreferences}
             />
-            {root && state && (
-              <Action.Push
-                title="Settings & Data"
-                icon={Icon.Gear}
-                target={<ManageData onClose={load} />}
-              />
-            )}
           </ActionPanel>
         }
       />
@@ -279,7 +272,7 @@ Ensure the data directory exists and is dedicated (empty or containing only \`ev
   if (!root || !state) {
     return (
       <Grid isLoading searchText={query} onSearchTextChange={setQuery}>
-        <Grid.EmptyView title="Reading Local Library" />
+        <Grid.EmptyView title={t("正在读取本地库")} />
       </Grid>
     );
   }
@@ -288,28 +281,26 @@ Ensure the data directory exists and is dedicated (empty or containing only \`ev
     const issues = state.issues
       .map(
         (issue) =>
-          `- \`${issue.code}\` ${issue.message}${issue.file ? ` (${issue.file})` : ""}`,
+          `- \`${issue.code}\` ${issue.message}${issue.file ? `（${issue.file}）` : ""}`,
       )
       .join("\n");
     return (
       <Detail
-        markdown={`# Local Library Is Read-Only
-
-Unreadable or unsafe data was detected. Local files will not be overwritten with an empty library, and unverified data will not be shown.
-
-${issues}
-
-Data directory: \`${root}\``}
+        markdown={t`# 本地库已暂停写入\n\n检测到不可读或不安全的数据，不会以空库覆盖本地文件，也不会展示未经校验的数据。\n\n${issues}\n\n数据目录：\`${root}\``}
         actions={
           <ActionPanel>
             <Action.Push
-              title="Settings & Data"
-              icon={Icon.Gear}
-              target={<ManageData onClose={load} />}
+              title={t("备份本地事件库（恢复用）")}
+              target={<ExportForm root={root} recovery />}
             />
-            <Action title="Reload" icon={Icon.ArrowClockwise} onAction={load} />
             <Action
-              title="Open Extension Preferences"
+              title={t("重新加载")}
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={load}
+            />
+            <Action
+              title={t("打开扩展设置")}
               icon={Icon.Gear}
               onAction={openExtensionPreferences}
             />
@@ -319,520 +310,55 @@ Data directory: \`${root}\``}
     );
   }
 
-  const libraryRoot = root;
-  const libraryState = state;
-
-  const conflicted = libraryState.status === "conflicted";
-
-  function actionsFor(bookmark: Bookmark) {
-    const fields = templateFields(bookmark.url);
-    return (
-      <ActionPanel>
-        <Action
-          title={fields.length ? "Fill Parameters and Open" : "Open"}
-          icon={Icon.Globe}
-          onAction={() => {
-            if (fields.length)
-              push(
-                <TemplateForm
-                  fields={fields}
-                  bookmark={bookmark}
-                  onSubmit={(values) => openBookmark(bookmark, values)}
-                />,
-              );
-            else void openBookmark(bookmark);
-          }}
-        />
-        <Action.CopyToClipboard
-          title="Copy URL"
-          content={bookmark.url}
-          shortcut={Keyboard.Shortcut.Common.Copy}
-        />
-        {!conflicted && (
-          <>
-            <Action
-              title="Add Bookmark"
-              icon={Icon.Plus}
-              shortcut={Keyboard.Shortcut.Common.New}
-              onAction={() =>
-                push(
-                  <BookmarkForm
-                    root={libraryRoot}
-                    state={libraryState}
-                    onSaved={(next) => setState(next)}
-                  />,
-                )
-              }
-            />
-            <Action
-              title="Edit"
-              icon={Icon.Pencil}
-              shortcut={Keyboard.Shortcut.Common.Edit}
-              onAction={() =>
-                push(
-                  <BookmarkForm
-                    root={libraryRoot}
-                    state={libraryState}
-                    bookmark={bookmark}
-                    onSaved={(next) => setState(next)}
-                  />,
-                )
-              }
-            />
-            {!bookmark.isDeleted && (
-              <Action
-                title="Manage Category Locations"
-                icon={Icon.Tag}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-                onAction={() =>
-                  push(
-                    <LocationsForm
-                      root={libraryRoot}
-                      state={libraryState}
-                      bookmark={bookmark}
-                      onSaved={setState}
-                    />,
-                  )
-                }
-              />
-            )}
-          </>
-        )}
-        {!conflicted && (
-          <Action
-            title={
-              bookmark.pinned ? "Remove from Favorites" : "Add to Favorites"
-            }
-            icon={bookmark.pinned ? Icon.StarDisabled : Icon.Star}
-            shortcut={Keyboard.Shortcut.Common.Pin}
-            onAction={() =>
-              void applyCommit(
-                [
-                  bookmarkMutation(libraryState, {
-                    ...bookmark,
-                    pinned: !bookmark.pinned,
-                    updatedAt: Date.now(),
-                  }),
-                ],
-                undefined,
-                bookmark.pinned
-                  ? "Removed from Favorites"
-                  : "Added to Favorites",
-                bookmark.title,
-              )
-            }
-          />
-        )}
-        {!conflicted &&
-          (bookmark.isDeleted ? (
-            <Action
-              title="Restore"
-              icon={Icon.ArrowCounterClockwise}
-              onAction={() =>
-                void applyCommit(
-                  [restoreBookmark(libraryState, bookmark)],
-                  undefined,
-                  "Restored",
-                  bookmark.title,
-                )
-              }
-            />
-          ) : (
-            <Action
-              title="Move to Trash"
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              shortcut={Keyboard.Shortcut.Common.Remove}
-              onAction={async () => {
-                const confirmed = await confirmAlert({
-                  title: "Move to Trash?",
-                  message: `${bookmark.title} will be moved to Trash and can be restored later.`,
-                  primaryAction: {
-                    title: "Move to Trash",
-                    style: Alert.ActionStyle.Destructive,
-                  },
-                });
-                if (confirmed)
-                  void applyCommit(
-                    [deleteBookmark(libraryState, bookmark)],
-                    undefined,
-                    "Moved to Trash",
-                    bookmark.title,
-                  );
-              }}
-            />
-          ))}
-        {conflicted && (
-          <Action.Push
-            title="Resolve Conflicts…"
-            icon={Icon.Warning}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-            target={<ManageData onClose={load} />}
-          />
-        )}
-        {!conflicted && (
-          <Action
-            title="Refresh Icon"
-            icon={Icon.Image}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "i" }}
-            onAction={() =>
-              void (async () => {
-                try {
-                  const icon = await ensureIconForBookmark(
-                    libraryRoot,
-                    bookmark,
-                    true,
-                  );
-                  await applyCommit(
-                    [
-                      bookmarkMutation(libraryState, {
-                        ...bookmark,
-                        icon,
-                        iconMatchedAt: Date.now(),
-                        updatedAt: Date.now(),
-                      }),
-                    ],
-                    undefined,
-                    "Icon refreshed",
-                    bookmark.title,
-                  );
-                } catch (error) {
-                  await showToast({
-                    style: Toast.Style.Failure,
-                    title: "Failed to refresh icon",
-                    message: failureMessage(error),
-                  });
-                }
-              })()
-            }
-          />
-        )}
-
-        <Action.Push
-          title="Settings & Data"
-          icon={Icon.Gear}
-          target={<ManageData onClose={load} />}
-        />
-        <Action
-          title="Open Extension Preferences"
-          icon={Icon.Gear}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-          onAction={openExtensionPreferences}
-        />
-      </ActionPanel>
-    );
-  }
-
+  const itemProps = {
+    root,
+    state,
+    onSaved: setState,
+    onReload: load,
+    openBookmark,
+    applyCommit,
+    onToggleView: toggleView,
+  };
+  const Item = view === "list" ? BookmarkListItem : BookmarkGridItem;
   const items = visible.items.map((bookmark) => (
-    <Grid.Item
-      key={bookmark.id}
-      id={bookmark.id}
-      title={bookmark.title}
-      subtitle={hostOf(bookmark.url)}
-      content={listIcon(bookmark)}
-      keywords={[bookmark.url, bookmark.desc ?? "", ...bookmark.tags]}
-      accessory={
-        bookmark.pinned ? { icon: Icon.Star, tooltip: "Favorite" } : undefined
-      }
-      actions={actionsFor(bookmark)}
-    />
+    <Item key={bookmark.id} bookmark={bookmark} {...itemProps} />
   ));
+  const Root = view === "list" ? List : Grid;
+  const Section = view === "list" ? List.Section : Grid.Section;
+  const empty = !items.length && (
+    <SearchEmptyView
+      root={root}
+      state={state}
+      query={query}
+      scope={scope}
+      onSaved={setState}
+      view={view}
+    />
+  );
 
   return (
-    <Grid
-      columns={5}
+    <Root
+      {...(view === "grid" ? { columns: 5 } : {})}
       isLoading={isLoading}
       filtering={false}
       searchText={query}
       onSearchTextChange={setQuery}
-      searchBarPlaceholder="Search titles, URLs, descriptions, or tags"
+      searchBarPlaceholder={t("搜索标题、网址、描述或标签")}
       searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Filter Scope"
-          value={scope}
+        <ScopeDropdown
+          catalog={state.catalog}
+          scope={scope}
           onChange={setScope}
-          storeValue
-        >
-          <Grid.Dropdown.Item title="All" value="all" icon={Icon.List} />
-          <Grid.Dropdown.Item
-            title="Favorite"
-            value="favorites"
-            icon={Icon.Star}
-          />
-          <Grid.Dropdown.Item
-            title="Recently Used"
-            value="recent"
-            icon={Icon.ArrowClockwise}
-          />
-          <Grid.Dropdown.Item title="Trash" value="trash" icon={Icon.Trash} />
-          {libraryState.catalog.groups
-            .filter(
-              (group) =>
-                !group.isDeleted && group.id !== TRASH_LOCATION.groupId,
-            )
-            .map((group) => (
-              <Grid.Dropdown.Section
-                key={group.id}
-                title={categoryTitle(group.id, group.name)}
-              >
-                {group.children
-                  .filter((sub) => !sub.isDeleted)
-                  .map((sub) => (
-                    <Grid.Dropdown.Item
-                      key={`${group.id}/${sub.id}`}
-                      value={locationValue({
-                        groupId: group.id,
-                        subGroupId: sub.id,
-                      })}
-                      title={categoryTitle(sub.id, sub.name)}
-                    />
-                  ))}
-              </Grid.Dropdown.Section>
-            ))}
-        </Grid.Dropdown>
+          view={view}
+        />
       }
     >
       {visible.fallback ? (
-        <Grid.Section title="Universal Match Fallback">{items}</Grid.Section>
+        <Section title={t("万能匹配回退")}>{items}</Section>
       ) : (
         items
       )}
-      {!items.length && (
-        <Grid.EmptyView
-          icon={Icon.Bookmark}
-          title={
-            query
-              ? "No matching bookmarks"
-              : scope === "trash"
-                ? "Trash is empty"
-                : "No bookmarks yet"
-          }
-          description={
-            query
-              ? "No local results; no global search entry is registered"
-              : "Add your first bookmark below"
-          }
-          actions={
-            <ActionPanel>
-              {!conflicted && looksLikeHttpUrl(query) && (
-                <>
-                  <Action
-                    title="Save This Link"
-                    icon={Icon.Plus}
-                    onAction={() => {
-                      const url = query.trim();
-                      push(
-                        <BookmarkForm
-                          root={libraryRoot}
-                          state={libraryState}
-                          seed={{ url, title: hostOf(url) }}
-                          onSaved={(next) => setState(next)}
-                        />,
-                      );
-                    }}
-                  />
-                  <Action
-                    title="Save This Link with AI"
-                    icon={Icon.Wand}
-                    onAction={() =>
-                      void (async () => {
-                        const url = query.trim();
-                        let seed = {
-                          url,
-                          title: hostOf(url),
-                          desc: undefined as string | undefined,
-                          tags: undefined as string[] | undefined,
-                        };
-                        try {
-                          const config = aiConfigFromPreferences(preferences);
-                          const suggestion = await suggestMetadata(config, {
-                            url,
-                          });
-                          seed = {
-                            url,
-                            title: suggestion.title?.trim() || hostOf(url),
-                            desc: suggestion.desc,
-                            tags: suggestion.tags,
-                          };
-                        } catch (error) {
-                          await showToast({
-                            style: Toast.Style.Failure,
-                            title: "AI unavailable; saved normally instead",
-                            message: failureMessage(error),
-                          });
-                        }
-                        push(
-                          <BookmarkForm
-                            root={libraryRoot}
-                            state={libraryState}
-                            seed={seed}
-                            onSaved={(next) => setState(next)}
-                          />,
-                        );
-                      })()
-                    }
-                  />
-                </>
-              )}
-              {!conflicted && (
-                <Action
-                  title="Add Bookmark"
-                  icon={Icon.Plus}
-                  onAction={() =>
-                    push(
-                      <BookmarkForm
-                        root={libraryRoot}
-                        state={libraryState}
-                        onSaved={(next) => setState(next)}
-                      />,
-                    )
-                  }
-                />
-              )}
-              <Action
-                title="Open Extension Preferences"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
-              <Action.Push
-                title="Settings & Data"
-                icon={Icon.Gear}
-                target={<ManageData onClose={load} />}
-              />
-            </ActionPanel>
-          }
-        />
-      )}
-    </Grid>
-  );
-}
-
-function TemplateForm({
-  fields,
-  bookmark,
-  onSubmit,
-}: {
-  fields: string[];
-  bookmark: Bookmark;
-  onSubmit: (values: Record<string, string>) => Promise<boolean>;
-}) {
-  const { pop } = useNavigation();
-  return (
-    <Form
-      navigationTitle={`Open: ${bookmark.title}`}
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Open"
-            icon={Icon.Globe}
-            onSubmit={async (values: Form.Values) => {
-              const succeeded = await onSubmit(
-                Object.fromEntries(
-                  fields.map((field) => [field, String(values[field] ?? "")]),
-                ),
-              );
-              if (succeeded) pop();
-            }}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.Description title="Template" text={bookmark.url} />
-      {fields.map((field) => (
-        <Form.TextField
-          key={field}
-          id={field}
-          title={`{${field}}`}
-          placeholder="Parameter value (URL-encoded)"
-        />
-      ))}
-    </Form>
-  );
-}
-
-function LocationsForm({
-  root,
-  state,
-  bookmark,
-  onSaved,
-}: {
-  root: string;
-  state: LibraryState;
-  bookmark: Bookmark;
-  onSaved: (state: LibraryState) => void;
-}) {
-  const { pop } = useNavigation();
-  const [values, setValues] = useState<string[]>(
-    bookmark.locations.map(locationValue),
-  );
-  const options = locationOptions(state.catalog);
-  return (
-    <Form
-      navigationTitle="Manage Category Locations"
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Save Locations"
-            icon={Icon.Checkmark}
-            onSubmit={async () => {
-              if (!values.length) {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: "Keep at least one category location",
-                  message:
-                    "To remove all categories, move the bookmark to Trash",
-                });
-                return;
-              }
-              try {
-                const result = await commit(root, {
-                  mutations: [
-                    bookmarkMutation(state, {
-                      ...bookmark,
-                      locations: values.map(parseLocationValue),
-                      updatedAt: Date.now(),
-                    }),
-                  ],
-                  expectedHeads: state.heads,
-                });
-                onSaved(result.state);
-                await showToast({
-                  style: Toast.Style.Success,
-                  title: "Category locations updated",
-                  message: result.warning ?? bookmark.title,
-                });
-                pop();
-              } catch (error) {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: "Not saved",
-                  message: failureMessage(error),
-                });
-              }
-            }}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.Description
-        title="Bookmark"
-        text={`${bookmark.title}\n${bookmark.url}`}
-      />
-      <Form.TagPicker
-        id="locations"
-        title="Category Locations (multiple)"
-        value={values}
-        onChange={setValues}
-        placeholder="Select or search categories"
-      >
-        {options.map((option) => (
-          <Form.TagPicker.Item
-            key={option.value}
-            value={option.value}
-            title={option.title}
-          />
-        ))}
-      </Form.TagPicker>
-    </Form>
+      {empty}
+    </Root>
   );
 }

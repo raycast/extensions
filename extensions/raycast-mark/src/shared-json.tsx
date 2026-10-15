@@ -1,4 +1,4 @@
-import * as fs from "node:fs/promises";
+import { t } from "./i18n.ts";
 import path from "node:path";
 import { useEffect, useState } from "react";
 import {
@@ -12,60 +12,20 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import type { LibraryState, Mutation } from "./model.ts";
-import {
-  bookmarkMutation,
-  canonical,
-  catalogMutation,
-  TRASH_LOCATION,
-} from "./model.ts";
+import { canonical } from "./model.ts";
+import type { LibraryState } from "./model.ts";
 import { readLibrary } from "./repository.ts";
+import { connectSharedJson, previewSharedJson } from "./shared-json-sync.ts";
 import {
-  applyJsonImport,
-  exportPortableJson,
-  previewJsonImport,
-} from "./import-export.ts";
-import type { ImportPlan } from "./import-export.ts";
-import {
-  readSharedJson,
+  disconnectSharedSource,
+  localLibrarySnapshot,
+  portableLibrary,
+  prepareLibrary,
+  readSharedSource,
   setSharedJsonSource,
-  sharedJsonBaseline,
-  sharedJsonDigest,
   sharedJsonPath,
-  updateSharedJsonBaseline,
   withExternalSharedJson,
 } from "./shared-json-storage.ts";
-
-function authoritativePlan(plan: ImportPlan, state: LibraryState): ImportPlan {
-  const incomingIds = new Set(
-    plan.data.bookmarks.map((bookmark) => bookmark.id),
-  );
-  const mutations: Mutation[] = plan.mutations.filter(
-    (mutation) => mutation.entity !== "catalog",
-  );
-  const incomingCatalog = {
-    id: "catalog" as const,
-    groups: plan.data.catalog.groups,
-  };
-  if (canonical(incomingCatalog) !== canonical(state.catalog))
-    mutations.push(catalogMutation(state, incomingCatalog));
-  for (const bookmark of state.bookmarks) {
-    if (incomingIds.has(bookmark.id)) continue;
-    const deleted = {
-      ...bookmark,
-      isDeleted: true,
-      locations: [TRASH_LOCATION],
-      prevLocations: undefined,
-      updatedAt: Date.now(),
-    };
-    if (
-      !bookmark.isDeleted ||
-      canonical(bookmark.locations) !== canonical(deleted.locations)
-    )
-      mutations.push(bookmarkMutation(state, deleted));
-  }
-  return { ...plan, mutations };
-}
 
 export default function SharedJsonForm({
   root,
@@ -81,234 +41,172 @@ export default function SharedJsonForm({
   useEffect(() => {
     void sharedJsonPath().then(setConnectedPath);
   }, []);
-  async function connect(file: string) {
-    const raw = await readSharedJson(file);
-    const plan = previewJsonImport(raw, state);
-    const incomingIds = new Set(
-      plan.data.bookmarks.map((bookmark) => bookmark.id),
+  async function connect(folder: string) {
+    const source = await portableLibrary.readBookmarks(folder);
+    const plan = previewSharedJson(
+      JSON.stringify(source.document),
+      state,
+      true,
     );
-    const missingLocally = state.bookmarks.filter(
-      (bookmark) => !incomingIds.has(bookmark.id),
-    ).length;
-    const differenceCount = plan.differences.length + missingLocally;
     const accepted = await confirmAlert({
-      title: differenceCount
-        ? `Local library differs from file (${differenceCount} items)`
-        : "Connect shared file?",
-      message: `Validated JSON: ${plan.counts.bookmarks} bookmarks, ${plan.counts.groups} groups. ${differenceCount ? "Continuing updates the local library from this file. To keep local content, cancel and export a backup from Settings & Data first." : "The file matches the current library."}
-
-The original events directory will not be deleted.
-${file}`,
+      title: t("以文件夹为准替换本地库？"),
+      message: `${t("预览变更实体")} ${plan.mutations.length} · ${t("书签")} ${plan.counts.bookmarks} · ${t("分类")} ${plan.counts.groups}\n${t("继续后权威覆盖当前书签与分类；请先导出本地备份。原事件历史保留。书签与图片需一起备份。\n")}${folder}`,
       primaryAction: {
-        title: "Use This File",
+        title: t("使用此文件夹"),
         style: Alert.ActionStyle.Destructive,
       },
     });
     if (!accepted) return;
-    const chosen = authoritativePlan(plan, state);
-    const decisions = Object.fromEntries(
-      plan.differences.map((difference) => [
-        difference.entityKey,
-        "incoming" as const,
-      ]),
+    const result = await connectSharedJson(
+      root,
+      folder,
+      state,
+      source.bookmarksText,
     );
-    const result = await withExternalSharedJson(async () => {
-      if (
-        raw !== (await readSharedJson(file)) ||
-        canonical(state) !== canonical(await readLibrary(root))
-      )
-        throw new Error("Data changed; reopen the form or preview");
-      const imported = chosen.mutations.length
-        ? await applyJsonImport(root, chosen, decisions)
-        : { state };
-      const local = await exportPortableJson(root, imported.state);
-      await setSharedJsonSource(file, raw, local);
-      return imported;
-    });
     onSaved(result.state);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Shared JSON connected",
-    });
     pop();
   }
-
   async function create(values: Form.Values) {
-    const directory = (values.directory as string[] | undefined)?.[0];
+    const parent = (values.directory as string[] | undefined)?.[0];
     const name =
       typeof values.filename === "string" ? values.filename.trim() : "";
     if (
-      !directory ||
-      !/^[^/\\]+\.json$/i.test(name) ||
+      !parent ||
+      !name ||
       name === "." ||
       name === ".." ||
-      name.includes("\0")
+      /[/\\\0]/.test(name)
     )
-      throw new Error("Choose a directory and enter a valid .json filename");
-    return withExternalSharedJson(async () => {
-      const target = path.join(directory, name);
-      const raw = await exportPortableJson(root, await readLibrary(root));
-      let handle: Awaited<ReturnType<typeof fs.open>> | undefined;
-      let created = false;
-      let owned: { dev: number; ino: number } | undefined;
-      try {
-        handle = await fs.open(target, "wx", 0o600);
-        created = true;
-        owned = await handle.stat();
-        await handle.writeFile(raw, "utf8");
-        await handle.sync();
-      } catch (error) {
-        await handle?.close().catch(() => undefined);
-        handle = undefined;
-        let cleanupFailed = false;
-        if (created && owned) {
-          const current = await fs.lstat(target).catch(() => undefined);
-          if (
-            current?.isFile() &&
-            !current.isSymbolicLink() &&
-            current.dev === owned.dev &&
-            current.ino === owned.ino
-          ) {
-            try {
-              await fs.unlink(target);
-            } catch {
-              cleanupFailed = true;
-            }
-          }
-        }
-        if (cleanupFailed)
-          throw new Error(
-            `Writing and cleaning up the new file failed; check manually: ${target}`,
-          );
-        throw error;
-      } finally {
-        await handle?.close().catch(() => undefined);
+      throw new Error(t("请选择目录并输入有效的文件夹名称"));
+    const target = path.join(parent, name);
+    await withExternalSharedJson(async () => {
+      const current = await readLibrary(root);
+      if (state.status !== "ready")
+        throw new Error(t("仅可对已验证且无冲突的库导入或完整导出"));
+      if (canonical(current) !== canonical(state))
+        throw new Error(t("数据已变化，请重新打开表单或预览"));
+      const oldSource = await sharedJsonPath();
+      const seed = oldSource
+        ? await readSharedSource(oldSource).catch(() => undefined)
+        : undefined;
+      if (seed) {
+        // Validate the connected source before creating another folder from the local library.
+        const sourcePlan = previewSharedJson(seed.text, current, true);
+        if (
+          (await localLibrarySnapshot(root, {
+            ...current,
+            catalog: sourcePlan.data.catalog,
+            bookmarks: sourcePlan.data.bookmarks,
+          })) !== (await localLibrarySnapshot(root, current))
+        )
+          throw new Error(t("源与本地不一致；请先重试同步或导出备份后断开"));
       }
-      await setSharedJsonSource(target, raw, raw);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Shared JSON created",
-      });
+      const prepared = await prepareLibrary(root, current, seed?.raw);
+      await portableLibrary.exportFolder(
+        target,
+        prepared,
+        seed ? oldSource : root,
+      );
+      const created = await portableLibrary.readBookmarks(target);
+      if (
+        created.bookmarksDigest !== prepared.bookmarksDigest ||
+        canonical(current) !== canonical(await readLibrary(root))
+      )
+        throw new Error(t("数据已变化，请重新打开表单或预览"));
+      if (seed && seed.raw !== (await readSharedSource(oldSource)).raw)
+        throw new Error(t("数据已变化，请重新打开表单或预览"));
+      await setSharedJsonSource(
+        target,
+        created.bookmarksText,
+        await localLibrarySnapshot(root, current),
+      );
+      onSaved(current);
       pop();
     });
   }
-
+  async function perform(operation: () => Promise<void>) {
+    try {
+      await operation();
+      await showToast({ style: Toast.Style.Success, title: t("数据源已更新") });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: t("数据源操作失败"),
+        message: error instanceof Error ? error.message : t("未知错误"),
+      });
+    }
+  }
   return (
     <Form
-      navigationTitle="Shared JSON Source"
+      navigationTitle={t("共享数据文件夹")}
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Use Existing JSON File"
+            title={t("打开已有文件夹")}
             icon={Icon.Link}
-            onSubmit={async (values) => {
-              const file = (values.existing as string[] | undefined)?.[0];
-              if (!file) {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: "Select a JSON file",
-                });
-                return;
-              }
-              try {
-                await connect(file);
-              } catch (error) {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: "Connection failed; file not overwritten",
-                  message:
-                    error instanceof Error ? error.message : "Invalid file",
-                });
-              }
-            }}
+            onSubmit={(values) =>
+              perform(async () => {
+                const folder = (values.existing as string[] | undefined)?.[0];
+                if (!folder) throw new Error(t("请选择共享数据文件夹"));
+                await connect(folder);
+              })
+            }
           />
           <Action.SubmitForm
-            title="Create JSON and Initialize Local Library"
+            title={t("新建文件夹并使用本地库初始化")}
             icon={Icon.Plus}
-            onSubmit={async (values) => {
-              try {
-                await create(values);
-              } catch (error) {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: "Creation failed; file not overwritten",
-                  message:
-                    error instanceof Error ? error.message : "Invalid file",
-                });
-              }
-            }}
+            onSubmit={(values) => perform(() => create(values))}
+          />
+          <Action
+            title={t("断开并保留本地")}
+            icon={Icon.XmarkCircle}
+            onAction={() =>
+              perform(async () => {
+                await disconnectSharedSource();
+                onSaved(await readLibrary(root));
+                pop();
+              })
+            }
           />
         </ActionPanel>
       }
     >
       <Form.Description
-        title="Existing JSON"
-        text={`A valid file becomes the authoritative source after confirmation. Writes are blocked if it is corrupt, missing, or conflicted.${connectedPath ? ` Connected: ${connectedPath}` : " Not connected."}`}
+        title={t("当前数据源")}
+        text={connectedPath || t("当前未连接")}
+      />
+      <Form.Description
+        title={t("打开")}
+        text={t(
+          "选择包含 bookmarks.json 与 assets/icons 的文件夹；预览后确认权威覆盖。书签与图片需一起备份。",
+        )}
       />
       <Form.FilePicker
         id="existing"
-        title="Choose JSON File"
-        canChooseDirectories={false}
-        canChooseFiles
+        title={t("数据文件夹")}
+        canChooseDirectories
+        canChooseFiles={false}
         allowMultipleSelection={false}
       />
       <Form.Separator />
       <Form.Description
-        title="New JSON"
-        text="Created only when the destination does not exist. Initialized from the local library, with icons embedded in JSON. You may choose an iCloud Drive directory."
+        title={t("新建文件夹")}
+        text={t(
+          "使用已验证本地库创建新文件夹；目标须不存在或为空。完成验证后切换连接。",
+        )}
       />
       <Form.FilePicker
         id="directory"
-        title="Save Directory"
+        title={t("保存目录")}
         canChooseDirectories
         canChooseFiles={false}
         allowMultipleSelection={false}
       />
       <Form.TextField
         id="filename"
-        title="Filename"
-        defaultValue="goose-marks.json"
+        title={t("文件夹名称")}
+        defaultValue="goose-marks"
       />
     </Form>
   );
-}
-
-export async function refreshSharedJson(root: string, state: LibraryState) {
-  return withExternalSharedJson(async () => {
-    const file = await sharedJsonPath();
-    if (!file) return state;
-    const current = await readLibrary(root);
-    const raw = await readSharedJson(file);
-    const baseline = await sharedJsonBaseline();
-    if (!baseline.remote || !baseline.local)
-      throw new Error(
-        "Shared JSON baseline missing; reconnect the file to avoid overwriting data",
-      );
-    const local = await exportPortableJson(root, current);
-    if (sharedJsonDigest(raw) === baseline.remote) {
-      if (sharedJsonDigest(local) !== baseline.local)
-        throw new Error(
-          "Local changes are not yet in shared JSON; export a backup, then reconnect the file",
-        );
-      return canonical(current) === canonical(state) ? state : current;
-    }
-    if (sharedJsonDigest(local) !== baseline.local)
-      throw new Error(
-        "Both shared file and local library changed; sync and writes are blocked due to conflict",
-      );
-    const plan = previewJsonImport(raw, current);
-    const chosen = authoritativePlan(plan, current);
-    const decisions = Object.fromEntries(
-      plan.differences.map((difference) => [
-        difference.entityKey,
-        "incoming" as const,
-      ]),
-    );
-    const result = chosen.mutations.length
-      ? await applyJsonImport(root, chosen, decisions)
-      : { state: current };
-    const nextLocal = await exportPortableJson(root, result.state);
-    await updateSharedJsonBaseline(raw, nextLocal);
-    return result.state;
-  });
 }

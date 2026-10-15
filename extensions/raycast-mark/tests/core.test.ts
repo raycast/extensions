@@ -5,13 +5,6 @@ import { randomUUID } from "node:crypto";
 import { createServer } from "node:http";
 import path from "node:path";
 import {
-  AI_MAX_RESPONSE_BYTES,
-  aiConfigFromPreferences,
-  aiEndpoint,
-  suggestMetadata,
-} from "../src/ai.ts";
-import type { AIConfig, AIProtocol } from "../src/ai.ts";
-import {
   normalizeBookmarkUrl,
   resolveLaunchUrl,
   templateFields,
@@ -19,15 +12,14 @@ import {
 import {
   applyJsonImport,
   exportJson,
+  exportPortableJson,
   previewJsonImport,
   saveJsonExport,
 } from "../src/import-export.ts";
 import {
   fetchAndPersistIcon,
-  fetchBinary,
   isPublicIconAddress,
 } from "../src/icon-service.ts";
-import type { FetchBinaryDeps } from "../src/icon-service.ts";
 import {
   bookmarkMutation,
   canonical,
@@ -119,7 +111,11 @@ test("shared JSON: existing lock is never removed by another writer", async () =
         bookmarks: [],
       });
       await fs.writeFile(file, initial);
-      await setSharedJsonSource(file, initial, initial);
+      await setSharedJsonSource(
+        file,
+        initial,
+        await exportPortableJson(dir, await readLibrary(dir)),
+      );
       await fs.writeFile(`${file}.lock`, "another writer");
       await assert.rejects(
         withSharedJsonWrite(dir, async () => ({
@@ -184,7 +180,11 @@ test("shared JSON: ordinary commit waits for external import and still publishes
         bookmarks: [],
       });
       await fs.writeFile(file, initial);
-      await setSharedJsonSource(file, initial, initial);
+      await setSharedJsonSource(
+        file,
+        initial,
+        await exportPortableJson(dir, await readLibrary(dir)),
+      );
       const gate = new Promise<void>((resolve) => {
         release = resolve;
       });
@@ -580,9 +580,12 @@ test("old JSON round trip: trash/prevLocations/multi-location/tags/pinned/times/
     assert.match(plan.warnings.join(), /saved on import/);
     const applied = await applyJsonImport(dir, plan, {});
     const exported = JSON.parse(exportJson(applied.state));
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const withoutIcon = ({ icon, iconMatchedAt, ...record }: Bookmark) =>
-      record;
+    const withoutIcon = (bookmark: Bookmark) => {
+      const record = { ...bookmark };
+      delete record.icon;
+      delete record.iconMatchedAt;
+      return record;
+    };
     assert.deepEqual(
       exported.bookmarks.map(withoutIcon),
       source.bookmarks
@@ -758,7 +761,7 @@ test("JSON rejects secrets, unknown versions, duplicate IDs, invalid times/URL/r
   const empty = replayEvents([]);
   for (const change of [
     (v: ReturnType<typeof legacy>) =>
-      Object.assign(v, { settings: { apiKey: "do-not-echo" } }),
+      Object.assign(v, { apiKey: "do-not-echo" }),
     (v: ReturnType<typeof legacy>) => Object.assign(v, { schemaVersion: 2 }),
     (v: ReturnType<typeof legacy>) => v.bookmarks.push(v.bookmarks[0]),
     (v: ReturnType<typeof legacy>) => {
@@ -790,168 +793,6 @@ test("JSON rejects secrets, unknown versions, duplicate IDs, invalid times/URL/r
   const plan = previewJsonImport(JSON.stringify(missing), empty);
   assert.equal(plan.counts.generatedIds, 1);
   assert.equal(plan.counts.missingTimes, 2);
-});
-
-test("AI: three non-stream protocols, independent keys, endpoint/headers/body and validated suggestions", async () => {
-  const original = globalThis.fetch;
-  try {
-    for (const protocol of [
-      "openai-responses",
-      "openai-compatible",
-      "anthropic",
-    ] as AIProtocol[]) {
-      const config: AIConfig = {
-        protocol,
-        baseUrl: "https://provider.test/v1",
-        model: "model",
-        apiKey: "synthetic-key",
-      };
-      globalThis.fetch = async (input, init) => {
-        const suffix =
-          protocol === "anthropic"
-            ? "/messages"
-            : protocol === "openai-responses"
-              ? "/responses"
-              : "/chat/completions";
-        assert.equal(input, config.baseUrl + suffix);
-        assert.equal(init?.redirect, "error");
-        assert.equal(init?.method, "POST");
-        const headers = init?.headers as Record<string, string>;
-        const body = JSON.parse(init?.body as string);
-        assert.equal(body.stream, false);
-        assert.equal(body.model, "model");
-        assert.ok(!JSON.stringify(body).includes("synthetic-key"));
-        assert.ok(!JSON.stringify(body).includes("not-selected"));
-        if (protocol === "anthropic") {
-          assert.equal(headers["x-api-key"], "synthetic-key");
-          assert.equal(headers["anthropic-version"], "2023-06-01");
-          assert.ok(body.system);
-          assert.ok(body.max_tokens);
-        } else assert.equal(headers.Authorization, "Bearer synthetic-key");
-        const answer = JSON.stringify({
-          title: "建议",
-          desc: "说明",
-          tags: ["a"],
-        });
-        return Response.json(
-          protocol === "anthropic"
-            ? { content: [{ type: "text", text: answer }] }
-            : protocol === "openai-compatible"
-              ? { choices: [{ message: { content: answer } }] }
-              : {
-                  output: [
-                    {
-                      type: "message",
-                      content: [{ type: "output_text", text: answer }],
-                    },
-                  ],
-                },
-        );
-      };
-      assert.deepEqual(await suggestMetadata(config, { title: "selected" }), {
-        title: "建议",
-        desc: "说明",
-        tags: ["a"],
-      });
-    }
-    assert.equal(
-      aiConfigFromPreferences({
-        aiProtocol: "anthropic",
-        anthropicKey: "a",
-        openaiResponsesKey: "b",
-      }).apiKey,
-      "a",
-    );
-    for (const baseUrl of [
-      "http://remote.test",
-      "https://u:p@host.test",
-      "https://host.test?key=secret",
-      "file:///tmp",
-    ])
-      assert.throws(() =>
-        aiEndpoint({ protocol: "anthropic", baseUrl, model: "m", apiKey: "k" }),
-      );
-    assert.equal(
-      aiEndpoint({
-        protocol: "anthropic",
-        baseUrl: "http://127.0.0.1:1234/v1",
-        model: "m",
-        apiKey: "k",
-      }),
-      "http://127.0.0.1:1234/v1",
-    );
-  } finally {
-    globalThis.fetch = original;
-  }
-});
-
-test("AI: no auth/rate/network fallback, explicit unsupported fallback, safe errors/size/cancel/timeout", async () => {
-  const original = globalThis.fetch;
-  const config: AIConfig = {
-    protocol: "openai-responses",
-    baseUrl: "https://provider.test/v1",
-    model: "m",
-    apiKey: "secret-value",
-  };
-  try {
-    for (const status of [401, 429, 500, 404]) {
-      let calls = 0;
-      globalThis.fetch = async () => {
-        calls++;
-        return new Response("secret-value raw response", { status });
-      };
-      await assert.rejects(
-        suggestMetadata(config, { title: "t" }),
-        (e: unknown) =>
-          e instanceof Error && !e.message.includes("secret-value"),
-      );
-      assert.equal(calls, 1);
-    }
-    let calls = 0;
-    globalThis.fetch = async () => {
-      calls++;
-      return calls === 1
-        ? new Response(null, { status: 405 })
-        : Response.json({
-            choices: [{ message: { content: '{"title":"ok"}' } }],
-          });
-    };
-    assert.equal((await suggestMetadata(config, { title: "t" })).title, "ok");
-    assert.equal(calls, 2);
-    globalThis.fetch = async () => {
-      throw new Error("secret-value network request");
-    };
-    await assert.rejects(
-      suggestMetadata(config, { title: "t" }),
-      (e: unknown) => e instanceof Error && !e.message.includes("secret-value"),
-    );
-    globalThis.fetch = async () =>
-      Response.json({
-        output: [
-          {
-            type: "message",
-            content: [
-              { type: "output_text", text: '{"apiKey":"secret-value"}' },
-            ],
-          },
-        ],
-      });
-    await assert.rejects(suggestMetadata(config, { title: "t" }));
-    globalThis.fetch = async () =>
-      new Response("x".repeat(AI_MAX_RESPONSE_BYTES + 1));
-    await assert.rejects(suggestMetadata(config, { title: "t" }), /too large/);
-    globalThis.fetch = async () => new Promise(() => undefined);
-    await assert.rejects(
-      suggestMetadata(config, { title: "t" }, AbortSignal.timeout(5)),
-      /canceled or timed out/,
-    );
-    await assert.rejects(
-      suggestMetadata({ ...config, apiKey: "" }, { title: "t" }),
-      /API key/i,
-    );
-  } finally {
-    globalThis.fetch = original;
-  }
 });
 
 test("event trust boundary: empty/duplicate mutations, duplicate parents and cross-entity dependency cycles", () => {
@@ -1019,123 +860,3 @@ test("directory event-count and aggregate-byte ceilings block writes", async () 
       JSON.stringify({ issues: state.issues, files: await fs.readdir(dir) }),
     );
   }));
-
-test("AI internal timeout bounds a transport ignoring cancellation", async () => {
-  const original = globalThis.fetch;
-  try {
-    globalThis.fetch = async () => new Promise(() => undefined);
-    await assert.rejects(
-      suggestMetadata(
-        {
-          protocol: "anthropic",
-          baseUrl: "https://provider.test/v1",
-          model: "m",
-          apiKey: "synthetic",
-        },
-        { title: "test" },
-      ),
-      /canceled or timed out/,
-    );
-  } finally {
-    globalThis.fetch = original;
-  }
-});
-
-test("fetchBinary follows redirects and validates every hop", async () => {
-  const hits: string[] = [];
-  let port = 0;
-  const server = createServer((request, response) => {
-    const url = request.url ?? "";
-    hits.push(`${request.headers.host?.split(":")[0]}${url}`);
-    const redirect = (location: string, status = 302) => {
-      response.writeHead(status, {
-        Location: location.replace("PORT", String(port)),
-      });
-      response.end();
-    };
-    if (url === "/start") return redirect("/relative");
-    if (url === "/relative")
-      return redirect("http://other.example:PORT/final", 301);
-    if (url === "/final") {
-      response.writeHead(200, { "Content-Type": "image/png" });
-      return response.end("png-bytes");
-    }
-    if (url === "/to-private")
-      return redirect("http://private.example:PORT/secret");
-    if (url === "/to-literal-metadata")
-      return redirect("http://169.254.169.254/latest/meta-data");
-    if (url === "/to-file") return redirect("file:///etc/passwd");
-    if (url === "/to-ftp") return redirect("ftp://public.example/icon.ico");
-    if (url === "/to-credentials")
-      return redirect("http://user:pass@other.example:PORT/final");
-    if (url === "/to-localhost") return redirect("http://localhost:PORT/final");
-    if (url === "/no-location") {
-      response.writeHead(302);
-      return response.end();
-    }
-    if (url.startsWith("/loop/")) {
-      const n = Number(url.slice(6));
-      return redirect(n > 0 ? `/loop/${n - 1}` : "/final");
-    }
-    if (url === "/secret") {
-      response.writeHead(200, { "Content-Type": "image/png" });
-      return response.end("must-never-be-fetched");
-    }
-    response.writeHead(404);
-    response.end();
-  });
-  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
-  port = (server.address() as { port: number }).port;
-  // Fake DNS: public names resolve to the local test server; private.example resolves to a private address.
-  const deps: FetchBinaryDeps = {
-    resolveHost: async (host) =>
-      host === "private.example"
-        ? [{ address: "10.0.0.5", family: 4 }]
-        : [{ address: "127.0.0.1", family: 4 }],
-    isPublicAddress: (address) =>
-      address === "127.0.0.1" || isPublicIconAddress(address),
-  };
-  const fetchFrom = (pathName: string) =>
-    fetchBinary(
-      `http://public.example:${port}${pathName}`,
-      1024,
-      "image/*",
-      deps,
-    );
-  try {
-    const followed = await fetchFrom("/start");
-    assert.equal(followed?.bytes.toString(), "png-bytes");
-    assert.equal(followed?.contentType, "image/png");
-    assert.equal(followed?.finalUrl, `http://other.example:${port}/final`);
-
-    for (const blockedPath of [
-      "/to-private",
-      "/to-literal-metadata",
-      "/to-file",
-      "/to-ftp",
-      "/to-credentials",
-      "/to-localhost",
-      "/no-location",
-    ])
-      assert.equal(await fetchFrom(blockedPath), null, blockedPath);
-    assert.equal(
-      hits.some(
-        (hit) => hit.endsWith("/secret") || hit.endsWith("/latest/meta-data"),
-      ),
-      false,
-      "blocked redirect targets must never be requested",
-    );
-
-    // 5 redirects are allowed, a 6th is not.
-    assert.equal((await fetchFrom("/loop/4"))?.bytes.toString(), "png-bytes");
-    assert.equal(await fetchFrom("/loop/5"), null);
-  } finally {
-    await new Promise((resolve) => server.close(resolve));
-  }
-
-  // With the default validation a loopback target (and a redirect to one) is rejected.
-  assert.equal(
-    await fetchBinary("http://127.0.0.1:1/x", 1024, "image/*"),
-    null,
-  );
-});

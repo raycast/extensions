@@ -33,12 +33,6 @@ export function siteColorOf(seed: string): SiteColor {
   return SITE_PALETTE[hashSeed(seed || "?") % SITE_PALETTE.length];
 }
 
-export function siteFgForBg(bg: string | undefined): string | null {
-  if (!bg) return null;
-  const hit = SITE_PALETTE.find((c) => c.bg.toLowerCase() === bg.toLowerCase());
-  return hit ? hit.fg : null;
-}
-
 const MULTI_PART_SUFFIXES = new Set([
   "com.cn",
   "net.cn",

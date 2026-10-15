@@ -1,3 +1,4 @@
+import { t } from "./i18n.ts";
 import { normalizeBookmarkUrl } from "./bookmark-utils.ts";
 
 export type ErrorCode =
@@ -69,6 +70,8 @@ export interface SubGroup extends Times {
   name: string;
   lastSyncedAt?: number;
   isDeleted?: boolean;
+  orderIndex?: number;
+  bookmarkIds?: string[];
 }
 export interface Group extends SubGroup {
   children: SubGroup[];
@@ -85,6 +88,10 @@ export interface Mutation {
   entityId: string;
   baseHeads: string[];
   value: EntityValue;
+  /** Visit events whose totals are already included in this snapshot. */
+  coveredVisits?: string[];
+  /** An authoritative source permanently removed this bookmark. */
+  removed?: true;
 }
 export interface Visit {
   bookmarkId: string;
@@ -100,6 +107,8 @@ export interface LibraryEvent {
 export interface Candidate {
   eventId: string;
   value: EntityValue;
+  coveredVisits?: string[];
+  removed?: true;
 }
 export interface Conflict {
   entityKey: string;
@@ -122,8 +131,10 @@ export interface LibraryState {
   /** Raw snapshots carry import usage bases, not accumulated visits. Use bookmarkMutation for edits. */
   baseBookmarks: Record<string, Bookmark>;
   visitCounts: Record<string, number>;
+  coveredVisits?: Record<string, string[]>;
+  visitEventIds?: Record<string, string[]>;
 }
-export function invalid(message = "Invalid data format"): never {
+export function invalid(message = t("数据格式无效")): never {
   throw new LibraryError("INVALID_INPUT", message);
 }
 export function object(value: unknown): Record<string, unknown> {
@@ -151,7 +162,7 @@ export function timestamp(value: unknown): number {
     value < 0 ||
     value > 8640000000000000
   )
-    invalid("Invalid timestamp or count");
+    invalid(t("时间或计数无效"));
   return value;
 }
 export function array(value: unknown, max = 10000): unknown[] {
@@ -160,7 +171,7 @@ export function array(value: unknown, max = 10000): unknown[] {
 }
 export function keys(value: Record<string, unknown>, allowed: string[]) {
   if (Object.keys(value).some((k) => !allowed.includes(k)))
-    invalid("Unknown fields present; remove settings or secrets");
+    invalid(t("含未知字段，请移除设置或秘密字段"));
 }
 export function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
@@ -191,7 +202,7 @@ export function locations(raw: unknown): Location[] {
     return { groupId: id(o.groupId), subGroupId: id(o.subGroupId) };
   });
   if (new Set(result.map(canonical)).size !== result.length)
-    invalid("Duplicate location");
+    invalid(t("位置重复"));
   return result;
 }
 export function validateBookmark(value: unknown): Bookmark {
@@ -221,7 +232,7 @@ export function validateBookmark(value: unknown): Bookmark {
   try {
     url = normalizeBookmarkUrl(text(raw.url, 8192));
   } catch {
-    invalid("Unsupported URL or template");
+    invalid(t("不支持的网址或模板"));
   }
   const b: Bookmark = {
     id: id(raw.id),
@@ -256,7 +267,7 @@ export function validateBookmark(value: unknown): Bookmark {
       type !== "text" &&
       type !== "custom"
     )
-      invalid("Invalid icon type");
+      invalid(t("图标类型无效"));
     const fields = {
       file: ["path", "hash"],
       remote: ["src", "cache"],
@@ -275,7 +286,7 @@ export function validateBookmark(value: unknown): Bookmark {
         });
     if (i.fetchedAt !== undefined) icon.fetchedAt = timestamp(i.fetchedAt);
     if (typeof i[fields[0]] !== "string" || !i[fields[0]])
-      invalid("Invalid icon fields");
+      invalid(t("图标字段无效"));
     b.icon = icon;
   }
   return b;
@@ -295,13 +306,21 @@ export function validateCatalog(value: unknown): Catalog {
       "serverUpdatedAt",
       "lastSyncedAt",
       "isDeleted",
+      "orderIndex",
+      "bookmarkIds",
       ...(group ? ["children"] : []),
     ]);
     const item: SubGroup = { id: id(o.id), name: id(o.name), ...times(o) };
-    if (seen.has(item.id)) invalid("Duplicate category ID");
+    if (seen.has(item.id)) invalid(t("分类 ID 重复"));
     seen.add(item.id);
     if (o.lastSyncedAt !== undefined)
       item.lastSyncedAt = timestamp(o.lastSyncedAt);
+    if (o.orderIndex !== undefined) item.orderIndex = timestamp(o.orderIndex);
+    if (o.bookmarkIds !== undefined) {
+      item.bookmarkIds = array(o.bookmarkIds).map(id);
+      if (new Set(item.bookmarkIds).size !== item.bookmarkIds.length)
+        invalid(t("分类成员索引重复"));
+    }
     if (o.isDeleted !== undefined) {
       if (typeof o.isDeleted !== "boolean") invalid();
       item.isDeleted = o.isDeleted;
@@ -320,8 +339,7 @@ export function validateCatalog(value: unknown): Catalog {
     groups: array(raw.groups, 1000).map((g) => parse(g, true) as Group),
   };
   for (const loc of [DEFAULT_LOCATION, TRASH_LOCATION])
-    if (!hasLocation(catalog, loc))
-      invalid("Default and Trash categories must be kept");
+    if (!hasLocation(catalog, loc)) invalid(t("默认分类与回收站必须保留"));
   return catalog;
 }
 export function hasLocation(c: Catalog, l: Location): boolean {
@@ -331,21 +349,6 @@ export function hasLocation(c: Catalog, l: Location): boolean {
       !g.isDeleted &&
       g.children.some((s) => s.id === l.subGroupId && !s.isDeleted),
   );
-}
-// Built-in category names stay as the legacy persisted values so existing local
-// libraries and shared JSON files keep matching; they are shown in English via categoryTitle().
-const BUILT_IN_CATEGORY_TITLES: Record<
-  string,
-  { stored: string; title: string }
-> = {
-  "g-default": { stored: "默认", title: "Default" },
-  "sg-default": { stored: "未分类", title: "Uncategorized" },
-  "g-trash": { stored: "回收站", title: "Trash" },
-  "sg-trash": { stored: "已删除", title: "Deleted" },
-};
-export function categoryTitle(id: string, name: string): string {
-  const builtIn = BUILT_IN_CATEGORY_TITLES[id];
-  return builtIn && builtIn.stored === name ? builtIn.title : name;
 }
 export function emptyCatalog(): Catalog {
   return {
@@ -385,6 +388,9 @@ export function bookmarkMutation(
     entityId: value.id,
     baseHeads: state.heads[entityKey("bookmark", value.id)] ?? [],
     value,
+    ...(state.coveredVisits?.[value.id]?.length
+      ? { coveredVisits: [...state.coveredVisits[value.id]] }
+      : {}),
   };
 }
 export function catalogMutation(
@@ -414,7 +420,7 @@ export function restoreBookmark(
   state: LibraryState,
   bookmark: Bookmark,
 ): Mutation {
-  if (!bookmark.isDeleted) invalid("Bookmark is not deleted");
+  if (!bookmark.isDeleted) invalid(t("书签不是删除状态"));
   const restored = bookmark.prevLocations?.filter(
     (l) =>
       l.groupId !== TRASH_LOCATION.groupId && hasLocation(state.catalog, l),
@@ -434,14 +440,14 @@ export function removeCategory(
   target: "default" | "trash" = "default",
 ): { affectedCount: number; mutations: Mutation[] } {
   if ([DEFAULT_LOCATION.groupId, TRASH_LOCATION.groupId].includes(groupId))
-    invalid("Default and Trash cannot be deleted");
+    invalid(t("默认分类与回收站禁止删除"));
   const catalog = structuredClone(state.catalog);
   const group = catalog.groups.find((g) => g.id === groupId);
   if (
     !group ||
     (subGroupId && !group.children.some((s) => s.id === subGroupId))
   )
-    invalid("Category not found");
+    invalid(t("分类不存在"));
   if (subGroupId)
     group.children = group.children.filter((s) => s.id !== subGroupId);
   else catalog.groups = catalog.groups.filter((g) => g.id !== groupId);
