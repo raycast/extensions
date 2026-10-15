@@ -1,6 +1,6 @@
 # Meme generator Changelog
 
-## [Fix Meme Download on Windows] - {PR_MERGE_DATE}
+## [Fix Meme Download on Windows] - 2026-10-15
 
 - Fix meme download failing on Windows when template titles contain forbidden filename characters ([#32320](https://github.com/raycast/extensions/issues/32320))
 
