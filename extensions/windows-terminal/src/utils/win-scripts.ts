@@ -2,19 +2,20 @@ import { runPowerShellScript } from "@raycast/utils";
 
 export async function getCurrentExplorerPath(): Promise<string> {
   const script = `
-Add-Type -Namespace Win32 -Name Foreground -MemberDefinition '[DllImport("user32.dll")] public static extern System.IntPtr GetForegroundWindow();' | Out-Null
-$foreground = [Win32.Foreground]::GetForegroundWindow().ToInt32()
-$windows = (New-Object -ComObject Shell.Application).Windows() |
-  Where-Object { $_.LocationName -ne $null -and $_.LocationName -ne "Desktop" }
-# Prefer the foreground Explorer window so a second, unrelated window doesn't win;
-# fall back to the first one (e.g. Raycast itself is foreground when this runs).
-$match = $windows | Where-Object { $_.HWND -eq $foreground } | Select-Object -First 1
-if ($null -eq $match) {
-  $match = $windows | Select-Object -First 1
-}
+      Add-Type -Namespace Win32 -Name Foreground -MemberDefinition '[DllImport("user32.dll")] public static extern System.IntPtr GetForegroundWindow();' | Out-Null
+      $foreground = [Win32.Foreground]::GetForegroundWindow().ToInt32()
+      $windows = (New-Object -ComObject Shell.Application).Windows() | Where-Object { $_.LocationName -ne $null -and $_.LocationName -ne "Desktop" }
 
-Write-Output $match.LocationURL
-`;
+      # Prefer the foreground Explorer window so a second, unrelated window doesn't win;
+      # fall back to the first one (e.g. Raycast itself is foreground when this runs).
+      $match = $windows | Where-Object { $_.HWND -eq $foreground } | Select-Object -First 1
+      if ($null -eq $match) {
+          $match = $windows | Select-Object -First 1
+      }
+
+      Write-Output $match.LocationURL
+  `;
+
   const rawUrl = (await runPowerShellScript(script)).trim();
   if (!rawUrl) {
     return "";
