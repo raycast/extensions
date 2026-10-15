@@ -9,6 +9,8 @@ export interface ProtectedText {
 }
 
 const PATTERNS: RegExp[] = [
+  /\[\[\s*P\d+\s*\]\]/g, // literal placeholders in the input, so they cannot collide with generated ones
+  /<<<REVIEW>>>/g, // literal review marker, so it cannot be mistaken for the model's flag section
   /(`{3,}|~{3,})[^\n]*\n[\s\S]*?\n[ \t]*\1[ \t]*(?=\n|$)/g, // fenced code blocks
   /(`+)(?!`)[^\n]*?[^`\n]\1(?!`)|``/g, // inline code
   /\bhttps?:\/\/[^\s<>"')\]]+/gi, // URLs

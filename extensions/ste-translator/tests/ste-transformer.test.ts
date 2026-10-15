@@ -341,3 +341,49 @@ describe("STE lint repair pass", () => {
     }
   });
 });
+
+describe("review feedback regressions", () => {
+  it("sends token IDs, not original values, in the repair prompt", async () => {
+    let n = 0;
+    const provider = fakeProvider((t) => (n++ === 0 ? "Open the link." : t));
+    await run("Open https://secret.example/x now.", provider);
+    expect(provider.calls).toHaveLength(2);
+    expect(provider.calls[1]).not.toContain("secret.example");
+    expect(provider.calls[1]).toContain("[[P0]]");
+  });
+
+  it("rejects a correction that drops a negation", async () => {
+    let n = 0;
+    const provider = fakeProvider(() => (n++ === 0 ? "Do not open the valve; wait." : "Open the valve. Wait."));
+    const result = await run("Do not open the valve. Wait.", provider);
+    expect(result.rewritten).toBe("Do not open the valve; wait.");
+    expect(result.repaired).toBe(false);
+  });
+
+  it("needs review when a meaning warning remains", async () => {
+    const result = await run(
+      "Do not open the valve.",
+      fakeProvider(() => "Open the valve."),
+    );
+    expect(result.needsReview).toBe(true);
+  });
+
+  it("does not treat an inline marker in the text as review flags", async () => {
+    const result = await run(
+      "Use <<<REVIEW>>> to mark this section.",
+      fakeProvider((t) => t),
+    );
+    expect(result.rewritten).toBe("Use <<<REVIEW>>> to mark this section.");
+    expect(parseModelOutput("Text\n<<<REVIEW>>>\n- check").reviewFlags).toEqual(["check"]);
+    expect(parseModelOutput("Use <<<REVIEW>>> here").reviewFlags).toEqual([]);
+  });
+
+  it("keeps literal placeholders in the input distinct from generated ones", async () => {
+    const src = "Explain [[P0]] beside `code`.";
+    const result = await run(
+      src,
+      fakeProvider((t) => t),
+    );
+    expect(result.rewritten).toBe(src);
+  });
+});

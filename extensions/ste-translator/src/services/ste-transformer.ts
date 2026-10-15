@@ -120,10 +120,13 @@ export function buildRepairPrompt(protectedOriginal: string, previousOutput: str
 }
 
 export function parseModelOutput(raw: string): { rewritten: string; reviewFlags: string[] } {
-  const index = raw.lastIndexOf(REVIEW_MARKER);
-  if (index === -1) return { rewritten: raw.trim(), reviewFlags: [] };
+  // The marker counts only when it is alone on its line, as the output format requires.
+  const markers = [...raw.matchAll(/^[ \t]*<<<REVIEW>>>[ \t]*$/gm)];
+  const marker = markers.at(-1);
+  if (!marker) return { rewritten: raw.trim(), reviewFlags: [] };
+  const index = marker.index;
   const flags = raw
-    .slice(index + REVIEW_MARKER.length)
+    .slice(index + marker[0].length)
     .split("\n")
     .map((line) => line.replace(/^\s*[-*]\s*/, "").trim())
     .filter((line) => line.length > 0);
@@ -149,10 +152,17 @@ function evaluate(raw: string, protectedOriginal: string, tokens: string[]): Eva
   return { protectedOutput, reviewFlags, restored, validation, lint };
 }
 
-/** Lower is better. Lost or altered protected content outweighs any style violation. */
+/** Lower is better. Lost or altered protected content outweighs meaning warnings, which outweigh style violations. */
 function score(e: Evaluation): number {
   const errors = e.validation.filter((w) => w.severity === "error").length;
-  return errors * 100 + hardFindings(e.lint).length;
+  const meaning = e.validation.filter((w) => w.severity === "warning").length;
+  return errors * 100 + meaning * 10 + hardFindings(e.lint).length;
+}
+
+/** True when the candidate has an error or meaning warning that the current result does not have. */
+function introducesProblem(candidate: Evaluation, current: Evaluation): boolean {
+  const known = new Set(current.validation.map((w) => w.message));
+  return candidate.validation.some((w) => w.severity !== "info" && !known.has(w.message));
 }
 
 function describeFinding(f: LintFinding): string {
@@ -160,7 +170,10 @@ function describeFinding(f: LintFinding): string {
 }
 
 function repairProblems(e: Evaluation): string[] {
-  const problems = e.validation.filter((w) => w.severity === "error" || w.severity === "warning").map((w) => w.message);
+  // Use the token-ID wording: original protected values must never reach the provider.
+  const problems = e.validation
+    .filter((w) => w.severity === "error" || w.severity === "warning")
+    .map((w) => w.repairMessage ?? w.message);
   return [...problems, ...hardFindings(e.lint).map(describeFinding)];
 }
 
@@ -208,7 +221,7 @@ export async function convertToSte(request: ConversionRequest, provider: AiProvi
       });
       if (!isBlank(repairRaw)) {
         const candidate = evaluate(repairRaw, protectedInput.text, protectedInput.tokens);
-        if (score(candidate) < score(current)) {
+        if (!introducesProblem(candidate, current) && score(candidate) < score(current)) {
           current = candidate;
           repaired = true;
         }
@@ -232,7 +245,8 @@ export async function convertToSte(request: ConversionRequest, provider: AiProvi
     mode: request.mode,
     warnings,
     repaired,
-    needsReview: hasBlockingWarnings(warnings) || current.reviewFlags.length > 0,
+    needsReview:
+      hasBlockingWarnings(warnings) || warnings.some((w) => w.severity === "warning") || current.reviewFlags.length > 0,
   };
 }
 

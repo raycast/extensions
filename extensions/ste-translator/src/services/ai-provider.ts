@@ -1,5 +1,5 @@
 import { AI, environment } from "@raycast/api";
-import { ConversionError, type AiProvider, type CompletionRequest, type StePreferences } from "../types";
+import { ConversionError, type AiProvider, type CompletionRequest } from "../types";
 import { parseTimeoutMs } from "../utils/text";
 
 /** Run `task` with a timeout that aborts its signal and rejects with a typed error. */
@@ -121,7 +121,7 @@ export class OpenAiCompatibleProvider implements AiProvider {
   }
 }
 
-export function createProvider(prefs: StePreferences): AiProvider {
+export function createProvider(prefs: Preferences): AiProvider {
   const timeoutMs = parseTimeoutMs(prefs.timeoutSeconds);
   if (prefs.provider === "openai-compatible") {
     const baseUrl = prefs.externalBaseUrl?.trim();

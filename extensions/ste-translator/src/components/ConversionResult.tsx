@@ -18,7 +18,6 @@ import {
   type ConversionRequest,
   type ConversionResult as Result,
   type ReviewWarning,
-  type StePreferences,
 } from "../types";
 import { fenceBlock } from "../utils/text";
 
@@ -28,7 +27,7 @@ const PRIVACY_NOTE =
   "Your text is sent to the configured AI provider and is subject to that provider's data policy. This extension does not store or log it. An AI rewrite alone does not certify ASD-STE100 compliance.";
 
 async function runConversion(request: ConversionRequest): Promise<Result> {
-  const prefs = getPreferenceValues<StePreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   return convertToSte(
     { ...request, customInstructions: request.customInstructions ?? prefs.customInstructions },
     createProvider(prefs),

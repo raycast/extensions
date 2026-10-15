@@ -3,7 +3,6 @@ import { usePromise } from "@raycast/utils";
 import { ClipboardConversion } from "./components/ClipboardConversion";
 import { ConversionForm } from "./components/ConversionForm";
 import { ConversionResultView } from "./components/ConversionResult";
-import type { StePreferences } from "./types";
 import { isBlank } from "./utils/text";
 
 async function readSelection(): Promise<string> {
@@ -15,7 +14,7 @@ async function readSelection(): Promise<string> {
 }
 
 export default function Command() {
-  const prefs = getPreferenceValues<StePreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const { data: selected, isLoading } = usePromise(readSelection);
 
   if (isLoading || selected === undefined) return <Detail isLoading markdown="Reading the selected text…" />;

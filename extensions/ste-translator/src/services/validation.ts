@@ -43,12 +43,14 @@ export function validateConversion(input: ValidationInput): ReviewWarning[] {
     warnings.push({
       severity: "error",
       message: `Protected content is missing from the result: ${preview(tokens[id])}`,
+      repairMessage: `Token [[P${id}]] is missing from the result. Put it back exactly once, unchanged.`,
     });
   }
   for (const id of check.duplicated) {
     warnings.push({
       severity: "warning",
       message: `Protected content appears more than once in the result: ${preview(tokens[id])}`,
+      repairMessage: `Token [[P${id}]] appears more than once in the result. Keep it exactly once.`,
     });
   }
   if (check.unknown.length > 0) {
@@ -61,7 +63,11 @@ export function validateConversion(input: ValidationInput): ReviewWarning[] {
   // Verbatim check on the final text: every token must still be present.
   for (const [id, token] of tokens.entries()) {
     if (!check.missing.includes(id) && !restored.includes(token)) {
-      warnings.push({ severity: "error", message: `Protected content was altered: ${preview(token)}` });
+      warnings.push({
+        severity: "error",
+        message: `Protected content was altered: ${preview(token)}`,
+        repairMessage: `Token [[P${id}]] was altered. Copy it unchanged.`,
+      });
     }
   }
 

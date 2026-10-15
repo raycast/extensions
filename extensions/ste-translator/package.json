@@ -43,7 +43,7 @@
       "default": "auto",
       "data": [
         {
-          "title": "Auto-detect",
+          "title": "Auto-Detect",
           "value": "auto"
         },
         {
@@ -93,7 +93,7 @@
     {
       "name": "provider",
       "title": "AI Provider",
-      "description": "Raycast AI (default) or an OpenAI-compatible endpoint. Text is sent to the provider and is subject to its data policy.",
+      "description": "Raycast AI (default) or an OpenAI-Compatible Endpoint. Text is sent to the provider and is subject to its data policy.",
       "type": "dropdown",
       "required": false,
       "default": "raycast",
@@ -103,7 +103,7 @@
           "value": "raycast"
         },
         {
-          "title": "OpenAI-compatible endpoint",
+          "title": "OpenAI-Compatible Endpoint",
           "value": "openai-compatible"
         }
       ]
@@ -117,7 +117,7 @@
       "default": "Anthropic_Claude_4.6_Sonnet",
       "data": [
         {
-          "title": "Claude 4.6 Sonnet (recommended)",
+          "title": "Claude 4.6 Sonnet (Recommended)",
           "value": "Anthropic_Claude_4.6_Sonnet"
         },
         {
@@ -137,7 +137,7 @@
           "value": "Google_Gemini_3.1_Pro"
         },
         {
-          "title": "GPT-4o mini (Raycast default)",
+          "title": "GPT-4o Mini (Raycast Default)",
           "value": "OpenAI_GPT-4o_mini"
         }
       ]
@@ -176,7 +176,7 @@
     },
     {
       "name": "timeoutSeconds",
-      "title": "Timeout (seconds)",
+      "title": "Timeout (Seconds)",
       "description": "Maximum wait for the AI provider.",
       "type": "textfield",
       "required": false,

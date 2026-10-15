@@ -29,6 +29,8 @@ export type WarningSeverity = "error" | "warning" | "info";
 export interface ReviewWarning {
   severity: WarningSeverity;
   message: string;
+  /** Wording safe to send to an AI provider: refers to protected content by token ID, never by value. */
+  repairMessage?: string;
 }
 
 export interface ConversionResult {
@@ -39,7 +41,7 @@ export interface ConversionResult {
   warnings: ReviewWarning[];
   /** True when a second pass fixed validation or STE lint problems found in the first rewrite. */
   repaired: boolean;
-  /** True when any warning has severity "error" or the model asked for human review. */
+  /** True when any warning has severity "error" or "warning" or the model asked for human review. */
   needsReview: boolean;
 }
 
@@ -65,16 +67,4 @@ export interface CompletionRequest {
 export interface AiProvider {
   readonly name: string;
   complete(request: CompletionRequest): Promise<string>;
-}
-
-export interface StePreferences {
-  defaultContentType?: ContentType;
-  defaultMode?: ConversionMode;
-  provider?: "raycast" | "openai-compatible";
-  externalBaseUrl?: string;
-  externalModel?: string;
-  raycastModel?: string;
-  externalApiKey?: string;
-  customInstructions?: string;
-  timeoutSeconds?: string;
 }

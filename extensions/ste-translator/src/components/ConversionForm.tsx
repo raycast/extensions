@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useState } from "react";
-import { CONTENT_TYPE_LABELS, MODE_LABELS, type ContentType, type ConversionMode, type StePreferences } from "../types";
+import { CONTENT_TYPE_LABELS, MODE_LABELS, type ContentType, type ConversionMode } from "../types";
 import { isBlank } from "../utils/text";
 import { ConversionResultView } from "./ConversionResult";
 
@@ -11,7 +11,7 @@ interface FormValues {
 }
 
 export function ConversionForm({ initialText = "", info }: { initialText?: string; info?: string }) {
-  const prefs = getPreferenceValues<StePreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const { push } = useNavigation();
   const [textError, setTextError] = useState<string | undefined>();
 

@@ -395,9 +395,9 @@ export function lintText(text: string): LintResult {
           line: seen.line,
           col: seen.col,
           rule: "synonym-rotation",
-          level: "advisory-free",
+          level: "advisory",
           match: seen.match,
-          message: `'${base}' and '${first}' name the same action. Pick one and use it every time.`,
+          message: `If '${base}' and '${first}' name the same action, pick one and use it every time.`,
         });
       }
     }

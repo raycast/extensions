@@ -130,11 +130,12 @@ describe("dangling conjunctions", () => {
 });
 
 describe("synonym rotation", () => {
-  it("flags the second member and names the keeper", () => {
+  it("advises on the second member and names the keeper", () => {
     const f = lintText("Check the config file. Then verify the output. Verify twice.").findings.filter(
       (x) => x.rule === "synonym-rotation",
     );
     expect(f).toHaveLength(1);
+    expect(f[0].level).toBe("advisory");
     expect(f[0].message).toContain("'verify' and 'check'");
   });
   it("accepts one consistent term", () => {

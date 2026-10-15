@@ -3,6 +3,7 @@ import { AI, environment } from "@raycast/api";
 import { createProvider, OpenAiCompatibleProvider, RaycastAiProvider } from "../src/services/ai-provider";
 
 const request = { system: "sys", user: "usr" };
+const prefs = (p: Partial<Preferences>) => p as Preferences;
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -11,22 +12,24 @@ afterEach(() => {
 
 describe("createProvider", () => {
   it("defaults to Raycast AI", () => {
-    expect(createProvider({})).toBeInstanceOf(RaycastAiProvider);
+    expect(createProvider(prefs({}))).toBeInstanceOf(RaycastAiProvider);
   });
 
   it("requires URL, model and key for the external provider", () => {
-    expect(() => createProvider({ provider: "openai-compatible", externalBaseUrl: "https://x/v1" })).toThrowError(
-      expect.objectContaining({ kind: "unavailable" }),
-    );
+    expect(() =>
+      createProvider(prefs({ provider: "openai-compatible", externalBaseUrl: "https://x/v1" })),
+    ).toThrowError(expect.objectContaining({ kind: "unavailable" }));
   });
 
   it("builds the external provider when configured", () => {
-    const p = createProvider({
-      provider: "openai-compatible",
-      externalBaseUrl: "https://x/v1",
-      externalModel: "m",
-      externalApiKey: "k",
-    });
+    const p = createProvider(
+      prefs({
+        provider: "openai-compatible",
+        externalBaseUrl: "https://x/v1",
+        externalModel: "m",
+        externalApiKey: "k",
+      }),
+    );
     expect(p).toBeInstanceOf(OpenAiCompatibleProvider);
   });
 });
