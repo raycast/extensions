@@ -1,5 +1,10 @@
 # Mint Changelog
 
+## [Easier to find] - {PR_MERGE_DATE}
+
+- The listing says what Mint is for: Mac storage cleanup and optimization for you and your AI agents.
+- Commands come up for more of what people search, like cleanup, deep clean, optimizer, Xcode, node_modules, Claude Code and Cursor.
+
 ## [Clearer access, recovery and AI answers] - 2026-10-12
 
 - Installation guidance now explains Direct's weekly free allowances and the differences between editions.
