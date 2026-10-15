@@ -4,6 +4,10 @@
 
 - Add MoltNode by Chord to the official registry: read 31 blockchains over JSON-RPC and get best-route DEX swap quotes with unsigned transactions via Chord, then broadcast a transaction you signed yourself. Non-custodial: it never holds keys or signs. Remote Streamable HTTP server with no sign-in and no API key. Direct HTTP connection in Raycast at https://moltnode.ag/mcp.
 
+## [Add Chord MCP Server] - 2026-10-15
+
+- Add Chord to the official registry: DEX swap quotes and unsigned transactions on 7 EVM chains, plus token boards, candles, wallet PnL and smart money from Chord's index of on-chain trades. Non-custodial: tools return unsigned transactions for your own wallet to sign. Remote Streamable HTTP server with no sign-in and no API key for the data and swap tools. Direct HTTP connection in Raycast at https://api.getchord.xyz/v1/mcp.
+
 ## [Add JANCTION Render MCP Server] - 2026-10-15
 
 - Add JANCTION Render to the official registry: render Blender scenes and 3D models (GLB, FBX, USD, OBJ, STL) on cloud GPUs, with a tiled preview first, then product shots, turntables, animations or stills as PNG or MP4. Hosted Streamable HTTP server at https://render.janction.jp/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
