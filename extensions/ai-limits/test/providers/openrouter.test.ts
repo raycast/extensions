@@ -111,6 +111,19 @@ describe("fetchOpenRouterUsage", () => {
     expect(usage.notes).toContain("Credit balance needs a key with credits access");
   });
 
+  it("keeps the wait of a 429 on one call alongside the data from the other", async () => {
+    const deps = fakeDeps({
+      routes: [
+        { prefix: KEY_URL, respond: { status: 429, headers: { "Retry-After": "600" }, body: {} } },
+        { prefix: CREDITS_URL, respond: { body: CREDITS_JSON } },
+      ],
+    });
+    const usage = await fetchOpenRouterUsage(deps, settings);
+
+    expect(usage.balances).toEqual([{ label: "Balance", amount: 62.3, currency: "USD" }]);
+    expect(usage.retryAt).toBe(NOW + 600_000);
+  });
+
   it("says the balance is unavailable when the credits body is malformed", async () => {
     const deps = fakeDeps({ routes: routes(KEY_JSON, { data: { total_credits: "lots" } }) });
     const usage = await fetchOpenRouterUsage(deps, settings);

@@ -4,7 +4,7 @@
 
 - Show Limits As: percent used or percent left, with colored tags at 70% and 90%
 - Usage for Claude, Codex, Cursor, Gemini, GitHub Copilot, OpenRouter, z.ai, Kimi Code, DeepSeek and Moonshot
-- Reset times for each window, and balances or credits where the provider reports them
+- Reset times for each window and for balances that reset, such as Cursor's on-demand spending, and balances or credits where the provider reports them
 - Detail pane with colored progress bars, plan, account, source, when the data was updated and a link to the dashboard
 - Hide Details (⌘⇧D) shows the plan and reset time on each row instead of the detail pane, and the choice is remembered
 - Providers that aren't connected are listed with a Connect action for each

@@ -6,6 +6,8 @@ import {
   Cached,
   cooldownEnds,
   cooldownsOf,
+  credentialFingerprints,
+  dropChanged,
   FRESH_MS,
   isCoolingDown,
   initialStates,
@@ -17,7 +19,7 @@ import {
   States,
   toFailure,
 } from "../src/lib/usage-state";
-import { ProviderError, ProviderUsage } from "../src/lib/types";
+import { ProviderError, ProviderUsage, Settings } from "../src/lib/types";
 
 const IDS = ["claude", "codex", "copilot"] as const;
 const NOW = Date.parse("2026-10-14T12:00:00Z");
@@ -289,6 +291,78 @@ describe("applySuccess", () => {
     const states = applyFailure(initialStates(IDS, {}), {}, "claude", { kind: "http", message: "down" }).states;
     const result = applySuccess(states, {}, "claude", usage("claude"));
     expect(result.states.claude.failure).toBeUndefined();
+  });
+});
+
+describe("applySuccess with a wait from a partial result", () => {
+  it("records the wait as a cooldown and keeps the data", () => {
+    const partial = { ...usage("claude", NOW), retryAt: NOW + 600_000 };
+    const result = applySuccess(initialStates(IDS, {}), {}, "claude", partial);
+    expect(result.states.claude).toEqual({
+      loading: false,
+      usage: partial,
+      cooldown: { kind: "http", message: "Rate limited", retryAt: NOW + 600_000 },
+    });
+    expect(result.states.claude.failure).toBeUndefined();
+    expect(isCoolingDown(result.states.claude, NOW)).toBe(true);
+    expect(providersToRefresh(result.states, IDS, NOW, { force: true })).not.toContain("claude");
+  });
+});
+
+describe("credentialFingerprints", () => {
+  const settings: Settings = { openrouterApiKey: "sk-or-v1-first" };
+
+  it("is the same for the same credentials and different when one changes", () => {
+    const ids = ["openrouter", "copilot"] as const;
+    const first = credentialFingerprints(settings, ids);
+    expect(credentialFingerprints({ openrouterApiKey: "sk-or-v1-first" }, ids)).toEqual(first);
+    const changed = credentialFingerprints({ openrouterApiKey: "sk-or-v1-second" }, ids);
+    expect(changed.copilot).toBe(first.copilot);
+    expect(changed.openrouter).not.toBe(first.openrouter);
+  });
+
+  it("does not contain the credential itself", () => {
+    const fingerprint = credentialFingerprints({ githubToken: "ghp_secret_value" }, ["copilot"]).copilot;
+    expect(fingerprint).toMatch(/^[0-9a-f]{16}$/);
+    expect(JSON.stringify(credentialFingerprints({ githubToken: "ghp_secret_value" }, ["copilot"]))).not.toContain(
+      "ghp_secret_value",
+    );
+  });
+});
+
+describe("dropChanged", () => {
+  it("drops the saved result and cooldown of a provider whose credentials changed, and keeps the others", () => {
+    const saved = usage("claude", NOW - 10 * 60_000);
+    const codexSaved = usage("codex", NOW - 10 * 60_000);
+    const cooling = { kind: "http" as const, message: "rate limited", retryAt: NOW + 60_000 };
+    const states: States = {
+      ...initialStates(IDS, { claude: saved, codex: codexSaved }),
+      claude: { loading: false, usage: saved, cooldown: cooling },
+    };
+    const current = { claude: "new", codex: "same" };
+    const result = dropChanged(
+      { states, cached: { claude: saved, codex: codexSaved } },
+      { claude: "old", codex: "same" },
+      current,
+      IDS,
+    );
+
+    expect(result.states.claude).toEqual({ loading: false });
+    expect(result.cached.claude).toBeUndefined();
+    expect(result.states.codex.usage).toBe(codexSaved);
+    expect(result.cached.codex).toBe(codexSaved);
+  });
+
+  it("treats a provider with no saved fingerprint as changed", () => {
+    const saved = usage("claude", NOW);
+    const result = dropChanged(
+      { states: initialStates(IDS, { claude: saved }), cached: { claude: saved } },
+      {},
+      { claude: "x" },
+      ["claude"],
+    );
+    expect(result.cached).toEqual({});
+    expect(result.states.claude).toEqual({ loading: false });
   });
 });
 

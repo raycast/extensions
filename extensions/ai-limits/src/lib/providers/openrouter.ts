@@ -148,7 +148,18 @@ export async function fetchOpenRouterUsage(deps: Deps, settings: Settings): Prom
     notes,
     source: "API key",
     fetchedAt: deps.now(),
+    retryAt: rateLimitWait(keyResult, creditsResult),
   };
+}
+
+// The later wait of any request that answered 429, so a partial result keeps it. Undefined when none did.
+function rateLimitWait(...results: PromiseSettledResult<unknown>[]): number | undefined {
+  const waits = results.flatMap((result) =>
+    result.status === "rejected" && result.reason instanceof ProviderError && result.reason.retryAt !== undefined
+      ? [result.reason.retryAt]
+      : [],
+  );
+  return waits.length > 0 ? Math.max(...waits) : undefined;
 }
 
 // Only a refused key means the key lacks credits access. Other failures say the balance is just unavailable.

@@ -146,6 +146,13 @@ export function formatBalance(balance: Balance): string {
   return `${amount} of ${formatMoney(balance.limit, balance.currency)} used`;
 }
 
+// "$40.00 · resets in 3d 4h" for a balance that resets, so the reset sits beside the amount. The reset is left out when the
+// balance doesn't say when it resets.
+function balanceText(balance: Balance, now: number): string {
+  const reset = formatReset(balance.resetsAt ?? null, now);
+  return reset ? `${formatBalance(balance)} · ${reset}` : formatBalance(balance);
+}
+
 // "just now", "2 min ago", "3 h ago", "2 d ago". A time in the future (clock changes) also reads as "just now".
 export function formatUpdated(fetchedAt: number, now: number): string {
   const elapsed = now - fetchedAt;
@@ -278,9 +285,9 @@ export function detailMarkdown(name: string, state: ProviderState, mode: Display
       if (balance.limit !== undefined && balance.limit > 0) {
         const usedPercent = (balance.amount / balance.limit) * 100;
         const bar = `![${percentText(usedPercent, mode)}](${progressBarImage(usedPercent)})`;
-        blocks.push([`**${balance.label}**`, "", bar, "", formatBalance(balance)].join("\n"));
+        blocks.push([`**${balance.label}**`, "", bar, "", balanceText(balance, now)].join("\n"));
       } else {
-        blocks.push([`**${balance.label}**`, "", formatBalance(balance)].join("\n"));
+        blocks.push([`**${balance.label}**`, "", balanceText(balance, now)].join("\n"));
       }
     }
     if (usage.windows.length === 0 && usage.balances.length === 0) {
@@ -317,7 +324,8 @@ export function summaryText(name: string, state: ProviderState, mode: DisplayMod
       lines.push(`${window.label}: ${formatPercent(window, mode)}${reset ? `, ${reset}` : ""}`);
     }
     for (const balance of usage.balances) {
-      lines.push(`${balance.label}: ${formatBalance(balance)}`);
+      const reset = formatReset(balance.resetsAt ?? null, now);
+      lines.push(`${balance.label}: ${formatBalance(balance)}${reset ? `, ${reset}` : ""}`);
     }
     lines.push(`Updated ${formatUpdated(usage.fetchedAt, now)}`);
   } else {

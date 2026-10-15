@@ -6,9 +6,10 @@ import { exchangeOpenRouterCode, OPENROUTER_AUTH_URL, openRouterAuthUrl } from "
 const CLIENT_ID = "ai-limits-raycast";
 
 // Opens OpenRouter in the browser, waits for the user to approve, and returns the API key OpenRouter made for them. The
-// key is returned rather than stored, so the caller saves it with saveConnections like the other connections.
+// key is returned rather than stored, so the caller saves it with saveConnections like the other connections. `signal`
+// stops the sign-in: when it is aborted before the approval comes back, undefined is returned and no key is requested.
 // Tests never import this file, because it needs @raycast/api. The pure parts live in openrouter-auth.ts.
-export async function signInWithOpenRouter(deps: Deps): Promise<string> {
+export async function signInWithOpenRouter(deps: Deps, signal?: AbortSignal): Promise<string | undefined> {
   const client = new OAuth.PKCEClient({
     redirectMethod: OAuth.RedirectMethod.Web,
     providerName: "OpenRouter",
@@ -24,5 +25,8 @@ export async function signInWithOpenRouter(deps: Deps): Promise<string> {
     codeChallenge: request.codeChallenge,
   });
   const response = await client.authorize({ url });
+  if (signal?.aborted) {
+    return undefined;
+  }
   return exchangeOpenRouterCode(deps, response.authorizationCode, request.codeVerifier);
 }

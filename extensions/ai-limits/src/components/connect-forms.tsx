@@ -45,6 +45,14 @@ export function ApiKeyForm({ provider, method, settings, onConnected }: ApiKeyFo
   // The clipboard poll runs on a timer, so it reads the field's latest value from here, not from the render it
   // started in.
   const keyRef = useRef("");
+  // False once the form is closed, so a key check that finishes after that doesn't save the key or leave the form.
+  const openRef = useRef(true);
+  useEffect(() => {
+    openRef.current = true;
+    return () => {
+      openRef.current = false;
+    };
+  }, []);
 
   function changeKey(value: string) {
     keyRef.current = value;
@@ -105,6 +113,9 @@ export function ApiKeyForm({ provider, method, settings, onConnected }: ApiKeyFo
     try {
       await provider.fetchUsage(realDeps(), { ...settings, ...patch });
     } catch (error) {
+      if (!openRef.current) {
+        return;
+      }
       const kind = error instanceof ProviderError ? error.kind : "http";
       const message = error instanceof Error ? error.message : String(error);
       if (kind === "auth") {
@@ -120,6 +131,10 @@ export function ApiKeyForm({ provider, method, settings, onConnected }: ApiKeyFo
       unchecked = message;
     }
 
+    // Closed during the check: the key is not saved, and nothing else happens.
+    if (!openRef.current) {
+      return;
+    }
     try {
       onConnected(await saveConnections(patch));
       if (unchecked === undefined) {

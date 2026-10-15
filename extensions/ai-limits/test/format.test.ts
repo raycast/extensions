@@ -331,6 +331,18 @@ describe("detailMarkdown", () => {
     expect(markdown).toContain("30% used · resets in 3d 4h");
   });
 
+  it("shows when a balance resets beside its amount", () => {
+    const resetsAt = NOW + 2 * HOUR + 13 * MINUTE;
+    const state = {
+      loading: false,
+      usage: usage({
+        windows: [],
+        balances: [{ label: "Extra Usage", amount: 12.34, currency: "USD", limit: 50, resetsAt }],
+      }),
+    };
+    expect(detailMarkdown("Claude", state, "used", NOW)).toContain("$12.34 of $50.00 used · resets in 2h 13m");
+  });
+
   it("lists balances and notes after the windows", () => {
     const state = {
       loading: false,
@@ -384,6 +396,15 @@ describe("detailMarkdown", () => {
 });
 
 describe("summaryText", () => {
+  it("copies the reset time of a balance that has one", () => {
+    const resetsAt = NOW + 2 * HOUR + 13 * MINUTE;
+    const state = {
+      loading: false,
+      usage: usage({ balances: [{ label: "Extra Usage", amount: 12.34, currency: "USD", limit: 50, resetsAt }] }),
+    };
+    expect(summaryText("Claude", state, "used", NOW)).toContain("Extra Usage: $12.34 of $50.00 used, resets in 2h 13m");
+  });
+
   it("copies the name, plan, each window, balances and the update time", () => {
     const state = {
       loading: false,

@@ -50,6 +50,9 @@ import {
   Cached,
   cooldownEnds,
   cooldownsOf,
+  credentialFingerprints,
+  dropChanged,
+  Fingerprints,
   initialStates,
   isNotConnected,
   providersToRefresh,
@@ -66,6 +69,8 @@ const cache = new Cache();
 const CACHE_KEY = "usage-v1";
 // Providers that answered 429 and asked to wait. Kept apart from the results, and an expired one is simply dropped.
 const COOLDOWN_KEY = "cooldowns-v1";
+// The fingerprints of the credentials the saved results and cooldowns came from. See credentialFingerprints.
+const FINGERPRINTS_KEY = "fingerprints-v1";
 
 const PROVIDER_IDS: ProviderId[] = PROVIDERS.map((provider) => provider.id);
 
@@ -103,6 +108,23 @@ function writeCooldowns(cooldowns: Partial<Record<ProviderId, Failure>>) {
   }
 }
 
+function readFingerprints(): Fingerprints {
+  try {
+    const raw = cache.get(FINGERPRINTS_KEY);
+    return raw ? (JSON.parse(raw) as Fingerprints) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeFingerprints(fingerprints: Fingerprints) {
+  try {
+    cache.set(FINGERPRINTS_KEY, JSON.stringify(fingerprints));
+  } catch {
+    // Without it the next open drops the saved results, which only costs a fetch. The list still works.
+  }
+}
+
 // The hook only holds the latest transition and renders it. Every change goes through the pure functions in
 // usage-state.ts, which are tested.
 function useUsage(onKeychainDenied: () => void) {
@@ -113,6 +135,8 @@ function useUsage(onKeychainDenied: () => void) {
     cached: initialCache,
   });
   const [states, setStates] = useState(storeRef.current.states);
+  const [initialFingerprints] = useState(readFingerprints);
+  const fingerprintsRef = useRef<Fingerprints>(initialFingerprints);
   // The refresh that asked for each provider last. A result counts only when it comes from that refresh, so a forced
   // refresh that starts while a partial one is running wins, and a partial refresh never drops another one's results.
   const requestsRef = useRef<Partial<Record<ProviderId, number>>>({});
@@ -127,6 +151,13 @@ function useUsage(onKeychainDenied: () => void) {
 
   const refresh = useCallback(
     async (settings: Settings, options: { force: boolean; only?: ProviderId[] }) => {
+      // Saved results from other credentials are dropped before anything is chosen to refresh, so they are never shown.
+      const current = credentialFingerprints(settings, PROVIDER_IDS);
+      if (PROVIDER_IDS.some((id) => fingerprintsRef.current[id] !== current[id])) {
+        commit(dropChanged(storeRef.current, fingerprintsRef.current, current, PROVIDER_IDS));
+        fingerprintsRef.current = current;
+        writeFingerprints(current);
+      }
       const ids = providersToRefresh(storeRef.current.states, PROVIDER_IDS, Date.now(), options);
       if (ids.length === 0) {
         return;
@@ -675,20 +706,30 @@ export default function Command() {
   }
 
   // OpenRouter's sign-in returns a key that OpenRouter made, which is saved like any other connection.
-  async function connectOpenRouter(provider: Provider) {
+  async function connectOpenRouter(provider: Provider, signal: AbortSignal) {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: `Connecting ${provider.name}`,
       message: "Finish in your browser",
     });
     try {
-      const next = await saveConnections({ openrouterApiKey: await signInWithOpenRouter(realDeps()) });
+      const key = await signInWithOpenRouter(realDeps(), signal);
+      // A key that comes back after Disconnect or closing the command is not saved, since that would undo the Disconnect.
+      if (key === undefined || signal.aborted) {
+        await toast.hide();
+        return;
+      }
+      const next = await saveConnections({ openrouterApiKey: key });
       updateConnections(next);
       toast.style = Toast.Style.Success;
       toast.title = `${provider.name} connected`;
       toast.message = undefined;
       await refreshWith([provider.id]);
     } catch (error) {
+      if (signal.aborted) {
+        await toast.hide();
+        return;
+      }
       toast.style = Toast.Style.Failure;
       toast.title = `Could not connect ${provider.name}`;
       toast.message = errorMessage(error);
@@ -739,7 +780,7 @@ export default function Command() {
           await connectGitHub(provider);
           return;
         case "openrouter":
-          await connectOpenRouter(provider);
+          await connectOpenRouter(provider, signal);
           return;
         case "api-key":
           return;

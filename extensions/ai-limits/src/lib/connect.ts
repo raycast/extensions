@@ -46,16 +46,18 @@ export function isStoppableConnect(method: ConnectMethod): method is LocalConnec
   return method.kind === "claude" || method.kind === "codex" || method.kind === "gemini" || method.kind === "cursor";
 }
 
-// What verify found. "ok" means the provider answered. "broken" means the provider rejected the login, can't find one or
-// can't read it. "denied" means macOS refused the Keychain read, which says nothing about whether the login is good.
-export type LoginCheck = "ok" | "broken" | "denied";
+// What verify found. "ok" means the provider answered with the login. "unreachable" means the provider couldn't be asked
+// (no network, or a server error), so the login is neither confirmed nor rejected. "broken" means the provider rejected
+// the login, can't find one or can't read it. "denied" means macOS refused the Keychain read, which says nothing about
+// whether the login is good.
+export type LoginCheck = "ok" | "unreachable" | "broken" | "denied";
 
 // The errors that mean the login itself can't be used.
 const BROKEN_KINDS = new Set<ProviderErrorKind>(["auth", "not-connected", "parse"]);
 
 // Turns the error from a provider's fetch into a check. A login that is rejected, missing or unreadable is "broken". A
-// failure that is none of those (no network, for example) says nothing about the login, so it counts as "ok" too. An
-// account the provider doesn't serve counts as "ok" as well: the login works, and signing in again would change nothing.
+// failure that is none of those (no network, for example) says nothing about the login, so it is "unreachable". An
+// account the provider doesn't serve counts as "ok": the app answered, and signing in again would change nothing.
 export function loginCheckFromError(error: unknown): LoginCheck {
   if (error instanceof ProviderError && error.code === "keychain-denied") {
     return "denied";
@@ -66,7 +68,13 @@ export function loginCheckFromError(error: unknown): LoginCheck {
   if (error instanceof ProviderError && BROKEN_KINDS.has(error.kind)) {
     return "broken";
   }
-  return "ok";
+  return "unreachable";
+}
+
+// Whether a check leaves the login in place, so Connect doesn't sign in again. An unreachable provider counts, since
+// signing in again would change nothing.
+function keepsLogin(check: LoginCheck): boolean {
+  return check === "ok" || check === "unreachable";
 }
 
 // Whether Connect would have no effect. A credential typed into the preferences overrides what Connect saves, so Connect
@@ -191,7 +199,7 @@ async function connectClaudeLogin(deps: Deps, ui: ConnectUi): Promise<ConnectOut
   // verify is the only read of the password in Connect, so it is the one that can show macOS's access dialog. A refusal
   // comes back as "denied", and Terminal is not opened for it, since that says nothing about the login.
   const check = await ui.verify();
-  if (check === "ok") {
+  if (keepsLogin(check)) {
     return CONNECTED;
   }
   if (check === "denied") {
@@ -291,7 +299,7 @@ async function connectCodex(deps: Deps, ui: ConnectUi): Promise<ConnectOutcome> 
   if (ui.signal?.aborted) {
     return STOPPED;
   }
-  if (before !== null && (await ui.verify()) === "ok") {
+  if (before !== null && keepsLogin(await ui.verify())) {
     return CONNECTED;
   }
 
@@ -318,7 +326,7 @@ async function connectGemini(deps: Deps, ui: ConnectUi): Promise<ConnectOutcome>
   if (ui.signal?.aborted) {
     return STOPPED;
   }
-  if (before !== null && (await ui.verify()) === "ok") {
+  if (before !== null && keepsLogin(await ui.verify())) {
     return CONNECTED;
   }
 
@@ -341,11 +349,17 @@ async function connectGemini(deps: Deps, ui: ConnectUi): Promise<ConnectOutcome>
 }
 
 // Connect Cursor means the app's login. A cookie saved as a fallback is used before the app's login, so the cookie is
-// left out of the check (usage.tsx does that), and it is cleared only once the app's login is confirmed. A cookie that
-// works is kept when Cursor isn't installed or the sign-in doesn't finish.
+// left out of the check (usage.tsx does that), and it is cleared only once an app request has succeeded. A changed login
+// alone doesn't show that, and neither does a check that couldn't reach the app. A cookie that works is kept when Cursor
+// isn't installed or the sign-in doesn't finish.
 async function connectCursor(deps: Deps, ui: ConnectUi): Promise<ConnectOutcome> {
   const outcome = await signInToCursor(deps, ui);
-  if (outcome.kind === "connected") {
+  if (outcome.kind !== "connected" || ui.signal?.aborted) {
+    return outcome;
+  }
+  const confirmed = (await ui.verify()) === "ok";
+  // A Connect stopped during the check must not clear the cookie, since Disconnect may have run.
+  if (confirmed && !ui.signal?.aborted) {
     await ui.save({ cursorCookie: "" });
   }
   return outcome;
@@ -357,7 +371,7 @@ async function signInToCursor(deps: Deps, ui: ConnectUi): Promise<ConnectOutcome
   if (ui.signal?.aborted) {
     return STOPPED;
   }
-  if (before !== null && (await ui.verify()) === "ok") {
+  if (before !== null && keepsLogin(await ui.verify())) {
     return CONNECTED;
   }
 

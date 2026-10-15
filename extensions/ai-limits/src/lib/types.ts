@@ -47,6 +47,9 @@ export interface ProviderUsage {
   // Set when macOS refused the Keychain read and the claude.ai session answered instead. The UI turns the Keychain setting
   // off, as it does for a failed refresh, so macOS isn't asked again on every refresh.
   keychainDenied?: true;
+  // Set when a request answered 429 but this result still has data from the others. It is the time the provider allows
+  // the next request, in epoch milliseconds, the same as ProviderError.retryAt.
+  retryAt?: number;
 }
 
 // Where a credential's value came from. A value typed into the preferences wins over a saved one, so a hint can name the

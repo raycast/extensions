@@ -870,6 +870,49 @@ describe("connectLocal for Cursor", () => {
     expect(saved).toEqual([{ cursorCookie: "" }]);
   });
 
+  it("keeps a saved cookie when a changed app login isn't confirmed by a request that succeeds", async () => {
+    const deps = fakeDeps();
+    deps.programs.push({ file: OPEN, respond: OK });
+    const { ui, saved } = testUi({
+      verify: async () => "broken",
+      sleep: async () => {
+        deps.sqliteResults.set(CURSOR_DB, CURSOR_TOKEN);
+      },
+    });
+
+    expect(await connectLocal(deps, CURSOR, ui)).toEqual({ kind: "connected" });
+    expect(saved).toEqual([]);
+  });
+
+  it("keeps a saved cookie when the app can't be reached to check its login, and does not open Cursor", async () => {
+    const deps = fakeDeps();
+    deps.sqliteResults.set(CURSOR_DB, CURSOR_TOKEN);
+    const { ui, saved } = testUi({ verify: async () => "unreachable" });
+
+    expect(await connectLocal(deps, CURSOR, ui)).toEqual({ kind: "connected" });
+    expect(deps.runCalls).toEqual([]);
+    expect(saved).toEqual([]);
+  });
+
+  it("does not clear the saved cookie when the Connect is stopped before the app's login is confirmed", async () => {
+    const deps = fakeDeps();
+    deps.programs.push({ file: OPEN, respond: OK });
+    const controller = new AbortController();
+    const { ui, saved } = testUi({
+      signal: controller.signal,
+      verify: async () => {
+        controller.abort();
+        return "ok";
+      },
+      sleep: async () => {
+        deps.sqliteResults.set(CURSOR_DB, CURSOR_TOKEN);
+      },
+    });
+
+    await connectLocal(deps, CURSOR, ui);
+    expect(saved).toEqual([]);
+  });
+
   it("keeps a saved cookie when Cursor isn't installed, since the cookie may still work", async () => {
     const deps = fakeDeps();
     deps.programs.push({ file: OPEN, respond: failure("Unable to find application") });
@@ -1114,12 +1157,12 @@ describe("loginCheckFromError", () => {
     },
   );
 
-  it("is ok for an http error, which says nothing about the login", () => {
-    expect(loginCheckFromError(new ProviderError("http", "unreachable"))).toBe("ok");
+  it("is unreachable for an http error, which says nothing about the login", () => {
+    expect(loginCheckFromError(new ProviderError("http", "unreachable"))).toBe("unreachable");
   });
 
-  it("is ok for an error that isn't a ProviderError, such as no network", () => {
-    expect(loginCheckFromError(new TypeError("fetch failed"))).toBe("ok");
+  it("is unreachable for an error that isn't a ProviderError, such as no network", () => {
+    expect(loginCheckFromError(new TypeError("fetch failed"))).toBe("unreachable");
   });
 });
 
