@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Fix translation with an HTTP proxy] - 2026-10-15
+
+- Fixed translations failing with a constructor error when an HTTP proxy is configured
+
 ## [Added new screenshots] - 2026-10-13
 
 ## [Use the built-in fetch client] - 2026-09-16
