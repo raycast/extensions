@@ -42,7 +42,10 @@ export function useRecentEntries() {
     }
 
     try {
-      await saveEntries(dbPath, parsedEntries.filter((currentEntry) => !isSameEntry(currentEntry, entry)));
+      await saveEntries(
+        dbPath,
+        parsedEntries.filter((currentEntry) => !isSameEntry(currentEntry, entry)),
+      );
       await revalidate();
       showToast(Toast.Style.Success, "Entry removed", `Restart IBM Bob to sync the list in IBM Bob (optional)`);
     } catch {
