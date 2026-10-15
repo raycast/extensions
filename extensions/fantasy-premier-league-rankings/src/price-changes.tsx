@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { ReactNode, useState } from "react";
 import { transfersUrl } from "./api/fpl";
 import type { Player } from "./api/types";
+import { SquadNeedsTeamId } from "./components/MissingTeamId";
 import { PlayerDetail } from "./components/PlayerDetail";
 import { useBootstrap, useMySquad } from "./hooks";
 import { BootstrapIndex, positionShort, teamBadgeUrl } from "./lib/bootstrap";
@@ -11,7 +12,7 @@ const LIMIT = 25;
 
 export default function Command() {
   const { data, index, isLoading } = useBootstrap();
-  const squad = useMySquad();
+  const { squad, missingTeamId, reloadTeamId } = useMySquad();
   const [scope, setScope] = useState("all");
   const [reversed, setReversed] = useState(false);
 
@@ -44,6 +45,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
+      {scope === "mine" && missingTeamId && <SquadNeedsTeamId onSave={reloadTeamId} />}
       {index && (
         <List.Section
           title={scope === "changed" ? "Changed this gameweek" : "Price movers"}

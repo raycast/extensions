@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, List, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, openExtensionPreferences, useNavigation } from "@raycast/api";
 import { showFailureToast, useForm, usePromise } from "@raycast/utils";
 import type { ReactElement } from "react";
 import { fetchEntry, FplError, SITE } from "../api/fpl";
@@ -21,6 +21,33 @@ export function RequireTeamId({ children }: { children: (teamId: number) => Reac
   if (teamId) return children(teamId);
   if (isLoading) return <List isLoading />;
   return <TeamIdForm onSave={revalidate} />;
+}
+
+/** Empty view for a "My squad" filter before a Team ID is set, with the Team ID form one Enter away. */
+export function SquadNeedsTeamId({ onSave }: { onSave: () => void }) {
+  const { pop } = useNavigation();
+  return (
+    <List.EmptyView
+      icon={Icon.Person}
+      title="Set your FPL Team ID to see your squad"
+      actions={
+        <ActionPanel>
+          <Action.Push
+            title="Set Team ID"
+            icon={Icon.Gear}
+            target={
+              <TeamIdForm
+                onSave={() => {
+                  pop();
+                  onSave();
+                }}
+              />
+            }
+          />
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 function TeamIdForm({ onSave }: { onSave: () => void }) {

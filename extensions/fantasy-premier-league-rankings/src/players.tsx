@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { SITE } from "./api/fpl";
+import { SquadNeedsTeamId } from "./components/MissingTeamId";
 import { PlayerDetail } from "./components/PlayerDetail";
 import { useBootstrap, useMySquad } from "./hooks";
 import { positionShort, teamBadgeUrl } from "./lib/bootstrap";
@@ -18,7 +19,7 @@ const sortLabels: Record<Sort, string> = {
 
 export default function Command() {
   const { data, index, isLoading } = useBootstrap();
-  const squad = useMySquad();
+  const { squad, missingTeamId, reloadTeamId } = useMySquad();
   const [filter, setFilter] = useState("all");
   const [sort, setSort] = useState<Sort>("total_points");
 
@@ -53,6 +54,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
+      {filter === "mine" && missingTeamId && <SquadNeedsTeamId onSave={reloadTeamId} />}
       {index &&
         players.map((player) => {
           const team = index.teams.get(player.team);

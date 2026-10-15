@@ -10,7 +10,7 @@ import { fdrColor, formatDeadline, formatKickoff } from "./lib/format";
 
 export default function Command() {
   const { index, isLoading: loadingBootstrap } = useBootstrap();
-  const squad = useMySquad();
+  const { squad } = useMySquad();
   const [selected, setSelected] = useState<number | undefined>();
   const playing = index?.currentEvent && !index.currentEvent.finished ? index.currentEvent : undefined;
   const defaultEvent = playing?.id ?? index?.nextEvent?.id ?? index?.currentEvent?.id;

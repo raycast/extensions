@@ -59,12 +59,13 @@ export function usePicks(entryId: number | undefined, event: number | undefined)
   return useCachedPromise(fetchPicks, [entryId ?? 0, event ?? 0], { execute: entryId != null && event != null });
 }
 
-/** The set of player IDs in the user's squad for the current gameweek. */
-export function useMySquad(): Set<number> | undefined {
-  const { data: teamId } = usePromise(getTeamId);
+/** The player IDs in the user's squad for the current gameweek, and whether a Team ID is still missing. */
+export function useMySquad() {
+  const { data: teamId, isLoading, revalidate } = usePromise(getTeamId);
   const { data: entry } = useEntry(teamId);
   const { data: picks } = usePicks(teamId, entry?.current_event ?? undefined);
-  return useMemo(() => (picks ? new Set(picks.picks.map((p) => p.element)) : undefined), [picks]);
+  const squad = useMemo(() => (picks ? new Set(picks.picks.map((p) => p.element)) : undefined), [picks]);
+  return { squad, missingTeamId: !isLoading && !teamId, reloadTeamId: revalidate };
 }
 
 /** Everything needed to render a squad for one gameweek: bootstrap, entry, picks, live points and fixtures. */
