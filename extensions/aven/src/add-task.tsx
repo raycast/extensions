@@ -64,6 +64,7 @@ export default function Command() {
   const projectKey = resolveSelection(projects, chosenProject, preferences.defaultProject);
 
   const listError = workspacesError ?? projectsError;
+  const isLoadingLists = isLoadingWorkspaces || isLoadingProjects;
 
   function handleWorkspaceChange(key: string) {
     setChosenWorkspace(key);
@@ -71,7 +72,7 @@ export default function Command() {
   }
 
   async function handleSubmit() {
-    if (submitInFlight.current) return;
+    if (submitInFlight.current || isLoadingLists) return;
 
     if (listError) {
       await showFailureToast(listError, { title: "Failed to load from aven" });
@@ -107,11 +108,13 @@ export default function Command() {
 
   return (
     <Form
-      isLoading={isLoadingWorkspaces || isLoadingProjects || isSubmitting}
+      isLoading={isLoadingLists || isSubmitting}
       actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} />
-        </ActionPanel>
+        isLoadingLists ? undefined : (
+          <ActionPanel>
+            <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} />
+          </ActionPanel>
+        )
       }
     >
       {listError && <Form.Description title="Error" text={listError.message} />}
