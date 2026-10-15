@@ -501,6 +501,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "janction-render",
+    title: "JANCTION Render",
+    description:
+      "Render Blender scenes and 3D models on cloud GPUs from Raycast AI: send a bpy script, a .blend or a GLB / glTF / FBX / USD / OBJ / STL file, get a tiled preview with a critic verdict in seconds, then product shots, 360-degree turntables, animations or stills as PNG frames or an MP4. No local Blender or GPU. 12 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration creates a key with free GPU time, then 0.1 JPY per GPU-second from prepaid credit.",
+    icon: "https://raw.githubusercontent.com/JasmyLab-JANCTION/janction-render/main/assets/logo-400.png",
+    homepage: "https://render.janction.jp/?src=raycast",
+    remoteUrl: "https://render.janction.jp/mcp?src=raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://render.janction.jp/mcp?src=raycast"],
+    },
+  },
+  {
     name: "jetbrains",
     title: "JetBrains",
     description: "The server proxies requests from client to JetBrains IDE.",

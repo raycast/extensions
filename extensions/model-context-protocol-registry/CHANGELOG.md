@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add JANCTION Render MCP Server] - 2026-10-15
+
+- Add JANCTION Render to the official registry: render Blender scenes and 3D models (GLB, FBX, USD, OBJ, STL) on cloud GPUs, with a tiled preview first, then product shots, turntables, animations or stills as PNG or MP4. Hosted Streamable HTTP server at https://render.janction.jp/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add Web3Juice MCP Server] - 2026-10-15
 
 - Add Web3Juice to the official registry: evidence-backed DeFi yield data. Market summaries, pool detail with base vs reward APY, 90-day history and side-by-side comparisons for ~17,000 pools. Read-only. Remote Streamable HTTP server with no sign-in for the research tools. Direct HTTP connection in Raycast at https://web3juice.com/api/mcp.
