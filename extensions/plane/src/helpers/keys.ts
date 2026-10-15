@@ -62,3 +62,8 @@ export async function findStoredWorkspaceSlug(
   }
   return undefined;
 }
+
+/** Short, non-reversible id of the signed-in account's token, used to keep cached results per account. */
+export function accountKey(token: string): string {
+  return hashToken(token).slice(0, 16);
+}

@@ -1,6 +1,6 @@
 import { Cache } from "@raycast/api";
 import { Project } from "@makeplane/plane-node-sdk";
-import { requirePlaneClient } from "./auth";
+import { getCurrentAccessToken, requirePlaneClient } from "./auth";
 import { getAllProjects, getMemberProjects } from "./projects";
 import { getCurrentUser } from "./users";
 import { listProjectWorkItemsRaw, WORK_ITEM_SCAN_FIELDS } from "./work-items";
@@ -17,7 +17,15 @@ import {
   MAX_SCAN_REQUESTS,
   SCAN_CONCURRENCY,
 } from "../helpers/limits";
-import { isAssignedTo, isCreatedBy } from "../helpers/my-work-items";
+import {
+  isAssignedTo,
+  isCreatedBy,
+  isSameScope,
+  parseSharedResult,
+  ResultScope,
+  sharedResultKey,
+} from "../helpers/my-work-items";
+import { accountKey } from "../helpers/keys";
 import { getApiBasePath } from "../helpers/urls";
 import { withScanLease } from "../helpers/scan-lease";
 import {
@@ -55,6 +63,8 @@ export type MyWorkItemsResult = {
   /** What was covered, shown when `truncated`. */
   coverage?: string;
   fetchedAt: string;
+  /** Server, workspace and account the result was fetched for. */
+  scope: ResultScope;
 };
 
 type Me = { id: string; displayName?: string };
@@ -62,26 +72,47 @@ type BackendResult = Pick<MyWorkItemsResult, "me" | "items" | "truncated" | "cov
 
 const SCAN_MEMO_MS = 60 * 1000;
 
-/** The last result per base URL, workspace and view, shared by the command, the menu bar and the AI tool. */
+/**
+ * The last result per base URL, workspace, account and view, shared by the command, the menu bar and the list-my-work-items tool.
+ * The account is part of the key, so after switching API keys in the same workspace the previous account's
+ * items are never shown.
+ */
 const resultStore = new Cache({ namespace: "plane-my-work-items" });
 
-function resultKey(view: MyWorkItemsView) {
-  return `${getApiBasePath()}|${requirePlaneClient().workspaceSlug}|${view}`;
+/** The server, workspace and account requests run against right now. */
+export function getResultScope(): ResultScope {
+  const workspaceSlug = requirePlaneClient().workspaceSlug;
+  return { basePath: getApiBasePath(), workspaceSlug, account: accountKey(getCurrentAccessToken()) };
 }
 
-export function readSharedResult(view: MyWorkItemsView): MyWorkItemsResult | undefined {
+function currentScopeOrUndefined(): ResultScope | undefined {
   try {
-    const raw = resultStore.get(resultKey(view));
-    const result = raw ? (JSON.parse(raw) as MyWorkItemsResult) : undefined;
-    return result?.view === view && Array.isArray(result.items) ? result : undefined;
+    return getResultScope();
   } catch {
     return undefined;
   }
 }
 
-function writeSharedResult(result: MyWorkItemsResult) {
+export function readSharedResult(
+  view: MyWorkItemsView,
+  scope: ResultScope | undefined = currentScopeOrUndefined(),
+): MyWorkItemsResult | undefined {
+  if (!scope) return undefined;
   try {
-    resultStore.set(resultKey(result.view), JSON.stringify(result));
+    return parseSharedResult<MyWorkItemsResult>(resultStore.get(sharedResultKey(scope, view)), scope, view);
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Stores a result under the scope its request started in. A result is dropped when the workspace or account
+ * changed while it loaded, since its later requests may have run against the new one.
+ */
+function writeSharedResult(result: MyWorkItemsResult) {
+  if (!isSameScope(result.scope, currentScopeOrUndefined())) return;
+  try {
+    resultStore.set(sharedResultKey(result.scope, result.view), JSON.stringify(result));
   } catch {
     // Caching is best effort.
   }
@@ -258,7 +289,9 @@ type ScanResult = {
 
 type ScanState = { project: Project; cursor?: string; done: boolean; pages: number };
 
-let scanMemo: { key: string; at: number; promise: Promise<ScanResult>; served: Set<MyWorkItemsView> } | undefined;
+let scanMemo:
+  | { scope: ResultScope; at: number; promise: Promise<ScanResult>; served: Set<MyWorkItemsView> }
+  | undefined;
 
 /**
  * Work items assigned to or created by the current user, across member projects.
@@ -322,24 +355,28 @@ async function scanProjects(): Promise<ScanResult> {
  * One scan serves both Assigned and Created, so switching views within a minute doesn't scan again.
  * Asking for a view the scan already served is a refresh (e.g. after an edit) and scans again.
  */
-function scanProjectsMemoized(view: MyWorkItemsView): Promise<ScanResult> {
-  const key = `${getApiBasePath()}|${requirePlaneClient().workspaceSlug}`;
+function scanProjectsMemoized(view: MyWorkItemsView, scope: ResultScope): Promise<ScanResult> {
   const now = Date.now();
-  if (scanMemo && scanMemo.key === key && now - scanMemo.at < SCAN_MEMO_MS && !scanMemo.served.has(view)) {
+  if (
+    scanMemo &&
+    isSameScope(scanMemo.scope, scope) &&
+    now - scanMemo.at < SCAN_MEMO_MS &&
+    !scanMemo.served.has(view)
+  ) {
     scanMemo.served.add(view);
     return scanMemo.promise;
   }
   const promise = scanProjects();
-  scanMemo = { key, at: now, promise, served: new Set([view]) };
+  scanMemo = { scope, at: now, promise, served: new Set([view]) };
   promise.catch(() => {
     if (scanMemo?.promise === promise) scanMemo = undefined;
   });
   return promise;
 }
 
-async function runScan(view: MyWorkItemsView): Promise<BackendResult> {
+async function runScan(view: MyWorkItemsView, scope: ResultScope): Promise<BackendResult> {
   if (view !== "assigned" && view !== "created") throw new Error(`The project scan can't find ${view} work items.`);
-  const scan = await scanProjectsMemoized(view);
+  const scan = await scanProjectsMemoized(view, scope);
   const items = scan.items.filter((item) =>
     view === "assigned" ? isAssignedTo(item, scan.me.id) : isCreatedBy(item, scan.me.id),
   );
@@ -363,14 +400,16 @@ export async function getSupportedViews(): Promise<MyWorkItemsView[]> {
  * API v2, then the custom v1 filters, then the project scan. If a fast backend answers 404 or 400,
  * its cached capability is dropped and the next backend runs once.
  *
- * With `maxAgeMs`, a shared result younger than that is returned without any request.
+ * With `maxAgeMs`, a shared result younger than that is returned without any request. Results are shared per
+ * server, workspace and account, captured when the call starts.
  */
 export async function getMyWorkItems(
   view: MyWorkItemsView = "assigned",
   options: { maxAgeMs?: number } = {},
 ): Promise<MyWorkItemsResult> {
+  const scope = getResultScope();
   if (options.maxAgeMs !== undefined) {
-    const shared = readSharedResult(view);
+    const shared = readSharedResult(view, scope);
     if (shared && Date.now() - new Date(shared.fetchedAt).getTime() < options.maxAgeMs) return shared;
   }
 
@@ -384,7 +423,11 @@ export async function getMyWorkItems(
     const { value, backend } = await runWithFallback(
       chain,
       (kind) =>
-        kind === "v2" ? runV2(view, capabilities) : kind === "custom" ? runCustom(view, capabilities) : runScan(view),
+        kind === "v2"
+          ? runV2(view, capabilities)
+          : kind === "custom"
+            ? runCustom(view, capabilities)
+            : runScan(view, scope),
       (kind) => {
         invalidateBackend(kind);
         if (kind === "v2") capabilities.v2 = false;
@@ -398,6 +441,7 @@ export async function getMyWorkItems(
       backend,
       supportedViews: supportedViews(capabilities),
       fetchedAt: new Date().toISOString(),
+      scope,
     };
     writeSharedResult(result);
     return result;
@@ -407,9 +451,9 @@ export async function getMyWorkItems(
   if (chain[0] !== "scan") return fetchFresh();
   return withScanLease({
     store: resultStore,
-    leaseKey: `${resultKey(view)}|scan-lease`,
+    leaseKey: `${sharedResultKey(scope, view)}|scan-lease`,
     readResult: () => {
-      const shared = readSharedResult(view);
+      const shared = readSharedResult(view, scope);
       return shared ? { value: shared, fetchedAt: new Date(shared.fetchedAt).getTime() } : undefined;
     },
     run: fetchFresh,

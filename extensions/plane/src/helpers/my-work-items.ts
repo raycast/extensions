@@ -34,3 +34,35 @@ export function countOpenAssignedWorkItems(items: Mine[], userId: string | undef
 export function getMenuBarTitle(count: number | undefined): string | undefined {
   return count && count > 0 ? String(count) : undefined;
 }
+
+/**
+ * Who and where a shared My Work Items result belongs to: the server, the workspace, and the account
+ * (a short hash of the token, see `accountKey`). Captured when a request starts.
+ */
+export type ResultScope = { basePath: string; workspaceSlug: string; account: string };
+
+/** Cache key of the shared result for one view in one scope. */
+export function sharedResultKey(scope: ResultScope, view: string): string {
+  return `${scope.basePath}|${scope.workspaceSlug}|${scope.account}|${view}`;
+}
+
+export function isSameScope(a: ResultScope | undefined, b: ResultScope | undefined): boolean {
+  return !!a && !!b && a.basePath === b.basePath && a.workspaceSlug === b.workspaceSlug && a.account === b.account;
+}
+
+/** A stored result, or undefined unless it is for `view` and was fetched in `scope`. */
+export function parseSharedResult<T extends { view: string; items: unknown; scope?: ResultScope }>(
+  raw: string | undefined,
+  scope: ResultScope,
+  view: string,
+): T | undefined {
+  if (!raw) return undefined;
+  try {
+    const result = JSON.parse(raw) as T;
+    return result?.view === view && Array.isArray(result.items) && isSameScope(result.scope, scope)
+      ? result
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
