@@ -172,11 +172,34 @@ function userLabel(user: RawUserLite) {
   return user.display_name || [user.first_name, user.last_name].filter(Boolean).join(" ") || user.email || user.id;
 }
 
+/**
+ * A work item as the AI tools return it. Declared explicitly: Raycast's tool schema extraction (CLI 2.7) fails on
+ * return types it has to infer through other modules.
+ */
+export type ToolWorkItem = {
+  id: string;
+  identifier: string;
+  name: string;
+  url: string;
+  project: string;
+  projectName?: string;
+  state?: string;
+  stateGroup?: string;
+  priority?: string | null;
+  assignees?: string[];
+  labels?: string[];
+  startDate?: string;
+  dueDate?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  description?: string;
+};
+
 export function serializeWorkItem(
   raw: RawWorkItem,
   project: Pick<Project, "identifier" | "name">,
   options: { includeDescription?: boolean } = {},
-) {
+): ToolWorkItem {
   const client = requirePlaneClient();
   const identifier = `${project.identifier}-${raw.sequence_id}`;
   const state = getExpandedState(raw);

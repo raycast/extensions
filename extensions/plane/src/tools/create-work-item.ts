@@ -6,6 +6,7 @@ import {
   resolveProject,
   resolveState,
   serializeWorkItem,
+  type ToolWorkItem,
 } from "../api/ai";
 import { planeRequest, workspacePath } from "../api/request";
 import type { RawWorkItem } from "../api/types";
@@ -31,7 +32,7 @@ type Input = {
   dueDate?: string;
 };
 
-export default withPlane(async (input: Input) => {
+export default withPlane(async (input: Input): Promise<ToolWorkItem> => {
   const project = await resolveProject(input.project);
   const state = input.state ? await resolveState(project.id, input.state) : undefined;
   const assignees = await resolveMemberIds(project.id, input.assignees ?? []);

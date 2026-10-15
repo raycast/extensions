@@ -6,6 +6,7 @@ import {
   resolvePriority,
   resolveState,
   serializeWorkItem,
+  type ToolWorkItem,
 } from "../api/ai";
 import { planeRequest, workspacePath } from "../api/request";
 import type { RawWorkItem } from "../api/types";
@@ -85,7 +86,7 @@ async function buildPatch(input: Input) {
   return { raw, project, patch, changes };
 }
 
-export default withPlane(async (input: Input) => {
+export default withPlane(async (input: Input): Promise<ToolWorkItem> => {
   const { raw, project, patch } = await buildPatch(input);
   if (Object.keys(patch).length === 0) {
     throw new Error(

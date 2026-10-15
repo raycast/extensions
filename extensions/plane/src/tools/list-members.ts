@@ -1,4 +1,4 @@
-import { getMembers, resolveProject } from "../api/ai";
+import { getMembers, resolveProject, type ToolMember } from "../api/ai";
 import { withPlane } from "../helpers/with-plane";
 
 type Input = {
@@ -6,7 +6,7 @@ type Input = {
   project?: string;
 };
 
-export default withPlane(async (input: Input) => {
+export default withPlane(async (input: Input): Promise<ToolMember[]> => {
   const project = input.project ? await resolveProject(input.project) : undefined;
   return getMembers(project?.id);
 });
