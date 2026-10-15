@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add MoltNode by Chord MCP Server] - 2026-10-15
+
+- Add MoltNode by Chord to the official registry: read 31 blockchains over JSON-RPC and get best-route DEX swap quotes with unsigned transactions via Chord, then broadcast a transaction you signed yourself. Non-custodial: it never holds keys or signs. Remote Streamable HTTP server with no sign-in and no API key. Direct HTTP connection in Raycast at https://moltnode.ag/mcp.
+
 ## [Add JANCTION Render MCP Server] - 2026-10-15
 
 - Add JANCTION Render to the official registry: render Blender scenes and 3D models (GLB, FBX, USD, OBJ, STL) on cloud GPUs, with a tiled preview first, then product shots, turntables, animations or stills as PNG or MP4. Hosted Streamable HTTP server at https://render.janction.jp/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
