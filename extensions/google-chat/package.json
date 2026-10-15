@@ -106,6 +106,43 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "list-spaces",
+      "title": "List Spaces",
+      "description": "List the user's Google Chat spaces, group chats and direct messages, most recently active first. Returns each space's resource name, title, type, last active time and URL. Optionally filter by title text or type."
+    },
+    {
+      "name": "get-messages",
+      "title": "Get Messages",
+      "description": "Get the most recent messages in one Google Chat space or direct message, newest first. Accepts a space resource name (spaces/AAAA), a Chat URL, a space title, or a person's email for their direct message."
+    },
+    {
+      "name": "get-unread",
+      "title": "Get Unread Messages",
+      "description": "Get the user's unread Google Chat messages from Google's own unread state: the total unread count, and per conversation its unread count, whether it mentions the user, and up to 20 unread messages. Covers the last few days; muted spaces are excluded."
+    },
+    {
+      "name": "search-messages",
+      "title": "Search Messages",
+      "description": "Search Google Chat messages by keywords across all spaces and direct messages, optionally only unread messages, messages that mention the user, or messages with links. Muted spaces are not searched."
+    },
+    {
+      "name": "find-person",
+      "title": "Find Person",
+      "description": "Search the user's Google Workspace directory by name or email. Returns names and email addresses to use as message recipients."
+    },
+    {
+      "name": "send-message",
+      "title": "Send Message",
+      "description": "Send a Google Chat message to a space or direct message, or to a person by email (opens or creates the direct message). Can reply in an existing thread."
+    },
+    {
+      "name": "add-reaction",
+      "title": "Add Reaction",
+      "description": "Add an emoji reaction to a Google Chat message by its resource name (spaces/AAAA/messages/BBBB)."
+    }
+  ],
   "preferences": [
     {
       "name": "clientId",

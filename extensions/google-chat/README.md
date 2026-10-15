@@ -44,7 +44,7 @@ When **To** is a space or group chat, a **Mention** field lists its members (not
 - Otherwise the mention goes at the start of the message, in the order you picked.
 - `@all` and `@everyone` in the text become the everyone mention the same way.
 
-Text in `` `code` `` and ` ``` ` blocks is left alone, and people already mentioned aren't mentioned twice. A **Preview** under the message shows what will be sent. Changing **To** clears the picked mentions. Mentions use Chat's `<users/{id}>` and `<users/all>` syntax; a space's permission settings can limit who may use `@all`.
+Text in `` `code` `` and ` ``` ` blocks is left alone, and people already mentioned aren't mentioned twice. A **Preview** under the message shows what will be sent. Changing **To** clears the picked mentions. Mentions use Chat's `<users/{id}>` and `<users/all>` syntax; a space's permission settings can limit who may use `@all`. The AI `send-message` tool takes `mentions` as names or emails of the conversation's members (or `all`) and stops with the list of candidates if a name matches nobody or several people.
 
 In message lists you can reply in a thread, add a reaction, copy the text or the message link, and open the message in Google Chat.
 
@@ -54,6 +54,10 @@ In message lists you can reply in a thread, add a reaction, copy the text or the
 - **Open With**: browser or installed Chat web app for every "Open in Google Chat" action. Empty uses your default browser.
 - **Unread Lookback (Days)**: only unread messages from this many days are counted (default 14, at most 90).
 - **Default View** (My Messages): All or Unread only, for the first time you open it. After that it remembers your last choice.
+
+### AI
+
+Use `@google-chat` in Raycast AI to list spaces, read recent messages, get unread messages, search messages, find people, send messages and add reactions. Sending and reacting always ask you to confirm first.
 
 ## My Messages
 
@@ -77,12 +81,12 @@ Actions: View Messages, Open in Google Chat (uses **Open With**), Send Message, 
 A background command that shows your unread total as its root search subtitle, e.g. `12 unread · 4 spaces · 2 mentions` or `No unread messages`.
 
 - **Run it once to start.** Raycast only runs it every 5 minutes after you've run it yourself once (and signed in).
-- **Every 5 minutes** it updates the subtitle. If My Messages checked in the last 2 minutes, it reuses that result instead of asking Google again. If the check fails, the subtitle says `Couldn't check unread`.
+- **Every 5 minutes** it updates the subtitle. If My Messages or the AI checked in the last 2 minutes, it reuses that result instead of asking Google again. If the check fails, the subtitle says `Couldn't check unread`.
 - **Running it** checks again, then opens the conversation in Google Chat when exactly one has unread messages (using **Open With**), or else My Messages in Unread only.
 
 ## How unread works
 
-Unread counts come from Google Chat's own unread state, not from guessing. Unread Chat and My Messages share one result: Unread Chat checks every 5 minutes in the background, and opening My Messages always checks again and updates Unread Chat's subtitle. Marking a conversation read in My Messages updates it too. The extension asks Google's message search for `is_unread()` messages from the lookback window (`is_unread() AND create_time >= "…"`), 100 at a time, up to 500. Above that the total shows as `500+`. Your own messages never count.
+Unread counts come from Google Chat's own unread state, not from guessing. Unread Chat, My Messages and the AI `get-unread` tool share one result: Unread Chat checks every 5 minutes in the background, and opening My Messages always checks again and updates Unread Chat's subtitle. Marking a conversation read in My Messages updates it too. The extension asks Google's message search for `is_unread()` messages from the lookback window (`is_unread() AND create_time >= "…"`), 100 at a time, up to 500. Above that the total shows as `500+`. Your own messages never count.
 
 Google's `is_unread()` also counts every reply you haven't opened in threads you don't follow, which Chat's Home never shows. So a message counts only when it is newer than your read position in that conversation (`spaceReadState`) and is either a new top-level message or a thread reply that @mentions you. That matches the unread conversations on Chat's Home. Like Google's search in general, it leaves out muted spaces and messages from Chat apps. Mark as Read and Mark All as Read move the conversation's read position to now, which clears every message in it.
 
