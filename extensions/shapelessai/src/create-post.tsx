@@ -2,6 +2,8 @@ import {
   Action,
   ActionPanel,
   Form,
+  Icon,
+  Keyboard,
   Toast,
   open,
   popToRoot,
@@ -18,7 +20,7 @@ type Values = {
 };
 
 export default function Command() {
-  const { data: accounts, isLoading } = usePromise(listConnections);
+  const { data: accounts, isLoading, revalidate } = usePromise(listConnections);
   const { handleSubmit, itemProps, values } = useForm<Values>({
     initialValues: { when: "queue" },
     validation: {
@@ -67,6 +69,12 @@ export default function Command() {
           <Action
             title="Connect an Account"
             onAction={() => open("https://shapelessai.com/settings")}
+          />
+          <Action
+            title="Reload Accounts"
+            icon={Icon.ArrowClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={revalidate}
           />
         </ActionPanel>
       }

@@ -38,6 +38,7 @@ export default function Command() {
         <List.Item
           key={p.id}
           title={p.postText.split("\n")[0] || "(no text)"}
+          keywords={[p.postText]}
           accessories={[
             { tag: { value: p.platform } },
             { tag: { value: p.status, color: tint[p.status] } },
