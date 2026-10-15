@@ -1,5 +1,9 @@
 # Obsidian Bookmarks Changelog
 
+## [Keep Window Open on Bookmark Deletion] - {PR_MERGE_DATE}
+
+- Keep the Raycast window open after deleting a bookmark and remove it from the list immediately ([#32044](https://github.com/raycast/extensions/issues/32044)).
+
 ## [Safer Bookmark Editing] - 2026-10-05
 
 - Keep frontmatter fields the extension doesn't manage, such as `aliases` or `cssclasses`, when editing, favoriting or marking a bookmark as read. They used to be dropped.
