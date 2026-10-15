@@ -9,7 +9,7 @@ A powerful Raycast extension for managing work items in [Plane](https://plane.so
 - **Create Work Item** - Create new work items with comprehensive details
 - **Search Work Items** - Search work items across all projects by title or ID
 - **Search Projects** - View projects and their work items
-- **My Work Items** - Work items assigned to you or created by you, grouped by state
+- **My Work Items** - Work items assigned to you or created by you (plus subscribed and mentions on servers that support them), grouped by state
 - **Open Work Item** - Open `ENG-123` or a Plane URL (argument, or read from the clipboard)
 - **Quick Create Work Item** - Create a work item from the root search with a title and optional description
 - **Quick Add Comment** - Comment on a work item by ID without opening it
@@ -91,9 +91,21 @@ For both **Plane Cloud** and **Self-Hosted** instances:
 
 ### Self-Hosted (Community Edition) Notes
 
-- Plane Community Edition only has the v1 API. It has no "assigned to me" filter, so **My Work Items** and the menu bar scan your projects' most recently updated work items (up to 20 projects × 300 items, 3 requests at a time) and filter locally. Results are cached.
+- Plane Community Edition only has the v1 API. It has no "assigned to me" filter, so **My Work Items** and the menu bar scan your projects' most recently updated work items (up to 20 projects × 300 items, 3 requests at a time) and filter locally, unless the server offers one of the faster backends below. Results are cached.
 - Plane allows 60 API requests per minute per key. If you hit the limit, wait a minute and retry.
 - If a command reports "Check API Base Path", make sure the preference points at your Plane host (e.g. `https://plane.example.com`).
+
+## Backends
+
+**My Work Items** and the **Assigned Work Items** menu bar pick the fastest way your server offers, per API base path and workspace. The list shows which one it used in the section subtitle (e.g. "via API v2"); the menu bar shows it in its tooltip.
+
+1. **Plane API v2** (Plane Cloud, Commercial): detected with `GET /api/v2/users/me/`. Uses `GET /api/v2/workspaces/{slug}/work-items/?assignee_id=…` for **Assigned**. v2 has no created-by filter, so **Created** uses the next backend.
+2. **Server-side v1 filters** (a Community Edition patched to add them): used only when `GET /api/v1/workspaces/{slug}/work-items/` answers with the header `X-Plane-Work-Item-Filters: 1`. Adds the **Subscribed** and **Mentions** views; only the filters the server lists in `X-Plane-Work-Item-Filter-Params` are sent.
+3. **Project scan**: the stock v1 fallback described above. Assigned and Created only.
+
+Detection results are cached per server and workspace: 24 hours when a faster backend is found, 1 hour when it isn't, so a server that gains API v2 or the filters is picked up within the hour. Rate limits and network errors during detection aren't cached, and every failure falls back silently. If a fast backend later answers 404 or 400, its cached result is dropped and the next backend is used.
+
+With a filtered backend, open work items are listed workspace-wide (up to 500 per view) plus the 50 most recently updated completed or cancelled ones.
 
 ## Usage
 

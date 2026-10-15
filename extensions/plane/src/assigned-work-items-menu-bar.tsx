@@ -18,6 +18,7 @@ import { groupByStateGroup } from "./helpers/state-groups";
 import { formatWorkItemIdentifier } from "./helpers/identifiers";
 import { getWorkItemUrlWithIdentifier } from "./helpers/work-items";
 import { describePlaneError } from "./helpers/errors";
+import { BACKEND_LABELS } from "./helpers/work-item-backends";
 
 const MAX_ITEMS_PER_SECTION = 15;
 const BACKGROUND_MAX_AGE_MS = 5 * 60 * 1000;
@@ -58,7 +59,7 @@ function AssignedWorkItemsMenuBar() {
     <MenuBarExtra
       icon="plane-icon.png"
       title={getMenuBarTitle(openItems.length)}
-      tooltip={`${openItems.length} open work item(s) assigned to you`}
+      tooltip={`${openItems.length} open work item(s) assigned to you${data?.backend ? ` (${BACKEND_LABELS[data.backend]})` : ""}`}
       isLoading={isLoading}
     >
       <MenuBarExtra.Section>

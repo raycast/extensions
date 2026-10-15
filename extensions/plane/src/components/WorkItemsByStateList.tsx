@@ -26,6 +26,8 @@ type WorkItemsByStateListProps = {
   toggleKey: string;
   /** Rendered after the grouped sections (e.g. a notice). */
   footer?: ReactNode;
+  /** Appended to each section's count, e.g. "via API v2". */
+  sectionSubtitleSuffix?: string;
 };
 
 /**
@@ -48,6 +50,7 @@ export default function WorkItemsByStateList({
   emptyDescription,
   toggleKey,
   footer,
+  sectionSubtitleSuffix,
 }: WorkItemsByStateListProps) {
   const [showClosed, setShowClosed] = useCachedState<boolean>(`show-closed:${toggleKey}`, false);
   const sections = groupByStateGroup(items, { includeClosed: showClosed });
@@ -98,7 +101,13 @@ export default function WorkItemsByStateList({
         />
       )}
       {sections.map((section) => (
-        <List.Section key={section.group} title={section.title} subtitle={String(section.items.length)}>
+        <List.Section
+          key={section.group}
+          title={section.title}
+          subtitle={
+            sectionSubtitleSuffix ? `${section.items.length} · ${sectionSubtitleSuffix}` : String(section.items.length)
+          }
+        >
           {section.items.map((item) => (
             <WorkItemListItem
               key={item.id}

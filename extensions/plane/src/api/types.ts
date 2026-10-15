@@ -80,6 +80,31 @@ export type RawActivity = {
 };
 
 /**
+ * A work item row from Plane API v2. Relations are ids (`state_id`, `assignee_ids`, `label_ids`); `?expand=`
+ * adds objects next to them without replacing the ids (developers.plane.so/api-reference/v2/expanding-relations).
+ */
+export type V2WorkItem = {
+  id: string;
+  name: string;
+  /** Human key, e.g. `ENG-142`. */
+  identifier?: string;
+  sequence_id: number;
+  project_id: string;
+  state_id?: string | null;
+  priority?: PriorityEnum;
+  assignee_ids?: string[];
+  label_ids?: string[];
+  created_by_id?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  start_date?: string | null;
+  target_date?: string | null;
+  description_html?: string;
+  /** With `?expand=state`. */
+  state?: RawStateLite | null;
+};
+
+/**
  * Normalized work item used by list rows and the menu bar.
  * Dates are ISO strings so the object survives `useCachedPromise` JSON caching.
  */

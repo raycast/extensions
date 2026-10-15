@@ -1,5 +1,5 @@
 import { requirePlaneClient } from "./auth";
-import { buildApiUrl, getApiBasePath, QueryValue } from "../helpers/urls";
+import { ApiVersion, buildVersionedApiUrl, getApiBasePath, QueryValue } from "../helpers/urls";
 import { extractErrorMessage, parseProblem, parseRetryAfter } from "../helpers/problem";
 import type { RawPaginated } from "./types";
 import { PlaneApiError } from "../helpers/plane-api-error";
@@ -20,6 +20,9 @@ export type PlaneResponse = {
   body: unknown;
   url: string;
 };
+
+/** Longest `Retry-After` we wait out before retrying a GET once. Longer waits surface as an error. */
+const MAX_RETRY_AFTER_SECONDS = 10;
 
 function parseBody(text: string): unknown {
   if (!text) return undefined;
@@ -63,14 +66,38 @@ function toApiError(response: PlaneResponse): PlaneApiError {
   });
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function requestVersion<T>(version: ApiVersion, path: string, options: PlaneRequestOptions = {}): Promise<T> {
+  const url = buildVersionedApiUrl(getApiBasePath(), version, path, options.query);
+  let response = await sendPlaneRequest(url, options);
+
+  // Honor Retry-After on 429: wait it out once for short GETs, otherwise report how long to wait.
+  if (response.status === 429 && (options.method ?? "GET") === "GET") {
+    const retryAfter = parseRetryAfter(response.headers.get("Retry-After"));
+    if (retryAfter !== undefined && retryAfter <= MAX_RETRY_AFTER_SECONDS) {
+      await sleep(retryAfter * 1000);
+      response = await sendPlaneRequest(url, options);
+    }
+  }
+
+  if (!response.ok) throw toApiError(response);
+  return response.body as T;
+}
+
 /**
  * Typed `fetch` for v1 endpoints the pinned SDK (0.1.3) lacks or mis-parses.
  * Uses the same base path and auth headers as the SDK client.
  */
-export async function planeRequest<T>(path: string, options: PlaneRequestOptions = {}): Promise<T> {
-  const response = await sendPlaneRequest(buildApiUrl(getApiBasePath(), path, options.query), options);
-  if (!response.ok) throw toApiError(response);
-  return response.body as T;
+export function planeRequest<T>(path: string, options: PlaneRequestOptions = {}): Promise<T> {
+  return requestVersion<T>("v1", path, options);
+}
+
+/** Same as `planeRequest`, for `/api/v2/...`. Errors are RFC 9457 problem+json, parsed into `PlaneApiError`. */
+export function planeRequestV2<T>(path: string, options: PlaneRequestOptions = {}): Promise<T> {
+  return requestVersion<T>("v2", path, options);
 }
 
 /** Builds `workspaces/{slug}/...` with each segment URL-encoded. */

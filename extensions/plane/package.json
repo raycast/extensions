@@ -42,7 +42,7 @@
       "name": "my-work-items",
       "title": "My Work Items",
       "subtitle": "Plane",
-      "description": "Work items assigned to you or created by you, grouped by state",
+      "description": "Work items assigned to you, created by you, or (where the server supports it) subscribed or mentioning you, grouped by state",
       "mode": "view"
     },
     {

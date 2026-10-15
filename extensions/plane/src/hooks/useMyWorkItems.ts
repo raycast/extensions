@@ -2,7 +2,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { getMyWorkItems, readSharedResult } from "../api/my-work-items";
 import { planeClient } from "../api/auth";
-import type { MyWorkItemsFilter } from "../helpers/my-work-items";
+import type { MyWorkItemsView } from "../helpers/work-item-backends";
 import { errorShownInline } from "../helpers/errors";
 
 /**
@@ -10,7 +10,7 @@ import { errorShownInline } from "../helpers/errors";
  * A result either of them fetched seeds this hook when the hook has nothing cached yet.
  */
 export function useMyWorkItems(
-  view: MyWorkItemsFilter = "assigned",
+  view: MyWorkItemsView = "assigned",
   config: {
     execute?: boolean;
     /** Reuse a shared result younger than this instead of fetching. */ maxAgeMs?: number;
@@ -20,7 +20,7 @@ export function useMyWorkItems(
   const initialData = useMemo(() => (workspaceSlug ? readSharedResult(view) : undefined), [view, workspaceSlug]);
   return useCachedPromise(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the slug only scopes the cache key
-    (view: MyWorkItemsFilter, _workspaceSlug?: string) => getMyWorkItems(view, { maxAgeMs: config.maxAgeMs }),
+    (view: MyWorkItemsView, _workspaceSlug?: string) => getMyWorkItems(view, { maxAgeMs: config.maxAgeMs }),
     [view, workspaceSlug],
     {
       initialData,
