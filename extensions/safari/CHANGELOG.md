@@ -1,5 +1,9 @@
 # Safari Changelog
 
+## [Duplicate Tab] - {PR_MERGE_DATE}
+
+- Add a `Duplicate Tab` command that opens a copy of the current Safari tab next to it ([#30541](https://github.com/raycast/extensions/issues/30541)).
+
 ## [Contributors] - 2026-10-10
 
 - Added Berenger to the contributors, for the AI tools improvements.
