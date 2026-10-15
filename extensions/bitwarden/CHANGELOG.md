@@ -1,5 +1,10 @@
 # Bitwarden Changelog
 
+## [Fix File Resource Cleanup] - 2026-10-15
+
+- Clear the file-wait timeout when the file becomes available
+- Close ZIP archives even when extraction fails
+
 ## [Fix Authenticator TOTP URIs without a label] - 2026-09-24
 
 - Fix "Failed to parse authenticator key" for `otpauth://` URIs that have no label (e.g. `otpauth://totp?secret=...`)
