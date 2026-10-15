@@ -5,6 +5,8 @@
   "description": "Capture screenshots, control recordings, and open Zoomer from Raycast.",
   "icon": "icon.png",
   "author": "colindotfun",
+  "owner": "galactusdev",
+  "access": "public",
   "license": "MIT",
   "platforms": [
     "macOS"
