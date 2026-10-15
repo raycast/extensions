@@ -7,7 +7,7 @@ A powerful Raycast extension for managing work items in [Plane](https://plane.so
 ### 🚀 Core Commands
 
 - **Create Work Item** - Create new work items with comprehensive details
-- **Search Work Items** - Search and filter work items across all projects
+- **Search Work Items** - Search work items across all projects by title or ID
 - **Search Projects** - View projects and their work items
 
 ### ✨ Work Item Management
@@ -73,11 +73,17 @@ For both **Plane Cloud** and **Self-Hosted** instances:
    - For self-hosted instances, also provide:
      - **API Base Path** (e.g., `https://your-plane.com`)
      - **App Base URL** (e.g., `https://your-plane.com`)
+   - Trailing slashes are fine, and so is a pasted `https://your-plane.com/api/v1`; the extension normalizes both.
 
 3. Set your workspace:
    - Run any Plane command
    - Enter your **workspace slug** when prompted
-   - You can find your workspace slug in your Plane URL: `plane.so/your-workspace-slug`
+   - You can find your workspace slug in your Plane URL: `plane.so/your-workspace-slug` (pasting the URL works too)
+
+### Self-Hosted (Community Edition) Notes
+
+- Plane allows 60 API requests per minute per key. If you hit the limit, wait a minute and retry.
+- If a command reports "Check API Base Path", make sure the preference points at your Plane host (e.g. `https://plane.example.com`).
 
 ## Usage
 

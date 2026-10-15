@@ -2,15 +2,17 @@ import { useCachedPromise } from "@raycast/utils";
 import { getProject, getProjects } from "../api/projects";
 import { PaginationOptions } from "@raycast/utils/dist/types";
 import { Project } from "@makeplane/plane-node-sdk";
+import { errorShownInline } from "../helpers/errors";
 
 export function useProjects(config: { perPage?: number; execute?: boolean }) {
-  const { data, error, isLoading, mutate, pagination } = useCachedPromise(
+  const { data, error, isLoading, mutate, pagination, revalidate } = useCachedPromise(
     (perPage?: number) => async (pagination: PaginationOptions<Project[]>) =>
       getProjects({ perPage, nextCursor: pagination.cursor }),
     [config.perPage],
     {
       initialData: [],
       keepPreviousData: true,
+      onError: errorShownInline,
       execute: config.execute !== false,
     },
   );
@@ -21,6 +23,7 @@ export function useProjects(config: { perPage?: number; execute?: boolean }) {
     isLoading,
     mutate,
     pagination,
+    revalidate,
   };
 }
 

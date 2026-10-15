@@ -9,7 +9,8 @@
   "access": "public",
   "contributors": [
     "xmok",
-    "vipin_chaudhary"
+    "vipin_chaudhary",
+    "smrehan"
   ],
   "categories": [
     "Productivity"
@@ -27,7 +28,7 @@
       "name": "search-work-items",
       "title": "Search Work Items",
       "subtitle": "Plane",
-      "description": "Search work items across projects",
+      "description": "Search work items across projects by title or ID",
       "mode": "view"
     },
     {
@@ -52,7 +53,8 @@
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.6"
   },
   "preferences": [
     {
@@ -60,7 +62,7 @@
       "name": "API_BASE_PATH",
       "type": "textfield",
       "required": false,
-      "description": "Your Plane API base path",
+      "description": "Your Plane API base path, e.g. https://plane.example.com for self-hosted (a trailing slash or /api is fine)",
       "default": "https://api.plane.so"
     },
     {
@@ -68,7 +70,7 @@
       "name": "APP_BASE_URL",
       "type": "textfield",
       "required": false,
-      "description": "Your Plane app base url",
+      "description": "Your Plane web app URL, e.g. https://plane.example.com for self-hosted",
       "default": "https://app.plane.so"
     },
     {
@@ -85,6 +87,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "vitest run",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
