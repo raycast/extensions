@@ -94,7 +94,7 @@ export async function searchFilesWithCLI(searchText: string, preferences: Prefer
     const hasStderr = error && typeof error === "object" && "stderr" in error;
     const stderr = hasStderr ? String(error.stderr) : "";
     // es.exe exits with code 8 ("Everything IPC not found") when the Everything app is not running
-    const isEverythingNotRunning = errorCode === 8 || `${stderr}${errorMessage}`.includes("Everything IPC");
+    const isEverythingNotRunning = errorCode === 8 || stderr.includes("Everything IPC");
 
     const isNotFound =
       errorCode === 1 ||
