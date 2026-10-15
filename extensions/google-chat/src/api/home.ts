@@ -1,11 +1,12 @@
 /**
  * Data for My Messages (Chat's Home view): the newest message from someone else in each conversation,
- * whether the user replied last, and the names previews need.
+ * whether the user replied last, the names previews need, and recent messages that mention the user.
  */
 
 import { mapLimit } from "../helpers/backoff";
 import type { UserNames } from "../helpers/chat-format";
 import { isAuthError, isScopeError } from "../helpers/errors";
+import { collectMentions, mentionRows, type MentionRow } from "../helpers/my-mentions";
 import {
   choosePreview,
   LATEST_MAX_PAGES,
@@ -18,7 +19,8 @@ import {
   previewUsers,
   youReplied,
 } from "../helpers/my-messages";
-import { listMessages } from "./chat";
+import { messageSpaceName } from "../helpers/unread";
+import { getSpace, listMessages, searchMessages } from "./chat";
 import { getCachedPeople, getMe, lookUpPeople } from "./people";
 import { listSpacesSorted, resolveSpaceItems } from "./spaces";
 import type { Message, Space, SpaceItem } from "./types";
@@ -236,4 +238,48 @@ export async function loadUnreadExtras(entries: UnreadPreviewInput[]): Promise<U
   });
   const names = await loadPreviewNames(entries.flatMap((entry) => (entry.newest ? [entry.newest] : [])));
   return { names, replied: toCheck.filter((_, i) => checks[i]).map((entry) => entry.spaceName) };
+}
+
+/** The Mentions section: messages that mention the user, newest first. */
+export interface MentionsResult {
+  rows: MentionRow[];
+  /** More mentions may exist than the rows hold. */
+  capped: boolean;
+}
+
+/**
+ * Messages from the last `days` days that mention the user (`messages:search` with
+ * `annotations.user_mentions.user.name:users/me`), newest first, at most `limit`, without the user's own.
+ * Conversation titles are resolved like the Unread section's, and preview names like every row's.
+ */
+export async function loadMentions(days: number, limit: number): Promise<MentionsResult> {
+  const me = await getMe();
+  const [spaces, found] = await Promise.all([
+    listSpacesSorted(),
+    collectMentions({
+      days,
+      limit,
+      me: me.userName,
+      fetchPage: async ({ filter, pageSize, pageToken }) => {
+        const page = await searchMessages({ filter, pageSize, pageToken, orderBy: "create_time desc" });
+        return {
+          messages: (page.results ?? []).flatMap((result) => (result.message ? [result.message] : [])),
+          nextPageToken: page.nextPageToken,
+        };
+      },
+      onPageError: (error) => console.error("Mentions search page failed; keeping earlier pages", error),
+    }),
+  ]);
+  if (found.messages.length === 0) return { rows: [], capped: found.capped };
+  const byName = new Map(spaces.map((space) => [space.name, space]));
+  const spaceNames = [...new Set(found.messages.map(messageSpaceName))];
+  const mentionSpaces = await mapLimit(
+    spaceNames,
+    CONCURRENCY,
+    async (name): Promise<Space> => byName.get(name) ?? (await getSpace(name).catch(() => ({ name }))),
+  );
+  const items = await resolveSpaceItems(mentionSpaces);
+  const names = await loadPreviewNames(found.messages);
+  const itemsByName = new Map(items.map((item) => [item.space.name, item]));
+  return { rows: mentionRows(found.messages, itemsByName, names), capped: found.capped };
 }

@@ -14,7 +14,15 @@ import { useEffect, useState } from "react";
 import { markRead, type UnreadSpace } from "./api/unread";
 import { ChatView } from "./components/ChatView";
 import { ConversationItem, RefreshAction, ToggleUnreadOnlyAction } from "./components/ConversationItem";
+import { MentionItem, MentionsErrorItem } from "./components/MentionItem";
 import { showChatError } from "./helpers/feedback";
+import {
+  mentionsSubtitle,
+  parseMentionsDays,
+  parseMentionsLimit,
+  unreadMessageNames,
+  visibleMentions,
+} from "./helpers/my-mentions";
 import { latestDate, namesFor, parseView, resolveView, splitSections, type HomeView } from "./helpers/my-messages";
 import {
   countMentions,
@@ -25,7 +33,7 @@ import {
   unreadSummary,
   withoutSpaces,
 } from "./helpers/unread";
-import { useMovedReadRows, useReadConversations, useUnreadExtras } from "./hooks/useHome";
+import { useMentions, useMovedReadRows, useReadConversations, useUnreadExtras } from "./hooks/useHome";
 import { useUnread } from "./hooks/useUnread";
 
 interface LaunchContext {
@@ -58,6 +66,16 @@ function MyMessages({ launchView }: { launchView?: string }) {
   const extras = useUnreadExtras(unreadEntries);
   const replied = new Set(extras.replied);
 
+  // Mentions load alongside unread; whether each is unread comes from the shared unread result.
+  const mentionsDays = parseMentionsDays(preferences.mentionsDays);
+  const mentions = useMentions(mentionsDays, parseMentionsLimit(preferences.mentionsLimit));
+  // Ignore cached data in another shape.
+  const mentionsData = Array.isArray(mentions.data?.rows) ? mentions.data : undefined;
+  const unreadMessages = unreadMessageNames(unreadEntries);
+  const allMentions = visibleMentions(mentionsData?.rows ?? [], unreadMessages, false);
+  const shownMentions = visibleMentions(mentionsData?.rows ?? [], unreadMessages, unreadOnly);
+  const unreadByName = new Map(unreadEntries.map((entry) => [entry.spaceName, entry]));
+
   // Wait for an unread result so the Read pages don't spend requests on conversations it lists. Which rows
   // show under Read is decided here, against the latest unread result.
   const reads = useReadConversations(!unreadOnly && !!unread, unreadEntries);
@@ -77,6 +95,7 @@ function MyMessages({ launchView }: { launchView?: string }) {
 
   function refresh() {
     unreadState.revalidate();
+    mentions.revalidate();
     if (!unreadOnly) reads.revalidate();
   }
 
@@ -115,7 +134,7 @@ function MyMessages({ launchView }: { launchView?: string }) {
     onSent: refresh,
   };
 
-  const isLoading = unreadState.isLoading || (!unreadOnly && reads.isLoading);
+  const isLoading = unreadState.isLoading || mentions.isLoading || (!unreadOnly && reads.isLoading);
   const unreadEmpty = unreadEmptyView(unread, lookbackDays);
   const emptyDescription = unreadOnly
     ? unreadEmpty.description
@@ -153,6 +172,34 @@ function MyMessages({ launchView }: { launchView?: string }) {
           </ActionPanel>
         }
       />
+      {shownMentions.length > 0 ? (
+        <List.Section
+          title="Mentions"
+          subtitle={mentionsSubtitle(
+            allMentions.length,
+            !!mentionsData?.capped,
+            allMentions.filter((row) => row.unread).length,
+            mentionsDays,
+          )}
+        >
+          {shownMentions.map((row) => {
+            const entry = unreadByName.get(row.item.space.name);
+            return (
+              <MentionItem
+                key={row.message.name}
+                {...common}
+                row={row}
+                unread={row.unread}
+                onMarkRead={entry ? () => markSpacesRead([entry]) : undefined}
+              />
+            );
+          })}
+        </List.Section>
+      ) : mentions.error && !mentionsData && !unreadOnly ? (
+        <List.Section title="Mentions">
+          <MentionsErrorItem onRetry={() => mentions.revalidate()} />
+        </List.Section>
+      ) : null}
       <List.Section
         title="Unread"
         subtitle={

@@ -54,6 +54,8 @@ In message lists you can reply in a thread, add a reaction, copy the text or the
 - **Open With**: browser or installed Chat web app for every "Open in Google Chat" action. Empty uses your default browser.
 - **Unread Lookback (Days)**: only unread messages from this many days are counted (default 14, at most 90).
 - **Default View** (My Messages): All or Unread Only, for the first time you open it. After that it remembers your last choice.
+- **Mentions From** (My Messages): how far back the Mentions section looks: the last day, 3, 7 (default) or 14 days.
+- **Mentions Shown** (My Messages): the most messages the Mentions section shows: 10, 20 (default) or 50.
 
 ### AI
 
@@ -61,18 +63,21 @@ Use `@google-chat` in Raycast AI to list spaces, read recent messages, get unrea
 
 ## My Messages
 
-A list of your conversations modelled on Google Chat's **Home**, one row per space, group chat or DM:
+A list of your conversations modelled on Google Chat's **Home**, one row per space, group chat or DM (the Mentions section has one row per message instead):
 
 - **Title**: the space name, or the other person's name for DMs.
 - **Subtitle**: the latest message from someone else, as `Sender: text` (mentions as `@Name`). Your own messages are never shown as the preview and never count as unread.
 - **Accessories**: the unread count, `@` when a message mentions you, a reply icon ("You replied") when the newest message is yours, a thread icon when the previewed message is a thread reply, and the time of the latest message.
 
-Two sections:
+Three sections:
 
+- **Mentions**: recent messages from others that @mention you, one row per message, newest first. See below.
 - **Unread**: conversations with unread messages from others, newest first, with counts and mentions. The preview is the newest unread message.
 - **Read**: every other conversation, most recently active first, 25 at a time; scroll to load more. For each page the extension lists the newest few messages of each conversation (5 per request, at most 3 requests) until it finds one from someone else.
 
-The **View** dropdown switches between **All** and **Unread Only** (⌘U toggles it); Unread Only shows just the Unread section. The choice is remembered; **Default View** sets the first one.
+**Mentions** shows each message that @mentions you from the last 7 days, at most 20 (set by **Mentions From** and **Mentions Shown**), with the conversation as the title, `Sender: text` as the subtitle, a blue dot when the message is unread, a thread icon for thread replies, and the time. The section subtitle reads like `5 in the last 7 days · 2 unread`. The messages come from Google's message search, `annotations.user_mentions.user.name:users/me AND create_time >= "…"`; Google documents no way to search for @all, so only mentions of you by name are searched. Whether a mention is unread comes from the same result as the Unread section, at no extra request. With no mentions the section is hidden; if the search fails, the All view shows one "Couldn't load mentions" row with Retry and the rest of the list loads as usual. Actions: View Messages, Reply in Thread, Open in Google Chat (opens the message), Mark Conversation as Read (while the conversation is unread), Copy Text, Copy Link, Toggle Unread Only (⌘U) and Refresh (⌘R).
+
+The **View** dropdown switches between **All** and **Unread Only** (⌘U toggles it); Unread Only shows just the Unread section, plus the unread mentions. The choice is remembered; **Default View** sets the first one.
 
 Actions: View Messages, Open in Google Chat (uses **Open With**), Send Message, Mark as Read and Mark All as Read (on unread rows), Copy Link, Toggle Unread Only (⌘U) and Refresh (⌘R). The command's root search subtitle shows the unread total from its last load, refresh or mark-as-read.
 

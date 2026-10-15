@@ -9,7 +9,8 @@ import { OpenInChatAction } from "./OpenInChatAction";
 import { SendMessageAction } from "./SpaceActions";
 import { SpaceMessages } from "./SpaceMessages";
 
-function conversationIcon(item: SpaceItem): Image.ImageLike {
+/** A conversation's avatar, or an icon for its kind. */
+export function conversationIcon(item: SpaceItem): Image.ImageLike {
   if (item.avatarUrl) return { source: item.avatarUrl, mask: Image.Mask.Circle };
   if (item.kind === "dm") return getAvatarIcon(item.title);
   return item.kind === "group" ? Icon.TwoPeople : Icon.SpeechBubble;

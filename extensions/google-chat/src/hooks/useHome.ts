@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   loadLatestDetails,
+  loadMentions,
   loadReadPage,
   loadUnreadExtras,
   unreadPreviewInputs,
@@ -45,6 +46,17 @@ export function useUnreadExtras(entries: UnreadSpace[]) {
     onError: (error) => console.error("Could not load unread details", error),
   });
   return data ?? { names: {}, replied: [] };
+}
+
+/**
+ * Recent messages that mention the user, for the Mentions section. A failure is only logged, so it never
+ * breaks the rest of the list; the section then offers Retry.
+ */
+export function useMentions(days: number, limit: number) {
+  return useCachedPromise(loadMentions, [days, limit], {
+    keepPreviousData: true,
+    onError: (error) => console.error("Could not load mentions", error),
+  });
 }
 
 /** A moved row's key: its conversation and the unread message its row was built from. */
