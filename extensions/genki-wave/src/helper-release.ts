@@ -4,10 +4,10 @@ import type { HelperRelease } from "./helper-download";
 // .github/workflows/helper-release.yml (scripts/helper-release.sh) and published in the
 // public genkiinstruments/genki-wave-helper repository, which holds releases only. Update both fields
 // together after a release: the checksum is the release's `.zip.sha256` asset.
-const version = "helper-v2";
+const version = "helper-v3";
 
 export const HELPER_RELEASE: HelperRelease = {
   version,
-  sha256: "4a951277b545f305fdfe698dff68962244db4935ed0fa3c7325d5b949b961e98",
+  sha256: "9525d325d6c1a8fe1dd32311465dc0ce69b1ff109c258d9af4858d580bed3dbe",
   url: `https://github.com/genkiinstruments/genki-wave-helper/releases/download/${version}/wave-helper-${version}.zip`,
 };

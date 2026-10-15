@@ -141,19 +141,22 @@ export default function ChooseWave() {
                       onAction={() => forget(wave.address)}
                     />
                   )}
-                  <Action
-                    title="Identify"
-                    icon={Icon.Eye}
-                    shortcut={{ modifiers: ["cmd"], key: "i" }}
-                    onAction={async () => {
-                      try {
-                        await identify(wave.address);
-                        await showToast({ style: Toast.Style.Success, title: "Look for the flashing ring" });
-                      } catch (e) {
-                        await showToast({ style: Toast.Style.Failure, title: "Identify failed", message: String(e) });
-                      }
-                    }}
-                  />
+                  {/* A ring without an address is one another app holds: only ours can be told to flash. */}
+                  {(wave.address || selected) && (
+                    <Action
+                      title="Identify"
+                      icon={Icon.Eye}
+                      shortcut={{ modifiers: ["cmd"], key: "i" }}
+                      onAction={async () => {
+                        try {
+                          await identify(wave.address);
+                          await showToast({ style: Toast.Style.Success, title: "Look for the flashing ring" });
+                        } catch (e) {
+                          await showToast({ style: Toast.Style.Failure, title: "Identify failed", message: String(e) });
+                        }
+                      }}
+                    />
+                  )}
                   {scanAgain}
                 </ActionPanel>
               }

@@ -115,7 +115,8 @@ export async function collectDiagnostics(): Promise<string> {
     [
       "listener.log (last 60 lines)",
       // The raw end of the file, earlier runs included: crashes and restarts show there.
-      read(listener.logPath(), 60)
+      listener
+        .readLastLines(listener.logPath(), 60)
         // Older helpers logged what was dictated; that doesn't belong in a pasted report.
         .replace(/"text":"(?:[^"\\]|\\.)*"/g, '"text":"…"')
         .trim() || "(empty)",

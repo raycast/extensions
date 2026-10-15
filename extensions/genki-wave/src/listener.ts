@@ -64,6 +64,25 @@ export function readLogTail(path = logPath(), limit = 2 * 1024 * 1024): string {
   }
 }
 
+/** The last `count` lines of a file, reading only its end (64 KB), for diagnostics. */
+export function readLastLines(path: string, count: number): string {
+  let fd: number;
+  try {
+    fd = openSync(path, "r");
+  } catch {
+    return "";
+  }
+  try {
+    const size = fstatSync(fd).size;
+    const length = Math.min(size, 64 * 1024);
+    const buffer = Buffer.alloc(length);
+    readSync(fd, buffer, 0, length, size - length);
+    return buffer.toString("utf8").trimEnd().split("\n").slice(-count).join("\n");
+  } finally {
+    closeSync(fd);
+  }
+}
+
 const xml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 export function launchAgentPlist(helper: string, log: string): string {

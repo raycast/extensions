@@ -27,8 +27,10 @@ does:
   screen, in Keynote, PowerPoint, Google Slides and PDF viewers.
 - **Media**: play/pause, next and previous track, mute, and hold-and-turn
   volume.
-- **Key…** or **Raycast Command or URL…**: any key combination, or any
-  deeplink (select a command in Raycast, press ⌘K, **Copy Deeplink**).
+- **Key…**: arrow keys, Space, Return, Escape, Tab, Delete, Page Up, Page Down,
+  Home, or End, with optional Control, Option, Shift, and Command modifiers.
+- **Raycast Command or URL…**: any deeplink (select a command in Raycast,
+  press ⌘K, **Copy Deeplink**).
 
 ⌘⇧P applies a presentation layout to all buttons and swipes at once.
 
