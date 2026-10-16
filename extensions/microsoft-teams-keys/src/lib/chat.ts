@@ -28,7 +28,7 @@ export function callLink(email: string, video: boolean): string {
 
 /**
  * Opens the chat through Teams search, the way you would by hand: ⌘E, the
- * name, then Return until the chat is open. Used for names that are neither
+ * name, then Return twice: once for the suggestion, once for the chat. Used for names that are neither
  * an email address nor a saved contact.
  */
 async function openThroughSearch(query: string): Promise<void> {
@@ -41,10 +41,8 @@ async function openThroughSearch(query: string): Promise<void> {
   await press(RETURN);
   await pause(300);
   await press(RETURN);
-  await pause(1200);
-  // One more Return makes sure the chat itself is open; in an empty message box it does nothing.
-  await press(RETURN);
-  await pause(600);
+  // No further Return: in a chat with an unsent draft it would send that draft.
+  await pause(1500);
 }
 
 export async function openChat(request: ChatRequest): Promise<ChatResult> {

@@ -45,15 +45,20 @@ function calendarAppScript(fromOffset: number, toOffset: number): string {
   return `set us to (ASCII character 31)
 set rs to (ASCII character 30)
 set nowDate to current date
+-- The script's own "now" as Unix time, so the offsets below can be turned
+-- back into absolute times without the delay of starting the script.
+set epochNow to do shell script "date +%s"
 set fromDate to nowDate + (${fromOffset})
 set toDate to nowDate + (${toOffset})
-set out to ""
+set out to "N" & us & epochNow & rs
 tell application "Calendar"
   repeat with c in calendars
     set calName to name of c
+    set out to out & "C" & us & calName & rs
     try
       set evs to (every event of c whose start date is less than toDate and end date is greater than fromDate)
     on error
+      set out to out & "F" & us & calName & rs
       set evs to {}
     end try
     repeat with e in evs
@@ -76,38 +81,59 @@ tell application "Calendar"
       if evUrl is "missing value" then set evUrl to ""
       if evLoc is "missing value" then set evLoc to ""
       if evNotes is "missing value" then set evNotes to ""
-      set out to out & (uid of e) & us & (summary of e) & us & (((start date of e) - nowDate) as text) & us & (((end date of e) - nowDate) as text) & us & calName & us & evAllDay & us & evUrl & us & evLoc & us & evNotes & rs
+      set out to out & "E" & us & (uid of e) & us & (summary of e) & us & (((start date of e) - nowDate) as text) & us & (((end date of e) - nowDate) as text) & us & calName & us & evAllDay & us & evUrl & us & evLoc & us & evNotes & rs
     end repeat
   end repeat
 end tell
 return out`;
 }
 
-async function eventsFromCalendarApp(from: Date, to: Date): Promise<RawEvent[]> {
-  const now = Date.now();
+interface EventRead {
+  events: RawEvent[];
+  /** Calendars that could not be read; their meetings are missing. */
+  failed: string[];
+}
+
+async function eventsFromCalendarApp(from: Date, to: Date): Promise<EventRead> {
+  const jsNow = Date.now();
   const raw = await runAppleScript(
-    calendarAppScript(Math.floor((from.getTime() - now) / 1000), Math.ceil((to.getTime() - now) / 1000)),
+    calendarAppScript(Math.floor((from.getTime() - jsNow) / 1000), Math.ceil((to.getTime() - jsNow) / 1000)),
     { timeout: 120_000 },
   );
-  return raw
-    .split(RECORD)
-    .map((record) => record.replace(/^[\r\n]+/, ""))
-    .filter(Boolean)
-    .map((record) => {
-      const [uid, title, start, end, calendar, allDay, url, location, ...notes] = record.split(UNIT);
-      const startSeconds = now / 1000 + Number(start);
-      return {
+  // Offsets are relative to the script's own "now", which it reports first.
+  let now = jsNow / 1000;
+  let calendars = 0;
+  const failed: string[] = [];
+  const events: RawEvent[] = [];
+  for (const record of raw.split(RECORD)) {
+    const [kind, ...fields] = record.replace(/^[\r\n]+/, "").split(UNIT);
+    if (kind === "N") {
+      const value = Number(fields[0]);
+      if (Number.isFinite(value) && value > 0) now = value;
+    } else if (kind === "C") {
+      calendars++;
+    } else if (kind === "F") {
+      failed.push(fields[0] ?? "");
+    } else if (kind === "E") {
+      const [uid, title, start, end, calendar, allDay, url, location, ...notes] = fields;
+      const startSeconds = now + Number(start);
+      events.push({
         id: `${uid}@${Math.round(startSeconds)}`,
         title: title ?? "",
         start: startSeconds,
-        end: now / 1000 + Number(end),
+        end: now + Number(end),
         calendar: calendar ?? "",
         allDay: allDay === "true",
         url: url ?? "",
         location: location ?? "",
         notes: notes.join(UNIT),
-      };
-    });
+      });
+    }
+  }
+  if (calendars > 0 && failed.length === calendars) {
+    throw new Error(`the Calendar app could not read any calendar (${failed.join(", ")})`);
+  }
+  return { events, failed };
 }
 
 async function eventsFromEventKit(from: Date, to: Date): Promise<RawEvent[] | string> {
@@ -120,14 +146,14 @@ async function eventsFromEventKit(from: Date, to: Date): Promise<RawEvent[] | st
 }
 
 /** EventKit first, the Calendar app when EventKit is not allowed. */
-async function readEvents(from: Date, to: Date): Promise<RawEvent[]> {
+async function readEvents(from: Date, to: Date): Promise<EventRead> {
   let eventKit: RawEvent[] | string;
   try {
     eventKit = await eventsFromEventKit(from, to);
   } catch (error) {
     eventKit = `EventKit failed: ${error instanceof Error ? error.message : String(error)}`;
   }
-  if (Array.isArray(eventKit)) return eventKit;
+  if (Array.isArray(eventKit)) return { events: eventKit, failed: [] };
   try {
     return await eventsFromCalendarApp(from, to);
   } catch (error) {
@@ -135,27 +161,6 @@ async function readEvents(from: Date, to: Date): Promise<RawEvent[]> {
       `${eventKit}; Calendar app: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
-}
-
-/** Shown in the diagnostics. */
-export async function calendarDiagnostics(): Promise<string> {
-  const now = new Date();
-  const later = new Date(now.getTime() + 86_400_000);
-  const lines: string[] = [];
-  try {
-    const result = await eventsFromEventKit(now, later);
-    lines.push(`EventKit: ${Array.isArray(result) ? `${result.length} events in the next 24 h` : result}`);
-  } catch (error) {
-    lines.push(`EventKit: error ${error instanceof Error ? error.message : String(error)}`);
-  }
-  try {
-    const result = await eventsFromCalendarApp(now, later);
-    const withLink = result.filter((e) => findMeetingLink(e.url, e.location, e.notes)).length;
-    lines.push(`Calendar app: ${result.length} events in the next 24 h, ${withLink} with a Teams link`);
-  } catch (error) {
-    lines.push(`Calendar app: error ${error instanceof Error ? error.message : String(error)}`);
-  }
-  return lines.join("\n");
 }
 
 /**
@@ -212,9 +217,16 @@ function run() {
 }`;
 }
 
-/** Teams meetings between `from` and `to`, sorted by start time. */
-export async function teamsMeetings(from: Date, to: Date): Promise<Meeting[]> {
-  const events = await readEvents(from, to);
+export interface MeetingsRead {
+  /** Teams meetings, sorted by start time. */
+  meetings: Meeting[];
+  /** Calendars that could not be read, so their meetings may be missing. */
+  failedCalendars: string[];
+}
+
+/** Teams meetings between `from` and `to`, plus the calendars that could not be read. */
+export async function teamsMeetings(from: Date, to: Date): Promise<MeetingsRead> {
+  const { events, failed } = await readEvents(from, to);
   const meetings: Meeting[] = [];
   for (const event of events) {
     // MeetingBar's order: the URL field, then the location, then the notes.
@@ -230,7 +242,12 @@ export async function teamsMeetings(from: Date, to: Date): Promise<Meeting[]> {
       allDay: event.allDay,
     });
   }
-  return meetings.sort((a, b) => a.start.getTime() - b.start.getTime());
+  return { meetings: meetings.sort((a, b) => a.start.getTime() - b.start.getTime()), failedCalendars: failed };
+}
+
+/** Text for a warning about calendars that could not be read. */
+export function failedCalendarsText(failed: string[]): string {
+  return `Could not read ${failed.length === 1 ? "the calendar" : "the calendars"} ${failed.join(", ")}, so meetings there may be missing.`;
 }
 
 /**

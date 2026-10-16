@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Clipboard, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, List, Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { teamsMeetings } from "./lib/calendar";
+import { failedCalendarsText, teamsMeetings } from "./lib/calendar";
 import { findMeetingLink } from "./lib/links";
 import { MeetingItem, MeetingsEmptyView, dayTitle, joinLink } from "./lib/meeting-ui";
 
@@ -33,10 +33,20 @@ export default function Command() {
     const now = new Date();
     const endOfTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2);
     // Long meetings that started hours ago still count, so look back a day.
-    const meetings = await teamsMeetings(new Date(now.getTime() - 86_400_000), endOfTomorrow);
-    const clipboard = findMeetingLink(await Clipboard.readText().catch(() => undefined));
-    return { meetings: meetings.filter((m) => m.end > now), clipboard };
+    const { meetings, failedCalendars } = await teamsMeetings(new Date(now.getTime() - 86_400_000), endOfTomorrow);
+    if (failedCalendars.length > 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Some calendars are missing",
+        message: failedCalendarsText(failedCalendars),
+      });
+    }
+    return { meetings: meetings.filter((m) => m.end > now) };
   });
+  // Read on its own, so a copied link can be joined even when the calendar cannot be read.
+  const { data: clipboard } = usePromise(async () =>
+    findMeetingLink(await Clipboard.readText().catch(() => undefined)),
+  );
 
   const now = new Date();
   const soon = new Date(now.getTime() + SOON_MINUTES * 60_000);
@@ -55,9 +65,9 @@ export default function Command() {
       filtering={!typedLink}
     >
       {typedLink ? <LinkItem link={typedLink} title="Join This Link" /> : null}
-      {!typedLink && data?.clipboard ? (
+      {!typedLink && clipboard ? (
         <List.Section title="Clipboard">
-          <LinkItem link={data.clipboard} title="Meeting Link from Clipboard" />
+          <LinkItem link={clipboard} title="Meeting Link from Clipboard" />
         </List.Section>
       ) : null}
       <MeetingsEmptyView

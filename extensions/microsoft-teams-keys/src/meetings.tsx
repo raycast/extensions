@@ -1,6 +1,6 @@
-import { List } from "@raycast/api";
+import { List, Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { Meeting, teamsMeetings } from "./lib/calendar";
+import { Meeting, failedCalendarsText, teamsMeetings } from "./lib/calendar";
 import { MeetingItem, MeetingsEmptyView, dayTitle } from "./lib/meeting-ui";
 
 const DAYS_AHEAD = 7;
@@ -19,8 +19,16 @@ export default function Command() {
     const now = new Date();
     const from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const to = new Date(from.getTime() + (DAYS_AHEAD + 1) * 86_400_000);
+    const { meetings, failedCalendars } = await teamsMeetings(from, to);
+    if (failedCalendars.length > 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Some calendars are missing",
+        message: failedCalendarsText(failedCalendars),
+      });
+    }
     // Meetings that are already over today are left out.
-    return (await teamsMeetings(from, to)).filter((m) => m.end > now);
+    return meetings.filter((m) => m.end > now);
   });
 
   const now = new Date();
