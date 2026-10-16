@@ -1,8 +1,8 @@
 # Google Translate Changelog
 
-## [Reset Quick Translate after dismissal on macOS] - {PR_MERGE_DATE}
+## [Refresh selected text on every Quick Translate invocation] - {PR_MERGE_DATE}
 
-- Clear Quick Translate when its window is dismissed so the next launch reads the current text selection instead of restoring the previous translation.
+- Read the current selection in a no-view launcher and pass it to Quick Translate Results, so invoking the existing command again uses fresh text even when Raycast retained its previous view.
 
 ## [Fix translation with an HTTP proxy] - 2026-10-15
 
