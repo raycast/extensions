@@ -54,14 +54,14 @@ export default function Command() {
     onError: () => undefined,
   });
   const { data: applications } = useCachedPromise(getApplications, [], { keepPreviousData: true });
-  const { ignored, isLoading: ignoredLoading } = useIgnoredApps();
+  const { isIgnored, isLoading: ignoredLoading } = useIgnoredApps(data);
   const { data: darkMode = false } = useCachedPromise(readSystemDarkMode, [], {
     keepPreviousData: true,
     execute: menuOpen,
   });
 
   const badged = (data ?? [])
-    .filter((tile) => tile.count > 0 && !ignored.has(tile.name))
+    .filter((tile) => tile.count > 0 && !isIgnored(tile))
     .map((tile) => ({ tile, ...resolvePaths(tile, applications) }));
   const total = badged.reduce((sum, { tile }) => sum + tile.count, 0);
   const hasBadges = total > 0;
