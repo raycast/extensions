@@ -77,11 +77,6 @@ export function EntryForm({
   const applications = [...(apps ?? [])].sort((a, b) => a.name.localeCompare(b.name));
 
   useEffect(() => {
-    setFilter("");
-    setFileResults([]);
-  }, [kind]);
-
-  useEffect(() => {
     if (kind !== "file") return;
     const query = filter.trim();
     if (query.length < 2) {
@@ -177,14 +172,37 @@ export function EntryForm({
         onChange={(next) => setKey([...next].at(-1) ?? "")}
       />
       <Form.TextField id="title" title="Title" placeholder="Action name" defaultValue={source?.title} />
-      <Form.Dropdown id="kind" title="Type" value={kind} onChange={(next) => setKind(next as EntryKind)}>
+      <Form.Dropdown
+        id="kind"
+        title="Type"
+        value={kind}
+        onChange={(next) => {
+          // Each kind has its own Target control and its own field id. Clear our
+          // copy on a type change and drop any in-flight file search with it.
+          setKind(next as EntryKind);
+          setValue("");
+          setFilter("");
+          setFileResults([]);
+        }}
+      >
         {ENTRY_KINDS.map((option) => (
           <Form.Dropdown.Item key={option} title={entryKindLabel(option)} value={option} />
         ))}
       </Form.Dropdown>
 
       {kind === "app" && (
-        <Form.Dropdown id="value" title="Target" placeholder="Search applications…" defaultValue={source?.value}>
+        <Form.Dropdown
+          key={kind}
+          id={`value-${kind}`}
+          title="Target"
+          placeholder="Search applications…"
+          value={value}
+          onChange={(next) => setValue(toTargetValue(next))}
+        >
+          {value === "" && <Form.Dropdown.Item value="" title="Choose an application…" />}
+          {value !== "" && !applications.some((app) => app.path === value) && (
+            <Form.Dropdown.Item key={value} value={value} title={value} icon={Icon.AppWindow} />
+          )}
           {applications.map((app) => (
             <Form.Dropdown.Item
               key={app.path}
@@ -199,7 +217,8 @@ export function EntryForm({
 
       {kind === "file" && (
         <Form.Dropdown
-          id="value"
+          key={kind}
+          id={`value-${kind}`}
           title="Target"
           placeholder="Search files and folders…"
           filtering={false}
@@ -231,7 +250,8 @@ export function EntryForm({
 
       {(kind === "url" || kind === "shell") && (
         <Form.TextField
-          id="value"
+          key={kind}
+          id={`value-${kind}`}
           title="Target"
           placeholder={entryKindPlaceholder(kind)}
           value={value}
