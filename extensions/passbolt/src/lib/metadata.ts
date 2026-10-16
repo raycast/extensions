@@ -155,9 +155,11 @@ export class MetadataDecryptor {
       if (metadata.object_type !== undefined && metadata.object_type !== "PASSBOLT_RESOURCE_METADATA") {
         throw new MetadataError("Unexpected metadata object type");
       }
-      if (typeof metadata.resource_type_id !== "string" || metadata.resource_type_id !== resource.resource_type_id) {
-        throw new MetadataError("Metadata resource type does not match the resource");
-      }
+      // The metadata also carries a resource_type_id, but the clear-text row is the id the API
+      // and the rest of the client use. Passbolt only advises writers to keep the pair in sync,
+      // and its own migration bug (API PB-39512) left legitimate vaults where the two differ.
+      // The decrypted metadata is the trusted side — the clear-text id is server-controlled — so
+      // a stale or missing id here must not hide an entry the Passbolt app opens normally.
       if (!text(metadata.name).trim()) throw new MetadataError("Decrypted metadata has no name");
       if (
         metadata.uris != null &&

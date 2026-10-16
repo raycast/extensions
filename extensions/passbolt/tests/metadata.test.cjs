@@ -419,13 +419,12 @@ test("shared keys from another instance or with mismatched fingerprints are reje
   }
 });
 
-test("malformed metadata, wrong object types, and resource type mismatches produce safe errors", async () => {
+test("malformed metadata and wrong object types produce safe errors", async () => {
   for (const payload of [
     "sensitive-test-data",
     [],
     metadata({ name: null }),
     metadata({ object_type: "PASSBOLT_SECRET_DATA" }),
-    metadata({ resource_type_id: "wrong" }),
     metadata({ uris: [42] }),
   ]) {
     const encrypted = await encrypt(payload, userKey);
@@ -434,6 +433,23 @@ test("malformed metadata, wrong object types, and resource type mismatches produ
     ]);
     assert.ok(result.metadata_error);
     assert.ok(!result.metadata_error.includes("sensitive-test-data"));
+  }
+});
+
+test("a stale or missing metadata resource type id does not hide the entry", async () => {
+  // Passbolt only advises writers to keep the clear-text and metadata ids consistent, and its
+  // own migration bug (API PB-39512) left legitimate vaults where they differ. The decrypted
+  // metadata is trusted for display; the clear-text row keeps driving type decisions.
+  for (const override of [{ resource_type_id: "stale-type" }, { resource_type_id: undefined }]) {
+    const encrypted = await encrypt(metadata(override), userKey);
+    const [result] = await decryptor().decryptResources([
+      resource({ metadata_key_type: "user_key", metadata: encrypted }),
+    ]);
+    assert.equal(result.name, "Example Login");
+    assert.equal(result.username, "alice@example.test");
+    assert.deepEqual(result.uris, metadata().uris);
+    assert.equal(result.metadata_error, undefined);
+    assert.equal(result.resource_type_id, typeId, "the clear-text row keeps its resource type id");
   }
 });
 
