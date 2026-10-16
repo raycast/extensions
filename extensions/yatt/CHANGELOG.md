@@ -1,6 +1,6 @@
 # Yet Another Timezone Tool Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-16
 
 - Convert Time: type a time, a window or a date with a place and see it in every location; colour-coded rows; copy one row or all; hour strip; nudge and re-anchor keys.
 - Manage Locations: 140,000 cities and places, every named time zone, custom places, OpenStreetMap lookup; aliases, home, order, export and import; optional shared locations file.
