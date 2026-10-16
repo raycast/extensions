@@ -1,6 +1,6 @@
 # IBM Bob Changelog
 
-## [IBM Bob Insiders Support] - {PR_MERGE_DATE}
+## [IBM Bob Insiders Support] - 2026-10-16
 
 - Added a "Bob Version" preference to select between the Standard and Insiders build of IBM Bob
 - All commands (Search Recent Projects, Open with IBM Bob, Open New Window) now target the selected build
