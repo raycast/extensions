@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Refresh selected text on every Quick Translate invocation] - {PR_MERGE_DATE}
+## [Refresh selected text on every Quick Translate invocation] - 2026-10-16
 
 - Read the current selection in a no-view launcher and pass it to Quick Translate Results, so invoking the existing command again uses fresh text even when Raycast retained its previous view.
 
