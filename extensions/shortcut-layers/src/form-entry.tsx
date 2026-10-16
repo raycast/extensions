@@ -123,13 +123,16 @@ export function EntryForm({
       return;
     }
 
+    // The icon picker only exists for url and shell actions, and cannot show a
+    // stored emoji: keep the saved icon unless this form actually offers to change it.
+    const icon = kind === "url" || kind === "shell" ? values.icon : source?.icon;
     const entry: Entry = {
       id: existing?.id ?? generateId(),
       key: normalizedKey,
       title,
       kind,
       value: target,
-      icon: values.icon || undefined,
+      icon: icon || undefined,
     };
 
     if (existing) {
@@ -283,13 +286,11 @@ export function EntryForm({
       )}
 
       {(kind === "url" || kind === "shell") && (
-        <Form.Dropdown
-          id="icon"
-          title="Icon"
-          defaultValue={source?.icon && ICON_VALUES.has(source.icon) ? source.icon : ""}
-          info="Shown next to the action"
-        >
+        <Form.Dropdown id="icon" title="Icon" defaultValue={source?.icon} info="Shown next to the action">
           <Form.Dropdown.Item value="" title="Default" />
+          {source?.icon && !ICON_VALUES.has(source.icon) && (
+            <Form.Dropdown.Item key={source.icon} value={source.icon} title="Current icon" icon={source.icon} />
+          )}
           {ICON_GROUPS.map((group) => (
             <Form.Dropdown.Section key={group.title} title={group.title}>
               {group.icons.map((glyph) => (
