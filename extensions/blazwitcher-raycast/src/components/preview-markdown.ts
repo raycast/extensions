@@ -1,5 +1,6 @@
-import { sourceNames, type BrowserEntry } from "../types";
+import type { BrowserEntry, SearchResult } from "../types";
 import type { PagePreview } from "../browser/page-content";
+import { previewFieldSvg } from "./preview-field";
 
 export function compactPreviewMarkdown(markdown: string) {
   let fence: string | undefined;
@@ -38,16 +39,16 @@ export function displayTitle(title: string) {
 }
 
 function escapeMarkdown(value: string) {
-  return value.replace(/([\\`*_{}[\]<>#+!|])/g, "\\$1");
+  return value.replace(/&/g, "&amp;").replace(/([\\`*_{}[\]<>#+!|$])/g, "\\$1");
 }
 
 export function resultDetailMarkdown(
   entry: BrowserEntry,
   preview: PagePreview,
   isLoading: boolean,
+  matches?: Pick<SearchResult, "titleRanges" | "urlRanges">,
 ) {
   const context = [
-    sourceNames[entry.source],
     entry.profile?.name,
     entry.tabGroup?.title,
     entry.incognito ? "Incognito" : undefined,
@@ -58,11 +59,23 @@ export function resultDetailMarkdown(
     .join(" · ");
   const visited =
     entry.visitedAt === undefined ? undefined : new Date(entry.visitedAt);
-  let address = escapeMarkdown(entry.url);
+  const title = `![${escapeMarkdown(displayTitle(entry.title))}](${previewFieldSvg(
+    entry.title,
+    matches?.titleRanges ?? [],
+    "title",
+    entry.title.length - displayTitle(entry.title).length,
+    entry.source,
+  )})`;
+  const visibleUrl = entry.url.split(/[?#]/, 1)[0];
+  let address = `![${escapeMarkdown(visibleUrl)}](${previewFieldSvg(
+    visibleUrl,
+    matches?.urlRanges ?? [],
+    "url",
+  )})`;
   try {
     const url = new URL(entry.url);
     if (url.protocol === "http:" || url.protocol === "https:")
-      address = `[${escapeMarkdown(url.hostname)}](<${entry.url.replace(/[<>\s]/g, encodeURIComponent)}>)`;
+      address = `[${address}](<${entry.url.replace(/[<>\\\s]/g, encodeURIComponent)}>)`;
   } catch {
     /* 非标准地址仍按文本展示。 */
   }
@@ -72,8 +85,9 @@ export function resultDetailMarkdown(
       ? "Loading page content…"
       : preview.message;
   return [
-    `### ${escapeMarkdown(displayTitle(entry.title))}`,
-    `${escapeMarkdown(context)} · ${address}`,
+    title,
+    escapeMarkdown(context),
+    address,
     visited && !Number.isNaN(visited.getTime())
       ? `Last visited: ${visited.toLocaleString("en-US", { hour12: false })}`
       : undefined,

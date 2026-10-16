@@ -42,13 +42,13 @@ JXA 通过 macOS 的 `osascript` 执行，与 AppleScript 使用同一套自动�
 
 默认搜索标题与域名，匹配与排序规则沿用 [Blazwitcher Chrome 插件](https://chromewebstore.google.com/detail/blazwitcher-search-and-sw/fjgablnemienkegdnbihhemebmmonihg)（[GitHub 源码](https://github.com/cjinhuo/blazwitcher)）。这项设置名为**Match Chrome Blaz**，“Chrome Blaz”指的就是 Blazwitcher 浏览器版。需要搜索网址路径、查询参数或片段时，在扩展设置中选择**Full URL Search**，这个模式也保留标题优先排序。
 
-先用 `sxw` 找到多篇“上下文”文档，再输入 `sxwcj` 定位**上下文层级**，或用 `sxwlx` 找到**上下文类型**。
+先用 `sxw` 找到 3 篇标题相近的“上下文”文档，再输入 `sxwlx` 定位**上下文类型**。完整拼音同样有效：`shangxiawen` 找到这 3 篇文档，加上 `tq` 后定位**上下文提取**。
 
 ![用拼音首字母逐步缩小中文标题的匹配范围](media/pinyin-search.gif)
 
 [观看拼音搜索录屏（MP4）](media/pinyin-search.mp4)。
 
-英文搜索也可以逐步细化。在这组演示中，`/t skills` 找到 3 个标题相近的标签；加上项目关键词，输入 `/t skills openai` 后缩小到 2 个结果，**openai/skills** 排在首位。结合列表里的 GitHub 标题和网址，可以直观看出命中的项目。
+英文搜索也可以逐步细化。在这组演示中，`/t skills github.com` 找到 3 个标题相近的标签；加上项目关键词，输入 `/t skills github.com openai` 后缩小到 2 个结果，**openai/skills** 排在首位。结合列表里的 GitHub 标题和网址，可以直观看出命中的项目。
 
 ![用英文项目关键词缩小相近 Skills 标签的搜索范围](media/english-search.gif)
 
@@ -65,6 +65,8 @@ JXA 通过 macOS 的 `osascript` 执行，与 AppleScript 使用同一套自动�
 安装并启用官方 [Raycast Browser Extension](https://www.raycast.com/browser-extension) 后，预览入口才会出现。选中结果后按 `⌘D`，或通过动作菜单 → **Expand Preview** 打开原生右侧面板。每次进入搜索命令都默认收起。
 
 ![搜索命令右侧面板中的网页正文](media/page-preview.png)
+
+预览会高亮标题和网址中参与匹配的文字，并以 **Tab**、**History** 或 **Bookmark** 标记来源。命中高亮位于右侧详情面板。
 
 普通 HTTP(S) 标签页可以展示提取的 Markdown 正文；书签、历史、无痕标签和特殊协议页面仅展示已有基础信息。**Refresh Preview** 会重新读取选中标签的正文，不会刷新 Chrome 页面。
 
@@ -112,8 +114,6 @@ JXA 通过 macOS 的 `osascript` 执行，与 AppleScript 使用同一套自动�
 已有用户保存的配置继续保留。Raycast 与 Chrome 版分别保存设置，自定义配置不会自动同步，标签页次序也可能存在差异；详见 [搜索策略说明](docs/默认搜索策略对齐.md)。
 
 ![Raycast 搜索参数设置](media/search-settings.png)
-
-![调整历史显示数量并恢复为 10](media/search-settings.gif)
 
 ### 准确切换和打开页面
 
@@ -181,7 +181,7 @@ npm run dev
 
 - 当前支持 **macOS 上的 Google Chrome**，界面运行在 Raycast 内。独立的 [Blazwitcher 浏览器扩展](https://github.com/cjinhuo/blazwitcher) 提供浏览器内界面与 AI 标签分组。
 - 默认搜索标题和域名，“Full URL Search”进一步支持路径、查询参数与片段；可选预览不会增加正文搜索、摘要或 AI 功能。
-- 当前结果列表没有彩色命中高亮。
+- 命中文字在右侧详情面板中高亮；列表行保留 Raycast 原生文字显示。
 - 浏览数据在本机搜索。Chrome 的书签、历史和网站图标数据库保持只读；不读取 Chrome Cookie，也不向搜索或 AI 服务上传浏览数据。
 - 可选启动缓存保存标题、网址等记录字段，每个配置最多 100 条书签和 100 条历史，有效期 5 分钟，总容量限制为 512 KB；不保存标签页或无痕数据。
 - 网页预览正文仅保留在本次命令的内存中，不写入磁盘或搜索索引。官方浏览器扩展返回的网站图标可能通过其提供的图片地址加载。

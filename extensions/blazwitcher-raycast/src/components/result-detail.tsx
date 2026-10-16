@@ -1,21 +1,21 @@
 import { List } from "@raycast/api";
-import type { BrowserEntry } from "../types";
+import type { SearchResult } from "../types";
 import type { PagePreview } from "../browser/page-content";
 import { resultDetailMarkdown } from "./preview-markdown";
 
 export function ResultDetail({
-  entry,
+  result,
   preview,
   isLoading,
 }: {
-  entry: BrowserEntry;
+  result: SearchResult;
   preview: PagePreview;
   isLoading: boolean;
 }) {
   return (
     <List.Item.Detail
       isLoading={isLoading}
-      markdown={resultDetailMarkdown(entry, preview, isLoading)}
+      markdown={resultDetailMarkdown(result.entry, preview, isLoading, result)}
     />
   );
 }

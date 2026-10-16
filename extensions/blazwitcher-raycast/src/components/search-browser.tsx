@@ -265,7 +265,7 @@ export default function SearchBrowser() {
               detail={
                 detailVisible && result.entry.id === activeId ? (
                   <ResultDetail
-                    entry={result.entry}
+                    result={result}
                     preview={preview}
                     isLoading={preview.isLoading}
                   />

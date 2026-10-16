@@ -124,7 +124,7 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
-    "check": "npm run typecheck && npm test && npm run lint && npm run build",
+    "check": "npm run build && npm run typecheck && npm test && npm run lint",
     "test:local": "tsx scripts/inspect-local.ts",
     "publish": "npx @raycast/api@latest publish",
     "prepublishOnly": "node -e \"console.error('Publish this extension through the Raycast CLI. Use npm run publish instead of npm publish.'); process.exit(1)\""

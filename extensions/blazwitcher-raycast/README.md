@@ -42,13 +42,13 @@ Powered by [text-search-engine](https://github.com/cjinhuo/text-search-engine), 
 
 By default, it searches titles and domains using the matching and ranking rules of the [Blazwitcher Chrome extension](https://chromewebstore.google.com/detail/blazwitcher-search-and-sw/fjgablnemienkegdnbihhemebmmonihg) ([GitHub source](https://github.com/cjinhuo/blazwitcher)). This mode appears as **Match Chrome Blaz** in preferences; "Chrome Blaz" refers to the Blazwitcher browser edition. To search URL paths, query parameters, or fragments, select **Full URL Search**, which also retains title-first ranking.
 
-Start with `sxw` to find several “上下文” pages, then use `sxwcj` for **上下文层级** or `sxwlx` for **上下文类型**.
+Start with `sxw` to find three related “上下文” pages, then use `sxwlx` for **上下文类型**. Full Pinyin works too: `shangxiawen` finds the same three pages; add `tq` to locate **上下文提取**.
 
 ![Narrow down Chinese titles with Pinyin initials](media/pinyin-search.gif)
 
 [Watch the Pinyin-search recording (MP4)](media/pinyin-search.mp4).
 
-English searches work the same way. In this demo, `/t skills` finds three tabs with similar titles. Add the project name with `/t skills openai` to narrow the list to two results, with **openai/skills** ranked first. The GitHub title and URL make the matching project easy to identify.
+English searches work the same way. In this demo, `/t skills github.com` finds three tabs with similar titles. Add the project name with `/t skills github.com openai` to narrow the list to two results, with **openai/skills** ranked first. The GitHub title and URL make the matching project easy to identify.
 
 ![Refine similar Skills tabs with an English project keyword](media/english-search.gif)
 
@@ -65,6 +65,8 @@ Refine `kuaisu` to `kuaisu rm`, then add `claude.com` to find **快速入门 - C
 Install and enable the official [Raycast Browser Extension](https://www.raycast.com/browser-extension) to make the preview available. Select a result and press `⌘D`, or choose **Expand Preview** in Actions, to show the native detail panel. It starts collapsed each time you open the command.
 
 ![Page content in the command's detail panel](media/page-preview.png)
+
+The preview highlights matching title and URL text when those fields contribute to the match, and labels each result as **Tab**, **History**, or **Bookmark**. These highlights appear in the detail panel.
 
 For ordinary HTTP(S) tabs, the panel can display the page's extracted Markdown. Bookmarks, history, incognito tabs, and special-protocol pages show existing metadata only. **Refresh Preview** rereads the selected tab's content without reloading the Chrome page.
 
@@ -112,8 +114,6 @@ The reading limit controls how many history records can be searched; result coun
 Existing saved preferences are preserved. Raycast and the Chrome edition save their settings independently; matching defaults do not automatically synchronize custom settings or guarantee identical tab ordering. See the [search strategy notes](docs/默认搜索策略对齐.md) for details.
 
 ![Raycast search preferences](media/search-settings.png)
-
-![Adjust the history result count and restore it to 10](media/search-settings.gif)
 
 ### Open the page you mean
 
@@ -181,7 +181,7 @@ The first tab operation may ask you to allow **Raycast to control Google Chrome*
 
 - This edition supports **Google Chrome on macOS** and runs inside Raycast. The separate [Blazwitcher browser extension](https://github.com/cjinhuo/blazwitcher) provides the browser-side interface and AI tab grouping.
 - Default search covers titles and domains; Full URL Search adds URL paths, query parameters, and fragments. The optional preview does not add page-body search, summaries, or AI features.
-- The result list currently does not color-highlight matched characters.
+- Matched characters are highlighted in the detail panel, while list rows retain Raycast’s native text rendering.
 - Browser data is searched locally. Chrome bookmarks, history, and favicon databases are read without modifying the originals. The extension does not read Chrome cookies or send browsing data to a search or AI service.
 - The optional startup cache stores at most 100 bookmarks and 100 history records per profile for five minutes, within a 512 KB total limit. It includes titles and URLs; it excludes tabs and incognito data.
 - Page-preview text stays in memory for the current command session. It is not written to disk or added to the search index. Favicon images returned by the official browser extension may be loaded from their supplied URLs.

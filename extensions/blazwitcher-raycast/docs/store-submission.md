@@ -12,13 +12,11 @@
 
 截图直接作为仓库文件提交，无需在 manifest 中填写截图 URL。将真实 Raycast 界面的 PNG 放入 `metadata/`，每张 **2000 × 1250**，最多六张；建议至少三张，按文件名顺序展示：
 
-1. `blazwitcher-raycast-1.png`：用 `/t sxw` 搜索相近中文标题，展示拼音首字母搜索。
-2. `blazwitcher-raycast-2.png`：用 `/t skills` 展示相近英文项目；录屏中继续输入 `/t skills openai`，将 3 个结果缩小到 2 个，`openai/skills` 排在首位。
-3. `blazwitcher-raycast-3.png`：按 `⌘D` 展开真实网页正文，展示官方 Raycast Browser Extension 提供的预览。
+1. `blazwitcher-raycast-1.png`：`/t sxw` 的 3 个相近中文标题。
+2. `blazwitcher-raycast-2.png`：`/t skills github.com` 的英文项目结果。
+3. `blazwitcher-raycast-3.png`：`⌘D` 预览的命中高亮、Tab 来源标签和真实正文。
 
-演示环境使用 `raycast-blaz` Chrome 配置中的 15 个公开页面、6 个分组，包括中文 AI 文档和英文 Agent / Skills 项目，并保留书签与历史案例。截图来自实际运行的英文界面，使用 Raycast 原生 **Capture Window**，勾选 **Save to Metadata**，统一使用湖景背景。三张原生 PNG 均已检查为 2000 × 1250，第一张 `/t sxw` 实测显示 4 个结果。
-
-只保留清晰的 Raycast 窗口，不包含其他应用或私人数据，不伪造结果。GIF 和 MP4 保留在 README 的 `media/` 中，不能代替商店 PNG 截图。
+本轮基于 master `232b014`，统一使用 `raycast-blaz` Chrome Profile 的公开页面。真实 Raycast 窗口截图居中放在一致的浅灰背景上，输出 2000 × 1250 PNG；不含其他应用或私人数据，不修改界面内容。具体录制方法、案例和检查范围见 [素材清单](media-guide.md)。GIF 和 MP4 位于 README 的 `media/` 中，不能替代商店 PNG。
 
 ## 检查与提交
 
@@ -31,7 +29,7 @@ npm run check
 
 `npm run check` 包括类型检查、测试、官方 `ray lint`、ESLint、Prettier 和构建。另在真实 Raycast 内确认搜索、来源筛选、打开标签、配置与正文预览；仅有构建通过不足以证明实际功能可用。
 
-官方发布申请已创建：[raycast/extensions #32402](https://github.com/raycast/extensions/pull/32402)。项目自身的 [上架准备 PR #18](https://github.com/cjinhuo/blazwitcher-raycast/pull/18) 汇总英文界面、发布配置、截图和验证结果。审核与合并状态以官方 PR 为准；创建 PR 不代表已上架。
+此前的 [官方 PR #32402](https://github.com/raycast/extensions/pull/32402) 已关闭且未合并。本轮重新从源项目最新 master 准备素材和提交，不复用旧分支作为发布版本。新的申请以实际官方 PR 为准；创建 PR 不代表已上架。
 
 确认最终文件和验证记录后，提交所有发布文件，在同步到最终提交的干净 checkout 中执行以下命令。不要从含 `.local`、`.env` 或其他本地诊断文件的开发目录直接发布，因为官方 CLI 复制文件时不完整遵循 `.gitignore`。使用交互终端，不传 `--non-interactive` 或 `--verbose`：
 

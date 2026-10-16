@@ -116,10 +116,10 @@ react-devtools
 | `npm run lint`       | Raycast 官方 lint、ESLint 与 Prettier 检查 |
 | `npm run format`     | 格式化项目文件，会修改文件                 |
 | `npm run build`      | Raycast 发行构建，写入本机扩展目录         |
-| `npm run check`      | 依次执行类型检查、测试、格式检查和构建     |
+| `npm run check`      | 依次执行构建、类型检查、测试和完整 lint    |
 | `npm run test:local` | 读取本机 Chrome 数据并输出诊断统计         |
 
-修改代码后，按影响范围运行测试；完成改动后运行 `npm run check`。仅修改 Markdown 时，可以先做针对性的格式检查：
+修改代码后，按影响范围运行测试；完成改动后运行 `npm run check`。该命令先构建并生成 `raycast-env.d.ts`，确保全新检出后也能使用生成的偏好类型。仅修改 Markdown 时，可以先做针对性的格式检查：
 
 ```bash
 npx prettier --check CONTRIBUTING.md
