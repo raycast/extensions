@@ -46,18 +46,7 @@ export default function Command() {
   }, [client]);
 
   // Filter items client-side for instant feedback
-  const filteredItems = useMemo(() => {
-    if (!searchText) return allItems;
-
-    const lowerSearch = searchText.toLowerCase();
-    return allItems.filter(
-      (item) =>
-        (item.name && item.name.toLowerCase().includes(lowerSearch)) ||
-        (item.username && item.username.toLowerCase().includes(lowerSearch)) ||
-        (item.uri && item.uri.toLowerCase().includes(lowerSearch)) ||
-        (item.description && item.description.toLowerCase().includes(lowerSearch)),
-    );
-  }, [searchText, allItems]);
+  const filteredItems = useMemo(() => filterResources(allItems, searchText), [allItems, searchText]);
 
   // Separate favorites from other items
   const { favoriteItems, otherItems } = useMemo(() => {
