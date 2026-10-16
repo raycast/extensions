@@ -352,6 +352,20 @@
       ]
     },
     {
+      "name": "view-recommendations",
+      "title": "View Recommendations",
+      "subtitle": "Apple Music",
+      "description": "Browse your personal Apple Music recommendations, add albums, playlists, and songs to your library, and play the ones already there.",
+      "disabledByDefault": true,
+      "mode": "view",
+      "keywords": [
+        "recommendations",
+        "for you",
+        "discover",
+        "catalog"
+      ]
+    },
+    {
       "name": "just-play",
       "title": "Just Play",
       "subtitle": "Apple Music",
