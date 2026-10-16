@@ -205,11 +205,16 @@ async function saveMovedSwipes(axes: Axis[]) {
   else await LocalStorage.setItem(MOVED_SWIPES_KEY, JSON.stringify(axes));
 }
 
-/** A swipe the user sets explicitly is theirs again: drag must not move it back later. */
+/**
+ * A swipe the user sets explicitly is theirs again. The one exception: three fingers while three-finger drag
+ * is on. The swipe has to go to four fingers for now, so it is remembered and moves back to three fingers
+ * once drag is turned off.
+ */
 async function writeSwipeChoice(axis: Axis, v: FingerChoice) {
   await writeFingers(axis, v);
-  const moved = await readMovedSwipes();
-  if (moved.includes(axis)) await saveMovedSwipes(moved.filter((a) => a !== axis));
+  const others = (await readMovedSwipes()).filter((a) => a !== axis);
+  const heldByDrag = v === "three" && asBool(await readTrackpad("TrackpadThreeFingerDrag"));
+  await saveMovedSwipes(heldByDrag ? [...others, axis] : others);
 }
 
 // --- Dragging style (Accessibility → Pointer Control → Trackpad Options)
