@@ -7,6 +7,8 @@
 - Use a full-width native reader and floating message composer, removing the chat sidebar and placeholder row entirely.
 - Continue the same conversation through Enter-to-compose/send and in-progress steering; preserve closed-menu drafts without accidental sends.
 - Remember supported model/effort choices, preserve drafts, and offer native copy/new/stop actions.
+- Preserve unsent drafts when a missing server conversation must be replaced.
+- Match streamed/completed messages to persisted server item IDs when resuming, avoiding duplicate replies.
 - Keep a short recent-chat switcher; remove global CLI browsing, rename and archive/restore management controls.
 - Remove the independent-window feature, preference, and handoff code.
 - Discover installed Codex on macOS and Windows and keep existing local authentication and data.

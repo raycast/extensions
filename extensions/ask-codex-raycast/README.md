@@ -15,6 +15,8 @@ Continue a conversation with your already signed-in local Codex CLI directly ins
 
 ## Drafts and native controls
 
+If a saved server thread cannot be resumed, the replacement conversation keeps the unsent draft and the old local record is retained. Resumed streaming updates reuse server item identities so partial replies are updated instead of duplicated.
+
 The floating composer uses Raycast's native action-menu input with filtering disabled. Its section label previews the message that will be sent. Closing the menu preserves the last non-empty draft; reopening offers **发送已保存的草稿**. Because the public submenu API cannot programmatically fill its search field, use the offered copy action and paste to edit a restored draft, or type replacement text. **清空草稿** explicitly discards it. A visibly empty new input never silently sends an old draft.
 
 The extension uses native controls rather than custom HTML/CSS or a separate app. Raycast's public full-width Detail has no permanent top input or top model dropdown, so the accepted design uses the floating composer and native Actions model selector. The native action input retains Raycast's built-in search placeholder; filtering is disabled and its contents are treated as a message.

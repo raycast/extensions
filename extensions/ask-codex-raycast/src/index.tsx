@@ -34,6 +34,8 @@ import {
   upsertConversation,
   latestRound,
   messagesFromThread,
+  reconnectedConversation,
+  applyAssistantMessage,
   transcript,
   LIBRARY_KEY,
   LEGACY_KEY,
@@ -87,7 +89,6 @@ export default function CodexInRaycast(
   const sendQueueRef = useRef<Promise<void>>(Promise.resolve());
   const requestPendingRef = useRef(false);
   const activeReplyRef = useRef<string | null>(null);
-  const itemIdsRef = useRef(new Map<string, string>());
   const persistedRef = useRef<StoredConversation | null>(null);
   const saveQueueRef = useRef<Promise<unknown>>(Promise.resolve());
   const draftRef = useRef(draft);
@@ -189,6 +190,7 @@ export default function CodexInRaycast(
     let disposed = false;
     mountedRef.current = true;
     readyRef.current = false;
+    activeReplyRef.current = null;
     setReady(false);
     setError("");
     setStatus("正在连接 Codex…");
@@ -225,36 +227,19 @@ export default function CodexInRaycast(
       ) {
         const item = asRecord(params.item);
         const itemId = asString(params.itemId) || asString(item.id);
-        let replyId = itemIdsRef.current.get(itemId);
-        if (!replyId) {
-          replyId = activeReplyRef.current || makeId();
-          activeReplyRef.current = null;
-          itemIdsRef.current.set(itemId, replyId);
-        }
+        const placeholderId = activeReplyRef.current;
+        activeReplyRef.current = null;
         const completed = event.method === "item/completed";
         const text = completed ? asString(item.text) : asString(params.delta);
-        const id = replyId;
-        setConversation((previous) => {
-          const existing = previous.messages.find(
-            (message) => message.id === id,
-          );
-          const next: ChatMessage = {
-            id,
-            role: "assistant",
-            content: completed
-              ? text || existing?.content || ""
-              : (existing?.content || "") + text,
-            status: completed ? "complete" : "streaming",
-          };
-          return {
-            ...previous,
-            messages: existing
-              ? previous.messages.map((message) =>
-                  message.id === id ? next : message,
-                )
-              : [...previous.messages, next],
-          };
-        });
+        setConversation((previous) => ({
+          ...previous,
+          messages: applyAssistantMessage(previous.messages, {
+            itemId,
+            placeholderId,
+            text,
+            completed,
+          }),
+        }));
         setStatus("正在回答 · 输入后按 Enter 发送补充要求");
       }
       if (event.method === "turn/completed") {
@@ -377,15 +362,17 @@ export default function CodexInRaycast(
         client.close();
         return;
       }
-      setConversation({
-        ...(threadId === stored.threadId ? stored : {}),
+      const resumed = reconnectedConversation(
+        stored,
         threadId,
         messages,
-        cwd: asString(client.threadSnapshot.cwd),
-        archived: false,
-      });
-      // Unsent drafts survive an empty, not-yet-persisted server thread.
-      if (threadId !== stored.threadId && stored.messages.length) setDraft("");
+        asString(client.threadSnapshot.cwd),
+        draftRef.current,
+      );
+      persistedRef.current = resumed;
+      setConversation(resumed);
+      setDraft(resumed.draft || "");
+      save(resumed);
       setBusy(Boolean(client.currentTurnId));
       setCurrentModel(client.currentModelSelection);
       readyRef.current = true;
@@ -472,7 +459,6 @@ export default function CodexInRaycast(
     const userId = makeId();
     const replyId = makeId();
     activeReplyRef.current = replyId;
-    itemIdsRef.current.clear();
     setBusy(true);
     setStatus("正在思考 · 输入后按 Enter 发送补充要求");
     setConversation((previous) => ({
@@ -588,7 +574,6 @@ export default function CodexInRaycast(
       save(next);
       setPage("chat");
       activeReplyRef.current = null;
-      itemIdsRef.current.clear();
       setError("");
       setStatus("新对话 · 输入后按 Enter 发送");
     } catch (reason) {
@@ -637,7 +622,6 @@ export default function CodexInRaycast(
         cwd: asString(client.threadSnapshot.cwd),
       };
       activeReplyRef.current = null;
-      itemIdsRef.current.clear();
       persistedRef.current = next;
       setConversation(next);
       setDraft(next.draft || "");

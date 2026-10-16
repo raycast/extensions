@@ -4,6 +4,7 @@ export type ChatMessage = {
   content: string;
   kind?: "message" | "steer";
   status?: "streaming" | "complete" | "error";
+  itemId?: string;
 };
 
 export type StoredConversation = {
@@ -38,6 +39,59 @@ export const messageOf = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
 export const makeId = () =>
   `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+/** Keep the pending text accessible even when a missing server thread is replaced. */
+export function reconnectedConversation(
+  saved: StoredConversation,
+  threadId: string,
+  messages: ChatMessage[],
+  cwd: string,
+  draft = saved.draft || "",
+): StoredConversation {
+  return {
+    ...(threadId === saved.threadId ? saved : {}),
+    threadId,
+    messages,
+    cwd,
+    draft,
+    archived: false,
+  };
+}
+
+/** Match both hydrated server IDs and the server ID attached to a local placeholder. */
+export function applyAssistantMessage(
+  messages: ChatMessage[],
+  update: {
+    itemId: string;
+    placeholderId: string | null;
+    text: string;
+    completed: boolean;
+  },
+): ChatMessage[] {
+  const existing =
+    messages.find(
+      (message) =>
+        message.role === "assistant" &&
+        Boolean(update.itemId) &&
+        (message.id === update.itemId || message.itemId === update.itemId),
+    ) ||
+    messages.find(
+      (message) =>
+        message.role === "assistant" && message.id === update.placeholderId,
+    );
+  const next: ChatMessage = {
+    id: existing?.id || update.itemId || makeId(),
+    itemId: update.itemId || existing?.itemId,
+    role: "assistant",
+    content: update.completed
+      ? update.text || existing?.content || ""
+      : (existing?.content || "") + update.text,
+    status: update.completed ? "complete" : "streaming",
+  };
+  return existing
+    ? messages.map((message) => (message === existing ? next : message))
+    : [...messages, next];
+}
 
 export function parseConversation(value: unknown): StoredConversation {
   const data = asRecord(value);
@@ -178,6 +232,7 @@ export function messagesFromThread(thread: unknown): ChatMessage[] {
       } else if (item.type === "agentMessage") {
         messages.push({
           id: asString(item.id) || makeId(),
+          itemId: asString(item.id) || undefined,
           role: "assistant",
           content: asString(item.text),
           status: turn.status === "inProgress" ? "streaming" : "complete",
