@@ -1,6 +1,6 @@
 # Dock Badges Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-16
 
 - Menu bar item showing the summed notification badge count of every app in your Dock
 - Dropdown lists the apps that currently have badges; click one to open it
