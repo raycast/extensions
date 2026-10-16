@@ -164,6 +164,50 @@ export function useEventTypes() {
   );
 }
 
+// ─── Team event types ──────────────────────────────────────────────────────
+
+const TEAM_EVENT_TYPES_API_VERSION = "2026-06-12";
+
+export interface CalTeamEventType extends Omit<CalEventType, "bookingUrl"> {
+  /** Null for managed event types or when the team has no slug. */
+  bookingUrl: string | null;
+  team: { id: number; slug: string; name: string };
+}
+
+export interface CalTeamEventTypes {
+  team: CalTeamSummary;
+  eventTypes: Array<CalTeamEventType & { bookingUrl: string }>;
+}
+
+async function fetchTeamEventTypes(team: CalTeamSummary): Promise<CalTeamEventTypes> {
+  try {
+    const eventTypes = await calAPI<CalTeamEventType[]>({
+      url: `/teams/${team.id}/event-types`,
+      headers: { "cal-api-version": TEAM_EVENT_TYPES_API_VERSION },
+    });
+    // Managed event types have no shareable team URL — they show up as personal event types for each member.
+    return {
+      team,
+      eventTypes: eventTypes.filter((e): e is CalTeamEventType & { bookingUrl: string } => !!e.bookingUrl),
+    };
+  } catch (err) {
+    console.error(`fetchTeamEventTypes(${team.name}) failed:`, err);
+    return { team, eventTypes: [] };
+  }
+}
+
+async function fetchAllTeamEventTypes(): Promise<CalTeamEventTypes[]> {
+  const teams = (await fetchTeams()).filter((t) => !t.isOrganization);
+  const results = await Promise.all(teams.map(fetchTeamEventTypes));
+  return results.filter((r) => r.eventTypes.length > 0);
+}
+
+export function useTeamEventTypes() {
+  return useCachedPromise(fetchAllTeamEventTypes, [], {
+    failureToastOptions: { title: "Unable to load team event types" },
+  });
+}
+
 const BOOKINGS_API_VERSION = "2026-02-25";
 
 interface BookingsListParams {
@@ -429,9 +473,11 @@ export function deleteOOO(id: number, signal?: AbortSignal) {
 
 const TEAMS_API_VERSION = "2024-08-13";
 
-interface CalTeamSummary {
+export interface CalTeamSummary {
   id: number;
   name: string;
+  slug: string | null;
+  isOrganization: boolean;
 }
 
 export interface CalTeammate {
