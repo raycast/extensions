@@ -10,9 +10,11 @@ export default function Command() {
     useInterval(revalidate, 1000);
 
     if (data?.length === 0) {
-        <List>
-            <List.EmptyView title="No connections" icon={Icon.Leaf} />
-        </List>;
+        return (
+            <List>
+                <List.EmptyView title="No connections" icon={Icon.Leaf} />
+            </List>
+        );
     }
 
     return (
@@ -49,15 +51,6 @@ export default function Command() {
                     }
                 />
             ))}
-            {/* <List.Item
-        icon={Icon.Bird}
-        title="Greeting"
-        actions={
-          <ActionPanel>
-            <Action.Push title="Show Details" target={<Detail markdown="# Hey! 👋" />} />
-          </ActionPanel>
-        }
-      /> */}
         </List>
     );
 }
