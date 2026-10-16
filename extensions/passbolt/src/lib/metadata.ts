@@ -68,15 +68,9 @@ export class MetadataDecryptor {
   }
 
   private getSharedKeys(): Promise<SharedMetadataKeys> {
-    if (!this.sharedKeys) {
-      const pending = this.loadSharedKeys().catch((error) => {
-        // A refresh may already have started a newer request.
-        if (this.sharedKeys === pending) this.sharedKeys = undefined;
-        throw error;
-      });
-      this.sharedKeys = pending;
-    }
-    return this.sharedKeys;
+    // Keep failures for this load so later batches do not repeat a failing HTTP request.
+    // clearSharedKeys() allows the next account/resource load to retry.
+    return (this.sharedKeys ??= this.loadSharedKeys());
   }
 
   private getDecryptedSharedKey(id: string): Promise<openpgp.PrivateKey> {

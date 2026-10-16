@@ -183,7 +183,7 @@ test("a rejected user-key load can recover on the same decryptor", async () => {
   assert.equal(userLoads, 2);
 });
 
-test("rejected shared-key list and decrypted-key promises can recover without restarting", async () => {
+test("a failed shared-key list stays cached until refresh and then recovers", async () => {
   let keyLoads = 0;
   const decoder = decryptor(async () => {
     if (++keyLoads === 1) throw new Error("Temporary network failure");
@@ -191,10 +191,68 @@ test("rejected shared-key list and decrypted-key promises can recover without re
   });
   const entries = [resource(), resource({ id: "resource-2" })];
   assert.ok((await decoder.decryptResources(entries)).every((entry) => entry.metadata_error));
+  assert.ok((await decoder.decryptResources(entries)).every((entry) => entry.metadata_error));
+  assert.equal(keyLoads, 1, "failed key-list requests are not retried during the same load");
+  decoder.clearSharedKeys();
   const results = await decoder.decryptResources(entries);
   assert.ok(results.every((entry) => entry.name === "Example Login" && !entry.metadata_error));
   assert.equal(keyLoads, 2, "concurrent resources share each key-list request");
 });
+
+for (const command of ["searchResources", "getTotpResources"]) {
+  test(`${command} makes one failed shared-key request pair for 1800 entries and retries on reload`, async () => {
+    const { PassboltClient } = loadTypeScript("src/lib/passbolt.ts", {
+      "@raycast/api": {
+        getPreferenceValues: () => ({ passboltUrl: baseUrl, privateKey: "/unused", passphrase: "unused" }),
+      },
+    });
+    const client = new PassboltClient();
+    client.authenticate = async () => {};
+    client.readPrivateKey = async () => userKey;
+    client.decryptSecretData = async () => JSON.stringify({ totp: { secret_key: "JBSWY3DPEHPK3PXP" } });
+    const shared = await sharedKeyResponse();
+    let failing = true,
+      userRequests = 0,
+      keyRequests = 0;
+    client.request = async (url) => {
+      let body;
+      if (url.startsWith("/resources.json")) {
+        body = failing
+          ? Array.from({ length: 1800 }, (_, index) =>
+              resource({
+                id: `resource-${index}`,
+                metadata_key_id: `${keyId}-${index % 17}`,
+                secrets: [{ data: "included-secret" }],
+              }),
+            )
+          : [resource({ secrets: [{ data: "included-secret" }] })];
+      } else if (url === "/resource-types.json") body = [{ id: typeId, slug: "totp" }];
+      else if (url === "/users/me.json") {
+        userRequests++;
+        body = { id: userId };
+      } else if (url.startsWith("/metadata/keys.json")) {
+        keyRequests++;
+        if (failing) return { ok: false, status: 503 };
+        body = shared.keys;
+      } else throw new Error(`Unexpected request: ${url}`);
+      return { ok: true, status: 200, json: async () => ({ header: { status: "success" }, body }) };
+    };
+    const load = async () =>
+      command === "searchResources" ? (await client.searchResources("")).body : (await client.getTotpResources()).items;
+
+    const failed = await load();
+    assert.equal(failed.length, 1800);
+    assert.ok(failed.every((entry) => entry.metadata_error));
+    assert.equal(userRequests, 1, "one user request across all batches and key IDs");
+    assert.equal(keyRequests, 1, "one shared-key request across all batches and key IDs");
+    failing = false;
+    const [recovered] = await load();
+    assert.equal(recovered.name, "Example Login");
+    assert.equal(recovered.metadata_error, undefined);
+    assert.equal(userRequests, 2, "a new load retries after recovery");
+    assert.equal(keyRequests, 2, "a new load retries after recovery");
+  });
+}
 
 test("a failed shared-key unwrap is retried without refetching a successful key list", async () => {
   const response = await sharedKeyResponse();

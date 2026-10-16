@@ -408,6 +408,7 @@ export class PassboltClient {
 
   public async searchResources(query: string) {
     // v5 names are encrypted, so keyword filtering must happen locally after decryption.
+    this.metadataDecryptor.clearSharedKeys();
     const json = await this.fetchResources();
     const resources = await this.metadataDecryptor.decryptResources(json.body);
     return { ...json, body: filterResources(resources, query) };

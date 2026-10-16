@@ -4,7 +4,7 @@
 
 - Select TOTP-capable entries before decryption, reuse included secrets, and unlock the private key once per command.
 - Load accounts progressively and include password-plus-TOTP entries that were previously omitted.
-- Retry failed metadata-key loads and reload shared metadata keys when refreshing accounts.
+- Cache shared metadata-key request failures for each load and retry when refreshing accounts.
 - Search account names, usernames, all URLs, tags, notes, and Oracle's OCI alias.
 - Prioritize saved URLs matching the current website when browser context is available.
 - Honor each account's algorithm, digits, and period, and generate a fresh code when copying or pasting.
