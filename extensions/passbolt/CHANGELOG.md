@@ -6,9 +6,12 @@
 - Load accounts progressively and include password-plus-TOTP entries that were previously omitted.
 - Cache shared metadata-key request failures for each load and retry when refreshing accounts.
 - Search account names, usernames, all URLs, tags, notes, and Oracle's OCI alias.
+- Match every search term, each in any field, so `pfeiffer office` finds entries combining that email and name.
 - Prioritize saved URLs matching the current website when browser context is available.
 - Honor each account's algorithm, digits, and period, and generate a fresh code when copying or pasting.
 - Support Authenticator refresh, copy, and paste shortcuts on both macOS and Windows.
+- Speed up loading with a shared client, parallel authentication and schema requests, streamed metadata
+  decryption, and cached search indexing.
 
 ## [Fix Search for Encrypted Metadata] - {PR_MERGE_DATE}
 

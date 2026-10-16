@@ -169,6 +169,45 @@ test("nullable v5 fields and absent legacy names do not break search", async () 
   assert.equal(filterResources(results, "absent").length, 0);
 });
 
+test("every search term must match, and each term may match a different field", () => {
+  const entries = [
+    {
+      id: "match",
+      name: "Office Portal",
+      username: "anna.pfeiffer@example.test",
+      uri: "https://portal.example.test",
+      uris: ["https://portal.example.test", "https://backup.example.test"],
+      description: "Renewal in March",
+      tags: [{ id: "tag-1", slug: "contracts", is_shared: true }],
+    },
+    {
+      id: "other",
+      name: "Warehouse",
+      username: "someone@example.test",
+      uri: "https://shop.example.test",
+      description: "Stock list",
+      tags: [{ id: "tag-2", slug: "logistics", is_shared: true }],
+    },
+  ];
+  // 'pfeiffer' only matches the email, 'office' only matches the name: both must match.
+  assert.deepEqual(
+    filterResources(entries, "pfeiffer office").map((entry) => entry.id),
+    ["match"],
+  );
+  // Order of terms is irrelevant and remaining terms may match other fields.
+  assert.deepEqual(
+    filterResources(entries, "office pfeiffer").map((entry) => entry.id),
+    ["match"],
+  );
+  for (const query of ["office contracts", "office renewal", "pfeiffer backup", "office portal example.test"]) {
+    assert.deepEqual(filterResources(entries, query).map((entry) => entry.id), ["match"], query);
+  }
+  // A missing term excludes the entry even when the other terms match.
+  assert.equal(filterResources(entries, "pfeiffer absent").length, 0);
+  // Blank queries still list everything.
+  assert.equal(filterResources(entries, "   ").length, 2);
+});
+
 test("a rejected user-key load can recover on the same decryptor", async () => {
   let userLoads = 0;
   const decoder = decryptor(undefined, async () => {

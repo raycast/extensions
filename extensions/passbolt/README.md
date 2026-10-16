@@ -8,7 +8,9 @@ A powerful [Raycast](https://raycast.com) extension for managing your [Passbolt]
 Quickly search and access your Passbolt vault directly from Raycast. View password details, copy credentials, and access TOTP codes with keyboard shortcuts.
 
 Search supports legacy resources and [Passbolt v5 encrypted metadata](https://www.passbolt.com/docs/development/resources/v5-encrypted-metadata/).
-Names, usernames, notes, and all URLs are decrypted locally before searching. Personal metadata uses your private key;
+Names, usernames, notes, all URLs, and tags are decrypted locally before searching. Search terms match in any
+order and across fields: `pfeiffer office` finds the entry whose email contains "pfeiffer" and whose name
+contains "office", and every term must match. Personal metadata uses your private key;
 shared metadata uses the metadata key encrypted for your account. Shared key envelopes must be signed by your account,
 match the configured Passbolt instance, and have matching fingerprints. Keys are cached only in memory for the command's lifetime.
 Entries that cannot be decrypted remain visible with an error indicator, and a toast reports the failure.
