@@ -440,7 +440,7 @@ test("a stale or missing metadata resource type id does not hide the entry", asy
   // Passbolt only advises writers to keep the clear-text and metadata ids consistent, and its
   // own migration bug (API PB-39512) left legitimate vaults where they differ. The decrypted
   // metadata is trusted for display; the clear-text row keeps driving type decisions.
-  for (const override of [{ resource_type_id: "stale-type" }, { resource_type_id: undefined }]) {
+  for (const override of [{ resource_type_id: "stale-type" }, { resource_type_id: undefined }, { resource_type_id: 42 }]) {
     const encrypted = await encrypt(metadata(override), userKey);
     const [result] = await decryptor().decryptResources([
       resource({ metadata_key_type: "user_key", metadata: encrypted }),
