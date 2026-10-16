@@ -175,6 +175,22 @@
       ]
     },
     {
+      "name": "bring-call-to-front",
+      "title": "Bring Current Teams Call to Front",
+      "description": "Brings the window of the running Teams call or meeting to the front, also when it is minimised or hidden behind other windows.",
+      "mode": "no-view",
+      "keywords": [
+        "call",
+        "meeting",
+        "front",
+        "window",
+        "anruf",
+        "besprechung",
+        "fenster",
+        "vordergrund"
+      ]
+    },
+    {
       "name": "set-status",
       "title": "Set Teams Status",
       "description": "Sets your Teams presence to Available, Busy, Do Not Disturb, Be Right Back, Away or Offline.",
