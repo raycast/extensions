@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Cursor sign-in on Windows] - {PR_MERGE_DATE}
+## [Cursor sign-in on Windows] - 2026-10-16
 
 - Auto-detect active Cursor authentication from the Windows state database, with `%APPDATA%\Cursor\auth.json` as a fallback
 
