@@ -1,6 +1,6 @@
 # Hue Changelog
 
-## [AI tools, Hue app look and bug fixes] - {PR_MERGE_DATE}
+## [AI tools, Hue app look and bug fixes] - 2026-10-16
 
 ### New
 
