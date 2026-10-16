@@ -1,6 +1,6 @@
 # Apple Music Changelog
 
-## [View Recommendations Command] - {PR_MERGE_DATE}
+## [View Recommendations Command] - 2026-10-16
 
 - Added a new "View Recommendations" command that shows your personal Apple Music recommendation rooms as a grid of albums, playlists, and songs — with In Library badges, Add to Library, album tracklists, and Open in Music.
 - Albums, songs, and playlists that are already in your library can be played (or shuffled) straight from the grid.
