@@ -21,16 +21,13 @@ function entryKindLabel(kind: EntryKind): string {
   }
 }
 
-function entryKindPlaceholder(kind: EntryKind): string {
+/** Placeholder shown by the kinds whose Target is a text field. */
+function entryKindPlaceholder(kind: "url" | "shell"): string {
   switch (kind) {
-    case "app":
-      return "/Applications/Ghostty.app";
-    case "file":
-      return "~/Documents";
     case "url":
       return "raycast://extensions/…";
     case "shell":
-      return "open -a Ghostty";
+      return 'say "Hello World!"';
   }
 }
 
