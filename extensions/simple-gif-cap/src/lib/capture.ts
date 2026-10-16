@@ -112,17 +112,24 @@ export async function convertPendingRecordings(limit = 3): Promise<number> {
   const newest = dated.sort((a, b) => b.createdAt - a.createdAt).slice(0, limit);
   let converted = 0;
   for (const { path, createdAt } of newest) {
+    // Only a video that cannot be read is set aside, so it stops blocking
+    // recovery. Anything else (missing encoder, full disk) is retried next time.
+    const readable = await probe(path).then(
+      () => true,
+      () => false,
+    );
+    if (!readable) {
+      await rename(path, `${path}.failed`).catch(() => undefined);
+      continue;
+    }
+
     try {
       await createCapture(path, Math.round(createdAt), { copy: false });
       converted++;
     } catch (error) {
-      // A missing encoder says nothing about the video, so keep it for later.
       if (error instanceof MissingToolError) {
         throw error;
       }
-
-      // An unreadable video would block recovery on every launch: set it aside.
-      await rename(path, `${path}.failed`).catch(() => undefined);
     }
   }
 
