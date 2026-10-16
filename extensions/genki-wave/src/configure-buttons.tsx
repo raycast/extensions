@@ -15,7 +15,7 @@ import {
   useNavigation,
   Keyboard,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { usePromise, showFailureToast } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { ReactNode, useEffect, useRef, useState } from "react";
@@ -89,9 +89,8 @@ async function copyDiagnostics() {
     toast.title = "Diagnostics copied";
     toast.message = "Paste them to Genki";
   } catch (e) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Couldn't collect diagnostics";
-    toast.message = e instanceof Error ? e.message : String(e);
+    await toast.hide();
+    await showFailureToast(e, { title: "Couldn't collect diagnostics" });
   }
 }
 
@@ -127,7 +126,7 @@ export default function ConfigureButtons() {
     helperPath()
       .then((helper) => listener.start(helper))
       .then(() => running.revalidate())
-      .catch((e) => showToast({ style: Toast.Style.Failure, title: "Couldn't start Wave", message: String(e) }));
+      .catch((e) => showFailureToast(e, { title: "Couldn't start Wave" }));
   }, [running.data]);
 
   // Re-read the listener's log while open, so a ring that connects, drops or stops responding shows up live.
@@ -304,9 +303,8 @@ export default function ConfigureButtons() {
                       toast.style = Toast.Style.Success;
                       refresh();
                     } catch (e) {
-                      toast.style = Toast.Style.Failure;
-                      toast.title = `Couldn't ${fix.title.toLowerCase()}`;
-                      toast.message = e instanceof Error ? e.message : String(e);
+                      await toast.hide();
+                      await showFailureToast(e, { title: `Couldn't ${fix.title.toLowerCase()}` });
                     }
                   }}
                 />
@@ -346,7 +344,7 @@ export default function ConfigureButtons() {
                     await identify();
                     await showToast({ style: Toast.Style.Success, title: "Look for the flashing ring" });
                   } catch (e) {
-                    await showToast({ style: Toast.Style.Failure, title: "Identify failed", message: String(e) });
+                    await showFailureToast(e, { title: "Identify failed" });
                   }
                 }}
               />

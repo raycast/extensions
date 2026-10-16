@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Color, Detail, Icon, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
+import { usePromise, showFailureToast } from "@raycast/utils";
 
 import { getStatus, identify, readListenerLog } from "./helper";
 import * as listener from "./listener";
@@ -66,7 +66,7 @@ export default function WaveStatus() {
               try {
                 await identify();
               } catch (e) {
-                await showToast({ style: Toast.Style.Failure, title: "Identify failed", message: String(e) });
+                await showFailureToast(e, { title: "Identify failed" });
               }
             }}
           />

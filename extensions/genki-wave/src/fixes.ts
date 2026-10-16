@@ -1,4 +1,5 @@
-import { open, showToast, Toast } from "@raycast/api";
+import { open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -46,10 +47,6 @@ export async function restartListener() {
   try {
     await listener.restart();
   } catch (e) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Couldn't restart Wave",
-      message: e instanceof Error ? e.message : String(e),
-    });
+    await showFailureToast(e, { title: "Couldn't restart Wave" });
   }
 }

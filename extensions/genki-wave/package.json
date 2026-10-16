@@ -5,7 +5,6 @@
   "description": "Use the buttons and swipes on your Genki Wave ring to dictate into any app, control slides and media, or run any Raycast command.",
   "icon": "icon.png",
   "author": "multivac61",
-  "owner": "genki.is",
   "categories": [
     "Productivity",
     "System"
@@ -59,6 +58,5 @@
       "description": "Run a wave-helper you installed yourself instead of the one the extension downloads.",
       "placeholder": "/opt/homebrew/bin/wave-helper"
     }
-  ],
-  "access": "public"
+  ]
 }

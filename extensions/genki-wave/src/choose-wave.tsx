@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast, Keyboard } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { usePromise, showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 
 import { bindingsPath, Device, forgetDevice, readDevice, readForgotten, setDevice } from "./bindings";
@@ -27,7 +27,7 @@ export default function ChooseWave() {
       await turnOnBluetooth();
       nearby.revalidate();
     } catch (e) {
-      await showToast({ style: Toast.Style.Failure, title: "Couldn't turn on Bluetooth", message: String(e) });
+      await showFailureToast(e, { title: "Couldn't turn on Bluetooth" });
     }
   };
   const forgotten = readForgotten();
@@ -152,7 +152,7 @@ export default function ChooseWave() {
                           await identify(wave.address);
                           await showToast({ style: Toast.Style.Success, title: "Look for the flashing ring" });
                         } catch (e) {
-                          await showToast({ style: Toast.Style.Failure, title: "Identify failed", message: String(e) });
+                          await showFailureToast(e, { title: "Identify failed" });
                         }
                       }}
                     />
