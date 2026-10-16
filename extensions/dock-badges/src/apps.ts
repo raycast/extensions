@@ -47,7 +47,7 @@ export async function openDockApp(tile: DockTile, path?: string): Promise<void> 
   }
   const reason = isAccessibilityError(clickError)
     ? "Raycast needs Accessibility permission"
-    : "it is no longer in the Dock";
+    : "its Dock tile could not be clicked";
   await showHUD(`Couldn't open ${tile.name}: ${reason}`);
 }
 
