@@ -1,3 +1,4 @@
+import { t } from "./i18n";
 import {
   Action,
   ActionPanel,
@@ -55,7 +56,7 @@ export function useSessionHistory({
     } catch (reason) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "未能继续对话",
+        title: t("未能继续对话"),
         message: messageOf(reason),
       });
     } finally {
@@ -65,23 +66,23 @@ export function useSessionHistory({
   }
 
   return {
-    navigationTitle: "最近对话",
-    searchBarPlaceholder: "选择最近的对话…",
+    navigationTitle: t("最近对话"),
+    searchBarPlaceholder: t("选择最近的对话…"),
     filtering: true,
     isLoading: opening,
     isShowingDetail: false,
     actions: (
       <ActionPanel>
-        <Action title="返回聊天" icon={Icon.ArrowLeft} onAction={onBack} />
-        <Action title="新建对话" icon={Icon.Plus} onAction={onNew} />
+        <Action title={t("返回聊天")} icon={Icon.ArrowLeft} onAction={onBack} />
+        <Action title={t("新建对话")} icon={Icon.Plus} onAction={onNew} />
       </ActionPanel>
     ),
     children: (
       <>
         <List.EmptyView
           icon={Icon.Message}
-          title="还没有最近对话"
-          description="返回输入一个问题，就可以开始。"
+          title={t("还没有最近对话")}
+          description={t("返回输入一个问题，就可以开始。")}
         />
         {recent.map((session) => (
           <List.Item
@@ -95,16 +96,20 @@ export function useSessionHistory({
             actions={
               <ActionPanel>
                 <Action
-                  title="继续对话"
+                  title={t("继续对话")}
                   icon={Icon.Message}
                   onAction={() => select(session)}
                 />
                 <Action
-                  title="返回聊天"
+                  title={t("返回聊天")}
                   icon={Icon.ArrowLeft}
                   onAction={onBack}
                 />
-                <Action title="新建对话" icon={Icon.Plus} onAction={onNew} />
+                <Action
+                  title={t("新建对话")}
+                  icon={Icon.Plus}
+                  onAction={onNew}
+                />
               </ActionPanel>
             }
           />

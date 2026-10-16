@@ -1,3 +1,4 @@
+import { t } from "./i18n";
 export type ChatMessage = {
   id: string;
   role: "user" | "assistant";
@@ -122,7 +123,9 @@ export function parseLibrary(
   if (value) {
     const data = asRecord(JSON.parse(value));
     if (data.version !== 2 || !Array.isArray(data.sessions))
-      throw new Error("会话记录格式无法识别，原记录已保留，请勿清除扩展数据。");
+      throw new Error(
+        t("会话记录格式无法识别，原记录已保留，请勿清除扩展数据。"),
+      );
     return {
       version: 2,
       activeId: asString(data.activeId) || null,
@@ -168,7 +171,7 @@ export function conversationTitle(session: StoredConversation): string {
       .find((item) => item.role === "user")
       ?.content.replace(/\s+/g, " ")
       .slice(0, 70) ||
-    "新对话"
+    t("新对话")
   );
 }
 
@@ -215,7 +218,7 @@ export function messagesFromThread(thread: unknown): ChatMessage[] {
                 const input = asRecord(raw);
                 if (input.type === "text") return asString(input.text);
                 if (input.type === "image" || input.type === "localImage")
-                  return "[图片]";
+                  return t("[图片]");
                 return "";
               })
               .filter(Boolean)
@@ -245,15 +248,15 @@ export function messagesFromThread(thread: unknown): ChatMessage[] {
 
 export function transcript(messages: ChatMessage[]): string {
   if (!messages.length)
-    return "# 新对话\n\n在顶部输入问题并按 Enter 发送。对话记录会一直保留在这里。\n\nChatGPT 回答过程中也可以继续输入，按 Enter 发送补充要求。";
+    return t("# 新对话\n\n按 Enter 打开输入浮层，输入后按 Enter 发送。");
   return messages
     .map((message) => {
       const heading =
         message.role === "assistant"
-          ? "ChatGPT"
+          ? "Codex"
           : message.kind === "steer"
-            ? "补充要求"
-            : "你";
+            ? t("补充要求")
+            : t("你");
       const body =
         message.role === "user"
           ? message.content
@@ -262,8 +265,8 @@ export function transcript(messages: ChatMessage[]): string {
               .join("\n")
           : message.content ||
             (message.status === "streaming"
-              ? "_正在思考…_"
-              : "_本轮没有文字回答。_");
+              ? t("_正在思考…_")
+              : t("_本轮没有文字回答。_"));
       return `### ${heading}\n\n${body}`;
     })
     .join("\n\n---\n\n");

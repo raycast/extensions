@@ -1,3 +1,4 @@
+import { t } from "./i18n";
 import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
 import { useRef, useState } from "react";
 
@@ -15,7 +16,7 @@ export function MessageComposer(props: {
   const preview = message.replace(/\s+/g, " ").slice(0, 90);
   return (
     <ActionPanel.Submenu
-      title={props.busy ? "补充要求" : "输入消息"}
+      title={props.busy ? t("补充要求") : t("输入消息")}
       icon={props.busy ? Icon.Plus : Icon.Pencil}
       shortcut={{ modifiers: [], key: "return" }}
       filtering={false}
@@ -42,22 +43,26 @@ export function MessageComposer(props: {
       }}
     >
       <ActionPanel.Section
-        title={preview ? `待发送 · ${preview}` : "输入消息，按 Enter 发送"}
+        title={
+          preview
+            ? t("待发送 · {v0}", { v0: preview })
+            : t("输入消息，按 Enter 发送")
+        }
       >
         <Action
           title={
             restored
-              ? "发送已保存的草稿"
+              ? t("发送已保存的草稿")
               : props.busy
-                ? "发送补充要求"
-                : "发送消息"
+                ? t("发送补充要求")
+                : t("发送消息")
           }
           icon={Icon.ArrowRight}
           onAction={async () => {
             if (!message.trim()) {
               await showToast({
                 style: Toast.Style.Failure,
-                title: "先在输入框里输入消息",
+                title: t("先在输入框里输入消息"),
               });
               return;
             }
@@ -69,7 +74,7 @@ export function MessageComposer(props: {
         />
         {props.draft.trim() && (
           <Action
-            title="清空草稿"
+            title={t("清空草稿")}
             icon={Icon.Eraser}
             onAction={() => {
               setQuery("");
@@ -80,7 +85,7 @@ export function MessageComposer(props: {
         )}
         {restored && (
           <Action.CopyToClipboard
-            title="复制草稿以继续编辑"
+            title={t("复制草稿以继续编辑")}
             content={props.draft}
           />
         )}

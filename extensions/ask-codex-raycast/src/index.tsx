@@ -1,3 +1,11 @@
+import { setLocale, t } from "./i18n";
+import { SetupWizard } from "./setup";
+import {
+  connectionSignature,
+  parseSetup,
+  SETUP_KEY,
+  type Setup,
+} from "./setup-state";
 import {
   Action,
   ActionPanel,
@@ -48,6 +56,124 @@ export default function CodexInRaycast(
   props: LaunchProps<{ arguments: Arguments.Index }>,
 ) {
   const preferences = getPreferenceValues<Preferences>();
+  const signature = connectionSignature(preferences);
+  const launchConsumed = useRef(false);
+  return (
+    <ConfiguredCommand
+      key={signature}
+      launch={props}
+      preferences={preferences}
+      launchConsumed={launchConsumed}
+    />
+  );
+}
+
+function ConfiguredCommand({
+  launch,
+  preferences,
+  launchConsumed,
+}: {
+  launch: LaunchProps<{ arguments: Arguments.Index }>;
+  preferences: Preferences;
+  launchConsumed: { current: boolean };
+}) {
+  const [loaded, setLoaded] = useState(false);
+  const [setup, setSetup] = useState<Setup | null>(null);
+  const [savedSelection, setSavedSelection] = useState<ModelSelection | null>(
+    null,
+  );
+  const [editing, setEditing] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoadError("");
+      const saved = parseSetup(await LocalStorage.getItem<string>(SETUP_KEY));
+      const rawSelection =
+        await LocalStorage.getItem<string>(MODEL_SELECTION_KEY);
+      let selection: ModelSelection | null = null;
+      try {
+        const parsed = JSON.parse(rawSelection || "null");
+        if (
+          typeof parsed?.model === "string" &&
+          typeof parsed.effort === "string"
+        )
+          selection = parsed;
+      } catch {
+        /* Keep setup available if an old model preference is malformed. */
+      }
+      if (cancelled) return;
+      setLocale(saved?.locale || "en");
+      setSetup(saved);
+      setSavedSelection(selection);
+      setLoaded(true);
+    }
+    void load().catch((reason) => {
+      if (!cancelled) setLoadError(messageOf(reason));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [attempt]);
+  if (!loaded)
+    return (
+      <Detail
+        isLoading={!loadError}
+        markdown={loadError || ""}
+        actions={
+          loadError ? (
+            <ActionPanel>
+              <Action
+                title={t("Retry")}
+                onAction={() => setAttempt((value) => value + 1)}
+              />
+            </ActionPanel>
+          ) : undefined
+        }
+      />
+    );
+  if (
+    editing ||
+    !setup ||
+    setup.connection !== connectionSignature(preferences)
+  )
+    return (
+      <SetupWizard
+        preferences={preferences}
+        previous={setup}
+        selection={savedSelection}
+        onComplete={(value) => {
+          setLocale(value.locale);
+          setSetup(value);
+          setSavedSelection(value.selection);
+          setEditing(false);
+        }}
+      />
+    );
+  return (
+    <NativeChat
+      {...(launchConsumed.current
+        ? { ...launch, arguments: { prompt: "" }, fallbackText: "" }
+        : launch)}
+      onPromptConsumed={() => {
+        launchConsumed.current = true;
+      }}
+      onConfigure={(selection) => {
+        setSavedSelection(selection);
+        setEditing(true);
+      }}
+    />
+  );
+}
+
+function NativeChat(
+  props: LaunchProps<{ arguments: Arguments.Index }> & {
+    onConfigure: (selection: ModelSelection | null) => void;
+    onPromptConsumed: () => void;
+  },
+) {
+  const preferences = getPreferenceValues<Preferences>();
   const initialPrompt =
     props.fallbackText?.trim() || props.arguments?.prompt?.trim() || "";
   const [conversation, setConversation] =
@@ -55,7 +181,7 @@ export default function CodexInRaycast(
   const [draft, setDraft] = useState("");
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState("正在连接 Codex…");
+  const [status, setStatus] = useState(t("正在连接 Codex…"));
   const [error, setError] = useState("");
   const [page, setPage] = useState<Page>("chat");
   const [sessions, setSessions] = useState<StoredConversation[]>([]);
@@ -111,7 +237,8 @@ export default function CodexInRaycast(
       .catch(() => undefined)
       .then(() => LocalStorage.setItem(LIBRARY_KEY, encoded));
     void saveQueueRef.current.catch((reason) => {
-      if (mountedRef.current) setError(`会话保存失败：${messageOf(reason)}`);
+      if (mountedRef.current)
+        setError(t("会话保存失败：{v0}", { v0: messageOf(reason) }));
     });
   }
 
@@ -171,7 +298,7 @@ export default function CodexInRaycast(
     void modelSaveQueueRef.current.catch((reason) =>
       showToast({
         style: Toast.Style.Failure,
-        title: "模型选择保存失败",
+        title: t("模型选择保存失败"),
         message: messageOf(reason),
       }),
     );
@@ -179,10 +306,10 @@ export default function CodexInRaycast(
       style: Toast.Style.Success,
       title: selection
         ? [selection.model, selection.effort].filter(Boolean).join(" · ")
-        : "沿用当前会话模型",
+        : t("沿用当前会话模型"),
       message: busy
-        ? "下一次回复使用；当前回答的补充要求仍使用原模型。"
-        : "下一条消息使用此设置。",
+        ? t("下一次回复使用；当前回答的补充要求仍使用原模型。")
+        : t("下一条消息使用此设置。"),
     });
   }
 
@@ -193,7 +320,7 @@ export default function CodexInRaycast(
     activeReplyRef.current = null;
     setReady(false);
     setError("");
-    setStatus("正在连接 Codex…");
+    setStatus(t("正在连接 Codex…"));
     modelsRequestRef.current = null;
     modelsRef.current = [];
     setModels([]);
@@ -210,15 +337,15 @@ export default function CodexInRaycast(
         return;
       if (event.method === "turn/started") {
         setBusy(true);
-        setStatus("正在思考 · 输入后按 Enter 发送补充要求");
+        setStatus(t("正在思考 · 输入后按 Enter 发送补充要求"));
       }
       if (event.method === "item/started") {
         const type = asString(asRecord(params.item).type);
-        if (type === "webSearch") setStatus("正在搜索网页 · 可继续补充要求");
+        if (type === "webSearch") setStatus(t("正在搜索网页 · 可继续补充要求"));
         else if (type === "commandExecution")
-          setStatus("正在运行命令 · 可停止或补充要求");
+          setStatus(t("正在运行命令 · 可停止或补充要求"));
         else if (type === "mcpToolCall")
-          setStatus("正在调用工具 · 可继续补充要求");
+          setStatus(t("正在调用工具 · 可继续补充要求"));
       }
       if (
         event.method === "item/agentMessage/delta" ||
@@ -240,7 +367,7 @@ export default function CodexInRaycast(
             completed,
           }),
         }));
-        setStatus("正在回答 · 输入后按 Enter 发送补充要求");
+        setStatus(t("正在回答 · 输入后按 Enter 发送补充要求"));
       }
       if (event.method === "turn/completed") {
         const turn = asRecord(params.turn);
@@ -249,10 +376,10 @@ export default function CodexInRaycast(
         if (failure) setError(failure);
         setStatus(
           turn.status === "failed"
-            ? "本次回答失败，可重试"
+            ? t("本次回答失败，可重试")
             : turn.status === "interrupted"
-              ? "已停止 · 输入后按 Enter 继续聊天"
-              : "已完成 · 输入后按 Enter 继续聊天",
+              ? t("已停止 · 输入后按 Enter 继续聊天")
+              : t("已完成 · 输入后按 Enter 继续聊天"),
         );
         setConversation((previous) => ({
           ...previous,
@@ -267,7 +394,7 @@ export default function CodexInRaycast(
         setError(
           asString(asRecord(params.error).message) ||
             asString(params.message) ||
-            "Codex 返回错误",
+            t("Codex 返回错误"),
         );
       }
       if (
@@ -276,7 +403,9 @@ export default function CodexInRaycast(
         event.method === "request/unsupported"
       ) {
         setError(
-          "此操作需要交互式确认，当前界面未自动授权。请停止本轮，在 Codex CLI 中继续此会话。",
+          t(
+            "此操作需要交互式确认，当前界面未自动授权。请停止本轮，在 Codex CLI 中继续此会话。",
+          ),
         );
       }
       if (event.method === "process/exited") {
@@ -284,9 +413,9 @@ export default function CodexInRaycast(
         setReady(false);
         setBusy(false);
         setError(
-          asString(params.stderr) || "Codex 连接已关闭，请使用“重新连接”。",
+          asString(params.stderr) || t("Codex 连接已关闭，请使用“重新连接”。"),
         );
-        setStatus("连接已关闭");
+        setStatus(t("连接已关闭"));
       }
     };
     const client = new CodexAppServer({
@@ -352,7 +481,9 @@ export default function CodexInRaycast(
           messages = [];
           if (stored.messages.length)
             setError(
-              `之前的会话暂时无法恢复，已保留在历史中：${messageOf(reason)}`,
+              t("之前的会话暂时无法恢复，已保留在历史中：{v0}", {
+                v0: messageOf(reason),
+              }),
             );
         }
       } else {
@@ -377,14 +508,14 @@ export default function CodexInRaycast(
       setCurrentModel(client.currentModelSelection);
       readyRef.current = true;
       setReady(true);
-      setStatus("已连接 · 输入后按 Enter 发送");
+      setStatus(t("已连接 · 输入后按 Enter 发送"));
       void refreshModels().catch(() => undefined);
     };
     initRef.current = initialize();
     void initRef.current.catch((reason: unknown) => {
       if (!disposed) {
         setError(messageOf(reason));
-        setStatus("连接失败");
+        setStatus(t("连接失败"));
       }
     });
     return () => {
@@ -415,7 +546,7 @@ export default function CodexInRaycast(
     if (!mountedRef.current) return;
     const client = clientRef.current;
     if (!client || !readyRef.current)
-      throw new Error("服务尚未连接，请重新打开命令。");
+      throw new Error(t("服务尚未连接，请重新打开命令。"));
     setError("");
     if (client.currentTurnId) {
       try {
@@ -434,7 +565,7 @@ export default function CodexInRaycast(
             },
           ],
         }));
-        setStatus("已发送补充要求");
+        setStatus(t("已发送补充要求"));
         return;
       } catch (reason) {
         // The turn may complete between pressing Enter and the steer RPC.
@@ -452,7 +583,7 @@ export default function CodexInRaycast(
         (selection.effort && !model.efforts.includes(selection.effort))
       ) {
         throw new Error(
-          "所选模型或档位已不可用，请在底部 Actions 中重新选择模型。",
+          t("所选模型或档位已不可用，请在底部 Actions 中重新选择模型。"),
         );
       }
     }
@@ -460,7 +591,7 @@ export default function CodexInRaycast(
     const replyId = makeId();
     activeReplyRef.current = replyId;
     setBusy(true);
-    setStatus("正在思考 · 输入后按 Enter 发送补充要求");
+    setStatus(t("正在思考 · 输入后按 Enter 发送补充要求"));
     setConversation((previous) => ({
       ...previous,
       messages: [
@@ -507,7 +638,7 @@ export default function CodexInRaycast(
     setDraft((current) => current || prompt);
     await showToast({
       style: Toast.Style.Failure,
-      title: "未发送成功",
+      title: t("未发送成功"),
       message,
     });
   }
@@ -515,6 +646,7 @@ export default function CodexInRaycast(
   useEffect(() => {
     if (!ready || !initialPrompt || initialSentRef.current) return;
     initialSentRef.current = true;
+    props.onPromptConsumed();
     setDraft((current) => (current.trim() === initialPrompt ? "" : current));
     void enqueue(initialPrompt).catch((reason: unknown) =>
       reportFailure(reason, initialPrompt),
@@ -527,8 +659,8 @@ export default function CodexInRaycast(
     if (!readyRef.current) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "服务尚未连接",
-        message: "文字已保留，请等待连接或点击“重新连接”。",
+        title: t("服务尚未连接"),
+        message: t("文字已保留，请等待连接或点击“重新连接”。"),
       });
       return false;
     }
@@ -549,7 +681,7 @@ export default function CodexInRaycast(
     if (busy || requestPendingRef.current || switching) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "请先停止当前回答",
+        title: t("请先停止当前回答"),
       });
       return;
     }
@@ -558,7 +690,7 @@ export default function CodexInRaycast(
     try {
       await initRef.current;
       const client = clientRef.current;
-      if (!client || !readyRef.current) throw new Error("服务尚未连接");
+      if (!client || !readyRef.current) throw new Error(t("服务尚未连接"));
       if (persistedRef.current) save(persistedRef.current);
       const threadId = await client.startThread();
       setCurrentModel(client.currentModelSelection);
@@ -575,7 +707,7 @@ export default function CodexInRaycast(
       setPage("chat");
       activeReplyRef.current = null;
       setError("");
-      setStatus("新对话 · 输入后按 Enter 发送");
+      setStatus(t("新对话 · 输入后按 Enter 发送"));
     } catch (reason) {
       await reportFailure(reason, "");
     } finally {
@@ -592,8 +724,8 @@ export default function CodexInRaycast(
     if (busy || requestPendingRef.current || switching) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "请先停止当前回答",
-        message: "停止后即可切换会话。",
+        title: t("请先停止当前回答"),
+        message: t("停止后即可切换会话。"),
       });
       return;
     }
@@ -603,7 +735,7 @@ export default function CodexInRaycast(
       await initRef.current;
       const client = clientRef.current;
       if (!client || !readyRef.current || !session.threadId)
-        throw new Error("服务尚未连接，请返回聊天重新连接。");
+        throw new Error(t("服务尚未连接，请返回聊天重新连接。"));
       if (persistedRef.current) save(persistedRef.current);
       const threadId = await client.resumeThread(session.threadId);
       const existing = libraryRef.current.sessions.find(
@@ -627,14 +759,14 @@ export default function CodexInRaycast(
       setDraft(next.draft || "");
       setBusy(Boolean(client.currentTurnId));
       setError("");
-      setStatus("会话已恢复 · 输入后按 Enter 继续聊天");
+      setStatus(t("会话已恢复 · 输入后按 Enter 继续聊天"));
       setCurrentModel(client.currentModelSelection);
       save(next);
       setPage("chat");
     } catch (reason) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "未能打开会话",
+        title: t("未能打开会话"),
         message: messageOf(reason),
       });
     } finally {
@@ -672,20 +804,19 @@ export default function CodexInRaycast(
       .filter(Boolean)
       .join("\n\n") || "";
 
-  const codexNotFound =
-    error.includes("未找到 Codex CLI") || error.includes("找不到指定的 Codex");
+  const codexNotFound = Boolean(error && !ready);
   const secondaryActions = (
     <>
       {codexNotFound && (
         <Action.OpenInBrowser
-          title="安装 Codex CLI"
+          title={t("安装 Codex CLI")}
           icon={Icon.Download}
           url="https://github.com/openai/codex#installation"
         />
       )}
       {busy && (
         <Action
-          title="停止回答"
+          title={t("停止回答")}
           icon={Icon.Stop}
           shortcut={{
             modifiers: [process.platform === "darwin" ? "cmd" : "ctrl"],
@@ -694,7 +825,7 @@ export default function CodexInRaycast(
           onAction={async () => {
             try {
               await clientRef.current?.interrupt();
-              setStatus("正在停止…");
+              setStatus(t("正在停止…"));
             } catch (reason) {
               await reportFailure(reason, "");
             }
@@ -702,7 +833,7 @@ export default function CodexInRaycast(
         />
       )}
       <Action
-        title="最近对话"
+        title={t("最近对话")}
         icon={Icon.Clock}
         shortcut={{
           modifiers: [process.platform === "darwin" ? "cmd" : "ctrl", "shift"],
@@ -712,13 +843,13 @@ export default function CodexInRaycast(
       />
       {answer && (
         <Action.CopyToClipboard
-          title="复制回答"
+          title={t("复制回答")}
           content={answer}
           shortcut={Keyboard.Shortcut.Common.Copy}
         />
       )}
       <Action.CopyToClipboard
-        title="复制当前对话"
+        title={t("复制当前对话")}
         content={transcript(conversation.messages)}
         shortcut={{
           modifiers: [process.platform === "darwin" ? "cmd" : "ctrl", "shift"],
@@ -726,13 +857,27 @@ export default function CodexInRaycast(
         }}
       />
       <Action
-        title="新建对话"
+        title={t("新建对话")}
         icon={Icon.Plus}
         shortcut={Keyboard.Shortcut.Common.New}
         onAction={newChat}
       />
       <Action
-        title="打开设置"
+        title={t("Language and Default Model")}
+        icon={Icon.Globe}
+        onAction={() => {
+          if (busy || switching || requestPendingRef.current) {
+            void showToast({
+              style: Toast.Style.Failure,
+              title: t("请先停止当前回答"),
+            });
+            return;
+          }
+          props.onConfigure(modelSelection || currentModel);
+        }}
+      />
+      <Action
+        title={t("打开设置")}
         icon={Icon.Gear}
         onAction={openExtensionPreferences}
       />
@@ -774,7 +919,7 @@ export default function CodexInRaycast(
     >
       {!ready && error ? (
         <Action
-          title="重新连接"
+          title={t("重新连接")}
           icon={Icon.ArrowClockwise}
           onAction={reconnect}
         />

@@ -2,6 +2,9 @@
 
 ## [Initial Release] - {PR_MERGE_DATE}
 
+- Add ten bundled interface languages with Gemini-assisted translations.
+- Require first-run language selection, local CLI connection/auth-state check, and an explicit default model/effort choice before opening chat.
+- Allow setup to be reopened from Actions; recheck after connection preference changes without deleting history.
 - Name the extension Codex in Raycast and focus on resident CLI chat using native Raycast controls.
 - Stream Markdown and LaTeX with speaker avatars and newest-first replies.
 - Use a full-width native reader and floating message composer, removing the chat sidebar and placeholder row entirely.

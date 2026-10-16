@@ -1,3 +1,4 @@
+import { t } from "./i18n";
 import { Action, ActionPanel, Icon } from "@raycast/api";
 import type { CodexModel, ModelSelection } from "./codex";
 
@@ -19,7 +20,7 @@ export function ModelMenu(props: ModelMenuProps) {
   const label = [selected.model, selected.effort].filter(Boolean).join(" · ");
   return (
     <ActionPanel.Submenu
-      title={`模型：${label || "自动"}`}
+      title={t("模型：{v0}", { v0: label || t("自动") })}
       icon={Icon.ComputerChip}
       shortcut={{
         modifiers: [process.platform === "darwin" ? "cmd" : "ctrl"],
@@ -32,7 +33,7 @@ export function ModelMenu(props: ModelMenuProps) {
       }}
     >
       <Action
-        title="沿用当前会话模型"
+        title={t("沿用当前会话模型")}
         icon={!props.selection ? Icon.Checkmark : Icon.Circle}
         onAction={() => props.onSelect(null)}
       />
@@ -56,10 +57,10 @@ export function ModelMenu(props: ModelMenuProps) {
         <Action
           title={
             props.error
-              ? "模型列表加载失败，重新加载"
+              ? t("模型列表加载失败，重新加载")
               : props.ready
-                ? "刷新模型列表"
-                : "等待连接后加载模型"
+                ? t("刷新模型列表")
+                : t("等待连接后加载模型")
           }
           icon={Icon.ArrowClockwise}
           onAction={props.onRefresh}
