@@ -152,6 +152,16 @@ export function EntryForm({
 
   const typed = filter.trim();
 
+  /**
+   * The dropdowns are a trust boundary: Raycast hands back the selected item, and
+   * anything that is not a string would end up rendered as "[object Object]".
+   */
+  function toTargetValue(next: unknown): string {
+    if (typeof next === "string") return next;
+    console.warn("[shortcut-layers] dropdown returned a non-string value", next);
+    return "";
+  }
+
   return (
     <Form
       navigationTitle={title ?? (existing ? "Edit Action" : "Add Action")}
@@ -178,37 +188,16 @@ export function EntryForm({
       </Form.Dropdown>
 
       {kind === "app" && (
-        <Form.Dropdown
-          id="value"
-          title="Target"
-          placeholder="Search applications…"
-          filtering={false}
-          value={value}
-          onChange={setValue}
-          onSearchTextChange={setFilter}
-          info={'Search installed applications, or type a path and pick "Use path"'}
-        >
-          {applications
-            .filter((app) => {
-              const query = typed.toLowerCase();
-              return !query || app.name.toLowerCase().includes(query) || app.path.toLowerCase().includes(query);
-            })
-            .map((app) => (
-              <Form.Dropdown.Item
-                key={app.path}
-                value={app.path}
-                title={app.name}
-                icon={{ fileIcon: app.path }}
-                keywords={[app.bundleId ?? "", app.path]}
-              />
-            ))}
-          {value === "" && <Form.Dropdown.Item key="__empty" value="" title="Choose an application…" />}
-          {value !== "" && !applications.some((app) => app.path === value) && (
-            <Form.Dropdown.Item key={value} value={value} title={value} icon={Icon.Terminal} />
-          )}
-          {typed.length > 0 && !applications.some((app) => app.path === typed) && (
-            <Form.Dropdown.Item key="__custom" value={typed} title={`Use path: ${typed}`} icon={Icon.Pencil} />
-          )}
+        <Form.Dropdown id="value" title="Target" placeholder="Search applications…" defaultValue={source?.value}>
+          {applications.map((app) => (
+            <Form.Dropdown.Item
+              key={app.path}
+              value={app.path}
+              title={app.name}
+              icon={{ fileIcon: app.path }}
+              keywords={[app.bundleId ?? "", app.path]}
+            />
+          ))}
         </Form.Dropdown>
       )}
 
@@ -219,19 +208,25 @@ export function EntryForm({
           placeholder="Search files and folders…"
           filtering={false}
           value={value}
-          onChange={setValue}
+          onChange={(next) => setValue(toTargetValue(next))}
           onSearchTextChange={setFilter}
           info={'Search indexed files and folders, or type a path and pick "Use path"'}
         >
-          {fileResults.map((path) => (
-            <Form.Dropdown.Item key={path} value={path} title={fileTitle(path)} icon={{ fileIcon: path }} />
-          ))}
           {value === "" && fileResults.length === 0 && (
             <Form.Dropdown.Item key="__empty" value="" title="Choose a file or folder…" />
           )}
           {value !== "" && !fileResults.includes(value) && (
             <Form.Dropdown.Item key={value} value={value} title={value} icon={Icon.Document} />
           )}
+          {fileResults.map((path) => (
+            <Form.Dropdown.Item
+              key={path}
+              value={path}
+              title={fileTitle(path)}
+              icon={{ fileIcon: path }}
+              keywords={[path]}
+            />
+          ))}
           {typed.length >= 2 && !fileResults.includes(typed) && (
             <Form.Dropdown.Item key="__custom" value={typed} title={`Use path: ${typed}`} icon={Icon.Pencil} />
           )}
