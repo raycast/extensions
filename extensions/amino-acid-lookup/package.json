@@ -25,7 +25,7 @@
   "commands": [
     {
       "name": "lookup",
-      "title": "Look up Amino Acids",
+      "title": "Look Up Amino Acids",
       "description": "Type a one-letter code, three-letter code, name or peptide sequence and see the other notations instantly.",
       "mode": "view",
       "arguments": [

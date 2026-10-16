@@ -21,21 +21,13 @@ import {
   peptideMass,
   threeToOne,
 } from "./lib/amino-acids";
-import { ColorSchemeName, residueHex } from "./lib/color-schemes";
+import { residueHex } from "./lib/color-schemes";
 
 const { Metadata } = List.Item.Detail;
 
-interface Arguments {
-  query?: string;
-}
-
-interface ColorPreferences {
-  colorScheme: ColorSchemeName;
-}
-
 /** The residue's colour in the chosen scheme, exactly as defined (Raycast would otherwise darken bright colours). */
 function residueColor(aa: AminoAcid): Color.ColorLike {
-  const { colorScheme } = getPreferenceValues<ColorPreferences>();
+  const { colorScheme } = getPreferenceValues<Preferences>();
   const hex = residueHex(colorScheme, aa.oneLetter);
   return hex ? { light: hex, dark: hex, adjustContrast: false } : Color.SecondaryText;
 }
@@ -75,8 +67,8 @@ function findSequences(query: string, residueMatches: ResidueMatch[]): SequenceC
   return [fromThree, fromOne].filter((s): s is SequenceConversion => s !== undefined);
 }
 
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
-  const [searchText, setSearchText] = useState(props.arguments?.query ?? props.fallbackText ?? "");
+export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup }>) {
+  const [searchText, setSearchText] = useState(props.arguments.query || props.fallbackText || "");
   const query = searchText.trim();
 
   const residues = useMemo(() => findResidues(query), [query]);

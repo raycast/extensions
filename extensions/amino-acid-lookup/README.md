@@ -30,8 +30,8 @@ Amino acids are colored with the **Clustal X** scheme by default. Switch to **Ta
 
 Raycast doesn't let extensions put results inline in the root search, but you can get close:
 
-1. **Alias or hotkey** — Raycast Settings → Extensions → Amino Acid Lookup → Look up Amino Acids → set an alias like `aa`. Then type `aa`, Tab, `Trp`.
-2. **Fallback command** — In root search, type `Trp`, scroll to the bottom, ⌘K on "Look up Amino Acids" → *Add to Fallback Commands*. Anything Raycast doesn't recognize can then be sent straight into the extension with the text pre-filled.
+1. **Alias or hotkey** — Raycast Settings → Extensions → Amino Acid Lookup → Look Up Amino Acids → set an alias like `aa`. Then type `aa`, Tab, `Trp`.
+2. **Fallback command** — In root search, type `Trp`, scroll to the bottom, ⌘K on "Look Up Amino Acids" → *Add to Fallback Commands*. Anything Raycast doesn't recognize can then be sent straight into the extension with the text pre-filled.
 
 ## Development
 
