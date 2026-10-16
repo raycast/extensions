@@ -1,0 +1,39 @@
+# Find Everything — better than Spotlight
+
+Instant file search for Raycast that does **not** use Spotlight. Works with Spotlight indexing completely disabled — or just finds the files Spotlight never shows you (dotfiles, gitignored work, `~/Library` is intentionally out, caches are filtered).
+
+## Why
+
+Spotlight either consumes too much CPU/IO to keep enabled, or misses half your files. Find Everything keeps its own lightweight index — built once by `fd`, filtered by `rg`, ranked by `fzf`. Queries take ~100–150 ms even over millions of indexed paths.
+
+## Features
+
+- **Instant fuzzy search** — type, get results in ~150 ms. No Enter, no waiting.
+- **Persistent index per scope** — built once, auto-refreshed in the background when stale (`⌘R` forces a rebuild).
+- **Real Finder icons**, file size, modification date, folder badges.
+- **Two-line results** — file name + smart middle-truncated path. `⌘D` toggles a detail pane with full path, metadata and image preview.
+- **Scopes** — Home, Downloads, Documents, Applications, All (`/`), or your own comma-separated paths.
+- **Actions** — Open `↵`, Reveal in Finder, Open in Terminal `⌘T`, Copy Path `⌘C`, Copy File `⌘⌥C`, Rebuild Index `⌘R`.
+- **Sane defaults** — `node_modules`, `.git`, build outputs, venvs and tool caches are excluded automatically; extend via preferences.
+
+## Requirements
+
+macOS with [fd](https://github.com/sharkdp/fd), [fzf](https://github.com/junegunn/fzf) and [ripgrep](https://github.com/BurntSushi/ripgrep):
+
+```bash
+brew install fd fzf ripgrep
+```
+
+## Usage
+
+Open the **Find Everything** command, type at least 2 characters. Switch scope in the dropdown. Recommended: assign your preferred hotkey in Raycast Settings → Extensions → Find Everything.
+
+## How it works
+
+1. `fd` scans the scope once into `~/.cache/hypersearch/index-<scope>.txt` (stale-while-revalidate).
+2. `rg` fixed-string-filters the index to candidate matches (~120 ms on a 4.6M-line index).
+3. `fzf --filter` fuzzy-ranks the candidates; results whose basename contains all query terms float to the top.
+
+## License
+
+MIT
