@@ -1,7 +1,7 @@
 import { Action, ActionPanel, environment, Icon, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { GUESS_LIMIT, WORD_LENGTH } from "@src/constants";
 import { UseTextInputReturnType, UseWordleReturnType } from "@src/hooks";
-import { showErrorToast } from "@src/util";
 import { getBoardMarkdown } from "@src/util/board";
 import { HowToAction } from "@src/components";
 
@@ -64,7 +64,7 @@ export const BoardListItem = ({ wordleProperties, textInputProperties }: BoardLi
         icon={Icon.LightBulb}
         title="Make Guess"
         onAction={async () => {
-          if (!isValidGuess) return showErrorToast({ title: status.error ?? "Invalid word" });
+          if (!isValidGuess) return showFailureToast(status.error ?? "Invalid word", { title: "Invalid guess" });
           await makeGuess(guessInputInLowercase);
           setGuessInput("");
         }}
