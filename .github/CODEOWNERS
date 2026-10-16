@@ -746,6 +746,7 @@
 /extensions/do-not-disturb                                          @Yakitrak @quanru @mikikiv @LitoMore
 /extensions/doccheck                                                @justspacedog @h16nning
 /extensions/dock                                                    @pradeepb28 @xmok
+/extensions/dock-badges                                             @mrpunkin
 /extensions/dock-tinker                                             @koinzhang @garrucho
 /extensions/docker                                                  @priithaamer @gebeto @BalliAsghar @jfkisafk @noblecloud @SebKranz @xdrakosha @Olivier-OG @Krosnoz @ahetzm
 /extensions/dockerhub                                               @k8scat @tonka3000 @BalliAsghar @imposibrus
@@ -3018,7 +3019,7 @@
 /extensions/tints-and-shades                                        @anusandhan
 /extensions/tiny-tycho                                              @tychoregter
 /extensions/tinyfaces-nft                                           @peduarte
-/extensions/tinyfish-search                                         @pranavjana
+/extensions/tinyfish-search                                         @pranavjana @0xdhrv
 /extensions/tinyimg                                                 @wuyax
 /extensions/tinypng                                                 @kawamataryo @j3lte @natsustan @muhammadrizo-y
 /extensions/tip-calculator                                          @Visual-Studio-Coder @pernielsentikaer
@@ -3248,6 +3249,7 @@
 /extensions/wallpaperengine                                         @hbdermott
 /extensions/warp                                                    @joetannenbaum @theRubberDuckiee @hakob8956 @drzastwakamil @chrismessina @pernielsentikaer
 /extensions/watchkey                                                @Etheirystech
+/extensions/watts-up                                                @mrmartineau
 /extensions/wave                                                    @xmok
 /extensions/wayback-machine                                         @pernielsentikaer @andreaselia @j3lte @chrismessina @tofrankie
 /extensions/wcag                                                    @fgeierst
@@ -3259,6 +3261,7 @@
 /extensions/web3bio                                                 @picturepan2
 /extensions/webbites                                                @elrumo
 /extensions/webdav-uploader                                         @i207M
+/extensions/webeep                                                  @05bmckay
 /extensions/webflow-sites                                           @vurhd @pernielsentikaer @xmok
 /extensions/webglossary-search                                      @apatki1996
 /extensions/webhook-sender                                          @binaryblitz10
@@ -3372,6 +3375,7 @@
 /extensions/yandex-telemost                                         @egorchuzhin
 /extensions/yap                                                     @bytechase
 /extensions/yasb                                                    @deviljin112
+/extensions/yatt                                                    @alexbartok
 /extensions/yazio-tracker                                           @Giton22 @pernielsentikaer
 /extensions/year-in-progress                                        @thomaspaulmann @anothertempore @akshykhade @teemusuvinen @0xdhrv
 /extensions/yerd                                                    @kylekanderson
