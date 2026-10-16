@@ -168,18 +168,6 @@ export const finderTweaks: TweakDefinition[] = [
     tags: ["ds_store", "network"],
   },
   {
-    id: "finder-no-ds-store-usb",
-    title: "Disable .DS_Store on USB Volumes",
-    description: "Prevent Finder from creating .DS_Store files on USB drives",
-    category: "finder",
-    domain: "com.apple.desktopservices",
-    key: "DSDontWriteUSBStores",
-    type: "boolean",
-    defaultValue: false,
-    risk: "safe",
-    tags: ["ds_store", "usb"],
-  },
-  {
     id: "finder-new-window-target",
     title: "New Finder Window Opens To",
     description: "Set what new Finder windows open to by default",

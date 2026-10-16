@@ -1,5 +1,16 @@
 # macOS Tweaks Changelog
 
+## [Dim Hidden Apps] - 2026-10-16
+
+### New Tweak
+
+- **Dock — Dim Hidden Apps**: the icon of an app hidden with ⌘H turns translucent, so you can tell what is hidden from what is closed at a glance
+
+### Removed
+
+- **Disable .DS_Store on USB Volumes**: macOS 27 does not read its `DSDontWriteUSBStores` key — the key is absent from the system frameworks, while `DSDontWriteNetworkStores` is there — so the toggle changed nothing. Apple only documents the network one, which stays
+- If you had turned it on, the leftover key is harmless; `defaults delete com.apple.desktopservices DSDontWriteUSBStores` removes it
+
 ## [Windows & Stage Manager] - 2026-09-01
 
 ### New Category
