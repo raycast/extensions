@@ -1,6 +1,6 @@
 # Fantasy Premier League Rankings Changelog
 
-## [New Commands] - {PR_MERGE_DATE}
+## [New Commands] - 2026-10-16
 
 - Add My Team, Price Changes, Search Players, Fixtures, Gameweek History, Live Points in Menu Bar and Open My Team commands
 - Replace View My Rankings with Mini-Leagues: every classic league with rank movement, paginated standings and any rival's team
