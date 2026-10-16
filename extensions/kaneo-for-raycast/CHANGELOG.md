@@ -1,6 +1,6 @@
 # Kaneo Changelog
 
-## [Custom Fields] - {PR_MERGE_DATE}
+## [Custom Fields] - 2026-10-16
 
 - Added support for custom fields when creating tasks
 - Added custom fields display in the task details
