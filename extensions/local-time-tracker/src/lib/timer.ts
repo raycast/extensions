@@ -52,6 +52,37 @@ async function saveNewTimer(projectId: string, description: string): Promise<Act
   return activeTimer;
 }
 
+export async function updateTimerStart(
+  timerId: string,
+  expectedStartedAt: string,
+  newStartedAt: Date,
+): Promise<ActiveTimer> {
+  const startedAtMs = newStartedAt.getTime();
+  if (!Number.isFinite(startedAtMs)) throw new Error("Select a valid start date and time");
+  const startedAt = newStartedAt.toISOString();
+
+  const updated = await withReminderOperation(async () => {
+    const current = await getActiveTimer();
+    if (!current || current.id !== timerId) {
+      throw new Error("The timer is no longer running. Reopen Start Work to load the current timer.");
+    }
+    if (current.startedAt !== expectedStartedAt) {
+      throw new Error("The start time has changed. Reopen Start Work before editing it again.");
+    }
+    if ((await getWorkLogs()).some((log) => log.id === timerId)) {
+      throw new Error("This timer already has a saved work log. Stop Work to finish recovery, then edit the work log.");
+    }
+    if (startedAtMs > Date.now()) throw new Error("Start time cannot be in the future");
+
+    const next = { ...current, startedAt };
+    await saveActiveTimer(next);
+    return next;
+  });
+  // The refresh may check reminders immediately; release the shared lock first.
+  await refreshMenuBar();
+  return updated;
+}
+
 export type StopTimerResult =
   | { status: "none" }
   | { status: "clock-rollback" }

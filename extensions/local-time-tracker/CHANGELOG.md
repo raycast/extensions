@@ -1,5 +1,17 @@
 # Changelog
 
+## [Precise Work Time Editing] - {PR_MERGE_DATE}
+
+- Return to an empty Root Search after successfully starting work, and label the running-timer view "Tracking Work".
+- Edit start and end times in 1-minute steps with live current times and a duration comparison.
+- Use native text rendering without bar images to avoid image-replacement flicker.
+- Adjust times by 1 minute with Left/Right or 5 minutes with Shift plus Left/Right; Up/Down focuses Start/End, Return switches focus, and Command-Return saves from either endpoint.
+- Limit work-log end times to the current time, removing the previous five-minute future allowance.
+- Apply exact dates and minute-precision times to the preview without saving until the final save action.
+- Correct a running timer's start time from Start Work using the same numeric preview.
+- Keep project and description edits in the preview until the final save action.
+- Preserve Pomodoro intervals and delivered alerts when correcting work time, and protect edits against concurrent timer operations.
+
 ## [Pomodoro, Timer Alerts, and Improved Reports] - 2026-10-14
 
 - Add a configurable work-timer alert, notified once per timer in a silent, persistent foreground Raycast window.

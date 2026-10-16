@@ -5,6 +5,7 @@ import {
   Form,
   Icon,
   LaunchType,
+  PopToRootType,
   Toast,
   launchCommand,
   closeMainWindow,
@@ -13,6 +14,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { TimerStartEditor } from "./components/timer-start-editor";
 import { getRecentDescriptions } from "./lib/descriptions";
 import { getProjectGroupIcon, getProjectGroupName } from "./lib/project-groups";
 import { launchWithFailure } from "./lib/command-actions";
@@ -101,6 +103,13 @@ export default function StartWorkCommand({
 
   const timeAlertTitles = launchContext?.timeAlertTitles?.filter((title) => typeof title === "string") ?? [];
   const timeAlertMarkdown = timeAlertTitles.map((title) => `**${title}**`).join("\n\n");
+  const editStartAction = activeTimer ? (
+    <Action.Push
+      title="Edit Start Time"
+      icon={Icon.Pencil}
+      target={<TimerStartEditor timer={activeTimer} onSaved={setActiveTimer} />}
+    />
+  ) : null;
 
   if (finishedPomodoro && activeTimer) {
     const next = phaseLabel(nextPhase(finishedPomodoro));
@@ -128,6 +137,7 @@ export default function StartWorkCommand({
               }}
             />
             <Action title="Dismiss" icon={Icon.XMarkCircle} onAction={() => closeMainWindow()} />
+            {editStartAction}
           </ActionPanel>
         }
       />
@@ -141,6 +151,7 @@ export default function StartWorkCommand({
         actions={
           <ActionPanel>
             <Action title="Dismiss" icon={Icon.XMarkCircle} onAction={() => closeMainWindow()} />
+            {editStartAction}
           </ActionPanel>
         }
       />
@@ -160,7 +171,7 @@ export default function StartWorkCommand({
 
     return (
       <Detail
-        markdown={`# Timer Already Running\n\n**${project?.name ?? "Unknown Project"}**${activeTimer.description ? `\n\n${activeTimer.description}` : ""}${clockRolledBack ? "\n\nThe system clock is earlier than this timer's start. The timer is preserved; correct the clock before stopping it." : ""}`}
+        markdown={`# Tracking Work\n\n**${project?.name ?? "Unknown Project"}**${activeTimer.description ? `\n\n${activeTimer.description}` : ""}${clockRolledBack ? "\n\nThe system clock is earlier than this timer's start. The timer is preserved; correct the clock before stopping it." : ""}`}
         metadata={
           <Detail.Metadata>
             <Detail.Metadata.Label title="Elapsed" text={elapsed} />
@@ -204,6 +215,7 @@ export default function StartWorkCommand({
                 )
               }
             />
+            {editStartAction}
           </ActionPanel>
         }
       />
@@ -252,7 +264,10 @@ export default function StartWorkCommand({
     try {
       const startedTimer = await startTimer(project.id, description, usePomodoro && pomodoroEnabled);
       setActiveTimer(startedTimer);
-      await showHUD(`Started: ${project.name}`);
+      await showHUD(`Started: ${project.name}`, {
+        clearRootSearch: true,
+        popToRootType: PopToRootType.Immediate,
+      });
     } catch (error) {
       if (error instanceof ActiveTimerExistsError) {
         const existingProject = findProject(projects, error.activeTimer.projectId);

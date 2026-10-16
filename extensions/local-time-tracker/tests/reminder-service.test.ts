@@ -63,7 +63,9 @@ test("reminder service integrates with Stop Work, storage and notification retri
   });
   try {
     const loadModule = createRequire(join(process.cwd(), "tests/reminder-service.test.ts"));
-    const { startTimer, stopTimer } = loadModule("../src/lib/timer.ts") as typeof import("../src/lib/timer");
+    const { startTimer, stopTimer, updateTimerStart } = loadModule(
+      "../src/lib/timer.ts",
+    ) as typeof import("../src/lib/timer");
     const { getActiveTimer, getWorkLogs, saveActiveTimer, getProjectGroups } = loadModule(
       "../src/lib/storage.ts",
     ) as typeof import("../src/lib/storage");
@@ -360,11 +362,124 @@ test("reminder service integrates with Stop Work, storage and notification retri
     const pendingStop = stopTimer();
     await stopEntered;
     await assert.rejects(startPomodoroInterval(stopping.id), /Another reminder operation/);
+    await assert.rejects(
+      updateTimerStart(stopping.id, stopping.startedAt, new Date(Date.now() - 1800000)),
+      /Another reminder operation/,
+    );
     releaseWrite();
     assert.equal((await pendingStop).status, "stopped");
     beforeWrite = undefined;
     assert.equal(await getPomodoro(stopping), null);
     await assert.rejects(startPomodoroInterval(stopping.id), /no longer running/);
+
+    // Correcting work time leaves the entire Pomodoro state untouched. Refresh
+    // sees the saved time and can deliver an overdue alert after the lock releases.
+    preferences.timerAlertMinutes = "1";
+    const editable = await startTimer("project", "Forgot to start", true);
+    const editableOverlay = await getPomodoro(editable);
+    const correctedStart = new Date(Date.now() - 1800000);
+    const alertsBeforeEdit = timeLaunches().length;
+    onRefresh = async () => {
+      const current = await getActiveTimer();
+      assert.equal(current?.startedAt, correctedStart.toISOString());
+      await checkReminders(current, new Date());
+    };
+    const corrected = await updateTimerStart(editable.id, editable.startedAt, correctedStart);
+    onRefresh = undefined;
+    assert.deepEqual(corrected, { ...editable, startedAt: correctedStart.toISOString() });
+    assert.deepEqual(await getActiveTimer(), corrected);
+    assert.deepEqual(await getPomodoro(corrected), editableOverlay);
+    assert.equal(timeLaunches().length, alertsBeforeEdit + 1);
+
+    // An old screen, invalid input and a future time cannot overwrite the edit.
+    const beforeRejectedEdit = new Map(items);
+    await assert.rejects(updateTimerStart(editable.id, editable.startedAt, correctedStart), /start time has changed/);
+    await assert.rejects(updateTimerStart(corrected.id, corrected.startedAt, new Date(NaN)), /valid start/);
+    await assert.rejects(
+      updateTimerStart(corrected.id, corrected.startedAt, new Date(Date.now() + 60000)),
+      /cannot be in the future/,
+    );
+    assert.deepEqual(items, beforeRejectedEdit);
+
+    // Moving time forward and back must never repeat an already delivered alert.
+    const later = await updateTimerStart(corrected.id, corrected.startedAt, new Date());
+    await checkReminders(later, new Date());
+    const earlier = await updateTimerStart(later.id, later.startedAt, correctedStart);
+    await checkReminders(earlier, new Date());
+    assert.equal(timeLaunches().length, alertsBeforeEdit + 1);
+    assert.deepEqual(await getPomodoro(earlier), editableOverlay);
+
+    // Storage failure preserves work, Pomodoro and notification state.
+    const beforeFailedEdit = new Map(items);
+    beforeWrite = async (key) => {
+      if (key === "activeTimer") throw new Error("timer write failed");
+    };
+    await assert.rejects(updateTimerStart(earlier.id, earlier.startedAt, new Date()), /timer write failed/);
+    assert.deepEqual(items, beforeFailedEdit);
+    beforeWrite = undefined;
+
+    // While an edit owns the storage write, neither Stop Work nor notification
+    // checks can use the old time. The retry stops with the corrected start.
+    const editEntered = new Promise<void>((resolve) => {
+      enteredWrite = resolve;
+    });
+    const editHeld = new Promise<void>((resolve) => {
+      releaseWrite = resolve;
+    });
+    beforeWrite = async (key) => {
+      if (key === "activeTimer") {
+        enteredWrite();
+        await editHeld;
+      }
+    };
+    const finalStart = new Date(Date.now() - 3600000);
+    const pendingEdit = updateTimerStart(earlier.id, earlier.startedAt, finalStart);
+    await editEntered;
+    await assert.rejects(stopTimer(), /Another reminder operation/);
+    await assert.rejects(checkReminders(earlier, new Date()), /Another reminder operation/);
+    await assert.rejects(updateTimerStart(earlier.id, earlier.startedAt, new Date()), /Another reminder operation/);
+    releaseWrite();
+    const finalTimer = await pendingEdit;
+    beforeWrite = undefined;
+    const { createReport } = loadModule("../src/lib/reports.ts") as typeof import("../src/lib/reports");
+    const { getDurationSeconds } = loadModule("../src/lib/duration.ts") as typeof import("../src/lib/duration");
+    const { getDateRange, getOverlapDurationSeconds } = loadModule(
+      "../src/lib/date.ts",
+    ) as typeof import("../src/lib/date");
+    const reportNow = new Date();
+    const report = createReport("month", [], [], finalTimer, reportNow);
+    const month = getDateRange("month", reportNow);
+    assert.equal(
+      report.totalSeconds,
+      getOverlapDurationSeconds(finalTimer.startedAt, reportNow, month.start, month.end),
+    );
+    const editedStop = await stopTimer();
+    assert.equal(editedStop.status, "stopped");
+    if (editedStop.status !== "stopped") throw new Error("Expected stopped timer");
+    assert.equal(editedStop.workLog.startedAt, finalStart.toISOString());
+    assert.equal(editedStop.workLog.id, editable.id);
+    const stoppedReport = createReport("month", [editedStop.workLog], [], null, new Date(editedStop.workLog.endedAt));
+    assert.equal(editedStop.durationSeconds, getDurationSeconds(finalStart, editedStop.workLog.endedAt));
+    const stoppedMonth = getDateRange("month", new Date(editedStop.workLog.endedAt));
+    assert.equal(
+      stoppedReport.totalSeconds,
+      getOverlapDurationSeconds(finalStart, editedStop.workLog.endedAt, stoppedMonth.start, stoppedMonth.end),
+    );
+    await assert.rejects(updateTimerStart(finalTimer.id, finalTimer.startedAt, new Date()), /no longer running/);
+
+    // Recovery state is not editable, and an old screen cannot change a new timer.
+    await saveActiveTimer(finalTimer);
+    await assert.rejects(updateTimerStart(finalTimer.id, finalTimer.startedAt, new Date()), /saved work log/);
+    assert.deepEqual(await getActiveTimer(), finalTimer);
+    assert.equal((await stopTimer()).status, "recovered");
+    const differentTimer = await startTimer("project", "Different timer");
+    await assert.rejects(updateTimerStart(finalTimer.id, finalTimer.startedAt, new Date()), /no longer running/);
+    assert.deepEqual(await getActiveTimer(), differentTimer);
+    failRefresh = true;
+    const savedDespiteRefresh = await updateTimerStart(differentTimer.id, differentTimer.startedAt, correctedStart);
+    assert.deepEqual(await getActiveTimer(), savedDespiteRefresh);
+    failRefresh = false;
+    await stopTimer();
   } finally {
     hooks.deregister();
     delete globals.reminderTestAPI;

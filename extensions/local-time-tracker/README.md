@@ -11,6 +11,7 @@ Track project work entirely inside Raycast. Local Time Tracker uses no server, e
 - Keep task descriptions optional and reuse recent descriptions for each project
 - See elapsed time in the menu bar
 - Search, edit, delete, and manually add work logs
+- Edit work-log start and end times to the minute, or correct a running timer's start time
 - Review today, this week, or this month
 - Break totals down by project and project group
 - View Reports charts in Raycast’s light or dark appearance
@@ -22,6 +23,8 @@ Track project work entirely inside Raycast. Local Time Tracker uses no server, e
 2. Optionally mark a project as preferred so it is selected first in **Start Work**.
 3. Open **Start Work**, choose a project, check its **Project Group**, and optionally enter a task description.
 4. Open **Menu Bar Timer** once to enable the menu bar item and background refresh.
+
+After a timer starts successfully, Raycast closes and resets to an empty Root Search for the next launch. Open **Start Work** again to view **Tracking Work**, stop the timer, or edit its start time.
 
 You can set global shortcuts for **Start Work** and **Stop Work** in Raycast Settings. Suggested shortcuts:
 
@@ -41,6 +44,18 @@ Create and manage groups in **Projects**. In **Start Work**, the selected projec
 Reports shows **Today**, **This Week**, or **This Month**, with totals and session counts for the overview, a project group, or an individual project. Today includes only today's time: a new day starts with zero until you track work. Earlier logs remain available in This Week, This Month, and **Work Logs**.
 
 The visual summary includes project mix, the last seven days, and 35-day activity. The daily charts keep their own rolling windows, so they can show earlier activity even when Today is zero. Expand the project list to see more than two projects. The card follows Raycast's light or dark appearance; after changing Raycast's theme while Reports is open, return to the root search and reopen Reports to refresh its appearance.
+
+## Editing Work Times
+
+In **Work Logs**, open a log and choose **Edit Work Log** to adjust start and end times in a numeric preview. Compact brackets mark the selected Start or End row without shifting either row when focus changes; current start/end times and the duration comparison update immediately, and the sidebar shows project details. **Add Work Log** opens the same preview. Start time is selected initially. Press **↑** to focus Start or **↓** to focus End without saving. Use **← / →** to move the selected time by 1 minute, or **⇧← / ⇧→** for 5 minutes. Press **⌘Return** to save from either Start or End. Plain **Return** switches between Start and End without saving. You can also choose **Adjust End Time** / **Adjust Start Time** in Actions or press **⌘T** to switch. Adjustments are also available in the Actions menu.
+
+For a precise date or minute, choose **Enter Exact Time** from Actions. Enter the start and end dates and 24-hour `HH:mm` times, then choose **Apply to Preview** to return to the numeric preview. Reopening exact input retains the applied times; going back without applying leaves the preview unchanged. Choose **Edit Project and Description** to change those fields in the same way. **⌘Return**, or **Save Work Log** / **Add Work Log** from Actions, writes the record; leaving the preview discards unsaved changes.
+
+Use separate dates for work spanning midnight. End time must be after start time and cannot be later than the current time; logs longer than 24 hours require confirmation. Unchanged timestamps retain their seconds. Relative adjustments add exactly the requested minutes; changing a date or time through exact input sets its seconds to zero. The preview uses Raycast's native text appearance and updates numbers immediately, without a bar or image replacement. For a running timer, elapsed time also refreshes while the editor is open.
+
+If you forgot to start tracking, start the timer normally, reopen **Start Work**, and choose **Edit Start Time** from the Actions menu. The action is also available in reminder windows while the timer is running. Adjust the start using **← / →** or **Enter Exact Time**, then press **⌘Return** to save. A running timer has no end step; you can also choose **Save Start Time** from Actions. Plain Return does not save. Future starts are rejected, and a start at least 24 hours ago requires confirmation. The corrected start appears in the menu bar, Reports, and the log saved when you stop. If the timer stops or another screen changes its start time while you edit, saving is rejected; reopen Start Work to load the current state.
+
+Editing work time leaves Pomodoro's remaining time, current interval, and completed intervals unchanged. **Work Timer Alert** uses the corrected elapsed time: if an undelivered alert is now overdue, it is sent on the next successful reminder check. An already delivered alert does not repeat.
 
 ## Storage and Privacy
 
