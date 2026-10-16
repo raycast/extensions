@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { StillTooBigError } from "../lib/capture";
 import { formatSize } from "../lib/encode";
 import { Capture } from "../lib/history";
 
@@ -13,6 +14,15 @@ export async function runEncode(label: string, work: () => Promise<Capture>, onU
     toast.title = "GIF copied to clipboard";
     toast.message = formatSize(next.size ?? 0);
   } catch (error) {
+    if (error instanceof StillTooBigError) {
+      onUpdate(error.capture);
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not get under 10 MB";
+      toast.message = error.message;
+
+      return;
+    }
+
     toast.style = Toast.Style.Failure;
     toast.title = "Encoding failed";
     toast.message = error instanceof Error ? error.message : String(error);

@@ -1,8 +1,8 @@
 import { Clipboard, environment } from "@raycast/api";
 import { existsSync } from "node:fs";
-import { copyFile, mkdir, readdir, rm, stat } from "node:fs/promises";
+import { copyFile, mkdir, readdir, rename, rm, stat } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
-import { encodeGif, encodeToFit, EncodeResult, probe } from "./encode";
+import { encodeGif, encodeToFit, EncodeResult, formatSize, MissingToolError, probe, SHARE_LIMIT_BYTES } from "./encode";
 import { Capture, EncodeSettings, listCaptures, putCapture } from "./history";
 import { outputDir, prefs } from "./prefs";
 import { activeMoviePath, recordingsDir } from "./recording";
@@ -10,6 +10,13 @@ import { activeMoviePath, recordingsDir } from "./recording";
 export class RecordingFailedError extends Error {
   constructor() {
     super("The recording produced no video. Check that Raycast has Screen Recording access.");
+  }
+}
+
+/** Even the smallest settings left the GIF over the limit. It is saved anyway. */
+export class StillTooBigError extends Error {
+  constructor(readonly capture: Capture) {
+    super(`Still ${formatSize(capture.size ?? 0)} at the smallest settings. Trim it to get under 10 MB.`);
   }
 }
 
@@ -21,10 +28,14 @@ export function defaultSettings(): EncodeSettings {
  * Raycast caches images by path, so the preview shows a per-version copy of the GIF.
  */
 export async function previewPath(capture: Capture): Promise<string> {
+  if (!existsSync(capture.gifPath)) {
+    return join(environment.supportPath, "previews", `${capture.id}-missing.gif`);
+  }
+
+  // Every encode rewrites the GIF, so its modification time names the version.
   const dir = join(environment.supportPath, "previews");
-  const name = `${capture.id}-${capture.size ?? 0}.gif`;
-  const path = join(dir, name);
-  if (!existsSync(path) && existsSync(capture.gifPath)) {
+  const path = join(dir, `${capture.id}-${Math.round((await stat(capture.gifPath)).mtimeMs)}.gif`);
+  if (!existsSync(path)) {
     await mkdir(dir, { recursive: true });
     for (const stale of (await readdir(dir)).filter((file) => file.startsWith(`${capture.id}-`))) {
       await rm(join(dir, stale), { force: true });
@@ -99,11 +110,23 @@ export async function convertPendingRecordings(limit = 3): Promise<number> {
     .filter((path) => !known.has(path) && path !== active);
   const dated = await Promise.all(movies.map(async (path) => ({ path, createdAt: (await stat(path)).mtimeMs })));
   const newest = dated.sort((a, b) => b.createdAt - a.createdAt).slice(0, limit);
+  let converted = 0;
   for (const { path, createdAt } of newest) {
-    await createCapture(path, Math.round(createdAt), { copy: false });
+    try {
+      await createCapture(path, Math.round(createdAt), { copy: false });
+      converted++;
+    } catch (error) {
+      // A missing encoder says nothing about the video, so keep it for later.
+      if (error instanceof MissingToolError) {
+        throw error;
+      }
+
+      // An unreadable video would block recovery on every launch: set it aside.
+      await rename(path, `${path}.failed`).catch(() => undefined);
+    }
   }
 
-  return newest.length;
+  return converted;
 }
 
 export async function reencode(capture: Capture, settings: EncodeSettings): Promise<Capture> {
@@ -114,8 +137,12 @@ export async function reencode(capture: Capture, settings: EncodeSettings): Prom
 
 export async function fitForSharing(capture: Capture): Promise<Capture> {
   const { result, settings } = await encodeToFit(capture.moviePath, capture.gifPath, capture.settings);
+  const next = await finish(applyResult(capture, settings, result));
+  if (result.size > SHARE_LIMIT_BYTES) {
+    throw new StillTooBigError(next);
+  }
 
-  return finish(applyResult(capture, settings, result));
+  return next;
 }
 
 export function trimmedDuration(capture: Capture): number {

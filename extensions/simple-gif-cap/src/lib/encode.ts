@@ -107,14 +107,24 @@ function encodeWithGifski(moviePath: string, gifPath: string, settings: EncodeSe
     ]);
     const encoder = spawn(gifskiPath()!, ["--fps", String(settings.fps), "--quality", "90", "-o", gifPath, "-"]);
     let stderr = "";
+    const fail = (error: Error) => {
+      decoder.kill();
+      encoder.kill();
+      reject(error);
+    };
     decoder.stderr.on("data", (chunk) => (stderr += chunk));
     encoder.stderr.on("data", (chunk) => (stderr += chunk));
     decoder.stdout.pipe(encoder.stdin);
-    decoder.on("error", reject);
-    encoder.on("error", reject);
-    encoder.on("close", (code) =>
-      code === 0 ? resolve() : reject(new Error(stderr.trim() || `gifski exited ${code}`)),
-    );
+    // gifski exiting early closes the pipe; the exit code below reports why.
+    encoder.stdin.on("error", () => decoder.kill());
+    decoder.on("error", fail);
+    encoder.on("error", fail);
+    decoder.on("close", (code, signal) => {
+      if (code !== 0 && !signal) {
+        fail(new Error(stderr.trim() || `ffmpeg exited ${code}`));
+      }
+    });
+    encoder.on("close", (code) => (code === 0 ? resolve() : fail(new Error(stderr.trim() || `gifski exited ${code}`))));
   });
 }
 

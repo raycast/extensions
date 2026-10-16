@@ -119,7 +119,11 @@ async function startRecording(target: Target) {
   await LocalStorage.setItem(STATE_KEY, JSON.stringify({ pid, moviePath, startedAt: now.getTime() }));
 }
 
-/** Asks the helper to stop. It saves the video and opens the preview itself. */
+/**
+ * Asks the helper to stop. It saves the video and opens the preview itself.
+ * The state stays until the helper exits, so recovery never reads a video
+ * that is still being written.
+ */
 export async function stopRecording(): Promise<boolean> {
   const recording = await activeRecording();
   if (!recording) {
@@ -127,7 +131,6 @@ export async function stopRecording(): Promise<boolean> {
   }
 
   process.kill(recording.pid, "SIGINT");
-  await LocalStorage.removeItem(STATE_KEY);
 
   return true;
 }

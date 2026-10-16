@@ -1,10 +1,11 @@
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, trash } from "@raycast/api";
 import { existsSync } from "node:fs";
 import { rm } from "node:fs/promises";
 
 const HISTORY_KEY = "history";
 /** Source videos are kept for trimming and re-encoding, but only for the latest captures. */
 const KEEP_VIDEOS = 20;
+const KEEP_ENTRIES = 200;
 
 export interface EncodeSettings {
   fps: number;
@@ -27,11 +28,18 @@ export interface Capture {
   height?: number;
 }
 
-export async function listCaptures(): Promise<Capture[]> {
+/**
+ * Everything saved, including entries whose files are gone. They stay hidden
+ * rather than dropped, so a file that comes back shows up again.
+ */
+async function storedCaptures(): Promise<Capture[]> {
   const raw = await LocalStorage.getItem<string>(HISTORY_KEY);
-  const captures = raw ? (JSON.parse(raw) as Capture[]) : [];
 
-  return captures.filter((capture) => existsSync(capture.gifPath) || existsSync(capture.moviePath));
+  return raw ? (JSON.parse(raw) as Capture[]) : [];
+}
+
+export async function listCaptures(): Promise<Capture[]> {
+  return (await storedCaptures()).filter((capture) => existsSync(capture.gifPath) || existsSync(capture.moviePath));
 }
 
 async function save(captures: Capture[]) {
@@ -47,7 +55,7 @@ export async function findByMovie(moviePath: string): Promise<Capture | undefine
 }
 
 export async function putCapture(capture: Capture) {
-  const captures = (await listCaptures()).filter((existing) => existing.id !== capture.id);
+  const captures = (await storedCaptures()).filter((existing) => existing.id !== capture.id);
   captures.unshift(capture);
   captures.sort((a, b) => b.createdAt - a.createdAt);
 
@@ -55,11 +63,10 @@ export async function putCapture(capture: Capture) {
     await rm(old.moviePath, { force: true });
   }
 
-  await save(captures);
+  await save(captures.slice(0, KEEP_ENTRIES));
 }
 
 export async function deleteCapture(capture: Capture) {
-  await rm(capture.gifPath, { force: true });
-  await rm(capture.moviePath, { force: true });
-  await save((await listCaptures()).filter((existing) => existing.id !== capture.id));
+  await trash([capture.gifPath, capture.moviePath].filter((path) => existsSync(path)));
+  await save((await storedCaptures()).filter((existing) => existing.id !== capture.id));
 }

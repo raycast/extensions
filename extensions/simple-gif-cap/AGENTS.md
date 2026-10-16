@@ -19,7 +19,7 @@ Guidelines for coding agents working in this repository.
   - `Sources/GifCapHelper/Geometry.swift`: coordinate conversion, the window list and the overlay window factory.
 - `scripts/demo/`: the README demo. `scene.html` and `timeline.js` recreate the UI, `render.mjs` renders it in headless Chrome to `media/demo.gif` (`npm run demo`). Update the scene when you change visible UI strings or layout.
 - `scripts/screenshots/run.mjs`: regenerates the Store screenshots in `metadata/` (`npm run screenshots`, see below).
-- `scripts/ci/raycast-env.d.ts`: stand-in for the Swift typings `ray build` generates, used by CI on Linux. Update it when an exported Swift signature changes.
+- `scripts/ci/raycast-env-stub.d.ts`: stand-in for the Swift typings `ray build` generates, used by CI on Linux. Update it when an exported Swift signature or a preference changes. It cannot be named `raycast-env.d.ts`: `ray publish` drops every file with that name.
 - `assets/`: `icon.png`, rendered by `scripts/icon.swift`.
 - `media/`: images the README links to (Raycast Store convention).
 
@@ -88,7 +88,7 @@ GIFs are expected in `~/Downloads`; set `GIFCAP_OUTPUT_DIR` if you changed the "
 
 ## CI
 
-`.forgejo/workflows/ci.yml` runs `npm run check` on Codeberg's Linux runners for pushes to `main` and for pull requests, with `scripts/ci/raycast-env.d.ts` standing in for the generated Swift typings. Linux cannot build the Swift package or run `ray build`, so run `npm run build` locally before pushing.
+`.forgejo/workflows/ci.yml` runs `npm run check` on Codeberg's Linux runners for pushes to `main` and for pull requests, with `scripts/ci/raycast-env-stub.d.ts` standing in for the generated Swift typings. Linux cannot build the Swift package or run `ray build`, so run `npm run build` locally before pushing.
 
 ## Commits and pull requests
 

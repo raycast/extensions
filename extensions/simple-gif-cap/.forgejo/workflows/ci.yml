@@ -20,7 +20,7 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       # ray build generates the Swift typings on macOS; CI uses a checked-in stand-in.
-      - run: cp scripts/ci/raycast-env.d.ts raycast-env.d.ts
+      - run: cp scripts/ci/raycast-env-stub.d.ts raycast-env.d.ts
       - run: npm run typecheck
       - run: npx eslint src
       - run: npm run format:check

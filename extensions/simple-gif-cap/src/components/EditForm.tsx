@@ -5,6 +5,11 @@ import { formatSeconds } from "../lib/encode";
 import { Capture } from "../lib/history";
 import { CaptureUpdate, runEncode } from "./run-encode";
 
+/** The usual choices plus whatever is saved, such as a Fit Under 10 MB result. */
+function withCurrent(choices: number[], current: number): number[] {
+  return choices.includes(current) ? choices : [...choices, current].sort((a, b) => (a || Infinity) - (b || Infinity));
+}
+
 function parseSeconds(value: string): number | undefined {
   const trimmed = value.trim();
   if (trimmed === "") {
@@ -79,12 +84,12 @@ export function EditForm(props: { capture: Capture; onUpdate: CaptureUpdate }) {
       />
       <Form.Separator />
       <Form.Dropdown id="fps" title="Frame Rate" defaultValue={String(capture.settings.fps)}>
-        {[6, 10, 15, 20, 30].map((fps) => (
+        {withCurrent([6, 10, 15, 20, 30], capture.settings.fps).map((fps) => (
           <Form.Dropdown.Item key={fps} value={String(fps)} title={`${fps} fps`} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown id="maxWidth" title="Max Width" defaultValue={String(capture.settings.maxWidth)}>
-        {[480, 640, 800, 1000, 1280, 1600, 0].map((width) => (
+        {withCurrent([480, 640, 800, 1000, 1280, 1600, 0], capture.settings.maxWidth).map((width) => (
           <Form.Dropdown.Item key={width} value={String(width)} title={width === 0 ? "Original" : `${width} px`} />
         ))}
       </Form.Dropdown>
