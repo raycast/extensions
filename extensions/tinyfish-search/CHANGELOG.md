@@ -1,6 +1,6 @@
 # TinyFish Search Changelog
 
-## [Search, Reading, and AI Tools] - {PR_MERGE_DATE}
+## [Search, Reading, and AI Tools] - 2026-10-16
 
 - Sign in to TinyFish in your browser to search the web and fetch page content without an API key.
 - Keep using an API key by entering one in extension preferences.
