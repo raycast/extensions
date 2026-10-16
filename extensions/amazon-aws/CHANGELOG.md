@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Fix AWS client initialization] - {PR_MERGE_DATE}
+## [Fix AWS client initialization] - 2026-10-16
 
 - Update the AWS SDK to fix a circular dependency that caused commands to fail with `Cannot read properties of undefined (reading 'for')` in Store builds.
 
