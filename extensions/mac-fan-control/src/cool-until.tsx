@@ -10,7 +10,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { useState } from "react";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import {
   coolUntil,
   estimate,
@@ -44,9 +44,8 @@ export default function Command() {
       toast.title = title;
       revalidate();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed";
-      toast.message = (error as Error).message;
+      await toast.hide();
+      showFailureToast(error, { title: "Failed" });
     }
   }
 
@@ -72,9 +71,6 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={
-        cooling ? `Cooling · below ${cooling.below} °C` : "Cool Until Below"
-      }
       searchBarAccessory={
         <List.Dropdown
           tooltip="Speed to hold"
