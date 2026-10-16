@@ -5,8 +5,6 @@
   "description": "Capture screenshots, control recordings, and open Zoomer from Raycast.",
   "icon": "icon.png",
   "author": "colindotfun",
-  "owner": "galactusdev",
-  "access": "public",
   "license": "MIT",
   "platforms": [
     "macOS"
@@ -186,7 +184,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.17"
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

@@ -3,7 +3,6 @@
 ## [Keep Zoomer in the Background] - {PR_MERGE_DATE}
 
 - Commands no longer bring the Zoomer main window to the front; Zoomer shows a window only when the command needs one
-- Zoomer is now published by the Galactus organization
 
 ## [Initial Release] - 2026-08-21
 
