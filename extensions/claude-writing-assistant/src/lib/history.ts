@@ -1,32 +1,15 @@
 import { Usage } from "./claude";
 import { readJson, updateJson, writeJson } from "./store";
-import { newId, truncate } from "./text";
+import { HistoryEntry, trimHistory } from "./history-entry";
+import { newId } from "./text";
 
-export interface HistoryEntry {
-  id: string;
-  createdAt: number;
-  /** Command name from package.json, used for the filter and the icon. */
-  command: string;
-  title: string;
-  input: string;
-  output: string;
-  model: string;
-  cost: number;
-}
+export type { HistoryEntry };
 
 const FILE = "history.json";
-const LIMIT = 300;
-const TEXT_LIMIT = 20_000;
 
 export async function addHistory(entry: Omit<HistoryEntry, "id" | "createdAt">): Promise<void> {
-  const item: HistoryEntry = {
-    ...entry,
-    id: newId(),
-    createdAt: Date.now(),
-    input: truncate(entry.input, TEXT_LIMIT),
-    output: truncate(entry.output, TEXT_LIMIT),
-  };
-  await updateJson<HistoryEntry[]>(FILE, [], (list) => [item, ...list].slice(0, LIMIT));
+  const item: HistoryEntry = { ...entry, id: newId(), createdAt: Date.now() };
+  await updateJson<HistoryEntry[]>(FILE, [], (list) => trimHistory([item, ...list]));
 }
 
 export function historyFromUsage(

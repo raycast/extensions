@@ -54,7 +54,11 @@ function reply(
         events.push({ type: "content_block_delta", index, delta: { type: "text_delta", text: chunk } });
       }
     } else if (block.type === "thinking") {
-      events.push({ type: "content_block_start", index, content_block: { type: "thinking", thinking: "", signature: "" } });
+      events.push({
+        type: "content_block_start",
+        index,
+        content_block: { type: "thinking", thinking: "", signature: "" },
+      });
       events.push({ type: "content_block_delta", index, delta: { type: "signature_delta", signature: "sig" } });
     } else if (block.type === "server_tool_use") {
       events.push({
@@ -161,8 +165,20 @@ describe("runClaude", () => {
             type: "web_search_tool_result",
             tool_use_id: "srv_1",
             content: [
-              { type: "web_search_result", url: "https://nodejs.org/en", title: "Node.js", encrypted_content: "x", page_age: null },
-              { type: "web_search_result", url: "https://example.com/a", title: "", encrypted_content: "y", page_age: null },
+              {
+                type: "web_search_result",
+                url: "https://nodejs.org/en",
+                title: "Node.js",
+                encrypted_content: "x",
+                page_age: null,
+              },
+              {
+                type: "web_search_result",
+                url: "https://example.com/a",
+                title: "",
+                encrypted_content: "y",
+                page_age: null,
+              },
             ],
           },
           { type: "text", text: "Node 24 LTS." },
@@ -223,8 +239,24 @@ describe("runClaude", () => {
           model: "claude-opus-5",
           usage: {
             iterations: [
-              { type: "message", model: null, input_tokens: 1000, output_tokens: 100, cache_read_input_tokens: 0, cache_creation_input_tokens: 0, cache_creation: null },
-              { type: "fallback_message", model: "claude-opus-5", input_tokens: 1000, output_tokens: 400, cache_read_input_tokens: 0, cache_creation_input_tokens: 0, cache_creation: null },
+              {
+                type: "message",
+                model: null,
+                input_tokens: 1000,
+                output_tokens: 100,
+                cache_read_input_tokens: 0,
+                cache_creation_input_tokens: 0,
+                cache_creation: null,
+              },
+              {
+                type: "fallback_message",
+                model: "claude-opus-5",
+                input_tokens: 1000,
+                output_tokens: 400,
+                cache_read_input_tokens: 0,
+                cache_creation_input_tokens: 0,
+                cache_creation: null,
+              },
             ],
           },
         },
@@ -241,11 +273,21 @@ describe("runClaude", () => {
 
   it("parses structured output and flags a cut-off reply", async () => {
     script.push(reply([{ type: "text", text: '{"text":"düzeltildi"}' }], "end_turn"));
-    const { data } = await runClaudeJson<{ text: string }>({ ...base, model: "claude-haiku-5-5", schema: { type: "object" } });
+    const { data } = await runClaudeJson<{ text: string }>({
+      ...base,
+      model: "claude-haiku-5-5",
+      schema: { type: "object" },
+    });
     assert.equal(data.text, "düzeltildi");
-    assert.deepEqual((requests[0].body.output_config as { format: unknown }).format, { type: "json_schema", schema: { type: "object" } });
+    assert.deepEqual((requests[0].body.output_config as { format: unknown }).format, {
+      type: "json_schema",
+      schema: { type: "object" },
+    });
 
     script.push(reply([{ type: "text", text: '{"text":"yar' }], "max_tokens"));
-    await assert.rejects(runClaudeJson({ ...base, model: "claude-haiku-5-5", schema: { type: "object" } }), IncompleteResponseError);
+    await assert.rejects(
+      runClaudeJson({ ...base, model: "claude-haiku-5-5", schema: { type: "object" } }),
+      IncompleteResponseError,
+    );
   });
 });

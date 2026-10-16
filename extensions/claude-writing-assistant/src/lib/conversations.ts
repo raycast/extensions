@@ -1,5 +1,6 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { promises as fs } from "node:fs";
+import path from "node:path";
 import { BetaMessageParam, Effort, Source, Usage } from "./claude";
 import { ModelId } from "./models";
 import { dataPath, readJson, removeFile, updateJson, writeJson } from "./store";
@@ -21,6 +22,8 @@ export interface Turn {
   /** What the user sees as their message. */
   prompt: string;
   attachments: Attachment[];
+  /** The hidden instruction sent instead of `prompt`, kept so a retry or edit can reuse it. */
+  instruction?: string;
   request: StoredBlock[];
   /** Assistant messages as received, replayed unchanged so thinking blocks stay valid. */
   replies: BetaMessageParam[];
@@ -163,6 +166,48 @@ export function loadConversation(id: string): Promise<Conversation | null> {
 
 export function listConversations(): Promise<ConversationSummary[]> {
   return readJson<ConversationSummary[]>(INDEX, []);
+}
+
+async function referencedImages(): Promise<Set<string>> {
+  const used = new Set<string>();
+  for (const summary of await listConversations()) {
+    const c = await loadConversation(summary.id);
+    for (const turn of c?.turns ?? []) {
+      for (const a of turn.attachments) if (a.kind === "image") used.add(a.path);
+    }
+  }
+  return used;
+}
+
+/** Deletes screenshots that were attached but never sent, unless a saved conversation uses them. */
+export async function discardImages(attachments: Attachment[]): Promise<void> {
+  const images = attachments.flatMap((a) =>
+    a.kind === "image" && a.path.startsWith(dataPath("images")) ? [a.path] : [],
+  );
+  if (!images.length) return;
+  const used = await referencedImages();
+  await Promise.all(images.filter((p) => !used.has(p)).map((p) => fs.rm(p, { force: true })));
+}
+
+/** Removes screenshots older than a day that no saved conversation refers to. */
+export async function cleanupOrphanImages(maxAgeMs = 24 * 60 * 60 * 1000): Promise<void> {
+  const dir = dataPath("images");
+  let names: string[];
+  try {
+    names = await fs.readdir(dir);
+  } catch {
+    return;
+  }
+  const used = await referencedImages();
+  const cutoff = Date.now() - maxAgeMs;
+  await Promise.all(
+    names.map(async (name) => {
+      const file = path.join(dir, name);
+      if (used.has(file)) return;
+      const stat = await fs.stat(file).catch(() => null);
+      if (stat && stat.mtimeMs < cutoff) await fs.rm(file, { force: true });
+    }),
+  );
 }
 
 async function removeImages(c: Conversation | null): Promise<void> {

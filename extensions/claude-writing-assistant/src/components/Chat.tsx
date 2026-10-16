@@ -8,6 +8,7 @@ import {
   Conversation,
   createConversation,
   deleteConversation,
+  discardImages,
   loadConversation,
   saveConversation,
   toApiContent,
@@ -147,9 +148,13 @@ export function Chat(props: ChatProps) {
   const [focusId, setFocusId] = useState<string>();
   const current = useRef(conversation);
   const abort = useRef<AbortController>(undefined);
+  /** A message put back into the search bar keeps its hidden instruction while its text is unchanged. */
+  const [restored, setRestored] = useState<{ prompt: string; instruction?: string }>();
   const busy = useRef(false);
   const seeded = useRef(false);
   const mounted = useRef(false);
+  const pendingRef = useRef(pending);
+  pendingRef.current = pending;
 
   function update(change: (c: Conversation) => Conversation) {
     if (!current.current) return;
@@ -191,7 +196,9 @@ export function Chat(props: ChatProps) {
       mounted.current = false;
       // Development builds run effects twice (React StrictMode): abort only if the view stays gone.
       setTimeout(() => {
-        if (!mounted.current) abort.current?.abort();
+        if (mounted.current) return;
+        abort.current?.abort();
+        void discardImages(pendingRef.current); // screenshots that were never sent
       }, 0);
     };
   }, []);
@@ -203,6 +210,7 @@ export function Chat(props: ChatProps) {
     }
     let text = prompt.trim();
     let hidden = instruction;
+    if (hidden === undefined && restored && text === restored.prompt) hidden = restored.instruction;
     if (!text && attachments.length) {
       const fallback = defaultRequest(attachmentKind(attachments), s.langs);
       text = fallback.prompt;
@@ -211,21 +219,35 @@ export function Chat(props: ChatProps) {
     if (!text && !hidden) return;
     setInput("");
     setPending([]);
+    setRestored(undefined);
     await run(
-      { prompt: text, attachments, request: buildRequest(text, attachments, hidden) },
+      { prompt: text, attachments, instruction: hidden, request: buildRequest(text, attachments, hidden) },
       current.current?.model ?? s.model,
-      !prompt.trim(),
+      { generated: !prompt.trim() },
     );
   }
 
-  /** `generated`: the visible prompt was filled in for the user, so a failure doesn't restore it. */
-  async function run(skeleton: Pick<Turn, "prompt" | "attachments" | "request">, model: ModelId, generated = false) {
+  /**
+   * `generated`: the visible prompt was filled in for the user, so a failure doesn't put it back.
+   * `replaces`: the turn being regenerated; it comes back if the new answer fails.
+   */
+  async function run(
+    skeleton: Pick<Turn, "prompt" | "attachments" | "request" | "instruction">,
+    model: ModelId,
+    opts: { generated?: boolean; replaces?: Turn } = {},
+  ) {
     if (busy.current || !current.current) return;
     busy.current = true;
     const conversationId = current.current.id;
-    const history = current.current.turns;
+    const { replaces } = opts;
+    const history = current.current.turns.filter((t) => t.id !== replaces?.id);
     const turn: Turn = { id: newId(), createdAt: Date.now(), ...skeleton, replies: [], answer: "", sources: [] };
-    update((c) => ({ ...c, model, updatedAt: Date.now(), turns: [...c.turns, turn] }));
+    update((c) => ({
+      ...c,
+      model,
+      updatedAt: Date.now(),
+      turns: [...c.turns.filter((t) => t.id !== replaces?.id), turn],
+    }));
     setFocusId(turn.id);
     setLive({ turnId: turn.id, text: "" });
 
@@ -273,10 +295,16 @@ export function Chat(props: ChatProps) {
       showText.cancel();
       const info = describeError(error);
       if (current.current?.id !== conversationId) return; // a new chat replaced this one
-      if (!streamed) {
-        // Nothing arrived: take the turn back and return the message so it can be sent again.
+      if (replaces) {
+        // A failed regeneration puts the previous answer back instead of losing it.
+        update((c) => ({ ...c, turns: c.turns.map((t) => (t.id === turn.id ? replaces : t)) }));
+      } else if (!streamed) {
+        // Nothing arrived: take the turn back and return the message, hidden instruction included.
         update((c) => ({ ...c, turns: c.turns.filter((t) => t.id !== turn.id) }));
-        if (!generated) setInput((text) => text || skeleton.prompt);
+        if (!opts.generated) {
+          setInput((text) => text || skeleton.prompt);
+          setRestored({ prompt: skeleton.prompt, instruction: skeleton.instruction });
+        }
         setPending((list) => (list.length ? list : skeleton.attachments));
       } else {
         patchTurn(turn.id, {
@@ -295,11 +323,10 @@ export function Chat(props: ChatProps) {
 
   async function regenerate(turn: Turn, model?: ModelId) {
     if (busy.current || !current.current) return;
-    update((c) => ({ ...c, turns: c.turns.filter((t) => t.id !== turn.id) }));
     await run(
-      { prompt: turn.prompt, attachments: turn.attachments, request: turn.request },
+      { prompt: turn.prompt, attachments: turn.attachments, request: turn.request, instruction: turn.instruction },
       model ?? current.current.model,
-      true,
+      { generated: true, replaces: turn },
     );
   }
 
@@ -308,6 +335,7 @@ export function Chat(props: ChatProps) {
     update((c) => ({ ...c, turns: c.turns.filter((t) => t.id !== turn.id) }));
     setInput(turn.prompt);
     setPending(turn.attachments);
+    setRestored({ prompt: turn.prompt, instruction: turn.instruction });
   }
 
   async function removeTurn(turn: Turn) {
@@ -319,10 +347,12 @@ export function Chat(props: ChatProps) {
 
   function newChat() {
     abort.current?.abort();
+    void discardImages(pendingRef.current);
     current.current = newConversation(s);
     setConversation(current.current);
     setInput("");
     setPending([]);
+    setRestored(undefined);
     setLive(undefined);
   }
 
@@ -458,7 +488,10 @@ export function Chat(props: ChatProps) {
               icon={Icon.XMarkCircle}
               style={Action.Style.Destructive}
               shortcut={Keyboard.Shortcut.Common.Remove}
-              onAction={() => setPending((list) => list.filter((_, i) => i !== attachmentIndex))}
+              onAction={() => {
+                void discardImages(pending.filter((_, i) => i === attachmentIndex));
+                setPending((list) => list.filter((_, i) => i !== attachmentIndex));
+              }}
             />
           )}
           {turn && !live && (

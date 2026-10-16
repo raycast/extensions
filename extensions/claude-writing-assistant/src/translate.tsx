@@ -14,6 +14,8 @@ import { recordUsage } from "./lib/usage";
 interface Result {
   text: string;
   done: boolean;
+  /** The reply hit the length limit, so the end of the translation is missing. */
+  truncated?: boolean;
   error?: string;
   usage?: Usage;
   durationMs?: number;
@@ -60,6 +62,7 @@ function useStreamed(key: string | null, system: () => string, source: string): 
         const done: Result = {
           text: stripWrapping(response.text, source),
           done: true,
+          truncated: response.truncated,
           usage: response.usage,
           durationMs: response.durationMs,
         };
@@ -141,7 +144,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Transl
     if (result.error) return `> ⚠️ ${result.error}`;
     if (!result.text) return `_${emptyText}_`;
     const body = !result.text.includes("\n") && result.text.length <= 90 ? `## ${result.text}` : result.text;
-    return body + footer(result, result === translation ? targetTitle : undefined);
+    const warning = result.truncated ? "\n\n_⚠️ Cut off at the length limit: the end is missing._" : "";
+    return body + warning + footer(result, result === translation ? targetTitle : undefined);
   }
 
   const alternatives = request && (
@@ -239,7 +243,10 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Transl
             id="translation"
             icon={translation?.error ? Icon.Warning : Icon.Globe}
             title={output ? oneLine(output, 60) : "Translating…"}
-            accessories={targetTitle ? [{ tag: targetTitle }] : undefined}
+            accessories={[
+              ...(translation?.truncated ? [{ icon: Icon.Warning, tooltip: "Cut off at the length limit" }] : []),
+              ...(targetTitle ? [{ tag: targetTitle }] : []),
+            ]}
             detail={<List.Item.Detail markdown={markdown(translation, "Translating…")} />}
             actions={actions}
           />

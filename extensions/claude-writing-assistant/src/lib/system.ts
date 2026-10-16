@@ -3,7 +3,7 @@ import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
-import type { ImageType } from "./conversations";
+import { cleanupOrphanImages, type ImageType } from "./conversations";
 import { dataPath } from "./store";
 
 const run = promisify(execFile);
@@ -29,6 +29,7 @@ async function dimensions(file: string): Promise<{ width: number; height: number
  * `keep` stores the image with the extension data so a conversation can refer to it later.
  */
 export async function captureRegion(keep: boolean): Promise<Capture | null> {
+  if (keep) void cleanupOrphanImages().catch(() => undefined);
   const dir = keep ? dataPath("images") : os.tmpdir();
   await fs.mkdir(dir, { recursive: true });
   const png = path.join(dir, `screen-${Date.now()}.png`);

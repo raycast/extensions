@@ -50,6 +50,8 @@ export default function Command(props: LaunchProps<{ launchContext?: { commandId
   const { data: custom = [], isLoading, revalidate } = usePromise(loadCustomCommands);
   const quickRun = props.launchContext?.commandId;
   const ran = useRef(false);
+  /** One paid request at a time: a second Run would paste a competing result. */
+  const running = useRef(false);
 
   // A quicklink passes the command id: run it straight away on the current selection.
   useEffect(() => {
@@ -79,13 +81,18 @@ export default function Command(props: LaunchProps<{ launchContext?: { commandId
       });
       return;
     }
-    const clipboard = await clipboardText(command);
     if (mode === "view") {
-      const { prompt, inline } = renderPrompt(command, { selection: input.text, clipboard, langs: s.langs });
+      // The selection always travels as an attachment, so a retry or an edit keeps it.
+      const { prompt } = renderPrompt(command, {
+        selection: input.text,
+        clipboard: await clipboardText(command),
+        langs: s.langs,
+        selectionPlaceholder: "the selected text (inside the <selected_text> tags)",
+      });
       const seed: ChatSeed = {
         prompt: command.title,
         instruction: prompt,
-        attachments: inline ? [] : [{ kind: "selection", text: input.text, source: input.source }],
+        attachments: [{ kind: "selection", text: input.text, source: input.source }],
         send: true,
         model: command.model,
         effort: command.effort,
@@ -93,7 +100,16 @@ export default function Command(props: LaunchProps<{ launchContext?: { commandId
       push(<Chat seed={seed} navigationTitle={command.title} />);
       return;
     }
-    await transform(command, mode, input, clipboard);
+    if (running.current) {
+      await showToast({ style: Toast.Style.Failure, title: "A command is already running" });
+      return;
+    }
+    running.current = true;
+    try {
+      await transform(command, mode, input, await clipboardText(command));
+    } finally {
+      running.current = false;
+    }
   }
 
   async function transform(command: AiCommand, mode: "replace" | "copy", input: Input, clipboard?: string) {
@@ -123,7 +139,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { commandId
         await closeMainWindow();
         await deliver(input, output);
         await showHUD(`✓ ${command.title}`);
-        await restoreClipboard(input, true);
+        await restoreClipboard(input, output, true);
       } else {
         await Clipboard.copy(output);
         await showHUD(`✓ ${command.title} · copied to clipboard`);

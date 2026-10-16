@@ -209,11 +209,19 @@ export const BUILTIN_COMMANDS: AiCommand[] = BUILTINS.map((command) => ({ ...com
  */
 export function renderPrompt(
   command: AiCommand,
-  values: { selection: string; clipboard?: string; langs: LanguagePair; tagSelection?: boolean },
+  values: {
+    selection: string;
+    clipboard?: string;
+    langs: LanguagePair;
+    tagSelection?: boolean;
+    /** Put this in place of {selection} when the text is attached separately. */
+    selectionPlaceholder?: string;
+  },
 ): { prompt: string; inline: boolean } {
-  const inline = command.prompt.includes("{selection}");
+  const inline = command.prompt.includes("{selection}") && values.selectionPlaceholder === undefined;
   const fills: Record<string, string> = {
-    selection: values.tagSelection ? `<text>\n${values.selection}\n</text>` : values.selection,
+    selection:
+      values.selectionPlaceholder ?? (values.tagSelection ? `<text>\n${values.selection}\n</text>` : values.selection),
     clipboard: values.clipboard ?? "",
     language: values.langs.primary,
     target: values.langs.secondary,

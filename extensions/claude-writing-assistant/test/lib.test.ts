@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { HistoryEntry, trimHistory } from "../src/lib/history-entry";
 import { findLanguage, languageTitle, parseTargetSuffix } from "../src/lib/languages";
 import { formatUsd, modelLabel, tokenCost } from "../src/lib/models";
 import { BUILTIN_COMMANDS, renderPrompt } from "../src/lib/presets";
@@ -81,7 +82,6 @@ describe("languages", () => {
     assert.equal(parseTargetSuffix(">de"), null);
     assert.equal(parseTargetSuffix("x => y"), null);
   });
-
 });
 
 describe("models", () => {
@@ -131,5 +131,52 @@ describe("presets", () => {
       assert.ok(["view", "replace", "copy"].includes(c.mode), c.id);
       assert.equal(c.builtin, true);
     }
+  });
+});
+
+describe("history", () => {
+  const entry = (id: number, size: number): HistoryEntry => ({
+    id: String(id),
+    createdAt: id,
+    command: "fix-grammar",
+    title: "Fix",
+    input: "x".repeat(size),
+    output: "",
+    model: "claude-opus-5-5",
+    cost: 0,
+  });
+
+  it("keeps full texts and drops the oldest entries past the size budget", () => {
+    const list = [entry(3, 1_500_000), entry(2, 2_000_000), entry(1, 1_000_000)];
+    const kept = trimHistory(list);
+    assert.deepEqual(
+      kept.map((e) => e.id),
+      ["3", "2"],
+    );
+    assert.equal(kept[0].input.length, 1_500_000);
+  });
+
+  it("always keeps the newest entry, however large", () => {
+    assert.deepEqual(
+      trimHistory([entry(2, 9_000_000), entry(1, 10)]).map((e) => e.id),
+      ["2"],
+    );
+  });
+
+  it("caps the number of entries", () => {
+    assert.equal(trimHistory(Array.from({ length: 400 }, (_, i) => entry(i, 1))).length, 300);
+  });
+});
+
+describe("presets with an attached selection", () => {
+  it("replaces {selection} with a reference when the text travels as an attachment", () => {
+    const command = { ...BUILTIN_COMMANDS[0], prompt: "Tweet this: {selection}" };
+    const { prompt, inline } = renderPrompt(command, {
+      selection: "hello",
+      langs: { primary: "Turkish", secondary: "English" },
+      selectionPlaceholder: "the selected text",
+    });
+    assert.equal(prompt, "Tweet this: the selected text");
+    assert.equal(inline, false);
   });
 });

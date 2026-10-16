@@ -47,14 +47,16 @@ export async function readInput(clipboardFallback: boolean): Promise<Input> {
 }
 
 /**
- * Puts the user's clipboard back. After a paste, waits so the target app reads the pasted text
- * first. Without a paste it still runs, because getSelectedText may have copied the selection.
+ * Puts the user's clipboard back, but only while it still holds `expected`: the pasted result,
+ * or the selection a synthetic ⌘C in getSelectedText may have copied. Anything else means the
+ * user copied something new in the meantime, and that copy must win.
  */
-export async function restoreClipboard(input: Input | undefined, afterPaste: boolean): Promise<void> {
+export async function restoreClipboard(input: Input | undefined, expected: string, afterPaste: boolean): Promise<void> {
   if (!input?.saved || input.source !== "selection") return;
+  // Give the target app time to read the pasted text before the clipboard changes again.
   if (afterPaste) await new Promise((resolve) => setTimeout(resolve, 600));
   const current = await Clipboard.readText().catch(() => undefined);
-  if (!afterPaste && current === ("text" in input.saved ? input.saved.text : undefined)) return;
+  if (current !== expected) return;
   await Clipboard.copy(input.saved, { concealed: true });
 }
 
@@ -111,16 +113,16 @@ export async function runQuickTask<T extends { text: string }>(task: QuickTask<T
     if (!changed && task.skipUnchanged) {
       await toast.hide();
       await showHUD(task.done(data, false));
-      await restoreClipboard(input, false);
+      await restoreClipboard(input, input.text, false);
       return;
     }
     const how = await deliver(input, output);
     await toast.hide();
     await showHUD(how === "copied" ? `${task.done(data, changed)} · copied to clipboard` : task.done(data, changed));
-    await restoreClipboard(input, how === "pasted");
+    await restoreClipboard(input, how === "pasted" ? output : input.text, how === "pasted");
   } catch (error) {
     await toast?.hide();
     await showErrorHUD(error);
-    await restoreClipboard(input, false);
+    if (input) await restoreClipboard(input, input.text, false);
   }
 }
