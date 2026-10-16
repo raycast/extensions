@@ -24,7 +24,7 @@
 
 5 段原始视频由桌面录屏采集。成品保留原速，只裁出完整 Raycast 命令窗口并删去静止等待，不改写界面、标题或结果。每段输出 GIF（15 fps）和 MP4（30 fps）。剪辑区间、尺寸、校验值和实际查询见 [录制记录](../media/recording-manifest.json)，可在 [素材预览](../media/recordings.html) 播放。
 
-三张 Store PNG 来自真实 Raycast 窗口截图，保留原始 1500 × 950 界面像素，居中放在统一浅灰背景上，输出 **2000 × 1250 PNG**。本轮未使用 Capture Window 的保存按钮：该按钮未被桌面自动化工具暴露。窗口内容未经修改，背景不含其他应用或私人数据。
+三张 Store PNG 来自真实 Raycast 窗口截图，保留原始 1500 × 950 界面像素，居中放在统一灰蓝背景上，输出 **2000 × 1250 PNG**。本轮未使用 Capture Window 的保存按钮：该按钮未被桌面自动化工具暴露。窗口内容未经修改，背景不含其他应用或私人数据。
 
 | 文件                                 | 内容                             |
 | ------------------------------------ | -------------------------------- |
@@ -33,3 +33,5 @@
 | `metadata/blazwitcher-raycast-3.png` | 新版预览高亮、来源标签和提取正文 |
 
 README 共用 `media/` 素材，商店截图位于 `metadata/`。官方尺寸、数量和内容要求见 [Store 截图规范](https://developers.raycast.com/basics/prepare-an-extension-for-store#screenshots)。Chrome 版 AI 分组操作与侧边栏不属于 Raycast 功能；录屏里的分组是 Chrome 中已有的真实分组。
+
+已用 Raycast 官方 `check_metadata_images.py` 和 `check_raycast_images.py` 校验三张 PNG 的尺寸、窗口留白、背景一致性和外观；均通过。初次提交的浅灰背景与预览窗口顶部对比不足，已调整背景颜色，未改动窗口像素。

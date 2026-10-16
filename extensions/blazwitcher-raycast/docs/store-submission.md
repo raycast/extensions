@@ -16,7 +16,7 @@
 2. `blazwitcher-raycast-2.png`：`/t skills github.com` 的英文项目结果。
 3. `blazwitcher-raycast-3.png`：`⌘D` 预览的命中高亮、Tab 来源标签和真实正文。
 
-本轮基于 master `232b014`，统一使用 `raycast-blaz` Chrome Profile 的公开页面。真实 Raycast 窗口截图居中放在一致的浅灰背景上，输出 2000 × 1250 PNG；不含其他应用或私人数据，不修改界面内容。具体录制方法、案例和检查范围见 [素材清单](media-guide.md)。GIF 和 MP4 位于 README 的 `media/` 中，不能替代商店 PNG。
+本轮基于 master `232b014`，统一使用 `raycast-blaz` Chrome Profile 的公开页面。真实 Raycast 窗口截图居中放在一致的灰蓝背景上，输出 2000 × 1250 PNG；不含其他应用或私人数据，不修改界面内容。具体录制方法、案例和检查范围见 [素材清单](media-guide.md)。GIF 和 MP4 位于 README 的 `media/` 中，不能替代商店 PNG。
 
 ## 检查与提交
 
@@ -29,7 +29,7 @@ npm run check
 
 `npm run check` 包括类型检查、测试、官方 `ray lint`、ESLint、Prettier 和构建。另在真实 Raycast 内确认搜索、来源筛选、打开标签、配置与正文预览；仅有构建通过不足以证明实际功能可用。
 
-此前的 [官方 PR #32402](https://github.com/raycast/extensions/pull/32402) 已关闭且未合并。本轮重新从源项目最新 master 准备素材和提交，不复用旧分支作为发布版本。新的申请以实际官方 PR 为准；创建 PR 不代表已上架。
+此前的 [官方 PR #32402](https://github.com/raycast/extensions/pull/32402) 已关闭且未合并。本轮重新从源项目最新 master 准备素材和提交，不复用旧分支作为发布版本。新申请为 [raycast/extensions #32426](https://github.com/raycast/extensions/pull/32426)，源仓库素材更新见 [PR #21](https://github.com/cjinhuo/blazwitcher-raycast/pull/21)；审核状态以官方 PR 为准，创建 PR 不代表已上架。
 
 确认最终文件和验证记录后，提交所有发布文件，在同步到最终提交的干净 checkout 中执行以下命令。不要从含 `.local`、`.env` 或其他本地诊断文件的开发目录直接发布，因为官方 CLI 复制文件时不完整遵循 `.gitignore`。使用交互终端，不传 `--non-interactive` 或 `--verbose`：
 

@@ -244,35 +244,46 @@
       "observed_url": "https://docs.openviking.ai/zh/concepts/12-metrics",
       "observed_profile": "raycast-blaz",
       "page_content_loaded": true
+    },
+    "distribution_build": {
+      "command": "npm run build (ray build -e dist)",
+      "development_watcher": "stopped",
+      "installed_bundle": "minified",
+      "verified": [
+        "/t sxwlx resolves one 上下文类型 result",
+        "Command-D loads extracted page content and highlights",
+        "Enter focuses https://docs.openviking.ai/zh/concepts/02-context-types in raycast-blaz"
+      ]
     }
   },
-  "store_screenshot_method": "Real native Raycast window captures, original 1500x950 pixels centered on a consistent #f3f4f6 2000x1250 canvas. No UI content was altered. Capture Window save control was not accessible to the automation tool.",
+  "store_screenshot_method": "Real native Raycast window captures, original 1500x950 pixels centered on a consistent #c4ccd8 2000x1250 canvas. No UI content was altered. Capture Window save control was not accessible to the automation tool.",
   "store_screenshots": [
     {
       "file": "metadata/blazwitcher-raycast-1.png",
       "width": 2000,
       "height": 1250,
-      "bytes": 240606,
-      "sha256": "7a5313821b4a7bfca5e1355bdc11b5352a93f0661ec09e90814688fdda13f63b"
+      "bytes": 240553,
+      "sha256": "aaf0f59306e253b856ccc1e62456ede4b153790dc8cd639c46784a5e0f702dc4"
     },
     {
       "file": "metadata/blazwitcher-raycast-2.png",
       "width": 2000,
       "height": 1250,
-      "bytes": 244536,
-      "sha256": "e227956239c943547e97c0c649e3eed336f51e96e973e1cfd4aaa962e3a27f07"
+      "bytes": 244487,
+      "sha256": "9940113a030a35a92221eca729781fa8b259931d822d84d3d3906786933fd693"
     },
     {
       "file": "metadata/blazwitcher-raycast-3.png",
       "width": 2000,
       "height": 1250,
-      "bytes": 348957,
-      "sha256": "ef681b7c34016922774d4d6025b3f78284690831a623c797c2b833314e911066"
+      "bytes": 348896,
+      "sha256": "50a193cdaa2ccde37d7c528c39d5c8e320f9cd8382af58143e76fab4a13b81f2"
     }
   ],
   "export_checks": {
     "decode": "all 5 GIFs and 5 MP4s passed",
-    "visual_review": "All 5 exported recordings and 3 Store PNGs visually reviewed; only public demo results are visible."
+    "visual_review": "All 5 exported recordings and 3 Store PNGs visually reviewed; only public demo results are visible.",
+    "official_metadata_validator": "Passed all three images: dimensions, padding, background consistency, appearance and local-extension badge checks."
   },
   "validation": {
     "command": "npm run check",
