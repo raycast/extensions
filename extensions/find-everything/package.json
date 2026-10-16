@@ -83,7 +83,9 @@
   },
   "scripts": {
     "build": "ray build",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "cli": "bun run src/cli.ts",
+    "build-cli": "bun build --compile ./src/cli.ts --outfile dist-bin/fe"
   },
   "platforms": [
     "macOS"
