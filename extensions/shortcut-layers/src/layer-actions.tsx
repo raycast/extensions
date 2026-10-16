@@ -2,6 +2,7 @@ import { Action, ActionPanel, Alert, Icon, Keyboard, List, confirmAlert, open, s
 import { createDeeplink } from "@raycast/utils";
 import { loadLayers, saveLayers } from "./data";
 import { LayerForm } from "./form-layer";
+import { ICON_VALUES } from "./icons";
 import { LayerView } from "./layer-view";
 import { duplicateKeys, quicklinkName } from "./schema";
 import type { Layer } from "./types";
@@ -58,7 +59,11 @@ export function LayerActionPanel({ layer, mutate }: { layer: Layer; mutate: () =
         <Action.CreateQuicklink
           title="Create Quicklink (First Time Only)"
           icon={Icon.Link}
-          quicklink={{ name, icon: layer.icon as Icon | undefined, link: hotkeyLink(layer) }}
+          quicklink={{
+            name,
+            icon: layer.icon && ICON_VALUES.has(layer.icon) ? (layer.icon as Icon) : undefined,
+            link: hotkeyLink(layer),
+          }}
         />
         <Action title="Set or Update Hotkey…" icon={Icon.Keyboard} onAction={() => open(quicklinksSearchLink(name))} />
         <Action.CopyToClipboard title="Copy Layer Deeplink" content={hotkeyLink(layer)} />
