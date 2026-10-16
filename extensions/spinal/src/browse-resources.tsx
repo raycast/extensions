@@ -320,7 +320,11 @@ export default function Command(props: LaunchProps) {
 
         const firstCollectionId = candidates[0] ?? result[0]?.id;
 
-        setSelectedCollectionId(firstCollectionId);
+        setSelectedCollectionId((current) =>
+          current && result.some((collection) => collection.id === current)
+            ? current
+            : firstCollectionId,
+        );
 
         if (!firstCollectionId) setIsLoading(false);
       } catch (error) {
@@ -343,6 +347,9 @@ export default function Command(props: LaunchProps) {
 
     latestRequestId.current = requestId;
     setLoadError(undefined);
+    setResources([]);
+    setPage(1);
+    setHasMore(false);
 
     const cachedResources = loadCachedResources(
       selectedCollectionId,
@@ -385,7 +392,7 @@ export default function Command(props: LaunchProps) {
   }, [selectedCollectionId, statusFilter, reloadKey]);
 
   const loadNextPage = useCallback(async () => {
-    if (!selectedCollectionId || !hasMore || isLoadingMore) return;
+    if (!selectedCollectionId || !hasMore || isLoadingMore || isLoading) return;
 
     const requestId = latestRequestId.current;
 
@@ -425,7 +432,14 @@ export default function Command(props: LaunchProps) {
     } finally {
       setIsLoadingMore(false);
     }
-  }, [selectedCollectionId, statusFilter, page, hasMore, isLoadingMore]);
+  }, [
+    selectedCollectionId,
+    statusFilter,
+    page,
+    hasMore,
+    isLoadingMore,
+    isLoading,
+  ]);
 
   function refreshResources() {
     if (selectedCollectionId) clearResourceCache(selectedCollectionId);

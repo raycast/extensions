@@ -166,6 +166,7 @@ function validationIssues(
     }
 
     if (
+      serialized !== undefined &&
       field.min_length &&
       typeof rawValue === "string" &&
       rawValue.length < field.min_length
