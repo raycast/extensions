@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "type": "module",
+  "name": "wireguide",
+  "title": "WireGuide",
+  "description": "Control WireGuide from Raycast",
+  "icon": "wireguide.png",
+  "author": "axelrindle",
+  "access": "public",
+  "keywords": [
+    "wireguide",
+    "wireguard"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Applications",
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-connections",
+      "title": "WireGuide",
+      "subtitle": "Control WireGuide",
+      "description": "Activate and deactivate WireGuide connections.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "binary",
+      "type": "textfield",
+      "description": "Path to the WireGuide CLI executable. You can find this by running 'where wireguide' in the terminal.",
+      "placeholder": "/opt/homebrew/bin/wireguide",
+      "default": {
+        "macOS": "/opt/homebrew/bin/wireguide",
+        "Windows": "C:\\Program Files\\WireGuide\\wireguide.exe"
+      },
+      "title": "WireGuide binary",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^1.17.0",
+    "pretty-bytes": "^7.1.1",
+    "usehooks-ts": "^3.1.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@eslint/config-inspector": "^3.5.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.10",
+    "typescript": "^5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint:fix": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
