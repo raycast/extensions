@@ -1,6 +1,6 @@
 # Mint for Raycast
 
-Shortcuts to [Mint](https://mintstorage.app/r/raycast), storage care for your Mac and your AI tools. See what is using space, optimize eligible files, review cleanup and organize folders. Mint considers what data is, where it came from and whether it is in use. Raycast sends each request to the signed Mint app, which applies the same rules and records as its own window.
+Mac storage cleanup and optimization for you and your AI agents, from Raycast. [Mint](https://mintstorage.app/r/raycast) finds caches, Xcode builds, `node_modules`, duplicate files and the gigabytes Codex, Claude Code and Cursor keep, and tells you what each one is, where it came from and whether it is in use. Identical copies share their storage without deleting anything, what apps make again is cleaned after one question, and your own files are chosen one by one. Mint's Auto Care can repeat the routines you turn on, on a schedule. Raycast sends each request to the signed Mint app, which applies the same rules and records as its own window.
 
 ## Commands
 
