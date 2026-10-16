@@ -17,6 +17,7 @@ function createHost(options = {}) {
     playSound: true,
     showToast: true,
     resultAction: "copy",
+    clipboardResultAction: "copy",
     ...options.preferences,
   };
   const api = {
@@ -40,8 +41,13 @@ function createHost(options = {}) {
       getItem: async (key) => storage.get(key),
       setItem: async (key, value) => storage.set(key, value),
     },
-    Toast: { Style: { Success: "success", Failure: "failure" } },
-    showToast: async (value) => calls.push(["toast", value]),
+    Toast: {
+      Style: { Success: "success", Failure: "failure", Animated: "animated" },
+    },
+    showToast: async (value) => {
+      calls.push(["toast", value]);
+      return { hide: async () => calls.push(["toast-hide"]) };
+    },
   };
   const overrides = {
     "@raycast/api": api,
@@ -66,11 +72,26 @@ function createHost(options = {}) {
       },
     },
     "swift:../../swift": Object.fromEntries(
-      ["recognizeText", "detectBarcode"].map((name) => [
+      [
+        "recognizeText",
+        "recognizeClipboard",
+        "detectBarcode",
+        "snapshotClipboard",
+        "restoreClipboard",
+      ].map((name) => [
         name,
         async (...args) => {
           calls.push(["swift", name, args]);
           if (options.swiftError) throw options.swiftError;
+          if (
+            options.swiftHanging === true ||
+            options.swiftHanging?.[name] === true
+          )
+            return new Promise(() => {});
+          if (options.swiftResults?.[name] !== undefined)
+            return options.swiftResults[name];
+          if (name === "snapshotClipboard") return "snapshot-id";
+          if (name === "restoreClipboard") return "OK";
           return options.swiftResult ?? "Example text";
         },
       ]),
