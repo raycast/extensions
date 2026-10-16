@@ -1,5 +1,10 @@
 # Amazon AWS Changelog
 
+## [Fix AWS client initialization] - 2026-10-16
+
+- Update the AWS SDK to fix a circular dependency that caused commands to fail with `Cannot read properties of undefined (reading 'for')` in Store builds.
+- Add an offline regression test for separately bundled Smithy subpaths and AWS client initialization.
+
 ## [Add AWS frontier agents to Console] - 2026-09-10
 
 - Add console links for AWS Security Agent, AWS DevOps Agent, and AWS FinOps Agent
