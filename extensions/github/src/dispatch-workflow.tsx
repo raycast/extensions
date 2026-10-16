@@ -108,16 +108,26 @@ function DispatchWorkflowForm() {
   const defaultBranch = branchesData?.defaultBranch ?? "";
 
   const {
-    data: workflows,
+    data: workflowLoad,
     isLoading: workflowsIsLoading,
     error: workflowsError,
+    revalidate: revalidateWorkflows,
   } = useCachedPromise(
     async (owner: string, name: string) => {
-      const { data } = await octokit.actions.listRepoWorkflows({ owner, repo: name, per_page: 100 });
-      const inspected: (DispatchableWorkflow | null)[] = [];
+      const listed = [];
+      for (let page = 1; ; page += 1) {
+        const { data } = await octokit.actions.listRepoWorkflows({ owner, repo: name, per_page: 100, page });
+        listed.push(...data.workflows);
+        if (listed.length >= data.total_count || data.workflows.length === 0) {
+          break;
+        }
+      }
 
-      for (let index = 0; index < data.workflows.length; index += WORKFLOW_INSPECTION_CONCURRENCY) {
-        const batch = data.workflows.slice(index, index + WORKFLOW_INSPECTION_CONCURRENCY);
+      const inspected: (DispatchableWorkflow | null)[] = [];
+      let failedCount = 0;
+
+      for (let index = 0; index < listed.length; index += WORKFLOW_INSPECTION_CONCURRENCY) {
+        const batch = listed.slice(index, index + WORKFLOW_INSPECTION_CONCURRENCY);
 
         inspected.push(
           ...(await Promise.all(
@@ -147,6 +157,7 @@ function DispatchWorkflowForm() {
                     }
                   : null;
               } catch {
+                failedCount += 1;
                 return null;
               }
             }),
@@ -154,13 +165,17 @@ function DispatchWorkflowForm() {
         );
       }
 
-      return inspected.filter((workflow): workflow is DispatchableWorkflow => workflow !== null);
+      return {
+        workflows: inspected.filter((workflow): workflow is DispatchableWorkflow => workflow !== null),
+        failedCount,
+      };
     },
     [owner, name],
     { execute: Boolean(owner && name) },
   );
 
-  const dispatchableWorkflows = workflows ?? [];
+  const dispatchableWorkflows = workflowLoad?.workflows ?? [];
+  const failedWorkflowCount = workflowLoad?.failedCount ?? 0;
   const selectedWorkflow = dispatchableWorkflows.find((workflow) => String(workflow.id) === values.workflowId);
   const workflowError = workflowsError ? getErrorMessage(workflowsError) : null;
 
@@ -212,16 +227,16 @@ function DispatchWorkflowForm() {
   const appliedInputsKey = useRef("");
 
   useEffect(() => {
-    if (workflowsIsLoading || pinsAreLoading || !workflows) {
+    if (workflowsIsLoading || pinsAreLoading || !workflowLoad) {
       return;
     }
 
-    if (values.workflowId && workflows.some((workflow) => String(workflow.id) === values.workflowId)) {
+    if (values.workflowId && workflowLoad.workflows.some((workflow) => String(workflow.id) === values.workflowId)) {
       return;
     }
 
     setValue("workflowId", orderedWorkflows.length > 0 ? String(orderedWorkflows[0].id) : "");
-  }, [values.workflowId, workflows, workflowsIsLoading, pinsAreLoading, orderedWorkflows]);
+  }, [values.workflowId, workflowLoad, workflowsIsLoading, pinsAreLoading, orderedWorkflows]);
 
   useEffect(() => {
     if (!values.repository || !selectedWorkflow || !defaultBranch || latestRunIsLoading) {
@@ -249,21 +264,25 @@ function DispatchWorkflowForm() {
     }
 
     appliedInputsKey.current = key;
+    // Shared input names must not keep the previous workflow's values.
     for (const input of selectedWorkflow.inputs) {
-      if (values[`input_${input.name}`] !== undefined && values[`input_${input.name}`] !== "") {
-        continue;
-      }
-
       const fallback = input.type === "choice" ? (input.options?.[0] ?? "") : input.type === "boolean" ? "false" : "";
       setValue(`input_${input.name}` as keyof DispatchFormValues, input.defaultValue ?? fallback);
     }
-  }, [selectedWorkflow?.id, values]);
+  }, [selectedWorkflow?.id]);
 
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Dispatch Workflow" icon={Icon.Play} onSubmit={handleSubmit} />
+          {failedWorkflowCount > 0 || workflowError ? (
+            <Action
+              title="Retry Loading Workflows"
+              icon={Icon.ArrowClockwise}
+              onAction={() => revalidateWorkflows()}
+            />
+          ) : null}
           {selectedWorkflow ? (
             <Action
               title={isSelectedWorkflowPinned ? "Unpin Workflow" : "Pin Workflow"}
@@ -309,12 +328,24 @@ function DispatchWorkflowForm() {
         ) : (
           <Form.Dropdown.Item
             value=""
-            title={workflowError ? "Failed to load workflows" : "No dispatchable workflows found"}
+            title={
+              workflowError
+                ? "Failed to load workflows"
+                : failedWorkflowCount > 0
+                  ? "Could not read workflow files"
+                  : "No dispatchable workflows found"
+            }
           />
         )}
       </Form.Dropdown>
 
       {workflowError ? <Form.Description title="Could not load workflows" text={workflowError} /> : null}
+      {failedWorkflowCount > 0 ? (
+        <Form.Description
+          title="Some workflow files could not be read"
+          text={`${failedWorkflowCount} workflow ${failedWorkflowCount === 1 ? "file" : "files"} failed to load, so this list may be incomplete.`}
+        />
+      ) : null}
 
       <Form.Dropdown {...itemProps.ref} title="Ref" isLoading={branchesIsLoading}>
         {(branchesData?.branches ?? []).map((branch) => (

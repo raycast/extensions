@@ -218,6 +218,7 @@ function ReleaseForm({ repository, onCreated }: ReleaseFormProps) {
     },
   });
 
+  const notesRequestId = useRef(0);
   const appliedSuggestions = useRef(false);
   useEffect(() => {
     if (appliedSuggestions.current || latestReleaseIsLoading) {
@@ -239,14 +240,20 @@ function ReleaseForm({ repository, onCreated }: ReleaseFormProps) {
     setValue("target", branchesData.branches.includes("main") ? "main" : branchesData.defaultBranch);
   }, [branchesData, branchesIsLoading]);
 
+  function invalidateGeneratedNotes() {
+    notesRequestId.current += 1;
+  }
+
   async function generateNotes() {
     const tag = values.tag.trim();
+    const target = values.target || undefined;
 
     if (!tag) {
       await showToast({ style: Toast.Style.Failure, title: "Enter a tag first" });
       return;
     }
 
+    const requestId = ++notesRequestId.current;
     const toast = await showToast({ style: Toast.Style.Animated, title: "Generating release notes" });
 
     try {
@@ -254,14 +261,24 @@ function ReleaseForm({ repository, onCreated }: ReleaseFormProps) {
         owner,
         repo,
         tag_name: tag,
-        target_commitish: values.target || undefined,
+        target_commitish: target,
       });
+
+      if (requestId !== notesRequestId.current) {
+        await toast.hide();
+        return;
+      }
 
       setValue("notes", data.body ?? "");
       setNotesAreGenerated(true);
       toast.style = Toast.Style.Success;
       toast.title = "Release notes generated";
     } catch (error) {
+      if (requestId !== notesRequestId.current) {
+        await toast.hide();
+        return;
+      }
+
       toast.style = Toast.Style.Failure;
       toast.title = "Failed generating release notes";
       toast.message = getErrorMessage(error);
@@ -269,6 +286,7 @@ function ReleaseForm({ repository, onCreated }: ReleaseFormProps) {
   }
 
   function handleTagChange(tag: string) {
+    invalidateGeneratedNotes();
     const previousTag = values.tag;
     setValue("tag", tag);
 
@@ -283,6 +301,7 @@ function ReleaseForm({ repository, onCreated }: ReleaseFormProps) {
   }
 
   function handleTargetChange(target: string) {
+    invalidateGeneratedNotes();
     setValue("target", target);
 
     if (notesAreGenerated) {
@@ -292,6 +311,7 @@ function ReleaseForm({ repository, onCreated }: ReleaseFormProps) {
   }
 
   function handleNotesChange(notes: string) {
+    invalidateGeneratedNotes();
     setValue("notes", notes);
 
     if (notesAreGenerated) {
