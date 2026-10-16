@@ -1,5 +1,5 @@
 import { Icon, Keyboard, launchCommand, LaunchType, MenuBarExtra } from "@raycast/api";
-import { useCachedState, usePromise } from "@raycast/utils";
+import { showFailureToast, useCachedState, usePromise } from "@raycast/utils";
 import { getSubmissions, Submission, submissionTitle } from "./lib/bricks-data";
 import { HelperMissingError } from "./lib/design";
 import { ProLicenseError } from "./lib/license";
@@ -58,12 +58,17 @@ export default function Command() {
   const unsupported = allChecks.filter((check) => check.unsupported);
   const total = data ? checks.reduce((sum, check) => sum + check.count, 0) : cachedTotal;
 
-  async function openSubmissions(siteId: string, formId?: string) {
-    await launchCommand({
-      name: "form-submissions",
-      type: LaunchType.UserInitiated,
-      context: { siteId, formId: formId ?? "" },
-    });
+  /** Opens Bricks Form Submissions, on one site and form when given (without, it keeps its saved filter). */
+  async function openSubmissions(siteId?: string, formId?: string) {
+    try {
+      await launchCommand({
+        name: "form-submissions",
+        type: LaunchType.UserInitiated,
+        ...(siteId ? { context: { siteId, formId: formId ?? "" } } : {}),
+      });
+    } catch (error) {
+      await showFailureToast(error, { title: "Couldn't open Bricks Form Submissions" });
+    }
   }
 
   async function markRead(check: SiteCheck) {
@@ -125,7 +130,7 @@ export default function Command() {
           title="Open Form Submissions"
           icon={Icon.List}
           shortcut={Keyboard.Shortcut.Common.Open}
-          onAction={() => launchCommand({ name: "form-submissions", type: LaunchType.UserInitiated })}
+          onAction={() => openSubmissions()}
         />
         <MenuBarExtra.Item
           title="Check Now"

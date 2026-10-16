@@ -74,26 +74,58 @@ export function normalizeSiteUrl(input: string): string {
   return `${url.origin}${url.pathname}`.replace(/\/+$/, "");
 }
 
-/** The saved site whose URL the given page URL lives under, if any. */
+/** How much of `pageUrl` the base URL covers, or -1 when the page doesn't live under it. */
+function matchLength(base: string, pageUrl: URL): number {
+  let url: URL;
+  try {
+    url = new URL(base);
+  } catch {
+    return -1; // A hand-edited entry shouldn't break the lookup for every other site.
+  }
+  // Match whole path segments, so a site at /blog doesn't claim /blog2.
+  const path = url.pathname.replace(/\/+$/, "");
+  const under = pageUrl.pathname === path || pageUrl.pathname.startsWith(`${path}/`);
+  return url.host === pageUrl.host && under ? path.length : -1;
+}
+
+/**
+ * The saved site whose URL the given page URL lives under, if any. Also checks WordPress's own
+ * address, so wp-admin pages of WordPress in a subfolder are found; the most specific match wins.
+ */
 export function findSiteForUrl(sites: Site[], pageUrl: URL): Site | undefined {
-  return sites
-    .filter((site) => {
-      const siteUrl = new URL(site.url);
-      return siteUrl.host === pageUrl.host && pageUrl.pathname.startsWith(siteUrl.pathname);
-    })
-    .sort((a, b) => b.url.length - a.url.length)[0];
+  let best: { site: Site; length: number } | undefined;
+  for (const site of sites) {
+    const length = Math.max(matchLength(site.url, pageUrl), site.adminUrl ? matchLength(site.adminUrl, pageUrl) : -1);
+    if (length >= 0 && (!best || length > best.length)) best = { site, length };
+  }
+  return best?.site;
 }
 
 /**
  * Adds or updates sites from an export, matching by id, then by URL. Sites exported without
  * passwords keep the password already saved here.
  */
-export async function importSites(incoming: Site[]): Promise<{ added: number; updated: number }> {
+export async function importSites(incoming: Site[]): Promise<{ added: number; updated: number; skipped: number }> {
   const sites = await loadSites();
   let added = 0;
   let updated = 0;
-  for (const raw of incoming) {
-    if (!raw || typeof raw.url !== "string" || typeof raw.name !== "string") continue;
+  let skipped = 0;
+  for (const entry of incoming) {
+    if (!entry || typeof entry.url !== "string" || typeof entry.name !== "string") {
+      skipped++;
+      continue;
+    }
+    // Normalize like the site form does; a hand-edited "example.com" would otherwise break URL parsing later.
+    let raw: Site;
+    try {
+      raw = { ...entry, url: normalizeSiteUrl(entry.url) };
+      // Only when the file has one: an older export without adminUrl keeps the one saved here.
+      if (typeof entry.adminUrl === "string") raw.adminUrl = normalizeSiteUrl(entry.adminUrl);
+      else delete raw.adminUrl;
+    } catch {
+      skipped++;
+      continue;
+    }
     const index = sites.findIndex((s) => s.id === raw.id || s.url === raw.url);
     if (index >= 0) {
       const existing = sites[index];
@@ -105,5 +137,5 @@ export async function importSites(incoming: Site[]): Promise<{ added: number; up
     }
   }
   await saveSites(sites);
-  return { added, updated };
+  return { added, updated, skipped };
 }

@@ -2,7 +2,9 @@ import {
   Action,
   ActionPanel,
   AI,
+  Alert,
   Color,
+  confirmAlert,
   environment,
   Form,
   Icon,
@@ -13,7 +15,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { ReactElement, useMemo, useState } from "react";
+import { ReactElement, useMemo, useRef, useState } from "react";
 import { ErrorEmptyView } from "./site-empty-view";
 import {
   AuditImage,
@@ -25,6 +27,8 @@ import {
   largeImageKb,
   setAltText,
 } from "../lib/bricks-data";
+import { ProLicenseError } from "../lib/license";
+import { escapeMarkdown } from "../lib/markdown";
 import { Site } from "../lib/sites";
 import { adminEditUrl } from "../lib/wordpress";
 
@@ -54,6 +58,18 @@ function webpEstimate(image: AuditImage): number | null {
   if (image.mime === "image/png") return bytes * 0.25;
   if (image.mime === "image/jpeg") return bytes * 0.7;
   return null;
+}
+
+/** An http(s) image URL safe to put in `<img src="…">`, or undefined if it isn't one. */
+function previewSrc(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return undefined;
+    return parsed.href.replace(/["'<>\s]/g, (c) => encodeURIComponent(c));
+  } catch {
+    return undefined;
+  }
 }
 
 const errorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
@@ -97,7 +113,9 @@ export function ImageList(props: { site: Site; preset: string }) {
   const { site } = props;
   const [filter, setFilter] = useState(props.preset);
   const [showingDetail, setShowingDetail] = useCachedState("audit-images:detail", true);
-  const { data, isLoading, error, revalidate } = useCachedPromise(getImageAudit, [site, largeImageKb()], {});
+  const { data: loaded, isLoading, error, revalidate } = useCachedPromise(getImageAudit, [site, largeImageKb()], {});
+  // A lapsed license shows the "Pro needed" screen, not the cached audit.
+  const data = error instanceof ProLicenseError ? undefined : loaded;
 
   const pages = useMemo(() => {
     const map = new Map<number, string>();
@@ -221,7 +239,8 @@ function issueNotes(image: AuditImage, audit: ImageAudit): { issue: ImageIssue; 
           : "**No alt text:** none in the media library, and the element doesn't set its own.",
       );
     }
-    if (issue === "filename_alt") add(issue, `**File name as alt:** “${image.alt}” doesn't describe the image.`);
+    if (issue === "filename_alt")
+      add(issue, `**File name as alt:** “${escapeMarkdown(image.alt ?? "")}” doesn't describe the image.`);
     if (issue === "large" && served) {
       add(
         issue,
@@ -289,19 +308,20 @@ function ImageItem(props: {
         ...(issues.length > 1 ? [{ text: `+${issues.length - 1}` }] : []),
       ]
     : [];
+  const preview = previewSrc(image.preview);
   const markdown = [
     notes
       .sort((a, b) => Number(b.issue === props.focusIssue) - Number(a.issue === props.focusIssue))
       .map((n) => `- ${n.text}`)
       .join("\n"),
-    image.preview ? `<img src="${image.preview}" alt="" height="160" />` : "",
+    preview ? `<img src="${preview}" alt="" height="160" />` : "",
   ]
     .filter(Boolean)
     .join("\n\n");
 
   return (
     <List.Item
-      icon={image.preview ? { source: image.preview, fallback: Icon.Image } : Icon.Image}
+      icon={preview ? { source: preview, fallback: Icon.Image } : Icon.Image}
       title={image.filename || image.url || "Image"}
       subtitle={props.showingDetail ? undefined : places.join(", ")}
       keywords={[
@@ -404,7 +424,20 @@ function ImageItem(props: {
               title="Mark as Decorative"
               icon={Icon.EyeDisabled}
               shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-              onAction={() => saveAlt(site, image, "", true, props.onChange)}
+              onAction={async () => {
+                // Decorative means an empty alt: don't erase existing alt text without asking.
+                if (
+                  image.alt &&
+                  !(await confirmAlert({
+                    title: "Mark as decorative?",
+                    message: `This removes the alt text “${image.alt}” so screen readers skip ${image.filename}.`,
+                    primaryAction: { title: "Remove Alt Text", style: Alert.ActionStyle.Destructive },
+                  }))
+                ) {
+                  return;
+                }
+                await saveAlt(site, image, "", true, props.onChange);
+              }}
             />
           )}
           {image.id !== null && (
@@ -518,6 +551,9 @@ export function AltTextForm(props: { site: Site; queue: AuditImage[]; onSaved: (
   const [suggesting, setSuggesting] = useState(false);
   const canUseAI = environment.canAccess(AI);
   const total = props.queue.length;
+  // The image on screen, so an AI suggestion that finishes after Skip doesn't land on the next one.
+  const currentKey = useRef(image.key);
+  currentKey.current = image.key;
 
   function next() {
     if (index + 1 >= total) {
@@ -553,9 +589,11 @@ export function AltTextForm(props: { site: Site; queue: AuditImage[]; onSaved: (
               icon={Icon.Stars}
               shortcut={{ modifiers: ["cmd"], key: "g" }}
               onAction={async () => {
+                const requested = image.key;
                 setSuggesting(true);
                 try {
-                  setAlt(await suggestAlt(image));
+                  const suggestion = await suggestAlt(image);
+                  if (currentKey.current === requested) setAlt(suggestion);
                 } catch (error) {
                   await showToast({
                     style: Toast.Style.Failure,

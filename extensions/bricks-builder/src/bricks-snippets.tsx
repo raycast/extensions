@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, List } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedState, usePromise } from "@raycast/utils";
 import { ImportForm } from "./components/import-form";
 import { SnippetForm, SnippetFromClipboardForm } from "./components/snippet-form";
 import { exportItems, readBackup } from "./lib/backup";
+import { codeBlock, escapeMarkdown, inlineCode } from "./lib/markdown";
 import {
   importSnippets,
   loadSnippets,
@@ -34,22 +35,28 @@ function snippetMarkdown(snippet: Snippet): string {
     const lines: string[] = [];
     const walk = (parent: string, depth: number) => {
       for (const el of byParent.get(parent) ?? []) {
-        lines.push(`${"  ".repeat(depth)}- ${el.label ? `**${el.label}** (${el.name})` : el.name}`);
+        lines.push(
+          `${"  ".repeat(depth)}- ${el.label ? `**${escapeMarkdown(String(el.label))}** (${escapeMarkdown(String(el.name))})` : escapeMarkdown(String(el.name))}`,
+        );
         walk(String(el.id), depth + 1);
       }
     };
     for (const root of elements.content.filter((el) => !ids.has(String(el.parent)))) {
-      lines.push(`- ${root.label ? `**${root.label}** (${root.name})` : root.name}`);
+      lines.push(
+        `- ${root.label ? `**${escapeMarkdown(String(root.label))}** (${escapeMarkdown(String(root.name))})` : escapeMarkdown(String(root.name))}`,
+      );
       walk(String(root.id), 1);
     }
-    const source = elements.sourceUrl ? `\n\nCopied from ${elements.sourceUrl}` : "";
-    return `## ${snippet.name}\n\n${lines.join("\n")}${source}`;
+    const source = elements.sourceUrl ? `\n\nCopied from ${inlineCode(elements.sourceUrl)}` : "";
+    return `## ${escapeMarkdown(snippet.name)}\n\n${lines.join("\n")}${source}`;
   }
-  return `## ${snippet.name}\n\n\`\`\`${FENCE[snippet.kind]}\n${snippet.content}\n\`\`\``;
+  return `## ${escapeMarkdown(snippet.name)}\n\n${codeBlock(snippet.content, FENCE[snippet.kind])}`;
 }
 
 export default function Command() {
-  const { data: snippets = [], isLoading, revalidate } = useCachedPromise(loadSnippets);
+  // usePromise, not useCachedPromise: snippets can hold API keys, and Raycast's cache is stored
+  // unencrypted on disk.
+  const { data: snippets = [], isLoading, revalidate } = usePromise(loadSnippets);
   const [kind, setKind] = useCachedState<string>("snippets:kind", "all");
   const visible = snippets.filter((s) => kind === "all" || s.kind === kind);
 

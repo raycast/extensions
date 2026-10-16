@@ -13,6 +13,7 @@ import {
   parseSettingKey,
   propertyLabel,
 } from "./lib/design";
+import { codeBlock, escapeMarkdown, inlineCode } from "./lib/markdown";
 import { Site } from "./lib/sites";
 
 const ALL = "__all";
@@ -65,16 +66,16 @@ function breakpointsUsed(cls: GlobalClass, breakpoints: Breakpoint[]): Breakpoin
 }
 
 function classMarkdown(cls: GlobalClass, detail: ClassDetail | undefined, loading: boolean): string {
-  const parts = [`## .${cls.name}`];
+  const parts = [`## .${escapeMarkdown(cls.name)}`];
   if (detail?.generated_css) {
-    parts.push("**Generated CSS**\n\n```css\n" + detail.generated_css.trim() + "\n```");
+    parts.push("**Generated CSS**\n\n" + codeBlock(detail.generated_css.trim(), "css"));
   } else if (cls.css) {
-    parts.push("**Custom CSS**\n\n```css\n" + cls.css.trim() + "\n```");
+    parts.push("**Custom CSS**\n\n" + codeBlock(cls.css.trim(), "css"));
   }
   if (!detail && loading) parts.push("_Loading generated CSS…_");
   if (detail && !detail.generated_css && !cls.css) parts.push("_This class has no styles yet._");
   if ((cls.selectors ?? []).length > 0) {
-    parts.push("**Extra selectors:** " + (cls.selectors ?? []).map((s) => `\`${s}\``).join(", "));
+    parts.push("**Extra selectors:** " + (cls.selectors ?? []).map(inlineCode).join(", "));
   }
   return parts.join("\n\n");
 }
@@ -159,9 +160,16 @@ function UsedOnList(props: { site: Site; cls: GlobalClass }) {
   const { data, isLoading, error } = useCachedPromise(getClassDetail, [props.site, props.cls.id]);
   const posts = data?.used_on ?? [];
   return (
-    <List isLoading={isLoading} navigationTitle={`.${props.cls.name} Used On`}>
-      <ErrorEmptyView error={error} />
-      <List.EmptyView icon={Icon.MagnifyingGlass} title={isLoading ? "Loading…" : "Not used on any page"} />
+    <List
+      isLoading={isLoading}
+      navigationTitle={`.${props.cls.name} Used On`}
+      searchBarPlaceholder={`Search pages using .${props.cls.name}…`}
+    >
+      {error ? (
+        <ErrorEmptyView error={error} />
+      ) : (
+        <List.EmptyView icon={Icon.MagnifyingGlass} title={isLoading ? "Loading…" : "Not used on any page"} />
+      )}
       <List.Section title="Pages and Templates" subtitle={`${posts.length}`}>
         {posts.map((post) => (
           <List.Item
@@ -196,7 +204,7 @@ function UsedOnList(props: { site: Site; cls: GlobalClass }) {
 
 export default function Command() {
   const { sites, site, setSiteId, isLoading: sitesLoading, reloadSites } = useSelectedSite();
-  const [filter, setFilter] = useState<string>(ALL);
+  const [savedFilter, setFilter] = useState<string>(ALL);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showingDetail, setShowingDetail] = useCachedState("classes:detail", true);
 
@@ -219,6 +227,9 @@ export default function Command() {
 
   const classes = useMemo(() => data?.classes ?? [], [data]);
   const categories = [...new Set(classes.map((c) => c.category ?? "Uncategorized"))].sort();
+  // A category picked on another site may not exist here: show all classes then.
+  const filter =
+    data && ![ALL, UNUSED, UTILITY, LOCKED, EMPTY, ...categories].includes(savedFilter) ? ALL : savedFilter;
   const visible = classes.filter((c) => matchesFilter(c, filter));
   const count = (f: string) => classes.filter((c) => matchesFilter(c, f)).length;
 

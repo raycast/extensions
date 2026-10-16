@@ -1,6 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { helperRequest, SCAN_TIMEOUT } from "./design";
 import { LicenseSummary } from "./license";
+import { escapeMarkdown } from "./markdown";
 import { Site } from "./sites";
 
 /** Plugin version that added the endpoints below. */
@@ -278,8 +279,8 @@ export async function getLibraryClipboard(site: Site, kind: "template" | "compon
 /** Markdown tree of an outline, e.g. "- **Hero** (section)". */
 export function outlineMarkdown(outline: OutlineLine[], total: number): string {
   const lines = outline.map((line) => {
-    const name = line.component ? `${elementTitle(line.name)} component` : line.name;
-    return `${"  ".repeat(line.depth)}- ${line.label ? `**${line.label}** (${name})` : name}`;
+    const name = escapeMarkdown(line.component ? `${elementTitle(line.name)} component` : line.name);
+    return `${"  ".repeat(line.depth)}- ${line.label ? `**${escapeMarkdown(line.label)}** (${name})` : name}`;
   });
   const more = total > outline.length ? `\n\n…and ${total - outline.length} more elements` : "";
   return lines.join("\n") + more;
@@ -358,8 +359,9 @@ export interface SiteHealth {
   site_name: string;
   home_url: string;
   wp_version: string;
-  php_version: string;
-  db_version: string;
+  /** The server details below are null for users who can't manage the site. */
+  php_version: string | null;
+  db_version: string | null;
   bricks_version: string | null;
   theme: string;
   plugin_version: string;
@@ -367,9 +369,9 @@ export interface SiteHealth {
   /** "" when off. */
   maintenance_mode: "" | "maintenance" | "comingSoon";
   code_execution_enabled: boolean | null;
-  debug: boolean;
-  environment: string;
-  multisite: boolean;
+  debug: boolean | null;
+  environment: string | null;
+  multisite: boolean | null;
   search_engines_blocked: boolean;
   /** Null when the user can't update plugins. */
   updates: {

@@ -79,8 +79,8 @@ function content_response( \WP_REST_Request $request ): \WP_REST_Response {
 	$per_type = min( 5000, max( 1, (int) ( $request->get_param( 'per_type' ) ?: 1000 ) ) );
 	$search   = trim( (string) $request->get_param( 'search' ) );
 
-	$items = [];
-	$types = [];
+	$editable = [];
+	$types    = [];
 	foreach ( $public as $slug => $object ) {
 		$args = [
 			'post_type'              => $slug,
@@ -90,6 +90,9 @@ function content_response( \WP_REST_Request $request ): \WP_REST_Response {
 			'order'                  => 'DESC',
 			'ignore_sticky_posts'    => true,
 			'update_post_term_cache' => false,
+			// Loading all meta would pull in every page's element data; uses_bricks comes from one query
+			// below. Templates keep it: their type and conditions are read for each one.
+			'update_post_meta_cache' => 'bricks_template' === $slug,
 			'suppress_filters'       => false,
 		];
 		if ( '' !== $search ) {
@@ -99,7 +102,7 @@ function content_response( \WP_REST_Request $request ): \WP_REST_Response {
 
 		foreach ( $query->posts as $post ) {
 			if ( current_user_can( 'edit_post', $post->ID ) ) {
-				$items[] = prepare_item( $post );
+				$editable[] = $post;
 			}
 		}
 		$types[] = [
@@ -109,6 +112,12 @@ function content_response( \WP_REST_Request $request ): \WP_REST_Response {
 			'returned'  => count( $query->posts ),
 			'truncated' => $query->found_posts > count( $query->posts ),
 		];
+	}
+
+	$with_bricks = posts_using_bricks( wp_list_pluck( $editable, 'ID' ) );
+	$items       = [];
+	foreach ( $editable as $post ) {
+		$items[] = prepare_item( $post, isset( $with_bricks[ $post->ID ] ) );
 	}
 
 	usort(
@@ -148,24 +157,39 @@ function modified_gmt( \WP_Post $post ): string {
 	return str_replace( ' ', 'T', $gmt ) . 'Z';
 }
 
-function prepare_item( \WP_Post $post ): array {
+/**
+ * Which of these posts have Bricks elements, as post id => true (headers and footers keep theirs under
+ * their own meta keys, so all three count). One query,
+ * without loading or unserializing the element data. Empty values ('', '0', an empty array) don't count.
+ */
+function posts_using_bricks( array $post_ids ): array {
+	global $wpdb;
+	$post_ids = array_values( array_unique( array_filter( array_map( 'intval', $post_ids ) ) ) );
+	if ( ! $post_ids ) {
+		return [];
+	}
+	$keys = array_keys( element_areas() );
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT DISTINCT post_id FROM {$wpdb->postmeta}
+			WHERE meta_key IN (" . implode( ',', array_fill( 0, count( $keys ), '%s' ) ) . ')
+			AND post_id IN (' . implode( ',', array_fill( 0, count( $post_ids ), '%d' ) ) . ")
+			AND meta_value NOT IN ('', '0', 'a:0:{}')",
+			array_merge( $keys, $post_ids )
+		)
+	);
+	return array_fill_keys( array_map( 'intval', $ids ), true );
+}
+
+/** $uses_bricks can be passed in when it's known already (see posts_using_bricks()). */
+function prepare_item( \WP_Post $post, ?bool $uses_bricks = null ): array {
 	$type          = get_post_type_object( $post->post_type );
 	$is_template   = 'bricks_template' === $post->post_type;
 	$template_key  = meta_key( 'BRICKS_DB_TEMPLATE_TYPE', '_bricks_template_type' );
 
-	// Headers and footers keep their elements under their own meta keys.
-	$uses_bricks = false;
-	foreach (
-		[
-			meta_key( 'BRICKS_DB_PAGE_CONTENT', '_bricks_page_content_2' ),
-			meta_key( 'BRICKS_DB_PAGE_HEADER', '_bricks_page_header_2' ),
-			meta_key( 'BRICKS_DB_PAGE_FOOTER', '_bricks_page_footer_2' ),
-		] as $key
-	) {
-		if ( get_post_meta( $post->ID, $key, true ) ) {
-			$uses_bricks = true;
-			break;
-		}
+	if ( null === $uses_bricks ) {
+		$uses_bricks = isset( posts_using_bricks( [ $post->ID ] )[ $post->ID ] );
 	}
 
 	return [
@@ -291,8 +315,10 @@ function design_data(): array {
 /** Creates a draft page/post or a Bricks template and returns it with its builder URL. */
 function create_response( \WP_REST_Request $request ) {
 	$type = (string) $request->get_param( 'type' );
-	if ( ! post_type_exists( $type ) ) {
-		return new \WP_Error( 'invalid_type', 'Unknown post type.', [ 'status' => 400 ] );
+	// Only what the builder can edit: Bricks templates and the post types enabled in Bricks' settings.
+	$allowed = array_merge( [ 'bricks_template' ], bricks_post_types() ?: [ 'post', 'page' ] );
+	if ( ! post_type_exists( $type ) || ! in_array( $type, $allowed, true ) ) {
+		return new \WP_Error( 'invalid_type', 'Bricks can\'t edit this post type.', [ 'status' => 400 ] );
 	}
 	$object = get_post_type_object( $type );
 	if ( ! current_user_can( $object->cap->create_posts ) ) {
@@ -326,23 +352,51 @@ function create_response( \WP_REST_Request $request ) {
  */
 /**
  * Every stored Bricks element list: page content, headers and footers (revisions and trash skipped).
- * Rows have post_id, meta_key and the serialized meta_value.
+ * Rows have meta_id, post_id, meta_key and the serialized meta_value.
+ *
+ * Read in batches of 200 rows (by meta_id) to keep each query small, and kept for the rest of the
+ * request, since /audit reads it for classes, code elements and images. $forget drops
+ * the kept rows (writes to scanned data call it through bump_scan_version()).
  */
-function element_rows(): array {
+function element_rows( bool $forget = false ): array {
 	global $wpdb;
+	static $rows = null;
+
+	if ( $forget ) {
+		$rows = null;
+		return [];
+	}
+	if ( null !== $rows ) {
+		return $rows;
+	}
 
 	$keys         = array_keys( element_areas() );
 	$placeholders = implode( ',', array_fill( 0, count( $keys ), '%s' ) );
-	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	return $wpdb->get_results(
-		$wpdb->prepare(
-			"SELECT pm.post_id, pm.meta_key, pm.meta_value FROM {$wpdb->postmeta} pm
-			INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
-			WHERE pm.meta_key IN ($placeholders)
-			AND p.post_type <> 'revision' AND p.post_status NOT IN ('trash', 'auto-draft', 'inherit')",
-			$keys
-		)
-	);
+	$rows         = [];
+	$after        = 0;
+	do {
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$batch = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT pm.meta_id, pm.post_id, pm.meta_key, pm.meta_value FROM {$wpdb->postmeta} pm
+				INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+				WHERE pm.meta_key IN ($placeholders) AND pm.meta_id > %d
+				AND p.post_type <> 'revision' AND p.post_status NOT IN ('trash', 'auto-draft', 'inherit')
+				ORDER BY pm.meta_id LIMIT 200",
+				array_merge( $keys, [ $after ] )
+			)
+		);
+		foreach ( (array) $batch as $row ) {
+			$rows[] = $row;
+			$after  = (int) $row->meta_id;
+		}
+	} while ( is_array( $batch ) && 200 === count( $batch ) );
+	return $rows;
+}
+
+/** Loads the posts of all element rows in one query, for scans that look up each of them. */
+function prime_element_posts(): void {
+	_prime_post_caches( array_values( array_unique( array_map( fn( $row ) => (int) $row->post_id, element_rows() ) ) ), false, false );
 }
 
 /** Meta key => area name for Bricks element data. */
@@ -754,6 +808,7 @@ function search_response( \WP_REST_Request $request ): \WP_REST_Response {
 	$classes = class_names();
 
 	$sources = [];
+	prime_element_posts();
 	foreach ( element_rows() as $row ) {
 		$sources[] = [
 			'post_id'   => (int) $row->post_id,
@@ -1054,6 +1109,7 @@ function image_audit(): array {
 	$dynamic      = [];
 
 	$sources = [];
+	prime_element_posts();
 	foreach ( element_rows() as $row ) {
 		$post_id = (int) $row->post_id;
 		if ( ! array_key_exists( $post_id, $posts ) ) {
@@ -1172,9 +1228,26 @@ function image_audit(): array {
 		'unused_library' => 0,
 	];
 
+	// Load every used image's post and meta up front: a handful of queries instead of several per image.
+	// Ids that don't exist (deleted, or copied from another site) aren't cached by WordPress, so which
+	// ids are attachments is looked up once here too.
+	$ids         = array_values( array_unique( array_filter( array_column( $images, 'id' ) ) ) );
+	$attachments = [];
+	if ( $ids ) {
+		global $wpdb;
+		$attachments = array_flip(
+			array_map(
+				'intval',
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'attachment' AND ID IN (" . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')', $ids ) )
+			)
+		);
+		_prime_post_caches( array_keys( $attachments ), false, true );
+	}
+
 	foreach ( $images as $image ) {
 		$id     = $image['id'];
-		$exists = $id && 'attachment' === get_post_type( $id );
+		$exists = $id && isset( $attachments[ $id ] );
 		$url    = $exists ? (string) wp_get_attachment_url( $id ) : $image['url'];
 		if ( $exists ) {
 			$used[ $id ] = true;
@@ -1195,40 +1268,41 @@ function image_audit(): array {
 		$items[] = $item;
 	}
 
-	// Media library images without alt text that Bricks doesn't use (newest 300).
-	$unused_query = new \WP_Query(
-		[
-			'post_type'      => 'attachment',
-			'post_status'    => 'inherit',
-			'post_mime_type' => 'image',
-			'posts_per_page' => 300,
-			'post__not_in'   => array_keys( $used ),
-			'fields'         => 'ids',
-			'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-				'relation' => 'AND',
-				[
-					'relation' => 'OR',
-					[
-						'key'     => '_wp_attachment_image_alt',
-						'compare' => 'NOT EXISTS',
-					],
-					[
-						'key'   => '_wp_attachment_image_alt',
-						'value' => '',
-					],
-				],
-				[
-					'key'     => DECORATIVE_META,
-					'compare' => 'NOT EXISTS',
-				],
-			],
-		]
-	);
+	// Media library images without alt text that Bricks doesn't use (newest 300). Only for users who
+	// can see the media library. Filtered in PHP: a NOT EXISTS meta query and a long post__not_in are slow.
 	$unused = [];
-	foreach ( $unused_query->posts as $id ) {
-		$unused[] = array_merge( image_item( (int) $id, (string) wp_get_attachment_url( $id ), [] ), [ 'unused' => true ] );
+	if ( current_user_can( 'upload_files' ) ) {
+		global $wpdb;
+		$library = new \WP_Query(
+			[
+				'post_type'      => 'attachment',
+				'post_status'    => 'inherit',
+				'post_mime_type' => 'image',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+				'no_found_rows'  => true,
+			]
+		);
+		// Images with alt text, or marked decorative.
+		$described = array_flip(
+			array_map(
+				'intval',
+				$wpdb->get_col(
+					$wpdb->prepare(
+						"SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE ( meta_key = '_wp_attachment_image_alt' AND meta_value <> '' ) OR meta_key = %s",
+						DECORATIVE_META
+					)
+				)
+			)
+		);
+		$candidates = array_values( array_filter( array_map( 'intval', $library->posts ), fn( $id ) => ! isset( $used[ $id ] ) && ! isset( $described[ $id ] ) ) );
+		$newest     = array_slice( $candidates, 0, 300 );
+		_prime_post_caches( $newest, false, true );
+		foreach ( $newest as $id ) {
+			$unused[] = array_merge( image_item( $id, (string) wp_get_attachment_url( $id ), [] ), [ 'unused' => true ] );
+		}
+		$summary['unused_library'] = count( $candidates );
 	}
-	$summary['unused_library'] = (int) $unused_query->found_posts;
 
 	$cache = [
 		'images'         => $items,
@@ -1365,6 +1439,7 @@ function audit_data( \WP_REST_Request $request ): array {
 	$counts = [];
 	$code   = [];
 
+	prime_element_posts();
 	foreach ( element_rows() as $row ) {
 		$post_id = (int) $row->post_id;
 		$info    = $post( $post_id );
@@ -1691,7 +1766,8 @@ function clipboard_for( array $content ): array {
 			if ( 'class' !== ( $property['type'] ?? '' ) ) {
 				continue;
 			}
-			foreach ( array_merge( (array) ( $property['default'] ?? [] ), ...array_map( fn( $o ) => (array) ( $o['value'] ?? [] ), (array) ( $property['options'] ?? [] ) ) ) as $id ) {
+			// array_values(): spreading string keys is a fatal error before PHP 8.1.
+			foreach ( array_merge( (array) ( $property['default'] ?? [] ), ...array_values( array_map( fn( $o ) => (array) ( $o['value'] ?? [] ), (array) ( $property['options'] ?? [] ) ) ) ) as $id ) {
 				$class_ids[ (string) $id ] = true;
 			}
 		}
@@ -1997,25 +2073,27 @@ function available_updates(): ?array {
 function health_response(): \WP_REST_Response {
 	global $wpdb;
 	$theme = wp_get_theme();
+	// Server details are for administrators; editors get null.
+	$admin = can_manage();
 	return rest_ensure_response(
 		[
 			'site_name'              => html_entity_decode( get_bloginfo( 'name' ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
 			'home_url'               => home_url(),
 			'wp_version'             => get_bloginfo( 'version' ),
-			'php_version'            => PHP_VERSION,
-			'db_version'             => $wpdb->db_server_info(),
+			'php_version'            => $admin ? PHP_VERSION : null,
+			'db_version'             => $admin ? $wpdb->db_server_info() : null,
 			'bricks_version'         => defined( 'BRICKS_VERSION' ) ? BRICKS_VERSION : null,
 			'theme'                  => $theme->get( 'Name' ) . ( $theme->parent() ? ' (child of ' . $theme->parent()->get( 'Name' ) . ')' : '' ),
 			'plugin_version'         => VERSION,
 			'css_loading'            => class_exists( '\Bricks\Database' ) ? ( \Bricks\Database::get_setting( 'cssLoading' ) ?: 'inline' ) : null,
 			'maintenance_mode'       => maintenance_mode(),
-			'code_execution_enabled' => class_exists( '\Bricks\Helpers' ) && method_exists( '\Bricks\Helpers', 'code_execution_enabled' ) ? (bool) \Bricks\Helpers::code_execution_enabled() : null,
-			'debug'                  => defined( 'WP_DEBUG' ) && WP_DEBUG,
-			'environment'            => wp_get_environment_type(),
-			'multisite'              => is_multisite(),
+			'code_execution_enabled' => $admin && class_exists( '\Bricks\Helpers' ) && method_exists( '\Bricks\Helpers', 'code_execution_enabled' ) ? (bool) \Bricks\Helpers::code_execution_enabled() : null,
+			'debug'                  => $admin ? ( defined( 'WP_DEBUG' ) && WP_DEBUG ) : null,
+			'environment'            => $admin ? wp_get_environment_type() : null,
+			'multisite'              => $admin ? is_multisite() : null,
 			'search_engines_blocked' => '0' === (string) get_option( 'blog_public' ),
 			'updates'                => available_updates(),
-			'can_manage'             => can_manage(),
+			'can_manage'             => $admin,
 			'license'                => license_summary(),
 		]
 	);
@@ -2213,7 +2291,7 @@ function dynamic_tags_response() {
 	return rest_ensure_response( [ 'tags' => $tags ] );
 }
 
-/** Option holding the number that every cached scan's key includes; bumping it invalidates them all. */
+/** Option holding the number every cached scan is stored with; bumping it invalidates them all. */
 const SCAN_VERSION_OPTION = 'bricks_raycast_scan_version';
 /** How long a cached scan lives. */
 const SCAN_CACHE_TTL = 10 * MINUTE_IN_SECONDS;
@@ -2223,22 +2301,35 @@ function scan_version(): int {
 }
 
 /**
- * Invalidates every cached scan. Bumped again at shutdown, so a scan that ran while this request
- * was still writing (some hooks fire before the write) can't stay cached under the new version.
+ * Invalidates every cached scan, once per request, at shutdown: some hooks fire before the write, and
+ * a scan that ran in between is stored under the old version, so the bump still invalidates it. Until
+ * then this request skips the cache (scan_bump_pending()). Not autoloaded: only scans read it.
  */
 function bump_scan_version(): void {
-	static $at_shutdown = false;
-	update_option( SCAN_VERSION_OPTION, scan_version() + 1, true );
-	if ( ! $at_shutdown ) {
-		$at_shutdown = true;
-		add_action( 'shutdown', fn() => update_option( SCAN_VERSION_OPTION, scan_version() + 1, true ) );
+	element_rows( true );
+	if ( scan_bump_pending( true ) ) {
+		return;
 	}
+	// A timestamp rather than +1: this request may hold an old copy of the option, and +1 could then
+	// land on the version another request already wrote, which would invalidate nothing.
+	add_action( 'shutdown', fn() => update_option( SCAN_VERSION_OPTION, max( scan_version() + 1, (int) floor( microtime( true ) * 1000 ) ), false ) );
+}
+
+/** Whether this request changed scanned data; $set marks it and returns whether it was already marked. */
+function scan_bump_pending( bool $set = false ): bool {
+	static $pending = false;
+	$was = $pending;
+	if ( $set ) {
+		$pending = true;
+	}
+	return $was;
 }
 
 /**
  * Serves $build's data from a 10-minute transient keyed by endpoint, the request params in $vary,
- * the user (results are filtered by capability), their locale and the scan version.
- * fresh=1 skips the cache and refreshes it. WP_Errors are passed through and never cached.
+ * the user (results are filtered by capability) and their locale. The entry holds the scan version it
+ * was built under, so a bump makes it stale and the next build overwrites the same transient instead
+ * of leaving the old one behind. fresh=1 skips the cache and refreshes it. WP_Errors are never cached.
  */
 function cached_response( string $name, \WP_REST_Request $request, callable $build, array $vary = [] ) {
 	$params = [];
@@ -2249,8 +2340,6 @@ function cached_response( string $name, \WP_REST_Request $request, callable $bui
 	$key = 'bricks_raycast_' . $name . '_' . md5(
 		(string) wp_json_encode(
 			[
-				VERSION,
-				scan_version(),
 				get_current_user_id(),
 				get_user_locale(),
 				is_ssl(),
@@ -2258,9 +2347,11 @@ function cached_response( string $name, \WP_REST_Request $request, callable $bui
 			]
 		)
 	);
+	// Read before building: if the data changes while the scan runs, the entry is already stale.
+	$version = VERSION . ':' . scan_version();
 
-	$entry = rest_sanitize_boolean( $request->get_param( 'fresh' ) ) ? false : get_transient( $key );
-	$hit   = is_array( $entry ) && array_key_exists( 'data', $entry );
+	$entry = rest_sanitize_boolean( $request->get_param( 'fresh' ) ) || scan_bump_pending() ? false : get_transient( $key );
+	$hit   = is_array( $entry ) && array_key_exists( 'data', $entry ) && ( $entry['version'] ?? null ) === $version;
 	if ( ! $hit ) {
 		$data = $build();
 		if ( is_wp_error( $data ) ) {
@@ -2273,6 +2364,7 @@ function cached_response( string $name, \WP_REST_Request $request, callable $bui
 			$data = $data->get_data();
 		}
 		$entry = [
+			'version'      => $version,
 			'data'         => $data,
 			'generated_at' => time(),
 		];

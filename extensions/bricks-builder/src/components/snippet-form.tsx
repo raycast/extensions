@@ -85,7 +85,8 @@ export function SnippetForm(props: SnippetFormProps) {
 
   return (
     <Form
-      navigationTitle={snippet ? `Edit ${snippet.name}` : "New Snippet"}
+      // The standalone command's form is a root screen, which keeps the command's own title.
+      navigationTitle={props.closeOnSave ? undefined : snippet ? `Edit ${snippet.name}` : "New Snippet"}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Snippet" icon={Icon.Check} onSubmit={handleSubmit} />

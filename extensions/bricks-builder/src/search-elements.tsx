@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { ReactElement, useMemo, useState } from "react";
+import { ReactElement, useEffect, useMemo, useState } from "react";
 import { ErrorEmptyView, NoSitesView } from "./components/site-empty-view";
 import { ManageSitesAction, SwitchSiteSubmenu, useSelectedSite } from "./hooks/use-selected-site";
 import { elementTitle, ElementResult, fieldLabel, searchElements } from "./lib/bricks-data";
@@ -19,17 +19,34 @@ function sectionKey(result: ElementResult) {
   return result.post ? `post-${result.post.id}-${result.area}` : `component-${result.component}`;
 }
 
+/** Results tagged with the site they came from (the previous search stays while typing). */
+async function searchSite(site: Site, query: string, element: string) {
+  return { ...(await searchElements(site, query, element)), siteId: site.id };
+}
+
 export default function Command() {
   const { sites, site, setSiteId, isLoading: sitesLoading, reloadSites } = useSelectedSite();
   const [searchText, setSearchText] = useState("");
   const [elementType, setElementType] = useCachedState<string>("search-elements:type", ALL);
   const query = searchText.trim();
 
-  const { data, isLoading, error, revalidate } = useCachedPromise(
-    searchElements,
-    [site as Site, query.length >= 2 ? query : "", elementType],
-    { execute: Boolean(site), keepPreviousData: true },
-  );
+  const {
+    data: loaded,
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(searchSite, [site as Site, query.length >= 2 ? query : "", elementType], {
+    execute: Boolean(site),
+    keepPreviousData: true,
+  });
+  // keepPreviousData keeps the last results while typing; never show another site's.
+  const data = loaded && loaded.siteId === site?.id ? loaded : undefined;
+
+  // The saved element type may not be used on this site (e.g. picked on another one): search all.
+  const typeMissing = Boolean(data && elementType !== ALL && !data.element_types.some((t) => t.name === elementType));
+  useEffect(() => {
+    if (typeMissing) setElementType(ALL);
+  }, [typeMissing]);
 
   // Results grouped by the page, template or component they're on, in the order the server found them.
   const sections = useMemo(() => {

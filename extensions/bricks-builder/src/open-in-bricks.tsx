@@ -14,6 +14,11 @@ const STATUS_COLORS: Record<string, Color> = {
   future: Color.Blue,
 };
 
+/** Server search results, tagged with the site they came from (the previous search stays while typing). */
+async function searchSite(site: Site, query: string) {
+  return { siteId: site.id, items: await searchContentRemote(site, query) };
+}
+
 export default function Command() {
   const { sites, site, setSiteId, isLoading: sitesLoading, reloadSites } = useSelectedSite();
 
@@ -29,11 +34,12 @@ export default function Command() {
 
   // The cached list holds the most recent items of each type; on big sites, also ask the server.
   const searchRemotely = Boolean(site && data?.viaHelper && truncated.length > 0 && searchText.trim().length >= 2);
-  const { data: remoteItems, isLoading: remoteLoading } = useCachedPromise(
-    searchContentRemote,
-    [site as Site, searchText.trim()],
-    { execute: searchRemotely, keepPreviousData: true },
-  );
+  const { data: remote, isLoading: remoteLoading } = useCachedPromise(searchSite, [site as Site, searchText.trim()], {
+    execute: searchRemotely,
+    keepPreviousData: true,
+  });
+  // keepPreviousData keeps the last results while typing; never show another site's.
+  const remoteItems = remote && remote.siteId === site?.id ? remote.items : undefined;
 
   const items = useMemo(() => {
     const local = data?.items ?? [];
@@ -109,8 +115,16 @@ export default function Command() {
       {truncated.length > 0 && !searchText && (
         <List.Item
           icon={{ source: Icon.Info, tintColor: Color.SecondaryText }}
-          title={`Showing the latest ${truncated.map((t) => `${t.returned} of ${t.total.toLocaleString()} ${t.label.toLowerCase()}`).join(", ")}`}
-          subtitle="Type to search the whole site"
+          title={
+            data?.viaHelper
+              ? `Showing the latest ${truncated.map((t) => `${t.returned} of ${t.total.toLocaleString()} ${t.label.toLowerCase()}`).join(", ")}`
+              : `Showing the latest ${truncated.map((t) => `${t.returned.toLocaleString()} ${t.label.toLowerCase()}`).join(", ")}`
+          }
+          subtitle={
+            data?.viaHelper
+              ? "Type to search the whole site"
+              : "Install the helper plugin (Bricks Site Health, ⌘⇧H) to search the rest"
+          }
         />
       )}
       {site &&

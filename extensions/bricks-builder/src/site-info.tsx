@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { NoSitesView, SiteEmptyView } from "./components/site-empty-view";
 import { SiteToolsSubmenu } from "./components/site-tools";
 import { ManageSitesAction, SwitchSiteSubmenu, useSelectedSite } from "./hooks/use-selected-site";
+import { getHealth } from "./lib/bricks-data";
 import { Breakpoint, getDesign, getSiteInfo } from "./lib/design";
 import { Site, wpAdminUrl } from "./lib/sites";
 
@@ -22,6 +23,11 @@ export default function Command() {
     execute: Boolean(site),
   });
   const { data: design } = useCachedPromise(getDesign, [site as Site], {
+    execute: Boolean(site),
+    onError: () => undefined,
+  });
+  // For the site tools: the current maintenance mode, and whether this user may use them.
+  const { data: health, revalidate: reloadHealth } = useCachedPromise(getHealth, [site as Site], {
     execute: Boolean(site),
     onError: () => undefined,
   });
@@ -54,7 +60,9 @@ export default function Command() {
         shortcut={Keyboard.Shortcut.Common.Refresh}
         onAction={revalidate}
       />
-      {site && <SiteToolsSubmenu site={site} />}
+      {site && health?.can_manage && (
+        <SiteToolsSubmenu site={site} maintenanceMode={health.maintenance_mode} onDone={reloadHealth} />
+      )}
       <SwitchSiteSubmenu sites={sites} current={site} onChange={setSiteId} />
       <ManageSitesAction onPop={reloadSites} />
     </ActionPanel>

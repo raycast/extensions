@@ -15,8 +15,11 @@ const PLUGIN_SLUG         = 'bricks-raycast-helper';
 const LICENSE_GRACE_DAYS  = 7;
 const DEFAULT_LICENSE_URL = 'https://license.martej.com';
 
-/** Endpoints that need a Pro license: Site Audit, element and dynamic data search, Form Submissions, the Template Library and site tools. */
-const PRO_ROUTE_PATTERN = '#^/' . REST_NAMESPACE . '/(audit|attachment|search|dynamic-tags|forms|tools|library)(/|$)#';
+/**
+ * Endpoints that need a Pro license: Site Audit, element and dynamic data search, Form Submissions, the Template Library and site tools.
+ * Case-insensitive, because WordPress matches REST routes that way (/Audit reaches /audit).
+ */
+const PRO_ROUTE_PATTERN = '#^/' . REST_NAMESPACE . '/(audit|attachment|search|dynamic-tags|forms|tools|library)(/|$)#i';
 
 /** The license server, without a trailing slash. Set BRICKS_RAYCAST_LICENSE_SERVER in wp-config.php to test against another one. */
 function license_server(): string {
@@ -40,7 +43,30 @@ function license(): array {
 }
 
 function save_license( array $license ): void {
+	$was_pro = is_pro();
 	update_option( LICENSE_OPTION, $license, false );
+	if ( is_pro() !== $was_pro ) {
+		forget_update_offer();
+	}
+}
+
+/** Pro turned on or off: the update offer's package changes, so Dashboard › Updates has to ask again. */
+function forget_update_offer(): void {
+	forget_update_info();
+	delete_site_transient( 'update_plugins' );
+}
+
+/** Notes a failed license check without throwing away the last known state when the server was only unreachable. */
+function record_license_error( array $license, \WP_Error $error ): array {
+	$license['checked_at'] = time();
+	$license['error']      = $error->get_error_message();
+	if ( ! is_transient_license_error( $error ) ) {
+		// The key or this site's activation is gone.
+		$license['valid']         = false;
+		$license['status']        = $error->get_error_code();
+		$license['last_valid_at'] = 0;
+	}
+	return $license;
 }
 
 /** POSTs (or GETs, without a body) JSON to the license server. */
@@ -127,8 +153,17 @@ function activate_license( string $key ) {
 /** Asks the license server whether this site's license is still good. */
 function validate_license() {
 	$license = license();
-	if ( empty( $license['key'] ) || empty( $license['instance_id'] ) ) {
+	if ( empty( $license['key'] ) ) {
 		return $license;
+	}
+	if ( empty( $license['instance_id'] ) ) {
+		// A reactivation (or a deactivation) that failed left the key without an activation: take one now,
+		// or the license would never be checked again.
+		$result = activate_license( (string) $license['key'] );
+		if ( is_wp_error( $result ) ) {
+			save_license( record_license_error( license(), $result ) );
+		}
+		return $result;
 	}
 	$result = license_request(
 		'/v1/validate',
@@ -141,17 +176,10 @@ function validate_license() {
 		// The server wants this site to take a fresh activation (sites from the free local-site test phase).
 		$license['instance_id'] = '';
 		save_license( $license );
-		return activate_license( (string) $license['key'] );
+		return validate_license();
 	}
 	if ( is_wp_error( $result ) ) {
-		$license['checked_at'] = time();
-		$license['error']      = $result->get_error_message();
-		if ( ! is_transient_license_error( $result ) ) {
-			// The key or this site's activation is gone.
-			$license['valid']         = false;
-			$license['status']        = $result->get_error_code();
-			$license['last_valid_at'] = 0;
-		}
+		$license = record_license_error( $license, $result );
 		save_license( $license );
 		return $license;
 	}
@@ -160,19 +188,28 @@ function validate_license() {
 	return $license;
 }
 
-/** Frees this site's activation and forgets the key. */
-function deactivate_license() {
+/**
+ * Frees this site's activation and forgets the key. The key is forgotten even when the license server
+ * can't be reached, so a site can always drop its license; the answer then carries a warning.
+ */
+function deactivate_license(): array {
 	$license = license();
+	$warning = null;
 	if ( ! empty( $license['key'] ) && ! empty( $license['instance_id'] ) ) {
 		$result = license_request( '/v1/deactivate', [ 'key' => $license['key'], 'instance_id' => $license['instance_id'] ] );
 		if ( is_wp_error( $result ) && is_transient_license_error( $result ) ) {
-			return $result;
+			$warning = 'The license server couldn\'t be reached, so the activation may still count on the license.';
 		}
 	}
+	$was_pro = is_pro();
 	delete_option( LICENSE_OPTION );
 	wp_clear_scheduled_hook( LICENSE_CRON );
-	forget_update_info();
-	return [];
+	if ( $was_pro ) {
+		forget_update_offer();
+	} else {
+		forget_update_info();
+	}
+	return $warning ? [ 'warning' => $warning ] : [];
 }
 
 /**
@@ -225,17 +262,27 @@ function license_status_message(): string {
 	return 'The Bricks Raycast Pro license on this site isn\'t active (' . ( $status ?: 'inactive' ) . '). Check the key under Settings › Bricks Raycast.';
 }
 
-/** Pro endpoints answer 402 without a license; permission checks run first, so signed-out requests still get 401. */
+/** Pro endpoints answer 402 without a license, but only to users the endpoint's permission check lets in. */
 function require_pro_license( $response, $handler, \WP_REST_Request $request ) {
 	if ( is_wp_error( $response ) || is_pro() || ! preg_match( PRO_ROUTE_PATTERN, $request->get_route() ) ) {
 		return $response;
 	}
+	// This filter runs before permission_callback. Run it here first: when it says no, WordPress
+	// answers 401/403 itself right after, and signed-out visitors learn nothing about the license.
+	if ( ! empty( $handler['permission_callback'] ) && is_callable( $handler['permission_callback'] ) ) {
+		$allowed = call_user_func( $handler['permission_callback'], $request );
+		if ( ! $allowed || is_wp_error( $allowed ) ) {
+			return $response;
+		}
+	}
+	$summary = license_summary();
 	return new \WP_Error(
 		'bricks_raycast_pro_required',
 		license_status_message(),
 		[
 			'status'  => 402,
-			'license' => license_summary(),
+			// Enough for Raycast to say what's wrong and where to fix it; activation counts stay on /license.
+			'license' => array_intersect_key( $summary, array_flip( [ 'active', 'status', 'expires_at', 'buy_url', 'settings_url' ] ) ),
 		]
 	);
 }
@@ -255,7 +302,7 @@ function save_license_response( \WP_REST_Request $request ) {
 
 function remove_license_response() {
 	$result = deactivate_license();
-	return is_wp_error( $result ) ? $result : rest_ensure_response( license_summary() );
+	return rest_ensure_response( license_summary() + $result );
 }
 
 add_action(
@@ -316,10 +363,13 @@ register_deactivation_hook(
 	function () {
 		$license = license();
 		if ( ! empty( $license['key'] ) && ! empty( $license['instance_id'] ) ) {
-			license_request( '/v1/deactivate', [ 'key' => $license['key'], 'instance_id' => $license['instance_id'] ] );
-			$license['instance_id'] = '';
-			$license['valid']       = false;
-			save_license( $license );
+			$result = license_request( '/v1/deactivate', [ 'key' => $license['key'], 'instance_id' => $license['instance_id'] ] );
+			// Only forget the activation once the server freed it; otherwise the next check still finds it.
+			if ( ! is_wp_error( $result ) ) {
+				$license['instance_id'] = '';
+				$license['valid']       = false;
+				save_license( $license );
+			}
 		}
 		wp_clear_scheduled_hook( LICENSE_CRON );
 	}
@@ -438,10 +488,13 @@ add_filter(
 		if ( 0 !== strpos( (string) $url, download_url() ) ) {
 			return $args;
 		}
-		$license                             = license();
-		$args['headers']                     = (array) ( $args['headers'] ?? [] );
-		$args['headers']['X-License-Key']    = (string) ( $license['key'] ?? '' );
-		$args['headers']['X-Instance-Id']    = (string) ( $license['instance_id'] ?? '' );
+		$license                          = license();
+		$args['headers']                  = (array) ( $args['headers'] ?? [] );
+		$args['headers']['X-License-Key'] = (string) ( $license['key'] ?? '' );
+		$args['headers']['X-Instance-Id'] = (string) ( $license['instance_id'] ?? '' );
+		// WordPress sends the same headers again on a redirect, which could hand the key to another host.
+		// The license server serves the zip itself, so there's nothing to follow.
+		$args['redirection'] = 0;
 		return $args;
 	},
 	10,
@@ -482,11 +535,21 @@ add_action(
 		} else {
 			$result = validate_license();
 		}
-		$notice = is_wp_error( $result ) ? $result->get_error_message() : '';
-		wp_safe_redirect( add_query_arg( 'license_error', rawurlencode( $notice ), admin_url( 'options-general.php?page=' . PLUGIN_SLUG ) ) );
+		// Kept on the server, so the page never shows text that came in through the URL.
+		if ( is_wp_error( $result ) ) {
+			set_transient( license_notice_key(), [ 'error', $result->get_error_message() ], MINUTE_IN_SECONDS );
+		} elseif ( ! empty( $result['warning'] ) ) {
+			set_transient( license_notice_key(), [ 'warning', (string) $result['warning'] ], MINUTE_IN_SECONDS );
+		}
+		wp_safe_redirect( admin_url( 'options-general.php?page=' . PLUGIN_SLUG ) );
 		exit;
 	}
 );
+
+/** The settings page's one-time notice for the current user. */
+function license_notice_key(): string {
+	return 'bricks_raycast_license_notice_' . get_current_user_id();
+}
 
 /** The Raycast extension's page on martej.com. */
 const PRODUCT_URL = 'https://martej.com/bricks-raycast';
@@ -516,7 +579,7 @@ function settings_logo(): string {
 function render_settings_page(): void {
 	$license    = license();
 	$summary    = license_summary();
-	$error      = isset( $_GET['license_error'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['license_error'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
+	$notice     = get_transient( license_notice_key() );
 	$has_key    = ! empty( $license['key'] );
 	$active     = (bool) $summary['active'];
 	$user       = wp_get_current_user();
@@ -524,6 +587,11 @@ function render_settings_page(): void {
 	$update     = update_info();
 	$has_update = $update && version_compare( (string) $update['version'], VERSION, '>' );
 	$date       = static fn( $iso ) => wp_date( get_option( 'date_format' ), strtotime( (string) $iso ) );
+
+	if ( false !== $notice ) {
+		delete_transient( license_notice_key() );
+	}
+	$notice = is_array( $notice ) && 2 === count( $notice ) ? $notice : null;
 
 	if ( $active ) {
 		$state = [ 'good', 'Active' ];
@@ -628,8 +696,8 @@ function render_settings_page(): void {
 			</nav>
 		</header>
 
-		<?php if ( $error ) : ?>
-			<div class="notice notice-error"><p><?php echo esc_html( $error ); ?></p></div>
+		<?php if ( $notice ) : ?>
+			<div class="notice notice-<?php echo 'warning' === $notice[0] ? 'warning' : 'error'; ?>"><p><?php echo esc_html( (string) $notice[1] ); ?></p></div>
 		<?php endif; ?>
 
 		<div class="brx-grid">

@@ -1,16 +1,17 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
+import { useCachedState } from "@raycast/utils";
 import { ReactNode } from "react";
 import { InstallHelperAction } from "./components/helper-install-action";
 import { LicenseActions } from "./components/license-form";
 import { SiteForm } from "./components/site-form";
 import { SiteToolsSubmenu } from "./components/site-tools";
 import { ManageSitesAction } from "./hooks/use-selected-site";
+import { useSiteChecks } from "./hooks/use-site-checks";
 import { compareVersions, getHealth, HELPER_VERSION, SiteHealth } from "./lib/bricks-data";
 import { HelperMissingError } from "./lib/design";
 import { licenseLabel, LicenseSummary } from "./lib/license";
 import { escapeMarkdown } from "./lib/markdown";
-import { loadSites, Site, withoutSecrets, wpAdminUrl } from "./lib/sites";
+import { Site, wpAdminUrl } from "./lib/sites";
 import { HELPER_NAMESPACE, WordPressError, wpRequest } from "./lib/wordpress";
 
 type Check =
@@ -64,17 +65,6 @@ function licenseTag(license: LicenseSummary): List.Item.Accessory {
 }
 
 const STATES = new Set<Check["state"]>(["ok", "old-helper", "no-helper", "no-password", "auth", "offline"]);
-
-// useCachedPromise keys its cache on the function's source and its arguments, so the
-// "health" argument keeps it apart from other commands' site checks (Bricks Raycast Pro has one too).
-const checkHealth = async (cacheKey: "health") => {
-  void cacheKey;
-  // The cached rows keep each site without its application password (see withoutSecrets).
-  return (await Promise.all((await loadSites()).map(checkSite))).map((row) => ({
-    ...row,
-    site: withoutSecrets(row.site),
-  }));
-};
 
 function updateCount(health: SiteHealth): number {
   const u = health.updates;
@@ -205,8 +195,8 @@ function Detail(props: { check: Check }) {
             />
           )}
           <List.Item.Detail.Metadata.Label title="WordPress" text={h.wp_version} />
-          <List.Item.Detail.Metadata.Label title="PHP" text={h.php_version} />
-          <List.Item.Detail.Metadata.Label title="Database" text={h.db_version} />
+          {h.php_version && <List.Item.Detail.Metadata.Label title="PHP" text={h.php_version} />}
+          {h.db_version && <List.Item.Detail.Metadata.Label title="Database" text={h.db_version} />}
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title="Maintenance Mode"
@@ -220,10 +210,12 @@ function Detail(props: { check: Check }) {
             title="Code Execution"
             text={h.code_execution_enabled === null ? "–" : h.code_execution_enabled ? "Enabled" : "Disabled"}
           />
-          <List.Item.Detail.Metadata.Label
-            title="Environment"
-            text={`${h.environment}${h.debug ? " · WP_DEBUG on" : ""}`}
-          />
+          {h.environment && (
+            <List.Item.Detail.Metadata.Label
+              title="Environment"
+              text={`${h.environment}${h.debug ? " · WP_DEBUG on" : ""}`}
+            />
+          )}
           {h.search_engines_blocked && (
             <List.Item.Detail.Metadata.Label title="Search Engines" text="Discouraged (Settings › Reading)" />
           )}
@@ -238,16 +230,13 @@ function Detail(props: { check: Check }) {
 
 /** All your sites at a glance: versions, updates, maintenance mode, and whether Raycast can reach them. */
 export default function Command() {
-  const { data, isLoading, revalidate } = useCachedPromise(checkHealth, ["health"], {
-    keepPreviousData: true,
-  });
+  const {
+    rows: checks,
+    isLoading,
+    recheck,
+    reload,
+  } = useSiteChecks("health", checkSite, (check) => STATES.has(check.state));
   const [showingDetail, setShowingDetail] = useCachedState("health:detail", true);
-  // The cached rows hold sites without passwords; put the saved sites back for the actions.
-  const { data: sites = [] } = usePromise(loadSites);
-  // Skip anything else a stale cache might hold.
-  const checks = (data ?? [])
-    .filter((check) => STATES.has(check.state))
-    .map((check) => ({ ...check, site: sites.find((s) => s.id === check.site.id) ?? check.site }));
 
   const shared = (extra?: ReactNode) => (
     <ActionPanel.Section>
@@ -258,13 +247,8 @@ export default function Command() {
         shortcut={{ modifiers: ["cmd"], key: "d" }}
         onAction={() => setShowingDetail(!showingDetail)}
       />
-      <Action
-        title="Reload"
-        icon={Icon.ArrowClockwise}
-        shortcut={Keyboard.Shortcut.Common.Refresh}
-        onAction={revalidate}
-      />
-      <ManageSitesAction onPop={revalidate} />
+      <Action title="Reload" icon={Icon.ArrowClockwise} shortcut={Keyboard.Shortcut.Common.Refresh} onAction={reload} />
+      <ManageSitesAction onPop={reload} />
     </ActionPanel.Section>
   );
 
@@ -294,7 +278,7 @@ export default function Command() {
                 <InstallHelperAction
                   site={check.site}
                   mode={check.state === "no-helper" ? "install" : "update"}
-                  onDone={revalidate}
+                  onDone={recheck}
                 />
               )}
               <Action.OpenInBrowser title="Open WordPress Admin" icon={Icon.Gear} url={wpAdminUrl(check.site)} />
@@ -317,28 +301,24 @@ export default function Command() {
                 shortcut={Keyboard.Shortcut.Common.OpenWith}
               />
               {check.state === "ok" && check.health.can_manage && (
-                <SiteToolsSubmenu
-                  site={check.site}
-                  maintenanceMode={check.health.maintenance_mode}
-                  onDone={revalidate}
-                />
+                <SiteToolsSubmenu site={check.site} maintenanceMode={check.health.maintenance_mode} onDone={recheck} />
               )}
               {check.state === "ok" && check.health.can_manage && check.health.license && (
                 <LicenseActions
                   site={check.site}
                   hasLicense={check.health.license.status !== "none"}
-                  onChange={revalidate}
+                  onChange={recheck}
                 />
               )}
               {check.state === "ok" && !needsHelper(check) && (
-                <InstallHelperAction site={check.site} mode="reinstall" onDone={revalidate} />
+                <InstallHelperAction site={check.site} mode="reinstall" onDone={recheck} />
               )}
               {shared(
                 <Action.Push
                   title="Edit Site"
                   icon={Icon.Pencil}
                   shortcut={Keyboard.Shortcut.Common.Edit}
-                  target={<SiteForm site={check.site} onSaved={revalidate} />}
+                  target={<SiteForm site={check.site} onSaved={reload} />}
                 />,
               )}
             </ActionPanel>

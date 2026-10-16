@@ -14,6 +14,7 @@ import {
   trashClasses,
   UnusedClass,
 } from "./lib/bricks-data";
+import { ProLicenseError } from "./lib/license";
 import { Site } from "./lib/sites";
 import { adminEditUrl } from "./lib/wordpress";
 
@@ -164,9 +165,16 @@ function countAccessory(section: SectionSummary): List.Item.Accessory {
 export default function Command() {
   const { sites, site, setSiteId, isLoading: sitesLoading, reloadSites } = useSelectedSite();
 
-  const { data, isLoading, error, revalidate } = useCachedPromise(getAudit, [site as Site, largeImageKb()], {
+  const {
+    data: loaded,
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(getAudit, [site as Site, largeImageKb()], {
     execute: Boolean(site),
   });
+  // A lapsed license shows the "Pro needed" screen, not the cached audit.
+  const data = error instanceof ProLicenseError ? undefined : loaded;
 
   if (!sitesLoading && sites.length === 0) {
     return (
@@ -237,7 +245,8 @@ export default function Command() {
 /** One part of the audit as its own list. Shares the audit cache with the overview. */
 function AuditSection(props: { site: Site; sectionKey: SectionKey }) {
   const { site, sectionKey } = props;
-  const { data, isLoading, error, revalidate } = useCachedPromise(getAudit, [site, largeImageKb()], {});
+  const { data: loaded, isLoading, error, revalidate } = useCachedPromise(getAudit, [site, largeImageKb()], {});
+  const data = error instanceof ProLicenseError ? undefined : loaded;
   const summary = data ? summarize(data).find((s) => s.key === sectionKey) : undefined;
   const title = summary?.title ?? "Site Audit";
 
@@ -421,11 +430,8 @@ function ClassSections(props: {
       toast.primaryAction = {
         title: "Undo",
         shortcut: { modifiers: ["cmd"], key: "z" },
-        onAction: async () => {
-          await restoreClasses(site, ids);
-          onChange();
-          await showToast({ style: Toast.Style.Success, title: "Restored" });
-        },
+        // restore() shows its own success or failure toast.
+        onAction: () => restore(ids),
       };
     } catch (error) {
       toast.style = Toast.Style.Failure;

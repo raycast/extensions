@@ -13,6 +13,13 @@ export class WordPressError extends Error {
   }
 }
 
+/** A POST (or overridden DELETE) got a 301/302/303, which would silently turn it into a GET. */
+class RedirectError extends Error {
+  constructor(readonly location: URL) {
+    super(`Redirects to ${location.host}`);
+  }
+}
+
 interface RawResponse {
   status: number;
   body: string;
@@ -47,19 +54,22 @@ function rawRequest(
           if (next.host !== url.host || (url.protocol === "https:" && next.protocol !== "https:")) {
             delete nextHeaders.Authorization;
           }
-          // 301, 302 and 303 turn a POST into a GET, like browsers do; 307 and 308 keep it.
-          const nextBody = status === 307 || status === 308 ? body : undefined;
-          if (nextBody === undefined) {
-            delete nextHeaders["Content-Type"];
-            delete nextHeaders["X-HTTP-Method-Override"];
+          // 301, 302 and 303 would turn a POST into a GET (so a change would "succeed" without
+          // happening); only follow those for GETs. 307 and 308 keep the method.
+          if (body !== undefined && status !== 307 && status !== 308) {
+            reject(new RedirectError(next));
+            return;
           }
-          rawRequest(next, nextHeaders, allowSelfSigned, nextBody, timeout, redirects - 1).then(resolve, reject);
+          rawRequest(next, nextHeaders, allowSelfSigned, body, timeout, redirects - 1).then(resolve, reject);
           return;
         }
         let data = "";
         res.setEncoding("utf8");
         res.on("data", (chunk) => (data += chunk));
         res.on("end", () => resolve({ status, body: data }));
+        // A reset or the timeout below mid-body; without these the error would be unhandled.
+        res.on("error", reject);
+        res.on("aborted", () => reject(new Error(`${url.host} closed the connection mid-response`)));
       },
     );
     req.on("timeout", () =>
@@ -117,6 +127,12 @@ export async function wpRequest<T>(
   try {
     response = await rawRequest(url, headers, site.allowSelfSigned ?? false, body, options.timeout);
   } catch (error) {
+    if (error instanceof RedirectError) {
+      const address = `${error.location.origin}${error.location.pathname}`.replace(/\/+$/, "");
+      throw new WordPressError(
+        `${site.name} redirects to ${address}. Edit the site in Manage Bricks Sites and change its URL to that address.`,
+      );
+    }
     throw connectionError(site, error);
   }
 
@@ -263,7 +279,7 @@ interface RawPost {
 const PAGE_SIZE = 100;
 const MAX_PAGES_PER_TYPE = 20;
 
-async function listType(site: Site, type: PostType): Promise<ContentItem[]> {
+async function listType(site: Site, type: PostType): Promise<{ items: ContentItem[]; truncated: boolean }> {
   const authed = isAuthenticated(site);
   const items: ContentItem[] = [];
   for (let page = 1; page <= MAX_PAGES_PER_TYPE; page++) {
@@ -281,7 +297,9 @@ async function listType(site: Site, type: PostType): Promise<ContentItem[]> {
       posts = await wpRequest<RawPost[]>(site, `/${type.restNamespace}/${type.restBase}`, params);
     } catch (error) {
       // A type with exactly 100, 200… items: WordPress answers the page after the last with this error.
-      if (page > 1 && error instanceof WordPressError && error.code === "rest_post_invalid_page_number") break;
+      if (page > 1 && error instanceof WordPressError && error.code === "rest_post_invalid_page_number") {
+        return { items, truncated: false };
+      }
       throw error;
     }
     for (const post of posts) {
@@ -295,22 +313,29 @@ async function listType(site: Site, type: PostType): Promise<ContentItem[]> {
         modified: Date.parse(`${post.modified_gmt}Z`),
       });
     }
-    if (posts.length < PAGE_SIZE) break;
+    if (posts.length < PAGE_SIZE) return { items, truncated: false };
   }
-  return items;
+  // Every page was full up to the cap, so there are (probably) more.
+  return { items, truncated: true };
 }
 
 /** Without the helper plugin: one paginated REST listing per post type (no Bricks templates). */
-async function listViaRest(site: Site): Promise<ContentItem[]> {
+async function listViaRest(site: Site): Promise<{ items: ContentItem[]; truncated: TruncatedType[] }> {
   const types = await getPostTypes(site);
   const results = await Promise.allSettled(types.map((type) => listType(site, type)));
 
-  const items = results.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
+  const items = results.flatMap((r) => (r.status === "fulfilled" ? r.value.items : []));
   if (items.length === 0) {
     const failure = results.find((r): r is PromiseRejectedResult => r.status === "rejected");
     if (failure) throw failure.reason;
   }
-  return items.sort((a, b) => b.modified - a.modified);
+  // The REST API's total isn't kept, so report what was fetched as both numbers.
+  const truncated = results.flatMap((r, i) =>
+    r.status === "fulfilled" && r.value.truncated
+      ? [{ label: types[i].name, total: r.value.items.length, returned: r.value.items.length }]
+      : [],
+  );
+  return { items: items.sort((a, b) => b.modified - a.modified), truncated };
 }
 
 /**
@@ -330,7 +355,7 @@ export async function listContent(site: Site): Promise<ContentList> {
       if (!isMissingRoute(error)) throw error;
     }
   }
-  return { items: await listViaRest(site), viaHelper: false, truncated: [] };
+  return { ...(await listViaRest(site)), viaHelper: false };
 }
 
 /** Server-side search through the helper plugin, for sites with more content than the list holds. */
@@ -407,8 +432,14 @@ export async function findPost(site: Site, id: number): Promise<{ link: string; 
         context: isAuthenticated(site) ? "edit" : "view",
       });
       if (post.link) return { link: post.link, builderUrl: builderUrl(post.link) };
-    } catch {
-      // Not this post type.
+    } catch (error) {
+      // A wrong password or a connection problem fails for every type: stop. Any other answer
+      // (not found, or a type this user can't read) means the post isn't this type: try the next.
+      const fatal =
+        !(error instanceof WordPressError) ||
+        error.status === undefined ||
+        ["incorrect_password", "invalid_username", "invalid_email"].includes(error.code ?? "");
+      if (fatal) throw error;
     }
   }
   return undefined;
@@ -425,6 +456,14 @@ export interface ConnectionCheck {
   hasHelper: boolean;
 }
 
+/**
+ * Sites behind a proxy often report an http:// home while serving HTTPS; never downgrade, or the
+ * application password would go out in plain text.
+ */
+function keepHttps(url: string, entered: string): string {
+  return entered.startsWith("https:") && url.startsWith("http:") ? `https:${url.slice("http:".length)}` : url;
+}
+
 export async function checkConnection(site: Site): Promise<ConnectionCheck> {
   const index = await wpRequest<{ name: string; home?: string; url?: string; namespaces?: string[] }>(site, "/");
   const namespaces = index.namespaces ?? [];
@@ -433,7 +472,7 @@ export async function checkConnection(site: Site): Promise<ConnectionCheck> {
   // (which would also drop the application password on a different host).
   let canonicalUrl: string | undefined;
   try {
-    const home = index.home ? normalizeSiteUrl(index.home) : undefined;
+    const home = index.home ? keepHttps(normalizeSiteUrl(index.home), site.url) : undefined;
     if (home && home !== site.url) canonicalUrl = home;
   } catch {
     canonicalUrl = undefined;
@@ -443,7 +482,7 @@ export async function checkConnection(site: Site): Promise<ConnectionCheck> {
   // wp-admin lives under WordPress's own address, which can differ from home (WordPress in /wordpress).
   let adminUrl: string | undefined;
   try {
-    const install = index.url ? normalizeSiteUrl(index.url) : undefined;
+    const install = index.url ? keepHttps(normalizeSiteUrl(index.url), site.url) : undefined;
     if (install && install !== target.url) adminUrl = install;
   } catch {
     adminUrl = undefined;
@@ -497,10 +536,13 @@ const NAMED_ENTITIES: Record<string, string> = {
   rdquo: "”",
 };
 
+// fromCodePoint throws above 0x10FFFF; keep such an entity as written.
+const fromCodePoint = (code: number, entity: string) => (code <= 0x10ffff ? String.fromCodePoint(code) : entity);
+
 export function decodeEntities(text: string): string {
   return text
     .replace(/<[^>]*>/g, "")
-    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
-    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
+    .replace(/&#x([0-9a-f]+);/gi, (match, hex) => fromCodePoint(parseInt(hex, 16), match))
+    .replace(/&#(\d+);/g, (match, dec) => fromCodePoint(parseInt(dec, 10), match))
     .replace(/&([a-z]+);/gi, (match, name) => NAMED_ENTITIES[name.toLowerCase()] ?? match);
 }

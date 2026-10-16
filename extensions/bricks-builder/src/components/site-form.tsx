@@ -53,6 +53,8 @@ export function SiteForm(props: { site?: Site; onSaved?: (site: Site) => void })
         appPassword: values.appPassword.trim() || undefined,
         allowSelfSigned: values.allowSelfSigned,
       };
+      // "Save Anyway" keeps the admin URL found earlier, as long as the site URL didn't change.
+      if (site?.adminUrl && site.url === candidate.url) candidate = { ...candidate, adminUrl: site.adminUrl };
 
       const toast = await showToast({ style: Toast.Style.Animated, title: `Connecting to ${candidate.name}…` });
       try {

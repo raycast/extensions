@@ -12,6 +12,7 @@ const CHROMIUM_BROWSERS = [
   "Dia",
 ];
 const SAFARI_BROWSERS = ["Safari", "Safari Technology Preview", "Orion"];
+export const SUPPORTED_BROWSERS = [...CHROMIUM_BROWSERS, ...SAFARI_BROWSERS];
 
 export class UnsupportedBrowserError extends Error {}
 
@@ -47,7 +48,7 @@ export async function getAnyBrowserTabUrl(): Promise<string | undefined> {
   const running = (
     await runAppleScript('tell application "System Events" to return name of every application process')
   ).split(", ");
-  for (const browser of [...CHROMIUM_BROWSERS, ...SAFARI_BROWSERS]) {
+  for (const browser of SUPPORTED_BROWSERS) {
     if (!running.includes(browser)) continue;
     try {
       const url = await getActiveTabUrl(browser);

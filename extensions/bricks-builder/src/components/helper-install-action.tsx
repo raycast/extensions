@@ -5,6 +5,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { HELPER_VERSION } from "../lib/bricks-data";
 import { buildZip } from "../lib/helper-zip";
+import { escapeMarkdown } from "../lib/markdown";
 import { Site, wpAdminUrl } from "../lib/sites";
 
 type Mode = "install" | "update" | "reinstall";
@@ -28,11 +29,12 @@ function guide(site: Site, mode: Mode): string {
     mode === "install"
       ? ""
       : `\n   WordPress sees the plugin is already there: click **Replace current with uploaded**.`;
-  return `## ${TITLES[mode]} on ${site.name}
+  const siteName = escapeMarkdown(site.name);
+  return `## ${TITLES[mode]} on ${siteName}
 
 The Bricks Raycast Helper plugin lets Raycast read Bricks' classes, colors, templates and more from your site. Version ${HELPER_VERSION} is ready in your **Downloads** folder as \`bricks-raycast-helper.zip\`.
 
-1. Press **↵** to open **Plugins › Add New › Upload Plugin** on ${site.name} (sign in to WordPress if asked).
+1. Press **↵** to open **Plugins › Add New › Upload Plugin** on ${siteName} (sign in to WordPress if asked).
 2. Click **Choose File**, pick \`bricks-raycast-helper.zip\` from Downloads, then **Install Now**.${replace}
 3. Click **Activate Plugin**${mode === "install" ? "" : " if WordPress asks"}.
 4. Come back to Raycast and press **⌘R** in Bricks Site Health to check the site.

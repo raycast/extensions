@@ -60,7 +60,11 @@ export function isPressable(shortcut: Shortcut): boolean {
 }
 
 /** AppleScript that presses the shortcut in the frontmost app via System Events. */
-export function toAppleScript(shortcut: Shortcut): string {
+/**
+ * AppleScript that presses the shortcut. With `onlyIn`, it first checks the frontmost app in the same
+ * `tell` block, right before the key press, and stops with `errorPrefix` + the app name otherwise.
+ */
+export function toAppleScript(shortcut: Shortcut, onlyIn?: { apps: string[]; errorPrefix: string }): string {
   const key = shortcut.key;
   if (!key || key.type === "label") {
     throw new Error(`"${shortcut.title}" can't be pressed as a single key combination`);
@@ -75,9 +79,15 @@ export function toAppleScript(shortcut: Shortcut): string {
       ? `keystroke "${key.value.replace(/["\\]/g, "\\$&")}"${usingClause}`
       : `key code ${MAC_KEY_CODES[key.value]}${usingClause}`;
 
+  const guard = onlyIn
+    ? `set frontApp to name of first application process whose frontmost is true
+      if frontApp is not in {${onlyIn.apps.map((a) => `"${a}"`).join(", ")}} then error "${onlyIn.errorPrefix}" & frontApp`
+    : "";
+
   return `
     delay 0.2
     tell application "System Events"
+      ${guard}
       ${press}
       return name of first application process whose frontmost is true
     end tell

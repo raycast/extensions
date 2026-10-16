@@ -57,9 +57,9 @@ export function ManageSitesList() {
             title="Import Raycast Site List"
             description="Choose a bricks-sites JSON file made with Export Raycast Site List. It holds your sites' Raycast settings, not their Bricks content. Sites already here (same URL) are updated and keep their saved password if the file has none."
             onImport={async (path) => {
-              const { added, updated } = await importSites(await readBackup<Site>(path, "bricks-sites"));
+              const { added, updated, skipped } = await importSites(await readBackup<Site>(path, "bricks-sites"));
               revalidate();
-              return `Imported ${added} new, updated ${updated}`;
+              return `Imported ${added} new, updated ${updated}${skipped ? `, skipped ${skipped} without a valid URL` : ""}`;
             }}
           />
         }

@@ -10,12 +10,22 @@ interface BackupFile<T> {
   items: T[];
 }
 
-/** Writes `items` to ~/Downloads/<name>-<date>.json and shows it in Finder. */
+/** Writes `items` to a new ~/Downloads/<name>-<date>.json (never overwriting one) and shows it in Finder. */
 export async function exportItems<T>(type: string, name: string, items: T[]) {
   const date = new Date().toISOString().slice(0, 10);
-  const path = join(homedir(), "Downloads", `${name}-${date}.json`);
   const file: BackupFile<T> = { type, version: 1, exportedAt: new Date().toISOString(), items };
-  await writeFile(path, JSON.stringify(file, null, 2));
+  const json = JSON.stringify(file, null, 2);
+  let path = "";
+  for (let n = 1; ; n++) {
+    path = join(homedir(), "Downloads", `${name}-${date}${n > 1 ? `-${n}` : ""}.json`);
+    try {
+      // Owner-only, since a sites export can hold application passwords; "wx" fails if it exists.
+      await writeFile(path, json, { mode: 0o600, flag: "wx" });
+      break;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    }
+  }
   await showInFinder(path);
   await showToast({ style: Toast.Style.Success, title: `Exported ${items.length} to Downloads`, message: path });
 }

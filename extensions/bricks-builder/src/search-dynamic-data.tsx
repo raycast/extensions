@@ -3,6 +3,7 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { NoSitesView, SiteEmptyView } from "./components/site-empty-view";
 import { ManageSitesAction, SwitchSiteSubmenu, useSelectedSite } from "./hooks/use-selected-site";
 import { DynamicTag, getDynamicTags } from "./lib/bricks-data";
+import { ProLicenseError } from "./lib/license";
 import { Site } from "./lib/sites";
 
 const DOCS_URL = "https://academy.bricksbuilder.io/article/dynamic-data/";
@@ -23,11 +24,18 @@ const providerName = (tag: DynamicTag) => (tag.provider ? (PROVIDER_NAMES[tag.pr
 
 export default function Command() {
   const { sites, site, setSiteId, isLoading: sitesLoading, reloadSites } = useSelectedSite();
-  const [provider, setProvider] = useCachedState<string>("dynamic-data:provider", "all");
+  const [savedProvider, setProvider] = useCachedState<string>("dynamic-data:provider", "all");
 
-  const { data, isLoading, error, revalidate } = useCachedPromise(getDynamicTags, [site as Site], {
+  const {
+    data: loaded,
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(getDynamicTags, [site as Site], {
     execute: Boolean(site),
   });
+  // A lapsed license shows the "Pro needed" screen, not the cached tags.
+  const data = error instanceof ProLicenseError ? undefined : loaded;
 
   if (!sitesLoading && sites.length === 0) {
     return (
@@ -42,6 +50,8 @@ export default function Command() {
 
   const tags = data ?? [];
   const providers = [...new Set(tags.map(providerName))];
+  // The saved provider may not be on this site (e.g. ACF): show all then.
+  const provider = data && savedProvider !== "all" && !providers.includes(savedProvider) ? "all" : savedProvider;
   const visible = tags.filter((tag) => provider === "all" || providerName(tag) === provider);
 
   // Sections in the order Bricks lists them (by group, e.g. "Post", "ACF", "Woo Product").

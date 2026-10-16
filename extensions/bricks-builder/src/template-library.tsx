@@ -18,6 +18,8 @@ import { ErrorEmptyView, NoSitesView } from "./components/site-empty-view";
 import { SnippetForm } from "./components/snippet-form";
 import { ManageSitesAction, SwitchSiteSubmenu, useSelectedSite } from "./hooks/use-selected-site";
 import { elementTitle, getLibrary, getLibraryClipboard, outlineMarkdown } from "./lib/bricks-data";
+import { ProLicenseError } from "./lib/license";
+import { escapeMarkdown } from "./lib/markdown";
 import { Site } from "./lib/sites";
 
 const TYPE_LABELS: Record<string, string> = {
@@ -46,12 +48,19 @@ interface Source {
 
 export default function Command() {
   const { sites, site, setSiteId, isLoading: sitesLoading, reloadSites } = useSelectedSite();
-  const [filter, setFilter] = useCachedState<string>("library:filter", "section");
+  const [savedFilter, setFilter] = useCachedState<string>("library:filter", "section");
   const [showingDetail, setShowingDetail] = useCachedState("library:detail", true);
 
-  const { data, isLoading, error, revalidate } = useCachedPromise(getLibrary, [site as Site], {
+  const {
+    data: loaded,
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(getLibrary, [site as Site], {
     execute: Boolean(site),
   });
+  // A lapsed license shows the "Pro needed" screen, not the cached library.
+  const data = error instanceof ProLicenseError ? undefined : loaded;
 
   if (!sitesLoading && sites.length === 0) {
     return (
@@ -69,6 +78,9 @@ export default function Command() {
   const types = [...new Set(templates.map((t) => t.template_type ?? "other"))].sort(
     (a, b) => (TYPE_ORDER.indexOf(a) + 1 || 99) - (TYPE_ORDER.indexOf(b) + 1 || 99),
   );
+  // The saved filter may be a template type this site doesn't have: show everything then.
+  const filter =
+    data && savedFilter !== "all" && savedFilter !== COMPONENTS && !types.includes(savedFilter) ? "all" : savedFilter;
   const visibleTypes = filter === "all" ? types : types.filter((t) => t === filter);
 
   const sharedActions = (
@@ -128,7 +140,7 @@ export default function Command() {
               accessories={showingDetail ? [] : [{ text: `${component.elements} elements` }]}
               detail={
                 <List.Item.Detail
-                  markdown={`## ${component.name}\n\n${component.description ? `${component.description}\n\n` : ""}${outlineMarkdown(component.outline, component.elements)}`}
+                  markdown={`## ${escapeMarkdown(component.name)}\n\n${component.description ? `${escapeMarkdown(component.description)}\n\n` : ""}${outlineMarkdown(component.outline, component.elements)}`}
                   metadata={
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label title="Elements" text={`${component.elements}`} />
@@ -169,7 +181,7 @@ export default function Command() {
                   ]}
                   detail={
                     <List.Item.Detail
-                      markdown={`## ${template.title}\n\n${template.elements ? outlineMarkdown(template.outline, template.elements) : "_Empty template_"}`}
+                      markdown={`## ${escapeMarkdown(template.title || "(no title)")}\n\n${template.elements ? outlineMarkdown(template.outline, template.elements) : "_Empty template_"}`}
                       metadata={
                         <List.Item.Detail.Metadata>
                           <List.Item.Detail.Metadata.Label title="Type" text={typeLabel(type)} />

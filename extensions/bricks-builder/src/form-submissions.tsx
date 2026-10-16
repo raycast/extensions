@@ -31,13 +31,29 @@ interface LaunchContext {
   formId?: string;
 }
 
+/** Forms tagged with the site they came from, so another site's cached list is never used. */
+async function getSiteForms(site: Site) {
+  return { ...(await getForms(site)), siteId: site.id };
+}
+
 export default function Command(props: LaunchProps<{ launchContext: LaunchContext }>) {
   const { sites, site, setSiteId, isLoading: sitesLoading, reloadSites } = useSelectedSite();
-  const [formId, setFormId] = useCachedState<string>("submissions:form", ALL);
+  const [savedFormId, setFormId] = useCachedState<string>("submissions:form", ALL);
   const [showingDetail, setShowingDetail] = useCachedState("submissions:detail", true);
-  // Submissions newer than what was seen when the command opened get a "new" dot.
-  const [seenBefore, setSeenBefore] = useState<number | undefined>(undefined);
+  // Submissions newer than what was seen when the command opened get a "new" dot. Kept per site, so
+  // a site switch doesn't use the previous site's value.
+  const [seen, setSeenState] = useState<{ siteId: string; before: number }>();
+  const seenBefore = seen && seen.siteId === site?.id ? seen.before : undefined;
   const launched = useRef(false);
+  const previousSiteId = useRef<string | undefined>(undefined);
+  // From the menu bar, wait until its site is selected before loading or marking anything as seen.
+  const launchSiteId = props.launchContext?.siteId;
+  const [launchApplied, setLaunchApplied] = useState(!launchSiteId);
+  useEffect(() => {
+    if (launchApplied || !site) return;
+    if (site.id === launchSiteId || !sites.some((s) => s.id === launchSiteId)) setLaunchApplied(true);
+  }, [launchApplied, site?.id, sites]);
+  const ready = Boolean(site) && launchApplied;
 
   useEffect(() => {
     if (launched.current || !props.launchContext) return;
@@ -46,27 +62,51 @@ export default function Command(props: LaunchProps<{ launchContext: LaunchContex
     if (props.launchContext.formId !== undefined) setFormId(props.launchContext.formId);
   }, [props.launchContext]);
 
-  const forms = useCachedPromise(getForms, [site as Site], { execute: Boolean(site) });
+  // Form IDs belong to one site: switching sites goes back to all forms (a menu-bar launch picks
+  // its site and form together, so it isn't a switch).
+  useEffect(() => {
+    if (!site || !launchApplied) return;
+    const switched = previousSiteId.current !== undefined && previousSiteId.current !== site.id;
+    previousSiteId.current = site.id;
+    if (switched) setFormId(ALL);
+  }, [site?.id, launchApplied]);
+
+  const forms = useCachedPromise(getSiteForms, [site as Site], { execute: ready });
+  const formsData = ready && forms.data?.siteId === site?.id ? forms.data : undefined;
+  // A saved form that isn't on this site would leave the list empty.
+  const formId =
+    savedFormId !== ALL && formsData && !formsData.forms.some((form) => form.form_id === savedFormId)
+      ? ALL
+      : savedFormId;
 
   // usePromise, not useCachedPromise: submissions hold people's names, emails and messages, and
   // Raycast's cache is stored unencrypted on disk.
   const submissions = usePromise(
     (current: Site, form: string) => async (options: { page: number }) => {
       const result = await getSubmissions(current, { formId: form, page: options.page + 1, perPage: PER_PAGE });
-      return { data: result.submissions, hasMore: (options.page + 1) * PER_PAGE < result.total };
+      // Tagged with the site they came from, so a site switch never shows (or deletes) them on another.
+      const data = result.submissions.map((submission) => ({ ...submission, siteId: current.id }));
+      return { data, hasMore: (options.page + 1) * PER_PAGE < result.total };
     },
     [site as Site, formId],
-    { execute: Boolean(site) },
+    { execute: ready },
   );
 
   // Remember what was new on opening, then mark everything up to the newest as seen.
   useEffect(() => {
-    if (!site || !forms.data) return;
-    getSeen(site.id).then((seen) => {
-      setSeenBefore(seen ?? forms.data!.max_id);
-      setSeen(site.id, forms.data!.max_id);
+    if (!site || !formsData) return;
+    const siteId = site.id;
+    const maxId = formsData.max_id;
+    let cancelled = false;
+    getSeen(siteId).then((stored) => {
+      if (cancelled) return;
+      setSeenState({ siteId, before: stored ?? maxId });
+      setSeen(siteId, maxId);
     });
-  }, [site?.id, forms.data?.max_id]);
+    return () => {
+      cancelled = true;
+    };
+  }, [site?.id, formsData?.max_id]);
 
   if (!sitesLoading && sites.length === 0) {
     return (
@@ -84,10 +124,13 @@ export default function Command(props: LaunchProps<{ launchContext: LaunchContex
     submissions.revalidate();
   };
 
-  async function remove(items: Submission[]) {
-    if (!site) return;
+  async function remove(items: (Submission & { siteId: string })[]) {
+    if (!site || items.some((item) => item.siteId !== site.id)) return;
     const confirmed = await confirmAlert({
-      title: items.length === 1 ? "Delete this submission?" : `Delete ${items.length} submissions?`,
+      title:
+        items.length === 1
+          ? `Delete this submission from ${site.name}?`
+          : `Delete ${items.length} submissions from ${site.name}?`,
       message: "They're removed from the site's database. This can't be undone.",
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
@@ -130,9 +173,9 @@ export default function Command(props: LaunchProps<{ launchContext: LaunchContex
     </ActionPanel.Section>
   );
 
-  const items = submissions.data ?? [];
+  const items = (submissions.data ?? []).filter((submission) => submission.siteId === site?.id);
   const error = forms.error ?? submissions.error;
-  const noTable = forms.data && !forms.data.table_exists;
+  const noTable = formsData && !formsData.table_exists;
 
   return (
     <List
@@ -142,8 +185,8 @@ export default function Command(props: LaunchProps<{ launchContext: LaunchContex
       searchBarPlaceholder={site ? `Search submissions on ${site.name}…` : "Search submissions…"}
       searchBarAccessory={
         <List.Dropdown tooltip="Form" value={formId} onChange={setFormId}>
-          <List.Dropdown.Item title={`All Forms${forms.data ? ` (${forms.data.total})` : ""}`} value={ALL} />
-          {(forms.data?.forms ?? []).map((form) => (
+          <List.Dropdown.Item title={`All Forms${formsData ? ` (${formsData.total})` : ""}`} value={ALL} />
+          {(formsData?.forms ?? []).map((form) => (
             <List.Dropdown.Item key={form.form_id} title={`${form.name} (${form.count})`} value={form.form_id} />
           ))}
         </List.Dropdown>

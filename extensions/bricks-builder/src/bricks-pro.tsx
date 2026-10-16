@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { useCachedPromise, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { InstallHelperAction } from "./components/helper-install-action";
 import { LicenseActions, LicenseForm, licenseFailure } from "./components/license-form";
 import { SiteForm } from "./components/site-form";
 import { ManageSitesAction } from "./hooks/use-selected-site";
+import { useSiteChecks } from "./hooks/use-site-checks";
 import {
   activateLicense,
   BUY_URL,
@@ -15,7 +16,7 @@ import {
   LicenseSummary,
   LICENSE_VERSION,
 } from "./lib/license";
-import { loadSites, Site, withoutSecrets } from "./lib/sites";
+import { Site } from "./lib/sites";
 import { isMissingRoute, WordPressError } from "./lib/wordpress";
 
 type Row =
@@ -45,16 +46,6 @@ async function checkSite(site: Site): Promise<Row> {
 }
 
 const STATES = new Set<Row["state"]>(["licensed", "no-password", "old-helper", "auth", "offline"]);
-
-// The "licenses" argument keeps useCachedPromise's cache apart from Bricks Site Health's site checks.
-const checkLicenses = async (cacheKey: "licenses") => {
-  void cacheKey;
-  // The cached rows keep each site without its application password (see withoutSecrets).
-  return (await Promise.all((await loadSites()).map(checkSite))).map((row) => ({
-    ...row,
-    site: withoutSecrets(row.site),
-  }));
-};
 
 function accessories(row: Row): List.Item.Accessory[] {
   switch (row.state) {
@@ -89,19 +80,23 @@ function icon(row: Row): List.Item.Props["icon"] {
 
 /** Your license key and which of your sites have Pro: activate it on one site or all of them. */
 export default function Command() {
-  const { data, isLoading, revalidate, mutate } = useCachedPromise(checkLicenses, ["licenses"], {
-    keepPreviousData: true,
-  });
-  // The cached rows hold sites without passwords; put the saved sites back for the actions.
-  const { data: sites = [] } = usePromise(loadSites);
-  const rows = (data ?? [])
-    .filter((row) => STATES.has(row.state))
-    .map((row) => ({ ...row, site: sites.find((s) => s.id === row.site.id) ?? row.site }));
+  const {
+    rows,
+    isLoading,
+    recheck,
+    reload: reloadChecks,
+  } = useSiteChecks("licenses", checkSite, (row) => STATES.has(row.state));
   // usePromise, not useCachedPromise: the key shouldn't sit in Raycast's unencrypted cache.
   const { data: savedKey, revalidate: reloadKey } = usePromise(getSavedKey);
+  /** After a license or the helper changed on a site (activating also saves the key). */
+  const refreshLicenses = () => {
+    reloadKey();
+    recheck();
+  };
+  /** After sites were added, edited or removed. */
   const reload = () => {
     reloadKey();
-    revalidate();
+    reloadChecks();
   };
 
   const waiting = rows.filter((row) => row.state === "licensed" && !row.license.active);
@@ -119,7 +114,7 @@ export default function Command() {
         failed.push(`${row.site.name}: ${licenseFailure(row.site, error)}`);
       }
     }
-    await mutate(checkLicenses("licenses"));
+    await recheck();
     toast.style = failed.length ? Toast.Style.Failure : Toast.Style.Success;
     toast.title = failed.length
       ? `Activated on ${waiting.length - failed.length} of ${waiting.length} sites`
@@ -201,9 +196,15 @@ export default function Command() {
             actions={
               <ActionPanel>
                 {row.state === "licensed" && (
-                  <LicenseActions site={row.site} hasLicense={row.license.status !== "none"} onChange={reload} />
+                  <LicenseActions
+                    site={row.site}
+                    hasLicense={row.license.status !== "none"}
+                    onChange={refreshLicenses}
+                  />
                 )}
-                {row.state === "old-helper" && <InstallHelperAction site={row.site} mode="update" onDone={reload} />}
+                {row.state === "old-helper" && (
+                  <InstallHelperAction site={row.site} mode="update" onDone={refreshLicenses} />
+                )}
                 {row.state === "no-password" || row.state === "auth" ? (
                   <Action.Push
                     title="Edit Site"
