@@ -1,6 +1,6 @@
 # macOS Tweaks Changelog
 
-## [Dim Hidden Apps] - {PR_MERGE_DATE}
+## [Dim Hidden Apps] - 2026-10-16
 
 ### New Tweak
 
