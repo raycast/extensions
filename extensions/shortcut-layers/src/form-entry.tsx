@@ -53,6 +53,8 @@ export function EntryForm({
   const [kind, setKind] = useState<EntryKind>(source?.kind ?? "app");
   const [value, setValue] = useState(source?.value ?? "");
   const [keyError, setKeyError] = useState<string | undefined>();
+  const [titleError, setTitleError] = useState<string | undefined>();
+  const [targetError, setTargetError] = useState<string | undefined>();
   const [filter, setFilter] = useState("");
   const [fileResults, setFileResults] = useState<string[]>([]);
   const [takenKeys, setTakenKeys] = useState<Record<string, string>>({});
@@ -101,9 +103,13 @@ export function EntryForm({
       return;
     }
     const title = values.title.trim();
+    if (!title) {
+      setTitleError("Title is required");
+      return;
+    }
     const target = kind === "file" ? value : value.trim();
-    if (!title || !target) {
-      await showToast({ style: Toast.Style.Failure, title: "Title and target are required" });
+    if (!target) {
+      setTargetError("Target is required");
       return;
     }
 
@@ -171,7 +177,14 @@ export function EntryForm({
         info="g/G"
         onChange={(next) => setKey([...next].at(-1) ?? "")}
       />
-      <Form.TextField id="title" title="Title" placeholder="Action name" defaultValue={source?.title} />
+      <Form.TextField
+        id="title"
+        title="Title"
+        placeholder="Action name"
+        defaultValue={source?.title}
+        error={titleError}
+        onChange={() => setTitleError(undefined)}
+      />
       <Form.Dropdown
         id="kind"
         title="Type"
@@ -183,6 +196,7 @@ export function EntryForm({
           setValue("");
           setFilter("");
           setFileResults([]);
+          setTargetError(undefined);
         }}
       >
         {ENTRY_KINDS.map((option) => (
@@ -197,7 +211,11 @@ export function EntryForm({
           title="Target"
           placeholder="Search applications…"
           value={value}
-          onChange={(next) => setValue(toTargetValue(next))}
+          error={targetError}
+          onChange={(next) => {
+            setValue(toTargetValue(next));
+            setTargetError(undefined);
+          }}
         >
           {value === "" && <Form.Dropdown.Item value="" title="Choose an application…" />}
           {value !== "" && !applications.some((app) => app.path === value) && (
@@ -223,7 +241,11 @@ export function EntryForm({
           placeholder="Search files and folders…"
           filtering={false}
           value={value}
-          onChange={(next) => setValue(toTargetValue(next))}
+          error={targetError}
+          onChange={(next) => {
+            setValue(toTargetValue(next));
+            setTargetError(undefined);
+          }}
           onSearchTextChange={setFilter}
           info={'Search indexed files and folders, or type a path and pick "Use path"'}
         >
@@ -255,7 +277,11 @@ export function EntryForm({
           title="Target"
           placeholder={entryKindPlaceholder(kind)}
           value={value}
-          onChange={setValue}
+          error={targetError}
+          onChange={(next) => {
+            setValue(next);
+            setTargetError(undefined);
+          }}
         />
       )}
 
