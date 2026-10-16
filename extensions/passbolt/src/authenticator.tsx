@@ -242,7 +242,7 @@ function TotpListItem({
                 onAction={() => copyCode(true)}
                 shortcut={{
                   macOS: { modifiers: ["cmd", "shift"], key: "v" },
-                  windows: { modifiers: ["ctrl", "shift"], key: "v" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "v" },
                 }}
               />
             </>
