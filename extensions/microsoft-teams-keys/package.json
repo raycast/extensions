@@ -1,0 +1,513 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "microsoft-teams-keys",
+  "title": "Microsoft Teams Keys",
+  "description": "Drive the Microsoft Teams desktop app from the keyboard without signing in: open a chat and type or send a message, control your meeting, share your screen, set your status, start calls and join or schedule meetings. Everything runs locally.",
+  "icon": "icon.png",
+  "author": "jnbp",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "keywords": [
+    "microsoft teams",
+    "teams",
+    "chat",
+    "message",
+    "meeting",
+    "mute",
+    "status",
+    "call",
+    "calendar",
+    "share screen",
+    "bildschirm teilen"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "open-chat",
+      "title": "Open Teams Chat",
+      "description": "Opens the chat with a person and types an optional message. Takes an email address, a saved contact or any name Teams search can find.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "person",
+          "type": "text",
+          "placeholder": "Name or email",
+          "required": true
+        },
+        {
+          "name": "message",
+          "type": "text",
+          "placeholder": "Message (optional)",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "afterTyping",
+          "title": "After Typing the Message",
+          "description": "Whether Open Teams Chat leaves the message for you to check or sends it right away. Send Teams Message always sends.",
+          "type": "dropdown",
+          "required": false,
+          "default": "draft",
+          "data": [
+            {
+              "title": "Leave It as a Draft",
+              "value": "draft"
+            },
+            {
+              "title": "Send It",
+              "value": "send"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "send-message",
+      "title": "Send Teams Message",
+      "description": "Opens the chat with a person and sends the message right away.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "person",
+          "type": "text",
+          "placeholder": "Name or email",
+          "required": true
+        },
+        {
+          "name": "message",
+          "type": "text",
+          "placeholder": "Message",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "contacts",
+      "title": "Teams Contacts",
+      "description": "Your saved Teams contacts: chat, message, call or video call them, and add short names for Open Teams Chat.",
+      "mode": "view"
+    },
+    {
+      "name": "control-meeting",
+      "title": "Control Teams Meeting",
+      "description": "Microphone, camera, raise hand, share content, admit from the lobby and leave the call from one list.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-microphone",
+      "title": "Toggle Teams Microphone",
+      "description": "Mutes or unmutes you in the current Teams call.",
+      "mode": "no-view",
+      "keywords": [
+        "mute",
+        "unmute",
+        "microphone",
+        "mikrofon",
+        "stumm",
+        "stummschalten"
+      ]
+    },
+    {
+      "name": "toggle-camera",
+      "title": "Toggle Teams Camera",
+      "description": "Turns your camera on or off in the current Teams call.",
+      "mode": "no-view",
+      "keywords": [
+        "camera",
+        "video",
+        "kamera"
+      ]
+    },
+    {
+      "name": "raise-hand",
+      "title": "Raise or Lower Hand in Teams",
+      "description": "Raises or lowers your hand in the current Teams meeting.",
+      "mode": "no-view",
+      "keywords": [
+        "hand",
+        "raise hand",
+        "hand heben",
+        "melden"
+      ]
+    },
+    {
+      "name": "leave-call",
+      "title": "Leave Teams Call",
+      "description": "Hangs up the current Teams call.",
+      "mode": "no-view",
+      "keywords": [
+        "hang up",
+        "leave",
+        "auflegen",
+        "verlassen"
+      ]
+    },
+    {
+      "name": "share-screen",
+      "title": "Share Screen in Teams",
+      "description": "Opens Share content in the current Teams call (⌘⇧E), where you pick your screen or a window. Teams stays in front so you can choose.",
+      "mode": "no-view",
+      "keywords": [
+        "share",
+        "screen",
+        "present",
+        "bildschirm teilen",
+        "inhalt freigeben",
+        "präsentieren"
+      ]
+    },
+    {
+      "name": "admit-from-lobby",
+      "title": "Admit from Teams Lobby",
+      "description": "Admits the people waiting in the lobby of the current Teams meeting.",
+      "mode": "no-view",
+      "keywords": [
+        "lobby",
+        "admit",
+        "wartebereich",
+        "zulassen"
+      ]
+    },
+    {
+      "name": "set-status",
+      "title": "Set Teams Status",
+      "description": "Sets your Teams presence to Available, Busy, Do Not Disturb, Be Right Back, Away or Offline.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "status",
+          "type": "dropdown",
+          "placeholder": "Status",
+          "required": true,
+          "data": [
+            {
+              "title": "Available",
+              "value": "available"
+            },
+            {
+              "title": "Busy",
+              "value": "busy"
+            },
+            {
+              "title": "Do Not Disturb",
+              "value": "dnd"
+            },
+            {
+              "title": "Be Right Back",
+              "value": "brb"
+            },
+            {
+              "title": "Away",
+              "value": "away"
+            },
+            {
+              "title": "Offline",
+              "value": "offline"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "status-available",
+      "title": "Set Teams Status to Available",
+      "description": "Sets your Teams presence to Available. Give it a hotkey to switch with one key press.",
+      "mode": "no-view",
+      "keywords": [
+        "verfügbar"
+      ]
+    },
+    {
+      "name": "status-busy",
+      "title": "Set Teams Status to Busy",
+      "description": "Sets your Teams presence to Busy. Give it a hotkey to switch with one key press.",
+      "mode": "no-view",
+      "keywords": [
+        "beschäftigt"
+      ]
+    },
+    {
+      "name": "status-dnd",
+      "title": "Set Teams Status to Do Not Disturb",
+      "description": "Sets your Teams presence to Do Not Disturb. Give it a hotkey to switch with one key press.",
+      "mode": "no-view",
+      "keywords": [
+        "nicht stören",
+        "dnd"
+      ]
+    },
+    {
+      "name": "status-brb",
+      "title": "Set Teams Status to Be Right Back",
+      "description": "Sets your Teams presence to Be Right Back. Give it a hotkey to switch with one key press.",
+      "mode": "no-view",
+      "keywords": [
+        "bin gleich zurück",
+        "brb"
+      ]
+    },
+    {
+      "name": "status-away",
+      "title": "Set Teams Status to Away",
+      "description": "Sets your Teams presence to Away. Give it a hotkey to switch with one key press.",
+      "mode": "no-view",
+      "keywords": [
+        "abwesend"
+      ]
+    },
+    {
+      "name": "status-offline",
+      "title": "Set Teams Status to Offline",
+      "description": "Sets your Teams presence to Offline. Give it a hotkey to switch with one key press.",
+      "mode": "no-view",
+      "keywords": [
+        "offline"
+      ]
+    },
+    {
+      "name": "start-call",
+      "title": "Start Teams Call",
+      "description": "Calls a person in Teams, with or without video. Teams asks once more before it dials.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "person",
+          "type": "text",
+          "placeholder": "Name or email",
+          "required": true
+        },
+        {
+          "name": "kind",
+          "type": "dropdown",
+          "placeholder": "Audio",
+          "required": false,
+          "data": [
+            {
+              "title": "Audio",
+              "value": "audio"
+            },
+            {
+              "title": "Video",
+              "value": "video"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "meetings",
+      "title": "Teams Meetings",
+      "description": "Today's and the next days' Teams meetings from your calendar, ready to join with Return.",
+      "mode": "view"
+    },
+    {
+      "name": "join-next-meeting",
+      "title": "Join Next Teams Meeting",
+      "description": "Joins the Teams meeting that is running now or starts within the next 15 minutes, taken from your calendar.",
+      "mode": "no-view"
+    },
+    {
+      "name": "choose-meeting",
+      "title": "Join Teams Meeting",
+      "description": "Pick the Teams meeting to join: what is running or starts within 15 minutes comes first, then the rest of today and tomorrow. Also joins a Teams link from the clipboard or the search bar.",
+      "mode": "view",
+      "keywords": [
+        "join",
+        "meeting",
+        "besprechung",
+        "beitreten",
+        "call"
+      ]
+    },
+    {
+      "name": "join-meeting",
+      "title": "Join Teams Meeting from Link",
+      "description": "Opens a Teams meeting link in the desktop app. Takes the link as an argument or from the clipboard, and unwraps Outlook Safe Links.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "link",
+          "type": "text",
+          "placeholder": "Meeting link (or clipboard)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "schedule-meeting",
+      "title": "Schedule Teams Meeting",
+      "description": "Fills in the new meeting form in Teams with a subject, attendees, a start time and a duration.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "returnToPreviousApp",
+      "title": "Meeting and Status Commands",
+      "label": "Return to the previous app afterwards",
+      "description": "Teams has to come to the front for a moment to receive the keyboard shortcut. With this on, the app you were in comes back right after.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "teamsLanguage",
+      "title": "Teams Language",
+      "description": "The language of your Teams app. Status commands are named differently in each language (/busy, /beschäftigt …). Automatic follows the macOS language.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Automatic",
+          "value": "auto"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Deutsch",
+          "value": "de"
+        }
+      ]
+    },
+    {
+      "name": "searchUnknownNames",
+      "title": "Unknown Names",
+      "label": "Look up names that are not saved contacts with Teams search",
+      "description": "Names that are neither an email address nor a saved contact are typed into the Teams search and the first result is opened.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "shortcutTiming",
+      "title": "Meeting Shortcut Timing",
+      "description": "How long meeting commands wait for Teams: microphone, camera, raise hand, share screen, admit from lobby and leave call. These are single shortcuts, so fast settings usually work. Normal is recommended.",
+      "type": "dropdown",
+      "required": false,
+      "default": "normal",
+      "data": [
+        {
+          "title": "Instant (0.1×)",
+          "value": "instant"
+        },
+        {
+          "title": "Ultra Fast (0.2×)",
+          "value": "ultraFast"
+        },
+        {
+          "title": "Very Fast (0.35×)",
+          "value": "veryFast"
+        },
+        {
+          "title": "Fast (0.6×)",
+          "value": "fast"
+        },
+        {
+          "title": "Normal (1×, Recommended)",
+          "value": "normal"
+        },
+        {
+          "title": "Slow (1.8×)",
+          "value": "slow"
+        },
+        {
+          "title": "Very Slow (3×)",
+          "value": "verySlow"
+        },
+        {
+          "title": "Custom Factor",
+          "value": "custom"
+        }
+      ]
+    },
+    {
+      "name": "customShortcutTiming",
+      "title": "Custom Meeting Shortcut Factor",
+      "description": "Used when Meeting Shortcut Timing is set to Custom Factor. Multiplies every wait: 1 is Normal, 0.5 half as long, 2 twice as long. Allowed: 0.05 to 10.",
+      "type": "textfield",
+      "required": false,
+      "default": "1",
+      "placeholder": "e.g. 0.5"
+    },
+    {
+      "name": "searchTiming",
+      "title": "Search Timing",
+      "description": "How long chats, messages and status changes wait for Teams. They go through the Teams search, which first has to find the person or command, so they need more time than shortcuts. Normal is recommended; pick a slower one if Teams misses keystrokes.",
+      "type": "dropdown",
+      "required": false,
+      "default": "normal",
+      "data": [
+        {
+          "title": "Instant (0.1×)",
+          "value": "instant"
+        },
+        {
+          "title": "Ultra Fast (0.2×)",
+          "value": "ultraFast"
+        },
+        {
+          "title": "Very Fast (0.35×)",
+          "value": "veryFast"
+        },
+        {
+          "title": "Fast (0.6×)",
+          "value": "fast"
+        },
+        {
+          "title": "Normal (1×, Recommended)",
+          "value": "normal"
+        },
+        {
+          "title": "Slow (1.8×)",
+          "value": "slow"
+        },
+        {
+          "title": "Very Slow (3×)",
+          "value": "verySlow"
+        },
+        {
+          "title": "Custom Factor",
+          "value": "custom"
+        }
+      ]
+    },
+    {
+      "name": "customSearchTiming",
+      "title": "Custom Search Factor",
+      "description": "Used when Search Timing is set to Custom Factor. Multiplies every wait: 1 is Normal, 0.5 half as long, 2 twice as long. Allowed: 0.05 to 10.",
+      "type": "textfield",
+      "required": false,
+      "default": "1",
+      "placeholder": "e.g. 0.5"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.36.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
