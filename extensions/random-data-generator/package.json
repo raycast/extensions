@@ -13,7 +13,8 @@
     "stefanmatar",
     "YourMCGeek",
     "xilopaint",
-    "just_me"
+    "just_me",
+    "GektorGrom"
   ],
   "platforms": [
     "macOS",
@@ -25,7 +26,8 @@
     "Developer Tools"
   ],
   "keywords": [
-    "faker"
+    "faker",
+    "custom"
   ],
   "commands": [
     {
@@ -65,6 +67,7 @@
   "dependencies": {
     "@faker-js/faker": "^10.2.0",
     "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.3.1",
     "is-url": "^1.2.4",
     "lodash": "^4.17.21"
   },
