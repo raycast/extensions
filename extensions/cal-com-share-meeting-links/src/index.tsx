@@ -30,7 +30,8 @@ export default function Command() {
 
   const { data: user, error: userError, isLoading: isLoadingUser } = useCurrentUser();
   const { data: items, isLoading: isLoadingEvents, error: eventsError } = useEventTypes();
-  const { data: teamGroups, isLoading: isLoadingTeamEvents } = useTeamEventTypes();
+  const { data: teamEventTypes, isLoading: isLoadingTeamEvents } = useTeamEventTypes();
+  const teamGroups = teamEventTypes?.groups;
 
   const myLink = `${publicBaseUrl}/${user?.username}`;
 
