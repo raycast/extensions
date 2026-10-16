@@ -3,10 +3,12 @@ import { usePromise } from "@raycast/utils";
 import { ReactElement, useState } from "react";
 import { LanguageDropdown } from "./QuickTranslate/LanguageDropdown";
 import { QuickTranslateListItem } from "./QuickTranslate/QuickTranslateListItem";
+import { useResetOnDismiss } from "./QuickTranslate/useResetOnDismiss";
 import { useDebouncedValue, usePreferences, useSourceLanguage, useTargetLanguages, useTextState } from "./hooks";
 import { multiTranslate } from "./simple-translate";
 
 export default function QuickTranslate(): ReactElement {
+  useResetOnDismiss();
   const [sourceLanguage] = useSourceLanguage();
   const [targetLanguages] = useTargetLanguages();
   const { proxy, prioritizeCrossLanguage } = usePreferences();

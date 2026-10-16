@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Reset Quick Translate after dismissal on macOS] - {PR_MERGE_DATE}
+
+- Clear Quick Translate when its window is dismissed so the next launch reads the current text selection instead of restoring the previous translation.
+
 ## [Fix translation with an HTTP proxy] - 2026-10-15
 
 - Fixed translations failing with a constructor error when an HTTP proxy is configured
@@ -36,7 +40,7 @@
 
 ## [Feature] - 2026-04-15
 
- - Added pronunciation text to quick translate command
+- Added pronunciation text to quick translate command
 
 ## [Cross Platform Shortcuts + Modernize] - 2025-12-24
 
@@ -47,7 +51,7 @@
 
 ## [Feature] - 2025-10-02
 
- - Added hotkey to switch between language sets quickly with `CMD+SHIFT+↑` and `CMD+SHIFT+↓`
+- Added hotkey to switch between language sets quickly with `CMD+SHIFT+↑` and `CMD+SHIFT+↓`
 
 ## [Feature] - 2025-07-01
 
