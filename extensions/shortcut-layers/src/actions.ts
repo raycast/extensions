@@ -6,9 +6,10 @@ import type { Entry } from "./types";
 
 const MAX_STDERR = 2000;
 
-function expandPath(value: string): string {
-  if (value === "~") return homedir();
-  return value.startsWith("~/") ? value.replace("~", homedir()) : value;
+/** Expands a leading `~` to the home directory, for paths typed by the user. */
+export function expandHome(value: string): string {
+  if (value === "~" || value.startsWith("~/")) return value.replace("~", homedir());
+  return value;
 }
 
 /**
@@ -48,7 +49,7 @@ export async function runEntry(entry: Entry): Promise<RunResult> {
         await runShellCommand(entry.value, await getShellEnvironment());
         break;
       case "file":
-        await open(expandPath(entry.value));
+        await open(expandHome(entry.value));
         break;
       default:
         await open(entry.value);

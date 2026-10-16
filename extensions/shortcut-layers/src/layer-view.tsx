@@ -13,10 +13,9 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { homedir } from "os";
-import { isAbsolute, join } from "path";
+import { isAbsolute } from "path";
 import { useEffect, useRef, useState } from "react";
-import { runEntry } from "./actions";
+import { expandHome, runEntry } from "./actions";
 import { updateLayer, useLayers } from "./data";
 import { EntryForm } from "./form-entry";
 import { DEFAULT_KEY_COLOR, findEntry } from "./schema";
@@ -278,7 +277,7 @@ function kindIcon(kind: EntryKind): Icon {
 
 /** Absolute local path for an app bundle or file entry, or undefined if not a path. */
 function localIconPath(value: string): string | undefined {
-  const path = value.startsWith("~/") ? join(homedir(), value.slice(2)) : value;
+  const path = expandHome(value);
   return isAbsolute(path) ? path : undefined;
 }
 
