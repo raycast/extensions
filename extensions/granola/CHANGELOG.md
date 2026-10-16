@@ -1,6 +1,6 @@
 # Granola Changelog
 
-## [2.2.1 - Sign-in Fix for Raycast 2.8] - {PR_MERGE_DATE}
+## [2.2.1 - Sign-in Fix for Raycast 2.8] - 2026-10-16
 
 - Fix sign-in timing out on Raycast 2.8 (`extensionHost.render timed out`), which left every view command unusable. The sign-in illustration now uses static image assets instead of a runtime-generated SVG.
 
