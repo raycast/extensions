@@ -18,6 +18,12 @@ export class BarometerError extends Error {
   }
 }
 
+export function describeError(error: Error): string {
+  return error instanceof BarometerError && error.status !== undefined
+    ? `${error.message} (HTTP ${error.status})`
+    : error.message;
+}
+
 export async function fetchBarometer(): Promise<Reading> {
   let res: Response;
   try {
@@ -40,9 +46,19 @@ export async function fetchBarometer(): Promise<Reading> {
     computedAt?: unknown;
     price?: { change7dPct?: unknown };
   } | null;
+  let text: string;
+  try {
+    text = await res.text();
+  } catch (e) {
+    if (e instanceof Error && e.name === "TimeoutError")
+      throw new BarometerError("Request timed out after 10s");
+    throw new BarometerError(
+      `Network error while reading the feed: ${e instanceof Error ? e.message : String(e)}`,
+    );
+  }
   let body: Body;
   try {
-    body = JSON.parse(await res.text());
+    body = JSON.parse(text);
   } catch {
     throw new BarometerError("Feed returned malformed JSON", 200);
   }

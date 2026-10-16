@@ -1,13 +1,13 @@
 import { Detail, Action, ActionPanel } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { fetchBarometer } from "./barometer";
+import { describeError, fetchBarometer } from "./barometer";
 
 export default function Command() {
   const { data, error, isLoading, revalidate } = usePromise(fetchBarometer);
   if (error) {
     return (
       <Detail
-        markdown={`# Barometer unavailable\n\n${error.message}`}
+        markdown={`# Barometer unavailable\n\n${describeError(error)}`}
         actions={
           <ActionPanel>
             <Action title="Retry" onAction={revalidate} />
@@ -21,6 +21,11 @@ export default function Command() {
     data.change7dPct === null ? "not available" : `${data.change7dPct}%`;
   return (
     <Detail
+      actions={
+        <ActionPanel>
+          <Action title="Refresh" onAction={revalidate} />
+        </ActionPanel>
+      }
       markdown={`# ${data.score}/100\n\nZone: ${data.zone}\n\nA description of the current reading against its history, not a forecast or investment advice.`}
       metadata={
         <Detail.Metadata>
