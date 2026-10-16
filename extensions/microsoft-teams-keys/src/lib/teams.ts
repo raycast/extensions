@@ -272,17 +272,27 @@ return out`,
       .split("|")
       .map((p) => p.trim())
       .filter((p) => p && p !== "Microsoft Teams");
-  const isMain = (title: string) => MAIN_VIEWS.has((parts(title)[0] ?? "").toLowerCase().normalize("NFC"));
-  const isCompact = (title: string) => /compact|kompakt/i.test(parts(title)[0] ?? "");
-  const others = windows.filter((w) => w.title && !isMain(w.title) && !isCompact(w.title));
-  // The mini window names the running meeting: pick the window with that name.
+  // Judge a window by the whole title, not just its first part: a meeting can
+  // be called "Chat" or "Compact Design Review". The meeting window has the
+  // subject alone; the main window and the mini window put something before it.
+  const isMain = (title: string) => {
+    const p = parts(title);
+    return p.length >= 2 && MAIN_VIEWS.has(p[0].toLowerCase().normalize("NFC"));
+  };
+  const isCompact = (title: string) => {
+    const p = parts(title);
+    return p.length >= 2 && /compact|kompakt/i.test(p[0]);
+  };
+  const single = windows.filter((w) => parts(w.title).length === 1);
+  // The mini window names the running meeting: pick the window with exactly that title.
   const compact = windows.find((w) => isCompact(w.title));
   const meetingName = compact ? parts(compact.title)[1] : undefined;
+  const others = single.filter((w) => !MAIN_VIEWS.has(parts(w.title)[0].toLowerCase().normalize("NFC")));
   // Without a mini window the meeting window is usually the one on top already.
   const call =
-    (meetingName ? others.find((w) => parts(w.title)[0] === meetingName) : undefined) ??
-    (others.length === 1 ? others[0] : undefined) ??
-    (!compact && others[0] === windows[0] ? others[0] : undefined);
+    (meetingName ? single.find((w) => parts(w.title)[0] === meetingName) : undefined) ??
+    (!compact && windows[0] && single.includes(windows[0]) && !isMain(windows[0].title) ? windows[0] : undefined) ??
+    (others.length === 1 ? others[0] : undefined);
   if (!call) {
     // Lists what Teams reports, so a window naming we do not know yet can be added.
     const seen = windows.map((w) => `${w.index}: "${w.title}"`).join("; ");
