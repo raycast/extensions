@@ -1,23 +1,35 @@
 import { ActionPanel, Action, List, showToast, Toast, Clipboard, Icon, Color } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
-import { PassboltClient } from "./lib/passbolt";
+import { getPassboltClient, PassboltClient } from "./lib/passbolt";
 import ResourceDetail from "./details";
 import { Resource } from "./types";
 import { filterResources } from "./utils/resources";
+
+// Minimum interval between progressive list updates while metadata is decrypting.
+const PROGRESS_RENDER_INTERVAL_MS = 150;
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [allItems, setAllItems] = useState<Resource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [client] = useState(() => new PassboltClient());
+  const [client] = useState(() => getPassboltClient());
 
   // Load all resources once on mount
   useEffect(() => {
     async function fetchResources() {
       setIsLoading(true);
       try {
-        // Fetch all resources (empty query returns all)
-        const response = await client.searchResources("");
+        // Fetch all resources (empty query returns all); decrypted entries appear progressively.
+        let lastRender = 0;
+        const response = await client.searchResources("", {
+          onProgress: ({ items }) => {
+            const now = Date.now();
+            if (now - lastRender >= PROGRESS_RENDER_INTERVAL_MS) {
+              lastRender = now;
+              setAllItems(items);
+            }
+          },
+        });
         if (response.body && Array.isArray(response.body)) {
           setAllItems(response.body);
           const failures = response.body.filter((resource) => resource.metadata_error);

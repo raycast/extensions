@@ -84,26 +84,49 @@ export function createTotpGenerator(config: TotpConfiguration): TOTP {
   });
 }
 
+// One precomputed search blob per entry, rebuilt only when the items array identity changes.
+// Query terms are whitespace-free, so matching the joined text equals matching per field.
+interface TotpSearchBlob {
+  text: string;
+  initials: string;
+  aliases: string;
+}
+
+const totpBlobCache = new WeakMap<TotpResource[], TotpSearchBlob[]>();
+
+function totpSearchBlobs(resources: TotpResource[]): TotpSearchBlob[] {
+  let blobs = totpBlobCache.get(resources);
+  if (!blobs) {
+    blobs = resources.map((resource) => {
+      const values = [
+        resource.name,
+        resource.username,
+        resource.uri,
+        ...(resource.uris ?? []),
+        resource.description,
+        ...(resource.tags ?? []).map((tag) => tag.slug),
+        resource.totp?.issuer,
+        resource.totp?.label,
+      ].filter((value): value is string => typeof value === "string");
+      const text = values.join(" ").toLowerCase();
+      const initials = (resource.name?.match(/[\p{L}\p{N}]+/gu) ?? [])
+        .map((word) => word[0])
+        .join("")
+        .toLowerCase();
+      const aliases = /\boracle\b|oraclecloud\.com/.test(text) ? "oci oracle cloud infrastructure" : "";
+      return { text, initials, aliases };
+    });
+    totpBlobCache.set(resources, blobs);
+  }
+  return blobs;
+}
+
 export function filterTotpResources(resources: TotpResource[], query: string): TotpResource[] {
   const terms = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
   if (!terms.length) return resources;
-  return resources.filter((resource) => {
-    const values = [
-      resource.name,
-      resource.username,
-      resource.uri,
-      ...(resource.uris ?? []),
-      resource.description,
-      ...(resource.tags ?? []).map((tag) => tag.slug),
-      resource.totp?.issuer,
-      resource.totp?.label,
-    ].filter((value): value is string => typeof value === "string");
-    const text = values.join(" ").toLowerCase();
-    const initials = (resource.name?.match(/[\p{L}\p{N}]+/gu) ?? [])
-      .map((word) => word[0])
-      .join("")
-      .toLowerCase();
-    const aliases = /\boracle\b|oraclecloud\.com/.test(text) ? "oci oracle cloud infrastructure" : "";
+  const blobs = totpSearchBlobs(resources);
+  return resources.filter((_resource, index) => {
+    const { text, initials, aliases } = blobs[index];
     return terms.every((term) => text.includes(term) || initials.includes(term) || aliases.includes(term));
   });
 }
@@ -119,28 +142,59 @@ export function websiteHostname(value?: string): string | undefined {
   }
 }
 
-export function websiteMatchScore(resource: Resource, currentUrl?: string): number {
-  const currentHost = websiteHostname(currentUrl);
-  if (!currentHost) return 0;
-  const currentDomain = getDomain(currentHost, { allowPrivateDomains: true });
+// The current website only needs parsing once per ranking pass instead of once per entry.
+interface WebsiteMatchContext {
+  host: string;
+  domain: string | null;
+}
+
+function websiteMatchContext(currentUrl?: string): WebsiteMatchContext | undefined {
+  const host = websiteHostname(currentUrl);
+  if (!host) return undefined;
+  return { host, domain: getDomain(host, { allowPrivateDomains: true }) };
+}
+
+function websiteScore(resource: Resource, context?: WebsiteMatchContext): number {
+  if (!context) return 0;
   let score = 0;
   for (const uri of [resource.uri, ...(resource.uris ?? [])]) {
     const host = websiteHostname(uri);
     if (!host) continue;
-    if (host === currentHost) return 2;
-    if (currentDomain && getDomain(host, { allowPrivateDomains: true }) === currentDomain) score = 1;
+    if (host === context.host) return 2;
+    if (context.domain && getDomain(host, { allowPrivateDomains: true }) === context.domain) score = 1;
   }
   return score;
 }
 
-export function rankTotpResources(resources: TotpResource[], currentUrl?: string): TotpResource[] {
+export function websiteMatchScore(resource: Resource, currentUrl?: string): number {
+  return websiteScore(resource, websiteMatchContext(currentUrl));
+}
+
+function scoreTotpResources(resources: TotpResource[], currentUrl?: string) {
+  const context = websiteMatchContext(currentUrl);
   return resources
-    .map((resource) => ({ resource, score: websiteMatchScore(resource, currentUrl) }))
+    .map((resource) => ({ resource, score: websiteScore(resource, context) }))
     .sort(
       (a, b) =>
         b.score - a.score ||
         Number(Boolean(b.resource.favorite)) - Number(Boolean(a.resource.favorite)) ||
         (a.resource.name ?? "").localeCompare(b.resource.name ?? ""),
-    )
-    .map(({ resource }) => resource);
+    );
+}
+
+export function rankTotpResources(resources: TotpResource[], currentUrl?: string): TotpResource[] {
+  return scoreTotpResources(resources, currentUrl).map(({ resource }) => resource);
+}
+
+// Scores each entry once and splits the ranked list in a single pass.
+export function rankAndPartitionTotpResources(
+  resources: TotpResource[],
+  currentUrl?: string,
+): { matching: TotpResource[]; others: TotpResource[] } {
+  const matching: TotpResource[] = [];
+  const others: TotpResource[] = [];
+  for (const { resource, score } of scoreTotpResources(resources, currentUrl)) {
+    (score > 0 ? matching : others).push(resource);
+  }
+  return { matching, others };
 }

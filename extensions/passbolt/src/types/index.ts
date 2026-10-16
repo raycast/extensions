@@ -61,6 +61,13 @@ export interface TotpLoadProgress {
   totalResources: number;
 }
 
+// Progressive metadata decryption updates, shared by Search and Authenticator load paths.
+export interface ResourceLoadProgress {
+  items: Resource[];
+  processed: number;
+  candidates: number;
+}
+
 export interface Tag {
   id: string;
   slug: string;

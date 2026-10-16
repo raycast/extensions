@@ -3,7 +3,7 @@ import * as openpgp from "openpgp";
 import * as fs from "fs/promises";
 import { TOTP } from "otpauth";
 import { MetadataDecryptor, SharedMetadataKey } from "./metadata";
-import { ApiResource, ResourceType, TotpLoadProgress } from "../types";
+import { ApiResource, ResourceLoadProgress, ResourceType, TotpLoadProgress } from "../types";
 import { filterResources } from "../utils/resources";
 import { parseTotpConfiguration, resourceTypeSupportsTotp } from "../utils/totp";
 
@@ -45,6 +45,8 @@ export class PassboltClient {
   private isAuthenticated: boolean = false;
   private metadataDecryptor: MetadataDecryptor;
   private privateKey?: Promise<openpgp.PrivateKey>;
+  private authAttempt?: Promise<void>;
+  private resourceTypes?: Promise<ResourceType[]>;
 
   constructor() {
     const prefs = getPreferenceValues<Preferences>();
@@ -228,14 +230,30 @@ export class PassboltClient {
     console.log("Access token refreshed successfully");
   }
 
-  public async authenticate() {
+  public async authenticate(): Promise<void> {
     // Skip if already authenticated
     if (this.isAuthenticated) {
       return;
     }
+    // Parallel resource/type loads share one GPGAuth login instead of racing two sessions.
+    if (!this.authAttempt) {
+      const pending = this.runAuthentication().catch((error: unknown) => {
+        if (this.authAttempt === pending) this.authAttempt = undefined;
+        throw error;
+      });
+      this.authAttempt = pending;
+    }
+    await this.authAttempt;
+  }
 
+  private async runAuthentication() {
     try {
       console.log("Starting GPGAuth authentication...");
+
+      // Start unlocking the user private key early so it overlaps the server-key request.
+      const userKeyPromise = this.getPrivateKey();
+      // The failure is surfaced below; swallow it here so a failed request cannot leave it unhandled.
+      userKeyPromise.catch(() => {});
 
       // 1. Get Server Public Key
       const verifyRes = await this.request("/auth/verify.json");
@@ -245,7 +263,7 @@ export class PassboltClient {
       console.log("Server Key ID:", serverKey.getKeyID().toHex());
 
       // 2. Get User Private Key
-      const userPrivateKey = await this.getPrivateKey();
+      const userPrivateKey = await userKeyPromise;
       const userFingerprint = userPrivateKey.getFingerprint();
       console.log("User Fingerprint:", userFingerprint);
 
@@ -352,11 +370,15 @@ export class PassboltClient {
     }
   }
 
-  private async fetchResources(signal?: AbortSignal) {
+  private async fetchResources(signal?: AbortSignal, includeSecrets = true) {
     await this.authenticate();
     signal?.throwIfAborted();
 
-    const resourcesPath = "/resources.json?contain[secret]=1&contain[tags]=1&contain[favorite]=1";
+    // Search decrypts names locally and only needs secrets on copy/detail, so it skips
+    // contain[secret]; the Authenticator keeps them to avoid one request per TOTP entry.
+    const resourcesPath = includeSecrets
+      ? "/resources.json?contain[secret]=1&contain[tags]=1&contain[favorite]=1"
+      : "/resources.json?contain[tags]=1&contain[favorite]=1";
     let res = await this.request(resourcesPath, { signal });
 
     // Check if MFA is required (403 response)
@@ -406,11 +428,12 @@ export class PassboltClient {
     return json;
   }
 
-  public async searchResources(query: string) {
+  public async searchResources(query: string, options: { onProgress?: (progress: ResourceLoadProgress) => void } = {}) {
     // v5 names are encrypted, so keyword filtering must happen locally after decryption.
     this.metadataDecryptor.clearSharedKeys();
-    const json = await this.fetchResources();
-    const resources = await this.metadataDecryptor.decryptResources(json.body);
+    // Search never needs the encrypted secret payloads in the list response.
+    const json = await this.fetchResources(undefined, false);
+    const resources = await this.metadataDecryptor.decryptResources(json.body, options.onProgress);
     return { ...json, body: filterResources(resources, query) };
   }
 
@@ -420,8 +443,8 @@ export class PassboltClient {
     const { signal, onProgress } = options;
     // Refresh Accounts reuses this client: reload current shares along with the resources.
     this.metadataDecryptor.clearSharedKeys();
-    const response = await this.fetchResources(signal);
-    const types = await this.getResourceTypes(signal);
+    // The schema request is independent of the resource list: run both at once.
+    const [response, types] = await Promise.all([this.fetchResources(signal), this.getResourceTypes(signal)]);
     const supportsTotp = new Map(types.map((type) => [type.id, resourceTypeSupportsTotp(type)]));
     const candidates = response.body.filter((resource) => supportsTotp.get(resource.resource_type_id ?? "") !== false);
     const progress: TotpLoadProgress = {
@@ -508,6 +531,19 @@ export class PassboltClient {
   }
 
   public async getResourceTypes(signal?: AbortSignal) {
+    // Resource types are the vault schema: they rarely change, so fetch them once per
+    // client and reuse them across Authenticator refreshes. Failures are not cached.
+    if (!this.resourceTypes) {
+      const pending = this.fetchResourceTypes(signal).catch((error: unknown) => {
+        if (this.resourceTypes === pending) this.resourceTypes = undefined;
+        throw error;
+      });
+      this.resourceTypes = pending;
+    }
+    return this.resourceTypes;
+  }
+
+  private async fetchResourceTypes(signal?: AbortSignal) {
     await this.authenticate();
     const res = await this.request("/resource-types.json", { signal });
     if (!res.ok) throw new Error(`Unable to fetch resource types (HTTP ${res.status})`);
@@ -576,4 +612,13 @@ export class PassboltClient {
       body: JSON.stringify(payload),
     });
   }
+}
+
+// One client per command process: the session, unlocked private key, and metadata-key
+// caches are reused instead of being rebuilt by every component that needs the vault.
+let sharedClient: PassboltClient | undefined;
+
+export function getPassboltClient(): PassboltClient {
+  sharedClient ??= new PassboltClient();
+  return sharedClient;
 }

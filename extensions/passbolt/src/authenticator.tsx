@@ -12,16 +12,10 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
-import { PassboltClient } from "./lib/passbolt";
+import { getPassboltClient } from "./lib/passbolt";
 import { getActiveWebsiteUrl } from "./lib/active-website";
 import { TotpLoadProgress, TotpResource } from "./types";
-import {
-  createTotpGenerator,
-  filterTotpResources,
-  rankTotpResources,
-  websiteHostname,
-  websiteMatchScore,
-} from "./utils/totp";
+import { createTotpGenerator, filterTotpResources, rankAndPartitionTotpResources, websiteHostname } from "./utils/totp";
 import type { TOTP } from "otpauth";
 
 export default function Authenticator(props: LaunchProps<{ launchContext?: { url?: string } }>) {
@@ -32,7 +26,7 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
   const [searchText, setSearchText] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState<string>();
   const [revision, setRevision] = useState(0);
-  const [client] = useState(() => new PassboltClient());
+  const [client] = useState(() => getPassboltClient());
   const [currentTime, setCurrentTime] = useState(Date.now());
   const { matchCurrentWebsite = true } = getPreferenceValues<Preferences.Authenticator>();
 
@@ -97,17 +91,10 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
     () => new Map(items.map((item) => [item.id, item.totp ? createTotpGenerator(item.totp) : undefined])),
     [items],
   );
-  const filtered = useMemo(
-    () => rankTotpResources(filterTotpResources(items, searchText), websiteUrl),
+  // Rank and split in one pass: each entry is scored against the current website exactly once.
+  const { matching, others } = useMemo(
+    () => rankAndPartitionTotpResources(filterTotpResources(items, searchText), websiteUrl),
     [items, searchText, websiteUrl],
-  );
-  const matching = useMemo(
-    () => filtered.filter((item) => websiteMatchScore(item, websiteUrl) > 0),
-    [filtered, websiteUrl],
-  );
-  const others = useMemo(
-    () => filtered.filter((item) => websiteMatchScore(item, websiteUrl) === 0),
-    [filtered, websiteUrl],
   );
   const refresh = () => setRevision((value) => value + 1);
   const refreshAction = (
@@ -137,7 +124,7 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
       searchBarPlaceholder="Search accounts, usernames, websites, or tags…"
       actions={<ActionPanel>{refreshAction}</ActionPanel>}
     >
-      {filtered.length === 0 && (
+      {matching.length === 0 && others.length === 0 && (
         <List.EmptyView
           title={
             isLoading

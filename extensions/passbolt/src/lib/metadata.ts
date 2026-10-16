@@ -1,5 +1,5 @@
 import * as openpgp from "openpgp";
-import type { ApiResource, Resource } from "../types";
+import type { ApiResource, Resource, ResourceLoadProgress } from "../types";
 
 export interface SharedMetadataKey {
   id: string;
@@ -85,16 +85,33 @@ export class MetadataDecryptor {
     return pending;
   }
 
-  public async decryptResources(resources: ApiResource[]): Promise<Resource[]> {
-    const result: Resource[] = [];
-    // Bound concurrent crypto work for large vaults; cache keys only in this client's memory.
-    for (let start = 0; start < resources.length; start += 10) {
-      const batch = await Promise.all(
-        resources.slice(start, start + 10).map((resource) => this.decryptResource(resource)),
-      );
-      result.push(...batch);
-    }
-    return result;
+  public async decryptResources(
+    resources: ApiResource[],
+    onProgress?: (progress: ResourceLoadProgress) => void,
+  ): Promise<Resource[]> {
+    // A fixed-size worker pool keeps concurrent crypto work bounded for large vaults while
+    // removing the barrier between batches: a slow entry no longer stalls the ones behind it.
+    // Workers pull indices in order and write into a pre-sized array, so output order always
+    // matches input order. Key caching stays exactly as before (memory of this client only).
+    const results: Resource[] = new Array<Resource>(resources.length);
+    let nextIndex = 0;
+    let processed = 0;
+    const worker = async () => {
+      while (nextIndex < resources.length) {
+        const index = nextIndex++;
+        results[index] = await this.decryptResource(resources[index]);
+        processed++;
+        if (onProgress) {
+          onProgress({
+            processed,
+            candidates: resources.length,
+            items: results.filter((item): item is Resource => item !== undefined),
+          });
+        }
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(resources.length, 16) }, worker));
+    return results;
   }
 
   private async decryptResource(resource: ApiResource): Promise<Resource> {
