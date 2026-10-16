@@ -12,16 +12,14 @@ export function timeEditingMarkdown(original: TimeDraft, draft: TimeDraft, endpo
     formatDuration(Math.max(0, Math.floor((endedAt.getTime() - startedAt.getTime()) / 1000)));
   const sameDay = isSameLocalDay(start, end);
   const dateSuffix = (date: Date) => (sameDay ? "" : ` · ${formatLogDate(date.toISOString())}`);
+  // Raycast's built-in math renderer supports typewriter text without image swaps.
+  const time = (date: Date) => `\\(\\texttt{${formatInputTime(date)}}\\)`;
   const values = [
-    `Start · ${formatInputTime(start)}${dateSuffix(start)}`,
-    `End   · ${draft.endedAt ? formatInputTime(end) : "Now (Running)"}${dateSuffix(end)}`,
+    `Start · ${time(start)}${dateSuffix(start)}`,
+    `End\u2002 · ${draft.endedAt ? time(end) : "Now (Running)"}${dateSuffix(end)}`,
   ];
-  // Reserve the brackets' space on both rows so moving focus never indents text.
-  const row = (text: string, selected: boolean) => {
-    const value = selected ? `[ ${text} ]` : `  ${text}  `;
-    // Keep reserved selection space when rendered as a native heading.
-    return `## ${value.replaceAll(" ", "\u00a0")}`;
-  };
+  // Only append the marker; the text before it is identical in either focus state.
+  const row = (text: string, selected: boolean) => `## ${text}${selected ? "　←" : ""}`;
 
   return [
     ...(sameDay ? [formatLogDate(start.toISOString()), ""] : []),

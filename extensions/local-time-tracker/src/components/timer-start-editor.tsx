@@ -16,7 +16,7 @@ export function TimerStartEditor({ timer, onSaved }: { timer: ActiveTimer; onSav
         const updated = await updateTimerStart(initialTimer.id, initialTimer.startedAt, new Date(times.startedAt));
         onSaved(updated);
       }}
-      note="Preview · ⌘Enter to save. Pomodoro unchanged; delivered alerts do not repeat."
+      note="Preview · Enter to save. Pomodoro unchanged; delivered alerts do not repeat."
     />
   );
 }

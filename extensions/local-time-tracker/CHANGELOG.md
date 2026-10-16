@@ -5,8 +5,8 @@
 - Return to an empty Root Search after successfully starting work, and label the running-timer view "Tracking Work".
 - Edit start and end times in 1-minute steps with live current times and a duration comparison.
 - Use native text rendering without bar images to avoid image-replacement flicker.
-- Adjust times by 1 minute with Left/Right or 5 minutes with Shift plus Left/Right; Up/Down focuses Start/End, Return switches focus, and Command-Return saves from either endpoint.
-- Limit work-log end times to the current time, removing the previous five-minute future allowance.
+- Adjust times by 1 minute with Left/Right or 5 minutes with Shift plus Left/Right; Up/Down focuses Start/End, and Return saves from either endpoint with the save action visible in the bottom-right corner.
+- Limit work-log end times to the current time, removing the previous five-minute future allowance. When adjusting End into the current minute, cap future hidden seconds at now so that minute can always be selected.
 - Apply exact dates and minute-precision times to the preview without saving until the final save action.
 - Correct a running timer's start time from Start Work using the same numeric preview.
 - Keep project and description edits in the preview until the final save action.

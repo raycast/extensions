@@ -6,7 +6,7 @@ import { parseLocalDateTime } from "../src/lib/date-time-input";
 import { formatLogDate } from "../src/lib/date";
 
 const timeEditingMarkdown: typeof rawTimeEditingMarkdown = (...args) =>
-  rawTimeEditingMarkdown(...args).replaceAll("\u00a0", " ");
+  rawTimeEditingMarkdown(...args).replace(/\\\(\\texttt\{(\d{2}:\d{2})\}\\\)/g, "$1");
 
 const now = new Date(2026, 9, 15, 11, 5);
 const original: TimeDraft = {
@@ -71,24 +71,60 @@ test("running drafts use now as the end, reject future starts and have no editab
   assert.throws(() => shiftTimeDraft(running, "end", 5), /no end time/);
 });
 
+test("the current end minute is selectable regardless of the original hidden seconds", () => {
+  const current = new Date(2026, 9, 16, 22, 9, 10, 123);
+  for (const seconds of [5, 45]) {
+    const times = {
+      startedAt: new Date(2026, 9, 16, 21, 0).toISOString(),
+      endedAt: new Date(2026, 9, 16, 22, 8, seconds, 987).toISOString(),
+    };
+    const adjusted = shiftTimeDraft(times, "end", 1, current);
+    assert.equal(new Date(adjusted.endedAt!).getMinutes(), 9);
+    assert.equal(validateTimeDraft(adjusted, current), undefined);
+    assert.equal(adjusted.startedAt, times.startedAt);
+    assert.equal(Date.parse(adjusted.endedAt!), Math.min(Date.parse(times.endedAt) + 60000, current.getTime()));
+    assert.match(validateTimeDraft(shiftTimeDraft(adjusted, "end", 1, current), current)!, /future/);
+  }
+});
+
+test("current-minute end adjustment is capped at now at minute boundaries, midnight and five-minute steps", () => {
+  for (const current of [
+    new Date(2026, 9, 16, 22, 9, 0),
+    new Date(2026, 9, 16, 22, 9, 59, 999),
+    new Date(2026, 9, 17, 0, 0, 0),
+  ]) {
+    for (const minutes of [1, 5]) {
+      const times = {
+        startedAt: new Date(current.getTime() - 3600000).toISOString(),
+        endedAt: new Date(Math.floor(current.getTime() / 60000) * 60000 - minutes * 60000 + 59999).toISOString(),
+      };
+      const adjusted = shiftTimeDraft(times, "end", minutes, current);
+      assert.equal(adjusted.endedAt, current.toISOString());
+      assert.equal(validateTimeDraft(adjusted, current), undefined);
+      assert.equal(adjusted.startedAt, times.startedAt);
+      assert.equal(shiftTimeDraft(times, "start", -1, current).endedAt, times.endedAt);
+    }
+  }
+});
+
 test("each one-minute adjustment is reflected in a numeric-only preview immediately", () => {
   const earlier = shiftTimeDraft(original, "start", -1);
   const preview = timeEditingMarkdown(original, earlier, "start", now);
-  assert.match(preview, /## \[ Start · 09:44 \]/);
+  assert.match(preview, /^## Start · 09:44　←$/m);
   assert.doesNotMatch(preview, /Time · Adjusting|^#\s/m);
-  assert.doesNotMatch(preview, /🟢|▶|\[ End/);
-  assert.match(preview, /##   End   · 11:05  /);
+  assert.doesNotMatch(preview, /🟢|▶|\[|\]|^## End.*←/m);
+  assert.match(preview, /^## End\u2002 · 11:05$/m);
   assert.match(preview, /1h 19m → \*\*1h 20m\*\*/);
   assert.doesNotMatch(preview, /Before|After|of work|Duration unchanged/);
   assert.doesNotMatch(preview, /data:image|<svg|!\[|\| Before|NaN|Infinity/);
 });
 
-test("end adjustments move the focus brackets to the end row and preserve start values", () => {
+test("end adjustments move the trailing focus marker to the end row and preserve start values", () => {
   const later = shiftTimeDraft(original, "end", 1);
   const preview = timeEditingMarkdown(original, later, "end", now);
-  assert.match(preview, /## \[ End   · 11:06 \]/);
-  assert.doesNotMatch(preview, /Time · Adjusting|^#\s|🟢|▶|\[ Start/m);
-  assert.match(preview, /##   Start · 09:45  /);
+  assert.match(preview, /^## End\u2002 · 11:06　←$/m);
+  assert.doesNotMatch(preview, /Time · Adjusting|^#\s|🟢|▶|\[|\]|^## Start.*←/m);
+  assert.match(preview, /^## Start · 09:45$/m);
   assert.doesNotMatch(preview, /Before|After|of work|Duration unchanged/);
 });
 
@@ -108,7 +144,8 @@ test("moving focus leaves both labels and times at the same text positions witho
   }
   for (const lines of [startFocused, endFocused]) {
     assert.equal(lines.filter((line) => line.includes("```")).length, 0);
-    assert.equal(lines.filter((line) => line.startsWith("## [ ")).length, 1);
+    assert.equal(lines.filter((line) => line.endsWith("←")).length, 1);
+    assert.ok(lines.filter((line) => line.startsWith("## ")).every((line) => /^## (Start|End)\s+·/.test(line)));
   }
 });
 
@@ -124,7 +161,7 @@ test("shortening work, zero elapsed time and clock rollback produce finite numer
 test("exact input shows the current time without a second before/after or duration-delta summary", () => {
   const exact = { ...original, startedAt: new Date(2026, 9, 15, 9, 23).toISOString() };
   const preview = timeEditingMarkdown(original, exact, "start", now);
-  assert.match(preview, /## \[ Start · 09:23 \]/);
+  assert.match(preview, /^## Start · 09:23　←$/m);
   assert.doesNotMatch(preview, /Before|After|of work|Duration unchanged/);
 });
 
@@ -153,7 +190,18 @@ test("same-day dates appear once and midnight corrections restore each endpoint'
   const crossing = { ...original, startedAt: new Date(2026, 9, 14, 23, 59).toISOString() };
   const crossDay = timeEditingMarkdown(original, crossing, "end", now);
   assert.ok(crossDay.includes(`Start · 23:59 · ${formatLogDate(crossing.startedAt)}`));
-  assert.ok(crossDay.includes(`End   · 11:05 · ${formatLogDate(crossing.endedAt!)}`));
+  assert.ok(crossDay.includes(`End\u2002 · 11:05 · ${formatLogDate(crossing.endedAt!)}`));
   const restored = timeEditingMarkdown(original, shiftTimeDraft(crossing, "start", 1), "start", now);
   assert.equal(restored.split(date).length - 1, 1);
+});
+
+test("preview times keep two-digit ASCII values inside native typewriter text", () => {
+  const times = {
+    startedAt: new Date(2026, 9, 15, 8, 8).toISOString(),
+    endedAt: new Date(2026, 9, 15, 21, 28).toISOString(),
+  };
+  const preview = rawTimeEditingMarkdown(times, times, "end", new Date(2026, 9, 16));
+  assert.ok(preview.includes("\\(\\texttt{08:08}\\)"));
+  assert.ok(preview.includes("\\(\\texttt{21:28}\\)"));
+  assert.doesNotMatch(preview, /data:image|<svg|!\[/);
 });

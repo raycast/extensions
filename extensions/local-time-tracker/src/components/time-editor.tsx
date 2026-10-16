@@ -44,14 +44,15 @@ export function TimeEditor({
   async function adjust(minutes: number) {
     if (isSaving) return;
     try {
-      const next = shiftTimeDraft(draft, endpoint, minutes);
-      const error = validateTimeDraft(next);
+      const currentNow = new Date();
+      const next = shiftTimeDraft(draft, endpoint, minutes, currentNow);
+      const error = validateTimeDraft(next, currentNow);
       if (error) {
         await showToast({ style: Toast.Style.Failure, title: "Cannot adjust time", message: error });
         return;
       }
       setDraft(next);
-      setNow(new Date());
+      setNow(currentNow);
     } catch (error) {
       await showFailure("Could not adjust time", error);
     }
@@ -89,23 +90,11 @@ export function TimeEditor({
     <Detail
       navigationTitle={title}
       isLoading={isSaving}
-      markdown={`${timeEditingMarkdown(original, draft, endpoint, now)}\n\n←/→ ±1m · ⇧←/→ ±5m\n\n${draft.endedAt ? "↑/↓ Start / End · " : ""}⌘↵ Save\n\n${note ?? "Preview · ⌘Enter to save"}`}
+      markdown={`${timeEditingMarkdown(original, draft, endpoint, now)}\n\n←/→ ±1m · ⇧←/→ ±5m\n\n${draft.endedAt ? "↑/↓ Start / End · " : ""}↵ Save\n\n${note ?? "Preview · Enter to save"}`}
       metadata={metadata ? <Detail.Metadata>{metadata}</Detail.Metadata> : undefined}
       actions={
         <ActionPanel>
-          <Action
-            key="select-time"
-            title={draft.endedAt && endpoint === "start" ? "Adjust End Time" : "Adjust Start Time"}
-            icon={Icon.Switch}
-            onAction={() => selectEndpoint(draft.endedAt && endpoint === "start" ? "end" : "start")}
-          />
-          <Action
-            key="save"
-            title={saveTitle}
-            icon={Icon.Checkmark}
-            shortcut={{ modifiers: ["cmd"], key: "return" }}
-            onAction={save}
-          />
+          <Action key="save" title={saveTitle} icon={Icon.Checkmark} onAction={save} />
           {!isSaving ? (
             <>
               <Action.Push

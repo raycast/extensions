@@ -13,12 +13,22 @@ export function validateTimeDraft(draft: TimeDraft, now: Date = new Date()): str
   }
 }
 
-export function shiftTimeDraft(draft: TimeDraft, endpoint: TimeEndpoint, minutes: number): TimeDraft {
+export function shiftTimeDraft(
+  draft: TimeDraft,
+  endpoint: TimeEndpoint,
+  minutes: number,
+  now: Date = new Date(),
+): TimeDraft {
   const key = endpoint === "start" ? "startedAt" : "endedAt";
   const current = draft[key];
   if (!current) throw new Error("A running timer has no end time to adjust");
-  // Relative adjustments add exactly the requested minutes, retaining seconds.
-  return { ...draft, [key]: new Date(Date.parse(current) + minutes * 60000).toISOString() };
+  // Retain seconds except when they would reject the visible current end minute.
+  let shifted = Date.parse(current) + minutes * 60000;
+  const currentTime = now.getTime();
+  if (endpoint === "end" && shifted > currentTime && Math.floor(shifted / 60000) === Math.floor(currentTime / 60000)) {
+    shifted = currentTime;
+  }
+  return { ...draft, [key]: new Date(shifted).toISOString() };
 }
 
 export function durationChangeSeconds(original: TimeDraft, draft: TimeDraft, now: Date): number {
