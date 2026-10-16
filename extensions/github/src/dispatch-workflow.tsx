@@ -277,11 +277,7 @@ function DispatchWorkflowForm() {
         <ActionPanel>
           <Action.SubmitForm title="Dispatch Workflow" icon={Icon.Play} onSubmit={handleSubmit} />
           {failedWorkflowCount > 0 || workflowError ? (
-            <Action
-              title="Retry Loading Workflows"
-              icon={Icon.ArrowClockwise}
-              onAction={() => revalidateWorkflows()}
-            />
+            <Action title="Retry Loading Workflows" icon={Icon.ArrowClockwise} onAction={() => revalidateWorkflows()} />
           ) : null}
           {selectedWorkflow ? (
             <Action
