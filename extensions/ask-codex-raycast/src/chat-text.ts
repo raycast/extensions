@@ -1,4 +1,3 @@
-import { t } from "./i18n";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import type { ChatMessage } from "./conversations";
@@ -15,24 +14,22 @@ export function conversationMarkdown(
       message.role === "assistant"
         ? "Codex"
         : message.kind === "steer"
-          ? t("你 · 补充要求")
-          : t("你");
+          ? "You · Additional Instructions"
+          : "You";
     const avatar =
       message.role === "assistant" ? "command-icon.png" : "user-avatar.svg";
     const avatarURL = pathToFileURL(join(assetsPath, avatar));
     avatarURL.search = "raycast-width=22&raycast-height=22";
-    const body = renderMarkdown(message.content) || t("正在思考…");
+    const body = renderMarkdown(message.content) || "Thinking…";
     return `![${speaker}](<${avatarURL.href}>) **${speaker}**\n\n${body}`;
   });
   const notice = error || status;
   const header = notice
-    ? `${error ? t("**连接提示** · ") : ""}${notice.replace(/\r?\n/g, " ")}\n\n`
+    ? `${error ? "**Connection Notice** · " : ""}${notice.replace(/\r?\n/g, " ")}\n\n`
     : "";
   return (
     header +
     (cards.join("\n\n---\n\n") ||
-      t(
-        "**Codex in Raycast**\n\n按 Enter 打开输入浮层，输入消息后再按 Enter 发送。回复与追问会保留在同一对话里。",
-      ))
+      "**Codex in Raycast**\n\nPress Enter to open the message composer, enter your message, and press Enter to send. Replies and follow-ups will stay in the same conversation.")
   );
 }

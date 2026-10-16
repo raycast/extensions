@@ -1,4 +1,3 @@
-import { t } from "./i18n";
 import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
 import { useRef, useState } from "react";
 
@@ -11,19 +10,21 @@ export function MessageComposer(props: {
   onSend: (text: string) => Promise<boolean>;
 }) {
   const ignoreOpeningReset = useRef(true);
+  const editRevision = useRef(0);
   const [restored, setRestored] = useState(false);
   const [query, setQuery] = useState("");
   const message = restored ? props.draft : query;
   const preview = message.replace(/\s+/g, " ").slice(0, 90);
   return (
     <ActionPanel.Submenu
-      title={props.busy ? t("补充要求") : t("输入消息")}
+      title={props.busy ? "Add Instructions" : "Enter Message"}
       icon={props.busy ? Icon.Plus : Icon.Pencil}
       shortcut={{ modifiers: [], key: "return" }}
       filtering={false}
       throttle={false}
       isLoading={!props.ready}
       onOpen={() => {
+        editRevision.current += 1;
         ignoreOpeningReset.current = true;
         setQuery("");
         setRestored(Boolean(props.draft.trim()));
@@ -36,6 +37,7 @@ export function MessageComposer(props: {
           return;
         }
         ignoreOpeningReset.current = false;
+        editRevision.current += 1;
         setQuery(text);
         setRestored(false);
         // Closing a native menu also clears its search text. Keep the last
@@ -46,28 +48,34 @@ export function MessageComposer(props: {
       <ActionPanel.Section
         title={
           preview
-            ? t("待发送 · {v0}", { v0: preview })
-            : t("输入消息，按 Enter 发送")
+            ? `Pending · ${preview}`
+            : "Type a message, press Enter to send"
         }
       >
         <Action
           title={
             restored
-              ? t("发送已保存的草稿")
+              ? "Send Saved Draft"
               : props.busy
-                ? t("发送补充要求")
-                : t("发送消息")
+                ? "Send Instructions"
+                : "Send Message"
           }
           icon={Icon.ArrowRight}
           onAction={async () => {
             if (!message.trim()) {
               await showToast({
                 style: Toast.Style.Failure,
-                title: t("先在输入框里输入消息"),
+                title: "Enter a message in the input field first",
               });
               return;
             }
-            if (await props.onSend(message)) {
+            const submittedRevision = editRevision.current;
+            // A native menu can reopen while the CLI acknowledges an older
+            // send. Keep any newer query, including identical text retyped.
+            if (
+              (await props.onSend(message)) &&
+              editRevision.current === submittedRevision
+            ) {
               setQuery("");
               setRestored(false);
             }
@@ -78,9 +86,10 @@ export function MessageComposer(props: {
       <ActionPanel.Section>
         {props.draft.trim() && (
           <Action
-            title={t("清空草稿")}
+            title="Clear Draft"
             icon={Icon.Eraser}
             onAction={() => {
+              editRevision.current += 1;
               setQuery("");
               setRestored(false);
               props.onChange("");
@@ -89,7 +98,7 @@ export function MessageComposer(props: {
         )}
         {restored && (
           <Action.CopyToClipboard
-            title={t("复制草稿以继续编辑")}
+            title="Copy Draft to Continue Editing"
             content={props.draft}
           />
         )}

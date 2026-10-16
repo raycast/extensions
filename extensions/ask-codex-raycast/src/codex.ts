@@ -1,4 +1,3 @@
-import { t } from "./i18n";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { createInterface, type Interface } from "node:readline";
 import { expandHome, resolveCodexExecutable } from "./executable";
@@ -97,7 +96,7 @@ export class CodexAppServer {
     }
 
     const executable = await resolveCodexExecutable(this.codexPath);
-    if (this.closed) throw new Error(t("连接已关闭"));
+    if (this.closed) throw new Error("Connection closed");
     const child = spawn(
       executable.command,
       [...(this.liveSearch ? ["--search"] : []), "app-server"],
@@ -131,10 +130,7 @@ export class CodexAppServer {
       const detail = this.stderr.trim();
       this.rejectPending(
         new Error(
-          detail ||
-            t("Codex app-server exited ({code}).", {
-              code: code ?? signal ?? "unknown",
-            }),
+          detail || `Codex app-server exited (${code ?? signal ?? "unknown"}).`,
         ),
       );
       this.onEvent({
@@ -160,13 +156,11 @@ export class CodexAppServer {
     const result = await this.request("account/read", { refreshToken: false });
     if (typeof result.requiresOpenaiAuth !== "boolean")
       throw new Error(
-        t("Could not read CLI sign-in status. Update Codex CLI and try again."),
+        "Could not read CLI sign-in status. Update Codex CLI and try again.",
       );
     if (result.requiresOpenaiAuth && !asString(asRecord(result.account).type))
       throw new Error(
-        t(
-          "Sign in with `codex login` in your terminal, then check the connection again.",
-        ),
+        "Sign in with `codex login` in your terminal, then check the connection again.",
       );
   }
 
@@ -175,7 +169,7 @@ export class CodexAppServer {
     const thread = asRecord(result).thread;
     const id = asString(asRecord(thread).id);
     if (!id) {
-      throw new Error(t("Codex app-server did not return a thread id."));
+      throw new Error("Codex app-server did not return a thread id.");
     }
 
     this.threadId = id;
@@ -284,7 +278,7 @@ export class CodexAppServer {
 
   async steer(prompt: string): Promise<void> {
     if (!this.threadId || !this.activeTurnId) {
-      throw new Error(t("There is no active Codex turn to steer."));
+      throw new Error("There is no active Codex turn to steer.");
     }
 
     await this.request("turn/steer", {
@@ -309,7 +303,7 @@ export class CodexAppServer {
     this.closed = true;
     this.reader?.close();
     this.reader = null;
-    this.rejectPending(new Error(t("Codex app-server connection closed.")));
+    this.rejectPending(new Error("Codex app-server connection closed."));
     const child = this.process;
     child?.stdin.end();
     if (child && child.exitCode === null) {
@@ -343,10 +337,7 @@ export class CodexAppServer {
         const optionalDiscovery =
           method === "model/list" || method === "thread/list";
         const error = new Error(
-          t("Codex 请求超时（{v0}）。{v1}", {
-            v0: method,
-            v1: optionalDiscovery ? t("请稍后重试。") : t("请重新连接后重试。"),
-          }),
+          `Codex request timed out (${method}). ${optionalDiscovery ? "Please try again later." : "Please reconnect and try again."}`,
         );
         // Optional, read-only discovery should not disconnect a usable chat.
         // A timed-out send may have been accepted; close to avoid duplicate turns.
@@ -380,7 +371,7 @@ export class CodexAppServer {
 
   private write(message: Record<string, unknown>): void {
     if (!this.process?.stdin.writable) {
-      throw new Error(t("Codex app-server is not connected."));
+      throw new Error("Codex app-server is not connected.");
     }
 
     this.process.stdin.write(`${JSON.stringify(message)}\n`);
@@ -404,9 +395,8 @@ export class CodexAppServer {
         id: message.id,
         error: {
           code: -32601,
-          message: t(
-            "此 Raycast 界面不支持交互式授权，请在 Codex CLI 中处理。",
-          ),
+          message:
+            "This Raycast interface does not support interactive authorization. Please handle it in the Codex CLI.",
         },
       });
       this.onEvent({
@@ -423,7 +413,7 @@ export class CodexAppServer {
         if (message.error) {
           pending.reject(
             new Error(
-              message.error.message ?? t("Codex app-server request failed."),
+              message.error.message ?? "Codex app-server request failed.",
             ),
           );
         } else {

@@ -1,4 +1,3 @@
-import { setLocale, t } from "./i18n";
 import { SetupWizard } from "./setup";
 import {
   connectionSignature,
@@ -104,7 +103,6 @@ function ConfiguredCommand({
         /* Keep setup available if an old model preference is malformed. */
       }
       if (cancelled) return;
-      setLocale(saved?.locale || "en");
       setSetup(saved);
       setSavedSelection(selection);
       setLoaded(true);
@@ -125,7 +123,7 @@ function ConfiguredCommand({
           loadError ? (
             <ActionPanel>
               <Action
-                title={t("Retry")}
+                title="Retry"
                 onAction={() => setAttempt((value) => value + 1)}
               />
             </ActionPanel>
@@ -144,7 +142,6 @@ function ConfiguredCommand({
         previous={setup}
         selection={savedSelection}
         onComplete={(value) => {
-          setLocale(value.locale);
           setSetup(value);
           setSavedSelection(value.selection);
           setEditing(false);
@@ -181,7 +178,12 @@ function NativeChat(
   const [draft, setDraft] = useState("");
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState(t("正在连接 Codex…"));
+  const [status, setStatus] = useState("Connecting to Codex…");
+  const [statusVisible, setStatusVisible] = useState(true);
+  function updateStatus(text: string, visible = true) {
+    setStatus(text);
+    setStatusVisible(visible);
+  }
   const [error, setError] = useState("");
   const [page, setPage] = useState<Page>("chat");
   const [sessions, setSessions] = useState<StoredConversation[]>([]);
@@ -238,7 +240,7 @@ function NativeChat(
       .then(() => LocalStorage.setItem(LIBRARY_KEY, encoded));
     void saveQueueRef.current.catch((reason) => {
       if (mountedRef.current)
-        setError(t("会话保存失败：{v0}", { v0: messageOf(reason) }));
+        setError(`Could not save conversation: ${messageOf(reason)}`);
     });
   }
 
@@ -298,7 +300,7 @@ function NativeChat(
     void modelSaveQueueRef.current.catch((reason) =>
       showToast({
         style: Toast.Style.Failure,
-        title: t("模型选择保存失败"),
+        title: "Could not save model selection",
         message: messageOf(reason),
       }),
     );
@@ -306,10 +308,10 @@ function NativeChat(
       style: Toast.Style.Success,
       title: selection
         ? [selection.model, selection.effort].filter(Boolean).join(" · ")
-        : t("沿用当前会话模型"),
+        : "Use Current Conversation Model",
       message: busy
-        ? t("下一次回复使用；当前回答的补充要求仍使用原模型。")
-        : t("下一条消息使用此设置。"),
+        ? "Used for the next reply; steering the current response will still use the original model."
+        : "This setting applies to the next message.",
     });
   }
 
@@ -320,7 +322,7 @@ function NativeChat(
     activeReplyRef.current = null;
     setReady(false);
     setError("");
-    setStatus(t("正在连接 Codex…"));
+    updateStatus("Connecting to Codex…");
     modelsRequestRef.current = null;
     modelsRef.current = [];
     setModels([]);
@@ -337,15 +339,16 @@ function NativeChat(
         return;
       if (event.method === "turn/started") {
         setBusy(true);
-        setStatus(t("正在思考 · 输入后按 Enter 发送补充要求"));
+        updateStatus("Thinking · Press Enter to steer");
       }
       if (event.method === "item/started") {
         const type = asString(asRecord(params.item).type);
-        if (type === "webSearch") setStatus(t("正在搜索网页 · 可继续补充要求"));
+        if (type === "webSearch")
+          updateStatus("Searching the web · Can still steer");
         else if (type === "commandExecution")
-          setStatus(t("正在运行命令 · 可停止或补充要求"));
+          updateStatus("Running command · Can stop or steer");
         else if (type === "mcpToolCall")
-          setStatus(t("正在调用工具 · 可继续补充要求"));
+          updateStatus("Calling tool · Can still steer");
       }
       if (
         event.method === "item/agentMessage/delta" ||
@@ -367,19 +370,20 @@ function NativeChat(
             completed,
           }),
         }));
-        setStatus(t("正在回答 · 输入后按 Enter 发送补充要求"));
+        updateStatus("Responding · Press Enter to steer");
       }
       if (event.method === "turn/completed") {
         const turn = asRecord(params.turn);
         setBusy(false);
         const failure = asString(asRecord(turn.error).message);
         if (failure) setError(failure);
-        setStatus(
+        updateStatus(
           turn.status === "failed"
-            ? t("本次回答失败，可重试")
+            ? "Response failed. You can retry"
             : turn.status === "interrupted"
-              ? t("已停止 · 输入后按 Enter 继续聊天")
-              : t("已完成 · 输入后按 Enter 继续聊天"),
+              ? "Stopped · Press Enter to continue chatting"
+              : "Completed · Press Enter to continue chatting",
+          turn.status !== "completed",
         );
         setConversation((previous) => ({
           ...previous,
@@ -394,7 +398,7 @@ function NativeChat(
         setError(
           asString(asRecord(params.error).message) ||
             asString(params.message) ||
-            t("Codex 返回错误"),
+            "Codex returned an error",
         );
       }
       if (
@@ -403,9 +407,7 @@ function NativeChat(
         event.method === "request/unsupported"
       ) {
         setError(
-          t(
-            "此操作需要交互式确认，当前界面未自动授权。请停止本轮，在 Codex CLI 中继续此会话。",
-          ),
+          "This action requires interactive confirmation, which is not automatically authorized in this interface. Please stop this turn and continue this session in the Codex CLI.",
         );
       }
       if (event.method === "process/exited") {
@@ -413,9 +415,10 @@ function NativeChat(
         setReady(false);
         setBusy(false);
         setError(
-          asString(params.stderr) || t("Codex 连接已关闭，请使用“重新连接”。"),
+          asString(params.stderr) ||
+            'Codex connection closed. Please use "Reconnect".',
         );
-        setStatus(t("连接已关闭"));
+        updateStatus("Connection closed");
       }
     };
     const client = new CodexAppServer({
@@ -481,9 +484,7 @@ function NativeChat(
           messages = [];
           if (stored.messages.length)
             setError(
-              t("之前的会话暂时无法恢复，已保留在历史中：{v0}", {
-                v0: messageOf(reason),
-              }),
+              `Previous conversation could not be restored and has been kept in history: ${messageOf(reason)}`,
             );
         }
       } else {
@@ -508,14 +509,19 @@ function NativeChat(
       setCurrentModel(client.currentModelSelection);
       readyRef.current = true;
       setReady(true);
-      setStatus(t("已连接 · 输入后按 Enter 发送"));
+      updateStatus(
+        client.currentTurnId
+          ? "Thinking · Press Enter to steer"
+          : "Connected · Press Enter to send",
+        Boolean(client.currentTurnId),
+      );
       void refreshModels().catch(() => undefined);
     };
     initRef.current = initialize();
     void initRef.current.catch((reason: unknown) => {
       if (!disposed) {
         setError(messageOf(reason));
-        setStatus(t("连接失败"));
+        updateStatus("Connection failed");
       }
     });
     return () => {
@@ -546,7 +552,7 @@ function NativeChat(
     if (!mountedRef.current) return;
     const client = clientRef.current;
     if (!client || !readyRef.current)
-      throw new Error(t("服务尚未连接，请重新打开命令。"));
+      throw new Error("Service not connected. Please reopen the command.");
     setError("");
     if (client.currentTurnId) {
       try {
@@ -565,7 +571,7 @@ function NativeChat(
             },
           ],
         }));
-        setStatus(t("已发送补充要求"));
+        updateStatus("Steer sent");
         return;
       } catch (reason) {
         // The turn may complete between pressing Enter and the steer RPC.
@@ -583,7 +589,7 @@ function NativeChat(
         (selection.effort && !model.efforts.includes(selection.effort))
       ) {
         throw new Error(
-          t("所选模型或档位已不可用，请在底部 Actions 中重新选择模型。"),
+          "The selected model or effort level is no longer available. Please reselect a model in Actions at the bottom.",
         );
       }
     }
@@ -591,7 +597,7 @@ function NativeChat(
     const replyId = makeId();
     activeReplyRef.current = replyId;
     setBusy(true);
-    setStatus(t("正在思考 · 输入后按 Enter 发送补充要求"));
+    updateStatus("Thinking · Press Enter to steer");
     setConversation((previous) => ({
       ...previous,
       messages: [
@@ -638,7 +644,7 @@ function NativeChat(
     setDraft((current) => current || prompt);
     await showToast({
       style: Toast.Style.Failure,
-      title: t("未发送成功"),
+      title: "Failed to send",
       message,
     });
   }
@@ -659,8 +665,9 @@ function NativeChat(
     if (!readyRef.current) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("服务尚未连接"),
-        message: t("文字已保留，请等待连接或点击“重新连接”。"),
+        title: "Service not connected",
+        message:
+          'Text has been preserved. Please wait for connection or click "Reconnect".',
       });
       return false;
     }
@@ -681,7 +688,7 @@ function NativeChat(
     if (busy || requestPendingRef.current || switching) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("请先停止当前回答"),
+        title: "Please stop the current response first",
       });
       return;
     }
@@ -690,7 +697,8 @@ function NativeChat(
     try {
       await initRef.current;
       const client = clientRef.current;
-      if (!client || !readyRef.current) throw new Error(t("服务尚未连接"));
+      if (!client || !readyRef.current)
+        throw new Error("Service not connected");
       if (persistedRef.current) save(persistedRef.current);
       const threadId = await client.startThread();
       setCurrentModel(client.currentModelSelection);
@@ -707,7 +715,7 @@ function NativeChat(
       setPage("chat");
       activeReplyRef.current = null;
       setError("");
-      setStatus(t("新对话 · 输入后按 Enter 发送"));
+      updateStatus("New Chat · Press Enter to send", false);
     } catch (reason) {
       await reportFailure(reason, "");
     } finally {
@@ -724,8 +732,8 @@ function NativeChat(
     if (busy || requestPendingRef.current || switching) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("请先停止当前回答"),
-        message: t("停止后即可切换会话。"),
+        title: "Please stop the current response first",
+        message: "You can switch conversations after stopping.",
       });
       return;
     }
@@ -735,7 +743,9 @@ function NativeChat(
       await initRef.current;
       const client = clientRef.current;
       if (!client || !readyRef.current || !session.threadId)
-        throw new Error(t("服务尚未连接，请返回聊天重新连接。"));
+        throw new Error(
+          "Service not connected. Please return to chat and reconnect.",
+        );
       if (persistedRef.current) save(persistedRef.current);
       const threadId = await client.resumeThread(session.threadId);
       const existing = libraryRef.current.sessions.find(
@@ -759,14 +769,19 @@ function NativeChat(
       setDraft(next.draft || "");
       setBusy(Boolean(client.currentTurnId));
       setError("");
-      setStatus(t("会话已恢复 · 输入后按 Enter 继续聊天"));
+      updateStatus(
+        client.currentTurnId
+          ? "Thinking · Press Enter to steer"
+          : "Session restored · Press Enter to continue chatting",
+        Boolean(client.currentTurnId),
+      );
       setCurrentModel(client.currentModelSelection);
       save(next);
       setPage("chat");
     } catch (reason) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("未能打开会话"),
+        title: "Could not open conversation",
         message: messageOf(reason),
       });
     } finally {
@@ -809,14 +824,14 @@ function NativeChat(
     <>
       {codexNotFound && (
         <Action.OpenInBrowser
-          title={t("安装 Codex CLI")}
+          title="Install Codex CLI"
           icon={Icon.Download}
           url="https://github.com/openai/codex#installation"
         />
       )}
       {busy && (
         <Action
-          title={t("停止回答")}
+          title="Stop Response"
           icon={Icon.Stop}
           shortcut={{
             modifiers: [process.platform === "darwin" ? "cmd" : "ctrl"],
@@ -825,7 +840,7 @@ function NativeChat(
           onAction={async () => {
             try {
               await clientRef.current?.interrupt();
-              setStatus(t("正在停止…"));
+              updateStatus("Stopping…");
             } catch (reason) {
               await reportFailure(reason, "");
             }
@@ -833,7 +848,7 @@ function NativeChat(
         />
       )}
       <Action
-        title={t("最近对话")}
+        title="Recent Chats"
         icon={Icon.Clock}
         shortcut={{
           modifiers: [process.platform === "darwin" ? "cmd" : "ctrl", "shift"],
@@ -843,13 +858,13 @@ function NativeChat(
       />
       {answer && (
         <Action.CopyToClipboard
-          title={t("复制回答")}
+          title="Copy Response"
           content={answer}
           shortcut={Keyboard.Shortcut.Common.Copy}
         />
       )}
       <Action.CopyToClipboard
-        title={t("复制当前对话")}
+        title="Copy Current Conversation"
         content={transcript(conversation.messages)}
         shortcut={{
           modifiers: [process.platform === "darwin" ? "cmd" : "ctrl", "shift"],
@@ -857,13 +872,13 @@ function NativeChat(
         }}
       />
       <Action
-        title={t("Language and Default Model")}
-        icon={Icon.Globe}
+        title="CLI and Default Model"
+        icon={Icon.Gear}
         onAction={() => {
           if (busy || switching || requestPendingRef.current) {
             void showToast({
               style: Toast.Style.Failure,
-              title: t("请先停止当前回答"),
+              title: "Please stop the current response first",
             });
             return;
           }
@@ -871,7 +886,7 @@ function NativeChat(
         }}
       />
       <Action
-        title={t("打开设置")}
+        title="Open Settings"
         icon={Icon.Gear}
         onAction={openExtensionPreferences}
       />
@@ -889,10 +904,10 @@ function NativeChat(
       conversationMarkdown(
         visibleMessages,
         environment.assetsPath,
-        !ready && !error ? status : "",
+        statusVisible ? status : "",
         error,
       ),
-    [visibleMessages, ready, error, status],
+    [visibleMessages, ready, error, status, statusVisible],
   );
   const historyProps = useSessionHistory({
     page,
@@ -917,7 +932,7 @@ function NativeChat(
       <ModelMenu {...modelMenuProps} shortcuts={shortcuts} />
       <EffortMenu {...modelMenuProps} />
       <Action
-        title={t("新建对话")}
+        title="New Chat"
         icon={Icon.Plus}
         shortcut={shortcuts ? Keyboard.Shortcut.Common.New : undefined}
         onAction={newChat}
@@ -935,7 +950,7 @@ function NativeChat(
     >
       {!ready && error ? (
         <Action
-          title={t("重新连接")}
+          title="Reconnect"
           icon={Icon.ArrowClockwise}
           onAction={reconnect}
         />

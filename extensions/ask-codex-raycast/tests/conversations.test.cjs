@@ -41,7 +41,7 @@ test("chat renders only the latest round and retains its steer messages", () => 
   const visible = latestRound(messages);
   assert.equal(visible.length, 3);
   assert.doesNotMatch(transcript(visible), /old answer/);
-  assert.match(transcript(visible), /补充要求/);
+  assert.match(transcript(visible), /Add Instructions/);
   assert.equal(messages.length, 5);
 });
 test("server history hydrates text and steering, ignoring tool output", () => {

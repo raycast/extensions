@@ -1,4 +1,3 @@
-import { t } from "./i18n";
 import { execFile } from "node:child_process";
 import { accessSync, constants, realpathSync, statSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -117,9 +116,7 @@ function nativeNpmBinary(file: string): string | undefined {
 export function windowsShellCommand(file: string): string {
   if (/[\r\n"%!]/.test(file))
     throw new Error(
-      t(
-        "该脚本路径包含 Windows 命令解释器无法安全处理的字符，请选择 codex.exe。",
-      ),
+      "This script path contains characters that the Windows command interpreter cannot safely handle. Please select codex.exe.",
     );
   return `"${file}"`;
 }
@@ -166,10 +163,7 @@ export async function resolveCodexExecutable(
       }
     }
     throw new Error(
-      t(
-        "找不到指定的 Codex：{v0}。请清空“Codex Path”以自动检测，或填写此电脑上的路径。",
-        { v0: requested },
-      ),
+      `Could not find the specified Codex: ${requested}. Please clear "Codex Path" to auto-detect, or enter the path on this computer.`,
     );
   }
   for (const name of platform === "win32"
@@ -210,8 +204,6 @@ export async function resolveCodexExecutable(
     }
   }
   throw new Error(
-    t(
-      "未找到 Codex CLI（ChatGPT/Codex 命令行工具）。请先安装并登录 Codex CLI；如果已经安装，请在扩展设置的 Codex Path 填写可执行文件路径。",
-    ),
+    "Codex CLI (ChatGPT/Codex command-line tool) not found. Please install and sign in to Codex CLI first. If already installed, specify the executable path in Codex Path in extension settings.",
   );
 }

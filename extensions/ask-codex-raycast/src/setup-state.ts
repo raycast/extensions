@@ -1,4 +1,3 @@
-import { isLocale, type Locale } from "./i18n";
 import type { CodexModel, ModelSelection } from "./codex";
 
 export const SETUP_KEY = "codex-in-raycast.setup.v1";
@@ -9,8 +8,7 @@ export type ConnectionPreferences = {
   liveSearch?: boolean;
 };
 export type Setup = {
-  version: 1;
-  locale: Locale;
+  version: 2;
   selection: ModelSelection;
   connection: string;
   checkedAt: number;
@@ -31,8 +29,7 @@ export function parseSetup(raw: string | undefined): Setup | null {
   try {
     const value = JSON.parse(raw || "null");
     if (
-      value?.version !== 1 ||
-      !isLocale(value.locale) ||
+      (value?.version !== 1 && value?.version !== 2) ||
       typeof value.selection?.model !== "string" ||
       !value.selection.model.trim() ||
       typeof value.selection?.effort !== "string" ||
@@ -42,7 +39,17 @@ export function parseSetup(raw: string | undefined): Setup | null {
       value.checkedAt <= 0
     )
       return null;
-    return value as Setup;
+    // Migrate completed language-era setup without invalidating the verified
+    // connection or dropping the model choice. Language is no longer stored.
+    return {
+      version: 2,
+      selection: {
+        model: value.selection.model,
+        effort: value.selection.effort,
+      },
+      connection: value.connection,
+      checkedAt: value.checkedAt,
+    };
   } catch {
     return null;
   }

@@ -12,7 +12,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { CodexAppServer, type CodexModel, type ModelSelection } from "./codex";
 import { messageOf } from "./conversations";
-import { locales, setLocale, t, type Locale } from "./i18n";
+
 import { MODEL_SELECTION_KEY } from "./model-menu";
 import {
   connectionSignature,
@@ -33,7 +33,6 @@ export function SetupWizard({
   onComplete: (setup: Setup) => void;
 }) {
   const [step, setStep] = useState(1);
-  const [language, setLanguage] = useState<Locale | "">(previous?.locale || "");
   const [models, setModels] = useState<CodexModel[]>([]);
   const [model, setModel] = useState("");
   const [effort, setEffort] = useState("");
@@ -73,7 +72,7 @@ export function SetupWizard({
       const catalog = await client.listModels();
       if (!catalog.length)
         throw new Error(
-          t("No models returned. Check your CLI configuration and try again."),
+          "No models returned. Check your CLI configuration and try again.",
         );
       if (!mounted.current) return;
       setModels(catalog);
@@ -87,7 +86,7 @@ export function SetupWizard({
         setEffort("");
       }
       setCheckedAt(Date.now());
-      setStep(3);
+      setStep(2);
     } catch (reason) {
       if (mounted.current) setError(messageOf(reason));
     } finally {
@@ -100,10 +99,10 @@ export function SetupWizard({
 
   async function finish() {
     if (savingRef.current) return;
-    if (!language || !checkedAt || !validSelection(models, { model, effort })) {
+    if (!checkedAt || !validSelection(models, { model, effort })) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("Choose a model and effort level to continue"),
+        title: "Choose a model and effort level to continue",
       });
       return;
     }
@@ -111,8 +110,7 @@ export function SetupWizard({
     setSaving(true);
     try {
       const setup: Setup = {
-        version: 1,
-        locale: language,
+        version: 2,
         selection: { model, effort },
         checkedAt,
         connection: connectionSignature(preferences),
@@ -127,7 +125,7 @@ export function SetupWizard({
     } catch (reason) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("Could not save settings"),
+        title: "Could not save settings",
         message: messageOf(reason),
       });
     } finally {
@@ -138,104 +136,38 @@ export function SetupWizard({
 
   const preferencesAction = (
     <Action
-      title={t("CLI Path and Permissions")}
+      title="CLI Path and Permissions"
       icon={Icon.Gear}
       onAction={openExtensionPreferences}
     />
   );
-  const title = t("Set Up Codex in Raycast");
+  const title = "Set Up Codex in Raycast";
   if (step === 1)
-    return (
-      <Form
-        navigationTitle={title}
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm
-              title={t("Continue")}
-              onSubmit={() => {
-                if (!language) {
-                  void showToast({
-                    style: Toast.Style.Failure,
-                    title: t("Choose your language"),
-                  });
-                  return;
-                }
-                setStep(2);
-              }}
-            />
-          </ActionPanel>
-        }
-      >
-        <Form.Description
-          title={t("1 of 3 · Language")}
-          text={t(
-            "Choose the interface language. Complete all three steps before chatting. Your existing conversations will be kept.",
-          )}
-        />
-        <Form.Dropdown
-          id="language"
-          title={t("Language / 语言")}
-          value={language}
-          onChange={(value) => {
-            setLanguage(value as Locale | "");
-            setLocale(value || "en");
-          }}
-        >
-          <Form.Dropdown.Item
-            value=""
-            title={t("Choose language / 选择语言")}
-          />
-          {locales.map((locale) => (
-            <Form.Dropdown.Item
-              key={locale.code}
-              value={locale.code}
-              title={locale.name}
-            />
-          ))}
-        </Form.Dropdown>
-      </Form>
-    );
-  if (step === 2)
     return (
       <Detail
         navigationTitle={title}
         isLoading={checking}
         markdown={[
-          `### ${t("2 of 3 · CLI Connection")}`,
-          t(
-            "Install Codex CLI and run `codex login` in your terminal first. If you use a custom provider, configure it in Codex CLI.",
-          ),
-          t(
-            "This check connects to your local CLI, reads its sign-in status and loads its model catalog. It does not send a prompt. Actual model access is confirmed when you send a message.",
-          ),
+          "### 1 of 2 · CLI Connection",
+          "Install Codex CLI and run `codex login` in your terminal first. If you use a custom provider, configure it in Codex CLI.",
+          "This check connects to your local CLI, reads its sign-in status and loads its model catalog. It does not send a prompt. Actual model access is confirmed when you send a message.",
           checking
-            ? t("Checking connection…")
+            ? "Checking Connection…"
             : error
-              ? `**${t("Connection check failed")}**\n\n${error.replace(/[<>]/g, "")}`
-              : t("Press Enter to check your connection."),
+              ? `**Connection check failed**\n\n${error.replace(/[<>]/g, "")}`
+              : "Press Enter to check your connection.",
         ].join("\n\n")}
         actions={
           <ActionPanel>
             <Action
-              title={
-                checking ? t("Checking connection…") : t("Check CLI Connection")
-              }
+              title={checking ? "Checking Connection…" : "Check CLI Connection"}
               icon={Icon.Link}
               onAction={checkConnection}
             />
             {preferencesAction}
             <Action.OpenInBrowser
-              title={t("安装 Codex CLI")}
+              title="Install Codex CLI"
               url="https://github.com/openai/codex#installation"
-            />
-            <Action
-              title={t("Back to Language")}
-              onAction={() => {
-                if (!checkingRef.current) {
-                  setError("");
-                  setStep(1);
-                }
-              }}
             />
           </ActionPanel>
         }
@@ -249,15 +181,15 @@ export function SetupWizard({
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={t("Save and Start Chatting")}
+            title="Save and Start Chatting"
             onSubmit={finish}
           />
           <Action
-            title={t("Check Connection Again")}
+            title="Check Connection Again"
             onAction={() => {
               if (!savingRef.current) {
                 setCheckedAt(0);
-                setStep(2);
+                setStep(1);
               }
             }}
           />
@@ -265,14 +197,12 @@ export function SetupWizard({
       }
     >
       <Form.Description
-        title={t("3 of 3 · Default Model")}
-        text={t(
-          "CLI connected. Choose a model and effort level. You can change them later in Actions.",
-        )}
+        title="2 of 2 · Default Model"
+        text="CLI connected. Choose a model and effort level. You can change them later in Actions."
       />
       <Form.Dropdown
         id="model"
-        title={t("Model")}
+        title="Model"
         value={model}
         onChange={(value) => {
           if (savingRef.current) return;
@@ -280,7 +210,7 @@ export function SetupWizard({
           setEffort("");
         }}
       >
-        <Form.Dropdown.Item value="" title={t("Choose a model")} />
+        <Form.Dropdown.Item value="" title="Choose a model" />
         {models.map((entry) => (
           <Form.Dropdown.Item
             key={entry.model}
@@ -293,28 +223,23 @@ export function SetupWizard({
         (selected.efforts.length ? (
           <Form.Dropdown
             id="effort"
-            title={t("Effort Level")}
+            title="Effort Level"
             value={effort}
             onChange={(value) => {
               if (!savingRef.current) setEffort(value);
             }}
           >
-            <Form.Dropdown.Item value="" title={t("Choose an effort level")} />
+            <Form.Dropdown.Item value="" title="Choose an effort level" />
             {selected.efforts.map((value) => (
               <Form.Dropdown.Item key={value} value={value} title={value} />
             ))}
           </Form.Dropdown>
         ) : (
           <Form.Description
-            title={t("Effort Level")}
-            text={t("This model does not expose an adjustable effort level.")}
+            title="Effort Level"
+            text="This model does not expose an adjustable effort level."
           />
         ))}
-      <Form.Description
-        text={t(
-          "Changing the interface language does not translate your saved chats or force the language of model replies.",
-        )}
-      />
     </Form>
   );
 }

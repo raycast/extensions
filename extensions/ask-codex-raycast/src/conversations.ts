@@ -1,4 +1,3 @@
-import { t } from "./i18n";
 export type ChatMessage = {
   id: string;
   role: "user" | "assistant";
@@ -124,7 +123,7 @@ export function parseLibrary(
     const data = asRecord(JSON.parse(value));
     if (data.version !== 2 || !Array.isArray(data.sessions))
       throw new Error(
-        t("会话记录格式无法识别，原记录已保留，请勿清除扩展数据。"),
+        "Unrecognized conversation format. Original records have been preserved; please do not clear extension data.",
       );
     return {
       version: 2,
@@ -171,7 +170,7 @@ export function conversationTitle(session: StoredConversation): string {
       .find((item) => item.role === "user")
       ?.content.replace(/\s+/g, " ")
       .slice(0, 70) ||
-    t("新对话")
+    "New Chat"
   );
 }
 
@@ -218,7 +217,7 @@ export function messagesFromThread(thread: unknown): ChatMessage[] {
                 const input = asRecord(raw);
                 if (input.type === "text") return asString(input.text);
                 if (input.type === "image" || input.type === "localImage")
-                  return t("[图片]");
+                  return "[Image]";
                 return "";
               })
               .filter(Boolean)
@@ -248,15 +247,15 @@ export function messagesFromThread(thread: unknown): ChatMessage[] {
 
 export function transcript(messages: ChatMessage[]): string {
   if (!messages.length)
-    return t("# 新对话\n\n按 Enter 打开输入浮层，输入后按 Enter 发送。");
+    return "# New Chat\n\nPress Enter to open the message composer, enter your message, and press Enter to send.";
   return messages
     .map((message) => {
       const heading =
         message.role === "assistant"
           ? "Codex"
           : message.kind === "steer"
-            ? t("补充要求")
-            : t("你");
+            ? "Add Instructions"
+            : "You";
       const body =
         message.role === "user"
           ? message.content
@@ -265,8 +264,8 @@ export function transcript(messages: ChatMessage[]): string {
               .join("\n")
           : message.content ||
             (message.status === "streaming"
-              ? t("_正在思考…_")
-              : t("_本轮没有文字回答。_"));
+              ? "_Thinking…_"
+              : "_No text response in this turn._");
       return `### ${heading}\n\n${body}`;
     })
     .join("\n\n---\n\n");

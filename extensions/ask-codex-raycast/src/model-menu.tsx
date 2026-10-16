@@ -1,4 +1,3 @@
-import { t } from "./i18n";
 import { Action, ActionPanel, Icon } from "@raycast/api";
 import type { CodexModel, ModelSelection } from "./codex";
 
@@ -21,10 +20,10 @@ function RefreshModels(props: ModelMenuProps) {
     <Action
       title={
         props.error
-          ? t("模型列表加载失败，重新加载")
+          ? "Reload Model List"
           : props.ready
-            ? t("刷新模型列表")
-            : t("等待连接后加载模型")
+            ? "Refresh Model List"
+            : "Waiting for Connection"
       }
       icon={Icon.ArrowClockwise}
       onAction={props.onRefresh}
@@ -40,7 +39,7 @@ export function ModelMenu(props: ModelMenuProps) {
   const selected = props.selection || props.current;
   return (
     <ActionPanel.Submenu
-      title={t("模型：{v0}", { v0: selected.model || t("自动") })}
+      title={`Model: ${selected.model || "Auto"}`}
       icon={Icon.ComputerChip}
       shortcut={
         props.shortcuts === false
@@ -54,11 +53,11 @@ export function ModelMenu(props: ModelMenuProps) {
       onOpen={() => loadOnOpen(props)}
     >
       <Action
-        title={t("沿用当前会话模型")}
+        title="Use Current Conversation Model"
         icon={!props.selection ? Icon.Checkmark : Icon.Circle}
         onAction={() => props.onSelect(null)}
       />
-      <ActionPanel.Section title={t("Model")}>
+      <ActionPanel.Section title="Model">
         {props.models.map((model) => (
           <Action
             key={model.model}
@@ -96,14 +95,6 @@ const effortOrder = [
   "max",
   "ultra",
 ];
-const progressIcons = [
-  Icon.Circle,
-  Icon.CircleProgress25,
-  Icon.CircleProgress50,
-  Icon.CircleProgress75,
-  Icon.CircleProgress100,
-];
-
 export function EffortMenu(props: ModelMenuProps) {
   const selected = props.selection || props.current;
   const model = props.models.find((entry) => entry.model === selected.model);
@@ -118,41 +109,26 @@ export function EffortMenu(props: ModelMenuProps) {
   });
   return (
     <ActionPanel.Submenu
-      title={`${t("Effort Level")}: ${selected.effort || t("自动")}`}
+      title={`Effort Level: ${selected.effort || "Auto"}`}
       icon={Icon.Gauge}
       isLoading={props.loading}
       onOpen={() => loadOnOpen(props)}
     >
       {model && efforts.length > 0 && (
         <ActionPanel.Section title={model.model}>
-          {efforts.map((effort, index) => {
-            // A discrete scale, not a draggable control: native ActionPanel
-            // supports actions/submenus only. Preserve the CLI's exact labels.
-            const scale = efforts
-              .map((_, position) => (position === index ? "●" : "─"))
-              .join("");
-            const icon =
-              progressIcons[
-                Math.round(
-                  (index * (progressIcons.length - 1)) /
-                    Math.max(1, efforts.length - 1),
-                )
-              ];
-            return (
-              <Action
-                key={effort}
-                title={`${effort}  ${scale}`}
-                icon={selected.effort === effort ? Icon.Checkmark : icon}
-                onAction={() => props.onSelect({ model: model.model, effort })}
-              />
-            );
-          })}
+          {efforts.map((effort) => (
+            <Action
+              key={effort}
+              title={effort}
+              icon={selected.effort === effort ? Icon.Checkmark : Icon.Circle}
+              autoFocus={selected.effort === effort}
+              onAction={() => props.onSelect({ model: model.model, effort })}
+            />
+          ))}
         </ActionPanel.Section>
       )}
       {model && !efforts.length && (
-        <ActionPanel.Section
-          title={t("This model does not expose an adjustable effort level.")}
-        >
+        <ActionPanel.Section title="This model does not expose an adjustable effort level.">
           <RefreshModels {...props} />
         </ActionPanel.Section>
       )}

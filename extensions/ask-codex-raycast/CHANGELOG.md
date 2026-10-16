@@ -2,10 +2,12 @@
 
 ## [Initial Release] - {PR_MERGE_DATE}
 
-- Put separate model/effort pickers and New Chat directly below message entry and inside the composer; show supported effort levels on a discrete scale.
-- Add ten bundled interface languages with Gemini-assisted translations.
-- Require first-run language selection, local CLI connection/auth-state check, and an explicit default model/effort choice before opening chat.
+- Put separate model/effort pickers and New Chat directly below message entry and inside the composer; open the supported effort list with Enter and focus the current level.
+- Require first-run local CLI connection/auth-state checks and an explicit default model/effort choice before opening chat.
+- Use an English interface following repository guidelines; preserve earlier completed setup and conversation records.
 - Allow setup to be reopened from Actions; recheck after connection preference changes without deleting history.
+- Preserve newer composer input when an earlier send acknowledgement completes.
+- Show active search/tool/command and stopped/failed states while keeping healthy idle chat uncluttered.
 - Name the extension Codex in Raycast and focus on resident CLI chat using native Raycast controls.
 - Stream Markdown and LaTeX with speaker avatars and newest-first replies.
 - Use a full-width native reader and floating message composer, removing the chat sidebar and placeholder row entirely.
