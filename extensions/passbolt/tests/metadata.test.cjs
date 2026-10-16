@@ -169,6 +169,119 @@ test("nullable v5 fields and absent legacy names do not break search", async () 
   assert.equal(filterResources(results, "absent").length, 0);
 });
 
+test("a rejected user-key load can recover on the same decryptor", async () => {
+  let userLoads = 0;
+  const decoder = decryptor(undefined, async () => {
+    if (++userLoads === 1) throw new Error("Temporary key failure");
+    return userKey;
+  });
+  const entries = [resource({ metadata_key_type: "user_key", metadata: personalMetadata })];
+  assert.ok((await decoder.decryptResources(entries))[0].metadata_error);
+  const [result] = await decoder.decryptResources(entries);
+  assert.equal(result.name, "Personal Login");
+  assert.equal(result.metadata_error, undefined);
+  assert.equal(userLoads, 2);
+});
+
+test("rejected shared-key list and decrypted-key promises can recover without restarting", async () => {
+  let keyLoads = 0;
+  const decoder = decryptor(async () => {
+    if (++keyLoads === 1) throw new Error("Temporary network failure");
+    return sharedKeyResponse();
+  });
+  const entries = [resource(), resource({ id: "resource-2" })];
+  assert.ok((await decoder.decryptResources(entries)).every((entry) => entry.metadata_error));
+  const results = await decoder.decryptResources(entries);
+  assert.ok(results.every((entry) => entry.name === "Example Login" && !entry.metadata_error));
+  assert.equal(keyLoads, 2, "concurrent resources share each key-list request");
+});
+
+test("a failed shared-key unwrap is retried without refetching a successful key list", async () => {
+  const response = await sharedKeyResponse();
+  const envelope = response.keys[0].metadata_private_keys.find((key) => key.user_id === userId);
+  const validData = envelope.data;
+  envelope.data = "temporarily unreadable key envelope";
+  let keyLoads = 0;
+  const decoder = decryptor(async () => {
+    keyLoads++;
+    return response;
+  });
+  assert.ok((await decoder.decryptResources([resource()]))[0].metadata_error);
+  envelope.data = validData;
+  const [result] = await decoder.decryptResources([resource()]);
+  assert.equal(result.name, "Example Login");
+  assert.equal(result.metadata_error, undefined);
+  assert.equal(keyLoads, 1);
+});
+
+test("an older failed load cannot evict shared keys loaded by a refresh", async () => {
+  let rejectFirst, notifyStarted;
+  const started = new Promise((resolve) => {
+    notifyStarted = resolve;
+  });
+  const firstResponse = new Promise((_, reject) => {
+    rejectFirst = reject;
+  });
+  let keyLoads = 0;
+  const decoder = decryptor(() => {
+    if (++keyLoads === 1) {
+      notifyStarted();
+      return firstResponse;
+    }
+    return sharedKeyResponse();
+  });
+  const initial = decoder.decryptResources([resource()]);
+  await started;
+  decoder.clearSharedKeys();
+  assert.equal((await decoder.decryptResources([resource()]))[0].name, "Example Login");
+  rejectFirst(new Error("Older request failed after refresh"));
+  assert.ok((await initial)[0].metadata_error);
+  assert.equal((await decoder.decryptResources([resource()]))[0].name, "Example Login");
+  assert.equal(keyLoads, 2, "the refreshed key list remains cached");
+});
+
+test("refreshing TOTP accounts reloads failed, missing, and previously decrypted shared keys", async () => {
+  const { PassboltClient } = loadTypeScript("src/lib/passbolt.ts", {
+    "@raycast/api": {
+      getPreferenceValues: () => ({ passboltUrl: baseUrl, privateKey: "/unused", passphrase: "unused" }),
+    },
+  });
+  const client = new PassboltClient();
+  client.authenticate = async () => {};
+  let userLoads = 0;
+  client.readPrivateKey = async () => {
+    userLoads++;
+    return userKey;
+  };
+  client.decryptSecretData = async () =>
+    JSON.stringify({ totp: { secret_key: "JBSWY3DPEHPK3PXP", digits: 6, period: 30, algorithm: "SHA1" } });
+  const response = await sharedKeyResponse();
+  let keyLoads = 0;
+  client.request = async (url) => {
+    let body;
+    if (url.startsWith("/resources.json")) body = [resource({ secrets: [{ data: "included-secret" }] })];
+    else if (url === "/resource-types.json") body = [{ id: typeId, slug: "totp" }];
+    else if (url === "/users/me.json") body = { id: userId };
+    else if (url.startsWith("/metadata/keys.json")) {
+      keyLoads++;
+      if (keyLoads === 1) throw new Error("Temporary network failure");
+      body = keyLoads === 3 ? response.keys : [];
+    } else throw new Error(`Unexpected request: ${url}`);
+    return { ok: true, status: 200, json: async () => ({ header: { status: "success" }, body }) };
+  };
+
+  const load = async () => (await client.getTotpResources()).items[0];
+  assert.ok((await load()).metadata_error, "failed request remains visible");
+  assert.match((await load()).metadata_error, /not been shared/, "refresh retries the failed request");
+  const recovered = await load();
+  assert.equal(recovered.name, "Example Login");
+  assert.equal(recovered.metadata_error, undefined, "refresh discovers a newly shared key");
+  assert.ok(recovered.totp);
+  assert.match((await load()).metadata_error, /not been shared/, "refresh discards previously decrypted shared keys");
+  assert.equal(keyLoads, 4);
+  assert.equal(userLoads, 1, "successful user-key loads remain cached across refreshes");
+});
+
 test("an unreadable entry is reported without preventing readable entries from loading", async () => {
   const results = await decryptor().decryptResources([
     resource({ metadata: "not an OpenPGP message" }),

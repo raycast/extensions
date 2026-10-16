@@ -33,7 +33,7 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
   const [revision, setRevision] = useState(0);
   const [client] = useState(() => new PassboltClient());
   const [currentTime, setCurrentTime] = useState(Date.now());
-  const { matchCurrentWebsite = true } = getPreferenceValues<{ matchCurrentWebsite?: boolean }>();
+  const { matchCurrentWebsite = true } = getPreferenceValues<Preferences.Authenticator>();
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(Date.now()), 1000);

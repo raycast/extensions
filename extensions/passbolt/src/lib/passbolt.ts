@@ -417,6 +417,8 @@ export class PassboltClient {
     options: { signal?: AbortSignal; onProgress?: (progress: TotpLoadProgress) => void } = {},
   ): Promise<TotpLoadProgress> {
     const { signal, onProgress } = options;
+    // Refresh Accounts reuses this client: reload current shares along with the resources.
+    this.metadataDecryptor.clearSharedKeys();
     const response = await this.fetchResources(signal);
     const types = await this.getResourceTypes(signal);
     const supportsTotp = new Map(types.map((type) => [type.id, resourceTypeSupportsTotp(type)]));

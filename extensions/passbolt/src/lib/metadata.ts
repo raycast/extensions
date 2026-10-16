@@ -51,6 +51,46 @@ export class MetadataDecryptor {
     private loadSharedKeys: () => Promise<SharedMetadataKeys>,
   ) {}
 
+  public clearSharedKeys(): void {
+    this.sharedKeys = undefined;
+    this.decryptedKeys.clear();
+  }
+
+  private getUserKey(): Promise<openpgp.PrivateKey> {
+    if (!this.userKey) {
+      const pending = this.loadUserKey().catch((error) => {
+        if (this.userKey === pending) this.userKey = undefined;
+        throw error;
+      });
+      this.userKey = pending;
+    }
+    return this.userKey;
+  }
+
+  private getSharedKeys(): Promise<SharedMetadataKeys> {
+    if (!this.sharedKeys) {
+      const pending = this.loadSharedKeys().catch((error) => {
+        // A refresh may already have started a newer request.
+        if (this.sharedKeys === pending) this.sharedKeys = undefined;
+        throw error;
+      });
+      this.sharedKeys = pending;
+    }
+    return this.sharedKeys;
+  }
+
+  private getDecryptedSharedKey(id: string): Promise<openpgp.PrivateKey> {
+    let pending = this.decryptedKeys.get(id);
+    if (!pending) {
+      pending = this.decryptSharedKey(id).catch((error) => {
+        if (this.decryptedKeys.get(id) === pending) this.decryptedKeys.delete(id);
+        throw error;
+      });
+      this.decryptedKeys.set(id, pending);
+    }
+    return pending;
+  }
+
   public async decryptResources(resources: ApiResource[]): Promise<Resource[]> {
     const result: Resource[] = [];
     // Bound concurrent crypto work for large vaults; cache keys only in this client's memory.
@@ -80,11 +120,9 @@ export class MetadataDecryptor {
 
       let key: openpgp.PrivateKey;
       if (resource.metadata_key_type === "user_key") {
-        key = await (this.userKey ??= this.loadUserKey());
+        key = await this.getUserKey();
       } else if (resource.metadata_key_type === "shared_key" && resource.metadata_key_id) {
-        const id = resource.metadata_key_id;
-        if (!this.decryptedKeys.has(id)) this.decryptedKeys.set(id, this.decryptSharedKey(id));
-        key = await this.decryptedKeys.get(id)!;
+        key = await this.getDecryptedSharedKey(resource.metadata_key_id);
       } else {
         throw new MetadataError("Metadata key type or identifier is missing or unsupported");
       }
@@ -129,8 +167,8 @@ export class MetadataDecryptor {
   }
 
   private async decryptSharedKey(id: string): Promise<openpgp.PrivateKey> {
-    const userKey = await (this.userKey ??= this.loadUserKey());
-    const { userId, keys } = await (this.sharedKeys ??= this.loadSharedKeys());
+    const userKey = await this.getUserKey();
+    const { userId, keys } = await this.getSharedKeys();
     const sharedKey = keys.find((key) => key.id === id);
     const envelope = sharedKey?.metadata_private_keys?.find(
       (key) => key.user_id === userId && (!key.metadata_key_id || key.metadata_key_id === id),
