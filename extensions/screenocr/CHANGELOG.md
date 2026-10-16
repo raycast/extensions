@@ -6,7 +6,7 @@
 - Added an **After Recognition (macOS)** option for that command: copy the text (replaces the clipboard image) or paste it into the active app and restore the original clipboard contents.
 - Fixed macOS failures being copied as recognized text with a success toast. Errors now show a failure toast and nothing is copied.
 - Fixed cancelling a region selection: it is now silent and leaves the clipboard unchanged, including with **Keep image in clipboard** enabled, where a stale clipboard image could previously be recognized.
-- Added a "Recognizing…" progress notification for clipboard recognition and a 5-second limit, so a slow first run reports a clear failure instead of appearing to do nothing.
+- Added a "Recognizing…" progress notification while clipboard recognition runs.
 - Clarified that **Keep image in clipboard** and **Play sounds** apply to screen-capture commands only.
 
 ## [Windows Support] - 2026-09-20
