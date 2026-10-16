@@ -7,6 +7,12 @@ A powerful [Raycast](https://raycast.com) extension for managing your [Passbolt]
 ### 🔍 Search Passwords
 Quickly search and access your Passbolt vault directly from Raycast. View password details, copy credentials, and access TOTP codes with keyboard shortcuts.
 
+Search supports legacy resources and [Passbolt v5 encrypted metadata](https://www.passbolt.com/docs/development/resources/v5-encrypted-metadata/).
+Names, usernames, notes, and all URLs are decrypted locally before searching. Personal metadata uses your private key;
+shared metadata uses the metadata key encrypted for your account. Shared key envelopes must be signed by your account,
+match the configured Passbolt instance, and have matching fingerprints. Keys are cached only in memory for the command's lifetime.
+Entries that cannot be decrypted remain visible with an error indicator, and a toast reports the failure.
+
 ### ➕ Create Password
 Create new password entries in your Passbolt vault with an intuitive form interface. Supports:
 - Name, username, and URI fields
@@ -151,6 +157,9 @@ npm run build
 
 # Lint code
 npm run lint
+
+# Run metadata decryption and search regression tests with synthetic OpenPGP keys
+npm test
 
 # Fix linting issues
 npm run fix-lint

@@ -4,10 +4,12 @@
 
 export interface Resource {
   id: string;
-  name: string;
+  name?: string | null;
   username: string;
   uri: string;
+  uris?: string[];
   description: string;
+  metadata_error?: string;
   modified: string;
   created: string;
   deleted: boolean;
@@ -17,6 +19,16 @@ export interface Resource {
   resource_type_id?: string;
   tags?: Tag[];
   permission?: Permission;
+}
+
+// v5 responses omit the descriptive fields until their metadata has been decrypted.
+export interface ApiResource extends Omit<Resource, "username" | "uri" | "description"> {
+  username?: string | null;
+  uri?: string | null;
+  description?: string | null;
+  metadata?: string | null;
+  metadata_key_type?: "user_key" | "shared_key";
+  metadata_key_id?: string | null;
 }
 
 export interface Tag {

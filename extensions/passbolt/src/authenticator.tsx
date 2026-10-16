@@ -146,7 +146,7 @@ export default function Authenticator() {
         return (
           <List.Item
             key={item.id}
-            title={item.name}
+            title={item.name || "Unnamed resource"}
             subtitle={item.username}
             accessories={[
               {

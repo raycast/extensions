@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import { PassboltClient } from "./lib/passbolt";
 import ResourceDetail from "./details";
 import { Resource } from "./types";
+import { filterResources } from "./utils/resources";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -19,8 +20,15 @@ export default function Command() {
         const response = await client.searchResources("");
         if (response.body && Array.isArray(response.body)) {
           setAllItems(response.body);
+          const failures = response.body.filter((resource) => resource.metadata_error);
+          if (failures.length) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: `Could not decrypt metadata for ${failures.length} resources`,
+              message: failures[0].metadata_error,
+            });
+          }
         } else {
-          console.log("Response body is not an array:", response);
           setAllItems([]);
         }
       } catch (error) {
@@ -38,18 +46,7 @@ export default function Command() {
   }, [client]);
 
   // Filter items client-side for instant feedback
-  const filteredItems = useMemo(() => {
-    if (!searchText) return allItems;
-
-    const lowerSearch = searchText.toLowerCase();
-    return allItems.filter(
-      (item) =>
-        item.name.toLowerCase().includes(lowerSearch) ||
-        (item.username && item.username.toLowerCase().includes(lowerSearch)) ||
-        (item.uri && item.uri.toLowerCase().includes(lowerSearch)) ||
-        (item.description && item.description.toLowerCase().includes(lowerSearch)),
-    );
-  }, [searchText, allItems]);
+  const filteredItems = useMemo(() => filterResources(allItems, searchText), [searchText, allItems]);
 
   // Separate favorites from other items
   const { favoriteItems, otherItems } = useMemo(() => {
@@ -146,6 +143,10 @@ interface ResourceListItemProps {
 function ResourceListItem({ item, client, onCopyPassword }: ResourceListItemProps) {
   const accessories: List.Item.Accessory[] = [];
 
+  if (item.metadata_error) {
+    accessories.push({ icon: Icon.ExclamationMark, tooltip: item.metadata_error });
+  }
+
   // Add URI as text accessory
   if (item.uri) {
     accessories.push({ text: item.uri });
@@ -165,7 +166,7 @@ function ResourceListItem({ item, client, onCopyPassword }: ResourceListItemProp
 
   return (
     <List.Item
-      title={item.name}
+      title={item.name || "Unnamed resource"}
       subtitle={item.username}
       icon={item.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : Icon.Key}
       accessories={accessories}

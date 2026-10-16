@@ -2,6 +2,9 @@ import { getPreferenceValues } from "@raycast/api";
 import * as openpgp from "openpgp";
 import * as fs from "fs/promises";
 import { TOTP } from "otpauth";
+import { MetadataDecryptor, SharedMetadataKey } from "./metadata";
+import { ApiResource } from "../types";
+import { filterResources } from "../utils/resources";
 
 interface PassboltResponse<T = unknown> {
   header: {
@@ -45,6 +48,7 @@ export class PassboltClient {
   private sessionCookie: string | null = null;
   private csrfToken: string | null = null;
   private isAuthenticated: boolean = false;
+  private metadataDecryptor: MetadataDecryptor;
 
   constructor() {
     const prefs = getPreferenceValues<Preferences>();
@@ -52,6 +56,23 @@ export class PassboltClient {
     this.privateKeyPath = prefs.privateKey;
     this.passphrase = prefs.passphrase;
     this.totpSecret = prefs.totpSecret;
+    this.metadataDecryptor = new MetadataDecryptor(
+      this.baseUrl,
+      () => this.getPrivateKey(),
+      async () => {
+        const [userResponse, keysResponse] = await Promise.all([
+          this.request("/users/me.json"),
+          this.request("/metadata/keys.json?contain[metadata_private_keys]=1"),
+        ]);
+        if (!userResponse.ok || !keysResponse.ok) throw new Error("Unable to load shared metadata keys");
+        const user = (await userResponse.json()) as PassboltResponse<{ id: string }>;
+        const keys = (await keysResponse.json()) as PassboltResponse<SharedMetadataKey[]>;
+        if (typeof user.body?.id !== "string" || !Array.isArray(keys.body)) {
+          throw new Error("Invalid shared metadata key response");
+        }
+        return { userId: user.body.id, keys: keys.body };
+      },
+    );
   }
 
   private async getPrivateKey(): Promise<openpgp.PrivateKey> {
@@ -328,9 +349,9 @@ export class PassboltClient {
   public async searchResources(query: string) {
     await this.authenticate();
 
-    let res = await this.request(
-      `/resources.json?filter[keywords]=${encodeURIComponent(query)}&contain[secret]=1&contain[tags]=1`,
-    );
+    // v5 names are encrypted, so keyword filtering must happen locally after decryption.
+    const resourcesPath = "/resources.json?contain[secret]=1&contain[tags]=1";
+    let res = await this.request(resourcesPath);
 
     // Check if MFA is required (403 response)
     if (res.status === 403) {
@@ -369,13 +390,15 @@ export class PassboltClient {
         console.log("MFA verification successful! Retrying resource request...");
 
         // Retry the request after MFA verification
-        res = await this.request(
-          `/resources.json?filter[keywords]=${encodeURIComponent(query)}&contain[secret]=1&contain[tags]=1`,
-        );
+        res = await this.request(resourcesPath);
       }
     }
 
-    return res.json() as Promise<PassboltResponse>;
+    if (!res.ok) throw new Error(`Unable to fetch resources (HTTP ${res.status})`);
+    const json = (await res.json()) as PassboltResponse<ApiResource[]>;
+    if (!Array.isArray(json.body)) throw new Error("Invalid resource response from Passbolt");
+    const resources = await this.metadataDecryptor.decryptResources(json.body);
+    return { ...json, body: filterResources(resources, query) };
   }
 
   public async getSecret(resourceId: string) {

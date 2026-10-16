@@ -1,5 +1,11 @@
 # Passbolt Changelog
 
+## [Fix Search for Encrypted Metadata] - {PR_MERGE_DATE}
+
+- Decrypt Passbolt v5 metadata with personal and shared metadata keys before searching.
+- Search all resource URLs and preserve support for legacy resources with missing fields.
+- Show metadata decryption failures without preventing readable entries from loading.
+
 ## [1.0.0] - 2025-12-01
 
 ### Features
