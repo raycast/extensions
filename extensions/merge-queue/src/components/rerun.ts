@@ -1,4 +1,5 @@
 import { Alert, confirmAlert, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { requestRerunFailed, requestRerunJob } from "../data";
 import { describeError } from "../lib/errors";
 import { Check, failingRunIds, QueueEntry } from "../lib/queue";
@@ -11,9 +12,8 @@ async function runWithToast(title: string, work: () => Promise<void>, onDone?: (
     toast.title = "Rerun requested";
     onDone?.();
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Couldn't rerun";
-    toast.message = describeError(error).description;
+    await toast.hide();
+    await showFailureToast(error, { title: "Couldn't rerun", message: describeError(error).description });
   }
 }
 

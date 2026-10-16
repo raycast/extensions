@@ -15,6 +15,7 @@ import {
 } from "./lib/jobs";
 import { LogSummary, logFingerprints, StepRef, summarizeLog } from "./lib/logs";
 import { fetchQueue, fetchRequiredChecks, parseQueue, QueueSnapshot } from "./lib/queue";
+import { JobLog } from "./lib/report";
 import { fetchRepoChoices, rememberRecent, RepoChoice, RepoSelection, RepoSort, searchRepoChoices } from "./lib/repos";
 
 export type MergeQueueLaunchContext = {
@@ -209,7 +210,11 @@ function downloadLog(config: RepoConfig, jobId: number): Promise<string> {
   return download;
 }
 
-export async function loadLogSummary(job: LogJob, step: StepRef | undefined, compare: boolean): Promise<LogSummary> {
+export async function loadJobLog(job: LogJob, step: StepRef | undefined, compare: boolean): Promise<JobLog> {
+  return { jobId: job.id, summary: await loadLogSummary(job, step, compare) };
+}
+
+async function loadLogSummary(job: LogJob, step: StepRef | undefined, compare: boolean): Promise<LogSummary> {
   if (demo) {
     return summarizeLog(demoLog(job.id), { step });
   }

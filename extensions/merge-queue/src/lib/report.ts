@@ -10,6 +10,23 @@ export type LogState =
   | { status: "loaded"; summary: LogSummary }
   | { status: "error"; message: string };
 
+export type JobLog = { jobId: number; summary: LogSummary };
+
+type LogResult = { data?: JobLog; error?: Error };
+
+export function currentJobLog(
+  jobId: number,
+  quick: LogResult,
+  compared: LogResult,
+): { summary?: LogSummary; error?: Error } {
+  const summaryOf = (result: LogResult) => (result.data?.jobId === jobId ? result.data.summary : undefined);
+  const comparedSummary = summaryOf(compared);
+  if (comparedSummary) {
+    return { summary: comparedSummary };
+  }
+  return { summary: summaryOf(quick), error: quick.error };
+}
+
 export type JobReportInput = {
   check: Check;
   pr?: { number: number; title: string; url: string };

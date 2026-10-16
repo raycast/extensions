@@ -427,12 +427,19 @@ export async function fetchQueue(
 }
 
 export function checkIds(checks: Check[]): string[] {
-  const seen = new Map<string, number>();
+  const identity = (check: Check) => JSON.stringify([check.workflow ?? "", check.name]);
+  const groups = new Map<string, Check[]>();
+  for (const check of checks) {
+    groups.set(identity(check), [...(groups.get(identity(check)) ?? []), check]);
+  }
+  const byJob = (a: Check, b: Check) => (a.jobId ?? Infinity) - (b.jobId ?? Infinity);
   return checks.map((check) => {
-    const id = `${check.workflow ?? ""}/${check.name}`;
-    const count = (seen.get(id) ?? 0) + 1;
-    seen.set(id, count);
-    return count === 1 ? id : `${id} #${count}`;
+    const group = groups.get(identity(check)) ?? [];
+    if (group.length === 1) {
+      return identity(check);
+    }
+    const sameRun = group.filter((other) => other.runId === check.runId).sort(byJob);
+    return JSON.stringify([check.workflow ?? "", check.name, check.runId ?? null, sameRun.indexOf(check)]);
   });
 }
 

@@ -60,13 +60,3 @@ The extension reads through `gh`, so it sees exactly what your `gh` account can 
 | `⌘L`  | Load the log of a job that didn't fail                              |
 | `⌘R`  | Refresh                                                             |
 | `⇧⌘P` | Switch repository                                                   |
-
-## Development
-
-```bash
-npm install
-npm run dev    # loads it into Raycast
-npm test
-```
-
-Screenshots use made-up data: `raycast://extensions/dholliday/merge-queue/merge-queue?launchContext=%7B%22demo%22%3Atrue%7D`

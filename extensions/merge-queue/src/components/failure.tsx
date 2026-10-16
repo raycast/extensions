@@ -1,12 +1,20 @@
 import { Color, Detail, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useRef } from "react";
-import { loadJob, loadLogSummary, LogJob } from "../data";
+import { loadJob, loadJobLog, LogJob } from "../data";
 import { jobErrorMessage, logErrorMessage } from "../lib/errors";
 import { formatSeconds, secondsBetween } from "../lib/format";
 import { isBehindQueue, jobState } from "../lib/jobs";
 import { Check, PullRequestSummary } from "../lib/queue";
-import { currentStep, failedStep, failingStepName, failureUrl, JobReportInput, LogState } from "../lib/report";
+import {
+  currentJobLog,
+  currentStep,
+  failedStep,
+  failingStepName,
+  failureUrl,
+  JobReportInput,
+  LogState,
+} from "../lib/report";
 import { checkLabel } from "./presentation";
 
 export type MetadataRow =
@@ -72,16 +80,16 @@ export function useJobReport(props: {
     headSha: job?.headSha,
   };
   const logOptions = { execute: props.enabled && props.wantLog && finished, keepPreviousData: true };
-  const quickLog = useCachedPromise(loadLogSummary, [logJob, stepRef, false], logOptions);
-  const comparedLog = useCachedPromise(loadLogSummary, [logJob, stepRef, true], logOptions);
-  const log = { data: comparedLog.data ?? quickLog.data, error: comparedLog.data ? undefined : quickLog.error };
+  const quickLog = useCachedPromise(loadJobLog, [logJob, stepRef, false], logOptions);
+  const comparedLog = useCachedPromise(loadJobLog, [logJob, stepRef, true], logOptions);
+  const log = currentJobLog(jobId, quickLog, comparedLog);
 
   let logState: LogState;
   const logEnabled = props.enabled && props.wantLog;
   if (logEnabled && log.error) {
     logState = { status: "error", message: logErrorMessage(log.error) };
-  } else if (logEnabled && log.data) {
-    logState = { status: "loaded", summary: log.data };
+  } else if (logEnabled && log.summary) {
+    logState = { status: "loaded", summary: log.summary };
   } else if (job && !finished) {
     logState = { status: "unavailable", reason: "Still running. The log is available once the job finishes." };
   } else if (props.wantLog) {
