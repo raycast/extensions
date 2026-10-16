@@ -19,6 +19,7 @@ Microsoft Teams Keys is not made by or affiliated with Microsoft.
 | **Leave Teams Call** | Hang up |
 | **Share Screen in Teams** | Opens *Share content* (`⌘⇧E`); you pick the screen or window, Teams stays in front |
 | **Admit from Teams Lobby** | Lets in the people waiting in the lobby |
+| **Bring Current Teams Call to Front** | Brings the window of the running call or meeting to the front, also when it is minimised |
 | **Set Teams Status** | Available, Busy, Do Not Disturb, Be Right Back, Away or Offline |
 | **Set Teams Status to …** | One command per status, so each can have its own hotkey |
 | **Start Teams Call** | Audio or video call; Teams asks once more before it dials |

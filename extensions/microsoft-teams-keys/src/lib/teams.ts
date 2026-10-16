@@ -182,11 +182,16 @@ end tell`,
 export async function typeText(text: string): Promise<void> {
   const previous = await Clipboard.read().catch(() => undefined);
   await Clipboard.copy(text, { concealed: true });
-  await press({ char: "v" }, ["command"]);
-  await pause(250);
-  if (previous?.file) await Clipboard.copy({ file: previous.file }, { concealed: true });
-  else if (previous?.html) await Clipboard.copy({ html: previous.html, text: previous.text }, { concealed: true });
-  else if (previous?.text) await Clipboard.copy(previous.text, { concealed: true });
+  try {
+    await press({ char: "v" }, ["command"]);
+    await pause(250);
+  } finally {
+    // Also when the paste failed, so the temporary text never stays behind.
+    if (previous?.file) await Clipboard.copy({ file: previous.file }, { concealed: true });
+    else if (previous?.html) await Clipboard.copy({ html: previous.html, text: previous.text }, { concealed: true });
+    else if (previous?.text) await Clipboard.copy(previous.text, { concealed: true });
+    else await Clipboard.clear();
+  }
 }
 
 /** Remembers the app in front, so it can come back after a quick trip to Teams. */
@@ -202,6 +207,107 @@ export async function returnTo(bundleId: string | undefined): Promise<void> {
 }
 
 /**
+ * The views of the Teams main window, in English and German. The main window
+ * is titled after the view that is open ("Chat | … | Microsoft Teams"); any
+ * other large Teams window is a meeting or call.
+ */
+const MAIN_VIEWS = new Set(
+  [
+    "activity",
+    "chat",
+    "teams",
+    "calendar",
+    "calls",
+    "files",
+    "onedrive",
+    "apps",
+    "communities",
+    "copilot",
+    "assignments",
+    "people",
+    "aktivität",
+    "kalender",
+    "anrufe",
+    "dateien",
+    "communitys",
+    "personen",
+    "aufgaben",
+  ].map((v) => v.normalize("NFC")),
+);
+
+/**
+ * Brings the window of the running call or meeting to the front, also when it
+ * is minimised or behind other windows. Returns its title.
+ */
+export async function bringCallToFront(): Promise<string> {
+  if (!(await isTeamsRunning())) throw new TeamsError("Teams is not running, so there is no call.");
+  const raw = await runAppleScript(
+    `set rs to (ASCII character 30)
+set us to (ASCII character 31)
+set out to ""
+tell application "System Events"
+  tell (first application process whose bundle identifier is ${quote(TEAMS_BUNDLE_ID)})
+    repeat with i from 1 to (count of windows)
+      set w to window i
+      set t to ""
+      try
+        set t to name of w
+      end try
+      set out to out & i & us & t & rs
+    end repeat
+  end tell
+end tell
+return out`,
+  );
+  const windows = raw
+    .split("\u001E")
+    .map((line) => line.replace(/^[\r\n]+/, "").split("\u001F"))
+    .filter((fields) => fields.length >= 2)
+    .map(([index, title]) => ({ index: Number(index), title }));
+  // Titles look like "Chat | Notes | Microsoft Teams" (main window, view first),
+  // "Notes | Microsoft Teams" (the meeting) and "Kompakte Besprechungsansicht |
+  // Notes | Microsoft Teams" (the floating mini window, which names the meeting).
+  const parts = (title: string) =>
+    title
+      .split("|")
+      .map((p) => p.trim())
+      .filter((p) => p && p !== "Microsoft Teams");
+  const isMain = (title: string) => MAIN_VIEWS.has((parts(title)[0] ?? "").toLowerCase().normalize("NFC"));
+  const isCompact = (title: string) => /compact|kompakt/i.test(parts(title)[0] ?? "");
+  const others = windows.filter((w) => w.title && !isMain(w.title) && !isCompact(w.title));
+  // The mini window names the running meeting: pick the window with that name.
+  const compact = windows.find((w) => isCompact(w.title));
+  const meetingName = compact ? parts(compact.title)[1] : undefined;
+  // Without a mini window the meeting window is usually the one on top already.
+  const call =
+    (meetingName ? others.find((w) => parts(w.title)[0] === meetingName) : undefined) ??
+    (others.length === 1 ? others[0] : undefined) ??
+    (!compact && others[0] === windows[0] ? others[0] : undefined);
+  if (!call) {
+    // Lists what Teams reports, so a window naming we do not know yet can be added.
+    const seen = windows.map((w) => `${w.index}: "${w.title}"`).join("; ");
+    throw new TeamsError(
+      others.length > 1
+        ? `Several Teams windows could be the call, so none was picked. Teams windows: ${seen}`
+        : `No Teams call or meeting window is open. Teams windows: ${seen || "none"}`,
+    );
+  }
+  await runAppleScript(
+    `tell application "System Events"
+  tell (first application process whose bundle identifier is ${quote(TEAMS_BUNDLE_ID)})
+    set w to window ${call.index}
+    try
+      set value of attribute "AXMinimized" of w to false
+    end try
+    set frontmost to true
+    perform action "AXRaise" of w
+  end tell
+end tell`,
+  );
+  return parts(call.title)[0] ?? "";
+}
+
+/**
  * Opens a teams.microsoft.com link in the desktop app instead of the browser.
  * The msteams: scheme is what the "Open in app" button on the web page uses.
  */
@@ -211,5 +317,5 @@ export async function openInTeams(httpsUrl: string): Promise<void> {
       "Microsoft Teams is not installed. Microsoft Teams Keys works with the new Teams desktop app.",
     );
   }
-  await open(httpsUrl.replace(/^https:/, "msteams:"));
+  await open(httpsUrl.replace(/^https?:/i, "msteams:"));
 }
