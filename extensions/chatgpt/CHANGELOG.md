@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fix Crash on Launch] - {PR_MERGE_DATE}
+
+- Fix every command failing with `Package subpath './_shims/auto/runtime' is not defined by "exports"` by upgrading the OpenAI SDK from v4 to v5, which no longer self-references `_shims`.
+
 ## [Fix] - 2026-10-14
 
 - Fix: `Fix Spelling and Grammar` and `Improve Writing` shipped with a `temperature` of `0.7` on `gpt-5-nano`, a reasoning model that only supports the default temperature, causing every run to fail with a 400 error. Default temperature for these commands is now `1`.
