@@ -206,6 +206,12 @@
       "disabledByDefault": true
     },
     {
+      "name": "create-release",
+      "title": "Create Release",
+      "description": "Create a release in one of your GitHub repositories.",
+      "mode": "view"
+    },
+    {
       "name": "search-repositories",
       "title": "Search Repositories",
       "description": "Search in your public or private repositories by name.",
@@ -286,6 +292,12 @@
       "name": "workflow-runs",
       "title": "Workflow Runs",
       "description": "Manage workflow runs for a selected GitHub repository.",
+      "mode": "view"
+    },
+    {
+      "name": "dispatch-workflow",
+      "title": "Dispatch Workflow",
+      "description": "Trigger a workflow_dispatch workflow in one of your GitHub repositories.",
       "mode": "view"
     },
     {
@@ -1224,6 +1236,7 @@
     "graphql-request": "^6.1.0",
     "lodash": "^4.17.23",
     "node-fetch": "^3.3.2",
+    "yaml": "^2.8.1",
     "yauzl": "^3.2.0"
   },
   "devDependencies": {
@@ -1253,7 +1266,7 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "generate": "graphql-codegen --config codegen.ts",
-    "test": "node --no-warnings --test --experimental-strip-types src/helpers/pull-request-checks.test.ts src/helpers/repository-filter.test.ts src/api/viewerStats.test.ts",
+    "test": "node --no-warnings --test --experimental-strip-types src/helpers/pull-request-checks.test.ts src/helpers/repository-filter.test.ts src/api/viewerStats.test.ts src/helpers/workflow-dispatch.test.ts",
     "update-schema": "node scripts/update-graphql-schema.mjs"
   },
   "platforms": [
