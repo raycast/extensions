@@ -16,37 +16,49 @@
     {
       "name": "fan-status",
       "title": "Fan Status",
+      "subtitle": "Mac Fan Control",
       "description": "Show live fan speed, control mode and CPU/GPU temperature.",
       "mode": "view"
     },
     {
       "name": "set-fan-speed",
       "title": "Set Fan Speed",
+      "subtitle": "Mac Fan Control",
       "description": "Force every fan to a percentage of its hardware range.",
+      "mode": "view"
+    },
+    {
+      "name": "cool-until",
+      "title": "Cool Until Below",
+      "subtitle": "Mac Fan Control",
+      "description": "Hold a speed until the hottest sensor drops below a temperature, then release.",
       "mode": "view"
     },
     {
       "name": "maximum",
       "title": "Set Fans to Maximum",
+      "subtitle": "Mac Fan Control",
       "description": "Force every fan to its hardware maximum.",
       "mode": "no-view"
     },
     {
       "name": "automatic",
       "title": "Set Fans to Automatic",
+      "subtitle": "Mac Fan Control",
       "description": "Hand every fan back to SMC firmware control.",
       "mode": "no-view"
     },
     {
       "name": "fan-menu-bar",
       "title": "Fan Menu Bar",
+      "subtitle": "Mac Fan Control",
       "description": "Show current fan speed in the menu bar.",
       "mode": "menu-bar",
       "interval": "1m"
     }
   ],
   "dependencies": {
-    "macos-fan-control-client": "^1.0.0",
+    "macos-fan-control-client": "^1.1.0",
     "@raycast/api": "^2.6.3",
     "@raycast/utils": "^2.3.2"
   },

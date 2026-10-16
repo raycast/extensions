@@ -9,7 +9,7 @@ import {
   confirmAlert,
   showToast,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import {
   average,
   estimate,
@@ -40,9 +40,8 @@ export default function Command() {
       toast.title = title;
       revalidate();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed";
-      toast.message = (error as Error).message;
+      await toast.hide();
+      showFailureToast(error, { title: "Failed" });
     }
   }
 
@@ -63,64 +62,71 @@ export default function Command() {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle={
-        fans.length ? `${current} · ${currentPercent}%` : "Fan Control"
-      }
-    >
-      <List.Item
-        icon={{ source: Icon.Repeat, tintColor: Color.Green }}
-        title="Automatic"
-        subtitle="Firmware decides"
-        accessories={
-          current === "Auto"
-            ? [{ tag: { value: "Active", color: Color.Green } }]
-            : []
+    <List isLoading={isLoading}>
+      {/* Set Fan Speed is a root command, so the bottom bar shows its own title;
+          the current mode and speed live here instead. */}
+      <List.Section
+        title={
+          fans.length
+            ? `Current: ${current} · ${currentPercent}%`
+            : "Fan Control"
         }
-        actions={
-          <ActionPanel>
-            <Action
-              title="Restore Automatic"
-              icon={Icon.Repeat}
-              onAction={() => apply(setAutomatic, "Fans on automatic")}
-            />
-          </ActionPanel>
-        }
-      />
-      {PRESETS.map((percent) => (
+      >
         <List.Item
-          key={percent}
-          icon={{
-            source: percent === 100 ? Icon.Bolt : Icon.Gauge,
-            tintColor: percent < CONFIRM_BELOW ? Color.Orange : Color.Blue,
-          }}
-          title={label(percent)}
-          subtitle={fans
-            .map((fan) => rpm(estimate(fan, percent)))
-            .join("  ·  ")}
+          icon={{ source: Icon.Repeat, tintColor: Color.Green }}
+          title="Automatic"
+          subtitle="Firmware decides"
           accessories={
-            current === "Forced" && currentPercent === percent
-              ? [{ tag: { value: "Active", color: Color.Blue } }]
+            current === "Auto"
+              ? [{ tag: { value: "Active", color: Color.Green } }]
               : []
           }
           actions={
             <ActionPanel>
               <Action
-                title={`Force ${label(percent)}`}
-                icon={Icon.Bolt}
-                onAction={() => force(percent)}
-              />
-              <Action
                 title="Restore Automatic"
                 icon={Icon.Repeat}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                 onAction={() => apply(setAutomatic, "Fans on automatic")}
               />
             </ActionPanel>
           }
         />
-      ))}
+      </List.Section>
+      <List.Section title="Force speed">
+        {PRESETS.map((percent) => (
+          <List.Item
+            key={percent}
+            icon={{
+              source: percent === 100 ? Icon.Bolt : Icon.Gauge,
+              tintColor: percent < CONFIRM_BELOW ? Color.Orange : Color.Blue,
+            }}
+            title={label(percent)}
+            subtitle={fans
+              .map((fan) => rpm(estimate(fan, percent)))
+              .join("  ·  ")}
+            accessories={
+              current === "Forced" && currentPercent === percent
+                ? [{ tag: { value: "Active", color: Color.Blue } }]
+                : []
+            }
+            actions={
+              <ActionPanel>
+                <Action
+                  title={`Force ${label(percent)}`}
+                  icon={Icon.Bolt}
+                  onAction={() => force(percent)}
+                />
+                <Action
+                  title="Restore Automatic"
+                  icon={Icon.Repeat}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                  onAction={() => apply(setAutomatic, "Fans on automatic")}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }

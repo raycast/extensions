@@ -1,4 +1,5 @@
-import { showHUD, showToast, Toast } from "@raycast/api";
+import { showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { setMaximum } from "macos-fan-control-client";
 
 export default async function Command() {
@@ -6,10 +7,6 @@ export default async function Command() {
     await setMaximum();
     await showHUD("Fans at maximum");
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed",
-      message: (error as Error).message,
-    });
+    showFailureToast(error, { title: "Failed" });
   }
 }

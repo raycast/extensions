@@ -4,12 +4,14 @@ import {
   Color,
   Detail,
   Icon,
+  LaunchType,
   Toast,
+  launchCommand,
   showToast,
   Keyboard,
 } from "@raycast/api";
 import { useEffect } from "react";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import {
   FanStatus,
   average,
@@ -40,7 +42,10 @@ function markdown(
   const temps = status.temperatures
     ? `\n## Temperature\n\n| Group | Average | Sensors |\n| --- | --- | --- |\n| CPU | ${status.temperatures.cpu.toFixed(1)} °C | ${status.temperatures.cpuSensors} |\n| GPU | ${status.temperatures.gpu.toFixed(1)} °C | ${status.temperatures.gpuSensors} |\n`
     : "";
-  return `# Fan Status\n\n| Fan | Actual | Load | Target | Range | Mode |\n| --- | --- | --- | --- | --- | --- |\n${rows}\n${temps}`;
+  const cooling = status.cooling
+    ? `\n## Cooldown\n\nHolding **${Math.round(status.cooling.percent)}%** until the hottest sensor is below **${Math.round(status.cooling.below)} °C**.\n`
+    : "";
+  return `# Fan Status\n\n| Fan | Actual | Load | Target | Range | Mode |\n| --- | --- | --- | --- | --- | --- |\n${rows}\n${temps}${cooling}`;
 }
 
 export default function Command() {
@@ -70,9 +75,8 @@ export default function Command() {
       toast.title = title;
       revalidate();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed";
-      toast.message = (error as Error).message;
+      await toast.hide();
+      showFailureToast(error, { title: "Failed" });
     }
   }
 
@@ -100,6 +104,14 @@ export default function Command() {
                 text={`${data.temperatures.cpu.toFixed(1)} / ${data.temperatures.gpu.toFixed(1)} °C`}
               />
             ) : null}
+            {data.cooling ? (
+              <Detail.Metadata.TagList title="Cooldown">
+                <Detail.Metadata.TagList.Item
+                  text={`until below ${Math.round(data.cooling.below)} °C`}
+                  color={Color.Blue}
+                />
+              </Detail.Metadata.TagList>
+            ) : null}
           </Detail.Metadata>
         ) : null
       }
@@ -111,6 +123,25 @@ export default function Command() {
             shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={revalidate}
           />
+          <Action
+            title="Cool Until Below…"
+            icon={Icon.Snowflake}
+            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            onAction={() =>
+              launchCommand({
+                name: "cool-until",
+                type: LaunchType.UserInitiated,
+              })
+            }
+          />
+          {data?.cooling ? (
+            <Action
+              title="Cancel Cooldown"
+              icon={Icon.XMarkCircle}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+              onAction={() => apply(setAutomatic, "Fans on automatic")}
+            />
+          ) : null}
           <Action
             title="Force Maximum"
             icon={Icon.Bolt}
