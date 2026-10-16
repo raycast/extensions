@@ -9,6 +9,9 @@
     "Fun"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "play_en-US",
