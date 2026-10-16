@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add TopxAI Models MCP Server] - {PR_MERGE_DATE}
+## [Add TopxAI Models MCP Server] - 2026-10-16
 
 - Add TopxAI Models to the official registry: list the TopxAI catalogue's text models with their prices, ask Claude, GPT, Grok, GLM, Kimi or DeepSeek from inside another model's conversation, and ask TypeSafe's Jev typed questions about a piece of text. Hosted Streamable HTTP server at https://ai.topxea.com/mcp/models, connected through `mcp-remote` with a TopxAI API key as a bearer header.
 
