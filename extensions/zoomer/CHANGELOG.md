@@ -1,6 +1,6 @@
 # Zoomer Changelog
 
-## [Keep Zoomer in the Background] - {PR_MERGE_DATE}
+## [Keep Zoomer in the Background] - 2026-10-16
 
 - Commands no longer bring the Zoomer main window to the front; Zoomer shows a window only when the command needs one
 
