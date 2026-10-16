@@ -48,7 +48,8 @@ Dedicated view for managing Time-based One-Time Passwords (TOTP):
 Website matching is optional in the Authenticator command's preferences. It uses an unambiguous active tab from the
 [Raycast Browser Extension](https://www.raycast.com/browser-extension), or a URL supplied in command launch context.
 Without browser access, all accounts remain searchable. Matching uses saved URL hostnames and the Public Suffix List,
-including private suffixes, rather than substring matching. Use **Refresh Accounts** (`⌘R`) to reload vault changes.
+including private suffixes, rather than substring matching. Use **Refresh Accounts** (`⌘R` on macOS, `Ctrl+R` on Windows)
+to reload vault changes. Copy TOTP codes with `⌘⇧C` / `Ctrl+Shift+C`, or paste them with `⌘⇧V` / `Ctrl+Shift+V`.
 
 ## Installation
 

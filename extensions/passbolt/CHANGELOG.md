@@ -8,6 +8,7 @@
 - Search account names, usernames, all URLs, tags, notes, and Oracle's OCI alias.
 - Prioritize saved URLs matching the current website when browser context is available.
 - Honor each account's algorithm, digits, and period, and generate a fresh code when copying or pasting.
+- Support Authenticator refresh, copy, and paste shortcuts on both macOS and Windows.
 
 ## [Fix Search for Encrypted Metadata] - {PR_MERGE_DATE}
 

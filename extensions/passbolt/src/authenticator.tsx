@@ -9,6 +9,7 @@ import {
   Clipboard,
   getPreferenceValues,
   LaunchProps,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import { PassboltClient } from "./lib/passbolt";
@@ -114,7 +115,7 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
       title="Refresh Accounts"
       onAction={refresh}
       icon={Icon.ArrowClockwise}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
     />
   );
   const renderItem = (item: TotpResource) => (
@@ -233,13 +234,16 @@ function TotpListItem({
                 title="Copy TOTP Code"
                 icon={Icon.Key}
                 onAction={() => copyCode(false)}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
               <Action
                 title="Paste TOTP Code"
                 icon={Icon.Key}
                 onAction={() => copyCode(true)}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "v" },
+                  windows: { modifiers: ["ctrl", "shift"], key: "v" },
+                }}
               />
             </>
           )}
@@ -249,7 +253,7 @@ function TotpListItem({
             title="Refresh Accounts"
             onAction={onRefresh}
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
           />
         </ActionPanel>
       }
