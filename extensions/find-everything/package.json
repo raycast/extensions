@@ -59,7 +59,7 @@
           "title": "Index Max Age (min)",
           "type": "textfield",
           "description": "Index older than this is rebuilt in the background on open.",
-          "default": "15",
+          "default": "60",
           "required": false
         },
         {

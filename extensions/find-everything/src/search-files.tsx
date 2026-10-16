@@ -117,8 +117,52 @@ function scopePaths(scope: Scope, prefs: Prefs): string[] {
 
 const indexPathFor = (scope: Scope) =>
   path.join(INDEX_DIR, `index-${scope}.txt`);
+const shardDirFor = (scope: Scope) =>
+  path.join(INDEX_DIR, `index-${scope}.d`);
+const SPLIT = ["/usr/bin/split", "/usr/sbin/split"].find((p) =>
+  fs.existsSync(p),
+);
+const SHARD_COUNT = 8;
+// Per-shard match cap -> at most SHARD_COUNT*cap candidates reach fzf,
+// which bounds the worst-case query (e.g. "e") at ~30ms instead of seconds.
+const SHARD_CAP = 4000;
+const FILE_CAP = 32000;
 
 const inFlight = new Map<string, Promise<void>>();
+
+// The flat index stays canonical; shards are a derived cache that lets
+// rg scan all 8 in parallel (~4x) and gives -m a spread across the tree.
+async function shardIndex(file: string, dir: string): Promise<void> {
+  if (!SPLIT || !fs.existsSync(file) || fs.statSync(file).size === 0)
+    return;
+  const tmpDir = `${dir}.tmp`;
+  fs.rmSync(tmpDir, { recursive: true, force: true });
+  fs.mkdirSync(tmpDir, { recursive: true });
+  await new Promise<void>((resolve, reject) => {
+    const c = spawn(SPLIT!, [
+      "-n",
+      String(SHARD_COUNT),
+      file,
+      path.join(tmpDir, "s-"),
+    ]);
+    c.on("error", reject);
+    c.on("close", (code) =>
+      code === 0 ? resolve() : reject(new Error(`split exited ${code}`)),
+    );
+  });
+  fs.rmSync(dir, { recursive: true, force: true });
+  fs.renameSync(tmpDir, dir);
+}
+
+// Search target: shard dir when available (parallel scan), flat file else.
+function searchTarget(
+  scope: Scope,
+): { target: string; isDir: boolean } {
+  const dir = shardDirFor(scope);
+  if (fs.existsSync(dir) && fs.readdirSync(dir).length > 0)
+    return { target: dir, isDir: true };
+  return { target: indexPathFor(scope), isDir: false };
+}
 
 function rebuildIndex(scope: Scope, prefs: Prefs): Promise<void> {
   const file = indexPathFor(scope);
@@ -157,7 +201,9 @@ function rebuildIndex(scope: Scope, prefs: Prefs): Promise<void> {
       out.close(() => {
         if (code === 0) {
           fs.renameSync(tmp, file);
-          resolve();
+          shardIndex(file, shardDirFor(scope))
+            .catch(() => {})
+            .then(resolve);
         } else {
           fs.rmSync(tmp, { force: true });
           reject(new Error(`fd exited with code ${code}`));
@@ -182,20 +228,43 @@ async function ensureIndex(
   const exists = fs.existsSync(file);
   const stale =
     exists && Date.now() - fs.statSync(file).mtimeMs > maxAgeMs;
-  if (exists && !stale && !force) return file;
+  if (exists && !stale && !force) {
+    await ensureShards(scope);
+    return file;
+  }
   if (exists && stale && !force) {
     rebuildIndex(scope, prefs).catch(() => {});
+    await ensureShards(scope);
     return file; // stale-while-revalidate
   }
   await rebuildIndex(scope, prefs);
   return file;
 }
 
-// Pipeline: index -> rg(term1) -> rg(term2) ... -> fzf --filter(query)
-// rg narrows a multi-GB index to ~2k candidates in ~120ms; fzf ranks them.
+// Shard dir may be missing on upgrade from a flat-index install; split it
+// on the fly (~150ms) instead of waiting for the next fd rebuild.
+async function ensureShards(scope: Scope): Promise<void> {
+  const file = indexPathFor(scope);
+  const dir = shardDirFor(scope);
+  if (!fs.existsSync(file)) return;
+  const dirFresh =
+    fs.existsSync(dir) &&
+    fs.statSync(dir).mtimeMs >= fs.statSync(file).mtimeMs;
+  if (!dirFresh) await shardIndex(file, dir).catch(() => {});
+  // Warm the OS page cache so the first keystroke never hits cold disk.
+  if (RG && fs.existsSync(dir))
+    spawn(RG, ["-c", "--no-ignore", ".", dir], {
+      stdio: "ignore",
+      detached: true,
+    }).unref();
+}
+
+// Pipeline: rg(term1, file/dir directly) -> rg(term2) ... -> fzf --filter
+// rg narrows the index to ~2k candidates in ~25ms (8 parallel shards);
+// fzf ranks them. Each shard is -m capped so worst-case queries stay ~30ms.
 function runSearch(
   query: string,
-  indexFile: string,
+  scope: Scope,
   limit: number,
   onSpawn: (c: ChildProcess[]) => void,
 ): Promise<string[]> {
@@ -204,19 +273,27 @@ function runSearch(
     const children: ChildProcess[] = [];
     onSpawn(children);
 
-    let stream: NodeJS.ReadableStream = fs.createReadStream(indexFile);
-    stream.on("error", () => {});
+    let stream: NodeJS.ReadableStream | undefined;
     if (RG) {
-      for (const term of terms) {
-        const p = spawn(RG, ["-S", "-F", "--no-line-number", "--", term], {
+      const { target, isDir } = searchTarget(scope);
+      for (const [i, term] of terms.entries()) {
+        const args = isDir
+          ? ["--no-ignore", "-S", "-F", "-m", String(SHARD_CAP), "--no-line-number", "--", term]
+          : ["-S", "-F", "-m", String(FILE_CAP), "--no-line-number", "--", term];
+        if (i === 0) args.push(target);
+        const p = spawn(RG, args, {
           stdio: ["pipe", "pipe", "ignore"],
         });
         children.push(p);
         p.stdin!.on("error", () => {}); // EPIPE on early kill
         p.stdout!.on("error", () => {});
-        stream.pipe(p.stdin!);
+        if (stream) stream.pipe(p.stdin!);
         stream = p.stdout!;
       }
+    }
+    if (!stream) {
+      stream = fs.createReadStream(indexPathFor(scope));
+      stream.on("error", () => {});
     }
     const fz = spawn(
       FZF,
@@ -358,12 +435,9 @@ export default function Command() {
       const mySeq = ++seq.current;
       setSearching(true);
       for (const p of procRef.current) p.kill("SIGKILL");
-      const out = await runSearch(
-        q,
-        indexPathFor(scope),
-        limit,
-        (c) => (procRef.current = c),
-      );
+      const out = await runSearch(q, scope, limit, (c) => {
+        procRef.current = c;
+      });
       if (mySeq !== seq.current) return;
       setResults(rerank(out, q));
       setSearching(false);
