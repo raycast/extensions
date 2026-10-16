@@ -355,7 +355,10 @@ test("clipboard command recognizes on macOS and copies by default", async () => 
 });
 
 test("clipboard command shows animated progress then the result toast", async () => {
-  const mac = createHost({ platform: "darwin", swiftResult: recognized("Clipboard text") });
+  const mac = createHost({
+    platform: "darwin",
+    swiftResult: recognized("Clipboard text"),
+  });
   await mac.load("src/recognize-clipboard.ts").default();
   const toasts = mac.calls
     .filter(([name]) => name === "toast")
@@ -386,13 +389,16 @@ test("clipboard progress toast is skipped when toasts are disabled", async () =>
   assert.deepEqual(outputs(mac), [["copy", "Clipboard text"]]);
 });
 
-test("clipboard recognition times out with an actionable error and no result", async () => {
-  const mac = createHost({ platform: "darwin", swiftHanging: true });
-  const { recognizeClipboard } = mac.load("src/ocr/macos.ts");
-  const outcome = await recognizeClipboard(20);
-  assert.equal(outcome.status, "error");
-  assert.match(outcome.message, /timed out/i);
-  assert.match(outcome.message, /try again/i);
+test("clipboard recognition waits for a slow helper instead of timing out", async () => {
+  const mac = createHost({
+    platform: "darwin",
+    swiftDelayMs: 50,
+    swiftResult: recognized("Slow text"),
+  });
+  const module = mac.load("src/ocr/macos.ts");
+
+  const outcome = await module.recognizeClipboard();
+  assert.deepEqual(outcome, { status: "recognized", text: "Slow text" });
 });
 
 test("clipboard paste-restore snapshots, pastes, then restores the clipboard", async () => {

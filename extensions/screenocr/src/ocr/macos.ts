@@ -20,36 +20,6 @@ const {
 
 const PASTE_SETTLE_MS = 400;
 
-// A cold first run loads the Vision model slowly, so fail fast instead of spinning.
-export const OCR_TIMEOUT_MS = 5000;
-
-class OcrTimeoutError extends Error {
-  constructor(timeoutMs: number) {
-    super(`Recognition timed out after ${Math.round(timeoutMs / 1000)}s`);
-    this.name = "OcrTimeoutError";
-  }
-}
-
-async function withOcrTimeout<T>(
-  operation: Promise<T>,
-  timeoutMs: number,
-): Promise<T> {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  try {
-    return await Promise.race([
-      operation,
-      new Promise<never>((_, reject) => {
-        timer = setTimeout(
-          () => reject(new OcrTimeoutError(timeoutMs)),
-          timeoutMs,
-        );
-      }),
-    ]);
-  } finally {
-    if (timer) clearTimeout(timer);
-  }
-}
-
 export const recognizeText = async (
   isFullScreen = false,
 ): Promise<RecognitionOutcome> => {
@@ -76,34 +46,23 @@ export const recognizeText = async (
   }
 };
 
-export const recognizeClipboard = async (
-  timeoutMs: number = OCR_TIMEOUT_MS,
-): Promise<RecognitionOutcome> => {
+export const recognizeClipboard = async (): Promise<RecognitionOutcome> => {
   const preference = getPreferenceValues<Preferences>();
 
   try {
     const languages = await getUserSelectedLanguages();
 
-    const recognizedText = await withOcrTimeout(
-      recognizeClipboardSwift(
-        preference.ocrMode === "fast",
-        preference.languageCorrection,
-        preference.ignoreLineBreaks,
-        preference.customWordsList ? preference.customWordsList.split(",") : [],
-        languages.map((lang) => lang.value),
-      ),
-      timeoutMs,
+    const recognizedText = await recognizeClipboardSwift(
+      preference.ocrMode === "fast",
+      preference.languageCorrection,
+      preference.ignoreLineBreaks,
+      preference.customWordsList ? preference.customWordsList.split(",") : [],
+      languages.map((lang) => lang.value),
     );
 
     return parseSwiftResult(recognizedText);
   } catch (error) {
     console.error(error);
-    if (error instanceof OcrTimeoutError) {
-      return {
-        status: "error",
-        message: `${error.message}. The first run can be slower while the OCR model loads — try again.`,
-      };
-    }
     return {
       status: "error",
       message: "Failed to recognize clipboard image",

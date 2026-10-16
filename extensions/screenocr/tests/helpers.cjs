@@ -84,11 +84,10 @@ function createHost(options = {}) {
         async (...args) => {
           calls.push(["swift", name, args]);
           if (options.swiftError) throw options.swiftError;
-          if (
-            options.swiftHanging === true ||
-            options.swiftHanging?.[name] === true
-          )
-            return new Promise(() => {});
+          if (options.swiftDelayMs)
+            await new Promise((resolve) =>
+              setTimeout(resolve, options.swiftDelayMs),
+            );
           if (options.swiftResults?.[name] !== undefined)
             return options.swiftResults[name];
           if (name === "snapshotClipboard")
