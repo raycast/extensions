@@ -128,5 +128,9 @@ describe("display helpers", () => {
     assert.match(slotMarkdown(undefined), /Empty/);
     assert.equal(slotMarkdown("hello"), "```\nhello\n```");
     assert.equal(slotMarkdown("has ``` inside"), "````\nhas ``` inside\n````");
+    assert.equal(slotMarkdown("a `b` c"), "```\na `b` c\n```");
+    const longRun = "`".repeat(5000);
+    const fence = "`".repeat(5001);
+    assert.equal(slotMarkdown(longRun), `${fence}\n${longRun}\n${fence}`);
   });
 });

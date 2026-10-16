@@ -102,10 +102,19 @@ export function slotMarkdown(text: string | undefined): string {
   if (!text) {
     return "Empty. Select text and run the copy command for this slot.";
   }
-  let fence = "```";
-  while (text.includes(fence)) {
-    fence += "`";
+  let longestRun = 0;
+  let currentRun = 0;
+  for (const char of text) {
+    if (char === "`") {
+      currentRun += 1;
+      if (currentRun > longestRun) {
+        longestRun = currentRun;
+      }
+    } else {
+      currentRun = 0;
+    }
   }
+  const fence = "`".repeat(Math.max(3, longestRun + 1));
   return `${fence}\n${text}\n${fence}`;
 }
 

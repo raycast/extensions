@@ -18,11 +18,6 @@ import {
   type Slot,
 } from "./slots";
 
-interface Preferences {
-  captureSource: string;
-  alsoCopyToClipboard: boolean;
-}
-
 async function readSelection(): Promise<
   { ok: true; text: string } | { ok: false; permissionDenied: boolean }
 > {
