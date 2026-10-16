@@ -19,6 +19,7 @@ function History({ entryId }: { entryId: number }) {
   if (error instanceof FplError && error.status === 404) return <EntryNotFound entryId={entryId} />;
 
   const gameweeks = [...(history?.current ?? [])].reverse();
+  const pastSeasons = [...(history?.past ?? [])].reverse();
   const chipsByEvent = new Map(history?.chips.map((c) => [c.event, c.name]) ?? []);
   const transfersByEvent = new Map<number, string[]>();
   if (index) {
@@ -86,7 +87,7 @@ function History({ entryId }: { entryId: number }) {
         ))}
       </List.Section>
       <List.Section title="Past seasons">
-        {history?.past.map((season) => (
+        {pastSeasons.map((season) => (
           <List.Item
             key={season.season_name}
             icon={Icon.Clock}
