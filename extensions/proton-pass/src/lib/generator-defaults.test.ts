@@ -12,6 +12,7 @@ test("starts with the usual defaults when nothing is set", () => {
     includeSymbols: true,
     separator: "hyphens",
     capitalize: true,
+    passphraseNumbers: true,
   });
 });
 
@@ -26,6 +27,7 @@ test("uses the preferences that are set", () => {
       includeSymbols: false,
       includeNumbers: false,
       capitalizeWords: false,
+      passphraseNumbers: false,
     }),
     {
       type: "passphrase",
@@ -36,8 +38,15 @@ test("uses the preferences that are set", () => {
       includeSymbols: false,
       separator: "spaces",
       capitalize: false,
+      passphraseNumbers: false,
     },
   );
+});
+
+test("random passwords and passphrases each have their own numbers setting", () => {
+  const settings = getInitialSettings({ includeNumbers: false, passphraseNumbers: true });
+  assert.equal(settings.includeNumbers, false);
+  assert.equal(settings.passphraseNumbers, true);
 });
 
 test("keeps lengths and word counts in range and ignores unknown values", () => {

@@ -65,17 +65,17 @@
         {
           "name": "defaultPasswordLength",
           "type": "textfield",
-          "title": "Password Length",
-          "description": "For random passwords, from 8 to 128.",
+          "title": "Random: Length",
+          "description": "Characters in random passwords, from 8 to 128.",
           "default": "20",
           "required": false
         },
         {
           "name": "includeUppercase",
           "type": "checkbox",
-          "title": "Characters",
+          "title": "Random: Characters",
           "label": "Uppercase letters",
-          "description": "In random passwords.",
+          "description": "Include uppercase letters in random passwords.",
           "default": true,
           "required": false
         },
@@ -84,7 +84,7 @@
           "type": "checkbox",
           "title": "",
           "label": "Symbols",
-          "description": "In random passwords.",
+          "description": "Include symbols in random passwords.",
           "default": true,
           "required": false
         },
@@ -93,14 +93,14 @@
           "type": "checkbox",
           "title": "",
           "label": "Numbers",
-          "description": "In random passwords and passphrases.",
+          "description": "Include numbers in random passwords.",
           "default": true,
           "required": false
         },
         {
           "name": "defaultPassphraseWords",
           "type": "dropdown",
-          "title": "Passphrase Words",
+          "title": "Passphrase: Words",
           "description": "Number of words in passphrases.",
           "default": "4",
           "required": false,
@@ -142,7 +142,7 @@
         {
           "name": "passphraseSeparator",
           "type": "dropdown",
-          "title": "Passphrase Separator",
+          "title": "Passphrase: Separator",
           "description": "Between the words of passphrases.",
           "default": "hyphens",
           "required": false,
@@ -180,9 +180,18 @@
         {
           "name": "capitalizeWords",
           "type": "checkbox",
-          "title": "Capitalization",
+          "title": "Passphrase: Options",
           "label": "Capitalize words",
-          "description": "In passphrases.",
+          "description": "Start each word of passphrases with a capital letter.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "passphraseNumbers",
+          "type": "checkbox",
+          "title": "",
+          "label": "Include numbers",
+          "description": "Include numbers in passphrases.",
           "default": true,
           "required": false
         }

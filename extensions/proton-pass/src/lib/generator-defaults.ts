@@ -28,6 +28,7 @@ export interface GeneratorSettings {
   includeSymbols: boolean;
   separator: PassphraseSeparator;
   capitalize: boolean;
+  passphraseNumbers: boolean;
 }
 
 /** The Generate Password command's preferences; every one is optional so older settings still load. */
@@ -40,6 +41,7 @@ export interface GeneratorPreferences {
   includeSymbols?: boolean;
   includeNumbers?: boolean;
   capitalizeWords?: boolean;
+  passphraseNumbers?: boolean;
 }
 
 export function clamp(value: number, min: number, max: number): number {
@@ -71,5 +73,6 @@ export function getInitialSettings(preferences: GeneratorPreferences): Generator
     includeSymbols: preferences.includeSymbols ?? true,
     separator: isPassphraseSeparator(preferences.passphraseSeparator) ? preferences.passphraseSeparator : "hyphens",
     capitalize: preferences.capitalizeWords ?? true,
+    passphraseNumbers: preferences.passphraseNumbers ?? true,
   };
 }

@@ -65,11 +65,11 @@ Browse Items opens on your items. Esc goes back to the vault list, where All Vau
 Generate Password has its own preferences for the settings it starts with. They can all still be changed while generating.
 
 - **Password Type**: Random password or passphrase (default: random)
-- **Password Length**: Characters in random passwords, from 8 to 128 (default: 20)
-- **Characters**: Uppercase letters, symbols and numbers, all on by default (numbers also apply to passphrases)
-- **Passphrase Words**: Number of words, from 3 to 10 (default: 4)
-- **Passphrase Separator**: Hyphens, spaces, periods, commas, underscores, numbers, or numbers and symbols (default: hyphens)
-- **Capitalization**: Capitalize passphrase words (on by default)
+- **Random: Length**: Characters in random passwords, from 8 to 128 (default: 20)
+- **Random: Characters**: Uppercase letters, symbols and numbers, all on by default
+- **Passphrase: Words**: Number of words, from 3 to 10 (default: 4)
+- **Passphrase: Separator**: Hyphens, spaces, periods, commas, underscores, numbers, or numbers and symbols (default: hyphens)
+- **Passphrase: Options**: Capitalize words and include numbers, both on by default
 
 ## Filling Logins (macOS)
 
