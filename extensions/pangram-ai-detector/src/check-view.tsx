@@ -47,7 +47,7 @@ export function CheckView({ readSource }: { readSource: () => Promise<string> })
   const [isSending, setIsSending] = useState(false);
   const refresh = () => setRefreshes((count) => count + 1);
 
-  const { data, error, isLoading } = usePromise(
+  const { data, error, isLoading, revalidate } = usePromise(
     async (refreshCount: number) => {
       setIsSending(false);
       text.current ??= await readSource();
@@ -86,7 +86,7 @@ export function CheckView({ readSource }: { readSource: () => Promise<string> })
       },
       onError: (error) => {
         if (error instanceof Cancelled) popToRoot();
-        else showCheckFailure(error, refresh);
+        else showCheckFailure(error, revalidate);
       },
     },
   );
@@ -94,12 +94,14 @@ export function CheckView({ readSource }: { readSource: () => Promise<string> })
   const actions = (
     <ActionPanel>
       {data && <Action.CopyToClipboard title="Copy Verdict Summary" content={verdictSummary(data.result)} />}
-      <Action
-        title="Refresh"
-        icon={Icon.ArrowClockwise}
-        shortcut={Keyboard.Shortcut.Common.Refresh}
-        onAction={refresh}
-      />
+      {!isLoading && (
+        <Action
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={refresh}
+        />
+      )}
       <Action.OpenInBrowser title="Open API Dashboard" url={API_DASHBOARD_URL} />
       <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
     </ActionPanel>
@@ -110,10 +112,11 @@ export function CheckView({ readSource }: { readSource: () => Promise<string> })
     return <Detail isLoading={isLoading} markdown={markdown} actions={actions} />;
   }
 
-  const words = countWords(text.current ?? "");
+  const words = data.result.segments.reduce((sum, segment) => sum + segment.wordCount, 0);
   return (
     <Detail
-      markdown={resultMarkdown(data.result)}
+      navigationTitle={data.result.headline}
+      markdown={resultMarkdown(data.result, preferences.literalSegmentText)}
       metadata={
         <ResultMetadata
           outcome={data}
@@ -153,7 +156,7 @@ function ResultMetadata({
       <Detail.Metadata.Label title="AI-Assisted" text={percent(result.breakdown.aiAssisted)} icon={dot(Color.Orange)} />
       <Detail.Metadata.Label title="Human Written" text={percent(result.breakdown.human)} icon={dot(Color.Green)} />
       <Detail.Metadata.Separator />
-      <Detail.Metadata.Label title="Words" text={words.toLocaleString()} />
+      <Detail.Metadata.Label title="Words (Pangram)" text={words.toLocaleString()} />
       <Detail.Metadata.Label title="Estimated Cost" text={formatCost(words)} />
       <Detail.Metadata.Label title="Model" text={`${model} · ${result.modelVersion}`} />
       <Detail.Metadata.Separator />
@@ -168,13 +171,24 @@ function ResultMetadata({
   );
 }
 
-/** Headline and summary, then each Segment's text under its label. */
-function resultMarkdown(result: CheckResult): string {
+/**
+ * Each Segment's text under its label; the headline is the navigation title.
+ * Multi-line Markdown (code fences, comments, math) can leak across Segments: https://github.com/mygirleatsmayo/pangram-raycast/issues/1
+ */
+function resultMarkdown(result: CheckResult, literalSegmentText: boolean): string {
   const segments = result.segments.map((segment) => {
     const tags = [`${segment.confidence} confidence`, ...(segment.isHumanized ? ["Humanized"] : [])];
-    return `${segmentDots[segment.label]} **${segment.label}** · ${tags.join(" · ")}\n\n${segment.text.trim()}`;
+    const text = segment.text.trim();
+    const body = literalSegmentText ? codeBlock(text) : text;
+    return `${segmentDots[segment.label]} **${segment.label}** · ${tags.join(" · ")}\n\n${body}`;
   });
-  return [`# ${result.headline}`, result.summary, "---", ...segments].join("\n\n");
+  return segments.join("\n\n");
+}
+
+/** Fences text in a code block longer than any backtick run inside it, so it shows as written. */
+function codeBlock(text: string): string {
+  const fence = "`".repeat(Math.max(3, ...(text.match(/`+/g) ?? []).map((run) => run.length + 1)));
+  return `${fence}\n${text}\n${fence}`;
 }
 
 function verdictSummary({ verdict, breakdown, modelVersion }: CheckResult): string {
@@ -200,8 +214,11 @@ function showCheckFailure(error: Error, retry: () => void) {
   return showFailureToast(error, { title: "Check failed", primaryAction: { title: "Try Again", onAction: retry } });
 }
 
+const wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
+
+/** Word estimate before sending; segments by locale rules, so text without spaces (e.g. Chinese) counts too. */
 function countWords(text: string): number {
-  return text.split(/\s+/).filter(Boolean).length;
+  return [...wordSegmenter.segment(text)].filter((segment) => segment.isWordLike).length;
 }
 
 /** Estimate assuming Pangram bills per started 100 words. */

@@ -17,7 +17,6 @@ export interface Segment {
 export interface CheckResult {
   verdict: Verdict;
   headline: string;
-  summary: string;
   breakdown: { ai: number; aiAssisted: number; human: number };
   modelVersion: string;
   segments: Segment[];
@@ -45,7 +44,6 @@ interface Task {
   stage: string;
   version: string;
   headline: string;
-  prediction: string;
   prediction_short: Verdict;
   fraction_ai: number;
   fraction_ai_assisted: number;
@@ -83,9 +81,12 @@ export async function checkText(text: string, { apiKey, model, timeoutMs }: Chec
       body: JSON.stringify({ text, model }),
     });
     for (;;) {
-      const task = await request<Task>(`/task/${task_id}`);
-      if (task.stage === "STAGE_SUCCESS") return toCheckResult(task);
-      if (task.stage === "STAGE_FAILED") throw new PangramError(task.headline);
+      // The Check is already paid for: ride out temporary poll failures until the timeout.
+      const task = await request<Task>(`/task/${task_id}`).catch((error: unknown) => {
+        if (signal.aborted || !isTemporary(error)) throw error;
+      });
+      if (task?.stage === "STAGE_SUCCESS") return toCheckResult(task);
+      if (task?.stage === "STAGE_FAILED") throw new PangramError(task.headline);
       await sleep(POLL_INTERVAL_MS, undefined, { signal });
     }
   } catch (error) {
@@ -94,11 +95,17 @@ export async function checkText(text: string, { apiKey, model, timeoutMs }: Chec
   }
 }
 
+/** Whether a failed request may succeed if repeated: a network error, rate limit, or server error. */
+function isTemporary(error: unknown): boolean {
+  if (error instanceof TypeError) return true; // fetch rejects with TypeError on network failure
+  const status = error instanceof PangramError ? error.status : undefined;
+  return status !== undefined && (status === 429 || status >= 500);
+}
+
 function toCheckResult(task: Task): CheckResult {
   return {
     verdict: task.prediction_short,
     headline: task.headline,
-    summary: task.prediction,
     breakdown: { ai: task.fraction_ai, aiAssisted: task.fraction_ai_assisted, human: task.fraction_human },
     modelVersion: task.version,
     segments: task.windows.map((window) => ({

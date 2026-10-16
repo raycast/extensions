@@ -63,6 +63,15 @@
       "default": true
     },
     {
+      "name": "literalSegmentText",
+      "title": "Segments",
+      "label": "Show Segment text literally",
+      "description": "Show Segment text exactly as written, in a code block. Turn off to render Segment text as Markdown.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
       "name": "confirmAboveWords",
       "title": "Confirm Above (Words)",
       "description": "Ask before checking texts longer than this. Checks cost about $0.05 per 100 words. Default: 2000.",

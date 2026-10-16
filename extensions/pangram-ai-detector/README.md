@@ -28,4 +28,5 @@ Results include a Verdict, the AI-Generated, AI-Assisted, and Human Written Brea
 - **Short text**: results below 200 words show Limited Confidence by default. This is the extension's warning, separate from Pangram's Segment confidence. The cutoff is configurable; Pangram does not publish its website's exact cutoff.
 - **Confirmations**: before sending text under 50 words or over 2,000 words, the extension asks for confirmation and shows an estimated cost. You can continue with either length. The upper limit is configurable.
 - **Cache**: new Model Versions invalidate older Cached Results by default. You can turn this off in Extension Preferences. Refreshing sends a new Check and spends credits.
+- **Segments**: Segment text renders as Markdown by default. Turn on "Show Segment text literally" in Extension Preferences to show it exactly as written, in a code block.
 - **Timeout**: Checks wait up to 300 seconds by default. You can change this in Extension Preferences.

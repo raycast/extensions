@@ -25,10 +25,12 @@ const success = {
   ],
 };
 
-/** Stubs fetch with queued JSON responses and records each request. */
-function stubFetch(...responses: { status?: number; body: unknown }[]) {
-  const fetch = vi.fn(async () => {
-    const { status = 200, body } = responses.shift()!;
+/** Stubs fetch with queued JSON responses (or network errors) and records each request. */
+function stubFetch(...responses: ({ status?: number; body: unknown } | Error)[]) {
+  const fetch = vi.fn<typeof globalThis.fetch>(async () => {
+    const response = responses.shift()!;
+    if (response instanceof Error) throw response;
+    const { status = 200, body } = response;
     return new Response(JSON.stringify(body), { status });
   });
   vi.stubGlobal("fetch", fetch);
@@ -50,7 +52,6 @@ describe("checkText", () => {
     expect(result).toEqual({
       verdict: "Mixed",
       headline: "AI Assisted",
-      summary: "We believe that this text is a mix of AI-assisted and human-written content.",
       breakdown: { ai: 0, aiAssisted: 0.6, human: 0.4 },
       modelVersion: "4.0",
       segments: [
@@ -67,6 +68,22 @@ describe("checkText", () => {
       }),
     );
     expect(fetch).toHaveBeenLastCalledWith("https://text.external-api.pangram.com/task/t1", expect.anything());
+  });
+
+  it.each([
+    ["a 503", { status: 503, body: { detail: "Unavailable" } }],
+    ["a network error", new TypeError("fetch failed")],
+  ])("keeps polling the same task after %s", async (_, failure) => {
+    const fetch = stubFetch({ body: { task_id: "t1" } }, failure, { body: success });
+
+    await expect(checkText("Some text", options)).resolves.toMatchObject({ verdict: "Mixed" });
+    expect(fetch.mock.calls.filter(([, init]) => init?.method === "POST")).toHaveLength(1);
+  });
+
+  it("fails without retrying when a poll is rejected", async () => {
+    stubFetch({ body: { task_id: "t1" } }, { status: 401, body: { detail: "Invalid API key" } });
+
+    await expect(checkText("Some text", options)).rejects.toMatchObject({ name: "PangramError", status: 401 });
   });
 
   it("fails with Pangram's headline when the task fails", async () => {
