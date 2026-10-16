@@ -21,6 +21,7 @@ Use **Actions → Language and Default Model** to reopen setup, and **Actions �
 - Press **Enter** to open the native floating message composer. Type in its input field and press **Enter** to send; there is no Command+Enter requirement. While an answer is running, the same composer sends steering instructions to that turn.
 - Raycast closes the action popover after sending. The conversation stays on the same full-width page and streams immediately; press Enter to compose the next message without choosing a conversation or opening another page.
 - Markdown, code, tables, LaTeX and speaker avatars are retained, with the newest messages first. Typing into the composer does not re-render the entire transcript.
+- Model, effort level, and New Chat are directly below the message action, also inside the floating composer. Model and effort have separate native pickers; the effort picker displays clickable discrete ticks for the selected model, not a draggable slider. Switching model preserves the effort when supported, otherwise uses that model's supported default.
 - Choose an actual CLI model/effort combination from **Actions → Model** or **Cmd/Ctrl+M**. Choices are remembered and apply to the next response; steering retains the current turn's model.
 - **Cmd/Ctrl+N** creates a conversation; **Cmd/Ctrl+.** stops a reply; **Cmd/Ctrl+C** copies the latest answer; **Cmd/Ctrl+Shift+C** copies the conversation.
 - **Recent Chats** opens an explicit short switcher for up to 12 chats stored by this extension. Conversation input does not search history.

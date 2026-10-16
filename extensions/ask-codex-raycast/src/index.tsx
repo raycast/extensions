@@ -30,7 +30,7 @@ import {
 } from "./codex";
 import { useSessionHistory, type Page } from "./history";
 import { conversationMarkdown } from "./chat-text";
-import { ModelMenu, MODEL_SELECTION_KEY } from "./model-menu";
+import { ModelMenu, EffortMenu, MODEL_SELECTION_KEY } from "./model-menu";
 import { MessageComposer } from "./message-composer";
 import {
   asRecord,
@@ -857,12 +857,6 @@ function NativeChat(
         }}
       />
       <Action
-        title={t("新建对话")}
-        icon={Icon.Plus}
-        shortcut={Keyboard.Shortcut.Common.New}
-        onAction={newChat}
-      />
-      <Action
         title={t("Language and Default Model")}
         icon={Icon.Globe}
         onAction={() => {
@@ -908,6 +902,28 @@ function NativeChat(
     onBack: () => changePage("chat"),
     onNew: newChat,
   });
+  const modelMenuProps = {
+    models,
+    selection: modelSelection,
+    current: currentModel,
+    loading: modelsLoading,
+    error: modelsError,
+    ready,
+    onRefresh: () => void refreshModels().catch(() => undefined),
+    onSelect: selectModel,
+  };
+  const conversationControls = (shortcuts = true) => (
+    <ActionPanel.Section>
+      <ModelMenu {...modelMenuProps} shortcuts={shortcuts} />
+      <EffortMenu {...modelMenuProps} />
+      <Action
+        title={t("新建对话")}
+        icon={Icon.Plus}
+        shortcut={shortcuts ? Keyboard.Shortcut.Common.New : undefined}
+        onAction={newChat}
+      />
+    </ActionPanel.Section>
+  );
   const chatActions = () => (
     <ActionPanel
       title={[
@@ -930,19 +946,11 @@ function NativeChat(
           ready={ready}
           onChange={setDraft}
           onSend={sendPrompt}
+          controls={conversationControls(false)}
         />
       )}
-      {secondaryActions}
-      <ModelMenu
-        models={models}
-        selection={modelSelection}
-        current={currentModel}
-        loading={modelsLoading}
-        error={modelsError}
-        ready={ready}
-        onRefresh={() => void refreshModels().catch(() => undefined)}
-        onSelect={selectModel}
-      />
+      {conversationControls()}
+      <ActionPanel.Section>{secondaryActions}</ActionPanel.Section>
     </ActionPanel>
   );
   if (page === "chat") {

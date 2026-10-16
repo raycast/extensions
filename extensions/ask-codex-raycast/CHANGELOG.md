@@ -2,6 +2,7 @@
 
 ## [Initial Release] - {PR_MERGE_DATE}
 
+- Put separate model/effort pickers and New Chat directly below message entry and inside the composer; show supported effort levels on a discrete scale.
 - Add ten bundled interface languages with Gemini-assisted translations.
 - Require first-run language selection, local CLI connection/auth-state check, and an explicit default model/effort choice before opening chat.
 - Allow setup to be reopened from Actions; recheck after connection preference changes without deleting history.

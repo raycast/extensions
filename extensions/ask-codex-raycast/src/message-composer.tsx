@@ -6,6 +6,7 @@ export function MessageComposer(props: {
   draft: string;
   busy: boolean;
   ready: boolean;
+  controls?: ActionPanel.Submenu.Props["children"];
   onChange: (text: string) => void;
   onSend: (text: string) => Promise<boolean>;
 }) {
@@ -72,6 +73,9 @@ export function MessageComposer(props: {
             }
           }}
         />
+      </ActionPanel.Section>
+      {props.controls}
+      <ActionPanel.Section>
         {props.draft.trim() && (
           <Action
             title={t("清空草稿")}
