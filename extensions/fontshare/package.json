@@ -17,12 +17,14 @@
     {
       "name": "search-fonts",
       "title": "Search Fonts",
+      "subtitle": "Fontshare",
       "description": "Search the Fontshare catalogue by name, designer, category or tag",
       "mode": "view"
     },
     {
       "name": "search-pairings",
       "title": "Search Font Pairings",
+      "subtitle": "Fontshare",
       "description": "Browse the font pairings curated by Fontshare",
       "mode": "view"
     },

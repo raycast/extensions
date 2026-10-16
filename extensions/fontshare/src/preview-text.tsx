@@ -56,7 +56,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Previe
       columns={3}
       aspectRatio="3/2"
       fit={Grid.Fit.Contain}
-      navigationTitle={text}
       isLoading={isLoading || isRendering}
       searchBarPlaceholder="Filter fonts by name, designer, category or tag"
     >
@@ -80,29 +79,31 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Previe
           actions={<ActionPanel>{editText}</ActionPanel>}
         />
       )}
-      {fonts?.map((font) => (
-        <Grid.Item
-          key={font.id}
-          title={font.name}
-          subtitle={font.categories.join(", ")}
-          keywords={fontKeywords(font)}
-          content={{
-            value: previews[font.id]
-              ? { source: previews[font.id], tintColor: Color.PrimaryText }
-              : PREVIEW_PLACEHOLDER,
-            tooltip: font.designers.join(", "),
-          }}
-          actions={
-            <FontActions font={font} extra={editText}>
-              <Action.Push
-                title="Show Details"
-                icon={Icon.Sidebar}
-                target={<FontDetail font={font} catalog={catalog} />}
-              />
-            </FontActions>
-          }
-        />
-      ))}
+      <Grid.Section title={`Preview: ${text}`}>
+        {fonts?.map((font) => (
+          <Grid.Item
+            key={font.id}
+            title={font.name}
+            subtitle={font.categories.join(", ")}
+            keywords={fontKeywords(font)}
+            content={{
+              value: previews[font.id]
+                ? { source: previews[font.id], tintColor: Color.PrimaryText }
+                : PREVIEW_PLACEHOLDER,
+              tooltip: font.designers.join(", "),
+            }}
+            actions={
+              <FontActions font={font} extra={editText}>
+                <Action.Push
+                  title="Show Details"
+                  icon={Icon.Sidebar}
+                  target={<FontDetail font={font} catalog={catalog} />}
+                />
+              </FontActions>
+            }
+          />
+        ))}
+      </Grid.Section>
     </Grid>
   );
 }
