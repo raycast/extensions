@@ -3,15 +3,32 @@ import RaycastSwiftMacros
 import ScreenCaptureKit
 import Vision
 
-// Failure and cancellation are reported to TypeScript as strings. Keep these in
-// sync with src/ocr/swift-result.ts.
-let errorPrefix = "Error: "
-let cancelledResult = "Error: cancelled"
-let noBarcodeResult = "No barcodes or QR codes detected"
+// Every entry point returns a JSON envelope so recognized content can never be
+// mistaken for a status. Keep these shapes in sync with src/ocr/swift-result.ts.
+struct BridgeResult: Encodable {
+  var status: String
+  var text: String?
+  var message: String?
+  var id: String?
+  var count: Int?
+}
+
+func encodeResult(_ result: BridgeResult) -> String {
+  guard let data = try? JSONEncoder().encode(result),
+    let json = String(data: data, encoding: .utf8)
+  else {
+    return #"{"message":"Failed to encode the Swift result","status":"error"}"#
+  }
+  return json
+}
+
+let screenRecordingPermissionMessage =
+  "Screen Recording permission is required. Enable it for Raycast in System Settings > Privacy & Security > Screen Recording."
 
 enum CaptureResult {
   case image(CGImage)
   case cancelled
+  case permissionDenied
   case failed
 }
 
@@ -32,9 +49,11 @@ func recognizeText(
 
   switch capture {
   case .cancelled:
-    return cancelledResult
+    return encodeResult(BridgeResult(status: "cancelled"))
+  case .permissionDenied:
+    return encodeResult(BridgeResult(status: "error", message: screenRecordingPermissionMessage))
   case .failed:
-    return "\(errorPrefix)failed to capture image"
+    return encodeResult(BridgeResult(status: "error", message: "failed to capture image"))
   case .image(let capturedImage):
     return await performOCR(
       on: capturedImage,
@@ -57,13 +76,13 @@ func recognizeClipboard(
 ) async -> String {
   let pasteboard = NSPasteboard.general
   guard NSImage.canInit(with: pasteboard) else {
-    return "\(errorPrefix)The clipboard does not contain an image."
+    return encodeResult(BridgeResult(status: "error", message: "The clipboard does not contain an image."))
   }
   guard
     let image = NSImage(pasteboard: pasteboard),
     let cgImage = cgImage(from: image)
   else {
-    return "\(errorPrefix)The clipboard image could not be decoded."
+    return encodeResult(BridgeResult(status: "error", message: "The clipboard image could not be decoded."))
   }
 
   return await performOCR(
@@ -96,11 +115,15 @@ func performOCR(
       try await request.perform(on: image)
     }
     let separator = ignoreLineBreaks ? " " : "\n"
-    return observations
+    let text = observations
       .compactMap { $0.topCandidates(1).first?.string }
       .joined(separator: separator)
+    guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+      return encodeResult(BridgeResult(status: "no-text"))
+    }
+    return encodeResult(BridgeResult(status: "recognized", text: text))
   } catch {
-    return "\(errorPrefix)\(error.localizedDescription)"
+    return encodeResult(BridgeResult(status: "error", message: error.localizedDescription))
   }
 }
 
@@ -108,9 +131,11 @@ func performOCR(
 func detectBarcode(keepImage: Bool, playSound: Bool) async -> String {
   switch captureSelectedArea(keepImage: keepImage, playSound: playSound) {
   case .cancelled:
-    return cancelledResult
+    return encodeResult(BridgeResult(status: "cancelled"))
+  case .permissionDenied:
+    return encodeResult(BridgeResult(status: "error", message: screenRecordingPermissionMessage))
   case .failed:
-    return "\(errorPrefix)failed to capture image"
+    return encodeResult(BridgeResult(status: "error", message: "failed to capture image"))
   case .image(let capturedImage):
     do {
       let observations = try await silencingStdout {
@@ -118,18 +143,17 @@ func detectBarcode(keepImage: Bool, playSound: Bool) async -> String {
       }
       let values = observations.compactMap(\.payloadString)
       guard !values.isEmpty else {
-        return noBarcodeResult
+        return encodeResult(BridgeResult(status: "no-text"))
       }
-      return values.joined(separator: "\n")
+      return encodeResult(BridgeResult(status: "recognized", text: values.joined(separator: "\n")))
     } catch {
-      return "\(errorPrefix)\(error.localizedDescription)"
+      return encodeResult(BridgeResult(status: "error", message: error.localizedDescription))
     }
   }
 }
 
 // Snapshots every item, type and byte of the general pasteboard to a temporary
-// property list so it can be restored after a temporary paste. Returns the
-// snapshot id, or an "Error: " string.
+// property list so it can be restored after a temporary paste.
 @raycast
 func snapshotClipboard() -> String {
   let items: [[String: Data]] = (NSPasteboard.general.pasteboardItems ?? []).map { item in
@@ -146,18 +170,19 @@ func snapshotClipboard() -> String {
   do {
     let data = try PropertyListSerialization.data(fromPropertyList: items, format: .binary, options: 0)
     try data.write(to: clipboardSnapshotURL(id), options: .atomic)
-    return id
+    return encodeResult(BridgeResult(status: "snapshot", id: id))
   } catch {
-    return "\(errorPrefix)\(error.localizedDescription)"
+    return encodeResult(BridgeResult(status: "error", message: error.localizedDescription))
   }
 }
 
 // Restores a snapshot made by snapshotClipboard and always deletes its file.
-// Returns "OK" or an "Error: " string.
+// expectedChangeCount is the pasteboard version the paste produced; pass a
+// negative value to restore unconditionally.
 @raycast
-func restoreClipboard(id: String) -> String {
+func restoreClipboard(id: String, expectedChangeCount: Int) -> String {
   guard UUID(uuidString: id) != nil else {
-    return "\(errorPrefix)invalid clipboard snapshot id"
+    return encodeResult(BridgeResult(status: "error", message: "invalid clipboard snapshot id"))
   }
   let url = clipboardSnapshotURL(id)
   defer { try? FileManager.default.removeItem(at: url) }
@@ -165,7 +190,7 @@ func restoreClipboard(id: String) -> String {
   do {
     let data = try Data(contentsOf: url)
     guard let entries = try PropertyListSerialization.propertyList(from: data, format: nil) as? [[String: Data]] else {
-      return "\(errorPrefix)invalid clipboard snapshot"
+      return encodeResult(BridgeResult(status: "error", message: "invalid clipboard snapshot"))
     }
 
     let items = entries.map { entry -> NSPasteboardItem in
@@ -177,14 +202,25 @@ func restoreClipboard(id: String) -> String {
     }
 
     let pasteboard = NSPasteboard.general
+    // Another writer changed the clipboard after our paste: keep that copy.
+    if expectedChangeCount >= 0, pasteboard.changeCount != expectedChangeCount {
+      return encodeResult(BridgeResult(status: "skipped"))
+    }
     pasteboard.clearContents()
     if !items.isEmpty, !pasteboard.writeObjects(items) {
-      return "\(errorPrefix)failed to restore clipboard"
+      return encodeResult(BridgeResult(status: "error", message: "failed to restore clipboard"))
     }
-    return "OK"
+    return encodeResult(BridgeResult(status: "restored"))
   } catch {
-    return "\(errorPrefix)\(error.localizedDescription)"
+    return encodeResult(BridgeResult(status: "error", message: error.localizedDescription))
   }
+}
+
+// The general pasteboard's change count lets a caller tell whether the clipboard
+// still holds what its last write put there.
+@raycast
+func clipboardChangeCount() -> String {
+  encodeResult(BridgeResult(status: "count", count: NSPasteboard.general.changeCount))
 }
 
 func clipboardSnapshotURL(_ id: String) -> URL {
@@ -248,14 +284,15 @@ func captureSelectedArea(keepImage: Bool, playSound: Bool) -> CaptureResult {
     // A cancelled selection leaves the previous clipboard contents in place,
     // so only a changed pasteboard means a new capture was made.
     guard pasteboard.changeCount != changeCountBefore else {
-      return .cancelled
+      return screenRecordingAccessMissing() ? .permissionDenied : .cancelled
     }
     image = NSImage(pasteboard: pasteboard)
   } else {
     defer { try? FileManager.default.removeItem(atPath: filePath) }
-    // screencapture writes no file when the selection is cancelled.
+    // screencapture writes no file when the selection is cancelled, but it also
+    // writes nothing when screen access is missing: report that instead.
     guard FileManager.default.fileExists(atPath: filePath) else {
-      return .cancelled
+      return screenRecordingAccessMissing() ? .permissionDenied : .cancelled
     }
     guard let data = try? Data(contentsOf: URL(fileURLWithPath: filePath)) else {
       return .failed
@@ -267,6 +304,10 @@ func captureSelectedArea(keepImage: Bool, playSound: Bool) -> CaptureResult {
     return .failed
   }
   return .image(cgImage)
+}
+
+func screenRecordingAccessMissing() -> Bool {
+  !CGPreflightScreenCaptureAccess()
 }
 
 // Prefers the largest bitmap representation so retina images keep their native

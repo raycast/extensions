@@ -78,6 +78,7 @@ function createHost(options = {}) {
         "detectBarcode",
         "snapshotClipboard",
         "restoreClipboard",
+        "clipboardChangeCount",
       ].map((name) => [
         name,
         async (...args) => {
@@ -90,9 +91,20 @@ function createHost(options = {}) {
             return new Promise(() => {});
           if (options.swiftResults?.[name] !== undefined)
             return options.swiftResults[name];
-          if (name === "snapshotClipboard") return "snapshot-id";
-          if (name === "restoreClipboard") return "OK";
-          return options.swiftResult ?? "Example text";
+          if (name === "snapshotClipboard")
+            return JSON.stringify({ status: "snapshot", id: "snapshot-id" });
+          if (name === "restoreClipboard")
+            return JSON.stringify({ status: "restored" });
+          if (name === "clipboardChangeCount")
+            return JSON.stringify({
+              status: "count",
+              count: options.clipboardChangeCount ?? 1,
+            });
+          if (options.swiftResult !== undefined) return options.swiftResult;
+          return JSON.stringify({
+            status: "recognized",
+            text: "Example text",
+          });
         },
       ]),
     ),

@@ -1,10 +1,16 @@
 import { Clipboard, getPreferenceValues } from "@raycast/api";
 import { getUserSelectedLanguages } from "../hooks";
 import * as swiftBridge from "swift:../../swift";
-import { parseSwiftResult } from "./swift-result";
+import {
+  parseClipboardChangeCount,
+  parseRestoreResult,
+  parseSnapshotId,
+  parseSwiftResult,
+} from "./swift-result";
 import { RecognitionOutcome } from "./types";
 
 const {
+  clipboardChangeCount: clipboardChangeCountSwift,
   detectBarcode: detectBarcodeSwift,
   recognizeClipboard: recognizeClipboardSwift,
   recognizeText: recognizeTextSwift,
@@ -114,7 +120,7 @@ export const detectBarcode = async (): Promise<RecognitionOutcome> => {
       Boolean(preference.playSound),
     );
 
-    return parseSwiftResult(detectedCodes, { barcode: true });
+    return parseSwiftResult(detectedCodes);
   } catch (error) {
     console.error(error);
     return { status: "error", message: "Failed to detect barcode" };
@@ -123,29 +129,49 @@ export const detectBarcode = async (): Promise<RecognitionOutcome> => {
 
 // Pastes text into the frontmost app, then puts the original clipboard back.
 // Nothing is pasted if the clipboard cannot be snapshotted, so the original
-// contents are never lost.
+// contents are never lost. The snapshot is restored only while the clipboard
+// still holds the paste, so a newer copy taken meanwhile is never overwritten.
 export const pasteTextAndRestoreClipboard = async (text: string) => {
-  const snapshotId = await snapshotClipboardSwift();
-  if (snapshotId.startsWith("Error: ")) {
-    throw new Error(
-      `Could not save the clipboard: ${snapshotId.slice("Error: ".length)}`,
-    );
+  const describe = (error: unknown) =>
+    error instanceof Error ? error.message : String(error);
+
+  let snapshotId: string;
+  try {
+    snapshotId = parseSnapshotId(await snapshotClipboardSwift());
+  } catch (error) {
+    throw new Error(`Could not save the clipboard: ${describe(error)}`);
   }
 
   let pasteError: unknown;
   try {
     await Clipboard.paste(text);
-    // Give the target app time to read the pasteboard before it is restored.
-    await new Promise((resolve) => setTimeout(resolve, PASTE_SETTLE_MS));
   } catch (error) {
     pasteError = error;
   }
 
+  // Record the pasteboard version our paste produced before waiting.
+  let expectedChangeCount: number | undefined;
+  try {
+    expectedChangeCount = parseClipboardChangeCount(
+      await clipboardChangeCountSwift(),
+    );
+  } catch {
+    expectedChangeCount = undefined;
+  }
+
+  // Give the target app time to read the pasteboard before it is restored.
+  if (!pasteError) {
+    await new Promise((resolve) => setTimeout(resolve, PASTE_SETTLE_MS));
+  }
+
   // Restore even when pasting failed; this also deletes the snapshot file.
-  const restored = await restoreClipboardSwift(snapshotId);
-  if (restored.startsWith("Error: ")) {
+  try {
+    parseRestoreResult(
+      await restoreClipboardSwift(snapshotId, expectedChangeCount ?? -1),
+    );
+  } catch (error) {
     throw new Error(
-      `Text was pasted, but the clipboard could not be restored: ${restored.slice("Error: ".length)}`,
+      `Text was pasted, but the clipboard could not be restored: ${describe(error)}`,
     );
   }
   if (pasteError) throw pasteError;

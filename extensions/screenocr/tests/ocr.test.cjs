@@ -9,6 +9,10 @@ const callbackOptions = {
 };
 const outputs = (host) =>
   host.calls.filter(([name]) => ["copy", "paste"].includes(name));
+const recognized = (text) => JSON.stringify({ status: "recognized", text });
+const cancelledPayload = JSON.stringify({ status: "cancelled" });
+const noTextPayload = JSON.stringify({ status: "no-text" });
+const errorResult = (message) => JSON.stringify({ status: "error", message });
 
 test("Windows preserves Unicode and real Error-prefixed OCR text", async () => {
   const text = "Error: this is real OCR\n日本語";
@@ -315,7 +319,7 @@ test("macOS OCR retains selected languages and the original raw Swift contract",
   const mac = createHost({
     platform: "darwin",
     storage: { SelectedLanguages: '[{"title":"French","value":"fr-FR"}]' },
-    swiftResult: "Known text",
+    swiftResult: recognized("Known text"),
   });
   await mac
     .load("src/recognize-text.tsx")
@@ -337,7 +341,7 @@ test("clipboard command recognizes on macOS and copies by default", async () => 
   const mac = createHost({
     platform: "darwin",
     storage: { SelectedLanguages: '[{"title":"French","value":"fr-FR"}]' },
-    swiftResult: "Clipboard text",
+    swiftResult: recognized("Clipboard text"),
   });
   await mac.load("src/recognize-clipboard.ts").default();
   assert.deepEqual(outputs(mac), [["copy", "Clipboard text"]]);
@@ -351,7 +355,7 @@ test("clipboard command recognizes on macOS and copies by default", async () => 
 });
 
 test("clipboard command shows animated progress then the result toast", async () => {
-  const mac = createHost({ platform: "darwin", swiftResult: "Clipboard text" });
+  const mac = createHost({ platform: "darwin", swiftResult: recognized("Clipboard text") });
   await mac.load("src/recognize-clipboard.ts").default();
   const toasts = mac.calls
     .filter(([name]) => name === "toast")
@@ -372,7 +376,7 @@ test("clipboard progress toast is skipped when toasts are disabled", async () =>
   const mac = createHost({
     platform: "darwin",
     preferences: { showToast: false },
-    swiftResult: "Clipboard text",
+    swiftResult: recognized("Clipboard text"),
   });
   await mac.load("src/recognize-clipboard.ts").default();
   assert.equal(
@@ -395,7 +399,7 @@ test("clipboard paste-restore snapshots, pastes, then restores the clipboard", a
   const mac = createHost({
     platform: "darwin",
     preferences: { clipboardResultAction: "paste-restore" },
-    swiftResult: "Clipboard text",
+    swiftResult: recognized("Clipboard text"),
   });
   await mac.load("src/recognize-clipboard.ts").default();
   assert.deepEqual(outputs(mac), [["paste", "Clipboard text"]]);
@@ -403,11 +407,17 @@ test("clipboard paste-restore snapshots, pastes, then restores the clipboard", a
     mac.calls
       .filter(([name]) => ["swift", "paste"].includes(name))
       .map(([name, detail]) => (name === "swift" ? detail : name)),
-    ["recognizeClipboard", "snapshotClipboard", "paste", "restoreClipboard"],
+    [
+      "recognizeClipboard",
+      "snapshotClipboard",
+      "paste",
+      "clipboardChangeCount",
+      "restoreClipboard",
+    ],
   );
   assert.deepEqual(
     mac.calls.find(([, name]) => name === "restoreClipboard")[2],
-    ["snapshot-id"],
+    ["snapshot-id", 1],
   );
 });
 
@@ -416,8 +426,8 @@ test("clipboard paste-restore does not paste when the snapshot fails", async () 
     platform: "darwin",
     preferences: { clipboardResultAction: "paste-restore" },
     swiftResults: {
-      recognizeClipboard: "Text",
-      snapshotClipboard: "Error: disk full",
+      recognizeClipboard: recognized("Text"),
+      snapshotClipboard: errorResult("disk full"),
     },
   });
   await mac.load("src/recognize-clipboard.ts").default();
@@ -434,7 +444,7 @@ test("clipboard paste-restore restores the clipboard when pasting fails", async 
     platform: "darwin",
     preferences: { clipboardResultAction: "paste-restore" },
     pasteError: new Error("No app"),
-    swiftResults: { recognizeClipboard: "Text" },
+    swiftResults: { recognizeClipboard: recognized("Text") },
   });
   await mac.load("src/recognize-clipboard.ts").default();
   assert.equal(swiftCalls(mac).at(-1), "restoreClipboard");
@@ -448,7 +458,7 @@ test("clipboard command returns macOS results to a callback without pasting", as
   const mac = createHost({
     platform: "darwin",
     preferences: { clipboardResultAction: "paste-restore" },
-    swiftResult: "Clipboard text",
+    swiftResult: recognized("Clipboard text"),
   });
   await mac
     .load("src/recognize-clipboard.ts")
@@ -466,9 +476,9 @@ test("clipboard command returns macOS results to a callback without pasting", as
 });
 
 for (const [swiftResult, entry] of [
-  ["Error: cancelled", "src/recognize-text.tsx"],
-  ["Error: cancelled", "src/recognize-text-fullscreen.ts"],
-  ["Error: cancelled", "src/detect-barcode.tsx"],
+  [cancelledPayload, "src/recognize-text.tsx"],
+  [cancelledPayload, "src/recognize-text-fullscreen.ts"],
+  [cancelledPayload, "src/detect-barcode.tsx"],
 ]) {
   test(`${entry} treats a cancelled macOS capture silently`, async () => {
     const mac = createHost({ platform: "darwin", swiftResult });
@@ -483,7 +493,7 @@ for (const [swiftResult, entry] of [
 test("macOS Swift errors are failures and never copied as text", async () => {
   const mac = createHost({
     platform: "darwin",
-    swiftResult: "Error: failed to capture image",
+    swiftResult: errorResult("failed to capture image"),
   });
   await mac.load("src/recognize-text.tsx").default({});
   assert.deepEqual(outputs(mac), []);
@@ -496,7 +506,7 @@ test("macOS Swift errors are failures and never copied as text", async () => {
 test("macOS cancellation reaches a callback as cancelled", async () => {
   const mac = createHost({
     platform: "darwin",
-    swiftResult: "Error: cancelled",
+    swiftResult: cancelledPayload,
   });
   await mac
     .load("src/recognize-text.tsx")
@@ -511,11 +521,8 @@ test("macOS cancellation reaches a callback as cancelled", async () => {
   );
 });
 
-test("macOS barcode sentinel is no-text with its own title", async () => {
-  const mac = createHost({
-    platform: "darwin",
-    swiftResult: "No barcodes or QR codes detected",
-  });
+test("macOS barcode no-text keeps its own title", async () => {
+  const mac = createHost({ platform: "darwin", swiftResult: noTextPayload });
   await mac.load("src/detect-barcode.tsx").default();
   assert.deepEqual(outputs(mac), []);
   assert.equal(
@@ -524,29 +531,92 @@ test("macOS barcode sentinel is no-text with its own title", async () => {
   );
 });
 
-test("parseSwiftResult maps Swift strings to outcomes", () => {
+test("parseSwiftResult maps Swift payloads to outcomes", () => {
   const { parseSwiftResult } = createHost().load("src/ocr/swift-result.ts");
-  assert.deepEqual(parseSwiftResult("Error: boom"), {
+  assert.deepEqual(parseSwiftResult(recognized("Hello\\nError: inside")), {
+    status: "recognized",
+    text: "Hello\\nError: inside",
+  });
+  assert.deepEqual(parseSwiftResult(recognized("Error: connection refused")), {
+    status: "recognized",
+    text: "Error: connection refused",
+  });
+  assert.deepEqual(parseSwiftResult(cancelledPayload), { status: "cancelled" });
+  assert.deepEqual(parseSwiftResult(noTextPayload), { status: "no-text" });
+  assert.deepEqual(parseSwiftResult(errorResult("boom")), {
     status: "error",
     message: "boom",
   });
-  assert.deepEqual(parseSwiftResult("Error: cancelled"), {
-    status: "cancelled",
+  for (const invalid of [
+    undefined,
+    "",
+    "  \\n ",
+    "plain text",
+    "null",
+    "[]",
+    '"recognized"',
+    '{"status":"recognized","text":""}',
+    '{"status":"recognized","text":"  "}',
+    '{"status":"recognized","text":"x","extra":true}',
+    '{"status":"unknown"}',
+    '{"status":"no-text","text":"stale"}',
+    '{"status":"error","message":""}',
+    '{"message":"boom","status":"error","extra":1}',
+  ]) {
+    const outcome = parseSwiftResult(invalid);
+    assert.equal(outcome.status, "error");
+    assert.equal(typeof outcome.message, "string");
+  }
+});
+
+test("parseSnapshotId, parseRestoreResult and parseClipboardChangeCount validate payloads", () => {
+  const parser = createHost().load("src/ocr/swift-result.ts");
+  assert.equal(
+    parser.parseSnapshotId(JSON.stringify({ status: "snapshot", id: "x" })),
+    "x",
+  );
+  assert.throws(
+    () => parser.parseSnapshotId(errorResult("no snapshot")),
+    /no snapshot/,
+  );
+  assert.equal(
+    parser.parseRestoreResult(JSON.stringify({ status: "restored" })),
+    "restored",
+  );
+  assert.equal(
+    parser.parseRestoreResult(JSON.stringify({ status: "skipped" })),
+    "skipped",
+  );
+  assert.throws(() => parser.parseRestoreResult("not json"));
+  assert.equal(
+    parser.parseClipboardChangeCount(
+      JSON.stringify({ status: "count", count: 7 }),
+    ),
+    7,
+  );
+  assert.equal(
+    parser.parseClipboardChangeCount(
+      JSON.stringify({ status: "count", count: -1 }),
+    ),
+    undefined,
+  );
+  assert.equal(parser.parseClipboardChangeCount(undefined), undefined);
+});
+
+test("clipboard paste-restore keeps a newer copy instead of restoring over it", async () => {
+  const mac = createHost({
+    platform: "darwin",
+    preferences: { clipboardResultAction: "paste-restore" },
+    swiftResults: {
+      recognizeClipboard: recognized("Clipboard text"),
+      restoreClipboard: JSON.stringify({ status: "skipped" }),
+    },
   });
-  assert.deepEqual(parseSwiftResult(""), { status: "no-text" });
-  assert.deepEqual(parseSwiftResult("  \n "), { status: "no-text" });
-  assert.deepEqual(parseSwiftResult(undefined), { status: "no-text" });
-  assert.deepEqual(parseSwiftResult("Hello\nError: inside"), {
-    status: "recognized",
-    text: "Hello\nError: inside",
-  });
-  assert.deepEqual(parseSwiftResult("No barcodes or QR codes detected"), {
-    status: "recognized",
-    text: "No barcodes or QR codes detected",
-  });
-  assert.deepEqual(
-    parseSwiftResult("No barcodes or QR codes detected", { barcode: true }),
-    { status: "no-text" },
+  await mac.load("src/recognize-clipboard.ts").default();
+  assert.deepEqual(outputs(mac), [["paste", "Clipboard text"]]);
+  assert.equal(
+    mac.calls.some(([name]) => name === "failure"),
+    false,
   );
 });
 
