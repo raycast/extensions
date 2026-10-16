@@ -29,6 +29,36 @@ export interface ApiResource extends Omit<Resource, "username" | "uri" | "descri
   metadata?: string | null;
   metadata_key_type?: "user_key" | "shared_key";
   metadata_key_id?: string | null;
+  secrets?: Secret[];
+  secret?: Secret;
+}
+
+export interface ResourceType {
+  id: string;
+  slug: string;
+  name: string;
+  definition?: unknown;
+}
+
+export interface TotpConfiguration {
+  secretKey: string;
+  algorithm: string;
+  digits: number;
+  period: number;
+  issuer?: string;
+  label?: string;
+}
+
+export interface TotpResource extends Resource {
+  totp?: TotpConfiguration;
+  totp_error?: string;
+}
+
+export interface TotpLoadProgress {
+  items: TotpResource[];
+  processed: number;
+  candidates: number;
+  totalResources: number;
 }
 
 export interface Tag {

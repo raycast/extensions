@@ -35,10 +35,20 @@ Generate secure passwords with customizable options:
 
 ### 🔐 Authenticator (TOTP)
 Dedicated view for managing Time-based One-Time Passwords (TOTP):
-- Automatically scans vault for resources with TOTP configured
+- Identifies TOTP-capable resource types before decrypting accounts
+- Reuses included encrypted secrets and unlocks your private key once per command
+- Loads accounts in bounded batches and displays results as they arrive
+- Includes entries containing both a password and TOTP
+- Searches names, usernames, all URLs, tags, notes, and account labels; `OCI` also finds Oracle accounts
+- Shows matching current-website accounts first when the Raycast Browser Extension is available
 - Real-time countdown timer with color-coded urgency
 - Quick copy and paste actions
-- Displays 6-digit codes with 30-second refresh cycle
+- Honors each account's algorithm, code length, and refresh period
+
+Website matching is optional in the Authenticator command's preferences. It uses an unambiguous active tab from the
+[Raycast Browser Extension](https://www.raycast.com/browser-extension), or a URL supplied in command launch context.
+Without browser access, all accounts remain searchable. Matching uses saved URL hostnames and the Public Suffix List,
+including private suffixes, rather than substring matching. Use **Refresh Accounts** (`⌘R`) to reload vault changes.
 
 ## Installation
 
@@ -108,7 +118,10 @@ private generateTOTP(): string {
 
 ### For Resource TOTP Codes
 
-The Authenticator view scans all resources in your vault, decrypts their secrets, and extracts TOTP configurations stored in the following format:
+The Authenticator reads resource-type schemas to skip password-only entries, reuses the encrypted secrets returned
+by the resources endpoint, and decrypts only TOTP candidates. Unknown custom resource types are also inspected so their
+accounts are not silently omitted. The complete secret object is parsed, including entries that contain both a password
+and TOTP. Configurations use this format:
 
 ```json
 {
@@ -120,9 +133,9 @@ The Authenticator view scans all resources in your vault, decrypts their secrets
 ```
 
 For each resource with TOTP configured, the extension:
-1. Generates the current 6-digit code
-2. Calculates time remaining (30-second cycle)
-3. Updates in real-time with color-coded urgency indicators
+1. Generates the current code using the configured SHA1/SHA256/SHA512 algorithm and code length
+2. Calculates time remaining using the account's refresh period (30 seconds by default)
+3. Updates in real-time with color-coded urgency indicators and generates a fresh code at copy/paste time
 
 ## API Integration
 

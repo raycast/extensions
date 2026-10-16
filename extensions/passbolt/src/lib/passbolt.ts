@@ -3,8 +3,9 @@ import * as openpgp from "openpgp";
 import * as fs from "fs/promises";
 import { TOTP } from "otpauth";
 import { MetadataDecryptor, SharedMetadataKey } from "./metadata";
-import { ApiResource } from "../types";
+import { ApiResource, ResourceType, TotpLoadProgress } from "../types";
 import { filterResources } from "../utils/resources";
+import { parseTotpConfiguration, resourceTypeSupportsTotp } from "../utils/totp";
 
 interface PassboltResponse<T = unknown> {
   header: {
@@ -21,12 +22,6 @@ interface PassboltResponse<T = unknown> {
 
 interface MFAProvider {
   mfa_providers?: string[];
-}
-
-interface ResourceType {
-  id: string;
-  slug: string;
-  name: string;
 }
 
 interface SecretData {
@@ -49,6 +44,7 @@ export class PassboltClient {
   private csrfToken: string | null = null;
   private isAuthenticated: boolean = false;
   private metadataDecryptor: MetadataDecryptor;
+  private privateKey?: Promise<openpgp.PrivateKey>;
 
   constructor() {
     const prefs = getPreferenceValues<Preferences>();
@@ -76,6 +72,16 @@ export class PassboltClient {
   }
 
   private async getPrivateKey(): Promise<openpgp.PrivateKey> {
+    if (!this.privateKey) {
+      this.privateKey = this.readPrivateKey().catch((error) => {
+        this.privateKey = undefined;
+        throw error;
+      });
+    }
+    return this.privateKey;
+  }
+
+  private async readPrivateKey(): Promise<openpgp.PrivateKey> {
     try {
       console.log(`Reading private key from: ${this.privateKeyPath}`);
       const keyContent = await fs.readFile(this.privateKeyPath, "utf8");
@@ -346,12 +352,12 @@ export class PassboltClient {
     }
   }
 
-  public async searchResources(query: string) {
+  private async fetchResources(signal?: AbortSignal) {
     await this.authenticate();
+    signal?.throwIfAborted();
 
-    // v5 names are encrypted, so keyword filtering must happen locally after decryption.
-    const resourcesPath = "/resources.json?contain[secret]=1&contain[tags]=1";
-    let res = await this.request(resourcesPath);
+    const resourcesPath = "/resources.json?contain[secret]=1&contain[tags]=1&contain[favorite]=1";
+    let res = await this.request(resourcesPath, { signal });
 
     // Check if MFA is required (403 response)
     if (res.status === 403) {
@@ -390,27 +396,90 @@ export class PassboltClient {
         console.log("MFA verification successful! Retrying resource request...");
 
         // Retry the request after MFA verification
-        res = await this.request(resourcesPath);
+        res = await this.request(resourcesPath, { signal });
       }
     }
 
     if (!res.ok) throw new Error(`Unable to fetch resources (HTTP ${res.status})`);
     const json = (await res.json()) as PassboltResponse<ApiResource[]>;
     if (!Array.isArray(json.body)) throw new Error("Invalid resource response from Passbolt");
+    return json;
+  }
+
+  public async searchResources(query: string) {
+    // v5 names are encrypted, so keyword filtering must happen locally after decryption.
+    const json = await this.fetchResources();
     const resources = await this.metadataDecryptor.decryptResources(json.body);
     return { ...json, body: filterResources(resources, query) };
   }
 
-  public async getSecret(resourceId: string) {
+  public async getTotpResources(
+    options: { signal?: AbortSignal; onProgress?: (progress: TotpLoadProgress) => void } = {},
+  ): Promise<TotpLoadProgress> {
+    const { signal, onProgress } = options;
+    const response = await this.fetchResources(signal);
+    const types = await this.getResourceTypes(signal);
+    const supportsTotp = new Map(types.map((type) => [type.id, resourceTypeSupportsTotp(type)]));
+    const candidates = response.body.filter((resource) => supportsTotp.get(resource.resource_type_id ?? "") !== false);
+    const progress: TotpLoadProgress = {
+      items: [],
+      processed: 0,
+      candidates: candidates.length,
+      totalResources: response.body.length,
+    };
+    onProgress?.({ ...progress, items: [] });
+
+    for (let start = 0; start < candidates.length; start += 8) {
+      signal?.throwIfAborted();
+      const batch = await Promise.all(
+        candidates.slice(start, start + 8).map(async (resource) => {
+          try {
+            // contain[secret] is scoped by Passbolt to the authenticated user. Avoid a second HTTP request.
+            const included = resource.secrets?.[0] ?? resource.secret;
+            const secret = included?.data ? included : await this.getSecret(resource.id, signal);
+            if (!secret?.data) throw new Error("Missing encrypted secret");
+            const config = parseTotpConfiguration(await this.decryptSecretData(secret.data));
+            if (!config) {
+              if (supportsTotp.get(resource.resource_type_id ?? "") === true)
+                throw new Error("Missing TOTP configuration");
+              return undefined;
+            }
+            return { resource, totp: config, totp_error: undefined };
+          } catch {
+            return {
+              resource,
+              totp: undefined,
+              totp_error: "Unable to read this TOTP entry. Check that it opens in Passbolt.",
+            };
+          }
+        }),
+      );
+      signal?.throwIfAborted();
+      const found = batch.filter((entry) => entry !== undefined);
+      const resources = await this.metadataDecryptor.decryptResources(found.map((entry) => entry.resource));
+      progress.items.push(
+        ...resources.map((resource, index) => ({
+          ...resource,
+          totp: found[index].totp,
+          totp_error: found[index].totp_error,
+        })),
+      );
+      progress.processed += batch.length;
+      onProgress?.({ ...progress, items: [...progress.items] });
+    }
+    return progress;
+  }
+
+  public async getSecret(resourceId: string, signal?: AbortSignal) {
     // Ensure we're authenticated before fetching secret
     await this.authenticate();
 
-    const res = await this.request(`/secrets/resource/${resourceId}.json`);
+    const res = await this.request(`/secrets/resource/${resourceId}.json`, { signal });
     const json = (await res.json()) as PassboltResponse<SecretData>;
     return json.body;
   }
 
-  public async decryptSecret(encryptedData: string) {
+  public async decryptSecretData(encryptedData: string): Promise<string> {
     const userPrivateKey = await this.getPrivateKey();
     const message = await openpgp.readMessage({ armoredMessage: encryptedData });
     const { data: decrypted } = await openpgp.decrypt({
@@ -418,7 +487,13 @@ export class PassboltClient {
       decryptionKeys: userPrivateKey,
     });
 
-    // Parse the decrypted JSON to extract the password
+    if (typeof decrypted !== "string") throw new Error("Unexpected decrypted secret format");
+    return decrypted;
+  }
+
+  public async decryptSecret(encryptedData: string) {
+    const decrypted = await this.decryptSecretData(encryptedData);
+    // Password-copy actions extract only the password; Authenticator needs the complete secret object.
     try {
       const secretData = JSON.parse(decrypted as string);
       // Return just the password field if it exists, otherwise return the whole decrypted data
@@ -429,10 +504,12 @@ export class PassboltClient {
     }
   }
 
-  public async getResourceTypes() {
+  public async getResourceTypes(signal?: AbortSignal) {
     await this.authenticate();
-    const res = await this.request("/resource-types.json");
+    const res = await this.request("/resource-types.json", { signal });
+    if (!res.ok) throw new Error(`Unable to fetch resource types (HTTP ${res.status})`);
     const json = (await res.json()) as PassboltResponse<ResourceType[]>;
+    if (!Array.isArray(json.body)) throw new Error("Invalid resource type response from Passbolt");
     return json.body;
   }
 

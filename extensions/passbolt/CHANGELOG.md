@@ -1,5 +1,13 @@
 # Passbolt Changelog
 
+## [Faster Authenticator and Complete Account Search] - {PR_MERGE_DATE}
+
+- Select TOTP-capable entries before decryption, reuse included secrets, and unlock the private key once per command.
+- Load accounts progressively and include password-plus-TOTP entries that were previously omitted.
+- Search account names, usernames, all URLs, tags, notes, and Oracle's OCI alias.
+- Prioritize saved URLs matching the current website when browser context is available.
+- Honor each account's algorithm, digits, and period, and generate a fresh code when copying or pasting.
+
 ## [Fix Search for Encrypted Metadata] - {PR_MERGE_DATE}
 
 - Decrypt Passbolt v5 metadata with personal and shared metadata keys before searching.
