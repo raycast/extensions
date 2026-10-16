@@ -104,8 +104,8 @@ Open Raycast Settings, go to Extensions and select Simple GIF Cap.
 | Save GIFs To                    | `~/Downloads`  | Folder for finished GIFs              |
 | Frames per Second               | 15             | Higher is smoother but bigger         |
 | Max Width                       | 1000 px        | Wider recordings are scaled down      |
-| Encoder                         | Best available | gifski, then ffmpeg, then built-in    |
-| Countdown                       | 3 seconds      | None, 3 or 5 seconds                  |
+| Encoder                         | Best Available | gifski, then ffmpeg, then built-in    |
+| Countdown                       | 3 Seconds      | None, 3 or 5 seconds                  |
 | Stop Automatically After        | 1 minute       | Keeps runaway recordings small        |
 | Show mouse clicks / Show cursor | On             | Passed to `screencapture`             |
 | ffmpeg Path                     | Homebrew       | Only needed for a non-Homebrew ffmpeg |
@@ -114,7 +114,7 @@ Open Raycast Settings, go to Extensions and select Simple GIF Cap.
 
 - **Raycast asks to run "Show Last GIF"**: the recorder opens the preview through a deeplink, and Raycast confirms deeplinks from other apps. Choose **Always Run Command** once.
 - **The recording is empty or fails**: give Raycast Screen Recording access in System Settings > Privacy & Security > Screen & System Audio Recording, then restart Raycast.
-- **"ffmpeg not found"**: you forced the ffmpeg or gifski encoder. Install it with Homebrew, set the ffmpeg path, or switch the encoder back to Best available.
+- **"ffmpeg not found"**: you forced the ffmpeg or gifski encoder. Install it with Homebrew, set the ffmpeg path, or switch the encoder back to Best Available.
 
 ## How it works
 
