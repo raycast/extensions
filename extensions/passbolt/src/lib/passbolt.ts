@@ -443,8 +443,20 @@ export class PassboltClient {
     const { signal, onProgress } = options;
     // Refresh Accounts reuses this client: reload current shares along with the resources.
     this.metadataDecryptor.clearSharedKeys();
-    // The schema request is independent of the resource list: run both at once.
-    const [response, types] = await Promise.all([this.fetchResources(signal), this.getResourceTypes(signal)]);
+    // The schema request is independent of the resource list: run both at once. A schema
+    // request can lose the race against the MFA challenge that fetchResources resolves, so
+    // on failure wait for the resource request to settle and retry once before giving up.
+    const resourcesPromise = this.fetchResources(signal);
+    const typesPromise = this.getResourceTypes().catch(async (error: unknown) => {
+      const resourcesOk = await resourcesPromise.then(
+        () => true,
+        () => false,
+      );
+      signal?.throwIfAborted();
+      if (!resourcesOk) throw error;
+      return this.getResourceTypes();
+    });
+    const [response, types] = await Promise.all([resourcesPromise, typesPromise]);
     const supportsTotp = new Map(types.map((type) => [type.id, resourceTypeSupportsTotp(type)]));
     const candidates = response.body.filter((resource) => supportsTotp.get(resource.resource_type_id ?? "") !== false);
     const progress: TotpLoadProgress = {
@@ -530,11 +542,14 @@ export class PassboltClient {
     }
   }
 
-  public async getResourceTypes(signal?: AbortSignal) {
+  public async getResourceTypes() {
     // Resource types are the vault schema: they rarely change, so fetch them once per
-    // client and reuse them across Authenticator refreshes. Failures are not cached.
+    // client and reuse them across Authenticator refreshes. The shared fetch is
+    // deliberately not tied to any caller's AbortSignal: a load cancelled mid-fetch
+    // (e.g. Refresh aborting the old load) must not poison the cache for the next one.
+    // Failures are not cached.
     if (!this.resourceTypes) {
-      const pending = this.fetchResourceTypes(signal).catch((error: unknown) => {
+      const pending = this.fetchResourceTypes().catch((error: unknown) => {
         if (this.resourceTypes === pending) this.resourceTypes = undefined;
         throw error;
       });
@@ -543,9 +558,9 @@ export class PassboltClient {
     return this.resourceTypes;
   }
 
-  private async fetchResourceTypes(signal?: AbortSignal) {
+  private async fetchResourceTypes() {
     await this.authenticate();
-    const res = await this.request("/resource-types.json", { signal });
+    const res = await this.request("/resource-types.json");
     if (!res.ok) throw new Error(`Unable to fetch resource types (HTTP ${res.status})`);
     const json = (await res.json()) as PassboltResponse<ResourceType[]>;
     if (!Array.isArray(json.body)) throw new Error("Invalid resource type response from Passbolt");

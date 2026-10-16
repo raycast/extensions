@@ -18,6 +18,9 @@ interface SharedMetadataKeys {
 
 class MetadataError extends Error {}
 
+// Minimum interval between progressive decryption snapshots for callers that render them.
+const PROGRESS_SNAPSHOT_INTERVAL_MS = 150;
+
 function readObject(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new MetadataError("Invalid metadata object");
@@ -96,18 +99,26 @@ export class MetadataDecryptor {
     const results: Resource[] = new Array<Resource>(resources.length);
     let nextIndex = 0;
     let processed = 0;
+    let lastSnapshot = 0;
+    // Snapshots scan the results array, so building one per completion would be quadratic.
+    // Throttle them, while always sending an early partial update and a final complete one.
+    const snapshot = (force: boolean) => {
+      if (!onProgress) return;
+      const now = Date.now();
+      if (!force && now - lastSnapshot < PROGRESS_SNAPSHOT_INTERVAL_MS) return;
+      lastSnapshot = now;
+      onProgress({
+        processed,
+        candidates: resources.length,
+        items: results.filter((item): item is Resource => item !== undefined),
+      });
+    };
     const worker = async () => {
       while (nextIndex < resources.length) {
         const index = nextIndex++;
         results[index] = await this.decryptResource(resources[index]);
         processed++;
-        if (onProgress) {
-          onProgress({
-            processed,
-            candidates: resources.length,
-            items: results.filter((item): item is Resource => item !== undefined),
-          });
-        }
+        snapshot(processed === 1 || processed === resources.length);
       }
     };
     await Promise.all(Array.from({ length: Math.min(resources.length, 16) }, worker));

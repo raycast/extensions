@@ -5,9 +5,6 @@ import ResourceDetail from "./details";
 import { Resource } from "./types";
 import { filterResources } from "./utils/resources";
 
-// Minimum interval between progressive list updates while metadata is decrypting.
-const PROGRESS_RENDER_INTERVAL_MS = 150;
-
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [allItems, setAllItems] = useState<Resource[]>([]);
@@ -19,16 +16,10 @@ export default function Command() {
     async function fetchResources() {
       setIsLoading(true);
       try {
-        // Fetch all resources (empty query returns all); decrypted entries appear progressively.
-        let lastRender = 0;
+        // Fetch all resources (empty query returns all); decrypted entries appear
+        // progressively through throttled snapshots from the decryptor.
         const response = await client.searchResources("", {
-          onProgress: ({ items }) => {
-            const now = Date.now();
-            if (now - lastRender >= PROGRESS_RENDER_INTERVAL_MS) {
-              lastRender = now;
-              setAllItems(items);
-            }
-          },
+          onProgress: ({ items }) => setAllItems(items),
         });
         if (response.body && Array.isArray(response.body)) {
           setAllItems(response.body);
