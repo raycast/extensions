@@ -16,6 +16,7 @@
     {
       "name": "run-for-current-user",
       "title": "Run for Current User",
+      "subtitle": "Alter Ego",
       "description": "Do not run directly — launched automatically by your Alter Ego Quicklink.",
       "mode": "no-view",
       "arguments": [
@@ -30,6 +31,7 @@
     {
       "name": "manage-alter-ego",
       "title": "Manage Alter Ego",
+      "subtitle": "Alter Ego",
       "description": "Add, edit, or remove per-user mappings.",
       "mode": "view"
     }
@@ -42,15 +44,13 @@
     "@types/node": "^26.1.1",
     "eslint": "^10.8.0",
     "prettier": "^3.9.6",
-    "typescript": "~6.0.3",
-    "vitest": "^4.1.10"
+    "typescript": "~6.0.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "test": "vitest run",
     "publish": "npx @raycast/api@latest publish"
   }
 }

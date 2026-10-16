@@ -25,14 +25,9 @@ import {
   extractPayloadFromLink,
   isAlterEgoLink,
 } from "./lib/quicklink";
-import { AlterEgoMap, AlterEgoPayload, Target } from "./lib/types";
+import { AlterEgoMap, HandoffContext, Target } from "./lib/types";
 
 type Source = "loading" | "hotkey" | "clipboard" | "new";
-
-interface HandoffContext {
-  payload?: AlterEgoPayload;
-  source?: "hotkey" | "decode-error";
-}
 
 export default function Command(props: LaunchProps<{ launchContext?: HandoffContext }>) {
   const { push, pop } = useNavigation();

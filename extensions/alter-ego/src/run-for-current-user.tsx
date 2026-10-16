@@ -2,7 +2,7 @@ import { launchCommand, LaunchProps, LaunchType, open, showHUD } from "@raycast/
 import { homedir, userInfo } from "node:os";
 import { lookupTarget } from "./lib/lookup";
 import { decodePayload } from "./lib/payload";
-import { Target } from "./lib/types";
+import { HandoffContext, Target } from "./lib/types";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.RunForCurrentUser }>) {
   const decoded = decodePayload(props.arguments.map);
@@ -12,11 +12,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     // still needs to fall through its normal clipboard/empty-state resolution
     // rather than silently discarding anything (spec §7).
     await showHUD("⚠️ Alter Ego: don't run this directly — use your Quicklink. Opening Manage…");
-    await launchCommand({
-      name: "manage-alter-ego",
-      type: LaunchType.UserInitiated,
-      context: { source: "decode-error" },
-    });
+    await launchManage({ source: "decode-error" });
     return;
   }
 
@@ -24,11 +20,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
   const target = lookupTarget(decoded.payload.map, username);
 
   if (!target) {
-    await launchCommand({
-      name: "manage-alter-ego",
-      type: LaunchType.UserInitiated,
-      context: { payload: decoded.payload, source: "hotkey" },
-    });
+    await launchManage({ payload: decoded.payload, source: "hotkey" });
     return;
   }
 
@@ -36,6 +28,14 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     await open(resolveOpenValue(target));
   } catch {
     await showHUD(`⚠️ Alter Ego: couldn't open "${target.value}"`);
+  }
+}
+
+async function launchManage(context: HandoffContext): Promise<void> {
+  try {
+    await launchCommand({ name: "manage-alter-ego", type: LaunchType.UserInitiated, context });
+  } catch {
+    await showHUD("⚠️ Alter Ego: couldn't open Manage Alter Ego — is the command enabled?");
   }
 }
 

@@ -15,3 +15,8 @@ export interface AlterEgoPayload {
 }
 
 export const TARGET_TYPES: readonly TargetType[] = ["app", "deeplink", "url", "path"];
+
+export interface HandoffContext {
+  payload?: AlterEgoPayload;
+  source?: "hotkey" | "decode-error";
+}
