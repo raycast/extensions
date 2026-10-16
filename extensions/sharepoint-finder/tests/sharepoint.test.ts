@@ -8,6 +8,7 @@ import {
   rankLocalSiteLibraries,
   rankSharedLibraryRoots,
   toLocalPath,
+  toLocalPaths,
 } from "../src/sharepoint.ts";
 
 const sharedLibrariesPath =
@@ -125,6 +126,38 @@ test("parses the exact Four12 folder URL", () => {
   });
 });
 
+test("tries literal URL names before decoded SharePoint names", () => {
+  const url =
+    "https://four12global.sharepoint.com/sites/creative.branding/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2Fcreative.branding%2FShared%20Documents%2FEvents%2FConferences%2FConference%20in%20South%20Africa%2F2026%2FAndrew%20Session%20%26%23x7c%3B%20Leaders%20and%20Conference%2FLeaders%20Time%2FFinal";
+  const location = parseSharePointLocation(url);
+  const basePath = `${sharedLibrariesPath}/Creative - Documents/Events/Conferences/Conference in South Africa/2026`;
+
+  assert.deepEqual(
+    toLocalPaths(
+      sharedLibrariesPath,
+      "Creative - Documents",
+      location.relativeSegments,
+    ),
+    [
+      `${basePath}/Andrew Session &#x7c; Leaders and Conference/Leaders Time/Final`,
+      `${basePath}/Andrew Session | Leaders and Conference/Leaders Time/Final`,
+    ],
+  );
+});
+
+test("decodes other numeric HTML entities in local name fallbacks", () => {
+  assert.deepEqual(
+    toLocalPaths(sharedLibrariesPath, "Creative - Documents", [
+      "R&#38;D",
+      "A&#x2013;Z",
+    ]),
+    [
+      `${sharedLibrariesPath}/Creative - Documents/R&#38;D/A&#x2013;Z`,
+      `${sharedLibrariesPath}/Creative - Documents/R&D/A–Z`,
+    ],
+  );
+});
+
 test("extracts a folder from a direct SharePoint URL", () => {
   const url = `https://four12global.sharepoint.com/:f:/r${folderPath.replaceAll(" ", "%20")}?csf=1`;
   assert.equal(extractServerRelativePath(url), folderPath);
@@ -186,12 +219,123 @@ test("rejects ambiguous reordered site names", () => {
     relativeSegments: [],
     serverRelativePath: "/sites/externalresources/Shared Documents",
   };
+  assert.throws(
+    () =>
+      rankLocalLibraries(
+        ["Resources External - Documents", "Resources-External - Documents"],
+        location,
+      ),
+    /More than one synced site/,
+  );
+});
+
+test("rejects multiple partial site matches instead of choosing the highest score", () => {
+  const location = parseSharePointLocation(exactUrl);
+  assert.throws(
+    () =>
+      rankLocalLibraries(
+        ["Creative - Documents", "Creative Branding Archive - Documents"],
+        location,
+      ),
+    /More than one synced site matches creative.branding/,
+  );
+});
+
+test("prefers an exact site over partial matches", () => {
+  const location = parseSharePointLocation(exactUrl);
   assert.deepEqual(
     rankLocalLibraries(
-      ["Resources External - Documents", "Resources-External - Documents"],
+      [
+        "Creative - Documents",
+        "Creative Branding - Documents",
+        "Creative Branding Archive - Documents",
+      ],
       location,
     ),
-    [],
+    ["Creative Branding - Documents"],
+  );
+});
+
+test("retains the actual synced library name and suffix casing", () => {
+  const location = parseSharePointLocation(exactUrl);
+  assert.deepEqual(rankLocalLibraries(["Creative - DOCUMENTS"], location), [
+    "Creative - DOCUMENTS",
+  ]);
+});
+
+test("rejects multiple libraries matching one site's requested library", () => {
+  const location = parseSharePointLocation(exactUrl);
+  assert.throws(
+    () =>
+      rankLocalLibraries(
+        ["Creative - Documents", "Creative - DOCUMENTS"],
+        location,
+      ),
+    /More than one synced library/,
+  );
+});
+
+test("rejects ambiguous sites before searching an opaque file's libraries", () => {
+  assert.throws(
+    () =>
+      rankLocalSiteLibraries(
+        ["Creative - Documents", "Creative Branding Archive - Brand Assets"],
+        "creative.branding",
+      ),
+    /More than one synced site/,
+  );
+});
+
+test("allows multiple libraries within one uniquely matched site", () => {
+  assert.deepEqual(
+    rankLocalSiteLibraries(
+      [
+        "Creative Branding - Documents",
+        "Creative Branding - Brand Assets",
+        "Creative - Documents",
+      ],
+      "creative.branding",
+    ),
+    ["Creative Branding - Documents", "Creative Branding - Brand Assets"],
+  );
+});
+
+test("rejects exact site names that normalize to the same slug", () => {
+  assert.throws(
+    () =>
+      rankLocalSiteLibraries(
+        ["Creative Branding - Documents", "Creative.Branding - Brand Assets"],
+        "creative.branding",
+      ),
+    /More than one synced site/,
+  );
+});
+
+test("rejects ambiguous tenants before probing their libraries", () => {
+  assert.throws(
+    () =>
+      rankSharedLibraryRoots(
+        [
+          "OneDrive-SharedLibraries-Four12",
+          "OneDrive-SharedLibraries-Four12GlobalArchive",
+        ],
+        "four12global",
+      ),
+    /More than one synced tenant/,
+  );
+});
+
+test("prefers the exact tenant over partial tenant names", () => {
+  assert.deepEqual(
+    rankSharedLibraryRoots(
+      [
+        "OneDrive-SharedLibraries-Four12",
+        "OneDrive-SharedLibraries-Four12Global",
+        "OneDrive-SharedLibraries-Four12GlobalArchive",
+      ],
+      "four12global",
+    ),
+    ["OneDrive-SharedLibraries-Four12Global"],
   );
 });
 

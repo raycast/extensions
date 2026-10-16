@@ -2,6 +2,7 @@ import {
   BrowserExtension,
   Clipboard,
   Toast,
+  environment,
   open,
   showInFinder,
   showToast,
@@ -9,38 +10,47 @@ import {
 import { readdir, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
+import {
+  resolveBrowserTarget,
+  type BrowserDiagnostics,
+} from "./browser-target";
 import { findFilesByName } from "./local-files";
 import {
   parseSharePointTarget,
   rankLocalLibraries,
   rankLocalSiteLibraries,
   rankSharedLibraryRoots,
-  toLocalPath,
+  toLocalPaths,
 } from "./sharepoint";
 
 export default async function Command(): Promise<void> {
+  let stage = "browser";
+  let browserDiagnostics: BrowserDiagnostics | undefined;
   try {
-    const tabs = await BrowserExtension.getTabs();
-    const activeSharePointTab = tabs.find((tab) => {
-      if (!tab.active) return false;
-      try {
-        return new URL(tab.url).hostname.endsWith(".sharepoint.com");
-      } catch {
-        return false;
-      }
-    });
+    const activeSharePointTab = await resolveBrowserTarget(
+      () => {
+        if (!environment.canAccess(BrowserExtension)) {
+          throw new Error("Raycast browser extension is not connected");
+        }
+        return BrowserExtension.getTabs();
+      },
+      () => Clipboard.readText(),
+      (diagnostics) => {
+        browserDiagnostics = diagnostics;
+        console.info(
+          "SharePoint browser diagnostics",
+          JSON.stringify(diagnostics),
+        );
+      },
+    );
 
-    if (!activeSharePointTab) {
-      throw new Error(
-        "Open the SharePoint file or folder in your browser first",
-      );
-    }
-
+    stage = "parse-link";
     const target = parseSharePointTarget(
       activeSharePointTab.url,
       activeSharePointTab.title,
     );
     const cloudStoragePath = path.join(homedir(), "Library", "CloudStorage");
+    stage = "find-synced-library";
     const cloudEntries = await readdir(cloudStoragePath, {
       withFileTypes: true,
     });
@@ -67,14 +77,13 @@ export default async function Command(): Promise<void> {
           ? rankLocalSiteLibraries(directoryNames, target.siteSlug)
           : rankLocalLibraries(directoryNames, target);
       for (const libraryName of rankedLibraries) {
-        candidates.push({
+        for (const localPath of toLocalPaths(
+          rootPath,
           libraryName,
-          localPath: toLocalPath(
-            rootPath,
-            libraryName,
-            target.kind === "path" ? target.relativeSegments : [],
-          ),
-        });
+          target.kind === "path" ? target.relativeSegments : [],
+        )) {
+          candidates.push({ libraryName, localPath });
+        }
       }
     }
 
@@ -83,6 +92,7 @@ export default async function Command(): Promise<void> {
     }
 
     if (target.kind === "shared-file") {
+      stage = "find-synced-file";
       const matches: string[] = [];
       for (const candidate of candidates) {
         matches.push(
@@ -106,10 +116,12 @@ export default async function Command(): Promise<void> {
         );
       }
 
+      stage = "open-in-finder";
       await showInFinder(matches[0]);
       return;
     }
 
+    stage = "find-synced-item";
     for (const candidate of candidates) {
       let itemStats;
       try {
@@ -120,6 +132,7 @@ export default async function Command(): Promise<void> {
         throw error;
       }
 
+      stage = "open-in-finder";
       if (itemStats.isDirectory()) await open(candidate.localPath);
       else await showInFinder(candidate.localPath);
       return;
@@ -129,8 +142,22 @@ export default async function Command(): Promise<void> {
       `The item is not available in ${candidates[0].libraryName}`,
     );
   } catch (error) {
-    console.error("SharePoint Finder failed", error);
     const message = error instanceof Error ? error.message : String(error);
+    const details = JSON.stringify(
+      {
+        stage,
+        browser: browserDiagnostics,
+        message,
+        stack: error instanceof Error ? error.stack : undefined,
+        cause:
+          error instanceof Error && error.cause instanceof Error
+            ? error.cause.message
+            : undefined,
+      },
+      null,
+      2,
+    );
+    console.error("SharePoint Finder failed", details);
     await showToast({
       style: Toast.Style.Failure,
       title: "Couldn’t open SharePoint item",
@@ -138,7 +165,7 @@ export default async function Command(): Promise<void> {
       primaryAction: {
         title: "Copy Full Error",
         onAction: async (toast) => {
-          await Clipboard.copy(message);
+          await Clipboard.copy(details);
           await toast.hide();
         },
       },

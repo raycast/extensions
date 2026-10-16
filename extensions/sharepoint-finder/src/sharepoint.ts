@@ -199,15 +199,39 @@ function rankByRemoteName(names: string[], remoteName: string): string[] {
     .map(({ name }) => name);
 }
 
+function matchUniqueName(
+  names: string[],
+  remoteName: string,
+  kind: "tenant" | "site" | "library",
+  allowReorderedWords = false,
+): string[] {
+  const uniqueNames = [...new Set(names)];
+  const remoteKey = normalizeName(remoteName);
+  let matches = uniqueNames.filter((name) => normalizeName(name) === remoteKey);
+  if (matches.length === 0 && allowReorderedWords) {
+    matches = uniqueNames.filter((name) =>
+      matchesReorderedWords(name, remoteName),
+    );
+  }
+  if (matches.length === 0) matches = rankByRemoteName(uniqueNames, remoteName);
+  if (matches.length > 1) {
+    throw new Error(
+      `More than one synced ${kind} matches ${remoteName}: ${matches.join(", ")}. The item was not opened.`,
+    );
+  }
+  return matches;
+}
+
 export function rankSharedLibraryRoots(
   directoryNames: string[],
   tenantName: string,
 ): string[] {
   const prefix = "OneDrive-SharedLibraries-";
   const roots = directoryNames.filter((name) => name.startsWith(prefix));
-  return rankByRemoteName(
+  return matchUniqueName(
     roots.map((name) => name.slice(prefix.length)),
     tenantName,
+    "tenant",
   ).map((name) => `${prefix}${name}`);
 }
 
@@ -226,28 +250,22 @@ export function rankLocalLibraries(
     name.toLocaleLowerCase().endsWith(suffix.toLocaleLowerCase()),
   );
   const siteNames = matchingNames.map((name) => name.slice(0, -suffix.length));
-  const remoteKey = normalizeName(location.siteSlug);
-  const exactMatches = siteNames.filter(
-    (siteName) => normalizeName(siteName) === remoteKey,
+  const [siteName] = matchUniqueName(
+    siteNames,
+    location.siteSlug,
+    "site",
+    true,
   );
-  if (exactMatches.length !== 0) {
-    return exactMatches.length === 1 ? [`${exactMatches[0]}${suffix}`] : [];
+  if (siteName === undefined) return [];
+  const libraries = matchingNames.filter(
+    (name) => name.slice(0, -suffix.length) === siteName,
+  );
+  if (libraries.length > 1) {
+    throw new Error(
+      `More than one synced library matches ${location.siteSlug}/${location.libraryName}. The item was not opened.`,
+    );
   }
-
-  // OneDrive display names can order site words differently from SharePoint's
-  // URL slug. Prefer one exact permutation over any partial prefix match.
-  const reorderedMatches = siteNames.filter((siteName) =>
-    matchesReorderedWords(siteName, location.siteSlug),
-  );
-  if (reorderedMatches.length !== 0) {
-    return reorderedMatches.length === 1
-      ? [`${reorderedMatches[0]}${suffix}`]
-      : [];
-  }
-
-  return rankByRemoteName(siteNames, location.siteSlug).map(
-    (siteName) => `${siteName}${suffix}`,
-  );
+  return libraries;
 }
 
 type LocalSiteLibraryCandidate = {
@@ -285,28 +303,60 @@ export function rankLocalSiteLibraries(
   siteSlug: string,
 ): string[] {
   const candidates = localSiteLibraryCandidates(directoryNames);
-  const remoteKey = normalizeName(siteSlug);
-  const exactMatches = candidates.filter(
-    ({ siteName }) => normalizeName(siteName) === remoteKey,
-  );
-  if (exactMatches.length > 0) return uniqueLibraryNames(exactMatches);
-
-  const reorderedMatches = candidates.filter(({ siteName }) =>
-    matchesReorderedWords(siteName, siteSlug),
-  );
-  if (reorderedMatches.length > 0) {
-    return uniqueLibraryNames(reorderedMatches);
-  }
-
-  const rankedSiteNames = rankByRemoteName(
-    [...new Set(candidates.map(({ siteName }) => siteName))],
+  const [siteName] = matchUniqueName(
+    candidates.map(({ siteName }) => siteName),
     siteSlug,
+    "site",
+    true,
   );
   return uniqueLibraryNames(
-    rankedSiteNames.flatMap((siteName) =>
-      candidates.filter((candidate) => candidate.siteName === siteName),
-    ),
+    candidates.filter((candidate) => candidate.siteName === siteName),
   );
+}
+
+function decodeNumericHtmlEntities(segment: string): string {
+  return segment.replace(
+    /&#(?:x([0-9a-f]+)|([0-9]+));/gi,
+    (entity, hex, decimal) => {
+      const codePoint = Number.parseInt(hex ?? decimal, hex ? 16 : 10);
+      if (
+        !Number.isInteger(codePoint) ||
+        codePoint < 32 ||
+        codePoint > 0x10ffff ||
+        (codePoint >= 0xd800 && codePoint <= 0xdfff) ||
+        codePoint === 127 ||
+        codePoint === 47 ||
+        codePoint === 92
+      ) {
+        return entity;
+      }
+      return String.fromCodePoint(codePoint);
+    },
+  );
+}
+
+// Try the URL's literal names first. SharePoint sometimes uses numeric HTML
+// entities in URLs for names that OneDrive syncs with the actual character.
+export function toLocalPaths(
+  sharedLibrariesPath: string,
+  localLibraryName: string,
+  relativeSegments: string[],
+): string[] {
+  const exactPath = toLocalPath(
+    sharedLibrariesPath,
+    localLibraryName,
+    relativeSegments,
+  );
+  const decodedSegments = relativeSegments.map(decodeNumericHtmlEntities);
+  if (decodedSegments.some((segment) => segment === "." || segment === "..")) {
+    return [exactPath];
+  }
+  const decodedPath = toLocalPath(
+    sharedLibrariesPath,
+    localLibraryName,
+    decodedSegments,
+  );
+  return decodedPath === exactPath ? [exactPath] : [exactPath, decodedPath];
 }
 
 export function toLocalPath(

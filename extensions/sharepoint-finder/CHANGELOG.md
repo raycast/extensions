@@ -5,3 +5,5 @@
 - Open the current SharePoint file or folder in its locally synced Finder location.
 - Automatically detect OneDrive tenants and synced document libraries.
 - Support multiple Microsoft organizations without Microsoft Graph access.
+- Refuse ambiguous tenant, site, library, or shared-file matches.
+- Support copied SharePoint URLs and include browser diagnostics in copyable errors.
