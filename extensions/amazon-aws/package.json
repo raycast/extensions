@@ -355,7 +355,6 @@
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/react": "^19.1.10",
-    "esbuild": "^0.27.7",
     "eslint": "^9.33.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2"
@@ -365,7 +364,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test:sdk-bundling": "node scripts/test-sdk-bundling.cjs",
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
