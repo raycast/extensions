@@ -1,6 +1,6 @@
 # Privacy Mask Changelog
 
-## [Copy as soon as it is ready] - {PR_MERGE_DATE}
+## [Copy as soon as it is ready] - 2026-10-16
 
 - Copies the masked text to the clipboard as soon as it is ready, and again whenever a finding is left alone or masked back, so pasting is all that is left to do
 - `⌘V` starts over on whatever is on the clipboard now, so the next text can be masked without closing and reopening the command
