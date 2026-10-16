@@ -17,6 +17,8 @@ import {
   rebuildIndex,
   runSearch,
   rerank,
+  applyPostFilters,
+  parseQuery,
   humanBytes,
   indexPathFor,
   shardDirFor,
@@ -91,9 +93,9 @@ Deps: fd, rg, fzf, split — index at ${INDEX_DIR}`;
 
 async function cmdSearch(q: string, flags: Flags): Promise<void> {
   if (q.trim().length < 2) return;
-  await ensureIndex(flags.scope, {}).catch(() => {});
+  await ensureIndex(flags.scope, {}, false, false).catch(() => {});
   const out = await runSearch(q, flags.scope, flags.limit);
-  const ranked = rerank(out, q);
+  const ranked = applyPostFilters(rerank(out, q), parseQuery(q));
   for (const p of ranked) {
     if (flags.tui) {
       const name = path.basename(p);

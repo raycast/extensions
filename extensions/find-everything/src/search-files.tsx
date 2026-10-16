@@ -18,6 +18,8 @@ import {
   ensureIndex,
   runSearch,
   rerank,
+  applyPostFilters,
+  parseQuery,
   humanBytes,
   prettyPath,
   scopePaths,
@@ -104,7 +106,7 @@ export default function Command() {
         procRef.current = c;
       });
       if (mySeq !== seq.current) return;
-      setResults(rerank(out, q));
+      setResults(applyPostFilters(rerank(out, q), parseQuery(q)));
       setSearching(false);
     }, 120);
     return () => clearTimeout(timer);

@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-16 (f)
+
+- Query language (engine-level — works in the app, the Raycast extension and the `fe` CLI):
+  `ext:md;pdf` / `*.md` extension filters, `in:downloads` / bare `invoice in downloads` location scoping,
+  `type:doc|image|video|audio|zip|code|app` macros, `!noise` exclusion, `a|b` alternation,
+  `"exact phrase"` literal, `sort:name|new|old|big|small`, `size:>10m`, `dm:today|week|<n>d`.
+- Query history: `↑` on the first result row cycles through past queries, `↓` walks back; persisted in `history.json` (last 30).
+- `⇧Tab` in path mode jumps to the parent directory.
+- Dead-end rescue: `↵` on an empty result list opens a web search instead of doing nothing.
+- Shortcut hints render as Raycast-style keycaps (one cap per key, combos side-by-side); action panel and help card can no longer overlap.
+- Fixed: early `-m` exits left orphaned `rg` processes blocked on full pipes; all pipeline children are killed when fzf finishes.
+
 ## 2026-10-16 (c)
 
 - Native macOS app `app/Find Everything.app` — SwiftUI/NSPanel floating panel, global `⌥Space` hotkey, shared `fe` engine + shared index. Build via `app/bundle-app.sh`, install via `install.sh`.

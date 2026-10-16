@@ -270,6 +270,7 @@ export async function ensureIndex(
   scope: Scope,
   opts: EngineOpts,
   force = false,
+  background = true,
 ): Promise<string> {
   const file = indexPathFor(scope);
   fs.mkdirSync(INDEX_DIR, { recursive: true });
@@ -282,7 +283,9 @@ export async function ensureIndex(
     return file;
   }
   if (exists && stale && !force) {
-    rebuildIndex(scope, opts).catch(() => {});
+    // CLI callers pass background=false so a queued fd scan can't pin
+    // the event loop after results were already printed.
+    if (background) rebuildIndex(scope, opts).catch(() => {});
     await ensureShards(scope);
     return file; // stale-while-revalidate
   }
@@ -298,6 +301,140 @@ function searchTarget(scope: Scope): { target: string; isDir: boolean } {
   return { target: indexPathFor(scope), isDir: false };
 }
 
+// Query language (Everything-style, validated): `ext:md;pdf` / `*.md`
+// extension lists, `in:downloads` / bare `invoice in downloads` location
+// scoping, `type:doc|image|video|audio|zip|code|app|hidden` macros,
+// `!noise` exclusion, `a|b` alternation, `"exact phrase"` literal,
+// `sort:name|new|old|big|small` result ordering, `size:>10m` / `dm:today`
+// post-filters on visible results. Unconsumed words stay fuzzy terms.
+export interface ParsedQuery {
+  fuzzy: string[]; // fzf filter terms ('exact, a|b, plain)
+  constraints: { pattern: string; negate: boolean }[]; // rg stages
+  sort?: string;
+  sizeFilter?: { op: string; bytes: number };
+  dmFilter?: { days: number };
+}
+const reEsc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const IN_ALIASES: Record<string, string> = {
+  downloads: "Downloads", documents: "Documents", docs: "Documents",
+  desktop: "Desktop", pictures: "Pictures", pics: "Pictures",
+  music: "Music", movies: "Movies", applications: "Applications",
+  apps: "Applications", projects: "Projects",
+};
+const TYPE_MACROS: Record<string, string> = {
+  doc: "txt|md|pdf|rtf|odt|doc|docx|pages|tex|epub",
+  image: "png|jpe?g|gif|webp|svg|heic|tiff?|bmp|ico",
+  video: "mp4|m4v|mov|mkv|avi|webm|wmv|flv",
+  audio: "mp3|wav|aac|flac|m4a|ogg|opus|aiff?",
+  zip: "zip|tar|tgz|gz|bz2|xz|rar|7z",
+  code: "py|js|ts|tsx|jsx|swift|rs|go|c|h|cpp|cc|mm|m|java|kt|rb|sh|zsh|pl|lua|sql|html|css|json|ya?ml|toml|xml",
+  app: "app|dmg|pkg",
+};
+const SIZE_UNITS: Record<string, number> = {
+  b: 1, k: 1 << 10, kb: 1 << 10, m: 1 << 20, mb: 1 << 20,
+  g: 1 << 30, gb: 1 << 30,
+};
+const DM_DAYS: Record<string, number> = {
+  today: 1, yesterday: 2, week: 7, thisweek: 7,
+  month: 31, thismonth: 31, year: 366, thisyear: 366,
+};
+export function parseQuery(q: string): ParsedQuery {
+  const pq: ParsedQuery = { fuzzy: [], constraints: [] };
+  let rest = q.replace(/"([^"]+)"/g, (_, s) => {
+    pq.fuzzy.push(`'${s}`); // fzf exact-substring marker
+    return " ";
+  });
+  const toks = rest.split(/\s+/).filter(Boolean);
+  const inTarget = (v: string) => {
+    const lv = v.toLowerCase();
+    if (IN_ALIASES[lv])
+      return `/${IN_ALIASES[lv]}/`;
+    if (v.startsWith("/") || v.startsWith("~"))
+      return reEsc(v.startsWith("~") ? HOME + v.slice(1) : v);
+    return `/${reEsc(lv)}/`;
+  };
+  for (let i = 0; i < toks.length; i++) {
+    const tok = toks[i];
+    // bare ` in X` keyword (Raycast style): `invoice in downloads`
+    if ((tok === "in" || tok === "in:") && toks[i + 1]) {
+      pq.constraints.push({ pattern: inTarget(toks[++i]), negate: false });
+      continue;
+    }
+    if (tok.startsWith("!") && tok.length > 1) {
+      pq.constraints.push({ pattern: reEsc(tok.slice(1)), negate: true });
+      continue;
+    }
+    if (tok.startsWith("*." ) && /^[\w-]+$/.test(tok.slice(2))) {
+      pq.constraints.push({ pattern: `\\.${tok.slice(2)}$`, negate: false });
+      continue;
+    }
+    const m = tok.match(/^([a-z]+):(.+)$/i);
+    if (m) {
+      const k = m[1].toLowerCase();
+      const v = m[2];
+      const lv = v.toLowerCase();
+      if (k === "ext") {
+        // ext:md;pdf;txt — `;` lists like Everything
+        const parts = lv.split(";").filter((e) => /^[\w-]+(\.[\w-]+)*$/.test(e));
+        if (parts.length)
+          pq.constraints.push({
+            pattern: `\\.(${parts.map(reEsc).join("|")})$`,
+            negate: false,
+          });
+        continue;
+      }
+      if (k === "in") {
+        pq.constraints.push({ pattern: inTarget(v), negate: false });
+        continue;
+      }
+      if (k === "type" || k === "is" || k === "kind") {
+        if (TYPE_MACROS[lv]) {
+          pq.constraints.push({
+            pattern: `\\.(${TYPE_MACROS[lv]})$`,
+            negate: false,
+          });
+        } else if (lv === "hidden" || lv === "dot") {
+          pq.constraints.push({ pattern: "/\\.", negate: false });
+        }
+        continue;
+      }
+      if (k === "sort") {
+        if (/^(name|new|old|big|small|size)$/.test(lv))
+          pq.sort = lv === "size" ? "big" : lv;
+        continue;
+      }
+      if (k === "size") {
+        const sm = lv.match(/^(>|<)?(\d+(?:\.\d+)?)(b|kb?|mb?|gb?)?$/);
+        if (sm)
+          pq.sizeFilter = {
+            op: sm[1] || ">",
+            bytes: parseFloat(sm[2]) * (SIZE_UNITS[sm[3] || "b"] || 1),
+          };
+        continue;
+      }
+      if (k === "dm" || k === "modified") {
+        if (DM_DAYS[lv]) pq.dmFilter = { days: DM_DAYS[lv] };
+        else {
+          const dm = lv.match(/^(?:<|in)?(\d+)d$/);
+          if (dm) pq.dmFilter = { days: parseInt(dm[1]) };
+        }
+        continue;
+      }
+    }
+    if (tok.includes("|")) {
+      // a|b alternation: rg gets a regex stage, fzf keeps native `|`
+      const alts = tok.split("|").filter(Boolean).map(reEsc);
+      if (alts.length > 1) {
+        pq.constraints.push({ pattern: `(${alts.join("|")})`, negate: false });
+        pq.fuzzy.push(tok);
+        continue;
+      }
+    }
+    pq.fuzzy.push(tok);
+  }
+  return pq;
+}
+
 // Pipeline: rg(term1, file/dir directly) -> rg(term2) ... -> fzf --filter
 // rg narrows the index to ~2k candidates in ~25ms (8 parallel shards);
 // fzf ranks them. Each shard is -m capped so worst-case queries stay ~30ms.
@@ -308,35 +445,33 @@ export function runSearch(
   onSpawn?: (c: ChildProcess[]) => void,
 ): Promise<string[]> {
   return new Promise((resolve) => {
-    const terms = query.split(/\s+/).filter(Boolean);
+    const pq = parseQuery(query);
     const children: ChildProcess[] = [];
     onSpawn?.(children);
 
     let stream: NodeJS.ReadableStream | undefined;
     if (RG) {
       const { target, isDir } = searchTarget(scope);
-      for (const [i, term] of terms.entries()) {
-        const args = isDir
-          ? [
-              "--no-ignore",
-              "--no-filename",
-              "-S",
-              "-F",
-              "-m",
-              String(SHARD_CAP),
-              "--no-line-number",
-              "--",
-              term,
-            ]
-          : [
-              "-S",
-              "-F",
-              "-m",
-              String(FILE_CAP),
-              "--no-line-number",
-              "--",
-              term,
-            ];
+      const stages: string[][] = [];
+      for (const term of pq.fuzzy) {
+        if (term.includes("|")) continue; // alternation already a regex stage
+        stages.push([
+          ...(isDir ? ["--no-ignore", "--no-filename"] : []),
+          "-S", "-F", "-m",
+          String(isDir ? SHARD_CAP : FILE_CAP),
+          "--no-line-number", "--",
+          term.startsWith("'") ? term.slice(1) : term,
+        ]);
+      }
+      for (const c of pq.constraints) {
+        stages.push([
+          ...(isDir ? ["--no-ignore", "--no-filename"] : []),
+          "-i", ...(c.negate ? ["-v"] : []), "-m",
+          String(isDir ? SHARD_CAP : FILE_CAP),
+          "--no-line-number", "--", c.pattern,
+        ]);
+      }
+      for (const [i, args] of stages.entries()) {
         if (i === 0) args.push(target);
         const p = spawn(RG, args, {
           stdio: ["pipe", "pipe", "ignore"],
@@ -353,9 +488,13 @@ export function runSearch(
       stream = fs.createReadStream(indexPathFor(scope));
       stream.on("error", () => {});
     }
+    // fzf needs `a | b` with spaces for OR; quoted terms use 'exact syntax.
+    const fzfFilter = pq.fuzzy
+      .map((t) => (t.includes("|") ? t.split("|").join(" | ") : t))
+      .join(" ");
     const fz = spawn(
       FZF,
-      [`--filter=${query}`, "--scheme=path", "--no-bold"],
+      [`--filter=${fzfFilter}`, "--scheme=path", "--no-bold"],
       { stdio: ["pipe", "pipe", "ignore"] },
     );
     children.push(fz);
@@ -370,17 +509,23 @@ export function runSearch(
       lines += (s.match(/\n/g) || []).length;
       if (buf.length > 8 * 1024 * 1024 || lines > 5000) fz.kill("SIGKILL");
     });
-    fz.on("close", () =>
-      resolve(buf.split("\n").filter(Boolean).slice(0, limit)),
-    );
+    fz.on("close", () => {
+      // Downstream exits early on -m caps; upstream rg stages would
+      // otherwise block forever writing into a readerless pipe.
+      for (const c of children) c.kill("SIGKILL");
+      resolve(buf.split("\n").filter(Boolean).slice(0, limit));
+    });
     fz.on("error", () => resolve([]));
   });
 }
 
 // fzf ranks the rg-filtered candidates; afterwards we partition so that
 // hits whose basename contains ALL query terms float to the top.
+// Takes the raw query; operator tokens are parsed away internally.
 export function rerank(paths: string[], q: string): string[] {
-  const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+  const groups = parseQuery(q)
+    .fuzzy.map((t) => t.replace(/^'/, "").toLowerCase())
+    .map((t) => t.split("|")); // each group's alts are OR-ed
   const seen = new Set<string>();
   const nameHit: string[] = [];
   const rest: string[] = [];
@@ -388,9 +533,42 @@ export function rerank(paths: string[], q: string): string[] {
     if (seen.has(p)) continue;
     seen.add(p);
     const base = path.basename(p).toLowerCase();
-    (terms.every((t) => base.includes(t)) ? nameHit : rest).push(p);
+    (groups.every((g) => g.some((alt) => base.includes(alt)))
+      ? nameHit
+      : rest
+    ).push(p);
   }
   return [...nameHit, ...rest];
+}
+
+// Post-filters needing stat() run on the visible top-N only (the flat
+// index stores just paths — stat'ing 4.6M entries would defeat it).
+export function applyPostFilters(paths: string[], pq: ParsedQuery): string[] {
+  if (!pq.sizeFilter && !pq.dmFilter && !pq.sort) return paths;
+  let items = paths.map((p) => {
+    try {
+      const s = fs.statSync(p);
+      return { p, size: s.size, mtime: s.mtimeMs };
+    } catch {
+      return { p, size: 0, mtime: 0 };
+    }
+  });
+  if (pq.sizeFilter)
+    items = items.filter((i) =>
+      pq.sizeFilter!.op === ">"
+        ? i.size > pq.sizeFilter!.bytes
+        : i.size < pq.sizeFilter!.bytes,
+    );
+  if (pq.dmFilter)
+    items = items.filter(
+      (i) => Date.now() - i.mtime <= pq.dmFilter!.days * 86_400_000,
+    );
+  if (pq.sort === "name") items.sort((a, b) => a.p.localeCompare(b.p));
+  else if (pq.sort === "new") items.sort((a, b) => b.mtime - a.mtime);
+  else if (pq.sort === "old") items.sort((a, b) => a.mtime - b.mtime);
+  else if (pq.sort === "big") items.sort((a, b) => b.size - a.size);
+  else if (pq.sort === "small") items.sort((a, b) => a.size - b.size);
+  return items.map((i) => i.p);
 }
 
 export const humanBytes = (n?: number) => {
