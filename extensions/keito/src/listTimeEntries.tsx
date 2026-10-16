@@ -4,6 +4,7 @@ import {
   Alert,
   Color,
   confirmAlert,
+  getPreferenceValues,
   Icon,
   List,
   showHUD,
@@ -18,13 +19,12 @@ import { OpenKeitoAction } from "./components/OpenKeitoAction";
 import { approvalLabel, enrichEntry, entryEditability } from "./services/keito/normalize";
 import { ResolvedSession } from "./services/keito/session";
 import { TimeEntry } from "./services/keito/types";
-import { restartEntry, startTimer, StartResult } from "./services/keito/workflows";
+import { assertTaskOnProject, restartEntry, startTimer, StartResult } from "./services/keito/workflows";
 import { primaryShortcut } from "./shortcuts";
 import {
   confirmReplaceRunning,
   formatHours,
   getApi,
-  getKeitoPreferences,
   refreshMenuBar,
   showKeitoError,
   todayString,
@@ -33,7 +33,7 @@ import {
 } from "./services/useKeito";
 import { EntryForm } from "./new";
 
-type SortBy = "updated-desc" | "updated-asc" | "created-desc" | "created-asc" | "none";
+type SortBy = Preferences.ListTimeEntries["sortBy"];
 
 export function sortEntries(entries: TimeEntry[], sortBy: SortBy): TimeEntry[] {
   if (sortBy === "none") return entries;
@@ -59,20 +59,18 @@ function Timesheet({ session }: { session: ResolvedSession }) {
   const [date, setDate] = useState(todayString(session));
   const { data, isLoading, revalidate } = useTimeEntries(session, date);
   const { byId } = useProjects(session.scope);
-  const { sortBy = "updated-desc", titleDisplay = "project" } = getKeitoPreferences() as {
-    sortBy?: SortBy;
-    titleDisplay?: "project" | "task";
-  };
+  const { sortBy = "updated-desc", titleDisplay = "project" } = getPreferenceValues<Preferences.ListTimeEntries>();
   const isToday = date === todayString(session);
   const title = dayTitle(date, todayString(session));
 
   const entries = useMemo(
     () =>
+      // Only entries for the day being viewed, so actions always match the heading.
       sortEntries(
-        data.map((e) => enrichEntry(e, byId)),
+        data.filter((e) => e.spentDate === date).map((e) => enrichEntry(e, byId)),
         sortBy,
       ),
-    [data, byId, sortBy],
+    [data, date, byId, sortBy],
   );
   const total = useMemo(() => entries.reduce((sum, e) => sum + e.hours, 0), [entries]);
 
@@ -247,15 +245,16 @@ function Timesheet({ session }: { session: ResolvedSession }) {
                         title="Start on Today"
                         icon={Icon.Calendar}
                         onAction={async () => {
-                          const result = await runStart("Starting timer…", () =>
-                            startTimer(ctx(), {
+                          const result = await runStart("Starting timer…", async () => {
+                            await assertTaskOnProject(getApi(), entry, "Use New Time Entry to choose a current task.");
+                            return startTimer(ctx(), {
                               projectId: entry.projectId,
                               taskId: entry.taskId,
                               spentDate: todayString(session),
                               notes: entry.notes || undefined,
                               externalReference: entry.externalReference,
-                            }),
-                          );
+                            });
+                          });
                           if (result?.status === "started") changeDate("today");
                         }}
                       />

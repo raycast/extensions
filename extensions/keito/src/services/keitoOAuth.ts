@@ -1,4 +1,6 @@
-import { LocalStorage, OAuth } from "@raycast/api";
+import { environment, LocalStorage, OAuth } from "@raycast/api";
+import { join } from "path";
+import { fileLock } from "./keito/lock";
 import { KEITO_OAUTH, KeitoOAuth, StoredTokens, TokenStore } from "./keito/oauth";
 import { SESSION_KEY } from "./keito/session";
 
@@ -47,6 +49,8 @@ export const keitoOAuth = new KeitoOAuth({
       return { code: authorizationCode, codeVerifier: request.codeVerifier, redirectUri: request.redirectURI };
     },
   },
+  // Commands run in separate processes; refresh-token rotation must not race between them.
+  lock: fileLock(join(environment.supportPath, "oauth-refresh.lock")),
   // A new sign-in may be a different person or company, so verify the identity again.
   onSignIn: () => LocalStorage.removeItem(SESSION_KEY),
 });

@@ -3,7 +3,7 @@
   "display": "Node 16",
   "include": [
     "src/**/*",
-    "src/.tsx"
+    "raycast-env.d.ts"
   ],
   "compilerOptions": {
     "lib": [

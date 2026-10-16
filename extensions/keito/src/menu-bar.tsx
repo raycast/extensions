@@ -19,11 +19,6 @@ import { TimeEntry } from "./services/keito/types";
 import { describeEntry, formatHours, getApi, getSession, showKeitoError, todayString } from "./services/useKeito";
 import { primaryShortcut } from "./shortcuts";
 
-interface MenuBarPreferences {
-  showTimerInMenuBar?: boolean;
-  statusFolder?: string;
-}
-
 interface Snapshot {
   running: TimeEntry | null;
   todayHours: number;
@@ -45,7 +40,7 @@ function launch(name: string) {
 }
 
 export default function MenuBar() {
-  const { showTimerInMenuBar = true, statusFolder } = getPreferenceValues<MenuBarPreferences>();
+  const { showTimerInMenuBar = true, statusFolder } = getPreferenceValues<Preferences.MenuBar>();
   const {
     data: session,
     error: sessionError,

@@ -45,6 +45,11 @@ const TEST_CASES = [
   { input: "1.5 - 45m", totalMinutes: 90 - 45 },
   { input: "1+1+2", totalMinutes: 4 * 60 },
   { input: "1+15m-5m", totalMinutes: 60 + 15 - 5 },
+  // Left to right, not right to left
+  { input: "2h-1h-30m", totalMinutes: 30 },
+  { input: "2h - 30m + 15m", totalMinutes: 105 },
+  { input: "3-1-1", totalMinutes: 60 },
+  { input: "1h-2h+3h", totalMinutes: 120 },
 
   // current-time based operations
   { input: "since 7:30a", totalMinutes: 60, assumeCurrentTime: dayjs("8:30 am", "h:mm a") },
@@ -56,7 +61,7 @@ const TEST_CASES = [
   { input: "until 5pm", totalMinutes: 60, assumeCurrentTime: dayjs("4:00 pm", "h:mm a") },
 ];
 
-const INVALID_CASES = ["", "abc", "h", ":", "1:", "1-2"];
+const INVALID_CASES = ["", "abc", "h", ":", "1:", "1-2", "-1h", "1h+", "1h-+2h", "2h-1h-2h"];
 
 describe("parseDuration", () => {
   it.each(TEST_CASES)("parses '$input' to $totalMinutes minutes", ({ input, totalMinutes, assumeCurrentTime }) => {

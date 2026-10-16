@@ -45,6 +45,22 @@ async function withConflictResolution(
   }
 }
 
+/**
+ * Keito accepts a task that is not assigned to the project (observed live), so check before reusing
+ * a saved project/task pair, e.g. from a favorite or a past entry, whose task may since have been
+ * removed from the project.
+ */
+export async function assertTaskOnProject(
+  api: KeitoApi,
+  pair: { projectId: string; projectName: string; taskId: string; taskName: string },
+  fix: string,
+): Promise<void> {
+  const tasks = await api.listProjectTasks(pair.projectId);
+  if (!tasks.some((t) => t.id === pair.taskId)) {
+    throw new KeitoError("validation", `“${pair.taskName}” is no longer assigned to ${pair.projectName}. ${fix}`);
+  }
+}
+
 export interface StartTimerInput {
   projectId: string;
   taskId: string;

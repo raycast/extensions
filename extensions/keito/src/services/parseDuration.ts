@@ -118,17 +118,18 @@ export function parseDuration(input: string, now: dayjs.Dayjs = dayjs()): Durati
     return dayjs.duration({ minutes: diff });
   }
 
-  // Check for add/subtract operations
-  const opMatch = str.match(/^(.+?)\s*([+-])\s*(.+)$/);
-  if (opMatch) {
-    const left = parseDuration(opMatch[1], now);
-    const right = parseDuration(opMatch[3], now);
-    if (!left || !right) return null;
-
-    const op = opMatch[2];
-    const result = op === "+" ? left.asMinutes() + right.asMinutes() : left.asMinutes() - right.asMinutes();
-    if (result < 0) return null;
-    return dayjs.duration({ minutes: result });
+  // Add/subtract operations, evaluated left to right: "2h-1h-30m" is (2h-1h)-30m.
+  // split() with a capture group yields [term, op, term, op, term, ...].
+  const parts = str.split(/\s*([+-])\s*/);
+  if (parts.length > 1) {
+    let total = 0;
+    for (let i = 0; i < parts.length; i += 2) {
+      const term = parseSingleDuration(parts[i]);
+      if (!term) return null;
+      total += i > 0 && parts[i - 1] === "-" ? -term.asMinutes() : term.asMinutes();
+    }
+    if (total < 0) return null;
+    return dayjs.duration({ minutes: total });
   }
 
   return parseSingleDuration(str);

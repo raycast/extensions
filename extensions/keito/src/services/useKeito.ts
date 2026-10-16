@@ -16,7 +16,7 @@ import { useMemo } from "react";
 import { KeitoApi } from "./keito/api";
 import { AuthConfig, resolveAuthConfig } from "./keito/config";
 import { errorMessage, errorTitle, isKeitoError } from "./keito/errors";
-import { formatHours as formatHoursValue, TimeFormat } from "./keito/normalize";
+import { formatHours as formatHoursValue } from "./keito/normalize";
 import {
   invalidateSessionOnSetupError,
   KeyValueStore,
@@ -28,20 +28,11 @@ import { oauthFingerprint } from "./keito/oauth";
 import { keitoOAuth } from "./keitoOAuth";
 import { Project, TimeEntry } from "./keito/types";
 import { WorkflowContext } from "./keito/workflows";
-import { EntryModePreference, todayIn } from "./keito/dates";
+import { todayIn } from "./keito/dates";
 
-export interface KeitoPreferences {
-  token?: string;
-  accountID?: string;
-  timeFormat?: TimeFormat;
-  entryMode?: EntryModePreference;
-  titleDisplay?: "project" | "task";
-  showClient?: boolean;
-  showClientInProject?: boolean;
-}
-
-export function getKeitoPreferences(): KeitoPreferences {
-  return getPreferenceValues<KeitoPreferences>();
+/** Extension-wide preferences, typed by Raycast's generated raycast-env.d.ts. */
+export function getKeitoPreferences(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 export const store: KeyValueStore = LocalStorage;
@@ -222,7 +213,8 @@ export function useTimeEntries(session: ResolvedSession | undefined, date: strin
     [session?.scope ?? "", session?.identity.userId ?? "", date],
     {
       execute: !!session,
-      keepPreviousData: true,
+      // Never show one day's entries under another day's heading and actions.
+      keepPreviousData: false,
       onError: (error) => showKeitoError(error, "Could not load time entries"),
     },
   );

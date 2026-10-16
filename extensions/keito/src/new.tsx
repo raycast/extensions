@@ -102,8 +102,9 @@ export function EntryForm({ session, entry, template, viewDate, onSave }: EntryF
   const [duration, setDuration] = useState(
     source && !source.isRunning ? formatHoursValue(source.hours, timeFormat) : "",
   );
-  const [startTime, setStartTime] = useState(entry?.startedTime ?? "");
-  const [endTime, setEndTime] = useState(entry && !isRunning ? (entry.endedTime ?? "") : "");
+  // Edits and duplicates of a completed entry start from its times; a running timer has no end yet.
+  const [startTime, setStartTime] = useState(source && !source.isRunning ? (source.startedTime ?? "") : "");
+  const [endTime, setEndTime] = useState(source && !source.isRunning ? (source.endedTime ?? "") : "");
   const [spentDate, setSpentDate] = useState<Date>(
     entry ? dayjs(entry.spentDate).toDate() : (viewDate ?? dayjs(todayString(session)).toDate()),
   );

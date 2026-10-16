@@ -159,8 +159,11 @@ export class KeitoHttpClient {
       let response: FetchResponseLike;
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), this.options.timeoutMs);
+      // The timeout covers the response body too: a server can send headers and then stall.
+      let raw: string;
       try {
         response = await this.fetchImpl(url, { method, headers, body: payload, signal: controller.signal });
+        raw = await response.text();
       } catch {
         const timedOut = controller.signal.aborted;
         if (idempotent && canRetry) {
@@ -177,7 +180,6 @@ export class KeitoHttpClient {
         clearTimeout(timer);
       }
 
-      const raw = await response.text().catch(() => "");
       let data: unknown = undefined;
       if (raw) {
         try {

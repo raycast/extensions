@@ -3,6 +3,7 @@
 import { createHash, randomBytes } from "crypto";
 import { KeitoError } from "./errors";
 import { FetchLike, KeitoAuthProvider } from "./http";
+import { Lock } from "./lock";
 
 export const KEITO_OAUTH = {
   clientId: "client_01M52K79JXK4NXVH05RY87VZ9P",
@@ -43,6 +44,8 @@ export interface KeitoOAuthDeps {
   nonce?: () => string;
   /** Called after a successful interactive sign-in, e.g. to forget the previously verified identity. */
   onSignIn?: () => Promise<void>;
+  /** Serializes refreshes across Raycast commands, which run in separate processes. */
+  lock?: Lock;
   timeoutMs?: number;
 }
 
@@ -114,7 +117,7 @@ export class KeitoOAuth {
         signal: controller.signal,
       });
       status = response.status;
-      raw = await response.text().catch(() => "");
+      raw = await response.text();
     } catch {
       throw new KeitoError(
         controller.signal.aborted ? "timeout" : "network",
@@ -204,8 +207,20 @@ export class KeitoOAuth {
   }
 
   private async doRefresh(): Promise<StoredTokens | undefined> {
+    const seen = await this.deps.store.get();
+    const run = () => this.refreshLocked(seen?.refreshToken);
+    return this.deps.lock ? this.deps.lock(run) : run();
+  }
+
+  /**
+   * Runs while holding the cross-command lock, so the read, token request, and save or removal
+   * can't interleave with another command's refresh.
+   */
+  private async refreshLocked(seenRefreshToken: string | undefined): Promise<StoredTokens | undefined> {
     const current = await this.deps.store.get();
     if (!current?.refreshToken) return undefined;
+    // Another command rotated the tokens while this one waited for the lock: use them.
+    if (seenRefreshToken && current.refreshToken !== seenRefreshToken && this.isFresh(current)) return current;
     try {
       const next = await this.tokenRequest({
         grant_type: "refresh_token",
@@ -223,9 +238,10 @@ export class KeitoOAuth {
       return merged;
     } catch (error) {
       if (!(error instanceof GrantError)) throw error;
-      // Another Raycast command may have rotated the refresh token first; use its tokens.
+      // Without a lock (or if a command signed in meanwhile), newer tokens may already be stored.
       const latest = await this.deps.store.get();
       if (latest?.refreshToken && latest.refreshToken !== current.refreshToken) return latest;
+      // The stored refresh token itself was rejected: sign out.
       await this.deps.store.remove();
       return undefined;
     }

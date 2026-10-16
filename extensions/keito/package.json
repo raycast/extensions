@@ -136,7 +136,7 @@
   "preferences": [
     {
       "name": "token",
-      "title": "Keito Integration API Key (optional)",
+      "title": "Keito Integration API Key (Optional)",
       "description": "Leave blank to sign in with your Keito account in the browser. Or enter a full-access integration key (kto_…) that a Keito Administrator created for you.",
       "required": false,
       "link": "https://keito.ai/docs/auth/api-keys",
@@ -145,7 +145,7 @@
     },
     {
       "name": "accountID",
-      "title": "Keito Company ID (optional)",
+      "title": "Keito Company ID (Optional)",
       "required": false,
       "description": "Only needed with an integration key: Settings → API & Developers → Company ID. Leave blank to sign in with Keito.",
       "link": "https://keito.ai/docs/auth/api-keys",
@@ -249,8 +249,8 @@
     "publish": "npm run test:run && npm run lint && npm run build && npm run check:publish && npx @raycast/api@latest publish",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:live": "node --env-file=\"${KEITO_ENV_FILE:-$HOME/.config/keito-raycast/live.env}\" node_modules/vitest/vitest.mjs run --config vitest.live.config.ts",
-    "test:live:write": "KEITO_LIVE_WRITE=1 node --env-file=\"${KEITO_ENV_FILE:-$HOME/.config/keito-raycast/live.env}\" node_modules/vitest/vitest.mjs run --config vitest.live.config.ts src/services/keito/writes.live.ts",
+    "test:live": "node --env-file=\"${KEITO_ENV_FILE:-$HOME/.config/keito-raycast/live.env}\" node_modules/vitest/vitest.mjs run --config vitest.live.config.mts",
+    "test:live:write": "KEITO_LIVE_WRITE=1 node --env-file=\"${KEITO_ENV_FILE:-$HOME/.config/keito-raycast/live.env}\" node_modules/vitest/vitest.mjs run --config vitest.live.config.mts src/services/keito/writes.live.ts",
     "check:publish": "node scripts/check-publish.js"
   },
   "packageManager": "npm@11.15.0"

@@ -26,9 +26,8 @@ import {
   parseFavorites,
   upsertFavorite as upsertInList,
 } from "./services/keito/favorites";
-import { KeitoError } from "./services/keito/errors";
 import { ResolvedSession } from "./services/keito/session";
-import { startTimer } from "./services/keito/workflows";
+import { assertTaskOnProject, startTimer } from "./services/keito/workflows";
 import {
   confirmReplaceRunning,
   formatHours,
@@ -90,15 +89,7 @@ function Favorites({ session }: { session: ResolvedSession }) {
     });
     try {
       const api = getApi();
-      // Keito accepts a task that is not assigned to the project (observed live), so check here:
-      // a saved favorite may point to a task that has since been removed from its project.
-      const projectTasks = await api.listProjectTasks(favorite.projectId);
-      if (!projectTasks.some((t) => t.id === favorite.taskId)) {
-        throw new KeitoError(
-          "validation",
-          `“${favorite.taskName}” is no longer assigned to ${favorite.projectName}. Edit the favorite to choose another task.`,
-        );
-      }
+      await assertTaskOnProject(api, favorite, "Edit the favorite to choose another task.");
       if (hasDuration) {
         await api.createTimeEntry({
           project_id: favorite.projectId,
