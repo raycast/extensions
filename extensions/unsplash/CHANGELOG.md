@@ -1,6 +1,6 @@
 # Unsplash Changelog
 
-## [Fix OAuth Redirect] - {PR_MERGE_DATE}
+## [Fix OAuth Redirect] - 2026-10-16
 
 - Fixed "Open Raycast" doing nothing after signing in to Unsplash (ref: [Issue #31324](https://github.com/raycast/extensions/issues/31324), [Issue #32425](https://github.com/raycast/extensions/issues/32425)). No changes needed in your Unsplash app; `https://raycast.com/redirect` stays the registered redirect URI
 - Fixed token exchange failing with "Missing required parameter: code_verifier" by sending the PKCE verifier
