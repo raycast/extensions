@@ -20,6 +20,12 @@
 - More file actions: Duplicate (`<name> copy`), Compress to zip, Copy file contents (`⌘⌥⇧C`), Share via NSSharingServicePicker, Finder Get Info on `⌘I`.
 - Result rows are draggable file references into Finder or other apps.
 
+## 2026-10-16 (e)
+
+- **Fixed real-keyboard arrows**: physical keyboards mark ↑↓/nav keys with `.function`; masking modifiers to just ⌘⌥⌃⇧ makes navigation fire on real hardware (synthetic tests had masked the bug).
+- Grouped results like Raycast: sections "Pinned" → "Recently Used" → "Applications" → "Files & Folders", with in-list headers.
+- Hotkey reference moved out of the footer: `?` button or `⌘/` opens a shortcuts card; `Keyboard Shortcuts` is also an entry in the ⌘K panel. Footer stays clean (status + latency + `?`/`⋯` buttons).
+
 ## 2026-10-16 (b)
 
 - Standalone CLI `fe` for macOS and Linux — same engine as the Raycast extension, shared index at `~/.cache/hypersearch`. Commands: interactive picker (`fe`), `fe search`, `fe index`, `fe status`, `fe open`, `fe preview`.
