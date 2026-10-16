@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add TopxAI Models MCP Server] - 2026-10-16
+
+- Add TopxAI Models to the official registry: list the TopxAI catalogue's text models with their prices, ask Claude, GPT, Grok, GLM, Kimi or DeepSeek from inside another model's conversation, and ask TypeSafe's Jev typed questions about a piece of text. Hosted Streamable HTTP server at https://ai.topxea.com/mcp/models, connected through `mcp-remote` with a TopxAI API key as a bearer header.
+
 ## [Add Kolect Creator Search MCP Server] - 2026-10-15
 
 - Add Kolect Creator Search to the official registry: search 300M+ TikTok, Instagram and YouTube creators from a plain-language brief, look up creators by link or @handle, check fake followers, get public contact emails and save shortlists. Hosted Streamable HTTP server at https://app.kolect.ai/mcp, connected through `mcp-remote` with a Kolect API key as a bearer header.
