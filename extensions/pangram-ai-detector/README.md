@@ -11,6 +11,8 @@ Checks cost about $0.05 per 100 words. Text is sent to Pangram's API.
 
 This is an unofficial extension. Each user needs their own Pangram API key and credits.
 
+The icon uses [Pangram's logo](https://www.pangram.com/favicon.svg). The Pangram name and logo belong to Pangram Labs.
+
 ## Commands
 
 - **Check Text**: checks the selected text, or the clipboard if nothing is selected.
