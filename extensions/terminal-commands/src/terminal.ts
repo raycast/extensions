@@ -10,7 +10,16 @@ export async function runInTerminal(command: string) {
           do script command
         else
           activate
-          do script command in window 1
+          -- The startup window can appear after activate returns; wait up to 5 seconds for it.
+          repeat 50 times
+            if (count of windows) > 0 then exit repeat
+            delay 0.1
+          end repeat
+          if (count of windows) > 0 then
+            do script command in window 1
+          else
+            do script command
+          end if
         end if
         activate
       end tell

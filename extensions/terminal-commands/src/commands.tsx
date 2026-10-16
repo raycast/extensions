@@ -5,6 +5,9 @@ import { CommandForm, CommandFormValues } from "./command-form";
 import { DEFAULT_COMMANDS, getSavedCommands, SavedCommand, STORAGE_KEY } from "./storage";
 import { runInTerminal } from "./terminal";
 
+// Chains updates so overlapping saves don't read the same list and overwrite each other's changes.
+let pendingUpdate: Promise<void> = Promise.resolve();
+
 export default function Command() {
   const {
     value: commands,
@@ -13,8 +16,11 @@ export default function Command() {
   } = useLocalStorage<SavedCommand[]>(STORAGE_KEY, DEFAULT_COMMANDS);
 
   // Reads the stored list instead of `commands`, which can be stale or still loading when a form submits.
-  async function updateCommands(update: (savedCommands: SavedCommand[]) => SavedCommand[]) {
-    await setCommands(update(await getSavedCommands()));
+  function updateCommands(update: (savedCommands: SavedCommand[]) => SavedCommand[]) {
+    const result = pendingUpdate.then(async () => setCommands(update(await getSavedCommands())));
+    // A failed update shouldn't block the ones queued after it.
+    pendingUpdate = result.catch(() => undefined);
+    return result;
   }
 
   async function createCommand(values: CommandFormValues) {

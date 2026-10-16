@@ -1,9 +1,15 @@
 import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { useForm } from "@raycast/utils";
 
 export interface CommandFormValues {
   name: string;
   command: string;
+}
+
+function requiredText(value?: string) {
+  if (!value?.trim()) {
+    return "The item is required";
+  }
 }
 
 export function CommandForm(props: {
@@ -17,9 +23,10 @@ export function CommandForm(props: {
       pop();
     },
     initialValues: props.initialValues,
+    // FormValidation.Required accepts whitespace-only text, which the submit handler would trim to an empty value.
     validation: {
-      name: FormValidation.Required,
-      command: FormValidation.Required,
+      name: requiredText,
+      command: requiredText,
     },
   });
 
