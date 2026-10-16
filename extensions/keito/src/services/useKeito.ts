@@ -114,7 +114,7 @@ export async function getWorkflowContext(
   };
 }
 
-/** Today's date in the Keito workspace timezone (falls back to the Mac's timezone). */
+/** Today's date in the Keito workspace timezone (falls back to this computer's timezone). */
 export function todayString(session?: ResolvedSession): string {
   return todayIn(session?.identity.settings?.timezone);
 }

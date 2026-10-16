@@ -6,7 +6,7 @@ Track time in [Keito](https://keito.ai) without leaving Raycast. Start, stop, an
 
 Open any Keito command and choose **Sign in with Keito**. Your browser opens Keito's sign-in page and then returns you to Raycast. You stay signed in, and the extension renews access automatically.
 
-Then run **Keito Connection** to confirm everything works. It checks your sign-in, the account and company in use, and that you can see your projects and tasks. It also shows your workspace settings: timezone, entry format, required notes, and rounding. To sign out, use **Sign out of Keito** in that command (⌘⇧L).
+Then run **Keito Connection** to confirm everything works. It checks your sign-in, the account and company in use, and that you can see your projects and tasks. It also shows your workspace settings: timezone, entry format, required notes, and rounding. To sign out, use **Sign out of Keito** in that command (⌘⇧L, or Ctrl+Shift+L on Windows).
 
 ### Using an integration key instead
 
@@ -32,7 +32,7 @@ A personal read-only sync key can't track time, and the extension tells you if y
 
 ## Tips
 
-- In the timesheet, ⌘← and ⌘→ move between days, and ⌘T jumps back to today. Pick an old entry and choose **Start on Today** to reuse its project, task, and notes.
+- In the timesheet, ⌘← and ⌘→ (Ctrl+← and Ctrl+→ on Windows) move between days, and ⌘T (Ctrl+T) jumps back to today. Pick an old entry and choose **Start on Today** to reuse its project, task, and notes.
 - Keito allows one running timer. If another timer is running, the extension shows which one and asks before switching. Toggle Timer and the menu bar never switch timers on their own.
 - Approved and locked entries show a tag and a lock icon, and can't be edited or deleted.
 - Durations accept `1:30`, `1.5`, `1h30m`, `90m`, simple math like `1+15m-5m`, and `since 9am`.

@@ -252,7 +252,7 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Workspace timezone"
-                      text={identity.settings.timezone ?? "Not reported (using this Mac's timezone)"}
+                      text={identity.settings.timezone ?? "Not reported (using this computer's timezone)"}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Entry format"

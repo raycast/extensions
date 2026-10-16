@@ -6,7 +6,8 @@
   "icon": "keito-icon-5046e5.png",
   "author": "eluce2",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Productivity"

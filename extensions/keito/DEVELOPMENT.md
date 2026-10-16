@@ -106,7 +106,7 @@ Steps marked ✎ change timesheet data.
 4. ✎ Start a second timer. The switch prompt names the first one. **Cancel** keeps it; **Stop and Switch** replaces it.
 5. ✎ Stop the timer from the menu bar, then use **Toggle Timer** twice (restart, then stop).
 6. ✎ Log a completed entry, edit its notes and duration, duplicate it, and delete the duplicate.
-7. View yesterday (⌘←). ✎ Use **Start on Today** on an entry.
+7. View yesterday (⌘← or Ctrl+←). ✎ Use **Start on Today** on an entry.
 8. ✎ Add a favorite with a duration and one without, and use both.
 9. Approved entries show an *Approved* tag and lock icon, with no edit or delete actions.
 10. Set a status folder and confirm `currentTimer.json` appears while a timer runs and disappears after it stops.
