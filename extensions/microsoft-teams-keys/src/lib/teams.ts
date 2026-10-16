@@ -267,31 +267,30 @@ return out`,
   // Titles look like "Chat | Notes | Microsoft Teams" (main window, view first),
   // "Notes | Microsoft Teams" (the meeting) and "Kompakte Besprechungsansicht |
   // Notes | Microsoft Teams" (the floating mini window, which names the meeting).
-  const parts = (title: string) =>
-    title
-      .split("|")
-      .map((p) => p.trim())
-      .filter((p) => p && p !== "Microsoft Teams");
-  // Judge a window by the whole title, not just its first part: a meeting can
-  // be called "Chat" or "Compact Design Review". The meeting window has the
-  // subject alone; the main window and the mini window put something before it.
+  // Only the known suffix and prefixes are taken off, so a subject that contains
+  // "|" itself ("Design | Review") stays whole.
+  const body = (title: string) => title.replace(/\s*\|\s*Microsoft Teams\s*$/i, "").trim();
+  const prefixed = (title: string) => {
+    const match = body(title).match(/^([^|]+?)\s*\|\s*(.+)$/);
+    return match ? { prefix: match[1].trim(), rest: match[2].trim() } : undefined;
+  };
   const isMain = (title: string) => {
-    const p = parts(title);
-    return p.length >= 2 && MAIN_VIEWS.has(p[0].toLowerCase().normalize("NFC"));
+    const p = prefixed(title);
+    return Boolean(p && MAIN_VIEWS.has(p.prefix.toLowerCase().normalize("NFC")));
   };
   const isCompact = (title: string) => {
-    const p = parts(title);
-    return p.length >= 2 && /compact|kompakt/i.test(p[0]);
+    const p = prefixed(title);
+    return Boolean(p && /compact|kompakt/i.test(p.prefix));
   };
-  const single = windows.filter((w) => parts(w.title).length === 1);
-  // The mini window names the running meeting: pick the window with exactly that title.
   const compact = windows.find((w) => isCompact(w.title));
-  const meetingName = compact ? parts(compact.title)[1] : undefined;
-  const others = single.filter((w) => !MAIN_VIEWS.has(parts(w.title)[0].toLowerCase().normalize("NFC")));
+  // The mini window names the running meeting: pick the window with exactly that title.
+  const meetingName = compact ? prefixed(compact.title)?.rest : undefined;
+  const candidates = windows.filter((w) => w.title && !isCompact(w.title));
+  const others = candidates.filter((w) => !isMain(w.title));
   // Without a mini window the meeting window is usually the one on top already.
   const call =
-    (meetingName ? single.find((w) => parts(w.title)[0] === meetingName) : undefined) ??
-    (!compact && windows[0] && single.includes(windows[0]) && !isMain(windows[0].title) ? windows[0] : undefined) ??
+    (meetingName ? candidates.find((w) => body(w.title) === meetingName) : undefined) ??
+    (!compact && windows[0] && others.includes(windows[0]) ? windows[0] : undefined) ??
     (others.length === 1 ? others[0] : undefined);
   if (!call) {
     // Lists what Teams reports, so a window naming we do not know yet can be added.
@@ -314,7 +313,7 @@ return out`,
   end tell
 end tell`,
   );
-  return parts(call.title)[0] ?? "";
+  return body(call.title);
 }
 
 /**
