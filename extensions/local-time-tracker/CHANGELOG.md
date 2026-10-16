@@ -3,7 +3,7 @@
 ## [Precise Work Time Editing] - {PR_MERGE_DATE}
 
 - Return to an empty Root Search after successfully starting work, and label the running-timer view "Tracking Work".
-- Edit start and end times in 1-minute steps with live current times and a duration comparison.
+- Edit start and end times in 1-minute steps with live current times and a compact preview without duration comparisons.
 - Use native text rendering without bar images to avoid image-replacement flicker.
 - Adjust times by 1 minute with Left/Right or 5 minutes with Shift plus Left/Right; Up/Down focuses Start/End, and Return saves from either endpoint with the save action visible in the bottom-right corner.
 - Limit work-log end times to the current time, removing the previous five-minute future allowance. When adjusting End into the current minute, cap future hidden seconds at now so that minute can always be selected.

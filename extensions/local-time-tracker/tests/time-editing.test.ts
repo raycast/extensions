@@ -109,19 +109,19 @@ test("current-minute end adjustment is capped at now at minute boundaries, midni
 
 test("each one-minute adjustment is reflected in a numeric-only preview immediately", () => {
   const earlier = shiftTimeDraft(original, "start", -1);
-  const preview = timeEditingMarkdown(original, earlier, "start", now);
+  const preview = timeEditingMarkdown(earlier, "start", now);
   assert.match(preview, /^## Start · 09:44　←$/m);
   assert.doesNotMatch(preview, /Time · Adjusting|^#\s/m);
   assert.doesNotMatch(preview, /🟢|▶|\[|\]|^## End.*←/m);
   assert.match(preview, /^## End\u2002 · 11:05$/m);
-  assert.match(preview, /1h 19m → \*\*1h 20m\*\*/);
+  assert.doesNotMatch(preview, /Duration|Elapsed|→/);
   assert.doesNotMatch(preview, /Before|After|of work|Duration unchanged/);
   assert.doesNotMatch(preview, /data:image|<svg|!\[|\| Before|NaN|Infinity/);
 });
 
 test("end adjustments move the trailing focus marker to the end row and preserve start values", () => {
   const later = shiftTimeDraft(original, "end", 1);
-  const preview = timeEditingMarkdown(original, later, "end", now);
+  const preview = timeEditingMarkdown(later, "end", now);
   assert.match(preview, /^## End\u2002 · 11:06　←$/m);
   assert.doesNotMatch(preview, /Time · Adjusting|^#\s|🟢|▶|\[|\]|^## Start.*←/m);
   assert.match(preview, /^## Start · 09:45$/m);
@@ -129,8 +129,8 @@ test("end adjustments move the trailing focus marker to the end row and preserve
 });
 
 test("moving focus leaves both labels and times at the same text positions without a large code block", () => {
-  const startFocused = timeEditingMarkdown(original, original, "start", now).split("\n");
-  const endFocused = timeEditingMarkdown(original, original, "end", now).split("\n");
+  const startFocused = timeEditingMarkdown(original, "start", now).split("\n");
+  const endFocused = timeEditingMarkdown(original, "end", now).split("\n");
   assert.equal(startFocused.length, endFocused.length);
   for (const label of ["Start", "End", "09:45", "11:05"]) {
     const startLine = startFocused.findIndex((line) => line.includes(label));
@@ -149,33 +149,37 @@ test("moving focus leaves both labels and times at the same text positions witho
   }
 });
 
-test("shortening work, zero elapsed time and clock rollback produce finite numeric previews", () => {
+test("shortened logs and clock rollback still render valid times without a duration summary", () => {
   const shortened = shiftTimeDraft(original, "end", -1);
-  assert.match(timeEditingMarkdown(original, shortened, "end", now), /1h 19m → \*\*1h 18m\*\*/);
+  assert.match(timeEditingMarkdown(shortened, "end", now), /11:04/);
   for (const start of [now.toISOString(), new Date(now.getTime() + 60000).toISOString()]) {
     const running = { startedAt: start };
-    assert.doesNotMatch(timeEditingMarkdown(running, running, "start", now), /NaN|Infinity|data:image/);
+    assert.doesNotMatch(timeEditingMarkdown(running, "start", now), /NaN|Infinity|data:image/);
   }
 });
 
 test("exact input shows the current time without a second before/after or duration-delta summary", () => {
   const exact = { ...original, startedAt: new Date(2026, 9, 15, 9, 23).toISOString() };
-  const preview = timeEditingMarkdown(original, exact, "start", now);
+  const preview = timeEditingMarkdown(exact, "start", now);
   assert.match(preview, /^## Start · 09:23　←$/m);
   assert.doesNotMatch(preview, /Before|After|of work|Duration unchanged/);
 });
 
-test("running numbers advance with now without changing the stored draft", () => {
-  const running = { startedAt: new Date(2026, 9, 15, 11, 0).toISOString() };
-  assert.match(timeEditingMarkdown(running, running, "start", now), /5m → \*\*5m\*\*/);
-  const next = new Date(now.getTime() + 60000);
-  assert.match(timeEditingMarkdown(running, running, "start", next), /6m → \*\*6m\*\*/);
-  assert.equal(running.startedAt, new Date(2026, 9, 15, 11, 0).toISOString());
+test("running previews update dates across midnight without changing the stored draft", () => {
+  const running = { startedAt: new Date(2026, 9, 15, 23, 55).toISOString() };
+  const beforeMidnight = new Date(2026, 9, 15, 23, 59);
+  const afterMidnight = new Date(2026, 9, 16, 0, 0);
+  const before = timeEditingMarkdown(running, "start", beforeMidnight);
+  const after = timeEditingMarkdown(running, "start", afterMidnight);
+  assert.ok(before.startsWith(`${formatLogDate(running.startedAt)}\n\n`));
+  assert.ok(after.includes(`Now (Running) · ${formatLogDate(afterMidnight.toISOString())}`));
+  assert.doesNotMatch(before + after, /Duration|Elapsed/);
+  assert.equal(running.startedAt, new Date(2026, 9, 15, 23, 55).toISOString());
 });
 
 test("cross-day corrections show the current date and preserve the running endpoint", () => {
   const running = { startedAt: new Date(2026, 9, 15, 0, 0).toISOString() };
-  const preview = timeEditingMarkdown(running, shiftTimeDraft(running, "start", -1), "start", now);
+  const preview = timeEditingMarkdown(shiftTimeDraft(running, "start", -1), "start", now);
   assert.match(preview, /Now \(Running\)/);
   assert.ok(preview.includes(formatLogDate(new Date(2026, 9, 14).toISOString())));
 
@@ -183,15 +187,15 @@ test("cross-day corrections show the current date and preserve the running endpo
 });
 
 test("same-day dates appear once and midnight corrections restore each endpoint's date", () => {
-  const preview = timeEditingMarkdown(original, original, "start", now);
+  const preview = timeEditingMarkdown(original, "start", now);
   const date = formatLogDate(original.startedAt);
   assert.equal(preview.split(date).length - 1, 1);
   assert.ok(preview.startsWith(`${date}\n\n`));
   const crossing = { ...original, startedAt: new Date(2026, 9, 14, 23, 59).toISOString() };
-  const crossDay = timeEditingMarkdown(original, crossing, "end", now);
+  const crossDay = timeEditingMarkdown(crossing, "end", now);
   assert.ok(crossDay.includes(`Start · 23:59 · ${formatLogDate(crossing.startedAt)}`));
   assert.ok(crossDay.includes(`End\u2002 · 11:05 · ${formatLogDate(crossing.endedAt!)}`));
-  const restored = timeEditingMarkdown(original, shiftTimeDraft(crossing, "start", 1), "start", now);
+  const restored = timeEditingMarkdown(shiftTimeDraft(crossing, "start", 1), "start", now);
   assert.equal(restored.split(date).length - 1, 1);
 });
 
@@ -200,7 +204,7 @@ test("preview times keep two-digit ASCII values inside native typewriter text", 
     startedAt: new Date(2026, 9, 15, 8, 8).toISOString(),
     endedAt: new Date(2026, 9, 15, 21, 28).toISOString(),
   };
-  const preview = rawTimeEditingMarkdown(times, times, "end", new Date(2026, 9, 16));
+  const preview = rawTimeEditingMarkdown(times, "end", new Date(2026, 9, 16));
   assert.ok(preview.includes("\\(\\texttt{08:08}\\)"));
   assert.ok(preview.includes("\\(\\texttt{21:28}\\)"));
   assert.doesNotMatch(preview, /data:image|<svg|!\[/);

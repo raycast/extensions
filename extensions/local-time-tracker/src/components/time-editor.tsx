@@ -26,7 +26,6 @@ export function TimeEditor({
   note?: string;
 }) {
   const { pop } = useNavigation();
-  const [original] = useState(initialTimes);
   const [draft, setDraft] = useState(initialTimes);
   const [endpoint, setEndpoint] = useState<TimeEndpoint>("start");
   const [isSaving, setIsSaving] = useState(false);
@@ -90,7 +89,7 @@ export function TimeEditor({
     <Detail
       navigationTitle={title}
       isLoading={isSaving}
-      markdown={`${timeEditingMarkdown(original, draft, endpoint, now)}\n\n←/→ ±1m · ⇧←/→ ±5m\n\n${draft.endedAt ? "↑/↓ Start / End · " : ""}↵ Save\n\n${note ?? "Preview · Enter to save"}`}
+      markdown={`${timeEditingMarkdown(draft, endpoint, now)}\n\n←/→ ±1m · ⇧←/→ ±5m\n\n${draft.endedAt ? "↑/↓ Start / End · " : ""}↵ Save\n\n${note ?? "Preview · Enter to save"}`}
       metadata={metadata ? <Detail.Metadata>{metadata}</Detail.Metadata> : undefined}
       actions={
         <ActionPanel>
