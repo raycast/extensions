@@ -8,7 +8,8 @@ export interface Entry {
   kind: EntryKind;
   /** App bundle path, URL or deeplink (including `raycast://`), file path, or shell command. */
   value: string;
-  keywords?: string[];
+  /** Glyph name or emoji shown in the layer list. */
+  icon?: string;
 }
 
 export interface Layer {

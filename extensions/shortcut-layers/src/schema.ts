@@ -36,12 +36,6 @@ function normalizeKind(value: unknown): EntryKind {
   return ENTRY_KINDS.includes(value as EntryKind) ? (value as EntryKind) : "url";
 }
 
-function normalizeKeywords(value: unknown): string[] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  const list = value.filter((k): k is string => typeof k === "string" && k.trim().length > 0);
-  return list.length > 0 ? list : undefined;
-}
-
 export function normalizeEntry(value: unknown): Entry {
   const src = (typeof value === "object" && value !== null ? value : {}) as Record<string, unknown>;
   const kind = normalizeKind(src.kind);
@@ -53,7 +47,7 @@ export function normalizeEntry(value: unknown): Entry {
     kind,
     // File paths are opaque: a trailing space is part of the name.
     value: kind === "file" ? rawValue : rawValue.trim(),
-    keywords: normalizeKeywords(src.keywords),
+    icon: typeof src.icon === "string" && src.icon.trim().length > 0 ? src.icon.trim() : undefined,
   };
 }
 

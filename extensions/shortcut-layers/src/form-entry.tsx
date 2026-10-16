@@ -3,6 +3,7 @@ import { usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { loadLayers, saveLayers } from "./data";
 import { fileTitle, searchFiles } from "./file-search";
+import { ICON_GROUPS, ICON_VALUES } from "./icons";
 import { generateId, normalizeKey } from "./schema";
 import { ENTRY_KINDS } from "./types";
 import type { Entry, EntryKind } from "./types";
@@ -98,7 +99,7 @@ export function EntryForm({
     };
   }, [filter, kind]);
 
-  async function submit(values: { title: string; keywords: string }) {
+  async function submit(values: { title: string; icon: string }) {
     const normalizedKey = normalizeKey(key);
     if (!normalizedKey) {
       setKeyError("Key is required");
@@ -124,18 +125,13 @@ export function EntryForm({
       return;
     }
 
-    const keywords = values.keywords
-      .split(",")
-      .map((k) => k.trim())
-      .filter((k) => k.length > 0);
-
     const entry: Entry = {
       id: existing?.id ?? generateId(),
       key: normalizedKey,
       title,
       kind,
       value: target,
-      keywords: keywords.length > 0 ? keywords : undefined,
+      icon: values.icon || undefined,
     };
 
     if (existing) {
@@ -243,13 +239,23 @@ export function EntryForm({
         />
       )}
 
-      <Form.TextField
-        id="keywords"
-        title="Keywords"
-        placeholder="Optional, comma separated"
-        defaultValue={source?.keywords?.join(", ")}
-        info="Extra search terms, like tags, so typing any of them finds this action"
-      />
+      {(kind === "url" || kind === "shell") && (
+        <Form.Dropdown
+          id="icon"
+          title="Icon"
+          defaultValue={source?.icon && ICON_VALUES.has(source.icon) ? source.icon : ""}
+          info="Shown next to the action"
+        >
+          <Form.Dropdown.Item value="" title="Default" />
+          {ICON_GROUPS.map((group) => (
+            <Form.Dropdown.Section key={group.title} title={group.title}>
+              {group.icons.map((glyph) => (
+                <Form.Dropdown.Item key={glyph.value} title={glyph.title} value={glyph.value} icon={glyph.value} />
+              ))}
+            </Form.Dropdown.Section>
+          ))}
+        </Form.Dropdown>
+      )}
     </Form>
   );
 }

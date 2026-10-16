@@ -50,7 +50,8 @@ they are easy to recall, and the same letter can do something else in another la
 1. In Manage Layers, choose Create Layer. Give it a name, an icon, and optionally a key
    color. The key color tints the key tags inside that layer.
 2. Choose Open Layer and add actions. Each action needs a title, a type, a target, and a
-   single trigger key.
+   single trigger key. URL and shell actions can also have an icon from the built-in
+   glyphs; application and file actions use their own icon.
 3. Choose Create Quicklink. It creates a Raycast Quicklink pointing at Run Layer with the
    layer preselected. Save the prefilled form. You only do this once per layer.
 4. Choose Set or Update Hotkey and assign the Quicklink a hotkey, for example `✦O`.

@@ -58,7 +58,7 @@ export function LayerActionPanel({ layer, mutate }: { layer: Layer; mutate: () =
         <Action.CreateQuicklink
           title="Create Quicklink (First Time Only)"
           icon={Icon.Link}
-          quicklink={{ name, link: hotkeyLink(layer) }}
+          quicklink={{ name, icon: layer.icon as Icon | undefined, link: hotkeyLink(layer) }}
         />
         <Action title="Set or Update Hotkey…" icon={Icon.Keyboard} onAction={() => open(quicklinksSearchLink(name))} />
         <Action.CopyToClipboard title="Copy Layer Deeplink" content={hotkeyLink(layer)} />

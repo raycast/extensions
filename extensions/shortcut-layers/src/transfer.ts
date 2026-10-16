@@ -10,7 +10,7 @@ export function layersToJson(layers: Layer[]): string {
         title: entry.title,
         kind: entry.kind,
         value: entry.value,
-        keywords: entry.keywords,
+        icon: entry.icon,
       })),
     })),
     null,

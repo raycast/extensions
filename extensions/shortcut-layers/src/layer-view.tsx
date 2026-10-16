@@ -178,7 +178,7 @@ export function LayerView({ layerId }: { layerId: string }) {
             icon={entryIcon(entry)}
             title={entry.title}
             subtitle={entry.value}
-            keywords={entry.keywords}
+            keywords={[entry.value]}
             accessories={[{ tag: { value: entry.key, color: layer.color ?? DEFAULT_KEY_COLOR } }]}
             actions={
               <ActionPanel>
@@ -282,8 +282,9 @@ function localIconPath(value: string): string | undefined {
   return isAbsolute(path) ? path : undefined;
 }
 
-/** Real icon for app and file entries; falls back to the kind's glyph. */
+/** Entry icon: the chosen glyph or emoji, else the app or file icon, else the kind's glyph. */
 function entryIcon(entry: Entry): string | { fileIcon: string } {
+  if (entry.icon) return entry.icon;
   if (entry.kind === "app" || entry.kind === "file") {
     const path = localIconPath(entry.value);
     if (path) return { fileIcon: path };

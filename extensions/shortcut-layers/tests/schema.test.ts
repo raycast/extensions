@@ -47,6 +47,12 @@ test("normalizeEntry keeps file paths verbatim and trims other targets", () => {
   assert.equal(normalizeEntry({ key: "x", title: "URL", kind: "url", value: " https://a " }).value, "https://a");
 });
 
+test("normalizeEntry keeps a chosen icon and drops a blank one", () => {
+  assert.equal(normalizeEntry({ key: "x", title: "T", kind: "url", value: "x://d", icon: " 🎵 " }).icon, "🎵");
+  assert.equal(normalizeEntry({ key: "x", title: "T", kind: "url", value: "x://d", icon: "  " }).icon, undefined);
+  assert.equal(normalizeEntry({ key: "x", title: "T", kind: "url", value: "x://d" }).icon, undefined);
+});
+
 test("normalizeEntry fills defaults", () => {
   const entry = normalizeEntry({ key: "N", title: "New note", value: "obsidian://new" });
   assert.equal(entry.key, "N");
