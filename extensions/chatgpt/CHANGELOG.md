@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix Crash on Launch] - {PR_MERGE_DATE}
+## [Fix Crash on Launch] - 2026-10-16
 
 - Fix every command crashing on launch with `Package subpath './_shims/auto/runtime' is not defined by "exports"` by upgrading the OpenAI SDK from v4 to v7: [#32288](https://github.com/raycast/extensions/issues/32288)
 - The proxy setting now also applies to the image commands.
