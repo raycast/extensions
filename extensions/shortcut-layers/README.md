@@ -61,7 +61,7 @@ Pressing that hotkey opens the layer. A single key runs the action and the panel
 
 | Type           | Target                                                                       |
 | -------------- | ---------------------------------------------------------------------------- |
-| Application    | a searchable list of installed apps, or a typed path                          |
+| Application    | a searchable list of installed apps                                          |
 | File / Folder  | Spotlight search, or a typed path                                            |
 | URL / Deeplink | `raycast://extensions/...`, `notes://`, or `https://mail.google.com`         |
 | Shell Command  | `killall Dock`                                                              |
