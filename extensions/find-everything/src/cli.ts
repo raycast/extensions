@@ -6,6 +6,7 @@ import {
   Scope,
   SCOPES,
   HOME,
+  IS_MAC,
   INDEX_DIR,
   FD,
   FZF,
@@ -164,6 +165,15 @@ function cmdPreview(p: string): void {
   }
 }
 
+function cmdReveal(p: string): void {
+  // macOS can reveal in Finder; on Linux the best equivalent is opening
+  // the containing directory.
+  const args = IS_MAC ? ["-R", p] : [path.dirname(p)];
+  spawn(OPEN_CMD, args, { stdio: "ignore", detached: true })
+    .on("error", () => {})
+    .unref();
+}
+
 async function cmdTui(flags: Flags): Promise<void> {
   if (!fs.existsSync(FZF)) {
     console.error("fzf not found — install it first (brew install fzf / apt install fzf)");
@@ -185,7 +195,7 @@ async function cmdTui(flags: Flags): Promise<void> {
       `--bind=change:reload:sleep 0.08; ${search} {q} || true`,
       `--bind=enter:execute-silent(${SELF} open {1})+abort`,
       `--bind=ctrl-r:execute-silent(${SELF} index --scope ${flags.scope})+reload:${search} {q}`,
-      `--bind=ctrl-o:execute-silent(${OPEN_CMD} -R {1})`,
+      `--bind=ctrl-o:execute-silent(${SELF} reveal {1})`,
       `--preview=${SELF} preview {1}`,
       "--preview-window=right,55%,border-left,wrap",
       `--header=Find Everything — ${flags.scope} · enter opens · ^R rebuild · ^O reveal`,
@@ -210,6 +220,8 @@ async function main(): Promise<void> {
       return cmdStatus();
     case "open":
       return openPath(rest[0]!);
+    case "reveal":
+      return cmdReveal(rest[0]!);
     case "preview":
       return cmdPreview(rest[0]!);
     case undefined:
