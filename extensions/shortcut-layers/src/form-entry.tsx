@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation, getAp
 import { usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { loadLayers, saveLayers } from "./data";
-import { fileTitle, searchFiles } from "./file-search";
+import { fileTitle, searchFiles, MIN_QUERY_LENGTH } from "./file-search";
 import { ICON_GROUPS, ICON_VALUES } from "./icons";
 import { generateId, normalizeKey } from "./schema";
 import { ENTRY_KINDS } from "./types";
@@ -81,7 +81,7 @@ export function EntryForm({
   useEffect(() => {
     if (kind !== "file") return;
     const query = filter.trim();
-    if (query.length < 2) {
+    if (query.length < MIN_QUERY_LENGTH) {
       setFileResults([]);
       return;
     }
@@ -264,7 +264,7 @@ export function EntryForm({
               keywords={[path]}
             />
           ))}
-          {typed.length >= 2 && !fileResults.includes(typed) && (
+          {typed.length >= MIN_QUERY_LENGTH && !fileResults.includes(typed) && (
             <Form.Dropdown.Item key="__custom" value={typed} title={`Use path: ${typed}`} icon={Icon.Pencil} />
           )}
         </Form.Dropdown>
