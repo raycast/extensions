@@ -9,6 +9,10 @@ export const INDEX_DIR = path.join(HOME, ".cache", "hypersearch");
 
 // Homebrew first, then system paths, then PATH lookup as last resort.
 const BIN_DIRS = [
+  path.join(
+    HOME,
+    "Library/Application Support/FindEverything/bin",
+  ),
   "/opt/homebrew/bin",
   "/usr/local/bin",
   "/usr/bin",

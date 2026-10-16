@@ -233,6 +233,12 @@ async function main(): Promise<void> {
   }
 }
 
+// A downstream consumer that closes the pipe early (`| head`) must not
+// turn into an EPIPE crash — exiting cleanly is the correct behavior.
+process.stdout.on("error", (e: NodeJS.ErrnoException) => {
+  if (e.code === "EPIPE") process.exit(0);
+});
+
 main().catch((e) => {
   console.error(`fe: ${e?.message || e}`);
   process.exit(1);
