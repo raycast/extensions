@@ -97,9 +97,7 @@ export function ImageList(props: { site: Site; preset: string }) {
   const { site } = props;
   const [filter, setFilter] = useState(props.preset);
   const [showingDetail, setShowingDetail] = useCachedState("audit-images:detail", true);
-  const { data, isLoading, error, revalidate } = useCachedPromise(getImageAudit, [site, largeImageKb()], {
-    keepPreviousData: true,
-  });
+  const { data, isLoading, error, revalidate } = useCachedPromise(getImageAudit, [site, largeImageKb()], {});
 
   const pages = useMemo(() => {
     const map = new Map<number, string>();

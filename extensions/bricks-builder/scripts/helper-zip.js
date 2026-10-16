@@ -1,9 +1,9 @@
-// Builds assets/bricks-raycast-helper.zip from wordpress-plugin/bricks-raycast-helper, ready to
-// upload under Plugins › Add New › Upload Plugin. Bricks Site Health hands this file to users whose
-// helper is missing or outdated.
+// Builds bricks-raycast-helper.zip from the plugin's source in assets/bricks-raycast-helper, for
+// releases (scripts/release-helper.mjs) and the GitHub release. The extension builds the same zip
+// itself when installing the helper (src/lib/helper-zip.ts), since Raycast's repository ignores zips.
 //
-//   node scripts/helper-zip.js          writes the zip
-//   node scripts/helper-zip.js --check  fails if the committed zip is out of date (used by publish)
+//   node scripts/helper-zip.js                  writes build/bricks-raycast-helper.zip
+//   node scripts/helper-zip.js path/to/out.zip  writes it there
 //
 // No dependencies: a minimal deflate zip with fixed timestamps, so the same source always gives
 // the same bytes.
@@ -11,8 +11,9 @@ const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
 
-const SOURCE = path.join("wordpress-plugin", "bricks-raycast-helper");
-const TARGET = path.join("assets", "bricks-raycast-helper.zip");
+const ROOT = path.join(__dirname, "..");
+const SOURCE = path.join(ROOT, "assets", "bricks-raycast-helper");
+const TARGET = path.resolve(process.argv[2] || path.join(ROOT, "build", "bricks-raycast-helper.zip"));
 
 const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
   let c = n;
@@ -90,13 +91,6 @@ function buildZip() {
 }
 
 const zip = buildZip();
-if (process.argv.includes("--check")) {
-  const current = fs.existsSync(TARGET) ? fs.readFileSync(TARGET) : Buffer.alloc(0);
-  if (!current.equals(zip)) {
-    console.error(`${TARGET} is out of date with ${SOURCE}. Run \`npm run helper-zip\` and commit it.`);
-    process.exit(1);
-  }
-} else {
-  fs.writeFileSync(TARGET, zip);
-  console.log(`Wrote ${TARGET} (${Math.round(zip.length / 1024)} KB)`);
-}
+fs.mkdirSync(path.dirname(TARGET), { recursive: true });
+fs.writeFileSync(TARGET, zip);
+console.log(`Wrote ${path.relative(process.cwd(), TARGET)} (${Math.round(zip.length / 1024)} KB)`);

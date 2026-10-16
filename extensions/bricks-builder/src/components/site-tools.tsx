@@ -39,13 +39,13 @@ export function SiteToolsSubmenu(props: { site: Site; maintenanceMode?: Maintena
       shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
     >
       {maintenanceMode !== "" && (
-        <Action title="Turn Off Maintenance Mode" icon={Icon.LockUnlocked} onAction={mode("")} />
+        <Action title="Turn off Maintenance Mode" icon={Icon.LockUnlocked} onAction={mode("")} />
       )}
       {maintenanceMode !== "maintenance" && (
-        <Action title="Turn On Maintenance Mode" icon={Icon.Lock} onAction={mode("maintenance")} />
+        <Action title="Turn on Maintenance Mode" icon={Icon.Lock} onAction={mode("maintenance")} />
       )}
       {maintenanceMode !== "comingSoon" && (
-        <Action title="Turn On Coming Soon Mode" icon={Icon.Clock} onAction={mode("comingSoon")} />
+        <Action title="Turn on Coming Soon Mode" icon={Icon.Clock} onAction={mode("comingSoon")} />
       )}
       <Action
         title="Regenerate CSS Files"

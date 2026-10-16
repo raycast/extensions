@@ -55,12 +55,13 @@ export async function runTool(site: Site, tool: Tool): Promise<string | undefine
       primaryAction: { title: "Regenerate", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return undefined;
-    await helperRequest<{ success: boolean }>(
+    const result = await helperRequest<{ success: boolean }>(
       site,
       "/tools/regenerate-signatures",
       {},
       { method: "POST", minVersion: MIN_VERSION, timeout: SCAN_TIMEOUT },
     );
+    if (!result.success) throw new Error(`Couldn't regenerate code signatures on ${site.name}`);
     return `Code signatures regenerated on ${site.name}`;
   }
   if (tool === "regenerate-css") {

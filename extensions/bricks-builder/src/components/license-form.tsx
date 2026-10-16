@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
+import { FormValidation, useForm, usePromise } from "@raycast/utils";
 import {
   activateLicense,
   BUY_URL,
@@ -47,7 +47,7 @@ export async function activateOn(site: Site, key: string): Promise<boolean> {
  */
 export function LicenseForm(props: { site?: Site; onSaved?: () => void }) {
   const { pop } = useNavigation();
-  const { data: savedKey } = useCachedPromise(getSavedKey);
+  const { data: savedKey } = usePromise(getSavedKey);
   const { handleSubmit, itemProps } = useForm<{ key: string }>({
     validation: { key: FormValidation.Required },
     async onSubmit(values) {
@@ -89,7 +89,7 @@ export function LicenseForm(props: { site?: Site; onSaved?: () => void }) {
 
 /** Add, change and remove a site's license, and buy one. Uses the saved key in one step when there is one. */
 export function LicenseActions(props: { site: Site; onChange?: () => void; hasLicense?: boolean }) {
-  const { data: savedKey } = useCachedPromise(getSavedKey);
+  const { data: savedKey } = usePromise(getSavedKey);
 
   async function remove() {
     const confirmed = await confirmAlert({

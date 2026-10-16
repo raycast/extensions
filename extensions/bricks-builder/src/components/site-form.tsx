@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, Icon, open, showToast, Toast, useNavigation 
 import { FormValidation, useForm } from "@raycast/utils";
 import { randomUUID } from "node:crypto";
 import { getAnyBrowserTabUrl } from "../lib/browser";
-import { normalizeSiteUrl, Site, upsertSite } from "../lib/sites";
+import { normalizeSiteUrl, Site, upsertSite, wpAdminUrl } from "../lib/sites";
 import { checkConnection } from "../lib/wordpress";
 
 interface FormValues {
@@ -58,6 +58,7 @@ export function SiteForm(props: { site?: Site; onSaved?: (site: Site) => void })
       try {
         const check = await checkConnection(candidate);
         if (check.canonicalUrl) candidate = { ...candidate, url: check.canonicalUrl };
+        candidate = { ...candidate, adminUrl: check.adminUrl };
         await upsertSite(candidate);
         toast.style = Toast.Style.Success;
         toast.title = `Saved ${candidate.name}`;
@@ -112,7 +113,10 @@ export function SiteForm(props: { site?: Site; onSaved?: (site: Site) => void })
 
   async function openApplicationPasswords() {
     try {
-      await open(`${normalizeSiteUrl(current.url)}/wp-admin/profile.php#application-passwords-section`);
+      const url = normalizeSiteUrl(current.url);
+      // An existing site may keep WordPress in a subfolder of its home URL.
+      const base = site && site.url === url ? site : { id: "", name: "", url };
+      await open(wpAdminUrl(base, "profile.php#application-passwords-section"));
     } catch {
       await showToast({ style: Toast.Style.Failure, title: "Enter the site URL first" });
     }

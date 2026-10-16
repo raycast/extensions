@@ -16,7 +16,8 @@ import { useEffect, useRef, useState } from "react";
 import { ErrorEmptyView, NoSitesView } from "./components/site-empty-view";
 import { ManageSitesAction, SwitchSiteSubmenu, useSelectedSite } from "./hooks/use-selected-site";
 import { deleteSubmissions, getForms, getSubmissions, Submission, submissionTitle } from "./lib/bricks-data";
-import { Site } from "./lib/sites";
+import { escapeMarkdown } from "./lib/markdown";
+import { Site, wpAdminUrl } from "./lib/sites";
 import { getSeen, setSeen } from "./lib/submissions-seen";
 
 const ALL = "";
@@ -45,7 +46,7 @@ export default function Command(props: LaunchProps<{ launchContext: LaunchContex
     if (props.launchContext.formId !== undefined) setFormId(props.launchContext.formId);
   }, [props.launchContext]);
 
-  const forms = useCachedPromise(getForms, [site as Site], { execute: Boolean(site), keepPreviousData: true });
+  const forms = useCachedPromise(getForms, [site as Site], { execute: Boolean(site) });
 
   // usePromise, not useCachedPromise: submissions hold people's names, emails and messages, and
   // Raycast's cache is stored unencrypted on disk.
@@ -120,7 +121,7 @@ export default function Command(props: LaunchProps<{ launchContext: LaunchContex
         <Action.OpenInBrowser
           title="Open Submissions in WordPress"
           icon={Icon.Globe}
-          url={`${site.url}/wp-admin/admin.php?page=bricks-form-submissions${formId ? `&form_id=${encodeURIComponent(formId)}` : ""}`}
+          url={`${wpAdminUrl(site, "admin.php")}?page=bricks-form-submissions${formId ? `&form_id=${encodeURIComponent(formId)}` : ""}`}
           shortcut={Keyboard.Shortcut.Common.Open}
         />
       )}
@@ -178,7 +179,7 @@ export default function Command(props: LaunchProps<{ launchContext: LaunchContex
                 <List.Item.Detail
                   markdown={submission.fields
                     .filter((f) => f.value)
-                    .map((f) => `**${f.label}**\n\n${f.value.replace(/\n/g, "  \n")}`)
+                    .map((f) => `**${escapeMarkdown(f.label)}**\n\n${escapeMarkdown(f.value).replace(/\n/g, "  \n")}`)
                     .join("\n\n")}
                   metadata={
                     <List.Item.Detail.Metadata>

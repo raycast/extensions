@@ -51,7 +51,6 @@ export default function Command() {
 
   const { data, isLoading, error, revalidate } = useCachedPromise(getLibrary, [site as Site], {
     execute: Boolean(site),
-    keepPreviousData: true,
   });
 
   if (!sitesLoading && sites.length === 0) {

@@ -1,43 +1,98 @@
-import { Action, environment, Icon, open, showInFinder, showToast, Toast } from "@raycast/api";
-import { copyFile } from "node:fs/promises";
+import { Action, ActionPanel, Detail, environment, Icon, Keyboard, showInFinder, useNavigation } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { HELPER_VERSION } from "../lib/bricks-data";
-import { Site } from "../lib/sites";
+import { buildZip } from "../lib/helper-zip";
+import { Site, wpAdminUrl } from "../lib/sites";
 
-/**
- * Puts the helper plugin zip this extension ships with in Downloads and opens the site's plugin
- * upload page. WordPress offers "Replace current with uploaded" when the plugin is already there.
- */
-export function InstallHelperAction(props: { site: Site; update: boolean }) {
-  async function install() {
-    try {
-      const target = join(homedir(), "Downloads", "bricks-raycast-helper.zip");
-      await copyFile(join(environment.assetsPath, "bricks-raycast-helper.zip"), target);
-      await showInFinder(target);
-      await open(`${props.site.url}/wp-admin/plugin-install.php?tab=upload`);
-      await showToast({
-        style: Toast.Style.Success,
-        title: `Upload bricks-raycast-helper.zip on ${props.site.name}`,
-        message: props.update
-          ? `It's in Downloads. Choose it, then "Replace current with uploaded" to update to ${HELPER_VERSION}.`
-          : "It's in Downloads. Choose it, install, then activate the plugin.",
-      });
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't prepare the helper plugin",
-        message: error instanceof Error ? error.message : String(error),
-      });
-    }
-  }
+type Mode = "install" | "update" | "reinstall";
+
+const TITLES: Record<Mode, string> = {
+  install: "Install Helper Plugin",
+  update: "Update Helper Plugin",
+  reinstall: "Reinstall Helper Plugin",
+};
+
+const ZIP_PATH = join(homedir(), "Downloads", "bricks-raycast-helper.zip");
+
+/** Builds the zip from the plugin source this extension ships with and puts it in Downloads. */
+async function prepareZip(): Promise<string> {
+  await writeFile(ZIP_PATH, buildZip(join(environment.assetsPath, "bricks-raycast-helper"), "bricks-raycast-helper"));
+  return ZIP_PATH;
+}
+
+function guide(site: Site, mode: Mode): string {
+  const replace =
+    mode === "install"
+      ? ""
+      : `\n   WordPress sees the plugin is already there: click **Replace current with uploaded**.`;
+  return `## ${TITLES[mode]} on ${site.name}
+
+The Bricks Raycast Helper plugin lets Raycast read Bricks' classes, colors, templates and more from your site. Version ${HELPER_VERSION} is ready in your **Downloads** folder as \`bricks-raycast-helper.zip\`.
+
+1. Press **↵** to open **Plugins › Add New › Upload Plugin** on ${site.name} (sign in to WordPress if asked).
+2. Click **Choose File**, pick \`bricks-raycast-helper.zip\` from Downloads, then **Install Now**.${replace}
+3. Click **Activate Plugin**${mode === "install" ? "" : " if WordPress asks"}.
+4. Come back to Raycast and press **⌘R** in Bricks Site Health to check the site.
+
+You need to be a WordPress administrator to upload plugins. The plugin's settings are under **Settings › Bricks Raycast**.`;
+}
+
+/** Step-by-step instructions next to the actions they need: the upload page and the zip. */
+function HelperInstallGuide(props: { site: Site; mode: Mode }) {
+  const { pop } = useNavigation();
+  const { data: path, isLoading, error } = usePromise(prepareZip);
+
+  const markdown = error
+    ? `## Couldn't prepare the helper plugin\n\n${error.message}`
+    : isLoading
+      ? `## ${TITLES[props.mode]} on ${props.site.name}\n\nPreparing the plugin…`
+      : guide(props.site, props.mode);
 
   return (
-    <Action
-      title={props.update ? "Update Helper Plugin" : "Install Helper Plugin"}
+    <Detail
+      isLoading={isLoading}
+      navigationTitle={TITLES[props.mode]}
+      markdown={markdown}
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser
+            title="Open Upload Plugin Page"
+            icon={Icon.Upload}
+            url={wpAdminUrl(props.site, "plugin-install.php?tab=upload")}
+          />
+          {path && (
+            <Action
+              title="Show Zip in Finder"
+              icon={Icon.Finder}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+              onAction={() => showInFinder(path)}
+            />
+          )}
+          <Action.OpenInBrowser
+            title="Open Plugins Page"
+            icon={Icon.Plug}
+            shortcut={Keyboard.Shortcut.Common.Open}
+            url={wpAdminUrl(props.site, "plugins.php")}
+          />
+          <Action title="Done" icon={Icon.Check} shortcut={{ modifiers: ["cmd"], key: "d" }} onAction={pop} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+/** `mode`: install where it's missing, update where it's old, reinstall where it's current. */
+export function InstallHelperAction(props: { site: Site; mode: Mode; onDone?: () => void }) {
+  return (
+    <Action.Push
+      title={TITLES[props.mode]}
       icon={Icon.Download}
       shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
-      onAction={install}
+      target={<HelperInstallGuide site={props.site} mode={props.mode} />}
+      onPop={props.onDone}
     />
   );
 }

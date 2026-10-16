@@ -1226,7 +1226,7 @@ function image_audit(): array {
 	);
 	$unused = [];
 	foreach ( $unused_query->posts as $id ) {
-		$unused[] = image_item( (int) $id, (string) wp_get_attachment_url( $id ), [] ) + [ 'unused' => true ];
+		$unused[] = array_merge( image_item( (int) $id, (string) wp_get_attachment_url( $id ), [] ), [ 'unused' => true ] );
 	}
 	$summary['unused_library'] = (int) $unused_query->found_posts;
 

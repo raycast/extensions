@@ -32,7 +32,9 @@ The license server runs at https://license.martej.com and lives in its own priva
 
 ## Releasing the helper plugin
 
-Bump the plugin's version, run `npm run helper-zip`, commit, then push an annotated tag whose message is the changelog: `git tag -a helper-v1.6.0 -m "- What changed"` and `git push origin helper-v1.6.0`. The [release workflow](.github/workflows/release-helper.yml) checks the version and zip, publishes the update to licensed sites through the license server, and creates a GitHub release with the zip. The one-time setup is at the top of the workflow file. To release by hand: `node scripts/release-helper.mjs` (`--dry-run` to see what it uploads).
+The plugin's source is `assets/bricks-raycast-helper/`; the extension zips it when installing it, and `npm run helper-zip` writes the same zip to `build/`. Its changelog is `HELPER-CHANGELOG.md`.
+
+Bump the plugin's version, commit, then push an annotated tag whose message is the changelog: `git tag -a helper-v1.6.0 -m "- What changed"` and `git push origin helper-v1.6.0`. The [release workflow](.github/workflows/release-helper.yml) checks the version and zip, publishes the update to licensed sites through the license server, and creates a GitHub release with the zip. The one-time setup is at the top of the workflow file. To release by hand: `node scripts/release-helper.mjs` (`--dry-run` to see what it uploads).
 
 ## Develop
 
@@ -41,7 +43,7 @@ npm install
 npm run dev     # loads the extension into Raycast with hot reload
 npm run lint
 npm run build
-npm run helper-zip   # after changing the helper plugin: rebuilds assets/bricks-raycast-helper.zip
+npm run helper-zip   # writes build/bricks-raycast-helper.zip from assets/bricks-raycast-helper
 ```
 
 ## Store screenshots

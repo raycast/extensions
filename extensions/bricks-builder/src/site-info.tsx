@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { ErrorEmptyView, NoSitesView } from "./components/site-empty-view";
+import { NoSitesView, SiteEmptyView } from "./components/site-empty-view";
 import { SiteToolsSubmenu } from "./components/site-tools";
 import { ManageSitesAction, SwitchSiteSubmenu, useSelectedSite } from "./hooks/use-selected-site";
 import { Breakpoint, getDesign, getSiteInfo } from "./lib/design";
-import { Site } from "./lib/sites";
+import { Site, wpAdminUrl } from "./lib/sites";
 
 const CSS_LOADING: Record<string, string> = {
   inline: "Inline styles",
@@ -20,7 +20,6 @@ export default function Command() {
   const { sites, site, setSiteId, isLoading: sitesLoading, reloadSites } = useSelectedSite();
   const { data, isLoading, error, revalidate } = useCachedPromise(getSiteInfo, [site as Site], {
     execute: Boolean(site),
-    keepPreviousData: true,
   });
   const { data: design } = useCachedPromise(getDesign, [site as Site], {
     execute: Boolean(site),
@@ -45,7 +44,7 @@ export default function Command() {
         <Action.OpenInBrowser
           title="Open Bricks Settings"
           icon={Icon.Gear}
-          url={`${site.url}/wp-admin/admin.php?page=bricks-settings`}
+          url={wpAdminUrl(site, "admin.php?page=bricks-settings")}
           shortcut={Keyboard.Shortcut.Common.Open}
         />
       )}
@@ -65,12 +64,31 @@ export default function Command() {
   const unused = classes.filter((c) => c.used_on === 0 && (c.components ?? []).length === 0).length;
   const breakpoints = data?.breakpoints ?? [];
 
+  const siteActions = (
+    <ActionPanel.Section>
+      <Action
+        title="Reload"
+        icon={Icon.ArrowClockwise}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={revalidate}
+      />
+      <SwitchSiteSubmenu sites={sites} current={site} onChange={setSiteId} />
+      <ManageSitesAction onPop={reloadSites} />
+    </ActionPanel.Section>
+  );
+
   return (
     <List
       isLoading={sitesLoading || isLoading}
       searchBarPlaceholder={site ? `Search site info on ${site.name}…` : "Search site info…"}
     >
-      <ErrorEmptyView error={error} />
+      <SiteEmptyView
+        error={error}
+        isLoading={isLoading}
+        title="No site info"
+        actions={siteActions}
+        onRetry={revalidate}
+      />
       {data && (
         <List.Section title="Overview">
           <List.Item

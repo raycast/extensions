@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 import { InstallHelperAction } from "./components/helper-install-action";
 import { LicenseActions, LicenseForm, licenseFailure } from "./components/license-form";
 import { SiteForm } from "./components/site-form";
@@ -15,7 +15,7 @@ import {
   LicenseSummary,
   LICENSE_VERSION,
 } from "./lib/license";
-import { loadSites, Site } from "./lib/sites";
+import { loadSites, Site, withoutSecrets } from "./lib/sites";
 import { isMissingRoute, WordPressError } from "./lib/wordpress";
 
 type Row =
@@ -49,7 +49,11 @@ const STATES = new Set<Row["state"]>(["licensed", "no-password", "old-helper", "
 // The "licenses" argument keeps useCachedPromise's cache apart from Bricks Site Health's site checks.
 const checkLicenses = async (cacheKey: "licenses") => {
   void cacheKey;
-  return Promise.all((await loadSites()).map(checkSite));
+  // The cached rows keep each site without its application password (see withoutSecrets).
+  return (await Promise.all((await loadSites()).map(checkSite))).map((row) => ({
+    ...row,
+    site: withoutSecrets(row.site),
+  }));
 };
 
 function accessories(row: Row): List.Item.Accessory[] {
@@ -88,8 +92,13 @@ export default function Command() {
   const { data, isLoading, revalidate, mutate } = useCachedPromise(checkLicenses, ["licenses"], {
     keepPreviousData: true,
   });
-  const rows = (data ?? []).filter((row) => STATES.has(row.state));
-  const { data: savedKey, revalidate: reloadKey } = useCachedPromise(getSavedKey);
+  // The cached rows hold sites without passwords; put the saved sites back for the actions.
+  const { data: sites = [] } = usePromise(loadSites);
+  const rows = (data ?? [])
+    .filter((row) => STATES.has(row.state))
+    .map((row) => ({ ...row, site: sites.find((s) => s.id === row.site.id) ?? row.site }));
+  // usePromise, not useCachedPromise: the key shouldn't sit in Raycast's unencrypted cache.
+  const { data: savedKey, revalidate: reloadKey } = usePromise(getSavedKey);
   const reload = () => {
     reloadKey();
     revalidate();
@@ -194,7 +203,7 @@ export default function Command() {
                 {row.state === "licensed" && (
                   <LicenseActions site={row.site} hasLicense={row.license.status !== "none"} onChange={reload} />
                 )}
-                {row.state === "old-helper" && <InstallHelperAction site={row.site} update />}
+                {row.state === "old-helper" && <InstallHelperAction site={row.site} mode="update" onDone={reload} />}
                 {row.state === "no-password" || row.state === "auth" ? (
                   <Action.Push
                     title="Edit Site"

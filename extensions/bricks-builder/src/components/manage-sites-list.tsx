@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, List, Keyboard } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { ImportForm } from "./import-form";
 import { LicenseActions } from "./license-form";
 import { SiteForm } from "./site-form";
@@ -8,7 +8,7 @@ import { importSites, loadSites, removeSite, Site } from "../lib/sites";
 
 /** The Manage Bricks Sites list; also pushed from site-based commands with ⌘⇧M. */
 export function ManageSitesList() {
-  const { data: sites = [], isLoading, revalidate } = useCachedPromise(loadSites);
+  const { data: sites = [], isLoading, revalidate } = usePromise(loadSites);
 
   const addAction = (
     <Action.Push

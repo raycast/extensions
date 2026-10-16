@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
 import { ReactNode } from "react";
 import { InstallHelperAction } from "./components/helper-install-action";
 import { LicenseActions } from "./components/license-form";
@@ -9,7 +9,8 @@ import { ManageSitesAction } from "./hooks/use-selected-site";
 import { compareVersions, getHealth, HELPER_VERSION, SiteHealth } from "./lib/bricks-data";
 import { HelperMissingError } from "./lib/design";
 import { licenseLabel, LicenseSummary } from "./lib/license";
-import { loadSites, Site } from "./lib/sites";
+import { escapeMarkdown } from "./lib/markdown";
+import { loadSites, Site, withoutSecrets, wpAdminUrl } from "./lib/sites";
 import { HELPER_NAMESPACE, WordPressError, wpRequest } from "./lib/wordpress";
 
 type Check =
@@ -38,7 +39,12 @@ async function checkSite(site: Site): Promise<Check> {
           bricksVersion: status.bricks_version ?? null,
         };
       } catch {
-        return { site, state: "no-helper", message: "The Bricks Raycast Helper plugin isn't installed" };
+        return {
+          site,
+          state: "no-helper",
+          message:
+            "The Bricks Raycast Helper plugin isn't installed on this site. Press ⌘⇧H for step-by-step instructions to install it.",
+        };
       }
     }
     const message = error instanceof Error ? error.message : String(error);
@@ -63,7 +69,11 @@ const STATES = new Set<Check["state"]>(["ok", "old-helper", "no-helper", "no-pas
 // "health" argument keeps it apart from other commands' site checks (Bricks Raycast Pro has one too).
 const checkHealth = async (cacheKey: "health") => {
   void cacheKey;
-  return Promise.all((await loadSites()).map(checkSite));
+  // The cached rows keep each site without its application password (see withoutSecrets).
+  return (await Promise.all((await loadSites()).map(checkSite))).map((row) => ({
+    ...row,
+    site: withoutSecrets(row.site),
+  }));
 };
 
 function updateCount(health: SiteHealth): number {
@@ -140,17 +150,17 @@ function Detail(props: { check: Check }) {
   if (check.state !== "ok") {
     const text =
       check.state === "old-helper"
-        ? `The Bricks Raycast Helper plugin is ${check.pluginVersion ?? "an older version"}. Update it to ${HELPER_VERSION} to see versions, updates and settings here.`
+        ? `The Bricks Raycast Helper plugin is ${check.pluginVersion ?? "an older version"}. Update it to ${HELPER_VERSION} to see versions, updates and settings here: press ⌘⇧H for step-by-step instructions.`
         : check.message;
-    return <List.Item.Detail markdown={`## ${check.site.name}\n\n${text}`} />;
+    return <List.Item.Detail markdown={`## ${escapeMarkdown(check.site.name)}\n\n${escapeMarkdown(text)}`} />;
   }
   const h = check.health;
   const u = h.updates;
   const updates = u
     ? [
         ...(u.core ? [`- WordPress → ${u.core}`] : []),
-        ...u.themes.map((t) => `- ${t.name} ${t.current ?? ""} → ${t.new}`),
-        ...u.plugins.map((p) => `- ${p.name} ${p.current ?? ""} → ${p.new}`),
+        ...u.themes.map((t) => `- ${escapeMarkdown(t.name)} ${t.current ?? ""} → ${t.new}`),
+        ...u.plugins.map((p) => `- ${escapeMarkdown(p.name)} ${p.current ?? ""} → ${p.new}`),
       ]
     : [];
   return (
@@ -232,8 +242,12 @@ export default function Command() {
     keepPreviousData: true,
   });
   const [showingDetail, setShowingDetail] = useCachedState("health:detail", true);
+  // The cached rows hold sites without passwords; put the saved sites back for the actions.
+  const { data: sites = [] } = usePromise(loadSites);
   // Skip anything else a stale cache might hold.
-  const checks = (data ?? []).filter((check) => STATES.has(check.state));
+  const checks = (data ?? [])
+    .filter((check) => STATES.has(check.state))
+    .map((check) => ({ ...check, site: sites.find((s) => s.id === check.site.id) ?? check.site }));
 
   const shared = (extra?: ReactNode) => (
     <ActionPanel.Section>
@@ -276,12 +290,18 @@ export default function Command() {
           detail={<Detail check={check} />}
           actions={
             <ActionPanel>
-              {needsHelper(check) && <InstallHelperAction site={check.site} update={check.state !== "no-helper"} />}
-              <Action.OpenInBrowser title="Open WordPress Admin" icon={Icon.Gear} url={`${check.site.url}/wp-admin/`} />
+              {needsHelper(check) && (
+                <InstallHelperAction
+                  site={check.site}
+                  mode={check.state === "no-helper" ? "install" : "update"}
+                  onDone={revalidate}
+                />
+              )}
+              <Action.OpenInBrowser title="Open WordPress Admin" icon={Icon.Gear} url={wpAdminUrl(check.site)} />
               <Action.OpenInBrowser
                 title="Open Updates"
                 icon={Icon.Download}
-                url={`${check.site.url}/wp-admin/update-core.php`}
+                url={wpAdminUrl(check.site, "update-core.php")}
                 shortcut={{ modifiers: ["cmd"], key: "u" }}
               />
               <Action.OpenInBrowser
@@ -293,7 +313,7 @@ export default function Command() {
               <Action.OpenInBrowser
                 title="Open Bricks Settings"
                 icon={Icon.Hammer}
-                url={`${check.site.url}/wp-admin/admin.php?page=bricks-settings`}
+                url={wpAdminUrl(check.site, "admin.php?page=bricks-settings")}
                 shortcut={Keyboard.Shortcut.Common.OpenWith}
               />
               {check.state === "ok" && check.health.can_manage && (
@@ -309,6 +329,9 @@ export default function Command() {
                   hasLicense={check.health.license.status !== "none"}
                   onChange={revalidate}
                 />
+              )}
+              {check.state === "ok" && !needsHelper(check) && (
+                <InstallHelperAction site={check.site} mode="reinstall" onDone={revalidate} />
               )}
               {shared(
                 <Action.Push

@@ -2,12 +2,12 @@
 // (github.com/matejmohar/martej-license-server), so licensed sites get it as a WordPress update.
 // The release workflow runs it for helper-v* tags; by hand, after bumping the version and building the zip:
 //
-//   npm run helper-zip && node scripts/release-helper.mjs
+//   node scripts/release-helper.mjs
 //   node scripts/release-helper.mjs --dry-run     shows what would be uploaded
 //   node scripts/release-helper.mjs --changelog-file notes.md --verify https://license.martej.com
 //
 // The changelog comes from --changelog-file (the GitHub Action passes the tag message), or else from
-// the plugin's section in ../wordpress-plugin/CHANGELOG.md. --verify checks that the license server
+// the plugin's section in HELPER-CHANGELOG.md. --verify checks that the license server
 // reports the new version afterwards. Uploading uses wrangler, so it needs `wrangler login` locally,
 // or CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in CI.
 import { execFileSync } from "node:child_process";
@@ -27,12 +27,13 @@ const option = (name) => {
 const changelogFile = option("--changelog-file");
 const verifyUrl = option("--verify");
 
-const plugin = readFileSync(join(ROOT, "wordpress-plugin/bricks-raycast-helper/bricks-raycast-helper.php"), "utf8");
+const plugin = readFileSync(join(ROOT, "assets/bricks-raycast-helper/bricks-raycast-helper.php"), "utf8");
 const header = (name) => plugin.match(new RegExp(`^ \\* ${name}:\\s*(.+)$`, "m"))?.[1].trim();
 const version = header("Version");
 if (!version) throw new Error("Couldn't read the plugin version");
 
-execFileSync("node", [join(ROOT, "scripts/helper-zip.js"), "--check"], { cwd: ROOT, stdio: "inherit" });
+const ZIP_FILE = join(ROOT, "build/bricks-raycast-helper.zip");
+execFileSync("node", [join(ROOT, "scripts/helper-zip.js"), ZIP_FILE], { stdio: "inherit" });
 
 const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 // "- item" lines become a list; other lines become paragraphs.
@@ -58,9 +59,9 @@ let notes;
 if (changelogFile) {
   notes = readFileSync(changelogFile, "utf8").split("\n");
 } else {
-  const changelog = readFileSync(join(ROOT, "wordpress-plugin/CHANGELOG.md"), "utf8");
+  const changelog = readFileSync(join(ROOT, "HELPER-CHANGELOG.md"), "utf8");
   const section = changelog.split(/^## /m).find((part) => part.startsWith(`${version}`));
-  if (!section) throw new Error(`Add a "## ${version}" section to wordpress-plugin/CHANGELOG.md first`);
+  if (!section) throw new Error(`Add a "## ${version}" section to HELPER-CHANGELOG.md first`);
   notes = section.split("\n").slice(1);
 }
 
@@ -86,7 +87,7 @@ const put = (key, file) => {
 };
 
 // The zip first, so latest.json never points at a file that isn't there yet.
-put(zip, join(ROOT, "assets/bricks-raycast-helper.zip"));
+put(zip, ZIP_FILE);
 put("latest.json", latest);
 console.log(dryRun ? `\nDry run: ${JSON.stringify(release, null, 2)}` : `\nReleased ${version}.`);
 

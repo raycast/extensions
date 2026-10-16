@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { ErrorEmptyView, NoSitesView } from "./components/site-empty-view";
+import { ErrorEmptyView, NoSitesView, SiteEmptyView } from "./components/site-empty-view";
 import { ManageSitesAction, SwitchSiteSubmenu, useSelectedSite } from "./hooks/use-selected-site";
 import {
   Breakpoint,
@@ -202,7 +202,6 @@ export default function Command() {
 
   const { data, isLoading, error, revalidate } = useCachedPromise(getDesign, [site as Site], {
     execute: Boolean(site),
-    keepPreviousData: true,
   });
   // Breakpoints are only used for labels, so a failure here is not worth an error view.
   const { data: siteInfo } = useCachedPromise(getSiteInfo, [site as Site], {
@@ -234,6 +233,19 @@ export default function Command() {
     );
   }
 
+  const siteActions = (
+    <ActionPanel.Section>
+      <Action
+        title="Reload"
+        icon={Icon.ArrowClockwise}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={revalidate}
+      />
+      <SwitchSiteSubmenu sites={sites} current={site} onChange={setSiteId} />
+      <ManageSitesAction onPop={reloadSites} />
+    </ActionPanel.Section>
+  );
+
   return (
     <List
       isLoading={sitesLoading || isLoading}
@@ -259,7 +271,13 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <ErrorEmptyView error={error} />
+      <SiteEmptyView
+        error={error}
+        isLoading={isLoading}
+        title="No global classes"
+        actions={siteActions}
+        onRetry={revalidate}
+      />
       {visible.map((cls) => {
         const isSelected = cls.id === selectedId;
         const classDetail = isSelected && detail?.id === cls.id ? detail : undefined;

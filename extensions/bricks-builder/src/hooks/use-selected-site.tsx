@@ -1,12 +1,14 @@
 import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedState, usePromise } from "@raycast/utils";
 import { ManageSitesList } from "../components/manage-sites-list";
 import { SiteForm } from "../components/site-form";
 import { loadSites, Site } from "../lib/sites";
 
 /** The site the user last picked, shared by every command. */
 export function useSelectedSite() {
-  const { data: sites, isLoading, revalidate } = useCachedPromise(loadSites);
+  // usePromise, not useCachedPromise: sites hold application passwords, and Raycast's cache is
+  // stored unencrypted on disk. Reading them from LocalStorage is quick.
+  const { data: sites, isLoading, revalidate } = usePromise(loadSites);
   const [siteId, setSiteId] = useCachedState<string | undefined>("selected-site");
   const site = sites?.find((s) => s.id === siteId) ?? sites?.[0];
   return { sites: sites ?? [], site, setSiteId, isLoading, reloadSites: revalidate };

@@ -4,7 +4,7 @@ import { ReactElement, useMemo, useState } from "react";
 import { CreateForm } from "./components/create-form";
 import { ErrorEmptyView, NoSitesView } from "./components/site-empty-view";
 import { ManageSitesAction, useSelectedSite } from "./hooks/use-selected-site";
-import { Site } from "./lib/sites";
+import { Site, wpAdminUrl } from "./lib/sites";
 import { adminEditUrl, ContentItem, listContent, searchContentRemote } from "./lib/wordpress";
 
 const STATUS_COLORS: Record<string, Color> = {
@@ -100,7 +100,7 @@ export default function Command() {
             <ActionPanel>
               <Action.OpenInBrowser
                 title="Open Plugin Upload Page"
-                url={`${site.url}/wp-admin/plugin-install.php?tab=upload`}
+                url={wpAdminUrl(site, "plugin-install.php?tab=upload")}
               />
             </ActionPanel>
           }

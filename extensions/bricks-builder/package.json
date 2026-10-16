@@ -491,7 +491,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "node scripts/check-screenshots.js && node scripts/helper-zip.js --check && npx @raycast/api@latest publish",
+    "publish": "node scripts/check-screenshots.js && npx @raycast/api@latest publish",
     "helper-zip": "node scripts/helper-zip.js"
   }
 }

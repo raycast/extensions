@@ -10,9 +10,20 @@ export interface Site {
   appPassword?: string;
   /** Accept self-signed HTTPS certificates, for local sites (Local, DDEV, Herd). */
   allowSelfSigned?: boolean;
+  /** Where WordPress itself lives (its "WordPress Address"), when that's a subfolder of the site's home URL. */
+  adminUrl?: string;
 }
 
 const STORAGE_KEY = "sites";
+
+/** A wp-admin URL for the site, e.g. wpAdminUrl(site, "update-core.php"). */
+export const wpAdminUrl = (site: Site, path = "") => `${site.adminUrl ?? site.url}/wp-admin/${path}`;
+
+/**
+ * The site without its application password, for anything that ends up in Raycast's cache, which
+ * is stored unencrypted on disk. Swap the full site back in from loadSites() before using it.
+ */
+export const withoutSecrets = (site: Site): Site => ({ ...site, appPassword: undefined });
 
 export async function loadSites(): Promise<Site[]> {
   const raw = await LocalStorage.getItem<string>(STORAGE_KEY);

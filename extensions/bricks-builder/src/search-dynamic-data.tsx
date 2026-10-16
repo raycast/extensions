@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { ErrorEmptyView, NoSitesView } from "./components/site-empty-view";
+import { NoSitesView, SiteEmptyView } from "./components/site-empty-view";
 import { ManageSitesAction, SwitchSiteSubmenu, useSelectedSite } from "./hooks/use-selected-site";
 import { DynamicTag, getDynamicTags } from "./lib/bricks-data";
 import { Site } from "./lib/sites";
@@ -27,7 +27,6 @@ export default function Command() {
 
   const { data, isLoading, error, revalidate } = useCachedPromise(getDynamicTags, [site as Site], {
     execute: Boolean(site),
-    keepPreviousData: true,
   });
 
   if (!sitesLoading && sites.length === 0) {
@@ -51,6 +50,19 @@ export default function Command() {
     groups.set(tag.group, [...(groups.get(tag.group) ?? []), tag]);
   }
 
+  const siteActions = (
+    <ActionPanel.Section>
+      <Action
+        title="Reload"
+        icon={Icon.ArrowClockwise}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={revalidate}
+      />
+      <SwitchSiteSubmenu sites={sites} current={site} onChange={setSiteId} />
+      <ManageSitesAction onPop={reloadSites} />
+    </ActionPanel.Section>
+  );
+
   return (
     <List
       isLoading={sitesLoading || isLoading}
@@ -64,7 +76,13 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <ErrorEmptyView error={error} onRetry={revalidate} />
+      <SiteEmptyView
+        error={error}
+        isLoading={isLoading}
+        title="No dynamic data tags"
+        actions={siteActions}
+        onRetry={revalidate}
+      />
       {[...groups].map(([group, groupTags]) => (
         <List.Section key={group} title={group} subtitle={`${groupTags.length}`}>
           {groupTags.map((tag) => (

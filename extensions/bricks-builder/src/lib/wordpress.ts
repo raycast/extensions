@@ -1,6 +1,6 @@
 import http from "node:http";
 import https from "node:https";
-import { normalizeSiteUrl, Site } from "./sites";
+import { normalizeSiteUrl, Site, wpAdminUrl } from "./sites";
 
 export class WordPressError extends Error {
   constructor(
@@ -276,7 +276,14 @@ async function listType(site: Site, type: PostType): Promise<ContentItem[]> {
     };
     if (authed) params.status = "publish,future,draft,pending,private";
 
-    const posts = await wpRequest<RawPost[]>(site, `/${type.restNamespace}/${type.restBase}`, params);
+    let posts: RawPost[];
+    try {
+      posts = await wpRequest<RawPost[]>(site, `/${type.restNamespace}/${type.restBase}`, params);
+    } catch (error) {
+      // A type with exactly 100, 200… items: WordPress answers the page after the last with this error.
+      if (page > 1 && error instanceof WordPressError && error.code === "rest_post_invalid_page_number") break;
+      throw error;
+    }
     for (const post of posts) {
       items.push({
         id: post.id,
@@ -411,13 +418,15 @@ export interface ConnectionCheck {
   siteName: string;
   /** The site's own home URL, when it differs from the one entered (e.g. it redirects to www). */
   canonicalUrl?: string;
+  /** WordPress's own address, when it lives in a subfolder of the home URL (e.g. /wordpress). */
+  adminUrl?: string;
   user?: string;
   hasBricks: boolean;
   hasHelper: boolean;
 }
 
 export async function checkConnection(site: Site): Promise<ConnectionCheck> {
-  const index = await wpRequest<{ name: string; home?: string; namespaces?: string[] }>(site, "/");
+  const index = await wpRequest<{ name: string; home?: string; url?: string; namespaces?: string[] }>(site, "/");
   const namespaces = index.namespaces ?? [];
 
   // Talk to the address WordPress calls home, so later requests don't go through a redirect
@@ -431,6 +440,15 @@ export async function checkConnection(site: Site): Promise<ConnectionCheck> {
   }
   const target = canonicalUrl ? { ...site, url: canonicalUrl } : site;
 
+  // wp-admin lives under WordPress's own address, which can differ from home (WordPress in /wordpress).
+  let adminUrl: string | undefined;
+  try {
+    const install = index.url ? normalizeSiteUrl(index.url) : undefined;
+    if (install && install !== target.url) adminUrl = install;
+  } catch {
+    adminUrl = undefined;
+  }
+
   let user: string | undefined;
   if (isAuthenticated(target)) {
     const me = await wpRequest<{ name: string }>(target, "/wp/v2/users/me", { context: "edit" });
@@ -439,6 +457,7 @@ export async function checkConnection(site: Site): Promise<ConnectionCheck> {
   return {
     siteName: decodeEntities(index.name),
     canonicalUrl,
+    adminUrl,
     user,
     hasBricks: namespaces.some((ns) => ns.startsWith("bricks/")),
     hasHelper: namespaces.includes(HELPER_NAMESPACE),
@@ -459,7 +478,7 @@ export function liveUrl(link: string): string {
 }
 
 export function adminEditUrl(site: Site, id: number): string {
-  return `${site.url}/wp-admin/post.php?post=${id}&action=edit`;
+  return wpAdminUrl(site, `post.php?post=${id}&action=edit`);
 }
 
 const NAMED_ENTITIES: Record<string, string> = {

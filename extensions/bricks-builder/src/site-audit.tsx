@@ -166,7 +166,6 @@ export default function Command() {
 
   const { data, isLoading, error, revalidate } = useCachedPromise(getAudit, [site as Site, largeImageKb()], {
     execute: Boolean(site),
-    keepPreviousData: true,
   });
 
   if (!sitesLoading && sites.length === 0) {
@@ -238,9 +237,7 @@ export default function Command() {
 /** One part of the audit as its own list. Shares the audit cache with the overview. */
 function AuditSection(props: { site: Site; sectionKey: SectionKey }) {
   const { site, sectionKey } = props;
-  const { data, isLoading, error, revalidate } = useCachedPromise(getAudit, [site, largeImageKb()], {
-    keepPreviousData: true,
-  });
+  const { data, isLoading, error, revalidate } = useCachedPromise(getAudit, [site, largeImageKb()], {});
   const summary = data ? summarize(data).find((s) => s.key === sectionKey) : undefined;
   const title = summary?.title ?? "Site Audit";
 

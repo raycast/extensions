@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { ErrorEmptyView, NoSitesView } from "./components/site-empty-view";
+import { NoSitesView, SiteEmptyView } from "./components/site-empty-view";
 import { ManageSitesAction, SwitchSiteSubmenu, useSelectedSite } from "./hooks/use-selected-site";
 import {
   buildLookup,
@@ -29,7 +29,6 @@ export default function Command() {
 
   const { data, isLoading, error, revalidate } = useCachedPromise(getDesign, [site as Site], {
     execute: Boolean(site),
-    keepPreviousData: true,
   });
   const lookup = useMemo(() => (data ? buildLookup(data) : new Map<string, string>()), [data]);
 
@@ -78,7 +77,13 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <ErrorEmptyView error={error} />
+      <SiteEmptyView
+        error={error}
+        isLoading={isLoading}
+        title="No colors or variables"
+        actions={commonActions}
+        onRetry={revalidate}
+      />
       {filter !== "variables" &&
         data?.palettes.map((palette) => (
           <List.Section key={palette.id} title={palette.name} subtitle={`${palette.colors.length} colors`}>

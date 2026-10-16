@@ -101,13 +101,15 @@ function activate_license( string $key ) {
 	if ( ( $current['key'] ?? '' ) === $key && ! empty( $current['instance_id'] ) ) {
 		return validate_license();
 	}
-	if ( ! empty( $current['key'] ) && ! empty( $current['instance_id'] ) ) {
-		license_request( '/v1/deactivate', [ 'key' => $current['key'], 'instance_id' => $current['instance_id'] ] );
-	}
 
+	// Activate the new key first: if it fails, the site keeps the license it has.
 	$result = license_request( '/v1/activate', [ 'key' => $key, 'site' => home_url() ] );
 	if ( is_wp_error( $result ) ) {
 		return $result;
+	}
+	if ( ! empty( $current['key'] ) && ! empty( $current['instance_id'] ) && $current['key'] !== $key ) {
+		// Free the old key's activation now that the new one works.
+		license_request( '/v1/deactivate', [ 'key' => $current['key'], 'instance_id' => $current['instance_id'] ] );
 	}
 	$license = apply_license_state(
 		[
