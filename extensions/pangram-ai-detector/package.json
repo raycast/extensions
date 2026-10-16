@@ -1,0 +1,112 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pangram-ai-detector",
+  "title": "Pangram AI Detector",
+  "description": "Check selected or copied text for AI writing with Pangram.",
+  "icon": "extension-icon.png",
+  "author": "mygirleatsmayo",
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "check-text",
+      "title": "Check Text",
+      "description": "Check the selected text, or the clipboard if nothing is selected, for AI writing.",
+      "keywords": ["ai", "detect", "detector", "gpt", "pangram"],
+      "mode": "view"
+    },
+    {
+      "name": "check-selected-text",
+      "title": "Check Selected Text",
+      "description": "Check the selected text for AI writing.",
+      "keywords": ["ai", "detect", "detector", "gpt", "pangram"],
+      "mode": "view"
+    },
+    {
+      "name": "check-clipboard-text",
+      "title": "Check Clipboard Text",
+      "description": "Check the clipboard text for AI writing.",
+      "keywords": ["ai", "detect", "detector", "gpt", "pangram"],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Pangram API key. Create one at pangram.com/apikey.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "Default follows Pangram's current model.",
+      "type": "dropdown",
+      "required": false,
+      "default": "default",
+      "data": [
+        { "title": "Default", "value": "default" },
+        { "title": "Pangram 4", "value": "pangram-4" }
+      ]
+    },
+    {
+      "name": "versionInvalidatesCache",
+      "title": "Cache",
+      "label": "New Model Version invalidates cached results",
+      "description": "Ignore results cached under an older Model Version.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "confirmAboveWords",
+      "title": "Confirm Above (Words)",
+      "description": "Ask before checking texts longer than this. Checks cost about $0.05 per 100 words. Default: 2000.",
+      "type": "textfield",
+      "required": false,
+      "default": "2000"
+    },
+    {
+      "name": "limitedConfidenceBelowWords",
+      "title": "Limited Confidence Below (Words)",
+      "description": "Flag results for shorter texts as limited confidence. Pangram doesn't publish its cutoff; 200 is an estimate based on observed website behavior. Default: 200.",
+      "type": "textfield",
+      "required": false,
+      "default": "200"
+    },
+    {
+      "name": "timeoutSeconds",
+      "title": "Timeout (Seconds)",
+      "description": "How long to wait for Pangram before giving up. Default: 300.",
+      "type": "textfield",
+      "required": false,
+      "default": "300"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
