@@ -44,7 +44,7 @@ export default function Command() {
     const lowerSearch = searchText.toLowerCase();
     return allItems.filter(
       (item) =>
-        item.name.toLowerCase().includes(lowerSearch) ||
+        (item.name && item.name.toLowerCase().includes(lowerSearch)) ||
         (item.username && item.username.toLowerCase().includes(lowerSearch)) ||
         (item.uri && item.uri.toLowerCase().includes(lowerSearch)) ||
         (item.description && item.description.toLowerCase().includes(lowerSearch)),
