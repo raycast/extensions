@@ -1,6 +1,6 @@
 # Oh Dear Changelog
 
-## [Updated Description] - {PR_MERGE_DATE}
+## [Updated Description] - 2026-10-16
 
 - Updated the extension description and README
 
