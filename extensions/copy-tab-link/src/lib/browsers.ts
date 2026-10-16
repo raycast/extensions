@@ -276,8 +276,16 @@ async function pickExtensionTab(
   const key = (tab: TabInfo) => (urlOnly ? tab.url : `${tab.url}${UNIT_SEPARATOR}${tab.title}`);
   const distinct = new Set(candidates.map(key));
   if (distinct.size > 1) throw new AmbiguousTabError(candidates, "windows");
-  if (target && !(await onlyTargetCanHaveTab(candidates[0], target))) {
-    throw new AmbiguousTabError(candidates, "unattributed", target);
+  if (target) {
+    if (!(await onlyTargetCanHaveTab(candidates[0], target))) {
+      throw new AmbiguousTabError(candidates, "unattributed", target);
+    }
+    // The check above reads the other browsers a moment later. If one of them navigated in between, the
+    // extension now reports something else, and the tab can no longer be attributed: ask instead.
+    const again = new Set((await activeTabsFromBrowserExtension()).map(key));
+    if (again.size !== distinct.size || [...distinct].some((k) => !again.has(k))) {
+      throw new AmbiguousTabError(candidates, "unattributed", target);
+    }
   }
   return candidates[0];
 }
