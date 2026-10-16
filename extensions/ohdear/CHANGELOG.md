@@ -2,7 +2,7 @@
 
 ## [Updated Description] - {PR_MERGE_DATE}
 
-- Updated the extension description and README to match how Oh Dear describes itself
+- Updated the extension description and README
 
 ## [New Icons] - 2022-09-20
 
