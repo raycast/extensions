@@ -68,6 +68,13 @@ export async function withBackoff<T>(
   }
 }
 
+/**
+ * Google API calls in flight at once for per-conversation lookups. Each call goes to a different space, so it
+ * stays under the per-space limit (15 reads a second), and a burst of a few dozen is far below the per-project
+ * ones (3,000 reads a minute).
+ */
+export const REQUEST_CONCURRENCY = 10;
+
 /** Runs `fn` over `items` with at most `limit` calls in flight. Keeps input order. */
 export async function mapLimit<T, R>(
   items: T[],

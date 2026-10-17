@@ -9,7 +9,7 @@
 
 import { Cache, environment, launchCommand, LaunchType } from "@raycast/api";
 
-import { defaultSleep, mapLimit } from "../helpers/backoff";
+import { defaultSleep, mapLimit, REQUEST_CONCURRENCY as CONCURRENCY } from "../helpers/backoff";
 import {
   collectUnread,
   countUnread,
@@ -34,7 +34,6 @@ import { getMe } from "./people";
 import { listSpacesSorted, resolveSpaceItems } from "./spaces";
 import type { Message, Space, SpaceItem } from "./types";
 
-const CONCURRENCY = 5;
 const cache = new Cache({ namespace: "unread" });
 const RESULT_KEY = "shared-result";
 const PENDING_KEY = "search-started";
@@ -75,7 +74,7 @@ async function searchUnread(lookbackDays: number, me: string): Promise<{ message
   });
 }
 
-/** Read positions (`spaceReadState.lastReadTime`) of the given spaces, 5 at a time. Failures leave a space out. */
+/** Read positions (`spaceReadState.lastReadTime`) of the given spaces, 10 at a time. Failures leave a space out. */
 async function readPositions(spaceNames: string[]): Promise<Map<string, string | undefined>> {
   const positions = new Map<string, string | undefined>();
   await mapLimit(spaceNames, CONCURRENCY, async (name) => {
@@ -118,7 +117,11 @@ async function readStateUnread(
  * last `lookbackDays` days count. Your own messages are excluded.
  */
 export async function loadUnread(lookbackDays: number): Promise<Unread> {
-  const [spaces, me] = await Promise.all([listSpacesSorted(), getMe()]);
+  // The search doesn't need the space list (only titles and the fallback do), so it doesn't wait for it.
+  const spacesRequest = listSpacesSorted();
+  // Awaited below; this only keeps an early search failure from leaving its rejection unhandled.
+  spacesRequest.catch(() => undefined);
+  const me = await getMe();
   let source: Unread["source"] = "search";
   // Only what Chat's Home counts as unread (see `countsAsUnread`).
   let found: { messages: Message[]; capped: boolean };
@@ -128,7 +131,7 @@ export async function loadUnread(lookbackDays: number): Promise<Unread> {
     if (!shouldFallBackFromSearch(error)) throw error;
     console.error("Unread search failed; falling back to read state", error);
     source = "readState";
-    const fallback = await readStateUnread(spaces, lookbackDays);
+    const fallback = await readStateUnread(await spacesRequest, lookbackDays);
     // Already after each space's read position, so no positions are needed.
     const visible = excludeOwnMessages(fallback.messages, me.userName).filter((message) =>
       countsAsUnread(message, undefined, me.userName),
@@ -136,6 +139,7 @@ export async function loadUnread(lookbackDays: number): Promise<Unread> {
     found = { messages: visible, capped: fallback.capped };
   }
 
+  const spaces = await spacesRequest;
   const groups = groupUnreadBySpace(found.messages, me.userName);
   const byName = new Map(spaces.map((space) => [space.name, space]));
   const groupSpaces = await mapLimit(
@@ -208,7 +212,8 @@ export async function getUnread(lookbackDays: number, options: { maxAgeMs: numbe
     cache.remove(PENDING_KEY);
   }
   writeShared({ at: Date.now(), lookbackDays, result });
-  await refreshUnreadSurfaces();
+  // Not awaited: the result is ready, and Unread Chat's subtitle can follow on its own (it never throws).
+  void refreshUnreadSurfaces();
   return result;
 }
 

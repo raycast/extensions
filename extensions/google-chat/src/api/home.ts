@@ -3,13 +3,12 @@
  * whether the user replied last, the names previews need, and recent messages that mention the user.
  */
 
-import { mapLimit } from "../helpers/backoff";
+import { mapLimit, REQUEST_CONCURRENCY as CONCURRENCY } from "../helpers/backoff";
 import type { UserNames } from "../helpers/chat-format";
 import { isAuthError, isScopeError } from "../helpers/errors";
 import { collectMentionsWithUnread, mentionRows, type MentionRow } from "../helpers/my-mentions";
 import {
   choosePreview,
-  LATEST_MAX_PAGES,
   type LatestDetails,
   LATEST_PAGE_SIZE,
   namesFor,
@@ -25,8 +24,6 @@ import { getCachedPeople, getMe, lookUpPeople } from "./people";
 import { listSpacesSorted, resolveSpaceItems } from "./spaces";
 import type { Message, Space, SpaceItem } from "./types";
 import type { UnreadSpace } from "./unread";
-
-const CONCURRENCY = 5;
 
 /** A conversation in the Read section. */
 export interface HomeRow extends LatestDetails {
@@ -46,22 +43,12 @@ function isFatal(error: unknown): boolean {
 }
 
 /**
- * The newest messages in a space (`spaces.messages.list`, newest first, 5 per page), paging only until one
- * from someone else turns up, at most 3 pages.
+ * The newest messages in a space: one `spaces.messages.list` of 15, newest first. One request instead of
+ * paging, since rows wait on the slowest conversation.
  */
 async function loadLatestMessages(spaceName: string, me: string): Promise<LatestMessages> {
-  const seen: Message[] = [];
-  let pageToken: string | undefined;
-  for (let page = 0; page < LATEST_MAX_PAGES; page++) {
-    const response = await listMessages(spaceName, {
-      pageSize: LATEST_PAGE_SIZE,
-      pageToken,
-      orderBy: "create_time desc",
-    });
-    seen.push(...(response.messages ?? []));
-    pageToken = response.nextPageToken || undefined;
-    if (choosePreview(seen, me) || !pageToken) break;
-  }
+  const response = await listMessages(spaceName, { pageSize: LATEST_PAGE_SIZE, orderBy: "create_time desc" });
+  const seen = response.messages ?? [];
   return {
     preview: choosePreview(seen, me),
     youReplied: youReplied(seen, me),
@@ -139,7 +126,7 @@ export async function loadLatestDetails(spaceNames: string[]): Promise<Record<st
 /**
  * One page of conversations for the Read section, most recently active first (25 that aren't unread per
  * page). The first page lists every space once (`spaces.list`); each page then resolves titles and lists
- * the newest messages of its conversations, 5 at a time. Conversations unread when the page loads keep a
+ * the newest messages of its conversations, 10 at a time. Conversations unread when the page loads keep a
  * row built from the unread result, without requests; My Messages hides them while the latest unread result
  * lists them, so one read elsewhere or marked as read shows under Read straight away.
  */

@@ -100,7 +100,8 @@ export interface CollectUnreadOptions {
 /**
  * Pages unread search results and keeps the messages Chat's Home counts (see {@link countsAsUnread}), without
  * the user's own. Stops after `cap` raw results once one of them counts; while none do, keeps going up to
- * `scanLimit`. Read positions are loaded once per space, as new spaces turn up. `capped` means results were
+ * `scanLimit`. Read positions are loaded once per space, as new spaces turn up; below both limits the next page
+ * is fetched while they load, as it's needed whatever they show. `capped` means results were
  * left unchecked (more pages, or a later page failed), so the count is a lower bound and a zero isn't certain.
  * A failure on the first page is thrown, so the caller can fall back.
  */
@@ -112,19 +113,29 @@ export async function collectUnread(options: CollectUnreadOptions): Promise<{ me
   let scanned = 0;
   let pages = 0;
   let pageToken: string | undefined;
-  do {
-    let page: UnreadSearchPage;
-    try {
-      page = await fetchPage(pageToken);
-    } catch (error) {
+  // Settled up front, so a page fetched ahead can fail while read positions load without an unhandled rejection.
+  const fetchSettled = (token: string | undefined) =>
+    fetchPage(token).then(
+      (page) => ({ page }),
+      (error: unknown) => ({ error }),
+    );
+  let next: ReturnType<typeof fetchSettled> | undefined = fetchSettled(undefined);
+  while (next) {
+    const fetched = await next;
+    next = undefined;
+    if ("error" in fetched) {
       // Google sometimes fails a later page with "Internal error encountered". Results are newest first, so the
       // pages already loaded hold the messages that matter; keep them and mark the total as a lower bound.
-      if (pages === 0) throw error;
-      onPageError?.(error);
+      if (pages === 0) throw fetched.error;
+      onPageError?.(fetched.error);
       return { messages: visible, capped: true };
     }
+    const { page } = fetched;
     pages++;
     scanned += page.messages.length;
+    pageToken = page.nextPageToken || undefined;
+    // Below both limits the next page is needed whatever this one holds, so it loads alongside the read positions.
+    if (pageToken && scanned < Math.min(cap, scanLimit)) next = fetchSettled(pageToken);
     const others = excludeOwnMessages(page.messages, me);
     const newSpaces = [...new Set(others.map(messageSpaceName))].filter((name) => !looked.has(name));
     if (newSpaces.length > 0) {
@@ -132,8 +143,8 @@ export async function collectUnread(options: CollectUnreadOptions): Promise<{ me
       for (const [name, position] of await readPositions(newSpaces)) positions.set(name, position);
     }
     visible.push(...others.filter((m) => countsAsUnread(m, positions.get(messageSpaceName(m)), me)));
-    pageToken = page.nextPageToken || undefined;
-  } while (pageToken && scanned < (visible.length > 0 ? cap : scanLimit));
+    if (!next && pageToken && scanned < (visible.length > 0 ? cap : scanLimit)) next = fetchSettled(pageToken);
+  }
   return { messages: visible, capped: !!pageToken };
 }
 

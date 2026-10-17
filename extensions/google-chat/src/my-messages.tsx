@@ -11,6 +11,7 @@ import {
 import { useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
+import { forgetSpaces } from "./api/spaces";
 import { markRead, type UnreadSpace } from "./api/unread";
 import { ChatView } from "./components/ChatView";
 import { ConversationItem, RefreshAction, ToggleUnreadOnlyAction } from "./components/ConversationItem";
@@ -105,6 +106,7 @@ function MyMessages({ launchView }: { launchView?: string }) {
   }, [subtitle, unreadState.isLoading]);
 
   function refresh() {
+    forgetSpaces();
     unreadState.revalidate();
     mentions.revalidate();
     if (!unreadOnly) reads.revalidate();

@@ -11,10 +11,11 @@ import { messageSnippet, senderName } from "./message-view";
 
 /** Read conversations per page of the Read section. */
 export const READ_PAGE_SIZE = 25;
-/** `spaces.messages.list` page size when looking for the newest message from someone else. */
-export const LATEST_PAGE_SIZE = 5;
-/** Stop after this many pages of the user's own messages; the row then has no preview. */
-export const LATEST_MAX_PAGES = 3;
+/**
+ * Newest messages loaded per conversation (one `spaces.messages.list`) to find the newest from someone else;
+ * when all of them are the user's own, the row has no preview.
+ */
+export const LATEST_PAGE_SIZE = 15;
 
 export type HomeView = "all" | "unread";
 

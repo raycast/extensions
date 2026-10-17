@@ -235,6 +235,35 @@ describe("collectUnread", () => {
     expect(found.capped).toBe(true);
     expect(errors).toHaveLength(1);
   });
+
+  it("fetches the next page while read positions load, below the cap", async () => {
+    const pages = [batch(0, 100, false), batch(1, 100, false)];
+    const { calls, fetchPage } = pager(pages);
+    const seenAtPositions: number[] = [];
+    const slowPositions = async (names: string[]) => {
+      seenAtPositions.push(calls.length);
+      return readPositions(names);
+    };
+    const found = await collectUnread({ fetchPage, readPositions: slowPositions, me: ME });
+    // Page 2 was requested before page 1's read positions were looked up.
+    expect(seenAtPositions).toEqual([2]);
+    expect(found.messages).toHaveLength(200);
+    expect(found.capped).toBe(false);
+  });
+
+  it("keeps earlier pages when a page fetched ahead fails", async () => {
+    const pages = [batch(0, 100, false), batch(1, 100, false), batch(2, 100, false)];
+    const errors: unknown[] = [];
+    const found = await collectUnread({
+      ...pager(pages, 2),
+      readPositions,
+      me: ME,
+      onPageError: (error) => errors.push(error),
+    });
+    expect(found.messages).toHaveLength(200);
+    expect(found.capped).toBe(true);
+    expect(errors).toHaveLength(1);
+  });
 });
 
 describe("settleMarkRead", () => {

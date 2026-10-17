@@ -5,7 +5,7 @@
 
 import { Cache } from "@raycast/api";
 
-import { mapLimit } from "../helpers/backoff";
+import { mapLimit, REQUEST_CONCURRENCY } from "../helpers/backoff";
 import { buildSpaceItem, namesFromMembers, usersNeedingLookup, type PeopleByUser } from "../helpers/dm-names";
 import { mentionMembers, type MentionMember } from "../helpers/mentions";
 import { findSpacesByTitle, parseRecipient } from "../helpers/recipient";
@@ -59,19 +59,42 @@ export async function getMembersCached(space: Space): Promise<Membership[]> {
   return members;
 }
 
-/** Spaces the user is in, most recently active first, without app DMs. */
-export async function listSpacesSorted(): Promise<Space[]> {
+/** A space list fetched less than this long ago is reused, so loaders started together share one download. */
+const SPACES_SHARE_MS = 30 * 1000;
+let sharedSpaces: { at: number; request: Promise<Space[]> } | undefined;
+
+async function fetchSpacesSorted(): Promise<Space[]> {
   const spaces = await listAllSpaces();
   return spaces
     .filter((s) => !s.singleUserBotDm)
     .sort((a, b) => Date.parse(b.lastActiveTime ?? "0") - Date.parse(a.lastActiveTime ?? "0"));
 }
 
-/** Titles for spaces, resolving DM and group chat names (5 member lookups at a time). */
+/**
+ * Spaces the user is in, most recently active first, without app DMs. My Messages' Unread, Mentions and Read
+ * loads each need the list, so one request (in flight or under 30 seconds old) serves them all; a failed one
+ * isn't reused. {@link forgetSpaces} makes the next call fetch afresh.
+ */
+export function listSpacesSorted(): Promise<Space[]> {
+  if (sharedSpaces && Date.now() - sharedSpaces.at < SPACES_SHARE_MS) return sharedSpaces.request;
+  const entry = { at: Date.now(), request: fetchSpacesSorted() };
+  sharedSpaces = entry;
+  entry.request.catch(() => {
+    if (sharedSpaces === entry) sharedSpaces = undefined;
+  });
+  return entry.request;
+}
+
+/** Drops the shared space list (on a manual refresh), so the next {@link listSpacesSorted} fetches afresh. */
+export function forgetSpaces(): void {
+  sharedSpaces = undefined;
+}
+
+/** Titles for spaces, resolving DM and group chat names (10 member lookups at a time). */
 export async function resolveSpaceItems(spaces: Space[]): Promise<SpaceItem[]> {
   const me = (await getMe()).userName;
   const membersBySpace = new Map<string, Membership[]>();
-  await mapLimit(spaces.filter(needsMembers), 5, async (space) => {
+  await mapLimit(spaces.filter(needsMembers), REQUEST_CONCURRENCY, async (space) => {
     try {
       membersBySpace.set(space.name, await getMembersCached(space));
     } catch (error) {

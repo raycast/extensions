@@ -2,7 +2,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 
 import { getCachedPeople } from "../api/people";
-import { listSpacesSorted, resolveSpaceItems } from "../api/spaces";
+import { forgetSpaces, listSpacesSorted, resolveSpaceItems } from "../api/spaces";
 import type { SpaceItem } from "../api/types";
 import { buildSpaceItem } from "../helpers/dm-names";
 import { showChatError } from "../helpers/feedback";
@@ -14,7 +14,7 @@ import { showChatError } from "../helpers/feedback";
 export function useSpaceItems() {
   const spaces = useCachedPromise(listSpacesSorted, [], {
     keepPreviousData: true,
-    onError: (error) => showChatError(error, () => spaces.revalidate()),
+    onError: (error) => showChatError(error, revalidate),
   });
   const titled = useCachedPromise(resolveSpaceItems, [spaces.data ?? []], {
     execute: !!spaces.data && spaces.data.length > 0,
@@ -33,9 +33,14 @@ export function useSpaceItems() {
     });
   }, [spaces.data, titled.data]);
 
+  function revalidate() {
+    forgetSpaces();
+    spaces.revalidate();
+  }
+
   return {
     items,
     isLoading: spaces.isLoading || titled.isLoading,
-    revalidate: spaces.revalidate,
+    revalidate,
   };
 }
