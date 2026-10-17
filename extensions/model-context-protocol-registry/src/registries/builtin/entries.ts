@@ -44,6 +44,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://www.a1.gallery/api/mcp",
   },
   {
+    name: "affixio",
+    title: "AffixIO",
+    description:
+      "Generate and verify zero-knowledge proofs with post-quantum ML-DSA-65 attestations for AI agents, without exposing personal data. 102 tools covering circuit proving and verification, signed attestation and token checks, delegation, and Merkle audit proofs. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, where you choose one of your AffixIO keys on the consent screen, so there is no API key to paste into the client.",
+    icon: "https://www.affix-io.com/logo.png",
+    homepage: "https://www.affix-io.com/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.affix-io.com/mcp/"],
+    },
+    remoteUrl: "https://www.affix-io.com/mcp/",
+  },
+  {
     name: "aggregate",
     title: "Aggregate",
     description:
