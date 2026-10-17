@@ -1,0 +1,9 @@
+[
+  [
+    -1,
+    {
+      "error": "AbortExtraction",
+      "message": "HTTP redirect to login page (https://www.instagram.com/accounts/login/)"
+    }
+  ]
+]
