@@ -13,6 +13,8 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
+import { TimeEditor } from "./components/time-editor";
+import type { TimeDraft } from "./lib/time-editing";
 import { formatLogDate, formatTime, isSameLocalDay } from "./lib/date";
 import { getProjectGroupIcon, getProjectGroupName } from "./lib/project-groups";
 import { formatDuration, getDurationSeconds } from "./lib/duration";
@@ -54,7 +56,7 @@ export default function WorkLogsCommand() {
       title="Add Work Log"
       icon={Icon.Plus}
       shortcut={Keyboard.Shortcut.Common.New}
-      target={<WorkLogForm projects={projects} categories={categories} onSaved={async () => reload()} />}
+      target={<WorkLogEditor projects={projects} categories={categories} onSaved={async () => reload()} />}
     />
   );
 
@@ -172,7 +174,7 @@ function WorkLogDetail({
             title="Edit Work Log"
             icon={Icon.Pencil}
             target={
-              <WorkLogForm
+              <WorkLogEditor
                 projects={projects}
                 categories={categories}
                 workLog={currentWorkLog}
@@ -190,14 +192,7 @@ function WorkLogDetail({
   );
 }
 
-type WorkLogFormValues = {
-  projectId: string;
-  description: string;
-  startedAt: Date;
-  endedAt: Date;
-};
-
-function WorkLogForm({
+function WorkLogEditor({
   projects,
   categories,
   workLog,
@@ -208,64 +203,39 @@ function WorkLogForm({
   workLog?: WorkLog;
   onSaved: (savedLog: WorkLog) => Promise<void>;
 }) {
-  const { pop } = useNavigation();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const now = useMemo(() => new Date(), []);
-  const defaultStart = useMemo(() => new Date(now.getTime() - 60 * 60 * 1000), [now]);
   const selectableProjects = useMemo(
     () => sortProjectsByPreference(projects.filter((project) => project.isActive || project.id === workLog?.projectId)),
     [projects, workLog?.projectId],
   );
+  const [details, setDetails] = useState({
+    projectId: workLog?.projectId ?? selectableProjects[0]?.id ?? "",
+    description: workLog?.description ?? "",
+  });
+  const [initialTimes] = useState(() => {
+    const end = new Date();
+    end.setSeconds(0, 0);
+    return {
+      startedAt: workLog?.startedAt ?? new Date(end.getTime() - 60 * 60000).toISOString(),
+      endedAt: workLog?.endedAt ?? end.toISOString(),
+    };
+  });
+  const project = findProject(projects, details.projectId);
 
-  async function submit(values: WorkLogFormValues) {
-    if (isSubmitting) return;
-
-    const description = values.description.trim();
-    const project = findProject(projects, values.projectId);
-    if (!project || (!workLog && !project.isActive)) {
-      await showToast({ style: Toast.Style.Failure, title: "Select an available project" });
-      return;
-    }
-    const startedAtMs = values.startedAt.getTime();
-    const endedAtMs = values.endedAt.getTime();
-    if (!Number.isFinite(startedAtMs) || !Number.isFinite(endedAtMs) || endedAtMs <= startedAtMs) {
-      await showToast({ style: Toast.Style.Failure, title: "End time must be after start time" });
-      return;
-    }
-    if (endedAtMs > Date.now() + 5 * 60 * 1000) {
-      await showToast({ style: Toast.Style.Failure, title: "End time cannot be in the future" });
-      return;
-    }
-    if (endedAtMs - startedAtMs > 24 * 60 * 60 * 1000) {
-      const confirmed = await confirmAlert({
-        title: "Save a log longer than 24 hours?",
-        message: "Check the start and end times before continuing.",
-        primaryAction: { title: "Save Anyway" },
-      });
-      if (!confirmed) return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const savedAt = new Date().toISOString();
-      const nextLog: WorkLog = {
-        id: workLog?.id ?? crypto.randomUUID(),
-        projectId: project.id,
-        description,
-        startedAt: values.startedAt.toISOString(),
-        endedAt: values.endedAt.toISOString(),
-        createdAt: workLog?.createdAt ?? savedAt,
-        updatedAt: savedAt,
-      };
-      await upsertWorkLog(nextLog);
-      await showToast({ style: Toast.Style.Success, title: workLog ? "Work log updated" : "Work log added" });
-      await onSaved(nextLog);
-      pop();
-    } catch (error) {
-      await showFailure("Failed to save work log", error);
-    } finally {
-      setIsSubmitting(false);
-    }
+  async function save(times: TimeDraft) {
+    if (!project || (!workLog && !project.isActive)) throw new Error("Select an available project");
+    if (!times.endedAt) throw new Error("A work log needs an end time");
+    const savedAt = new Date().toISOString();
+    const nextLog: WorkLog = {
+      id: workLog?.id ?? crypto.randomUUID(),
+      projectId: project.id,
+      description: details.description.trim(),
+      startedAt: times.startedAt,
+      endedAt: times.endedAt,
+      createdAt: workLog?.createdAt ?? savedAt,
+      updatedAt: savedAt,
+    };
+    await upsertWorkLog(nextLog);
+    await onSaved(nextLog);
   }
 
   if (selectableProjects.length === 0) {
@@ -273,28 +243,73 @@ function WorkLogForm({
   }
 
   return (
+    <TimeEditor
+      title={workLog ? "Edit Work Log" : "Add Work Log"}
+      initialTimes={initialTimes}
+      saveTitle={workLog ? "Save Work Log" : "Add Work Log"}
+      successTitle={workLog ? "Work log updated" : "Work log added"}
+      onSave={save}
+      metadata={
+        <>
+          <Detail.Metadata.Label title="Project" text={project?.name ?? "Unknown Project"} />
+          <Detail.Metadata.Label
+            title="Project Group"
+            text={project ? getProjectGroupName(categories, project.type) : "Unknown"}
+          />
+          {details.description.trim() ? <Detail.Metadata.Label title="Description" text={details.description} /> : null}
+          <Detail.Metadata.Separator />
+        </>
+      }
+      extraActions={
+        <ActionPanel.Section>
+          <Action.Push
+            title="Edit Project and Description"
+            icon={Icon.Text}
+            target={
+              <WorkLogDetailsForm
+                projects={selectableProjects}
+                categories={categories}
+                details={details}
+                onApply={setDetails}
+              />
+            }
+          />
+        </ActionPanel.Section>
+      }
+    />
+  );
+}
+
+function WorkLogDetailsForm({
+  projects,
+  categories,
+  details,
+  onApply,
+}: {
+  projects: Project[];
+  categories: ProjectCategory[];
+  details: { projectId: string; description: string };
+  onApply: (details: { projectId: string; description: string }) => void;
+}) {
+  const { pop } = useNavigation();
+  return (
     <Form
-      isLoading={isSubmitting}
+      navigationTitle="Edit Project and Description"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={workLog ? "Save Work Log" : "Add Work Log"} onSubmit={submit} />
+          <Action.SubmitForm
+            title="Apply to Preview"
+            onSubmit={(values: { projectId: string; description: string }) => {
+              onApply({ projectId: values.projectId, description: values.description.trim() });
+              pop();
+            }}
+          />
         </ActionPanel>
       }
     >
-      <ProjectDropdown projects={selectableProjects} categories={categories} defaultValue={workLog?.projectId} />
-      <Form.TextField id="description" title="Description" placeholder="Optional" defaultValue={workLog?.description} />
-      <Form.DatePicker
-        id="startedAt"
-        title="Started At"
-        type={Form.DatePicker.Type.DateTime}
-        defaultValue={workLog ? new Date(workLog.startedAt) : defaultStart}
-      />
-      <Form.DatePicker
-        id="endedAt"
-        title="Ended At"
-        type={Form.DatePicker.Type.DateTime}
-        defaultValue={workLog ? new Date(workLog.endedAt) : now}
-      />
+      <ProjectDropdown projects={projects} categories={categories} defaultValue={details.projectId} />
+      <Form.TextField id="description" title="Description" placeholder="Optional" defaultValue={details.description} />
+      <Form.Description text="Apply returns to the numeric preview. Your record is updated only when you choose Save." />
     </Form>
   );
 }
