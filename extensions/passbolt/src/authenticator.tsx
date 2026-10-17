@@ -80,9 +80,17 @@ export default function Authenticator() {
 
           setItems(totpResources);
 
-          // Final toast
-          toast.style = Toast.Style.Success;
-          toast.title = `Found ${totpResources.length} TOTP resources`;
+          // Final toast: report metadata failures the way Search Passwords does,
+          // so unnamed entries come with an explanation instead of a success only.
+          const failures = totpResources.filter((entry) => entry.metadata_error);
+          if (failures.length) {
+            toast.style = Toast.Style.Failure;
+            toast.title = `Found ${totpResources.length} TOTP resources, ${failures.length} need attention`;
+            toast.message = failures[0].metadata_error;
+          } else {
+            toast.style = Toast.Style.Success;
+            toast.title = `Found ${totpResources.length} TOTP resources`;
+          }
         } else {
           setItems([]);
         }
@@ -149,6 +157,9 @@ export default function Authenticator() {
             title={item.name || "Unnamed resource"}
             subtitle={item.username}
             accessories={[
+              ...(item.metadata_error
+                ? [{ icon: { source: Icon.ExclamationMark, tintColor: Color.Orange }, tooltip: item.metadata_error }]
+                : []),
               {
                 text: item.totpCode || "------",
                 icon: Icon.Key,
