@@ -1,5 +1,9 @@
 # Granola Changelog
 
+## [2.2.2 - Resume Sign-in After Browser Approval] - 2026-10-17
+
+- Fix sign-in not completing when Raycast closes while you approve access in the browser. The pending sign-in is now saved and finishes automatically the next time you open any Granola command.
+
 ## [2.2.1 - Sign-in Fix for Raycast 2.8] - 2026-10-16
 
 - Fix sign-in timing out on Raycast 2.8 (`extensionHost.render timed out`), which left every view command unusable. The sign-in illustration now uses static image assets instead of a runtime-generated SVG.
