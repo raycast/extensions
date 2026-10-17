@@ -1,31 +1,16 @@
+import { Temporal } from "@js-temporal/polyfill";
 import type { Event } from "../types";
-
-export function toLocalDateTime(date: Date, timeZone: string): string {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hourCycle: "h23",
-  }).formatToParts(date);
-  const get = (type: string) => parts.find((part) => part.type === type)?.value ?? "00";
-  return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}:${get("second")}`;
-}
+import { eventDate, formatDateTime } from "./event-time";
 
 export function systemTimeZone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 }
 
-export function validTimeZone(zone: string): boolean {
-  try {
-    new Intl.DateTimeFormat("en", { timeZone: zone });
-    return true;
-  } catch {
-    return false;
-  }
+export function toLocalDateTime(date: Date, timeZone: string): string {
+  return Temporal.Instant.fromEpochMilliseconds(date.getTime())
+    .toZonedDateTimeISO(timeZone)
+    .toPlainDateTime()
+    .toString({ smallestUnit: "second" });
 }
 
 export function isoDuration(minutes: number): string {
@@ -37,30 +22,52 @@ export function isoDuration(minutes: number): string {
   return `PT${hours ? `${hours}H` : ""}${remainder ? `${remainder}M` : ""}`;
 }
 
-export function durationMinutes(duration: string): number {
-  const match = /^PT(?:(\d+)H)?(?:(\d+)M)?$/.exec(duration);
-  return match ? Number(match[1] ?? 0) * 60 + Number(match[2] ?? 0) : 0;
-}
-
 export function eventStartDate(event: Event): Date {
-  const zone = event.timeZone ?? systemTimeZone();
-  const utcGuess = Date.parse(`${event.start}Z`);
-  if (!Number.isFinite(utcGuess)) return new Date(NaN);
-  let timestamp = utcGuess;
-  for (let i = 0; i < 3; i++) {
-    const represented = Date.parse(`${toLocalDateTime(new Date(timestamp), zone)}Z`);
-    timestamp += utcGuess - represented;
-  }
-  return new Date(timestamp);
+  return eventDate(event.start, event.showWithoutTime ? null : event.timeZone);
 }
 
 export function formatEventTime(event: Event): string {
-  if (event.showWithoutTime) return event.start.slice(0, 10);
-  const date = eventStartDate(event);
-  return Number.isNaN(date.getTime())
-    ? event.start
-    : new Intl.DateTimeFormat(undefined, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }).format(date);
+  return event.showWithoutTime ? `${event.start.slice(0, 10)} · All day` : formatDateTime(event.start, event.timeZone);
+}
+
+export function calendarDayRange(days: number, now = new Date(), zone = systemTimeZone()) {
+  if (![1, 7, 14, 30].includes(days)) throw new Error("Unsupported calendar range.");
+  const start = Temporal.Instant.fromEpochMilliseconds(now.getTime()).toZonedDateTimeISO(zone).startOfDay();
+  return {
+    start: new Date(start.epochMilliseconds),
+    end: new Date(start.add({ days }).epochMilliseconds),
+  };
+}
+
+export function formEventTime(date: Date, time: string, allDay: boolean, zone = systemTimeZone()) {
+  if (!(date instanceof Date) || !Number.isFinite(date.getTime())) throw new Error("Choose a valid date.");
+  const day = toLocalDateTime(date, zone).slice(0, 10);
+  if (allDay)
+    return {
+      start: `${day}T00:00:00`,
+      duration: "P1D",
+      timeZone: null,
+      showWithoutTime: true,
+    };
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) throw new Error("Enter a start time in HH:mm format.");
+  const start = `${day}T${time}:00`;
+  // New manual writes reject nonexistent/ambiguous wall times; no silent DST shift.
+  Temporal.PlainDateTime.from(start).toZonedDateTime(zone, {
+    disambiguation: "reject",
+  });
+  return { start, timeZone: zone, showWithoutTime: false };
+}
+
+export function validTimeZone(zone: string): boolean {
+  try {
+    new Intl.DateTimeFormat("en", { timeZone: zone });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function durationMinutes(duration: string): number {
+  const match = /^PT(?:(\d+)H)?(?:(\d+)M)?$/.exec(duration);
+  return match ? Number(match[1] ?? 0) * 60 + Number(match[2] ?? 0) : 0;
 }
