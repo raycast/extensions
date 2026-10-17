@@ -252,9 +252,13 @@ export function TransactionsList({
   // Budgets count only their own category, not subcategories.
   const categoryIds = useMemo(() => (budgetCategory ? [budgetCategory.id] : undefined), [budgetCategory?.id]);
   const { isLoading, data, pagination, revalidate } = useCachedPromise(
-    (query: string, acctId: string, selectedIds?: number[]) =>
+    (query: string, acctId: string, selectedIds?: number[], startDate?: string, endDate?: string) =>
       async ({ page }: { page: number }) => {
-        const options = { query: query || undefined, accountId: acctId ? Number(acctId) : undefined, ...dateRange };
+        const options = {
+          query: query || undefined,
+          accountId: acctId ? Number(acctId) : undefined,
+          ...(startDate && endDate ? { startDate, endDate } : {}),
+        };
         if (selectedIds) {
           // The transactions endpoint has no verified category filter. Read the complete
           // recent range before filtering so matches on later pages are not omitted.
