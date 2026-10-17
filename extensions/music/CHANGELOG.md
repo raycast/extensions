@@ -1,6 +1,6 @@
 # Apple Music Changelog
 
-## [Rewind and Fast Forward Commands] - {PR_MERGE_DATE}
+## [Rewind and Fast Forward Commands] - 2026-10-17
 
 - Added "Rewind" and "Fast Forward" commands that move the current track back or ahead by 15 seconds, stopping at the start or end of the track.
 
