@@ -1,6 +1,6 @@
 # Changelog
 
-## [Precise Work Time Editing] - {PR_MERGE_DATE}
+## [Precise Work Time Editing] - 2026-10-17
 
 - Return to an empty Root Search after successfully starting work, and label the running-timer view "Tracking Work".
 - Edit start and end times in 1-minute steps with live current times and a compact preview without duration comparisons.
