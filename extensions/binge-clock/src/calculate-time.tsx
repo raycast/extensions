@@ -1,10 +1,11 @@
-import { Grid, Icon, List } from "@raycast/api";
+import { ActionPanel, Grid, Icon, List } from "@raycast/api";
 import { useMemo, useRef, useState } from "react";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { getSuggestions } from "./utils/api";
 import { SearchResult } from "./interface/search-result";
 import { SearchResultListItem } from "./components/SearchResultListItem";
 import { SearchResultGridItem } from "./components/SearchResultGridItem";
+import { ToggleLayoutAction } from "./components/Actions";
 
 const MIN_SEARCH_LENGTH = 2;
 
@@ -79,7 +80,15 @@ export default function Command() {
           </Grid.Dropdown>
         }
       >
-        <Grid.EmptyView title={emptyTitle} description={emptyDescription} />
+        <Grid.EmptyView
+          title={emptyTitle}
+          description={emptyDescription}
+          actions={
+            <ActionPanel>
+              <ToggleLayoutAction layout={layout} onToggleLayout={toggleLayout} />
+            </ActionPanel>
+          }
+        />
         <Grid.Section title="Results" subtitle={filteredResults.length + ""}>
           {filteredResults.map((result: SearchResult) => (
             <SearchResultGridItem key={result.id} result={result} layout={layout} onToggleLayout={toggleLayout} />
@@ -108,7 +117,15 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView title={emptyTitle} description={emptyDescription} />
+      <List.EmptyView
+        title={emptyTitle}
+        description={emptyDescription}
+        actions={
+          <ActionPanel>
+            <ToggleLayoutAction layout={layout} onToggleLayout={toggleLayout} />
+          </ActionPanel>
+        }
+      />
       <List.Section title="Results" subtitle={filteredResults.length + ""}>
         {filteredResults.map((result: SearchResult) => (
           <SearchResultListItem

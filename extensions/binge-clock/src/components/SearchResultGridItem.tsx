@@ -30,7 +30,7 @@ export function SearchResultGridItem(props: { result: SearchResult; layout: stri
     <Grid.Item
       id={id}
       title={title}
-      subtitle={`${yearLabel} · ${compactTime}`}
+      subtitle={yearLabel ? `${yearLabel} · ${compactTime}` : compactTime}
       content={{ source: image ?? "", fallback: type === "show" ? Icon.Play : Icon.FilmStrip }}
       accessory={{
         icon: type === "show" ? Icon.Play : Icon.FilmStrip,
