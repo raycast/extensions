@@ -64,7 +64,7 @@ function mountDetail(character, animated = true) {
   };
 }
 const markdown = (character, animated = true) => mountDetail(character, animated)().props.markdown;
-const animationAction = (detail) => detail.props.actions.props.children[2]?.props.children;
+const animationAction = (detail) => detail.props.actions.props.children[2]?.props?.children;
 
 function portraitPath(text) {
   const image = text.match(/!\[[^\n]+\]\((file:\/\/[^\n]+)\?raycast-width=/);
@@ -134,6 +134,57 @@ test("animated artwork still works when the original portrait is missing", () =>
   assert.equal(path.extname(portraitPath(markdown({ ...CHARACTERS[0], icon: "" }))), ".svg");
 });
 
+test("animation can be restored when the original portrait is unavailable", async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "chiikawa-unreadable-"));
+  const unreadable = path.join(dir, "unreadable.png");
+  fs.copyFileSync(CHARACTERS[0].icon, unreadable);
+  const { accessSync } = fs;
+  t.mock.method(fs, "accessSync", (source, mode) => {
+    if (source === unreadable) throw Object.assign(new Error("Permission denied"), { code: "EACCES" });
+    return accessSync(source, mode);
+  });
+  try {
+    const inputs = [
+      ["absent", undefined],
+      ["empty path", ""],
+      ["nonexistent", path.join(dir, "missing.png")],
+      ["directory", dir],
+      ["unreadable", unreadable],
+    ];
+    for (const [label, icon] of inputs) {
+      for (const initiallyAnimated of [true, false]) {
+        await t.test(`${label} PNG, animation initially ${initiallyAnimated ? "on" : "off"}`, () => {
+          const character = { ...CHARACTERS[0], icon };
+          const render = mountDetail(character, initiallyAnimated);
+          const copiedMarkdown = mountDetail(CHARACTERS[0])().props.actions.props.children[1].props.children[2].props
+            .content;
+          for (const animated of [initiallyAnimated, !initiallyAnimated, initiallyAnimated]) {
+            const detail = render();
+            const action = animationAction(detail);
+            assert.ok(action, "keep the animation action available when the SVG exists");
+            assert.equal(action.props.title, animated ? "Show Original Portrait" : "Show Animated Character");
+            if (animated) {
+              assert.equal(
+                portraitPath(detail.props.markdown),
+                path.join(root, "assets", "animated", `${character.id}.svg`),
+              );
+            } else {
+              assert.ok(!detail.props.markdown.includes("!["), "respect animation-off when the PNG is unavailable");
+            }
+            assert.equal(detail.props.markdown.replace(/!\[[^\n]+\]\([^\n]+\)\n\n/, ""), copiedMarkdown);
+            const copyActions = detail.props.actions.props.children[1].props.children;
+            assert.equal(copyActions[1].props.content, character.description);
+            assert.equal(copyActions[2].props.content, copiedMarkdown);
+            action.props.onAction();
+          }
+        });
+      }
+    }
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("missing, absent, or unreadable images omit the image and animation action without losing the biography", () => {
   for (const icon of [undefined, "", path.join(root, "assets", "missing.png"), path.join(root, "assets")]) {
     for (const animated of [true, false]) {
@@ -143,6 +194,9 @@ test("missing, absent, or unreadable images omit the image and animation action 
       assert.ok(!text.includes("undefined"));
       assert.ok(text.includes(CHARACTERS[0].description));
       assert.equal(animationAction(detail), undefined);
+      const copyActions = detail.props.actions.props.children[1].props.children;
+      assert.equal(copyActions[1].props.content, CHARACTERS[0].description);
+      assert.equal(copyActions[2].props.content, text);
     }
   }
 });

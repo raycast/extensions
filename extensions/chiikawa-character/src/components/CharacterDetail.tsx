@@ -47,6 +47,7 @@ export function CharacterDetail({ character }: Props) {
   const { animateCharacters } = getPreferenceValues<Preferences>();
   const [animated, setAnimated] = useState(animateCharacters);
   const image = useMemo(() => getCharacterImage(character, animated), [character, animated]);
+  const canToggleAnimation = useMemo(() => Boolean(getCharacterImage(character, true)), [character]);
   const markdown = toMarkdown(character, image);
   const randomCharacter = useMemo(() => getRandomCharacter(character.id), [character.id]);
 
@@ -101,7 +102,7 @@ export function CharacterDetail({ character }: Props) {
               shortcut={{ modifiers: ["cmd"], key: "m" }}
             />
           </ActionPanel.Section>
-          {image && (
+          {canToggleAnimation && (
             <ActionPanel.Section title="Animation">
               <Action
                 icon={animated ? Icon.Pause : Icon.Play}
