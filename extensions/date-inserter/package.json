@@ -130,7 +130,7 @@
         {
           "name": "weekNumbers",
           "title": "Week Numbers",
-          "description": "Show week numbers in the calendar. \"Auto\" matches the week start: Sunday → Western traditional, Monday → ISO 8601.",
+          "description": "Show week numbers in the calendar. \"Auto\" matches the week start: Sunday → Western Traditional, Monday → ISO 8601.",
           "type": "dropdown",
           "default": "off",
           "required": false,
@@ -144,7 +144,7 @@
               "value": "iso"
             },
             {
-              "title": "Western traditional",
+              "title": "Western Traditional",
               "value": "western"
             },
             {
@@ -152,7 +152,7 @@
               "value": "middle-eastern"
             },
             {
-              "title": "Auto (based on week start)",
+              "title": "Auto (Based on Week Start)",
               "value": "auto"
             }
           ]

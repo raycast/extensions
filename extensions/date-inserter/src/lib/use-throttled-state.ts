@@ -13,5 +13,7 @@ export function useThrottledState<T>(initial: T, normalize: (value: T) => T = (v
 
   const update = (next: (current: T) => T, hold?: HoldOptions<T>) =>
     scheduler.update((current) => normalize(next(current)), hold);
-  return [shown, update] as const;
+  // Confirming actions read the latest value, which may not be on screen yet.
+  const settle = () => scheduler.settle();
+  return [shown, update, settle] as const;
 }

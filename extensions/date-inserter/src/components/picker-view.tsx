@@ -24,13 +24,13 @@ export interface PickerViewProps<T> {
   /** Called with the chosen value; the caller decides where to navigate next. */
   onPick: (value: T) => void;
   /** Additional actions for the Jump section. */
-  jumpActions?: (selected: T, select: (value: T) => void) => JSX.Element;
+  jumpActions?: (settle: () => T, select: (value: T) => void) => JSX.Element;
 }
 
 /** A 4 x 3 page of months or years, navigated with the arrow keys like the day calendar. */
 export function PickerView<T>(props: PickerViewProps<T>) {
   const { noun, current, step, rowOf, onPick, jumpActions } = props;
-  const [selected, update] = useThrottledState(props.initial, props.normalize);
+  const [selected, update, settle] = useThrottledState(props.initial, props.normalize);
   const imageFor = useImageCache();
   const image = imageFor(props.idOf(selected), (dark) => props.renderImage(selected, dark));
   const select = (value: T) => update(() => value);
@@ -42,7 +42,7 @@ export function PickerView<T>(props: PickerViewProps<T>) {
       navigationTitle={`Go to ${noun}`}
       actions={
         <ActionPanel>
-          <Action title={`Choose ${noun}`} icon={Icon.Checkmark} onAction={() => onPick(selected)} />
+          <Action title={`Choose ${noun}`} icon={Icon.Checkmark} onAction={() => onPick(settle())} />
           <ActionPanel.Section title="Jump">
             <Action
               title={`Go to This ${noun}`}
@@ -50,7 +50,7 @@ export function PickerView<T>(props: PickerViewProps<T>) {
               shortcut={GO_TO_TODAY}
               onAction={() => select(current)}
             />
-            {jumpActions?.(selected, select)}
+            {jumpActions?.(settle, select)}
           </ActionPanel.Section>
           <ActionPanel.Section title="Navigate">
             {arrowActions(

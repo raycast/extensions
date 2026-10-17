@@ -59,6 +59,20 @@ describe("UpdateScheduler", () => {
     expect(rendered.at(-1)).toBe(10);
   });
 
+  it("settles pending moves when a selection is confirmed", () => {
+    for (let i = 0; i < 5; i++) {
+      scheduler.update(add(1), hold);
+      vi.advanceTimersByTime(KEY_REPEAT_MS);
+    }
+    // The hold has only drawn the first press so far.
+    expect(rendered).toEqual([1]);
+    expect(scheduler.settle()).toBe(5);
+    expect(rendered).toEqual([1, 5]);
+    // Nothing is left to draw once the key is released.
+    vi.advanceTimersByTime(HOLD_GAP_MS);
+    expect(rendered).toEqual([1, 5]);
+  });
+
   it("does not treat alternating keys as a hold", () => {
     scheduler.update(add(1), hold);
     vi.advanceTimersByTime(KEY_REPEAT_MS);

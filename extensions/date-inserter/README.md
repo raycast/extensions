@@ -50,7 +50,7 @@ Moving past the first or last day of a month turns the page to the neighboring m
 | Initial Format | Format selected when the calendar opens | Date Format 1 |
 | Language | Language of the calendar and of names in the inserted date | English |
 | Week Start | Sunday or Monday | Sunday |
-| Week Numbers | Off, ISO 8601, Western traditional, Middle Eastern, or Auto (based on week start) | Off |
+| Week Numbers | Off, ISO 8601, Western Traditional, Middle Eastern, or Auto (Based on Week Start) | Off |
 
 ### Date Formats
 

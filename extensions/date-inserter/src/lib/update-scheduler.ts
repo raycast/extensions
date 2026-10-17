@@ -65,6 +65,15 @@ export class UpdateScheduler<T> {
     }
   }
 
+  /**
+   * Shows any pending change right away and returns the latest value. Use it
+   * when confirming a selection, so keys pressed just before Enter still count.
+   */
+  settle(): T {
+    if (this.shown !== this.latest) this.flush();
+    return this.latest;
+  }
+
   dispose() {
     clearTimeout(this.throttleTimer);
     clearTimeout(this.settleTimer);

@@ -18,6 +18,7 @@ import {
   WeekNumbering,
   WeekStartsOn,
   weekRowId,
+  withTimeOf,
   yearRowId,
 } from "./calendar";
 
@@ -182,5 +183,16 @@ describe("row ids", () => {
     expect(yearRowId(2029)).toBe(yearRowId(2027));
     // 2019 belongs to the 2010s page.
     expect(yearRowId(2019)).not.toBe(yearRowId(2020));
+  });
+});
+
+describe("withTimeOf", () => {
+  it("keeps the day and takes the time of day from the other date", () => {
+    const opened = new Date(2026, 9, 15, 14, 30, 5);
+    const moved = withTimeOf(shiftMonth(day(2026, 10, 15), 1), opened);
+    expect(moved.getFullYear()).toBe(2026);
+    expect(moved.getMonth()).toBe(10);
+    expect(moved.getDate()).toBe(15);
+    expect([moved.getHours(), moved.getMinutes(), moved.getSeconds()]).toEqual([14, 30, 5]);
   });
 });

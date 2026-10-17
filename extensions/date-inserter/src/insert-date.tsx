@@ -1,10 +1,21 @@
-import { Action, ActionPanel, Detail, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  closeMainWindow,
+  Detail,
+  Icon,
+  showHUD,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { dayNavigationActions } from "./components/day-navigation-actions";
 import { formatActions } from "./components/format-actions";
 import { MonthView } from "./components/month-view";
 import { YearView } from "./components/year-view";
-import { clampDate, moveToMonth, moveToYear, toDayId } from "./lib/calendar";
+import { clampDate, moveToMonth, moveToYear, toDayId, withTimeOf } from "./lib/calendar";
 import { renderCalendarSvg } from "./lib/calendar-image";
 import { formatDate } from "./lib/date-format";
 import { readSettings } from "./lib/settings";
@@ -18,7 +29,8 @@ export default function Command() {
   const settings = useMemo(readSettings, []);
   const { formats, language, weekStartsOn, weekNumbering } = settings;
   const today = useMemo(() => new Date(), []);
-  const [selected, updateSelected] = useThrottledState(today, clampDate);
+  // Every day carries the time the command opened; see withTimeOf.
+  const [selected, updateSelected, settle] = useThrottledState(today, (date) => withTimeOf(clampDate(date), today));
   const [formatIndex, setFormatIndex] = useState(settings.initialFormatIndex);
   const { push, pop } = useNavigation();
 
@@ -51,6 +63,12 @@ export default function Command() {
     }
   }, [activeFormat.number, activeFormat.pattern]);
 
+  /** Formats the latest selection, including moves not drawn yet, for paste and copy. */
+  function latestOutput(): string | undefined {
+    const latest = formatDate(settle(), activeFormat.pattern, language.locale);
+    return latest.ok ? latest.value : undefined;
+  }
+
   /** Opens the month view; `pops` is how many screens to close after a month is chosen. */
   function monthView(initial: Date, pops: number) {
     return (
@@ -73,8 +91,29 @@ export default function Command() {
         <ActionPanel>
           {result.ok ? (
             <>
-              <Action.Paste title="Paste Date" content={result.value} />
-              <Action.CopyToClipboard title="Copy Date" content={result.value} shortcut={COPY_DATE} />
+              {/* Not Action.Paste / Action.CopyToClipboard: their content is fixed when the frame is drawn. */}
+              <Action
+                title="Paste Date"
+                icon={Icon.Clipboard}
+                onAction={async () => {
+                  const text = latestOutput();
+                  if (text === undefined) return;
+                  // Same order as the Raycast docs: paste first, then close the window.
+                  await Clipboard.paste(text);
+                  await closeMainWindow();
+                }}
+              />
+              <Action
+                title="Copy Date"
+                icon={Icon.CopyClipboard}
+                shortcut={COPY_DATE}
+                onAction={async () => {
+                  const text = latestOutput();
+                  if (text === undefined) return;
+                  await Clipboard.copy(text);
+                  await showHUD("Copied to Clipboard");
+                }}
+              />
             </>
           ) : (
             <Action.OpenInBrowser title="Open Date Format Reference" url={FORMAT_REFERENCE_URL} />
@@ -91,22 +130,23 @@ export default function Command() {
               title="Go to Month…"
               icon={Icon.Calendar}
               shortcut={GO_TO_MONTH}
-              onAction={() => push(monthView(selected, 1))}
+              onAction={() => push(monthView(settle(), 1))}
             />
             <Action
               title="Go to Year…"
               icon={Icon.Calendar}
               shortcut={GO_TO_YEAR}
-              onAction={() =>
+              onAction={() => {
+                const current = settle();
                 push(
                   <YearView
-                    initialYear={selected.getFullYear()}
+                    initialYear={current.getFullYear()}
                     today={today}
                     // Choosing a year continues to that year's months; afterwards close both screens.
-                    onPick={(year) => push(monthView(moveToYear(selected, year), 2))}
+                    onPick={(year) => push(monthView(moveToYear(current, year), 2))}
                   />,
-                )
-              }
+                );
+              }}
             />
           </ActionPanel.Section>
           {dayNavigationActions(updateSelected, weekStartsOn)}

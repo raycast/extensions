@@ -42,12 +42,13 @@ export function MonthView({ initial, today, language, onPick }: Props) {
         )
       }
       onPick={onPick}
-      jumpActions={(selected, select) => (
+      jumpActions={(settle, select) => (
         <Action
           title="Go to Year…"
           icon={Icon.Calendar}
           shortcut={GO_TO_YEAR}
-          onAction={() =>
+          onAction={() => {
+            const selected = settle();
             push(
               <YearView
                 initialYear={selected.getFullYear()}
@@ -57,8 +58,8 @@ export function MonthView({ initial, today, language, onPick }: Props) {
                   pop();
                 }}
               />,
-            )
-          }
+            );
+          }}
         />
       )}
     />

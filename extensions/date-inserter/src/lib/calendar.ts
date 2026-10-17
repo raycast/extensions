@@ -137,3 +137,14 @@ export function yearRowId(year: number): string {
   const first = decadeStart(year) - 1;
   return `${first}-${Math.floor((year - first) / PICKER_COLUMNS)}`;
 }
+
+/**
+ * Returns `date` with the time of day taken from `time`. Every selected day
+ * carries the same time, so formats that include a time (e.g. `HH:mm`) show
+ * the moment the calendar opened, whichever day is picked.
+ */
+export function withTimeOf(date: Date, time: Date): Date {
+  const result = new Date(date);
+  result.setHours(time.getHours(), time.getMinutes(), time.getSeconds(), time.getMilliseconds());
+  return result;
+}

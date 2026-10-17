@@ -7,4 +7,4 @@
 - Month and year views for jumping to distant dates.
 - Two date formats using date-fns tokens, switched with the 1 and 2 keys.
 - Eleven languages for the calendar and for names in the inserted date.
-- Week start (Sunday or Monday) and optional week numbers (ISO 8601, Western traditional, or Middle Eastern).
+- Week start (Sunday or Monday) and optional week numbers (ISO 8601, Western Traditional, or Middle Eastern).
