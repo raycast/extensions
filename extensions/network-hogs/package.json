@@ -4,7 +4,7 @@
   "title": "Network Hogs",
   "description": "Find which apps are using your network, see live download and upload rates, and quit bandwidth hogs.",
   "icon": "icon.png",
-  "author": "ray.dhruv",
+  "author": "0xdhrv",
   "platforms": [
     "macOS"
   ],
