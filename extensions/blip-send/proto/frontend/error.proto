@@ -1,0 +1,18 @@
+syntax = "proto3";
+package frontend;
+
+
+enum ErrCode {
+  Unknown = 0;
+  Internal = 500;
+  NotFound = 404;
+  Invalid = 400;
+  Unauthorized = 401;
+  NotImplemented = 501;
+  Network = 600;
+}
+
+message Err {
+  int32 code = 1;
+  string msg = 2;
+}
