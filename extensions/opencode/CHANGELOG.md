@@ -1,6 +1,6 @@
 # OpenCode Changelog
 
-## [OpenCode Go] - {PR_MERGE_DATE}
+## [OpenCode Go] - 2026-10-17
 
 - Add models from your OpenCode Go subscription
 
