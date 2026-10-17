@@ -1,6 +1,6 @@
 # Email Subaddresses & Aliases Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-17
 
 - Generate a plus-addressed or catch-all email alias from the active browser tab
 - Multiple accounts, with a picker in the **Build Email Alias** form
