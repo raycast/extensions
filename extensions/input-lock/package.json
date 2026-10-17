@@ -1,0 +1,125 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "input-lock",
+  "title": "Input Lock",
+  "description": "Lock the keyboard and trackpad, and unlock only by typing a secret key sequence.",
+  "icon": "extension-icon.png",
+  "author": "dharun",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "lock",
+      "title": "Lock Keyboard & Trackpad",
+      "subtitle": "Input Lock",
+      "description": "Block all keyboard and trackpad input until the unlock sequence is typed.",
+      "mode": "no-view",
+      "keywords": [
+        "clean",
+        "keyboard",
+        "trackpad",
+        "kid",
+        "cat",
+        "block"
+      ],
+      "arguments": [
+        {
+          "name": "duration",
+          "placeholder": "Auto-unlock e.g. 5m",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "blockTrackpad",
+          "title": "Pointer",
+          "label": "Also block trackpad & mouse",
+          "description": "Freeze the cursor and swallow clicks, scrolls and gestures.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "lock-keyboard",
+      "title": "Lock Keyboard Only",
+      "subtitle": "Input Lock",
+      "description": "Block keyboard input but keep the trackpad working — handy for wiping the keys.",
+      "mode": "no-view",
+      "keywords": [
+        "clean",
+        "keyboard",
+        "wipe",
+        "block"
+      ],
+      "arguments": [
+        {
+          "name": "duration",
+          "placeholder": "Auto-unlock e.g. 5m",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "unlockSequence",
+      "title": "Unlock Sequence",
+      "description": "Type these characters (case-insensitive, at least 3) while locked to unlock. Only the sequence matters — other keys typed before it are ignored.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "autoUnlockMinutes",
+      "title": "Auto-Unlock After (minutes)",
+      "description": "Safety net in case you forget the sequence. 0 disables it. Override per lock with the duration argument (e.g. 5m, 90s, 1h30m).",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
+    },
+    {
+      "name": "showOverlay",
+      "title": "Overlay",
+      "label": "Show lock overlay",
+      "description": "Show a small on-screen panel while locked, with progress dots as you type the sequence.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "playUnlockSound",
+      "title": "Unlock Feedback",
+      "label": "Play a sound when unlocked",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "description": "Play the Glass sound and briefly show an \"Unlocked\" confirmation when input is restored."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build-helper": "./scripts/build-helper.sh",
+    "build": "npm run build-helper && ray build",
+    "dev": "npm run build-helper && ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
