@@ -1,5 +1,9 @@
 # Badges Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Bump `raycast-cross-extension@0.3.0` to fix asset path compatibility issues
+
 ## [Improvement] - 2026-09-21
 
 - Add an entry for acquiring 3D badge models
