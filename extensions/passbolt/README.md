@@ -158,9 +158,6 @@ npm run build
 # Lint code
 npm run lint
 
-# Run metadata decryption and search regression tests with synthetic OpenPGP keys
-npm test
-
 # Fix linting issues
 npm run fix-lint
 ```
