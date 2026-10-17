@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Posy MCP Server] - {PR_MERGE_DATE}
+
+- Add Posy to the official registry: build and edit a hand-made link-in-bio page, add, update, move and remove link tiles, set the theme and profile, import an existing page and publish. Hosted Streamable HTTP server at https://posy.page/api/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add TopxAI Models MCP Server] - 2026-10-16
 
 - Add TopxAI Models to the official registry: list the TopxAI catalogue's text models with their prices, ask Claude, GPT, Grok, GLM, Kimi or DeepSeek from inside another model's conversation, and ask TypeSafe's Jev typed questions about a piece of text. Hosted Streamable HTTP server at https://ai.topxea.com/mcp/models, connected through `mcp-remote` with a TopxAI API key as a bearer header.
