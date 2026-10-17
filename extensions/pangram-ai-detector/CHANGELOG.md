@@ -2,7 +2,7 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Check selected or copied text using your own Pangram API key.
-- View the Verdict, Breakdown, and Segment confidence.
-- Reuse Cached Results or refresh to run a new Check.
-- Confirm short and long texts before spending credits, and flag Limited Confidence for short texts.
+- Check selected or copied text using your own Pangram API key and prepaid credits.
+- View the Verdict, Breakdown percentages, and each Segment's label and Pangram's confidence.
+- Reuse Cached Results at no cost, or Refresh to send a new Check and spend credits.
+- Confirm short and long texts with an estimated cost before sending. Show the extension's Limited Confidence warning for short texts.

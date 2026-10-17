@@ -69,7 +69,7 @@ export async function checkText(text: string, { apiKey, model, timeoutMs }: Chec
     const body: unknown = await response.json().catch(() => undefined);
     if (!response.ok) {
       const detail = (body as { detail?: unknown } | undefined)?.detail;
-      const message = typeof detail === "string" ? detail : `Pangram API error ${response.status}`;
+      const message = typeof detail === "string" ? detail : `Pangram API request failed (HTTP ${response.status}).`;
       throw new PangramError(message, response.status);
     }
     return body as T;
@@ -90,7 +90,7 @@ export async function checkText(text: string, { apiKey, model, timeoutMs }: Chec
       await sleep(POLL_INTERVAL_MS, undefined, { signal });
     }
   } catch (error) {
-    if (signal.aborted) throw new PangramError(`Pangram didn't finish within ${timeoutMs / 1000} s`);
+    if (signal.aborted) throw new PangramError(`Check timed out after ${timeoutMs / 1000} seconds.`);
     throw error;
   }
 }

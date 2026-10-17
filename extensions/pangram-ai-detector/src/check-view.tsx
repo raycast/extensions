@@ -62,10 +62,10 @@ export function CheckView({ readSource }: { readSource: () => Promise<string> })
           const words = countWords(sent);
           const isTooShort = words < MIN_WORDS;
           if (isTooShort || words > confirmAboveWords) {
-            const shortNote = isTooShort ? `Pangram needs at least ${MIN_WORDS} words for a reliable result. ` : "";
+            const shortNote = isTooShort ? `Pangram's results are less reliable below ${MIN_WORDS} words. ` : "";
             const confirmed = await confirmAlert({
-              title: `Check ${words.toLocaleString()} words?`,
-              message: `${shortNote}This costs about ${formatCost(words)} in Pangram credits.`,
+              title: `Check about ${words.toLocaleString()} words?`,
+              message: `${shortNote}This sends your text to Pangram and spends ${formatCost(words)} in prepaid credits.`,
               primaryAction: { title: "Check" },
             });
             if (!confirmed) throw new Cancelled();
@@ -80,7 +80,7 @@ export function CheckView({ readSource }: { readSource: () => Promise<string> })
         if (!previousModelVersion) return;
         showToast({
           style: Toast.Style.Success,
-          title: "Pangram model updated",
+          title: "New Model Version detected",
           message: `${previousModelVersion} → ${result.modelVersion}`,
         });
       },
@@ -96,7 +96,7 @@ export function CheckView({ readSource }: { readSource: () => Promise<string> })
       {data && <Action.CopyToClipboard title="Copy Verdict Summary" content={verdictSummary(data.result)} />}
       {!isLoading && (
         <Action
-          title="Refresh"
+          title="Refresh (Spends Credits)"
           icon={Icon.ArrowClockwise}
           shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={refresh}
@@ -145,27 +145,20 @@ function ResultMetadata({
   return (
     <Detail.Metadata>
       <Detail.Metadata.TagList title="Verdict">
-        <Detail.Metadata.TagList.Item text={result.verdict} color={verdictColors[result.verdict]} />
-      </Detail.Metadata.TagList>
-      {isLimitedConfidence && (
-        <Detail.Metadata.TagList title="Confidence">
-          <Detail.Metadata.TagList.Item text="Limited — short text" color={Color.Yellow} />
-        </Detail.Metadata.TagList>
-      )}
-      <Detail.Metadata.Label title="AI-Generated" text={percent(result.breakdown.ai)} icon={dot(Color.Red)} />
-      <Detail.Metadata.Label title="AI-Assisted" text={percent(result.breakdown.aiAssisted)} icon={dot(Color.Orange)} />
-      <Detail.Metadata.Label title="Human Written" text={percent(result.breakdown.human)} icon={dot(Color.Green)} />
-      <Detail.Metadata.Separator />
-      <Detail.Metadata.Label title="Words (Pangram)" text={words.toLocaleString()} />
-      <Detail.Metadata.Label title="Estimated Cost" text={formatCost(words)} />
-      <Detail.Metadata.Label title="Model" text={`${model} · ${result.modelVersion}`} />
-      <Detail.Metadata.Separator />
-      <Detail.Metadata.TagList title="Result">
         <Detail.Metadata.TagList.Item
-          text={isCached ? "Cached" : "Fresh"}
-          color={isCached ? Color.SecondaryText : Color.Green}
+          text={result.verdict === "AI" ? "AI-Generated" : result.verdict}
+          color={verdictColors[result.verdict]}
         />
+        {isLimitedConfidence && <Detail.Metadata.TagList.Item text="Short text" color={Color.Yellow} />}
       </Detail.Metadata.TagList>
+      <Detail.Metadata.Label title="Result" text={isCached ? "Cached · $0" : `New Check · ${formatCost(words)}`} />
+      <Detail.Metadata.TagList title="Breakdown">
+        <Detail.Metadata.TagList.Item text={`AI ${percent(result.breakdown.ai)}`} color={Color.Red} />
+        <Detail.Metadata.TagList.Item text={`Assisted ${percent(result.breakdown.aiAssisted)}`} color={Color.Orange} />
+        <Detail.Metadata.TagList.Item text={`Human ${percent(result.breakdown.human)}`} color={Color.Green} />
+      </Detail.Metadata.TagList>
+      <Detail.Metadata.Label title="Words (Pangram)" text={words.toLocaleString()} />
+      <Detail.Metadata.Label title="Model" text={`${model} · ${result.modelVersion}`} />
       <Detail.Metadata.Label title="Checked" text={new Date(checkedAt).toLocaleString()} />
     </Detail.Metadata>
   );
@@ -201,13 +194,13 @@ function showCheckFailure(error: Error, retry: () => void) {
   const status = error instanceof PangramError ? error.status : undefined;
   if (status === 401) {
     return showFailureToast(error, {
-      title: "Invalid Pangram API key",
+      title: "Missing or invalid Pangram API key",
       primaryAction: { title: "Open Extension Preferences", onAction: openExtensionPreferences },
     });
   }
   if (status === 402) {
     return showFailureToast(error, {
-      title: "Out of Pangram credits",
+      title: "Not enough Pangram credits",
       primaryAction: { title: "Open API Dashboard", onAction: () => open(API_DASHBOARD_URL) },
     });
   }
@@ -228,10 +221,6 @@ function formatCost(words: number): string {
 
 function percent(fraction: number): string {
   return `${Math.round(fraction * 100)}%`;
-}
-
-function dot(tintColor: Color) {
-  return { source: Icon.CircleFilled, tintColor };
 }
 
 function positiveNumber(value: string, fallback: number): number {

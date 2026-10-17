@@ -105,7 +105,7 @@ describe("checkText", () => {
     stubFetch({ body: { task_id: "t1" } }, { body: { stage: "STAGE_PREPROCESSING" } });
 
     await expect(checkText("Some text", { ...options, timeoutMs: 50 })).rejects.toThrow(
-      "Pangram didn't finish within 0.05 s",
+      "Check timed out after 0.05 seconds.",
     );
   });
 });

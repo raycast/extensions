@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pangram-ai-detector",
   "title": "Pangram AI Detector",
-  "description": "Check selected or copied text for AI writing with Pangram.",
+  "description": "Check selected or copied text for AI writing with your Pangram API key and prepaid credits.",
   "icon": "extension-icon.png",
   "author": "mygirleatsmayo",
   "license": "MIT",
@@ -37,14 +37,14 @@
     {
       "name": "apiKey",
       "title": "API Key",
-      "description": "Your Pangram API key. Create one at pangram.com/apikey.",
+      "description": "Get your key and add prepaid credits at pangram.com/apikey. Each new Check costs about $0.05 per started 100 words.",
       "type": "password",
       "required": true
     },
     {
       "name": "model",
       "title": "Model",
-      "description": "Default follows Pangram's current model.",
+      "description": "Choose the Model for new Checks. Default uses Pangram's current Model.",
       "type": "dropdown",
       "required": false,
       "default": "default",
@@ -56,8 +56,8 @@
     {
       "name": "versionInvalidatesCache",
       "title": "Cache",
-      "label": "New Model Version invalidates cached results",
-      "description": "Ignore results cached under an older Model Version.",
+      "label": "Invalidate older Cached Results",
+      "description": "Ignore older Cached Results after detecting a new Model Version. Reusing a Cached Result costs no credits.",
       "type": "checkbox",
       "required": false,
       "default": true
@@ -66,7 +66,7 @@
       "name": "literalSegmentText",
       "title": "Segments",
       "label": "Show Segment text literally",
-      "description": "Show Segment text exactly as written, in a code block. Turn off to render Segment text as Markdown.",
+      "description": "Show Pangram's Segment text exactly as returned, in a code block. Turn off to render it as Markdown.",
       "type": "checkbox",
       "required": false,
       "default": false
@@ -74,7 +74,7 @@
     {
       "name": "confirmAboveWords",
       "title": "Confirm Above (Words)",
-      "description": "Ask before checking texts longer than this. Checks cost about $0.05 per 100 words. Default: 2000.",
+      "description": "Ask before sending texts above this estimated word count. Default: 2000.",
       "type": "textfield",
       "required": false,
       "default": "2000"
@@ -82,7 +82,7 @@
     {
       "name": "limitedConfidenceBelowWords",
       "title": "Limited Confidence Below (Words)",
-      "description": "Flag results for shorter texts as limited confidence. Pangram doesn't publish its cutoff; 200 is an estimate based on observed website behavior. Default: 200.",
+      "description": "Show the extension's Limited Confidence warning below this word count. Separate from Pangram's Segment confidence. Default: 200.",
       "type": "textfield",
       "required": false,
       "default": "200"
@@ -90,7 +90,7 @@
     {
       "name": "timeoutSeconds",
       "title": "Timeout (Seconds)",
-      "description": "How long to wait for Pangram before giving up. Default: 300.",
+      "description": "Time to wait for a Check to finish. Default: 300 seconds.",
       "type": "textfield",
       "required": false,
       "default": "300"
