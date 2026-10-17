@@ -857,6 +857,8 @@ export async function removeWorktree(
 export async function startSession(input: {
   projectId: string;
   prompt: string;
+  /** Defaults to the first line of the prompt. */
+  title?: string;
   modelSelection: ModelSelection;
   runtimeMode: RuntimeMode;
   branch: string | null;
@@ -865,7 +867,7 @@ export async function startSession(input: {
 }): Promise<string> {
   const threadId = randomUUID();
   const createdAt = new Date().toISOString();
-  const title = threadTitle(input.prompt);
+  const title = input.title ?? threadTitle(input.prompt);
 
   await dispatch({
     type: "thread.create",

@@ -20,6 +20,7 @@ import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { stat } from "node:fs/promises";
 import { basename, extname } from "node:path";
+import { pathToFileURL } from "node:url";
 import { ErrorView } from "./thread-list";
 import { clipboardHash, clipboardImagePath } from "./clipboard";
 import {
@@ -68,7 +69,7 @@ function AttachmentPreview({ files }: { files: string[] }) {
   const markdown = files
     .map((file) =>
       IMAGE_MIME_TYPES[extname(file).toLowerCase()]
-        ? `![${basename(file)}](${encodeURI(`file://${file}`)}?raycast-width=520)`
+        ? `![${basename(file).replace(/[[\]]/g, "\\$&")}](${pathToFileURL(file).href}?raycast-width=520)`
         : `**${basename(file)}**\n\n\`${file}\``,
     )
     .join("\n\n---\n\n");
@@ -465,6 +466,7 @@ export default function Command() {
         try {
           threadId = await startSession({
             projectId: project.id,
+            title,
             prompt,
             modelSelection,
             runtimeMode,

@@ -62,13 +62,13 @@ export function recentPresets(snapshot: ShellSnapshot): Preset[] {
     )
     .sort((a, b) => threadTimestamp(b) - threadTimestamp(a));
   for (const thread of threads) {
-    const project = snapshot.projects.find((p) => p.id === thread.projectId);
     const candidate: Preset = {
       id: "",
       projectId: thread.projectId,
       modelKey: modelKey(thread.modelSelection!),
       runtimeMode: thread.runtimeMode,
-      envMode: project?.defaultThreadEnvMode ?? "local",
+      // What the thread ran in, so a recent worktree session is not offered as Local.
+      envMode: thread.worktreePath ? "worktree" : "local",
       saved: false,
     };
     if (found.some((existing) => sameSettings(existing, candidate))) {
