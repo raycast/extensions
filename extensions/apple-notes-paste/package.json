@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "apple-notes-paste",
+  "title": "Apple Notes Paste",
+  "description": "Search Apple Notes and paste their contents into the active app.",
+  "icon": "apple-notes-paste.png",
+  "author": "pedrosari",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "paste-apple-note",
+      "title": "Paste Apple Note",
+      "description": "Search Apple Notes and paste a note into the active app.",
+      "mode": "view"
+    },
+    {
+      "name": "create-apple-note",
+      "title": "Create Apple Note",
+      "description": "Create an Apple Note in the configured default folder.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultFolder",
+      "title": "Default Folder",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "All Notes",
+      "description": "The Apple Notes folder to search when the command opens. Leave blank to search all notes."
+    },
+    {
+      "name": "defaultAction",
+      "title": "Return Key Action",
+      "type": "dropdown",
+      "required": false,
+      "default": "paste",
+      "description": "Choose what happens when you press Return on a note.",
+      "data": [
+        {
+          "title": "Paste Note Content",
+          "value": "paste"
+        },
+        {
+          "title": "Open in Apple Notes",
+          "value": "open"
+        }
+      ]
+    },
+    {
+      "name": "excludeFirstLineWhenPasting",
+      "title": "Exclude First Line When Pasting",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Paste from the second line",
+      "description": "Use the first line as the note title and omit it from pasted content."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.16",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
