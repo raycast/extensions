@@ -41,6 +41,10 @@ Built-in categories. Create a custom child category from any parent
 category, or from an existing child category under the same parent.
 Edit custom category names, parent categories, and icons.
 
+### List Budgets
+
+View synced category budget **limits** by name. Press Enter to edit a saved limit, create a new limit for an expense category without one, or delete a limit after a confirmation. Writes re-read the saved budgets to check the result. This does not show spending or remaining budget; it does not reconcile household reimbursements, credit card settlements, or prepaid card top-ups.
+
 ### Ask Moneytree
 
 Ask Raycast AI about your Moneytree data using the extension's tools:
@@ -50,9 +54,13 @@ Ask Raycast AI about your Moneytree data using the extension's tools:
 - Browse Moneytree categories and custom subcategories
 - Update specific transactions' descriptions or categories
 - Create custom subcategories under existing Moneytree categories
+- List category budget limits and create, update, or delete them on explicit request
 
-AI tools that update transactions or create categories mutate your
-Moneytree data. They should be used only for explicit edit requests.
+AI tools that update transactions, categories, or budgets mutate your
+Moneytree data. Suggestions and budget plans alone do not save limits.
+Budget management uses Moneytree endpoints identified from its Android app;
+these are not a documented public API and may change. The budget response
+contains saved category limits, not spending progress or remaining balances.
 
 ## Setup
 
@@ -70,7 +78,7 @@ Moneytree data. They should be used only for explicit edit requests.
 - **Direct communication**: All API calls go directly to
   Moneytree servers — no third-party services involved
 - **Limited writes**: The extension can update transaction
-  descriptions/categories and create or edit custom subcategories
+  descriptions/categories, create or edit custom subcategories, and manage category budget limits
 - **Local caching**: Data is cached locally and expires after
   a few minutes
 - **No data collection**: Nothing is collected or shared — your

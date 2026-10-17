@@ -1,5 +1,12 @@
 # Moneytree Changelog
 
+## [Category Budget Management] - {PR_MERGE_DATE}
+
+- Add List Budgets to view saved Moneytree category limits and create, edit, or delete them from Raycast; Enter opens the edit form, and deletion requires confirmation.
+- Add AI tools to read, create, update, and delete category budget limits. Writes require an explicitly requested category and amount or deletion target, validate expense categories, and verify results with a fresh read.
+- Add mocked CRUD tests and AI eval scenarios for read-only suggestions, duplicate budgets, and ambiguous categories.
+- Clarify that saved limits do not include spending or remaining balances.
+
 ## [Improved Category Management & Metadata Updates] - 2026-06-03
 
 - Add a category browser command with custom/built-in filters and custom category create/edit actions
