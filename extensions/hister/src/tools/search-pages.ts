@@ -19,8 +19,10 @@ function isoDate(seconds?: number): string | undefined {
 // Hister 0.20 has no site: filter, but the model writes one anyway.
 function siteToDomain(query: string): string {
   return query.replace(
-    /(^|[\s(])(-?)site:("[^"]*"|\([^)]*\)|[^\s()]+)/gi,
-    (match, before: string, minus: string, value: string) => {
+    /"[^"]*"|(^|[\s(])(-?)site:("[^"]*"|\([^)]*\)|[^\s()"]+)/gi,
+    (match, before: string, minus: string, value: string | undefined) => {
+      // A quoted phrase, matched only so a site: inside it stays literal.
+      if (value === undefined) return match;
       const hosts = value
         .replace(/^\(|\)$/g, "")
         .split("|")
