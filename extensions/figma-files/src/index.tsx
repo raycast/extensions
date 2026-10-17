@@ -1,6 +1,6 @@
 import { ActionPanel, Grid, type LaunchProps, getPreferenceValues } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import AdvancedActionSection from "./components/AdvancedActionSection";
 import { ErrorView } from "./components/ErrorView";
 import FileGridItem from "./components/FileGridItem";
@@ -30,45 +30,32 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
     desktopApp,
   } = useFigmaData();
 
-  const [filteredFiles, setFilteredFiles] = useState(allFiles);
-  const [isFiltered, setIsFiltered] = useState(false);
+  // Kept as the raw dropdown value and applied on every render, so a folder picked during a long load stays selected
+  const [filterValue, setFilterValue] = useState<string>(FILTER_TYPES.ALL);
   const [searchText, setSearchText] = useState<string>(launchContext?.query ?? "");
 
-  useEffect(() => {
-    setFilteredFiles(allFiles);
-  }, [allFiles]);
+  const filter = parseFilterValue(filterValue);
+  const isFiltered = filter.type !== "all";
+  const filteredFiles = useMemo(() => {
+    if (!allFiles) return allFiles;
+    switch (filter.type) {
+      case "team":
+        return filterTeamsByName(allFiles, filter.teamName!);
+      case "project":
+        return filterToSpecificProject(allFiles, filter.teamName!, filter.folderId!);
+      default:
+        return allFiles;
+    }
+  }, [allFiles, filterValue]);
 
   if (error) {
     return <ErrorView />;
   }
 
-  function handleDropdownChange(value: string) {
-    if (allFiles && !isLoading) {
-      const filter = parseFilterValue(value);
-
-      switch (filter.type) {
-        case "all":
-          setFilteredFiles(allFiles);
-          setIsFiltered(false);
-          break;
-
-        case "team":
-          setFilteredFiles(filterTeamsByName(allFiles, filter.teamName!));
-          setIsFiltered(true);
-          break;
-
-        case "project":
-          setFilteredFiles(filterToSpecificProject(allFiles, filter.teamName!, filter.folderId!));
-          setIsFiltered(true);
-          break;
-      }
-    }
-  }
-
   const { TEAM_ID } = getPreferenceValues();
   const teamID: string[] = TEAM_ID.split(",").map((team: string) => team.toString().trim());
   const filterDropdown = () => (
-    <Grid.Dropdown tooltip={teamID.length > 1 ? "Teams" : "Folders"} defaultValue="All" onChange={handleDropdownChange}>
+    <Grid.Dropdown tooltip={teamID.length > 1 ? "Teams" : "Folders"} defaultValue="All" onChange={setFilterValue}>
       <Grid.Dropdown.Item key="all" title={teamID.length > 1 ? "All teams" : "All folders"} value={FILTER_TYPES.ALL} />
       {teamID.length > 1 &&
         allFiles?.map((team: TeamFiles) => (

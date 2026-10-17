@@ -50,18 +50,22 @@ async function acquireRequestSlot() {
 // After a 429 every request is spaced out by Figma's Retry-After, so parallel requests stop colliding
 let requestIntervalMs = 0;
 let nextRequestAt = 0;
+let pausedUntil = 0;
 
 async function waitForRequestTurn() {
   const now = Date.now();
   const startAt = Math.max(now, nextRequestAt);
   nextRequestAt = startAt + requestIntervalMs;
   if (startAt > now) await sleep(startAt - now);
+  // Another request may have hit a 429 while this one was waiting
+  while (Date.now() < pausedUntil) await sleep(pausedUntil - Date.now());
 }
 
 function slowDown(retryAfterSec: number) {
   const retryAfterMs = retryAfterSec * 1000;
   requestIntervalMs = Math.min(Math.max(requestIntervalMs, retryAfterMs), MAX_REQUEST_INTERVAL_MS);
-  nextRequestAt = Math.max(nextRequestAt, Date.now() + retryAfterMs);
+  pausedUntil = Math.max(pausedUntil, Date.now() + retryAfterMs);
+  nextRequestAt = Math.max(nextRequestAt, pausedUntil);
 }
 
 function releaseRequestSlot() {
@@ -355,6 +359,7 @@ async function refreshTeam(
           // Failures are isolated per folder: a folder that fails keeps its cached files and is retried next time
           console.error(`Could not load files in "${folder.path}"`, error);
           failures.push(error);
+          delete times[folder.id];
           filesByFolder.set(folder.id, cachedFolder?.files ?? []);
         },
       ),
@@ -384,14 +389,17 @@ async function refreshTeam(
       failures.push(error);
       return snapshot() ?? cachedTeam;
     }
-    if (tree.complete) {
-      markFresh(times, treeKey);
-    } else {
+    if (!tree.complete) {
       failures.push(new Error("Some subfolders could not be loaded."));
     }
   }
 
   await Promise.all(fileRequests);
+  // Only now does the saved folder list match the tree; marking it earlier would let a progress save
+  // pair a fresh tree with a partial folder list if Raycast closes mid-refresh
+  if (tree.complete) {
+    markFresh(times, treeKey);
+  }
 
   return {
     id: teamId,
