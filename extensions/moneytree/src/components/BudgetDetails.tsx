@@ -120,10 +120,12 @@ export function BudgetDetails({
       isLoading={isLoading || transactionsLoading}
     >
       {!transactions.length && !transactionsLoading ? (
-        <List.EmptyView
+        // Keep the budget summary visible even without transaction rows to attach it to.
+        <List.Item
+          id="summary"
           icon={transactionsError ? Icon.ExclamationMark : Icon.Receipt}
           title={transactionsError ? "Transactions Unavailable" : "No Transactions This Month"}
-          description="Budget totals may still be available. Open the full transaction list to search further."
+          detail={<List.Item.Detail markdown={summary} />}
           actions={actions}
         />
       ) : (

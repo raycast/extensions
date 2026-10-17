@@ -327,7 +327,7 @@ export function TransactionsList({
           title={searchText ? "No Matching Transactions" : "No Transactions"}
           description={
             budgetCategory
-              ? `No matching transactions ${dateRange ? "this month" : searchText ? "in the searched six-month range" : "in the last 30 days"} (including subcategories).`
+              ? `No matching transactions ${dateRange ? "this month" : searchText ? "in the searched six-month range" : "in the last 30 days"}.`
               : searchText
                 ? `No transactions matching "${searchText}"`
                 : "No transactions found for the last 30 days."
