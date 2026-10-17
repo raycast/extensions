@@ -1,0 +1,163 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "babav",
+  "title": "BABAV",
+  "description": "Find people, add leads, approve replies and posts, answer in your brand voice, watch hot leads and book meetings — your BABAV brand, one keystroke away.",
+  "icon": "icon.png",
+  "author": "ty_blacke",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "quick-reply",
+      "title": "Quick Reply",
+      "subtitle": "Write a reply in your brand voice and copy it",
+      "description": "Write a reply in your brand voice and copy it to the clipboard.",
+      "mode": "view",
+      "keywords": [
+        "reply",
+        "draft",
+        "answer",
+        "compose",
+        "ai"
+      ]
+    },
+    {
+      "name": "find-person",
+      "title": "Find Person",
+      "subtitle": "Search your people and leads; call, text, email",
+      "description": "Search your people and leads; see their last message; call, text, email or open them in BABAV.",
+      "mode": "view",
+      "keywords": [
+        "contact",
+        "people",
+        "lead",
+        "search",
+        "crm"
+      ]
+    },
+    {
+      "name": "approve-queue",
+      "title": "Approve Queue",
+      "subtitle": "Approve replies, drafts and posts waiting for you",
+      "description": "Approve replies, drafts and posts waiting for you. Enter approves, Cmd+Backspace rejects.",
+      "mode": "view",
+      "keywords": [
+        "approve",
+        "approvals",
+        "drafts",
+        "queue",
+        "posts",
+        "replies"
+      ]
+    },
+    {
+      "name": "hot-leads",
+      "title": "Hot Leads",
+      "subtitle": "Your hottest leads, newest first",
+      "description": "Your hottest leads, newest first.",
+      "mode": "view",
+      "keywords": [
+        "hot",
+        "leads",
+        "score"
+      ]
+    },
+    {
+      "name": "add-lead",
+      "title": "Add Lead",
+      "subtitle": "Save a lead from the selected text or clipboard",
+      "description": "Save a lead from the selected text or your clipboard.",
+      "mode": "view",
+      "keywords": [
+        "lead",
+        "save",
+        "contact",
+        "new"
+      ]
+    },
+    {
+      "name": "book-meeting",
+      "title": "Book a Meeting",
+      "subtitle": "Copy your booking link, or book someone in",
+      "description": "Copy your booking link, or pick an open time and book someone in.",
+      "mode": "view",
+      "keywords": [
+        "book",
+        "booking",
+        "meeting",
+        "calendar",
+        "schedule",
+        "link"
+      ]
+    },
+    {
+      "name": "switch-brand",
+      "title": "Switch Brand",
+      "subtitle": "Choose which brand the commands act on",
+      "description": "Choose which of your brands the other commands act on.",
+      "mode": "view",
+      "keywords": [
+        "brand",
+        "account",
+        "switch"
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "BABAV Menu Bar",
+      "subtitle": "Hot leads, missed calls and approvals in the menu bar",
+      "description": "Hot leads, missed calls and items waiting for approval, in the menu bar (Mac only).",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "platforms": [
+        "macOS"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "connectionKey",
+      "title": "Connection Key",
+      "description": "Optional. Your BABAV Connection Key (starts with bvk_), from BABAV › Settings › Extensions & apps. You can also paste it on the Connect screen any command shows. The same key BABAV Finder and BABAV Compose use.",
+      "type": "password",
+      "required": false,
+      "placeholder": "bvk_..."
+    },
+    {
+      "name": "apiBase",
+      "title": "API Base URL",
+      "description": "Leave as is unless BABAV support tells you otherwise.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://babav-api-250906620051.us-west1.run.app"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "echo 'Ty publishes by hand: npx @raycast/api@latest publish' && exit 1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "typescript": "^6.0.3"
+  },
+  "version": "0.1.0"
+}
