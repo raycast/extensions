@@ -1,5 +1,9 @@
 # Skills Changelog
 
+## [Fix Skills List Troubleshooting] - {PR_MERGE_DATE}
+
+- Include `--json` in the troubleshooting commands so they match the installed-skills list command used by the extension
+
 ## [Show Unexpected CLI Output When Listing Fails] - 2026-09-26
 
 - Include what the `skills` CLI actually printed when "Manage Skills" cannot parse its installed-skills list, instead of only reporting that the output was unexpected
