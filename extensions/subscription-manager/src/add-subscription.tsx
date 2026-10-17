@@ -1,37 +1,52 @@
-import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, getPreferenceValues, showToast, useNavigation } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { useState } from "react";
+import { saveCustomService, useCustomServices } from "./custom-services";
 import { useSubscriptions } from "./storage";
 import {
   applyServiceSelection,
   BillingCycleDropdown,
   CategoryAndPaymentFields,
   CurrencyDropdown,
+  CUSTOM_SERVICE_VALUE,
+  getServiceBySelection,
   ServiceDropdown,
   SubscriptionFormValues,
   validateSubscriptionFormInput,
 } from "./subscription-form-fields";
 import { BillingCycle, Subscription } from "./types";
-import { generateId, PRESET_PAYMENT_METHODS } from "./utils";
+import { generateId, PRESET_PAYMENT_METHODS, PRESET_SERVICES } from "./utils";
 
 export function AddSubscriptionForm() {
   const { addSubscription } = useSubscriptions();
+  const { value: customServices = [] } = useCustomServices();
   const { pop } = useNavigation();
   const [paymentSelection, setPaymentSelection] = useState(PRESET_PAYMENT_METHODS[0].value);
   const [serviceSelection, setServiceSelection] = useState("__none__");
   const [category, setCategory] = useState("Entertainment");
-  const { value: lastCurrency, setValue: setLastCurrency } = useLocalStorage("last-currency", "INR");
+  const [customCategoryDefaultValue, setCustomCategoryDefaultValue] = useState("");
+  const [listSelection, setListSelection] = useState("Personal");
+  const { primaryCurrency } = getPreferenceValues<Preferences>();
+  const { value: lastCurrency, setValue: setLastCurrency } = useLocalStorage<string>("last-currency", primaryCurrency);
 
-  const isCustomService = serviceSelection === "__custom__";
+  const services = [...PRESET_SERVICES, ...customServices];
+  const isCustomService = serviceSelection === CUSTOM_SERVICE_VALUE;
 
   async function handleSubmit(values: SubscriptionFormValues) {
-    const parsed = await validateSubscriptionFormInput(values, serviceSelection, paymentSelection, isCustomService, {
-      requireServiceSelection: true,
-      invalidAmountMessage: "Enter a valid positive number",
-    });
+    const parsed = await validateSubscriptionFormInput(
+      values,
+      serviceSelection,
+      paymentSelection,
+      isCustomService,
+      services,
+      {
+        requireServiceSelection: true,
+        invalidAmountMessage: "Enter a valid positive number",
+      },
+    );
     if (!parsed) return;
 
-    const { amount, name, iconUrl, paymentMethod, startDate, billingDay } = parsed;
+    const { amount, name, iconUrl, paymentMethod, category, list, startDate, billingDay } = parsed;
 
     const sub: Subscription = {
       id: generateId(),
@@ -41,14 +56,18 @@ export function AddSubscriptionForm() {
       amount,
       currency: values.currency,
       billingCycle: values.billingCycle as BillingCycle,
-      category: values.category,
+      category,
       paymentMethod,
-      list: values.list,
+      list,
       iconUrl,
       notes: values.notes || undefined,
       status: "active",
     };
 
+    const selectedService = getServiceBySelection(serviceSelection, services);
+    if (isCustomService || selectedService?.custom) {
+      await saveCustomService({ name, iconUrl, category });
+    }
     await setLastCurrency(values.currency);
     await addSubscription(sub);
     await showToast({ style: Toast.Style.Success, title: "Subscription Added", message: sub.name });
@@ -66,7 +85,10 @@ export function AddSubscriptionForm() {
     >
       <ServiceDropdown
         serviceSelection={serviceSelection}
-        onServiceChange={(value) => applyServiceSelection(value, setServiceSelection, setCategory)}
+        services={services}
+        onServiceChange={(value) =>
+          applyServiceSelection(value, setServiceSelection, setCategory, setCustomCategoryDefaultValue, services)
+        }
         showPlaceholder
       />
       {isCustomService && (
@@ -76,7 +98,7 @@ export function AddSubscriptionForm() {
       <Form.Separator />
 
       <Form.TextField id="amount" title="Amount" placeholder="9.99" />
-      <CurrencyDropdown defaultValue={lastCurrency ?? "INR"} />
+      <CurrencyDropdown defaultValue={lastCurrency ?? primaryCurrency} />
 
       <Form.Separator />
 
@@ -90,6 +112,9 @@ export function AddSubscriptionForm() {
         onCategoryChange={setCategory}
         paymentSelection={paymentSelection}
         onPaymentSelectionChange={setPaymentSelection}
+        listSelection={listSelection}
+        onListChange={setListSelection}
+        customCategoryDefaultValue={customCategoryDefaultValue}
       />
 
       <Form.Separator />

@@ -6,6 +6,8 @@ import { useSubscriptions } from "./storage";
 import { Subscription } from "./types";
 import {
   formatCurrency,
+  getMissingRateCurrencies,
+  getMissingRateCurrenciesForSubscriptions,
   getMonthlyEquivalent,
   getMonthlyTotal,
   getNextBillingDate,
@@ -44,16 +46,24 @@ export default function AnalyticsCommand() {
   const active = subscriptions.filter((s) => s.status === "active");
   const paused = subscriptions.filter((s) => s.status === "paused");
 
-  function toMonthlyPrimary(sub: Subscription): number {
+  function toMonthlyPrimary(sub: Subscription): number | null {
     const monthly = getMonthlyEquivalent(sub.amount, sub.billingCycle);
-    if (!rates || sub.currency === prefs.primaryCurrency) return monthly;
-    return monthly / (rates[sub.currency] ?? 1);
+    if (sub.currency === prefs.primaryCurrency) return monthly;
+    const rate = rates?.[sub.currency];
+    return rate ? monthly / rate : null;
   }
 
   const thisMonthTotal = getMonthlyTotal(subscriptions, month, year, prefs.primaryCurrency, rates);
   const lastMonthTotal = getMonthlyTotal(subscriptions, lastMonth, lastMonthYear, prefs.primaryCurrency, rates);
-  const activeMonthlyTotal = active.reduce((sum, s) => sum + toMonthlyPrimary(s), 0);
+  const activeMonthlyTotal = active.reduce((sum, s) => sum + (toMonthlyPrimary(s) ?? 0), 0);
   const yearlyForecast = activeMonthlyTotal * 12;
+  const missingRateCurrencies = [
+    ...new Set([
+      ...getMissingRateCurrencies(subscriptions, month, year, prefs.primaryCurrency, rates),
+      ...getMissingRateCurrencies(subscriptions, lastMonth, lastMonthYear, prefs.primaryCurrency, rates),
+      ...getMissingRateCurrenciesForSubscriptions(active, prefs.primaryCurrency, rates),
+    ]),
+  ].sort();
 
   const groups: Record<string, Subscription[]> = {};
   for (const sub of active) {
@@ -62,10 +72,18 @@ export default function AnalyticsCommand() {
     groups[key].push(sub);
   }
   const groupTotals = Object.entries(groups)
-    .map(([key, subs]) => ({ key, total: subs.reduce((sum, s) => sum + toMonthlyPrimary(s), 0), count: subs.length }))
+    .map(([key, subs]) => ({
+      key,
+      total: subs.reduce((sum, s) => sum + (toMonthlyPrimary(s) ?? 0), 0),
+      count: subs.length,
+    }))
     .sort((a, b) => b.total - a.total);
 
-  const topSubs = [...active].sort((a, b) => toMonthlyPrimary(b) - toMonthlyPrimary(a)).slice(0, 5);
+  const topSubs = [...active]
+    .map((sub) => ({ sub, monthly: toMonthlyPrimary(sub) }))
+    .filter((item): item is { sub: Subscription; monthly: number } => item.monthly !== null)
+    .sort((a, b) => b.monthly - a.monthly)
+    .slice(0, 5);
 
   let nextBill: { name: string; daysAway: number } | null = null;
   for (const sub of active) {
@@ -92,7 +110,7 @@ export default function AnalyticsCommand() {
     .join("\n");
 
   const topRows = topSubs
-    .map((sub, i) => `| ${i + 1} | ${sub.name} | ${formatCurrency(toMonthlyPrimary(sub), prefs.primaryCurrency)} /mo |`)
+    .map(({ sub, monthly }, i) => `| ${i + 1} | ${sub.name} | ${formatCurrency(monthly, prefs.primaryCurrency)} /mo |`)
     .join("\n");
 
   const lastMonthName = new Date(lastMonthYear, lastMonth, 1).toLocaleString("default", { month: "long" });
@@ -116,6 +134,8 @@ ${breakdownRows}
 |:--|:--|--:|
 ${topRows}
 
+${missingRateCurrencies.length > 0 ? `> Partial totals: missing exchange rates for ${missingRateCurrencies.join(", ")}.\n` : ""}
+
 ---
 
 ### Month Comparison
@@ -136,10 +156,17 @@ ${topRows}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label
-            title="Monthly Total"
+            title={missingRateCurrencies.length > 0 ? "Monthly Total (Partial)" : "Monthly Total"}
             text={formatCurrency(thisMonthTotal, prefs.primaryCurrency)}
             icon={Icon.BankNote}
           />
+          {missingRateCurrencies.length > 0 && (
+            <Detail.Metadata.Label
+              title="Missing Rates"
+              text={missingRateCurrencies.join(", ")}
+              icon={Icon.ExclamationMark}
+            />
+          )}
           <Detail.Metadata.Label
             title="Yearly Forecast"
             text={formatCurrency(yearlyForecast, prefs.primaryCurrency)}
@@ -165,8 +192,8 @@ ${topRows}
           {mostExpensive && (
             <Detail.Metadata.Label
               title="Most Expensive"
-              text={`${mostExpensive.name} · ${formatCurrency(toMonthlyPrimary(mostExpensive), prefs.primaryCurrency)} /mo`}
-              icon={getSubscriptionIcon(mostExpensive)}
+              text={`${mostExpensive.sub.name} · ${formatCurrency(mostExpensive.monthly, prefs.primaryCurrency)} /mo`}
+              icon={getSubscriptionIcon(mostExpensive.sub)}
             />
           )}
           {nextBill && (

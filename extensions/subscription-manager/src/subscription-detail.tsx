@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, Form, Icon, Toast, popToRoot, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
+import { saveCustomService, useCustomServices } from "./custom-services";
 import { useSubscriptions } from "./storage";
 import { confirmAndDeleteSubscription } from "./subscription-actions";
 import {
@@ -7,30 +8,68 @@ import {
   BillingCycleDropdown,
   CategoryAndPaymentFields,
   CurrencyDropdown,
+  CUSTOM_SERVICE_VALUE,
+  getCategorySelectionValue,
+  getServiceBySelection,
+  getServiceSelectionValue,
   ServiceDropdown,
   SubscriptionFormValues,
   validateSubscriptionFormInput,
 } from "./subscription-form-fields";
 import { BillingCycle, Subscription } from "./types";
-import { PRESET_PAYMENT_METHODS, PRESET_SERVICES, formatCurrency, getNextBillingDate } from "./utils";
+import {
+  LISTS,
+  PRESET_PAYMENT_METHODS,
+  PRESET_SERVICES,
+  formatCurrency,
+  getBillingDayForMonth,
+  getNextBillingDate,
+} from "./utils";
 
 function EditForm({ sub, onSave }: { sub: Subscription; onSave: (updates: Partial<Subscription>) => Promise<void> }) {
   const { pop } = useNavigation();
+  const { value: customServices = [] } = useCustomServices();
   const isPresetPayment = PRESET_PAYMENT_METHODS.some((p) => p.value === sub.paymentMethod);
   const [paymentSelection, setPaymentSelection] = useState(
     isPresetPayment ? (sub.paymentMethod ?? PRESET_PAYMENT_METHODS[0].value) : "__custom__",
   );
 
-  const matchedService = PRESET_SERVICES.find((s) => s.name === sub.name);
-  const [serviceSelection, setServiceSelection] = useState(matchedService ? sub.name : "__custom__");
-  const [category, setCategory] = useState(sub.category);
-  const isCustomService = serviceSelection === "__custom__";
+  const services = [...PRESET_SERVICES, ...customServices];
+  const matchedService =
+    services.find((s) => s.custom && s.name === sub.name && s.category === sub.category) ??
+    services.find((s) => !s.custom && s.name === sub.name) ??
+    services.find((s) => s.name === sub.name);
+  const [serviceSelection, setServiceSelection] = useState(
+    matchedService ? getServiceSelectionValue(matchedService) : CUSTOM_SERVICE_VALUE,
+  );
+  const initialCategory = getCategorySelectionValue(sub.category);
+  const [category, setCategory] = useState(initialCategory.category);
+  const [customCategoryDefaultValue, setCustomCategoryDefaultValue] = useState(initialCategory.customCategory);
+  const isPresetList = LISTS.includes(sub.list);
+  const [listSelection, setListSelection] = useState(isPresetList ? sub.list : "__custom__");
+  const isCustomService = serviceSelection === CUSTOM_SERVICE_VALUE;
 
   async function handleSubmit(values: SubscriptionFormValues) {
-    const parsed = await validateSubscriptionFormInput(values, serviceSelection, paymentSelection, isCustomService);
+    const parsed = await validateSubscriptionFormInput(
+      values,
+      serviceSelection,
+      paymentSelection,
+      isCustomService,
+      services,
+    );
     if (!parsed) return;
 
-    const { amount, name, iconUrl, paymentMethod, startDate, billingDay } = parsed;
+    const { amount, name, iconUrl, paymentMethod, category, list, startDate, billingDay } = parsed;
+
+    const selectedService = getServiceBySelection(serviceSelection, services);
+    if (isCustomService || selectedService?.custom) {
+      await saveCustomService({
+        name,
+        iconUrl,
+        category,
+        previousName: isCustomService && matchedService?.custom ? matchedService.name : undefined,
+      });
+    }
 
     await onSave({
       name,
@@ -39,9 +78,9 @@ function EditForm({ sub, onSave }: { sub: Subscription; onSave: (updates: Partia
       billingCycle: values.billingCycle as BillingCycle,
       billingDay,
       startDate,
-      category: values.category,
+      category,
       paymentMethod,
-      list: values.list,
+      list,
       iconUrl,
       notes: values.notes || undefined,
     });
@@ -61,7 +100,10 @@ function EditForm({ sub, onSave }: { sub: Subscription; onSave: (updates: Partia
     >
       <ServiceDropdown
         serviceSelection={serviceSelection}
-        onServiceChange={(value) => applyServiceSelection(value, setServiceSelection, setCategory)}
+        services={services}
+        onServiceChange={(value) =>
+          applyServiceSelection(value, setServiceSelection, setCategory, setCustomCategoryDefaultValue, services)
+        }
       />
       {isCustomService && (
         <Form.TextField id="customName" title="Service Name" defaultValue={matchedService ? "" : sub.name} />
@@ -84,7 +126,10 @@ function EditForm({ sub, onSave }: { sub: Subscription; onSave: (updates: Partia
         paymentSelection={paymentSelection}
         onPaymentSelectionChange={setPaymentSelection}
         customPaymentMethodDefaultValue={isPresetPayment ? "" : (sub.paymentMethod ?? "")}
-        listDefaultValue={sub.list}
+        listSelection={listSelection}
+        onListChange={setListSelection}
+        customCategoryDefaultValue={customCategoryDefaultValue}
+        customListDefaultValue={isPresetList ? "" : sub.list}
       />
       <Form.Separator />
       {isCustomService && <Form.TextField id="iconUrl" title="Website URL" defaultValue={sub.iconUrl ?? ""} />}
@@ -132,6 +177,9 @@ export function SubscriptionDetail({
   const nextBilling = nextBillingDate
     ? nextBillingDate.toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })
     : "—";
+  const nextBillingDay = nextBillingDate
+    ? getBillingDayForMonth(sub, nextBillingDate.getMonth(), nextBillingDate.getFullYear())
+    : sub.billingDay;
 
   const markdown = `
 # ${sub.name}
@@ -139,7 +187,7 @@ export function SubscriptionDetail({
 | Field | Value |
 |---|---|
 | Amount | **${formatCurrency(sub.amount, sub.currency)}** / ${sub.billingCycle} |
-| Next Billing | ${nextBilling} (day ${sub.billingDay}) |
+| Next Billing | ${nextBilling} (day ${nextBillingDay}) |
 | Started | ${new Date(sub.startDate + "T00:00:00").toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })} |
 | Category | ${sub.category} |
 | List | ${sub.list} |
