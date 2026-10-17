@@ -1,5 +1,10 @@
 # Paper Agent Changelog
 
+## [SDK maintenance] - 2026-10-17
+
+- Update to Raycast API 2.8.2, which shares bundled dependencies across commands.
+- Refresh compatible development dependencies and verify the extension's offline regression tests and distribution build.
+
 ## [Maintenance] - 2026-10-07
 
 - Update to Raycast API 2.6.3 and Node.js 22.22.2 for development and CI.
