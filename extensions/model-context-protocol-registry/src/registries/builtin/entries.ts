@@ -840,6 +840,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "posy",
+    title: "Posy",
+    description:
+      "Build and edit a hand-made link-in-bio page: create or import a page, add, update, move and remove link tiles, set the theme and profile, and publish. Hosted remote Streamable HTTP server at https://posy.page/api/mcp with OAuth 2.1 sign-in (dynamic client registration), no API key to paste; free plan available. Open source (MIT) and self-hostable.",
+    icon: "https://posy.page/brand/posy-app-512.png",
+    homepage: "https://docs.posy.page/agents/connect",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://posy.page/api/mcp"],
+    },
+    remoteUrl: "https://posy.page/api/mcp",
+  },
+  {
     name: "prisma",
     title: "Prisma",
     description:
