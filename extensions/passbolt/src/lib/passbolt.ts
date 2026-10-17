@@ -3,9 +3,27 @@ import * as openpgp from "openpgp";
 import * as fs from "fs/promises";
 import { TOTP } from "otpauth";
 import { MetadataDecryptor, SharedMetadataKey } from "./metadata";
-import { ApiResource, ResourceLoadProgress, ResourceType, TotpLoadProgress } from "../types";
+import {
+  ApiResource,
+  ResourceLoadProgress,
+  ResourceType,
+  Secret,
+  TotpConfiguration,
+  TotpLoadProgress,
+  TotpResource,
+} from "../types";
 import { filterResources } from "../utils/resources";
 import { parseTotpConfiguration, resourceTypeSupportsTotp } from "../utils/totp";
+
+// Secrets load in ID-filtered batches after the metadata-only list, so a vault's
+// non-TOTP secrets are never downloaded. The first batch is small: the entries the
+// Authenticator shows first get their codes before the rest of the vault streams in.
+const FIRST_SECRET_BATCH_SIZE = 8;
+const SECRET_BATCH_SIZE = 40;
+// Per-entry secret and metadata work runs through a fixed-size worker pool.
+const TOTP_WORKER_COUNT = 8;
+// Minimum interval between progressive load snapshots for callers that render them.
+const PROGRESS_SNAPSHOT_INTERVAL_MS = 150;
 
 interface PassboltResponse<T = unknown> {
   header: {
@@ -24,13 +42,19 @@ interface MFAProvider {
   mfa_providers?: string[];
 }
 
-interface SecretData {
-  id: string;
-  user_id: string;
-  resource_id: string;
-  data: string;
-  created: string;
-  modified: string;
+// Match bulk rows by ID, never by response order, and reject secrets whose explicit
+// resource_id disagrees with their row. Older responses may omit resource_id.
+function ownSecret(resourceId: string, secret?: Secret | null): Secret | undefined {
+  if (!secret?.data) return undefined;
+  return secret.resource_id && secret.resource_id !== resourceId ? undefined : secret;
+}
+
+function rowSecret(resource: ApiResource): Secret | undefined {
+  for (const candidate of [...(resource.secrets ?? []), resource.secret]) {
+    const secret = ownSecret(resource.id, candidate);
+    if (secret) return secret;
+  }
+  return undefined;
 }
 
 export class PassboltClient {
@@ -85,30 +109,23 @@ export class PassboltClient {
 
   private async readPrivateKey(): Promise<openpgp.PrivateKey> {
     try {
-      console.log(`Reading private key from: ${this.privateKeyPath}`);
       const keyContent = await fs.readFile(this.privateKeyPath, "utf8");
 
       let privateKey = await openpgp.readPrivateKey({ armoredKey: keyContent });
 
       if (!privateKey.isDecrypted()) {
-        console.log("Key is encrypted, attempting to decrypt with passphrase...");
         try {
           privateKey = await openpgp.decryptKey({
             privateKey,
             passphrase: this.passphrase,
           });
-          console.log("Private key decrypted successfully.");
-        } catch (decryptError) {
-          console.error("Failed to decrypt private key with provided passphrase:", decryptError);
+        } catch {
           throw new Error("Invalid passphrase or corrupted key.");
         }
-      } else {
-        console.log("Private key is already decrypted.");
       }
 
       return privateKey;
     } catch (error) {
-      console.error("Error reading private key:", error);
       if ((error as Error & { code?: string }).code === "ENOENT") {
         throw new Error(`Private key file not found at ${this.privateKeyPath}`);
       }
@@ -142,14 +159,11 @@ export class PassboltClient {
       headers["Cookie"] = this.sessionCookie;
     }
 
-    console.log(`Requesting ${url}`);
     const response = await fetch(url, { ...options, headers });
 
     // Handle set-cookie for session management
     const setCookie = response.headers.get("set-cookie");
     if (setCookie) {
-      console.log("Received Set-Cookie:", setCookie);
-
       // Parse new cookies
       const newCookies: Record<string, string> = {};
       setCookie.split(",").forEach((cookieStr) => {
@@ -182,13 +196,13 @@ export class PassboltClient {
       // Extract CSRF token if present
       if (newCookies.csrfToken) {
         this.csrfToken = newCookies.csrfToken;
-        console.log("CSRF token extracted:", this.csrfToken.substring(0, 20) + "...");
       }
     }
 
     if (!response.ok && response.status !== 403) {
-      const text = await response.text();
-      console.error(`API Error ${response.status}: ${text}`);
+      // The response body is deliberately not logged: it can echo request content.
+      await response.body?.cancel().catch(() => {});
+      console.error(`Passbolt API error ${response.status} for ${new URL(url).pathname}`);
       throw new Error(`Passbolt API Error: ${response.status} ${response.statusText}`);
     }
 
@@ -210,7 +224,6 @@ export class PassboltClient {
       throw new Error("No refresh token available");
     }
 
-    console.log("Refreshing access token...");
     const response = await fetch(`${this.baseUrl}/auth/jwt/refresh.json`, {
       method: "POST",
       headers: {
@@ -227,7 +240,6 @@ export class PassboltClient {
 
     const json = (await response.json()) as PassboltResponse<{ access_token: string }>;
     this.accessToken = json.body.access_token;
-    console.log("Access token refreshed successfully");
   }
 
   public async authenticate(): Promise<void> {
@@ -259,13 +271,11 @@ export class PassboltClient {
       const verifyRes = await this.request("/auth/verify.json");
       const verifyJson = (await verifyRes.json()) as PassboltResponse<{ keydata: string }>;
       const serverKeyArmored = verifyJson.body.keydata;
-      const serverKey = await openpgp.readKey({ armoredKey: serverKeyArmored });
-      console.log("Server Key ID:", serverKey.getKeyID().toHex());
+      await openpgp.readKey({ armoredKey: serverKeyArmored });
 
       // 2. Get User Private Key
       const userPrivateKey = await userKeyPromise;
       const userFingerprint = userPrivateKey.getFingerprint();
-      console.log("User Fingerprint:", userFingerprint);
 
       // 3. Stage 1 Login: Send Key ID
       const login1Res = await this.request("/auth/login.json", {
@@ -279,18 +289,13 @@ export class PassboltClient {
         }),
       });
 
-      console.log("Login stage 1 status:", login1Res.status);
-      console.log("Login stage 1 headers:", Object.fromEntries(login1Res.headers.entries()));
-
       const nonceHeader = login1Res.headers.get("x-gpgauth-user-auth-token");
       if (!nonceHeader) {
         // Check if we're already authenticated
         const login1Json = (await login1Res.json()) as PassboltResponse;
-        console.log("Login stage 1 response:", JSON.stringify(login1Json).substring(0, 300));
 
         // If already authenticated, just return
         if (login1Json.header && login1Json.header.status === "success") {
-          console.log("Already authenticated, skipping nonce verification");
           this.isAuthenticated = true;
           return;
         }
@@ -300,7 +305,6 @@ export class PassboltClient {
 
       // 4. Decrypt Nonce
       let encryptedNonce = decodeURIComponent(nonceHeader);
-      console.log("Raw Nonce (first 50 chars):", encryptedNonce.substring(0, 50));
 
       // Sanitize nonce
       encryptedNonce = encryptedNonce.replace(/-----BEGIN\\\+PGP\\\+MESSAGE-----/g, "-----BEGIN PGP MESSAGE-----");
@@ -312,8 +316,6 @@ export class PassboltClient {
         message,
         decryptionKeys: [userPrivateKey],
       });
-
-      console.log("Decrypted nonce:", String(decryptedNonce));
 
       // 5. Stage 2 Login: Send Decrypted Nonce in PLAINTEXT
       const login2Res = await this.request("/auth/login.json", {
@@ -329,11 +331,10 @@ export class PassboltClient {
       });
 
       const login2Json = (await login2Res.json()) as PassboltResponse<MFAProvider>;
-      console.log("Login stage 2 response:", JSON.stringify(login2Json).substring(0, 300));
 
       // Check if MFA is required
       if (login2Json.body && login2Json.body.mfa_providers) {
-        console.log("MFA required. Providers:", login2Json.body.mfa_providers);
+        console.log("MFA verification required");
 
         if (!this.totpSecret) {
           throw new Error(
@@ -342,7 +343,6 @@ export class PassboltClient {
         }
 
         // Send TOTP for verification
-        console.log("Sending TOTP for MFA verification...");
         const mfaRes = await this.request("/mfa/verify/totp.json", {
           method: "POST",
           body: JSON.stringify({
@@ -354,38 +354,35 @@ export class PassboltClient {
         if ((mfaJson as PassboltResponse).header && (mfaJson as PassboltResponse).header.status === "error") {
           throw new Error(`MFA verification failed: ${(mfaJson as PassboltResponse).header.message}`);
         }
-
-        console.log("MFA verification successful!");
       } else if (login2Json.header && login2Json.header.status === "error") {
-        console.error("Authentication stage 2 failed:", login2Json.header.message);
         throw new Error(`Authentication failed: ${login2Json.header.message}`);
       }
 
-      console.log("GPGAuth authentication successful!");
       this.isAuthenticated = true;
     } catch (error) {
-      console.error("GPGAuth authentication failed:", error);
       this.isAuthenticated = false;
       throw error;
     }
   }
 
-  private async fetchResources(signal?: AbortSignal, includeSecrets = true) {
+  private async fetchResources(signal?: AbortSignal, includeSecrets = true, resourceIds?: string[]) {
     await this.authenticate();
     signal?.throwIfAborted();
 
     // Search decrypts names locally and only needs secrets on copy/detail, so it skips
-    // contain[secret]; the Authenticator keeps them to avoid one request per TOTP entry.
-    const resourcesPath = includeSecrets
-      ? "/resources.json?contain[secret]=1&contain[tags]=1&contain[favorite]=1"
-      : "/resources.json?contain[tags]=1&contain[favorite]=1";
+    // contain[secret]; Authenticator secrets load in ID-filtered batches below. The ID
+    // filter is the documented filter[has-id][] array (passbolt_api's
+    // ResourcesIndexControllerTest exercises it with two IDs) and keeps secret
+    // downloads limited to the entries that actually need one.
+    const idFilter = (resourceIds ?? []).map((id) => `&filter[has-id][]=${encodeURIComponent(id)}`).join("");
+    const resourcesPath = `/resources.json?${includeSecrets ? "contain[secret]=1&" : ""}contain[tags]=1&contain[favorite]=1${idFilter}`;
     let res = await this.request(resourcesPath, { signal });
 
     // Check if MFA is required (403 response)
     if (res.status === 403) {
       const errorJson = (await res.json()) as PassboltResponse<MFAProvider>;
       if (errorJson.body && errorJson.body.mfa_providers) {
-        console.log("MFA required for resource access. Providers:", errorJson.body.mfa_providers);
+        console.log("MFA verification required for resource access");
 
         if (!this.totpSecret) {
           throw new Error(
@@ -394,11 +391,9 @@ export class PassboltClient {
         }
 
         // Send TOTP for verification
-        console.log("Sending TOTP for MFA verification...");
         const mfaHeaders: Record<string, string> = {};
         if (this.csrfToken) {
           mfaHeaders["X-CSRF-Token"] = this.csrfToken;
-          console.log("Including CSRF token in MFA request");
         }
         const mfaRes = await this.request("/mfa/verify/totp.json", {
           method: "POST",
@@ -409,13 +404,11 @@ export class PassboltClient {
         });
 
         const mfaJson = await mfaRes.json();
-        console.log("MFA response:", JSON.stringify(mfaJson).substring(0, 200));
-
         if ((mfaJson as PassboltResponse).header && (mfaJson as PassboltResponse).header.status === "error") {
           throw new Error(`MFA verification failed: ${(mfaJson as PassboltResponse).header.message}`);
         }
 
-        console.log("MFA verification successful! Retrying resource request...");
+        console.log("MFA verification successful. Retrying resource request...");
 
         // Retry the request after MFA verification
         res = await this.request(resourcesPath, { signal });
@@ -428,12 +421,118 @@ export class PassboltClient {
     return json;
   }
 
-  public async searchResources(query: string, options: { onProgress?: (progress: ResourceLoadProgress) => void } = {}) {
+  // Secrets are fetched in ID-filtered batches: the first, small batch covers the
+  // entries the Authenticator shows first, later batches amortize round trips, and
+  // at most one batch request is in flight at a time. Entries that already carry
+  // their secret skip the fetch; a missing or foreign secret falls back to that
+  // entry's own request so one slow or broken entry cannot hide the others.
+  private secretLoader(
+    resources: ApiResource[],
+    signal?: AbortSignal,
+  ): (resource: ApiResource) => Promise<Secret | undefined> {
+    const loaders = new Map<string, () => Promise<Secret | undefined>>();
+    // This flag belongs to this load only: Refresh retries the bulk path. If the
+    // server cannot provide any bulk secrets, avoid repeating a failed probe for
+    // every batch while still allowing the bounded workers to try each entry.
+    let useBatches = true;
+    let previousBatch: Promise<unknown> = Promise.resolve();
+    for (let start = 0, first = true; start < resources.length; first = false) {
+      const batch = resources.slice(start, start + (first ? FIRST_SECRET_BATCH_SIZE : SECRET_BATCH_SIZE));
+      start += batch.length;
+      const missing = batch.filter((resource) => !rowSecret(resource));
+      if (!missing.length) continue;
+      let loaded: Promise<Map<string, Secret>> | undefined;
+      const loadBatch = () => {
+        if (!loaded) {
+          loaded = previousBatch.then(async () => {
+            signal?.throwIfAborted();
+            if (useBatches) {
+              try {
+                const secrets = await this.fetchSecretsByIds(
+                  missing.map((resource) => resource.id),
+                  signal,
+                );
+                if (secrets.size) return secrets;
+              } catch (error) {
+                if (signal?.aborted) throw error;
+              }
+              useBatches = false;
+            }
+            return new Map<string, Secret>();
+          });
+          previousBatch = loaded;
+        }
+        return loaded;
+      };
+      for (const resource of missing) {
+        // Start per-entry fallbacks only when a worker asks for the entry, rather
+        // than eagerly starting up to 40 requests when the batch promise resolves.
+        loaders.set(resource.id, async () => {
+          const secrets = await loadBatch();
+          signal?.throwIfAborted();
+          const secret = secrets.get(resource.id);
+          return secret ?? ownSecret(resource.id, await this.getSecret(resource.id, signal));
+        });
+      }
+    }
+    return (resource) => {
+      const included = rowSecret(resource);
+      if (included) return Promise.resolve(included);
+      return loaders.get(resource.id)?.() ?? Promise.resolve(undefined);
+    };
+  }
+
+  private async fetchSecretsByIds(resourceIds: string[], signal?: AbortSignal): Promise<Map<string, Secret>> {
+    const json = await this.fetchResources(signal, true, resourceIds);
+    const secrets = new Map<string, Secret>();
+    const requestedIds = new Set(resourceIds);
+    for (const resource of json.body) {
+      // Match the response rows to entries by ID; server order is never trusted.
+      if (!requestedIds.has(resource.id)) continue;
+      const secret = rowSecret(resource);
+      if (secret) secrets.set(resource.id, secret);
+    }
+    return secrets;
+  }
+
+  private async readTotpEntry(
+    resource: ApiResource,
+    secret: Promise<Secret | undefined>,
+    supportsTotp: Map<string, boolean | undefined>,
+    signal?: AbortSignal,
+  ): Promise<{ totp?: TotpConfiguration; totp_error?: string } | undefined> {
+    try {
+      const encrypted = await secret;
+      if (!encrypted?.data) throw new Error("Missing encrypted secret");
+      const config = parseTotpConfiguration(await this.decryptSecretData(encrypted.data));
+      if (!config) {
+        if (supportsTotp.get(resource.resource_type_id ?? "") === true) throw new Error("Missing TOTP configuration");
+        return undefined;
+      }
+      return { totp: config, totp_error: undefined };
+    } catch (error) {
+      // Cancellation is not an entry failure: let it stop the whole load instead of
+      // turning aborted entries into error rows.
+      if (signal?.aborted) throw error;
+      return {
+        totp: undefined,
+        totp_error: "Unable to read this TOTP entry. Check that it opens in Passbolt.",
+      };
+    }
+  }
+
+  public async searchResources(
+    query: string,
+    options: { signal?: AbortSignal; onProgress?: (progress: ResourceLoadProgress) => void } = {},
+  ) {
+    const { signal, onProgress } = options;
     // v5 names are encrypted, so keyword filtering must happen locally after decryption.
     this.metadataDecryptor.clearSharedKeys();
     // Search never needs the encrypted secret payloads in the list response.
-    const json = await this.fetchResources(undefined, false);
-    const resources = await this.metadataDecryptor.decryptResources(json.body, options.onProgress);
+    const json = await this.fetchResources(signal, false);
+    signal?.throwIfAborted();
+    const resources = await this.metadataDecryptor.decryptResources(json.body, { onProgress, signal });
+    signal?.throwIfAborted();
     return { ...json, body: filterResources(resources, query) };
   }
 
@@ -446,7 +545,9 @@ export class PassboltClient {
     // The schema request is independent of the resource list: run both at once. A schema
     // request can lose the race against the MFA challenge that fetchResources resolves, so
     // on failure wait for the resource request to settle and retry once before giving up.
-    const resourcesPromise = this.fetchResources(signal);
+    // The list itself is metadata-only: secret payloads dominate large vault downloads
+    // and only TOTP candidates ever need one, so secrets load in batches afterwards.
+    const resourcesPromise = this.fetchResources(signal, false);
     const typesPromise = this.getResourceTypes().catch(async (error: unknown) => {
       const resourcesOk = await resourcesPromise.then(
         () => true,
@@ -467,45 +568,49 @@ export class PassboltClient {
     };
     onProgress?.({ ...progress, items: [] });
 
-    for (let start = 0; start < candidates.length; start += 8) {
-      signal?.throwIfAborted();
-      const batch = await Promise.all(
-        candidates.slice(start, start + 8).map(async (resource) => {
-          try {
-            // contain[secret] is scoped by Passbolt to the authenticated user. Avoid a second HTTP request.
-            const included = resource.secrets?.[0] ?? resource.secret;
-            const secret = included?.data ? included : await this.getSecret(resource.id, signal);
-            if (!secret?.data) throw new Error("Missing encrypted secret");
-            const config = parseTotpConfiguration(await this.decryptSecretData(secret.data));
-            if (!config) {
-              if (supportsTotp.get(resource.resource_type_id ?? "") === true)
-                throw new Error("Missing TOTP configuration");
-              return undefined;
-            }
-            return { resource, totp: config, totp_error: undefined };
-          } catch {
-            return {
-              resource,
-              totp: undefined,
-              totp_error: "Unable to read this TOTP entry. Check that it opens in Passbolt.",
-            };
-          }
-        }),
-      );
-      signal?.throwIfAborted();
-      const found = batch.filter((entry) => entry !== undefined);
-      const resources = await this.metadataDecryptor.decryptResources(found.map((entry) => entry.resource));
-      progress.items.push(
-        ...resources.map((resource, index) => ({
-          ...resource,
-          totp: found[index].totp,
-          totp_error: found[index].totp_error,
-        })),
-      );
-      progress.processed += batch.length;
-      onProgress?.({ ...progress, items: [...progress.items] });
-    }
-    return progress;
+    const secretFor = this.secretLoader(candidates, signal);
+    const items = new Array<TotpResource | undefined>(candidates.length);
+    let nextIndex = 0;
+    let processed = 0;
+    let shown = 0;
+    let hasCode = false;
+    let lastSnapshot = 0;
+    // Snapshots copy the collected items, so one per completion would be quadratic:
+    // throttle them while always sending an early partial update and the final one.
+    const snapshot = (force: boolean) => {
+      if (!onProgress) return;
+      const now = Date.now();
+      if (!force && now - lastSnapshot < PROGRESS_SNAPSHOT_INTERVAL_MS) return;
+      lastSnapshot = now;
+      onProgress({
+        ...progress,
+        processed,
+        items: items.filter((item): item is TotpResource => item !== undefined),
+      });
+    };
+    // Each entry resolves independently — a slow secret no longer stalls the entries
+    // behind it — and metadata is decrypted only for entries that will be shown.
+    const worker = async () => {
+      while (nextIndex < candidates.length) {
+        signal?.throwIfAborted();
+        const index = nextIndex++;
+        const resource = candidates[index];
+        const entry = await this.readTotpEntry(resource, secretFor(resource), supportsTotp, signal);
+        signal?.throwIfAborted();
+        if (entry) {
+          items[index] = { ...(await this.metadataDecryptor.decryptResource(resource)), ...entry };
+          signal?.throwIfAborted();
+        }
+        processed++;
+        const firstItem = entry !== undefined && ++shown === 1;
+        const firstCode = !hasCode && !!entry?.totp;
+        if (firstCode) hasCode = true;
+        snapshot(firstItem || firstCode || processed === candidates.length);
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(candidates.length, TOTP_WORKER_COUNT) }, worker));
+    signal?.throwIfAborted();
+    return { ...progress, processed, items: items.filter((item): item is TotpResource => item !== undefined) };
   }
 
   public async getSecret(resourceId: string, signal?: AbortSignal) {
@@ -513,7 +618,7 @@ export class PassboltClient {
     await this.authenticate();
 
     const res = await this.request(`/secrets/resource/${resourceId}.json`, { signal });
-    const json = (await res.json()) as PassboltResponse<SecretData>;
+    const json = (await res.json()) as PassboltResponse<Secret>;
     return json.body;
   }
 

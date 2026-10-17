@@ -90,8 +90,9 @@ export class MetadataDecryptor {
 
   public async decryptResources(
     resources: ApiResource[],
-    onProgress?: (progress: ResourceLoadProgress) => void,
+    options: { onProgress?: (progress: ResourceLoadProgress) => void; signal?: AbortSignal } = {},
   ): Promise<Resource[]> {
+    const { onProgress, signal } = options;
     // A fixed-size worker pool keeps concurrent crypto work bounded for large vaults while
     // removing the barrier between batches: a slow entry no longer stalls the ones behind it.
     // Workers pull indices in order and write into a pre-sized array, so output order always
@@ -115,17 +116,20 @@ export class MetadataDecryptor {
     };
     const worker = async () => {
       while (nextIndex < resources.length) {
+        signal?.throwIfAborted();
         const index = nextIndex++;
         results[index] = await this.decryptResource(resources[index]);
+        signal?.throwIfAborted();
         processed++;
         snapshot(processed === 1 || processed === resources.length);
       }
     };
     await Promise.all(Array.from({ length: Math.min(resources.length, 16) }, worker));
+    signal?.throwIfAborted();
     return results;
   }
 
-  private async decryptResource(resource: ApiResource): Promise<Resource> {
+  public async decryptResource(resource: ApiResource): Promise<Resource> {
     const normalized: Resource = {
       ...resource,
       name: text(resource.name),

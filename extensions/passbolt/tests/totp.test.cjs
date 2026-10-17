@@ -307,7 +307,7 @@ test("unknown resource types are inspected without dropping their TOTP accounts"
   assert.equal(result.items[0].totp.secretKey, secretKey);
 });
 
-test("closing the command cancels remaining TOTP batches", async () => {
+test("closing the command cancels the entries still waiting and a later refresh recovers", async () => {
   const controller = new AbortController();
   const { client } = clientFor(
     Array.from({ length: 20 }, (_, i) => resource(String(i), { secrets: [{ data: "valid" }] })),
@@ -326,7 +326,11 @@ test("closing the command cancels remaining TOTP batches", async () => {
     }),
     /abort/i,
   );
-  assert.equal(processed, 8);
+  assert.ok(processed < 20, "entries still waiting to start are not processed after cancellation");
+  // Refresh Accounts runs the same load again: cancellation must not poison the client.
+  const result = await client.getTotpResources();
+  assert.equal(result.items.length, 20);
+  assert.ok(result.items.every((item) => item.totp?.secretKey === secretKey));
 });
 
 test("current-website lookup uses launch context or an available browser without prompting", async () => {

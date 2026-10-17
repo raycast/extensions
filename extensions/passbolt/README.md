@@ -38,8 +38,8 @@ Generate secure passwords with customizable options:
 ### 🔐 Authenticator (TOTP)
 Dedicated view for managing Time-based One-Time Passwords (TOTP):
 - Identifies TOTP-capable resource types before decrypting accounts
-- Reuses included encrypted secrets and unlocks your private key once per command
-- Loads accounts in bounded batches and displays results as they arrive
+- Downloads secrets only for TOTP-capable entries, in ID-filtered batches, and unlocks your private key once per command
+- Resolves accounts independently and displays results as they arrive, so the first codes appear quickly
 - Includes entries containing both a password and TOTP
 - Searches names, usernames, all URLs, tags, notes, and account labels; `OCI` also finds Oracle accounts
 - Shows matching current-website accounts first when the Raycast Browser Extension is available

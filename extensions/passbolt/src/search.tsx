@@ -11,16 +11,22 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [client] = useState(() => getPassboltClient());
 
-  // Load all resources once on mount
+  // Load all resources once on mount; closing the command cancels the load and its
+  // remaining decryption work instead of continuing in the background.
   useEffect(() => {
+    const controller = new AbortController();
     async function fetchResources() {
       setIsLoading(true);
       try {
         // Fetch all resources (empty query returns all); decrypted entries appear
         // progressively through throttled snapshots from the decryptor.
         const response = await client.searchResources("", {
-          onProgress: ({ items }) => setAllItems(items),
+          signal: controller.signal,
+          onProgress: ({ items }) => {
+            if (!controller.signal.aborted) setAllItems(items);
+          },
         });
+        if (controller.signal.aborted) return;
         if (response.body && Array.isArray(response.body)) {
           setAllItems(response.body);
           const failures = response.body.filter((resource) => resource.metadata_error);
@@ -35,17 +41,19 @@ export default function Command() {
           setAllItems([]);
         }
       } catch (error) {
+        if (controller.signal.aborted) return;
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to fetch resources",
           message: String(error),
         });
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     }
 
     fetchResources();
+    return () => controller.abort();
   }, [client]);
 
   // Filter items client-side for instant feedback
