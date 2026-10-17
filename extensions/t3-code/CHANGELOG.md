@@ -1,6 +1,6 @@
 # T3 Code Changelog
 
-## [Prompt T3 Code on protocol v2, files, presets and providers] - {PR_MERGE_DATE}
+## [Prompt T3 Code on protocol v2, files, presets and providers] - 2026-10-17
 
 - Prompt T3 Code works on protocol v2 servers. It creates the thread, the worktree and the first message over the WebSocket, and still uses HTTP on v1.
 - Attach files to a prompt: any file type, up to 8, with images up to 10 MB and other files up to 50 MB. A screenshot on the clipboard is attached when the command opens, and `⌘⇧V` attaches one copied later. `⌘⇧A` attaches the files selected in Finder, and `⌘Y` previews what is attached.
