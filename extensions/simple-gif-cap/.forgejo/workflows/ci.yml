@@ -1,0 +1,27 @@
+# Forgejo Actions on Codeberg (https://codeberg.org/actions/meta).
+# The hosted runners are Linux, so this covers everything that does not need
+# macOS: typecheck, lint, formatting and the ASCII rule. The Swift package and
+# `ray build` are checked locally (see AGENTS.md).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: codeberg-small
+    steps:
+      - uses: https://data.forgejo.org/actions/checkout@v4
+      - uses: https://data.forgejo.org/actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      # ray build generates the Swift typings on macOS; CI uses a checked-in stand-in.
+      - run: cp scripts/ci/raycast-env-stub.d.ts raycast-env.d.ts
+      - run: npm run typecheck
+      - run: npx eslint src
+      - run: npm run format:check
+      - run: sh scripts/check-ascii.sh

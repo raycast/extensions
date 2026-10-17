@@ -1,0 +1,261 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "simple-gif-cap",
+  "title": "Simple GIF Cap",
+  "description": "Record a region, window or screen straight to a GIF on your clipboard.",
+  "icon": "icon.png",
+  "author": "justsamuel",
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "record-region",
+      "title": "Record GIF of Region",
+      "subtitle": "Simple GIF Cap",
+      "description": "Drag a region, or press Space to pick a window. Run again to stop.",
+      "mode": "no-view"
+    },
+    {
+      "name": "record-window",
+      "title": "Record GIF of Window",
+      "subtitle": "Simple GIF Cap",
+      "description": "Hover and click the window to record. Run again to stop.",
+      "mode": "no-view"
+    },
+    {
+      "name": "record-screen",
+      "title": "Record GIF of Screen",
+      "subtitle": "Simple GIF Cap",
+      "description": "Record the display under the mouse. Run again to stop.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-recording",
+      "title": "Stop GIF Recording",
+      "subtitle": "Simple GIF Cap",
+      "description": "Stop the running recording and open the preview.",
+      "mode": "no-view"
+    },
+    {
+      "name": "preview",
+      "title": "Show Last GIF",
+      "subtitle": "Simple GIF Cap",
+      "description": "Preview, trim, shrink and copy the latest GIF.",
+      "mode": "view"
+    },
+    {
+      "name": "recent-gifs",
+      "title": "Recent GIFs",
+      "subtitle": "Simple GIF Cap",
+      "description": "Browse, copy and edit your recent GIFs.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "outputDir",
+      "title": "Save GIFs To",
+      "description": "Folder for finished GIFs.",
+      "type": "directory",
+      "required": false,
+      "default": "~/Downloads"
+    },
+    {
+      "name": "fps",
+      "title": "Frames per Second",
+      "description": "Higher is smoother but bigger.",
+      "type": "dropdown",
+      "required": false,
+      "default": "15",
+      "data": [
+        {
+          "title": "10",
+          "value": "10"
+        },
+        {
+          "title": "15",
+          "value": "15"
+        },
+        {
+          "title": "20",
+          "value": "20"
+        },
+        {
+          "title": "30",
+          "value": "30"
+        }
+      ]
+    },
+    {
+      "name": "maxWidth",
+      "title": "Max Width (px)",
+      "description": "GIFs wider than this are scaled down.",
+      "type": "dropdown",
+      "required": false,
+      "default": "1000",
+      "data": [
+        {
+          "title": "640",
+          "value": "640"
+        },
+        {
+          "title": "800",
+          "value": "800"
+        },
+        {
+          "title": "1000",
+          "value": "1000"
+        },
+        {
+          "title": "1280",
+          "value": "1280"
+        },
+        {
+          "title": "1600",
+          "value": "1600"
+        },
+        {
+          "title": "Original",
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "name": "encoder",
+      "title": "Encoder",
+      "description": "Built-in needs nothing installed. ffmpeg makes smaller files, gifski sharper ones (brew install ffmpeg gifski).",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Best Available",
+          "value": "auto"
+        },
+        {
+          "title": "Built-in",
+          "value": "builtin"
+        },
+        {
+          "title": "ffmpeg",
+          "value": "ffmpeg"
+        },
+        {
+          "title": "gifski",
+          "value": "gifski"
+        }
+      ]
+    },
+    {
+      "name": "countdown",
+      "title": "Countdown",
+      "description": "Seconds to wait before recording starts.",
+      "type": "dropdown",
+      "required": false,
+      "default": "3",
+      "data": [
+        {
+          "title": "None",
+          "value": "0"
+        },
+        {
+          "title": "3 Seconds",
+          "value": "3"
+        },
+        {
+          "title": "5 Seconds",
+          "value": "5"
+        }
+      ]
+    },
+    {
+      "name": "maxDuration",
+      "title": "Stop Automatically After",
+      "description": "Stops long recordings before they get huge.",
+      "type": "dropdown",
+      "required": false,
+      "default": "60",
+      "data": [
+        {
+          "title": "Never",
+          "value": "0"
+        },
+        {
+          "title": "15 Seconds",
+          "value": "15"
+        },
+        {
+          "title": "30 Seconds",
+          "value": "30"
+        },
+        {
+          "title": "1 Minute",
+          "value": "60"
+        },
+        {
+          "title": "2 Minutes",
+          "value": "120"
+        },
+        {
+          "title": "5 Minutes",
+          "value": "300"
+        }
+      ]
+    },
+    {
+      "name": "showClicks",
+      "label": "Show mouse clicks",
+      "title": "Recording",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "description": "Highlight clicks in the recording."
+    },
+    {
+      "name": "showCursor",
+      "label": "Show cursor",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "description": "Include the mouse cursor."
+    },
+    {
+      "name": "ffmpegPath",
+      "title": "ffmpeg Path",
+      "description": "Only needed for an ffmpeg outside Homebrew.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/ffmpeg"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "puppeteer-core": "^25.13.0",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "demo": "node scripts/demo/render.mjs",
+    "typecheck": "tsc --noEmit",
+    "format:check": "prettier --check src scripts README.md AGENTS.md CHANGELOG.md package.json",
+    "check": "npm run typecheck && eslint src && npm run format:check && sh scripts/check-ascii.sh",
+    "publish": "npx @raycast/api@latest publish",
+    "screenshots": "node scripts/screenshots/run.mjs"
+  }
+}
