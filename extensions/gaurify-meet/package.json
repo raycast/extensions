@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gaurify-meet",
+  "title": "Gaurify Meet",
+  "description": "See your next meetings, join in one keystroke, share open times and your booking link.",
+  "icon": "extension-icon.png",
+  "author": "gaurify",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "meeting",
+    "calendar",
+    "booking",
+    "scheduling",
+    "gaurify"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "upcoming-meetings",
+      "title": "Upcoming Meetings",
+      "subtitle": "Gaurify Meet",
+      "description": "Your next meetings, grouped by day. Join, copy, cancel or open them.",
+      "mode": "view"
+    },
+    {
+      "name": "copy-booking-link",
+      "title": "Copy Booking Link",
+      "subtitle": "Gaurify Meet",
+      "description": "Copy the link to your booking page.",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-meeting-type-link",
+      "title": "Copy Meeting Type Link",
+      "subtitle": "Gaurify Meet",
+      "description": "Pick a meeting type and copy its booking link.",
+      "mode": "view"
+    },
+    {
+      "name": "find-open-time",
+      "title": "Find Open Time",
+      "subtitle": "Gaurify Meet",
+      "description": "See your next open times and copy three of them with your link.",
+      "mode": "view"
+    },
+    {
+      "name": "new-meeting",
+      "title": "New Meeting",
+      "subtitle": "Gaurify Meet",
+      "description": "Book a meeting on your calendar.",
+      "mode": "view"
+    },
+    {
+      "name": "join-next-meeting",
+      "title": "Join Next Meeting",
+      "subtitle": "Gaurify Meet",
+      "description": "Open the join link of the meeting that is on now or next.",
+      "mode": "no-view"
+    },
+    {
+      "name": "share-open-times",
+      "title": "Share Open Times",
+      "subtitle": "Gaurify Meet",
+      "description": "Copy three open times and your link, no window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-gaurify-meet",
+      "title": "Open Gaurify Meet",
+      "subtitle": "Gaurify Meet",
+      "description": "Open your Gaurify Meet in the browser.",
+      "mode": "no-view"
+    },
+    {
+      "name": "next-meeting",
+      "title": "Next Meeting",
+      "subtitle": "Gaurify Meet",
+      "description": "Your next meeting in the menu bar, with the rest of today below.",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Create one in Gaurify Meet: Settings > API & webhooks. It starts with gm_live_.",
+      "type": "password",
+      "required": true,
+      "placeholder": "gm_live_..."
+    },
+    {
+      "name": "baseUrl",
+      "title": "Base URL",
+      "description": "Leave empty to use https://meet.gaurifyhq.com.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://meet.gaurifyhq.com"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.0",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nThis is a Raycast extension. Use npm run publish to send it to the Raycast Store.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
