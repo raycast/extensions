@@ -63,7 +63,6 @@ describe("buildTranslationDetailMarkdown", () => {
     ["cat", "The birds scatter."],
     ["кіт", "Це макітра."],
     ["말", "주말에 만나요."],
-    ["Tシャツ", "ATシャツB"],
   ])("does not bold %s inside an unrelated word", (word, exampleTranslation) => {
     const md = buildTranslationDetailMarkdown({ ...translation, word, exampleTranslation });
     const example = md.split("\n\n---\n\n")[1];
@@ -272,6 +271,33 @@ describe("buildTranslationDetailMarkdown", () => {
     const md = buildTranslationDetailMarkdown(t);
     // multiline escaping joins with markdown line break
     expect(md).toContain("  \n");
+  });
+});
+
+describe.each([
+  ["translation detail", buildTranslationDetailMarkdown],
+  ["flashcard detail", buildFlashcardDetailMarkdown],
+] as const)("%s Han/kana highlighting", (_view, buildMarkdown) => {
+  it.each([
+    ["猫", "猫2匹を飼っています。", "**猫**2匹を飼っています。"],
+    ["猫", "猫Aを選ぶ。", "**猫**Aを選ぶ。"],
+    ["猫", "A猫を選ぶ。", "A**猫**を選ぶ。"],
+    ["シャツ", "私はTシャツを着る。", "私はT**シャツ**を着る。"],
+    ["Tシャツ", "Tシャツ2枚を買う。", "**Tシャツ**2枚を買う。"],
+    ["ねこ", "ねこ２匹を飼っています。", "**ねこ**２匹を飼っています。"],
+    ["猫", "我有猫2只。", "我有**猫**2只。"],
+    ["iPhoneケース", "iPhoneケース2個を買う。", "**iPhoneケース**2個を買う。"],
+    ["猫", "猫2匹と猫Aを見た。", "**猫**2匹と**猫**Aを見た。"],
+  ])("keeps the exact span of %s in %s", (word, exampleTranslation, expected) => {
+    const markdown = buildMarkdown({
+      word,
+      translation: "target gloss",
+      partOfSpeech: "noun",
+      exampleTranslation,
+      example: "Target sentence",
+    });
+
+    expect(markdown.split("\n\n---\n\n")[1]).toBe(`${expected}\n\n*Target sentence*`);
   });
 });
 

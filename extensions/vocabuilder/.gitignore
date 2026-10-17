@@ -45,6 +45,9 @@ dist/
 .agents/
 .claude/
 
+# Keep the tracked source config out of new Raycast Store submissions.
+/.coderabbit.yaml
+
 # Promptfoo local artifacts
 .promptfoo/
 evals/results/

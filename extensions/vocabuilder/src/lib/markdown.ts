@@ -19,18 +19,17 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// Han and kana can border words without separating spaces, including mixed-script
-// Japanese words such as Tシャツ.
+// Han/kana lookups need an exact span: inflection matching can consume an
+// entire unspaced sentence, including counters and Latin affixes.
 function findWordPattern(line: string, word: string): RegExp | null {
   const escaped = escapeRegExp(word.trim());
   if (!escaped) return null;
   const unspaced = String.raw`[\p{Script_Extensions=Han}\p{Script_Extensions=Hiragana}\p{Script_Extensions=Katakana}]`;
   const start = `(?:(?<![\\p{L}\\p{N}])|(?<=${unspaced}))`;
   const end = `(?:(?![\\p{L}\\p{N}])|(?=${unspaced}))`;
-  const candidates = [
-    new RegExp(`${start}${escaped}${end}`, "giu"),
-    new RegExp(`${start}${escaped}[\\p{L}\\p{N}]*`, "giu"),
-  ];
+  const candidates = new RegExp(unspaced, "u").test(word)
+    ? [new RegExp(escaped, "giu")]
+    : [new RegExp(`${start}${escaped}${end}`, "giu"), new RegExp(`${start}${escaped}[\\p{L}\\p{N}]*`, "giu")];
   return candidates.find((pattern) => line.search(pattern) !== -1) ?? null;
 }
 
