@@ -36,7 +36,7 @@ const pending = { response: { ok: false, status: 400 }, body: { error: "authoriz
 
 // One shared Raycast environment: LocalStorage and the OAuth token store
 // persist across command processes, exactly as they do in Raycast.
-function raycast({ exchange, grant = async () => device } = {}) {
+function raycast({ exchange, grant = async () => device, beforeSave = async () => {}, onWait = () => {} } = {}) {
   const storage = new Map();
   const events = [];
   let session;
@@ -62,6 +62,8 @@ function raycast({ exchange, grant = async () => device } = {}) {
           granolaOAuth: {
             getTokens: async () => session,
             setTokens: async (tokens) => {
+              // Lets a test hold the keychain write open, like a slow save.
+              await beforeSave();
               session = tokens;
             },
           },
@@ -78,6 +80,7 @@ function raycast({ exchange, grant = async () => device } = {}) {
         "node:timers/promises": {
           setTimeout: async (ms, _value, { signal } = {}) => {
             events.push(["wait", ms]);
+            onWait(ms);
             signal?.throwIfAborted();
             await new Promise((r) => setImmediate(r));
             signal?.throwIfAborted();
@@ -128,7 +131,9 @@ test("a fresh sign-in waits between checks until the user approves", async () =>
     env.events.map(([e]) => e),
     ["open", "wait", "exchange", "wait", "exchange", "wait", "exchange"],
   );
-  assert.ok(env.events.filter(([e]) => e === "wait").every(([, ms]) => ms === 5000));
+  // Waits are computed from the next allowed check time, so allow for the
+  // few milliseconds spent between scheduling and waiting.
+  assert.ok(env.events.filter(([e]) => e === "wait").every(([, ms]) => ms > 4900 && ms <= 5000));
   assert.equal(env.storage.has(KEY), false);
 });
 
@@ -147,6 +152,64 @@ test("two commands resuming the same grant both end up signed in", async () => {
   const signal = new AbortController().signal;
   assert.equal(await a.runDeviceSignIn({ signal, resume, onGrant: () => {} }), "saved");
   assert.equal(await b.runDeviceSignIn({ signal, resume, onGrant: () => {} }), "existing");
+});
+
+test("a command rejected while the winner is still saving waits for that session", async () => {
+  let release;
+  const saving = new Promise((r) => (release = r));
+  let redeemed = false;
+  const env = raycast({
+    exchange: async () => {
+      if (redeemed) return { response: { ok: false, status: 400 }, body: { error: "invalid_grant" } };
+      redeemed = true;
+      return approved;
+    },
+    // Hold the winner's keychain write until the loser has already looked
+    // for a session once and found nothing.
+    beforeSave: () => saving,
+    onWait: (ms) => ms === 250 && release(),
+  });
+  env.storage.set(KEY, savedGrant());
+  const [a, b] = [env.command(), env.command()];
+  const resume = await a.readPendingSignIn();
+  const signal = new AbortController().signal;
+  const outcomes = await Promise.all([
+    a.runDeviceSignIn({ signal, resume, onGrant: () => {} }),
+    b.runDeviceSignIn({ signal, resume, onGrant: () => {} }),
+  ]);
+  assert.deepEqual(outcomes, ["saved", "existing"]);
+  assert.equal(env.session().accessToken, "access");
+});
+
+test("slow_down survives an unload, and the resumed run keeps the longer interval", async () => {
+  const slow = { response: { ok: false, status: 400 }, body: { error: "slow_down" } };
+  const replies = [slow, approved];
+  const controller = new AbortController();
+  let waits = 0;
+  const env = raycast({
+    exchange: async () => replies.shift(),
+    // Unload the command while it waits after the slow_down reply.
+    onWait: () => ++waits === 2 && controller.abort(),
+  });
+  await assert.rejects(env.command().runDeviceSignIn({ signal: controller.signal, onGrant: () => {} }), {
+    name: "AbortError",
+  });
+  const saved = JSON.parse(env.storage.get(KEY));
+  assert.equal(saved.interval, 10);
+  assert.ok(saved.nextCheckAt > Date.now() + 9000);
+
+  env.events.length = 0;
+  const next = env.command();
+  const outcome = await next.runDeviceSignIn({
+    signal: new AbortController().signal,
+    resume: await next.readPendingSignIn(),
+    onGrant: () => {},
+  });
+  assert.equal(outcome, "saved");
+  // The resumed run waits out the server's pacing instead of checking at once.
+  assert.equal(env.events[0][0], "wait");
+  assert.ok(env.events[0][1] > 9000);
+  assert.equal(env.events[1][0], "exchange");
 });
 
 test("declined and expired codes are cleared; network errors keep the grant for a retry", async () => {
