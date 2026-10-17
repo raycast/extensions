@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "swiss-dummy-data",
+  "title": "Swiss Dummy Data",
+  "description": "Generates various random data commonly found in Switzerland, such as Social Security Number (SSN, aka «AHV»).",
+  "icon": "extension-icon.png",
+  "author": "cmdr",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-ssn",
+      "title": "Generate SSN",
+      "subtitle": "Generates a fake Social Security Number",
+      "description": "Generates a fake Social Security Number with a valid check digit.\n\nAlso known as AHV Nummer.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "history",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "History",
+      "label": "Keep previously generated values",
+      "description": "Show previously generated values below the new one."
+    },
+    {
+      "name": "historySize",
+      "type": "textfield",
+      "required": false,
+      "default": "20",
+      "title": "History Size",
+      "description": "Number of previously generated values to keep per command."
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.104.20"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
