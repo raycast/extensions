@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "comarkserv",
+  "title": "Comarkserv",
+  "description": "Preview markdown files and folders in the browser with comarkserv: live reload, search, 580+ themes.",
+  "icon": "extension-icon.png",
+  "author": "matteo_rigoni",
+  "categories": [
+    "Developer Tools",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "preview",
+      "title": "Preview Markdown",
+      "subtitle": "comarkserv",
+      "description": "Open the markdown file or the folder that is selected in Finder, with live reload.",
+      "mode": "no-view"
+    },
+    {
+      "name": "previews",
+      "title": "Markdown Previews",
+      "subtitle": "comarkserv",
+      "description": "Show the running previews and the recent folders. Open, copy or stop a preview.",
+      "mode": "view"
+    },
+    {
+      "name": "themes",
+      "title": "Search Markdown Themes",
+      "subtitle": "comarkserv",
+      "description": "Search the base16, base24 and Omarchy themes, see their colors and choose the default.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "theme",
+      "title": "Default Theme",
+      "description": "The theme for new previews, as for --theme. Search Markdown Themes can change it.",
+      "type": "textfield",
+      "required": false,
+      "default": "github"
+    },
+    {
+      "name": "command",
+      "title": "comarkserv Command",
+      "description": "The command that starts comarkserv. Empty: comarkserv if it is installed, else npx comarkserv.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "comarkserv"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
