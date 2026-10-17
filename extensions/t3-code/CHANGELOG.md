@@ -1,5 +1,13 @@
 # T3 Code Changelog
 
+## [Prompt T3 Code on protocol v2, files, presets and providers] - {PR_MERGE_DATE}
+
+- Prompt T3 Code works on protocol v2 servers. It creates the thread, the worktree and the first message over the WebSocket, and still uses HTTP on v1.
+- Attach files to a prompt: any file type, up to 8, with images up to 10 MB and other files up to 50 MB. A screenshot on the clipboard is attached when the command opens, and `⌘⇧V` attaches one copied later. `⌘⇧A` attaches the files selected in Finder, and `⌘Y` previews what is attached.
+- One Preset dropdown replaces Project, Model, Permissions and Workspace. It lists starred presets, then the combinations you used recently. Custom… shows the separate fields again. `⌘⇧S` stars the current settings.
+- Models are listed for every enabled provider instance, including custom ones such as a second Claude. Each shows its provider, effort and context window, and models that differ only by a no-op option are listed once. Models starred in T3 Code show as favorites.
+- `⌘⇧↵` sends the prompt without opening T3 Code.
+
 ## [Protocol v2 support] - 2026-10-08
 
 - Waiting T3 Threads and Search T3 Threads work with T3 Code servers on orchestration protocol v2 as well as v1.
