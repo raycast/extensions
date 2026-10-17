@@ -1,5 +1,11 @@
 # GitHub Changelog
 
+## [Create Release and Dispatch Workflow Commands] - {PR_MERGE_DATE}
+
+- New **Create Release** command to publish a release with auto-suggested next tag, generated release notes, draft and pre-release options.
+- New **Dispatch Workflow** command to trigger `workflow_dispatch` workflows with their inputs, defaulting the ref to the branch of the latest run.
+- Dispatch Workflow: Pin workflows with ⌘P to list them first in the workflow picker; pins are stored per repository.
+
 ## [Open Created Issue in Browser] - 2026-10-14
 
 - Create Issue: Add an **Open issue in browser** preference to open newly created issues in your default browser.
