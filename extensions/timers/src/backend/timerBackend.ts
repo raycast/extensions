@@ -10,6 +10,7 @@ import { kill } from "node:process";
 import { writeTimerFile } from "./timerStorage";
 import { alertVolume, ensureWindowsWorker, windowsWorkerConfig } from "./windowsBackend";
 import { getErrorMessage } from "@chrismessina/raycast-kit/errors";
+import { buildMacTimerCommand } from "./macosTimer";
 
 const DATAPATH = environment.supportPath + "/customTimers.json";
 const DEFAULT_PRESET_VISIBLES_FILE = environment.supportPath + "/defaultPresetVisibles.json";
@@ -134,24 +135,16 @@ function buildTimerCommand(
   selectedSound: string,
 ): string {
   const prefs = getPreferenceValues<Preferences>();
-  const selectedSoundPath = `${
-    environment.assetsPath + "/" + (selectedSound === "default" ? prefs.selectedSound : selectedSound)
-  }`;
-  const cmdParts = [`sleep ${timeInSeconds}`];
-  cmdParts.push(
-    `if [ -f "${masterName}" ]; then osascript -e 'display notification "Timer \\"${timerName}\\" complete" with title "Ding!"'`,
-  );
-  const alertSoundString =
-    (selectedSound === "default" ? prefs.selectedSound : selectedSound) === "speak_timer_name"
-      ? `say ${timerName}`
-      : `afplay "${selectedSoundPath}" --volume ${prefs.volumeSetting.replace(",", ".")}`;
-  cmdParts.push(alertSoundString);
-  if (prefs.ringContinuously) {
-    const dismissFile = `${masterName}`.replace(".timer", ".dismiss");
-    cmdParts.push(`while [ -f "${dismissFile}" ]; do ${alertSoundString}; done`);
-  }
-  cmdParts.push(`rm "${masterName}"; else echo "Timer deleted"; fi`);
-  return cmdParts.join(" ; ");
+  const sound = selectedSound === "default" ? prefs.selectedSound : selectedSound;
+  return buildMacTimerCommand({
+    timerFile: masterName,
+    timerName,
+    seconds: timeInSeconds,
+    soundPath: join(environment.assetsPath, sound),
+    speak: sound === "speak_timer_name",
+    volume: alertVolume(prefs.volumeSetting),
+    ringContinuously: prefs.ringContinuously,
+  });
 }
 
 function stopTimer(timerFile: string) {

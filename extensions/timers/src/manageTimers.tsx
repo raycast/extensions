@@ -14,32 +14,32 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLinkP
   const timerID = props.launchContext?.timerID;
 
   useEffect(() => {
+    let disposed = false;
     if (timerID) {
-      const customTimers = readCustomTimers();
-      const ct = customTimers[timerID];
-      if (ct == undefined) {
-        showError(new Error("This preset no longer exists"), { title: "Could Not Start Preset" });
-      } else {
-        startTimer({
-          timeInSeconds: ct.timeInSeconds,
-          timerName: ct.name,
-          selectedSound: ct.selectedSound,
-        })
-          .then((started) => {
-            if (started) return popToRoot();
-          })
-          .catch((error) => showError(error, { title: "Could Not Start Timer" }));
-      }
-      return;
+      void (async () => {
+        try {
+          const ct = readCustomTimers()[timerID];
+          if (!ct) throw new Error("This preset no longer exists");
+          const started = await startTimer({
+            timeInSeconds: ct.timeInSeconds,
+            timerName: ct.name,
+            selectedSound: ct.selectedSound,
+          });
+          if (started && !disposed) await popToRoot();
+        } catch (error) {
+          if (!disposed) await showError(error, { title: "Could Not Start Preset" });
+        }
+      })();
     }
     refreshTimers();
     const interval = setInterval(() => {
       refreshTimers();
     }, 1000);
-    return () => clearInterval(interval);
+    return () => {
+      disposed = true;
+      clearInterval(interval);
+    };
   }, [timerID]);
-
-  if (timerID) return null;
 
   return (
     <List isLoading={isLoading}>

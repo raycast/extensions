@@ -31,7 +31,11 @@ export default function EditPresetView({ id, preset }: { id: string; preset: Cus
   const submit = async (values: PresetValues) => {
     if ((["name", "hours", "minutes", "seconds"] as const).map((field) => validate(field, values[field])).some(Boolean))
       return;
-    const duration = Number(values.hours) * 3600 + Number(values.minutes) * 60 + Number(values.seconds);
+    // Preserve the original number exactly for name/sound-only edits, including fine precision.
+    const durationUnchanged = fields.every((field) => Number(values[field.id]) === field.value);
+    const duration = durationUnchanged
+      ? preset.timeInSeconds
+      : Number(values.hours) * 3600 + Number(values.minutes) * 60 + Number(values.seconds);
     if (duration <= 0) {
       setErrors((current) => ({ ...current, seconds: "Enter a duration greater than zero" }));
       return;
@@ -47,7 +51,7 @@ export default function EditPresetView({ id, preset }: { id: string; preset: Cus
   const fields = [
     { id: "hours" as const, title: "Hours", value: Math.floor(preset.timeInSeconds / 3600) },
     { id: "minutes" as const, title: "Minutes", value: Math.floor((preset.timeInSeconds % 3600) / 60) },
-    { id: "seconds" as const, title: "Seconds", value: Number((preset.timeInSeconds % 60).toFixed(3)) },
+    { id: "seconds" as const, title: "Seconds", value: preset.timeInSeconds % 60 },
   ];
   return (
     <Form

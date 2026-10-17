@@ -187,3 +187,24 @@ test("new menu-bar defaults preserve saved visibility choices", () => {
     f.cleanup();
   }
 });
+
+test(
+  "Windows rounds sub-millisecond durations up to native integer deadlines",
+  { skip: process.platform !== "win32" },
+  async () => {
+    const f = fixture();
+    try {
+      for (const seconds of [60.0005, 0.0004]) {
+        const before = Date.now();
+        await f.backend.startTimer({ timeInSeconds: seconds, skipRingContinuouslyWarning: true });
+        const after = Date.now();
+        const config = f.launched.at(-1);
+        assert.ok(Number.isSafeInteger(config.deadline));
+        assert.ok(config.deadline >= before + Math.ceil(seconds * 1000));
+        assert.ok(config.deadline <= after + Math.ceil(seconds * 1000));
+      }
+    } finally {
+      f.cleanup();
+    }
+  },
+);

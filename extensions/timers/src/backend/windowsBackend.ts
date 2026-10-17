@@ -46,7 +46,7 @@ export async function windowsWorkerConfig(
   return {
     timerFile,
     workerId,
-    deadline: Date.now() + seconds * 1000,
+    deadline: Date.now() + Math.ceil(seconds * 1000),
     soundPath: join(environment.assetsPath, sound),
     speak: sound === "speak_timer_name",
     volume: alertVolume(prefs.volumeSetting),

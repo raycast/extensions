@@ -515,8 +515,5 @@
         ]
       }
     ]
-  },
-  "allowScripts": {
-    "esbuild": true
   }
 }
