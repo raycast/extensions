@@ -1,0 +1,14 @@
+/node_modules
+/dist
+raycast-env.d.ts
+
+# Raycast's Swift bridge build output
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+.build
+.DS_Store
+
+# Personal research notes, not part of the extension
+/research/
+/coverage
