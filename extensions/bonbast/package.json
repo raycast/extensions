@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bonbast",
+  "title": "Bonbast",
+  "description": "Live Iranian free-market exchange rates for currencies, gold coins and gold from bonbast.com, in Toman or Rial.",
+  "icon": "extension-icon.png",
+  "author": "afshany",
+  "categories": [
+    "Finance"
+  ],
+  "keywords": [
+    "iran",
+    "toman",
+    "rial",
+    "dollar",
+    "gold",
+    "coin",
+    "سکه",
+    "دلار",
+    "ارز"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "rates",
+      "title": "Search Rates",
+      "subtitle": "Bonbast",
+      "description": "Browse and search free-market sell and buy rates for currencies, gold coins and gold.",
+      "mode": "view"
+    },
+    {
+      "name": "convert",
+      "title": "Convert Currency",
+      "subtitle": "Bonbast",
+      "description": "Convert an amount of a foreign currency or gold coin to Toman, or Toman to every currency.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "amount",
+          "type": "text",
+          "placeholder": "Amount",
+          "required": true
+        },
+        {
+          "name": "code",
+          "type": "text",
+          "placeholder": "USD",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Rate in Menu Bar",
+      "subtitle": "Bonbast",
+      "description": "Show one rate in the menu bar, refreshed every 15 minutes.",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "menuBarItem",
+          "type": "dropdown",
+          "required": false,
+          "title": "Menu Bar Rate",
+          "description": "Which rate to show in the menu bar.",
+          "default": "usd",
+          "data": [
+            { "title": "US Dollar", "value": "usd" },
+            { "title": "Euro", "value": "eur" },
+            { "title": "British Pound", "value": "gbp" },
+            { "title": "UAE Dirham", "value": "aed" },
+            { "title": "Turkish Lira", "value": "try" },
+            { "title": "Emami Gold Coin", "value": "emami" },
+            { "title": "18k Gold (1 g)", "value": "gol18" }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "unit",
+      "type": "dropdown",
+      "required": false,
+      "title": "Unit",
+      "description": "Show Iranian prices in Toman or Rial (1 Toman = 10 Rial).",
+      "default": "toman",
+      "data": [
+        { "title": "Toman", "value": "toman" },
+        { "title": "Rial", "value": "rial" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
