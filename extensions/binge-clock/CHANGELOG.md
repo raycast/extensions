@@ -1,6 +1,6 @@
 # Binge Clock Changelog
 
-## [Windows support & Grid view] - {PR_MERGE_DATE}
+## [Windows support & Grid view] - 2026-10-17
 
 - Add Windows support
 - Add Grid view; toggled via new `Toggle Layout` action
