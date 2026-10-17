@@ -6,10 +6,12 @@ import {
   getPreferenceValues,
   popToRoot,
   showHUD,
+  closeMainWindow,
   showToast,
 } from "@raycast/api";
+import { showError } from "@chrismessina/raycast-kit";
 import { Preferences } from "./types";
-import { existsSync, writeFileSync } from "fs";
+import { existsSync, writeFileSync } from "node:fs";
 
 const shortCircuitMenuBar = <T>(state: T[] | undefined, prefs: Preferences): boolean => {
   return (
@@ -19,13 +21,13 @@ const shortCircuitMenuBar = <T>(state: T[] | undefined, prefs: Preferences): boo
 };
 
 const showHudOrToast = (args: { msg: string; launchedFromMenuBar: boolean; isErr: boolean }) => {
+  if (args.isErr) return showError(new Error(args.msg), { title: "Timer Error" });
   const prefs: Preferences = getPreferenceValues();
   if (args.launchedFromMenuBar || prefs.closeWindowOnTimerStart) {
-    const msgEmoji = args.isErr ? "⚠️" : "🎉";
-    showHUD(`${msgEmoji} ${args.msg}`);
-    return popToRoot();
+    showHUD(`🎉 ${args.msg}`);
+    return prefs.closeWindowOnTimerStart ? closeMainWindow() : popToRoot();
   } else {
-    showToast({ style: args.isErr ? Toast.Style.Failure : Toast.Style.Success, title: args.msg });
+    return showToast({ style: Toast.Style.Success, title: args.msg });
   }
 };
 
@@ -39,7 +41,7 @@ const showInitialRingContinuouslyWarning = async (): Promise<boolean> => {
     title: "Ring Continuously is enabled!",
     icon: Icon.Bell,
     message:
-      'When the timer rings, you will need to use the "Stop Running Timer" command or stop the timer in the "Manage Timers" command to dismiss the sound. You can configure this in your Raycast settings.',
+      'When the timer rings, use "Dismiss Ringing Timer", "Stop Running Timer", or stop it in "Manage Timers" to dismiss the sound. You can configure this in your Raycast settings.',
   });
   if (result) writeFileSync(RINGCONTINUOUSLY_SHOWN_PATH, "");
   return result;

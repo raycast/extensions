@@ -8,6 +8,16 @@
 - The Menu Bar Player dropdown now shows the track title and artist statically instead of a scrolling title, which froze at a random point while the menu was open. Long names are shortened with an ellipsis, and the full text is shown on hover.
 - The Menu Bar Player now refreshes right after the Next, Previous, Play, Pause, Play/Pause, and Dislike & Skip commands instead of waiting for its next interval run.
 
+## [Rewind and Fast Forward Commands] - 2026-10-17
+
+- Added "Rewind" and "Fast Forward" commands that move the current track back or ahead by 15 seconds, stopping at the start or end of the track.
+
+## [View Recommendations Command] - 2026-10-16
+
+- Added a new "View Recommendations" command that shows your personal Apple Music recommendation rooms as a grid of albums, playlists, and songs — with In Library badges, Add to Library, album tracklists, and Open in Music.
+- Albums, songs, and playlists that are already in your library can be played (or shuffled) straight from the grid.
+- Your own playlists are recognised when Apple recommends them back to you (for example in Recently Played) and play directly.
+
 ## [Fix Add to Playlist] - 2026-10-08
 
 - Fixed adding a song that is not in your library yet to a playlist.

@@ -138,6 +138,7 @@ function generateArgs(additionalArgs?: string) {
   if (preferences.preventDisplay) flags.push("d");
   if (preferences.preventDisk) flags.push("m");
   if (preferences.preventSystem) flags.push("i");
+  if (preferences.preventSleepOnAC) flags.push("s");
 
   const parts = [];
   if (flags.length > 0) parts.push(`-${flags.join("")}`);

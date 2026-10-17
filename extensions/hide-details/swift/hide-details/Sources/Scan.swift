@@ -8,6 +8,7 @@ struct Report: Codable {
   let regionCount: Int
   let output: String
   let clipboardChangeCount: Int?
+  let reviewKey: String?
 }
 
 struct Configuration {
@@ -52,7 +53,7 @@ func parseConfiguration(
   )
 }
 
-func redact(_ configuration: Configuration) throws -> Report {
+func redact(_ configuration: Configuration, forReview: Bool = false) throws -> Report {
   let image: CGImage
   let clipboardChangeCount: Int?
   if let inputURL = configuration.inputURL {
@@ -142,6 +143,7 @@ func redact(_ configuration: Configuration) throws -> Report {
     throw RedactionError(message: "Could not encode the redacted image. No image was published.")
   }
   try png.write(to: configuration.outputURL, options: .atomic)
+  let reviewKey = forReview ? try saveReviewSource(image, beside: configuration.outputURL) : nil
   return Report(hits: hits, regionCount: regions.count, output: configuration.outputURL.path,
-                clipboardChangeCount: clipboardChangeCount)
+                clipboardChangeCount: clipboardChangeCount, reviewKey: reviewKey)
 }

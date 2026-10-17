@@ -51,3 +51,159 @@ test("stops repeated pagination", async () => {
     json({ items: [], next_page: "/projects?limit=100" })) as typeof fetch);
   await assert.rejects(client.projects(), /repeated pagination/);
 });
+
+test("v3 replaces period metrics with verified chart totals; legacy makes only the overview request", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: new Date("2026-10-11T20:00:00Z") });
+  const urls: URL[] = [];
+  const client = new RevenueCatClient("test", (async (input) => {
+    const url = new URL(String(input));
+    urls.push(url);
+    if (url.pathname.endsWith("/overview")) return json(demoOverview);
+    assert.equal(url.searchParams.get("realtime"), "true");
+    assert.equal(url.searchParams.get("start_date"), "2026-09-13");
+    assert.equal(url.searchParams.get("end_date"), "2026-10-11");
+    assert.equal(url.searchParams.get("expand_periods"), "false");
+    if (url.pathname.endsWith("/customers_active")) {
+      assert.equal(url.searchParams.get("resolution"), "4");
+      assert.equal(url.searchParams.has("aggregate"), false);
+      return json({
+        object: "chart_data",
+        resolution: "year",
+        segments: null,
+        measures: [{ display_name: "Active Customers", unit: "#" }],
+        values: [{ measure: 0, value: 664 }],
+      });
+    }
+    const revenue = url.pathname.endsWith("/revenue");
+    assert.equal(url.searchParams.get("aggregate"), "total");
+    if (revenue) assert.deepEqual(JSON.parse(url.searchParams.get("selectors")!), { revenue_type: "revenue" });
+    const name = revenue ? "Revenue" : "New Customers";
+    return json({
+      object: "chart_data",
+      yaxis_currency: "USD",
+      segments: null,
+      measures: [{ display_name: name, unit: revenue ? "$" : "#" }],
+      summary: { total: { [name]: revenue ? 2072.78 : 525 } },
+    });
+  }) as typeof fetch);
+  const data = await client.overview("project", "USD", undefined, true);
+  assert.equal(urls.length, 4);
+  assert.equal(data.metrics.find((m) => m.id === "revenue")?.value, 2072.78);
+  assert.equal(data.metrics.find((m) => m.id === "new_customers")?.value, 525);
+  assert.equal(data.metrics.find((m) => m.id === "active_users")?.value, 664);
+  assert.equal(data.metrics.find((m) => m.id === "active_users")?.name, "Active Customers");
+  assert.deepEqual(
+    data.metrics.find((m) => m.id === "mrr"),
+    demoOverview.metrics.find((m) => m.id === "mrr"),
+  );
+  assert.equal(data.metrics.find((m) => m.id === "revenue")?.last_updated_at, null);
+  urls.length = 0;
+  assert.deepEqual(await client.overview("project", "USD", undefined, false), demoOverview);
+  assert.equal(urls.length, 1);
+});
+
+test("a range crossing calendar years leaves active customers unavailable, never a duplicate count or legacy fallback", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: new Date("2027-01-10T12:00:00Z") });
+  const client = new RevenueCatClient("test", (async (input) => {
+    const url = String(input);
+    assert.ok(!url.includes("customers_active"));
+    if (url.includes("/overview")) return json(demoOverview);
+    const revenue = url.includes("/revenue?");
+    const name = revenue ? "Revenue" : "New Customers";
+    return json({
+      object: "chart_data",
+      yaxis_currency: "USD",
+      segments: null,
+      measures: [{ display_name: name, unit: revenue ? "$" : "#" }],
+      summary: { total: { [name]: 0 } },
+    });
+  }) as typeof fetch);
+  const metric = (await client.overview("project", "USD", undefined, true)).metrics.find(
+    (m) => m.id === "active_users",
+  )!;
+  assert.equal(metric.value, null);
+  assert.match(metric.unavailableReason!, /calendar years/);
+  assert.equal(formatMetric(metric, "USD"), "Unavailable");
+});
+
+const v3Charts = [
+  { chart: "revenue", id: "revenue", name: "Revenue", unit: "$", value: 12 },
+  { chart: "customers_new", id: "new_customers", name: "New Customers", unit: "#", value: 0 },
+  { chart: "customers_active", id: "active_users", name: "Active Customers", unit: "#", value: 7 },
+];
+function validV3Chart(chart: (typeof v3Charts)[number]) {
+  return {
+    object: "chart_data",
+    resolution: "year",
+    segments: null,
+    yaxis_currency: "USD",
+    measures: [{ display_name: chart.name, unit: chart.unit }],
+    summary: { total: { [chart.name]: chart.value } },
+    values: [{ measure: 0, value: chart.value }],
+  };
+}
+
+test("a chart HTTP or parse failure only marks that metric unavailable and preserves all successful metrics", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: new Date("2026-10-11T20:00:00Z") });
+  for (const failed of v3Charts) {
+    for (const failure of ["http", "parse"]) {
+      const client = new RevenueCatClient("test", (async (input) => {
+        const path = new URL(String(input)).pathname;
+        if (path.endsWith("/overview")) return json(demoOverview);
+        const chart = v3Charts.find((item) => path.endsWith(`/${item.chart}`))!;
+        return chart.id === failed.id
+          ? failure === "http"
+            ? json({ message: "private provider message" }, 403)
+            : json({ object: "chart_data" })
+          : json(validV3Chart(chart));
+      }) as typeof fetch);
+      const result = await client.overview("project", "USD", undefined, true);
+      for (const metric of result.metrics) {
+        const chart = v3Charts.find((item) => item.id === metric.id);
+        if (!chart) {
+          assert.deepEqual(
+            metric,
+            demoOverview.metrics.find((item) => item.id === metric.id),
+          );
+        } else if (chart.id === failed.id) {
+          assert.equal(metric.value, null);
+          assert.match(metric.unavailableReason!, failure === "http" ? /charts_metrics:charts:read/ : /did not return/);
+          assert.ok(!metric.unavailableReason!.includes("private provider message"));
+          assert.equal(formatMetric(metric, "USD"), "Unavailable");
+        } else {
+          assert.equal(metric.value, chart.value);
+          assert.equal(metric.unavailableReason, undefined);
+        }
+      }
+    }
+  }
+});
+
+test("all chart requests can fail without hiding overview metrics or falling back to legacy period values", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: new Date("2026-10-11T20:00:00Z") });
+  const client = new RevenueCatClient("test", (async (input) =>
+    String(input).includes("/overview") ? json(demoOverview) : json({}, 429, { "retry-after": "30" })) as typeof fetch);
+  const result = await client.overview("project", "USD", undefined, true);
+  for (const metric of result.metrics) {
+    if (v3Charts.some((chart) => chart.id === metric.id)) {
+      assert.equal(metric.value, null);
+      assert.match(metric.unavailableReason!, /30 seconds/);
+    } else {
+      assert.deepEqual(
+        metric,
+        demoOverview.metrics.find((item) => item.id === metric.id),
+      );
+    }
+  }
+});
+
+test("cancelling a v3 load still rejects rather than returning cacheable partial metrics", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: new Date("2026-10-11T20:00:00Z") });
+  const controller = new AbortController();
+  const client = new RevenueCatClient("test", (async (input) => {
+    if (String(input).includes("/overview")) return json(demoOverview);
+    controller.abort();
+    throw controller.signal.reason;
+  }) as typeof fetch);
+  await assert.rejects(client.overview("project", "USD", controller.signal, true), { name: "AbortError" });
+});

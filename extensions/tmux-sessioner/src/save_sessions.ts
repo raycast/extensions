@@ -2,12 +2,12 @@ import { showHUD, showToast, Toast } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { env } from "./config";
 
-// bash (used by the resurrect script's `#!/usr/bin/env bash` shebang) and pgrep
-// live in /bin and /usr/bin, which the extension's restricted PATH omits
+// The resurrect save script has a `#!/usr/bin/env bash` shebang; env resolves
+// bash from PATH, and bash lives in /bin, which the extension's restricted PATH
+// omits — so add the system bin dirs for that subprocess.
 const scriptEnv = { ...env, PATH: `${env.PATH}:/bin:/usr/bin:/usr/sbin:/sbin` };
 
 const SAVE_TIMEOUT_MS = 600000;
-const WAIT_FOR_RUNNING_MS = 240000;
 const CONTINUUM_TIMESTAMP_OPTION = "@continuum-save-last-timestamp";
 
 function tmux(args: string[]): Promise<string> {
@@ -20,29 +20,6 @@ function tmux(args: string[]): Promise<string> {
       resolve(stdout.trim());
     });
   });
-}
-
-function isSaveRunning(scriptPath: string): Promise<boolean> {
-  return new Promise((resolve) => {
-    // The resurrect save runs as `bash <scriptPath> quiet`, whether launched by
-    // this command, `prefix + Ctrl-s`, or tmux-continuum's background timer
-    execFile("pgrep", ["-f", scriptPath], { env: scriptEnv }, (_error, stdout) => {
-      resolve(stdout.trim().length > 0);
-    });
-  });
-}
-
-async function waitForNoRunningSave(scriptPath: string): Promise<boolean> {
-  const start = Date.now();
-
-  while (await isSaveRunning(scriptPath)) {
-    if (Date.now() - start > WAIT_FOR_RUNNING_MS) {
-      return false;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
-
-  return true;
 }
 
 function runSaveScript(scriptPath: string): Promise<void> {
@@ -92,11 +69,12 @@ export default async function Command() {
     return;
   }
 
-  // If tmux-continuum is active, mark a save as happening now via its own public
-  // option so its interval guard backs off and it won't launch a competing save.
-  // Concurrent saves write shared files (pane_contents.tar.gz, the `last` pointer)
-  // and can corrupt the snapshot — which is exactly what this command exists to
-  // guarantee against.
+  // Serializing saves is the save script's job, not this command's: tmux-resurrect
+  // itself (and `prefix + Ctrl-s`) run it without a cross-process lock, and users
+  // who auto-save frequently wrap the script in their own mutex. This command just
+  // invokes the configured script and lets it decide, so it never blocks waiting
+  // on a slow or piled-up save. We still nudge continuum to back off (below) to
+  // reduce the chance of a competing automatic save.
   let continuumActive = false;
 
   try {
@@ -113,25 +91,10 @@ export default async function Command() {
     }
   }
 
-  // Serialize behind any save already in progress rather than overlapping it
-  if (await isSaveRunning(scriptPath)) {
-    toast.title = "Waiting for an in-progress save…";
-
-    if (!(await waitForNoRunningSave(scriptPath))) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "A save is already in progress";
-      toast.message = "Try again in a moment";
-      return;
-    }
-
-    toast.title = "Saving tmux sessions…";
-  }
-
   try {
     await runSaveScript(scriptPath);
 
-    // Reflect the completed save so continuum's next automatic save is a full
-    // interval away from this one
+    // Reflect the save so continuum's next automatic save is a full interval away
     if (continuumActive) {
       try {
         await tmux(["set-option", "-g", CONTINUUM_TIMESTAMP_OPTION, nowUnix()]);

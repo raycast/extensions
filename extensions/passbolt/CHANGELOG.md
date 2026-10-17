@@ -1,5 +1,9 @@
 # Passbolt Changelog
 
+## [Fix Search Crash on Resources Without a Name] - 2026-10-16
+
+- Fix `TypeError: Cannot read properties of undefined (reading 'toLowerCase')` when searching resources returned without a `name` by a self-hosted Passbolt instance ([#32415](https://github.com/raycast/extensions/issues/32415))
+
 ## [1.0.0] - 2025-12-01
 
 ### Features

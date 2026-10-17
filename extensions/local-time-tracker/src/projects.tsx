@@ -13,9 +13,14 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { showFailure } from "./lib/errors";
-import { CATEGORY_ICONS, getCategoryIcon, getCategoryIconName, getCategoryName } from "./lib/categories";
+import {
+  CATEGORY_ICONS,
+  getProjectGroupIcon,
+  getProjectGroupIconName,
+  getProjectGroupName,
+} from "./lib/project-groups";
 import { sortProjectsByPreference } from "./lib/projects";
-import { getProjectCategories, getProjects, saveProjectCategories, saveProjects } from "./lib/storage";
+import { getProjectGroups, getProjects, saveProjectGroups, saveProjects } from "./lib/storage";
 import type { Project, ProjectCategory } from "./lib/types";
 
 export default function ProjectsCommand() {
@@ -25,7 +30,7 @@ export default function ProjectsCommand() {
 
   async function reload() {
     try {
-      const [savedProjects, savedCategories] = await Promise.all([getProjects(), getProjectCategories()]);
+      const [savedProjects, savedCategories] = await Promise.all([getProjects(), getProjectGroups()]);
       setProjects(savedProjects);
       setCategories(savedCategories);
     } catch (error) {
@@ -71,9 +76,9 @@ export default function ProjectsCommand() {
                 />
               ) : null}
               <Action.Push
-                title="Manage Categories"
+                title="Manage Project Groups"
                 icon={Icon.Folder}
-                target={<CategoryList projects={projects} onChanged={reload} />}
+                target={<ProjectGroupList projects={projects} onChanged={reload} />}
               />
             </ActionPanel>
           }
@@ -121,10 +126,10 @@ function ProjectSection({
       {projects.map((project) => (
         <List.Item
           key={project.id}
-          icon={getCategoryIcon(categories, project.type)}
+          icon={getProjectGroupIcon(categories, project.type)}
           title={project.name}
           subtitle={project.isActive ? undefined : "Disabled"}
-          keywords={[getCategoryName(categories, project.type), project.isPreferred ? "preferred" : ""]}
+          keywords={[getProjectGroupName(categories, project.type), project.isPreferred ? "preferred" : ""]}
           accessories={project.isPreferred ? [{ icon: Icon.Star, tooltip: "Preferred Project" }] : undefined}
           actions={
             <ActionPanel>
@@ -154,9 +159,9 @@ function ProjectSection({
                 />
               ) : null}
               <Action.Push
-                title="Manage Categories"
+                title="Manage Project Groups"
                 icon={Icon.Folder}
-                target={<CategoryList projects={allProjects} onChanged={onChanged} />}
+                target={<ProjectGroupList projects={allProjects} onChanged={onChanged} />}
               />
             </ActionPanel>
           }
@@ -294,13 +299,13 @@ function ProjectForm({
       }
     >
       <Form.TextField id="name" title="Name" defaultValue={project?.name} autoFocus />
-      <Form.Dropdown id="type" title="Category" defaultValue={project?.type ?? categories[0]?.id}>
+      <Form.Dropdown id="type" title="Project Group" defaultValue={project?.type ?? categories[0]?.id}>
         {categories.map((category) => (
           <Form.Dropdown.Item
             key={category.id}
             value={category.id}
             title={category.name}
-            icon={getCategoryIcon(categories, category.id)}
+            icon={getProjectGroupIcon(categories, category.id)}
           />
         ))}
       </Form.Dropdown>
@@ -314,11 +319,11 @@ function ProjectForm({
   );
 }
 
-function CategoryList({ projects, onChanged }: { projects: Project[]; onChanged: () => Promise<void> }) {
+function ProjectGroupList({ projects, onChanged }: { projects: Project[]; onChanged: () => Promise<void> }) {
   const [categories, setCategories] = useState<ProjectCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   async function reload() {
-    setCategories(await getProjectCategories());
+    setCategories(await getProjectGroups());
     setIsLoading(false);
     await onChanged();
   }
@@ -326,16 +331,16 @@ function CategoryList({ projects, onChanged }: { projects: Project[]; onChanged:
     void reload();
   }, []);
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search categories">
+    <List isLoading={isLoading} searchBarPlaceholder="Search project groups">
       {categories.length === 0 ? (
         <List.EmptyView
-          title="No Categories"
+          title="No Project Groups"
           actions={
             <ActionPanel>
               <Action.Push
-                title="Add Category"
+                title="Add Project Group"
                 icon={Icon.Plus}
-                target={<CategoryForm categories={categories} onSaved={reload} />}
+                target={<ProjectGroupForm categories={categories} onSaved={reload} />}
               />
             </ActionPanel>
           }
@@ -346,27 +351,27 @@ function CategoryList({ projects, onChanged }: { projects: Project[]; onChanged:
         return (
           <List.Item
             key={category.id}
-            icon={getCategoryIcon(categories, category.id)}
+            icon={getProjectGroupIcon(categories, category.id)}
             title={category.name}
             accessories={[{ text: `${projectCount} project${projectCount === 1 ? "" : "s"}` }]}
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="Edit Category"
+                  title="Edit Project Group"
                   icon={Icon.Pencil}
-                  target={<CategoryForm categories={categories} category={category} onSaved={reload} />}
+                  target={<ProjectGroupForm categories={categories} category={category} onSaved={reload} />}
                 />
                 <Action.Push
-                  title="Add Category"
+                  title="Add Project Group"
                   icon={Icon.Plus}
-                  target={<CategoryForm categories={categories} onSaved={reload} />}
+                  target={<ProjectGroupForm categories={categories} onSaved={reload} />}
                   shortcut={Keyboard.Shortcut.Common.New}
                 />
                 <Action
-                  title="Delete Category"
+                  title="Delete Project Group"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  onAction={() => void deleteCategory(category, categories, projects, reload)}
+                  onAction={() => void deleteProjectGroup(category, categories, projects, reload)}
                 />
               </ActionPanel>
             }
@@ -377,7 +382,7 @@ function CategoryList({ projects, onChanged }: { projects: Project[]; onChanged:
   );
 }
 
-function CategoryForm({
+function ProjectGroupForm({
   categories,
   category,
   onSaved,
@@ -389,20 +394,20 @@ function CategoryForm({
   const { pop } = useNavigation();
   async function submit(values: { name: string; icon: string }) {
     const name = values.name.trim();
-    if (!name) return void showToast({ style: Toast.Style.Failure, title: "Category name is required" });
+    if (!name) return void showToast({ style: Toast.Style.Failure, title: "Project group name is required" });
     if (
       categories.some(
         (item) => item.id !== category?.id && item.name.localeCompare(name, undefined, { sensitivity: "accent" }) === 0,
       )
     )
-      return void showToast({ style: Toast.Style.Failure, title: "Category name already exists" });
+      return void showToast({ style: Toast.Style.Failure, title: "Project group name already exists" });
     const now = new Date().toISOString();
     const next = category
       ? categories.map((item) =>
           item.id === category.id ? { ...item, name, icon: values.icon, updatedAt: now } : item,
         )
       : [...categories, { id: crypto.randomUUID(), name, icon: values.icon, createdAt: now, updatedAt: now }];
-    await saveProjectCategories(next);
+    await saveProjectGroups(next);
     await onSaved();
     pop();
   }
@@ -410,12 +415,12 @@ function CategoryForm({
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={category ? "Save Category" : "Add Category"} onSubmit={submit} />
+          <Action.SubmitForm title={category ? "Save Project Group" : "Add Project Group"} onSubmit={submit} />
         </ActionPanel>
       }
     >
       <Form.TextField id="name" title="Name" defaultValue={category?.name} autoFocus />
-      <Form.Dropdown id="icon" title="Icon" defaultValue={getCategoryIconName(categories, category?.id ?? "")}>
+      <Form.Dropdown id="icon" title="Icon" defaultValue={getProjectGroupIconName(categories, category?.id ?? "")}>
         {CATEGORY_ICONS.map(({ name, icon }) => (
           <Form.Dropdown.Item key={name} value={name} title={name} icon={icon} />
         ))}
@@ -424,7 +429,7 @@ function CategoryForm({
   );
 }
 
-async function deleteCategory(
+async function deleteProjectGroup(
   category: ProjectCategory,
   categories: ProjectCategory[],
   projects: Project[],
@@ -434,16 +439,16 @@ async function deleteCategory(
   if (count > 0)
     return void showToast({
       style: Toast.Style.Failure,
-      title: "Category is in use",
+      title: "Project group is in use",
       message: `Move or delete ${count} project${count === 1 ? "" : "s"} first.`,
     });
   const confirmed = await confirmAlert({
-    title: "Delete Category?",
+    title: "Delete Project Group?",
     message: category.name,
     primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
   });
   if (!confirmed) return;
-  await saveProjectCategories(categories.filter((item) => item.id !== category.id));
-  await showToast({ style: Toast.Style.Success, title: "Category deleted", message: category.name });
+  await saveProjectGroups(categories.filter((item) => item.id !== category.id));
+  await showToast({ style: Toast.Style.Success, title: "Project group deleted", message: category.name });
   await onChanged();
 }

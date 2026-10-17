@@ -55,15 +55,34 @@ async function harness({ preferences = {}, native } = {}) {
   const calls = [];
   const invoke = async (operation, args) => {
     calls.push({ operation, args });
-    if (native) return native(args, operation);
+    if (native) {
+      const result = await native(args, operation);
+      return operation === "redactImage" && result && typeof result === "object"
+        ? { reviewKey: Buffer.alloc(32, 1).toString("base64"), ...result }
+        : result;
+    }
+    if (operation === "updateReviewImage") {
+      await writeFile(args[4], png);
+      return new Set(JSON.parse(args[2]).map((box) => JSON.stringify(box))).size;
+    }
     if (operation === "copyRedactedImage") return;
     await writeFile(args[0], png);
-    return { hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: 17 };
+    return {
+      hits: [hit],
+      regionCount: 1,
+      output: args[0],
+      clipboardChangeCount: 17,
+      reviewKey: Buffer.alloc(32, 1).toString("base64"),
+    };
   };
+  const api = { getPreferenceValues: () => preferences, LocalStorage: { getItem: async () => undefined } };
+  const categoryModule = await loadSource("src/categories.ts", { "@raycast/api": api });
   const source = await loadSource("src/redaction.ts", {
-    "@raycast/api": { getPreferenceValues: () => preferences },
+    "./categories": categoryModule,
+    "@raycast/api": api,
     os: { tmpdir: () => directory },
     "swift:../swift/hide-details": {
+      updateReviewImage: (...args) => invoke("updateReviewImage", args),
       redactImage: (...args) => invoke("redactImage", args),
       copyRedactedImage: (...args) => invoke("copyRedactedImage", args),
     },
@@ -278,6 +297,7 @@ test("unmount disposes a scan that finishes after the review closes", async () =
   let mount;
   const stateValues = [];
   const command = await loadSource("src/redact-clipboard.tsx", {
+    "./category-settings": { CategorySettings: () => null },
     "./redaction": wrapper,
     react: {
       useState: (initial) => [initial, (value) => stateValues.push(value)],
@@ -298,7 +318,7 @@ test("unmount disposes a scan that finishes after the review closes", async () =
   for (let attempts = 0; attempts < 50 && (await wrapper.outputs()).length; attempts++) {
     await new Promise((resolve) => setTimeout(resolve, 10));
   }
-  assert.deepEqual(stateValues, [null, null]);
+  assert.deepEqual(stateValues, [false, null, null]);
   assert.deepEqual(await wrapper.outputs(), []);
 });
 
@@ -537,8 +557,18 @@ test("review masks all detection labels, uses real line breaks, and disposes rep
     kind,
     text: `${kind}: sensitive OCR text 4111.1111.1111.1111`,
   }));
+  let finishRender;
+  let renderGate;
+  let failRender = false;
   const wrapper = await harness({
-    native: async (args) => {
+    native: async (args, operation) => {
+      if (operation === "copyRedactedImage") return;
+      if (operation === "updateReviewImage") {
+        if (renderGate) await renderGate;
+        await writeFile(args[4], png);
+        if (failRender) throw new Error("synthetic render failure");
+        return new Set(JSON.parse(args[2]).map((box) => JSON.stringify(box))).size;
+      }
       await writeFile(args[0], png);
       return { hits: privateHits, regionCount: 1, output: args[0], clipboardChangeCount: 17 };
     },
@@ -549,6 +579,7 @@ test("review masks all detection labels, uses real line breaks, and disposes rep
   const hooks = [];
   const jsx = (type, props) => ({ type, props });
   const command = await loadSource("src/redact-clipboard.tsx", {
+    "./category-settings": { CategorySettings: () => null },
     "./redaction": wrapper,
     react: {
       useState(initial) {
@@ -575,6 +606,7 @@ test("review masks all detection labels, uses real line breaks, and disposes rep
     "@raycast/api": {
       getPreferenceValues: () => preferences,
       Icon: {},
+      Color: { Orange: "orange" },
       Keyboard: { Shortcut: { Common: { Refresh: { modifiers: ["cmd"], key: "r" } } } },
       Action: {},
       ActionPanel: {},
@@ -615,7 +647,37 @@ test("review masks all detection labels, uses real line breaks, and disposes rep
   assert.equal(render().props.children[1].props.children[0].props.accessories.length, 0);
   preferences.showOCRConfidence = true;
   assert.equal(render().props.children[1].props.children[0].props.accessories[0].text, "OCR 90%");
-  const scanAgain = preview.props.actions.props.children[1];
+  const action = (row, title) => row.props.actions.props.children.find((action) => action?.props?.title === title);
+  const detectionRow = () => render().props.children[1].props.children[0];
+  renderGate = new Promise((resolve) => {
+    finishRender = resolve;
+  });
+  const toggle = action(detectionRow(), "Don't Redact").props.onAction();
+  assert.equal(render().props.isLoading, true);
+  assert.equal(action(detectionRow(), "Copy Redacted Image"), undefined);
+  // Even a stale keyboard action from the previous render cannot copy during an update.
+  const copies = wrapper.calls.filter((call) => call.operation === "copyRedactedImage").length;
+  await action(hitRow, "Copy Redacted Image").props.onAction();
+  assert.equal(wrapper.calls.filter((call) => call.operation === "copyRedactedImage").length, copies);
+  finishRender();
+  await toggle;
+  renderGate = undefined;
+  assert.equal(detectionRow().props.id, first.hits[0].id);
+  assert.equal(detectionRow().props.accessories[0].tag.value, "Don't Redact");
+  assert.equal(hooks[0].regionCount, 1, "overlapping enabled detections still cover the same region");
+  assert.ok(detectionRow().props.detail.props.markdown.includes(hooks[0].output));
+  await action(detectionRow(), "Copy Redacted Image").props.onAction();
+  assert.equal(wrapper.calls.at(-1).args[0], hooks[0].output);
+  failRender = true;
+  await action(detectionRow(), "Redact").props.onAction();
+  assert.ok(action(detectionRow(), "Redact"), "failed edit retains the prior state for retry");
+  failRender = false;
+  await action(detectionRow(), "Redact").props.onAction();
+  assert.ok(action(detectionRow(), "Don't Redact"));
+  await action(detectionRow(), "Don't Redact").props.onAction();
+  await action(detectionRow(), "Redact All Detections").props.onAction();
+  assert.deepEqual(Array.from(hooks[0].excludedIds), []);
+  const scanAgain = action(render().props.children[0], "Scan Current Clipboard Again");
   await scanAgain.props.onAction();
   const second = await waitForScan();
   assert.notEqual(first.output, second.output);
@@ -626,4 +688,157 @@ test("review masks all detection labels, uses real line breaks, and disposes rep
     await new Promise((resolve) => setTimeout(resolve, 10));
   }
   assert.deepEqual(await wrapper.outputs(), []);
+});
+
+test("exclusions use scan-scoped identities and copy only the latest successful render", async () => {
+  const wrapper = await harness();
+  const first = await wrapper.redactClipboard({ forReview: true });
+  const id = first.hits[0].id;
+  assert.deepEqual(Array.from(first.excludedIds), []);
+  const excluded = await wrapper.updateRedactions(first, [id]);
+  assert.equal(excluded.regionCount, 0);
+  assert.equal(excluded.hits[0].id, id);
+  assert.notEqual(excluded.output, first.output);
+  assert.equal(wrapper.calls.filter((call) => call.operation === "redactImage").length, 1);
+  assert.deepEqual(JSON.parse(wrapper.calls.at(-1).args[2]), []);
+  await assert.rejects(wrapper.copyRedacted(first), /expired/);
+  await wrapper.copyRedacted(excluded);
+  assert.equal(wrapper.calls.at(-1).args[0], excluded.output);
+  const restored = await wrapper.updateRedactions(excluded, []);
+  assert.equal(restored.regionCount, 1);
+  assert.deepEqual(JSON.parse(wrapper.calls.at(-1).args[2]), [hit.box]);
+  const second = await wrapper.redactClipboard({ forReview: true });
+  assert.notEqual(second.hits[0].id, id, "a new scan never inherits an exclusion");
+  await assert.rejects(wrapper.updateRedactions(second, [id]), /different scan/);
+  await wrapper.disposeScan(restored);
+  await wrapper.disposeScan(second);
+  assert.deepEqual(await wrapper.outputs(), []);
+});
+
+test("excluding one of overlapping detections keeps other categories masked", async () => {
+  const wrapper = await harness({
+    native: async (args, operation) => {
+      if (operation === "updateReviewImage") {
+        await writeFile(args[4], png);
+        return new Set(JSON.parse(args[2]).map((box) => JSON.stringify(box))).size;
+      }
+      await writeFile(args[0], png);
+      return {
+        hits: [hit, { ...hit, kind: "custom" }, { ...hit, box: { ...hit.box, y: 50 } }],
+        regionCount: 2,
+        output: args[0],
+        clipboardChangeCount: 17,
+      };
+    },
+  });
+  const scan = await wrapper.redactClipboard({ forReview: true });
+  assert.equal(new Set(scan.hits.map((hit) => hit.id)).size, 3);
+  const excludedId = scan.hits[0].id;
+  scan.hits.reverse(); // Sorting the review must not change which detection an ID refers to.
+  const excluded = await wrapper.updateRedactions(scan, [excludedId]);
+  assert.equal(excluded.regionCount, 2);
+  assert.deepEqual(JSON.parse(wrapper.calls.at(-1).args[2]), [{ ...hit.box, y: 50 }, hit.box]);
+  await wrapper.disposeScan(excluded);
+});
+
+test("pending renders block copying and edits; closing waits for cleanup without publishing", async () => {
+  let finish;
+  const gate = new Promise((resolve) => {
+    finish = resolve;
+  });
+  const wrapper = await harness({
+    native: async (args, operation) => {
+      if (operation === "updateReviewImage") {
+        await gate;
+        await writeFile(args[4], png);
+        return 0;
+      }
+      await writeFile(args[0], png);
+      return { hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: 17 };
+    },
+  });
+  const scan = await wrapper.redactClipboard({ forReview: true });
+  const updating = wrapper.updateRedactions(scan, [scan.hits[0].id]);
+  await assert.rejects(wrapper.copyRedacted(scan), /updating/);
+  await assert.rejects(wrapper.updateRedactions(scan, []), /updating/);
+  const closing = wrapper.disposeScan(scan);
+  finish();
+  await assert.rejects(updating, /expired/);
+  await closing;
+  assert.deepEqual(await wrapper.outputs(), []);
+});
+
+test("failed or invalid render retains the previous selection and allows retry", async () => {
+  let behavior = "failure";
+  const wrapper = await harness({
+    native: async (args, operation) => {
+      if (operation === "updateReviewImage") {
+        await writeFile(args[4], png);
+        if (behavior === "failure") throw new Error("synthetic render failure");
+        return behavior === "count" ? 1 : 0;
+      }
+      await writeFile(args[0], png);
+      return { hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: 17 };
+    },
+  });
+  const scan = await wrapper.redactClipboard({ forReview: true });
+  for (const value of ["failure", "count"]) {
+    behavior = value;
+    await assert.rejects(wrapper.updateRedactions(scan, [scan.hits[0].id]));
+    assert.deepEqual(Array.from(scan.excludedIds), []);
+    await access(scan.output);
+    assert.deepEqual(await readdir(path.dirname(scan.output)), ["out.png"]);
+  }
+  behavior = "success";
+  const next = await wrapper.updateRedactions(scan, [scan.hits[0].id]);
+  assert.equal(next.regionCount, 0);
+  await wrapper.disposeScan(next);
+});
+
+test("edits and closing preserve output until every already-started copy finishes", async () => {
+  for (const close of [false, true]) {
+    const readers = [];
+    const wrapper = await harness({
+      native: async (args, operation) => {
+        if (operation === "copyRedactedImage") {
+          await new Promise((resolve) => {
+            readers.push(resolve);
+          });
+          await access(args[0]); // Model a native process that only opens the file after spawning.
+          return;
+        }
+        if (operation === "updateReviewImage") {
+          await writeFile(args[4], png);
+          return 0;
+        }
+        await writeFile(args[0], png);
+        return { hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: 17 };
+      },
+    });
+    const scan = await wrapper.redactClipboard({ forReview: true });
+    const firstCopy = wrapper.copyRedacted(scan);
+    const secondCopy = wrapper.copyRedacted(scan);
+    let finished = false;
+    const pending = (close ? wrapper.disposeScan(scan) : wrapper.updateRedactions(scan, [scan.hits[0].id])).then(
+      (result) => {
+        finished = true;
+        return result;
+      },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    assert.equal(finished, false);
+    await access(scan.output);
+    readers[0]();
+    await firstCopy;
+    assert.equal(finished, false, "the second copy also owns the old output");
+    readers[1]();
+    await secondCopy;
+    const result = await pending;
+    await absent(scan.output);
+    if (!close) {
+      assert.equal(result.regionCount, 0);
+      await wrapper.disposeScan(result);
+    }
+    assert.deepEqual(await wrapper.outputs(), []);
+  }
 });

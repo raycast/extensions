@@ -1,6 +1,6 @@
 # Mint for Raycast
 
-Shortcuts to [Mint](https://mintstorage.app/r/raycast), the Mac app that shows what fills your disk and gives the space back. Raycast is where you ask; the signed Mint app does every scan and every change, with the same rules, history and Undo as its own window.
+Mac storage cleanup and optimization for you and your AI agents, from Raycast. [Mint](https://mintstorage.app/r/raycast) finds caches, Xcode builds, `node_modules`, duplicate files and the gigabytes Codex, Claude Code and Cursor keep, and tells you what each one is, where it came from and whether it is in use. Identical copies share their storage without deleting anything, what apps make again is cleaned after one question, and your own files are chosen one by one. Mint's Auto Care can repeat the routines you turn on, on a schedule. Raycast sends each request to the signed Mint app, which applies the same rules and records as its own window.
 
 ## Commands
 
@@ -9,10 +9,10 @@ Every command is a list with a picture beside it: groups on the left, what is in
 - **View Mac Status**: the Mint menu bar dropdown on one screen. Disk and Memory rings with their Auto Care, and your organized folders with how many files each would sort.
 - **Free Disk**: Mint's groups, Optimizable, Safe to clean and Yours, each with what is in it. ↵ optimizes every copy, or deletes everything Safe to clean after one question; your own files are always chosen one by one. While Mint scans, a bar shows how far it is and how many files it has read.
 - **Optimize Storage**: where space can come back without deleting anything, by source: Codex, Claude, Cursor, your files, app data and temporary files. Beside each, its duplicate files and how many copies each has. ↵ optimizes them all, ⌘↵ one source.
-- **Free Memory**: Idle, In use and Ask first, each with its apps. ↵ on Idle quits every idle app; the others are chosen.
+- **Free Memory**: Idle, In use and Ask first, each with its apps. ↵ on Idle quits the apps in that group; the others are chosen individually. Releasing memory quits apps: review any ongoing work before confirming.
 - **Organize a Folder**: each folder with how many loose files it would sort and where they go. ↵ organizes it.
 - **Uninstall App**: the selected app and everything it left behind, with the total. ↵ moves them to the Trash after one question.
-- **Undo Mint Action**: what Mint did recently and which files each run moved. ↵ puts it back.
+- **Undo Mint Action**: review recent recoverable operations and restore eligible files that are still available. See the recovery limits below.
 - **Show Disk Growth**: what grew most this week, by app and folder, category or AI tool, each with its size over every map Mint has drawn.
 
 ## Ask Mint in Raycast AI
@@ -28,9 +28,33 @@ The answers come from Mint and only read. When you want the space or memory back
 
 ## Requirements
 
-Mint 1.0.80 or later (1.0.81 adds live progress and the Disk page's groups), the edition from [mintstorage.app](https://mintstorage.app/r/raycast-download), opened once from Applications (or `brew install --cask dzg-studio/mint/mint`). Mint is free to download: scanning, organizing and freeing memory stay free, and so does your first 1 GB of cleanup. Mint from the Mac App Store or Setapp does not include the command-line tool these commands use.
+**Mint Direct is required.** Download it from [mintstorage.app](https://mintstorage.app/r/raycast-download), or run `brew install --cask dzg-studio/mint/mint`, then open Mint once from Applications. The extension supports Mint 1.0.80 or later; use the latest Direct version for current features and allowances. Mint 1.0.81 adds live progress and the Disk page's groups.
 
 macOS 14 Sonoma or later.
+
+## Free use and editions
+
+In **Mint Direct 1.0.92 and later**, disk scans and memory release are free and unlimited. Each week includes **1 GB of cleanup and 50 organized files**, and your first manual clean is free regardless of size. Setup does not use either allowance. Cleanup, Optimize and app uninstall share the 1 GB; organizing uses the separate 50-file allowance. Auto Care is included and shares these allowances with manual use, including Raycast. Mint Unlimited removes both limits.
+
+The editions have different features and access. Checked October 12, 2026:
+
+| Edition       | Works with this extension? | Features and access                                                                                                                                                                                                                  |
+| ------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Direct        | Yes                        | Storage care, organizing, Memory, Uninstall, CLI and MCP. Free allowances above apply from 1.0.92; earlier versions have different limits.                                                                                           |
+| Mac App Store | No                         | Storage care and organizing; no Memory, Uninstall, CLI or MCP. Public version 1.0.84 has unlimited scans and manual organizing, plus a one-time 1 GB cleanup allowance. Monthly or Lifetime removes the limit and enables Auto Care. |
+| Setapp        | No                         | Storage care, organizing, Memory and Uninstall; no CLI or MCP. Access follows [Setapp's offer for Mint](https://setapp.com/apps/mint), with no Mint in-app cleanup or organizing allowance. Direct's free offer does not apply.      |
+
+See [current plans](https://mintstorage.app/pricing/) and [edition terms](https://mintstorage.app/terms/) for the version you use. Redact has been retired and is no longer part of Mint.
+
+## What Undo can recover
+
+Undo can restore eligible file moves, items moved to Trash and supported archive optimizations while the required files and recovery records remain available. The operation journal keeps up to **90 days or 5,000 batches**, whichever limit is reached first; this is a history limit, not a promise that every action is reversible.
+
+**Permanent deletion, emptied Trash and removed conversation media cannot be undone.** Quitting an app to free memory also cannot restore its running tasks. Review the action before confirming and keep backups of important files.
+
+## Mac slow while AI tasks are running?
+
+Start with [the memory-pressure guide](https://mintstorage.app/mac-slow-ai-tasks/) to distinguish memory, CPU and disk problems before acting. It links the memory research and explains what Mint can help with. A cleanup or memory release cannot guarantee an AI task will keep running.
 
 ## How it works
 

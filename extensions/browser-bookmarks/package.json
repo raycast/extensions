@@ -77,6 +77,28 @@
           "value": "cmd-opt-c"
         }
       ]
+    },
+    {
+      "type": "dropdown",
+      "title": "Search Strictness",
+      "name": "searchStrictness",
+      "description": "How closely a bookmark must match your search. A stricter search hides loose matches on short queries.",
+      "default": "0.4",
+      "required": false,
+      "data": [
+        {
+          "title": "Loose",
+          "value": "0.4"
+        },
+        {
+          "title": "Balanced",
+          "value": "0.3"
+        },
+        {
+          "title": "Strict",
+          "value": "0.2"
+        }
+      ]
     }
   ],
   "commands": [

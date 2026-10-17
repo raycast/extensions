@@ -1,5 +1,16 @@
 # Telegram Changelog
 
+## [Recover Invalid Telegram Sessions] - 2026-10-15
+
+- Clear rejected or revoked sessions and offer a sign-in action instead of failing requests with an unusable saved key
+- Preserve saved sessions when requests fail because of network errors
+
+## [Switch to QR Code Authentication] - 2026-10-13
+
+- Replace legacy phone number / SMS verification code login with Telegram QR code authentication
+- QR code is now the sole sign-in method, with 2-Step Verification password support when enabled
+- Remove phone number configuration from extension preferences
+
 ## [Add Unit Tests] - 2026-09-16
 
 - Add a `vitest` suite covering message content parsing, sender attribution, media type detection, detail-pane markdown, and chat and date grouping, runnable with `npm test`

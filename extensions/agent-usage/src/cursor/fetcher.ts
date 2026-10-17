@@ -49,7 +49,7 @@ export function resolveCursorCredential(manualCookieHeader?: string): CursorCred
 
   const appSession = resolveCursorAppAuthSession();
   return appSession
-    ? { cookieHeader: appSession.cookieHeader, source: "Cursor.app", requestUsageUserIdFallback: appSession.userId }
+    ? { cookieHeader: appSession.cookieHeader, source: "Cursor", requestUsageUserIdFallback: appSession.userId }
     : null;
 }
 
@@ -63,7 +63,7 @@ export async function fetchCursorUsage(
       error: {
         type: "not_configured",
         message:
-          "Cursor is not configured. Sign in to Cursor.app, or paste a cursor.com Cookie header in extension settings.",
+          "Cursor is not configured. Sign in to Cursor, or paste a cursor.com Cookie header in extension settings.",
       },
     };
   }

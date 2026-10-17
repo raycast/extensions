@@ -19,6 +19,7 @@ export default function DomainItem({ domain }: { domain: Domain }) {
               <PriceListItem price={domain.price} />
               <List.Item.Detail.Metadata.Label title="Owned since" text={domain.owned_since} />
               <NextDueDate date={domain.price.next_due_date} />
+              <List.Item.Detail.Metadata.Label title="Provider" text={domain.provider.name} />
             </List.Item.Detail.Metadata>
           }
         />
