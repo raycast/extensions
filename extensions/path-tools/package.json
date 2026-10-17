@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "path-tools",
+  "title": "Path Tools",
+  "version": "1.0.0",
+  "description": "Open Finder paths in iTerm and Visual Studio Code",
+  "main": "src/finder-to-iterm.tsx",
+  "icon": "icon.png",
+  "author": "han_dong",
+  "license": "MIT",
+  "categories": [
+    "System",
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "finder-to-iterm",
+      "title": "Finder -> iTerm",
+      "description": "Open the current Finder directory in iTerm.",
+      "subtitle": "Open the current Finder directory in iTerm",
+      "mode": "no-view"
+    },
+    {
+      "name": "iterm-to-finder",
+      "title": "iTerm -> Finder",
+      "description": "Open the current iTerm directory in Finder.",
+      "subtitle": "Open the current iTerm directory in Finder",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-in-vscode",
+      "title": "Finder -> VS Code",
+      "description": "Open the current Finder directory in Visual Studio Code.",
+      "subtitle": "Open the current Finder directory in VS Code",
+      "mode": "no-view"
+    },
+    {
+      "name": "openi",
+      "title": "Search and Open in iTerm",
+      "description": "Search files and folders, then open their directory in iTerm.",
+      "subtitle": "Search files and folders to open their directory in iTerm",
+      "keywords": [
+        "openi"
+      ],
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}
