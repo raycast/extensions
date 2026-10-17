@@ -4,7 +4,7 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { jsonSchema, streamText, tool, type ToolSet } from "ai";
-import { loadModels, type Format } from "./console";
+import { loadModels, type Format, type Source } from "./console";
 import { defaultEffort, loadReasoningSupport, resolveVariants, saveVariants, variantOptions } from "./reasoning";
 
 const INFERENCE_URL = "https://opencode.ai/inference";
@@ -16,15 +16,15 @@ export const getModels: AI.GetModels = async () => {
   ]);
   const variants: Parameters<typeof saveVariants>[0] = {};
   const registered = models.map((model): AI.RegisteredModel => {
-    // Raycast only passes the ID back to streamCompletion, so it carries the API format too.
-    const id = `${model.format}/${model.id}`;
-    const resolved = resolveVariants(model, reasoning[model.id] ?? []);
+    // Raycast only passes the ID back to streamCompletion, so it carries the API format, and the source for Go.
+    const id = `${model.source === "go" ? "go/" : ""}${model.format}/${model.id}`;
+    const resolved = resolveVariants(model, reasoning[model.source][model.id] ?? []);
     const efforts = resolved.map(([effort]) => effort);
     variants[id] = Object.fromEntries(resolved);
     return {
       id,
-      title: model.title,
-      description: model.price && `$${model.price.input} in · $${model.price.output} out per 1M tokens`,
+      title: model.source === "go" ? `${model.title} (Go)` : model.title,
+      description: model.source === "go" ? "Included in your OpenCode Go subscription" : price(model.price),
       icon: "extension-icon.png",
       contextWindow: model.contextWindow,
       capabilities: {
@@ -46,10 +46,10 @@ export const getModels: AI.GetModels = async () => {
 };
 
 export const streamCompletion: AI.StreamCompletion = (model, request) => {
-  const { format, modelID } = parseID(model.id);
+  const { source, format, modelID } = parseID(model.id);
   const effort = request.providerOptions?.raycast?.reasoningEffort;
   return streamText({
-    model: languageModel(format, modelID, getPreferenceValues<Preferences>().apiKey),
+    model: languageModel(source, format, modelID, getPreferenceValues<Preferences>().apiKey),
     system: request.system,
     messages: request.messages ?? [],
     temperature: model.capabilities?.temperature?.supported ? request.temperature : undefined,
@@ -60,21 +60,29 @@ export const streamCompletion: AI.StreamCompletion = (model, request) => {
   });
 };
 
-function parseID(id: string) {
-  const [format, ...rest] = id.split("/") as [Format, ...string[]];
-  return { format, modelID: rest.join("/") };
+function price(cost: { input: number; output: number } | undefined) {
+  return cost && `$${cost.input} in · $${cost.output} out per 1M tokens`;
 }
 
-function languageModel(format: Format, modelID: string, apiKey: string) {
+// Zen IDs predate Go and stay unprefixed so saved model selections keep working.
+function parseID(id: string) {
+  const [first, ...rest] = id.split("/");
+  const source: Source = first === "go" ? "go" : "zen";
+  const [format, ...model] = (source === "go" ? rest : [first, ...rest]) as [Format, ...string[]];
+  return { source, format, modelID: model.join("/") };
+}
+
+function languageModel(source: Source, format: Format, modelID: string, apiKey: string) {
+  const baseURL = source === "go" ? `${INFERENCE_URL}/go` : INFERENCE_URL;
   switch (format) {
     case "anthropic":
-      return createAnthropic({ baseURL: `${INFERENCE_URL}/anthropic/v1`, apiKey })(modelID);
+      return createAnthropic({ baseURL: `${baseURL}/anthropic/v1`, apiKey })(modelID);
     case "openai":
-      return createOpenAI({ baseURL: `${INFERENCE_URL}/openai/v1`, apiKey }).responses(modelID);
+      return createOpenAI({ baseURL: `${baseURL}/openai/v1`, apiKey }).responses(modelID);
     case "google":
-      return createGoogleGenerativeAI({ baseURL: `${INFERENCE_URL}/google/v1beta`, apiKey })(modelID);
+      return createGoogleGenerativeAI({ baseURL: `${baseURL}/google/v1beta`, apiKey })(modelID);
     default:
-      return createOpenAICompatible({ name: "opencode", baseURL: `${INFERENCE_URL}/openai/v1`, apiKey })(modelID);
+      return createOpenAICompatible({ name: "opencode", baseURL: `${baseURL}/openai/v1`, apiKey })(modelID);
   }
 }
 

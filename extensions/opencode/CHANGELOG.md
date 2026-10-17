@@ -1,5 +1,9 @@
 # OpenCode Changelog
 
+## [OpenCode Go] - {PR_MERGE_DATE}
+
+- Add models from your OpenCode Go subscription
+
 ## [Reasoning Levels] - 2026-09-29
 
 - Add reasoning levels for models that support them
