@@ -1,0 +1,210 @@
+{
+  "ownerName": "Raycast",
+  "ownerType": "mac-app",
+  "sourceUrl": "https://manual.raycast.com/keyboard-shortcuts",
+  "shortcuts": [
+    {
+      "id": "open-raycast",
+      "commandName": "Open or Close Raycast",
+      "modifiers": ["option"],
+      "key": "Space",
+      "scope": "global"
+    },
+    {
+      "id": "go-back",
+      "commandName": "Go Back",
+      "modifiers": [],
+      "key": "Esc",
+      "scope": "app"
+    },
+    {
+      "id": "pop-to-root",
+      "commandName": "Pop to Root",
+      "modifiers": ["command"],
+      "key": "Esc",
+      "scope": "app"
+    },
+    {
+      "id": "close-window",
+      "commandName": "Close Raycast Window",
+      "modifiers": ["command"],
+      "key": "W",
+      "scope": "app"
+    },
+    {
+      "id": "open-settings",
+      "commandName": "Open Raycast Settings",
+      "modifiers": ["command"],
+      "key": ",",
+      "scope": "app"
+    },
+    {
+      "id": "open-user-guide",
+      "commandName": "Open User Guide",
+      "modifiers": ["command", "shift"],
+      "key": "/",
+      "scope": "app"
+    },
+    {
+      "id": "previous-page-results",
+      "commandName": "Previous Page of Results",
+      "modifiers": ["option"],
+      "key": "Up",
+      "scope": "app"
+    },
+    {
+      "id": "next-page-results",
+      "commandName": "Next Page of Results",
+      "modifiers": ["option"],
+      "key": "Down",
+      "scope": "app"
+    },
+    {
+      "id": "previous-section",
+      "commandName": "Previous Section",
+      "modifiers": ["command"],
+      "key": "Up",
+      "scope": "app"
+    },
+    {
+      "id": "next-section",
+      "commandName": "Next Section",
+      "modifiers": ["command"],
+      "key": "Down",
+      "scope": "app"
+    },
+    {
+      "id": "run-primary-action",
+      "commandName": "Run Primary Action",
+      "modifiers": [],
+      "key": "Enter",
+      "scope": "app"
+    },
+    {
+      "id": "open-action-panel",
+      "commandName": "Open Action Panel",
+      "modifiers": ["command"],
+      "key": "K",
+      "scope": "app"
+    },
+    {
+      "id": "navigate-into-directory",
+      "commandName": "Navigate into Directory",
+      "modifiers": [],
+      "key": "Tab",
+      "scope": "app"
+    },
+    {
+      "id": "navigate-parent-directory",
+      "commandName": "Navigate to Parent Directory",
+      "modifiers": ["shift"],
+      "key": "Tab",
+      "scope": "app"
+    },
+    {
+      "id": "add-to-favorites",
+      "commandName": "Add Selected Item to Favorites",
+      "modifiers": ["command"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "move-favorite-up",
+      "commandName": "Move Favorite Up",
+      "modifiers": ["command", "shift"],
+      "key": "Up",
+      "scope": "app"
+    },
+    {
+      "id": "move-favorite-down",
+      "commandName": "Move Favorite Down",
+      "modifiers": ["command", "shift"],
+      "key": "Down",
+      "scope": "app"
+    },
+    {
+      "id": "configure-command",
+      "commandName": "Configure Command",
+      "modifiers": ["command"],
+      "key": ",",
+      "scope": "app"
+    },
+    {
+      "id": "configure-extension",
+      "commandName": "Configure Extension",
+      "modifiers": ["command", "shift"],
+      "key": ",",
+      "scope": "app"
+    },
+    {
+      "id": "execute-secondary-action",
+      "commandName": "Execute Secondary Action",
+      "modifiers": ["command"],
+      "key": "Enter",
+      "scope": "app"
+    },
+    {
+      "id": "execute-tertiary-action",
+      "commandName": "Execute Tertiary Action",
+      "modifiers": ["command", "shift"],
+      "key": "Enter",
+      "scope": "app"
+    },
+    {
+      "id": "copy",
+      "commandName": "Copy",
+      "modifiers": ["command"],
+      "key": "C",
+      "scope": "app"
+    },
+    {
+      "id": "copy-secondary",
+      "commandName": "Copy Secondary Value",
+      "modifiers": ["command", "shift"],
+      "key": "C",
+      "scope": "app"
+    },
+    {
+      "id": "paste",
+      "commandName": "Paste",
+      "modifiers": ["command"],
+      "key": "V",
+      "scope": "app"
+    },
+    {
+      "id": "paste-secondary",
+      "commandName": "Paste Secondary Value",
+      "modifiers": ["command", "shift"],
+      "key": "V",
+      "scope": "app"
+    },
+    {
+      "id": "delete-selected-item",
+      "commandName": "Delete Selected Item",
+      "modifiers": ["control"],
+      "key": "X",
+      "scope": "app"
+    },
+    {
+      "id": "delete-all",
+      "commandName": "Delete All",
+      "modifiers": ["control", "shift"],
+      "key": "X",
+      "scope": "app"
+    },
+    {
+      "id": "report-bug",
+      "commandName": "Report a Bug",
+      "modifiers": ["command", "shift"],
+      "key": "B",
+      "scope": "app"
+    },
+    {
+      "id": "request-feature",
+      "commandName": "Request a Feature",
+      "modifiers": ["command", "option"],
+      "key": "F",
+      "scope": "app"
+    }
+  ]
+}
