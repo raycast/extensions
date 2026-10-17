@@ -73,6 +73,10 @@ describe("turnOnMessage", () => {
     expect(turnOnMessage(120)).toBe("Lid Awake on for 2 hours");
     expect(turnOnMessage(240)).toBe("Lid Awake on for 4 hours");
   });
+
+  it("names hours and minutes for a typed duration", () => {
+    expect(turnOnMessage(90)).toBe("Lid Awake on for 1 hour 30 minutes");
+  });
 });
 
 describe("menuBarTitles", () => {
@@ -198,6 +202,15 @@ describe("presetSubtitle", () => {
 
     expect(subtitle.startsWith("Until ")).toBe(true);
     expect(subtitle).toBe(`Until ${expectedTime}`);
+  });
+
+  it("names the day when the duration ends on a later day", () => {
+    const localNow = new Date(2024, 0, 1, 22, 0).getTime();
+    const endsAt = new Date(localNow + 3 * 60 * MINUTE);
+    const expectedDay = endsAt.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+    const expectedTime = endsAt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+    expect(presetSubtitle(3 * 60, localNow)).toBe(`Until ${expectedDay}, ${expectedTime}`);
   });
 });
 

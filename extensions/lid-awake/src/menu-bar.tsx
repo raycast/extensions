@@ -10,6 +10,7 @@ import {
 } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { PRESETS, disable, durationLabel, enable, enforce, getStatus } from "./lib/session";
+import { getRecentDurations } from "./lib/recent";
 import { autoOffMessage, batteryTitle, menuBarTitles, turnOnMessage } from "./lib/labels";
 
 async function loadState() {
@@ -27,6 +28,7 @@ async function loadState() {
 
 export default function Command() {
   const { data: status, isLoading, revalidate } = usePromise(loadState);
+  const { data: recent } = usePromise(getRecentDurations);
 
   const on = status?.on ?? false;
   const now = Date.now();
@@ -72,6 +74,24 @@ export default function Command() {
         {PRESETS.map((minutes) => (
           <MenuBarExtra.Item key={String(minutes)} title={durationLabel(minutes)} onAction={() => turnOn(minutes)} />
         ))}
+        {recent && recent.length > 0 && (
+          <MenuBarExtra.Section>
+            {recent.map((minutes) => (
+              <MenuBarExtra.Item
+                key={`recent-${minutes}`}
+                title={durationLabel(minutes)}
+                onAction={() => turnOn(minutes)}
+              />
+            ))}
+          </MenuBarExtra.Section>
+        )}
+        <MenuBarExtra.Section>
+          <MenuBarExtra.Item
+            title="Custom Duration…"
+            icon={Icon.Pencil}
+            onAction={() => launchCommand({ name: "start", type: LaunchType.UserInitiated }).catch(() => undefined)}
+          />
+        </MenuBarExtra.Section>
       </MenuBarExtra.Submenu>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item

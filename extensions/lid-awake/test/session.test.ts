@@ -929,8 +929,12 @@ describe("enforce race", () => {
 describe("durationLabel", () => {
   it.each<[number | null, string]>([
     [null, "Indefinitely"],
+    [1, "1 minute"],
     [30, "30 minutes"],
     [60, "1 hour"],
+    [61, "1 hour 1 minute"],
+    [90, "1 hour 30 minutes"],
+    [150, "2 hours 30 minutes"],
     [120, "2 hours"],
     [240, "4 hours"],
   ])("labels %s as %j", (minutes, label) => {

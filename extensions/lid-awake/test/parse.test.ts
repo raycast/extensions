@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   formatRemaining,
   parseBattery,
+  MAX_CUSTOM_MINUTES,
   parseBootTime,
+  parseDuration,
   parseSleepDisabled,
   shouldAutoDisable,
   type Battery,
@@ -17,6 +19,47 @@ const DESKTOP = "Now drawing from 'AC Power'\n";
 
 const BATTERY_OK: Battery = { hasBattery: true, percent: 80, onAC: false };
 const BOOT = 1728633600;
+
+describe("parseDuration", () => {
+  it.each<[string, number]>([
+    ["45", 45],
+    ["45m", 45],
+    ["45 min", 45],
+    ["45 mins", 45],
+    ["45 minutes", 45],
+    ["1 minute", 1],
+    ["2h", 120],
+    ["2 hr", 120],
+    ["2 hours", 120],
+    ["1 hour", 60],
+    ["2.5h", 150],
+    ["0.5h", 30],
+    ["1h30", 90],
+    ["1h30m", 90],
+    ["1h 30m", 90],
+    ["1 hour 30 minutes", 90],
+    ["1:30", 90],
+    ["0:05", 5],
+    ["  90  ", 90],
+    ["2H", 120],
+    ["1.4", 1],
+  ])("reads %j as %i minutes", (text, minutes) => {
+    expect(parseDuration(text)).toBe(minutes);
+  });
+
+  it.each(["", "   ", "abc", "h", "m", "1d", "-5", "1:5", "1:60", "30m 1h", "1h1h", "0", "0m", "0.4"])(
+    "rejects %j",
+    (text) => {
+      expect(parseDuration(text)).toBeNull();
+    },
+  );
+
+  it("accepts the maximum and rejects anything longer", () => {
+    expect(parseDuration(String(MAX_CUSTOM_MINUTES))).toBe(MAX_CUSTOM_MINUTES);
+    expect(parseDuration(String(MAX_CUSTOM_MINUTES + 1))).toBeNull();
+    expect(parseDuration("169h")).toBeNull();
+  });
+});
 
 describe("parseSleepDisabled", () => {
   it("returns true when SleepDisabled is 1", () => {

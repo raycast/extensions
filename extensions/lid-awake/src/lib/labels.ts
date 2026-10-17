@@ -62,7 +62,13 @@ export function presetSubtitle(minutes: number | null, now: number): string {
     return "Until you turn it off";
   }
   const endsAt = new Date(now + minutes * 60_000);
-  return `Until ${endsAt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+  const time = endsAt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  if (endsAt.toDateString() === new Date(now).toDateString()) {
+    return `Until ${time}`;
+  }
+  // A typed duration can end on a later day, so name the day too.
+  const day = endsAt.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+  return `Until ${day}, ${time}`;
 }
 
 export function isUserCancelled(error: unknown): boolean {

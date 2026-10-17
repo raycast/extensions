@@ -34,11 +34,14 @@ export function durationLabel(minutes: number | null): string {
   if (minutes === null) {
     return "Indefinitely";
   }
-  if (minutes < 60) {
-    return `${minutes} minutes`;
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  const hourPart = hours === 1 ? "1 hour" : `${hours} hours`;
+  const minutePart = rest === 1 ? "1 minute" : `${rest} minutes`;
+  if (hours === 0) {
+    return minutePart;
   }
-  const hours = minutes / 60;
-  return hours === 1 ? "1 hour" : `${hours} hours`;
+  return rest === 0 ? hourPart : `${hourPart} ${minutePart}`;
 }
 
 // Session keys carry a sequence number, not the start time: the clock can move backward, but a sequence number only grows.

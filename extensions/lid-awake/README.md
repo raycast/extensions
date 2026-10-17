@@ -12,10 +12,10 @@ Setup is required before Lid Awake can turn on, because it has to turn itself of
 ## Commands
 
 - **Set up Lid Awake**: installs or removes the passwordless rule that lets Lid Awake toggle sleep.
-- **Keep Awake with Lid Closed**: pick 30 minutes, 1 hour, 2 hours, 4 hours, or indefinitely.
+- **Keep Awake with Lid Closed**: pick 30 minutes, 1 hour, 2 hours, 4 hours, or indefinitely, or type your own duration in the search bar, such as `45` (minutes), `45m`, `1h30`, `2.5h` or `1:30`, up to 7 days.
 - **Allow Sleep**: turns Lid Awake off so the Mac can sleep normally.
 - **Toggle Lid Awake**: turns Lid Awake on for your default duration, or off if it is already on.
-- **Lid Awake Menu Bar**: shows the state and time left, and enforces the auto-off rules.
+- **Lid Awake Menu Bar**: shows the state and time left, and enforces the auto-off rules. Its Keep Awake For submenu lists your last 3 custom durations, and Custom Duration… opens Keep Awake with Lid Closed so you can type a new one.
 
 ## Auto-off rules
 
