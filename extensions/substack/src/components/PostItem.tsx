@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { useMemo } from "react";
 
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, open } from "@raycast/api";
 
 import type { Post, WithDetails } from "@/types";
 
@@ -70,20 +70,13 @@ ${post.truncated_body_text}`}
       }
       actions={
         <ActionPanel>
-          <Action
-            title={detailsShown ? "Hide Details" : "Show Details"}
-            onAction={toggleDetails}
-            icon={{ source: Icon.AppWindowSidebarLeft, tintColor: "#FF6719" }}
-          />
-          {post.canonical_url && (
-            <Action.OpenInBrowser title="Open on Substack" url={post.canonical_url} icon={{ source: "substack.svg" }} />
-          )}
+          <Action title={detailsShown ? "Hide Details" : "Show Details"} onAction={toggleDetails} />
+          {post.canonical_url && <Action title="Open on Substack" onAction={() => open(post.canonical_url)} />}
           {author && author.name && author.handle ? (
-            <Action.OpenInBrowser
+            <Action
               title="Open Author Page on Substack"
-              url={`https://substack.com/@${author.handle}`}
-              icon={{ source: "substack.svg" }}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onAction={() => open(`https://substack.com/@${author.handle}`)}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
           ) : null}
         </ActionPanel>
