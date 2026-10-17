@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Fix Skills List Troubleshooting] - {PR_MERGE_DATE}
+## [Fix Skills List Troubleshooting] - 2026-10-17
 
 - Include `--json` in the troubleshooting commands so they match the installed-skills list command used by the extension
 
