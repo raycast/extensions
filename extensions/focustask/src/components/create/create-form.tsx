@@ -64,6 +64,9 @@ export const CreateForm: FC<{initialTitle?: string}> = ({initialTitle}) => {
     validation: {
       title: FormValidation.Required,
     },
+    initialValues: {
+      title: initialTitle,
+    },
   })
 
   return (

@@ -1,5 +1,5 @@
 import {Icon, MenuBarExtra, open} from "@raycast/api"
-import { getApiRoot } from "../../api/helpers"
+import {getApiRoot} from "../../api/helpers"
 import {useFetchTasks} from "../../api/hooks"
 import {Task} from "../../api/types"
 import {uniq, sortBy} from "lodash"
@@ -39,38 +39,41 @@ export const Menubar = () => {
   )
 
   return (
-    (<MenuBarExtra
+    <MenuBarExtra
       icon={Icon.Bolt}
       title={tasks.length > 0 ? `${tasks.length}` : undefined}
       tooltip="Current FocusTask Tasks"
       isLoading={isLoading}
-    ><MenuBarExtra.Section>
-      {isLoading && !allTasks.length ? (
-        <MenuBarExtra.Item title="Loading" />
-      ) : error ? (
-        <MenuBarExtra.Item title={`Error: ${error}`} />
-      ) : menuItems.length > 0 ? (
-        menuItems.map((item, i) =>
-          item.type === "column" ? (
-            <Fragment key={i}>
-              <MenuBarExtra.Item
-                title={labelForTaskColumn(item.column) ?? ""}
-                icon={item.column === "current" ? Icon.Bolt : undefined}
-              />
-              {/* </MenuBarExtra.Section><MenuBarExtra.Section> */}
-            </Fragment>
-          ) : (
-            <TaskItem key={i} task={item.task} />
-          ),
-        )
-      ) : (
-        <MenuBarExtra.Item title="No tasks in Current!" />
-      )}
-      </MenuBarExtra.Section><MenuBarExtra.Section>
-      <MenuBarExtra.Item
-        title="Open FocusTask"
-        onAction={() => open(getApiRoot())}
-      /></MenuBarExtra.Section>
-    </MenuBarExtra>)
-  );
+    >
+      <MenuBarExtra.Section>
+        {isLoading && !allTasks.length ? (
+          <MenuBarExtra.Item title="Loading" />
+        ) : error ? (
+          <MenuBarExtra.Item title={`Error: ${error}`} />
+        ) : menuItems.length > 0 ? (
+          menuItems.map((item, i) =>
+            item.type === "column" ? (
+              <Fragment key={i}>
+                <MenuBarExtra.Item
+                  title={labelForTaskColumn(item.column) ?? ""}
+                  icon={item.column === "current" ? Icon.Bolt : undefined}
+                />
+                {/* </MenuBarExtra.Section><MenuBarExtra.Section> */}
+              </Fragment>
+            ) : (
+              <TaskItem key={i} task={item.task} />
+            ),
+          )
+        ) : (
+          <MenuBarExtra.Item title="No tasks in Current!" />
+        )}
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Open FocusTask"
+          onAction={() => open(getApiRoot())}
+        />
+      </MenuBarExtra.Section>
+    </MenuBarExtra>
+  )
 }

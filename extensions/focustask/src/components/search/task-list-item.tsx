@@ -32,6 +32,25 @@ export const TaskListItem: FC<{task: Task; lists: Checklist[]}> = ({
             }
           : undefined
       }
+      detail={
+        <List.Item.Detail
+          markdown={task.note}
+          metadata={
+            <List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.Label
+                title="Title"
+                text={task.title}
+              />
+              <List.Item.Detail.Metadata.TagList title="Status">
+                <List.Item.Detail.Metadata.TagList.Item text={task.status} />
+              </List.Item.Detail.Metadata.TagList>
+              <List.Item.Detail.Metadata.TagList title="Column">
+                <List.Item.Detail.Metadata.TagList.Item text={task.column} />
+              </List.Item.Detail.Metadata.TagList>
+            </List.Item.Detail.Metadata>
+          }
+        />
+      }
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

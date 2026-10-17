@@ -60,9 +60,9 @@ const fetchJson = async <T>({
     const json = await result.json()
 
     return json as T
-  } catch (e: any) {
+  } catch (e) {
     console.log("error:", e)
 
-    return {error: e.message}
+    return {error: e instanceof Error ? e.message : "Unknown Error"}
   }
 }

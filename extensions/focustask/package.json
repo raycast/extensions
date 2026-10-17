@@ -27,7 +27,17 @@
       "title": "Search Tasks",
       "subtitle": "FocusTask",
       "description": "Find anything in FocusTask",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "show-detail-view",
+          "label": "Show Detail View",
+          "required": false,
+          "default": false,
+          "type": "checkbox",
+          "description": "Show Detail View"
+        }
+      ]
     },
     {
       "name": "create",
@@ -43,12 +53,12 @@
       "type": "password",
       "required": true,
       "title": "API Key",
-      "description": "Your API Key. Find it Settings.",
+      "description": "Your API Key. Find it in Settings.",
       "placeholder": "Enter your API Key"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
+    "@raycast/api": "^2.5.0",
     "@raycast/utils": "^2.2.0",
     "date-fns": "^2.28.0",
     "lodash": "^4.17.21",
@@ -70,5 +80,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
