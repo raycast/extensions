@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { addSkipRule, countPatternMatches, deletePatternMatches } from "./api";
 import { pagePattern, sitePattern } from "./lib/rules";
@@ -71,9 +71,7 @@ export function DisableIndexingForm({ url, onDone }: { url: string; onDone: () =
       onDone();
       pop();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not disable indexing";
-      toast.message = error instanceof Error ? error.message : undefined;
+      await showFailureToast(error, { title: "Could not disable indexing" });
     }
   };
 

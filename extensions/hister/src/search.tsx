@@ -13,8 +13,9 @@ import {
   openExtensionPreferences,
   showToast,
   Toast,
+  useNavigation,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import {
   deleteDocument,
@@ -30,7 +31,7 @@ import {
   webSearchUrl,
 } from "./api";
 import { DisableIndexingForm } from "./disable-indexing";
-import { RulesList } from "./rules-list";
+import { requestAliasForm, RulesList } from "./rules-list";
 import { useCurrentTab } from "./lib/current-tab";
 import { useFavicons } from "./lib/favicons";
 import { previewMarkdown } from "./lib/preview";
@@ -70,6 +71,7 @@ function fallbackIcon(document?: HisterDocument): Image.ImageLike {
 }
 
 export default function Command() {
+  const { push } = useNavigation();
   const [searchText, setSearchText] = useState("");
   const rulesAction = (
     <Action.Push
@@ -80,11 +82,14 @@ export default function Command() {
     />
   );
   const addAliasAction = (
-    <Action.Push
+    <Action
       title="Add Alias"
       icon={Icon.Plus}
       shortcut={Keyboard.Shortcut.Common.New}
-      target={<RulesList onSearch={setSearchText} initialView="aliases" startAddingAlias />}
+      onAction={() => {
+        requestAliasForm();
+        push(<RulesList onSearch={setSearchText} initialView="aliases" />);
+      }}
     />
   );
   const [sort, setSort] = useState("relevance");
@@ -205,9 +210,7 @@ export default function Command() {
       toast.style = Toast.Style.Success;
       toast.title = "Deleted from Hister";
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not delete";
-      toast.message = error instanceof Error ? error.message : undefined;
+      await showFailureToast(error, { title: "Could not delete" });
     }
   };
 
@@ -263,7 +266,6 @@ export default function Command() {
             <Action.Push
               title="Disable Indexing…"
               icon={Icon.EyeDisabled}
-              shortcut={Keyboard.Shortcut.Common.RemoveAll}
               target={<DisableIndexingForm url={result.url} onDone={revalidate} />}
             />
           </ActionPanel.Section>

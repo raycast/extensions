@@ -192,10 +192,10 @@ export async function getPreview(url: string, documentId?: string): Promise<Prev
   return readJSON<Preview>(response);
 }
 
-export async function getFavicon(key: string): Promise<string> {
+export async function getFavicon(key: string): Promise<{ type: string; data: Buffer }> {
   const response = await request(`/api/favicon?key=${encodeURIComponent(key)}`);
   const type = response.headers.get("content-type")?.split(";")[0].trim() || "image/png";
-  return `data:${type};base64,${Buffer.from(await response.arrayBuffer()).toString("base64")}`;
+  return { type, data: Buffer.from(await response.arrayBuffer()) };
 }
 
 /** Makes `url` rank first the next time `query` is searched, as opening it in the Hister web UI does. */

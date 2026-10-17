@@ -16,11 +16,35 @@ function isoDate(seconds?: number): string | undefined {
   return seconds ? new Date(seconds * 1000).toISOString() : undefined;
 }
 
+// Hister 0.20 has no site: filter, but the model writes one anyway.
+function siteToDomain(query: string): string {
+  return query.replace(
+    /(^|[\s(])(-?)site:("[^"]*"|\([^)]*\)|[^\s()]+)/gi,
+    (match, before: string, minus: string, value: string) => {
+      const hosts = value
+        .replace(/^\(|\)$/g, "")
+        .split("|")
+        .map((host) =>
+          host
+            .replace(/"/g, "")
+            .replace(/^https?:\/\//i, "")
+            .split("/")[0]
+            .replace(/\.$/, "")
+            .toLowerCase(),
+        )
+        .filter(Boolean);
+      if (!hosts.length) return match;
+      const domains = hosts.flatMap((host) => (host.includes("*") ? [host] : [host, `*.${host}`]));
+      return `${before}${minus}domain:(${domains.join("|")})`;
+    },
+  );
+}
+
 /**
  * Search the user's Hister index: the full text of web pages they have visited and files they keep. Results come best match first, each with a snippet of the text that matched. Use read-page for what a page actually says.
  */
 export default async function tool({ query, limit = 10 }: Input) {
-  const results = await search(query.trim(), { limit: Math.min(Math.max(Math.round(limit), 1), 25) });
+  const results = await search(siteToDomain(query.trim()), { limit: Math.min(Math.max(Math.round(limit), 1), 25) });
   const history = results.history.map((entry) => ({
     title: entry.title,
     url: entry.url,

@@ -10,7 +10,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useCachedPromise, usePromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { AddAliasForm } from "./add-alias";
 import {
@@ -51,14 +51,19 @@ function pages(count: number): string {
   return `${count.toLocaleString()} page${count === 1 ? "" : "s"}`;
 }
 
+// Cleared on first read, so a mount effect that runs twice can't push a second form.
+let aliasFormRequested = false;
+
+export function requestAliasForm() {
+  aliasFormRequested = true;
+}
+
 export function RulesList({
   onSearch,
   initialView = "rules",
-  startAddingAlias = false,
 }: {
   onSearch: (query: string) => void;
   initialView?: "rules" | "aliases";
-  startAddingAlias?: boolean;
 }) {
   const { pop, push } = useNavigation();
   const [view, setView] = useState<string>(initialView);
@@ -118,29 +123,22 @@ export function RulesList({
       toast.style = Toast.Style.Success;
       toast.title = added ? `Added ${site.host}` : `${site.host} is already added`;
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = `Could not add ${site.host}`;
-      toast.message = error instanceof Error ? error.message : undefined;
+      await showFailureToast(error, { title: `Could not add ${site.host}` });
     }
   };
 
   const addRuleActions = (
     <ActionPanel.Section>
-      {tab && !tabAdded && (
-        <Action
-          title={`Add ${tab.host}`}
-          icon={Icon.Plus}
-          shortcut={Keyboard.Shortcut.Common.New}
-          onAction={() => addSite(tab)}
-        />
-      )}
+      {tab && !tabAdded && <Action title={`Add ${tab.host}`} icon={Icon.Plus} onAction={() => addSite(tab)} />}
       {openInHister}
       {openDocs(rulesDocsUrl)}
     </ActionPanel.Section>
   );
 
   useEffect(() => {
-    if (startAddingAlias) push(<AddAliasForm onDone={revalidate} />);
+    if (!aliasFormRequested) return;
+    aliasFormRequested = false;
+    push(<AddAliasForm onDone={revalidate} />);
   }, []);
 
   const search = (query: string) => {
@@ -161,9 +159,7 @@ export function RulesList({
       toast.style = Toast.Style.Success;
       toast.title = "Removed";
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not remove";
-      toast.message = error instanceof Error ? error.message : undefined;
+      await showFailureToast(error, { title: "Could not remove" });
     }
   };
 

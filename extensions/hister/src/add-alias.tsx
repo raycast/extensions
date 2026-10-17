@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { useCachedPromise, usePromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { addAlias, countQueryMatches, getRules } from "./api";
 
@@ -47,9 +47,7 @@ export function AddAliasForm({ onDone }: { onDone: () => void }) {
       onDone();
       pop();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not save alias";
-      toast.message = error instanceof Error ? error.message : undefined;
+      await showFailureToast(error, { title: "Could not save alias" });
     }
   };
 
@@ -62,7 +60,7 @@ export function AddAliasForm({ onDone }: { onDone: () => void }) {
         </ActionPanel>
       }
     >
-      <Form.Description text="A query like `gh raycast` would expand to `domain:github.com raycast`." />
+      <Form.Description text='A query like "gh raycast" would expand to "domain:github.com raycast".' />
       <Form.TextField
         id="keyword"
         title="Keyword"

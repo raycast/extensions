@@ -1,5 +1,5 @@
 import { BrowserExtension, environment } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useEffect, useState } from "react";
 
 export type CurrentTab = { url: string; title: string; host: string; favicon?: string };
 
@@ -23,8 +23,35 @@ async function getCurrentTab(): Promise<CurrentTab | undefined> {
   return { url: tab.url, title: tab.title || tab.url, host: new URL(tab.url).hostname, favicon: tab.favicon };
 }
 
+function sameTab(a?: CurrentTab, b?: CurrentTab): boolean {
+  return a?.url === b?.url && a?.title === b?.title && a?.favicon === b?.favicon;
+}
+
 /** Undefined without Raycast's browser extension, or when the focused tab isn't a web page. */
 export function useCurrentTab(): CurrentTab | undefined {
-  const { data } = usePromise(getCurrentTab, [], { onError: () => undefined });
-  return data;
+  const [tab, setTab] = useState<CurrentTab>();
+
+  // Raycast resumes a closed command without remounting it, so a tab read once goes stale.
+  useEffect(() => {
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const check = () =>
+      getCurrentTab()
+        .then(
+          (next) => {
+            if (!cancelled) setTab((current) => (sameTab(current, next) ? current : next));
+          },
+          () => undefined,
+        )
+        .finally(() => {
+          if (!cancelled) timer = setTimeout(check, 2000);
+        });
+    check();
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, []);
+
+  return tab;
 }

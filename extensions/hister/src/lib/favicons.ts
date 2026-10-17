@@ -1,26 +1,43 @@
-import { Cache } from "@raycast/api";
+import { environment } from "@raycast/api";
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { useEffect, useState } from "react";
 import { getFavicon } from "../api";
 
-// Keys are content hashes, so a cached icon never goes stale.
-const cache = new Cache({ namespace: "favicons" });
+const folder = join(environment.supportPath, "favicons");
+const extensions: Record<string, string> = {
+  "image/svg+xml": "svg",
+  "image/x-icon": "ico",
+  "image/vnd.microsoft.icon": "ico",
+  "image/jpeg": "jpg",
+  "image/gif": "gif",
+  "image/webp": "webp",
+};
+
+// Keys are content hashes, so a saved icon never goes stale.
+const saved = new Map(
+  (existsSync(folder) ? readdirSync(folder) : []).map((file) => [file.replace(/\.\w+$/, ""), join(folder, file)]),
+);
 // Shared across renders so a missing favicon is asked for once per session, not on every keystroke.
 const failed = new Set<string>();
 
-/** Favicons need the access token, which an image URL can't carry, so they are fetched and cached as data URIs. */
+/** Fetched with the access token and saved as files; large data-URI icons freeze Raycast's window. */
 export function useFavicons(keys: (string | undefined)[]): (key?: string) => string | undefined {
   const signature = [...new Set(keys.filter(Boolean))].sort().join("\n");
-  const [fetched, setFetched] = useState<Record<string, string>>({});
+  const [, setSavedCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
-    const queue = signature.split("\n").filter((key) => key && !cache.has(key) && !failed.has(key));
+    const queue = signature.split("\n").filter((key) => key && !saved.has(key) && !failed.has(key));
     const worker = async () => {
       for (let key = queue.shift(); key && !cancelled; key = queue.shift()) {
         try {
-          const uri = await getFavicon(key);
-          cache.set(key, uri);
-          setFetched((current) => ({ ...current, [key]: uri }));
+          const { type, data } = await getFavicon(key);
+          const path = join(folder, `${key}.${extensions[type] ?? "png"}`);
+          mkdirSync(folder, { recursive: true });
+          writeFileSync(path, data);
+          saved.set(key, path);
+          setSavedCount((count) => count + 1);
         } catch {
           failed.add(key);
         }
@@ -32,5 +49,5 @@ export function useFavicons(keys: (string | undefined)[]): (key?: string) => str
     };
   }, [signature]);
 
-  return (key) => (key ? (fetched[key] ?? cache.get(key)) : undefined);
+  return (key) => (key ? saved.get(key) : undefined);
 }
