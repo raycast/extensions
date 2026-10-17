@@ -101,12 +101,27 @@ export class MetadataDecryptor {
     let nextIndex = 0;
     let processed = 0;
     let lastSnapshot = 0;
+    let trailingSnapshot: ReturnType<typeof setTimeout> | undefined;
     // Snapshots scan the results array, so building one per completion would be quadratic.
     // Throttle them, while always sending an early partial update and a final complete one.
+    // A throttled completion schedules one trailing update instead of being dropped, so
+    // ready entries are never left hidden behind a slow entry; the timer is cleared when
+    // the load finishes or is cancelled.
     const snapshot = (force: boolean) => {
       if (!onProgress) return;
       const now = Date.now();
-      if (!force && now - lastSnapshot < PROGRESS_SNAPSHOT_INTERVAL_MS) return;
+      const wait = PROGRESS_SNAPSHOT_INTERVAL_MS - (now - lastSnapshot);
+      if (!force && wait > 0) {
+        trailingSnapshot ??= setTimeout(() => {
+          trailingSnapshot = undefined;
+          snapshot(true);
+        }, wait);
+        return;
+      }
+      if (trailingSnapshot) {
+        clearTimeout(trailingSnapshot);
+        trailingSnapshot = undefined;
+      }
       lastSnapshot = now;
       onProgress({
         processed,
@@ -118,18 +133,23 @@ export class MetadataDecryptor {
       while (nextIndex < resources.length) {
         signal?.throwIfAborted();
         const index = nextIndex++;
-        results[index] = await this.decryptResource(resources[index]);
+        results[index] = await this.decryptResource(resources[index], signal);
         signal?.throwIfAborted();
         processed++;
         snapshot(processed === 1 || processed === resources.length);
       }
     };
-    await Promise.all(Array.from({ length: Math.min(resources.length, 16) }, worker));
-    signal?.throwIfAborted();
-    return results;
+    try {
+      await Promise.all(Array.from({ length: Math.min(resources.length, 16) }, worker));
+      signal?.throwIfAborted();
+      return results;
+    } finally {
+      // Never leave a throttled trailing update behind after completion or cancellation.
+      if (trailingSnapshot) clearTimeout(trailingSnapshot);
+    }
   }
 
-  public async decryptResource(resource: ApiResource): Promise<Resource> {
+  public async decryptResource(resource: ApiResource, signal?: AbortSignal): Promise<Resource> {
     const normalized: Resource = {
       ...resource,
       name: text(resource.name),
@@ -152,6 +172,10 @@ export class MetadataDecryptor {
       } else {
         throw new MetadataError("Metadata key type or identifier is missing or unsupported");
       }
+
+      // Stop before starting new crypto when the load was cancelled while this entry
+      // waited for its key. Crypto that already started is allowed to finish.
+      signal?.throwIfAborted();
 
       const message = await openpgp.readMessage({ armoredMessage: resource.metadata });
       const decrypted = await openpgp.decrypt({ message, decryptionKeys: key, format: "utf8" });
@@ -182,6 +206,9 @@ export class MetadataDecryptor {
         description: text(metadata.description),
       };
     } catch (error) {
+      // Cancellation is not an entry failure: let it stop the whole load instead of
+      // reporting closed-command entries as undecryptable.
+      if (signal?.aborted) throw error;
       // Never include encrypted payloads or decrypted private data in errors or logs.
       return {
         ...normalized,

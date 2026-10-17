@@ -575,12 +575,27 @@ export class PassboltClient {
     let shown = 0;
     let hasCode = false;
     let lastSnapshot = 0;
+    let trailingSnapshot: ReturnType<typeof setTimeout> | undefined;
     // Snapshots copy the collected items, so one per completion would be quadratic:
     // throttle them while always sending an early partial update and the final one.
+    // A throttled completion schedules one trailing update instead of being dropped,
+    // so ready entries are never left hidden while the remaining workers wait on
+    // slow requests. The timer is cleared when the load finishes or is cancelled.
     const snapshot = (force: boolean) => {
       if (!onProgress) return;
       const now = Date.now();
-      if (!force && now - lastSnapshot < PROGRESS_SNAPSHOT_INTERVAL_MS) return;
+      const wait = PROGRESS_SNAPSHOT_INTERVAL_MS - (now - lastSnapshot);
+      if (!force && wait > 0) {
+        trailingSnapshot ??= setTimeout(() => {
+          trailingSnapshot = undefined;
+          snapshot(true);
+        }, wait);
+        return;
+      }
+      if (trailingSnapshot) {
+        clearTimeout(trailingSnapshot);
+        trailingSnapshot = undefined;
+      }
       lastSnapshot = now;
       onProgress({
         ...progress,
@@ -598,7 +613,7 @@ export class PassboltClient {
         const entry = await this.readTotpEntry(resource, secretFor(resource), supportsTotp, signal);
         signal?.throwIfAborted();
         if (entry) {
-          items[index] = { ...(await this.metadataDecryptor.decryptResource(resource)), ...entry };
+          items[index] = { ...(await this.metadataDecryptor.decryptResource(resource, signal)), ...entry };
           signal?.throwIfAborted();
         }
         processed++;
@@ -608,9 +623,14 @@ export class PassboltClient {
         snapshot(firstItem || firstCode || processed === candidates.length);
       }
     };
-    await Promise.all(Array.from({ length: Math.min(candidates.length, TOTP_WORKER_COUNT) }, worker));
-    signal?.throwIfAborted();
-    return { ...progress, processed, items: items.filter((item): item is TotpResource => item !== undefined) };
+    try {
+      await Promise.all(Array.from({ length: Math.min(candidates.length, TOTP_WORKER_COUNT) }, worker));
+      signal?.throwIfAborted();
+      return { ...progress, processed, items: items.filter((item): item is TotpResource => item !== undefined) };
+    } finally {
+      // Never leave a throttled trailing update behind after completion or cancellation.
+      if (trailingSnapshot) clearTimeout(trailingSnapshot);
+    }
   }
 
   public async getSecret(resourceId: string, signal?: AbortSignal) {

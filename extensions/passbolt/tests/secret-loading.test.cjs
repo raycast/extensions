@@ -472,3 +472,94 @@ test("cancellation during the final decrypt prevents late progress and successfu
     assert.equal(updates.length, updatesBeforeAbort, "in-flight crypto must not publish after cancellation");
   }
 });
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Throttled progress updates are dropped inside the 150 ms window, so a trailing
+// update must be scheduled: ready entries must not stay hidden behind a slow one.
+test("a throttled update is delivered later instead of hiding ready Authenticator entries", async () => {
+  const rows = await Promise.all([
+    ...Array.from({ length: 4 }, (_, index) => makeRow(`trail-${index}`)),
+    makeRow("trail-slow"),
+  ]);
+  const client = newClient();
+  serve(client, rows);
+  const decryptor = client.metadataDecryptor;
+  const decryptResource = decryptor.decryptResource.bind(decryptor);
+  let releaseSlow;
+  const held = new Promise((resolve) => (releaseSlow = resolve));
+  decryptor.decryptResource = async (resource, signal) => {
+    if (resource.id === "trail-slow") await held;
+    return decryptResource(resource, signal);
+  };
+  const updates = [];
+  const load = client.getTotpResources({
+    onProgress: (progress) => updates.push({ ...progress, items: [...progress.items] }),
+  });
+  // Only the four quick entries can finish while the slow one is held: any update
+  // that shows them must come from the scheduled trailing snapshot, not from a
+  // further completion.
+  const deadline = Date.now() + 2000;
+  while (Date.now() < deadline && !updates.some((update) => update.processed === 4)) await sleep(25);
+  const trailing = updates.find((update) => update.processed === 4);
+  assert.ok(trailing, "a throttled update is delivered later instead of dropped");
+  assert.equal(trailing.items.length, 4);
+  assert.ok(trailing.processed < trailing.candidates);
+  releaseSlow();
+  const result = await load;
+  assert.equal(result.items.length, 5);
+});
+
+test("a throttled update is delivered later instead of hiding ready search entries", async () => {
+  const rows = await Promise.all([
+    ...Array.from({ length: 4 }, (_, index) => makeRow(`trail-search-${index}`)),
+    makeRow("trail-search-slow"),
+  ]);
+  const client = newClient();
+  serve(client, rows);
+  const decryptor = client.metadataDecryptor;
+  const decryptResource = decryptor.decryptResource.bind(decryptor);
+  let releaseSlow;
+  const held = new Promise((resolve) => (releaseSlow = resolve));
+  decryptor.decryptResource = async (resource, signal) => {
+    if (resource.id === "trail-search-slow") await held;
+    return decryptResource(resource, signal);
+  };
+  const updates = [];
+  const load = client.searchResources("", {
+    onProgress: (progress) => updates.push({ ...progress, items: [...progress.items] }),
+  });
+  const deadline = Date.now() + 2000;
+  while (Date.now() < deadline && !updates.some((update) => update.processed === 4)) await sleep(25);
+  const trailing = updates.find((update) => update.processed === 4);
+  assert.ok(trailing, "a throttled update is delivered later instead of dropped");
+  assert.equal(trailing.items.length, 4);
+  releaseSlow();
+  const result = await load;
+  assert.equal(result.body.length, 5);
+});
+
+// Cancelling while an entry waits for its metadata key must stop before more
+// crypto starts, instead of decrypting the entry and discarding the result.
+test("metadata decryption stops at the key wait when its load is cancelled", async () => {
+  const rows = [await makeRow("keywait")];
+  const client = newClient();
+  serve(client, rows);
+  const decryptor = client.metadataDecryptor;
+  let releaseKey;
+  const held = new Promise((resolve) => (releaseKey = resolve));
+  const readPrivateKey = client.readPrivateKey.bind(client);
+  let notifyStarted;
+  const started = new Promise((resolve) => (notifyStarted = resolve));
+  client.readPrivateKey = async () => {
+    notifyStarted();
+    await held;
+    return readPrivateKey();
+  };
+  const controller = new AbortController();
+  const load = decryptor.decryptResource(rows[0], controller.signal);
+  await started;
+  controller.abort();
+  releaseKey();
+  await assert.rejects(load, /abort/i, "cancellation during the key wait must reject instead of decrypting");
+});
