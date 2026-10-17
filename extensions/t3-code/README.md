@@ -13,7 +13,7 @@ Three commands against the T3 Code server running on this Mac.
   `⌘⇧V` attaches one copied later, `⌘⇧A` attaches the files selected in Finder, and `⌘Y` previews
   what is attached. Protocol v1 servers accept images only.
 - **Preset** is the project, model, permissions and workspace in one choice. Starred presets come
-  first, then the combinations you used recently. `⌘⇧S` stars the current settings, and again
+  first, then the combinations you used recently. `⌘D` stars the current settings, and again
   unstars them. Choose Custom… for the separate fields. Model names show the provider and effort,
   for example `Claude · Sonnet 5.5 · high · 1M`.
 - `↵` sends and opens the thread in T3 Code. `⌘⇧↵` sends and leaves T3 Code alone.

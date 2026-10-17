@@ -327,6 +327,11 @@ export default function Command() {
   );
 
   function choosePreset(value: string) {
+    // Until the data has loaded the only item is Custom…, which Raycast selects and
+    // reports on mount. That is not a choice, and it must not beat the real default.
+    if (presetValue === undefined) {
+      return;
+    }
     if (value === CUSTOM_PRESET) {
       setPresetValue(CUSTOM_PRESET);
       return;
@@ -634,7 +639,7 @@ export default function Command() {
         title="Preset"
         value={presetValue}
         onChange={choosePreset}
-        info="Project · model · permissions (Full, Auto, Edits = auto-accept edits, Approval) · Worktree when it makes a new one. ⌘⇧S stars the current settings so they stay at the top."
+        info="Project · model · permissions (Full, Auto, Edits = auto-accept edits, Approval) · Worktree when it makes a new one. ⌘D stars the current settings so they stay at the top."
       >
         {savedList.length > 0 ? (
           <Form.Dropdown.Section title="Starred">
