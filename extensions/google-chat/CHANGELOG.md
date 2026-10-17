@@ -1,0 +1,15 @@
+# Google Chat Changelog
+
+## [Initial Version] - {PR_MERGE_DATE}
+
+- Search Spaces & DMs with frecency sorting, message view, reply in thread, reactions and mark as read
+- My Messages, a conversation list like Google Chat's Home: Unread (counts, mentions) and Read (paginated, by latest activity) sections, a preview of the latest message from others, "You replied" and thread markers, an All / Unread Only switch (⌘U, Default View preference), and Mark as Read / Mark All as Read
+- Send Message form with one searchable To field (DMs, spaces, group chats, directory people or any email), a Thread picker with recent threads, and drafts; Quick Message from root search
+- @mentions in Send Message for spaces and group chats: pick members or @all, mentions go where the text says `@Name` (or at the start), with a preview; the send-message AI tool takes `mentions` by name or email
+- My Messages Mentions section: recent messages that @mention you (Mentions From and Mentions Shown preferences), with an unread dot and thread marker, reply in thread, open, copy and mark the conversation as read
+- My Messages shows the unread total in its root search subtitle, updated on every load, refresh and mark-as-read
+- Unread Chat: the unread total in root search, refreshed every 5 minutes; running it opens My Messages' unread view
+- Unread counts match Chat's Home: only messages newer than your read position that are new top-level messages or replies mentioning you (unopened replies in threads you don't follow are left out); past 500 results the total shows as N+, or "Unread check incomplete" when none of the results checked count
+- Search Messages with Unread, Mentions Me and Has Link filters
+- Find Person in your Workspace directory
+- AI tools: list spaces, get messages, get unread (with totals), search messages, find person, send message, add reaction

@@ -1,0 +1,240 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-chat",
+  "title": "Google Chat",
+  "description": "Search spaces and direct messages, read and reply to messages, see your unread chats, and send messages in Google Chat.",
+  "icon": "google-chat-icon.png",
+  "author": "smrehan",
+  "license": "MIT",
+  "categories": [
+    "Communication"
+  ],
+  "keywords": [
+    "google",
+    "chat",
+    "workspace",
+    "hangouts",
+    "gchat",
+    "messages"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-spaces",
+      "title": "Search Spaces & DMs",
+      "subtitle": "Google Chat",
+      "description": "Search your spaces, group chats and direct messages, read their messages, and send or mark them as read.",
+      "mode": "view"
+    },
+    {
+      "name": "my-messages",
+      "title": "My Messages",
+      "subtitle": "Google Chat",
+      "description": "Your Google Chat conversations like Chat's Home, with unread ones first.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultView",
+          "title": "Default View",
+          "description": "What My Messages shows the first time you open it. Afterwards it remembers your last choice.",
+          "type": "dropdown",
+          "required": false,
+          "default": "all",
+          "data": [
+            {
+              "title": "All",
+              "value": "all"
+            },
+            {
+              "title": "Unread Only",
+              "value": "unread"
+            }
+          ]
+        },
+        {
+          "name": "mentionsDays",
+          "title": "Mentions From",
+          "description": "How far back the Mentions section looks for messages that @mention you.",
+          "type": "dropdown",
+          "required": false,
+          "default": "7",
+          "data": [
+            {
+              "title": "Last Day",
+              "value": "1"
+            },
+            {
+              "title": "Last 3 Days",
+              "value": "3"
+            },
+            {
+              "title": "Last 7 Days",
+              "value": "7"
+            },
+            {
+              "title": "Last 14 Days",
+              "value": "14"
+            }
+          ]
+        },
+        {
+          "name": "mentionsLimit",
+          "title": "Mentions Shown",
+          "description": "The most messages the Mentions section shows, newest first.",
+          "type": "dropdown",
+          "required": false,
+          "default": "20",
+          "data": [
+            {
+              "title": "10",
+              "value": "10"
+            },
+            {
+              "title": "20",
+              "value": "20"
+            },
+            {
+              "title": "50",
+              "value": "50"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "unread-count",
+      "title": "Unread Chat",
+      "subtitle": "Google Chat",
+      "description": "Shows your unread Google Chat total in root search, refreshed every 5 minutes.",
+      "mode": "no-view",
+      "interval": "5m"
+    },
+    {
+      "name": "send-message",
+      "title": "Send Message",
+      "subtitle": "Google Chat",
+      "description": "Send a message to a space, group chat, direct message, or anyone in your directory, optionally in a thread.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-message",
+      "title": "Quick Message",
+      "subtitle": "Google Chat",
+      "description": "Send a message from root search to a person's email or a space name.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "to",
+          "placeholder": "Email or space",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "message",
+          "placeholder": "Message",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "search-messages",
+      "title": "Search Messages",
+      "subtitle": "Google Chat",
+      "description": "Search messages across your spaces and direct messages, filtered by unread, mentions or links.",
+      "mode": "view"
+    },
+    {
+      "name": "find-person",
+      "title": "Find Person",
+      "subtitle": "Google Chat",
+      "description": "Search your organization's directory and open or send a direct message.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-spaces",
+      "title": "List Spaces",
+      "description": "List the user's Google Chat spaces, group chats and direct messages, most recently active first. Returns each space's resource name, title, type, last active time and URL. Optionally filter by title text or type."
+    },
+    {
+      "name": "get-messages",
+      "title": "Get Messages",
+      "description": "Get the most recent messages in one Google Chat space or direct message, newest first. Accepts a space resource name (spaces/AAAA), a Chat URL, a space title, or a person's email for their direct message."
+    },
+    {
+      "name": "get-unread",
+      "title": "Get Unread Messages",
+      "description": "Get the user's unread Google Chat messages from Google's own unread state: the total unread count, and per conversation its unread count, whether it mentions the user, and up to 20 unread messages. Covers the last few days; muted spaces are excluded."
+    },
+    {
+      "name": "search-messages",
+      "title": "Search Messages",
+      "description": "Search Google Chat messages by keywords across all spaces and direct messages, optionally only unread messages, messages that mention the user, or messages with links. Muted spaces are not searched."
+    },
+    {
+      "name": "find-person",
+      "title": "Find Person",
+      "description": "Search the user's Google Workspace directory by name or email. Returns names and email addresses to use as message recipients."
+    },
+    {
+      "name": "send-message",
+      "title": "Send Message",
+      "description": "Send a Google Chat message to a space or direct message, or to a person by email (opens or creates the direct message). Can reply in an existing thread."
+    },
+    {
+      "name": "add-reaction",
+      "title": "Add Reaction",
+      "description": "Add an emoji reaction to a Google Chat message by its resource name (spaces/AAAA/messages/BBBB)."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "title": "Google OAuth Client ID",
+      "description": "OAuth client ID of type iOS with bundle ID com.raycast, from a Google Cloud project with the Google Chat API (and People API) enabled and the Chat app configuration filled in.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "1234567890-abc.apps.googleusercontent.com"
+    },
+    {
+      "name": "openWith",
+      "title": "Open With",
+      "description": "Browser or app that opens Google Chat links. Empty uses your default browser.",
+      "type": "appPicker",
+      "required": false
+    },
+    {
+      "name": "unreadLookbackDays",
+      "title": "Unread Lookback (Days)",
+      "description": "Only unread messages from this many recent days are counted.",
+      "type": "textfield",
+      "required": false,
+      "default": "14"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.0",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "~26.1.1",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  }
+}
