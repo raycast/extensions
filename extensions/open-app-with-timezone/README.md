@@ -42,11 +42,3 @@ open -n --env TZ=<zone> --env __XPC_TZ=<zone> /path/to/App.app
 - macOS hides the process environment of Apple system apps, so the extension cannot check the result for them and reports it as not verifiable.
 - If a running app does not quit within 30 seconds, for example because an unsaved-changes dialog is open, the relaunch is aborted.
 
-## Development
-
-```sh
-npm install
-npm run dev    # load the extension into Raycast in development mode
-npm run lint   # Raycast manifest, icon, ESLint, and Prettier checks
-npm run build  # type-check and build the extension
-```
