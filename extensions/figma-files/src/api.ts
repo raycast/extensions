@@ -367,6 +367,8 @@ async function refreshTeam(
   };
 
   let tree: FolderTree;
+  // A tree reused from the cache must not renew its own timestamp, or it would never be refetched
+  let fetchedTree = false;
   if (cachedTeam && isFresh(times, treeKey)) {
     tree = {
       name: cachedTeam.name,
@@ -382,6 +384,7 @@ async function refreshTeam(
         discovered.push(...folders);
         folders.forEach((folder) => loadFolderFiles(folder, info.source));
       });
+      fetchedTree = true;
     } catch (error) {
       await Promise.all(fileRequests);
       if (!cachedTeam) throw error;
@@ -397,7 +400,7 @@ async function refreshTeam(
   await Promise.all(fileRequests);
   // Only now does the saved folder list match the tree; marking it earlier would let a progress save
   // pair a fresh tree with a partial folder list if Raycast closes mid-refresh
-  if (tree.complete) {
+  if (fetchedTree && tree.complete) {
     markFresh(times, treeKey);
   }
 
