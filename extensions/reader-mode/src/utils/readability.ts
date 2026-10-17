@@ -1,10 +1,11 @@
-import { Readability, isProbablyReaderable } from "@mozilla/readability";
+import { isProbablyReaderable, Readability } from "@mozilla/readability";
 import { parseHTML } from "linkedom";
-import { parseLog } from "./logger";
-import { preCleanHtml } from "./html-cleaner";
-import { MetadataExtractor } from "./metadata-extractor";
-import { getExtractor } from "../extractors";
 import { getSiteConfig } from "../config/site-config";
+import { getExtractor } from "../extractors";
+import { preCleanHtml } from "./html-cleaner";
+import { parseLog } from "./logger";
+import { MetadataExtractor } from "./metadata-extractor";
+import { findNuxtArticles, PayloadArticle } from "./nuxt-payload";
 
 type LinkedomDocument = ReturnType<typeof parseHTML>["document"];
 
@@ -22,6 +23,11 @@ export interface ArticleContent {
   image: string | null;
   description: string | null;
   favicon: string | null;
+  /**
+   * The article came from the page's data payload, which held well over what the page shows.
+   * The page's paywall markup then describes the teaser, not this text.
+   */
+  recoveredFromPayload?: boolean;
 }
 
 export interface ReadabilityError {
@@ -69,6 +75,45 @@ const FALLBACK_SELECTORS = [
   "main",
   '[role="main"]',
 ];
+
+/**
+ * The page's data payload replaces Readability's result when it holds this many times the text:
+ * the visible page is then a teaser, not the article.
+ */
+const PAYLOAD_PREFERENCE_RATIO = 1.5;
+
+/**
+ * How much of Readability's article a payload article must contain to replace it. A
+ * continuation of a teaser contains the teaser, which can be under half of what Readability
+ * found when it also kept the subscribe box; a comment quoting the article's opening contains
+ * one sentence of it.
+ */
+const MIN_CONTINUATION_SHARE = 0.25;
+
+/** Elements whose subtree is never text the page shows. */
+const UNSHOWN_ELEMENTS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE", "IFRAME"]);
+
+/**
+ * The text the page shows, in one walk over its text nodes, skipping hidden subtrees and the
+ * contents of scripts (which hold the payload itself). Not aria-hidden: a modal, the subscribe
+ * wall itself, marks the whole page behind it so.
+ */
+function shownText(document: LinkedomDocument): string {
+  const parts: string[] = [];
+  const stack: Node[] = document.body ? [document.body as unknown as Node] : [];
+  while (stack.length) {
+    const node = stack.pop()!;
+    if (node.nodeType === 3) {
+      parts.push(node.nodeValue ?? "");
+      continue;
+    }
+    if (node.nodeType !== 1) continue;
+    const el = node as Element;
+    if (UNSHOWN_ELEMENTS.has(el.tagName.toUpperCase()) || el.hasAttribute("hidden")) continue;
+    for (let i = el.childNodes.length - 1; i >= 0; i--) stack.push(el.childNodes[i]);
+  }
+  return parts.join("");
+}
 
 /** Minimum text for a generic container to be believable as the article. */
 const MIN_FALLBACK_TEXT_LENGTH = 200;
@@ -187,6 +232,35 @@ export function parseArticle(
       }
     }
 
+    // Some pages show a teaser but ship the whole article in their Nuxt data payload. Read it,
+    // and the article text the page shows, before cleaning, which can remove both.
+    const nuxt = findNuxtArticles(document, url);
+    const pageText = nuxt ? shownText(document) : "";
+    const fromPayload = (payload: PayloadArticle, reason: string) => {
+      const recoveredFromPayload = payload.textContent.length > payload.shownLength * PAYLOAD_PREFERENCE_RATIO;
+      parseLog.log("parse:nuxt-payload", { url, reason, textLength: payload.textContent.length, recoveredFromPayload });
+      return {
+        success: true as const,
+        article: {
+          title: metadata.title || "Untitled",
+          content: payload.content,
+          textContent: payload.textContent,
+          excerpt: metadata.description || "",
+          byline: metadata.author || null,
+          siteName: metadata.siteName || null,
+          length: payload.textContent.length,
+          author: metadata.author || null,
+          published: metadata.published || null,
+          image: metadata.image || null,
+          description: metadata.description || null,
+          favicon: metadata.favicon || null,
+          recoveredFromPayload,
+        },
+      };
+    };
+    // When Readability can't read the page, the payload article must still share a paragraph with it.
+    const payloadForPage = () => nuxt?.pick(pageText) ?? null;
+
     // Strip sidebars, ads, comments, subscription boxes, and other non-article chrome.
     // Mutates the document in place; only Readability sees the result, and site
     // extractors have already returned above without needing it.
@@ -198,6 +272,8 @@ export function parseArticle(
       parseLog.log("parse:precheck", { url, isReadable });
 
       if (!isReadable) {
+        const payload = payloadForPage();
+        if (payload) return fromPayload(payload, "not-readable");
         parseLog.warn("parse:skip", { url, reason: "content not readable" });
         return {
           success: false,
@@ -222,6 +298,8 @@ export function parseArticle(
     if (!article || !article.content || article.content.trim().length === 0) {
       const reason = !article ? "Readability returned null" : "empty content";
       parseLog.warn("parse:readability-failed", { url, reason });
+      const payload = payloadForPage();
+      if (payload) return fromPayload(payload, "readability-failed");
 
       // Fall back to whatever we snapshotted before Readability emptied the document.
       if (fallbackContent) {
@@ -261,6 +339,17 @@ export function parseArticle(
     }
 
     const textContent = article.textContent || "";
+    // The payload replaces Readability's article only when it continues it: it contains a real
+    // share of what Readability found, and holds well over that much text.
+    const payload = nuxt?.pick(textContent) ?? null;
+    const shown = textContent.trim().length;
+    if (
+      payload &&
+      payload.shownLength >= shown * MIN_CONTINUATION_SHARE &&
+      payload.textContent.length > shown * PAYLOAD_PREFERENCE_RATIO
+    ) {
+      return fromPayload(payload, "longer-than-page");
+    }
 
     parseLog.log("parse:success", {
       url,

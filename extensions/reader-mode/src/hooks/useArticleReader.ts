@@ -17,40 +17,43 @@
  *
  * @see src/utils/article-loader.ts for the fetch/parse/paywall logic
  */
-import { useState, useEffect, useCallback, useRef } from "react";
-import { environment, AI, Clipboard, Keyboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AI, Clipboard, environment, getPreferenceValues, Keyboard, showToast, Toast } from "@raycast/api";
 import { useAI } from "@raycast/utils";
-import { ArticleState } from "../types/article";
-import { BrowserTab } from "../types/browser";
-import { SummaryStyle } from "../types/summary";
 import {
+  DEFAULT_SUMMARY_MODEL,
   getAIConfigForStyle,
   getSummaryModelChoice,
   getSummaryModelTitle,
-  DEFAULT_SUMMARY_MODEL,
   SummaryModelKey,
 } from "../config/ai";
-import { rewriteArticleTitle } from "../config/prompts";
 import { getArchiveSourceLabel } from "../config/labels";
-import { getCachedSummary, setCachedSummary, getLastSummaryStyle } from "../utils/summaryCache";
+import { rewriteArticleTitle } from "../config/prompts";
+import { ArticleState } from "../types/article";
+import { BrowserTab } from "../types/browser";
+import { SummaryStyle } from "../types/summary";
+import { loadArticleFromUrl, LoadArticleResult, loadArticleViaPaywallHopper } from "../utils/article-loader";
 import {
+  getContentFromActiveTab,
   isBrowserExtensionAvailable,
   reimportFromBrowserTab,
-  getContentFromActiveTab,
 } from "../utils/browser-extension";
-import { urlLog, aiLog } from "../utils/logger";
-import { isValidUrl } from "../utils/url-resolver";
+import { aiLog, urlLog } from "../utils/logger";
 import {
-  getStyleLabel,
   buildSummaryPrompt,
-  logSummarySuccess,
+  getStyleLabel,
   logSummaryError,
+  logSummarySuccess,
   regenerateNeedsRevalidate,
 } from "../utils/summarizer";
-import { loadArticleFromUrl, loadArticleViaPaywallHopper, LoadArticleResult } from "../utils/article-loader";
+import { getCachedSummary, getLastSummaryStyle, setCachedSummary } from "../utils/summaryCache";
+import { isValidUrl } from "../utils/url-resolver";
+import { useThrottledValue } from "./useThrottledValue";
 
 const MINIMUM_ARTICLE_LENGTH = 100;
 
+/** How often a streaming summary refreshes the view. See `currentSummary` below. */
+const SUMMARY_REFRESH_MS = 500;
 export interface UseArticleReaderOptions {
   resolveUrl: () => Promise<{ url: string; source: string } | null>;
   onNoUrl?: () => void;
@@ -66,6 +69,8 @@ export interface ArticleReaderState {
   blockedUrl: string | null;
   hasBrowserExtension: boolean;
   isWaitingForBrowser: boolean;
+  /** Why the last fetch from the browser failed, shown on the blocked page. */
+  browserFetchError: string | null;
   foundTab: BrowserTab | null;
   notReadableUrl: string | null;
   emptyContentUrl: string | null;
@@ -109,6 +114,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
   const [blockedUrl, setBlockedUrl] = useState<string | null>(null);
   const [hasBrowserExtension, setHasBrowserExtension] = useState(false);
   const [isWaitingForBrowser, setIsWaitingForBrowser] = useState(false);
+  const [browserFetchError, setBrowserFetchError] = useState<string | null>(null);
   const [foundTab, setFoundTab] = useState<BrowserTab | null>(null);
 
   // Not-readable page state
@@ -236,6 +242,10 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
     },
   });
 
+  // Read by handleRegenerate, so that callback doesn't change on every streamed token.
+  const summaryDataRef = useRef(summaryData);
+  summaryDataRef.current = summaryData;
+
   // When streaming completes, log final stats and cache the complete summary
   useEffect(() => {
     if (
@@ -322,7 +332,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
       regenerateFromRef.current ??= {
         model: modelOverride,
         style: summaryStyle,
-        summary: cachedSummary || summaryData,
+        summary: cachedSummary || summaryDataRef.current,
       };
       setModelOverride(model);
       setCachedSummaryState(null);
@@ -334,7 +344,6 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
       summaryStyle,
       summaryPrompt,
       cachedSummary,
-      summaryData,
       cacheModel,
       modelOverride,
       preferences.summaryOutputLanguage,
@@ -407,6 +416,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
         }
       } else if (result.status === "blocked") {
         setBlockedUrl(result.url);
+        setBrowserFetchError(null);
         setHasBrowserExtension(result.hasBrowserExtension);
         setFoundTab(result.foundTab);
         setError(result.error);
@@ -476,23 +486,31 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
     }
   }, [article, shouldShowSummary, summaryInitialized, handleSummarize, preferences.defaultSummaryStyle]);
 
-  // Handler to fetch content via browser extension after user opens the page
+  // Handler to fetch content via browser extension after user opens the page. One at a time:
+  // a second press while the first is in flight would let a late failure cover a success.
+  const fetchingFromBrowserRef = useRef(false);
   const handleFetchFromBrowser = useCallback(async () => {
-    if (!blockedUrl) return;
+    if (!blockedUrl || fetchingFromBrowserRef.current) return;
+    fetchingFromBrowserRef.current = true;
 
     setIsWaitingForBrowser(true);
     setError(null);
+    setBrowserFetchError(null);
 
-    const result = await getContentFromActiveTab(blockedUrl);
+    try {
+      const result = await getContentFromActiveTab(blockedUrl);
 
-    if (result.success) {
-      setArticle(result.article);
-      setBlockedUrl(null);
-    } else {
-      setError(result.error);
+      if (result.success) {
+        setArticle(result.article);
+        setBlockedUrl(null);
+      } else {
+        setError(result.error);
+        setBrowserFetchError(result.error);
+      }
+    } finally {
+      fetchingFromBrowserRef.current = false;
+      setIsWaitingForBrowser(false);
     }
-
-    setIsWaitingForBrowser(false);
   }, [blockedUrl]);
 
   // Handler to reimport content from browser tab
@@ -629,7 +647,9 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
     });
   }
 
-  const currentSummary = cachedSummary || summaryData;
+  // Every view update re-sends the whole article to Raycast. On a long article, an update per
+  // streamed token exhausts the 100 MB extension heap, so a streaming summary shows twice a second.
+  const currentSummary = useThrottledValue(cachedSummary || summaryData, isSummarizing ? SUMMARY_REFRESH_MS : 0);
 
   return {
     // State
@@ -640,6 +660,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
     blockedUrl,
     hasBrowserExtension,
     isWaitingForBrowser,
+    browserFetchError,
     foundTab,
     notReadableUrl,
     emptyContentUrl: hasMinimalContent ? article?.url || emptyContentUrl : emptyContentUrl,

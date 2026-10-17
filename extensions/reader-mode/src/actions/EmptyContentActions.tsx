@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 
 interface EmptyContentActionsProps {
   url: string;

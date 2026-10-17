@@ -1,5 +1,24 @@
 # Reader Mode Changelog
 
+## [Markdown Articles and Summary Models] - {PR_MERGE_DATE}
+
+### Added
+
+- Reader opens Markdown files. A link to a `.md` file used to fail with "Cannot destructure property 'firstElementChild'"; it now shows the article.
+- When a page offers a Markdown version of itself, Reader reads that version instead of the page's HTML, keeping the page's title, author, and image. If the Markdown version is missing or broken, Reader falls back to the page.
+- Reader reads the whole article on sites that show a teaser but ship the full text in the page's data, such as the Business Journals (bizjournals.com) sites.
+
+### Fixed
+
+- When fetching a page from your browser fails, the "Page Found in Browser" and "Page Blocked" screens now say why, instead of staying unchanged.
+- Summarizing a long article no longer runs out of memory and crashes Reader. The summary now refreshes on screen twice a second while it streams, instead of on every word.
+
+### Changed
+
+- Summaries now default to GPT-6 Luna, replacing GPT-5.4 nano, which Raycast has deprecated.
+- Claude Haiku 5.5 replaces Claude Haiku 4.5 in the Summary Model list.
+- GPT-5.6 Terra replaces GPT-5.4 mini in the Summary Model list.
+
 ## [Choose a Summary Model] - 2026-10-06
 
 ### Added

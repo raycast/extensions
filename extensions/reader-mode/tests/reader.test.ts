@@ -11,37 +11,44 @@
  * three shipped, for months, because nothing ever asserted otherwise.
  */
 
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-
-import { parseArticle } from "../src/utils/readability";
-import { detectPaywall } from "../src/utils/paywall-detector";
-import { preCleanHtml } from "../src/utils/html-cleaner";
-import { regenerateNeedsRevalidate } from "../src/utils/summarizer";
-import { getAIConfigForStyle, SUMMARY_MODELS, DEFAULT_SUMMARY_MODEL } from "../src/config/ai";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
-import { AI, stubPreferences } from "./raycast-api-stub";
-import {
-  loadFixture,
-  loadPrivateFixture,
-  hasPrivateFixture,
-  PAYWALLED_FIXTURES,
-  OPEN_FIXTURES,
-  PRIVATE_PAYWALLED_FIXTURES,
-  PRIVATE_OPEN_FIXTURES,
-} from "./fixtures";
-import { parseHTML } from "linkedom";
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
-import { tryBypassPaywall } from "../src/utils/paywall-hopper";
-import { loadArticleViaPaywallHopper } from "../src/utils/article-loader";
+import { join } from "node:path";
+import { describe, it } from "node:test";
+import { parseHTML } from "linkedom";
 import {
-  fetchHtmlAsGooglebot,
-  fetchHtmlAsBingbot,
-  GOOGLEBOT_USER_AGENT,
+  applyModelUpdates,
+  modelTitle,
+  parseModelCatalog,
+  planModelUpdates,
+  referencedModels,
+} from "../scripts/summary-models.mjs";
+import { DEFAULT_SUMMARY_MODEL, getAIConfigForStyle, SUMMARY_MODELS } from "../src/config/ai";
+import { loadArticleFromUrl, loadArticleViaPaywallHopper } from "../src/utils/article-loader";
+import {
   BINGBOT_USER_AGENT,
+  fetchHtmlAsBingbot,
+  fetchHtmlAsGooglebot,
+  GOOGLEBOT_USER_AGENT,
 } from "../src/utils/fetcher";
+import { preCleanHtml } from "../src/utils/html-cleaner";
+import { findMarkdownAlternate, isMarkdownResponse, parseMarkdownArticle } from "../src/utils/markdown-source";
+import { detectPaywall } from "../src/utils/paywall-detector";
+import { tryBypassPaywall } from "../src/utils/paywall-hopper";
+import { parseArticle } from "../src/utils/readability";
+import { regenerateNeedsRevalidate } from "../src/utils/summarizer";
+import {
+  hasPrivateFixture,
+  loadFixture,
+  loadPrivateFixture,
+  OPEN_FIXTURES,
+  PAYWALLED_FIXTURES,
+  PRIVATE_OPEN_FIXTURES,
+  PRIVATE_PAYWALLED_FIXTURES,
+} from "./fixtures";
+import { AI, stubPreferences } from "./raycast-api-stub";
 
 /** Asserts a page's paywall verdict, given a loader for its HTML. */
 function assertPaywall(html: string, url: string, site: string, expected: boolean) {
@@ -790,14 +797,14 @@ describe("Summary Model preference", () => {
   };
 
   it("keeps each style's own model when the preference is default or unset", () => {
-    withModel("default", () => assert.equal(getAIConfigForStyle("eli5").model, "openai-gpt-5.4-nano"));
-    withModel(undefined, () => assert.equal(getAIConfigForStyle("eli5").model, "openai-gpt-5.4-nano"));
+    withModel("default", () => assert.equal(getAIConfigForStyle("eli5").model, "openai-gpt-6-luna"));
+    withModel(undefined, () => assert.equal(getAIConfigForStyle("eli5").model, "openai-gpt-6-luna"));
   });
 
   it("uses the picked model and keeps the style's creativity", () => {
-    withModel("Anthropic_Claude_Haiku_4.5", () => {
+    withModel("Anthropic_Claude_Haiku_5.5", () => {
       const config = getAIConfigForStyle("eli5");
-      assert.equal(config.model, "anthropic-claude-4-5-haiku");
+      assert.equal(config.model, "anthropic-claude-haiku-5-5");
       assert.equal(config.creativity, "medium");
     });
   });
@@ -824,7 +831,7 @@ describe("Summary Model preference", () => {
   });
 
   it("falls back to the default when Raycast no longer has the picked model", () => {
-    withModel("OpenAI_GPT-4_retired", () => assert.equal(getAIConfigForStyle("overview").model, "openai-gpt-5.4-nano"));
+    withModel("OpenAI_GPT-4_retired", () => assert.equal(getAIConfigForStyle("overview").model, "openai-gpt-6-luna"));
   });
 });
 
@@ -848,5 +855,959 @@ describe("Regenerate", () => {
   it("lets useAI re-run by itself when the model or prompt changes", () => {
     assert.equal(regenerateNeedsRevalidate({ ...request, model: "Anthropic_Claude_Haiku_4.5" }), false);
     assert.equal(regenerateNeedsRevalidate({ ...request, currentPrompt: "" }), false);
+  });
+});
+
+describe("Summary model sync", () => {
+  const types = `
+export declare namespace AI {
+    export enum Model {
+        "OpenAI_GPT-6_Luna" = "openai-gpt-6-luna",
+        "OpenAI_GPT-5.6_Terra" = "openai-gpt-5.6-terra",
+        "OpenAI_GPT-6_Terra" = "openai-gpt-6-terra",
+        "Google_Gemini_3.8_Flash" = "google-gemini-3.8-flash",
+        "Google_Gemini_3.9_Flash_Lite" = "google-gemini-3.9-flash-lite",
+        "xAI_Grok-4.7" = "xai-grok-4.7",
+        /** @deprecated Use \`AI.Model["OpenAI_GPT-6_Luna"]\` instead */
+        "OpenAI_GPT-5.4_nano" = "openai-gpt-5.4-nano",
+        /** @deprecated Use \`AI.Model["xAI_Grok-4.7"]\` instead */
+        "xAI_Grok-4.5" = "xai-grok-4.5",
+    }
+}`;
+  const catalog = parseModelCatalog(types);
+
+  it("reads each model and the successor Raycast names for a deprecated one", () => {
+    assert.equal(catalog.get("OpenAI_GPT-6_Luna")?.deprecatedFor, undefined);
+    assert.equal(catalog.get("OpenAI_GPT-5.4_nano")?.deprecatedFor, "OpenAI_GPT-6_Luna");
+    assert.equal(catalog.get("xAI_Grok-4.7")?.value, "xai-grok-4.7");
+  });
+
+  it("replaces a deprecated model with its named successor", () => {
+    assert.deepEqual(planModelUpdates(catalog, ["OpenAI_GPT-5.4_nano"]), [
+      { from: "OpenAI_GPT-5.4_nano", to: "OpenAI_GPT-6_Luna", reason: "deprecated", duplicate: false },
+    ]);
+  });
+
+  it("moves a model to the newest version of the same line, and only that line", () => {
+    assert.deepEqual(planModelUpdates(catalog, ["OpenAI_GPT-5.6_Terra", "Google_Gemini_3.8_Flash"]), [
+      { from: "OpenAI_GPT-5.6_Terra", to: "OpenAI_GPT-6_Terra", reason: "newer", duplicate: false },
+    ]);
+  });
+
+  it("marks a replacement that is already listed as a duplicate", () => {
+    const plan = planModelUpdates(catalog, ["xAI_Grok-4.7", "xAI_Grok-4.5"]);
+    assert.deepEqual(plan, [{ from: "xAI_Grok-4.5", to: "xAI_Grok-4.7", reason: "deprecated", duplicate: true }]);
+  });
+
+  it("refuses a model Raycast no longer has at all", () => {
+    assert.throws(() => planModelUpdates(catalog, ["OpenAI_GPT-4_retired"]), /OpenAI_GPT-4_retired/);
+  });
+
+  it("titles a model the way the lists already do", () => {
+    assert.equal(modelTitle("OpenAI_GPT-5.6_Terra"), "GPT-5.6 Terra");
+    assert.equal(modelTitle("Anthropic_Claude_Haiku_5.5"), "Claude Haiku 5.5");
+    assert.equal(modelTitle("xAI_Grok-4.7"), "Grok 4.7");
+    assert.equal(modelTitle("Google_Gemini_3.1_Pro"), "Gemini 3.1 Pro");
+  });
+
+  it("rewrites ai.ts, the manifest, and the stub together", () => {
+    const aiTs = [
+      `export const DEFAULT_SUMMARY_MODEL: SummaryModelKey = "OpenAI_GPT-5.4_nano";`,
+      `  { key: "OpenAI_GPT-5.4_nano", title: "GPT-5.4 nano" },`,
+      `  { key: "xAI_Grok-4.7", title: "Grok 4.7" },`,
+      `  { key: "xAI_Grok-4.5", title: "Grok 4.5" },`,
+      `    model: AI.Model["OpenAI_GPT-5.4_nano"],`,
+    ].join("\n");
+    const manifest = {
+      preferences: [
+        {
+          name: "summaryModel",
+          data: [
+            { title: "Default (GPT-5.4 nano)", value: "default" },
+            { title: "Grok 4.7", value: "xAI_Grok-4.7" },
+            { title: "Grok 4.5", value: "xAI_Grok-4.5" },
+          ],
+        },
+      ],
+    };
+    const stub = `  Model: {\n    "xAI_Grok-4.7": "xai-grok-4.7",\n  },`;
+    const plan = planModelUpdates(catalog, ["OpenAI_GPT-5.4_nano", "xAI_Grok-4.7", "xAI_Grok-4.5"]);
+    const out = applyModelUpdates({ plan, catalog, defaultKey: "OpenAI_GPT-5.4_nano", aiTs, manifest, stub });
+
+    assert.equal(
+      out.aiTs,
+      [
+        `export const DEFAULT_SUMMARY_MODEL: SummaryModelKey = "OpenAI_GPT-6_Luna";`,
+        `  { key: "OpenAI_GPT-6_Luna", title: "GPT-6 Luna" },`,
+        `  { key: "xAI_Grok-4.7", title: "Grok 4.7" },`,
+        `    model: AI.Model["OpenAI_GPT-6_Luna"],`,
+      ].join("\n"),
+    );
+    assert.deepEqual(out.manifest.preferences[0].data, [
+      { title: "Default (GPT-6 Luna)", value: "default" },
+      { title: "Grok 4.7", value: "xAI_Grok-4.7" },
+    ]);
+    assert.match(out.stub, /"OpenAI_GPT-6_Luna": "openai-gpt-6-luna",/);
+  });
+
+  it("keeps the default first and drops its separate row when it is deprecated into a listed model", () => {
+    const aiTs = [
+      `  { key: "OpenAI_GPT-5.4_nano", title: "GPT-5.4 nano" },`,
+      `  { key: "xAI_Grok-4.7", title: "Grok 4.7" },`,
+      `  { key: "OpenAI_GPT-6_Luna", title: "GPT-6 Luna" },`,
+    ].join("\n");
+    const manifest = {
+      preferences: [
+        {
+          name: "summaryModel",
+          data: [
+            { title: "Default (GPT-5.4 nano)", value: "default" },
+            { title: "Grok 4.7", value: "xAI_Grok-4.7" },
+            { title: "GPT-6 Luna", value: "OpenAI_GPT-6_Luna" },
+          ],
+        },
+      ],
+    };
+    const plan = planModelUpdates(catalog, ["OpenAI_GPT-5.4_nano", "xAI_Grok-4.7", "OpenAI_GPT-6_Luna"]);
+    const out = applyModelUpdates({ plan, catalog, defaultKey: "OpenAI_GPT-5.4_nano", aiTs, manifest, stub: "" });
+
+    assert.equal(
+      out.aiTs,
+      [`  { key: "OpenAI_GPT-6_Luna", title: "GPT-6 Luna" },`, `  { key: "xAI_Grok-4.7", title: "Grok 4.7" },`].join(
+        "\n",
+      ),
+    );
+    assert.deepEqual(out.manifest.preferences[0].data, [
+      { title: "Default (GPT-6 Luna)", value: "default" },
+      { title: "Grok 4.7", value: "xAI_Grok-4.7" },
+    ]);
+  });
+
+  it("reads a deprecation whose comment wraps across lines", () => {
+    const wrapped = parseModelCatalog(`
+    export enum Model {
+        "OpenAI_GPT-6_Luna" = "openai-gpt-6-luna",
+        /**
+         * @deprecated
+         * Use \`AI.Model["OpenAI_GPT-6_Luna"]\` instead
+         */
+        "OpenAI_GPT-5.4_nano" = "openai-gpt-5.4-nano",
+    }`);
+    assert.equal(wrapped.get("OpenAI_GPT-5.4_nano")?.deprecatedFor, "OpenAI_GPT-6_Luna");
+  });
+
+  it("refuses a deprecated model whose successor it can't read", () => {
+    const unnamed = parseModelCatalog(`
+    export enum Model {
+        /** @deprecated Retired. */
+        "OpenAI_GPT-5.4_nano" = "openai-gpt-5.4-nano",
+    }`);
+    assert.throws(() => planModelUpdates(unnamed, ["OpenAI_GPT-5.4_nano"]), /OpenAI_GPT-5.4_nano/);
+  });
+
+  it("checks every model ai.ts names, not just the menu", () => {
+    const aiTs = [
+      `export const DEFAULT_SUMMARY_MODEL: SummaryModelKey = "OpenAI_GPT-6_Luna";`,
+      `  { key: "OpenAI_GPT-6_Luna", title: "GPT-6 Luna" },`,
+      `    model: AI.Model["OpenAI_GPT-5.4_nano"],`,
+    ].join("\n");
+    const keys = referencedModels(aiTs);
+    assert.deepEqual(keys, ["OpenAI_GPT-6_Luna", "OpenAI_GPT-5.4_nano"]);
+    assert.deepEqual(planModelUpdates(catalog, keys), [
+      { from: "OpenAI_GPT-5.4_nano", to: "OpenAI_GPT-6_Luna", reason: "deprecated", duplicate: true },
+    ]);
+  });
+
+  it("renames a menu row whose replacement only a style uses, instead of dropping it", () => {
+    const aiTs = [
+      `export const DEFAULT_SUMMARY_MODEL: SummaryModelKey = "OpenAI_GPT-6_Luna";`,
+      `  { key: "OpenAI_GPT-6_Luna", title: "GPT-6 Luna" },`,
+      `  { key: "OpenAI_GPT-5.6_Terra", title: "GPT-5.6 Terra" },`,
+      `    model: AI.Model["OpenAI_GPT-6_Terra"],`,
+    ].join("\n");
+    const manifest = {
+      preferences: [
+        {
+          name: "summaryModel",
+          data: [
+            { title: "Default (GPT-6 Luna)", value: "default" },
+            { title: "GPT-5.6 Terra", value: "OpenAI_GPT-5.6_Terra" },
+          ],
+        },
+      ],
+    };
+    const plan = planModelUpdates(catalog, referencedModels(aiTs), ["OpenAI_GPT-6_Luna", "OpenAI_GPT-5.6_Terra"]);
+    const out = applyModelUpdates({ plan, catalog, defaultKey: "OpenAI_GPT-6_Luna", aiTs, manifest, stub: "" });
+    assert.match(out.aiTs, /\{ key: "OpenAI_GPT-6_Terra", title: "GPT-6 Terra" \}/);
+    assert.deepEqual(out.manifest.preferences[0].data[1], { title: "GPT-6 Terra", value: "OpenAI_GPT-6_Terra" });
+  });
+
+  it("ignores models named only in comments", () => {
+    const aiTs = [
+      `// Previously used AI.Model["OpenAI_GPT-4_retired"].`,
+      `/* Also { key: "OpenAI_GPT-3_retired", title: "x" } */`,
+      `export const DEFAULT_SUMMARY_MODEL: SummaryModelKey = "OpenAI_GPT-6_Luna";`,
+    ].join("\n");
+    assert.deepEqual(referencedModels(aiTs), ["OpenAI_GPT-6_Luna"]);
+  });
+
+  it("finds nothing to change in the shipped lists against the installed Raycast API", () => {
+    const installed = parseModelCatalog(
+      readFileSync(join(process.cwd(), "node_modules/@raycast/api/types/index.d.ts"), "utf8"),
+    );
+    assert.deepEqual(
+      planModelUpdates(installed, referencedModels(readFileSync(join(process.cwd(), "src/config/ai.ts"), "utf8"))),
+      [],
+    );
+  });
+});
+
+describe("Nuxt data payload", () => {
+  const TEASER_URL = "https://www.example.test/news/2026/harbor-labs.html";
+  const teaser = loadFixture("nuxt-payload-teaser.html");
+  const payloadScript = teaser.match(/<script[^>]*id="__NUXT_DATA__">[\s\S]*?<\/script>/)![0];
+  const teaserBody = teaser.match(/<article[\s\S]*?<\/article>/)![0];
+  const page = (body: string, script = payloadScript) =>
+    `<!DOCTYPE html><html><head><title>Example</title></head><body>${body}${script}</body></html>`;
+  // Escaped as Nuxt does, so markup inside the payload can't close its <script> early.
+  const nuxt = (payload: unknown) =>
+    `<script type="application/json" id="__NUXT_DATA__">${JSON.stringify(payload).replace(/</g, "\\u003c")}</script>`;
+  // The teaser's article paragraphs, as the payload holds them.
+  const articleParagraphs = (JSON.parse(payloadScript.replace(/^<script[^>]*>|<\/script>$/g, "")) as unknown[]).filter(
+    (s): s is string => typeof s === "string" && s.endsWith("&nbsp;"),
+  );
+  const fullArticle = `<article><h1>Example</h1>${articleParagraphs.map((p) => `<p>${p}</p>`).join("")}</article>`;
+
+  /** A devalue payload holding block lists; each list is `[type, html][]`. */
+  function payloadWith(...lists: [string, string][][]) {
+    const payload: unknown[] = [null];
+    const add = (value: unknown) => payload.push(value) - 1;
+    const listIndexes = lists.map((list) => add(list.map(([type, html]) => add({ type: add(type), html: add(html) }))));
+    payload[0] = Object.fromEntries(listIndexes.map((index, i) => [`list${i}`, index]));
+    return payload;
+  }
+  const paragraphs = (texts: string[]): [string, string][] => texts.map((text) => ["paragraph", text]);
+
+  it("reads the whole article from the payload when the page shows a teaser", () => {
+    const result = parseArticle(teaser, TEASER_URL);
+    assert.ok(result.success, "the teaser page should parse from its payload");
+    const { content, textContent, title, recoveredFromPayload } = result.article;
+    assert.match(textContent, /SENTINEL-LAST-PARAGRAPH/, "the last payload paragraph is missing");
+    assert.doesNotMatch(textContent, /RESERVED FOR SUBSCRIBERS/, "the subscribe wall leaked in");
+    assert.match(content, /<li>The deal closes next quarter\.<\/li>/, "the highlights list is missing");
+    assert.match(content, /<h2>What the buyer gets<\/h2>/, "a subhead block should become a heading");
+    assert.match(content, /href="https:\/\/www\.example\.test\/news\/example-corp"/, "relative links must resolve");
+    assert.equal(title, "Example Corp. buys Harbor Labs");
+    assert.equal(recoveredFromPayload, true, "the payload held far more than the teaser");
+  });
+
+  it("keeps Readability's result when the page already shows the whole article", () => {
+    const html = page(fullArticle.replace("</article>", '<img src="https://example.test/visible-only.jpg"></article>'));
+    const result = parseArticle(html, TEASER_URL);
+    assert.ok(result.success);
+    assert.match(result.article.content, /visible-only\.jpg/, "the visible article should win over an equal payload");
+    assert.ok(!result.article.recoveredFromPayload);
+  });
+
+  it("doesn't replace a complete article with a longer list from the payload", () => {
+    const comments = paragraphs(
+      Array.from(
+        { length: 30 },
+        (_, i) => `COMMENT-SENTINEL ${i}: I have opinions about this acquisition and here they are at length.`,
+      ),
+    );
+    const article = paragraphs(articleParagraphs);
+    for (const payload of [payloadWith(article, comments), payloadWith(comments)]) {
+      const result = parseArticle(page(fullArticle, nuxt(payload)), TEASER_URL);
+      assert.ok(result.success);
+      assert.doesNotMatch(result.article.textContent, /COMMENT-SENTINEL/, "comments replaced the article");
+      assert.match(result.article.textContent, /SENTINEL-LAST-PARAGRAPH/);
+    }
+  });
+
+  it("doesn't take a payload list the page doesn't show any of", () => {
+    const cards = paragraphs(
+      Array.from(
+        { length: 10 },
+        (_, i) => `CARD-SENTINEL ${i}: a story about something else entirely, told at some length.`,
+      ),
+    );
+    const result = parseArticle(page("<nav><a href='/'>Home</a></nav>", nuxt(payloadWith(cards))), TEASER_URL);
+    assert.equal(result.success, false, "a list the page never shows is not this page's article");
+  });
+
+  it("doesn't take a list of head tags for the article", () => {
+    const description = "A meta description long enough to outweigh a short article in a naive scorer. ".repeat(3);
+    const payload: unknown[] = [{ head: 1 }, [2, 5, 8, 11]];
+    for (let i = 0; i < 4; i++)
+      payload.push({ name: payload.length + 1, content: payload.length + 2 }, "description", description);
+    const result = parseArticle(
+      page(`<nav><a href='/'>Home</a></nav><p>${description}</p>`, nuxt(payload)),
+      TEASER_URL,
+    );
+    assert.equal(result.success, false, "meta tags are not an article");
+  });
+
+  it("passes over a list that is mostly scripts and embeds", () => {
+    const embeds: [string, string][] = Array.from({ length: 10 }, (_, i) => [
+      "embed",
+      `<script>window.track${i}("${"x".repeat(400)}")</script>`,
+    ]);
+    // The teaser's opening paragraph is in both lists, so both are tied to the page.
+    const payload = payloadWith(paragraphs(articleParagraphs), [
+      ...paragraphs(articleParagraphs.slice(0, 1)),
+      ...embeds,
+    ]);
+    const result = parseArticle(page(teaserBody, nuxt(payload)), TEASER_URL);
+    assert.ok(result.success);
+    assert.match(result.article.textContent, /SENTINEL-LAST-PARAGRAPH/, "an embed list that comes out empty won");
+  });
+
+  it("keeps image blocks and resolves their URLs", () => {
+    const list: [string, string][] = [
+      ...paragraphs(articleParagraphs.slice(0, 3)),
+      ["image", '<figure><img src="../media/chart.png" alt="A chart"></figure>'],
+      ...paragraphs(articleParagraphs.slice(3)),
+    ];
+    const result = parseArticle(page(teaserBody, nuxt(payloadWith(list))), TEASER_URL);
+    assert.ok(result.success);
+    assert.match(result.article.content, /src="https:\/\/www\.example\.test\/news\/media\/chart\.png"/);
+  });
+
+  it("bounds a payload that points at one long block many times", () => {
+    const long = "A paragraph long enough to matter, repeated by reference rather than by copy. ".repeat(250);
+    // One block, listed 3,000 times: a 20 KB payload that expands to 60 MB if each copy is built.
+    const payload: unknown[] = [{ list: 1 }, [], { type: 3, html: 4 }, "paragraph", long];
+    (payload[1] as number[]).push(...Array.from({ length: 3000 }, () => 2));
+    globalThis.gc?.();
+    const before = process.memoryUsage().heapUsed;
+    // The page shows the block, so only the bound stands between it and a 60 MB article.
+    parseArticle(page(`<article><p>${long}</p></article>`, nuxt(payload)), TEASER_URL);
+    const grewMB = (process.memoryUsage().heapUsed - before) / 1e6;
+    assert.ok(grewMB < 40, `heap grew ${Math.round(grewMB)} MB`);
+  });
+
+  it("walks a large, self-referencing payload in linear time", () => {
+    // Under the 5 MB cap, so the walker runs; the article sits at the far end of the chain.
+    const article = payloadWith(paragraphs(articleParagraphs));
+    const offset = 60_000;
+    const payload: unknown[] = [];
+    // The chain's last link points at the article's list, reached only by walking all of it.
+    const listIndex = (article[0] as Record<string, number>).list0 + offset - 1;
+    for (let i = 0; i < offset; i++) {
+      payload.push({ next: i + 1 < offset ? i + 1 : listIndex, back: Math.max(0, i - 1), self: i });
+    }
+    for (const value of article.slice(1)) {
+      payload.push(
+        Array.isArray(value)
+          ? value.map((i) => (i as number) + offset - 1)
+          : isRecordLike(value)
+            ? Object.fromEntries(Object.entries(value).map(([k, v]) => [k, typeof v === "number" ? v + offset - 1 : v]))
+            : value,
+      );
+    }
+    const json = JSON.stringify(payload);
+    assert.ok(json.length < 5 * 1024 * 1024, `payload is ${json.length} characters, over the cap`);
+    const start = performance.now();
+    const result = parseArticle(page(teaserBody, nuxt(payload)), TEASER_URL);
+    assert.ok(performance.now() - start < 2000, `took ${Math.round(performance.now() - start)} ms`);
+    assert.ok(
+      result.success && /SENTINEL-LAST-PARAGRAPH/.test(result.article.textContent),
+      "the walk never reached the article",
+    );
+  });
+
+  it("doesn't run Paywall Hopper on an article recovered from the payload", async () => {
+    let requests = 0;
+    const server = createServer((_req, res) => {
+      requests++;
+      res.writeHead(200, { "content-type": "text/html" });
+      res.end(teaser);
+    });
+    await new Promise<void>((done) => server.listen(0, "127.0.0.1", done));
+    try {
+      const url = `http://127.0.0.1:${(server.address() as AddressInfo).port}/news/harbor-labs.html`;
+      const result = await loadArticleFromUrl(url, "test", {
+        skipPreCheck: false,
+        enablePaywallHopper: true,
+        showArticleImage: true,
+      });
+      assert.equal(result.status, "success");
+      assert.equal(requests, 1, "Paywall Hopper refetched a page whose payload already held the article");
+    } finally {
+      server.close();
+    }
+  });
+
+  const heapGrowthMB = (run: () => void) => {
+    globalThis.gc?.();
+    const before = process.memoryUsage().heapUsed;
+    run();
+    return (process.memoryUsage().heapUsed - before) / 1e6;
+  };
+  const opening = articleParagraphs[0];
+  const openingText = "Harbor Labs, a maker of fictional sensor software, is being acquired by Example Corp.";
+
+  it("bounds many distinct blocks that share one long string", () => {
+    const long = `${openingText} ${"Shared text that many blocks point at, at length. ".repeat(450)}`;
+    const payload: unknown[] = [{ list: 1 }, [], long];
+    for (let i = 0; i < 6000; i++) (payload[1] as number[]).push(payload.push({ html: 2 }) - 1);
+    const grew = heapGrowthMB(() =>
+      parseArticle(page(`<article><p>${openingText}</p></article>`, nuxt(payload)), TEASER_URL),
+    );
+    assert.ok(grew < 40, `heap grew ${Math.round(grew)} MB`);
+  });
+
+  it("bounds a candidate's tag count, not just its length", () => {
+    const list: [string, string][] = [...paragraphs(articleParagraphs), ["paragraph", "<b>x</b>".repeat(120_000)]];
+    const grew = heapGrowthMB(() => parseArticle(page(teaserBody, nuxt(payloadWith(list))), TEASER_URL));
+    assert.ok(grew < 40, `heap grew ${Math.round(grew)} MB`);
+  });
+
+  it("scores unclosed script tags in linear time", () => {
+    const list = paragraphs([opening, "<script>".repeat(80_000), "x" + "<script>".repeat(80_000)]);
+    const start = performance.now();
+    parseArticle(page(teaserBody, nuxt(payloadWith(list))), TEASER_URL);
+    assert.ok(performance.now() - start < 1500, `took ${Math.round(performance.now() - start)} ms`);
+  });
+
+  it("matches a teaser that cuts its paragraph off early", () => {
+    const cut = `<article><h1>Example</h1><p>${openingText.slice(0, 60)}…</p><p>Subscribe to read more.</p></article>`;
+    const result = parseArticle(page(cut), TEASER_URL);
+    assert.ok(
+      result.success && /SENTINEL-LAST-PARAGRAPH/.test(result.article.textContent),
+      "the cut teaser wasn't matched",
+    );
+  });
+
+  it("decodes entities before matching the page", () => {
+    const encoded = articleParagraphs.map((p, i) =>
+      i === 0 ? p.replace("Harbor Labs,", "Harbor &amp; Sons &ldquo;Labs&rdquo;,") : p,
+    );
+    const shown = `<article><p>${encoded[0].replace(/&nbsp;$/, "")}</p></article>`;
+    const result = parseArticle(page(shown, nuxt(payloadWith(paragraphs(encoded)))), TEASER_URL);
+    assert.ok(result.success && /SENTINEL-LAST-PARAGRAPH/.test(result.article.textContent), "entities broke the match");
+    assert.match(result.article.textContent, /Harbor & Sons “Labs”/);
+  });
+
+  it("finds the article among many longer unrelated lists", () => {
+    const unrelated = Array.from({ length: 6 }, (_, n) =>
+      paragraphs(
+        Array.from(
+          { length: 12 },
+          (_, i) => `Unrelated list ${n}, item ${i}: a story card about something else entirely.`,
+        ),
+      ),
+    );
+    const payload = payloadWith(...unrelated, paragraphs(articleParagraphs));
+    const result = parseArticle(page(teaserBody, nuxt(payload)), TEASER_URL);
+    assert.ok(
+      result.success && /SENTINEL-LAST-PARAGRAPH/.test(result.article.textContent),
+      "longer lists crowded out the article",
+    );
+  });
+
+  it("doesn't let a comment quoting the article tie a comment list to the page", () => {
+    const comments = paragraphs(
+      Array.from({ length: 30 }, (_, i) =>
+        i === 5
+          ? `${openingText} — quoting the article, and I disagree with every word of it.`
+          : `Comment ${i}: I have opinions about this acquisition, at length.`,
+      ),
+    );
+    const result = parseArticle(page(fullArticle, nuxt(payloadWith(comments))), TEASER_URL);
+    assert.ok(result.success);
+    assert.match(result.article.textContent, /SENTINEL-LAST-PARAGRAPH/, "comments replaced the article");
+  });
+
+  it("doesn't count hidden text as what the page shows", () => {
+    const card = (i: number) => `Hidden card ${i}: a recommended story about something else, at some length.`;
+    const cards = paragraphs(Array.from({ length: 10 }, (_, i) => card(i)));
+    const html = page(`<nav><a href="/">Home</a></nav><div hidden><p>${card(0)}</p></div>`, nuxt(payloadWith(cards)));
+    assert.equal(parseArticle(html, TEASER_URL).success, false, "a hidden paragraph tied a payload list to the page");
+  });
+
+  it("measures how much of a long block the teaser shows", () => {
+    const long = `${openingText} ${"The rest of a long opening paragraph that the teaser never shows. ".repeat(30)}`;
+    const list = paragraphs([
+      long,
+      "A short second paragraph of the article.",
+      "A short third paragraph of the article.",
+    ]);
+    const result = parseArticle(page(`<article><p>${openingText}…</p></article>`, nuxt(payloadWith(list))), TEASER_URL);
+    assert.ok(result.success);
+    assert.equal(
+      result.article.recoveredFromPayload,
+      true,
+      "the teaser shows ~85 characters of a 2,000-character block",
+    );
+  });
+
+  it("resolves lazy-loaded payload images", () => {
+    const list: [string, string][] = [
+      ...paragraphs(articleParagraphs.slice(0, 3)),
+      ["image", '<figure><img src="data:image/gif;base64,R0lGOD" data-src="../media/lazy.png"></figure>'],
+      ...paragraphs(articleParagraphs.slice(3)),
+    ];
+    const result = parseArticle(page(teaserBody, nuxt(payloadWith(list))), TEASER_URL);
+    assert.ok(result.success);
+    assert.match(result.article.content, /src="https:\/\/www\.example\.test\/news\/media\/lazy\.png"/);
+  });
+
+  const realArticle = (text: string) =>
+    `<!doctype html><html><head><title>Real</title></head><body><article><h1>Real</h1><p>${text.repeat(60)}</p></article></body></html>`;
+
+  /** Serves `first` to the first request and `rest` to every later one. */
+  async function withServer(first: string, rest: string, run: (url: string) => Promise<void>) {
+    let hits = 0;
+    const server = createServer((_req, res) => {
+      hits += 1;
+      res.writeHead(200, { "content-type": "text/html" });
+      res.end(hits === 1 ? first : rest);
+    });
+    await new Promise<void>((done) => server.listen(0, "127.0.0.1", done));
+    try {
+      await run(`http://127.0.0.1:${(server.address() as AddressInfo).port}/news/harbor-labs.html`);
+    } finally {
+      await new Promise((done) => server.close(done));
+    }
+  }
+
+  it("still checks a recovered article's own text for a paywall", async () => {
+    const gated = teaser.replace(
+      /SENTINEL-LAST-PARAGRAPH:[^"]*/,
+      "Subscribe to continue reading the rest of this article.",
+    );
+    await withServer(
+      gated,
+      realArticle("This is the genuine article body with plenty of real reporting. "),
+      async (url) => {
+        const options = { skipPreCheck: false, enablePaywallHopper: true, showArticleImage: true };
+        const result = await loadArticleFromUrl(url, "test", options);
+        assert.ok(
+          result.status === "success" && /genuine article body/.test(result.article.textContent),
+          "the gated payload was shown",
+        );
+      },
+    );
+  });
+
+  it("lets Paywall Hopper accept an article recovered from a payload", async () => {
+    await withServer(teaser, realArticle("A different page the second method would return. "), async (url) => {
+      const result = await loadArticleViaPaywallHopper(url, { showArticleImage: false });
+      assert.ok(
+        result.status === "success" && /SENTINEL-LAST-PARAGRAPH/.test(result.article.textContent),
+        "the recovered teaser was rejected",
+      );
+    });
+  });
+
+  it("counts each block's wrapper against the tag budget", () => {
+    const payload: unknown[] = [{ list: 1 }, [], `${openingText} ${"Opening paragraph text. ".repeat(30)}`, "x"];
+    const list = payload[1] as number[];
+    list.push(payload.push({ html: 2 }) - 1);
+    for (let i = 0; i < 80_000; i++) list.push(payload.push({ html: 3 }) - 1);
+    const page = `<!DOCTYPE html><html><body><article><p>${openingText}</p></article>${nuxt(payload)}</body></html>`;
+    const grew = heapGrowthMB(() => parseArticle(page, TEASER_URL));
+    assert.ok(grew < 40, `heap grew ${Math.round(grew)} MB`);
+  });
+
+  it("strips malformed markup in linear time", () => {
+    const list = paragraphs([opening, "<".repeat(160_000), "x" + "<!--".repeat(40_000)]);
+    const start = performance.now();
+    parseArticle(page(teaserBody, nuxt(payloadWith(list))), TEASER_URL);
+    assert.ok(performance.now() - start < 1500, `took ${Math.round(performance.now() - start)} ms`);
+  });
+
+  it("bounds memory across many lists of the same blocks", () => {
+    const payload: unknown[] = [[], "paragraph"];
+    const blocks = articleParagraphs.slice(1, 4).map((p) => payload.push({ type: 1, html: payload.push(p) - 1 }) - 1);
+    for (let i = 0; i < 250_000; i++) (payload[0] as number[]).push(payload.push(blocks) - 1);
+    const html = `<!DOCTYPE html><html><body><nav>Home</nav>${nuxt(payload)}</body></html>`;
+    const grew = heapGrowthMB(() => parseArticle(html, TEASER_URL));
+    assert.ok(grew < 60, `heap grew ${Math.round(grew)} MB`);
+  });
+
+  it("doesn't let a comment list that opens by quoting the article replace it", () => {
+    const comments = paragraphs([
+      `${openingText} — quoting the article, and I disagree with every word of it.`,
+      ...Array.from({ length: 30 }, (_, i) => `Comment ${i}: I have opinions about this acquisition, at length.`),
+    ]);
+    const result = parseArticle(page(fullArticle, nuxt(payloadWith(comments))), TEASER_URL);
+    assert.ok(result.success);
+    assert.match(result.article.textContent, /SENTINEL-LAST-PARAGRAPH/, "comments replaced the article");
+  });
+
+  it("doesn't count hidden text inside a visible element", () => {
+    const card = (i: number) => `Hidden card ${i}: a recommended story about something else, at some length.`;
+    const cards = paragraphs(Array.from({ length: 10 }, (_, i) => card(i)));
+    for (const hidden of [
+      `<blockquote><p hidden>${card(0)}</p></blockquote>`,
+      `<div><template><p>${card(0)}</p></template></div>`,
+    ]) {
+      const html = page(`<nav><a href="/">Home</a></nav>${hidden}`, nuxt(payloadWith(cards)));
+      assert.equal(parseArticle(html, TEASER_URL).success, false, `hidden text tied a list to the page: ${hidden}`);
+    }
+  });
+
+  it("decodes accented named entities like the page does", () => {
+    const renamed = articleParagraphs.map((p, i) => (i === 0 ? p.replace("Harbor Labs,", "Ren&eacute;e Labs,") : p));
+    const shown = `<article><p>${renamed[0].replace(/&nbsp;$/, "")}</p></article>`;
+    const result = parseArticle(page(shown, nuxt(payloadWith(paragraphs(renamed)))), TEASER_URL);
+    assert.ok(result.success && /SENTINEL-LAST-PARAGRAPH/.test(result.article.textContent), "&eacute; broke the match");
+  });
+
+  it(
+    "reads the real bizjournals capture",
+    { skip: !hasPrivateFixture("bizjournals-nuxt.html") && "no private corpus" },
+    () => {
+      const url = "https://www.bizjournals.com/portland/news/2026/10/13/c1-workday-acquisition.html?page=all";
+      const result = parseArticle(loadPrivateFixture("bizjournals-nuxt.html"), url);
+      assert.ok(result.success, "the captured page should parse from its payload");
+      assert.match(result.article.textContent, /Paul Querna/, "a paragraph past the teaser is missing");
+      assert.doesNotMatch(result.article.textContent, /RESERVED FOR SUBSCRIBERS/);
+      assert.ok(result.article.textContent.length > 2500, `only ${result.article.textContent.length} characters`);
+      assert.equal(result.article.recoveredFromPayload, true);
+    },
+  );
+});
+
+function isRecordLike(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+describe("markdown articles", () => {
+  const essay = loadFixture("markdown-essay.md");
+  const page = loadFixture("markdown-alternate.html");
+
+  it("recognizes a markdown response by content type, or a plain-text .md file", () => {
+    const md = "# Title";
+    assert.ok(isMarkdownResponse("text/markdown", "https://example.test/essay", md));
+    assert.ok(isMarkdownResponse("text/markdown; charset=utf-8", "https://example.test/essay", md));
+    assert.ok(isMarkdownResponse("text/x-markdown", "https://example.test/essay", md));
+    assert.ok(isMarkdownResponse("text/plain", "https://example.test/essay.md", md));
+    assert.ok(isMarkdownResponse(null, "https://example.test/notes.markdown?v=2", md));
+    assert.ok(!isMarkdownResponse("text/html", "https://example.test/essay.md", md));
+    assert.ok(!isMarkdownResponse("text/plain", "https://example.test/robots.txt", md));
+  });
+
+  it("never treats a full HTML document as markdown, whatever its headers say", () => {
+    const shell =
+      "<html><head><title>Login</title></head><body>" + "Login or subscribe. ".repeat(30) + "</body></html>";
+    assert.ok(!isMarkdownResponse("text/plain", "https://example.test/alt.md", shell));
+    assert.ok(!isMarkdownResponse("text/markdown", "https://example.test/alt.md", "\n<!DOCTYPE html><html>"));
+    // HTML fragments inside markdown are fine.
+    assert.ok(isMarkdownResponse("text/markdown", "https://example.test/a.md", '<p align="center">logo</p>\n\n# Hi'));
+  });
+
+  it("ignores markdown links in comments, scripts, and quoted attribute values", () => {
+    const pageUrl = "https://example.test/";
+    for (const head of [
+      "<!-- <link rel=alternate type=text/markdown href=/wrong.md> -->",
+      "<script>const x = `<link rel=alternate type=text/markdown href=/wrong.md>`</script>",
+      '<link title=" rel=alternate type=text/markdown href=/wrong.md">',
+    ]) {
+      assert.equal(findMarkdownAlternate(`<html><head>${head}</head><body></body></html>`, pageUrl), null, head);
+    }
+  });
+
+  it("decodes entities in the alternate's href and honors <base href>", () => {
+    assert.equal(
+      findMarkdownAlternate(
+        '<link rel=alternate type=text/markdown href="/a.md?a=1&amp;b=2">',
+        "https://example.test/",
+      ),
+      "https://example.test/a.md?a=1&b=2",
+    );
+    assert.equal(
+      findMarkdownAlternate(
+        '<base href="https://cdn.test/"><link rel=alternate type=text/markdown href="a.md">',
+        "https://example.test/x/y",
+      ),
+      "https://cdn.test/a.md",
+    );
+  });
+
+  it("finds the alternate past a '<body>' in a head script, and despite non-ASCII text before it", () => {
+    const link = "<link rel=alternate type=text/markdown href=/essay.md>";
+    for (const head of [
+      `<script>const html = "<body>";</script>${link}`,
+      `<!-- <body> example -->${link}`,
+      `<title>İletişim İçin</title>${link}`,
+    ]) {
+      assert.equal(
+        findMarkdownAlternate(`<head>${head}</head>`, "https://example.test/"),
+        "https://example.test/essay.md",
+        head,
+      );
+    }
+  });
+
+  it("recognizes an HTML shell that starts with a comment", () => {
+    const shell =
+      "<!-- cached page -->\n<!DOCTYPE html><html><head><title>Login</title></head><body>Login</body></html>";
+    assert.ok(!isMarkdownResponse("text/plain", "https://example.test/alt.md", shell));
+  });
+
+  it("scans hostile input in linear time", () => {
+    for (const run of [
+      () => parseMarkdownArticle("[".repeat(166_000), "https://example.test/a.md"),
+      () => parseMarkdownArticle("`".repeat(166_000), "https://example.test/a.md"),
+      () => parseMarkdownArticle("[a](b)[c] ".repeat(16_000), "https://example.test/a.md"),
+      () => findMarkdownAlternate("<link ".repeat(27_667), "https://example.test/"),
+      () => findMarkdownAlternate("<script>".repeat(30_000), "https://example.test/"),
+    ]) {
+      const start = performance.now();
+      run();
+      assert.ok(performance.now() - start < 500, `${run} took ${Math.round(performance.now() - start)} ms`);
+    }
+  });
+
+  it("finds a page's <link rel=alternate type=text/markdown>, whatever the attribute order", () => {
+    assert.equal(
+      findMarkdownAlternate(page, "https://example.test/essays/tidy"),
+      "https://example.test/essays/essay.md",
+    );
+    assert.equal(
+      findMarkdownAlternate(`<link rel='alternate' type='text/markdown' href='/a.md'>`, "https://example.test/x/y"),
+      "https://example.test/a.md",
+    );
+    assert.equal(
+      findMarkdownAlternate(`<link rel="alternate" type="application/rss+xml" href="/feed">`, "https://example.test/"),
+      null,
+    );
+    assert.equal(
+      findMarkdownAlternate(`<link rel="stylesheet" type="text/markdown" href="/a.md">`, "https://example.test/"),
+      null,
+    );
+    assert.equal(
+      findMarkdownAlternate(
+        `<link rel="alternate" type="text/markdown" href="javascript:alert(1)">`,
+        "https://example.test/",
+      ),
+      null,
+    );
+    assert.equal(findMarkdownAlternate("<p>no links</p>", "https://example.test/"), null);
+  });
+
+  it("takes the title from the first heading and drops it from the body", () => {
+    const article = parseMarkdownArticle(essay, "https://example.test/essays/essay.md");
+    assert.equal(article.title, "Networks Are Tidy");
+    assert.doesNotMatch(article.body, /^# Networks Are Tidy/m);
+    assert.match(article.body, /^## The Short Version/m);
+  });
+
+  it("takes the title from YAML front matter, and leaves the front matter out of the body", () => {
+    const article = parseMarkdownArticle(
+      '---\ntitle: "From Front Matter"\ndate: 2026-01-01\n---\n\nBody text.',
+      "https://example.test/a.md",
+    );
+    assert.equal(article.title, "From Front Matter");
+    assert.equal(article.body.trim(), "Body text.");
+  });
+
+  it("makes relative links and images absolute against the markdown's own URL", () => {
+    const { body } = parseMarkdownArticle(essay, "https://example.test/essays/essay.md");
+    assert.match(body, /\[web page\]\(https:\/\/example\.test\/essays\/index\.html\)/);
+    assert.match(body, /\[appendix\]\(https:\/\/example\.test\/appendix#notes\)/);
+    assert.match(body, /\[Wikipedia\]\(https:\/\/en\.wikipedia\.org\/wiki\/Neuron\)/);
+    assert.match(body, /!\[\]\(https:\/\/example\.test\/essays\/figures\/city\.png\)/);
+  });
+
+  it("rewrites bracketed figure notes the way HTML articles are, so Raycast doesn't render them as math", () => {
+    const { body } = parseMarkdownArticle(essay, "https://example.test/essays/essay.md");
+    assert.match(body, /^\(Figure: A city vs\. a knot \(header animation\)\.\)$/m);
+  });
+
+  it("leaves fenced and inline code exactly as written", () => {
+    const md = [
+      "Intro.",
+      "",
+      "  ```",
+      "  [aside] and [x](file.md)",
+      "  ```",
+      "",
+      "````md",
+      "```",
+      "[still code](rel.md)",
+      "```",
+      "````",
+      "",
+      "Inline ``a ` [note] ` b`` and `[y](z.md)`.",
+    ].join("\n");
+    const { body } = parseMarkdownArticle(md, "https://example.test/docs/a.md");
+    assert.equal(body, md);
+  });
+
+  it("keeps markdown brackets: nested labels, reference links, and brackets in a link's URL", () => {
+    const base = "https://example.test/docs/a.md";
+    assert.equal(
+      parseMarkdownArticle("See [nested [label]](../b.md).", base).body,
+      "See [nested [label]](https://example.test/b.md).",
+    );
+    assert.equal(
+      parseMarkdownArticle("See [x](file.md?list=[a]).", base).body,
+      "See [x](https://example.test/docs/file.md?list=[a]).",
+    );
+    assert.equal(
+      parseMarkdownArticle("See [Text].\n\n[text]: ../b.md", base).body,
+      "See [Text].\n\n[text]: https://example.test/b.md",
+    );
+    assert.equal(parseMarkdownArticle("- [ ] todo\n- [x] done", base).body, "- [ ] todo\n- [x] done");
+  });
+
+  it("doesn't resolve a link whose destination has markdown escapes", () => {
+    assert.equal(parseMarkdownArticle("[x](foo\\(bar\\).md)", "https://test/docs/a.md").body, "[x](foo\\(bar\\).md)");
+  });
+
+  it("resolves relative URLs in embedded HTML", () => {
+    const { body } = parseMarkdownArticle(
+      '<a href="../b">link</a> <img src="../image.png" alt="hi">',
+      "https://example.test/docs/a.md",
+    );
+    assert.equal(body, '<a href="https://example.test/b">link</a> <img src="https://example.test/image.png" alt="hi">');
+  });
+
+  it("reads YAML block-scalar and TOML front matter titles, and '# C#' headings", () => {
+    const base = "https://example.test/a.md";
+    assert.equal(
+      parseMarkdownArticle("---\ntitle: >-\n  Multiline\n  title\n---\nBody", base).title,
+      "Multiline title",
+    );
+    const toml = parseMarkdownArticle('+++\ntitle = "Hugo"\n+++\nBody', base);
+    assert.deepEqual([toml.title, toml.body], ["Hugo", "Body"]);
+    assert.equal(parseMarkdownArticle("# C#\n\nBody", base).title, "C#");
+    assert.equal(parseMarkdownArticle("# Closed ##\n\nBody", base).title, "Closed");
+  });
+
+  it("keeps code in the summarizer's text, and drops scripts and HTML tags", () => {
+    const { textContent } = parseMarkdownArticle(
+      "```\nif (a < b && c > d) return x_y;\n```\n\n<script>window.secret = 42;</script><p>Hello &amp; world</p>",
+      "https://example.test/a.md",
+    );
+    assert.match(textContent, /if \(a < b && c > d\) return x_y;/);
+    assert.match(textContent, /Hello & world/);
+    assert.doesNotMatch(textContent, /secret|<p>/);
+  });
+
+  it("keeps HTML-looking inline code as text, and decodes common entities", () => {
+    const { textContent } = parseMarkdownArticle(
+      "Use `<script>` tags carefully. İstanbul <script>alert(1)</script> Costs &pound;10 &mdash; a bargain &copy; 2026.",
+      "https://example.test/a.md",
+    );
+    assert.equal(textContent, "Use <script> tags carefully. İstanbul  Costs £10 — a bargain © 2026.");
+  });
+
+  it("gives the summarizer plain text, without markdown syntax or URLs", () => {
+    const { textContent } = parseMarkdownArticle(essay, "https://example.test/essays/essay.md");
+    assert.match(textContent, /The first approach is rapid normal science/);
+    assert.doesNotMatch(textContent, /\*\*|##|\]\(|https:\/\//);
+  });
+
+  describe("loading", () => {
+    let base = "";
+    let server: ReturnType<typeof createServer>;
+    const send = (res: import("node:http").ServerResponse, status: number, type: string, body: string) => {
+      res.writeHead(status, { "Content-Type": type });
+      res.end(body);
+    };
+
+    // Routes: /essay.md is markdown; /post advertises it. Under /broken/ the alternate 404s,
+    // and under /spa/ it answers with an HTML app shell, as a catch-all route would.
+    const ready = new Promise<void>((resolve) => {
+      server = createServer((req, res) => {
+        const path = req.url ?? "/";
+        if (path === "/essay.md") return send(res, 200, "text/markdown; charset=utf-8", essay);
+        if (path === "/spa/essay.md")
+          return send(res, 200, "text/html", "<html><body><div id=app></div></body></html>");
+        if (path === "/shell/essay.md") {
+          return send(
+            res,
+            200,
+            "text/plain",
+            "<html><head><title>Login</title></head><body>" + "Login or subscribe. ".repeat(30) + "</body></html>",
+          );
+        }
+        if (path === "/heading/essay.md") return send(res, 200, "text/markdown", "# " + "A".repeat(220));
+        if (path === "/encoded/post")
+          return send(res, 200, "text/html", page.replace('href="essay.md"', 'href="bad%FF.md"'));
+        if (path === "/encoded/bad%FF.md") return send(res, 200, "text/markdown", essay.replace(/^# .*\n/, ""));
+        if (path === "/headless/post") {
+          return send(res, 200, "text/html", page.replace(/<\/head>[\s\S]*/, "<p>Text</p>".repeat(100_000)));
+        }
+        if (path === "/headless/essay.md") return send(res, 200, "text/markdown", essay);
+        if (path.endsWith("/post")) return send(res, 200, "text/html; charset=utf-8", page);
+        send(res, 404, "text/plain", "not found");
+      });
+      server.listen(0, "127.0.0.1", () => {
+        base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+        resolve();
+      });
+    });
+    const options = { skipPreCheck: false, enablePaywallHopper: false, showArticleImage: true };
+
+    it("opens a markdown URL directly instead of parsing it as HTML", async () => {
+      await ready;
+      const result = await loadArticleFromUrl(`${base}/essay.md`, "test", options);
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status !== "success") return;
+      assert.equal(result.article.title, "Networks Are Tidy");
+      assert.match(result.article.bodyMarkdown, /^## The Short Version/m);
+      assert.match(result.article.textContent, /legible building blocks/);
+    });
+
+    it("prefers a page's markdown alternate, keeping the page's title, site name, and image", async () => {
+      await ready;
+      const result = await loadArticleFromUrl(`${base}/post`, "test", options);
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status !== "success") return;
+      assert.match(result.article.bodyMarkdown, /^## The Short Version/m);
+      assert.doesNotMatch(result.article.bodyMarkdown, /This HTML body/);
+      assert.equal(result.article.title, "Networks Are Tidy");
+      assert.equal(result.article.siteName, "Example Lab");
+      assert.ok(result.article.bodyMarkdown.startsWith("![](https://example.test/og.png)"));
+      assert.equal(result.article.url, `${base}/post`);
+    });
+
+    it("titles an untitled markdown file by its name, even when the name isn't valid percent-encoding", async () => {
+      await ready;
+      const result = await loadArticleFromUrl(`${base}/encoded/post`, "test", options);
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status === "success") assert.match(result.article.bodyMarkdown, /^## The Short Version/m);
+    });
+
+    it("reads only the <head> of a page that never closes it, so a long page's DOM is never built", async () => {
+      await ready;
+      (globalThis as { gc?: () => void }).gc?.();
+      const before = process.memoryUsage().heapUsed;
+      let peak = before;
+      const timer = setInterval(() => (peak = Math.max(peak, process.memoryUsage().heapUsed)), 1);
+      const result = await loadArticleFromUrl(`${base}/headless/post`, "test", options);
+      clearInterval(timer);
+      peak = Math.max(peak, process.memoryUsage().heapUsed);
+      assert.equal(result.status, "success", JSON.stringify(result).slice(0, 300));
+      if (result.status === "success") assert.match(result.article.bodyMarkdown, /^## The Short Version/m);
+      assert.ok(peak - before < 40e6, `heap grew ${Math.round((peak - before) / 1e6)} MB`);
+    });
+
+    for (const [label, path] of [
+      ["is missing", "/broken/post"],
+      ["answers with HTML", "/spa/post"],
+      ["is an HTML page served as text/plain", "/shell/post"],
+      ["has no text once its title is taken", "/heading/post"],
+    ] as const) {
+      it(`falls back to the HTML article when the markdown alternate ${label}`, async () => {
+        await ready;
+        const result = await loadArticleFromUrl(`${base}${path}`, "test", { ...options, skipPreCheck: true });
+        assert.equal(result.status, "success", JSON.stringify(result));
+        if (result.status !== "success") return;
+        assert.match(result.article.bodyMarkdown, /This HTML body/);
+      });
+    }
+
+    it("closes the server", async () => {
+      await ready;
+      await new Promise((resolve) => server.close(resolve));
+    });
   });
 });

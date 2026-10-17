@@ -21,15 +21,18 @@
  * @see src/hooks/useArticleReader.ts for the React state management layer
  */
 
-import { urlLog, paywallLog } from "./logger";
-import { fetchHtml } from "./fetcher";
-import { parseArticle, ArticleContent } from "./readability";
-import { formatArticle } from "./markdown";
-import { isBrowserExtensionAvailable, tryGetContentFromOpenTab } from "./browser-extension";
-import { tryBypassPaywall, createArchiveSource, PaywallHopperResult } from "./paywall-hopper";
-import { detectPaywall } from "./paywall-detector";
-import { BrowserTab } from "../types/browser";
+import { parseHTML } from "linkedom";
 import { ArticleState } from "../types/article";
+import { BrowserTab } from "../types/browser";
+import { isBrowserExtensionAvailable, tryGetContentFromOpenTab } from "./browser-extension";
+import { fetchHtml } from "./fetcher";
+import { paywallLog, urlLog } from "./logger";
+import { dedupeArticleImage, formatArticle } from "./markdown";
+import { findMarkdownAlternate, isMarkdownResponse, pageHead, parseMarkdownArticle } from "./markdown-source";
+import { MetadataExtractor } from "./metadata-extractor";
+import { detectPaywall } from "./paywall-detector";
+import { createArchiveSource, PaywallHopperResult, tryBypassPaywall } from "./paywall-hopper";
+import { ArticleContent, parseArticle } from "./readability";
 
 export type LoadArticleResult =
   | { status: "success"; article: ArticleState }
@@ -127,7 +130,9 @@ function validateBypassCandidate(url: string, minTextLength: number): (html: str
     }
     // Short candidates: overlay DOM + text signals. Long: text signals only (a full article can
     // carry a leftover overlay; a gating phrase in the body cannot). See the doc comment above.
-    const isShort = textContent.length < FULL_ARTICLE_TEXT_FLOOR;
+    // An article recovered from the page's data payload is weighed on its text too: the page's
+    // overlay describes the teaser the payload got past.
+    const isShort = textContent.length < FULL_ARTICLE_TEXT_FLOOR && !parsed.article.recoveredFromPayload;
     const evidence = isShort ? { textContent, html, description } : { textContent, description };
     if (detectPaywall(evidence, url).isPaywalled) {
       paywallLog.log("candidate:rejected", {
@@ -178,6 +183,87 @@ function buildBypassArticle(
     },
     markdownLength: formatted.markdown.length,
   };
+}
+
+/** Below this much text, a Markdown alternate is treated as broken and the HTML page is used. */
+const MIN_MARKDOWN_TEXT_LENGTH = 200;
+
+/**
+ * Builds the article from Markdown: a `.md` URL opened directly, or a page's Markdown alternate.
+ *
+ * For an alternate, `page` is the HTML page that advertised it. Its `<head>` supplies the title,
+ * site name, author, and image, and only the `<head>` is parsed: the alternate replaces the
+ * body, so the page's DOM (tens of MB for a long article) is never built.
+ */
+function buildMarkdownArticle(
+  markdown: string,
+  markdownUrl: string,
+  url: string,
+  source: string,
+  showArticleImage: boolean | undefined,
+  page?: { html: string; url: string },
+): ArticleState {
+  const parsed = parseMarkdownArticle(markdown, markdownUrl);
+
+  const meta = page
+    ? MetadataExtractor.extract(parseHTML(`${pageHead(page.html)}</head><body></body>`).document, page.url)
+    : null;
+
+  let bodyMarkdown = parsed.body;
+  const image = showArticleImage !== false ? meta?.image : null;
+  if (image) bodyMarkdown = `![](${image})\n\n${dedupeArticleImage(bodyMarkdown, image)}`;
+
+  return {
+    bodyMarkdown,
+    title: meta?.title || parsed.title || fileTitle(markdownUrl) || "Untitled",
+    byline: meta?.author ?? null,
+    siteName: meta?.siteName ?? null,
+    url,
+    source,
+    textContent: parsed.textContent,
+  };
+}
+
+/** "…/my-notes.md" → "my-notes". */
+function fileTitle(url: string): string {
+  let name = new URL(url).pathname.split("/").pop() ?? "";
+  try {
+    name = decodeURIComponent(name);
+  } catch {
+    // Malformed percent-encoding: keep the name as written
+  }
+  return name.replace(/\.(?:md|markdown)$/i, "");
+}
+
+/**
+ * Reads the Markdown alternate a page advertises. Null if it is missing, isn't Markdown (a
+ * catch-all route answering with the app's HTML shell), or has too little text to be the
+ * article; the caller then reads the HTML page as usual.
+ */
+async function loadMarkdownAlternate(
+  alternateUrl: string,
+  url: string,
+  source: string,
+  showArticleImage: boolean | undefined,
+  page: { html: string; url: string },
+): Promise<ArticleState | null> {
+  const fallback = (reason: string, detail: Record<string, unknown> = {}) => {
+    urlLog.log("markdown-alternate:fallback", { alternateUrl, reason, ...detail });
+    return null;
+  };
+  const result = await fetchHtml(alternateUrl);
+  if (!result.success) return fallback(result.error.message);
+  const { html: markdown, url: markdownUrl, contentType } = result.data;
+  if (!isMarkdownResponse(contentType, markdownUrl, markdown)) return fallback("not-markdown", { contentType });
+  try {
+    const article = buildMarkdownArticle(markdown, markdownUrl, url, source, showArticleImage, page);
+    if (article.textContent.length < MIN_MARKDOWN_TEXT_LENGTH) {
+      return fallback("too-short", { textLength: article.textContent.length });
+    }
+    return article;
+  } catch (err) {
+    return fallback("build-failed", { error: err instanceof Error ? err.message : String(err) });
+  }
 }
 
 /**
@@ -269,6 +355,34 @@ export async function loadArticleFromUrl(
     return { status: "error", error: fetchResult.error.message };
   }
 
+  // Step 1.5: Markdown. A .md URL is read as Markdown, never as HTML. A page that links a
+  // Markdown version of itself gets that version instead of an HTML parse.
+  const { html, url: finalUrl, contentType } = fetchResult.data;
+  const direct = isMarkdownResponse(contentType, finalUrl, html);
+  let markdownArticle: ArticleState | null = null;
+  if (direct) {
+    markdownArticle = buildMarkdownArticle(html, finalUrl, url, source, options.showArticleImage);
+  } else {
+    const alternateUrl = findMarkdownAlternate(html, finalUrl);
+    if (alternateUrl && alternateUrl !== finalUrl) {
+      progress("Fetching the Markdown version…");
+      urlLog.log("markdown-alternate:found", { url, alternateUrl });
+      markdownArticle = await loadMarkdownAlternate(alternateUrl, url, source, options.showArticleImage, {
+        html,
+        url: finalUrl,
+      });
+    }
+  }
+  if (markdownArticle) {
+    urlLog.log("session:ready", {
+      url,
+      title: markdownArticle.title,
+      markdownLength: markdownArticle.bodyMarkdown.length,
+      markdown: direct ? "direct" : "alternate",
+    });
+    return { status: "success", article: markdownArticle };
+  }
+
   // Step 2: Parse with Readability
   // When skipPreCheck is true (from "Try Anyway"), also enable forceParse
   const forceParse = options.forceParse ?? options.skipPreCheck;
@@ -303,11 +417,13 @@ export async function loadArticleFromUrl(
   if (options.enablePaywallHopper) {
     // Weigh the HTML and the page's own description too, not just the extracted text:
     // the barrier markup and a body far shorter than its og:description are the signals
-    // that catch paywalls on sites nobody thought to enumerate.
+    // that catch paywalls on sites nobody thought to enumerate. When the article came from the
+    // page's data payload, the barrier markup describes the teaser this parse got past, so only
+    // the recovered text is weighed.
     const paywallCheck = detectPaywall(
       {
         textContent: parseResult.article.textContent,
-        html: fetchResult.data.html,
+        html: parseResult.article.recoveredFromPayload ? undefined : fetchResult.data.html,
         description: parseResult.article.description,
       },
       url,

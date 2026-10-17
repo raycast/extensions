@@ -59,6 +59,11 @@ Need custom article container selector?
 
 Need to completely restructure content?
   └─→ Create an extractor (rare)
+
+Page shows a teaser, but the full article is in <script id="__NUXT_DATA__"> as a list of
+html/text blocks?
+  └─→ utils/nuxt-payload.ts already reads it, for any site without a registered extractor.
+      A payload holding the article as one string isn't covered.
 ```
 
 ## Common Mistakes to Avoid
@@ -84,6 +89,7 @@ Need to completely restructure content?
 6. **Changing the summary models in one place only**
    - The models are listed twice: `SUMMARY_MODELS` in `src/config/ai.ts` (the "Regenerate with Model…" menu) and the `summaryModel` dropdown in `package.json`. Edit both; a test fails when they disagree.
    - Use `AI.Model` keys that are not marked `@deprecated` in `node_modules/@raycast/api/types/index.d.ts`. A stored key Raycast later removes falls back to the default model instead of failing.
+   - `npm run publish` runs `scripts/sync-summary-models.mjs` first. It fails when the installed `@raycast/api` is behind npm's latest, or when `ai.ts`, the `summaryModel` dropdown (including its "Default (…)" label), disagree, or the test stub is missing a model `ai.ts` uses. It checks every model `ai.ts` names (the menu, the default, and each style's `AI.Model[...]`). It replaces each deprecated model with the successor Raycast's types name, and moves each model to the newest version of its own line (`GPT-#_Terra`, `Gemini_#_Flash`). It rewrites `ai.ts`, `package.json`, and the test stub. When it changes anything, it stops the publish and asks you to run the tests and add a CHANGELOG line before publishing again. Moving to a different line (GPT-5.4 mini → GPT-5.6 Terra) is a judgment call the script does not make.
 
 ## File Structure
 
@@ -98,7 +104,9 @@ src/
 │   └── site-config.ts   # Site-specific selectors (works WITH Readability)
 ├── utils/
 │   ├── html-cleaner.ts  # Pre-cleaning logic using site configs
-│   ├── readability.ts   # Main extraction pipeline (one DOM: metadata → clean → parse)
+│   ├── readability.ts   # Main extraction pipeline (one DOM: metadata → Nuxt payload → clean → parse)
+│   ├── nuxt-payload.ts  # Reads an article from a Nuxt __NUXT_DATA__ payload (teaser pages)
+│   ├── markdown-source.ts   # .md URLs and <link rel="alternate" type="text/markdown"> pages
 │   ├── paywall-detector.ts  # Evidence-based paywall scoring (no domain allowlist)
 │   ├── host-api.ts      # Bounded/guarded Raycast host API calls (Windows-safe)
 │   └── ...
