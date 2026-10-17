@@ -35,9 +35,11 @@ import {
 } from "../src/utils/fetcher";
 import { preCleanHtml } from "../src/utils/html-cleaner";
 import { findMarkdownAlternate, isMarkdownResponse, parseMarkdownArticle } from "../src/utils/markdown-source";
+import { findNuxtArticles } from "../src/utils/nuxt-payload";
 import { detectPaywall } from "../src/utils/paywall-detector";
 import { tryBypassPaywall } from "../src/utils/paywall-hopper";
 import { parseArticle } from "../src/utils/readability";
+import { runExclusive } from "../src/utils/run-exclusive";
 import { regenerateNeedsRevalidate } from "../src/utils/summarizer";
 import {
   hasPrivateFixture,
@@ -88,6 +90,36 @@ describe("paywall detection", () => {
       assertPaywall(loadPrivateFixture(file), url, site, false),
     );
   }
+
+  it("does not convict on circumstantial signals alone", () => {
+    // A complete article that quotes "subscribe now", ends in an ellipsis, and carries a long SEO
+    // description: three circumstantial points, and no barrier.
+    const body =
+      "The newsletter business has its own vocabulary, and editors say the phrase they hear most is subscribe now. ".repeat(
+        9,
+      ) + "And so the pitch goes on...";
+    const description = "A long description written by an SEO plugin, longer than any summary needs to be. ".repeat(10);
+    const result = detectPaywall({ textContent: body, description }, "https://example.com/essay");
+    assert.equal(result.isPaywalled, false, `convicted on ${result.signals.map((s) => s.name).join(", ")}`);
+  });
+
+  it("convicts on explicit member-gating language without barrier markup", () => {
+    const body = "Reporting on the regional economy, with figures from the latest filings and interviews. ".repeat(12);
+    for (const gate of [
+      "Sign up to read the full story.",
+      "This article is available to members.",
+      "You have used your free article limit.",
+      "You have a preview view of this article.",
+    ]) {
+      const result = detectPaywall({ textContent: `${body} ${gate}` }, "https://example.com/news");
+      assert.equal(result.isPaywalled, true, `missed: ${gate}`);
+    }
+    const newsletter = detectPaywall(
+      { textContent: `${body} Sign up to read our weekly digest.` },
+      "https://example.com/news",
+    );
+    assert.equal(newsletter.isPaywalled, false, "a newsletter pitch is not a barrier");
+  });
 
   it("does not depend on a domain allowlist", () => {
     // The old detector returned isPaywalled:false for any site not among thirteen
@@ -1419,13 +1451,15 @@ describe("Nuxt data payload", () => {
     assert.ok(performance.now() - start < 1500, `took ${Math.round(performance.now() - start)} ms`);
   });
 
-  it("bounds memory across many lists of the same blocks", () => {
+  it("folds many lists of the same blocks into one candidate", () => {
+    // Memory is asserted structurally: a heap reading here is dominated by the garbage from
+    // parsing a 4 MB page, and swings by more than the difference being tested.
     const payload: unknown[] = [[], "paragraph"];
-    const blocks = articleParagraphs.slice(1, 4).map((p) => payload.push({ type: 1, html: payload.push(p) - 1 }) - 1);
+    // All five paragraphs: fewer would fall under the 500-character bar and never be a candidate.
+    const blocks = articleParagraphs.map((p) => payload.push({ type: 1, html: payload.push(p) - 1 }) - 1);
     for (let i = 0; i < 250_000; i++) (payload[0] as number[]).push(payload.push(blocks) - 1);
-    const html = `<!DOCTYPE html><html><body><nav>Home</nav>${nuxt(payload)}</body></html>`;
-    const grew = heapGrowthMB(() => parseArticle(html, TEASER_URL));
-    assert.ok(grew < 60, `heap grew ${Math.round(grew)} MB`);
+    const { document } = parseHTML(`<!DOCTYPE html><html><body>${nuxt(payload)}</body></html>`);
+    assert.equal(findNuxtArticles(document, TEASER_URL)?.candidates, 1);
   });
 
   it("doesn't let a comment list that opens by quoting the article replace it", () => {
@@ -1475,6 +1509,33 @@ describe("Nuxt data payload", () => {
 function isRecordLike(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
+
+describe("runExclusive", () => {
+  it("ignores a second run while the first is in flight, and releases the lock however it ends", async () => {
+    const lock = { current: false };
+    let finishFirst!: () => void;
+    const runs: string[] = [];
+    const first = runExclusive(lock, () => {
+      runs.push("first");
+      return new Promise<void>((resolve) => (finishFirst = resolve));
+    });
+    const second = await runExclusive(lock, async () => {
+      runs.push("second");
+    });
+    assert.equal(second, false, "a second press while a fetch runs must be ignored");
+    finishFirst();
+    assert.equal(await first, true);
+    assert.equal(lock.current, false, "the lock must be released after the run");
+
+    await assert.rejects(
+      runExclusive(lock, async () => {
+        throw new Error("fetch failed");
+      }),
+    );
+    assert.equal(lock.current, false, "the lock must be released after a failure");
+    assert.deepEqual(runs, ["first"]);
+  });
+});
 
 describe("markdown articles", () => {
   const essay = loadFixture("markdown-essay.md");
@@ -1617,6 +1678,14 @@ describe("markdown articles", () => {
   it("rewrites bracketed figure notes the way HTML articles are, so Raycast doesn't render them as math", () => {
     const { body } = parseMarkdownArticle(essay, "https://example.test/essays/essay.md");
     assert.match(body, /^\(Figure: A city vs\. a knot \(header animation\)\.\)$/m);
+  });
+
+  it("leaves brackets the author escaped as written", () => {
+    const { body } = parseMarkdownArticle(
+      "Intro.\n\nThe array is written \\[literal text\\] in the docs.",
+      "https://example.test/a.md",
+    );
+    assert.match(body, /\\\[literal text\\\]/, "an escaped bracket was rewritten");
   });
 
   it("leaves fenced and inline code exactly as written", () => {

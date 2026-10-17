@@ -238,7 +238,13 @@ export function parseArticle(
     const pageText = nuxt ? shownText(document) : "";
     const fromPayload = (payload: PayloadArticle, reason: string) => {
       const recoveredFromPayload = payload.textContent.length > payload.shownLength * PAYLOAD_PREFERENCE_RATIO;
-      parseLog.log("parse:nuxt-payload", { url, reason, textLength: payload.textContent.length, recoveredFromPayload });
+      parseLog.log("parse:nuxt-payload", {
+        url,
+        reason,
+        textLength: payload.textContent.length,
+        recoveredFromPayload,
+        candidates: nuxt?.candidates,
+      });
       return {
         success: true as const,
         article: {

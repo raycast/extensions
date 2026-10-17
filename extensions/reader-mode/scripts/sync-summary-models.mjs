@@ -31,9 +31,22 @@ function fail(message) {
 }
 
 const installed = JSON.parse(readFileSync(paths.api, "utf8")).version;
+// Runs npm's own JavaScript entry point under node, so it works on Windows (where `npm` is a
+// `.cmd` wrapper a subprocess can't launch without a shell) and keeps the user's .npmrc proxy and
+// registry settings. Outside `npm run`, there is no entry point to borrow, so ask the registry.
 let latest;
 try {
-  latest = execFileSync("npm", ["view", "@raycast/api", "version"], { encoding: "utf8" }).trim();
+  const npmCli = process.env.npm_execpath;
+  if (npmCli && /\.[cm]?js$/.test(npmCli)) {
+    latest = execFileSync(process.execPath, [npmCli, "view", "@raycast/api", "version"], { encoding: "utf8" }).trim();
+  } else {
+    const response = await fetch("https://registry.npmjs.org/@raycast%2Fapi/latest", {
+      signal: AbortSignal.timeout(20_000),
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    latest = (await response.json()).version;
+  }
+  if (typeof latest !== "string" || !latest) throw new Error("no version");
 } catch {
   fail("couldn't read the latest @raycast/api version from npm, so the model list can't be checked.");
 }

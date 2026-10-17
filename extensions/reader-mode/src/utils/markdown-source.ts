@@ -353,11 +353,11 @@ export function parseMarkdownArticle(markdown: string, url: string): MarkdownArt
     // Also as for HTML articles: a bracketed aside like "[Figure: …]" becomes "(Figure: …)" so
     // Raycast doesn't render it as math. Brackets that are Markdown keep them: links and nested
     // link labels, reference links and definitions, task-list boxes, and anything inside a
-    // link's destination.
+    // link's destination, and brackets the author escaped (`\[`).
     // Matches arrive in order, so one pointer walks the destinations.
     const destinations = [...prose.matchAll(/\]\([^)\n]*\)/g)].map((m) => [m.index, m.index + m[0].length]);
     let next = 0;
-    return prose.replace(/(?<![\]!])\[(?![ xX]\])([^\]\n]{1,300})\](?![([:\]])/g, (match, text, offset: number) => {
+    return prose.replace(/(?<![\]!\\])\[(?![ xX]\])([^\]\n]{1,300})\](?![([:\]])/g, (match, text, offset: number) => {
       while (next < destinations.length && destinations[next][1] <= offset) next++;
       if (next < destinations.length && destinations[next][0] < offset) return match;
       if (references.has(label(text))) return match;

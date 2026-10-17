@@ -280,6 +280,8 @@ export interface NuxtArticles {
    * scripts and embeds are removed is passed over.
    */
   pick(pageText: string): PayloadArticle | null;
+  /** How many distinct block lists qualified, for logs and tests. */
+  readonly candidates: number;
 }
 
 /**
@@ -303,6 +305,7 @@ export function findNuxtArticles(document: LinkedomDocument, url: string): NuxtA
   if (!candidates.length) return null;
 
   return {
+    candidates: candidates.length,
     pick(pageText) {
       const page = normalize(pageText);
       for (const candidate of candidates) {

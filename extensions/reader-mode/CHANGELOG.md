@@ -10,6 +10,7 @@
 
 ### Fixed
 
+- Fewer complete articles are mistaken for paywalled ones, which sent them through a slow round of bypass attempts.
 - When fetching a page from your browser fails, the "Page Found in Browser" and "Page Blocked" screens now say why, instead of staying unchanged.
 - Summarizing a long article no longer runs out of memory and crashes Reader. The summary now refreshes on screen twice a second while it streams, instead of on every word.
 

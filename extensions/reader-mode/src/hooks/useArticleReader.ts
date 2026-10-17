@@ -39,6 +39,7 @@ import {
   reimportFromBrowserTab,
 } from "../utils/browser-extension";
 import { aiLog, urlLog } from "../utils/logger";
+import { runExclusive } from "../utils/run-exclusive";
 import {
   buildSummaryPrompt,
   getStyleLabel,
@@ -490,27 +491,27 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
   // a second press while the first is in flight would let a late failure cover a success.
   const fetchingFromBrowserRef = useRef(false);
   const handleFetchFromBrowser = useCallback(async () => {
-    if (!blockedUrl || fetchingFromBrowserRef.current) return;
-    fetchingFromBrowserRef.current = true;
+    if (!blockedUrl) return;
 
-    setIsWaitingForBrowser(true);
-    setError(null);
-    setBrowserFetchError(null);
+    await runExclusive(fetchingFromBrowserRef, async () => {
+      setIsWaitingForBrowser(true);
+      setError(null);
+      setBrowserFetchError(null);
 
-    try {
-      const result = await getContentFromActiveTab(blockedUrl);
+      try {
+        const result = await getContentFromActiveTab(blockedUrl);
 
-      if (result.success) {
-        setArticle(result.article);
-        setBlockedUrl(null);
-      } else {
-        setError(result.error);
-        setBrowserFetchError(result.error);
+        if (result.success) {
+          setArticle(result.article);
+          setBlockedUrl(null);
+        } else {
+          setError(result.error);
+          setBrowserFetchError(result.error);
+        }
+      } finally {
+        setIsWaitingForBrowser(false);
       }
-    } finally {
-      fetchingFromBrowserRef.current = false;
-      setIsWaitingForBrowser(false);
-    }
+    });
   }, [blockedUrl]);
 
   // Handler to reimport content from browser tab

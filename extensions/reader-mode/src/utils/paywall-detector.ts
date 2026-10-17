@@ -93,11 +93,14 @@ export const BARRIER_SELECTORS = [
 /** Phrases that a page shows only when it is withholding the story. */
 const BARRIER_PHRASES: RegExp[] = [
   /subscribe to (?:unlock|read|continue)/i,
-  /(?:this|the) (?:article|story|content) is (?:reserved )?for subscribers/i,
+  /(?:this|the) (?:article|story|content) is (?:reserved )?(?:for|available (?:only )?to) (?:paying )?(?:subscribers|members)/i,
   /create (?:a )?(?:free )?account to continue/i,
   /(?:log ?in|sign ?in) to (?:read|continue)/i,
   /to continue reading[,.]? (?:subscribe|sign|log|create|register)/i,
-  /you(?:'ve| have) (?:reached|read) your (?:free )?(?:article|story) limit/i,
+  /you(?:'ve| have) (?:reached|read|used) your (?:free )?(?:article|story) limit/i,
+  // About the article, not a newsletter: "sign up to read our weekly digest" is marketing.
+  /sign up to (?:read|continue reading) (?:the |this )?(?:full |rest of (?:the |this )?)?(?:article|story)/i,
+  /you have a preview view of this article/i,
   /already a (?:subscriber|member)\?/i,
   /unlimited (?:digital )?access/i,
   /for subscribers only/i,
@@ -187,7 +190,11 @@ export function detectPaywall(evidence: PaywallEvidence, url: string): PaywallDe
 
   signals.sort((a, b) => b.weight - a.weight);
   const score = signals.reduce((total, signal) => total + signal.weight, 0);
-  const isPaywalled = score >= PAYWALL_SCORE_THRESHOLD;
+  // The weights alone don't uphold the invariant: on a full-length page, a quoted keyword, a
+  // trailing ellipsis, and a long SEO description are three circumstantial points. So a
+  // verdict also needs a conclusive signal.
+  const hasConclusive = signals.some((signal) => signal.weight >= CONCLUSIVE);
+  const isPaywalled = score >= PAYWALL_SCORE_THRESHOLD && hasConclusive;
 
   paywallLog.log(isPaywalled ? "paywall:detected" : "paywall:clean", {
     url,
