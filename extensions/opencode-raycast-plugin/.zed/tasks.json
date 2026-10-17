@@ -1,0 +1,17 @@
+[
+  {
+    "label": "opencode usage: clean dev start",
+    "command": "pkill -f 'opencode-raycast-plugin/node_modules/.bin/ray develop' 2>/dev/null; sleep 1; npm run dev & sleep 6; open \"raycast://extensions/raycast/raycast/reload-extensions\"",
+    "use_new_terminal": true,
+    "reveal": "always",
+    "description": "Kill any stale ray develop, start a fresh one, then reload the extension in Raycast so the actual code and assets load."
+  },
+  {
+    "label": "opencode usage: reload in Raycast",
+    "command": "open \"raycast://extensions/raycast/raycast/reload-extensions\"",
+    "use_new_terminal": false,
+    "reveal": "never",
+    "hide": "on_success",
+    "description": "Reload the opencode usage extension in Raycast without restarting the dev server."
+  }
+]
