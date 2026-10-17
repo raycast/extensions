@@ -1,0 +1,924 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-writing-assistant",
+  "title": "Claude Writing Assistant",
+  "description": "Translate, fix and rewrite selected text in any app with Claude, plus chat, screenshot and web page tools, using your own Anthropic API key.",
+  "icon": "icon.png",
+  "author": "cofie",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "translate-replace",
+      "title": "Translate and Replace",
+      "description": "Translate the selected text in place: text in your primary language goes to your second language, anything else goes to your primary language.",
+      "mode": "no-view",
+      "icon": "commands/translate-replace.png",
+      "keywords": [
+        "translate",
+        "replace",
+        "selection",
+        "language"
+      ]
+    },
+    {
+      "name": "translate-to",
+      "title": "Translate to Language",
+      "description": "Translate the selected text into a language you pick and replace it.",
+      "mode": "no-view",
+      "icon": "commands/translate-to.png",
+      "keywords": [
+        "translate",
+        "language",
+        "convert"
+      ],
+      "arguments": [
+        {
+          "name": "target",
+          "type": "dropdown",
+          "placeholder": "Language",
+          "required": true,
+          "data": [
+            {
+              "title": "English",
+              "value": "English"
+            },
+            {
+              "title": "Spanish",
+              "value": "Spanish"
+            },
+            {
+              "title": "French",
+              "value": "French"
+            },
+            {
+              "title": "German",
+              "value": "German"
+            },
+            {
+              "title": "Italian",
+              "value": "Italian"
+            },
+            {
+              "title": "Portuguese",
+              "value": "Portuguese"
+            },
+            {
+              "title": "Dutch",
+              "value": "Dutch"
+            },
+            {
+              "title": "Turkish",
+              "value": "Turkish"
+            },
+            {
+              "title": "Russian",
+              "value": "Russian"
+            },
+            {
+              "title": "Ukrainian",
+              "value": "Ukrainian"
+            },
+            {
+              "title": "Polish",
+              "value": "Polish"
+            },
+            {
+              "title": "Czech",
+              "value": "Czech"
+            },
+            {
+              "title": "Greek",
+              "value": "Greek"
+            },
+            {
+              "title": "Romanian",
+              "value": "Romanian"
+            },
+            {
+              "title": "Hungarian",
+              "value": "Hungarian"
+            },
+            {
+              "title": "Bulgarian",
+              "value": "Bulgarian"
+            },
+            {
+              "title": "Swedish",
+              "value": "Swedish"
+            },
+            {
+              "title": "Norwegian",
+              "value": "Norwegian"
+            },
+            {
+              "title": "Danish",
+              "value": "Danish"
+            },
+            {
+              "title": "Finnish",
+              "value": "Finnish"
+            },
+            {
+              "title": "Arabic",
+              "value": "Arabic"
+            },
+            {
+              "title": "Hebrew",
+              "value": "Hebrew"
+            },
+            {
+              "title": "Persian",
+              "value": "Persian"
+            },
+            {
+              "title": "Azerbaijani",
+              "value": "Azerbaijani"
+            },
+            {
+              "title": "Kazakh",
+              "value": "Kazakh"
+            },
+            {
+              "title": "Georgian",
+              "value": "Georgian"
+            },
+            {
+              "title": "Hindi",
+              "value": "Hindi"
+            },
+            {
+              "title": "Indonesian",
+              "value": "Indonesian"
+            },
+            {
+              "title": "Vietnamese",
+              "value": "Vietnamese"
+            },
+            {
+              "title": "Thai",
+              "value": "Thai"
+            },
+            {
+              "title": "Japanese",
+              "value": "Japanese"
+            },
+            {
+              "title": "Korean",
+              "value": "Korean"
+            },
+            {
+              "title": "Chinese (Simplified)",
+              "value": "Chinese (Simplified)"
+            },
+            {
+              "title": "Chinese (Traditional)",
+              "value": "Chinese (Traditional)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fix-grammar",
+      "title": "Fix Spelling and Grammar",
+      "description": "Fix spelling, grammar, punctuation and missing accents in the selected text, in place.",
+      "mode": "no-view",
+      "icon": "commands/fix-grammar.png",
+      "keywords": [
+        "fix",
+        "grammar",
+        "spelling",
+        "proofread",
+        "typo"
+      ]
+    },
+    {
+      "name": "improve-writing",
+      "title": "Improve Writing",
+      "description": "Make the selected text clearer and more fluent without changing its language or meaning.",
+      "mode": "no-view",
+      "icon": "commands/improve-writing.png",
+      "keywords": [
+        "improve",
+        "rewrite",
+        "polish",
+        "edit"
+      ]
+    },
+    {
+      "name": "change-tone",
+      "title": "Change Tone",
+      "description": "Rewrite the selected text in the tone you pick.",
+      "mode": "no-view",
+      "icon": "commands/change-tone.png",
+      "keywords": [
+        "tone",
+        "rewrite",
+        "style",
+        "formal",
+        "friendly"
+      ],
+      "arguments": [
+        {
+          "name": "tone",
+          "type": "dropdown",
+          "placeholder": "Tone",
+          "required": true,
+          "data": [
+            {
+              "title": "Professional",
+              "value": "professional"
+            },
+            {
+              "title": "Friendly",
+              "value": "friendly"
+            },
+            {
+              "title": "Formal",
+              "value": "formal"
+            },
+            {
+              "title": "Confident",
+              "value": "confident"
+            },
+            {
+              "title": "Concise",
+              "value": "concise"
+            },
+            {
+              "title": "Diplomatic",
+              "value": "diplomatic"
+            },
+            {
+              "title": "Empathetic",
+              "value": "empathetic"
+            },
+            {
+              "title": "Persuasive",
+              "value": "persuasive"
+            },
+            {
+              "title": "Playful",
+              "value": "playful"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "transform",
+      "title": "Edit with Instruction",
+      "description": "Apply your own instruction to the selected text and replace it.",
+      "mode": "no-view",
+      "icon": "commands/transform.png",
+      "keywords": [
+        "transform",
+        "instruction",
+        "edit",
+        "prompt",
+        "rewrite"
+      ],
+      "arguments": [
+        {
+          "name": "instruction",
+          "type": "text",
+          "placeholder": "Instruction",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "translate",
+      "title": "Translate Selection",
+      "description": "Open Translate with the selected text already translated, or empty when nothing is selected. Best with a hotkey.",
+      "mode": "no-view",
+      "icon": "commands/translate.png",
+      "keywords": [
+        "translate",
+        "translator",
+        "selection",
+        "selected",
+        "language"
+      ]
+    },
+    {
+      "name": "translator",
+      "title": "Translate",
+      "description": "Translate as you type, with dictionary entries for single words, text to speech and language suffixes such as “>de”.",
+      "mode": "view",
+      "icon": "commands/translator.png",
+      "keywords": [
+        "translate",
+        "translator",
+        "dictionary",
+        "language"
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ask",
+      "title": "Ask Claude",
+      "description": "Chat with Claude; it searches the web when an answer needs current information.",
+      "mode": "view",
+      "icon": "commands/ask.png",
+      "keywords": [
+        "ask",
+        "chat",
+        "question",
+        "claude",
+        "ai"
+      ],
+      "arguments": [
+        {
+          "name": "question",
+          "type": "text",
+          "placeholder": "Question",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ask-selection",
+      "title": "Ask About Selection",
+      "description": "Ask a question about the selected text and keep chatting about it.",
+      "mode": "view",
+      "icon": "commands/ask-selection.png",
+      "keywords": [
+        "ask",
+        "selection",
+        "explain",
+        "question"
+      ],
+      "arguments": [
+        {
+          "name": "question",
+          "type": "text",
+          "placeholder": "Question",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ai-commands",
+      "title": "AI Commands",
+      "description": "Run built-in and custom prompt commands on the selected text and add hotkeys to them with quicklinks.",
+      "mode": "view",
+      "icon": "commands/ai-commands.png",
+      "keywords": [
+        "commands",
+        "prompts",
+        "presets",
+        "summarize",
+        "custom"
+      ]
+    },
+    {
+      "name": "screen-translate",
+      "title": "Translate Screen Area",
+      "description": "Select an area of the screen and translate the text in it.",
+      "mode": "no-view",
+      "icon": "commands/screen-translate.png",
+      "keywords": [
+        "screenshot",
+        "ocr",
+        "translate",
+        "screen",
+        "image"
+      ]
+    },
+    {
+      "name": "screen-ask",
+      "title": "Ask About Screen Area",
+      "description": "Select an area of the screen and ask Claude about it.",
+      "mode": "no-view",
+      "icon": "commands/screen-ask.png",
+      "keywords": [
+        "screenshot",
+        "vision",
+        "image",
+        "screen",
+        "explain"
+      ]
+    },
+    {
+      "name": "screen-text",
+      "title": "Copy Text from Screen",
+      "description": "Select an area of the screen and copy the text in it.",
+      "mode": "no-view",
+      "icon": "commands/screen-text.png",
+      "keywords": [
+        "ocr",
+        "screenshot",
+        "text",
+        "copy",
+        "screen"
+      ]
+    },
+    {
+      "name": "page-summary",
+      "title": "Summarize Web Page",
+      "description": "Summarize the current browser tab and ask follow-up questions about it.",
+      "mode": "view",
+      "icon": "commands/page-summary.png",
+      "keywords": [
+        "browser",
+        "page",
+        "summarize",
+        "tab",
+        "web",
+        "article"
+      ]
+    },
+    {
+      "name": "conversations",
+      "title": "Search Conversations",
+      "description": "Go back to earlier chats and continue where you left off.",
+      "mode": "view",
+      "icon": "commands/conversations.png",
+      "keywords": [
+        "history",
+        "chats",
+        "conversations"
+      ]
+    },
+    {
+      "name": "history",
+      "title": "Search Edit History",
+      "description": "Originals and results of your translations, fixes and AI commands.",
+      "mode": "view",
+      "icon": "commands/history.png",
+      "keywords": [
+        "history",
+        "undo",
+        "original",
+        "edits"
+      ]
+    },
+    {
+      "name": "usage",
+      "title": "Show Usage and Cost",
+      "description": "Token usage and estimated spending by day, week, month and model.",
+      "mode": "view",
+      "icon": "commands/usage.png",
+      "keywords": [
+        "usage",
+        "cost",
+        "tokens",
+        "billing",
+        "spending"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Anthropic API Key",
+      "description": "Create a key in the Claude Console under API Keys.",
+      "placeholder": "sk-ant-…"
+    },
+    {
+      "name": "secondaryLanguage",
+      "type": "dropdown",
+      "required": true,
+      "title": "Second Language",
+      "description": "Text in your primary language is translated into this one.",
+      "data": [
+        {
+          "title": "English",
+          "value": "English"
+        },
+        {
+          "title": "Spanish",
+          "value": "Spanish"
+        },
+        {
+          "title": "French",
+          "value": "French"
+        },
+        {
+          "title": "German",
+          "value": "German"
+        },
+        {
+          "title": "Italian",
+          "value": "Italian"
+        },
+        {
+          "title": "Portuguese",
+          "value": "Portuguese"
+        },
+        {
+          "title": "Dutch",
+          "value": "Dutch"
+        },
+        {
+          "title": "Turkish",
+          "value": "Turkish"
+        },
+        {
+          "title": "Russian",
+          "value": "Russian"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "Ukrainian"
+        },
+        {
+          "title": "Polish",
+          "value": "Polish"
+        },
+        {
+          "title": "Czech",
+          "value": "Czech"
+        },
+        {
+          "title": "Greek",
+          "value": "Greek"
+        },
+        {
+          "title": "Romanian",
+          "value": "Romanian"
+        },
+        {
+          "title": "Hungarian",
+          "value": "Hungarian"
+        },
+        {
+          "title": "Bulgarian",
+          "value": "Bulgarian"
+        },
+        {
+          "title": "Swedish",
+          "value": "Swedish"
+        },
+        {
+          "title": "Norwegian",
+          "value": "Norwegian"
+        },
+        {
+          "title": "Danish",
+          "value": "Danish"
+        },
+        {
+          "title": "Finnish",
+          "value": "Finnish"
+        },
+        {
+          "title": "Arabic",
+          "value": "Arabic"
+        },
+        {
+          "title": "Hebrew",
+          "value": "Hebrew"
+        },
+        {
+          "title": "Persian",
+          "value": "Persian"
+        },
+        {
+          "title": "Azerbaijani",
+          "value": "Azerbaijani"
+        },
+        {
+          "title": "Kazakh",
+          "value": "Kazakh"
+        },
+        {
+          "title": "Georgian",
+          "value": "Georgian"
+        },
+        {
+          "title": "Hindi",
+          "value": "Hindi"
+        },
+        {
+          "title": "Indonesian",
+          "value": "Indonesian"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "Vietnamese"
+        },
+        {
+          "title": "Thai",
+          "value": "Thai"
+        },
+        {
+          "title": "Japanese",
+          "value": "Japanese"
+        },
+        {
+          "title": "Korean",
+          "value": "Korean"
+        },
+        {
+          "title": "Chinese (Simplified)",
+          "value": "Chinese (Simplified)"
+        },
+        {
+          "title": "Chinese (Traditional)",
+          "value": "Chinese (Traditional)"
+        }
+      ]
+    },
+    {
+      "name": "primaryLanguage",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary Language",
+      "description": "Text in other languages is translated into this one, and explanations are written in it.",
+      "default": "English",
+      "data": [
+        {
+          "title": "English",
+          "value": "English"
+        },
+        {
+          "title": "Spanish",
+          "value": "Spanish"
+        },
+        {
+          "title": "French",
+          "value": "French"
+        },
+        {
+          "title": "German",
+          "value": "German"
+        },
+        {
+          "title": "Italian",
+          "value": "Italian"
+        },
+        {
+          "title": "Portuguese",
+          "value": "Portuguese"
+        },
+        {
+          "title": "Dutch",
+          "value": "Dutch"
+        },
+        {
+          "title": "Turkish",
+          "value": "Turkish"
+        },
+        {
+          "title": "Russian",
+          "value": "Russian"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "Ukrainian"
+        },
+        {
+          "title": "Polish",
+          "value": "Polish"
+        },
+        {
+          "title": "Czech",
+          "value": "Czech"
+        },
+        {
+          "title": "Greek",
+          "value": "Greek"
+        },
+        {
+          "title": "Romanian",
+          "value": "Romanian"
+        },
+        {
+          "title": "Hungarian",
+          "value": "Hungarian"
+        },
+        {
+          "title": "Bulgarian",
+          "value": "Bulgarian"
+        },
+        {
+          "title": "Swedish",
+          "value": "Swedish"
+        },
+        {
+          "title": "Norwegian",
+          "value": "Norwegian"
+        },
+        {
+          "title": "Danish",
+          "value": "Danish"
+        },
+        {
+          "title": "Finnish",
+          "value": "Finnish"
+        },
+        {
+          "title": "Arabic",
+          "value": "Arabic"
+        },
+        {
+          "title": "Hebrew",
+          "value": "Hebrew"
+        },
+        {
+          "title": "Persian",
+          "value": "Persian"
+        },
+        {
+          "title": "Azerbaijani",
+          "value": "Azerbaijani"
+        },
+        {
+          "title": "Kazakh",
+          "value": "Kazakh"
+        },
+        {
+          "title": "Georgian",
+          "value": "Georgian"
+        },
+        {
+          "title": "Hindi",
+          "value": "Hindi"
+        },
+        {
+          "title": "Indonesian",
+          "value": "Indonesian"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "Vietnamese"
+        },
+        {
+          "title": "Thai",
+          "value": "Thai"
+        },
+        {
+          "title": "Japanese",
+          "value": "Japanese"
+        },
+        {
+          "title": "Korean",
+          "value": "Korean"
+        },
+        {
+          "title": "Chinese (Simplified)",
+          "value": "Chinese (Simplified)"
+        },
+        {
+          "title": "Chinese (Traditional)",
+          "value": "Chinese (Traditional)"
+        }
+      ]
+    },
+    {
+      "name": "model",
+      "type": "dropdown",
+      "required": false,
+      "title": "Model",
+      "description": "Used for chats, questions, screenshots and web pages.",
+      "default": "claude-opus-5-5",
+      "data": [
+        {
+          "title": "Claude Opus 5.5 · recommended",
+          "value": "claude-opus-5-5"
+        },
+        {
+          "title": "Claude Sonnet 5.5 · fast and affordable",
+          "value": "claude-sonnet-5-5"
+        },
+        {
+          "title": "Claude Haiku 5.5 · fastest, lowest cost",
+          "value": "claude-haiku-5-5"
+        },
+        {
+          "title": "Claude Fable 5.1 · most capable, expensive",
+          "value": "claude-fable-5-1"
+        }
+      ]
+    },
+    {
+      "name": "quickModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Model for Quick Edits",
+      "description": "Used by in-place edits and the live translator. Claude Haiku 5.5 is the fastest.",
+      "default": "same",
+      "data": [
+        {
+          "title": "Same as Model",
+          "value": "same"
+        },
+        {
+          "title": "Claude Haiku 5.5 · fastest",
+          "value": "claude-haiku-5-5"
+        },
+        {
+          "title": "Claude Sonnet 5.5",
+          "value": "claude-sonnet-5-5"
+        },
+        {
+          "title": "Claude Opus 5.5",
+          "value": "claude-opus-5-5"
+        },
+        {
+          "title": "Claude Fable 5.1",
+          "value": "claude-fable-5-1"
+        }
+      ]
+    },
+    {
+      "name": "chatEffort",
+      "type": "dropdown",
+      "required": false,
+      "title": "Thinking Effort",
+      "description": "How much Claude thinks in chats. Higher is more thorough but slower and costs more.",
+      "default": "medium",
+      "data": [
+        {
+          "title": "Low · fast",
+          "value": "low"
+        },
+        {
+          "title": "Medium · balanced",
+          "value": "medium"
+        },
+        {
+          "title": "High · thorough",
+          "value": "high"
+        }
+      ]
+    },
+    {
+      "name": "customInstructions",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Instructions",
+      "description": "Added to every conversation, for example: I am a developer, keep answers short and technical.",
+      "placeholder": "e.g. Keep answers short and to the point."
+    },
+    {
+      "name": "webSearch",
+      "type": "checkbox",
+      "required": false,
+      "title": "Chat",
+      "label": "Search the web when needed",
+      "description": "Claude searches the web for questions that need current information (about $0.01 per search).",
+      "default": true
+    },
+    {
+      "name": "clipboardFallback",
+      "type": "checkbox",
+      "required": false,
+      "title": "Selection",
+      "label": "Use clipboard text when nothing is selected",
+      "description": "Results for clipboard text are copied back to the clipboard instead of being pasted.",
+      "default": true
+    },
+    {
+      "name": "keepHistory",
+      "type": "checkbox",
+      "required": false,
+      "title": "History",
+      "label": "Keep a history of edits",
+      "description": "Originals and results of your edits are stored locally on this Mac.",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test test/*.test.ts",
+    "icons": "node scripts/icons.mjs",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
