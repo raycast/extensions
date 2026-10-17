@@ -1,0 +1,8 @@
+# AI
+.claude
+.omc
+
+# Project
+.idea/
+node_modules/
+README.local.md
