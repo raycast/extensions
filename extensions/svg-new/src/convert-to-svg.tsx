@@ -4,7 +4,7 @@ import {
   creditsNote,
   outputDir,
   savedWhere,
-  saveNewFiles,
+  saveResult,
   selectedImagePath,
   showError,
   showProgress,
@@ -30,10 +30,11 @@ export default async function Command() {
     toast.title = "Saving SVG…";
     toast.message = undefined;
     const svg = await svgText(result);
-    const [outputPath] = await saveNewFiles(dir, path.parse(filePath).name, [{ ext: ".svg", data: svg }]);
+    const saved = await saveResult(dir, path.parse(filePath).name, [{ ext: ".svg", data: svg }]);
+    const [outputPath] = saved.paths;
 
     await showHUD(
-      `Saved ${path.basename(outputPath)}${savedWhere(filePath, dir)}${creditsNote(result.creditsRemaining)}`,
+      `Saved ${path.basename(outputPath)}${savedWhere(filePath, saved.dir)}${creditsNote(result.creditsRemaining)}`,
     );
     await open(outputPath);
   } catch (error) {

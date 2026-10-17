@@ -29,7 +29,30 @@ export async function outputDir(filePath: string): Promise<string> {
     await fs.access(dir, constants.W_OK);
     return dir;
   } catch {
-    return path.join(os.homedir(), "Downloads");
+    return downloadsDir();
+  }
+}
+
+function downloadsDir(): string {
+  return path.join(os.homedir(), "Downloads");
+}
+
+/**
+ * Saves a paid result with saveNewFiles in `dir`, and in Downloads if that folder still refuses the
+ * write (permissions or a read-only volume that the check before the API call didn't catch), so a
+ * conversion is never lost. Returns the paths and the folder used.
+ */
+export async function saveResult(
+  dir: string,
+  name: string,
+  files: { ext: string; data: string | Buffer }[],
+): Promise<{ paths: string[]; dir: string }> {
+  try {
+    return { paths: await saveNewFiles(dir, name, files), dir };
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (dir === downloadsDir() || !["EACCES", "EPERM", "EROFS"].includes(code ?? "")) throw error;
+    return { paths: await saveNewFiles(downloadsDir(), name, files), dir: downloadsDir() };
   }
 }
 
