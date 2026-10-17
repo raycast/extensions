@@ -51,7 +51,8 @@ Website matching is optional in the Authenticator command's preferences. It uses
 [Raycast Browser Extension](https://www.raycast.com/browser-extension), or a URL supplied in command launch context.
 Without browser access, all accounts remain searchable. Matching uses saved URL hostnames and the Public Suffix List,
 including private suffixes, rather than substring matching. Use **Refresh Accounts** (`⌘R` on macOS, `Ctrl+R` on Windows)
-to reload vault changes. Copy TOTP codes with `⌘⇧C` / `Ctrl+Shift+C`, or paste them with `⌘⇧V` / `Ctrl+Shift+V`.
+to reload vault changes. `↵` copies the selected TOTP code to the clipboard and `⌘↵` (`Ctrl+↵` on Windows) pastes it
+into the previous app — both are shown in the action bar at the bottom right.
 
 ## Installation
 

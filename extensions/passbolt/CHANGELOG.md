@@ -5,6 +5,7 @@
 - Load the vault list without secret payloads and download secrets only for TOTP-capable entries, in ID-filtered batches.
 - Resolve each account independently so one slow secret no longer delays the codes behind it, and show first codes sooner.
 - Cancel remaining fetch and decryption work when a command closes; refreshing afterwards recovers cleanly.
+- Show the paste shortcut for TOTP codes in the action bar: `⌘↵` pastes the code into the previous app.
 - Stop logging cookies, CSRF tokens, authentication nonces, response bodies, and private key paths.
 
 ## [Faster Authenticator and Complete Account Search] - {PR_MERGE_DATE}

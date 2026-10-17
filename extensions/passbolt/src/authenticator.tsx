@@ -223,15 +223,9 @@ function TotpListItem({
                 onAction={() => copyCode(false)}
                 shortcut={Keyboard.Shortcut.Common.Copy}
               />
-              <Action
-                title="Paste TOTP Code"
-                icon={Icon.Key}
-                onAction={() => copyCode(true)}
-                shortcut={{
-                  macOS: { modifiers: ["cmd", "shift"], key: "v" },
-                  Windows: { modifiers: ["ctrl", "shift"], key: "v" },
-                }}
-              />
+              {/* As the secondary action this gets ⌘↵ (Ctrl↵ on Windows) from Raycast,
+                  which the action bar shows next to the primary action. */}
+              <Action title="Paste TOTP Code" icon={Icon.Key} onAction={() => copyCode(true)} />
             </>
           )}
           {item.username && <Action.CopyToClipboard title="Copy Username" content={item.username} icon={Icon.Person} />}
