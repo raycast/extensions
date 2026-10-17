@@ -44,7 +44,22 @@ export const UnknownErrorText = `
 [![Google Chrome](https://www.google.com/chrome/static/images/chrome-logo-m100.svg)]()
 `;
 
+export const AutomationPermissionText = `
+# 🚨Error: Raycast is not allowed to control Google Chrome
+
+macOS blocked the request with the AppleScript error \`Not authorized to send Apple events to Google Chrome (-1743)\`.
+
+## How to fix it
+
+1. Press ⏎ (Enter Key) to open **System Settings → Privacy & Security → Automation**.
+2. Expand **Raycast** and turn on **Google Chrome**. If it is already on, turn it off and on again.
+3. Restart Google Chrome if the command still shows this error.
+
+[![Google Chrome](https://www.google.com/chrome/static/images/chrome-logo-m100.svg)]()
+`;
+
 export const DEFAULT_ERROR_TITLE = "An Error Occurred";
 
 export const NOT_INSTALLED_MESSAGE = "Google Chrome not installed";
+export const AUTOMATION_PERMISSION_MESSAGE = "Raycast is not allowed to control Google Chrome";
 export const NO_BOOKMARKS_MESSAGE = "Google Chrome has no bookmarks.";
