@@ -1,0 +1,6 @@
+.DS_Store
+.vscode/launch.json
+.vscode/tasks.json
+dist/
+node_modules/
+raycast-env.d.ts
