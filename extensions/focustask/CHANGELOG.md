@@ -1,7 +1,8 @@
 # FocusTask Changelog
 
-## [Enhancements + Modernize] - {PR_MERGE_DATE}
+## [Detail View + Enhancements + Modernize] - {PR_MERGE_DATE}
 
+- `add`: `Detail` view in "search"
 - `show`: `isLoading` indicator proprly in "search"
 - `fix`: failed task creation would show `Success` instead of `Failure`
 - `modernize`: extension uses latest Raycast config
