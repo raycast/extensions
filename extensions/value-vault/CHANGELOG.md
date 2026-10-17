@@ -1,6 +1,6 @@
 # Value Vault Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-17
 
 - Add, browse, search, and copy values to your clipboard
 - Support for strings, numbers, URLs, emails, JSON, and colors
