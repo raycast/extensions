@@ -154,6 +154,29 @@ export async function getBudgets(): Promise<Budget[]> {
   return response.budgets;
 }
 
+/** Android's monthly spending presenter returns category totals for each period. */
+export type SpendingPeriod = {
+  start_date: string;
+  end_date: string;
+  total: number;
+  categories: Record<string, number>;
+};
+
+export async function getMonthlySpending(startDate: string, endDate: string): Promise<SpendingPeriod[]> {
+  const params = new URLSearchParams({
+    group_by: "monthly_period",
+    start_date: startDate,
+    end_date: endDate,
+    end_of_month: "0",
+    include_gap: "true",
+  });
+  const response = await apiRequest<{ category_totals: SpendingPeriod[] }>(
+    `/presenter/spending_historical.json?${params.toString()}`,
+  );
+  if (!Array.isArray(response?.category_totals)) throw new Error("Unexpected Moneytree spending response");
+  return response.category_totals;
+}
+
 /** Android uses this PUT route both to set an existing limit and to create a new one. */
 export async function putBudget(categoryId: number, amount: number): Promise<void> {
   await apiRequest<unknown>(`/budgets/${categoryId}.json`, {

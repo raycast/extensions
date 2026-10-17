@@ -77,7 +77,7 @@
     {
       "name": "list-budgets",
       "title": "List Budgets",
-      "description": "List, create, edit, and delete saved category budget limits (not spending progress)",
+      "description": "View monthly category budget spending and manage saved limits",
       "mode": "view"
     }
   ],

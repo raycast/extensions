@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, Toast, popToRoot, showToast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { changeBudget, type BudgetWithCategory } from "../lib/budgets";
 import type { Category } from "../lib/types";
@@ -9,8 +9,10 @@ export function BudgetForm(props: {
   categories: Category[];
   budgets: BudgetWithCategory[];
   editing?: BudgetWithCategory;
-  onSaved: () => void;
+  onSaved: (categoryId: number) => void | Promise<void>;
+  fromDetails?: boolean;
 }) {
+  const { pop } = useNavigation();
   const [categoryId, setCategoryId] = useState(String(props.editing?.category_id ?? ""));
   const [amount, setAmount] = useState(String(props.editing?.amount ?? ""));
   const [error, setError] = useState<string>();
@@ -37,9 +39,10 @@ export function BudgetForm(props: {
         return setError("To budget a different category, create a new budget instead");
       }
       await changeBudget(props.editing ? "update" : "create", category.id, Number(amount));
-      await props.onSaved();
+      await props.onSaved(category.id);
+      pop();
+      if (props.fromDetails) pop();
       await showToast({ style: Toast.Style.Success, title: `${category.name}: ${yen.format(Number(amount))} saved` });
-      await popToRoot({ clearSearchBar: true });
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : "Unable to save budget";
       setError(message);
