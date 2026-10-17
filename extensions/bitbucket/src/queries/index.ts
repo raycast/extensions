@@ -1,7 +1,7 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { Bitbucket, Schema } from "bitbucket";
 import { preferences } from "../helpers/preferences";
-import { extractReviewers, Reviewer } from "../helpers/reviewers";
+import { extractPendingReviewerUuids, extractReviewers, Reviewer } from "../helpers/reviewers";
 import { URLSearchParams } from "url";
 
 const clientOptions = {
@@ -180,8 +180,11 @@ type OpenPullRequest = {
   comment_count: number;
   created_on?: string;
   reviewers: Reviewer[];
+  // Uuids of reviewers who were asked to review but haven't approved / requested changes yet.
+  pendingReviewerUuids: string[];
   author: {
     nickname: string;
+    uuid?: string;
     links: {
       avatar: { href: string };
     };
@@ -238,7 +241,10 @@ type RepoWithSlug = Schema.Repository & { slug: string; updated_on?: string };
 // maxRepoAgeDays only exists on the two commands that scan repos (not on the shared
 // ExtensionPreferences), so it's read here with its proper per-command generated type
 // instead of being force-added to the shared `preferences` object.
-type RepoScanPreferences = Preferences.SearchAllPullRequests | Preferences.SearchMyOpenPullRequests;
+type RepoScanPreferences =
+  | Preferences.SearchAllPullRequests
+  | Preferences.SearchMyOpenPullRequests
+  | Preferences.Notifications;
 
 function maxRepoAgeDaysRaw(): string {
   return getPreferenceValues<RepoScanPreferences>().maxRepoAgeDays;
@@ -369,10 +375,12 @@ async function listOpenPullRequestsForRepo(
           "values.comment_count",
           "values.created_on",
           "values.author.nickname",
+          "values.author.uuid",
           "values.author.links.avatar.href",
           "values.destination.repository.name",
           "values.destination.repository.full_name",
           "values.participants.state",
+          "values.participants.role",
           "values.participants.user.nickname",
           "values.participants.user.uuid",
           "next",
@@ -382,7 +390,9 @@ async function listOpenPullRequestsForRepo(
 
     let newInThisPage = 0;
     for (const pr of data.values ?? []) {
-      const author = pr.author as { nickname?: string; links?: { avatar?: { href?: string } } } | undefined;
+      const author = pr.author as
+        | { nickname?: string; uuid?: string; links?: { avatar?: { href?: string } } }
+        | undefined;
       if (typeof pr.id !== "number" || typeof pr.title !== "string" || typeof author?.nickname !== "string") {
         continue;
       }
@@ -402,8 +412,10 @@ async function listOpenPullRequestsForRepo(
         comment_count: (pr.comment_count as number) ?? 0,
         created_on: pr.created_on,
         reviewers: extractReviewers(pr.participants as Schema.Participant[] | undefined),
+        pendingReviewerUuids: extractPendingReviewerUuids(pr.participants as Schema.Participant[] | undefined),
         author: {
           nickname: author.nickname,
+          uuid: author.uuid,
           links: {
             avatar: {
               href: author.links?.avatar?.href ?? "",
@@ -469,7 +481,8 @@ class RepoQueue {
   }
 }
 
-export type OpenPullRequestsResult = { values: OpenPullRequest[]; failedRepoCount: number };
+export type ScanResult<T> = { values: T[]; failedRepoCount: number };
+export type OpenPullRequestsResult = ScanResult<OpenPullRequest>;
 
 const PROGRESS_EMIT_INTERVAL_MS = 200;
 
@@ -477,15 +490,15 @@ const PROGRESS_EMIT_INTERVAL_MS = 200;
 // (optionally server-side filtered to one author via fetchForRepo). Repos are sorted
 // -updated_on, so onProgress lets callers render the most-active repos' PRs as soon as
 // they land instead of waiting for every repo to finish.
-async function scanOpenPullRequests(
-  fetchForRepo: (repo: RepoWithSlug) => Promise<OpenPullRequest[]>,
-  onProgress?: (partial: OpenPullRequestsResult) => void,
-): Promise<OpenPullRequestsResult> {
-  const collected: OpenPullRequest[] = [];
+async function scanOpenPullRequests<T extends { created_on?: string }>(
+  fetchForRepo: (repo: RepoWithSlug) => Promise<T[]>,
+  onProgress?: (partial: ScanResult<T>) => void,
+): Promise<ScanResult<T>> {
+  const collected: T[] = [];
   let failedRepoCount = 0;
   let lastEmit = 0;
 
-  const snapshot = (): OpenPullRequestsResult => {
+  const snapshot = (): ScanResult<T> => {
     const values = [...collected].sort((a, b) => {
       const aTime = a.created_on ? Date.parse(a.created_on) : 0;
       const bTime = b.created_on ? Date.parse(b.created_on) : 0;
@@ -578,4 +591,226 @@ export async function getMyOpenPullRequests(
 ): Promise<OpenPullRequestsResult> {
   const uuid = await getCurrentUserUuid();
   return scanOpenPullRequests((repo) => listOpenPullRequestsForRepo(repo, uuid), onProgress);
+}
+
+export type NotificationEventKind = "comment" | "mention" | "pr_merged" | "pr_declined" | "pipeline_failed";
+
+export interface NotificationEvent {
+  id: string;
+  kind: NotificationEventKind;
+  created_on: string;
+  repoName: string;
+  actor?: string;
+  title: string;
+  url: string;
+}
+
+const REQUEST_BASE = "https://api.bitbucket.org/2.0";
+const MAX_EVENT_PAGES = 10;
+
+async function apiGet<T>(url: string): Promise<T> {
+  return withRetry(async () => {
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${preferences.email}:${preferences.apiToken}`).toString("base64")}`,
+        Accept: "application/json",
+      },
+    });
+    if (!response.ok) {
+      throw Object.assign(new Error(`Bitbucket request failed: ${response.status}`), {
+        status: response.status,
+        headers: Object.fromEntries(response.headers.entries()),
+      });
+    }
+    return (await response.json()) as T;
+  });
+}
+
+type Paged<T> = { values?: T[]; next?: string };
+
+// Follows `next` links so activity isn't capped at the first page. `isPastWindow` lets callers
+// whose endpoint can't filter by date server-side stop as soon as a page reaches older items.
+async function apiGetAll<T>(
+  path: string,
+  params: Record<string, string>,
+  isPastWindow?: (item: T) => boolean,
+): Promise<T[]> {
+  const items: T[] = [];
+  let url: string | undefined = `${REQUEST_BASE}${path}?${new URLSearchParams(params).toString()}`;
+
+  for (let page = 0; url && page < MAX_EVENT_PAGES; page++) {
+    const data: Paged<T> = await apiGet<Paged<T>>(url);
+    const values = data.values ?? [];
+    items.push(...values);
+    if (isPastWindow && values.some(isPastWindow)) {
+      break;
+    }
+    url = data.next;
+  }
+
+  return items;
+}
+
+type ClosedPullRequest = {
+  id: number;
+  title: string;
+  state: string;
+  updated_on: string;
+  links?: { html?: { href?: string } };
+};
+
+type PullRequestComment = {
+  id: number;
+  created_on: string;
+  content?: { raw?: string };
+  user?: { uuid?: string; nickname?: string };
+  deleted?: boolean;
+  pullrequest?: { id: number; title: string; author?: { uuid?: string } };
+  links?: { html?: { href?: string } };
+};
+
+type PipelineRun = {
+  uuid: string;
+  build_number: number;
+  created_on: string;
+  creator?: { uuid?: string };
+  state?: { result?: { name?: string } };
+  target?: { ref_name?: string };
+};
+
+function listClosedPullRequests(repoPath: string, state: string, myUuid: string, since: string) {
+  return apiGetAll<ClosedPullRequest>(`${repoPath}/pullrequests`, {
+    state,
+    q: `author.uuid="${myUuid}" AND updated_on>${JSON.stringify(since)}`,
+    sort: "-updated_on",
+    pagelen: "50",
+    fields: "values.id,values.title,values.state,values.updated_on,values.links.html.href,next",
+  });
+}
+
+function listComments(repoPath: string, since: string) {
+  return apiGetAll<PullRequestComment>(`${repoPath}/pullrequests/comments`, {
+    q: `created_on>${JSON.stringify(since)}`,
+    sort: "-created_on",
+    pagelen: "50",
+    fields: [
+      "values.id",
+      "values.created_on",
+      "values.deleted",
+      "values.content.raw",
+      "values.user.uuid",
+      "values.user.nickname",
+      "values.pullrequest.id",
+      "values.pullrequest.title",
+      "values.pullrequest.author.uuid",
+      "values.links.html.href",
+      "next",
+    ].join(","),
+  });
+}
+
+// The pipelines endpoint can't filter by date or creator, so page through the newest runs
+// (all users) until the lookback window is covered.
+function listPipelines(repoPath: string, since: string) {
+  return apiGetAll<PipelineRun>(
+    `${repoPath}/pipelines`,
+    {
+      sort: "-created_on",
+      pagelen: "50",
+      fields:
+        "values.uuid,values.build_number,values.created_on,values.creator.uuid,values.state.result.name,values.target.ref_name,next",
+    },
+    (run) => run.created_on < since,
+  );
+}
+
+type RepoEvents = { events: NotificationEvent[]; failedSources: number };
+
+async function listNotificationEventsForRepo(repo: RepoWithSlug, myUuid: string, since: string): Promise<RepoEvents> {
+  const repoPath = `/repositories/${preferences.workspace}/${repo.slug}`;
+  const repoName = repo.name ?? repo.slug;
+  const prUrl = (id: number) => `https://bitbucket.org/${preferences.workspace}/${repo.slug}/pull-requests/${id}`;
+  const events: NotificationEvent[] = [];
+
+  // Sources fail independently (e.g. a token without pipeline scope shouldn't hide comments).
+  const [comments, merged, declined, pipelines] = await Promise.allSettled([
+    listComments(repoPath, since),
+    listClosedPullRequests(repoPath, "MERGED", myUuid, since),
+    listClosedPullRequests(repoPath, "DECLINED", myUuid, since),
+    listPipelines(repoPath, since),
+  ]);
+  const settled = [comments, merged, declined, pipelines];
+  const failedSources = settled.filter((r) => r.status === "rejected").length;
+  if (failedSources === settled.length) {
+    throw (comments as PromiseRejectedResult).reason;
+  }
+
+  if (comments.status === "fulfilled") {
+    for (const c of comments.value) {
+      if (c.deleted || !c.pullrequest || c.user?.uuid === myUuid) continue;
+      const mentioned = c.content?.raw?.includes(myUuid) ?? false;
+      if (!mentioned && c.pullrequest.author?.uuid !== myUuid) continue;
+      events.push({
+        id: `comment:${repo.slug}:${c.id}`,
+        kind: mentioned ? "mention" : "comment",
+        created_on: c.created_on,
+        repoName,
+        actor: c.user?.nickname,
+        title: `${c.user?.nickname ?? "Someone"} ${mentioned ? "mentioned you" : "commented"} on "${c.pullrequest.title}"`,
+        url: c.links?.html?.href ?? prUrl(c.pullrequest.id),
+      });
+    }
+  }
+
+  for (const result of [merged, declined]) {
+    if (result.status !== "fulfilled") continue;
+    for (const pr of result.value) {
+      events.push({
+        id: `pr:${repo.slug}:${pr.id}:${pr.state}`,
+        kind: pr.state === "MERGED" ? "pr_merged" : "pr_declined",
+        created_on: pr.updated_on,
+        repoName,
+        title: `Your pull request "${pr.title}" was ${pr.state === "MERGED" ? "merged" : "declined"}`,
+        url: pr.links?.html?.href ?? prUrl(pr.id),
+      });
+    }
+  }
+
+  if (pipelines.status === "fulfilled") {
+    for (const run of pipelines.value) {
+      const result = run.state?.result?.name;
+      if (run.creator?.uuid !== myUuid || run.created_on < since) continue;
+      if (result !== "FAILED" && result !== "ERROR") continue;
+      events.push({
+        id: `pipeline:${repo.slug}:${run.uuid}`,
+        kind: "pipeline_failed",
+        created_on: run.created_on,
+        repoName,
+        title: `Pipeline #${run.build_number} failed${run.target?.ref_name ? ` on ${run.target.ref_name}` : ""}`,
+        url: `https://bitbucket.org/${preferences.workspace}/${repo.slug}/pipelines/results/${run.build_number}`,
+      });
+    }
+  }
+
+  return { events, failedSources };
+}
+
+// Bitbucket Cloud has no notifications API, so events are derived from per-repo activity
+// (PR comments / mentions, your merged or declined PRs, your failed pipelines).
+// `failedRepoCount` counts repos where at least one source failed, so callers can flag
+// an incomplete refresh instead of showing it as "no notifications".
+export async function getNotificationEvents(lookbackDays = 7): Promise<ScanResult<NotificationEvent>> {
+  const uuid = await getCurrentUserUuid();
+  const since = new Date(Date.now() - lookbackDays * 24 * 60 * 60 * 1000).toISOString();
+  let partialFailures = 0;
+
+  const result = await scanOpenPullRequests(async (repo) => {
+    const { events, failedSources } = await listNotificationEventsForRepo(repo, uuid, since);
+    if (failedSources > 0) {
+      partialFailures += 1;
+    }
+    return events;
+  });
+
+  return { ...result, failedRepoCount: result.failedRepoCount + partialFailures };
 }

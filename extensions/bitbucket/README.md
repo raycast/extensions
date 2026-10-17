@@ -44,6 +44,21 @@ Raycast extension to search repositories, check pipelines status, open recent Pu
 - Quick access to your repositories
 - Search your recent pipelines and see their status
 - See your recent open pull requests
+- Get Bitbucket notifications in the menu bar (see below)
+
+## Notifications
+
+The **Notifications** menu bar command shows a count of unread notifications and lists them in the menu. Bitbucket Cloud has no notifications API, so they are derived from your open pull requests and from repository activity of the last 7 days:
+
+- Review requested from you on a pull request (current state of open pull requests, regardless of age)
+- Approvals and requested changes on your pull requests (current state of open pull requests, regardless of age)
+- Comments on your pull requests and `@` mentions of you
+- Your pull requests that were merged or declined
+- Pipelines you started that failed
+
+Click a notification to open it (this also marks it as read), hold <kbd>⌥</kbd> to only mark it as read, or use **Mark All as Read**. Read state is stored locally. If some repositories fail to load (for example because the API token lacks a scope), the menu says that the list may be incomplete.
+
+The command refreshes every 15 minutes and sends a few requests per repository. On large workspaces, lower **Max Repository Age (Days)** in the command preferences (default 30) to skip dormant repositories. You can also hide the menu bar item when there is nothing new (**Always Show**) and toggle the count (**Show Notification Count**).
 
 ## Getting started
 
@@ -52,6 +67,7 @@ Raycast extension to search repositories, check pipelines status, open recent Pu
   - read:user:bitbucket
   - read:repository:bitbucket
   - read:pullrequest:bitbucket
+  - read:pipeline:bitbucket (needed for pipeline status and failed-pipeline notifications)
   - write:pullrequest:bitbucket (needed to approve, decline, or request changes on pull requests)
 - Start a bitbucket command and fill the required fields:
   - Workspace: You can see your workspaces [here](https://bitbucket.org/account/workspaces/), and use the slug. You can find it in the URL of your workspace: `https://bitbucket.org/{organization}/`
