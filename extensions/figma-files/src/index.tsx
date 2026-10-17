@@ -1,6 +1,7 @@
-import { Grid, type LaunchProps, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Grid, type LaunchProps, getPreferenceValues } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { useEffect, useState } from "react";
+import AdvancedActionSection from "./components/AdvancedActionSection";
 import { ErrorView } from "./components/ErrorView";
 import FileGridItem from "./components/FileGridItem";
 import { useFigmaData } from "./hooks/useFigmaData";
@@ -57,7 +58,7 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
           break;
 
         case "project":
-          setFilteredFiles(filterToSpecificProject(allFiles, filter.teamName!, filter.projectName!));
+          setFilteredFiles(filterToSpecificProject(allFiles, filter.teamName!, filter.folderId!));
           setIsFiltered(true);
           break;
       }
@@ -67,12 +68,8 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
   const { TEAM_ID } = getPreferenceValues();
   const teamID: string[] = TEAM_ID.split(",").map((team: string) => team.toString().trim());
   const filterDropdown = () => (
-    <Grid.Dropdown
-      tooltip={teamID.length > 1 ? "Teams" : "Projects"}
-      defaultValue="All"
-      onChange={handleDropdownChange}
-    >
-      <Grid.Dropdown.Item key="all" title={teamID.length > 1 ? "All teams" : "All projects"} value={FILTER_TYPES.ALL} />
+    <Grid.Dropdown tooltip={teamID.length > 1 ? "Teams" : "Folders"} defaultValue="All" onChange={handleDropdownChange}>
+      <Grid.Dropdown.Item key="all" title={teamID.length > 1 ? "All teams" : "All folders"} value={FILTER_TYPES.ALL} />
       {teamID.length > 1 &&
         allFiles?.map((team: TeamFiles) => (
           <Grid.Dropdown.Item key={team.name} title={team.name} value={createTeamFilter(team.name)} icon="team.svg" />
@@ -80,11 +77,11 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
 
       {allFiles?.map((team: TeamFiles) => (
         <Grid.Dropdown.Section title={team.name} key={team.name}>
-          {team.files.map((project) => (
+          {team.folders.map((folder) => (
             <Grid.Dropdown.Item
-              key={project.name}
-              title={project.name}
-              value={createProjectFilter(team.name, project.name)}
+              key={folder.id}
+              title={folder.path}
+              value={createProjectFilter(team.name, folder.id)}
               icon="project.svg"
             />
           ))}
@@ -102,6 +99,23 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
       filtering={true}
       searchBarAccessory={filterDropdown()}
     >
+      <Grid.EmptyView
+        icon="emptyProject.svg"
+        title={isLoading ? "Loading files from Figma…" : "No files found"}
+        description={
+          isLoading
+            ? "Folders appear as they load. The first load can take a few minutes for teams with many folders."
+            : undefined
+        }
+        actions={
+          <ActionPanel>
+            <AdvancedActionSection
+              revalidateVisitedFiles={revalidateVisitedFiles}
+              revalidateAllFiles={revalidateAllFiles}
+            />
+          </ActionPanel>
+        }
+      />
       {!isFiltered && (
         <Grid.Section key="starred-files" title="Starred Files">
           {starredFiles?.map((file) => (
@@ -141,17 +155,17 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
       )}
 
       {filteredFiles?.map((team: TeamFiles) =>
-        team.files.map((project) =>
-          (project.files?.length ?? 0) > 0 ? (
+        team.folders.map((folder) =>
+          folder.files.length > 0 ? (
             <Grid.Section
-              key={team.name + project.name + "-project"}
-              title={`${project.name} (${project.files!.length} File${project.files!.length === 1 ? "" : "s"})`}
+              key={team.id + folder.id + "-folder"}
+              title={`${folder.path} (${folder.files.length} File${folder.files.length === 1 ? "" : "s"})`}
               subtitle={team.name}
             >
-              {project.files?.map((file) => (
+              {folder.files.map((file) => (
                 <FileGridItem
                   key={file.key + "-file"}
-                  searchkeywords={project.name}
+                  searchKeywords={[...folder.path.split(" / "), team.name]}
                   revalidateStarredFiles={revalidateStarredFiles}
                   revalidateVisitedFiles={revalidateVisitedFiles}
                   revalidateAllFiles={revalidateAllFiles}
@@ -164,14 +178,17 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
               ))}
             </Grid.Section>
           ) : (
-            <Grid.Section
-              key={team.name + project.name + "-project"}
-              title={project.name}
-              subtitle={team.name}
-              aspectRatio="16/9"
-            >
-              <Grid.Item key={project.name + "-file-empty"} content="emptyProject.svg" title="Empty project" />
-            </Grid.Section>
+            // Folders that only hold subfolders are not worth an "Empty folder" placeholder
+            !team.folders.some((other) => other.parentId === folder.id) && (
+              <Grid.Section
+                key={team.id + folder.id + "-folder"}
+                title={folder.path}
+                subtitle={team.name}
+                aspectRatio="16/9"
+              >
+                <Grid.Item key={folder.id + "-file-empty"} content="emptyProject.svg" title="Empty folder" />
+              </Grid.Section>
+            )
           ),
         ),
       )}
