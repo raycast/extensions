@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { getPreferenceValues, type AI } from "@raycast/api";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
@@ -49,7 +50,7 @@ export const streamCompletion: AI.StreamCompletion = (model, request) => {
   const { source, format, modelID } = parseID(model.id);
   const effort = request.providerOptions?.raycast?.reasoningEffort;
   return streamText({
-    model: languageModel(source, format, modelID, getPreferenceValues<Preferences>().apiKey),
+    model: languageModel(source, format, modelID, getPreferenceValues<Preferences>().apiKey, sessionID(request)),
     system: request.system,
     messages: request.messages ?? [],
     temperature: model.capabilities?.temperature?.supported ? request.temperature : undefined,
@@ -72,17 +73,25 @@ function parseID(id: string) {
   return { source, format, modelID: model.join("/") };
 }
 
-function languageModel(source: Source, format: Format, modelID: string, apiKey: string) {
+// Go rejects requests without a session, which it uses to keep a conversation on one route. Raycast has no
+// conversation ID, so the opening of the chat stands in for one: it stays the same on every turn.
+function sessionID(request: AI.ModelRequest) {
+  const opening = JSON.stringify([request.system ?? "", request.messages?.[0] ?? null]);
+  return `raycast_${createHash("sha256").update(opening).digest("hex").slice(0, 32)}`;
+}
+
+function languageModel(source: Source, format: Format, modelID: string, apiKey: string, session: string) {
   const baseURL = source === "go" ? `${INFERENCE_URL}/go` : INFERENCE_URL;
+  const headers = source === "go" ? { "x-opencode-session": session } : undefined;
   switch (format) {
     case "anthropic":
-      return createAnthropic({ baseURL: `${baseURL}/anthropic/v1`, apiKey })(modelID);
+      return createAnthropic({ baseURL: `${baseURL}/anthropic/v1`, apiKey, headers })(modelID);
     case "openai":
-      return createOpenAI({ baseURL: `${baseURL}/openai/v1`, apiKey }).responses(modelID);
+      return createOpenAI({ baseURL: `${baseURL}/openai/v1`, apiKey, headers }).responses(modelID);
     case "google":
-      return createGoogleGenerativeAI({ baseURL: `${baseURL}/google/v1beta`, apiKey })(modelID);
+      return createGoogleGenerativeAI({ baseURL: `${baseURL}/google/v1beta`, apiKey, headers })(modelID);
     default:
-      return createOpenAICompatible({ name: "opencode", baseURL: `${baseURL}/openai/v1`, apiKey })(modelID);
+      return createOpenAICompatible({ name: "opencode", baseURL: `${baseURL}/openai/v1`, apiKey, headers })(modelID);
   }
 }
 
