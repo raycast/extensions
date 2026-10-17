@@ -19,6 +19,7 @@ Translate, fix and rewrite the text you select in any app, ask questions, read s
 | **Change Tone** | Rewrites the selection as professional, friendly, formal, confident, concise, diplomatic, empathetic, persuasive or playful. |
 | **Edit with Instruction** | Applies your own instruction ("make it a bulleted list", "convert to JSON") to the selection. |
 | **Translate** | Translates as you type, adds a dictionary entry for single words, reads text aloud and supports suffixes such as `>de` to pick a language. |
+| **Translate Selection** | Opens Translate with the selected text already translated, or empty when nothing is selected. Best with a hotkey. |
 | **Ask Claude** | Chats with Claude, searching the web and listing sources when an answer needs current information. Works as a fallback command too. |
 | **Ask About Selection** | Asks a question about the selected text and keeps the conversation going. |
 | **AI Commands** | 19 built-in commands (summarize, draft a reply, write a commit message, regex, shell commands, localization files…) plus your own. Create a quicklink for any of them to give it a hotkey. |
@@ -32,7 +33,7 @@ Translate, fix and rewrite the text you select in any app, ask questions, read s
 
 ## Tips
 
-- Give **Translate and Replace** and **Fix Spelling and Grammar** a hotkey in Raycast Settings → Extensions to use them from anywhere in one keystroke.
+- Give **Translate and Replace**, **Translate Selection** and **Fix Spelling and Grammar** a hotkey in Raycast Settings → Extensions to use them from anywhere in one keystroke.
 - For the fastest in-place edits, choose Claude Haiku 5.5 as **Model for Quick Edits**.
 - If nothing is selected, the clipboard text is used and the result is copied back to the clipboard. After pasting over a selection, your previous clipboard content is restored.
 

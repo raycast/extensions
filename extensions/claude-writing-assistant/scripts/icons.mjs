@@ -154,6 +154,16 @@ const ICONS = {
 
   "commands/translate": tile(
     "ink",
+    `<rect x="118" y="214" width="180" height="70" rx="20" fill="${CORAL}" stroke="none"/>
+     <line x1="132" y1="154" x2="330" y2="154" stroke-width="26"/>
+     <line x1="140" y1="249" x2="276" y2="249" stroke-width="26"/>
+     <line x1="132" y1="344" x2="262" y2="344" stroke-width="26"/>
+     <circle cx="378" cy="330" r="62" stroke-width="22"/>
+     <ellipse cx="378" cy="330" rx="25" ry="62" stroke-width="16"/>
+     <line x1="316" y1="330" x2="440" y2="330" stroke-width="16"/>`,
+  ),
+  "commands/translator": tile(
+    "ink",
     `<circle cx="256" cy="252" r="138"/>
      <ellipse cx="256" cy="252" rx="62" ry="138" stroke-width="24"/>
      <line x1="124" y1="206" x2="388" y2="206" stroke-width="22"/>

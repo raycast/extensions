@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getSelectedText, Icon, LaunchProps, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchProps, List } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { Chat } from "./components/Chat";
 import { runClaude, Usage } from "./lib/claude";
@@ -93,27 +93,19 @@ function footer(result: Result, targetTitle?: string): string {
   return `\n\n---\n\n_${parts.filter(Boolean).join(" · ")}_`;
 }
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.Translate }>) {
+/**
+ * Opens with the typed argument, or with the selection that Translate Selection (translate.ts)
+ * read before Raycast's window took focus. A view can't read the selection itself: once its window
+ * has focus, apps such as Telegram and Electron apps no longer hand it over.
+ */
+export default function Command(
+  props: LaunchProps<{ arguments: Arguments.Translator; launchContext?: { text?: string } }>,
+) {
   const [s] = useState(settings);
-  const initial = (props.arguments.text || props.fallbackText || "").trim();
+  const initial = (props.arguments?.text || props.launchContext?.text || props.fallbackText || "").trim();
   const [text, setText] = useState(initial);
   const [query, setQuery] = useState(initial);
   const [target, setTarget] = useState(AUTO);
-  const [readingSelection, setReadingSelection] = useState(!initial);
-  const typed = useRef(false);
-
-  useEffect(() => {
-    if (initial) return;
-    getSelectedText()
-      .then((selected) => {
-        if (selected.trim() && !typed.current) {
-          setText(selected.trim());
-          setQuery(selected.trim());
-        }
-      })
-      .catch(() => undefined)
-      .finally(() => setReadingSelection(false));
-  }, []);
 
   useEffect(() => {
     if (text === query) return;
@@ -137,7 +129,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Transl
   const output = translation?.text ?? "";
   const outputCode = lang === AUTO ? guessLanguageCode(output) : languageCode(lang);
   const targetTitle = lang === AUTO ? (outputCode ? languageTitle(outputCode) : undefined) : languageTitle(lang);
-  const busy = readingSelection || (!!translation && !translation.done) || (!!dictionary && !dictionary.done);
+  const busy = (!!translation && !translation.done) || (!!dictionary && !dictionary.done);
 
   function markdown(result: Result | undefined, emptyText: string): string {
     if (!result) return "";
@@ -197,7 +189,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Transl
             icon={Icon.Switch}
             shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
             onAction={() => {
-              typed.current = true;
               setTarget(AUTO);
               setText(output);
               setQuery(output);
@@ -215,10 +206,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Transl
       isShowingDetail={!!request}
       filtering={false}
       searchText={text}
-      onSearchTextChange={(value) => {
-        typed.current = true;
-        setText(value);
-      }}
+      onSearchTextChange={setText}
       searchBarPlaceholder="Text to translate… (end with >de to pick a language)"
       searchBarAccessory={
         <List.Dropdown tooltip="Target Language" storeValue onChange={setTarget}>
@@ -233,8 +221,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Transl
     >
       {!request ? (
         <List.EmptyView
-          icon={{ source: "commands/translate.png" }}
-          title={readingSelection ? "Reading selection…" : "Type text to translate"}
+          icon={{ source: "commands/translator.png" }}
+          title="Type text to translate"
           description={`${s.langs.primary} ⇄ ${s.langs.secondary} automatically. Pick another language at the top right, or end your text with “>de”.`}
         />
       ) : (

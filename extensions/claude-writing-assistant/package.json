@@ -296,10 +296,24 @@
     },
     {
       "name": "translate",
+      "title": "Translate Selection",
+      "description": "Open Translate with the selected text already translated, or empty when nothing is selected. Best with a hotkey.",
+      "mode": "no-view",
+      "icon": "commands/translate.png",
+      "keywords": [
+        "translate",
+        "translator",
+        "selection",
+        "selected",
+        "language"
+      ]
+    },
+    {
+      "name": "translator",
       "title": "Translate",
       "description": "Translate as you type, with dictionary entries for single words, text to speech and language suffixes such as “>de”.",
       "mode": "view",
-      "icon": "commands/translate.png",
+      "icon": "commands/translator.png",
       "keywords": [
         "translate",
         "translator",
