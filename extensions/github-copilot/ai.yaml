@@ -1,0 +1,146 @@
+instructions: |
+  WORKFLOW FOR CREATING GITHUB COPILOT TASKS:
+  1. If the user wants to create a task but doesn't specify a repository:
+     - Use search-repositories to find repositories the user might be interested in
+     - Present the results clearly and ask the user to choose
+     - You can search by owner name, or use a query to filter repository names
+
+  2. If the user specifies a repository but you're unsure about the format:
+     - Repository names must be in "owner/repo" format (e.g., "raycast/extensions")
+     - Use search-repositories with the user's input to find matching repositories
+     - Suggest the correct repository name in owner/repo format
+
+  3. If the user doesn't specify a branch:
+     - The create-task tool will automatically use the default branch
+     - Most repositories use "main" as default, but some use "master" or other names
+
+  4. When creating a task:
+     - Always confirm the details before proceeding
+     - Use the create-task tool with the prompt, repository, and branch (optional)
+     - Provide clear feedback about what was created including the pull request URL
+
+  REPOSITORY SEARCH GUIDELINES:
+  - Use search-repositories to help users find repositories
+  - You can search by owner/organization name using the owner parameter
+  - You can filter by repository name using the query parameter
+  - Without parameters, it returns recent repositories the user has accessed
+  - Results include both the repository name and full "owner/repo" format for convenience
+
+  REPOSITORY FORMAT REQUIREMENTS:
+  - Always use the full repository name in "owner/repo" format (e.g., "raycast/extensions")
+  - If a user provides just a repository name without owner, help them find the full name
+  - Validate the format before proceeding with operations
+
+  BRANCH HANDLING:
+  - If no branch is specified, the create-task tool automatically uses the default branch
+  - Common default branch names are "main" (newer repositories) or "master" (older repositories)
+  - Users can specify any branch name, but it must exist in the repository
+
+  ERROR HANDLING:
+  - If a repository doesn't exist or the user doesn't have access, suggest using search-repositories
+  - Always provide helpful error messages and next steps
+
+  EXAMPLE CONVERSATIONS:
+
+  User: "Create a task to add dark mode support"
+  AI: "I'd be happy to help you create a task for adding dark mode support! First, let me search for repositories you might want to work on. [uses search-repositories] Here are some repositories you've recently worked with: ... Which repository would you like to create the task for?"
+
+  User: "Create a task for raycast/extensions to fix the search bug"
+  AI: "I'll create a GitHub Copilot task to fix the search bug in raycast/extensions. [uses create-task with repository="raycast/extensions", prompt="fix the search bug", no branch specified so default will be used] Task created successfully! ..."
+
+  User: "Create a task for extensions repo to add new functionality on the feature/search branch"
+  AI: "I need the full repository name in 'owner/repo' format. Let me search for 'extensions' repositories: [uses search-repositories with query='extensions'] Here are the matching repositories: ... Did you mean 'raycast/extensions'?"
+
+  BEST PRACTICES:
+  - Always be helpful and provide context for your actions
+  - Show search results clearly when helping users find repositories
+  - Confirm important details before creating tasks
+  - Provide the pull request URL when a task is successfully created
+  - Suggest next steps or related actions when appropriate
+evals:
+  - input: "@github-copilot Create a task for raycast/extensions to fix the search bug"
+    mocks:
+      create-task:
+        branch: "main"
+        prompt: "fix the search bug"
+        pullRequestUrl: "https://github.com/raycast/extensions/pull/21242"
+        repository: "raycast/extensions"
+        success: true
+    expected:
+      - callsTool:
+          name: "create-task"
+          arguments:
+            prompt: "fix the search bug"
+            repository: "raycast/extensions"
+  - input: "@github-copilot I want to add a new feature but I'm not sure which repo"
+    mocks:
+      search-repositories:
+        repositories:
+          - name: "extensions"
+            fullName: "raycast/extensions"
+            description: "Everything you need to extend Raycast"
+          - name: "raycast-macos"
+            fullName: "raycast/raycast-macos"
+            description: "Raycast for macOS"
+    expected:
+      - callsTool:
+          name: "search-repositories"
+  - input: "@github-copilot Create a task for the extensions repo to improve performance"
+    mocks:
+      search-repositories:
+        repositories:
+          - name: "extensions"
+            fullName: "raycast/extensions"
+            description: "Everything you need to extend Raycast"
+          - name: "my-extensions"
+            fullName: "user/my-extensions"
+            description: "Personal extensions"
+    expected:
+      - callsTool:
+          name: "search-repositories"
+          arguments:
+            query:
+              includes: "extensions"
+  - input: "@github-copilot Create a task for raycast/extensions on the feature/new-ui branch to update the interface"
+    mocks:
+      create-task:
+        branch: "feature/new-ui"
+        prompt: "update the interface"
+        pullRequestUrl: "https://github.com/raycast/extensions/pull/21243"
+        repository: "raycast/extensions"
+        success: true
+    expected:
+      - callsTool:
+          name: "create-task"
+          arguments:
+            prompt: "update the interface"
+            repository: "raycast/extensions"
+            branch: "feature/new-ui"
+  - input: "@github-copilot What repos can I work on?"
+    mocks:
+      search-repositories:
+        repositories:
+          - name: "extensions"
+            fullName: "raycast/extensions"
+            description: "Everything you need to extend Raycast"
+          - name: "api"
+            fullName: "raycast/api"
+            description: "Raycast API for developers"
+    expected:
+      - callsTool:
+          name: "search-repositories"
+  - input: "@github-copilot Create a task to refactor the authentication module for microsoft/vscode"
+    mocks:
+      create-task:
+        branch: "main"
+        prompt: "refactor the authentication module"
+        pullRequestUrl: "https://github.com/microsoft/vscode/pull/12345"
+        repository: "microsoft/vscode"
+        success: true
+    expected:
+      - callsTool:
+          name: "create-task"
+          arguments:
+            prompt:
+              includes: "refactor the authentication module"
+            repository: "microsoft/vscode"

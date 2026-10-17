@@ -1,7 +1,7 @@
 import { Color, Icon } from '@raycast/api'
-import { BareMetal } from '@scaleway/sdk'
+import { Baremetalv1 } from '@scaleway/sdk'
 
-export const SERVER_STATUSES = BareMetal.v1.SERVER_TRANSIENT_STATUSES.reduce(
+export const SERVER_STATUSES = Baremetalv1.SERVER_TRANSIENT_STATUSES.reduce(
   (acc, transientStatus) => ({
     ...acc,
     [transientStatus]: {
@@ -13,6 +13,7 @@ export const SERVER_STATUSES = BareMetal.v1.SERVER_TRANSIENT_STATUSES.reduce(
   {
     deleting: { source: Icon.CircleProgress100, tintColor: Color.Blue },
     delivering: { source: Icon.CircleProgress100, tintColor: Color.Blue },
+    migrating: { source: Icon.CircleProgress100, tintColor: Color.Blue },
     error: { source: Icon.CircleFilled, tintColor: Color.Red },
     installing: { source: Icon.CircleProgress100, tintColor: Color.Blue },
     locked: { source: Icon.Lock, tintColor: Color.Red },
@@ -32,4 +33,4 @@ export const SERVER_STATUSES = BareMetal.v1.SERVER_TRANSIENT_STATUSES.reduce(
   }
 )
 
-export const getServerStatusIcon = (server: BareMetal.v1.Server) => SERVER_STATUSES[server.status]
+export const getServerStatusIcon = (server: Baremetalv1.Server) => SERVER_STATUSES[server.status]

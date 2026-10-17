@@ -60,7 +60,7 @@ export async function getPageFromCache(topic: TopicType): Promise<string | undef
   try {
     await showToast(Toast.Style.Animated, "Fetching from Cache");
     return fs.readFileSync(path.resolve(DATA_PATH, topic.path), "utf8");
-  } catch (err) {
+  } catch {
     clearStorageItem(topic.path);
     return undefined;
   }

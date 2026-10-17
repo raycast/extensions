@@ -5,7 +5,11 @@
   "description": "View the balances and add expenses to Splitwise",
   "icon": "command-icon.png",
   "author": "ilian",
-  "contributors": ["diogo_ferrer", "djpowers"],
+  "contributors": [
+    "diogo_ferrer",
+    "djpowers",
+    "damian_duchnowski"
+  ],
   "categories": ["Finance"],
   "license": "MIT",
   "commands": [

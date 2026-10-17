@@ -1,5 +1,10 @@
 # ChatGPT Quick Actions Changelog
 
+## [Models Update] - 2026-04-15
+
+- Add latest OpenAI flagship models: GPT-5.4, GPT-5.4 mini, GPT-5.4 nano
+- Add pricing for new models
+
 ## [API Pricing] - 2025-06-26
 
 - Updated [API pricing information](https://platform.openai.com/docs/pricing) and conversion fix

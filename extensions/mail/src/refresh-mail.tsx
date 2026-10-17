@@ -1,19 +1,29 @@
-import { getMessages } from "./scripts/messages";
+import { environment, LaunchType, showHUD, showToast, Toast } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { getAccounts } from "./scripts/accounts";
-import { showToast, Toast, environment, LaunchType, showHUD } from "@raycast/api";
+import { getMessages } from "./scripts/messages";
 
 export default async function RefreshMail() {
+  // Any `tell application "Mail"` launches Mail, so the background refresh would open it (and switch to its assigned desktop) when it is closed
+  if (environment.launchType === LaunchType.Background) {
+    const isMailRunning = await runAppleScript(`application id "com.apple.mail" is running`);
+    if (isMailRunning !== "true") {
+      console.log("Mail is not running, skipping background refresh");
+      return;
+    }
+  }
+
   if (environment.launchType !== LaunchType.Background) {
-    await showToast(Toast.Style.Animated, "Refreshing All Mail Accounts");
+    await showToast(Toast.Style.Animated, "Refreshing all Mail accounts");
   } else {
-    console.log("Refreshing All Mail Accounts...");
+    console.log("Refreshing all Mail accounts...");
   }
   const accounts = await getAccounts();
   if (!accounts) {
     if (environment.launchType !== LaunchType.Background) {
-      await showToast(Toast.Style.Failure, "Failed to Get Mail Accounts");
+      await showToast(Toast.Style.Failure, "Failed to get Mail accounts");
     } else {
-      await showHUD("Failed to Get Mail Accounts");
+      await showHUD("Failed to get Mail accounts");
     }
     return;
   }
@@ -21,32 +31,36 @@ export default async function RefreshMail() {
   const mailboxes = accounts.flatMap((account) => account.mailboxes.map((mailbox) => ({ ...mailbox, account })));
   if (!mailboxes) {
     if (environment.launchType !== LaunchType.Background) {
-      await showToast(Toast.Style.Failure, "Failed to Get Mailboxes");
+      await showToast(Toast.Style.Failure, "Failed to get mailboxes");
     } else {
-      await showHUD("Failed to Get Mailboxes");
+      await showHUD("Failed to get mailboxes");
     }
     return;
   }
 
   if (environment.launchType !== LaunchType.Background) {
-    await showToast(Toast.Style.Animated, "Refreshing Messages for Accounts");
+    await showToast(Toast.Style.Animated, "Refreshing messages for accounts");
   }
-  const getAccountMessagesPromises = mailboxes.map((mailbox) => getMessages(mailbox.account, mailbox));
 
-  const mailboxMessages = await Promise.all(getAccountMessagesPromises);
-  for (const messages of mailboxMessages) {
+  let failed = false;
+  for (const mailbox of mailboxes) {
+    const messages = await getMessages(mailbox.account, mailbox);
     if (!messages) {
-      if (environment.launchType !== LaunchType.Background) {
-        await showToast(Toast.Style.Failure, "Failed to Refresh Messages");
-      } else {
-        await showHUD("Failed to Refresh Messages");
-      }
-      return;
+      failed = true;
+      console.log(`Failed to refresh messages for ${mailbox.account.name}: ${mailbox.name}`);
     }
   }
-  if (environment.launchType !== LaunchType.Background) {
-    await showToast(Toast.Style.Success, "Refreshed All Mail Accounts");
+  if (failed) {
+    if (environment.launchType !== LaunchType.Background) {
+      await showToast(Toast.Style.Failure, "Failed to refresh some mailboxes");
+    } else {
+      console.log("Failed to refresh some mailboxes");
+    }
   } else {
-    console.log("Refreshed All Mail Accounts");
+    if (environment.launchType !== LaunchType.Background) {
+      await showToast(Toast.Style.Success, "Refreshed all Mail accounts");
+    } else {
+      console.log("Refreshed all Mail accounts");
+    }
   }
 }

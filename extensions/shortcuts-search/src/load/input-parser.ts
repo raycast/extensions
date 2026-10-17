@@ -1,9 +1,10 @@
-import { Application, AtomicShortcut, SectionShortcut } from "../model/internal/internal-models";
-import { modifierMapping, Modifiers } from "../model/internal/modifiers";
+import { parseKey } from "../shortcut-core/parser";
+import { Application, SectionShortcut } from "../model/internal/internal-models";
+import { modifierMapping } from "../model/internal/modifiers";
 import { InputApp, InputKeymap, InputSection, InputShortcut } from "../model/input/input-models";
 
 export class ShortcutsParser {
-  constructor(private readonly keyCodes: Map<string, string>) {}
+  constructor(private readonly keyCodes: Record<string, string>) {}
 
   public parseInputShortcuts(inputApps: InputApp[]): Application[] {
     return inputApps
@@ -12,11 +13,14 @@ export class ShortcutsParser {
         return {
           name: inputApp.name,
           bundleId: inputApp.bundleId,
+          windowsAppId: inputApp.windowsAppId,
+          windowsProcessName: inputApp.windowsProcessName,
           hostname: inputApp.hostname,
           slug: inputApp.slug,
           keymaps: inputApp.keymaps.map((inputKeymap) => {
             return {
               title: inputKeymap.title,
+              platforms: inputKeymap.platforms,
               sections: inputKeymap.sections.map((inputSection) => {
                 return {
                   title: inputSection.title,
@@ -67,67 +71,23 @@ export class ShortcutsParser {
     );
   }
 
-  private shortcutKeyIsValid(shortcutKey: string | undefined): boolean {
-    if (shortcutKey === undefined) {
+  private shortcutKeyIsValid(key: string | undefined): boolean {
+    try {
+      parseKey(key, (base) => Object.prototype.hasOwnProperty.call(this.keyCodes, base));
       return true;
-    }
-
-    const chords = shortcutKey.split(" ");
-
-    return chords.length > 0 && chords.every((chord) => this.chordIsValid(chord));
-  }
-
-  private chordIsValid(chord: string): boolean {
-    const chordTokens = chord.split(/(?<!\+)\+/);
-    if (chordTokens.length === 0) {
+    } catch {
       return false;
     }
-    const totalNumberOfTokens = chordTokens.length;
-
-    return (
-      this.modifiersExist(totalNumberOfTokens, chordTokens) &&
-      this.baseShortcutTokenIsValid(chordTokens[totalNumberOfTokens - 1])
-    );
-  }
-
-  private modifiersExist(totalNumberOfTokens: number, chordTokens: string[]): boolean {
-    for (let i = 0; i < totalNumberOfTokens - 1; i++) {
-      if (!modifierMapping.has(chordTokens[i])) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  private baseShortcutTokenIsValid(baseToken: string): boolean {
-    return this.keyCodes.has(baseToken);
   }
 
   private parseSingleShortcut(inputShortcut: InputShortcut): SectionShortcut {
-    const chords = inputShortcut.key?.split(" ");
-    const atomicSequence = chords?.map((chord) => this.parseChord(chord));
     return {
       title: inputShortcut.title,
-      sequence: atomicSequence ?? [],
       comment: inputShortcut.comment,
-    };
-  }
-
-  private parseChord(chord: string): AtomicShortcut {
-    const chordTokens = chord.split(/(?<!\+)\+/);
-    const totalNumberOfTokens = chordTokens.length;
-    const modifiers: Modifiers[] = [];
-    for (let i = 0; i < totalNumberOfTokens - 1; i++) {
-      const token = chordTokens[i];
-      const modifier = modifierMapping.get(token);
-      if (modifier) {
-        modifiers.push(modifier);
-      }
-    }
-    const baseToken = chordTokens[totalNumberOfTokens - 1];
-    return {
-      base: baseToken,
-      modifiers: modifiers,
+      sequence: parseKey(inputShortcut.key).map(({ base, modifiers }) => ({
+        base,
+        modifiers: modifiers.map((token) => modifierMapping.get(token)!),
+      })),
     };
   }
 }

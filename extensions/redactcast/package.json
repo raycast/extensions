@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "redactcast",
+  "title": "RedactCast",
+  "description": "Reversible PII Masker: Sanitize sensitive data before sending to AI, and restore it locally.",
+  "icon": "extension-icon.png",
+  "author": "Tomokisan",
+  "categories": [
+    "Developer Tools",
+    "Security"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "teamApiKey",
+      "title": "Team API Key",
+      "description": "B2B Sync Engine API Key to download custom rules.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "mask-clipboard",
+      "title": "Mask Clipboard",
+      "description": "Replaces sensitive data in the clipboard with placeholders.",
+      "mode": "no-view"
+    },
+    {
+      "name": "rehydrate-clipboard",
+      "title": "Rehydrate Clipboard",
+      "description": "Restores the original data back into the AI's response.",
+      "mode": "no-view"
+    },
+    {
+      "name": "force-sync-rules",
+      "title": "Force Sync Team Rules",
+      "description": "Downloads the latest masking rules from your organization.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.22"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.5",
+    "react": "^19.2.7",
+    "typescript": "^6.0.0",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

@@ -5,6 +5,9 @@
   "description": "Get data from your Oura ring experience to keep track of your readiness, sleep, activity, and more.",
   "icon": "command-icon.png",
   "author": "Rob",
+  "contributors": [
+    "Menchynskyi"
+  ],
   "categories": [
     "Fun",
     "Data",
@@ -68,14 +71,41 @@
       "title": "Oura Stress",
       "description": "Get today's stress data: stress high, recovery high, and day summary.",
       "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Oura Menu Bar",
+      "description": "Show Oura scores in the menu bar",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "showScoresInTitle",
+          "title": "Display",
+          "description": "Show scores next to the icon in the menu bar. When off, scores are only visible on click.",
+          "type": "checkbox",
+          "default": true,
+          "label": "Show Scores in Menu Bar",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
     {
-      "key": "token",
-      "title": "Oura Personal Access Token",
-      "name": "oura_token",
-      "description": "Your personal access token from the Oura API.",
+      "key": "client_id",
+      "title": "Oura Client ID",
+      "name": "client_id",
+      "description": "Your Oura OAuth client ID.",
+      "required": true,
+      "type": "password",
+      "defaultValue": ""
+    },
+    {
+      "key": "client_secret",
+      "title": "Oura Client Secret",
+      "name": "client_secret",
+      "description": "Your Oura OAuth client secret.",
       "required": true,
       "type": "password",
       "defaultValue": ""
@@ -108,7 +138,7 @@
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
-    "axios": "^1.8.4",
+    "axios": "^1.18.0",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
@@ -119,5 +149,11 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9"
   }
 }

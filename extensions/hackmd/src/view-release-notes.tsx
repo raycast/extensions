@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import MiniSearch from "minisearch";
 import { Content, Root, PhrasingContent } from "mdast";
 import { remark } from "remark";
@@ -7,6 +7,7 @@ import { toMarkdown } from "mdast-util-to-markdown";
 
 import api from "./lib/api";
 import { useCachedPromise } from "@raycast/utils";
+import { getNoteUrl } from "./helpers/noteHelper";
 
 function astToMarkdown(contents: Content[]) {
   return toMarkdown({ type: "root", children: contents as PhrasingContent[] });
@@ -22,6 +23,7 @@ function getVersionFromHeading2Node(heading: Content) {
 export default function Releases() {
   const { data: note, isLoading } = useCachedPromise(() => api.getNote("release-notes"));
   const [search, setSearch] = useState("");
+  const noteUrl = useMemo(() => (note && getNoteUrl(note)) || "", [note]);
 
   const sections = useMemo(() => {
     if (note?.content) {
@@ -106,7 +108,24 @@ export default function Releases() {
 
           const changelog = sectionsChangelogMap[version];
 
-          return <List.Item key={index} title={version} detail={<List.Item.Detail markdown={changelog} />} />;
+          return (
+            <List.Item
+              key={index}
+              title={version}
+              detail={<List.Item.Detail markdown={changelog} />}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser title="Open Release Notes" url={noteUrl} />
+                  <Action.CopyToClipboard
+                    title="Copy Changelog"
+                    content={changelog}
+                    icon={Icon.Clipboard}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
         })}
     </List>
   );

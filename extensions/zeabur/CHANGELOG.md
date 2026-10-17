@@ -1,5 +1,39 @@
 # Zeabur Changelog
 
+## [Fix] - 2026-04-14
+
+- Fixed the issue where the provider information in the manage servers command may be null.
+- Fixed potential null access issues across manage projects, manage servers, and deployment commands.
+
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Feature] - 2026-03-01
+
+- Added the send email command to send emails through Zeabur Email API.
+
+## [Feature] - 2026-01-16
+
+- Added the AI Hub command to view your AI Hub balance and usage.
+
+## [Feature] - 2025-12-17
+
+- Added the manage servers command to manage the servers on Zeabur.
+- Added deploy template action, service count, and deployment count information to the template list.
+- Added the menu bar deployment command to see your Zeabur deployments at a glance.
+- Updated the menu bar projects command script.
+
+## [Feature] - 2025-10-10
+
+- Added the menu bar projects command to see your Zeabur projects at a glance.
+- Added project usage information to the project list.
+
+## [Maintenance] - 2025-09-03
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Fix] - 2025-06-30
 
 - Fixed the issue where the provider information in the project list may be null.

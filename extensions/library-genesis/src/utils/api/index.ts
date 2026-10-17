@@ -1,10 +1,10 @@
 import { load } from "cheerio";
-import fetch from "node-fetch";
 
-import type { BookEntry, LibgenDownloadGateway } from "@/types";
+import type { BookEntry } from "@/types";
 import { SearchType } from "@/types";
 
 import { getMirror } from "./mirrors";
+import { fetchLibgenDocument, fetchLibgenSearchPage } from "./request";
 
 export const getLibgenSearchResults = async (
   searchContent: string,
@@ -21,53 +21,69 @@ export const getLibgenSearchResults = async (
 
   const { parse } = getMirror(libgenUrl);
 
-  const queryUrl =
-    searchType === SearchType.Fiction
-      ? libgenUrl +
-        `/fiction/?` +
-        new URLSearchParams({
-          q: searchContent,
-          criteria: "",
-          language: "",
-          format: "",
-        })
-      : libgenUrl +
-        "/search.php?" +
-        new URLSearchParams({
-          req: searchContent,
-          open: "0",
-          res: "100",
-          view: "detailed",
-          phrase: "1",
-          column: "def",
-        });
+  const fields = [
+    "t", // title
+    "a", // author(s)
+    "s", // series
+    "y", // year
+    "p", // publisher
+    "i", // isbn
+  ];
+  const objects = [
+    "f", // files
+    "e", // editions
+    "s", // series
+    "a", // authors
+    "p", // publishers
+    "w", // works
+  ];
+  const topics = {
+    fiction: [
+      "f", // fiction
+      "r", // fiction rus
+      "c", // comics
+    ],
+    nonfiction: [
+      "l", // libgen
+      "a", // scientific articles
+      "m", // magazines
+      "s", // standards
+    ],
+  };
+  const params = new URLSearchParams({
+    req: searchContent,
+    res: "100",
+    covers: "on",
+    filesuns: "all",
+  });
+  fields.forEach((column) => params.append("columns[]", column));
+  objects.forEach((object) => params.append("objects[]", object));
+  if (searchType === SearchType.Fiction) topics.fiction.forEach((topic) => params.append("topics[]", topic));
+  else if (searchType === SearchType.NonFiction) topics.nonfiction.forEach((topic) => params.append("topics[]", topic));
+  else [...topics.fiction, ...topics.nonfiction].forEach((topic) => params.append("topics[]", topic));
+
+  const queryUrl = new URL("index.php", `${libgenUrl.replace(/\/+$/, "")}/`);
+  queryUrl.search = params.toString();
 
   console.log(`Libgen Query URL: ${queryUrl}`);
 
-  try {
-    const response = await fetch(queryUrl, {
-      signal: abortSignal,
-    });
-    const data = await response.text();
-
-    return parse(data, libgenUrl);
-  } catch (error) {
-    console.log(error);
-    return [];
-  }
+  const data = await fetchLibgenSearchPage(queryUrl.toString(), abortSignal);
+  return parse(data, libgenUrl);
 };
 
-export const getUrlFromDownloadPage = async (
+export const getDownloadLinkFromPage = async (
   downloadUrl: string,
-  gateWay: LibgenDownloadGateway,
-): Promise<string | undefined> => {
-  const response = await fetch(downloadUrl);
-  const data = await response.text();
+  signal?: AbortSignal,
+): Promise<{ url: string; referer: string }> => {
+  const document = await fetchLibgenDocument(downloadUrl, signal);
 
-  const $ = load(data);
-  console.log(downloadUrl);
-  const downloadLinks = $("#download").find("a");
+  const $ = load(document.content);
+  const links = $("#main a[href]").toArray();
+  const link = links.find((element) => $(element).text().trim().toUpperCase() === "GET");
+  const href = link && $(link).attr("href");
+  if (!href) throw new Error("The download page did not provide a GET link. Try another mirror.");
 
-  const downloadLink = downloadLinks.eq(gateWay).attr("href");
-  return downloadLink;
+  const url = new URL(href, document.url);
+  if (!["http:", "https:"].includes(url.protocol)) throw new Error("The download page returned an invalid GET link.");
+  return { url: url.toString(), referer: document.url };
 };

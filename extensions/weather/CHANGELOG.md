@@ -1,5 +1,20 @@
 # Weather Changelog
 
+## [Feels Like in Menu Bar] - 2026-09-08
+
+- Add menu bar preference to show the feels-like temperature instead of the actual temperature
+
+## [Fix wttr.in API compatibility] - 2026-03-17
+
+- Handle new `data` wrapper in wttr.in JSON response.
+- Handle removed `nearest_area` field with coordinate display fallback.
+- Add response shape validation in API client.
+- Add defensive array access to prevent crash on malformed data.
+
+## [Maintenance] - 2026-03-06
+
+- Bump all dependencies to the latest
+
 ## [Chore: Renamed file] - 2025-04-29
 
 ## [SF Symbols] - 2024-03-04

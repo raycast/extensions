@@ -25,7 +25,7 @@ export default function ProjectDeployments({ projectID, serviceID, environmentID
         setHistoryDeployments(last5Deployments);
         setRunningDeployment(latestRunningDeployment);
         setIsLoading(false);
-      } catch (error) {
+      } catch {
         showFailureToast("Failed to fetch deployments");
         setIsLoading(false);
       }

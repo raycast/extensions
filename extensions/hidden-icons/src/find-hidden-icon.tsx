@@ -19,7 +19,7 @@ export default function FindHiddenIcon() {
     isGaming,
     difficultyMode,
     lastRandomRow,
-    refreshIcon
+    refreshIcon,
   );
 
   useEffect(() => {
@@ -73,7 +73,10 @@ export default function FindHiddenIcon() {
               <Action
                 title={"Score History"}
                 icon={Icon.StarCircle}
-                shortcut={{ modifiers: ["cmd"], key: "h" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "h" },
+                  Windows: { modifiers: ["ctrl"], key: "h" },
+                }}
                 onAction={async () => {
                   const historyScore = await getHistoryScore();
                   push(<ScorePage myScore={{ mode: difficultyMode, score: 0 }} historyScore={historyScore} />);

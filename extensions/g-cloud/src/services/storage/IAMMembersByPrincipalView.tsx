@@ -1,10 +1,10 @@
-import { Detail } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { Detail, showToast, Toast } from "@raycast/api";
 import { useEffect } from "react";
 
 export default function IAMMembersByPrincipalView() {
   useEffect(() => {
-    showFailureToast({
+    showToast({
+      style: Toast.Style.Failure,
       title: "Not implemented",
       message: "This view is under development",
     });

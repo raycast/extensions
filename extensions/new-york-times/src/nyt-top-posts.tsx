@@ -34,12 +34,12 @@ const sections = [
 ];
 
 export default function Command() {
-  const apiKey = getPreferenceValues()?.api_key;
+  const apiKey = getPreferenceValues<Preferences>().api_key;
 
   const [section, setSection] = useState("politics");
 
   const { isLoading, data, revalidate } = useFetch<NYTTopResult>(
-    `https://api.nytimes.com/svc/topstories/v2/${section}.json?api-key=${apiKey}`
+    `https://api.nytimes.com/svc/topstories/v2/${section}.json?api-key=${apiKey}`,
   );
 
   return (

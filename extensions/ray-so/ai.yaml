@@ -1,0 +1,65 @@
+instructions: |
+  Use create-code-image to prepare code images in ray.so. Preserve the supplied code exactly
+  unless the user asks to change it. If no code is available in the request or conversation,
+  ask for it instead of inventing a snippet.
+  Omit theme, padding, darkMode, and background unless the user explicitly requests overrides;
+  the tool reads the user's saved defaults. Overrides do not change saved preferences.
+  Use get-image-options when the user asks about available settings or their defaults, or
+  when you need to look up an unfamiliar theme or language ID. Do not fetch options merely
+  to create a snippet with defaults. Omit language to auto-detect it.
+  The creation tool opens the browser by default. Set openInBrowser to false if the user
+  only wants a link or asks not to open the browser.
+  Return the tool's exact URL as a Markdown link. This is a ray.so editor link, not an
+  exported image or a hosted PNG. Tell the user to export the image in the editor.
+  Only say the editor was opened when openedInBrowser is true. Never claim an image was
+  saved, copied, downloaded, or exported by these tools.
+evals:
+  - input: "@ray-so Create an image of this code using my saved defaults: console.log('Hello, world!')"
+    mocks:
+      create-code-image:
+        url: "https://ray.so/#theme=candy&background=true&darkMode=true&padding=64&code=Y29uc29sZS5sb2coJ0hlbGxvLCB3b3JsZCEnKQ&title=Untitled+1&language=auto"
+        title: "Untitled 1"
+        settings: { theme: candy, padding: "64", darkMode: true, background: true, language: auto }
+        openedInBrowser: true
+        imageExported: false
+    expected:
+      - callsTool:
+          name: create-code-image
+          arguments:
+            code: "console.log('Hello, world!')"
+      - not:
+          callsTool: get-image-options
+      - includes: "https://ray.so/"
+      - includes: export
+  - input: "@ray-so Create only a link for print('Hello') using theme ID noir, light mode, no background, and 32px padding. Do not open the browser."
+    mocks:
+      create-code-image:
+        url: "https://ray.so/#theme=noir&background=false&darkMode=false&padding=32&code=cHJpbnQoJ0hlbGxvJyk&title=Untitled+1&language=auto"
+        title: "Untitled 1"
+        settings: { theme: noir, padding: "32", darkMode: false, background: false, language: auto }
+        openedInBrowser: false
+        imageExported: false
+    expected:
+      - callsTool:
+          name: create-code-image
+          arguments:
+            code: "print('Hello')"
+            theme: noir
+            padding: 32
+            darkMode: false
+            background: false
+            openInBrowser: false
+      - includes: "https://ray.so/"
+      - includes: export
+  - input: "@ray-so What themes, languages, and padding can I use, and what are my saved defaults?"
+    mocks:
+      get-image-options:
+        defaults: { theme: candy, padding: 64, darkMode: true, background: true, language: auto }
+        themes: [{ id: candy, name: Candy }, { id: noir, name: Noir }]
+        languages: [{ id: auto, name: Auto-Detect }, { id: typescript, name: TypeScript }]
+        padding: [16, 32, 64, 128]
+    expected:
+      - callsTool: get-image-options
+      - includes: Candy
+      - includes: TypeScript
+      - includes: "64"

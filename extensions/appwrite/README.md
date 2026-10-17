@@ -4,7 +4,7 @@
 
 # Appwrite
 
-This is a Raycast extension for [Appwrite](https://appwrite.io/) - Build like a team of hundreds. With this extension you can view various services in multiple Appwrite projects.
+This is a Raycast extension for [Appwrite](https://appwrite.io/) - _Build like a team of hundreds_. With this extension you can view various services in multiple Appwrite projects.
 
 ## 🤔 How It Works
 
@@ -13,11 +13,14 @@ Since:
 1. there can be multiple Appwrite projects with a mix of self-hosted and hosted,
 2. API keys are scoped to single projects,
 
-...the extension allows you to add each project, securely store it via Raycast LocalStorage, then view its serviecs. This means you can have, for example, 2 hosted Appwrite projects with different endpoints as well as multiple self-hosted projects.
+...the extension allows you to add each project, securely store it via [Raycast Storage](https://developers.raycast.com/api-reference/storage), then view its serviecs. This means you can have, for example, 2 hosted Appwrite projects with different endpoints as well as multiple self-hosted projects.
 
 ## 🚀 Getting Started
 
 1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/appwrite) OR `install` via Raycast Store
+
+    <a title="Install appwrite Raycast Extension" href="https://www.raycast.com/xmok/appwrite"><img src="https://www.raycast.com/xmok/appwrite/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+
 
 2. **Configure**:
 

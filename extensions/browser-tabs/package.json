@@ -5,6 +5,10 @@
   "description": "Search and open tabs in Chrome, Safari, Edge, Arc, Brave, Vivaldi, Opera and Orion, etc.",
   "icon": "browser-tabs-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "ridemountainpig",
+    "artistro08"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -73,8 +77,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.1.0",
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
     "fuse.js": "^7.1.0"
   },
   "devDependencies": {
@@ -92,5 +96,9 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

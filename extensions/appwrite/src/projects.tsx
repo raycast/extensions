@@ -18,6 +18,7 @@ import Databases from "./databases";
 import Storage from "./storage";
 import Users from "./users";
 import Sites from "./sites";
+import CopyIDAction from "./common/CopyIDAction";
 
 export interface Project {
   name: string;
@@ -120,6 +121,9 @@ export default function Projects() {
                     style={Action.Style.Destructive}
                     shortcut={Keyboard.Shortcut.Common.Remove}
                   />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <CopyIDAction item={{ $id: project.id }} />
                 </ActionPanel.Section>
               </ActionPanel>
             }

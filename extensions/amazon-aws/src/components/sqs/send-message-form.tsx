@@ -150,7 +150,7 @@ export const SendMessageForm = ({
           }
           try {
             JSON.parse(value!);
-          } catch (err) {
+          } catch (_err) {
             return "Message Attributes must be valid JSON";
           }
         }

@@ -4,7 +4,10 @@ import { BASE_URL } from "../scira";
 // Define Message type to match what the API expects
 type Message = {
   role: "user";
-  content: string;
+  parts: {
+    type: "text";
+    text: string;
+  }[];
 };
 
 type Input = {
@@ -34,7 +37,12 @@ export default async function (input: Input) {
     messages: [
       {
         role: "user",
-        content: query,
+        parts: [
+          {
+            type: "text",
+            text: query,
+          },
+        ],
       },
     ],
     model: "scira-default",

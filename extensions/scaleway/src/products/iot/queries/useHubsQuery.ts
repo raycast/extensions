@@ -1,19 +1,21 @@
-import { IOT } from '@scaleway/sdk'
+import { Iotv1 } from '@scaleway/sdk'
 import { useDataLoader } from '@scaleway/use-dataloader'
 import { fetchAllRegions } from 'helpers/fetchLocalities'
 import { useAPI } from 'helpers/useAPI'
 
 type DataLoaderOptions<T> = Parameters<typeof useDataLoader<T>>[2]
 
+const defaultRegions = Iotv1.API.LOCALITY.type === 'region' ? Iotv1.API.LOCALITY.regions : []
+
 export const useAllRegionsHubsQuery = (
-  params: IOT.v1.ListHubsRequest,
-  dataloaderOptions: DataLoaderOptions<IOT.v1.ListHubsResponse['hubs']> = {}
+  params: Iotv1.ListHubsRequest,
+  dataloaderOptions: DataLoaderOptions<Iotv1.ListHubsResponse['hubs']> = {}
 ) => {
   const { iotV1 } = useAPI()
 
-  const regions = params.region ? [params.region] : IOT.v1.API.LOCALITIES
+  const regions = params.region ? [params.region] : defaultRegions
 
-  const key = ['IOT', 'servers', 'all', regions, Object.entries(params).sort()].flat(3)
+  const key = ['iotV1', 'listHubs', 'all', regions, Object.entries(params).sort()].flat(3)
 
   return useDataLoader(
     key,

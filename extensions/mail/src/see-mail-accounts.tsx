@@ -1,9 +1,9 @@
 import { Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-import { Account } from "./types";
 import { MailboxList } from "./components";
 import { getAccounts } from "./scripts/accounts";
+import { Account } from "./types";
 
 export default function SeeMailAccounts() {
   const { data: accounts, isLoading: isLoadingAccounts } = useCachedPromise(getAccounts);

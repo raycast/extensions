@@ -9,13 +9,13 @@ export const getAppName = (): string => {
   return warpApp === "preview" ? "Warp Preview" : "Warp";
 };
 
-// URL for Warp Launch Configurations Docs
-export const LAUNCH_CONFIGS_URL = "https://docs.warp.dev/features/sessions/launch-configurations";
+// URL for Warp Tab Configs Docs
+export const CONFIGS_URL = "https://docs.warp.dev/terminal/windows/tab-configs/";
 
 // Error and information messages
-export const NO_LAUNCH_CONFIGS_TITLE = "No Launch Configurations found";
-export const NO_LAUNCH_CONFIGS_MESSAGE = "You need to create at least one Launch Configuration before launching.";
+export const NO_CONFIGS_TITLE = "No Tab Configs found";
+export const NO_CONFIGS_MESSAGE = "You need to create at least one Tab Config before launching.";
 
 // Action titles
-export const VIEW_DOCS_ACTION_TITLE = "View Launch Configuration Docs";
-export const OPEN_CONFIGS_DIR_ACTION_TITLE = "Open Launch Configurations Directory";
+export const VIEW_DOCS_ACTION_TITLE = "View Tab Config Docs";
+export const OPEN_CONFIGS_DIR_ACTION_TITLE = "Open Tab Configs Directory";

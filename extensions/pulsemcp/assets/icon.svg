@@ -1,0 +1,9 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="128" fill="#302F7D"/>
+  <!-- Left dot -->
+  <circle cx="80" cy="256" r="24" stroke="#FF642B" stroke-width="8" fill="none"/>
+  <!-- Right dot -->
+  <circle cx="432" cy="256" r="24" stroke="#FF642B" stroke-width="8" fill="none"/>
+  <!-- EKG pulse line -->
+  <path d="M104 256 H180 L220 140 L280 256 H340 L380 372 L420 256 H432" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

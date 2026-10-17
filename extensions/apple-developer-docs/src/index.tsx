@@ -5,16 +5,16 @@ import { config } from "./config";
 import { useFetch } from "@raycast/utils";
 import useSearchedResults from "./hooks/useSearchedResults";
 import DevOnlyActionPanel from "./DevOnlyActionPanel";
+import { createAppleSearchRequest, parseAppleSearchResponse } from "./appleSearch";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
+  const query = searchText.length === 0 ? "SwiftUI" : searchText;
 
-  const params = new URLSearchParams();
-  params.append("q", searchText.length === 0 ? "SwiftUI" : searchText);
-  params.append("results", config.maxResults.toString());
-
-  const { data, isLoading } = useFetch(config.apiBaseUrl + "?" + params.toString(), {
-    parseResponse: async (response) => (await response.json()) as PayloadResponse,
+  const request = createAppleSearchRequest(query);
+  const { data, isLoading } = useFetch(request.url, {
+    ...request.options,
+    parseResponse: (response) => parseAppleSearchResponse(response, config.maxResults),
     keepPreviousData: true,
     initialData: { results: [], featuredResult: "", suggested_query: "", uuid: "" },
   });
@@ -43,13 +43,12 @@ export default function Command() {
 
   const { results: searchedResults, markAsSearched } = useSearchedResults();
   const filteredSearchedResults = useMemo(() => {
-    if (typeFilter.toLowerCase() === "all") {
-      return searchedResults;
-    }
+    const byType =
+      typeFilter.toLowerCase() === "all"
+        ? searchedResults
+        : searchedResults?.filter((result) => result.type.toLowerCase() === typeFilter.toLowerCase());
 
-    const filteredResults = searchedResults?.filter((result) => result.type === typeFilter.toLowerCase());
-
-    return filteredResults?.filter(
+    return byType?.filter(
       (result) => searchText.trim() === "" || result.title.toLowerCase().includes(searchText.toLowerCase())
     );
   }, [searchedResults, searchText, typeFilter]);

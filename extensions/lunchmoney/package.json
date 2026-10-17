@@ -1,10 +1,13 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lunchmoney",
-  "title": "Lunch Money Transactions",
-  "description": "View and update your Lunch Money transactions",
+  "title": "Lunch Money",
+  "description": "Unofficial Lunch Money extension to manage your personal finances.",
   "icon": "extension-icon.png",
   "author": "oppenheimer",
+  "contributors": [
+    "zebapy"
+  ],
   "categories": [
     "Finance"
   ],
@@ -12,10 +15,27 @@
   "commands": [
     {
       "name": "transactions",
-      "title": "Transactions",
+      "title": "List Transactions",
       "subtitle": "Lunch Money",
-      "description": "View Transactions",
-      "mode": "view"
+      "description": "Search and list your LunchMoney transactions with flexible date ranges",
+      "mode": "view",
+      "icon": "list.png"
+    },
+    {
+      "name": "category-totals",
+      "title": "Category Totals",
+      "subtitle": "Lunch Money",
+      "description": "See total spending breakdown by category for selected month",
+      "mode": "view",
+      "icon": "chart.png"
+    },
+    {
+      "name": "accounts",
+      "title": "Account Balances",
+      "subtitle": "Lunch Money",
+      "description": "See balances for all connected accounts and net worth",
+      "mode": "view",
+      "icon": "card.png"
     }
   ],
   "preferences": [
@@ -28,29 +48,34 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.84.9",
-    "@raycast/utils": "^1.17.0",
     "date-fns": "^4.1.0",
     "isomorphic-fetch": "^3.0.0",
     "ky": "^1.7.2",
     "radash": "^12.1.0",
-    "ts-pattern": "^5.5.0"
+    "ts-pattern": "^5.5.0",
+    "@raycast/api": "^1.103.8",
+    "@raycast/utils": "^2.2.2",
+    "openapi-fetch": "^0.15.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/isomorphic-fetch": "^0.0.39",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "openapi-typescript": "^7.10.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "generate-types": "openapi-typescript lunchmoney-api-v2.json -o src/lunchmoney-api.ts",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

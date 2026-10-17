@@ -1,0 +1,42 @@
+   -    \    |    /    -    \    |    /    -                                                                                                                         Found 115浏览器 [115.115Chrome]
+Version: 36.0.0
+Publisher: 广东一一五科技股份有限公司
+Publisher Url: https://115.com
+Publisher Support Url: https://115.com/115115
+Author: Guangdong 115 Technology Co., Ltd.
+Description:
+  115 Browser is a PC client that perfectly integrates multiple platforms including 115, 115 organization and browser.
+  It supports 115 account quick login, favorites synchronization, files backup by dragging and dropping, batch uploading and downloading, etc.; supports 115 organization affairs notification, so you can keep track of the organization's collaboration; supports browser quick search and built-in utilities and extensions, giving you a high-speed, refreshing, and smooth Internet experience.
+Homepage: https://pc.115.com/browser.html
+License: Proprietary
+License Url: https://115.com/pc_agreement.html
+Privacy Url: https://115.com/privacy.html
+Copyright: Copyright 2024 The 115Browser Authors. All rights reserved.
+Release Notes:
+  1. 修复部分用户不能正确启动 115 浏览器的问题;
+  2. 下载的存储路径由“默认系统的 download 目录”改为“磁盘空间最大的盘符”。
+Release Notes Url: https://q.115.com/115/T898696.html
+Purchase Url: https://vip.115.com
+Tags:
+  backup
+  browser
+  chromium
+  cloud
+  cloud-drive
+  download
+  drive
+  file
+  netdisk
+  share
+  sync
+  upload
+  web
+  webpage
+  prc
+  china
+Installer:
+  Installer Type: nullsoft
+  Installer Url: https://down.115.com/client/win/115br_v36.0.0_x64.exe
+  Installer SHA256: 123f61e478ca1637998e51abc1640e6b962f4a6afa396f0761f57987dc12aad4
+  Release Date: 2025-08-22
+  Offline Distribution Supported: true

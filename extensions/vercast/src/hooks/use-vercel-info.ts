@@ -24,15 +24,24 @@ const useVercel = () => {
         if (selectedTeamId) {
           setSelectedTeamId(selectedTeamId);
         }
-        const [fetchedUser, fetchedTeams] = await Promise.all([fetchUser(), fetchTeams()]);
+        // Fetch user and teams but ensure one failing request doesn't block the other.
+        const [userResult, teamsResult] = await Promise.allSettled([fetchUser(), fetchTeams()]);
 
-        setUser(fetchedUser);
-        setTeams(fetchedTeams);
+        const fetchedUser = userResult.status === "fulfilled" ? userResult.value : undefined;
+        const fetchedTeams = teamsResult.status === "fulfilled" ? teamsResult.value : undefined;
 
-        if (selectedTeamId) {
-          const selectedTeam = fetchedTeams.find((team) => team.id === selectedTeamId);
-          if (!selectedTeam) {
-            setSelectedTeamId(undefined);
+        if (fetchedUser) {
+          setUser(fetchedUser);
+        }
+
+        if (fetchedTeams) {
+          setTeams(fetchedTeams);
+
+          if (selectedTeamId) {
+            const selectedTeam = fetchedTeams.find((team) => team.id === selectedTeamId);
+            if (!selectedTeam) {
+              setSelectedTeamId(undefined);
+            }
           }
         }
       }
@@ -41,7 +50,7 @@ const useVercel = () => {
   }, []);
 
   const updateSelectedTeam = async (teamIdOrUsername: string) => {
-    const teamIfExists = teams?.find((team) => team.id === teamIdOrUsername);
+    const teamIfExists = teams?.find((team: Team) => team.id === teamIdOrUsername);
     if (teamIfExists) {
       setSelectedTeamId(teamIfExists.id);
       await LocalStorage.setItem("selectedTeamId", teamIfExists.id);

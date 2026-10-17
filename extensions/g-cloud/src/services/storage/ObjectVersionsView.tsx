@@ -20,7 +20,6 @@ import {
   isCurrentVersion,
   calculateAge,
 } from "../../utils/FileUtils";
-import { showFailureToast } from "@raycast/utils";
 
 const execPromise = promisify(exec);
 
@@ -245,11 +244,6 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
       }
 
       setError(`${errorTitle}: ${errorMessage}`);
-
-      showFailureToast({
-        title: errorTitle,
-        message: errorMessage,
-      });
     } finally {
       setIsLoading(false);
     }
@@ -311,7 +305,8 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
           errorMessage = `The version "${generation}" was not found.`;
         }
 
-        showFailureToast({
+        showToast({
+          style: Toast.Style.Failure,
           title: errorTitle,
           message: errorMessage,
         });
@@ -367,7 +362,8 @@ export default function ObjectVersionsView({ projectId, gcloudPath, bucketName, 
           errorMessage = `The version "${generation}" was not found. It may have been deleted already.`;
         }
 
-        showFailureToast({
+        showToast({
+          style: Toast.Style.Failure,
           title: errorTitle,
           message: errorMessage,
         });

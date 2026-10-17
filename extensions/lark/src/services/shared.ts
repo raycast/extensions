@@ -1,20 +1,19 @@
-import { AbortError, got } from 'got';
-import { getDefaultStore } from 'jotai';
-import { Cookie, CookieJar } from 'tough-cookie';
-import { isAuthenticatedAtom } from '../hooks/atoms';
-import { DOMAIN, GENERAL_DOMAIN } from '../utils/config';
-import { StorageKey, getStorage, setStorage } from '../utils/storage';
+import { AbortError, got } from "got";
+import { Cookie, CookieJar } from "tough-cookie";
+import { getIsAuthenticated, setIsAuthenticated } from "../hooks/auth-state";
+import { DOMAIN, GENERAL_DOMAIN } from "../utils/config";
+import { StorageKey, getStorage, setStorage } from "../utils/storage";
 
 export const cookieJar = new CookieJar();
 
 export const client = got.extend({
   cookieJar,
-  headers: { 'User-Agent': 'Raycast' },
-  responseType: 'json',
+  headers: { "User-Agent": "Raycast" },
+  responseType: "json",
 });
 
 export async function checkAuthState(): Promise<boolean> {
-  if (getDefaultStore().get(isAuthenticatedAtom)) return true;
+  if (getIsAuthenticated()) return true;
   const session = await getStorage(StorageKey.SpaceSession);
   if (session) {
     await setAuthData(session);
@@ -24,11 +23,11 @@ export async function checkAuthState(): Promise<boolean> {
 }
 
 export async function setAuthData(session: string): Promise<void> {
-  getDefaultStore().set(isAuthenticatedAtom, true);
+  setIsAuthenticated(true);
 
   cookieJar.setCookieSync(
     new Cookie({
-      key: 'session',
+      key: "session",
       value: session,
       domain: DOMAIN,
     }),

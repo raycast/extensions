@@ -25,13 +25,13 @@ interface Values {
 }
 
 interface FieldRefs {
-  nameFieldRef: React.RefObject<Form.TextField>;
-  noteFieldRef: React.RefObject<Form.TextArea>;
-  dateFieldRef: React.RefObject<Form.DatePicker>;
+  nameFieldRef: React.RefObject<Form.TextField | null>;
+  noteFieldRef: React.RefObject<Form.TextArea | null>;
+  dateFieldRef: React.RefObject<Form.DatePicker | null>;
 }
 
 async function createTask(values: Values, fieldRefs: FieldRefs) {
-  const { defaultAreaId } = getPreferenceValues();
+  const { defaultAreaId } = getPreferenceValues<Preferences>();
 
   const toast = await showToast({
     style: Toast.Style.Animated,
@@ -58,7 +58,9 @@ async function createTask(values: Values, fieldRefs: FieldRefs) {
       toast.message = message;
     } else {
       // Clear all fields
-      Object.values(fieldRefs).forEach((ref) => ref.current?.reset());
+      fieldRefs.nameFieldRef.current?.reset();
+      fieldRefs.noteFieldRef.current?.reset();
+      fieldRefs.dateFieldRef.current?.reset();
 
       // Focus back on the first field
       fieldRefs.nameFieldRef.current?.focus();
@@ -84,7 +86,7 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
   const noteFieldRef = useRef<Form.TextArea>(null);
   const dateFieldRef = useRef<Form.DatePicker>(null);
 
-  const { defaultAreaId } = getPreferenceValues();
+  const { defaultAreaId } = getPreferenceValues<Preferences>();
 
   const { isLoading, data } = usePromise(async () => {
     const allAreas = await LocalStorage.allItems();
@@ -128,7 +130,7 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
         onChange={dropNameErrorIfNeeded}
         onBlur={(event) => {
           if (event.target.value?.length == 0) {
-            setNameError("The field should't be empty!");
+            setNameError("The field shouldn't be empty!");
           } else {
             dropNameErrorIfNeeded();
           }

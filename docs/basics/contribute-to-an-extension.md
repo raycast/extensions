@@ -8,7 +8,7 @@ All published extensions are open-source and can be found in [this repository](h
 
 ## Get source code
 
-First, you need to find the source code of the extension. The easiest way to do this is to use the `Fork Extension` action in the Raycast's root search.
+First, you need to find the source code of the extension. The easiest way to do this is to use the `Fork Extension` action on a command of the extension in the Raycast's root search.
 
 ![Fork an extension](../.gitbook/assets/fork-extension.webp)
 
@@ -24,4 +24,4 @@ When you're done editing the extension, make sure to add yourself to the contrib
 
 Additionally, ensure the `CHANGELOG.md` file is updated with your changes; create it if it doesn't exist. Use the `{PR_MERGE_DATE}` placeholder for the date – see the [Version History documentation](prepare-an-extension-for-store.md#version-history) for details.
 
-Once everything is ready, see [how to publish an extension](publish-an-extension.md) for instructions on validating and publishing the changes (via a pull request).
+Once everything is ready, see [how to publish an extension](publish-an-extension.md) for instructions on validating and publishing the changes.

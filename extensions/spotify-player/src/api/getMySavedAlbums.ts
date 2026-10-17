@@ -1,10 +1,11 @@
+import { withCache } from "../helpers/apiCache";
 import { getErrorMessage } from "../helpers/getError";
 import { SimplifiedAlbumObject } from "../helpers/spotify.api";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 type GetMySavedAlbumsProps = { limit?: number };
 
-export async function getMySavedAlbums({ limit = 50 }: GetMySavedAlbumsProps = {}) {
+async function _getMySavedAlbums({ limit = 50 }: GetMySavedAlbumsProps = {}) {
   const { spotifyClient } = getSpotifyClient();
 
   try {
@@ -27,3 +28,5 @@ export async function getMySavedAlbums({ limit = 50 }: GetMySavedAlbumsProps = {
     throw new Error(error);
   }
 }
+
+export const getMySavedAlbums = withCache("api:library:albums", 300000, _getMySavedAlbums);

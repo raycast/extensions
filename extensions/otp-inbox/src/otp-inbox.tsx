@@ -8,6 +8,7 @@ import {
   openExtensionPreferences,
   getPreferenceValues,
   Detail,
+  Keyboard,
 } from "@raycast/api";
 import { Clipboard, showHUD } from "@raycast/api";
 import { getEmails } from "./lib/gmail";
@@ -92,13 +93,13 @@ export default function OTPInbox() {
                   <Action.Push
                     title="Show Email Content"
                     icon={{ source: Icon.Text }}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "e" }, Windows: { modifiers: ["ctrl"], key: "e" } }}
                     target={<Detail markdown={`### Email from ${code.sender.name}\n\n${code.emailText}`} />}
                   />
                   <Action
                     title="Refresh"
                     icon={{ source: Icon.ArrowClockwise }}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={async () => {
                       await getVerificationCodes();
                     }}
@@ -129,7 +130,7 @@ export default function OTPInbox() {
                   <Action.Push
                     title="Show Email Content"
                     icon={{ source: Icon.Text }}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "e" }, Windows: { modifiers: ["ctrl"], key: "e" } }}
                     target={<Detail markdown={`### Email from ${email.sender.name}\n\n${email.emailText}`} />}
                   />
                   <Action

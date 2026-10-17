@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import { format } from "date-fns";
+import { format, differenceInCalendarDays, isThisYear } from "date-fns";
 
 import { Action, ActionPanel, Color, Icon, Keyboard, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
@@ -13,6 +13,11 @@ import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import { groupBy } from "lodash";
 import useFavorites from "../hooks/useFavorites";
 import { getSectionTitle } from "../utils/getSectionTitle";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
+import { instanceLabel } from "../utils/instanceLabel";
+import { useAuthHeader } from "../hooks/useAuthHeader";
+import { expandKeywords } from "../utils/expandKeywords";
 
 export default function NavigationHistory() {
   const {
@@ -24,27 +29,26 @@ export default function NavigationHistory() {
     setSelectedInstance,
   } = useInstances();
   const { isInFavorites, revalidateFavorites } = useFavorites();
-  const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const { id: instanceId = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
+  const { id: instanceId = "", name: instanceName = "" } = selectedInstance || {};
 
-  const instanceUrl = `https://${instanceName}.service-now.com`;
+  const instanceUrl = getInstanceBaseUrl({ name: instanceName });
+  const authHeader = useAuthHeader(selectedInstance);
 
-  const { isLoading, data, revalidate, pagination } = useFetch(`${instanceUrl}/api/now/ui/history`, {
-    headers: {
-      Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-    },
-    execute: !!selectedInstance,
+  const { isLoading, data, error, revalidate, pagination } = useFetch(`${instanceUrl}/api/now/ui/history`, {
+    headers: authHeader ? { Authorization: authHeader } : undefined,
+    execute: !!selectedInstance && !!authHeader,
     onError: (error) => {
-      setErrorFetching(true);
       console.error(error);
-      showToast(Toast.Style.Failure, "Could not fetch navigation history", error.message);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Could Not Fetch Navigation History",
+        message: error.message,
+      });
     },
 
     mapResult(response: NavigationHistoryResponse) {
-      setErrorFetching(false);
-
       return { data: response.result.list };
     },
     keepPreviousData: true,
@@ -55,10 +59,10 @@ export default function NavigationHistory() {
   }, [data]);
 
   const onInstanceChange = (newValue: string) => {
-    const aux = instances.find((instance) => instance.id === newValue);
-    if (aux) {
-      setSelectedInstance(aux);
-      LocalStorage.setItem("selected-instance", JSON.stringify(aux));
+    const found = instances.find((instance) => instance.id === newValue);
+    if (found) {
+      setSelectedInstance(found);
+      LocalStorage.setItem("selected-instance", JSON.stringify(found));
     }
   };
 
@@ -66,6 +70,7 @@ export default function NavigationHistory() {
     <List
       searchText={searchTerm}
       onSearchTextChange={setSearchTerm}
+      searchBarPlaceholder="Filter by title, description, table..."
       isLoading={isLoading}
       pagination={pagination}
       throttle
@@ -82,7 +87,7 @@ export default function NavigationHistory() {
             {instances.map((instance: Instance) => (
               <List.Dropdown.Item
                 key={instance.id}
-                title={instance.alias ? instance.alias : instance.name}
+                title={instanceLabel(instance)}
                 value={instance.id}
                 icon={{
                   source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,
@@ -95,7 +100,7 @@ export default function NavigationHistory() {
       }
     >
       {selectedInstance ? (
-        errorFetching ? (
+        error ? (
           <List.EmptyView
             icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
             title="Could Not Fetch Results"
@@ -120,7 +125,7 @@ export default function NavigationHistory() {
             >
               {sections[section].map((historyEntry) => {
                 const path = historyEntry.url.startsWith("/") ? historyEntry.url : `/${historyEntry.url}`;
-                const url = `${instanceUrl}${path}`;
+                const url = buildServiceNowUrl(instanceName, path);
                 const table = historyEntry.url.split(".do")[0];
                 const { icon: iconName, color: colorName } = getTableIconAndColor(table);
 
@@ -128,10 +133,20 @@ export default function NavigationHistory() {
                   source: Icon[iconName as keyof typeof Icon],
                   tintColor: Color[colorName as keyof typeof Color],
                 };
+                const createdDate = new Date((historyEntry.createdString || "") + " UTC");
+                const daysAgo = differenceInCalendarDays(new Date(), createdDate);
+                const dateLabel =
+                  daysAgo === 0
+                    ? format(createdDate, "HH:mm")
+                    : daysAgo <= 6
+                      ? format(createdDate, "EEE")
+                      : isThisYear(createdDate)
+                        ? format(createdDate, "d MMM")
+                        : format(createdDate, "yyyy");
                 const accessories: List.Item.Accessory[] = [
                   {
-                    icon: Icon.Calendar,
-                    tooltip: format(historyEntry.createdString || "", "EEEE d MMMM yyyy 'at' HH:mm"),
+                    text: dateLabel,
+                    tooltip: format(createdDate, "EEEE d MMMM yyyy 'at' HH:mm"),
                   },
                   {
                     icon: Icon.Link,
@@ -155,7 +170,7 @@ export default function NavigationHistory() {
                     icon={icon}
                     title={historyEntry.title}
                     subtitle={description}
-                    keywords={[historyEntry.title, description || "", ...table.split("_")]}
+                    keywords={expandKeywords(historyEntry.title, description, table)}
                     accessories={accessories}
                     actions={
                       <ActionPanel>

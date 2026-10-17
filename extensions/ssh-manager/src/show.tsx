@@ -8,17 +8,12 @@ import {
   Icon,
   List,
   showHUD,
+  useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript, usePromise } from "@raycast/utils";
 import { getConnections, saveConnections } from "./storage.api";
 import { ISSHConnection } from "./types";
-
-interface Preferences {
-  terminal: string;
-  openin: string;
-  onlyname: boolean;
-}
+import Edit from "./edit";
 
 const preferences = getPreferenceValues<Preferences>();
 export const terminal = preferences["terminal"];
@@ -505,19 +500,8 @@ function getConnectionString(item: ISSHConnection) {
 }
 
 export default function Command() {
-  const [connectionsList, setConnectionsList] = useState<ISSHConnection[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-
-      const items: ISSHConnection[] = await getConnections();
-
-      setConnectionsList(items);
-      setLoading(false);
-    })();
-  }, []);
+  const { isLoading: loading, data: connectionsList = [], revalidate } = usePromise(getConnections);
+  const { push } = useNavigation();
 
   async function removeItem(item: ISSHConnection) {
     const confirmed = await confirmAlert({
@@ -536,9 +520,13 @@ export default function Command() {
       items = items.filter((i) => i.id !== item.id);
 
       await saveConnections(items);
-      setConnectionsList(items);
+      revalidate();
       await showHUD(`🗑 Connection [${item.name}] removed!`);
     }
+  }
+
+  async function editItem(item: ISSHConnection) {
+    push(<Edit connectionToEdit={item} />, revalidate);
   }
 
   return (
@@ -546,7 +534,7 @@ export default function Command() {
       {connectionsList.map((item) => {
         return (
           <List.Item
-            actions={<GetAction item={item} onItemRemove={removeItem} />}
+            actions={<GetAction item={item} onItemRemove={removeItem} onItemEdit={editItem} />}
             id={item.id}
             key={item.name}
             title={item.name}
@@ -561,9 +549,11 @@ export default function Command() {
 function GetAction({
   item,
   onItemRemove,
+  onItemEdit,
 }: {
   item: ISSHConnection;
   onItemRemove: (item: ISSHConnection) => Promise<void>;
+  onItemEdit: (item: ISSHConnection) => Promise<void>;
 }) {
   const itemString = getConnectionString(item);
   return (
@@ -581,6 +571,13 @@ function GetAction({
           content={itemString}
           shortcut={{ modifiers: ["cmd"], key: "v" }}
           onPaste={() => showHUD(`📝 Pasting conn. [${item.name}] to active app`)}
+        />
+        <Action
+          title="Edit Connection"
+          icon={Icon.Pencil}
+          style={Action.Style.Regular}
+          onAction={() => onItemEdit(item)}
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Danger zone">

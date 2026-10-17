@@ -1,4 +1,4 @@
-import { execp } from "../utils";
+import { execf } from "../utils";
 
 export const getNetworkData = async (): Promise<{ [key: string]: number[] }> => {
   const nettopOptions = [
@@ -20,15 +20,18 @@ export const getNetworkData = async (): Promise<{ [key: string]: number[] }> => 
     "W",
     "arch",
   ];
-  const output = await execp(`/usr/bin/nettop -P -L 1 -k ${nettopOptions.join()}`);
+  const output = await execf("/usr/bin/nettop", ["-P", "-L", "1", "-k", nettopOptions.join()]);
   const processList: string[] = output.split("\n").slice(1);
   const modProcessList: string[][] = [];
   const processDict: { [key: string]: number[] } = {};
 
   processList.forEach((value, index) => {
     const temp = processList[index].split(",").slice(0, -1);
-    temp[0] = temp[0].split(".")[0];
-
+    // Keep nettop's full "name.pid" string as the key: the PID suffix is what
+    // makes each process instance unique. Stripping it here would collapse
+    // same-named processes (every com.apple.* helper) onto one dictionary key,
+    // so their cumulative counters overwrite each other and rate deltas get
+    // computed across unrelated processes.
     modProcessList.push(temp);
   });
   modProcessList.forEach((value) => {

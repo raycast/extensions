@@ -4,12 +4,10 @@ import { Application, AtomicShortcut } from "../model/internal/internal-models";
 import { Modifiers } from "../model/internal/modifiers";
 
 describe("Parses shortcut correctly", () => {
-  const parser = new ShortcutsParser(
-    new Map([
-      ["e", "10"],
-      ["+", "24"],
-    ])
-  );
+  const parser = new ShortcutsParser({
+    e: "10",
+    "+": "24",
+  });
 
   it("Parses app shortcut", () => {
     expect(parser.parseInputShortcuts([generateInputAppWithShortcut()])).toEqual([generateExpectedAppWithShortcut()]);
@@ -20,6 +18,22 @@ describe("Parses shortcut correctly", () => {
     inputApp.bundleId = undefined;
     const expectedApplication = generateExpectedAppWithShortcut();
     expectedApplication.bundleId = undefined;
+
+    expect(parser.parseInputShortcuts([inputApp])).toEqual([expectedApplication]);
+  });
+
+  it("Parses app with windowsAppId", () => {
+    const inputApp = generateInputAppWithShortcut({ windowsAppId: "some-windows-app-id" });
+    const expectedApplication = generateExpectedAppWithShortcut({ windowsAppId: "some-windows-app-id" });
+
+    expect(parser.parseInputShortcuts([inputApp])).toEqual([expectedApplication]);
+  });
+
+  it("Parses app without windowsAppId", () => {
+    const inputApp = generateInputAppWithShortcut();
+    inputApp.windowsAppId = undefined;
+    const expectedApplication = generateExpectedAppWithShortcut();
+    expectedApplication.windowsAppId = undefined;
 
     expect(parser.parseInputShortcuts([inputApp])).toEqual([expectedApplication]);
   });
@@ -99,6 +113,11 @@ describe("Parses shortcut correctly", () => {
     "ctrl+opt+cmd+e",
     "shift+opt+cmd+e",
     "ctrl+shift+opt+cmd+e ctrl+opt+cmd+e shift+opt+e ctrl+shift+e opt+cmd+e ctrl+cmd+e ctrl+shift+opt+e ctrl+shift+cmd+e ctrl+opt+cmd+e shift+opt+cmd+e",
+    "alt+e",
+    "ctrl+alt+e",
+    "shift+alt+e",
+    "alt+cmd+e",
+    "ctrl+shift+alt+cmd+e",
   ])("Parses apps with different modifiers %p", (shortcut: string) => {
     expect(parser.parseInputShortcuts([generateInputAppWithShortcut({ shortcut })])).toHaveLength(1); // todo: pass all of them at once
   });
@@ -106,6 +125,7 @@ describe("Parses shortcut correctly", () => {
 
 function generateInputAppWithShortcut(override?: {
   appBundleId?: string;
+  windowsAppId?: string;
   appName?: string;
   slug?: string;
   keymapTitle?: string;
@@ -116,6 +136,7 @@ function generateInputAppWithShortcut(override?: {
 }): InputApp {
   return {
     bundleId: override?.appBundleId ?? "some-bundle-id",
+    windowsAppId: override?.windowsAppId,
     name: override?.appName ?? "some-name",
     slug: override?.slug ?? "some-slug",
     keymaps: [
@@ -140,11 +161,13 @@ function generateInputAppWithShortcut(override?: {
 
 function generateExpectedAppWithShortcut(override?: {
   appBundleId?: string;
+  windowsAppId?: string;
   comment?: string;
   shortcutSequence?: AtomicShortcut[];
 }): Application {
   return {
     bundleId: override?.appBundleId ?? "some-bundle-id",
+    windowsAppId: override?.windowsAppId,
     name: "some-name",
     slug: "some-slug",
     keymaps: [

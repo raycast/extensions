@@ -5,7 +5,8 @@
   "icon": "password-store.png",
   "author": "afok",
   "contributors": [
-    "tim.shilov"
+    "tim.shilov",
+    "sereinne"
   ],
   "categories": [
     "Security"
@@ -67,5 +68,8 @@
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.3.1",
     "typescript": "^5.4.5"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

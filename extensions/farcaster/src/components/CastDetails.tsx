@@ -1,23 +1,23 @@
-import { Action, ActionPanel, Detail, Icon } from '@raycast/api';
-import { Cast } from '../utils/types';
-import { getUserIcon, getCastUrl } from '../utils/helpers';
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Cast } from "../utils/types";
+import { getUserIcon, getCastUrl } from "../utils/helpers";
 
 export default function CastDetails({ cast }: { cast: Cast }) {
   const hasFrame = cast.frames && cast.frames[0]?.image;
   const imageEmbeds = cast.embeds.filter(
-    (embed): embed is { url: string } => 'url' in embed && embed.url.startsWith('https://i.imgur.com/'),
+    (embed): embed is { url: string } => "url" in embed && embed.url.startsWith("https://i.imgur.com/"),
   );
   const raycastWidth = imageEmbeds.length === 1 ? 300 : 180;
   const imagesPerRow = imageEmbeds.length === 1 ? 1 : 2;
 
   const image = imageEmbeds
     .map((embed, index) => {
-      const separator = index % imagesPerRow === imagesPerRow - 1 ? '\n\n' : ' ';
+      const separator = index % imagesPerRow === imagesPerRow - 1 ? "\n\n" : " ";
       return `![image](${embed.url}?raycast-width=${raycastWidth})${separator}`;
     })
-    .join('');
+    .join("");
 
-  const frame = hasFrame ? `![image](${cast.frames[0]?.image})` : '';
+  const frame = hasFrame ? `![image](${cast.frames[0]?.image})` : "";
   {
     /* support for cast embeds */
   }
@@ -35,7 +35,7 @@ export default function CastDetails({ cast }: { cast: Cast }) {
         <ActionPanel>
           <Action.OpenInBrowser
             title="View Cast in Browser"
-            shortcut={{ modifiers: ['ctrl'], key: 'enter' }}
+            shortcut={{ modifiers: ["ctrl"], key: "enter" }}
             url={getCastUrl(cast)}
           />
         </ActionPanel>

@@ -1,6 +1,6 @@
-import { ChromiumProfile } from "./chromium";
+import { BrowserProfile, Browser } from "./types";
 
-export const sortProfiles = (profiles: ChromiumProfile[]) => {
+export const sortProfiles = (profiles: BrowserProfile[]) => {
   profiles.sort((profileA, profileB) => {
     if (profileA.name.toLowerCase() < profileB.name.toLowerCase()) {
       return -1;
@@ -10,4 +10,18 @@ export const sortProfiles = (profiles: ChromiumProfile[]) => {
     }
     return 0;
   });
+};
+
+export const isBrowserEnabled = (filters: string[], browser: Browser) => {
+  if (!filters) {
+    return true;
+  }
+
+  for (const filter of filters) {
+    if (browser.title.includes(filter) || browser.type.includes(filter)) {
+      return true;
+    }
+  }
+
+  return false;
 };

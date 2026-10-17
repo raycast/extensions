@@ -1,4 +1,14 @@
-import { Action, ActionPanel, closeMainWindow, getApplications, Icon, open, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  getApplications,
+  Icon,
+  open,
+  showToast,
+  Toast,
+  Keyboard,
+} from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useCallback, useState } from "react";
 import {
@@ -18,17 +28,23 @@ import { getSpaceTitle, isTab, showFailureToast } from "./utils";
 function OpenInArcAction(props: { tabOrUrl: Tab | string }) {
   async function handleAction() {
     try {
-      if (isTab(props.tabOrUrl)) {
-        const tab = props.tabOrUrl;
-        await closeMainWindow();
-        await selectTab(tab);
-        return;
+      if (typeof props.tabOrUrl === "string") {
+        await open(props.tabOrUrl, "company.thebrowser.Browser");
       } else {
-        await open(props.tabOrUrl as string, "company.thebrowser.Browser");
+        try {
+          await selectTab(props.tabOrUrl);
+          closeMainWindow();
+        } catch (e) {
+          if (props.tabOrUrl.url) {
+            await open(props.tabOrUrl.url, "company.thebrowser.Browser");
+          } else {
+            throw e;
+          }
+        }
       }
     } catch (e) {
       console.error(e);
-      await open(props.tabOrUrl as string, "company.thebrowser.Browser");
+      await showFailureToast(e, { title: "Failed opening in Arc" });
     }
   }
 
@@ -38,8 +54,8 @@ function OpenInArcAction(props: { tabOrUrl: Tab | string }) {
 function OpenInNewWindowAction(props: { url: string }) {
   async function handleAction() {
     try {
-      await closeMainWindow();
       await makeNewWindow({ url: props.url });
+      closeMainWindow();
     } catch (e) {
       await showFailureToast(e, { title: "Failed opening link in new window" });
     }
@@ -58,8 +74,8 @@ function OpenInNewWindowAction(props: { url: string }) {
 function OpenInNewIncognitoWindowAction(props: { url: string }) {
   async function handleAction() {
     try {
-      await closeMainWindow();
       await makeNewWindow({ incognito: true, url: props.url });
+      closeMainWindow();
     } catch (e) {
       await showFailureToast(e, { title: "Failed opening link in new incognito window" });
     }
@@ -78,8 +94,8 @@ function OpenInNewIncognitoWindowAction(props: { url: string }) {
 function OpenInLittleArc(props: { url: string }) {
   async function handleAction() {
     try {
-      await closeMainWindow();
       await makeNewLittleArcWindow(props.url);
+      closeMainWindow();
     } catch (e) {
       await showFailureToast(e, { title: "Failed opening link in Little Arc window" });
     }
@@ -94,8 +110,8 @@ function OpenInSpaceAction(props: { url: string }) {
 
   async function openSpace(space: Space) {
     try {
-      await closeMainWindow();
       await makeNewTabWithinSpace(props.url, space);
+      closeMainWindow();
     } catch (e) {
       await showFailureToast(e, { title: "Failed opening link in space" });
     }
@@ -117,8 +133,8 @@ function OpenInSpaceAction(props: { url: string }) {
 export function OpenSpaceAction(props: { space: Space }) {
   async function handleAction() {
     try {
-      await closeMainWindow();
       await selectSpace(props.space);
+      closeMainWindow();
     } catch (e) {
       await showFailureToast(e, { title: "Failed opening Space" });
     }
@@ -140,6 +156,9 @@ const browserBundleIds = new Set([
   "com.microsoft.edgemac.beta",
   "com.vivaldi.vivaldi",
   "com.kagi.kagimacos", // Orion
+  "app.zen-browser.zen",
+  "company.thebrowser.dia",
+  "ai.perplexity.comet",
 ]);
 
 function OpenInOtherBrowserAction(props: { url: string }) {
@@ -150,7 +169,7 @@ function OpenInOtherBrowserAction(props: { url: string }) {
     <ActionPanel.Submenu
       icon={Icon.Globe}
       title="Open in Other Browser"
-      shortcut={{ modifiers: ["cmd"], key: "o" }}
+      shortcut={Keyboard.Shortcut.Common.Open}
       onOpen={() => setOpen(true)}
     >
       {data?.map((browser) => (
@@ -183,8 +202,8 @@ export function SearchWithGoogleAction(props: { searchText: string }) {
     try {
       const openTab = await findTab(searchUrl);
       if (openTab) {
-        await closeMainWindow();
         await selectTab(openTab);
+        closeMainWindow();
       } else {
         await open(searchUrl, "company.thebrowser.Browser");
       }
@@ -289,17 +308,9 @@ export function OpenLinkActionSections(props: { tabOrUrl: Tab | string; searchTe
 export function CopyLinkActionSection(props: { url: string; title?: string }) {
   return (
     <ActionPanel.Section>
-      <Action.CopyToClipboard
-        title="Copy URL"
-        content={props.url}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-      />
+      <Action.CopyToClipboard title="Copy URL" content={props.url} shortcut={Keyboard.Shortcut.Common.Copy} />
       {props.title && (
-        <Action.CopyToClipboard
-          title="Copy Title"
-          content={props.title}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-        />
+        <Action.CopyToClipboard title="Copy Title" content={props.title} shortcut={Keyboard.Shortcut.Common.CopyName} />
       )}
       {props.title && (
         <Action.CopyToClipboard
@@ -326,7 +337,7 @@ export function CreateQuickLinkActionSection(props: { url: string; title?: strin
     <ActionPanel.Section>
       <Action.CreateQuicklink
         quicklink={{ link: props.url, name: props.title, application: "Arc" }}
-        shortcut={{ modifiers: ["cmd"], key: "s" }}
+        shortcut={Keyboard.Shortcut.Common.Save}
       />
     </ActionPanel.Section>
   );

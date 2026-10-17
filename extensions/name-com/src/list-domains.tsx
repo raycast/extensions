@@ -14,17 +14,17 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { FormValidation, getFavicon, MutatePromise, useFetch, useForm } from "@raycast/utils";
-import { API_URL, headers, parseResponse } from "./api";
-import { DNSRecord, Domain, type DomainDetails } from "./types";
+import { API_URL, callCoreApi, headers, parseResponse } from "./api";
+import { DNSRecord, Domain } from "./types";
 import { useState } from "react";
 
 export default function ListDomains() {
   const { isLoading, data } = useFetch(API_URL + "domains", {
     headers,
     parseResponse,
-    mapResult(result: { domains?: Domain[] }) {
+    mapResult(result) {
       return {
-        data: result.domains ?? [],
+        data: (result as { domains: Domain[] }).domains,
       };
     },
     initialData: [],
@@ -57,7 +57,7 @@ export default function ListDomains() {
           ]}
           actions={
             <ActionPanel>
-              <Action.Push icon={Icon.Eye} title="View Details" target={<DomainDetails domainName={d.domainName} />} />
+              <Action.Push icon={Icon.Eye} title="View Details" target={<DomainDetails domain={d} />} />
               <Action.Push
                 icon={Icon.Text}
                 title="View DNS Records"
@@ -71,28 +71,20 @@ export default function ListDomains() {
   );
 }
 
-function DomainDetails({ domainName }: { domainName: string }) {
-  const { isLoading, data } = useFetch<DomainDetails>(API_URL + "domains/" + domainName, {
-    headers,
-    parseResponse,
-  });
-
-  const markdown = domainName + (!data ? "" : `\n\n ## Nameservers \n\n ${data.nameservers.join(`\n\n`)}`);
+function DomainDetails({ domain }: { domain: Domain }) {
+  const markdown = domain.domainName + `\n\n ## Nameservers \n\n ${domain.nameservers.join(`\n\n`)}`;
 
   return (
     <Detail
-      isLoading={isLoading}
       markdown={markdown}
       metadata={
-        data && (
-          <Detail.Metadata>
-            <Detail.Metadata.Label title="Locked" icon={data.locked ? Icon.Check : Icon.Xmark} />
-            <Detail.Metadata.Label title="Autorenew" icon={data.autorenewEnabled ? Icon.Check : Icon.Xmark} />
-            <Detail.Metadata.Label title="Renewal Price" text={data.renewalPrice.toString()} />
-            <Detail.Metadata.Label title="Create Date" text={data.createDate} />
-            <Detail.Metadata.Label title="Expiry Date" text={data.expireDate} />
-          </Detail.Metadata>
-        )
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="Locked" icon={domain.locked ? Icon.Check : Icon.Xmark} />
+          <Detail.Metadata.Label title="Autorenew" icon={domain.autorenewEnabled ? Icon.Check : Icon.Xmark} />
+          <Detail.Metadata.Label title="Renewal Price" text={domain.renewalPrice.toString()} />
+          <Detail.Metadata.Label title="Create Date" text={domain.createDate} />
+          <Detail.Metadata.Label title="Expiry Date" text={domain.expireDate} />
+        </Detail.Metadata>
       }
     />
   );
@@ -102,9 +94,9 @@ function DNSRecords({ domainName }: { domainName: string }) {
   const { isLoading, data, mutate } = useFetch(API_URL + `domains/${domainName}/records`, {
     headers,
     parseResponse,
-    mapResult(result: { records?: DNSRecord[] }) {
+    mapResult(result) {
       return {
-        data: result.records ?? [],
+        data: (result as { records: DNSRecord[] }).records,
       };
     },
     initialData: [],
@@ -124,10 +116,15 @@ function DNSRecords({ domainName }: { domainName: string }) {
       const toast = await showToast(Toast.Style.Animated, "Deleting DNS Record");
       try {
         await mutate(
-          fetch(API_URL + `domains/${domainName}/records/${recordId}`, {
+          callCoreApi(`domains/${domainName}/records/${recordId}`, {
             method: "DELETE",
-            headers,
-          }).then(parseResponse),
+          }),
+          {
+            optimisticUpdate(data) {
+              return data.filter((r) => r.id !== recordId);
+            },
+            shouldRevalidateAfter: false,
+          },
         );
         toast.style = Toast.Style.Success;
         toast.title = "Deleted DNS Record";
@@ -159,7 +156,7 @@ function DNSRecords({ domainName }: { domainName: string }) {
         <List.Item
           key={record.id}
           icon={Icon.Dot}
-          title={record.host ?? ""}
+          title={record.host}
           subtitle={record.domainName}
           accessories={[{ tag: record.type }]}
           actions={
@@ -202,11 +199,10 @@ function CreateDNSRecord({ domainName, mutate }: { domainName: string; mutate: M
       try {
         setIsLoading(true);
         await mutate(
-          fetch(API_URL + `domains/${domainName}/records`, {
+          callCoreApi(`domains/${domainName}/records`, {
             method: "POST",
-            headers,
-            body: JSON.stringify(values),
-          }).then(parseResponse),
+            body: values,
+          }),
         );
         toast.style = Toast.Style.Success;
         toast.title = "Created DNS Record";

@@ -14,7 +14,11 @@ const MSG_TYPE_AUTH_REQUIRED = "auth_required";
 const MSG_TYPE_AUTH_INVALID = "auth_invalid";
 const MSG_TYPE_AUTH_OK = "auth_ok";
 
-export function createSocket(auth: Auth, ignoreCertificates: boolean): Promise<any> {
+export function createSocket(
+  auth: Auth,
+  ignoreCertificates: boolean,
+  customHeaders?: Record<string, string>,
+): Promise<any> {
   // Convert from http:// -> ws://, https:// -> wss://
   const url = auth.wsUrl;
 
@@ -25,6 +29,7 @@ export function createSocket(auth: Auth, ignoreCertificates: boolean): Promise<a
 
     const socket = new WebSocket(url, {
       rejectUnauthorized: !ignoreCertificates,
+      headers: customHeaders,
     });
 
     // If invalid auth, we will not try to reconnect.

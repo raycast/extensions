@@ -1,14 +1,19 @@
-import { open, getPreferenceValues } from "@raycast/api";
-import { readdirSync, statSync } from "fs";
+import { open, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { readFiles } from "./utils/read-directory";
 
-const downloadsdir = getPreferenceValues<Preferences.MostRecent>().downloadsdir;
+export default async function Command() {
+  const dir = getPreferenceValues<Preferences.MostRecent>().downloadsdir;
+  const { entries, error } = readFiles(dir);
 
-export default function Command() {
-  const dirContents = readdirSync(downloadsdir, { withFileTypes: true }).sort((a, b) => {
-    const createA: Date = statSync(`${a.path}/${a.name}`).birthtime;
-    const createB: Date = statSync(`${b.path}/${b.name}`).birthtime;
-    return createA < createB ? 1 : -1;
-  });
+  if (error) {
+    await showToast({ style: Toast.Style.Failure, title: "Cannot read directory", message: error });
+    return;
+  }
 
-  return open(`${dirContents[0].path}/${dirContents[0].name}`);
+  if (entries.length === 0) {
+    await showToast({ style: Toast.Style.Failure, title: "No files found", message: dir });
+    return;
+  }
+
+  await open(entries[0].fullPath);
 }

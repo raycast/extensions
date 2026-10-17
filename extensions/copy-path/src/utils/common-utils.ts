@@ -3,7 +3,11 @@ import {
   copySafariWebAppPath,
   getChromiumBrowserPath,
   getFocusFinderPath,
+  getFocusWindowPath,
   getFocusWindowTitle,
+  getQSpacePathUrls,
+  getArcFocusedPageUrl,
+  getVSCodeActiveFilePath,
   getWebkitBrowserPath,
 } from "./applescript-utils";
 import {
@@ -29,7 +33,7 @@ import {
 } from "../types/preferences";
 import parseUrl from "parse-url";
 import * as os from "node:os";
-import { firefoxBrowsers } from "./constants";
+import { arcBundleId, firefoxBrowsers, vsCodeBundleIds } from "./constants";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -46,6 +50,50 @@ const copyFinerFilesPath = async (fileSystemItems: FileSystemItem[]) => {
     hud: (filePaths.length > 1 ? "📑 " : "📄 ") + filePaths[0],
     path: filePaths.join(multiPathSeparator),
   };
+};
+
+const qSpaceUrlToPath = (url: string) => {
+  if (!url.startsWith("file://")) {
+    return url;
+  }
+
+  try {
+    return decodeURIComponent(new URL(url).pathname);
+  } catch {
+    try {
+      return decodeURIComponent(url.replace(/^file:\/\/(?:localhost)?/, ""));
+    } catch {
+      return url;
+    }
+  }
+};
+
+export const copyQSpacePath = async () => {
+  const { useTildeForHome } = await getPreferenceValues();
+  const urls = await getQSpacePathUrls();
+  const paths = urls
+    .split(/\r?\n/)
+    .map((url) => url.trim())
+    .filter(Boolean)
+    .map(qSpaceUrlToPath);
+
+  if (paths.length === 0) {
+    await showFailureHUD({ title: "Nothing to Copy", style: Toast.Style.Failure });
+    return "";
+  }
+
+  let path = paths.join(multiPathSeparator);
+  let hud = (paths.length > 1 ? "📑 " : "📂 ") + paths[0];
+
+  if (useTildeForHome) {
+    path = path.replace(os.homedir(), "~");
+    hud = hud.replace(os.homedir(), "~");
+  }
+
+  await Clipboard.copy(path);
+  await showSuccessHUD(hud);
+  await customUpdateCommandMetadata(path.replace(os.homedir(), "~"));
+  return path;
 };
 
 export const copyFinderPath = async () => {
@@ -71,9 +119,32 @@ export const copyFinderPath = async () => {
   }
 };
 
+export const copyWindowPath = async (app: Application) => {
+  const { useTildeForHome } = await getPreferenceValues();
+  let path = vsCodeBundleIds.includes(app.bundleId ?? "") ? await getVSCodeActiveFilePath(app) : "";
+  if (isEmpty(path)) {
+    path = await getFocusWindowPath(app);
+  }
+  if (useTildeForHome) {
+    path = path.replace(os.homedir(), "~");
+  }
+  if (!isEmpty(path)) {
+    await Clipboard.copy(path);
+    await showSuccessHUD("📂 " + path);
+    await customUpdateCommandMetadata(path);
+  }
+  return path;
+};
+
 const tryCopyBrowserUrl = async (app: Application) => {
+  // Arc: Little Arc windows and Peek previews are not reachable through Arc's
+  // scripting dictionary, so read the focused web area first; otherwise the
+  // underlying tab of the main window would be copied.
+  let url = app.bundleId === arcBundleId ? await getArcFocusedPageUrl() : "";
   // get extra browser web page url
-  let url = await getChromiumBrowserPath(app.name);
+  if (isEmpty(url)) {
+    url = await getChromiumBrowserPath(app.name);
+  }
   if (isEmpty(url)) {
     url = await getWebkitBrowserPath(app.name);
   }

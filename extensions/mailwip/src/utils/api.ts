@@ -1,4 +1,3 @@
-import { Toast, showToast } from "@raycast/api";
 import {
   BodyRequest,
   ErrorResponse,
@@ -9,92 +8,48 @@ import {
   Email,
   DomainDelete,
 } from "./types";
-import fetch from "node-fetch";
 import { API_HEADERS, API_URL } from "./constants";
 
-const callApi = async (endpoint: string, method: APIMethod, body?: BodyRequest, animatedToastMessage = "") => {
-  await showToast(Toast.Style.Animated, "Processing...", animatedToastMessage);
-  try {
-    let apiResponse;
-    if (body) {
-      apiResponse = await fetch(API_URL + endpoint, {
-        method,
-        headers: API_HEADERS,
-        body: JSON.stringify(body),
-      });
-    } else {
-      apiResponse = await fetch(API_URL + endpoint, {
-        method,
-        headers: API_HEADERS,
-      });
-    }
+const callApi = async <T>(endpoint: string, method: APIMethod = "GET", body?: BodyRequest) => {
+  const response = await fetch(API_URL + endpoint, {
+    method,
+    headers: API_HEADERS,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!response.ok) {
+    const contentType = response.headers.get("Content-Type");
 
-    if (!apiResponse.ok) {
-      const contentType = apiResponse.headers.get("content-type");
-      const { status, statusText } = apiResponse;
-      const error = `${status} Error`;
+    // 'application/json' returns empty whereas 'application/json; charset=utf-8' has json
+    if (contentType === "text/html" || contentType === "application/json") throw response.statusText;
 
-      if (contentType?.includes("application/json")) {
-        const jsonResponse = (await apiResponse.json()) as { message: string } | { errors: string[] };
-        if ("errors" in jsonResponse) {
-          const message = jsonResponse.errors.join(" | ");
-          await showToast(Toast.Style.Failure, error, message);
-          return { errors: message };
-        } else {
-          await showToast(Toast.Style.Failure, error, jsonResponse.message);
-          return { errors: jsonResponse.message };
-        }
-      } else {
-        await showToast(Toast.Style.Failure, error, statusText);
-        return { errors: statusText };
-      }
-    }
-
-    const response = await apiResponse.json();
-    await showToast(Toast.Style.Success, `Success`);
-    return response;
-  } catch (err) {
-    console.log(err);
-    const error = "Failed to execute request. Please try again later.";
-    await showToast(Toast.Style.Failure, `Error`, error);
-    return { error };
+    const result = (await response.json()) as ErrorResponse;
+    if ("errors" in result) throw Array.isArray(result.errors) ? result.errors.join(" | ") : result.errors;
+    if ("message" in result) throw result.message;
+    throw result.error;
   }
+  const result = await response.json();
+  return result as T;
 };
 
 // DOMAINS
 export async function deleteDomains({ domains }: DomainDelete) {
-  return (await callApi(
-    `domains/batch/`,
-    "DELETE",
-    { domains },
-    `Deleting Domain${domains.length !== 1 ? "s" : ""}`
-  )) as ErrorResponse | { message: string };
+  return await callApi<{ message: string }>(`domains/batch/`, "DELETE", { domains });
 }
 
 // ALIASES
 export async function getDomainAliases(domain: string) {
-  return (await callApi(`domains/${domain}/aliases`, "GET", undefined, "Fetching Aliases")) as
-    | ErrorResponse
-    | { data: Alias[] };
+  return await callApi<{ data: Alias[] }>(`domains/${domain}/aliases`);
 }
 export async function createDomainAlias(domain: string, newAlias: AliasCreate) {
-  return (await callApi(`domains/${domain}/aliases`, "POST", newAlias, "Creating Alias")) as
-    | ErrorResponse
-    | AliasCreateResponse;
+  return await callApi<AliasCreateResponse>(`domains/${domain}/aliases`, "POST", newAlias);
 }
 export async function deleteDomainAlias(domain: string, alias: Alias) {
-  return (await callApi(`domains/${domain}/aliases/`, "DELETE", alias, "Deleting Alias")) as
-    | ErrorResponse
-    | { data: { success: true } };
+  return await callApi<{ data: { success: true } }>(`domains/${domain}/aliases/`, "DELETE", alias);
 }
-
 // EMAILS
-export async function getEmails(domain: string, status: string, limit: number) {
-  const searchParams =
-    domain !== "all"
-      ? new URLSearchParams({ domain, status, limit: limit.toString() })
-      : new URLSearchParams({ status, limit: limit.toString() });
-  return (await callApi(`mails?${searchParams}`, "GET", undefined, "Fetching Emails")) as
-    | ErrorResponse
-    | { data: Email[] };
+export async function getEmails(domain: string, status: string, limit: string) {
+  const searchParams = new URLSearchParams({ status, limit });
+  if (domain !== "all") searchParams.append("domain", domain);
+  const result = await callApi<{ data: Email[] }>(`mails?${searchParams}`);
+  return result.data;
 }

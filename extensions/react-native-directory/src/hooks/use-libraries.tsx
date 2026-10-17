@@ -1,17 +1,17 @@
 import { useFetch } from "@raycast/utils";
-import { Library, Query, QueryOrder } from "../types";
+import { LibraryType, Query, QueryOrder } from "../types";
 import { urlWithQuery } from "../utils";
 import { BASE_API_URL } from "../constants";
 import { getPreferenceValues } from "@raycast/api";
 
 type SearchResult = {
-  libraries: Library[];
+  libraries: LibraryType[];
 };
 
 const { libraries_sort_order } = getPreferenceValues<Preferences>();
 
 export const useLibraries = (searchText: string, sortOrder: QueryOrder, filter: string) => {
-  const { data, error, isLoading, pagination } = useFetch<{ libraries: Library[] }>(
+  const { data, error, isLoading, pagination } = useFetch<{ libraries: LibraryType[] }>(
     ({ page }: { page: number }) => {
       const query: Query = {
         search: searchText,

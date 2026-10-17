@@ -5,6 +5,10 @@
   "description": "Manage your Proxmox server from Raycast",
   "icon": "icon.png",
   "author": "CzBiX",
+  "contributors": [
+    "xmok",
+    "j3lte"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -19,14 +23,37 @@
       "keywords": [
         "pve"
       ]
+    },
+    {
+      "name": "storage",
+      "title": "Manage Storage",
+      "subtitle": "Proxmox",
+      "description": "Manage your Proxmox storage from Raycast",
+      "mode": "view",
+      "keywords": [
+        "pve",
+        "storage"
+      ]
+    },
+    {
+      "name": "manage-servers",
+      "title": "Manage Servers",
+      "subtitle": "Proxmox",
+      "description": "Add, edit or remove Proxmox servers",
+      "mode": "view",
+      "keywords": [
+        "pve",
+        "server",
+        "host"
+      ]
     }
   ],
   "preferences": [
     {
       "name": "serverUrl",
-      "description": "The URL of your Proxmox server",
+      "description": "The URL of your Proxmox server. Additional servers can be added with the Manage Servers command",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "Server URL",
       "placeholder": "https://pve.local:8006"
     },
@@ -34,36 +61,42 @@
       "name": "tokenId",
       "description": "The token ID of your Proxmox server",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "Token ID",
       "placeholder": "root@pam!raycast"
     },
     {
       "name": "tokenSecret",
       "description": "The token secret of your Proxmox server",
-      "type": "textfield",
-      "required": true,
+      "type": "password",
+      "required": false,
       "title": "Token Secret",
       "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.78.0",
-    "@raycast/utils": "^1.16.2"
+    "@raycast/api": "^1.103.9",
+    "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
 }

@@ -1,6 +1,6 @@
 import { closeMainWindow } from "@raycast/api";
-import { createNewWindow } from "./scripts";
 import { showFailureToast } from "@raycast/utils";
+import { createNewWindow } from "./dia";
 
 interface Arguments {
   profile?: string;

@@ -3,6 +3,8 @@ import { RegistryEntry } from "./types";
 import { URL } from "url";
 
 function getEnvironmentIcon(entry: RegistryEntry): List.Item.Accessory | undefined {
+  if (entry.remoteUrl) return undefined;
+
   switch (entry.configuration.command) {
     case "uvx":
       return { icon: "https://svgl.app/library/python.svg", tooltip: "Python (uvx)" };
@@ -20,10 +22,10 @@ function getEnvironmentIcon(entry: RegistryEntry): List.Item.Accessory | undefin
 }
 
 function getTransportTypeIcon(entry: RegistryEntry) {
-  if ("command" in entry.configuration) {
+  if (!entry.remoteUrl) {
     return { icon: Icon.Terminal, tooltip: "Standard Input/Output" };
   } else {
-    return { icon: Icon.Globe, tooltip: "Server-Sent Events" };
+    return { icon: Icon.Globe, tooltip: "HTTP" };
   }
 }
 

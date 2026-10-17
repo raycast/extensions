@@ -97,6 +97,7 @@ export type PrivateKey = {
   description: string;
   fingerprint: string | null;
   private_key: string;
+  public_key: string;
   is_git_related: true;
   team_id: number;
   created_at: string;
@@ -180,4 +181,28 @@ export type EnvironmentVariable = {
 
 export type MessageResult = {
   message: string;
+};
+export type ErrorResult = MessageResult & {
+  errors?: {
+    [key: string]: string[];
+  };
+};
+
+export type Deployment = {
+  id: number;
+  application_id: string;
+  deployment_uuid: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  application_name: string;
+  server_name: string;
+  deployment_url: string;
+  commit?: string;
+  commit_message?: string;
+};
+
+export type DeploymentHistory = {
+  count: number;
+  deployments: Deployment[];
 };

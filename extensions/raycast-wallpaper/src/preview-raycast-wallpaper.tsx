@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { downloadPicture, getThumbnailUrl } from "./utils/common-utils";
 import { RaycastWallpaperWithInfo } from "./types/types";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
-import { setWallpaper } from "./utils/applescript-utils";
+import { setWallpaper } from "./utils/platform-utils";
 
 export default function PreviewRaycastWallpaper(props: {
   index: number;

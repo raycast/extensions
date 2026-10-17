@@ -1,9 +1,9 @@
 import { Action, ActionPanel } from '@raycast/api'
-import type { TransactionalEmail } from '@scaleway/sdk'
+import type { Temv1alpha1 } from '@scaleway/sdk'
 import { getDomainUrl } from './urls'
 
 type DomainActionProps = {
-  domain: TransactionalEmail.v1alpha1.Domain
+  domain: Temv1alpha1.Domain
   toggleIsDetailOpen: () => void
 }
 

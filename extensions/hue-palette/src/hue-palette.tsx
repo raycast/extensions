@@ -25,31 +25,31 @@ export default function Command() {
             {
               tooltip: hue.colors[0],
               icon: {
-                source: `https://hue-palette.zeabur.app/hue-color-image/${hue.colors[0].replace("#", "")}`,
+                source: `https://hue-palette.yencheng.dev/hue-color-image/${hue.colors[0].replace("#", "")}`,
               },
             },
             {
               tooltip: hue.colors[1],
               icon: {
-                source: `https://hue-palette.zeabur.app/hue-color-image/${hue.colors[1].replace("#", "")}`,
+                source: `https://hue-palette.yencheng.dev/hue-color-image/${hue.colors[1].replace("#", "")}`,
               },
             },
             {
               tooltip: hue.colors[2],
               icon: {
-                source: `https://hue-palette.zeabur.app/hue-color-image/${hue.colors[2].replace("#", "")}`,
+                source: `https://hue-palette.yencheng.dev/hue-color-image/${hue.colors[2].replace("#", "")}`,
               },
             },
             {
               tooltip: hue.colors[3],
               icon: {
-                source: `https://hue-palette.zeabur.app/hue-color-image/${hue.colors[3].replace("#", "")}`,
+                source: `https://hue-palette.yencheng.dev/hue-color-image/${hue.colors[3].replace("#", "")}`,
               },
             },
             {
               tooltip: hue.colors[4],
               icon: {
-                source: `https://hue-palette.zeabur.app/hue-color-image/${hue.colors[4].replace("#", "")}`,
+                source: `https://hue-palette.yencheng.dev/hue-color-image/${hue.colors[4].replace("#", "")}`,
               },
             },
           ]}

@@ -21,6 +21,7 @@ import { autocompleteUsers, User } from "../api/users";
 import { getUserAvatar } from "../helpers/avatars";
 import { getErrorMessage } from "../helpers/errors";
 import { generateBranchName } from "../helpers/issues";
+import { getIssueUrl } from "../helpers/urls";
 
 import CreateIssueForm from "./CreateIssueForm";
 import IssueAttachments from "./IssueAttachments";
@@ -52,7 +53,7 @@ export default function IssueActions({
   showAttachmentsAction,
 }: IssueActionsProps) {
   const { siteUrl, myself } = getJiraCredentials();
-  const issueUrl = `${siteUrl.startsWith("https://") ? siteUrl : `https://${siteUrl}`}/browse/${issue.key}`;
+  const issueUrl = getIssueUrl(issue.key, siteUrl);
 
   async function mutateWithOptimisticUpdate({ asyncUpdate, optimisticUpdate }: MutateParams) {
     if (mutate) {
@@ -204,7 +205,7 @@ export default function IssueActions({
         <ChangeAssigneeSubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
 
         <Action
-          title={isAssignedToMe ? "Un-Assign From Me" : "Assign to Me"}
+          title={isAssignedToMe ? "Un-Assign from Me" : "Assign to Me"}
           icon={getUserAvatar(myself)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           onAction={assignToMe}
@@ -355,7 +356,7 @@ function ChangePrioritySubmenu({ issue, mutate }: SubmenuProps) {
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         priorities?.map((priority) => {
           return (
@@ -429,7 +430,7 @@ function ChangeAssigneeSubmenu({ issue, mutate }: SubmenuProps) {
 
   return (
     <ActionPanel.Submenu
-      title="Assign To"
+      title="Assign to"
       icon={Icon.AddPerson}
       shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
       onOpen={() => setLoad(true)}
@@ -515,7 +516,7 @@ function ChangeStatusSubmenu({ issue, mutate }: SubmenuProps) {
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         transitions?.map((transition) => {
           if (transition.to.id === issue.fields.status.id) {

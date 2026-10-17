@@ -27,7 +27,7 @@ export default function DigestDetail({ digest }: { digest: Digest }) {
       actions={
         <CustomActionPanel>
           <Action
-            title="Export As Markdown File"
+            title="Export as Markdown File"
             icon={Icon.Download}
             onAction={async () => {
               try {

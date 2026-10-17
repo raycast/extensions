@@ -1,5 +1,20 @@
 # Soundboard Changelog
 
+## [Fix] - 2026-08-14
+
+- Fixed "ReferenceError: crypto is not defined" when saving a sound by replacing `nanoid` with `randomUUID` from `node:crypto`
+
+## [Enhancement] - 2026-08-13
+
+- Add support for Windows platform using Rust
+- Add Stop action for currently playing sounds
+- Add icons for sound entries
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2026-01-09
+
+- Added "Close the Raycast window after triggering a sound" option to preferences
+
 ## [Fix] - 2023-12-08
 
 - Fixed Move Down hotkey

@@ -1,16 +1,15 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node 18",
   "include": [
     "src/**/*",
     "raycast-env.d.ts"
   ],
   "compilerOptions": {
     "lib": [
-      "es2021"
+      "ES2023"
     ],
     "module": "commonjs",
-    "target": "es2021",
+    "target": "ES2023",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,

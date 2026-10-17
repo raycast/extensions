@@ -8,7 +8,3 @@ export interface SearchResult {
   isNavigation?: boolean;
   isHistory?: boolean;
 }
-
-export interface Preferences {
-  rememberSearchHistory: boolean;
-}

@@ -1,10 +1,10 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
-import OpenAI from "openai";
 import { useEffect } from "react";
 import { OPENAI_MODEL } from "../../../const/defaults";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
 import type { OpenAIPreferences } from "../../../summarizeVideoWithOpenAI";
 import { getAiInstructionSnippet } from "../../../utils/getAiInstructionSnippets";
+import { getOpenAIClient } from "../../../utils/sdkClients";
 
 type GetOpenAISummaryProps = {
   transcript?: string;
@@ -13,7 +13,6 @@ type GetOpenAISummaryProps = {
 };
 
 export const useOpenAISummary = ({ transcript, setSummaryIsLoading, setSummary }: GetOpenAISummaryProps) => {
-  const abortController = new AbortController();
   const preferences = getPreferenceValues() as OpenAIPreferences;
   const { creativity, openaiApiToken, language, openaiEndpoint, openaiModel } = preferences;
 
@@ -26,19 +25,13 @@ export const useOpenAISummary = ({ transcript, setSummaryIsLoading, setSummary }
     return;
   }
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `abortController ` in dependencies will lead to an error
   useEffect(() => {
     if (!transcript) return;
 
+    const abortController = new AbortController();
+
     const aiInstructions = getAiInstructionSnippet(language, transcript, transcript);
-
-    const openai = new OpenAI({
-      apiKey: openaiApiToken,
-    });
-
-    if (openaiEndpoint !== "") {
-      openai.baseURL = openaiEndpoint;
-    }
+    const openai = getOpenAIClient(openaiApiToken, openaiEndpoint || undefined);
 
     setSummaryIsLoading(true);
 
@@ -50,7 +43,6 @@ export const useOpenAISummary = ({ transcript, setSummaryIsLoading, setSummary }
 
     const stream = openai.chat.completions.stream({
       model: openaiModel || OPENAI_MODEL,
-      temperature: Number.parseInt(creativity),
       messages: [{ role: "user", content: aiInstructions }],
       stream: true,
     });

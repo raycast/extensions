@@ -1,5 +1,41 @@
 # Dust.tt Changelog
 
+## [Feature] - 2026-09-18
+
+- Add "Replace Selection with Agent": silently sends the selected text to a specific assistant and replaces it with the answer, with no window — bind a Quicklink to a hotkey for instant use.
+- Add "Set up Replace Selection": pick any assistant and create a freely-renamable Quicklink for it, targeting the Replace Selection command. Create as many as you want, one per assistant.
+- Remove "Ask Claude-4" and "Ask GPT-5" (superseded by the two commands above, which let you point at any assistant yourself).
+
+## [Maintenance] - 2026-09-18
+
+- Add `leandre_le_bizec` to the contributor list.
+
+## [Fixes] - 2026-04-02
+
+- Fix SSE streaming: replace client library streaming with direct undici fetch to fix incompatibility with Raycast's Node.js environment.
+- Fix AbortController lifecycle causing the stream to abort mid-flight on React re-renders.
+- Fix workspace picker to fall back to user.workspaces when organizations list is empty, using the region from the JWT token.
+
+## [Fixes] - 2025-11-27
+
+- Tighten auth flow for people with multiple accounts
+- Solved a bug where people would log out but being unable to re-log in on the same account
+
+## [Fixes] - 2025-10-14
+
+- Move gpt4 and claude3 defaults to gpt5 and claude4
+- Fix a login bug for users in EU workspaces
+
+## [Update] - 2025-10-07
+
+- Remove deprecated API Key flow.
+- OAuth flow without setup.
+- Allow workspace switch between regions.
+
+## [Maintenance] - 2025-10-07
+
+- Replace all `\r\n` with `\n` in the codebase to ensure consistent line endings across all files.
+
 ## [Update] - 2025-06-18
 
 - Move Oauth connexion flow from Auth0 to WorkOS.

@@ -1,11 +1,11 @@
 import { jest } from "@jest/globals";
-import { searchWord, getDailyWord, getRandomWord } from "./rae";
+import { searchWord, getDailyWord, getRandomWord, ApiError } from "./rae";
 
-// Set longer timeout for API calls
-jest.setTimeout(10000);
+// Set longer timeout for API calls (allows for rate-limit retries)
+jest.setTimeout(30000);
 
 // Tests are skipped to avoid hitting the real API during CI/CD
-describe.skip("RAE API", () => {
+describe("RAE API", () => {
   // Real API tests using snapshots
   describe("searchWord", () => {
     it("should fetch and return a known word", async () => {
@@ -22,7 +22,21 @@ describe.skip("RAE API", () => {
 
     it("should throw error for non-existent words", async () => {
       // Using a gibberish word that shouldn't exist in the dictionary
-      await expect(searchWord("xyzxyzxyznotaword")).rejects.toThrow("Request error: Not Found");
+      await expect(searchWord("xyzxyzxyznotaword")).rejects.toThrow("Word not found");
+    });
+
+    it("should return suggestions for misspelled words", async () => {
+      try {
+        await searchWord("rosis");
+        // Si llegamos aquí, la palabra se encontró cuando no debería
+        expect(true).toBe(false);
+      } catch (e) {
+        if (e instanceof ApiError && e.suggestions && e.suggestions.length > 0) {
+          expect(e.suggestions).toContain("rosa");
+        } else {
+          throw new Error("Expected ApiError with suggestions");
+        }
+      }
     });
   });
 
@@ -72,6 +86,64 @@ describe.skip("RAE API", () => {
         word: expect.any(String),
         meanings: expect.any(Array),
       });
+    });
+  });
+
+  describe("rate limiting", () => {
+    const wordPayload = {
+      ok: true,
+      data: { word: "casa", meanings: [], suggestions: [] },
+      suggestions: [],
+    };
+
+    function newTestRateLimitedFetch(retryAfterHeader: string) {
+      return jest
+        .spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ ok: false, error: "RATE_LIMIT_EXCEEDED", suggestions: [] }), {
+            status: 429,
+            headers: { "retry-after": retryAfterHeader },
+          }),
+        )
+        .mockResolvedValueOnce(new Response(JSON.stringify(wordPayload), { status: 200 }));
+    }
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date("2026-07-23T00:00:00Z"));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      jest.restoreAllMocks();
+    });
+
+    it("waits the number of seconds given in retry-after before retrying", async () => {
+      const fetchSpy = newTestRateLimitedFetch("5");
+
+      const promise = searchWord("casa");
+      await jest.advanceTimersByTimeAsync(4_000);
+      const callsBeforeDeadline = fetchSpy.mock.calls.length;
+      await jest.advanceTimersByTimeAsync(2_000);
+      const result = await promise;
+
+      expect(callsBeforeDeadline).toBe(1);
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(result.word).toBe("casa");
+    });
+
+    it("honors retry-after given as an HTTP date", async () => {
+      const fetchSpy = newTestRateLimitedFetch(new Date(Date.now() + 10_000).toUTCString());
+
+      const promise = searchWord("casa");
+      await jest.advanceTimersByTimeAsync(8_000);
+      const callsBeforeDeadline = fetchSpy.mock.calls.length;
+      await jest.advanceTimersByTimeAsync(3_000);
+      const result = await promise;
+
+      expect(callsBeforeDeadline).toBe(1);
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(result.word).toBe("casa");
     });
   });
 });

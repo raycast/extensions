@@ -2,11 +2,12 @@ import * as fs from "fs";
 import { getSelectedFinderItems, showToast, Toast } from "@raycast/api";
 import Notifications from "./ui/Notifications";
 import { saveFileToPieces } from "./actions/saveAsset";
-import piecesHealthCheck from "./connection/health/piecesHealthCheck";
+import { piecesPreflightCheck } from "./connection/health/piecesPreflightCheck";
 
 export default async function Command() {
-  const healthy = await piecesHealthCheck();
-  if (!healthy) return;
+  const ready = await piecesPreflightCheck();
+  if (!ready) return;
+
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Reading Finder selection",

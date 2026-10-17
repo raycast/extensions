@@ -1,5 +1,41 @@
 # Font Awesome Changelog
 
+## [Improve API token error handling] - 2026-04-06
+
+- Added a clearer error state for misconfigured custom API tokens while keeping the default no-token free-icon flow working normally.
+
+## [Fix pro token refresh and kit loading] - 2026-03-27
+
+- Fixed pro icon searches after changing the API token by scoping cached access tokens and expiry timestamps to the selected API token, which prevents the extension from continuing to use the default free token after a pro token is added (ref: [Issue #26096](https://github.com/raycast/extensions/issues/26096#issuecomment-4013620785)).
+- Scoped cached icon and kit data to the active token/style selection so custom kit results and pro search results no longer bleed across token changes.
+- Updated custom kit handling to rely on Font Awesome kit tokens instead of a nonexistent `Kit.id` field when filtering, selecting, and loading kit uploads.
+
+## [Added Custom Kits Support for Pro accounts] - 2025-11-25
+
+- Added support for browsing and searching custom kit icons
+- Added "Remember Last Used Kit" preference to restore your previous selection on launch
+- Added "Filter Custom Kits" preference to limit which kits appear in the dropdown
+
+## [Improvements] - 2025-10-13
+
+- Fixed issue where the search would sometimes fail and the cached state gets corrupted (ref: [Issue #22051](https://github.com/raycast/extensions/issues/22051))
+- Refactored code to use hooks/components/utils for better readability
+
+## [Fix: Search would get stuck] - 2025-09-29
+
+- Fixed issue where search would get stuck since token was not persisted (ref: [Issue #21781](https://github.com/raycast/extensions/issues/21781))
+- Simplified some code by replacing `useEffect` with `useLocalStorage`
+
+## [Fix: Unused Dependencies deleted] - 2025-09-15
+
+- Remove `svg-to-png` and `change-case` dependencies
+- Bump `@types/node`
+
+## [Feat: Add Support for Windows] - 2025-09-09
+
+- Add support for Raycast Windows
+- Bump dependencies to latest versions
+
 ## [Added AI icon search, Sharp Duotone and Duotone families] - 2025-06-22
 
 - The extension now supports v6.7.2.

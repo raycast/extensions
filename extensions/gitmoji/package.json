@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "ricoberger",
   "contributors": [
-    "joshmedeski"
+    "joshmedeski",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "commands": [
@@ -64,16 +65,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.97.1",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^1.103.8",
+    "@raycast/utils": "^2.2.2",
     "gitmojis": "^3.15.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^22.15.11",
-    "eslint": "^9.26.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.10.1",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -81,5 +82,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

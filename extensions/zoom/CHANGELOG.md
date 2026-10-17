@@ -1,5 +1,32 @@
 # Zoom Changelog
 
+## [Fixed duplicate recurring meetings] - 2026-10-03
+
+- Fixed recurring Zoom meetings with no fixed time appearing twice in the upcoming list.
+
+## [Meeting Prep Skill] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Add a skill for preparing upcoming-meeting briefs with Zoom details, join links, and suggested questions.
+- Keep known meeting details separate from proposed agendas and flag missing context or schedule coverage.
+
+## [Personal Meeting ID Support] - 2026-08-10
+
+- Added a `Personal Meeting ID` preference to the Start Meeting command so you can always start your own personal meeting room with a consistent meeting ID.
+
+## [Improvements] - 2026-06-29
+
+- Retry meeting list requests when Zoom rate limits the API
+- Improve reliability when loading upcoming meetings concurrently
+
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Windows Support] - 2026-01-05
+
+- Added Windows support for starting, joining, and scheduling Zoom meetings.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 - Added AI tools for creating and editing meetings.

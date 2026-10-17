@@ -46,18 +46,21 @@ export default function main() {
   const preferences = getPreferenceValues();
 
   React.useEffect(() => {
-    Clipboard.readText().then((text) => {
-      setClipboardText(text?.toString() || "");
-    });
-  });
+    if (preferences.autoPasteClipboard) {
+      Clipboard.readText().then((text) => {
+        // Only fill in a date or time, so other copied text doesn't open on an error
+        if (text && dayjs(text).isValid()) {
+          setClipboardText(text);
+        }
+      });
+    }
+  }, []);
 
   React.useEffect(() => {
     const _input = input || clipboardText;
     console.log("input: " + _input);
     setInput(_input);
-    if (_input) {
-      timeConverter(_input);
-    }
+    timeConverter(_input);
   }, [clipboardText]);
 
   function timeConverter(time: string) {

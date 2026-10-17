@@ -29,9 +29,9 @@ Use this option to let this extension know what kind of callback needs to be per
 
 ### `icon`
 
-Type: `IconData`
+Type: `IconData & { file: string }`
 
-It returns the icon data.
+It returns the icon data. The `file` field is the file asset path of the icon, which can be used to copy or open the icon file.
 
 ## Launch Example
 

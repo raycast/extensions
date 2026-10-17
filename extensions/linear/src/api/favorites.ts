@@ -5,7 +5,7 @@ import {
   Issue,
   IssueLabel,
   Project,
-  Roadmap,
+  Initiative,
   Team,
   User,
   WorkflowState,
@@ -17,7 +17,8 @@ export type Favorite = {
   id: string;
   // Type is defined as a string in Linear's SDK so let's narrow down the type from this page:
   // https://linear.app/docs/favorites
-  type: "customView" | "cycle" | "document" | "issue" | "label" | "project" | "roadmap" | "user";
+  type: "customView" | "cycle" | "document" | "issue" | "label" | "project" | "user" | "initiative";
+  url: string;
   customView?: Pick<CustomView, "id" | "name" | "icon" | "color">;
   cycle?: Pick<Cycle, "id" | "number" | "startsAt" | "endsAt" | "completedAt"> & {
     team: Pick<Team, "key">;
@@ -26,11 +27,9 @@ export type Favorite = {
   issue?: Pick<Issue, "id" | "title" | "url"> & {
     state: Pick<WorkflowState, "id" | "type" | "name" | "color">;
   };
-  label?: Pick<IssueLabel, "id" | "name" | "color"> & {
-    team: Pick<Team, "key">;
-  };
+  label?: Pick<IssueLabel, "id" | "name" | "color">;
   project?: Pick<Project, "id" | "name" | "icon" | "color" | "url">;
-  roadmap?: Pick<Roadmap, "id" | "color" | "name">;
+  initiative?: Pick<Initiative, "id" | "name" | "color" | "icon">;
   user?: Pick<User, "id" | "displayName" | "name" | "avatarUrl" | "url">;
   updatedAt: string;
 };
@@ -52,6 +51,7 @@ export async function getFavorites() {
           nodes {
             id
             type
+            url
             customView {
               id
               color
@@ -89,9 +89,6 @@ export async function getFavorites() {
               id
               color
               name
-              team {
-                key
-              }
             }
             project {
               id
@@ -100,9 +97,10 @@ export async function getFavorites() {
               name
               url
             }
-            roadmap {
+            initiative {
               id
               color
+              icon
               name
             }
             user {

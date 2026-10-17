@@ -1,6 +1,9 @@
 import { runAppleScript } from "@raycast/utils";
 import * as os from "node:os";
-import { Application } from "@raycast/api";
+import { Application, Clipboard } from "@raycast/api";
+
+const APPLESCRIPT_TIMEOUT_MS = 5000;
+const VSCODE_SENTINEL_CLIPBOARD = "__raycast_copy_path_no_active_file__";
 
 export const scriptFinderPath = `
 if application "Finder" is not running then
@@ -15,9 +18,149 @@ end tell
 // finder path, with / at the end
 export const getFocusFinderPath = async () => {
   try {
-    return await runAppleScript(scriptFinderPath);
+    return await runAppleScript(scriptFinderPath, { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return os.homedir();
+  }
+};
+
+export const scriptQSpacePath = `
+tell application id "com.jinghaoshe.qspace.pro"
+  set urlList to {}
+
+  try
+    repeat with itemRef in selected items
+      set end of urlList to urlstr of itemRef
+    end repeat
+  end try
+
+  if (count of urlList) = 0 then
+    try
+      repeat with desktopRef in qs desktops
+        repeat with itemRef in selected items of desktopRef
+          set end of urlList to urlstr of itemRef
+        end repeat
+      end repeat
+    end try
+  end if
+
+  if (count of urlList) = 0 then
+    try
+      set end of urlList to urlstr of root item
+    end try
+  end if
+
+  set AppleScript's text item delimiters to linefeed
+  return urlList as text
+end tell
+`;
+
+export const getQSpacePathUrls = async () => {
+  try {
+    return await runAppleScript(scriptQSpacePath, { timeout: APPLESCRIPT_TIMEOUT_MS });
+  } catch (e) {
+    return "";
+  }
+};
+
+export const scriptWindowPath = (app: Application) => `
+set windowPath to ""
+tell application "System Events"
+	tell process "${app.name}"
+		tell (1st window whose value of attribute "AXMain" is true)
+			try
+				set windowPath to value of attribute "AXDocument"
+			on error
+				set windowPath to ""
+			end try
+		end tell
+	end tell
+end tell
+return windowPath
+`;
+
+export const getFocusWindowPath = async (app: Application) => {
+  try {
+    let path = await runAppleScript(scriptWindowPath(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
+    if (path == "missing value" || path == "") {
+      return "";
+    }
+    if (!path.startsWith("file://") && !path.startsWith("/")) {
+      return "";
+    }
+    if (path.startsWith("file://")) {
+      path = path.replace("file://", "");
+    }
+    try {
+      return decodeURIComponent(path);
+    } catch {
+      return path;
+    }
+  } catch (e) {
+    return "";
+  }
+};
+
+export const scriptVSCodeActiveFilePath = (app: Application) => `
+try
+  tell application id "${app.bundleId}" to activate
+  delay 0.1
+  tell application "System Events"
+    tell process "${app.name}"
+      keystroke "c" using {option down, command down}
+    end tell
+  end tell
+  delay 0.2
+  return the clipboard
+on error
+  return ""
+end try
+`;
+
+export const getVSCodeActiveFilePath = async (app: Application) => {
+  if (!app.bundleId) {
+    return "";
+  }
+
+  const previousClipboard = await Clipboard.read();
+  let path = "";
+  try {
+    await Clipboard.copy(VSCODE_SENTINEL_CLIPBOARD);
+    const clipboardPath = (
+      await runAppleScript(scriptVSCodeActiveFilePath(app), { timeout: APPLESCRIPT_TIMEOUT_MS })
+    ).trim();
+    path = normalizeVSCodeFilePath(clipboardPath);
+  } catch (e) {
+    path = "";
+  } finally {
+    if (path === "") {
+      await restoreClipboard(previousClipboard);
+    }
+  }
+
+  return path;
+};
+
+const normalizeVSCodeFilePath = (path: string) => {
+  try {
+    if (path.startsWith("file://")) {
+      return decodeURIComponent(new URL(path).pathname);
+    }
+  } catch {
+    return "";
+  }
+  return path.startsWith("/") || path.startsWith("~") ? path : "";
+};
+
+const restoreClipboard = async (content: Clipboard.ReadContent) => {
+  if (content.file) {
+    await Clipboard.copy({ file: content.file });
+  } else if (content.html) {
+    await Clipboard.copy({ html: content.html, text: content.text });
+  } else if (content.text) {
+    await Clipboard.copy(content.text);
+  } else {
+    await Clipboard.clear();
   }
 };
 
@@ -40,7 +183,7 @@ return windowTitle
 
 export const getFocusWindowTitle = async (app: Application) => {
   try {
-    return await runAppleScript(scriptWindowTitle(app));
+    return await runAppleScript(scriptWindowTitle(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }
@@ -55,7 +198,7 @@ return currentURL`;
 
 export const getWebkitBrowserPath = async (app: string) => {
   try {
-    return await runAppleScript(scriptWebkitBrowserPath(app));
+    return await runAppleScript(scriptWebkitBrowserPath(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }
@@ -70,7 +213,7 @@ return currentURL`;
 
 export const getChromiumBrowserPath = async (app: string) => {
   try {
-    return await runAppleScript(scriptChromiumBrowserPath(app));
+    return await runAppleScript(scriptChromiumBrowserPath(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }
@@ -95,7 +238,7 @@ end tell`;
 
 export const copyFirefoxBrowserPath = async (app: string) => {
   try {
-    return await runAppleScript(scriptFirefoxBrowserPath(app));
+    return await runAppleScript(scriptFirefoxBrowserPath(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }
@@ -115,7 +258,85 @@ end tell`;
 
 export const copySafariWebAppPath = async (app: string) => {
   try {
-    return await runAppleScript(scriptSafariWebAppPath(app));
+    return await runAppleScript(scriptSafariWebAppPath(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
+  } catch (e) {
+    return "";
+  }
+};
+
+// Arc popup views: "Little Arc" windows and "Peek" previews.
+// Arc's scripting dictionary only knows about full tabs, so
+// "URL of active tab of front window" returns the underlying tab (or fails)
+// while a Little Arc window or a Peek preview is what the user is looking at.
+// Both are plain Chromium web areas in the accessibility tree, so read the
+// AXURL of the focused web area through the accessibility C API
+// (System Events cannot coerce Chromium's AXURL value).
+export const scriptArcFocusedPageUrl = `
+ObjC.import("Cocoa");
+ObjC.import("ApplicationServices");
+ObjC.bindFunction("AXUIElementCreateApplication", ["id", ["int"]]);
+ObjC.bindFunction("AXUIElementCopyAttributeValue", ["int", ["id", "id", "id*"]]);
+function attr(el, name) {
+  if (!el) return null;
+  const ref = Ref();
+  const err = $.AXUIElementCopyAttributeValue(el, $(name), ref);
+  return err === 0 ? ref[0] : null;
+}
+function str(v) {
+  if (!v) return null;
+  try {
+    return ObjC.unwrap(v.isKindOfClass($.NSURL) ? v.absoluteString : v);
+  } catch (e) {
+    return null;
+  }
+}
+function isWebArea(el) {
+  return str(attr(el, "AXRole")) === "AXWebArea";
+}
+function collectWebAreas(el, depth, acc) {
+  if (!el || depth > 10 || acc.visited > 4000) return;
+  acc.visited++;
+  if (isWebArea(el)) {
+    acc.areas.push(el);
+    return;
+  }
+  const kids = attr(el, "AXChildren");
+  if (!kids) return;
+  const n = kids.count;
+  for (let i = 0; i < n; i++) collectWebAreas(kids.objectAtIndex(i), depth + 1, acc);
+}
+function urlOf(el) {
+  const u = str(attr(el, "AXURL"));
+  return u && u.indexOf("http") === 0 ? u : "";
+}
+const apps = $.NSRunningApplication.runningApplicationsWithBundleIdentifier("company.thebrowser.Browser");
+let result = "";
+if (apps.count > 0) {
+  const app = $.AXUIElementCreateApplication(apps.objectAtIndex(0).processIdentifier);
+  // 1. the focused element, or its nearest enclosing web area
+  let el = attr(app, "AXFocusedUIElement");
+  for (let i = 0; el && i < 30 && !isWebArea(el); i++) el = attr(el, "AXParent");
+  if (el) result = urlOf(el);
+  // 2. otherwise the focused web area of the focused window; a lone web area also counts
+  if (!result) {
+    const win = attr(app, "AXFocusedWindow") || attr(app, "AXMainWindow");
+    const acc = { visited: 0, areas: [] };
+    collectWebAreas(win, 0, acc);
+    const focused = acc.areas.filter(function (a) { return str(attr(a, "AXFocused")) === true || str(attr(a, "AXFocused")) === 1; });
+    if (focused.length === 1) result = urlOf(focused[0]);
+    else if (acc.areas.length === 1) result = urlOf(acc.areas[0]);
+  }
+}
+result;
+`;
+
+export const getArcFocusedPageUrl = async () => {
+  try {
+    const url = await runAppleScript(scriptArcFocusedPageUrl, {
+      language: "JavaScript",
+      timeout: APPLESCRIPT_TIMEOUT_MS,
+    });
+    return url.trim().startsWith("http") ? url.trim() : "";
   } catch (e) {
     return "";
   }

@@ -1,25 +1,16 @@
-import { execSync } from "node:child_process";
 import { checkSchedule } from "../status";
+import { isCaffeinateRunning, deviceName } from "../utils";
 
 /**
- * Checks if your Mac is currently prevented from sleeping
+ * Checks if your computer is currently prevented from sleeping
  */
 export default async function () {
-  const isCaffeinated = isCaffeinateRunning();
+  const isCaffeinated = await isCaffeinateRunning();
   const isScheduled = await checkSchedule();
 
   if (isCaffeinated || isScheduled) {
-    return "Your Mac is currently caffeinated (sleep is prevented)";
+    return `Your ${deviceName()} is currently caffeinated (sleep is prevented)`;
   } else {
-    return "Your Mac is not caffeinated (normal sleep settings apply)";
-  }
-}
-
-function isCaffeinateRunning(): boolean {
-  try {
-    execSync("pgrep caffeinate");
-    return true;
-  } catch {
-    return false;
+    return `Your ${deviceName()} is not caffeinated (normal sleep settings apply)`;
   }
 }

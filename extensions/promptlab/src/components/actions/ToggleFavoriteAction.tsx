@@ -23,7 +23,7 @@ export default function ToggleFavoriteAction(props: ToggleFavoriteActionProps) {
 
   return (
     <Action
-      title={object.favorited ? "Remove From Favorites" : "Add To Favorites"}
+      title={object.favorited ? "Remove from Favorites" : "Add to Favorites"}
       icon={object.favorited ? Icon.StarDisabled : Icon.Star}
       shortcut={getActionShortcut("ToggleFavoriteAction", settings)}
       onAction={async () => {

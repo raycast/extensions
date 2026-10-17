@@ -5,6 +5,9 @@
   "description": "Tracks deliveries, packages, and parcels.",
   "icon": "extension-icon.png",
   "author": "halprin",
+  "contributors": [
+    "chrismessina"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -34,9 +37,54 @@
       "subtitle": "Delivery Tracker",
       "description": "Starts tracking a new delivery.",
       "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Delivery Tracker Menu Bar",
+      "subtitle": "Delivery Tracker",
+      "description": "View delivery status in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "30m"
+    },
+    {
+      "name": "view-archived",
+      "title": "View Archived Deliveries",
+      "subtitle": "Delivery Tracker",
+      "description": "View deliveries you've archived.",
+      "mode": "view"
     }
   ],
   "preferences": [
+    {
+      "name": "refreshInterval",
+      "title": "Refresh Interval",
+      "description": "How often to refresh tracking data from carrier APIs (in minutes)",
+      "type": "dropdown",
+      "required": false,
+      "default": "30",
+      "data": [
+        {
+          "title": "5 minutes",
+          "value": "5"
+        },
+        {
+          "title": "10 minutes",
+          "value": "10"
+        },
+        {
+          "title": "15 minutes",
+          "value": "15"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30"
+        },
+        {
+          "title": "60 minutes",
+          "value": "60"
+        }
+      ]
+    },
     {
       "name": "upsClientId",
       "title": "UPS Client ID",
@@ -68,17 +116,15 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.19.1"
+    "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "2.0.4",
-    "@types/node": "20.17.27",
-    "@types/react": "19.0.12",
-    "eslint": "9.23.0",
-    "prettier": "3.5.3",
-    "typescript": "5.8.2",
-    "node-fetch": "3.3.2",
-    "@raycast/migration": "1.94.0"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.9.2",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build",
@@ -93,5 +139,8 @@
   },
   "engines": {
     "node": ">=20.0.0"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

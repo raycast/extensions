@@ -2,6 +2,7 @@ import { ActionPanel, Action, Form, showToast, Toast, useNavigation, LaunchProps
 import { verifyPurchaseCode } from "./utils";
 import PurchaseDetails from "./purchaseDetails";
 import { FormValidation, useForm } from "@raycast/utils";
+import { useEffect } from "react";
 type Values = {
   pc: string;
 };
@@ -20,23 +21,22 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Verify
     },
   });
 
-  if (props.arguments.purchaseCode) {
-    submit(props.arguments.purchaseCode);
-  }
+  useEffect(() => {
+    if (props.arguments.purchaseCode) {
+      submit(props.arguments.purchaseCode);
+    }
+  }, []);
 
   async function submit(purchaseCode: string) {
-    const loadingToast = await showToast({ title: "Verifiying...", style: Toast.Style.Animated });
+    const toast = await showToast({ title: "Verifiying...", style: Toast.Style.Animated });
     try {
       const result = await verifyPurchaseCode(purchaseCode);
-      loadingToast.hide();
-      if (!result) {
-        await showToast({ title: "Invalid Purchase Code", style: Toast.Style.Failure });
-        return;
-      }
+      if (!result) throw new Error("Invalid Purchase Code");
       push(<PurchaseDetails data={result} />);
     } catch (error) {
-      loadingToast.hide();
-      await showToast({ title: "Error", style: Toast.Style.Failure });
+      toast.title = "Error";
+      toast.message = `${error}`;
+      toast.style = Toast.Style.Failure;
     }
   }
 

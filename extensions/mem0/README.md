@@ -36,3 +36,6 @@
 - **Learn Your Style**: Adapts to how you work and what you like, becoming more helpful over time
 - **No More Repetition**: Stop explaining the same things over and over - your AI remembers your context and preferences
 
+## 🗒️ Note
+
+> By default, the extension will store memories for the user `raycast`. If you want to store memories for a different user, you can set the `defaultUserId` preference in the extension settings.

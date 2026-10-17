@@ -8,7 +8,13 @@
   "contributors": [
     "friendlyusername",
     "alexs",
-    "mathisfoxius"
+    "degouville",
+    "mathisfoxius",
+    "joaogf.dev",
+    "pernielsentikaer"
+  ],
+  "platforms": [
+    "macOS"
   ],
   "categories": [
     "Productivity",
@@ -42,25 +48,150 @@
       "mode": "view"
     },
     {
+      "name": "open-ghostty-workspace",
+      "title": "Open Workspace from Git Repos",
+      "description": "List git repos in a directory and open with your launch configuration",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "workspaceParentDirectory",
+          "type": "directory",
+          "required": false,
+          "title": "Workspaces Parent Directory",
+          "description": "Directory to scan for git repos (used by Open Workspace from Git Repos)"
+        },
+        {
+          "name": "workspaceScanDepth",
+          "type": "dropdown",
+          "required": true,
+          "title": "Workspace Scan Depth",
+          "description": "Max depth to scan for git repositories",
+          "default": "3",
+          "data": [
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            }
+          ]
+        },
+        {
+          "name": "editorApplication",
+          "type": "appPicker",
+          "required": false,
+          "title": "Editor",
+          "description": "Open repos in this editor (optional)"
+        }
+      ]
+    },
+    {
       "name": "open-with-ghostty",
       "title": "Open with Ghostty",
       "description": "Open the currently selected Finder item with Ghostty",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "openWithGhosttyMode",
+          "type": "dropdown",
+          "required": true,
+          "title": "Open In",
+          "description": "Open selected Finder folder in new window or new tab",
+          "default": "window",
+          "data": [
+            {
+              "title": "New Window",
+              "value": "window"
+            },
+            {
+              "title": "New Tab",
+              "value": "tab"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "view-ghostty-config",
+      "title": "Edit Ghostty Config",
+      "description": "View and edit the Ghostty configuration file (~/.config/ghostty/config)",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "workspaceParentDirectory",
+      "type": "directory",
+      "required": false,
+      "title": "Workspaces Parent Directory",
+      "description": "Directory to scan for git repos (used by Open Workspace from Git Repos)"
+    },
+    {
+      "name": "workspaceScanDepth",
+      "type": "dropdown",
+      "required": true,
+      "title": "Workspace Scan Depth",
+      "description": "Max depth to scan for git repositories",
+      "default": "3",
+      "data": [
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        }
+      ]
+    },
+    {
+      "name": "autoFocusGhostty",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto Focus on Tab Selection",
+      "label": "Move cursor to selected tab",
+      "description": "Move cursor to the selected tab after selecting it",
+      "default": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.89.0",
-    "@raycast/utils": "^1.17.0",
-    "run-applescript": "^7.0.0",
-    "yaml": "^2.7.0"
+    "@raycast/api": "^1.104.10",
+    "@raycast/utils": "^2.2.3",
+    "yaml": "^2.8.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.7.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.5.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.1.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
@@ -69,8 +200,5 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }

@@ -27,7 +27,9 @@ export default function Command() {
     data: bookmarkData,
     isLoading: isLoadingBookmark,
     revalidate: revalidateBookmark,
-  } = useBookmarkSearch(searchText);
+    visitItem: visitBookmark,
+    resetRanking: resetBookmarkRanking,
+  } = useBookmarkSearch(profile, searchText);
 
   const revalidate = (profile: string) => {
     revalidateHistory?.(profile);
@@ -44,7 +46,9 @@ export default function Command() {
     >
       {/* use Item for titles instead of sections for explicit feedback that the list is empty */}
       <List.Section title="Tabs">
-        {tabData.length === 0 ? (
+        {isLoadingTab ? (
+          <List.Item title="Loading tabs..." key={"loading tab list item"} />
+        ) : tabData.length === 0 ? (
           <List.Item title="No tabs found" key={"empty tab list item"} />
         ) : (
           tabData.map((tab) => (
@@ -71,7 +75,16 @@ export default function Command() {
         {bookmarkData.length === 0 ? (
           <List.Item title="No bookmarks found" key={"empty bookmark list item"} />
         ) : (
-          bookmarkData.map((e) => <ChromeListItems.TabHistory key={e.id} entry={e} profile={profile} type="Bookmark" />)
+          bookmarkData.map((e) => (
+            <ChromeListItems.TabHistory
+              key={e.id}
+              entry={e}
+              profile={profile}
+              type="Bookmark"
+              onVisit={() => visitBookmark(e)}
+              onResetRanking={() => resetBookmarkRanking(e)}
+            />
+          ))
         )}
       </List.Section>
     </List>

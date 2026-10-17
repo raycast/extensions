@@ -5,6 +5,7 @@
     "lib": ["ES2023"],
     "module": "commonjs",
     "target": "ES2023",
+    "types": ["node"],
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,

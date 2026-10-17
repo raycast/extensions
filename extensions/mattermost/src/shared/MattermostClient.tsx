@@ -24,23 +24,28 @@ axios.interceptors.response.use(
     const data = error.response?.data;
     if (data) return Promise.reject(new Error(data.message));
     return Promise.reject(error);
-  }
+  },
 );
 
 export class MattermostClient {
   static baseUrl(): string {
-    return getPreferenceValues<Preferences>().baseUrl + "/api/v4";
+    return this.apiBaseUrl();
   }
 
   static token = "";
 
   static config(): AxiosRequestConfig {
     return {
-      baseURL: getPreferenceValues<Preferences>().baseUrl + "/api/v4",
+      baseURL: this.apiBaseUrl(),
       headers: {
         Authorization: `Bearer ${this.token}`,
       },
     };
+  }
+
+  static apiBaseUrl(): string {
+    const baseUrl = getPreferenceValues<Preferences>().baseUrl.trim().replace(/\/+$/, "");
+    return `${/^https?:\/\//i.test(baseUrl) ? baseUrl : `https://${baseUrl}`}/api/v4`;
   }
 
   static async wakeUpSession(): Promise<boolean> {
@@ -63,9 +68,9 @@ export class MattermostClient {
         login_id: username,
         password: password,
       }),
-      MattermostClient.config()
+      MattermostClient.config(),
     );
-    const token = response.headers["token"];
+    const token = response.headers["token"] ?? "";
     console.log(response.statusText);
     MattermostClient.token = token;
     console.log("successfull login");
@@ -139,7 +144,7 @@ export class MattermostClient {
           user_id: user_id,
           status: status,
         }),
-        this.config()
+        this.config(),
       )
       .then((response) => response.data);
   }
@@ -164,7 +169,7 @@ export class MattermostClient {
           duration: status.duration,
           expires_at: status.expires_at ?? (status.duration && durationToExpireDate(status.duration)),
         }),
-        this.config()
+        this.config(),
       )
       .then((response) => response.data);
   }

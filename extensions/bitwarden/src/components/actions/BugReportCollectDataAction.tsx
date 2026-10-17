@@ -5,8 +5,10 @@ import { promisify } from "util";
 import { cliInfo } from "~/api/bitwarden";
 import { existsSync } from "fs";
 import { dirname } from "path";
+import { platform } from "~/utils/platform";
 
 const exec = promisify(execWithCallbacks);
+const { supportPath } = environment;
 
 /** strip out any sensitive data from preferences */
 const getSafePreferences = () => {
@@ -44,7 +46,14 @@ const getSafePreferences = () => {
 const NA = "N/A";
 const tryExec = async (command: string, trimLineBreaks = true) => {
   try {
-    const { stdout } = await exec(`PATH="$PATH:${dirname(process.execPath)}" ${command}`);
+    let cmd = command;
+
+    if (platform === "windows") {
+      cmd = `powershell -Command "${command}"`;
+    } else {
+      cmd = `PATH="$PATH:${dirname(process.execPath)}" ${command}`;
+    }
+    const { stdout } = await exec(cmd, { env: { BITWARDENCLI_APPDATA_DIR: supportPath } });
     const response = stdout.trim();
     if (trimLineBreaks) return response.replace(/\n|\r/g, "");
     return response;
@@ -94,26 +103,25 @@ function BugReportCollectDataAction() {
     try {
       const preferences = getSafePreferences();
       const bwInfo = getBwBinInfo();
-      const [systemArch, macosVersion, macosBuildVersion, bwVersion, brewInfo] = await Promise.all([
-        tryExec("uname -m"),
-        tryExec("sw_vers -productVersion"),
-        tryExec("sw_vers -buildVersion"),
-        tryExec(`"${bwInfo.path}" --version`),
-        getHomebrewInfo(),
+      const [systemArch, osVersion, osBuildVersion, bwVersion] = await Promise.all([
+        ...(platform === "macos"
+          ? [tryExec("uname -m"), tryExec("sw_vers -productVersion"), tryExec("sw_vers -buildVersion")]
+          : [
+              tryExec("(Get-CimInstance Win32_OperatingSystem).OSArchitecture"),
+              tryExec("(Get-CimInstance Win32_OperatingSystem).Caption"),
+              tryExec("(Get-CimInstance Win32_OperatingSystem).Version"),
+            ]),
+        tryExec(`${bwInfo.path} --version`),
       ]);
 
-      const data = {
+      const data: Record<string, any> = {
         raycast: {
           version: environment.raycastVersion,
         },
         system: {
           arch: systemArch,
-          version: macosVersion,
-          buildVersion: macosBuildVersion,
-        },
-        homebrew: {
-          arch: brewInfo.arch,
-          version: brewInfo.version,
+          version: osVersion,
+          buildVersion: osBuildVersion,
         },
         node: {
           arch: process.arch,
@@ -125,6 +133,14 @@ function BugReportCollectDataAction() {
         },
         preferences,
       };
+
+      if (platform === "macos") {
+        const brewInfo = await getHomebrewInfo();
+        data.homebrew = {
+          arch: brewInfo.arch,
+          version: brewInfo.version,
+        };
+      }
 
       await Clipboard.copy(JSON.stringify(data, null, 2));
       toast.style = Toast.Style.Success;

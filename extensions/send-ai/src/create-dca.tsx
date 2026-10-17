@@ -27,6 +27,9 @@ function CreateDCA() {
 
   async function handleCreateDCA(values: DCARequest) {
     try {
+      if (isLoading) {
+        return;
+      }
       setIsLoading(true);
 
       const inputMint = values.inputMint === SOL.address ? WRAPPED_SOL_ADDRESS : values.inputMint;

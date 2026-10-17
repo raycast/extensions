@@ -1,5 +1,25 @@
 # Jira Search Self Hosted Changelog
 
+## [Fix stale search results] - 2026-07-18
+
+- Fixed older Jira responses overriding the latest query while typing an issue number.
+
+## [Search issues by number] - 2026-07-16
+
+- Added the ability to find an issue by number when its project key is configured in **Default Included Projects**.
+
+## [Update] - 2026-04-30
+
+Added configuration option to set default filters for projects, issue types, statuses, and assignees for inclusion and exclusion.
+
+## [Moved contributor] - 2025-12-07
+
+## [Moved contributor] - 2025-12-03
+
+## [Update] - 2025-11-12
+
+- Improved search by `key` to include numbers in project key.
+
 ## [Fixed typo] - 2024-04-30
 
 ## [Update] - 2024-02-02

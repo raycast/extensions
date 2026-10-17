@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lifx-advanced-controller",
+  "title": "LIFX Advanced Controller",
+  "description": "Control your LIFX smart lights with natural language commands and profiles",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "LIFX Dashboard",
+      "subtitle": "LIFX",
+      "description": "Control lights with natural language, manage profiles, and more",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "httpApiToken",
+      "type": "password",
+      "required": false,
+      "title": "LIFX HTTP API Token",
+      "description": "Get your token from https://cloud.lifx.com/settings",
+      "placeholder": "Enter your LIFX API token"
+    },
+    {
+      "name": "defaultFadeDuration",
+      "type": "textfield",
+      "required": false,
+      "default": "1000",
+      "title": "Default Fade Duration (ms)",
+      "description": "How long light transitions should take",
+      "placeholder": "1000"
+    },
+    {
+      "name": "lanTimeout",
+      "type": "textfield",
+      "required": false,
+      "default": "5000",
+      "title": "LAN Discovery Timeout (ms)",
+      "description": "How long to wait for local network discovery",
+      "placeholder": "5000"
+    },
+    {
+      "name": "enableLanDiscovery",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Enable LAN Discovery",
+      "description": "Discover lights on local network (faster than HTTP)"
+    },
+    {
+      "name": "lanStateTimeout",
+      "type": "textfield",
+      "required": false,
+      "default": "5000",
+      "title": "LAN State Query Timeout (ms)",
+      "description": "Timeout for querying individual light state (increase if lights are unreliable)",
+      "placeholder": "5000"
+    },
+    {
+      "name": "lanRetryAttempts",
+      "type": "textfield",
+      "required": false,
+      "default": "3",
+      "title": "LAN Retry Attempts",
+      "description": "Number of retry attempts for unresponsive lights",
+      "placeholder": "3"
+    },
+    {
+      "name": "lanCooldownPeriod",
+      "type": "textfield",
+      "required": false,
+      "default": "2000",
+      "title": "LAN Control Cooldown (ms)",
+      "description": "Wait time after controlling a light before querying state",
+      "placeholder": "2000"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "lifx-lan-client": "^2.1.2",
+    "lifxjs": "^1.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "nazzy_wazzy_lu",
+  "categories": [
+    "Applications"
+  ],
+  "platforms": [
+    "Windows"
+  ]
+}

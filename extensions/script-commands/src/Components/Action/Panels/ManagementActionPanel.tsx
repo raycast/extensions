@@ -41,7 +41,7 @@ export function ManagementActionPanel({
       {
         if (commandPath) {
           elements.push(
-            <EditLocalSourceCodeActionItem key="edit-source-code" path={commandPath} onSetup={onEditLocal} />
+            <EditLocalSourceCodeActionItem key="edit-source-code" path={commandPath} onSetup={onEditLocal} />,
           );
         }
 

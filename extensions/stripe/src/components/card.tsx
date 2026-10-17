@@ -1,15 +1,33 @@
 import { Action, ActionPanel, closeMainWindow, Color, Icon, List } from "@raycast/api";
-import type { Card } from "../data/cards";
-import { createAppleScript } from "../utils/cards";
+import type { Card } from "@src/data/cards";
+import { createAppleScript } from "@src/utils/cards";
 import { runAppleScript } from "@raycast/utils";
 
+/**
+ * Props for the Card component.
+ */
 type CardProps = {
+  /** The test card to display */
   card: Card;
+  /** Whether to show the card category in the subtitle */
   showCategory?: boolean;
+  /** Callback when card is used (for ranking) */
   visitItem: (card: Card) => void;
+  /** Callback to reset card's usage ranking */
   resetRanking: (card: Card) => void;
 };
 
+/**
+ * Card - List item displaying a Stripe test card.
+ *
+ * Shows test card details with actions to:
+ * - Autofill card into active checkout form
+ * - Copy card number to clipboard
+ * - View card documentation
+ * - Reset usage ranking
+ *
+ * Cards are ranked by usage frequency for quick access to commonly used test cards.
+ */
 const Card = ({ card, showCategory = false, visitItem, resetRanking }: CardProps) => {
   return (
     <List.Item

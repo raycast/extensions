@@ -17,5 +17,5 @@ export default async () => {
     return;
   }
 
-  openSiteManager();
+  await openSiteManager();
 };

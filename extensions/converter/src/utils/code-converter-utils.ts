@@ -130,6 +130,34 @@ export const hexToNative = (hex: string) => {
   return native;
 };
 
+// decimal
+
+export const nativeToDecimal = (native: string) => {
+  if (native.length == 0) return "";
+  let dec = BigInt(0);
+  for (const char of native) {
+    const c = char.charCodeAt(0);
+    if (c >= 256) return "";
+    dec = dec * BigInt(256) + BigInt(c);
+  }
+  return dec.toString();
+};
+
+export const decimalToNative = (dec: string) => {
+  try {
+    let number = BigInt(dec.trim());
+    let native = "";
+    while (number > 0) {
+      const c = number % BigInt(256);
+      native = String.fromCharCode(Number(c)) + native;
+      number = number / BigInt(256);
+    }
+    return native;
+  } catch {
+    return "";
+  }
+};
+
 // url
 
 export const urlToNative = (url: string) => {

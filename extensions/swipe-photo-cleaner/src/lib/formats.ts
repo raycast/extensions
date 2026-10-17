@@ -1,0 +1,15 @@
+export const IMAGE_EXTENSIONS = new Set([
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".gif",
+  ".bmp",
+  ".tiff",
+  ".tif",
+  ".webp",
+  ".heic",
+  ".heif",
+  ".avif",
+  ".svg",
+  ".ico",
+]);

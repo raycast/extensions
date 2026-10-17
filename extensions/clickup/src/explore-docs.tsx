@@ -1,16 +1,20 @@
 import { ActionPanel, Icon, List, Action } from "@raycast/api";
-import { useTeams } from "./hooks/useTeams";
+import { useCachedPromise } from "@raycast/utils";
+import { getClickUpClient } from "./api/clickup";
 import { ListDocs } from "./views/DocList/ListDocs";
 import { OpenInClickUpAction } from "./components/OpenInClickUpAction";
 
 export default function Teams() {
-  const { isLoading, teams } = useTeams();
+  const { isLoading, data: teams } = useCachedPromise(async () => getClickUpClient().getTeams(), [], {
+    initialData: [],
+  });
+
   return (
     <List searchBarPlaceholder="Search teams" isLoading={isLoading}>
       <List.Section title="/" subtitle={`${teams.length} teams`}>
-        {teams.map((team, index) => (
+        {teams.map((team) => (
           <List.Item
-            key={index}
+            key={team.id}
             icon={Icon.Person}
             title={team.name}
             actions={

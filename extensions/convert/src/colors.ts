@@ -1,4 +1,5 @@
-import { HEXtoRGB } from "./conversions";
+import { HEXtoRGB } from "./colorsConversion";
+
 // tailwind colors as of v3.3.2
 const colors: { [key: string]: { [key: string]: string } } = {
   slate: {
@@ -278,7 +279,7 @@ export function findClosestColor(r: number, g: number, b: number): { name: strin
       const shadeRgb = HEXtoRGB(colors[colorGroup][shade]);
       // Calculate the Euclidean distance between the two colors
       const distance = Math.sqrt(
-        Math.pow(r - shadeRgb[0], 2) + Math.pow(g - shadeRgb[1], 2) + Math.pow(b - shadeRgb[2], 2)
+        Math.pow(r - shadeRgb[0], 2) + Math.pow(g - shadeRgb[1], 2) + Math.pow(b - shadeRgb[2], 2),
       );
       // If the distance is smaller than the current closest distance, update the closest color and distance
       if (distance < closestDistance) {

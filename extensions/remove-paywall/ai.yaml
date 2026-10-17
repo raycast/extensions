@@ -1,0 +1,22 @@
+instructions: |
+  When a user asks to read an article through a paywall removal service, use the get-paywall-free-url tool.
+  Return the link from the tool. Do not claim that access to the article is guaranteed.
+evals:
+  - input: "@remove-paywall Get a link to read https://example.com/article"
+    mocks:
+      get-paywall-free-url: "https://archive.is/https://example.com/article"
+    expected:
+      - callsTool:
+          name: get-paywall-free-url
+          arguments:
+            url: "https://example.com/article"
+      - includes: "https://archive.is/https://example.com/article"
+  - input: "@remove-paywall Remove the paywall from https://medium.com/example/story"
+    mocks:
+      get-paywall-free-url: "https://freedium-mirror.cfd/https://medium.com/example/story"
+    expected:
+      - callsTool:
+          name: get-paywall-free-url
+          arguments:
+            url: "https://medium.com/example/story"
+      - includes: "https://freedium-mirror.cfd/https://medium.com/example/story"

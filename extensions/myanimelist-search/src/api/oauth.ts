@@ -1,5 +1,4 @@
 import { OAuth } from "@raycast/api";
-import fetch from "node-fetch";
 
 import { generateCodeVerifier } from "./challenge";
 

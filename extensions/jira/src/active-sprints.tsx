@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Project, getProjects } from "./api/projects";
 import StatusIssueList from "./components/StatusIssueList";
 import { getProjectAvatar } from "./helpers/avatars";
+import { sanitizeJqlIdentifier, withProjectFilter } from "./helpers/jql";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
 import useIssues from "./hooks/useIssues";
 
@@ -17,9 +18,10 @@ export function ActiveSprints() {
     { keepPreviousData: true },
   );
 
-  const jql = `sprint in openSprints() AND project = '${cachedProject?.key}' ORDER BY updated DESC`;
+  const jql = withProjectFilter("sprint in openSprints() ORDER BY updated DESC", cachedProject?.key);
 
-  const { issues, isLoading: isLoadingIssues, mutate } = useIssues(jql, { execute: cachedProject?.key !== "" });
+  const safeProjectKey = sanitizeJqlIdentifier(cachedProject?.key);
+  const { issues, isLoading: isLoadingIssues, mutate } = useIssues(jql, { execute: safeProjectKey !== undefined });
 
   const isSearching = projectQuery !== "";
 

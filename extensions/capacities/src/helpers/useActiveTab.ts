@@ -1,5 +1,4 @@
-import React from "react";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, usePromise } from "@raycast/utils";
 
 type ActiveTab = {
   url: string;
@@ -7,35 +6,29 @@ type ActiveTab = {
 };
 
 export function useActiveTab() {
-  const [activeTab, setActiveTab] = React.useState<ActiveTab | null>(null);
+  const { data: activeTab } = usePromise(
+    async () => {
+      if (process.platform !== "darwin") return;
+      const activeWindow = await getActiveWindow();
 
-  React.useEffect(() => {
-    (async () => {
-      try {
-        const activeWindow = await getActiveWindow();
+      if (!supportedBrowsers.some((browser) => browser === activeWindow)) return;
 
-        if (!supportedBrowsers.some((browser) => browser === activeWindow)) {
-          return;
-        }
+      const activeTab = await getActiveTabByBrowser[activeWindow as Browser]();
 
-        const activeTab = await getActiveTabByBrowser[activeWindow as Browser]();
+      if (!activeTab) return;
 
-        if (!activeTab) {
-          return;
-        }
+      const { url, title } = extractUrlAndTitle(activeTab);
 
-        const { url, title } = extractUrlAndTitle(activeTab);
-
-        setActiveTab({
-          url,
-          title,
-        });
-      } catch (e) {
-        console.error(e);
-      }
-    })();
-  }, []);
-
+      return {
+        url,
+        title,
+      } as ActiveTab;
+    },
+    [],
+    {
+      onError() {},
+    },
+  );
   return activeTab;
 }
 

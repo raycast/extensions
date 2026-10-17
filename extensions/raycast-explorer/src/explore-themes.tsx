@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Icon, List, closeMainWindow, environment } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, closeMainWindow } from "@raycast/api";
 import { getAvatarIcon, useFetch } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
-import { CONTRIBUTE_URL } from "./helpers";
+import { CONTRIBUTE_URL, platformShortcut } from "./helpers";
 
 const baseUrl = "https://ray.so/themes";
 
@@ -31,7 +31,7 @@ type Theme = {
 };
 
 export default function ExploreThemes() {
-  const { data: themes, isLoading } = useFetch<Theme[]>(`https:/ray.so/api/themes`);
+  const { data: themes, isLoading } = useFetch<Theme[]>(`https://ray.so/api/themes`);
 
   const [appearanceFilter, setAppearanceFilter] = useState("all");
 
@@ -70,8 +70,7 @@ export default function ExploreThemes() {
   }, [appearanceFilter, themes]);
 
   function getThemeURL(theme: Theme): string {
-    const { raycastVersion } = environment;
-    const protocol = raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
+    const protocol = `${process.env.RAYCAST_SCHEME ?? "raycast"}://`;
 
     const encode = (value: string) => encodeURIComponent(value);
     const urlWithoutColors = `${protocol}theme?version=${theme.version}&name=${encode(theme.name)}&appearance=${encode(
@@ -162,7 +161,7 @@ export default function ExploreThemes() {
                   title="Copy URL to Share"
                   icon={Icon.Link}
                   content={getThemeURL(theme)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                  shortcut={platformShortcut(["cmd", "shift"], "s")}
                 />
 
                 <Action.Open
@@ -170,24 +169,23 @@ export default function ExploreThemes() {
                   icon={Icon.Stars}
                   target={getThemeURL(filteredThemes[Math.floor(Math.random() * filteredThemes.length)])}
                   onOpen={() => closeMainWindow()}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                  shortcut={platformShortcut(["cmd", "shift"], "r")}
                 />
 
                 <ActionPanel.Section>
                   <Action.OpenInBrowser
                     title="Contribute"
                     icon={Icon.PlusSquare}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={platformShortcut(["cmd", "shift"], "c")}
                     url={CONTRIBUTE_URL}
                   />
                 </ActionPanel.Section>
 
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
-                    /* eslint-disable-next-line @raycast/prefer-title-case */
                     title="Copy JSON Configuration"
                     content={JSON.stringify(theme, null, 2)}
-                    shortcut={{ modifiers: ["cmd"], key: "." }}
+                    shortcut={platformShortcut(["cmd"], ".")}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

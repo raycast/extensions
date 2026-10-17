@@ -14,7 +14,7 @@ export async function getRequest<T>(
     headers: {
       Authorization: `bearer ${preferences.token}`,
     },
-    signal: signal,
+    signal,
   });
 
   const json = (await response.json()) as WrikeResponse<T> | APIError;

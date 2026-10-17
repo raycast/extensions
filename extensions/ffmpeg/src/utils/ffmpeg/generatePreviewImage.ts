@@ -16,7 +16,7 @@ export const generatePreviewImage = async ({ filePath: videoFilePath }: { filePa
   }
 
   const command = `-i ${JSON.stringify(
-    videoFilePath
+    videoFilePath,
   )} -vf "select=eq(n\\,0)" -q:v 50 -frames:v 1 ${previewImageFilePath}`;
 
   try {

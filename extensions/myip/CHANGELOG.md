@@ -1,5 +1,21 @@
 # MyIP Changelog
 
+## [Update] - 2026-06-11
+
+- Remove unused ip dependency (clears CVE-2024-29415)
+
+## [Update] - 2026-06-01
+
+- Add "IP in Menu Bar" command to display your IP address in the macOS menu bar
+
+## [Update] - 2025-09-15
+
+- Add Windows support
+- Typescript fixes
+- Display IPV4 details even when using IPV6
+- Bump deps
+- Use newest eslint config
+
 ## [Update] - 2025-02-21
 
 - Redesigned the icon to be more consistent with the Raycast style and better looking

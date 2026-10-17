@@ -1,0 +1,53 @@
+---
+description: Raycast Extension Development Standards and Best Practices
+globs: ["src/**/*", "package.json", "raycast-env.d.ts"]
+alwaysApply: false
+---
+
+# Raycast Extension Development Guidelines
+
+## Core Principles
+
+1. **Consult Raycast Documentation First:** Always refer to `https://developers.raycast.com/` for the most accurate and up-to-date information on APIs, components, and best practices.
+2. **Follow Raycast Design Patterns:** Use Raycast's built-in components and follow their design system.
+3. **TypeScript First:** Use TypeScript for all development to ensure type safety.
+4. **Performance Focus:** Raycast extensions should be fast and responsive.
+
+## Development Standards
+
+### File Structure
+- Keep components in `src/components/`
+- API utilities in `src/api/`
+- Utility functions in `src/utils/`
+- Main extension files in `src/` root
+
+### Component Guidelines
+- Use Raycast's built-in components (ActionPanel, List, Form, etc.)
+- Follow Raycast's naming conventions
+- Implement proper error handling with try-catch blocks
+- Use Raycast's loading states and error states
+
+### API Integration
+- Handle API rate limits appropriately
+- Implement proper error handling for network requests
+- Use Raycast's environment variables for API keys
+- Cache responses when appropriate
+
+### Testing and Verification
+- Run `npm run lint` and `npm run fix-lint` to ensure code style
+- Run `npm run build` to test the extension can be built in Raycast
+- Test all user flows before considering features complete
+
+### Error Handling
+- When encountering errors, first check the console/logs for specific error messages
+- Search for similar issues in Raycast documentation or community forums
+- If stuck after multiple attempts, provide clear error context when asking for help
+
+## Best Practices
+
+- Keep functions focused and single-purpose
+- Use meaningful variable and function names
+- Add appropriate comments for complex logic
+- Follow the existing code style and formatting
+- Implement proper error boundaries and validation
+- Write self-documenting code with clear naming conventions 

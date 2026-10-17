@@ -6,7 +6,7 @@ import { View } from "./components/View";
 import {
   Cycle,
   PaginatedCycleResponse,
-  PaginatedRecoveryResponse,
+  RecoveryCollection,
   PaginatedSleepResponse,
   Recovery,
   Sleep,
@@ -191,7 +191,7 @@ function BiometricsCommand() {
   );
 
   let cycleCollection: PaginatedCycleResponse | undefined;
-  let recoveryCollection: PaginatedRecoveryResponse | undefined;
+  let recoveryCollection: RecoveryCollection | undefined;
   let sleepCollection: PaginatedSleepResponse | undefined;
 
   if (data) {
@@ -212,8 +212,9 @@ function BiometricsCommand() {
     return recoveryCollection?.records?.find((recovery) => recovery.cycle_id === cycleId);
   };
 
-  const findSleepForRecovery = (sleepId: number) => {
-    return sleepCollection?.records?.find((sleep) => sleep.id === sleepId);
+  const findSleepForRecovery = (sleepId: string) => {
+    // Be tolerant of legacy numeric IDs (V1) vs V2 string IDs.
+    return sleepCollection?.records?.find((sleep: Sleep) => String(sleep.id) === String(sleepId));
   };
 
   return (

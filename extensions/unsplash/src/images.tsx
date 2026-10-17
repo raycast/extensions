@@ -1,71 +1,55 @@
 import { useState } from "react";
 import { Grid } from "@raycast/api";
-import { getGridItemSize, showImageTitle, toTitleCase } from "@/functions/utils";
-
-// Hooks
+import { getGridColumns, showImageTitle, toTitleCase } from "@/functions/utils";
 import { useSearch } from "@/hooks/useSearch";
-
-// Components
+import { useSetupAuth } from "@/hooks/useSetupAuth";
 import Actions from "@/components/Actions";
-
-// Types
+import OrientationDropdown from "@/components/OrientationDropdown";
+import OAuthSetupGuide from "@/components/OAuthSetupGuide";
 import { Orientation, SearchResult } from "@/types";
-interface SearchListItemProps {
-  searchResult: SearchResult;
+
+export default function UnsplashImages() {
+  const auth = useSetupAuth();
+
+  if (auth.status === "loading") return <Grid isLoading />;
+  if (auth.status === "needs-setup")
+    return <OAuthSetupGuide onConnect={auth.connect} connectError={auth.connectError} />;
+
+  return <ImageGrid />;
 }
 
-const UnsplashImages: React.FC = () => {
+function ImageGrid() {
   const [orientation, setOrientation] = useState<Orientation>("landscape");
   const [search, setSearch] = useState("");
   const { state } = useSearch(search, "photos", orientation);
-  const itemSize = getGridItemSize();
-
-  const handleOrientationChange = (value: string) => {
-    setOrientation(value as Orientation);
-  };
 
   return (
     <Grid
       isLoading={state.isLoading}
-      itemSize={itemSize}
+      columns={getGridColumns()}
       onSearchTextChange={setSearch}
       searchBarPlaceholder="Search wallpapers..."
-      searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Orientation"
-          storeValue={true}
-          defaultValue={orientation}
-          onChange={handleOrientationChange}
-        >
-          <Grid.Dropdown.Section title="Orientation">
-            <Grid.Dropdown.Item title="All" value="all" />
-            <Grid.Dropdown.Item title="Landscape" value="landscape" />
-            <Grid.Dropdown.Item title="Portrait" value="portrait" />
-            <Grid.Dropdown.Item title="Squarish" value="squarish" />
-          </Grid.Dropdown.Section>
-        </Grid.Dropdown>
-      }
+      searchBarAccessory={<OrientationDropdown onChange={setOrientation} />}
       throttle
       pagination={state.pagination}
     >
-      <Grid.Section title="Results" subtitle={String(state?.results?.length)}>
+      <Grid.Section title="Results" subtitle={String(state.results.length)}>
         {state.results.map((result) => (
-          <SearchListItem key={result.id} searchResult={result} />
+          <ImageGridItem key={result.id} result={result} />
         ))}
       </Grid.Section>
     </Grid>
   );
-};
+}
 
-const SearchListItem: React.FC<SearchListItemProps> = ({ searchResult }) => {
-  const [title, image] = [
-    searchResult.description || searchResult.alt_description || searchResult.user.name || "No Name",
-    searchResult.urls?.thumb || searchResult.urls?.small || searchResult.urls?.regular,
-  ];
-
-  const gridItemTitle = showImageTitle() ? toTitleCase(title) : "";
-
-  return <Grid.Item content={image} title={gridItemTitle} actions={<Actions item={searchResult} details />} />;
-};
-
-export default UnsplashImages;
+function ImageGridItem({ result }: { result: SearchResult }) {
+  const title = result.description || result.alt_description || result.user.name || "No Name";
+  const image = result.urls.thumb || result.urls.small || result.urls.regular;
+  return (
+    <Grid.Item
+      content={image}
+      title={showImageTitle() ? toTitleCase(title) : ""}
+      actions={<Actions item={result} details />}
+    />
+  );
+}

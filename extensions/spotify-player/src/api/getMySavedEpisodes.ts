@@ -1,10 +1,11 @@
+import { withCache } from "../helpers/apiCache";
 import { getErrorMessage } from "../helpers/getError";
 import { SimplifiedEpisodeObject } from "../helpers/spotify.api";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 type GetMySavedEpisodesProps = { limit?: number };
 
-export async function getMySavedEpisodes({ limit = 50 }: GetMySavedEpisodesProps = {}) {
+async function _getMySavedEpisodes({ limit = 50 }: GetMySavedEpisodesProps = {}) {
   const { spotifyClient } = getSpotifyClient();
 
   try {
@@ -25,3 +26,5 @@ export async function getMySavedEpisodes({ limit = 50 }: GetMySavedEpisodesProps
     throw new Error(error);
   }
 }
+
+export const getMySavedEpisodes = withCache("api:library:episodes", 300000, _getMySavedEpisodes);

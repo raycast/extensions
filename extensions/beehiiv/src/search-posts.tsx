@@ -2,7 +2,7 @@ import { ActionPanel, Action, List, getPreferenceValues, Icon, Cache } from "@ra
 import { useEffect, useState, useRef } from "react";
 import fetch from "node-fetch";
 
-const preferences = getPreferenceValues<Preferences>();
+const preferences = getPreferenceValues();
 
 interface Post {
   id: string;

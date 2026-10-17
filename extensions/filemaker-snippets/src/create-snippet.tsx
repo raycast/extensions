@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
-import { detectType, FMObjectsToXML } from "./utils/FmClipTools";
+import { detectType } from "./utils/FmClipTools";
 import CreateError from "./components/create-snippet-error";
 import { snippetTypesMap } from "./utils/types";
 import EditSnippet from "./components/edit-snippet";

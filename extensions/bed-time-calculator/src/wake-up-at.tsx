@@ -1,78 +1,122 @@
-import { useState, useEffect } from "react";
-import { Form, LaunchProps } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast, LaunchProps } from "@raycast/api";
+import { useState } from "react";
+import {
+  bedtimesForWake,
+  formatTime,
+  formatDuration,
+  parseTimeInput,
+  getSleepQuality,
+  SleepTime,
+  FALL_ASLEEP_BUFFER,
+  CYCLE_LENGTH,
+} from "./lib/sleep-utils";
 
-type Values = {
+interface Arguments {
   wakeUpTime: string;
-};
+}
 
-const SLEEP_CYCLE_DURATION = 90; // Duration of one sleep cycle in minutes
-const FALL_ASLEEP_BUFFER = 15; // Time in minutes to fall asleep
+export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+  const initialTime = props.arguments.wakeUpTime;
+  const [searchText, setSearchText] = useState("");
+  const [showMoreUsed, setShowMoreUsed] = useState(false);
 
-export default function Command(props: LaunchProps<{ arguments: Values }>) {
-  const [bedtimes, setBedtimes] = useState<
-    { time24: string; timeAMPM: string; cycles: number; recommended?: boolean }[]
-  >([]);
-  const [error, setError] = useState<string | null>(null);
+  // Use search text if provided, otherwise fall back to initial argument
+  const timeInput = searchText.trim() || initialTime;
+  const parsed = parseTimeInput(timeInput);
 
-  useEffect(() => {
-    const { wakeUpTime } = props.arguments;
-    handleSubmit({ wakeUpTime });
-  }, [props.arguments]);
+  const handleSearchChange = (text: string) => {
+    setSearchText(text);
+  };
 
-  function handleSubmit(values: Values) {
-    const timePattern = /^(0?\d|1\d|2[0-3]):([0-5]\d)$/; // Regex for HH:MM format allowing optional leading zero
-    if (!timePattern.test(values.wakeUpTime)) {
-      setError("Invalid time format. Please enter time in HH:MM format.");
-      setBedtimes([]);
-      return;
-    }
+  const handleShowMore = () => {
+    setShowMoreUsed(true);
+    showToast({
+      style: Toast.Style.Success,
+      title: "Showing More Options",
+    });
+  };
 
-    const [wakeHour, wakeMinute] = values.wakeUpTime.split(":").map(Number);
-    const wakeTimeInMinutes = wakeHour * 60 + wakeMinute;
-
-    const calculatedBedtimes: { time24: string; timeAMPM: string; cycles: number; recommended?: boolean }[] = [];
-
-    for (let cycles = 1; cycles <= 6; cycles++) {
-      const bedtimeInMinutes =
-        (wakeTimeInMinutes - FALL_ASLEEP_BUFFER - cycles * SLEEP_CYCLE_DURATION + 24 * 60) % (24 * 60);
-      const bedtimeHour = Math.floor(bedtimeInMinutes / 60);
-      const bedtimeMinute = bedtimeInMinutes % 60;
-
-      const ampm = bedtimeHour >= 12 ? "PM" : "AM";
-      const formattedHour12 = bedtimeHour > 12 ? bedtimeHour - 12 : bedtimeHour === 0 ? 12 : bedtimeHour;
-      const formattedHour24 = bedtimeHour.toString().padStart(2, "0");
-      const formattedMinute = bedtimeMinute.toString().padStart(2, "0");
-
-      const formattedTimeAMPM = `${formattedHour12}:${formattedMinute} ${ampm}`;
-      const formattedTime24 = `${formattedHour24}:${formattedMinute}`;
-
-      const recommended = cycles === 5 || cycles === 6;
-
-      calculatedBedtimes.unshift({
-        time24: formattedTime24,
-        timeAMPM: formattedTimeAMPM,
-        cycles: cycles,
-        recommended: recommended,
+  if (!parsed) {
+    if (timeInput) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid Time Format",
+        message: "Try formats like 7:30 AM, 07:30, or 0730",
       });
     }
 
-    setError(null);
-    setBedtimes(calculatedBedtimes);
+    return (
+      <List searchBarPlaceholder="Enter wake time (e.g., 7:30 AM)..." onSearchTextChange={handleSearchChange} throttle>
+        <List.EmptyView
+          icon={Icon.Clock}
+          title="Enter a Wake Time"
+          description="Type a time like 7:30 AM, 7am, 07:30, or 0730 to see optimal bedtimes"
+        />
+      </List>
+    );
   }
 
+  // Generate cycles: default 4 (6,5,4,3), extended adds 2 more (2,1)
+  const baseCycles = [6, 5, 4, 3];
+  const extendedCycles = showMoreUsed ? [2, 1] : [];
+  const cycles = [...baseCycles, ...extendedCycles];
+
+  const bedtimes = bedtimesForWake(parsed.hour, parsed.minute, parsed.ampm, FALL_ASLEEP_BUFFER, CYCLE_LENGTH, cycles);
+  const wakeTimeFormatted = `${parsed.hour}:${parsed.minute.toString().padStart(2, "0")} ${parsed.ampm}`;
+
+  // Sort by cycles descending (most sleep first)
+  const sortedBedtimes = [...bedtimes].sort((a, b) => b.cycles - a.cycles);
+
   return (
-    <Form>
-      <Form.Description text={`Wake Up Time: ${props.arguments.wakeUpTime}`} />
-      {error && <Form.Description text={error} />}
-      <Form.Separator />
-      <Form.Description text="Recommended Bedtimes:" />
-      {bedtimes.map((bedtime, index) => (
-        <Form.Description
-          key={index}
-          text={`• ${bedtime.time24} (${bedtime.timeAMPM}) - ${bedtime.cycles} cycles${bedtime.recommended ? " (recommended)" : ""}`}
-        />
-      ))}
-      <Form.Description text="The cycle lasts approximately 90 minutes + it takes the average person 15 minutes to go to sleep. Good night!" />
-    </Form>
+    <List searchBarPlaceholder="Change wake time..." onSearchTextChange={handleSearchChange} throttle>
+      <List.Section title={`Wake up at ${wakeTimeFormatted}`} subtitle={`+${FALL_ASLEEP_BUFFER} min to fall asleep`}>
+        {sortedBedtimes.map((bedtime, index) => (
+          <BedtimeItem key={index} bedtime={bedtime} />
+        ))}
+      </List.Section>
+
+      {!showMoreUsed && (
+        <List.Section>
+          <List.Item
+            icon={{ source: Icon.Plus, tintColor: Color.Purple }}
+            title="Show More Bedtimes"
+            subtitle="Add shorter sleep cycle options"
+            accessories={[{ tag: "+2 more" }]}
+            actions={
+              <ActionPanel>
+                <Action title="Show More Bedtimes" icon={Icon.Plus} onAction={handleShowMore} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
+    </List>
+  );
+}
+
+function BedtimeItem({ bedtime }: { bedtime: SleepTime }) {
+  const timeStr = formatTime(bedtime);
+  const durationStr = formatDuration(bedtime.totalMinutes);
+  const quality = getSleepQuality(bedtime.cycles);
+
+  return (
+    <List.Item
+      icon={{
+        source: quality.icon,
+        tintColor: quality.color,
+      }}
+      title={timeStr}
+      subtitle={`${bedtime.cycles} cycles · ${durationStr}`}
+      accessories={[{ tag: { value: quality.label, color: quality.color } }]}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy Time" content={timeStr} />
+          <Action.CopyToClipboard
+            title="Copy Details"
+            content={`Go to bed at ${timeStr} (${bedtime.cycles} cycles, ${durationStr} of sleep)`}
+          />
+        </ActionPanel>
+      }
+    />
   );
 }

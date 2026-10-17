@@ -1,6 +1,38 @@
 # Changelog
 
+## [Quicklink and Menu Bar Launch Fixes] - 2026-10-12
+
+- Fix Quicklinks that opened the action list instead of the saved action by passing the action ID through launch context.
+- Fix menu-bar launches of saved actions and history entries using the same launch context.
+
+## [Raycast Compatibility and Latest AI Models] - 2026-10-11
+
+- Fix extension startup failures caused by missing `zustand/vanilla` package exports.
+- Add GPT-6 Luna, GPT-6.1 Sol, and GPT-6 Astra, plus Gemini 3.8 Flash, 3.6 Flash, 3.5 Flash-Lite, 3.1 Flash-Lite, and 3.1 Pro Preview.
+- Add GPT-5.6 Sol, Terra, and Luna with model-specific reasoning levels and long-context cost estimates.
+- Use GPT-6 Luna for initial built-in actions, new actions, and the initial Custom Action setting while preserving model choices in existing saved actions.
+- Migrate retired Gemini 3 Pro Preview selections to Gemini 3.1 Pro Preview.
+- Add a Reasoning Level setting for OpenAI and Gemini models in saved actions and Custom Action.
+- Mark models that support thinking in Custom Action's Raycast settings and explain how Reasoning Level and Temperature apply to each model.
+- Improve response streaming, error handling, token totals, and model cost estimates; use the Responses API for OpenAI reasoning models.
+- Fix loading of saved actions and prevent list sorting from changing stored data.
+- Reject invalid or unsupported backups before replacing saved actions.
+- Update build and publishing tools to Raycast SDK 2.7.3.
+- Refresh the extension icon from a higher-resolution source.
+
+## [AI SDK, Multi-Provider & Model Updates] - 2026-04-12
+
+- Internal: Migrated model integration from `openai` SDK to `ai` SDK with provider routing.
+- Improvement: Restored live streaming responses and improved final usage/token extraction compatibility in Raycast runtime.
+- Feat: Added Google Gemini provider support with a dedicated `Gemini API Key` setting.
+- Feat: Added Gemini models: `gemini-3-flash-preview`, `gemini-3-pro-preview`, `gemini-2.5-flash`, `gemini-2.5-flash-lite`.
+- Feat: Added OpenAI GPT-5.4 models: `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`.
+- Improvement: `OpenAI API Key` and `Gemini API Key` are now optional in settings and validated at model usage time with explicit errors.
+- Improvement: Removed deprecated models `gpt-3.5-turbo` and `gpt-4-turbo`; defaults now use `gpt-4o-mini`.
+- Internal: Added data migration to automatically map legacy model selections to supported defaults.
+
 ## [New Models] - 2024-08-27
+
 - Feat: Added `gpt-4o` and `gpt-4o-mini` models.
 - Improvement: Default actions now use the `gpt-4o-mini` model, and the prompts have been updated to be consistent with the new model.
 - Internal: Removed the gpt-tokens package and replaced it with tokenization from the OpenAI API, calculating costs based on OpenAI's pricing.
@@ -17,7 +49,6 @@
 - Feat: Add Favorites section.
 - Feat: Add Action colors.
 - Internal: Refactor store structure and backup mechanism. Add store versioning.
-
 
 ## [Fixes and New Additions] - 2024-04-11
 

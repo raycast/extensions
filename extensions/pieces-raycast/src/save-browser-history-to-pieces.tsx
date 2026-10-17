@@ -1,5 +1,5 @@
 import URL from "url";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Action, ActionPanel, Detail, List } from "@raycast/api";
 import classificationSpecificToReadable from "./utils/converters/classificationSpecificToReadable";
 import BrowserController, {
@@ -9,9 +9,12 @@ import { ClassificationSpecificEnum } from "@pieces.app/pieces-os-client";
 import { saveTextToPieces } from "./actions/saveAsset";
 import getDraftMetadata from "./utils/ui/getDraftMetadata";
 import getIcon from "./utils/ui/getDraftIcon";
-import piecesHealthCheck from "./connection/health/piecesHealthCheck";
+import { usePiecesPreflightCheck } from "./utils/ui/usePiecesPreflightCheck";
 
 export default function Command() {
+  const preflightCheck = usePiecesPreflightCheck({
+    context: "browser history",
+  });
   const [items, setItems] = useState([] as BrowserAsset[]);
   const [searchText, setSearchText] = useState("");
   // we use this version here because otherwise react will not recognize the state changes in the items
@@ -20,14 +23,8 @@ export default function Command() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [version, setVersion] = useState(0);
 
-  const hasRanHealthCheck = useRef(false);
-
   useEffect(() => {
-    if (!hasRanHealthCheck.current) {
-      hasRanHealthCheck.current = true;
-
-      piecesHealthCheck();
-    }
+    if (!preflightCheck.isReady) return () => {};
 
     BrowserController.getInstance()
       .updateHistory()
@@ -36,11 +33,20 @@ export default function Command() {
       });
 
     // return the unsubscription call for the controller so it doesn't end up spamming event listeners
-    return BrowserController.getInstance().controller.listen((assets) => {
-      setItems(assets);
-      setVersion((v) => v + 1);
-    });
-  }, []);
+    const cleanup = BrowserController.getInstance().controller.listen(
+      (assets) => {
+        setItems(assets);
+        setVersion((v) => v + 1);
+      },
+    );
+
+    return cleanup;
+  }, [preflightCheck.isReady]);
+
+  // Show preflight check UI if not ready
+  if (!preflightCheck.isReady) {
+    return preflightCheck.renderUI();
+  }
 
   const filteredList = items.filter(
     (item) =>

@@ -25,44 +25,30 @@ export function clearDurationText(key: string | undefined | null): string {
   if (key === undefined || key === null) {
     return "";
   }
-  const r = clearDurations[key] || undefined;
-  if (r === undefined) {
-    return "";
-  }
-  return r;
-}
-
-function getClearDurationMinutes(key: string | undefined | null): number | undefined {
-  if (key === undefined || key == null) {
-    return undefined;
-  }
-  const r = clearDurationMinutes[key];
-  return r;
+  return clearDurations[key] || "";
 }
 
 export function getClearDurationDate(key: string | undefined | null): Date | undefined {
-  const minutes = getClearDurationMinutes(key);
+  if (key === undefined || key == null) {
+    return undefined;
+  }
+  const minutes = clearDurationMinutes[key];
   if (minutes === undefined) {
     return undefined;
   }
-  const d = new Date();
-  d.setMinutes(d.getMinutes() + minutes);
-  return d;
+  const clearAt = new Date();
+  clearAt.setMinutes(clearAt.getMinutes() + minutes);
+  return clearAt;
 }
 
 export function emojiSymbol(text: string | undefined): string {
   if (!text) {
     return "";
   }
-  const es = emojis as Record<string, string>;
-  const val = es[text];
-  if (val === undefined) {
-    return "";
-  }
-  return val;
+  return (emojis as Record<string, string>)[text] || "";
 }
 
 export function getAllEmojiSymbolAliases(): string[] {
-  const es = emojis as Record<string, string>;
-  return Object.keys(es).map((e) => e);
+  const emojiSymbols = emojis as Record<string, string>;
+  return Object.keys(emojiSymbols).map((alias) => alias);
 }

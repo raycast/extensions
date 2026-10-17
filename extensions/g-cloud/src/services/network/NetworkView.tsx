@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Action, List, Icon, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { ActionPanel, Action, List, Icon, useNavigation, showToast, Toast } from "@raycast/api";
 import VPCView from "./VPCView";
 import IPAddressView from "./IPAddressView";
 import FirewallRulesView from "./FirewallRulesView";
 import { NetworkService } from "./NetworkService";
 import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
+import { CloudShellAction } from "../../components/CloudShellAction";
+import { friendlyErrorMessage } from "../../utils/errorMessages";
 
 interface NetworkViewProps {
   projectId: string;
@@ -27,8 +28,11 @@ export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps)
       } catch (error) {
         if (!abortController.signal.aborted) {
           console.error("Error validating network access:", error);
-          showFailureToast(error, {
-            title: "Network Service Error",
+          const friendly = friendlyErrorMessage(error, "Network Service Error");
+          showToast({
+            style: Toast.Style.Failure,
+            title: friendly.title,
+            message: friendly.message,
           });
         }
       } finally {
@@ -73,6 +77,9 @@ export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps)
                   push(<VPCView projectId={projectId} gcloudPath={gcloudPath} />);
                 }}
               />
+              <ActionPanel.Section title="Cloud Shell">
+                <CloudShellAction projectId={projectId} />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -87,12 +94,15 @@ export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps)
           actions={
             <ActionPanel>
               <Action
-                title="Open Ip Addresses"
+                title="Open IP Addresses"
                 icon={Icon.Globe}
                 onAction={() => {
                   push(<IPAddressView projectId={projectId} gcloudPath={gcloudPath} />);
                 }}
               />
+              <ActionPanel.Section title="Cloud Shell">
+                <CloudShellAction projectId={projectId} />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -113,6 +123,9 @@ export default function NetworkView({ projectId, gcloudPath }: NetworkViewProps)
                   push(<FirewallRulesView projectId={projectId} gcloudPath={gcloudPath} />);
                 }}
               />
+              <ActionPanel.Section title="Cloud Shell">
+                <CloudShellAction projectId={projectId} />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

@@ -1,10 +1,8 @@
 export interface Feed<T> {
   items: T[];
-  feedUrl: string;
   image: Image;
   title: string;
   description: string;
-  webMaster: string;
   link: string;
   language: string;
 }
@@ -24,6 +22,12 @@ export interface FeedItemInterface {
   mediaContent: string;
   description: string;
   guid: string;
+}
+
+export interface FeedResponse {
+  rss: {
+    channel: Omit<Feed<never>, "items"> & { item: FeedItemInterface[] };
+  };
 }
 
 export interface PaginationLinks {

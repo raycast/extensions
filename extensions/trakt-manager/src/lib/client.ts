@@ -1,6 +1,6 @@
 import { initClient } from "@ts-rest/core";
 import fetch, { AbortError } from "node-fetch";
-import { TRAKT_API_URL, TRAKT_CLIENT_ID } from "./constants";
+import { TRAKT_API_URL, TRAKT_CLIENT_ID, USER_AGENT } from "./constants";
 import { TraktContract } from "./contract";
 import { AuthProvider } from "./oauth";
 
@@ -10,6 +10,7 @@ export const initTraktClient = () => {
     baseHeaders: {
       "Content-Type": "application/json; charset=utf-8",
       "trakt-api-version": "2",
+      "User-Agent": USER_AGENT,
     },
     api: async ({ path, method, body, headers, fetchOptions }) => {
       const accessToken = await AuthProvider.authorize();
@@ -26,7 +27,10 @@ export const initTraktClient = () => {
           body,
           ...fetchOptions,
         });
-        const json = await response.json();
+        // DELETE answers 204 with an empty body; parsing it as JSON would turn a success into a 500.
+        // Any other unparseable body still throws and lands in the catch below, as before.
+        const text = await response.text();
+        const json: unknown = text ? JSON.parse(text) : undefined;
 
         // Uncomment this line to log API requests
         // console.log(

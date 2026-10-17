@@ -1,24 +1,26 @@
-import { Webhosting } from '@scaleway/sdk'
+import { Webhostingv1 } from '@scaleway/sdk'
 import { useDataLoader } from '@scaleway/use-dataloader'
 import { fetchAllRegions } from 'helpers/fetchLocalities'
 import { useAPI } from 'helpers/useAPI'
 
+const defaultRegions =
+  Webhostingv1.HostingAPI.LOCALITY.type === 'region' ? Webhostingv1.HostingAPI.LOCALITY.regions : []
+
 type DataLoaderOptions<T> = Parameters<typeof useDataLoader<T>>[2]
 
 export const useAllRegionHostingsQuery = (
-  params: Webhosting.v1alpha1.ListHostingsRequest,
-  dataloaderOptions: DataLoaderOptions<Webhosting.v1alpha1.ListHostingsResponse['hostings']>
+  params: Webhostingv1.HostingApiListHostingsRequest,
+  dataloaderOptions: DataLoaderOptions<Webhostingv1.ListHostingsResponse['hostings']>
 ) => {
-  const { webhostingV1alpha1 } = useAPI()
+  const { webhostingv1 } = useAPI()
 
-  const regions = params.region ? [params.region] : Webhosting.v1alpha1.API.LOCALITIES
+  const regions = params.region ? [params.region] : defaultRegions
 
   const key = ['webhosting', 'hosting', 'all', regions, Object.entries(params).sort()].flat(3)
 
   return useDataLoader(
     key,
-    () =>
-      fetchAllRegions(regions, (request) => webhostingV1alpha1.listHostings(request).all(), params),
+    () => fetchAllRegions(regions, (request) => webhostingv1.listHostings(request).all(), params),
     dataloaderOptions
   )
 }

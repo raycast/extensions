@@ -1,5 +1,19 @@
 # spanish-tv-guide Changelog
 
+## [Bug fix] - 2026-07-21
+
+- Fix date parsing as the API now returns dates in UTC
+
+## [Bug fix] - 2026-07-06
+
+- Fix crash when the icons cache directory does not exist yet
+- Fix program title being cut off in the schedule detail sidebar
+
+## [Bug fixes and dependency updates] - 2026-05-17
+
+- Fix timezone issue
+- Fix icon for Raycast 2
+
 ## [Calculate if a program is live client side] - 2024-12-09
 
 - Calculate if a program is live in raycast extension to avoid timezone issues as data is cached now at origin

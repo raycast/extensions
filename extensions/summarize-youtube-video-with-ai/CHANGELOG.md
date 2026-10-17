@@ -1,5 +1,45 @@
 # Summarize YouTube Video Changelog
 
+## [Feature] - 2026-05-19
+
+- Add a Raycast AI tool to answer questions about YouTube videos from their transcript
+
+## [Fix] - 2026-03-17
+
+- 🔧 Fix transcript fetching
+
+## [Chore] - 2026-02-06
+
+- Moved AbortController inside useEffect
+- Parallelized video data and transcript fetching
+- Added stream listener cleanup with cancelled flags
+- Created singleton SDK clients
+- Optimized O(n) array updates in streaming
+- Fixed history sorting (newest first)
+
+## [Fix] - 2026-01-29
+
+- Fix transcript XML parsing for YouTube's srv3 format (extract text from `<s>` segments)
+- Remove deprecated "Summarize YouTube Video" command
+
+## [Fix] - 2026-01-29
+
+- 🔧 Fix video ID extraction for YouTube URLs with query params (e.g. `?app=desktop&v=...`)
+- 🔧 Fix transcript parsing when caption XML uses nested tags (e.g. `<p><s>text</s></p>`)
+
+## [Fix] - 2026-01-27
+
+- 🔧 Fix transcript fetching using ANDROID client API
+- ⬆️ Upgraded dependencies
+
+## [Feat] - 2025-10-28
+
+- 🖼️ Added Support for Windows
+
+## [Fix] - 2025-10-10
+
+- Update the way transscriptions is handled
+
 ## [Fixes] - 2025-06-27
 
 - 📚 Remove `youtube-transcript` package and install `youtube-transcript-api`

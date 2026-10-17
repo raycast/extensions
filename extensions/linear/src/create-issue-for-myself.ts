@@ -1,16 +1,13 @@
-import { LinearClient } from "@linear/sdk";
-import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast } from "@raycast/api";
-import { getAccessToken, withAccessToken } from "@raycast/utils";
+import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast, Keyboard } from "@raycast/api";
+import { withAccessToken } from "@raycast/utils";
 
-import { getTeams } from "./api/getTeams";
-import { linear } from "./api/linearClient";
+import { getLinearClient, linear } from "./api/linearClient";
 
 const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
   try {
-    const { token } = getAccessToken();
-    const linearClient = new LinearClient({ accessToken: token });
+    const { linearClient } = getLinearClient();
 
     const preferences = getPreferenceValues<Preferences.CreateIssueForMyself>();
 
@@ -19,23 +16,40 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
     }
 
     const viewer = await linearClient.viewer;
-    const { teams } = await getTeams();
-
     let teamId: string | undefined;
 
     if (preferences.preferredTeamKey) {
-      const team = teams.find((t) => t.key === preferences.preferredTeamKey);
-      if (team) {
-        teamId = team.id;
-      }
+      const key = preferences.preferredTeamKey.trim().toUpperCase();
+      const { nodes } = await linearClient.teams({ filter: { key: { eq: key } } });
+      teamId = nodes[0]?.id;
     }
 
     if (!teamId) {
-      teamId = teams[0].id;
+      const { nodes } = await viewer.teams({ first: 1 });
+      teamId = nodes[0]?.id;
     }
 
     if (!teamId) {
       throw Error("No team found");
+    }
+
+    let stateId: string | undefined;
+
+    if (preferences.preferredStatusName) {
+      const states = await linearClient.workflowStates({
+        filter: {
+          team: { id: { eq: teamId } },
+          name: { eq: preferences.preferredStatusName },
+        },
+      });
+
+      const state = states.nodes[0];
+
+      if (!state) {
+        throw Error(`Status "${preferences.preferredStatusName}" not found`);
+      }
+
+      stateId = state.id;
     }
 
     const payload = await linearClient.createIssue({
@@ -43,6 +57,7 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
       title: props.arguments.title,
       description: props.arguments.description,
       assigneeId: viewer.id,
+      stateId: stateId,
     });
 
     const issue = await payload.issue;
@@ -54,7 +69,7 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
     toast.title = `Created issue • ${issue.identifier}`;
     toast.primaryAction = {
       title: "Open Issue",
-      shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+      shortcut: Keyboard.Shortcut.Common.OpenWith,
       onAction: async () => {
         await open(issue.url);
         await toast.hide();
@@ -63,7 +78,7 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
 
     toast.secondaryAction = {
       title: "Copy Issue ID",
-      shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+      shortcut: Keyboard.Shortcut.Common.Copy,
       onAction: () => Clipboard.copy(issue.identifier),
     };
   } catch (e) {
@@ -72,7 +87,7 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
     toast.message = e instanceof Error ? e.message : String(e);
     toast.primaryAction = {
       title: "Copy Error Log",
-      shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+      shortcut: Keyboard.Shortcut.Common.Copy,
       onAction: () => Clipboard.copy(e instanceof Error ? (e.stack ?? e.message) : String(e)),
     };
   }

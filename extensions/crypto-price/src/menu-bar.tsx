@@ -2,7 +2,7 @@ import { MenuBarExtra, openCommandPreferences } from "@raycast/api";
 import { useMenuBar } from "./useMenuBar";
 
 export default function Command() {
-  const { isLoading, title, items, sections } = useMenuBar();
+  const { isLoading, title, items, sections, activeSource } = useMenuBar();
   return (
     <MenuBarExtra isLoading={isLoading} title={title}>
       {items.map((item) => (
@@ -16,6 +16,7 @@ export default function Command() {
         </MenuBarExtra.Section>
       ))}
       <MenuBarExtra.Section>
+        {activeSource ? <MenuBarExtra.Item title={`Source: ${activeSource}`} onAction={() => null} /> : null}
         <MenuBarExtra.Item
           title="Settings"
           onAction={openCommandPreferences}

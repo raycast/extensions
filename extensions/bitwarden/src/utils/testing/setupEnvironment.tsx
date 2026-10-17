@@ -1,3 +1,11 @@
+jest.mock("~/utils/development", () => {
+  const actual = jest.requireActual<typeof import("~/utils/development")>("~/utils/development");
+  return {
+    ...actual,
+    captureException: jest.fn(),
+  };
+});
+
 jest.mock(
   "@raycast/api",
   () => ({
@@ -37,6 +45,7 @@ jest.mock(
         shouldCacheVaultItems: true,
         windowActionOnCopy: "close",
         primaryAction: "copy",
+        syncOnLaunch: true,
       })
     ),
     LocalStorage: {

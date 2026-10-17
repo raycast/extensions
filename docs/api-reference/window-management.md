@@ -8,6 +8,8 @@ Some users might not have access to this API. If a user doesn't have access to R
 
 You can check if a user has access to the API using [`environment.canAccess(WindowManagement)`](./environment.md).
 
+The API is not accessible on Windows for now.
+
 {% endhint %}
 
 ## API Reference
@@ -31,10 +33,10 @@ export default async function Command() {
   try {
     const window = await WindowManagement.getActiveWindow();
     if (window.positionable) {
-      WindowManagement.setWindowBounds({ id: window.id, bounds: { position: { x: 100 } } });
+      await WindowManagement.setWindowBounds({ id: window.id, bounds: { position: { x: 100 } } });
     }
   } catch (error) {
-    showToast({ title: "Could not move window", message: error.message, style: Toast.Style.Failure });
+    showToast({ title: `Could not move window: ${error.message}`, style: Toast.Style.Failure });
   }
 }
 ```
@@ -131,10 +133,10 @@ export default async function Command() {
   try {
     const window = await WindowManagement.getActiveWindow();
     if (window.positionable) {
-      WindowManagement.setWindowBounds({ id: window.id, bounds: { position: { x: 100 } } });
+      await WindowManagement.setWindowBounds({ id: window.id, bounds: { position: { x: 100 } } });
     }
   } catch (error) {
-    showToast({ title: "Could not move window", message: error.message, style: Toast.Style.Failure });
+    showToast({ title: `Could not move window: ${error.message}`, style: Toast.Style.Failure });
   }
 }
 ```

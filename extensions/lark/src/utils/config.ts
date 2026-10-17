@@ -1,4 +1,4 @@
-import { getPreferenceValues } from '@raycast/api';
+import { getPreferenceValues } from "@raycast/api";
 
 export type Preference = Override<
   ExtensionPreferences,
@@ -17,15 +17,15 @@ function getPreference(): Preference {
 
 export const preference = getPreference();
 
-const builtinDomainMap: Partial<Record<Preference['type'], string>> = {
-  feishu: 'feishu.cn',
-  lark: 'larksuite.com',
+const builtinDomainMap: Partial<Record<Preference["type"], string>> = {
+  feishu: "feishu.cn",
+  lark: "larksuite.com",
 };
 export const DOMAIN = preference.selfHostedDomain?.trim() || builtinDomainMap[preference.type];
 
 export function getDomain(sub?: string): string {
-  return `https://${sub ? `${sub}.` : ''}${DOMAIN}`;
+  return `https://${sub ? `${sub}.` : ""}${DOMAIN}`;
 }
 
-export const GENERAL_DOMAIN = getDomain('www');
-export const TENANT_DOMAIN = getDomain('tenant');
+export const GENERAL_DOMAIN = getDomain("www");
+export const TENANT_DOMAIN = getDomain("tenant");

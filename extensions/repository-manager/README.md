@@ -13,7 +13,7 @@ A comprehensive Raycast extension for managing all your local Git repositories w
 ### Git Statistics
 - **Repository Overview**: View total commits, branches, and tags
 - **Contributor Analysis**: See top contributors with commit counts
-- **Code Statistics**: Detailed code analysis with language breakdown (requires cloc)
+- **Code Statistics**: Detailed code analysis with language breakdown (requires tokei)
 - **Git Status**: Check working directory status and pending changes
 - **Commit History**: Browse recent commits with details
 
@@ -30,9 +30,9 @@ A comprehensive Raycast extension for managing all your local Git repositories w
 - Git installed and accessible from command line
 
 ### Optional Requirements
-- **cloc**: For detailed code statistics and language analysis
-  - **macOS**: `brew install cloc`
-  - **npm**: `npm install -g cloc`
+- **tokei**: For detailed code statistics and language analysis
+  - **macOS**: `brew install tokei`
+  - **Cargo**: `cargo install tokei`
 
 ## Configuration
 
@@ -106,8 +106,8 @@ Enable window resizing/positioning in extension preferences for automatic window
 
 ## Git Statistics Features
 
-### Code Statistics (cloc integration)
-When cloc is installed, you get detailed analysis including:
+### Code Statistics (tokei integration)
+When tokei is installed, you get detailed analysis including:
 - Lines of code by programming language
 - Comment and blank line counts
 - File counts per language
@@ -137,6 +137,6 @@ The extension provides quick access to:
 ## Installation Notes
 
 1. Ensure Git is installed and accessible from your terminal
-2. For code statistics, install cloc using your preferred method
+2. For code statistics, install tokei using your preferred method
 3. Configure your preferred editor and terminal in Raycast settings
 4. Enable caching for better performance with large numbers of repositories

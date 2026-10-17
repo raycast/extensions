@@ -1,5 +1,15 @@
 # argy-usd Changelog
 
+## [1.0.5] - 2026-07-15
+
+### Fixed
+
+- **Crypto prices not loading**: BTC/ETH source migrated from CryptoCompare (now requires an API key, returned 401) to CoinGecko. The menu bar no longer gets stuck on "Cargando…".
+
+### Changed
+
+- Fetches are now resilient: if one source fails, the others still update instead of blanking the whole menu bar.
+
 ## [1.0.4] - 2025-04-30
 
 ### Changed

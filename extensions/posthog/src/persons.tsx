@@ -1,16 +1,8 @@
-import { LaunchProps } from "@raycast/api";
-import { Action, ActionPanel, List } from "@raycast/api";
-import { usePostHogClient } from "../helpers/usePostHogClient";
+import { LaunchProps, List } from "@raycast/api";
 import { useUrl } from "../helpers/useUrl";
-import { WithProjects, ProjectSelector, ProjectsContext } from "../helpers/ProjectsContext";
-import { useContext } from "react";
-
-type SearchResult = {
-  count: number;
-  next: null;
-  previous: null;
-  results: Person[];
-};
+import { WithProjects } from "../helpers/ProjectsContext";
+import { ResourceActions } from "../helpers/ResourceActions";
+import { ProjectResourceList } from "../helpers/ProjectResourceList";
 
 type Person = {
   id: number;
@@ -23,26 +15,10 @@ export type PersonsArguments = {
 };
 
 function Persons({ searchTerm }: { searchTerm: string }) {
-  const { selectedId } = useContext(ProjectsContext);
-  const { data, isLoading } = usePostHogClient<SearchResult>(
-    "projects/" + selectedId + "/persons?search=" + searchTerm
-  );
-
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search persons..."
-      searchBarAccessory={<ProjectSelector />}
-      throttle
-    >
-      {data ? (
-        <List.Section title="Results">
-          {data.results.map((person) => (
-            <ResultsListSection key={person.id} person={person} />
-          ))}
-        </List.Section>
-      ) : null}
-    </List>
+    <ProjectResourceList<Person> endpoint={`persons?search=${searchTerm}`} searchBarPlaceholder="Search persons...">
+      {(persons) => persons.map((person) => <ResultsListSection key={person.id} person={person} />)}
+    </ProjectResourceList>
   );
 }
 
@@ -51,24 +27,7 @@ const ResultsListSection = ({ person }: { person: Person }) => {
   const appUrl = useUrl(`person/${originalId}`);
 
   return (
-    <List.Item
-      key={person.id}
-      title={person.name}
-      actions={
-        <ActionPanel title={person.name}>
-          <ActionPanel.Section>
-            <Action.OpenInBrowser url={appUrl} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard
-              title="Copy URL"
-              content={appUrl}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
+    <List.Item key={person.id} title={person.name} actions={<ResourceActions title={person.name} url={appUrl} />} />
   );
 };
 

@@ -23,6 +23,11 @@ export function useActivity() {
         };
       },
       mapResult({ result, cursor }) {
+        // EDGE CASE - when there is no change Nextcloud return 304 w/ no data which isn't really an error
+        if (!result)
+          return {
+            data: [],
+          };
         const parser = new XMLParser();
         const dom = parser.parse(result) as Response;
         if (!("ocs" in dom)) throw new Error("Invalid response: " + result);
@@ -51,7 +56,7 @@ export function useActivity() {
         };
       },
       initialData: [],
-    }
+    },
   );
   return { isLoading, activity: data, pagination };
 }

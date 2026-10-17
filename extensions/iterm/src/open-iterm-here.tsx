@@ -3,7 +3,7 @@ import { ItermCommand } from "./core/iterm-command";
 import { ErrorToast } from "./core/error-toast";
 import { useSelectedItems } from "./core/use-selected-items";
 import { useFinderPath } from "./core/use-finder-path";
-import { FileSystemItem } from "@raycast/api";
+import { FileSystemItem, getPreferenceValues } from "@raycast/api";
 import { dirname } from "path";
 import { statSync } from "fs";
 
@@ -16,6 +16,7 @@ export default function Command() {
   const { items, error: itemsError } = useSelectedItems();
   const { path: finderPath, error: finderError } = useFinderPath();
   const [paths, setPaths] = useState(new Set<string>());
+  const { windowOrTab } = getPreferenceValues<Preferences.OpenItermHere>();
 
   useEffect(() => {
     if (items.length) {
@@ -40,7 +41,7 @@ export default function Command() {
             key={path}
             command={`cd "${path}"`}
             loadingMessage="Getting selected file(s)..."
-            location="new-window"
+            location={windowOrTab}
           />
         ))}
       </>

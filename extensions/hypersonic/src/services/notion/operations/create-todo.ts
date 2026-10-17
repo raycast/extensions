@@ -2,6 +2,7 @@ import { Todo } from '@/types/todo'
 import { notion } from '../client'
 import { loadPreferences } from '@/services/storage'
 import { normalizeTodo } from '../utils/normalize-todo'
+import { buildNoteBlocks } from '../utils/build-note-blocks'
 
 export async function createTodo(
   todo: Todo,
@@ -9,6 +10,7 @@ export async function createTodo(
 ): Promise<Todo> {
   const notionClient = await notion()
   const preferences = await loadPreferences()
+  const noteBlocks = buildNoteBlocks(todo.note)
 
   const data = await notionClient.pages.create({
     parent: { database_id: databaseId },
@@ -62,6 +64,7 @@ export async function createTodo(
           }
         : {}),
     },
+    ...(noteBlocks.length > 0 ? { children: noteBlocks } : {}),
   })
 
   const normalizedTodo = normalizeTodo({

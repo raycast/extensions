@@ -56,9 +56,40 @@ Raycast extension to create, search and modify issues, manage merge requests, pr
 
 and many more
 
-## How to get the access token for the GitLab API
+## Authentication
 
-- Goto to your GitLab instance e.g. https://gitlab.com
+The extension supports two authentication methods. Which one it uses depends on which credential you fill in, with the Personal Access Token taking precedence when both are set:
+
+1. **Personal Access Token**, used whenever the `API Token` preference is set. Simple, ideal for `gitlab.com` and instances without rotation.
+2. **OAuth (PKCE)**, used whenever the `API Token` preference is empty. Recommended for enterprise instances that revoke or rotate Personal Access Tokens. Tokens are stored encrypted by Raycast and refreshed automatically. The browser flow runs only on first use and when the refresh token is revoked.
+
+Leaving both empty configures neither method, and commands report that no `API Token` or `OAuth Application ID` is set.
+
+### Option A: OAuth (recommended for enterprise / token-rotating instances)
+
+1. Open your GitLab instance (e.g. `https://gitlab.com` or your self-hosted URL).
+2. Go to `Preferences` > `Applications` and click `Add new application`.
+3. Fill in the form:
+   - **Name**: `Raycast GitLab` (or any label).
+   - **Redirect URI**: paste both lines below, one per line. GitLab does exact matching, and Raycast may use either form depending on the version, so registering both avoids "redirect URI is not valid" errors.
+     ```
+     https://raycast.com/redirect?packageName=Extension
+     https://raycast.com/redirect/extension
+     ```
+   - **Confidential**: leave **unchecked**. Raycast is a public client and authenticates via PKCE.
+   - **Scopes**: tick `api`, `read_user`, and `read_repository`. The extension always requests these three.
+4. Save and copy the **Application ID**.
+5. In Raycast, open the GitLab extension preferences:
+   - Set **GitLab URL** to your instance.
+   - Paste the Application ID into **OAuth Application ID**.
+   - Leave **API Token** empty. A token there takes precedence and OAuth is never used.
+6. Run any GitLab command. Your browser opens once for authorization. After that the extension refreshes access tokens automatically and re-authorizes only if the refresh token is revoked.
+
+Once you have authorized, Raycast adds a logout option to the extension preferences. Logging out (e.g. to switch accounts) makes the next GitLab command start a fresh authorization flow, as long as the `API Token` field is still empty. Filling that field back in switches authentication back to the token, and logging out has no further effect.
+
+### Option B: Personal Access Token
+
+- Go to your GitLab instance e.g. https://gitlab.com
 - Click on your avatar image in the right upper corner
 - Click on `Edit profile`
 - Click on `Access Tokens` on the left sidebar
@@ -77,6 +108,8 @@ and many more
 - Set the token from the previous step into the `API Token` field
 
 Now you should be able to manage your GitLab instance with Raycast 🚀.
+
+> **Tip**: If your instance auto-revokes Personal Access Tokens (e.g. nightly), use OAuth instead. The Application ID is permanent; access tokens are minted from a long-lived refresh token, so you re-authorize only when the refresh token itself is revoked.
 
 ## API Token/Personal Access Token scope
 

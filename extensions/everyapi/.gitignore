@@ -1,0 +1,23 @@
+# Raycast
+.DS_Store
+dist
+.cache
+
+# Editor
+.vscode
+.idea
+
+# Dependencies
+node_modules
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env
+.env
+.env.local
+
+# Build outputs
+*.tsbuildinfo

@@ -1,11 +1,18 @@
 <p align="center">
-  <img src="assets/icon.png" height="128">
+  <h1 align="center">Lega Serie A</h1>
 </p>
 
-Lega Serie A | La massima serie in Italia, le venti migliore squadre, classifica, risultati, statistiche, video e foto uniche. Tutto sul nuovo sito a tua disposizione.
+Stay up-to-date with the latest scores, and standings from the Italian Serie A football league.
 
 ![Example](./metadata/serie-a-1.png)
 
+**Features:**
+
+* **Standings:** Check the current league table and track the progress of your favorite teams.
+* **Fixtures & Results:** View upcoming fixtures, recent results, and live match updates for all Serie A games.
+* **Club Details:** Explore detailed information about each Serie A club, including rosters, recent matches, and club history.
+* **Coppa Italia & International Competitions:** Follow Italian teams in major domestic and international tournaments.
+
 ## Issues
 
-[Track here](https://github.com/anhthang/raycast-serie-a/issues) or create an issue.
+Report bugs or suggest improvements by creating an issue [here](https://github.com/anhthang/raycast-serie-a/issues).

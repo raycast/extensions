@@ -1,5 +1,31 @@
 # Aave Search Changelog
 
+## [1.1.6] - 2026-03-04
+
+### Maintenance
+
+- Update source url to use new aave-dao repo
+
+## [1.1.5] - 2026-02-06
+
+### Maintenance
+
+- Update toolbox to support new networks
+- Add megaeth icon
+
+## [1.1.4] - 2025-09-29
+
+### Maintenance
+
+- Update toolbox to support new networks
+
+## [1.1.3] - 2025-08-26
+
+### Maintenance
+
+- Add bob, plasma and ink icons
+- Improve sorting algorithm
+
 ## [1.1.2] - 2025-06-03
 
 ### Maintenance

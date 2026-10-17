@@ -1,5 +1,15 @@
 # Pieces for Raycast Changelog
 
+## [0.5.0] - 2025-07-29
+
+- Update compatibility with PiecesOS 12.0.0
+- Ensure users are signed in to use the commands
+- Transfer extension to organization
+
+## [0.4.0] - 2025-03-24
+
+- Updates links to Pieces documentation
+
 ## [0.3.0] - 2025-02-27
 
 - Fixes website link color contrast in search results

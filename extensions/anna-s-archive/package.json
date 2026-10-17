@@ -5,53 +5,34 @@
   "description": "Search Anna's Archive, the largest truly open library in human history",
   "icon": "command-icon.png",
   "author": "j3lte",
+  "contributors": [
+    "seanwessmith"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "search-archives",
-      "title": "Search Archives",
+      "title": "Search Archives (Obsolete)",
       "subtitle": "Anna's Archive",
-      "description": "Search Anna's Archive, the largest truly open library in human history",
+      "description": "This extension is obsolete, due to Anna's Archive implementing bot protection. Please uninstall the extension.",
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "mirror",
-      "title": "Mirror",
-      "type": "dropdown",
-      "default": "https://annas-archive.org",
-      "description": "Choose a mirror to use",
-      "required": false,
-      "data": [
-        {
-          "value": "https://annas-archive.org",
-          "title": "https://annas-archive.org"
-        },
-        {
-          "value": "https://annas-archive.se",
-          "title": "https://annas-archive.se"
-        },
-        {
-          "value": "https://annas-archive.li",
-          "title": "https://annas-archive.li"
-        }
-      ]
-    }
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "dependencies": {
-    "@raycast/api": "^1.82.5",
-    "@raycast/utils": "^1.17.0",
-    "cheerio": "^1.0.0"
+    "@raycast/api": "^1.104.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@types/node": "22.5.5",
-    "@types/react": "18.3.5",
-    "eslint": "^8.51.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.0",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,0 +1,275 @@
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
+import { type WingetSearchPackage, type WingetUpgradePackage } from "../cli/types";
+
+import {
+  bumpMutationEpoch,
+  clearIndex,
+  commitCatalog,
+  currentMutationEpoch,
+  isCatalogFresh,
+  loadIndex,
+  markUpdateNotApplicable,
+  markUpgradeFailed,
+  migrateLegacyIndex,
+  patchMutable,
+  type IndexPaths,
+} from "./index-store";
+import { type LockEnvironment } from "./lock";
+
+let dir: string;
+let paths: IndexPaths;
+
+const env: LockEnvironment = {
+  now: () => Date.now(),
+  isWingetProcessAlive: () => false,
+};
+
+function pkg(id: string): WingetSearchPackage {
+  return { id, name: id, version: "1.0", source: "winget" };
+}
+
+function upgradable(id: string): WingetUpgradePackage {
+  return { id, name: id, version: "1.0", available: "2.0", source: "winget" };
+}
+
+function catalog(count: number): WingetSearchPackage[] {
+  return Array.from({ length: count }, (_, i) => pkg(`pkg.${i}`));
+}
+
+beforeEach(() => {
+  dir = mkdtempSync(join(tmpdir(), "winget-index-test-"));
+  paths = {
+    indexPath: join(dir, "index.json"),
+    writeLockPath: join(dir, "index-write-lock.json"),
+  };
+});
+
+afterEach(() => {
+  rmSync(dir, { recursive: true, force: true });
+});
+
+describe("patchMutable", () => {
+  it("commits slice changes, bumps revision, never touches packages", () => {
+    commitCatalog(paths, env, catalog(100));
+    const before = loadIndex(paths)!;
+
+    const outcome = patchMutable(paths, env, {}, (slices) => ({
+      ...slices,
+      upgradable: [upgradable("a")],
+    }));
+
+    expect(outcome).toBe("committed");
+    const after = loadIndex(paths)!;
+    expect(after.upgradable.map((u) => u.id)).toEqual(["a"]);
+    expect(after.packages).toHaveLength(100);
+    expect(after.revision).toBe(before.revision + 1);
+  });
+
+  it("is fenced when the mutation epoch advanced after the snapshot was taken", () => {
+    commitCatalog(paths, env, catalog(10));
+    patchMutable(paths, env, {}, (s) => ({
+      ...s,
+      upgradable: [upgradable("foo")],
+    }));
+
+    const snapshotEpoch = currentMutationEpoch(paths);
+    // A mutation starts (op-lock acquired) and optimistically removes foo.
+    bumpMutationEpoch(paths, env);
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [] }));
+
+    // The pre-mutation refresher now tries to commit its stale snapshot.
+    const outcome = patchMutable(paths, env, { startEpoch: snapshotEpoch, stampMutableAt: true }, (s) => ({
+      ...s,
+      upgradable: [upgradable("foo")],
+    }));
+
+    expect(outcome).toBe("fenced");
+    expect(loadIndex(paths)!.upgradable).toHaveLength(0); // foo not resurrected
+  });
+});
+
+describe("not-applicable markers", () => {
+  it("marks a version and keeps the marker while winget offers the same version", () => {
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [upgradable("zed")] }));
+    markUpdateNotApplicable(paths, env, { id: "zed", source: "winget" }, "2.0");
+    expect(loadIndex(paths)!.notApplicable).toEqual({ "winget|zed": "2.0" });
+
+    // An authoritative refresh that still lists 2.0 keeps the marker.
+    patchMutable(paths, env, { stampMutableAt: true }, (s) => ({ ...s, upgradable: [upgradable("zed")] }));
+    expect(loadIndex(paths)!.notApplicable).toEqual({ "winget|zed": "2.0" });
+  });
+
+  it("clears the marker when winget offers a different version", () => {
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [upgradable("zed")] }));
+    markUpdateNotApplicable(paths, env, { id: "zed", source: "winget" }, "2.0");
+
+    patchMutable(paths, env, {}, (s) => ({
+      ...s,
+      upgradable: [{ ...upgradable("zed"), available: "2.1" }],
+    }));
+
+    expect(loadIndex(paths)!.notApplicable).toEqual({});
+  });
+
+  it("clears the marker when the row leaves the upgradable list", () => {
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [upgradable("zed")] }));
+    markUpdateNotApplicable(paths, env, { id: "zed", source: "winget" }, "2.0");
+
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [] }));
+
+    expect(loadIndex(paths)!.notApplicable).toEqual({});
+  });
+
+  it("defaults the field when loading an index written before markers existed", () => {
+    commitCatalog(paths, env, catalog(1));
+    const raw = loadIndex(paths)! as unknown as Record<string, unknown>;
+    delete raw.notApplicable;
+    delete raw.failedUpgrades;
+    writeFileSync(paths.indexPath, JSON.stringify(raw));
+
+    expect(loadIndex(paths)!.notApplicable).toEqual({});
+    expect(loadIndex(paths)!.failedUpgrades).toEqual({});
+  });
+});
+
+describe("failed-upgrade markers", () => {
+  const marker = { version: "2.0", message: "Installer failed with exit code 3221225477" };
+
+  it("keeps the marker while winget offers the same version", () => {
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [upgradable("zed")] }));
+    markUpgradeFailed(paths, env, { id: "zed", source: "winget" }, marker);
+    expect(loadIndex(paths)!.failedUpgrades).toEqual({ "winget|zed": marker });
+
+    patchMutable(paths, env, { stampMutableAt: true }, (s) => ({ ...s, upgradable: [upgradable("zed")] }));
+    expect(loadIndex(paths)!.failedUpgrades).toEqual({ "winget|zed": marker });
+  });
+
+  it("clears the marker when winget offers a different version", () => {
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [upgradable("zed")] }));
+    markUpgradeFailed(paths, env, { id: "zed", source: "winget" }, marker);
+
+    patchMutable(paths, env, {}, (s) => ({
+      ...s,
+      upgradable: [{ ...upgradable("zed"), available: "2.1" }],
+    }));
+
+    expect(loadIndex(paths)!.failedUpgrades).toEqual({});
+  });
+
+  it("clears the marker when the row leaves the upgradable list", () => {
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [upgradable("zed")] }));
+    markUpgradeFailed(paths, env, { id: "zed", source: "winget" }, marker);
+
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [] }));
+
+    expect(loadIndex(paths)!.failedUpgrades).toEqual({});
+  });
+});
+
+describe("clearIndex", () => {
+  it("empties every slice but keeps the epoch, so in-flight refreshers stay fenced", () => {
+    commitCatalog(paths, env, catalog(50));
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [upgradable("zed")] }));
+    bumpMutationEpoch(paths, env);
+    bumpMutationEpoch(paths, env);
+    const before = loadIndex(paths)!;
+
+    clearIndex(paths, env);
+
+    const after = loadIndex(paths)!;
+    expect(after.packages).toEqual([]);
+    expect(after.upgradable).toEqual([]);
+    expect(after.builtAt).toBeNull();
+    expect(after.mutableAt).toBeNull();
+    // A recycled epoch would let a pre-clear snapshot commit as if current.
+    expect(after.mutationEpoch).toBe(before.mutationEpoch);
+    expect(after.revision).toBe(before.revision + 1);
+  });
+
+  it("leaves a stale snapshot fenced after the clear", () => {
+    commitCatalog(paths, env, catalog(10));
+    const snapshotEpoch = currentMutationEpoch(paths);
+    clearIndex(paths, env);
+    // One mutation after the clear: with a reset epoch this would land back on
+    // the snapshot's value and the commit below would be admitted.
+    bumpMutationEpoch(paths, env);
+
+    const outcome = patchMutable(paths, env, { startEpoch: snapshotEpoch }, (s) => ({
+      ...s,
+      upgradable: [upgradable("zed")],
+    }));
+
+    expect(outcome).toBe("fenced");
+    expect(loadIndex(paths)!.upgradable).toEqual([]);
+  });
+});
+
+describe("revision and epoch", () => {
+  it("revision increases monotonically across interleaved writers", () => {
+    const revisions: number[] = [];
+    commitCatalog(paths, env, catalog(10));
+    revisions.push(loadIndex(paths)!.revision);
+    bumpMutationEpoch(paths, env);
+    revisions.push(loadIndex(paths)!.revision);
+    patchMutable(paths, env, {}, (s) => s);
+    revisions.push(loadIndex(paths)!.revision);
+    commitCatalog(paths, env, catalog(12));
+    revisions.push(loadIndex(paths)!.revision);
+
+    const sorted = [...revisions].sort((a, b) => a - b);
+    expect(revisions).toEqual(sorted);
+    expect(new Set(revisions).size).toBe(revisions.length);
+  });
+
+  it("bumpMutationEpoch increments the epoch", () => {
+    const before = currentMutationEpoch(paths);
+    const after = bumpMutationEpoch(paths, env);
+    expect(after).toBe(before + 1);
+    expect(currentMutationEpoch(paths)).toBe(after);
+  });
+});
+
+describe("freshness and migration", () => {
+  it("isCatalogFresh respects TTL and emptiness", () => {
+    expect(isCatalogFresh(null, 1000, Date.now())).toBe(false);
+    commitCatalog(paths, env, catalog(3));
+    const index = loadIndex(paths)!;
+    expect(isCatalogFresh(index, 60_000, Date.now())).toBe(true);
+    expect(isCatalogFresh(index, 60_000, Date.now() + 120_000)).toBe(false);
+  });
+
+  it("migrates a legacy v1 index once and deletes the legacy file", () => {
+    const legacyPath = join(dir, "winget-package-index.json");
+    writeFileSync(
+      legacyPath,
+      JSON.stringify({
+        packages: [pkg("legacy")],
+        installed: [],
+        upgradable: [],
+        pinned: [],
+        timestamp: 123,
+      }),
+    );
+
+    expect(migrateLegacyIndex(paths, env, legacyPath)).toBe(true);
+    const index = loadIndex(paths)!;
+    expect(index.packages.map((p) => p.id)).toEqual(["legacy"]);
+    expect(index.builtAt).toBe(123);
+
+    // Second migration attempt: file gone, index untouched.
+    expect(migrateLegacyIndex(paths, env, legacyPath)).toBe(false);
+  });
+
+  it("does not overwrite an existing catalog during migration", () => {
+    commitCatalog(paths, env, catalog(2));
+    const legacyPath = join(dir, "winget-package-index.json");
+    writeFileSync(legacyPath, JSON.stringify({ packages: [pkg("legacy")], timestamp: 1 }));
+    expect(migrateLegacyIndex(paths, env, legacyPath)).toBe(false);
+    expect(loadIndex(paths)!.packages).toHaveLength(2);
+  });
+});

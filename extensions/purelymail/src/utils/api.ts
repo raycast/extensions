@@ -8,7 +8,6 @@ import {
   CreateAppPasswordRequest,
   ModifyUserRequest,
 } from "./types";
-import fetch from "node-fetch";
 import { API_HEADERS, API_METHOD, API_URL } from "./constants";
 import { Toast, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
@@ -46,7 +45,7 @@ const callApi = async (
       else await showFailureToast(response.message, { title: response.code });
     }
     return response;
-  } catch (error) {
+  } catch {
     const errorResponse = {
       type: "error",
       code: "purelymailError",

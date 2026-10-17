@@ -1,4 +1,4 @@
-import { Application, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Application, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 type SupportedBrowsers = "Safari" | "Chrome" | "YouTube Music" | "Microsoft Edge";
@@ -7,10 +7,6 @@ type UrlPreference = "music" | "youtube" | "both";
 interface Preferences {
   browser: Application;
   urlPreference: UrlPreference;
-}
-
-interface OsaError {
-  stderr: string;
 }
 
 /**
@@ -48,14 +44,65 @@ function getUrlCondition(preference: UrlPreference): string {
 }
 
 /**
+ * Handles AppleScript errors by extracting the error message and showing an appropriate toast.
+ */
+function handleAppleScriptError(error: unknown, browserName: string): void {
+  const message = (error as { stderr?: string })?.stderr || (error as { message?: string })?.message || String(error);
+
+  if (message.includes("Allow JavaScript from Apple Events")) {
+    showToast({
+      title: "Enable JavaScript from Apple Events",
+      message: `Please enable "Allow JavaScript from Apple Events" in ${browserName}'s Develop menu.`,
+      style: Toast.Style.Failure,
+      primaryAction: {
+        onAction: () => {
+          open("https://www.raycast.com/danieldbird/youtube-music");
+        },
+        title: "🔗 How to enable JavaScript from Apple Events",
+      },
+    });
+    return;
+  }
+
+  if (
+    message.includes("not allowed to send") ||
+    message.includes("not allowed assistive") ||
+    message.includes("privacy")
+  ) {
+    showToast({
+      title: "Automation Permission Needed",
+      message: `macOS blocked the script from controlling ${browserName}. Check System Settings → Privacy & Security → Automation.`,
+      style: Toast.Style.Failure,
+    });
+    return;
+  }
+
+  if (message.includes("can't get window") || message.includes("not running")) {
+    showToast({
+      title: "Browser Not Available",
+      message: `${browserName} doesn't appear to be running or doesn't support AppleScript.`,
+      style: Toast.Style.Failure,
+    });
+    return;
+  }
+
+  showToast({
+    title: "AppleScript Execution Failed",
+    message: message.slice(0, 200),
+    style: Toast.Style.Failure,
+  });
+}
+
+/**
  * Executes JavaScript inside a matching YouTube or YouTube Music tab in the selected browser.
  */
-export async function runJSInYouTubeMusicTab(code: string): Promise<string | false> {
+export async function runJSInYouTubeMusicTab(code: string): Promise<string | undefined> {
   const preferences = getPreferenceValues<Preferences>();
   const { browser, urlPreference } = preferences;
 
+  let result: string;
   try {
-    const result = await runAppleScript(`
+    result = await runAppleScript(`
       tell application "${browser.name}"
         repeat with w in (every window)
           repeat with t in (every tab whose ${getUrlCondition(urlPreference)}) of w
@@ -69,49 +116,45 @@ export async function runJSInYouTubeMusicTab(code: string): Promise<string | fal
           end repeat
         end repeat
       end tell
-      return "false"
+      return "no-matching-tab"
     `);
-
-    if (result === "false") {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No matching YouTube tab found",
-        message: "Check your browser and URL preference in settings.",
-      });
-      return false;
-    }
-
-    return result;
-  } catch (e) {
-    const message = (e as OsaError).stderr;
-
-    if (message.includes("Allow JavaScript from Apple Events")) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "JavaScript not allowed",
-        message: `Enable "Allow JavaScript from Apple Events" in ${browser.name}'s Develop menu.`,
-      });
-    } else {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "AppleScript execution failed",
-        message,
-      });
-    }
-
-    return false;
+  } catch (error) {
+    handleAppleScriptError(error, browser.name);
+    return undefined;
   }
-}
 
-export const goToChapter = {
-  next: `(function() {
-    const activeChapter = document.querySelector('ytd-macro-markers-list-item-renderer[active]');
-    const nextChapter = activeChapter?.nextElementSibling;
-    nextChapter?.querySelector('a')?.click();
-  })();`,
-  previous: `(function(){
-    const activeChapter = document.querySelector('ytd-macro-markers-list-item-renderer[active]');
-    const previousChapter = activeChapter?.previousElementSibling;
-    previousChapter?.querySelector('a')?.click();
-  })();`,
-};
+  if (result.includes("Allow JavaScript from Apple Events")) {
+    showToast({
+      title: "Enable JavaScript from Apple Events",
+      message: `Please enable "Allow JavaScript from Apple Events" in ${browser.name}'s Develop menu.`,
+      style: Toast.Style.Failure,
+      primaryAction: {
+        onAction: () => {
+          open("https://www.raycast.com/danieldbird/youtube-music");
+        },
+        title: "🔗 How to enable JavaScript from Apple Events",
+      },
+    });
+    return undefined;
+  }
+
+  if (result.includes("JS Error")) {
+    showToast({
+      title: "JavaScript Error",
+      message: result.split("JS Error: ")[1],
+      style: Toast.Style.Failure,
+    });
+    return undefined;
+  }
+
+  if (result === "no-matching-tab") {
+    showToast({
+      title: "No matching tab found",
+      message: "Please open a YouTube or YouTube Music tab in the selected browser",
+      style: Toast.Style.Failure,
+    });
+    return undefined;
+  }
+
+  return result;
+}

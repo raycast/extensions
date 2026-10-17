@@ -1,8 +1,12 @@
-import { AI, Action, ActionPanel, Grid, LaunchProps } from "@raycast/api";
+import { AI, Action, ActionPanel, Grid, LaunchProps, List } from "@raycast/api";
 import { showFailureToast, useAI } from "@raycast/utils";
+import { useState } from "react";
 import CopyAsSubmenu from "./components/CopyAsSubmenu";
-import { addToHistory } from "./history";
-import { getFormattedColor, getPreviewColor } from "./utils";
+import MultipleColorActions from "./components/MultipleColorActions";
+import { useColorsSelection } from "./hooks/useColorsSelection";
+import { addToHistory } from "./lib/history";
+import { SelectMode, UseColorsSelectionObject } from "./lib/types";
+import { getFormattedColor, getIcon, getPreviewColor } from "./lib/utils";
 
 export default function GenerateColors(props: LaunchProps<{ arguments: Arguments.GenerateColors }>) {
   const { data, isLoading } = useAI(
@@ -20,10 +24,12 @@ Examples:
 Prompt: ${props.arguments.prompt}
 JSON colors:`,
     {
-      model: AI.Model.OpenAI_GPT4o,
+      model: AI.Model["OpenAI_GPT-5_mini"],
       stream: false,
     },
   );
+
+  const [selectMode, setSelectMode] = useState<SelectMode>("single");
 
   let colors: string[] = [];
   try {
@@ -32,12 +38,57 @@ JSON colors:`,
     showFailureToast(error, { title: "Could not generate colors, please try again." });
   }
 
+  const { selection } = useColorsSelection<string>(colors);
+
+  if (selectMode === "multi") {
+    return (
+      <List
+        isLoading={isLoading}
+        searchBarAccessory={
+          <List.Dropdown
+            tooltip="Switch Select Mode"
+            value={selectMode}
+            onChange={(v) => setSelectMode(v as SelectMode)}
+          >
+            <List.Dropdown.Item title="Single-Select Mode" value="single" />
+            <List.Dropdown.Item title="Multi-Select Mode" value="multi" />
+          </List.Dropdown>
+        }
+      >
+        {colors.map((c, index) => {
+          const formattedColor = getFormattedColor(c);
+          const previewColor = getPreviewColor(c);
+          const isSelected = selection.helpers.getIsItemSelected(c);
+
+          return (
+            <List.Item
+              key={index}
+              icon={getIcon(previewColor)}
+              title={`${isSelected ? "✓ " : ""}${formattedColor}`}
+              actions={<MultiActions color={c} formattedColor={formattedColor} selection={selection} />}
+            />
+          );
+        })}
+      </List>
+    );
+  }
+
   return (
-    <Grid columns={5} isLoading={isLoading}>
+    <Grid
+      columns={5}
+      isLoading={isLoading}
+      searchBarAccessory={
+        <Grid.Dropdown tooltip="Switch Select Mode" value={selectMode} onChange={(v) => setSelectMode(v as SelectMode)}>
+          <Grid.Dropdown.Item title="Single-Select Mode" value="single" />
+          <Grid.Dropdown.Item title="Multi-Select Mode" value="multi" />
+        </Grid.Dropdown>
+      }
+    >
       {colors.map((c, index) => {
         const formattedColor = getFormattedColor(c);
         const previewColor = getPreviewColor(c);
         const color = { light: previewColor, dark: previewColor, adjustContrast: false };
+
         return (
           <Grid.Item
             key={index}
@@ -45,14 +96,44 @@ JSON colors:`,
             title={formattedColor}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={formattedColor} onCopy={() => addToHistory(formattedColor)} />
-                <Action.Paste content={formattedColor} onPaste={() => addToHistory(formattedColor)} />
-                <CopyAsSubmenu color={formattedColor} onCopy={() => addToHistory(formattedColor)} />
+                <GeneratedColorActions formattedColor={formattedColor} />
               </ActionPanel>
             }
           />
         );
       })}
     </Grid>
+  );
+}
+
+type MultiActionsProps = {
+  color: string;
+  formattedColor: string;
+  selection: UseColorsSelectionObject<string>;
+};
+
+function MultiActions({ color, formattedColor, selection }: MultiActionsProps) {
+  return (
+    <ActionPanel>
+      <ActionPanel.Section>
+        <GeneratedColorActions formattedColor={formattedColor} />
+      </ActionPanel.Section>
+      <MultipleColorActions
+        item={color}
+        selection={selection}
+        onCopySelected={() => selection.selected.selectedItems.forEach((item) => addToHistory(item))}
+      />
+    </ActionPanel>
+  );
+}
+
+function GeneratedColorActions({ formattedColor }: { formattedColor: string }) {
+  const saveColor = () => addToHistory(formattedColor);
+  return (
+    <>
+      <Action.CopyToClipboard content={formattedColor} onCopy={saveColor} />
+      <Action.Paste content={formattedColor} onPaste={saveColor} />
+      <CopyAsSubmenu color={formattedColor} onCopy={saveColor} />
+    </>
   );
 }

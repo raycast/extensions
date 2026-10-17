@@ -248,6 +248,7 @@ function CreateDNSRecord({ domain, onRecordAdded }: { domain: DomainInfo; onReco
         </ActionPanel>
       }
     >
+      <Form.Description title="Domain" text={domain.name} />
       <Form.Dropdown title="Type" {...itemProps.type}>
         <Form.Dropdown.Item title="A" value="A" />
         <Form.Dropdown.Item title="AAAA" value="AAAA" />

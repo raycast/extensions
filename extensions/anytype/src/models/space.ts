@@ -12,15 +12,16 @@ export interface UpdateSpaceRequest {
 }
 
 export interface RawSpace {
-  object: string;
+  object: "anytype.space" | "anytype.onetoone" | "anytype.chatspace";
   id: string;
   name: string;
-  icon: ObjectIcon;
+  icon: ObjectIcon | null;
   description: string;
   gateway_url: string;
   network_id: string;
 }
 
-export interface Space extends Omit<RawSpace, "icon"> {
+export interface Space extends Omit<RawSpace, "icon" | "object"> {
+  object: "space" | "chat";
   icon: Image.ImageLike;
 }

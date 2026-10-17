@@ -1,5 +1,8 @@
 import { Color } from "@raycast/api";
-export function getExecutionStatusColor(status: string) {
+import type { SubmissionVerdict } from "../types/codeforces";
+
+export function getExecutionStatusColor(status?: SubmissionVerdict) {
+  if (!status) return Color.PrimaryText;
   switch (status) {
     case "FAILED":
       return Color.Red;
@@ -13,8 +16,6 @@ export function getExecutionStatusColor(status: string) {
       return Color.Red;
     case "WRONG_ANSWER":
       return Color.Red;
-    case "PRESENTATION_ERROR":
-      return Color.Yellow;
     case "TIME_LIMIT_EXCEEDED":
       return Color.Red;
     case "MEMORY_LIMIT_EXCEEDED":
@@ -35,12 +36,15 @@ export function getExecutionStatusColor(status: string) {
       return Color.Magenta;
     case "REJECTED":
       return Color.Red;
+    case "SUBMITTED":
+      return Color.Blue;
     default:
       return Color.PrimaryText;
   }
 }
 
-export function getExecutionStatusString(status: string) {
+export function getExecutionStatusString(status?: SubmissionVerdict) {
+  if (!status) return "Unknown Status";
   switch (status) {
     case "FAILED":
       return "Failed";
@@ -54,8 +58,6 @@ export function getExecutionStatusString(status: string) {
       return "Runtime Error";
     case "WRONG_ANSWER":
       return "Wrong Answer";
-    case "PRESENTATION_ERROR":
-      return "Presentation Error";
     case "TIME_LIMIT_EXCEEDED":
       return "Time Limit Exceeded";
     case "MEMORY_LIMIT_EXCEEDED":
@@ -76,6 +78,8 @@ export function getExecutionStatusString(status: string) {
       return "Testing";
     case "REJECTED":
       return "Rejected";
+    case "SUBMITTED":
+      return "Submitted";
     default:
       return "Unknown Status";
   }

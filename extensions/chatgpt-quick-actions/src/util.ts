@@ -29,7 +29,13 @@ export function countToken(content: string) {
 export function estimatePrice(input_token: number, output_token: number, model: string) {
   let price = 0;
 
-  if (model == "gpt-4o") {
+  if (model == "gpt-5.4") {
+    price = (input_token * 2.5 + output_token * 15) / 10000;
+  } else if (model == "gpt-5.4-mini") {
+    price = (input_token * 0.75 + output_token * 4.5) / 10000;
+  } else if (model == "gpt-5.4-nano") {
+    price = (input_token * 0.2 + output_token * 1.25) / 10000;
+  } else if (model == "gpt-4o") {
     price = (input_token * 2.5 + output_token * 10) / 10000;
   } else if (model == "gpt-4o-mini") {
     price = (input_token * 0.15 + output_token * 0.6) / 10000;

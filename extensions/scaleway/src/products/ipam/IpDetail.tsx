@@ -1,9 +1,9 @@
 import { List } from '@raycast/api'
-import type { IPAM } from '@scaleway/sdk'
+import type { Ipamv1 } from '@scaleway/sdk'
 import { getIconFromLocality } from '../../helpers/locality'
 
 type IPProps = {
-  ip: IPAM.v1.IP
+  ip: Ipamv1.IP
 }
 
 export const IpDetail = ({ ip }: IPProps) => (

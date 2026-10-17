@@ -2,18 +2,14 @@ import { ActionPanel, Action, List, Icon, Keyboard, Clipboard, Image, Alert, con
 import { useEffect, useMemo, useState } from "react";
 import { getFavicon, useCachedState } from "@raycast/utils";
 import QRCode from "qrcode";
-import { EditUrlForm } from "./edit-url-form";
-import { ParseResult } from "./types";
-import { isURLLike, renderQrMarkdown } from "./utils";
-
-function getItemId(item: ParseResult) {
-  return item.href + "#$#" + item.alias;
-}
-
-function getItemIdFromId(id: string) {
-  const [href, alias] = id.split("#$#");
-  return { href, alias };
-}
+import { EditUrlForm } from "./editor/edit-url-form";
+import { ParseResult, TemplateGroup } from "./types";
+import { isURLLike, getItemId, getItemIdFromId } from "./utils";
+import { renderQrMarkdown } from "./qrcode";
+import { TemplateManager } from "./template/template-manager";
+import { createVariantsView } from "./template/template-variants-helper";
+import { DEFAULT_TEMPLATE_GROUPS } from "./template/template-group-config";
+import { WELCOME_BRIEF, CLIPBOARD_DETECTED_BRIEF, URL_INPUT_BRIEF } from "./brief";
 
 export default function Command() {
   const [history, setHistory] = useCachedState<ParseResult[]>("url-history", []);
@@ -22,6 +18,7 @@ export default function Command() {
   const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
   const [filteredHistory, setFilteredHistory] = useState<ParseResult[]>(history);
   const [clipboardUrl, setClipboardUrl] = useState<string>("");
+  const [templateGroups] = useCachedState<TemplateGroup[]>("template-groups", DEFAULT_TEMPLATE_GROUPS);
 
   useEffect(() => {
     async function readClipboard() {
@@ -109,6 +106,19 @@ export default function Command() {
     return undefined;
   }, [history, input, clipboardUrl]);
 
+  const templateEntryAction = useMemo(() => {
+    return (
+      <ActionPanel.Section title="Template">
+        <Action.Push
+          title="Manage Template"
+          icon={Icon.Gear}
+          target={<TemplateManager />}
+          shortcut={{ modifiers: ["ctrl", "shift"], key: "t" }}
+        />
+      </ActionPanel.Section>
+    );
+  }, []);
+
   return (
     <List
       searchBarPlaceholder="Paste or type your URL..."
@@ -130,10 +140,10 @@ export default function Command() {
           <List.Item.Detail
             markdown={
               showClipboardUrl
-                ? `URL detected in clipboard:\n\n\`\`\`\n${clipboardUrl}\n\`\`\`\n\n**Press Enter to paste and parse**`
+                ? CLIPBOARD_DETECTED_BRIEF(clipboardUrl)
                 : isURLLike(input)
-                  ? `**Press Enter to parse and Edit** \n\n \`\`\`\n${input}\n\`\`\``
-                  : "Enter URL to parse and edit"
+                  ? URL_INPUT_BRIEF(input)
+                  : WELCOME_BRIEF
             }
           />
         }
@@ -168,6 +178,14 @@ export default function Command() {
               />
             ) : null}
 
+            {isURLLike(input || clipboardUrl) && (
+              <Action.Push
+                title="Generate Variants"
+                icon={Icon.Bolt}
+                target={createVariantsView(input || clipboardUrl, templateGroups, handleSaveToHistory)}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+              />
+            )}
             {history.length > 0 && (
               <Action
                 title="Clear History"
@@ -177,6 +195,7 @@ export default function Command() {
                 onAction={handleClear}
               />
             )}
+            {templateEntryAction}
           </ActionPanel>
         }
       />
@@ -206,7 +225,14 @@ export default function Command() {
                 target={<EditUrlForm url={item} onSave={handleSaveToHistory} />}
               />
               <Action.CopyToClipboard content={item.href || ""} title="Copy URL" />
-
+              {item.href && (
+                <Action.Push
+                  title="Generate Variants"
+                  icon={Icon.Bolt}
+                  target={createVariantsView(item.href, templateGroups, handleSaveToHistory)}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                />
+              )}
               <Action
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
@@ -214,6 +240,7 @@ export default function Command() {
                 title="Delete from History"
                 onAction={() => handleDeleteFromHistory(getItemId(item))}
               />
+              {templateEntryAction}
             </ActionPanel>
           }
         />

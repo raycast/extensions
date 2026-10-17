@@ -1,6 +1,7 @@
 name: "🛠 🐞 Dev Tools Bug Report"
 description: Report a reproducible bug or regression related to dev tools (CLI, publishing, commands like Manage Extension or Create Extension, etc.)
 labels: ["dev tools", "bug"]
+type: "Bug"
 body:
   - type: markdown
     attributes:

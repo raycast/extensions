@@ -1,11 +1,12 @@
 import { ActionPanel, Action, Form, useNavigation } from '@raycast/api';
 import { FormValidation, useForm } from '@raycast/utils';
 
-import { Todo, handleError, updateTodo } from '../api';
+import { handleError, updateProject, updateTodo } from '../api';
+import { Todo } from '../types';
 
 type EditTodoProps = {
   todo: Todo;
-  refreshTodos: () => void;
+  refreshTodos: () => Promise<void>;
 };
 
 export default function EditTodo({ todo, refreshTodos }: EditTodoProps) {
@@ -14,11 +15,15 @@ export default function EditTodo({ todo, refreshTodos }: EditTodoProps) {
   const { handleSubmit, itemProps } = useForm<{ title: string; notes: string }>({
     async onSubmit(values) {
       try {
-        await updateTodo(todo.id, { notes: values.notes, title: values.title });
-        refreshTodos();
+        if (todo.isProject) {
+          await updateProject(todo.id, { notes: values.notes, title: values.title });
+        } else {
+          await updateTodo(todo.id, { notes: values.notes, title: values.title });
+        }
+        await refreshTodos();
         pop();
       } catch (error) {
-        handleError(error);
+        await handleError(error);
       }
     },
     initialValues: { title: todo.name, notes: todo.notes },

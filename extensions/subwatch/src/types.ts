@@ -1,29 +1,27 @@
-interface Billing {
-  count: number;
+export interface Subscription {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+  name: string;
+  domain: string;
   price: number;
-  end_date: string | null;
+  currency: string;
   interval: string;
   start_date: string;
-}
-
-interface Item {
-  name: string;
-  count: number;
-  domain: string;
-  billing: Billing[];
-}
-
-export interface GetSubscriptionsResponse {
-  id: string;
-  data: Item[];
-  premium: boolean;
+  end_date: string | null;
+  trial_end_date: string | null;
+  usage: number;
+  category: string;
 }
 
 export type NewSubscription = {
-  service: string;
+  name: string;
   domain: string;
   price: string;
+  currency: string;
   interval: string;
-  start_date: Date;
-  end_date: Date;
+  start_date: Date | null;
+  end_date?: Date | null;
+  trial_end_date?: Date | null;
 };

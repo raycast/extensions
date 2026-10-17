@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "apple-container",
+  "title": "Apple Container",
+  "description": "Manage containers, images, and volumes created by Apple's open-source container CLI.",
+  "icon": "command-icon.png",
+  "author": "davireisvieira",
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "container",
+    "apple",
+    "docker",
+    "oci",
+    "vm",
+    "linux"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "containers",
+      "title": "Manage Containers",
+      "description": "List, start, stop, inspect, and remove containers",
+      "mode": "view"
+    },
+    {
+      "name": "images",
+      "title": "Manage Images",
+      "description": "List, pull, tag, run, and remove images",
+      "mode": "view"
+    },
+    {
+      "name": "volumes",
+      "title": "Manage Volumes",
+      "description": "List, create, inspect, and remove volumes",
+      "mode": "view"
+    },
+    {
+      "name": "system",
+      "title": "Container System",
+      "description": "View daemon status and disk usage, and start or stop the service",
+      "mode": "view"
+    },
+    {
+      "name": "running-containers",
+      "title": "Running Containers",
+      "description": "Menu bar item showing running containers",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "containerPath",
+      "title": "Container CLI Path",
+      "description": "Absolute path to the container binary",
+      "type": "textfield",
+      "required": false,
+      "default": "/usr/local/bin/container",
+      "placeholder": "/usr/local/bin/container"
+    },
+    {
+      "name": "autoRefresh",
+      "title": "Auto Refresh",
+      "label": "Auto-refresh lists while open",
+      "description": "Periodically refresh lists while a command is open (uses extra CPU)",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.8",
+    "esbuild": "0.28.1"
+  }
+}

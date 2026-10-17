@@ -1,0 +1,276 @@
+import { API_URL } from "./config";
+import { dateRange } from "./finance";
+import { SignInRequiredError } from "./oauth-session";
+import { restoreMissingBalances } from "./balances";
+import { accountBalance, compareTransactionsNewestFirst, decimal } from "./format";
+import { amountSearch } from "./transaction-search";
+import type {
+  AccountHolding,
+  AccountHoldings,
+  BalanceEntry,
+  FinancialAccount,
+  FinancialConnection,
+  Page,
+  Period,
+  Transaction,
+} from "./types";
+
+import { SynciApiError } from "./diagnostics";
+import { categoryMatches } from "./categories";
+export { SynciApiError } from "./diagnostics";
+
+export interface TransactionQuery {
+  search?: string;
+  accountId?: string;
+  period?: Period;
+  booked?: boolean;
+  category?: string;
+}
+
+export function transactionParams(query: TransactionQuery, now = new Date()): Record<string, string> {
+  const range = dateRange(query.period ?? "all", now);
+  return {
+    include: "financial_account.financial_connection.institution,enriched",
+    sort: "-mapped_fields.date,-id",
+    omit_sensitive_identifiers: "1",
+    ...(query.search?.trim() ? { "filter[search]": query.search.trim() } : {}),
+    ...(query.accountId && query.accountId !== "all" ? { "filter[financial_account_id]": query.accountId } : {}),
+    ...(query.booked !== undefined ? { "filter[booked]": query.booked ? "1" : "0" } : {}),
+    ...(range.after ? { "filter[booking_date_after]": range.after, "filter[booking_date_before]": range.before } : {}),
+  };
+}
+
+export class SynciClient {
+  constructor(
+    private token: () => Promise<string>,
+    private transport: typeof fetch = fetch,
+  ) {}
+
+  private async request(path: string, params: Record<string, string>, signal?: AbortSignal): Promise<unknown> {
+    const url = new URL(`${API_URL}${path}`);
+    url.search = new URLSearchParams(params).toString();
+    const token = await this.token();
+    signal?.throwIfAborted();
+    let response: Response;
+    try {
+      response = await this.transport(url, {
+        headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+        signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(30_000)]) : AbortSignal.timeout(30_000),
+        redirect: "error",
+      });
+    } catch (error) {
+      if (signal?.aborted) throw error;
+      throw new SynciApiError("Could not reach Synci. Check your internet connection and try again.", 0, "network");
+    }
+    if (response.status === 401) throw new SignInRequiredError();
+    if (response.status === 403)
+      throw new SynciApiError("Synci did not grant access to this data. Reconnect to review the app's access.", 403);
+    if (response.status === 429) {
+      const retryAfter = response.headers.get("retry-after");
+      const seconds = retryAfter && /^\d+$/.test(retryAfter) ? ` in ${retryAfter} seconds` : " shortly";
+      throw new SynciApiError(`Synci's request limit was reached. Try again${seconds}.`, 429);
+    }
+    if (!response.ok)
+      throw new SynciApiError(
+        `Synci could not load this data (HTTP ${response.status}). Try again shortly.`,
+        response.status,
+      );
+    return response.json().catch(() => null);
+  }
+
+  async page<T>(path: string, params: Record<string, string>, page: number, signal?: AbortSignal): Promise<Page<T>> {
+    const payload = (await this.request(
+      path,
+      { ...params, "page[size]": "100", "page[number]": String(page) },
+      signal,
+    )) as Page<T> | null;
+    if (
+      !payload ||
+      !Array.isArray(payload.data) ||
+      !payload.meta ||
+      !Number.isInteger(payload.meta.current_page) ||
+      !Number.isInteger(payload.meta.last_page) ||
+      payload.meta.current_page !== page ||
+      payload.meta.last_page < page
+    )
+      throw new SynciApiError("Synci returned an unexpected response. Refresh to try again.", 0, "response");
+    return payload;
+  }
+
+  async all<T>(path: string, params: Record<string, string>, signal?: AbortSignal, maxPages = 100): Promise<T[]> {
+    const data: T[] = [];
+    for (let page = 1; page <= maxPages; page++) {
+      const result = await this.page<T>(path, params, page, signal);
+      data.push(...result.data);
+      if (page >= result.meta.last_page) return data;
+    }
+    throw new Error(
+      "This selection contains more than 10,000 records. Choose a shorter period or a single account to see a complete result.",
+    );
+  }
+
+  accounts(signal?: AbortSignal) {
+    return this.all<FinancialAccount>(
+      "/finance/accounts",
+      { include: "financial_connection.institution", omit_sensitive_identifiers: "1", sort: "name,id" },
+      signal,
+    );
+  }
+  accountSummary(accountId: number, signal?: AbortSignal) {
+    return this.account(accountId, true, signal);
+  }
+  accountDetails(accountId: number, signal?: AbortSignal) {
+    return this.account(accountId, false, signal);
+  }
+  private async account(
+    accountId: number,
+    omitSensitiveIdentifiers: boolean,
+    signal?: AbortSignal,
+  ): Promise<FinancialAccount> {
+    if (!Number.isSafeInteger(accountId) || accountId <= 0) throw new Error("This account link is invalid.");
+    const payload = (await this.request(
+      `/finance/accounts/${accountId}`,
+      { include: "financial_connection.institution", omit_sensitive_identifiers: omitSensitiveIdentifiers ? "1" : "0" },
+      signal,
+    )) as { data?: FinancialAccount } | null;
+    if (!payload?.data || String(payload.data.id) !== String(accountId))
+      throw new SynciApiError("Synci returned unexpected account details. Refresh to try again.", 0, "response");
+    return payload.data;
+  }
+  async accountsWithBalances(signal?: AbortSignal): Promise<FinancialAccount[]> {
+    const accounts = await this.accounts(signal);
+    const controller = new AbortController();
+    const requestSignal = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
+    // Only resolve genuinely unavailable summaries; account filters stay lightweight.
+    // A small worker pool avoids flooding the API for users with many accounts.
+    const result = [...accounts];
+    let next = 0;
+    try {
+      await Promise.all(
+        Array.from({ length: Math.min(3, accounts.length) }, async () => {
+          while (next < accounts.length) {
+            requestSignal.throwIfAborted();
+            const index = next++;
+            const account = accounts[index];
+            if (decimal(accountBalance(account).amount)) continue;
+            try {
+              const history = await this.all<BalanceEntry>(
+                `/finance/accounts/${account.id}/balances`,
+                { sort: "-updated_at,-id" },
+                requestSignal,
+              );
+              result[index] = restoreMissingBalances(account, history);
+            } catch (error) {
+              if (
+                requestSignal.aborted ||
+                error instanceof SignInRequiredError ||
+                (error instanceof SynciApiError && [403, 429].includes(error.status))
+              )
+                throw error;
+              result[index] = {
+                ...account,
+                balance_warning:
+                  "Recorded balances could not be loaded completely. Refresh to try again; this balance remains unavailable.",
+              };
+            }
+          }
+        }),
+      );
+    } catch (error) {
+      // Stop sibling pagination and queued accounts after access or rate-limit failures.
+      controller.abort();
+      throw error;
+    }
+    return result;
+  }
+  connections(signal?: AbortSignal) {
+    return this.all<FinancialConnection>(
+      "/finance/connections",
+      { include: "institution,financial_accounts_count" },
+      signal,
+    );
+  }
+  accountBalanceHistory(accountId: number, signal?: AbortSignal) {
+    return this.all<BalanceEntry>(`/finance/accounts/${accountId}/balances`, { sort: "-reference_date,-id" }, signal);
+  }
+  accountHoldings(accountId: number, signal?: AbortSignal) {
+    return this.all<AccountHolding>(`/finance/accounts/${accountId}/holdings`, { sort: "-market_value,-id" }, signal);
+  }
+  async holdingsForAccounts(accounts: FinancialAccount[], signal?: AbortSignal): Promise<AccountHoldings[]> {
+    const controller = new AbortController();
+    const requestSignal = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
+    const result: AccountHoldings[] = new Array(accounts.length);
+    let next = 0;
+    try {
+      await Promise.all(
+        Array.from({ length: Math.min(3, accounts.length) }, async () => {
+          while (next < accounts.length) {
+            requestSignal.throwIfAborted();
+            const index = next++;
+            const account = accounts[index];
+            const holdings = await this.accountHoldings(account.id, requestSignal);
+            result[index] = { account, holdings };
+          }
+        }),
+      );
+    } catch (error) {
+      // Do not keep loading other accounts or present a partial portfolio as complete.
+      controller.abort();
+      throw error;
+    }
+    return result;
+  }
+  transactions(query: TransactionQuery, page: number, signal?: AbortSignal) {
+    return this.page<Transaction>("/finance/transactions", transactionParams(query), page, signal);
+  }
+  async recentTransactions(accountId: number, signal?: AbortSignal): Promise<Transaction[]> {
+    // Output rules can change mapped dates after server pagination. Scan every
+    // page in stable ID order before claiming these are the newest transactions.
+    const params = { ...transactionParams({ accountId: String(accountId) }), sort: "-id" };
+    const transactions = new Map<number, Transaction>();
+    const maxPages = 100;
+    for (let page = 1; page <= maxPages; page++) {
+      const result = await this.page<Transaction>("/finance/transactions", params, page, signal);
+      if (result.meta.last_page > maxPages)
+        throw new Error(
+          "This account's history is too large to verify the latest activity. Open View Transactions to browse it.",
+        );
+      for (const transaction of result.data) transactions.set(transaction.id, transaction);
+      if (page === result.meta.last_page)
+        return [...transactions.values()].sort(compareTransactionsNewestFirst).slice(0, 5);
+    }
+    throw new Error("The account history could not be loaded completely. Refresh to try again.");
+  }
+  async transactionBatch(query: TransactionQuery, startPage: number, signal?: AbortSignal) {
+    const amount = amountSearch(query.search);
+    // Rules may remove every item on a server page. Skip such pages so Raycast's
+    // infinite scroll never gets a zero-sized page with more results behind it.
+    for (let page = startPage; page < startPage + 100; page++) {
+      // Synci's text filter excludes amounts. Scan the selected account/date/status
+      // scope for numeric searches. Return the first matching page promptly.
+      const response = await this.transactions(amount ? { ...query, search: undefined } : query, page, signal);
+      const hasMore = response.meta.current_page < response.meta.last_page;
+      if (amount || query.category !== undefined) {
+        const matches = response.data.filter(
+          (transaction) => (!amount || amount.matches(transaction)) && categoryMatches(transaction, query.category),
+        );
+        if (matches.length || !hasMore) return { data: matches, hasMore, cursor: page + 1 };
+        continue;
+      }
+      if (response.data.length || !hasMore) return { data: response.data, hasMore, cursor: page + 1 };
+    }
+    if (query.category !== undefined)
+      throw new Error(
+        "Category search scanned 10,000 records. Choose a shorter period or a single account and try again.",
+      );
+    if (amount) {
+      throw new Error(
+        "Amount search scanned 10,000 records. Choose a shorter period or a single account and try again.",
+      );
+    }
+    throw new Error("Too many empty result pages. Narrow your search or account filter and try again.");
+  }
+  spending(query: TransactionQuery, signal?: AbortSignal) {
+    return this.all<Transaction>("/finance/transactions", transactionParams({ ...query, booked: true }), signal);
+  }
+}

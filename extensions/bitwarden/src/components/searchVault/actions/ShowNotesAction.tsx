@@ -29,14 +29,14 @@ function ShowNotesAction() {
       icon={Icon.Eye}
       onAction={showNotes}
       repromptDescription={`Showing the notes of <${selectedItem.name}>`}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={{ macOS: { key: "n", modifiers: ["opt"] }, Windows: { key: "n", modifiers: ["alt"] } }}
     />
   );
 }
 
 function DetailsScreen({ itemName, notes }: { itemName: string; notes: string }) {
   const handleCopy = async () => {
-    await Clipboard.copy(notes, { transient: getTransientCopyPreference("other") });
+    await Clipboard.copy(notes, { concealed: getTransientCopyPreference("other") });
     await showCopySuccessMessage("Copied notes to clipboard");
   };
 

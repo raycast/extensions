@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "alice-ai",
-  "title": "Alice AI - Your ChatGPT Actions Companion",
-  "description": "Alice helps with your daily tasks by providing quick access to OpenAI's ChatGPT API. Use Alice to generate text, code, and more with just a few keystrokes.",
+  "title": "Alice AI - Your Daily AI Actions Companion",
+  "description": "Alice helps with your daily tasks by providing quick access to reusable AI actions across OpenAI and Gemini models.",
   "icon": "icon.png",
   "author": "quiknull",
   "categories": [
@@ -48,17 +48,45 @@
         {
           "name": "model",
           "title": "Model",
-          "description": "Select Custom Action Model",
+          "description": "Select the model for Custom Action. Models marked '(thinking)' support Reasoning Level.",
           "type": "dropdown",
-          "default": "gpt-3.5-turbo",
+          "default": "gpt-6-luna",
           "data": [
             {
-              "title": "GPT-3.5 Turbo",
-              "value": "gpt-3.5-turbo"
+              "title": "GPT-6 Luna (thinking)",
+              "value": "gpt-6-luna"
             },
             {
-              "title": "GPT-4 Turbo",
-              "value": "gpt-4-turbo"
+              "title": "GPT-6.1 Sol (thinking)",
+              "value": "gpt-6.1-sol"
+            },
+            {
+              "title": "GPT-6 Astra (thinking)",
+              "value": "gpt-6-astra"
+            },
+            {
+              "title": "GPT-5.6 Sol (thinking)",
+              "value": "gpt-5.6-sol"
+            },
+            {
+              "title": "GPT-5.6 Terra (thinking)",
+              "value": "gpt-5.6-terra"
+            },
+            {
+              "title": "GPT-5.6 Luna (thinking)",
+              "value": "gpt-5.6-luna"
+            },
+            {
+              "title": "GPT-5.4 (thinking)",
+              "value": "gpt-5.4"
+            },
+            {
+              "title": "GPT-5.4 Mini (thinking)",
+              "value": "gpt-5.4-mini"
+            },
+            {
+              "title": "GPT-5.4 Nano (thinking)",
+              "value": "gpt-5.4-nano"
             },
             {
               "title": "GPT-4o",
@@ -67,14 +95,88 @@
             {
               "title": "GPT-4o Mini",
               "value": "gpt-4o-mini"
+            },
+            {
+              "title": "Gemini 3.8 Flash (thinking)",
+              "value": "gemini-3.8-flash"
+            },
+            {
+              "title": "Gemini 3.6 Flash (thinking)",
+              "value": "gemini-3.6-flash"
+            },
+            {
+              "title": "Gemini 3.5 Flash-Lite (thinking)",
+              "value": "gemini-3.5-flash-lite"
+            },
+            {
+              "title": "Gemini 3.1 Flash-Lite (thinking)",
+              "value": "gemini-3.1-flash-lite"
+            },
+            {
+              "title": "Gemini 3.1 Pro Preview (thinking)",
+              "value": "gemini-3.1-pro-preview"
+            },
+            {
+              "title": "Gemini 3 Flash Preview (thinking)",
+              "value": "gemini-3-flash-preview"
+            },
+            {
+              "title": "Gemini 2.5 Flash (thinking)",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Flash-Lite (thinking)",
+              "value": "gemini-2.5-flash-lite"
             }
           ],
           "required": true
         },
         {
+          "name": "reasoningLevel",
+          "title": "Reasoning Level",
+          "description": "Controls how much thinking models marked '(thinking)' do before answering. Higher levels can help with difficult tasks, but take longer and use more tokens. With Model Default, Alice AI sends no explicit reasoning level, so the model uses its own default thinking setting. This default can differ between models. Off disables thinking when supported. Other models ignore this setting; unsupported levels use Model Default.",
+          "type": "dropdown",
+          "default": "default",
+          "data": [
+            {
+              "title": "Model Default",
+              "value": "default"
+            },
+            {
+              "title": "Off",
+              "value": "none"
+            },
+            {
+              "title": "Minimal",
+              "value": "minimal"
+            },
+            {
+              "title": "Low",
+              "value": "low"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "High",
+              "value": "high"
+            },
+            {
+              "title": "Extra High",
+              "value": "xhigh"
+            },
+            {
+              "title": "Maximum",
+              "value": "max"
+            }
+          ],
+          "required": false
+        },
+        {
           "name": "temperature",
           "title": "Temperature",
-          "description": "Custom Action Temperature (value between 0.0 and 1.0)",
+          "description": "Controls how varied the answers are. Enter 0.0 to 1.0: lower values make wording more consistent; higher values make it more varied. Used by Gemini and OpenAI models without thinking. OpenAI thinking models ignore it unless Reasoning Level is Off and the model supports turning thinking off.",
           "type": "textfield",
           "default": "0.7",
           "required": true
@@ -82,7 +184,7 @@
         {
           "name": "maxTokens",
           "title": "Max Tokens",
-          "description": "Custom Action Max Tokens to be generated (set -1 for unlimited)",
+          "description": "The maximum number of tokens to generate. Set -1 for unlimited.",
           "type": "textfield",
           "default": "-1",
           "required": true
@@ -102,31 +204,45 @@
       "title": "OpenAI API Key",
       "description": "Your OpenAI API Key",
       "type": "password",
-      "required": true
+      "required": false
+    },
+    {
+      "name": "geminiApiKey",
+      "title": "Gemini API Key",
+      "description": "Your Gemini API Key",
+      "type": "password",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.69.0",
-    "@raycast/utils": "^1.14.0",
-    "@reduxjs/toolkit": "^2.2.3",
-    "openai": "^4.56.0",
-    "zod": "^3.23.8",
-    "zustand": "^4.5.4"
+    "@ai-sdk/google": "^4.0.93",
+    "@ai-sdk/openai": "^4.0.91",
+    "@raycast/api": "2.7.3",
+    "@raycast/utils": "^2.3.2",
+    "ai": "^7.0.137",
+    "zod": "^3.25.76",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "19.0.10",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.12.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build --environment dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish",
-    "pull": "npx @raycast/api@latest pull-contributions"
-  }
+    "publish": "ray publish",
+    "pull": "ray pull-contributions",
+    "bundle": "ray bundle --output release/alice-ai.rayext",
+    "test": "node --test tests/*.test.cjs"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

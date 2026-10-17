@@ -36,7 +36,7 @@ export default function ConvertRgb() {
       showToast(
         ToastStyle.Failure,
         "Couldn't parse the color string",
-        "Please provide the color as valid RGB notation."
+        "Please provide the color as valid RGB notation.",
       );
       return;
     }

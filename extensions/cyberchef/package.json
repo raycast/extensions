@@ -5,6 +5,9 @@
   "description": "The Cyber Swiss Army Knife - a web app for encryption, encoding, compression and data analysis",
   "icon": "command-icon.png",
   "author": "mblode",
+  "contributors": [
+    "karsten_brusch"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -414,6 +417,17 @@
       "title": "To Camel Case",
       "description": "Converts the input string to camel case. Camel case is all lower case except letters after word boundaries which are uppercase. e.g. thisIsCamelCase",
       "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Enter the URL of the CyberChef instance you want to use. Defaults to the official instance.",
+      "name": "cyberChefUrl",
+      "placeholder": "e.g., https://cyberchef.io without ending /",
+      "required": true,
+      "title": "CyberChef Instance URL",
+      "type": "textfield",
+      "default": "https://gchq.github.io/CyberChef"
     }
   ],
   "dependencies": {

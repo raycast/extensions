@@ -5,3 +5,16 @@ export enum Creativity {
   High = 1.5,
   Maximum = 2,
 }
+
+export enum ThinkingEffort {
+  None = "false",
+  Low = "low",
+  Medium = "medium",
+  High = "high",
+}
+
+export enum PromptInputSource {
+  None = "None",
+  SelectedText = "SelectedText",
+  Clipboard = "Clipboard",
+}

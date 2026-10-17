@@ -186,7 +186,6 @@ export function PXtoTailwindSpacing(value: number): string {
 }
 
 export function REMtoTailwindSpacing(value: number): string {
-  console.log(value);
   const spacingValue = Object.values(spacing).find((s) => s.size === value);
   if (spacingValue) {
     return spacingValue.slug;

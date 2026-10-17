@@ -86,7 +86,7 @@ describe("count function", () => {
   test("should calculate reading and speaking time", () => {
     const result = count(
       "This is a test with 28 words. This is a test with 28 words. This is a test with 28 words. This is a test with 28 words.",
-      true
+      true,
     );
     expect(result.words).toBe(28);
     expect(result.reading_time).toBe(Math.ceil(28 / 275));

@@ -1,6 +1,7 @@
 import { ActionPanel, Detail, Action } from "@raycast/api";
+import { License } from "./types";
 
-export function LicenseDetailView({ license }: { license: any }) {
+export function LicenseDetailView({ license }: { license: License }) {
   const markdown = `
 ## ${license.name}
 
@@ -25,8 +26,8 @@ ${license.content}
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard content={license.content} shortcut={{ modifiers: ["cmd"], key: "." }} />
-          <Action.OpenInBrowser url={license.url} shortcut={{ modifiers: ["cmd"], key: "," }} />
+          <Action.CopyToClipboard content={license.content} />
+          <Action.OpenInBrowser url={license.url} />
         </ActionPanel>
       }
     />

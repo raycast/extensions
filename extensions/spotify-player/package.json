@@ -16,7 +16,6 @@
     "andreaselia",
     "stuart",
     "tonka3000",
-    "dancannon",
     "pernielsentikaer",
     "stevensd2m",
     "erics118",
@@ -27,7 +26,6 @@
     "rfaccio",
     "badta5te",
     "andyburris",
-    "thomaslombart",
     "rhesamu",
     "themitpatel",
     "litomore",
@@ -36,13 +34,25 @@
     "tsibog",
     "viethung0823",
     "eyal_levy",
-    "jonasengelmann",
     "vmrjnvc",
     "karthik_manikandan",
-    "kartheesan05"
+    "kartheesan05",
+    "joshkat",
+    "CaffeineCat",
+    "AdrianKokot",
+    "validate",
+    "xmok",
+    "hugodemenez",
+    "alexi.build",
+    "shivraj-roy",
+    "ridemountainpig",
+    "clemenzi",
+    "0xdhrv"
   ],
   "pastContributors": [
-    "bkeys818"
+    "bkeys818",
+    "jonasengelmann",
+    "thomaslombart"
   ],
   "debug": {
     "reloadShortcut": {
@@ -177,9 +187,9 @@
       "name": "nowPlayingMenuBar",
       "title": "Menu Bar Player",
       "subtitle": "Spotify",
-      "description": "See what's currently playing in your Menu Bar. Click for further actions, such as Play/Pause, Like/Dislike, Skip, Start Radio, Add to Playlist, Connect Device and more. Refreshes every 10 seconds.",
+      "description": "See what's currently playing in your Menu Bar. Click for further actions, such as Play/Pause, Like/Dislike, Skip, Start Radio, Add to Playlist, Connect Device and more. Refreshes every 30 seconds.",
       "mode": "menu-bar",
-      "interval": "10s",
+      "interval": "30s",
       "preferences": [
         {
           "name": "hideIconWhenIdle",
@@ -194,6 +204,14 @@
           "description": "If enabled, the artist's name will be hidden in the Menu Bar",
           "type": "checkbox",
           "label": "Hide artist's name",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "cleanupTitle",
+          "description": "If enabled cleans up extra info like remix titles or versions from the song name",
+          "type": "checkbox",
+          "label": "Cleanup song title",
           "default": false,
           "required": false
         },
@@ -238,7 +256,17 @@
       "subtitle": "Spotify",
       "description": "Adds the current song to a playlist of your choice.",
       "mode": "view",
-      "disabledByDefault": true
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "duplicateSongCheck",
+          "description": "Check for duplicates when adding through a Quicklink. The playlist picker always checks membership to offer Add or Remove.",
+          "type": "checkbox",
+          "label": "Check for duplicate songs in Quicklinks",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "removeSongFromPlaylist",
@@ -351,7 +379,7 @@
     },
     {
       "name": "volumeUp",
-      "title": "Turn Volume Up",
+      "title": "Turn Volume up",
       "subtitle": "Spotify",
       "description": "Turn the volume up by 10%.",
       "mode": "no-view",
@@ -386,7 +414,7 @@
       "title": "Current Track",
       "description": "Show the current song/episode state.",
       "mode": "no-view",
-      "interval": "30s",
+      "interval": "1m",
       "disabledByDefault": true
     },
     {
@@ -407,7 +435,7 @@
     },
     {
       "name": "copyArtistAndTitle",
-      "title": "Copy Artist And Title",
+      "title": "Copy Artist and Title",
       "subtitle": "Spotify",
       "description": "Copy the artist and track title of the current song/episode",
       "mode": "no-view",
@@ -448,7 +476,7 @@
           "name": "description",
           "placeholder": "Playlist description",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },
@@ -488,7 +516,7 @@
       "name": "findLyrics",
       "title": "Find Lyrics",
       "subtitle": "Spotify",
-      "description": "Find and display lyrics for the currently playing song from Genius.",
+      "description": "Find and display lyrics for the currently playing song.",
       "mode": "view"
     }
   ],
@@ -530,28 +558,31 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.87.0",
-    "@raycast/utils": "^1.16.2",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
     "@types/async-retry": "^1.4.9",
-    "@types/node-fetch": "^2.6.12",
+    "@types/node-fetch": "^2.6.13",
     "async-retry": "^1.3.3",
-    "genius-lyrics": "^4.4.7",
     "node-fetch": "^3.3.2",
     "oazapfts": "^4.10.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.14.10",
-    "@types/react": "^19.1.8",
-    "eslint": "^8.53.0",
-    "prettier": "^3.4.2",
-    "typescript": "^5.5.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.17.2",
+    "@types/react": "^19.1.10",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "react-test-renderer": "19.0.0",
+    "typescript": "^5.9.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
+    "test": "node --test src/__tests__/library.test.mjs",
+    "test:memory": "node --expose-gc --max-old-space-size=100 src/__tests__/memory.mjs",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
     "generate-spotify-client": "oazapfts --optimistic ./fixed-spotify-open-api.yml ./src/helpers/spotify.api.ts"
   },
@@ -726,6 +757,7 @@
     ]
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

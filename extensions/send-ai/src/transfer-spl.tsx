@@ -47,6 +47,9 @@ function TransferSPL() {
   });
 
   async function handleTransfer(values: FormValues) {
+    if (isLoading) {
+      return;
+    }
     try {
       setIsLoading(true);
       const amount = parseFloat(values.amount);

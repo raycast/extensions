@@ -1,0 +1,390 @@
+{
+  "contractDocument": "../../RaycastHomebrewReadinessV2.md",
+  "entries": [
+    {
+      "expected": {
+        "decode": "acceptSchema3",
+        "reviewGate": "eligibleWithInjectedAuthorization",
+        "selectedTargetIndices": [
+          0,
+          1
+        ]
+      },
+      "file": "export-ready.json",
+      "kind": "export",
+      "producerPossible": true,
+      "sha256": "8ccc2de1bc3adab20ec08196781f49fd27d6038d6018d7df7fab756f4b0d937a"
+    },
+    {
+      "expected": {
+        "blockedTargetReasons": {
+          "1": "sourceFailed",
+          "2": "sourceUnverified"
+        },
+        "decode": "acceptSchema3",
+        "globalStatus": "failed",
+        "reviewGate": "eligibleWithInjectedAuthorization",
+        "selectedTargetIndices": [
+          0
+        ]
+      },
+      "file": "export-global-failed-ready-one.json",
+      "kind": "export",
+      "producerPossible": true,
+      "sha256": "ed70387a63bce0eaab06f6bdee507cb0521de9b064aa1d7e54db1b8f26159b8c"
+    },
+    {
+      "expected": {
+        "decode": "acceptSchema3",
+        "reviewGate": "sourceFailed"
+      },
+      "file": "export-source-failed.json",
+      "kind": "export",
+      "producerPossible": true,
+      "sha256": "e9823afacf5ba0f386d086fc9b001cfa6b5710f70a0484cd3941be04ff987c0a"
+    },
+    {
+      "expected": {
+        "decode": "acceptSchema3",
+        "reviewGate": "sourceUnverified"
+      },
+      "file": "export-proof-missing.json",
+      "kind": "export",
+      "producerPossible": true,
+      "sha256": "5981c4a67ca7ecb83a521cb6b846309bbd0ab486e6f1e67f2ff8d96bbe31f051"
+    },
+    {
+      "expected": {
+        "decode": "acceptSchema3",
+        "reviewGate": "sourceEvidenceExpired"
+      },
+      "file": "export-proof-expired.json",
+      "kind": "export",
+      "producerPossible": true,
+      "sha256": "a1aacdacac84079af6fd31ef85abd00cdaa5a18455c3ede4f595908c3e05642b"
+    },
+    {
+      "expected": {
+        "decode": "acceptSchema3",
+        "previousCompletionIsCurrent": false,
+        "reviewGate": "checkIncomplete"
+      },
+      "file": "export-new-check.json",
+      "kind": "export",
+      "producerPossible": true,
+      "sha256": "e6e62a34d5b6505ce606afd397a999c7e3ecf2dfcfa012c7e3eb7d551461b2c0"
+    },
+    {
+      "expected": {
+        "decode": "acceptSchema3",
+        "previousCompletionIsCurrent": false,
+        "reviewGate": "checkIncomplete"
+      },
+      "file": "export-inventory-changed.json",
+      "kind": "export",
+      "producerPossible": true,
+      "sha256": "e70e9c1d9660397502dbdb0bf3a33a861b1e77fb55c4be4b155ab62901a3f311"
+    },
+    {
+      "expected": {
+        "decode": "rejectInvalidReadiness"
+      },
+      "file": "export-invalid-duplicate-evidence.json",
+      "kind": "export",
+      "producerPossible": false,
+      "sha256": "d8119c265cfdf0ee1d5e2372ce2c753f823679f4b75684b569f1fee49b9c9e04"
+    },
+    {
+      "expected": {
+        "decode": "rejectInvalidReadiness"
+      },
+      "file": "export-invalid-nested-proof.json",
+      "kind": "export",
+      "producerPossible": false,
+      "sha256": "f8a5dd5e6c341605946176c422a1c2b76be5a90a0b4669c0c798ab19d7674eed"
+    },
+    {
+      "expected": {
+        "decode": "acceptSchema3",
+        "reviewGate": "staleSourceEvidence"
+      },
+      "file": "export-proof-future.json",
+      "kind": "export",
+      "producerPossible": false,
+      "sha256": "99f6b43682eae30a83e3c5d01d1db8fc117c72bdc506eaed3e8f8afada679a17"
+    },
+    {
+      "expected": {
+        "decode": "acceptSchema3",
+        "reviewGate": "staleSourceEvidence"
+      },
+      "file": "export-proof-after-completion.json",
+      "kind": "export",
+      "producerPossible": false,
+      "sha256": "87c7c127c8e0a898c52a90c45f45ee0d7f05510d01a64b0b917205d762473eae"
+    },
+    {
+      "evaluationAt": "2026-09-12T00:00:00.000Z",
+      "expected": {
+        "executorCallsBeforeConfirmation": 0,
+        "requestValidation": "accept",
+        "review": "accepted"
+      },
+      "file": "request-v2-single.json",
+      "kind": "request",
+      "metadataFile": "export-global-failed-ready-one.json",
+      "sha256": "28c47506ccfeb2e6f868368c011280437568a62241bab7203d5a3d046c6892f3"
+    },
+    {
+      "evaluationAt": "2026-09-12T00:00:00.000Z",
+      "expected": {
+        "executorCallsBeforeConfirmation": 0,
+        "requestValidation": "accept",
+        "review": "accepted"
+      },
+      "file": "request-v2-multiple.json",
+      "kind": "request",
+      "metadataFile": "export-ready.json",
+      "sha256": "5a7bda2283724a9fd4043834047640db117971f828453d15a25b28988f43fe94"
+    },
+    {
+      "evaluationAt": "2026-09-12T00:00:00.000Z",
+      "expected": {
+        "executorCalls": 0,
+        "requestValidation": "sourceUnverified"
+      },
+      "file": "request-v2-missing-proof.json",
+      "kind": "request",
+      "metadataFile": "export-ready.json",
+      "sha256": "1ad9d3a056f378c5f0b158ece0f0a341ee567feabd264090dfdd19d718e1b575"
+    },
+    {
+      "expected": {
+        "lookup": "readyProofFromPreviousCheck",
+        "publicExport": false
+      },
+      "file": "stale-proof-lookup.json",
+      "kind": "injectedReadinessLookup",
+      "sha256": "a934d6f2b1cfc1b03945d3d986fbde7c9a0d8e76d82ffe3f9c36c7650f6486db"
+    },
+    {
+      "evaluationAt": "2026-09-12T00:00:00.000Z",
+      "expected": {
+        "executorCalls": 0,
+        "reason": "staleSourceEvidence",
+        "requestValidation": "accept",
+        "review": "rejected"
+      },
+      "file": "request-v2-stale-evidence.json",
+      "kind": "request",
+      "lookupFile": "stale-proof-lookup.json",
+      "metadataFile": "export-ready.json",
+      "sha256": "b004115b6ad9e6178153bb0ebea847d25338bf0e0a7ab5df0064c6bd9231f1cd"
+    },
+    {
+      "evaluationAt": "2026-09-12T00:00:00.000Z",
+      "expected": {
+        "allOrNone": true,
+        "executorCalls": 0,
+        "reason": "sourceFailed",
+        "requestValidation": "accept",
+        "review": "rejected"
+      },
+      "file": "request-v2-mixed.json",
+      "kind": "request",
+      "lookupFile": "revoked-proof-lookup.json",
+      "metadataFile": "export-global-failed-ready-one.json",
+      "sha256": "0b231e93efe41edaa0d793919ee1de92e4f7cebe4cc73416bacc4404561cb85e"
+    },
+    {
+      "expected": {
+        "lookup": "revokedEvidence",
+        "publicExport": false
+      },
+      "file": "revoked-proof-lookup.json",
+      "kind": "injectedReadinessLookup",
+      "sha256": "f063ba462f9f346d1a4a5d96c12e5acf1d287e6669c6b80d3e4ed20be66a573f"
+    },
+    {
+      "evaluationAt": "2026-09-12T00:00:00.000Z",
+      "expected": {
+        "executorCalls": 0,
+        "requestValidation": "unsupportedVersion"
+      },
+      "file": "request-v1-unsupported.json",
+      "kind": "request",
+      "metadataFile": "export-ready.json",
+      "sha256": "438a434df042cb89051c5624593dee817f11f4d11901f96f10737417a6a3a14c"
+    },
+    {
+      "evaluationAt": "2026-09-12T00:00:00.000Z",
+      "expected": {
+        "executorCalls": 0,
+        "requestValidation": "duplicate"
+      },
+      "file": "request-v2-duplicate-proof.json",
+      "kind": "request",
+      "metadataFile": "export-ready.json",
+      "sha256": "deff05efbe180493be35050f56a1303e9e82d478d9a159ecf71725bfa4390c62"
+    },
+    {
+      "evaluationAt": "2026-09-12T00:00:00.000Z",
+      "expected": {
+        "aggregate": "accepted",
+        "completionClaim": false,
+        "targetPhases": [
+          "accepted",
+          "accepted"
+        ]
+      },
+      "file": "receipt-accepted.json",
+      "kind": "receiptEnvelope",
+      "requestFile": "request-v2-multiple.json",
+      "sha256": "ea8f75406d5f47c0359257132a1c27e1a7068a875267c86bbdd057087aebeb97",
+      "syntheticStateExample": true
+    },
+    {
+      "evaluationAt": "2026-09-12T00:00:00.000Z",
+      "expected": {
+        "aggregate": "cancelled",
+        "completionClaim": false,
+        "targetPhases": [
+          "cancelled",
+          "cancelled"
+        ]
+      },
+      "file": "receipt-cancelled.json",
+      "kind": "receiptEnvelope",
+      "requestFile": "request-v2-multiple.json",
+      "sha256": "1e206aa17daa2a41535fa98f2e80907a663cf05a44e02e80d3dca236b3c59bdd",
+      "syntheticStateExample": true
+    },
+    {
+      "evaluationAt": "2026-09-12T00:00:00.000Z",
+      "expected": {
+        "aggregate": "failed",
+        "allTargetsCompleted": false,
+        "targetPhases": [
+          "completed",
+          "failed"
+        ]
+      },
+      "file": "receipt-partial-failure.json",
+      "kind": "receiptEnvelope",
+      "requestFile": "request-v2-multiple.json",
+      "sha256": "85f378c99284a42d30cafdea2efcd07c17a8c5ff84eb1fa1fce29af62db6215a",
+      "syntheticStateExample": true
+    },
+    {
+      "evaluationAt": "2026-09-12T00:00:00.000Z",
+      "expected": {
+        "aggregate": "verificationPending",
+        "completionClaim": false,
+        "targetPhases": [
+          "verificationPending",
+          "verificationPending"
+        ]
+      },
+      "file": "receipt-verification-pending.json",
+      "kind": "receiptEnvelope",
+      "requestFile": "request-v2-multiple.json",
+      "sha256": "6d8a175011132d409853451c72451683d1cb7d137389deb14f659ea1ba8b6a22",
+      "syntheticStateExample": true
+    },
+    {
+      "evaluationAt": "2026-09-12T00:00:00.000Z",
+      "expected": {
+        "aggregate": "completed",
+        "nativeExecutionEvidence": false,
+        "requiresAuthoritativePhysicalVerification": true,
+        "targetPhases": [
+          "completed",
+          "completed"
+        ]
+      },
+      "file": "receipt-completed.json",
+      "kind": "receiptEnvelope",
+      "requestFile": "request-v2-multiple.json",
+      "sha256": "1a81bd7734ac8d79ebec3725ceb86faa681d7757baf6e64eca984d6524774901",
+      "syntheticStateExample": true
+    },
+    {
+      "evaluationAt": "2026-09-12T00:00:00.000Z",
+      "expected": {
+        "decode": "preserveSchema1History",
+        "execute": false
+      },
+      "file": "receipt-legacy-history.json",
+      "kind": "receiptEnvelope",
+      "requestFile": "request-v1-unsupported.json",
+      "sha256": "24895369d778dfa7a1b2b69a6e3d13fb576025c89b15cce03e5672c639cddb61",
+      "syntheticStateExample": true
+    },
+    {
+      "evaluationAt": "2026-09-12T00:00:00.000Z",
+      "expected": {
+        "decode": "preserveInnerVersions2And1",
+        "legacyExecutionUpgrade": false
+      },
+      "file": "receipt-mixed-history.json",
+      "kind": "receiptEnvelope",
+      "sha256": "18a28463f1ccd4e809f5b181fb0233bd1292628c223c474e1e38d50ec9d6d93d",
+      "syntheticStateExample": true
+    }
+  ],
+  "exportSchemaVersion": 3,
+  "fixtureClock": "2026-09-12T00:00:00.000Z",
+  "fixtureIdentity": {
+    "apps": [
+      "E77F09D1-EF1B-54DB-8666-11B1EEB8F469",
+      "22C3432D-44D5-52C5-965E-04C440617C35",
+      "A42EA2FE-0EC8-566B-9E28-6F2F5ACBF072"
+    ],
+    "evidence": [
+      "CF25F52B-AABB-5F8C-99E1-02EF51293F49",
+      "80D15174-1AE7-5458-BEC3-052FA22988E6",
+      "483FF5F5-AFE8-5BEE-ADBD-2B60C41E2DCD"
+    ]
+  },
+  "fixtureSessionId": "91A2BD20-5A2B-5BF8-AD00-0970710119E7",
+  "provenance": "Authored anonymous contract examples. No operating application JSON was copied. Runtime and consumer validation are separate.",
+  "receiptSchemaVersion": 2,
+  "receiptSnapshotsAreAlternatives": true,
+  "requestSchemaVersion": 2,
+  "safety": "Use injected clock, inventory, private lookup and executor. Do not open URLs against an installed application.",
+  "schemaVersion": 1,
+  "synthetic": true,
+  "validation": {
+    "debugBuild": "pending root integration",
+    "historicalNativeEvidence": "not reused",
+    "jsonAndSHA256": {
+      "checksByCategory": {
+        "cancelledNotCompleted": 3,
+        "capabilities": 11,
+        "completedRequiresEveryTarget": 1,
+        "completionEvidenceTimeBoundary": 1,
+        "expiredEvidenceBoundary": 1,
+        "exportSchema": 11,
+        "fileSHA256": 27,
+        "futureEvidenceBoundary": 1,
+        "globalFailurePreservedWithPositiveTarget": 1,
+        "jsonParse": 27,
+        "legacyHistoryNotUpgraded": 1,
+        "readinessStructuralExpectation": 11,
+        "receiptEnvelopeSchema": 7,
+        "receiptFullOrderedIdentity": 8,
+        "receiptInnerVersion": 8,
+        "receiptOriginalRequest": 6,
+        "receiptTimeAndRevision": 8,
+        "requestSourceAndCount": 7,
+        "requestStructuralExpectation": 7,
+        "visibleCount": 11
+      },
+      "logicalChecks": 158,
+      "method": "Local Python structural validator; separate Swift Codable and receiver tests remain required",
+      "status": "passed"
+    },
+    "nativeCurrentBinary": "not performed by fixture author",
+    "swiftConsumerTests": "pending root integration"
+  }
+}

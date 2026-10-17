@@ -86,20 +86,22 @@ export default function CardsList({
                                         />
                                     )}
 
-                                    {(item.source || item.domain) && (
+                                    {(item.source?.name || item.source?.domain || item.domain) && (
                                         <List.Item.Detail.Metadata.Label
                                             title="Source"
                                             text={
-                                                item.source
-                                                    ? `${item.source.name} (${item.source.domain})`
-                                                    : item.domain
+                                                item.source?.name
+                                                    ? item.source?.domain
+                                                        ? `${item.source.name} (${item.source.domain})`
+                                                        : item.source.name
+                                                    : item.source?.domain || item.domain || ""
                                             }
                                         />
                                     )}
-                                    {item.authors[0] && (
+                                    {item.authors?.[0] && (
                                         <List.Item.Detail.Metadata.Label title="Author" text={item.authors[0]} />
                                     )}
-                                    {item.curated_by?.first && (
+                                    {item.curated_by?.first?.name && (
                                         <List.Item.Detail.Metadata.Label
                                             title={item.number_of_cards ? "By" : "Added by"}
                                             text={
@@ -142,8 +144,8 @@ export default function CardsList({
                     actions={
                         <ActionPanel>
                             <Action.OpenInBrowser title="Open Card" url={getCardUrl(item)} />
-                            {(item.urls[0] || item.source?.url) && (
-                                <Action.OpenInBrowser title="Open Source" url={item.urls[0] || item.source!.url} />
+                            {(item.urls?.[0] || item.source?.url) && (
+                                <Action.OpenInBrowser title="Open Source" url={item.urls?.[0] || item.source!.url} />
                             )}
                         </ActionPanel>
                     }

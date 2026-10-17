@@ -1,9 +1,10 @@
 import { MenuBarExtra, Icon, Image, Color } from "@raycast/api";
 import { useState } from "react";
-import { FocusText, LongBreakText, ShortBreakText, TimeStoppedPlaceholder } from "./lib/constants";
+import { FocusText, IntervalTitles, LongBreakText, ShortBreakText, TimeStoppedPlaceholder } from "./lib/constants";
 import {
   createInterval,
   getCurrentInterval,
+  getNextIntervalType,
   resetInterval,
   restartInterval,
   pauseInterval,
@@ -13,6 +14,7 @@ import {
   preferences,
   progress,
   endOfInterval,
+  skipInterval,
 } from "./lib/intervals";
 import { secondsToTime } from "./lib/secondsToTime";
 import { Interval, IntervalType } from "./lib/types";
@@ -55,6 +57,11 @@ export default function TogglePomodoroTimer() {
     setCurrentInterval(getCurrentInterval());
   }
 
+  async function onSkip() {
+    await checkDNDExtensionInstall();
+    setCurrentInterval(skipInterval());
+  }
+
   let icon: Image.ImageLike;
   icon = { source: "tomato-0.png", tintColor: IconTint };
   if (currentInterval) {
@@ -64,6 +71,10 @@ export default function TogglePomodoroTimer() {
 
   const stopedPlaceholder = preferences.hideTimeWhenStopped ? undefined : TimeStoppedPlaceholder;
   const title = currentInterval ? secondsToTime(currentInterval.length - duration(currentInterval)) : stopedPlaceholder;
+
+  if (!currentInterval && preferences.hideMenuBarWhenStopped) {
+    return null;
+  }
 
   return (
     <MenuBarExtra icon={icon} title={preferences.enableTimeOnMenuBar ? title : undefined} tooltip={"Pomodoro"}>
@@ -96,6 +107,13 @@ export default function TogglePomodoroTimer() {
             icon={Icon.Repeat}
             onAction={onRestart}
             shortcut={{ modifiers: ["cmd"], key: "t" }}
+          />
+          <MenuBarExtra.Item
+            title="Skip to Next"
+            subtitle={IntervalTitles[getNextIntervalType(currentInterval.type)]}
+            icon={Icon.Forward}
+            onAction={onSkip}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
           />
         </>
       ) : (

@@ -25,7 +25,6 @@
   "dependencies": {
     "@raycast/api": "^1.100.3",
     "@raycast/utils": "^2.0.1",
-    "@sanity/cli": "^3.95.0",
     "@sanity/client": "^7.6.0",
     "configstore": "^6.0.0"
   },

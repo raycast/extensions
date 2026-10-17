@@ -1,10 +1,50 @@
 import { Form, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useGraphsConfig } from "./utils";
 import { usePromise } from "@raycast/utils";
 import { getAllPagesCached } from "./roamApi";
+import { normalizeForSearch, tokenizeQuery, matchesTokens, rankMatch } from "./components";
 
-// TODO: feel like the code in this file is not that good. Need to clean it up. Not doing it right now because I'm short of time and it's working
+const QuicklinkPageDropdown = ({
+  graphPagesData,
+  value,
+  onChange,
+}: {
+  graphPagesData: Record<string, string>;
+  value: string;
+  onChange: (value: string) => void;
+}) => {
+  const [searchText, setSearchText] = useState("");
+  const tokens = tokenizeQuery(searchText);
+  const normalizedQuery = normalizeForSearch(searchText);
+
+  const filteredPages = useMemo(() => {
+    const entries = Object.entries(graphPagesData);
+    const matched = entries.filter(([, nodeTitle]) => matchesTokens(normalizeForSearch(nodeTitle), tokens));
+    if (!searchText) return matched.slice(0, 100);
+    return matched
+      .map(([uid, title]) => [uid, title, rankMatch(normalizeForSearch(title), normalizedQuery)] as const)
+      .sort((a, b) => a[2] - b[2])
+      .slice(0, 100)
+      .map(([uid, title]) => [uid, title] as [string, string]);
+  }, [graphPagesData, tokens.join(" "), normalizedQuery]); // eslint-disable-line
+
+  return (
+    <Form.Dropdown
+      id="graphPageDropdown"
+      title="Specific Page?"
+      value={value}
+      onChange={onChange}
+      filtering={false}
+      onSearchTextChange={setSearchText}
+    >
+      <Form.Dropdown.Item key="dailyNotesPage" value="" title="Daily Notes Page (default)" />
+      {filteredPages.map(([blockUid, nodeTitle]) => (
+        <Form.Dropdown.Item key={blockUid} value={blockUid} title={nodeTitle} />
+      ))}
+    </Form.Dropdown>
+  );
+};
 
 export default function CreateGraphQuicklink() {
   const preferences = getPreferenceValues<Preferences>();
@@ -18,12 +58,22 @@ export default function CreateGraphQuicklink() {
 
   const [openInDropdownValue, setOpenInDropdownValue] = useState<string>(preferences.openIn || "web");
 
-  const { graphsConfig, isGraphsConfigLoading } = useGraphsConfig();
-  const graphNames = Object.keys(graphsConfig);
+  const { graphsConfig, isGraphsConfigLoading, orderedGraphNames } = useGraphsConfig();
+  const graphNames = orderedGraphNames;
+
+  const firstGraphName = useMemo(() => (graphNames.length > 0 ? graphNames[0] : ""), [graphNames[0]]);
+
+  useEffect(() => {
+    if (!isGraphsConfigLoading && !graphNameDropdownValue && firstGraphName) {
+      setGraphNameDropdownValue(firstGraphName);
+    }
+  }, [isGraphsConfigLoading, firstGraphName]);
 
   const { isLoading: isGraphPagesLoading, data: graphPagesData } = usePromise(
     (graphNameDropdownValue: string) => {
       if (!graphNameDropdownValue || graphNameDropdownValue === "useGraphNameTextField") {
+        return Promise.resolve(null);
+      } else if (graphsConfig[graphNameDropdownValue]?.capabilities?.read === false) {
         return Promise.resolve(null);
       } else {
         return getAllPagesCached(graphsConfig[graphNameDropdownValue]);
@@ -61,7 +111,6 @@ export default function CreateGraphQuicklink() {
   const handleGraphChange = (newValue: string) => {
     setGraphNameDropdownValue(newValue);
     if (newValue === "useGraphNameTextField") {
-      // console.log("newValue: ", newValue);
       setShowTextBoxForGraphName(true);
     } else {
       setShowTextBoxForGraphName(false);
@@ -114,18 +163,11 @@ export default function CreateGraphQuicklink() {
         </Form.Dropdown>
       )}
       {!isGraphsConfigLoading && !showTextBoxForGraphName && !isGraphPagesLoading && graphPagesData && (
-        <Form.Dropdown
-          id="graphPageDropdown"
-          title="Specific Page?"
+        <QuicklinkPageDropdown
+          graphPagesData={graphPagesData}
           value={graphPageDropdownValue}
           onChange={setGraphPageDropdownValue}
-        >
-          <Form.Dropdown.Item key="dailyNotesPage" value="" title="Daily Notes Page (default)" />
-          {graphPagesData &&
-            Object.entries(graphPagesData).map(([blockUid, nodeTitle]) => (
-              <Form.Dropdown.Item key={blockUid} value={blockUid} title={nodeTitle} />
-            ))}
-        </Form.Dropdown>
+        />
       )}
     </Form>
   );

@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Form,
+  Icon,
+  Image,
+  Toast,
+  getPreferenceValues,
+  open,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect } from "react";
 
@@ -18,6 +30,7 @@ type IssueFormValues = {
   labels: string[];
   projects: string[];
   milestone: string;
+  issueType: string;
 };
 
 type IssueFormProps = {
@@ -28,10 +41,15 @@ export function IssueForm({ draftValues }: IssueFormProps) {
   const { push } = useNavigation();
   const { data: repositories } = useMyRepositories();
   const { github } = getGitHubClient();
+  // Preferences of the Create Issue command; undefined when the form is pushed from another command
+  const { openInBrowserAfterCreate } = getPreferenceValues<Preferences.CreateIssue>();
 
   const { handleSubmit, itemProps, values, setValue, reset, focus } = useForm<IssueFormValues>({
     async onSubmit(values) {
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Creating issue",
+      });
 
       try {
         const createResult = await github.createIssue({
@@ -41,6 +59,7 @@ export function IssueForm({ draftValues }: IssueFormProps) {
           assigneeIds: values.assignees,
           labelIds: values.labels,
           milestoneId: values.milestone || null,
+          issueTypeId: values.issueType || null,
         });
 
         const issue = createResult?.createIssue?.issue;
@@ -65,6 +84,14 @@ export function IssueForm({ draftValues }: IssueFormProps) {
             shortcut: { modifiers: ["shift", "cmd"], key: "c" },
             onAction: () => Clipboard.copy(issue.url),
           };
+
+          if (openInBrowserAfterCreate) {
+            try {
+              await open(issue.url);
+            } catch {
+              // The issue was created, so failing to open the browser shouldn't mark it as failed
+            }
+          }
         }
 
         reset({
@@ -75,6 +102,7 @@ export function IssueForm({ draftValues }: IssueFormProps) {
           labels: [],
           projects: [],
           milestone: "",
+          issueType: "",
         });
 
         focus("repository");
@@ -93,6 +121,7 @@ export function IssueForm({ draftValues }: IssueFormProps) {
       labels: draftValues?.labels ?? [],
       projects: draftValues?.projects ?? [],
       milestone: draftValues?.milestone ?? "",
+      issueType: draftValues?.issueType ?? "",
     },
     validation: {
       repository: FormValidation.Required,
@@ -108,7 +137,10 @@ export function IssueForm({ draftValues }: IssueFormProps) {
         return Promise.resolve(null);
       }
 
-      return github.dataForRepository({ owner: selectedRepository.owner.login, name: selectedRepository.name });
+      return github.dataForRepository({
+        owner: selectedRepository.owner.login,
+        name: selectedRepository.name,
+      });
     },
     [values.repository],
     { execute: !!values.repository },
@@ -118,9 +150,20 @@ export function IssueForm({ draftValues }: IssueFormProps) {
 
   const labels = data?.repository?.labels?.nodes;
 
-  const projects = data?.repository?.projectsV2?.nodes;
+  const repositoryProjects = data?.repository?.projectsV2?.nodes ?? [];
+  const organizationProjects =
+    data?.repository?.owner?.__typename === "Organization" ? (data.repository.owner.projectsV2?.nodes ?? []) : [];
+  const projects = [...repositoryProjects, ...organizationProjects].filter((project, index, list) => {
+    if (!project) {
+      return false;
+    }
+
+    return list.findIndex((item) => item?.id === project.id) === index;
+  });
 
   const milestones = data?.repository?.milestones?.nodes;
+
+  const issueTypes = data?.repository?.issueTypes?.nodes?.filter((t) => t && t.isEnabled);
 
   useEffect(() => {
     setValue("description", "");
@@ -128,6 +171,7 @@ export function IssueForm({ draftValues }: IssueFormProps) {
     setValue("labels", []);
     setValue("projects", []);
     setValue("milestone", "");
+    setValue("issueType", "");
   }, [values.repository]);
 
   return (
@@ -146,7 +190,10 @@ export function IssueForm({ draftValues }: IssueFormProps) {
               key={repository.id}
               title={repository.nameWithOwner}
               value={repository.id}
-              icon={{ source: repository.owner.avatarUrl, mask: Image.Mask.Circle }}
+              icon={{
+                source: repository.owner.avatarUrl,
+                mask: Image.Mask.Circle,
+              }}
             />
           );
         })}
@@ -203,6 +250,25 @@ export function IssueForm({ draftValues }: IssueFormProps) {
           return <Form.TagPicker.Item key={project.id} title={project.title} value={project.id} />;
         })}
       </Form.TagPicker>
+
+      <Form.Dropdown {...itemProps.issueType} title="Issue Type">
+        <Form.Dropdown.Item value="" title="None" />
+
+        {issueTypes?.map((issueType) => {
+          if (!issueType) {
+            return null;
+          }
+
+          return (
+            <Form.Dropdown.Item
+              icon={{ source: Icon.Dot, tintColor: issueType.color }}
+              key={issueType.id}
+              title={issueType.name}
+              value={issueType.id}
+            />
+          );
+        })}
+      </Form.Dropdown>
 
       <Form.Dropdown {...itemProps.milestone} title="Milestone">
         <Form.Dropdown.Item value="" title="None" />

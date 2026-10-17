@@ -1,4 +1,6 @@
-export function abbreviateNames(names: Array<{ full_name: string }>) {
+import type { InspireAuthor, InspireCollaboration, InspireExternalIdentifier, InspireItem } from "./types";
+
+export function abbreviateNames(names: InspireAuthor[]) {
   return names
     .map(({ full_name }) => {
       const [last, first = ""] = full_name.split(", ");
@@ -8,20 +10,24 @@ export function abbreviateNames(names: Array<{ full_name: string }>) {
     .join(", ");
 }
 
-export function displayCollaborations(collaborations: Array<{ value: string }>) {
+export function displayCollaborations(collaborations: InspireCollaboration[]) {
   return collaborations.map((obj) => obj.value).join(", ");
 }
 
-export function selectUrl(item: any) {
+export function selectUrl(item: InspireItem) {
   if (item.metadata.arxiv_eprints) {
     return `https://arxiv.org/pdf/${item.metadata.arxiv_eprints[0].value}`;
   } else if (
     item.metadata.external_system_identifiers &&
-    item.metadata.external_system_identifiers.some((obj: any) => obj.schema === "KEKSCAN")
+    item.metadata.external_system_identifiers.some((obj: InspireExternalIdentifier) => obj.schema === "KEKSCAN")
   ) {
-    const kekValue: string = item.metadata.external_system_identifiers.find(
-      (obj: any) => obj.schema === "KEKSCAN"
-    ).value;
+    const kekIdentifier = item.metadata.external_system_identifiers.find(
+      (obj: InspireExternalIdentifier) => obj.schema === "KEKSCAN",
+    );
+    if (!kekIdentifier) {
+      return `https://inspirehep.net/literature/${item.id}`;
+    }
+    const kekValue: string = kekIdentifier.value;
     const parts: string[] = kekValue.split("-");
     const urlComponent: string =
       (parts[0].length === 4 ? parts[0] : "19" + parts[0]) +

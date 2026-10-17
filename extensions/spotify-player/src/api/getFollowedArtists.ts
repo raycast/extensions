@@ -1,9 +1,10 @@
+import { withCache } from "../helpers/apiCache";
 import { getErrorMessage } from "../helpers/getError";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 type GetFollowedArtistsProps = { limit?: number };
 
-export async function getFollowedArtists({ limit = 50 }: GetFollowedArtistsProps = {}) {
+async function _getFollowedArtists({ limit = 50 }: GetFollowedArtistsProps = {}) {
   const { spotifyClient } = getSpotifyClient();
 
   try {
@@ -15,3 +16,5 @@ export async function getFollowedArtists({ limit = 50 }: GetFollowedArtistsProps
     throw new Error(error);
   }
 }
+
+export const getFollowedArtists = withCache("api:library:artists", 300000, _getFollowedArtists);

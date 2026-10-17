@@ -1,6 +1,5 @@
 import { List, Icon, Color } from "@raycast/api";
-import { useFetch, Response } from "@raycast/utils";
-import React from "react";
+import { useFetch } from "@raycast/utils";
 import { ENDPOINTS, plex_token } from "../utils/constants";
 import { SessionApiResponse } from "../types/types";
 

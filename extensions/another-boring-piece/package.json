@@ -1,0 +1,139 @@
+{
+  "name": "another-boring-piece",
+  "title": "Art Wallpapers",
+  "description": "Another boring piece. Daily.",
+  "icon": "basalt-icon.png",
+  "author": "yevgen_glukhov",
+  "contributors": [
+    "alexi.build",
+    "0xdhrv"
+  ],
+  "categories": [
+    "Design Tools",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Today's Wallpapers",
+      "description": "View and set today's wallpaper",
+      "mode": "view",
+      "icon": "basalt-icon.png"
+    },
+    {
+      "name": "random-wallpaper",
+      "title": "Set Random Wallpaper",
+      "description": "Set a random wallpaper",
+      "mode": "no-view",
+      "icon": "basalt-icon.png"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "description": "View wallpapers you selected or downloaded",
+      "mode": "view",
+      "icon": "basalt-icon.png"
+    },
+    {
+      "name": "auto-switch-wallpaper",
+      "title": "Auto Switch Wallpaper",
+      "description": "Switch wallpapers automatically on a schedule",
+      "mode": "no-view",
+      "interval": "30m",
+      "icon": "basalt-icon.png",
+      "preferences": [
+        {
+          "name": "refreshIntervalSeconds",
+          "type": "dropdown",
+          "title": "Refresh Interval",
+          "description": "How often the wallpaper should change in the background.",
+          "required": false,
+          "default": "3600",
+          "data": [
+            {
+              "title": "30 Minutes",
+              "value": "1800"
+            },
+            {
+              "title": "1 Hour",
+              "value": "3600"
+            },
+            {
+              "title": "1 Day",
+              "value": "86400"
+            }
+          ]
+        },
+        {
+          "name": "notifyOnSwitch",
+          "type": "checkbox",
+          "title": "Notification",
+          "label": "Show HUD when wallpaper changes",
+          "description": "Display a brief on-screen notice with the artwork title each time the wallpaper changes in the background.",
+          "required": false,
+          "default": false
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-wallpaper-history",
+      "title": "Search Wallpaper History",
+      "description": "Search saved history by artwork words, artist, creation year, usage date range, or action type. Returns unique artworks and their matching events, newest first."
+    },
+    {
+      "name": "set-wallpaper-from-history",
+      "title": "Set Wallpaper from History",
+      "description": "Set a previously used artwork as the desktop wallpaper using its exact wallpaper ID from history search or listing. Records a new selection in history."
+    },
+    {
+      "name": "get-todays-wallpapers",
+      "title": "Get Today's Wallpapers",
+      "description": "Get today's featured artwork and two alternative wallpapers with their details. Does not change the desktop wallpaper."
+    },
+    {
+      "name": "get-random-wallpaper",
+      "title": "Get Random Wallpaper",
+      "description": "Get a random artwork with its wallpaper details. Does not change the desktop wallpaper."
+    },
+    {
+      "name": "get-wallpaper-history",
+      "title": "Get Wallpaper History",
+      "description": "Get previously selected, downloaded, and automatically switched wallpapers, grouped by artwork with every action and timestamp, newest first."
+    },
+    {
+      "name": "set-wallpaper",
+      "title": "Set Wallpaper",
+      "description": "Set an artwork as the desktop wallpaper and record it in history. Use wallpaper details returned by the browsing or history tools."
+    },
+    {
+      "name": "download-wallpaper",
+      "title": "Download Wallpaper",
+      "description": "Save an artwork to the Downloads folder and record it in history. Use wallpaper details returned by the browsing or history tools. Does not change the desktop wallpaper."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.0.1",
+    "@types/react": "19.2.17",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "build": "ray build",
+    "dev": "ray dev",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

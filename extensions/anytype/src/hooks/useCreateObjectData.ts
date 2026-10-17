@@ -11,7 +11,6 @@ export function useCreateObjectData(initialValues?: CreateObjectFormValues) {
   const [selectedTemplateId, setSelectedTemplateId] = useState(initialValues?.templateId || "");
   const [selectedListId, setSelectedListId] = useState(initialValues?.listId || "");
   const [listSearchText, setListSearchText] = useState("");
-  const [objectSearchText, setObjectSearchText] = useState("");
 
   const { spaces, spacesError, isLoadingSpaces } = useSpaces();
   const {
@@ -52,24 +51,21 @@ export function useCreateObjectData(initialValues?: CreateObjectFormValues) {
     initialData: [],
   });
 
-  const { objects, objectsError, isLoadingObjects } = useSearch(selectedSpaceId, objectSearchText, []);
-
   useEffect(() => {
-    if (spacesError || typesError || templatesError || listsError || objectsError) {
-      showFailureToast(spacesError || typesError || templatesError || listsError || objectsError, {
+    if (spacesError || typesError || templatesError || listsError) {
+      showFailureToast(spacesError || typesError || templatesError || listsError, {
         title: "Failed to fetch latest data",
       });
     }
-  }, [spacesError, typesError, templatesError, listsError, objectsError]);
+  }, [spacesError, typesError, templatesError, listsError]);
 
-  const isLoading = isLoadingSpaces || isLoadingTypes || isLoadingTemplates || isLoadingLists || isLoadingObjects;
+  const isLoadingData = isLoadingSpaces || isLoadingTypes || isLoadingTemplates || isLoadingLists;
 
   return {
     spaces,
     types,
     templates,
     lists,
-    objects,
     selectedSpaceId,
     setSelectedSpaceId,
     selectedTypeId,
@@ -80,8 +76,6 @@ export function useCreateObjectData(initialValues?: CreateObjectFormValues) {
     setSelectedListId,
     listSearchText,
     setListSearchText,
-    objectSearchText,
-    setObjectSearchText,
-    isLoading,
+    isLoadingData,
   };
 }

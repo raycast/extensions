@@ -23,7 +23,7 @@ export interface CreateTypeRequest {
   key?: string;
   name: string;
   plural_name: string;
-  icon: ObjectIcon;
+  icon: ObjectIcon | null;
   layout: TypeLayout;
   properties: PropertyLink[];
 }
@@ -43,7 +43,7 @@ export interface RawType {
   key: string;
   name: string;
   plural_name: string;
-  icon: ObjectIcon;
+  icon: ObjectIcon | null;
   layout: ObjectLayout;
   archived: boolean;
   properties: RawProperty[];

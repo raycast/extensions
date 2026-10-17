@@ -1,6 +1,7 @@
 import { showToast, Toast, clearSearchBar } from "@raycast/api";
 
 import { createTimeEntry, stopTimeEntry, TimeEntry } from "@/api";
+import { refreshMenuBar } from "@/helpers/common";
 
 export function useTimeEntryActions(revalidateRunningTimeEntry: () => void, revalidateTimeEntries: () => void) {
   async function resumeTimeEntry(timeEntry: TimeEntry) {
@@ -14,9 +15,10 @@ export function useTimeEntryActions(revalidateRunningTimeEntry: () => void, reva
         billable: timeEntry.billable,
       });
       revalidateRunningTimeEntry();
+      refreshMenuBar();
       await showToast(Toast.Style.Success, "Time entry resumed");
       await clearSearchBar({ forceScrollToTop: true });
-    } catch (e) {
+    } catch {
       await showToast(Toast.Style.Failure, "Failed to resume time entry");
     }
   }
@@ -28,7 +30,8 @@ export function useTimeEntryActions(revalidateRunningTimeEntry: () => void, reva
       await showToast(Toast.Style.Success, `Stopped time entry`);
       revalidateRunningTimeEntry();
       revalidateTimeEntries();
-    } catch (e) {
+      refreshMenuBar();
+    } catch {
       await showToast(Toast.Style.Failure, "Failed to stop time entry");
     }
   }

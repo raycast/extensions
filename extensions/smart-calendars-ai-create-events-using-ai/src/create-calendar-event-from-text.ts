@@ -14,11 +14,7 @@ export default async function Command() {
 
     // Check if we have text to process
     if (!clipboardText) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No text found in clipboard",
-        message: "Copy some text first",
-      });
+      await showFailureToast("No text found in clipboard");
       return;
     }
 
@@ -38,7 +34,7 @@ export default async function Command() {
     const url = `smartcalendars://${encodedText}`;
 
     // Update toast
-    loadingToast.title = "Creating calendar event...";
+    loadingToast.title = "Creating calendar event/reminder...";
 
     // Open the URL
     await open(url);
@@ -46,11 +42,11 @@ export default async function Command() {
     // Show success toast
     await showToast({
       style: Toast.Style.Success,
-      title: "Calendar event created",
+      title: "Calendar event/reminder created",
       message: "Text sent to Smart Calendars app",
     });
   } catch (error) {
     // Show error toast
-    await showFailureToast(error, { title: "Failed to create calendar event" });
+    await showFailureToast(error, { title: "Failed to create calendar event/reminder" });
   }
 }

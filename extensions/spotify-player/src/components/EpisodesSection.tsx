@@ -15,7 +15,9 @@ export function EpisodesSection({ episodes, limit, title = "Episodes" }: Episode
 
   return (
     <List.Section title={title}>
-      {items?.map((episode) => <EpisodeListItem key={episode.id} episode={episode} />)}
+      {items?.map((episode) => (
+        <EpisodeListItem key={episode.id} episode={episode} />
+      ))}
     </List.Section>
   );
 }

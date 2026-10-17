@@ -2,6 +2,7 @@ import { ActionPanel, Action, Detail, getPreferenceValues, environment } from "@
 import { BugReportCollectDataAction, BugReportOpenAction } from "~/components/actions";
 import { BUG_REPORT_URL } from "~/components/actions/BugReportOpenAction";
 import { EnsureCliBinError, InstalledCLINotFoundError, getErrorString } from "~/utils/errors";
+import { platform } from "~/utils/platform";
 
 const LINE_BREAK = "\n\n";
 const CLI_INSTALLATION_HELP_URL = "https://bitwarden.com/help/cli/#download-and-install";
@@ -54,7 +55,9 @@ const TroubleshootingGuide = ({ error }: TroubleshootingGuideProps) => {
     messages.push(
       ">## Technical details 🤓",
       isArchError &&
-        "⚠️ We suspect that your Bitwarden CLI was installed using a version of NodeJS that's incompatible with your system architecture (e.g. x64 NodeJS on a M1/Apple Silicon Mac). Please make sure your have the correct versions of your software installed (Homebrew → NodeJS → Bitwarden CLI).",
+        `⚠️ We suspect that your Bitwarden CLI was installed using a version of NodeJS that's incompatible with your system architecture (e.g. x64 NodeJS on a M1/Apple Silicon Mac). Please make sure your have the correct versions of your software installed (e.g., ${
+          platform === "macos" ? "Homebrew, " : ""
+        }NodeJS, and Bitwarden CLI).`,
       getCodeBlock(errorString)
     );
   }
@@ -69,10 +72,7 @@ const TroubleshootingGuide = ({ error }: TroubleshootingGuideProps) => {
             <BugReportCollectDataAction />
           </ActionPanel.Section>
           {needsToInstallCli && (
-            <>
-              <Action.CopyToClipboard title="Copy Homebrew Installation Command" content="brew install bitwarden-cli" />
-              <Action.OpenInBrowser title="Open Installation Guide" url={CLI_INSTALLATION_HELP_URL} />
-            </>
+            <Action.OpenInBrowser title="Open Installation Guide" url={CLI_INSTALLATION_HELP_URL} />
           )}
         </ActionPanel>
       }

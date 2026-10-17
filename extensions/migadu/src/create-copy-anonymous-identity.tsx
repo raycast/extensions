@@ -1,5 +1,5 @@
-import { Form, ActionPanel, Action, getPreferenceValues, showHUD, PopToRootType, Clipboard, Icon } from "@raycast/api";
-import { createMailboxIdentity, getMailboxes } from "./utils/api";
+import { Form, ActionPanel, Action, showHUD, PopToRootType, Clipboard, Icon } from "@raycast/api";
+import { createMailboxIdentity, getDomains, getMailboxes } from "./utils/api";
 import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { uniqueNamesGenerator } from "unique-names-generator";
 import { IdentityCreate, Mailbox } from "./utils/types";
@@ -8,16 +8,16 @@ import { UNIQUE_NAME_GENERATOR_CONFIG } from "./utils/constants";
 
 type FormValue = Pick<IdentityCreate, "name" | "local_part"> & { mailbox: string };
 
-const PREFERENCES = getPreferenceValues<Preferences>();
-
 // Will open a GitHub bug report titled "[Migadu] ..."
 const bugReportUrl = `https://github.com/raycast/extensions/issues/new?body=%3C!--%0APlease%20update%20the%20title%20above%20to%20consisely%20describe%20the%20issue%0A--%3E%0A%0A%23%23%23%20Extension%0A%0Ahttps://www.raycast.com/xmok/migadu%0A%0A%23%23%23%20Description%0A%0A%3C!--%0APlease%20provide%20a%20clear%20and%20concise%20description%20of%20what%20the%20bug%20is.%20Include%0Ascreenshots%20if%20needed.%20Please%20test%20using%20the%20latest%20version%20of%20the%20extension,%20Raycast%20and%20API.%0A--%3E%0A%23%23%23%20Steps%20To%20Reproduce%0A%0A%3C!--%0AYour%20bug%20will%20get%20fixed%20much%20faster%20if%20the%20extension%20author%20can%20easily%20reproduce%20it.%20Issues%20without%20reproduction%20steps%20may%20be%20immediately%20closed%20as%20not%20actionable.%0A--%3E%0A%0A1.%20In%20this%20environment...%0A2.%20With%20this%20config...%0A3.%20Run%20'...'%0A4.%20See%20error...%0A%0A%23%23%23%20Current%20Behaviour%0A%0A%0A%23%23%23%20Expected%20Behaviour%0A%0A%23%23%23%20Raycast%20version%0AVersion:%201.83.2%0A&title=%5BMigadu%5D%20...&template=extension_bug_report.yml&labels=extension,bug&extension-url=https://www.raycast.com/xmok/migadu&description`;
 
 export default function CreateAnonymousIdentityCommand() {
   const mailboxesQuery = useCachedPromise(
     async () => {
-      const domains = PREFERENCES.domains.split(",");
-      const responses = await Promise.all(domains.map((domain) => getMailboxes(domain.trim(), "error")));
+      const domainsResponse = await getDomains();
+      if ("error" in domainsResponse) return [];
+      const domains = domainsResponse.domains;
+      const responses = await Promise.all(domains.map((domain) => getMailboxes(domain.name, "error")));
       const mailboxes = responses.flatMap((response) => {
         if ("error" in response) {
           // the API call already shows an error message. If all calls fail, no email can be selected, which is fine.
@@ -107,10 +107,8 @@ export default function CreateAnonymousIdentityCommand() {
           <Action
             onAction={regenerateLocalPart}
             title="Generate New Address"
-            shortcut={{
-              key: "r",
-              modifiers: ["ctrl"],
-            }}
+            // eslint-disable-next-line @raycast/prefer-common-shortcut
+            shortcut={{ modifiers: ["ctrl"], key: "r" }}
             icon={Icon.RotateClockwise}
           />
           {/*

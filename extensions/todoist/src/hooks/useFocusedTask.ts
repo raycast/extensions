@@ -2,32 +2,36 @@ import { getPreferenceValues, Toast, environment, showToast } from "@raycast/api
 import { useCachedState } from "@raycast/utils";
 import { useEffect } from "react";
 
-import { initialSync, SyncData, Task, updateTask } from "../api";
+import { CachedDataParams, initialSync, SyncData, Task, updateTask } from "../api";
 import { truncateMiddle } from "../helpers/menu-bar";
 
-import useCachedData from "./useCachedData";
-
-export const useFocusedTask = () => {
+/** Takes the cached data from the caller, so the hook doesn't parse the whole cache again for each task. */
+export const useFocusedTask = ({ data, setData }: CachedDataParams) => {
   const { taskWidth } = getPreferenceValues<Preferences.MenuBar>();
   const { focusLabelName } = getPreferenceValues<Preferences>();
 
   const { commandMode } = environment;
 
   const [focusedTask, setFocusedTask] = useCachedState("todoist.focusedTask", { id: "", content: "" });
-  const [data, setData] = useCachedData();
 
   async function unfocusTask() {
+    if (!focusedTask.id) {
+      return;
+    }
+
     if (focusLabelName && focusLabelName.trim().length > 0) {
       if (commandMode === "view") {
         await showToast({ style: Toast.Style.Animated, title: "Removing focus label" });
       }
 
       // Need to sync the task before removing the label to avoid race condition.
-      const data = (await initialSync()) as SyncData;
-      const labels = data.items
-        .find((task: Task) => task.id === focusedTask.id)
-        ?.labels.filter((label) => label !== focusLabelName.trim());
-      await updateTask({ id: focusedTask.id, labels }, { data, setData });
+      const syncData = (await initialSync()) as SyncData;
+      const task = syncData.items.find((t) => t.id === focusedTask.id);
+
+      if (task) {
+        const labels = task.labels.filter((label) => label !== focusLabelName.trim());
+        await updateTask({ id: focusedTask.id, labels }, { data: syncData, setData });
+      }
     }
 
     setFocusedTask({ id: "", content: "" });
@@ -59,3 +63,5 @@ export const useFocusedTask = () => {
 
   return { focusedTask, unfocusTask, focusTask };
 };
+
+export type FocusedTaskState = ReturnType<typeof useFocusedTask>;

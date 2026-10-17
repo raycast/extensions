@@ -1,4 +1,4 @@
-import { Color, getPreferenceValues, Icon, launchCommand, LaunchType, open } from "@raycast/api";
+import { Color, getPreferenceValues, Icon, launchCommand, LaunchType, open, Keyboard } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useMemo } from "react";
 
@@ -24,6 +24,19 @@ function getMaxPullRequestsPreference(): number {
 }
 
 function getPullRequestStatusIcon(pr: PullRequestFieldsFragment): Icon | string {
+  if (pr.merged) {
+    return "pull-request-merged.svg";
+  }
+  if (pr.closed) {
+    return "pull-request-closed.svg";
+  }
+  if (pr.isDraft) {
+    return "pull-request-draft.svg";
+  }
+  if (pr.isInMergeQueue) {
+    return "pull-request-merge-queue.svg";
+  }
+
   const pullRequestStatus = pr.commits.nodes ? pr.commits.nodes[0]?.commit.statusCheckRollup?.state : null;
   switch (pullRequestStatus) {
     case "SUCCESS":
@@ -47,6 +60,7 @@ function MyPullRequestsMenu() {
     includeReviewed,
     includeReviewRequests,
     includeRecentlyClosed,
+    includeDrafts,
     useUnreadIndicator,
     repositoryFilterMode,
     repositoryList,
@@ -72,6 +86,7 @@ function MyPullRequestsMenu() {
     includeRecentlyClosed,
     includeReviewRequests,
     includeReviewed,
+    includeDrafts,
     filterMode: repositoryFilterMode,
     repositoryList: repositoryListArray,
   });
@@ -143,7 +158,7 @@ function MyPullRequestsMenu() {
         <MenuBarItem
           title="Open My Pull Requests"
           icon={Icon.AppWindowList}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
           onAction={() => launchMyPullRequestsCommand()}
         />
         <SortMenuBarAction {...{ sortQuery, setSortQuery, data: PR_SORT_TYPES_TO_QUERIES }} />

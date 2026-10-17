@@ -33,7 +33,7 @@ export function withAuthorization(children: ReactNode) {
           },
         });
       },
-    }
+    },
   );
 
   if (!authorized) {

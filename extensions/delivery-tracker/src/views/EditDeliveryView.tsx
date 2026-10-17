@@ -1,8 +1,8 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
 import carriers from "../carriers";
 import { FormValidation, useForm } from "@raycast/utils";
-import { Delivery } from "../delivery";
-import { PackageMap } from "../package";
+import { Delivery } from "../types/delivery";
+import { PackageMap } from "../types/package";
 import { useState } from "react";
 
 interface EditDeliveryForm {
@@ -10,6 +10,7 @@ interface EditDeliveryForm {
   carrier: string;
   trackingNumber: string;
   manualDeliveryDate?: Date | null;
+  notes?: string;
 }
 
 export default function EditDeliveryView({
@@ -48,6 +49,7 @@ export default function EditDeliveryView({
         delivery.trackingNumber = deliveryForm.trackingNumber;
         delivery.carrier = deliveryForm.carrier;
         delivery.manualDeliveryDate = deliveryForm.manualDeliveryDate ?? undefined;
+        delivery.notes = deliveryForm.notes;
 
         await setDeliveries(deliveries);
 
@@ -71,12 +73,14 @@ export default function EditDeliveryView({
       carrier: delivery.carrier,
       trackingNumber: delivery.trackingNumber,
       manualDeliveryDate: delivery.manualDeliveryDate,
+      notes: delivery.notes,
     },
     validation: {
       name: FormValidation.Required,
       carrier: FormValidation.Required,
       trackingNumber: FormValidation.Required,
       manualDeliveryDate: undefined,
+      notes: undefined,
     },
   });
 
@@ -116,6 +120,7 @@ export default function EditDeliveryView({
           {...itemProps.manualDeliveryDate}
         />
       )}
+      <Form.TextArea title="Notes" placeholder="Optional notes about this delivery" {...itemProps.notes} />
     </Form>
   );
 }

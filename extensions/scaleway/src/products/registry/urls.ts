@@ -1,13 +1,13 @@
-import type { Registry } from '@scaleway/sdk'
+import type { Registryv1 } from '@scaleway/sdk'
 import { CONSOLE_URL } from '../../constants'
 
-export const getNamespaceUrl = (namespace: Registry.v1.Namespace) =>
+export const getNamespaceUrl = (namespace: Registryv1.Namespace) =>
   `${CONSOLE_URL}/registry/namespaces/${namespace.region}/${namespace.id}`
 
 export const getImageUrl = ({
   namespace,
   image,
 }: {
-  namespace: Registry.v1.Namespace
-  image: Registry.v1.Image
+  namespace: Registryv1.Namespace
+  image: Registryv1.Image
 }) => `${getNamespaceUrl(namespace)}/images/${image.id}`

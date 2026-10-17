@@ -1,11 +1,11 @@
-import { Toast, showToast, closeMainWindow } from "@raycast/api";
+import { Toast, closeMainWindow, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 async function script(): Promise<void> {
   const script = `
   tell application "Mail"
 	set visible of every window to false
-	
+
 	set allAccounts to every account
 	repeat with anAccount in allAccounts
 		set allMailboxes to every mailbox of anAccount
@@ -16,7 +16,7 @@ async function script(): Promise<void> {
 			end repeat
 		end repeat
 	end repeat
-	
+
 	close every window
 	activate
 	delay 1 -- Wait for a second to ensure Mail app is activated

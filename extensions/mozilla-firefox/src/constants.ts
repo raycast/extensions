@@ -6,21 +6,18 @@ export const SEARCH_ENGINE: { [key: string]: string } = {
   duckduckgo: `https://duckduckgo.com/?q=`,
 };
 
-export const DownloadText = `
+const makeDownloadText = (installer: string, installerUrl: string) => `
   # 🚨Error: Mozilla Firefox browser is not installed
   ## This extension depends on Mozilla Firefox browser. You must install it to continue.
   
-  If you have [Homebrew](https://brew.sh/) installed then press ⏎ (Enter Key) to install Mozilla Firefox browser.
+  If you have [${installer}](${installerUrl}) installed then press ⏎ (Enter Key) to install Mozilla Firefox browser.
   [Click here](https://www.mozilla.org/en-US/firefox/new/) if you want to download manually.
   
   [![Mozilla Firefox](https://mozilla.design/files/2019/10/logo-firefox.svg)]()
 `;
 
-export const NoBookmarksText = `
-# 🚨Error: Mozilla Firefox browser has no bookmarks. Please add some bookmarks to continue using this command.
-
-[![Mozilla Firefox](https://mozilla.design/files/2019/10/logo-firefox.svg)]()
-`;
+export const DownloadText = makeDownloadText("Homebrew", "https://brew.sh/");
+export const DownloadTextWindows = makeDownloadText("Winget", "https://aka.ms/winget");
 
 export const UnknownErrorText = `
 # 🚨Error: Something happened while trying to run your command
@@ -31,4 +28,3 @@ export const UnknownErrorText = `
 export const DEFAULT_ERROR_TITLE = "An Error Occurred";
 
 export const NOT_INSTALLED_MESSAGE = "Mozilla Firefox not installed";
-export const NO_BOOKMARKS_MESSAGE = "Mozilla Firefox has no bookmarks";

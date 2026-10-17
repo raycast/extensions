@@ -1,9 +1,10 @@
+import { withCache } from "../helpers/apiCache";
 import { getErrorMessage } from "../helpers/getError";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 type GetUserPlaylistsProps = { limit?: number };
 
-export async function getMyPlaylists({ limit = 50 }: GetUserPlaylistsProps = {}) {
+async function _getMyPlaylists({ limit = 50 }: GetUserPlaylistsProps = {}) {
   const { spotifyClient } = getSpotifyClient();
   let response = null;
   let nextUrl = null;
@@ -14,18 +15,24 @@ export async function getMyPlaylists({ limit = 50 }: GetUserPlaylistsProps = {})
 
     while (nextUrl) {
       const nextResponse = await spotifyClient.getNext(nextUrl);
-      response = {
-        ...response,
-        ...nextResponse,
-        items: [...(response?.items ?? []), ...(nextResponse.items ?? [])],
-      };
+      (response.items ??= []).push(...(nextResponse.items ?? []));
       nextUrl = nextResponse?.next;
     }
 
-    return response;
+    return { ...response, next: null };
   } catch (err) {
     const error = getErrorMessage(err);
     console.log("getMyPlaylists.ts Error:", error);
     throw new Error(error);
   }
+}
+
+const getCachedPlaylists = withCache("api:playlists", 300000, _getMyPlaylists);
+let pending: ReturnType<typeof getCachedPlaylists> | undefined;
+
+export function getMyPlaylists() {
+  // Library and action consumers share one catalog request, including cold cache misses.
+  return (pending ??= getCachedPlaylists().finally(() => {
+    pending = undefined;
+  }));
 }

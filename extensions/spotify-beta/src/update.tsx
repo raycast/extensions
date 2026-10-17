@@ -11,7 +11,7 @@ export default function Update() {
           <ActionPanel>
             <Action
               title="Install Spotify Player"
-              onAction={() => open("raycast://extensions/mattisssa/spotify-player")}
+              onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/mattisssa/spotify-player`)}
             />
           </ActionPanel>
         }

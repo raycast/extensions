@@ -13,4 +13,5 @@ export enum CommandAnswer {
   SHORTER = "shorter",
   TRANSLATE = "translate",
   TWEET = "tweet",
+  BROWSER_SUMMARIZE = "browser-summarize",
 }

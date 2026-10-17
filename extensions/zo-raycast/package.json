@@ -1,0 +1,132 @@
+{
+  "name": "zo-raycast",
+  "title": "Zo",
+  "version": "0.1.0",
+  "description": "Chat with Zo models, manage defaults, and review activity",
+  "icon": "icon.png",
+  "screenshots": [
+    "metadata/zo-chat.png",
+    "metadata/zo-models.png",
+    "metadata/zo-activity.png"
+  ],
+  "author": "skeletorjs",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "zo",
+    "ai",
+    "chat",
+    "models",
+    "productivity"
+  ],
+  "commands": [
+    {
+      "name": "zo-setup",
+      "title": "Zo Setup",
+      "subtitle": "Validate and Diagnose",
+      "description": "Validate credentials and check Zo API connectivity",
+      "mode": "view"
+    },
+    {
+      "name": "zo-chat",
+      "title": "Zo Chat",
+      "subtitle": "Conversation",
+      "description": "Chat with Zo models through the Zo API",
+      "mode": "view"
+    },
+    {
+      "name": "zo-models",
+      "title": "Zo Models",
+      "subtitle": "Model Management",
+      "description": "Browse available Zo models and set defaults",
+      "mode": "view"
+    },
+    {
+      "name": "zo-activity",
+      "title": "Zo Activity",
+      "subtitle": "History and Replay",
+      "description": "Review recent Zo runs and replay safe operations",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "zoApiKey",
+      "type": "password",
+      "title": "Zo API Key",
+      "required": true,
+      "placeholder": "sk-...",
+      "description": "Used for Zo API requests"
+    },
+    {
+      "name": "zoApiBaseUrl",
+      "type": "textfield",
+      "title": "Zo API Base URL",
+      "required": false,
+      "default": "https://api.zo.computer",
+      "description": "Base URL for Zo REST API requests"
+    },
+    {
+      "name": "requestTimeoutMs",
+      "type": "textfield",
+      "title": "Request Timeout (ms)",
+      "required": false,
+      "default": "30000",
+      "description": "Timeout applied to Zo API requests"
+    },
+    {
+      "name": "maxRetries",
+      "type": "textfield",
+      "title": "Max Retries",
+      "required": false,
+      "default": "2",
+      "description": "Retry attempts for transient network failures"
+    },
+    {
+      "name": "enableChatStreaming",
+      "type": "checkbox",
+      "title": "Enable Chat Streaming",
+      "label": "Stream responses as they arrive",
+      "required": false,
+      "default": false,
+      "description": "When disabled, Zo Chat waits for the final response instead of streaming chunks"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "publish": "npx ray publish",
+    "lint": "eslint --max-warnings=0 \"src/**/*.{ts,tsx}\" \"tests/**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "ci": "npm run lint && npm run typecheck && npm run test && npm run format"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.10.1",
+    "@types/react": "^19.0.10",
+    "@typescript-eslint/eslint-plugin": "^8.18.1",
+    "@typescript-eslint/parser": "^8.18.1",
+    "eslint": "^9.16.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

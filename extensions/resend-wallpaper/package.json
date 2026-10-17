@@ -5,6 +5,9 @@
   "description": "Get and set Resend official wallpapers.",
   "icon": "resend-icon.png",
   "author": "jopcmelo",
+  "contributors": [
+    "alexi.build"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -203,6 +206,32 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "get-resend-wallpapers",
+      "title": "Get Resend Wallpapers",
+      "description": "List current Resend wallpapers with their names and image URLs. Use this before choosing a wallpaper."
+    },
+    {
+      "name": "set-resend-wallpaper",
+      "title": "Set Resend Wallpaper",
+      "description": "Set a Resend wallpaper by its exact name on the monitors selected in tool preferences.",
+      "preferences": [
+        {
+          "name": "applyTo",
+          "type": "dropdown",
+          "title": "Apply Wallpaper To",
+          "description": "Choose which monitors the AI tool changes.",
+          "default": "current",
+          "required": true,
+          "data": [
+            { "title": "Current Monitor", "value": "current" },
+            { "title": "All Monitors", "value": "every" }
+          ]
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.100.3",
     "@raycast/utils": "^1.17.0",
@@ -225,5 +254,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

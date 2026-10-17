@@ -1,4 +1,4 @@
-import { StatusType } from "../utils/storage";
+import { StatusType } from "../../utils/storage";
 
 export type Task = {
   id: number;

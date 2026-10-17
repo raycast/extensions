@@ -1,0 +1,254 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "codex",
+  "title": "Codex",
+  "description": "Monitor and manage your Codex threads, MCPs, projects, and usage directly from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "asifk",
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "openai",
+    "chatgpt",
+    "agent",
+    "tasks",
+    "threads",
+    "sessions",
+    "history",
+    "transcripts",
+    "mcp",
+    "projects",
+    "usage",
+    "limits"
+  ],
+  "commands": [
+    {
+      "name": "search-threads",
+      "title": "Search Threads",
+      "subtitle": "Codex",
+      "description": "Search, resume, rename, summarize, archive, fork, and export Codex threads.",
+      "mode": "view",
+      "keywords": [
+        "sessions",
+        "history",
+        "resume",
+        "rename",
+        "summarize",
+        "archive",
+        "fork",
+        "export"
+      ]
+    },
+    {
+      "name": "manage-projects",
+      "title": "Browse Projects",
+      "subtitle": "Codex",
+      "description": "Browse Codex Projects, folders, and assigned threads.",
+      "mode": "view",
+      "keywords": [
+        "projects",
+        "folders",
+        "workspaces",
+        "pinned",
+        "threads"
+      ]
+    },
+    {
+      "name": "usage-stats",
+      "title": "Usage Stats",
+      "subtitle": "Codex",
+      "description": "View Codex rate limits and token usage.",
+      "mode": "view",
+      "keywords": [
+        "limits",
+        "tokens",
+        "quota"
+      ]
+    },
+    {
+      "name": "manage-mcp-servers",
+      "title": "Manage MCP Servers",
+      "subtitle": "Codex",
+      "description": "Inspect and manage MCP servers configured for Codex.",
+      "mode": "view",
+      "keywords": [
+        "mcp",
+        "servers",
+        "tools",
+        "configuration",
+        "oauth"
+      ]
+    },
+    {
+      "name": "new-thread",
+      "title": "New Thread",
+      "subtitle": "Codex",
+      "description": "Start a new Codex thread.",
+      "mode": "no-view",
+      "keywords": [
+        "start",
+        "create"
+      ]
+    },
+    {
+      "name": "new-thread-with-prompt",
+      "title": "New Thread with Prompt",
+      "subtitle": "Codex",
+      "description": "Start a new Codex thread with an initial prompt.",
+      "mode": "view",
+      "keywords": [
+        "start",
+        "prompt",
+        "task",
+        "folder",
+        "directory"
+      ]
+    },
+    {
+      "name": "new-thread-from-clipboard",
+      "title": "New Thread from Clipboard",
+      "subtitle": "Codex",
+      "description": "Start a new Codex thread using clipboard text as the initial prompt.",
+      "mode": "no-view",
+      "keywords": [
+        "clipboard",
+        "prompt",
+        "start"
+      ]
+    },
+    {
+      "name": "new-thread-from-selected-text",
+      "title": "New Thread from Selected Text",
+      "subtitle": "Codex",
+      "description": "Start a new Codex thread using selected text from the frontmost application as the initial prompt.",
+      "mode": "no-view",
+      "keywords": [
+        "selection",
+        "highlight",
+        "prompt",
+        "start"
+      ],
+      "preferences": [
+        {
+          "name": "selectedTextPromptPrefix",
+          "title": "Prompt Prefix",
+          "description": "Optional text to preface the selection with",
+          "type": "textfield",
+          "placeholder": "Implement this:",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-codex",
+      "title": "Open Codex",
+      "description": "Open the Codex app.",
+      "mode": "no-view",
+      "keywords": [
+        "launch",
+        "app",
+        "chatgpt"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "newThreadMode",
+      "title": "New Thread Mode",
+      "description": "Which mode to open new threads in (codex, work, or regular chat)",
+      "type": "dropdown",
+      "required": false,
+      "default": "codex",
+      "data": [
+        {
+          "title": "Codex",
+          "value": "codex"
+        },
+        {
+          "title": "ChatGPT Work",
+          "value": "work"
+        },
+        {
+          "title": "ChatGPT Chat",
+          "value": "chat"
+        }
+      ]
+    },
+    {
+      "name": "defaultProjectDirectory",
+      "title": "Default Working Directory",
+      "description": "Default directory for all new Codex threads",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "projectsDirectory",
+      "title": "Working Directory Root",
+      "description": "Folder whose subfolders become working directory choices (for example, ~/projects or ~/dev)",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "terminalApp",
+      "title": "Terminal App",
+      "description": "Terminal opened by thread actions",
+      "type": "dropdown",
+      "required": false,
+      "default": "terminal",
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "terminal"
+        },
+        {
+          "title": "Ghostty",
+          "value": "ghostty"
+        },
+        {
+          "title": "iTerm2",
+          "value": "iterm"
+        }
+      ]
+    },
+    {
+      "name": "codexCliPath",
+      "title": "Codex CLI Path",
+      "description": "Path to the Codex CLI binary (leave blank to auto-detect)",
+      "type": "textfield",
+      "placeholder": "/opt/homebrew/bin/codex",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.1.3",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.36.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test --experimental-strip-types 'src/**/*.test.ts'"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "overrides": {
+    "brace-expansion@1": "1.1.18",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9"
+  }
+}

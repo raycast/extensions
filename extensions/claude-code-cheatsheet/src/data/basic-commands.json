@@ -10,7 +10,7 @@
       "usage": "claude",
       "example": "claude",
       "category": "basic",
-      "tags": ["basic", "interactive", "REPL"]
+      "tags": ["REPL", "basic", "interactive"]
     },
     {
       "id": "claude-query",
@@ -66,7 +66,7 @@
       "usage": "claude mcp",
       "example": "claude mcp",
       "category": "basic",
-      "tags": ["configuration", "MCP", "protocol", "server"]
+      "tags": ["MCP", "configuration", "protocol", "server"]
     },
     {
       "id": "claude-migrate-installer",
@@ -112,6 +112,24 @@
       "example": "claude -r \"ab-cde-123\" \"Finish writing this function\"",
       "category": "basic",
       "tags": ["id", "resume", "session"]
+    },
+    {
+      "id": "claude-setup-token",
+      "name": "claude setup-token",
+      "description": "Set up a long-lived authentication token (requires Claude subscription).",
+      "usage": "claude setup-token",
+      "example": "claude setup-token",
+      "category": "basic",
+      "tags": ["auth", "setup", "subscription", "token"]
+    },
+    {
+      "id": "claude-install",
+      "name": "claude install",
+      "description": "Install Claude Code native build. Use [target] to specify version (stable, latest, or specific version).",
+      "usage": "claude install [target]",
+      "example": "claude install stable",
+      "category": "basic",
+      "tags": ["build", "install", "native", "version"]
     }
   ]
 }

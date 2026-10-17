@@ -32,7 +32,7 @@ export default function Command() {
         ) {
           setSelectedImage(items[0].path);
         }
-      } catch (error) {
+      } catch {
         return;
       } finally {
         setIsLoading(false);
@@ -51,7 +51,7 @@ export default function Command() {
       if (width) formData.append("width", width.toString());
       if (height) formData.append("height", height.toString());
 
-      const response = await axios.post("https://ascii-image-converter.zeabur.app/image-to-ascii", formData, {
+      const response = await axios.post("https://ascii-image-converter.yencheng.dev/image-to-ascii", formData, {
         headers: {
           ...formData.getHeaders(),
         },

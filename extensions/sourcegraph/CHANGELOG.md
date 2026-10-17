@@ -1,5 +1,16 @@
 # Changelog
 
+## [Setup improvements](https://github.com/raycast/extensions/pull/25950) - 2026-03-01
+
+- **setup**: The "Sourcegraph URL" is now an extension-level required option. This change improves the setup experience for users accessing their own Sourcegraph instance. If you are only using 'Search Public Code', you can enter an arbitrary value when prompted.
+- **oauth**: When logging out, the extension now pops you back to root to refresh command states.
+
+## [Deep Search and OAuth](https://github.com/raycast/extensions/pull/23281) - 2025-12-01
+
+- **deepsearch**: Added new commands 'Ask Deep Search' and 'Deep Search Conversations' to interact with Sourcegraph's new [agentic, natural language code search](https://sourcegraph.com/deep-search).
+- **oauth**: When connected to a Sourcegraph instance with a version newer than v6.10.0, you can now authenticate the extension using [Sourcegraph OAuth Apps](https://sourcegraph.com/docs/admin/oauth_apps) by removing your access token from the extension preferences.
+- **notebooks**: The "Find Search Notebooks" command has been removed.
+
 ## [Branding updates and workspaces](https://github.com/raycast/extensions/pull/16793) - 2025-02-03
 
 - **search**: We've updated colors throughout the extension to match Sourcegraph's refreshed branding.

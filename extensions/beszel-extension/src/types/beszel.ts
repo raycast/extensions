@@ -1,58 +1,104 @@
 interface SystemInfo {
   /**
-   * Network
+   * Hostname (omitted by the agent when not reported; fall back to the
+   * top-level `host` field).
    */
-  b: number;
+  h?: string;
 
   /**
-   * CPU Cores
+   * Kernel version (omitted when not reported by the agent)
    */
-  c: number;
+  k?: string;
 
   /**
-   * CPU
+   * CPU cores (omitted when zero / not reported)
    */
-  cpu: number;
+  c?: number;
 
   /**
-   * Disk
+   * Thread count (omitted when not reported)
    */
-  dp: number;
+  t?: number;
 
   /**
-   * Hostname
+   * CPU model / chip (omitted when not reported)
    */
-  h: string;
+  m?: string;
 
   /**
-   * Kernel
-   */
-  k: string;
-
-  /**
-   * CPU Chip
-   */
-  m: string;
-
-  /**
-   * Memory
-   */
-  mp: number;
-
-  /**
-   * Thread Count
-   */
-  t: number;
-
-  /**
-   * Uptime
+   * Uptime (seconds)
    */
   u: number;
 
   /**
-   * Agent Version
+   * CPU percent
+   */
+  cpu: number;
+
+  /**
+   * Memory percent
+   */
+  mp: number;
+
+  /**
+   * Disk percent
+   */
+  dp: number;
+
+  /**
+   * Bandwidth in MB (deprecated, replaced by `bb`)
+   */
+  b?: number;
+
+  /**
+   * Bandwidth in bytes (omitted by older instances that only report `b`)
+   */
+  bb?: number;
+
+  /**
+   * Agent version
    */
   v: string;
+
+  /**
+   * Whether the agent is running under Podman
+   */
+  p?: boolean;
+
+  /**
+   * Highest GPU utilization percent
+   */
+  g?: number;
+
+  /**
+   * Dashboard temperature (Celsius)
+   */
+  dt?: number;
+
+  /**
+   * Load average [1m, 5m, 15m]
+   */
+  la?: [number, number, number];
+
+  /**
+   * Connection type
+   */
+  ct?: number;
+
+  /**
+   * Extra filesystem usage percentages, keyed by mount name
+   */
+  efs?: Record<string, number>;
+
+  /**
+   * Services [total, failed]
+   */
+  sv?: [number, number];
+
+  /**
+   * Battery [percent, charge state]
+   */
+  bat?: [number, number];
 }
 
 export type BeszelSystemStatus = "up" | "down" | "paused" | "pending";

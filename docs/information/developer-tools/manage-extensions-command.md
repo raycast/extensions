@@ -1,5 +1,5 @@
 ---
-description: A Raycast command to manage your extensions, add new commands or attachments, etc.
+description: A Raycast command to manage your extensions, add new commands or tools, etc.
 ---
 
 # `Manage Extensions` Command

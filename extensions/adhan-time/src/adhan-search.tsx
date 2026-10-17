@@ -26,8 +26,8 @@ export default function Command() {
               isCurrent
                 ? [{ tag: { value: `Time left: ${countdown}`, color: color } }, { tag: { value: "Current" } }]
                 : isNext
-                ? [{ tag: { value: "Next" } }]
-                : undefined
+                  ? [{ tag: { value: "Next" } }]
+                  : undefined
             }
             keywords={isCurrent ? ["Current"] : isNext ? ["Next"] : []}
             actions={

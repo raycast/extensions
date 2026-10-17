@@ -16,7 +16,7 @@ export function isValidUrl(url: string) {
     try {
       new URL(url);
       return true;
-    } catch (_) {
+    } catch {
       return false;
     }
   }
@@ -35,8 +35,12 @@ export async function getUrlFromSelectionOrClipboard(): Promise<string | undefin
     if (selectedText && isValidUrl(selectedText)) {
       return selectedText;
     }
-  } catch {
-    // Silently continue to clipboard fallback regardless of error
+  } catch (error) {
+    if (error instanceof Error && error.message === "Unable to get selected text from frontmost application") {
+      console.log("Failed to get text from selection. Trying clipboard instead.");
+    } else {
+      console.error(error);
+    }
   }
 
   try {
@@ -48,81 +52,28 @@ export async function getUrlFromSelectionOrClipboard(): Promise<string | undefin
       }
     }
   } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Failed to read clipboard: ${error.message}`);
-    }
-    throw new Error("Failed to read clipboard");
+    console.error(error);
   }
-
-  return undefined;
 }
 
 export async function unshortenUrl(url: string): Promise<{ redirectionSteps: RedirectionStep[] }> {
   try {
-    const commonHeaders = {
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-      "Accept-Language": "en-US,en;q=0.5",
-      Connection: "keep-alive",
-    };
-
-    // Try HEAD request first
     let response = await fetch(url, {
       method: "HEAD",
       redirect: "manual",
-      headers: commonHeaders,
     });
-
-    // If HEAD fails or returns an error, retry with GET
-    if (response.status >= 400 || !response.headers.get("location")) {
-      response = await fetch(url, {
-        method: "GET",
-        redirect: "manual",
-        headers: commonHeaders,
-      });
-    }
-
     const redirectionSteps = [{ url: url, statusCode: response.status, statusName: response.statusText }];
-    let currentUrl = url;
-    const maxRedirects = 10; // Safety limit
-    let redirectCount = 0;
 
-    while (redirectCount < maxRedirects) {
+    while (response.url) {
       if (response.status >= 300 && response.status < 400) {
         const nextUrl = response.headers.get("location");
-
         if (nextUrl) {
-          // Handle relative URLs
-          const resolvedUrl = new URL(nextUrl, currentUrl).toString();
-          currentUrl = resolvedUrl;
-
-          try {
-            // Try HEAD request first for redirects too
-            response = await fetch(resolvedUrl, {
-              method: "HEAD",
-              redirect: "manual",
-              headers: commonHeaders,
-            });
-
-            // If HEAD fails or returns an error, retry with GET
-            if (response.status >= 400 || !response.headers.get("location")) {
-              response = await fetch(resolvedUrl, {
-                method: "GET",
-                redirect: "manual",
-                headers: commonHeaders,
-              });
-            }
-
-            redirectionSteps.push({
-              url: resolvedUrl,
-              statusCode: response.status,
-              statusName: response.statusText,
-            });
-            redirectCount++;
-          } catch (redirectError) {
-            break;
-          }
+          response = await fetch(nextUrl, { method: "HEAD", redirect: "manual" });
+          redirectionSteps.push({
+            url: nextUrl,
+            statusCode: response.status,
+            statusName: response.statusText,
+          });
         } else {
           break;
         }
@@ -133,19 +84,10 @@ export async function unshortenUrl(url: string): Promise<{ redirectionSteps: Red
     return { redirectionSteps };
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(`URL expansion failed: ${error.message}`);
+      throw new Error(error.message);
     } else {
-      throw new Error("An unknown error occurred during URL expansion");
+      throw new Error("An unknown error occurred");
     }
-  }
-}
-
-export function getFaviconUrl(url: string) {
-  try {
-    const hostname = new URL(url).hostname;
-    return `https://www.google.com/s2/favicons?domain=${hostname}`;
-  } catch (error) {
-    return Icon.Globe;
   }
 }
 

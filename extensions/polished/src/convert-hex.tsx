@@ -32,7 +32,7 @@ export default function ConvertHex() {
       showToast(
         ToastStyle.Failure,
         "Couldn't parse the color string",
-        "Please provide the color as a string in hex notation."
+        "Please provide the color as a string in hex notation.",
       );
       return;
     }

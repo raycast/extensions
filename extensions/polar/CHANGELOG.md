@@ -1,5 +1,9 @@
 # Polar Changelog
 
+## [Security: Refresh Lockfile to Remove Unused Transitive Dependencies] - 2026-02-13
+
+- Refreshed `package-lock.json` to remove stale transitive entries (including `got`/`electron`) that were no longer part of the installed dependency graph.
+
 ## [BYOK + View Products] - 2025-07-01
 
 - View Products and their Media

@@ -4,7 +4,7 @@ import { weatherConditionToIcon } from "@components/weather/utils";
 import { RGBtoString, changeRGBBrightness } from "@lib/color";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
-import { sleep } from "@lib/utils";
+import { sleep, stringToDate } from "@lib/utils";
 import { Color, Image, getPreferenceValues } from "@raycast/api";
 
 /**
@@ -220,7 +220,7 @@ function getDeviceClassIcon(state: State): Image.ImageLike | undefined {
   }
 }
 
-export function getStateValue(state: State): string | undefined {
+export function getStateValue(state: State, statesById?: ReadonlyMap<string, State>): string | undefined {
   if (state.entity_id.startsWith("light") && state.state === "on") {
     const brightnessPercentage = getLightCurrentBrightnessPercentage(state);
     if (brightnessPercentage !== undefined) {
@@ -247,7 +247,9 @@ export function getStateValue(state: State): string | undefined {
   } else if (state.entity_id.startsWith("binary_sensor")) {
     return getDeviceClassState(state);
   } else if (state.entity_id.startsWith("input_button")) {
-    return new Date(state.state).toISOString().replace("T", " ").replace("Z", "");
+    // The state is the last press timestamp, or "unknown"/"unavailable" if never pressed
+    const lastPressed = stringToDate(state.state);
+    return lastPressed ? lastPressed.toISOString().replace("T", " ").replace("Z", "") : state.state;
   } else if (state.entity_id.startsWith("update")) {
     if (state.attributes.in_progress === true) {
       return "in progress";
@@ -263,6 +265,13 @@ export function getStateValue(state: State): string | undefined {
       return "✔";
     }
     return state.state;
+  } else if (state.entity_id.startsWith("person")) {
+    const inZones = state.attributes.in_zones;
+    if (Array.isArray(inZones) && inZones.length > 0 && inZones.every((zone) => typeof zone === "string")) {
+      return inZones
+        .map((zone) => statesById?.get(zone)?.attributes.friendly_name || zone.replace(/^zone\./, ""))
+        .join(", ");
+    }
   }
   return state.state;
 }

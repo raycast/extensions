@@ -12,11 +12,11 @@ Peace, dignity and equality on a healthy planet.
 - Explore UN Photos
 - Explore UN Press
 - Explore UN Site Index
-- Text-to-Speech (requires [Say extension](https://raycast.com/litomore/say))
+- Text-to-Speech (macOS only & requires [Say extension](https://raycast.com/litomore/say))
 
 ## Pro Enhanced Features
 
-- AI-summarized UN News for Text-to-Speech
+- AI-summarized UN News for Text-to-Speech (macOS only)
 
 ## Languages Support
 

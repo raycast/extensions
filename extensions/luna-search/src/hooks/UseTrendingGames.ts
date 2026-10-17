@@ -20,7 +20,7 @@ const FETCH_CONFIG = {
 /**
  * The ID of the widget that contains the trending games in the Luna API response.
  */
-const WIDGET_ID = "collection_trending_on_tempo";
+const WIDGET_ID = "collection_quick_search_popular_games_anonymous";
 
 /**
  * A custom React hook that fetches the trending games, using an expiring cache to optimize the fetch requests.

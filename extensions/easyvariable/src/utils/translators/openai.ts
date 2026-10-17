@@ -1,7 +1,7 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
-import { getPreferenceValues } from "@raycast/api";
 import { HttpsProxyAgent } from "https-proxy-agent";
+import { getPreferenceValues } from "@raycast/api";
 
 const preferences = getPreferenceValues<ExtensionPreferences>();
 

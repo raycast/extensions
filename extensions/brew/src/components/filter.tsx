@@ -6,7 +6,7 @@ export enum InstallableFilterType {
   casks = "casks",
 }
 
-export function InstallableFilterDropdown(props: { onSelect: (value: InstallableFilterType) => void }): JSX.Element {
+export function InstallableFilterDropdown(props: { onSelect: (value: InstallableFilterType) => void }) {
   return (
     <List.Dropdown
       tooltip="Filter by formula or cask"
@@ -22,12 +22,14 @@ export function InstallableFilterDropdown(props: { onSelect: (value: Installable
   );
 }
 
-export function placeholder(filter: InstallableFilterType): string {
-  return `Search ${
+export function placeholder(filter: InstallableFilterType, sortByPopularity = false): string {
+  const target =
     filter === InstallableFilterType.all
       ? "formulae or casks"
       : filter === InstallableFilterType.casks
         ? "casks"
-        : "formulae"
-  } by name${String.ellipsis}`;
+        : "formulae";
+  // Name the ordering: otherwise a popularity-sorted list is indistinguishable
+  // from a relevance-sorted one that happens to look wrong.
+  return `Search ${target} by name${sortByPopularity ? ", most installed first" : ""}${String.ellipsis}`;
 }

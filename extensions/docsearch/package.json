@@ -14,7 +14,8 @@
   "license": "MIT",
   "contributors": [
     "AnishDe12020",
-    "pomdtr"
+    "pomdtr",
+    "janosorcsik"
   ],
   "commands": [
     {
@@ -64,7 +65,7 @@
     },
     {
       "name": "arthas",
-      "icon": "/logo/arthas.ico",
+      "icon": "/logo/arthas.png",
       "title": "Arthas",
       "subtitle": "DocSearch",
       "description": "Search Arthas documentation",
@@ -94,7 +95,7 @@
     },
     {
       "name": "bootstrap",
-      "icon": "/logo/bootstrap.ico",
+      "icon": "/logo/bootstrap.png",
       "title": "Bootstrap",
       "subtitle": "DocSearch",
       "description": "Search Bootstrap documentation",
@@ -319,7 +320,7 @@
     },
     {
       "name": "react",
-      "icon": "/logo/react.ico",
+      "icon": "/logo/react.png",
       "title": "React",
       "subtitle": "DocSearch",
       "description": "Search React documentation",
@@ -337,7 +338,7 @@
       "icon": "/logo/react_bootstrap.png",
       "title": "React Bootstrap",
       "subtitle": "DocSearch",
-      "description": "Search React_Bootstrap documentation",
+      "description": "Search React Bootstrap documentation",
       "arguments": [
         {
           "name": "search",
@@ -349,10 +350,10 @@
     },
     {
       "name": "react_native",
-      "icon": "/logo/react.ico",
+      "icon": "/logo/react.png",
       "title": "React Native",
       "subtitle": "DocSearch",
-      "description": "Search React_Native documentation",
+      "description": "Search React Native documentation",
       "arguments": [
         {
           "name": "search",
@@ -502,7 +503,7 @@
       "icon": "/logo/vue.png",
       "title": "Vue Router",
       "subtitle": "DocSearch",
-      "description": "Search Vue_Router documentation",
+      "description": "Search Vue Router documentation",
       "arguments": [
         {
           "name": "search",
@@ -646,29 +647,72 @@
         }
       ],
       "mode": "view"
+    },
+    {
+      "name": "nextjs",
+      "icon": "/logo/nextjs.png",
+      "title": "NextJS",
+      "subtitle": "DocSearch",
+      "description": "Search NextJS documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "masstransit",
+      "icon": "/logo/masstransit.png",
+      "title": "MassTransit",
+      "subtitle": "DocSearch",
+      "description": "Search MassTransit documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "pinia",
+      "icon": "/logo/pinia.png",
+      "title": "Pinia",
+      "subtitle": "DocSearch",
+      "description": "Search Pinia documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
+    "@raycast/api": "^1.100.3",
     "algoliasearch": "^4.14.1",
     "meilisearch": "^0.32.4"
   },
   "devDependencies": {
-    "@rogerpence/edit-package-json": "^1.1.1",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "generate": "ts-node .factory/generate.ts && ts-node .format/format.ts && prettier -w README.md package.json && ray lint --fix",
-    "fix-lint": "ts-node .factory/generate.ts && ts-node .format/format.ts && prettier -w README.md package.json && ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

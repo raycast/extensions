@@ -313,51 +313,55 @@ export default function BuildItem({ build, app }: BuildItemProps) {
       accessories={accessoriesForBuild()}
       actions={
         <ActionPanel>
-          {canInviteTesters() && (
-            <>
-              {manageBetaGroupsAction()}
-              {manageIndividualTestersAction()}
-            </>
-          )}
-          {isMissingExportCompliance() && (
-            <Action
-              title="Set Is Not Using Non-Exempt Encryption"
-              onAction={async () => {
-                const oldState = build.buildBetaDetails.attributes.externalBuildState;
-                (async () => {
-                  try {
-                    build.buildBetaDetails.attributes.externalBuildState = "READY_FOR_BETA_SUBMISSION";
-                    setExternalBuildState("READY_FOR_BETA_SUBMISSION");
-                    await setExportCompliance(false);
-                  } catch (error) {
-                    presentError(error);
-                    build.buildBetaDetails.attributes.externalBuildState = oldState;
-                    setExternalBuildState(oldState);
-                  }
-                })();
-              }}
-            />
-          )}
-          {isMissingExportCompliance() && (
-            <Action
-              title="Set Is Using Non-Exempt Encryption"
-              onAction={async () => {
-                const oldState = build.buildBetaDetails.attributes.externalBuildState;
-                (async () => {
-                  try {
-                    build.buildBetaDetails.attributes.externalBuildState = "READY_FOR_BETA_SUBMISSION";
-                    setExternalBuildState("READY_FOR_BETA_SUBMISSION");
-                    await setExportCompliance(true);
-                  } catch (error) {
-                    presentError(error);
-                    build.buildBetaDetails.attributes.externalBuildState = oldState;
-                    setExternalBuildState(oldState);
-                  }
-                })();
-              }}
-            />
-          )}
-          {!isExpired() && expireBuildAction()}
+          <ActionPanel.Section title={`Build ${build.build.attributes.version}`}>
+            {canInviteTesters() && (
+              <>
+                {manageBetaGroupsAction()}
+                {manageIndividualTestersAction()}
+              </>
+            )}
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Export Compliance">
+            {isMissingExportCompliance() && (
+              <Action
+                title="Set Is Not Using Non-Exempt Encryption"
+                onAction={async () => {
+                  const oldState = build.buildBetaDetails.attributes.externalBuildState;
+                  (async () => {
+                    try {
+                      build.buildBetaDetails.attributes.externalBuildState = "READY_FOR_BETA_SUBMISSION";
+                      setExternalBuildState("READY_FOR_BETA_SUBMISSION");
+                      await setExportCompliance(false);
+                    } catch (error) {
+                      presentError(error);
+                      build.buildBetaDetails.attributes.externalBuildState = oldState;
+                      setExternalBuildState(oldState);
+                    }
+                  })();
+                }}
+              />
+            )}
+            {isMissingExportCompliance() && (
+              <Action
+                title="Set Is Using Non-Exempt Encryption"
+                onAction={async () => {
+                  const oldState = build.buildBetaDetails.attributes.externalBuildState;
+                  (async () => {
+                    try {
+                      build.buildBetaDetails.attributes.externalBuildState = "READY_FOR_BETA_SUBMISSION";
+                      setExternalBuildState("READY_FOR_BETA_SUBMISSION");
+                      await setExportCompliance(true);
+                    } catch (error) {
+                      presentError(error);
+                      build.buildBetaDetails.attributes.externalBuildState = oldState;
+                      setExternalBuildState(oldState);
+                    }
+                  })();
+                }}
+              />
+            )}
+          </ActionPanel.Section>
+          <ActionPanel.Section>{!isExpired() && expireBuildAction()}</ActionPanel.Section>
         </ActionPanel>
       }
     />

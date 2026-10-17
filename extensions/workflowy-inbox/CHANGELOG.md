@@ -1,6 +1,15 @@
 # workflowy-inbox Changelog
 
-## 2024-03-09 - Updated Logo, Name, and Action
+## [Added Windows Support + Retitled Extension] - 2025-11-24
+
+- Added command to View Nodes
+- Retitled to "Workflowy Inbox" since we have more commands now
+- Modernized to use latest Raycast eslint configuration
+- Added Windows support (ref: [Issue #23082](https://github.com/raycast/extensions/issues/23082))
+- Fixed error where `Form` would close even if the submit was unsuccessful
+- Fixed error where Inboxy URL would not open if URL invalid
+
+## [Updated Logo, Name, and Action] - 2024-03-09
 
 - Updated the logo from a sort-of Workflowy-branded logo to a custom one. _This
   helps ensure it's clear that we are not affiliated with Workflowy._

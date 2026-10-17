@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
+import { deleteTag } from "../../api";
 import { useTags } from "../../hooks/useTags";
 import { Space } from "../../models";
-import { hexToColor } from "../../utils";
+import { hexToColor, tagMatchesSearch } from "../../utils";
 import { CreateTagForm } from "../CreateForm/CreateTagForm";
 import { EmptyViewTag } from "../EmptyView/EmptyViewTag";
 import { UpdateTagForm } from "../UpdateForm/UpdateTagForm";
@@ -15,7 +16,7 @@ interface TagListProps {
 
 export function TagList({ space, propertyId }: TagListProps) {
   const [searchText, setSearchText] = useState("");
-  const { tags, isLoadingTags, tagsError, mutateTags, tagsPagination } = useTags(space.id, propertyId);
+  const { tags, isLoadingTags, tagsError, mutateTags, tagsPagination } = useTags(space.id, propertyId, searchText);
 
   useEffect(() => {
     if (tagsError) {
@@ -36,7 +37,29 @@ export function TagList({ space, propertyId }: TagListProps) {
     }
   };
 
-  const filteredTags = tags?.filter((tag) => tag.name.toLowerCase().includes(searchText.toLowerCase()));
+  const handleDeleteTag = async (tagId: string, tagName: string) => {
+    const confirm = await confirmAlert({
+      title: "Delete Tag",
+      message: `Are you sure you want to delete "${tagName}"?`,
+      icon: { source: Icon.Trash, tintColor: Color.Red },
+    });
+
+    if (confirm) {
+      try {
+        await deleteTag(space.id, propertyId, tagId);
+        await mutateTags();
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Tag deleted",
+          message: `"${tagName}" has been deleted.`,
+        });
+      } catch (error) {
+        await showFailureToast(error, { title: "Failed to delete tag" });
+      }
+    }
+  };
+
+  const filteredTags = tags.filter((tag) => tagMatchesSearch(tag, searchText));
 
   return (
     <List
@@ -55,14 +78,23 @@ export function TagList({ space, propertyId }: TagListProps) {
             icon={{ source: Icon.Tag, tintColor: tag.color, tooltip: `Color: ${hexToColor[tag.color]}` }}
             actions={
               <ActionPanel>
-                <Action.Push
-                  icon={Icon.Pencil}
-                  title="Edit Tag"
-                  shortcut={Keyboard.Shortcut.Common.Edit}
-                  target={
-                    <UpdateTagForm spaceId={space.id} propertyId={propertyId} tag={tag} mutateTags={mutateTags} />
-                  }
-                />
+                <ActionPanel.Section>
+                  <Action.Push
+                    icon={Icon.Pencil}
+                    title="Edit Tag"
+                    shortcut={Keyboard.Shortcut.Common.Edit}
+                    target={
+                      <UpdateTagForm spaceId={space.id} propertyId={propertyId} tag={tag} mutateTags={mutateTags} />
+                    }
+                  />
+                  <Action
+                    icon={Icon.Trash}
+                    title="Delete Tag"
+                    style={Action.Style.Destructive}
+                    onAction={() => handleDeleteTag(tag.id, tag.name)}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                  />
+                </ActionPanel.Section>
                 <ActionPanel.Section>
                   <Action.Push
                     icon={Icon.Plus}

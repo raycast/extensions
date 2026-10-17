@@ -2,16 +2,14 @@ import {
   ActionPanel,
   Detail,
   Form,
-  SubmitFormAction,
   useNavigation,
   showToast,
-  ToastStyle,
   getPreferenceValues,
   environment,
-  OpenInBrowserAction,
   Icon,
+  Action,
+  Toast,
 } from "@raycast/api";
-import fetch from "node-fetch";
 import { useState } from "react";
 
 interface Preferences {
@@ -25,12 +23,14 @@ export default function Command() {
   const [query, setQuery] = useState("");
   const { push } = useNavigation();
 
-  // @ts-expect-error theme isn't there yet
-  const theme = environment.theme || null;
+  const theme = environment.appearance || null;
 
   const onSubmit = async () => {
     if (!query) {
-      showToast(ToastStyle.Failure, "Please enter something to query");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Please enter something to query",
+      });
       return;
     }
     setLoading(true);
@@ -49,7 +49,11 @@ export default function Command() {
       const res = await fetch(`https://api.wolframalpha.com/v1/simple?${params.toString()}`);
       if (!res.ok) {
         if (res.status === 403) {
-          showToast(ToastStyle.Failure, "Invalid App ID", "Update the App ID in the preferences");
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Invalid App ID",
+            message: "Update the App ID in the preferences",
+          });
           return;
         }
         throw new Error(res.statusText);
@@ -63,13 +67,17 @@ export default function Command() {
           }
           actions={
             <ActionPanel>
-              <OpenInBrowserAction url={`https://www.wolframalpha.com/input/?i=${encodeURIComponent(query)}`} />
+              <Action.OpenInBrowser url={`https://www.wolframalpha.com/input/?i=${encodeURIComponent(query)}`} />
             </ActionPanel>
           }
-        />
+        />,
       );
     } catch (err) {
-      showToast(ToastStyle.Failure, "Could not query WolframAlpha", (err as Error).message);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Could not query WolframAlpha",
+        message: (err as Error).message,
+      });
     } finally {
       setLoading(false);
     }
@@ -79,8 +87,8 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction onSubmit={onSubmit} title="Query" icon={Icon.MagnifyingGlass} />
-          <OpenInBrowserAction url={`https://www.wolframalpha.com/input/?i=${encodeURIComponent(query)}`} />
+          <Action.SubmitForm onSubmit={onSubmit} title="Query" icon={Icon.MagnifyingGlass} />
+          <Action.OpenInBrowser url={`https://www.wolframalpha.com/input/?i=${encodeURIComponent(query)}`} />
         </ActionPanel>
       }
       isLoading={loading}

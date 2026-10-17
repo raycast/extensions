@@ -35,7 +35,7 @@ async function QuickAddTask(props: QuickAddTaskProps) {
       text = `${text} // ${props.arguments.description}`;
     }
 
-    const { id } = await quickAddTask({ text });
+    const { id } = await quickAddTask({ text, auto_reminder: true });
 
     toast.style = Toast.Style.Success;
     toast.title = "Task created";

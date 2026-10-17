@@ -1,5 +1,28 @@
 # cURL Changelog
 
+## [Maintenance] - 2026-03-16
+
+- Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
+
+## [Security: Refresh Lockfile to Remove Unused Transitive Dependencies] - 2026-02-13
+
+- Refreshed `package-lock.json` to remove stale transitive entries (including `got`/`electron`) that were no longer part of the installed dependency graph.
+
+## [Fix: Valid POST Failing] - 2026-01-05
+
+- Fixed an issue where valid POST requests were failing (ref: [Issue #24065](https://github.com/raycast/extensions/issues/24065))
+- Updated more shortcuts
+
+## [Fix: Windows Shortcuts] - 2025-09-18
+
+- Updated `@raycast/api` to the latest version
+- Added cross-platform shortcut support for Windows
+
+## [Feat: Add Windows Support] - 2025-09-09
+
+- Added support for Windows
+- Bumped dependencies
+
 ## [Enhancement] - 2025-07-07
 
 - Enhanced the request form to allow users to select and modify parameters for their requests

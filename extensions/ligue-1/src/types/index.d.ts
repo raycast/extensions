@@ -34,10 +34,17 @@ export interface Standing {
   gameWeekStartingRank: number;
   rank: number;
   rankDelta: number;
-  seasonResults: unknown[];
-  allSeasonResults: unknown[];
+  seasonResults: SeasonResult[];
+  allSeasonResults: string[];
   higherWinsInARow: number;
   qualifiedFor?: string;
+}
+
+export interface SeasonResult {
+  resultLetter: string;
+  side: string;
+  opponentClubId: string;
+  score: string;
 }
 
 export interface Match {

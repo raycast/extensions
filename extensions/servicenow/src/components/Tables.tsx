@@ -7,7 +7,12 @@ import { DBObjectsResponse, Instance } from "../types";
 import useInstances from "../hooks/useInstances";
 import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
+import TableRecords from "./TableRecords";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { instanceLabel } from "../utils/instanceLabel";
+import { useAuthHeader } from "../hooks/useAuthHeader";
+import { expandKeywords } from "../utils/expandKeywords";
 
 export default function Tables() {
   const {
@@ -18,33 +23,28 @@ export default function Tables() {
     selectedInstance,
     setSelectedInstance,
   } = useInstances();
-  const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const { id: instanceId = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
+  const { id: instanceId = "", name: instanceName = "" } = selectedInstance || {};
 
-  const instanceUrl = `https://${instanceName}.service-now.com`;
+  const instanceUrl = getInstanceBaseUrl({ name: instanceName });
+  const authHeader = useAuthHeader(selectedInstance);
 
-  const { isLoading, data, revalidate, pagination } = useFetch(
+  const { isLoading, data, error, revalidate, pagination } = useFetch(
     (options) => {
       const terms = searchTerm.split(" ");
       const query = terms.map((t) => `^labelLIKE${t}^ORnameLIKE${t}^ORsuper_class.labelLIKE${t}`).join("");
-      return `${instanceUrl}/api/now/table/sys_db_object?sysparm_display_value=true&sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_query=${query}^ORDERBYlabel&sysparm_fields=name,label,super_class&sysparm_limit=100&sysparm_offset=${options.page * 100}`;
+      return `${instanceUrl}/api/now/table/sys_db_object?sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_query=${query}^ORDERBYlabel&sysparm_fields=name,label,super_class&sysparm_limit=100&sysparm_offset=${options.page * 100}`;
     },
     {
-      headers: {
-        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-      },
-      execute: !!selectedInstance,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+      execute: !!selectedInstance && !!authHeader,
       onError: (error) => {
-        setErrorFetching(true);
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch tables", error.message);
+        showToast({ style: Toast.Style.Failure, title: "Could Not Fetch Tables", message: error.message });
       },
 
       mapResult(response: DBObjectsResponse) {
-        setErrorFetching(false);
-
         return { data: response.result, hasMore: response.result.length > 0 };
       },
       keepPreviousData: true,
@@ -52,10 +52,10 @@ export default function Tables() {
   );
 
   const onInstanceChange = (newValue: string) => {
-    const aux = instances.find((instance) => instance.id === newValue);
-    if (aux) {
-      setSelectedInstance(aux);
-      LocalStorage.setItem("selected-instance", JSON.stringify(aux));
+    const found = instances.find((instance) => instance.id === newValue);
+    if (found) {
+      setSelectedInstance(found);
+      LocalStorage.setItem("selected-instance", JSON.stringify(found));
     }
   };
 
@@ -66,6 +66,7 @@ export default function Tables() {
       isLoading={isLoading}
       pagination={pagination}
       throttle
+      searchBarPlaceholder="Filter by label, name, super class..."
       searchBarAccessory={
         <List.Dropdown
           isLoading={isLoadingInstances}
@@ -79,7 +80,7 @@ export default function Tables() {
             {instances.map((instance: Instance) => (
               <List.Dropdown.Item
                 key={instance.id}
-                title={instance.alias ? instance.alias : instance.name}
+                title={instanceLabel(instance)}
                 value={instance.id}
                 icon={{
                   source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,
@@ -92,7 +93,7 @@ export default function Tables() {
       }
     >
       {selectedInstance ? (
-        errorFetching ? (
+        error ? (
           <List.EmptyView
             icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
             title="Could Not Fetch Results"
@@ -117,11 +118,16 @@ export default function Tables() {
                 key={table.name}
                 title={table.label}
                 subtitle={table.name}
-                keywords={[table.super_class, ...table.name.split("_")]}
+                keywords={expandKeywords(table.super_class, table.name)}
                 accessories={accessories}
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section title={table.label}>
+                      <Action.Push
+                        title="Explore Records"
+                        icon={Icon.MagnifyingGlass}
+                        target={<TableRecords table={table} />}
+                      />
                       <Action.OpenInBrowser
                         title="Open in ServiceNow"
                         url={listUrl}

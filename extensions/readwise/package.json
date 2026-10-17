@@ -2,13 +2,19 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "readwise",
   "title": "Readwise",
-  "description": "Search and browse your Readwise Library.",
+  "description": "Search and browse your Readwise library, and ask AI about your saved highlights and notes.",
   "icon": "icon.png",
   "author": "natterstefan",
+  "contributors": [
+    "alexi.build"
+  ],
   "categories": [
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "dailyreview",
@@ -58,6 +64,18 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "list-books",
+      "title": "List Library Entries",
+      "description": "Browse your Readwise library, including books, articles, tweets, and podcasts. Returns IDs for fetching highlights and links to Readwise."
+    },
+    {
+      "name": "list-highlights",
+      "title": "List Highlights",
+      "description": "Read saved Readwise highlights and notes, optionally filtered by library entry or highlight date."
+    }
+  ],
   "preferences": [
     {
       "name": "token",
@@ -80,27 +98,29 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^2.5.3",
     "date-fns": "^2.28.0",
-    "node-fetch": "^3.0.0",
     "query-string": "^7.1.1",
-    "swr": "^1.2.2"
+    "swr": "^2.5.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
+    "@vitest/coverage-v8": "^5.0.2",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit && tsc --project tsconfig.test.json --noEmit"
   }
 }

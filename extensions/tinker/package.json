@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tinker",
+  "title": "Tinker",
+  "description": "Control Tinker from Raycast.",
+  "icon": "icon.png",
+  "author": "jrl",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "screen recording",
+    "capture",
+    "video",
+    "designer",
+    "animation"
+  ],
+  "commands": [
+    {
+      "name": "record-area",
+      "title": "Record Area",
+      "description": "Choose an area, then start recording it with Tinker.",
+      "mode": "no-view",
+      "keywords": [
+        "capture",
+        "select",
+        "region"
+      ]
+    },
+    {
+      "name": "record-last-area",
+      "title": "Record Last Area",
+      "description": "Start recording the most recently selected area with Tinker.",
+      "mode": "no-view",
+      "keywords": [
+        "repeat",
+        "again",
+        "region"
+      ]
+    },
+    {
+      "name": "copy-latest-recording",
+      "title": "Copy Latest Recording",
+      "description": "Copy the most recent Tinker recording to the clipboard.",
+      "mode": "no-view",
+      "keywords": [
+        "clipboard",
+        "recent",
+        "video",
+        "paste"
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.0"
+  }
+}

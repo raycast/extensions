@@ -8,7 +8,8 @@
   "contributors": [
     "xmok",
     "doxxx93",
-    "svenhofman"
+    "svenhofman",
+    "harsh_varshney"
   ],
   "categories": [
     "Web"
@@ -28,22 +29,52 @@
       "subtitle": "LeetCode",
       "description": "Search and preview the LeetCode problems.",
       "mode": "view"
+    },
+    {
+      "name": "random-problem",
+      "title": "Pick a Random LeetCode Problem",
+      "subtitle": "LeetCode",
+      "description": "Pick a random LeetCode problem, optionally filtered by difficulty, category, and topic.",
+      "mode": "view"
+    },
+    {
+      "name": "user-profile",
+      "title": "View LeetCode User Profile",
+      "subtitle": "LeetCode",
+      "description": "View solve stats, streak, and contest rating for a username.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "username",
+          "placeholder": "username",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "potd-menu-bar",
+      "title": "Daily Challenge Status",
+      "subtitle": "LeetCode",
+      "description": "Menu bar timer showing whether you've solved the daily challenge and how long is left.",
+      "mode": "menu-bar",
+      "interval": "15m"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.17.0",
-    "node-html-markdown": "^1.3.0"
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.5",
+    "node-html-markdown": "^2.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "@types/turndown": "^5.0.1",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "react": "^18.2.0",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
+    "@types/turndown": "^5.0.6",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.3",
+    "react": "^19.2.6",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -53,6 +84,13 @@
     "publish": "ray publish"
   },
   "preferences": [
+    {
+      "name": "username",
+      "title": "LeetCode Username",
+      "description": "Your LeetCode username. Used by the daily challenge menu bar to check your status, and as the default for the profile command.",
+      "type": "textfield",
+      "required": false
+    },
     {
       "name": "defaultLanguage",
       "title": "Default Programming Language",
@@ -106,6 +144,27 @@
           "value": "go"
         }
       ]
+    },
+    {
+      "name": "showProblemStats",
+      "title": "Problem Stats",
+      "label": "Show difficulty, likes, dislikes, and acceptance rate",
+      "description": "If enabled, the problem's difficulty, likes, dislikes, and acceptance stats are shown above and below the problem description.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showProblemRatings",
+      "title": "Problem Ratings",
+      "label": "Show zerotrac difficulty ratings",
+      "description": "If enabled, fetches community difficulty ratings from zerotrac and shows them next to each problem.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

@@ -1,7 +1,5 @@
 import { LocalStorage, showToast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
-import { useStockInfo } from "./use-stock-info";
-import { Quote } from "./yahoo-finance";
 
 export interface FavoritesStore {
   add: (symbol: string) => void;
@@ -18,7 +16,7 @@ export function useFavorites(): { favorites: string[]; favoritesStore: Favorites
       setFavorites(newFavorites);
       LocalStorage.setItem("favorites", JSON.stringify(newFavorites));
     },
-    [setFavorites]
+    [setFavorites],
   );
 
   // Load from local storage on mount
@@ -39,7 +37,7 @@ export function useFavorites(): { favorites: string[]; favoritesStore: Favorites
       updateFavorites([...favorites, symbol]);
       showToast({ title: `Added ${symbol} to favorites` });
     },
-    [favorites, updateFavorites]
+    [favorites, updateFavorites],
   );
 
   const remove = useCallback(
@@ -50,59 +48,48 @@ export function useFavorites(): { favorites: string[]; favoritesStore: Favorites
       updateFavorites(favorites.filter((s) => s !== symbol));
       showToast({ title: `Removed ${symbol} from favorites` });
     },
-    [favorites, updateFavorites]
+    [favorites, updateFavorites],
   );
 
-  const moveUp = useCallback(
-    (symbol: string) => {
-      const index = favorites.indexOf(symbol);
-      if (index === 0) {
+  const move = useCallback(
+    (symbol: string, delta: -1 | 1) => {
+      const i = favorites.indexOf(symbol);
+      const j = i + delta;
+      if (i === -1 || j < 0 || j >= favorites.length) {
         return;
       }
-
-      const newFavs = [...favorites];
-      newFavs[index] = newFavs[index - 1];
-      newFavs[index - 1] = symbol;
-      updateFavorites(newFavs);
+      const next = [...favorites];
+      [next[i], next[j]] = [next[j], next[i]];
+      updateFavorites(next);
     },
-    [favorites, updateFavorites]
-  );
-
-  const moveDown = useCallback(
-    (symbol: string) => {
-      const index = favorites.indexOf(symbol);
-      if (index === favorites.length - 1) {
-        return favorites;
-      }
-
-      const newFavs = [...favorites];
-      newFavs[index] = newFavs[index + 1];
-      newFavs[index + 1] = symbol;
-      updateFavorites(newFavs);
-    },
-    [favorites, updateFavorites]
+    [favorites, updateFavorites],
   );
 
   return {
     favorites,
-    favoritesStore: { add, remove, moveUp, moveDown },
+    favoritesStore: {
+      add,
+      remove,
+      moveUp: (symbol) => move(symbol, -1),
+      moveDown: (symbol) => move(symbol, 1),
+    },
     isLoading,
   };
 }
 
-export function useFavoritesQuotes(): { favorites: Quote[]; favoritesStore: FavoritesStore; isLoading: boolean } {
-  const { favorites, favoritesStore, isLoading: favoritesIsLoading } = useFavorites();
-  const { quotes, isLoading: quotesIsLoading } = useStockInfo(favorites);
-  const isLoading = favoritesIsLoading || quotesIsLoading;
-
-  return { favorites: favorites.map((s) => quotes[s]).filter((q): q is Quote => !!q), favoritesStore, isLoading };
-}
-
-async function load() {
+async function load(): Promise<string[]> {
   const favorites = await LocalStorage.getItem<string>("favorites");
-  if (favorites) {
-    return JSON.parse(favorites);
-  } else {
+  if (!favorites) {
     return [];
   }
+  try {
+    const parsed = JSON.parse(favorites);
+    if (Array.isArray(parsed) && parsed.every((s) => typeof s === "string")) {
+      return parsed;
+    }
+    console.warn("favorites: stored value is not a string array, resetting");
+  } catch (e) {
+    console.warn("favorites: failed to parse stored value, resetting", e);
+  }
+  return [];
 }

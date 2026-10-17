@@ -1,4 +1,3 @@
-import fetch from "cross-fetch";
 import { useRef } from "react";
 import type { List } from "@raycast/api";
 import { environment } from "@raycast/api";
@@ -9,7 +8,7 @@ import { favoriteAccessories } from "@/utils/item-accessories/favoriteAccessory"
 import { buildLeagueLogoUrl, buildPlayerImageUrl, buildTeamLogoUrl } from "@/utils/url-builder";
 
 export function useSearch(searchText: string) {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | undefined>(undefined);
   const { data, error, isLoading, revalidate } = useCachedPromise(
     async (query: string): Promise<SearchResultSection[]> => {
       const url = `https://apigw.fotmob.com/searchapi/suggest?term=${query}&lang=en`;
@@ -21,7 +20,7 @@ export function useSearch(searchText: string) {
         throw new Error("Failed to fetch search results");
       }
 
-      const searchResults: SearchResponse = await searchResponse.json();
+      const searchResults: SearchResponse = (await searchResponse.json()) as SearchResponse;
 
       // Parse Team
       const teams = Promise.all(
@@ -29,7 +28,7 @@ export function useSearch(searchText: string) {
           async (option): Promise<SearchResultItem> => ({
             type: "team",
             title: option.text.split("|")[0],
-            iamgeUrl: buildTeamLogoUrl(option.payload.id),
+            imageUrl: buildTeamLogoUrl(option.payload.id),
             subtitle: ``,
             accessories: await favoriteAccessories("team", option.payload.id),
             payload: option.payload,
@@ -44,7 +43,7 @@ export function useSearch(searchText: string) {
           async (option): Promise<SearchResultItem> => ({
             type: "player",
             title: option.text.split("|")[0],
-            iamgeUrl: buildPlayerImageUrl(option.payload.id),
+            imageUrl: buildPlayerImageUrl(option.payload.id),
             subtitle: ``,
             accessories: (await favoriteAccessories("player", option.payload.id)).concat(
               typeof option.payload.teamId === "number" && option.payload.teamName
@@ -63,7 +62,7 @@ export function useSearch(searchText: string) {
           async (option): Promise<SearchResultItem> => ({
             type: "match",
             title: option.text.split("|")[0],
-            iamgeUrl: buildLeagueLogoUrl(option.payload.leagueId, "dark"),
+            imageUrl: buildLeagueLogoUrl(option.payload.leagueId, "dark"),
             subtitle: prettyDate(option.payload.matchDate),
             accessories: (
               [
@@ -95,7 +94,7 @@ export function useSearch(searchText: string) {
           async (option): Promise<SearchResultItem> => ({
             type: "league",
             title: option.text.split("|")[0],
-            iamgeUrl: buildLeagueLogoUrl(option.payload.id, environment.appearance),
+            imageUrl: buildLeagueLogoUrl(option.payload.id, environment.appearance),
             subtitle: ``,
             accessories: [],
             payload: option.payload,

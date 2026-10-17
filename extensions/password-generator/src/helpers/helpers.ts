@@ -6,23 +6,30 @@ const numbers = "23456789";
 const symbols = "!@#$*^&%";
 
 export function generatePassword(len: number, useNumbers: boolean, useChars: boolean): string {
-  let charset = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ";
+  const baseCharset = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ";
+  let fullCharset = baseCharset;
 
-  if (useNumbers) {
-    charset += numbers;
+  if (useNumbers) fullCharset += numbers;
+  if (useChars) fullCharset += symbols;
+
+  const result: string[] = [];
+
+  // Reserve guaranteed positions
+  if (useNumbers) result.push(numbers[crypto.randomInt(numbers.length)]);
+  if (useChars) result.push(symbols[crypto.randomInt(symbols.length)]);
+
+  // Fill remaining positions from full charset
+  while (result.length < len) {
+    result.push(fullCharset[crypto.randomInt(fullCharset.length)]);
   }
 
-  if (useChars) {
-    charset += symbols;
+  // Shuffle to avoid predictable patterns
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = crypto.randomInt(i + 1);
+    [result[i], result[j]] = [result[j], result[i]];
   }
 
-  let retVal = "";
-
-  for (let i = 0; i < len; ++i) {
-    retVal += charset.charAt(crypto.randomInt(charset.length));
-  }
-
-  return retVal;
+  return result.join("");
 }
 
 export function generateCustomPassword(format: string): string {

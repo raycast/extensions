@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List, showInFinder } from "@raycast/api";
 import groupBy from "lodash/groupBy.js";
 import { useEffect, useState } from "react";
-import { allCategory, allPreset, downloadPreset } from "./api.js";
+import { allCategory, allPreset, downloadPreset, presetDetail } from "./api.js";
 import { Category, Preset } from "./types.js";
 
 export default function Search() {
@@ -39,25 +39,25 @@ export default function Search() {
       searchBarAccessory={
         <List.Dropdown tooltip="Select Category" value={categoryId} onChange={setCategoryId}>
           {categories.map((c) => (
-            <List.Dropdown.Item key={c.id} title={c.name} value={c.categoryId} />
+            <List.Dropdown.Item key={c.id} title={c.name} value={c.id} />
           ))}
         </List.Dropdown>
       }
     >
-      {Object.entries(groupBy(presets, (x) => x.applicationName))
+      {Object.entries(groupBy(presets, (x) => x.appName))
         .filter(([section]) => Boolean(section))
         .map(([section, presets]) => (
           <List.Section key={section} title={section}>
             {presets?.map((preset) => (
               <List.Item
-                key={preset.id}
-                title={preset.title}
+                key={preset.presetId}
+                icon={preset.appIcon}
+                title={preset.presetTitle}
                 subtitle={preset.author}
-                keywords={[preset.applicationName, ...preset.sysName.split("/"), ...preset.nameArr]}
+                keywords={[preset.appName, ...preset.systemList]}
                 accessories={[
-                  ...preset.sysName.split("/").map((x) => ({ tag: { color: Color.Yellow, value: x } })),
-                  ...preset.nameArr.map((x) => ({ tag: { color: Color.Blue, value: x } })),
-                  { icon: Icon.Download, tag: { color: Color.Green, value: preset.downloadNum.toString() } },
+                  ...preset.systemList.map((x) => ({ tag: { color: Color.Yellow, value: x } })),
+                  { icon: Icon.Download, tag: { color: Color.Green, value: preset.download.toString() } },
                 ]}
                 actions={
                   <ActionPanel>
@@ -68,7 +68,8 @@ export default function Search() {
                       onAction={async () => {
                         if (isDownloading) return;
                         setIsDownloading(true);
-                        const destination = await downloadPreset(preset.filePath);
+                        const detail = await presetDetail(preset.presetId);
+                        const destination = await downloadPreset(detail.fileS3);
                         setIsDownloading(false);
                         await showInFinder(destination);
                       }}

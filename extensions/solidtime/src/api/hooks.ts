@@ -1,6 +1,7 @@
 import { QueryCache, QueryClient, useQuery } from "@tanstack/react-query";
 import { api } from "./index.js";
 import { useMembership } from "../utils/membership.js";
+import { showFailureToast } from "@raycast/utils";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -8,7 +9,11 @@ export const queryClient = new QueryClient({
       staleTime: 10 * 1_000,
     },
   },
-  queryCache: new QueryCache({}),
+  queryCache: new QueryCache({
+    onError(error) {
+      showFailureToast(error);
+    },
+  }),
 });
 
 export function useMemberships() {

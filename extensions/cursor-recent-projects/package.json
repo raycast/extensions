@@ -2,14 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cursor-recent-projects",
   "title": "Cursor",
-  "description": "Control Cursor, Cursor & Codium directly from Raycast - Search and open recent projects, handle extensions and commands.",
+  "description": "Control Cursor directly from Raycast - Search and open recent projects, handle extensions and commands.",
   "icon": "cursor-icon.png",
   "author": "degouville",
   "contributors": [
     "pernielsentikaer",
     "escwxyz",
     "litomore",
-    "michalzuch"
+    "michalzuch",
+    "NirRosh",
+    "alexi.build"
   ],
   "categories": [
     "Applications",
@@ -58,6 +60,13 @@
       "name": "install-extension",
       "title": "Install Extension",
       "description": "Install Extensions from the Cursor Marketplace",
+      "mode": "view"
+    },
+    {
+      "name": "active-workspaces",
+      "title": "Show Active Workspaces",
+      "subtitle": "Cursor",
+      "description": "Show currently active Cursor windows and workspaces",
       "mode": "view"
     }
   ],

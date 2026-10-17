@@ -32,11 +32,6 @@ Quickly initialize new projects:
 
 View, edit and delete your saved presets from a single interface.
 
-## Configuration
-
-In Raycast preferences, you can configure:
-- **Language**: Choose between English and Simplified Chinese
-
 ## Privacy
 
 This extension stores all data locally on your device. No data is sent to any servers.

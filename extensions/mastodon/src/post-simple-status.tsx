@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { JSX, useEffect } from "react";
 import { Form, ActionPanel, Action, Icon, getPreferenceValues, LaunchProps } from "@raycast/api";
 
 import { Status, StatusRequest } from "./utils/types";
@@ -8,7 +8,7 @@ import { useMe } from "./hooks/useMe";
 import VisibilityDropdown from "./components/VisibilityDropdown";
 import { contentExtractor } from "./utils/helpers";
 
-const { instance, enableMarkdown }: Preferences = getPreferenceValues();
+const { instance, enableMarkdown } = getPreferenceValues<ExtensionPreferences>();
 
 export interface LaunchContext {
   status: Status;
@@ -29,7 +29,7 @@ export default function SimpleCommand({ children, draftValues, launchContext, on
 
   useEffect(() => {
     getUsername();
-    itemProps.sensitive.value ? focus("spoiler_text") : focus("status");
+    focus(itemProps.sensitive.value ? "spoiler_text" : "status");
   }, [itemProps.sensitive.value]);
 
   return (
@@ -41,7 +41,7 @@ export default function SimpleCommand({ children, draftValues, launchContext, on
           {latestStatus && <Action.OpenInBrowser url={latestStatus.url} title={openActionText} />}
           {instance && <Action.OpenInBrowser url={`https://${instance}/home`} title="Open Mastodon in Browser" />}
           {onAddFileFromClipboard && (
-            <Action title="Add File From Clipboard" icon={Icon.Image} onAction={onAddFileFromClipboard} />
+            <Action title="Add File from Clipboard" icon={Icon.Image} onAction={onAddFileFromClipboard} />
           )}
         </ActionPanel>
       }
@@ -75,7 +75,7 @@ export default function SimpleCommand({ children, draftValues, launchContext, on
         />
       )}
       {!children && !launchContext?.status && <VisibilityDropdown />}
-      {children}
+      {children as JSX.Element}
       {enableMarkdown && <Form.Checkbox label="Markdown" storeValue {...itemProps.isMarkdown} />}
       <Form.Checkbox label="Sensitive" {...itemProps.sensitive} storeValue />
     </Form>

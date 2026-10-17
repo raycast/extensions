@@ -8,7 +8,9 @@ export default function Command() {
   return (
     <List isLoading={!profiles} searchBarPlaceholder="Search by title or domain name">
       {profiles && <ProfileListItem profile={profiles.default} />}
-      {profiles?.profiles.map((p) => <ProfileListItem profile={p} />)}
+      {profiles?.profiles.map((p) => (
+        <ProfileListItem profile={p} />
+      ))}
     </List>
   );
 }

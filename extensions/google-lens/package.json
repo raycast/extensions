@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-lens",
+  "title": "Google Lens",
+  "description": "Search images with Google Lens",
+  "icon": "extension-icon.png",
+  "author": "ridemountainpig",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-image-with-google-lens",
+      "title": "Search Image with Google Lens",
+      "description": "Search Image with Google Lens by taking a screenshot or selecting an image in Finder",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "turnOffUploadAlert",
+          "label": "Turn off upload alert",
+          "type": "checkbox",
+          "required": false,
+          "title": "Upload Image Alert",
+          "description": "Turn off the upload alert when uploading an image to Google Lens",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "categories": [
+    "Productivity",
+    "Media",
+    "Web"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.9",
+    "@raycast/utils": "^2.2.2",
+    "form-data": "^4.0.5",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

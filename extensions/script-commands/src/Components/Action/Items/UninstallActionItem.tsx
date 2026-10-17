@@ -1,6 +1,6 @@
 import { ActionPanel } from "@raycast/api";
 
-import { IconConstants, ShortcutConstants } from "@constants";
+import { IconConstants, ShortcutConstants } from "Const";
 
 type Props = {
   onUninstall: () => void;

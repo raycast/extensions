@@ -1,26 +1,31 @@
-import { List } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
-import { returnTodos } from "./utils/fetchTodos";
+import { trelloClient } from "./utils/trelloClient";
 import { TrelloFetchResponse } from "./trelloResponse.model";
-import { TodoListItem } from "./TrelloListItem";
+import { CardListItem } from "./TrelloListItem";
 
 export default function PackageList() {
-  const [results, setTodos] = useState<TrelloFetchResponse>([]);
+  const [results, setCards] = useState<TrelloFetchResponse>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const onSearchTextChange = async (text: string) => {
     setLoading(true);
-    await returnTodos(text.replace(/\s/g, "+")).then((response) => {
-      setTodos(response);
+    try {
+      const response = await trelloClient.searchCards(text);
+      setCards(response);
+    } catch (error) {
+      console.error("Failed to search cards:", error);
+      showToast(Toast.Style.Failure, "Failed to search cards");
+    } finally {
       setLoading(false);
-    });
+    }
   };
 
   return (
-    <List isLoading={loading} searchBarPlaceholder={`Search todos`} onSearchTextChange={onSearchTextChange} throttle>
+    <List isLoading={loading} searchBarPlaceholder={`Search cards`} onSearchTextChange={onSearchTextChange} throttle>
       {results?.length
         ? results.map((result) => {
-            return <TodoListItem key={result.id} result={result} />;
+            return <CardListItem key={result.id} card={result} />;
           })
         : null}
     </List>

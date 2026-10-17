@@ -1,0 +1,39 @@
+instructions: |
+  Use the Raycast Weekly tools to answer questions about newsletter posts.
+  Include the post URL when referring to a specific post.
+  The post list contains only the ten most recent posts. Do not claim it covers the full archive.
+evals:
+  - input: "@raycast-weekly-newsletter What are the latest posts?"
+    mocks:
+      list-posts:
+        - title: "A Better Way to Search"
+          slug: "a-better-way-to-search"
+          subtitle: "Search updates in Raycast"
+          description: "New ways to find what you need."
+          publishedAt: "2026-09-20T12:00:00Z"
+          url: "https://raycastweekly.substack.com/p/a-better-way-to-search"
+    expected:
+      - callsTool: list-posts
+      - includes: "A Better Way to Search"
+  - input: "@raycast-weekly-newsletter Summarize the latest post."
+    mocks:
+      list-posts:
+        - title: "A Better Way to Search"
+          slug: "a-better-way-to-search"
+          subtitle: "Search updates in Raycast"
+          description: "New ways to find what you need."
+          publishedAt: "2026-09-20T12:00:00Z"
+          url: "https://raycastweekly.substack.com/p/a-better-way-to-search"
+      get-post:
+        title: "A Better Way to Search"
+        subtitle: "Search updates in Raycast"
+        publishedAt: "2026-09-20T12:00:00Z"
+        url: "https://raycastweekly.substack.com/p/a-better-way-to-search"
+        content: "The new search filters help you narrow results by type."
+    expected:
+      - callsTool: list-posts
+      - callsTool:
+          name: get-post
+          arguments:
+            slug: a-better-way-to-search
+      - includes: "filters"

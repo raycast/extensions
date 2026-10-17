@@ -27,7 +27,7 @@ export default function SummaryCommand() {
             title={data.display_name}
             accessories={accessories}
             icon={
-              data.photo_public ? { source: data.photo, mask: Image.Mask.Circle } : getAvatarIcon(data.display_name)
+              data.is_photo_public ? { source: data.photo, mask: Image.Mask.Circle } : getAvatarIcon(data.display_name)
             }
             actions={
               <ActionPanel>

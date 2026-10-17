@@ -7,10 +7,10 @@
  */
 export const cleanGitUrl = (url: string): string => {
   // Remove 'git+' prefix if present
-  let cleanUrl = url.startsWith('git+') ? url.slice(4) : url
+  let cleanUrl = url.startsWith("git+") ? url.slice(4) : url;
 
   // Remove '.git' suffix if present
-  cleanUrl = cleanUrl.endsWith('.git') ? cleanUrl.slice(0, -4) : cleanUrl
+  cleanUrl = cleanUrl.endsWith(".git") ? cleanUrl.slice(0, -4) : cleanUrl;
 
-  return cleanUrl
-}
+  return cleanUrl;
+};

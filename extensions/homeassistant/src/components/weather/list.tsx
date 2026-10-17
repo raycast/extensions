@@ -115,10 +115,14 @@ function WeatherList({ state: s }: { state: State }) {
         <WeatherWindSpeed state={s} />
       </List.Section>
       <List.Section title="Forecast (Hourly)">
-        {hourly?.slice(0, 4).map((f) => <WeatherForecastItem forecast={f} isDaily={false} tempUnit={tempUnit} />)}
+        {hourly?.slice(0, 4).map((f) => (
+          <WeatherForecastItem forecast={f} isDaily={false} tempUnit={tempUnit} />
+        ))}
       </List.Section>
       <List.Section title="Forecast (Daily)">
-        {daily?.map((f) => <WeatherForecastItem forecast={f} isDaily={isDaily} tempUnit={tempUnit} />)}
+        {daily?.map((f) => (
+          <WeatherForecastItem forecast={f} isDaily={isDaily} tempUnit={tempUnit} />
+        ))}
       </List.Section>
     </List>
   );

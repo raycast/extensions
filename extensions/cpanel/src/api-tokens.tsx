@@ -11,7 +11,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useListAPITokens, useUAPI } from "./lib/hooks";
-import { isInvalidUrl } from "./lib/utils";
+import { formatDate, isInvalidUrl } from "./lib/utils";
 import InvalidUrl from "./lib/components/invalid-url";
 import { useState } from "react";
 import { FormValidation, useForm } from "@raycast/utils";
@@ -49,11 +49,11 @@ export default function APITokens() {
                   />
                   <List.Item.Detail.Metadata.Label
                     title="Created"
-                    text={new Date(token.create_time * 1000).toDateString()}
+                    text={formatDate(new Date(token.create_time * 1000))}
                   />
                   <List.Item.Detail.Metadata.Label
                     title="Expires"
-                    text={!token.expires_at ? "Never" : new Date(token.expires_at * 1000).toString()}
+                    text={!token.expires_at ? "Never" : formatDate(new Date(token.expires_at * 1000))}
                   />
                 </List.Item.Detail.Metadata>
               }

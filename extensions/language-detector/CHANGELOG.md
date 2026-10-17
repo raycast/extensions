@@ -1,5 +1,22 @@
 # Language Detector Changelog
 
+## [Maintenance] - 2026-01-01
+
+- Add multi-platform badge
+- Add affiliate parameter to Raycast website links
+- Bump all dependencies to the latest
+
+## [Maintenance] - 2025-08-27
+
+- Bump latest `raycast-language-detector` to support internet slangs
+- Bump latest `mac-say` to handle `SIGTERM` gracefully
+- Bump all dependencies to the latest
+
+## [Maintenance] - 2025-08-18
+
+- Add support for Windows platform
+- Bump all dependencies to the latest
+
 ## [Enhancement] - 2025-03-31
 
 - Add new detector - [franc](https://npmjs.com/franc)

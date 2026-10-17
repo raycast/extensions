@@ -1,8 +1,14 @@
 # URL Parse Changelog
 
-## [Initial Version] - 2024-02-20
+## [New Additions] - 2025-11-05
 
-- Add `Url Parse` command
+- Add paste from clipboard action to parse long URLs
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
+## [New Additions] - 2024-03-06
+
+- Improve actions
 
 ## [New Additions] - 2024-03-05
 
@@ -10,6 +16,6 @@
 - Add style to clear history action
 - Improve search & parse actions
 
-## [New Additions] - 2024-03-06
+## [Initial Version] - 2024-02-20
 
-- Improve actions
+- Add `Url Parse` command

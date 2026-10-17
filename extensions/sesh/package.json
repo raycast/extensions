@@ -5,6 +5,11 @@
   "description": "Smart, instant terminal session management.",
   "icon": "command-icon.png",
   "author": "joshmedeski",
+  "contributors": [
+    "sebastian_gunnarsson",
+    "pernielsentikaer",
+    "tharropoulos"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -23,24 +28,84 @@
           "name": "openWithApp",
           "type": "appPicker",
           "required": true,
-          "title": "Open with (required)",
+          "title": "Open With (Required)",
           "description": "Open with",
           "default": "Terminal"
+        },
+        {
+          "name": "environmentPath",
+          "type": "textfield",
+          "required": true,
+          "title": "Environment Path",
+          "description": "Colon-separated PATH (Unix-style), e.g /usr/local/bin:/usr/bin",
+          "default": "/usr/local/bin:/usr/bin:/opt/homebrew/bin:/run/current-system/sw/bin"
+        }
+      ]
+    },
+    {
+      "name": "cmd-connect-window",
+      "title": "Connect to Window",
+      "subtitle": "Sesh",
+      "description": "Search every tmux window across your sessions and jump straight to it.",
+      "icon": "command-icon.png",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "openWithApp",
+          "type": "appPicker",
+          "required": true,
+          "title": "Open With (Required)",
+          "description": "Open with",
+          "default": "Terminal"
+        },
+        {
+          "name": "environmentPath",
+          "type": "textfield",
+          "required": true,
+          "title": "Environment Path",
+          "description": "Colon-separated PATH (Unix-style), e.g /usr/local/bin:/usr/bin",
+          "default": "/usr/local/bin:/usr/bin:/opt/homebrew/bin:/run/current-system/sw/bin"
+        }
+      ]
+    },
+    {
+      "name": "cmd-connect-browser-worktree",
+      "title": "Connect to Worktree from Browser",
+      "subtitle": "Sesh",
+      "description": "Open a worktree for the GitHub issue or pull request in your active browser tab, creating it if needed.",
+      "icon": "command-icon.png",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "openWithApp",
+          "type": "appPicker",
+          "required": true,
+          "title": "Open With (Required)",
+          "description": "Open with",
+          "default": "Terminal"
+        },
+        {
+          "name": "environmentPath",
+          "type": "textfield",
+          "required": true,
+          "title": "Environment Path",
+          "description": "Colon-separated PATH (Unix-style), e.g /usr/local/bin:/usr/bin",
+          "default": "/usr/local/bin:/usr/bin:/opt/homebrew/bin:/run/current-system/sw/bin"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.2",
-    "run-applescript": "^6.1.0"
+    "@raycast/api": "^1.102.0",
+    "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "18.8.3",
-    "@types/react": "^18.2.47",
-    "eslint": "^7.32.0",
-    "prettier": "^2.8.8",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -48,5 +113,12 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2"
   }
 }

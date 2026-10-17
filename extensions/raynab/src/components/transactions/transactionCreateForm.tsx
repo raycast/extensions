@@ -54,8 +54,8 @@ interface TransactionCreateFormProps {
   transaction?: {
     account_id: string;
     amount: number;
-    payee_name: string;
-    payee_id: string;
+    payee_name?: string;
+    payee_id?: string;
     memo?: string;
     flag_color?: string;
     date?: string;
@@ -147,7 +147,7 @@ export function TransactionCreateForm({ accountId, transaction }: TransactionCre
   // Form hook - always called
   const { handleSubmit, itemProps } = useForm<FormValues>({
     initialValues: {
-      date: transaction?.date ? new Date(transaction.date) : new Date(new Date().toLocaleDateString()),
+      date: transaction?.date ? new Date(transaction.date) : new Date(),
       account_id: transaction?.account_id || accountId || '',
       amount: transaction?.amount?.toString() || '',
       payee_name: transaction?.payee_name || '',
@@ -168,7 +168,8 @@ export function TransactionCreateForm({ accountId, transaction }: TransactionCre
           amount: formatToYnabAmount(values.amount, activeBudgetCurrency),
           approved: true,
           category_id: isTransfer ? null : values.categoryList?.[0] || undefined,
-          payee_name: values.payee_id ? undefined : values.payee_name,
+          payee_id: values.payee_id || undefined,
+          payee_name: values.payee_id ? undefined : values.payee_name?.trim() || undefined,
           cleared: values.cleared ? TransactionClearedStatus.Cleared : TransactionClearedStatus.Uncleared,
           flag_color: values.flag_color ? (values.flag_color as TransactionFlagColor) : null,
           subtransactions: undefined,
@@ -243,21 +244,22 @@ export function TransactionCreateForm({ accountId, transaction }: TransactionCre
     },
     validation: {
       date: FormValidation.Required,
-      payee_name: (value) => {
-        if (selectOwnPayee && !value && !isTransfer) {
-          return 'Please add a counterparty';
-        }
-      },
       payee_id: (value) => {
-        const errorMessage = 'Please select or enter a payee';
-
-        if (!selectOwnPayee && !value) {
-          return errorMessage;
+        if (isTransfer && !selectOwnPayee && !value) {
+          return 'Please select an account to transfer from';
         }
       },
       amount: (value: string | undefined) => {
         if (!value) return 'Please enter an amount';
-        const num = Number(value);
+
+        // Normalize the amount based on currency format, similar to formatToYnabAmount
+        const normalizedAmount = activeBudgetCurrency
+          ? value
+              .replaceAll(activeBudgetCurrency.group_separator, '')
+              .replaceAll(activeBudgetCurrency.decimal_separator, '.')
+          : value;
+
+        const num = Number(normalizedAmount);
         if (isNaN(num)) return 'Please enter a valid number';
         if (num === 0) return 'Amount cannot be zero';
         return undefined;
@@ -320,12 +322,14 @@ export function TransactionCreateForm({ accountId, transaction }: TransactionCre
         </Form.Dropdown>
       ) : !selectOwnPayee ? (
         <Form.Dropdown {...itemProps.payee_id} title="Payee" info="Press Opt+P to add a payee not in the list">
+          <Form.Dropdown.Item value="" title="No Payee" icon={Icon.Minus} />
           {payeeItems}
         </Form.Dropdown>
       ) : (
         <Form.TextField
           {...itemProps.payee_name}
           title="Payee"
+          placeholder="Optional"
           info="Press Opt+P to select from the list of existing payees"
         />
       )}

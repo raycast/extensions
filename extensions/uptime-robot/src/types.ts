@@ -27,11 +27,22 @@ type MonitorLog = {
     detail: string;
   };
 };
+export enum MonitorType {
+  HTTP = 1,
+  PING = 3,
+}
+export enum MonitorStatus {
+  "Paused" = 0,
+  "Preparing" = 1,
+  "Up" = 2,
+  "" = 8,
+  "Down" = 9,
+}
 export type Monitor = {
   id: number;
   friendly_name: string;
   url: string;
-  type: number;
+  type: MonitorType;
   sub_type: string;
   keyword_type: number;
   keyword_case_type: number;
@@ -41,7 +52,7 @@ export type Monitor = {
   port: string;
   interval: number;
   timeout: number;
-  status: number;
+  status: MonitorStatus;
   create_datetime: number;
   logs: MonitorLog[];
 };
@@ -50,7 +61,7 @@ export type NewMonitor = {
   friendly_name: string;
   url: string;
   type: string;
-  interval: string;
+  interval?: string;
   timeout: string;
 };
 

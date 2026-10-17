@@ -36,6 +36,21 @@ export async function updateProject(project: Project): Promise<void> {
   await saveProjects(updatedProjects);
 }
 
+export async function updateProjectUsage(projectId: string): Promise<void> {
+  const projects = await getProjects();
+  const updatedProjects = projects.map((project) => {
+    if (project.id === projectId) {
+      return {
+        ...project,
+        usageCount: (project.usageCount || 0) + 1,
+        lastUsed: new Date().toISOString(),
+      };
+    }
+    return project;
+  });
+  await saveProjects(updatedProjects);
+}
+
 export async function deleteProject(id: string): Promise<void> {
   const projects = await getProjects();
   const filteredProjects = projects.filter((project) => project.id !== id);

@@ -1,5 +1,8 @@
 # Code Quarkus Changelog
 
+## [Improve UI/UX and enable save configuration] - 2025-12-01
+- Improve general ui
+- Allow saving preferred configuration
 ## [Allow to automatically unzip and open the IDE] - 2025-02-28
 - Allow to automatically unzip the downloaded archive
 - Allow to automatically open the project in your favorite IDE

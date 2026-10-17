@@ -1,6 +1,7 @@
 name: "🧬 🐞 API Bug Report"
 description: Report a reproducible bug or regression related to extensions API
 labels: ["api", "bug"]
+type: "Bug"
 body:
   - type: markdown
     attributes:

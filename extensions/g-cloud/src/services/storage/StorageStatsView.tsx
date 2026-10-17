@@ -1,6 +1,5 @@
 import { ActionPanel, Action, List, Detail, showToast, Toast, Icon, Color } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
-import { showFailureToast } from "@raycast/utils";
 
 interface StorageStatsViewProps {
   projectId: string;
@@ -37,7 +36,6 @@ export default function StorageStatsView({ projectId, gcloudPath, bucketName }: 
       const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
       console.error("Error analyzing storage:", err);
       setError(errorMessage);
-      showFailureToast("Failed to load storage statistics");
     } finally {
       setIsLoading(false);
     }

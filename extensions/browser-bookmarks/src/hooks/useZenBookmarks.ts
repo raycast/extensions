@@ -9,11 +9,14 @@ import ini from "ini";
 import { useMemo, useEffect } from "react";
 import initSqlJs, { Database } from "sql.js";
 
-import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
+import { BROWSERS_BUNDLE_ID, getBrowserDataPath } from "./useAvailableBrowsers";
 
 const read = promisify(readFile);
 
-const ZEN_FOLDER = path.join(process.env.HOME || "", "Library", "Application Support", "zen");
+const ZEN_FOLDER = getBrowserDataPath(
+  BROWSERS_BUNDLE_ID.zen,
+  path.join(process.env.HOME || "", "Library", "Application Support", "zen"),
+);
 
 const folderNames: Record<string, string> = {
   menu: "Bookmark Menu",
@@ -206,7 +209,11 @@ export default function useZenBookmarks(enabled: boolean) {
       }
 
       const buffer = new Uint8Array(await read(dbPath));
-      const wasmBinary = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
+      const wasmBinaryBuffer = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
+      const wasmBinary =
+        wasmBinaryBuffer instanceof Uint8Array
+          ? (wasmBinaryBuffer.buffer as ArrayBuffer)
+          : (new Uint8Array(wasmBinaryBuffer).buffer as ArrayBuffer);
       const SQL = await initSqlJs({ wasmBinary });
       const db = new SQL.Database(buffer);
 

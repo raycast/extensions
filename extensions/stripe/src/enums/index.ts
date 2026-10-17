@@ -1,3 +1,5 @@
+export const STRIPE_API_VERSION = "2025-02-24.acacia";
+
 export const STRIPE_ENDPOINTS = {
   BALANCE: "balance",
   BALANCE_TRANSACTIONS: "balance_transactions",

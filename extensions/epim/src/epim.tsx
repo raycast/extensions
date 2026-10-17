@@ -10,6 +10,7 @@ import {
   Icon,
   Color,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import React from "react";
@@ -233,6 +234,7 @@ function formatDateTime(dateTimeStr: string): string {
 interface JustificationFormProps {
   role: Role;
   userId: string;
+  onActivationComplete?: () => void;
 }
 
 interface JustificationFormValues {
@@ -321,29 +323,30 @@ async function activateRole(
 }
 
 // Add the form component
-function JustificationForm({ role, userId }: JustificationFormProps) {
+function JustificationForm({ role, userId, onActivationComplete }: JustificationFormProps) {
   const { pop } = useNavigation();
 
   async function handleSubmit(values: JustificationFormValues) {
-    try {
-      await showToast({ style: Toast.Style.Animated, title: "Activating role..." });
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Activating role...",
+    });
 
+    try {
       const activationResult = await activateRole(userId, role, values.justification, parseInt(values.duration));
 
       if (activationResult.alreadyExists) {
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Role Already Active",
-          message: activationResult.message,
-        });
+        toast.style = Toast.Style.Success;
+        toast.title = "Role Already Active";
+        toast.message = activationResult.message;
+        await onActivationComplete?.();
         pop();
         return;
       } else if (activationResult.alreadyPending) {
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Role Already Pending",
-          message: activationResult.message,
-        });
+        toast.style = Toast.Style.Success;
+        toast.title = "Role Already Pending";
+        toast.message = activationResult.message;
+        await onActivationComplete?.();
         pop();
         return;
       }
@@ -352,18 +355,17 @@ function JustificationForm({ role, userId }: JustificationFormProps) {
         throw new Error(activationResult.message || "Failed to activate role");
       }
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Role activated successfully",
-        message: `${role.displayName} activated for ${values.duration} hour${values.duration === "1" ? "" : "s"}`,
-      });
+      await onActivationComplete?.();
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Role activated successfully";
+      toast.message = `${role.displayName} activated for ${values.duration} hour${values.duration === "1" ? "" : "s"}`;
+
       pop();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to activate role",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to activate role";
+      toast.message = error instanceof Error ? error.message : "Unknown error";
     }
   }
 
@@ -386,7 +388,7 @@ function JustificationForm({ role, userId }: JustificationFormProps) {
 }
 
 // Add a new component for the main list view
-function CommandList({ userId, roles }: { userId: string; roles: Role[] }) {
+function CommandList({ userId, roles, onRefresh }: { userId: string; roles: Role[]; onRefresh: () => void }) {
   return (
     <List isShowingDetail searchBarPlaceholder="Choose PIM Role to activate...">
       {roles.map((role, index) => (
@@ -434,7 +436,7 @@ function CommandList({ userId, roles }: { userId: string; roles: Role[] }) {
             <ActionPanel>
               <Action.Push
                 title={role.isActive ? "Role Already Active" : "Activate Role"}
-                target={<JustificationForm role={role} userId={userId} />}
+                target={<JustificationForm role={role} userId={userId} onActivationComplete={onRefresh} />}
               />
               {role.isActive && (
                 <Action
@@ -463,9 +465,37 @@ export default function Command() {
   const [error, setError] = React.useState<Error | null>(null);
   const [data, setData] = React.useState<{ userId: string; roles: Role[] } | null>(null);
 
+  const refresh = React.useCallback(async () => {
+    if (!data) return;
+
+    try {
+      const activatedRoles = await getActivatedRoles(data.userId);
+
+      const eligibleRoles = await getEligibleRoles(data.userId);
+
+      const rolesWithActiveStatus = eligibleRoles.map((role) => {
+        const activeRole = activatedRoles.find((ar) => ar.roleDefinitionId === role.roleTemplateId);
+        if (activeRole) {
+          return {
+            ...role,
+            isActive: true,
+            endDateTime: activeRole.endDateTime,
+            remainingTime: calculateRemainingTime(activeRole.endDateTime),
+          };
+        }
+        return { ...role, isActive: false };
+      });
+
+      setData({ userId: data.userId, roles: rolesWithActiveStatus });
+    } catch (e) {
+      await showFailureToast(e, { title: "Failed to refresh roles" });
+    }
+  }, [data]);
+
   React.useEffect(() => {
     async function loadData() {
       try {
+        setLoading(true);
         await showToast({
           style: Toast.Style.Animated,
           title: "Connecting to Microsoft Graph...",
@@ -484,10 +514,8 @@ export default function Command() {
           throw new Error("No eligible roles found");
         }
 
-        // Get activated roles
         const activatedRoles = await getActivatedRoles(userId);
 
-        // Merge data from eligible and activated roles
         const rolesWithActiveStatus = eligibleRoles.map((role) => {
           const activeRole = activatedRoles.find((ar) => ar.roleDefinitionId === role.roleTemplateId);
           if (activeRole) {
@@ -529,5 +557,5 @@ export default function Command() {
     return <List />;
   }
 
-  return <CommandList userId={data.userId} roles={data.roles} />;
+  return <CommandList userId={data.userId} roles={data.roles} onRefresh={refresh} />;
 }

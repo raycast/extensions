@@ -1,6 +1,20 @@
 {
-  "endOfLine": "lf",
-  "semi": false,
-  "trailingComma": "all",
-  "singleQuote": true
+  "printWidth": 120,
+  "singleQuote": false,
+  "importOrder": [
+    "<THIRD_PARTY_MODULES>",
+    "^@raycast/(.*)$",
+    "^@/model",
+    "^@/utils/(.*)$",
+    "^@/hooks/(.*)$",
+    "^@/screens/(.*)$",
+    "^@/components/(.*)$",
+    "^@/(.*)$",
+    "^[./]"
+  ],
+  "importOrderSeparation": false,
+  "importOrderSortSpecifiers": true,
+  "plugins": [
+    "@trivago/prettier-plugin-sort-imports"
+  ]
 }

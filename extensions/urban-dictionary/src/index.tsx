@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
@@ -15,7 +15,9 @@ export default function Command(props: { arguments: Arguments.Index }) {
       searchText={searchText}
     >
       <List.Section title="Suggestions" subtitle={`${data?.length ?? 0}`}>
-        {data?.map((searchResult) => <SearchListItem key={searchResult.preview} searchResult={searchResult} />)}
+        {data?.map((searchResult) => (
+          <SearchListItem key={searchResult.preview} searchResult={searchResult} />
+        ))}
       </List.Section>
     </List>
   );
@@ -82,7 +84,7 @@ function ItemDetails({ term }: { term: string }) {
                   <Action.CopyToClipboard
                     title={`Copy "${term}" to Clipboard`}
                     content={term}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

@@ -1,6 +1,5 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
-import fetch from "node-fetch";
 
 interface App {
   id: string;
@@ -47,7 +46,7 @@ export default function AppList() {
             !appsResponse?.apps.featured.includes(app.id) &&
             !appsResponse?.apps.new.includes(app.id) &&
             !appsResponse?.apps.upcoming.includes(app.id) &&
-            !appsResponse?.apps.waitlist.includes(app.id)
+            !appsResponse?.apps.waitlist.includes(app.id),
         ),
         popular: appsResponse?.apps.all.filter((app) => appsResponse?.apps.popular.includes(app.id)),
         featured: appsResponse?.apps.all.filter((app) => appsResponse?.apps.featured.includes(app.id)),
@@ -57,7 +56,7 @@ export default function AppList() {
             !appsResponse?.apps.featured.includes(app.id) &&
             appsResponse?.apps.new.includes(app.id) &&
             !appsResponse?.apps.upcoming.includes(app.id) &&
-            !appsResponse?.apps.waitlist.includes(app.id)
+            !appsResponse?.apps.waitlist.includes(app.id),
         ),
         upcoming: appsResponse?.apps.all.filter(
           (app) =>
@@ -65,7 +64,7 @@ export default function AppList() {
             !appsResponse?.apps.featured.includes(app.id) &&
             !appsResponse?.apps.new.includes(app.id) &&
             appsResponse?.apps.upcoming.includes(app.id) &&
-            !appsResponse?.apps.waitlist.includes(app.id)
+            !appsResponse?.apps.waitlist.includes(app.id),
         ),
         waitlist: appsResponse?.apps.all.filter(
           (app) =>
@@ -73,7 +72,7 @@ export default function AppList() {
             !appsResponse?.apps.featured.includes(app.id) &&
             !appsResponse?.apps.new.includes(app.id) &&
             !appsResponse?.apps.upcoming.includes(app.id) &&
-            appsResponse?.apps.waitlist.includes(app.id)
+            appsResponse?.apps.waitlist.includes(app.id),
         ),
       }));
     }
@@ -128,8 +127,8 @@ function AppListItem(props: { app: App; type: string }) {
       icon={{ source: app.icon }}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={`https://app.airport.community/app/${app.id}`} />
-          <CopyToClipboardAction title="Copy URL" content={`https://app.airport.community/app/${app.id}`} />
+          <Action.OpenInBrowser url={`https://app.airport.community/app/${app.id}`} />
+          <Action.CopyToClipboard title="Copy URL" content={`https://app.airport.community/app/${app.id}`} />
         </ActionPanel>
       }
     />
@@ -143,7 +142,7 @@ async function fetchApps(): Promise<Response | null> {
     return json as Response;
   } catch (error) {
     console.error(error);
-    showToast(ToastStyle.Failure, "Could not load apps");
+    showToast(Toast.Style.Failure, "Could not load apps");
     return Promise.resolve(null);
   }
 }

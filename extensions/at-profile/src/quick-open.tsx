@@ -1,23 +1,16 @@
-import { showToast, Toast, open } from "@raycast/api";
-import { getAllSites } from "./sites";
+import { LaunchProps } from "@raycast/api";
+import { openProfile } from "./helpers/open-profile";
+import { QuickOpenArguments } from "./types";
 
-export default async function command(props: { arguments: { profile: string; site: string } }) {
-  const { profile, site } = props.arguments;
+/**
+ * Quick open command that directly opens a profile on a specified app
+ * Bypasses manage apps settings since it uses a hardcoded list
+ * @param props - Launch props containing profile and app arguments
+ */
+export default async function QuickOpenCommand(props: LaunchProps<{ arguments: QuickOpenArguments }>) {
+  const { profile, app } = props.arguments;
 
-  try {
-    const allSites = await getAllSites();
-    const enabledSites = allSites.filter((s) => s.value === site);
-    const selectedSite = enabledSites.find((s) => s.value === site);
-    if (!selectedSite) {
-      throw new Error(`Site "${site}" not found or not enabled`);
-    }
-    const url = selectedSite.urlTemplate.replace("{profile}", profile);
-    await open(url);
-  } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to open profile",
-      message: (error as Error).message,
-    });
-  }
+  // Open the profile with the selected app, bypassing manage apps settings
+  // since Quick Open uses a hardcoded list and should work regardless of disabled apps
+  await openProfile(profile, app, true, true);
 }

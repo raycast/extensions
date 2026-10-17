@@ -1,12 +1,16 @@
 import * as Types from "./types";
 import * as React from "react";
 import { Ollama } from "../../ollama/ollama";
-import { OllamaApiGenerateRequestBody, OllamaApiGenerateResponse } from "../../ollama/types";
+import { OllamaApiGenerateRequestBody, OllamaApiGenerateResponse, ThinkingEffort } from "../../ollama/types";
 import { CommandAnswer } from "../../settings/enum";
-import { AddSettingsCommandChat, GetOllamaServerByName, GetSettingsCommandAnswer } from "../../settings/settings";
+import {
+  AddSettingsCommandChat,
+  GetOllamaServerByName,
+  GetResolvedSettingsCommandAnswer,
+} from "../../settings/settings";
 import { launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import { GetAvailableModel, PromptTokenImageParser, PromptTokenParser } from "../function";
-import { Creativity } from "../../enum";
+import { Creativity, PromptInputSource } from "../../enum";
 import { RaycastChat, SettingsCommandAnswer } from "../../settings/types";
 import { OllamaApiChatMessageRole } from "../../ollama/enum";
 import { RaycastImage } from "../../types";
@@ -21,7 +25,7 @@ import { RaycastImage } from "../../types";
 export async function GetModel(command?: CommandAnswer, server?: string, model?: string): Promise<Types.UiModel> {
   let settings: SettingsCommandAnswer | undefined;
   if (command) {
-    settings = await GetSettingsCommandAnswer(command);
+    settings = await GetResolvedSettingsCommandAnswer(command);
     server = settings.server;
     model = settings.model.main.tag;
   } else if (!server || !model) throw new Error("server and model need to be defined");
@@ -34,6 +38,7 @@ export async function GetModel(command?: CommandAnswer, server?: string, model?:
       ollama: new Ollama(s),
     },
     tag: m[0],
+    thinking: settings?.model.main.thinking,
     keep_alive: settings?.model.main.keep_alive,
   };
 }
@@ -50,9 +55,11 @@ export async function convertAnswerToChat(
   model: Types.UiModel,
   query: string | undefined,
   images: RaycastImage[] | undefined,
+  thinking: string | undefined,
   answer: string,
   answerMeta: OllamaApiGenerateResponse,
-  openCommand = true
+  openCommand = true,
+  thinkingEffort?: ThinkingEffort,
 ): Promise<void> {
   const server = await GetOllamaServerByName(model.server.name);
   const chat: RaycastChat = {
@@ -63,6 +70,7 @@ export async function convertAnswerToChat(
         server_name: model.server.name,
         tag: model.tag.name,
         keep_alive: model.keep_alive,
+        thinking: thinkingEffort ? thinkingEffort : model.thinking,
       },
     },
     messages: [
@@ -75,6 +83,7 @@ export async function convertAnswerToChat(
           },
           {
             role: OllamaApiChatMessageRole.ASSISTANT,
+            thinking: thinking,
             content: answer,
           },
         ],
@@ -84,7 +93,20 @@ export async function convertAnswerToChat(
     ],
   };
   await AddSettingsCommandChat(chat);
-  openCommand && (await launchCommand({ name: "ollama-chat", type: LaunchType.UserInitiated }));
+  if (openCommand) {
+    try {
+      await launchCommand({
+        name: "ollama-chat",
+        type: LaunchType.UserInitiated,
+      });
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: String(e),
+      });
+    }
+  }
 }
 
 /**
@@ -94,39 +116,71 @@ async function Inference(
   model: Types.UiModel,
   prompt: string,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  setThinking: React.Dispatch<React.SetStateAction<string>>,
   setAnswer: React.Dispatch<React.SetStateAction<string>>,
   setAnswerMetadata: React.Dispatch<React.SetStateAction<OllamaApiGenerateResponse>>,
   images: string[] | undefined = undefined,
   creativity: Creativity = Creativity.Medium,
-  keep_alive?: string
+  thinking: ThinkingEffort = false,
+  keep_alive?: string,
 ): Promise<void> {
-  await showToast({ style: Toast.Style.Animated, title: "🧠 Inference." });
   const body: OllamaApiGenerateRequestBody = {
     model: model.tag.name,
     prompt: prompt,
     images: images,
+    think: thinking,
     options: {
       temperature: creativity,
     },
   };
   if (keep_alive) body.keep_alive = keep_alive;
-  model.server.ollama
-    .OllamaApiGenerate(body)
-    .then(async (emiter) => {
-      emiter.on("data", (data) => {
-        setAnswer((prevState) => prevState + data);
+
+  try {
+    await showToast({ style: Toast.Style.Animated, title: "🔌 Connecting to Ollama..." });
+
+    const emiter = await model.server.ollama.OllamaApiGenerate(body);
+
+    let thinkingStarted = false;
+    let responseStarted = false;
+
+    const processEmiter = () => {
+      emiter.on("thinking", async (data) => {
+        if (!thinkingStarted) {
+          thinkingStarted = true;
+          await showToast({
+            style: Toast.Style.Animated,
+            title: "🤔 Thinking...",
+          });
+        }
+        setThinking((prevState) => prevState + data);
       });
 
+      emiter.on("data", async (data) => {
+        if (!responseStarted) {
+          responseStarted = true;
+          await showToast({
+            style: Toast.Style.Animated,
+            title: "✍️ Typing...",
+          });
+        }
+        setAnswer((prevState) => prevState + data);
+      });
+    };
+    processEmiter();
+
+    await new Promise<void>((resolve) => {
       emiter.on("done", async (data) => {
-        await showToast({ style: Toast.Style.Success, title: "🧠 Inference Done." });
+        await showToast({ style: Toast.Style.Success, title: "👍 Done." });
         setAnswerMetadata(data);
         setLoading(false);
+        emiter.removeAllListeners();
+        resolve();
       });
-    })
-    .catch(async (err) => {
-      await showToast({ style: Toast.Style.Failure, title: err });
-      setLoading(false);
     });
+  } catch (err) {
+    if (err instanceof Error) await showToast({ style: Toast.Style.Failure, title: err.message });
+    setLoading(false);
+  }
 }
 
 /**
@@ -137,12 +191,15 @@ export async function Run(
   prompt: string,
   query: React.MutableRefObject<undefined | string>,
   images: React.MutableRefObject<undefined | RaycastImage[]>,
+  inputSource: React.MutableRefObject<PromptInputSource>,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>,
   setImageView: React.Dispatch<React.SetStateAction<string>>,
+  setThinking: React.Dispatch<React.SetStateAction<string>>,
   setAnswer: React.Dispatch<React.SetStateAction<string>>,
   setAnswerMetadata: React.Dispatch<React.SetStateAction<OllamaApiGenerateResponse>>,
   creativity: Creativity = Creativity.Medium,
-  keep_alive?: string
+  thinking: ThinkingEffort = false,
+  keep_alive?: string,
 ): Promise<void> {
   setLoading(true);
 
@@ -159,19 +216,24 @@ export async function Run(
   }
 
   // Loading query
-  prompt = await PromptTokenParser(prompt);
+  const [parsed, source] = await PromptTokenParser(prompt);
+  prompt = parsed;
   query.current = prompt;
+  inputSource.current = source;
 
   // Start Inference
   setAnswer("");
+  setThinking("");
   await Inference(
     model,
     prompt,
     setLoading,
+    setThinking,
     setAnswer,
     setAnswerMetadata,
     imgs && imgs[1] ? imgs[1].map((i) => i.base64) : undefined,
     creativity,
-    keep_alive
+    thinking,
+    keep_alive,
   );
 }

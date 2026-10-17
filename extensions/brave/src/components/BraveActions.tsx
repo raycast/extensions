@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon } from "@raycast/api";
-import { closeTab, openNewTab, setActiveTab } from "../actions";
-import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+import { closeTab, executeJavascript, openNewTab, setActiveTab, openAllBookmarksInFolder } from "../actions";
+import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { useCachedState } from "@raycast/utils";
 import { BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID } from "../constants";
 
@@ -9,6 +9,27 @@ export class BraveActions {
   public static NewTab = NewTabActions;
   public static TabList = TabListItemActions;
   public static TabHistory = HistoryItemActions;
+  public static OpenAllBookmarksInFolder = OpenAllBookmarksInFolderAction;
+}
+
+function OpenAllBookmarksInFolderAction(props: { urls: string[]; profile: string }) {
+  const { openTabInProfile } = getPreferenceValues<Preferences>();
+  const [profileCurrent] = useCachedState(BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID);
+
+  return (
+    <ActionPanel title="Open All Bookmarks In Folder">
+      <Action
+        title="Open All Bookmarks in Folder"
+        onAction={() =>
+          openAllBookmarksInFolder({
+            urls: props.urls,
+            profileCurrent: profileCurrent,
+            openTabInProfile: openTabInProfile,
+          })
+        }
+      />
+    </ActionPanel>
+  );
 }
 
 function NewTabActions({ query, incognito }: { query?: string; incognito?: boolean }): ReactElement {
@@ -34,7 +55,7 @@ function TabListItemActions({ tab }: { tab: Tab }) {
     <ActionPanel title={tab.title}>
       <GoToTab tab={tab} />
       <Action
-        title="Move To New Window"
+        title="Move to New Window"
         icon={Icon.Window}
         onAction={async () => {
           await closeTab(tab.tabIndex);
@@ -42,7 +63,7 @@ function TabListItemActions({ tab }: { tab: Tab }) {
         }}
       />
       <Action
-        title="Move To Incognito Window"
+        title="Move to Incognito Window"
         icon={Icon.EyeDisabled}
         onAction={async () => {
           await closeTab(tab.tabIndex);
@@ -66,6 +87,16 @@ function HistoryItemActions({
   const { openTabInProfile } = getPreferenceValues<Preferences>();
   const [profileCurrent] = useCachedState(BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID);
 
+  if (url.startsWith("javascript:")) {
+    const code = url.substring("javascript:".length);
+    return (
+      <ActionPanel title={title}>
+        <Action onAction={() => executeJavascript(code)} icon={Icon.Play} title="Run Bookmarklet" />
+        <Action.CopyToClipboard title="Copy Code" content={code} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+      </ActionPanel>
+    );
+  }
+
   return (
     <ActionPanel title={title}>
       <Action
@@ -74,14 +105,14 @@ function HistoryItemActions({
         title="Open"
       />
       <Action
-        title="Open In New Window"
+        title="Open in New Window"
         icon={Icon.Window}
         onAction={async () =>
           await openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile, newWindow: true })
         }
       />
       <Action
-        title="Open In Incognito Window"
+        title="Open in Incognito Window"
         icon={Icon.EyeDisabled}
         onAction={async () =>
           await openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile, incognito: true })
@@ -97,7 +128,7 @@ function HistoryItemActions({
               openTabInProfile: SettingsProfileOpenBehaviour.ProfileCurrent,
             })
           }
-          title={"Open in current profile"}
+          title={"Open in Current Profile"}
         />
         <Action
           onAction={() =>
@@ -108,7 +139,7 @@ function HistoryItemActions({
               openTabInProfile: SettingsProfileOpenBehaviour.ProfileOriginal,
             })
           }
-          title={"Open in original profile"}
+          title={"Open in Original Profile"}
         />
       </ActionPanel.Section>
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />

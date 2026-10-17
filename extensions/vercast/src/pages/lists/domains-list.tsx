@@ -1,5 +1,5 @@
 import { ActionPanel, Icon, List, Action } from "@raycast/api";
-import { Domain } from "../../types";
+import { Domain, Team } from "../../types";
 import SearchBarAccessory from "../search-projects/team-switch-search-accessory";
 import useVercel from "../../hooks/use-vercel-info";
 import { getFetchDomainsURL } from "../../vercel";
@@ -7,7 +7,7 @@ import { getFavicon, useFetch } from "@raycast/utils";
 import { FetchHeaders } from "../../vercel";
 
 const DomainListSection = () => {
-  const { selectedTeam, user } = useVercel();
+  const { selectedTeam, user, teams } = useVercel();
   const url = getFetchDomainsURL(selectedTeam);
 
   const {
@@ -28,6 +28,12 @@ const DomainListSection = () => {
     revalidate();
   };
 
+  const getVercelDomainUrl = (domainName: string) => {
+    const teamSlug = teams?.find((team: Team) => team.id === selectedTeam)?.slug;
+    const ownerSlug = teamSlug || user?.username;
+    return `https://vercel.com/${ownerSlug}/~/domains/${domainName}`;
+  };
+
   return (
     <List
       searchBarPlaceholder="Search Domains..."
@@ -45,6 +51,17 @@ const DomainListSection = () => {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser title={`Visit ${domain.name}`} url={`https://${domain.name}`} />
+              {domain.serviceType === "zeit.world" && (
+                <Action.OpenInBrowser
+                  title="Visit on Vercel"
+                  url={getVercelDomainUrl(domain.name)}
+                  icon={Icon.Globe}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "opt"], key: "v" },
+                    Windows: { modifiers: ["ctrl", "opt"], key: "v" },
+                  }}
+                />
+              )}
             </ActionPanel>
           }
           accessories={[

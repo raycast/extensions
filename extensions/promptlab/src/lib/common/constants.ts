@@ -16,7 +16,7 @@ export const STORE_KEY = "JYfba9q8piZhhF88BymU9qQd6qjbZi5iAeUA5YI1";
  * The base URL for the PromptLab QuickLinks.
  */
 export const QUICKLINK_URL_BASE =
-  "raycast://extensions/HelloImSteven/promptlab/search-commands?arguments=%7B%22commandName%22:%22";
+  `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/HelloImSteven/promptlab/search-commands?arguments=%7B%22commandName%22:%22`;
 
 /**
  * The filename for the placeholders guide in the support directory.

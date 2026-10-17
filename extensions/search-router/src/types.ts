@@ -16,8 +16,12 @@ export interface SearchEngine {
   ad?: string;
   /** The specific trigger word or phrase used to invoke the bang. */
   t: string;
+  /** Additional triggers for the same search engine. */
+  ts?: string[];
   /** The URL template to use when the bang is invoked, where `{{{s}}}` is replaced by the user's query. */
   u: string;
+  /** Multiple URL templates for multi-site search. If present, overrides `u`. */
+  urls?: string[];
   /** The category of the website, if applicable. */
   c?: (typeof BANG_CATEGORIES)[number];
   /** The subcategory of the website, if applicable. */
@@ -26,6 +30,8 @@ export interface SearchEngine {
   fmt?: (typeof BANG_FORMATS)[number][];
   /** Whether specs should be run on this bang */
   skip_tests?: boolean;
+  /** Whether the search engine is a custom user-defined engine */
+  isCustom?: boolean;
 }
 
 export const BANG_CATEGORIES = [

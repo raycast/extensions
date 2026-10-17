@@ -1,6 +1,13 @@
 import { Image } from "@raycast/api";
 
-export type ProcessStatus = "online" | "stopping" | "stopped" | "launching" | "errored" | "one-launch-status";
+export type ProcessStatus =
+  | "online"
+  | "stopping"
+  | "stopped"
+  | "launching"
+  | "errored"
+  | "one-launch-status"
+  | "waiting_restart";
 
 export type Pm2Command = "start" | "stop" | "restart" | "reload" | "delete";
 

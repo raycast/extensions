@@ -1,3 +1,5 @@
+import path from "node:path";
+import { environment } from "@raycast/api";
 import { colorsForBackground } from "./vendor/badge-maker-color.js";
 import { CommandConfig } from "./types.js";
 
@@ -25,13 +27,18 @@ export const commandConfig: CommandConfig = {
   },
   createSocialBadge: {
     defaultBadge: {
-      $icon: { title: "Raycast", slug: "raycast", hex: "FF6363", source: "" },
+      $icon: {
+        title: "Raycast",
+        slug: "raycast",
+        hex: "FF6363",
+        source: "",
+        file: path.join(environment.assetsPath, "raycast.svg"),
+      },
       logo: "raycast",
       label: "Raycast",
       color: "FF6363",
       labelColor: undefined,
       logoColor: colorsForBackground("#FF6363"),
-      style: "flat-square",
     },
     parameterIds: ["Logo", "Style", "Label", "Message", "Color", "LabelColor"],
     validationFields: ["color", "labelColor", "logoColor"],

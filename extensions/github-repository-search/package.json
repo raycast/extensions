@@ -19,9 +19,9 @@
     {
       "name": "token",
       "type": "password",
-      "required": true,
+      "required": false,
       "title": "Personal Access Token",
-      "description": "Create a token with repository access"
+      "description": "Optional. Leave empty to sign in with GitHub OAuth. Set a token for GitHub Enterprise or to use a PAT instead."
     },
     {
       "name": "baseUrl",
@@ -55,7 +55,8 @@
   "contributors": [
     "immint023",
     "mheidinger",
-    "j3lte"
+    "j3lte",
+    "0xdhrv"
   ],
   "categories": [
     "Developer Tools"
@@ -84,5 +85,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx -y @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
