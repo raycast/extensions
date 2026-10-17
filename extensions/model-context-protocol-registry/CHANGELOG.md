@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add AffixIO MCP Server] - {PR_MERGE_DATE}
+## [Add AffixIO MCP Server] - 2026-10-17
 
 - Add AffixIO to the official registry: generate and verify zero-knowledge proofs with post-quantum ML-DSA-65 attestations for AI agents, without exposing personal data. Hosted Streamable HTTP server at https://www.affix-io.com/mcp/ with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
