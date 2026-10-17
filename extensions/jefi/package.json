@@ -1,0 +1,124 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jefi",
+  "title": "Jefi",
+  "description": "Search mail, see today's meetings, and write mail, events and notes in Jefi — the native macOS mail app with calendar and notes.",
+  "icon": "icon.png",
+  "author": "ericmaro",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "keywords": [
+    "jefi",
+    "mail",
+    "email",
+    "inbox",
+    "calendar",
+    "events",
+    "notes",
+    "meeting"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-mail",
+      "title": "Search Mail",
+      "subtitle": "Jefi",
+      "description": "Search your mail in Jefi.",
+      "mode": "view"
+    },
+    {
+      "name": "inbox",
+      "title": "Inbox",
+      "subtitle": "Jefi",
+      "description": "Show your inbox, unread first.",
+      "mode": "view"
+    },
+    {
+      "name": "today",
+      "title": "Today",
+      "subtitle": "Jefi",
+      "description": "Today's events and invitations awaiting a reply.",
+      "mode": "view"
+    },
+    {
+      "name": "compose",
+      "title": "Compose Email",
+      "subtitle": "Jefi",
+      "description": "Start an email in Jefi. Nothing is sent until you send it there.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-add",
+      "title": "Quick Add Event",
+      "subtitle": "Jefi",
+      "description": "Create an event from a sentence, like \"Lunch with Nora Friday 1pm\".",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Lunch with Nora Friday 1pm",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "new-note",
+      "title": "Create Note",
+      "subtitle": "Jefi",
+      "description": "Start a note in Jefi.",
+      "mode": "view"
+    },
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "subtitle": "Jefi",
+      "description": "Search your notes in Jefi.",
+      "mode": "view"
+    },
+    {
+      "name": "unread-mail",
+      "title": "Unread Mail",
+      "subtitle": "Jefi",
+      "description": "Unread count and your next event in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "2m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "jefiPath",
+      "title": "Jefi Executable",
+      "description": "Path to the Jefi executable. Change it if Jefi isn't in /Applications.",
+      "type": "textfield",
+      "required": false,
+      "default": "/Applications/Jefi.app/Contents/MacOS/Jefi"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.0",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

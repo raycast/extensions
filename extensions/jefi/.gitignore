@@ -1,0 +1,4 @@
+node_modules
+dist
+*.log
+raycast-env.d.ts
