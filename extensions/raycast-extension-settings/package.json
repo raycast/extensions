@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-extension-settings",
+  "version": "0.1.0",
+  "title": "Raycast Extension Settings",
+  "description": "Find any installed extension and open its settings.",
+  "icon": "extension-icon.png",
+  "author": "jasoneric",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "keywords": [
+    "settings",
+    "preferences",
+    "configure",
+    "extensions",
+    "hotkey",
+    "alias",
+    "shortcut"
+  ],
+  "commands": [
+    {
+      "name": "open-raycast-extension-settings",
+      "title": "Open Raycast Extension Settings",
+      "description": "Search installed extensions and open an extension's page in Raycast Settings.",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.6.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.11.0",
+    "@types/react": "^19.3.0",
+    "eslint": "^8.57.0",
+    "react": "^19.3.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.2.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "showDevelopment",
+      "title": "Show",
+      "label": "Development extensions",
+      "description": "Include extensions you run with ray develop.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showAuthor",
+      "title": "",
+      "label": "Authors",
+      "description": "Show each extension's author after its name.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "showOrigin",
+      "title": "",
+      "label": "Origin tags",
+      "description": "Show a Built-in, Store, or Dev tag on each extension.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ]
+}
