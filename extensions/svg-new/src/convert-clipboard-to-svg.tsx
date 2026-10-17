@@ -1,174 +1,84 @@
-import {
-  showToast,
-  Toast,
-  Clipboard,
-  showHUD,
-  open,
-  getPreferenceValues,
-} from "@raycast/api";
-import fs from "fs";
+import { Clipboard, open, showHUD, showToast, Toast } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+import { promises as fs } from "fs";
+import os from "os";
 import path from "path";
+import { fileURLToPath } from "url";
+import { availablePaths, creditsNote, showError, showProgress } from "./lib/command";
+import { InputError, isSupportedImage, readImageAsDataUrl, unsupportedImageError } from "./lib/image";
+import { svgText, vectorize } from "./lib/svgnew";
 
-interface ProgressEvent {
-  stage: string;
-  percent: number;
-  step?: number;
-  totalSteps?: number;
-}
+// Raycast's Clipboard API gives file paths, not image data, so screenshots and "Copy Image"
+// are written to a temporary file from the pasteboard (PNG, or TIFF when there is no PNG).
+const WRITE_PASTEBOARD_IMAGE = `
+on run argv
+  set outPath to item 1 of argv
+  try
+    set imageData to the clipboard as «class PNGf»
+  on error
+    try
+      set imageData to the clipboard as «class TIFF»
+      set outPath to item 2 of argv
+    on error
+      return ""
+    end try
+  end try
+  set fileRef to open for access POSIX file outPath with write permission
+  set eof of fileRef to 0
+  write imageData to fileRef
+  close access fileRef
+  return outPath
+end run
+`;
 
-interface VectorizeResult {
-  svg: string;
-  id?: string;
-}
-
-interface ApiError {
-  error?: string;
-}
-
-const VALID_EXTS = [".png", ".jpg", ".jpeg", ".webp", ".avif", ".tiff"];
-
-const MIME_MAP: Record<string, string> = {
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".webp": "image/webp",
-  ".avif": "image/avif",
-  ".tiff": "image/tiff",
-};
-
-async function vectorize(
-  imageBase64: string,
-  apiKey: string,
-  onProgress?: (progress: ProgressEvent) => void,
-): Promise<VectorizeResult> {
-  const response = await fetch("https://svg.new/api/agent/vectorize", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-      Accept: "text/event-stream",
-    },
-    body: JSON.stringify({ image: imageBase64 }),
-  });
-
-  if (!response.ok) {
-    const err = (await response.json()) as ApiError;
-    throw new Error(err.error || `API error: ${response.status}`);
+/** The copied image as a file path, plus a temporary folder to delete afterwards. */
+async function clipboardImage(): Promise<{ filePath: string; name: string; tempDir?: string }> {
+  const { file } = await Clipboard.read();
+  if (file) {
+    const filePath = file.startsWith("file://") ? fileURLToPath(file) : file;
+    if (!isSupportedImage(filePath)) throw unsupportedImageError();
+    return { filePath, name: path.parse(filePath).name };
   }
 
-  const contentType = response.headers.get("content-type") || "";
-
-  if (contentType.includes("text/event-stream") && response.body) {
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    let result: VectorizeResult | null = null;
-
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() || "";
-
-      let eventType = "";
-      for (const line of lines) {
-        if (line.startsWith("event: ")) {
-          eventType = line.slice(7).trim();
-        } else if (line.startsWith("data: ")) {
-          const data = JSON.parse(line.slice(6));
-          if (eventType === "progress" && onProgress) {
-            onProgress(data as ProgressEvent);
-          } else if (eventType === "result") {
-            result = { svg: data.svg, id: data.id };
-          } else if (eventType === "error") {
-            throw new Error(data.message || "Vectorization failed");
-          }
-          eventType = "";
-        }
-      }
-    }
-
-    if (!result) throw new Error("No result received from stream");
-    return result;
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "svg-new-"));
+  const written = await runAppleScript(WRITE_PASTEBOARD_IMAGE, [
+    path.join(tempDir, "clipboard.png"),
+    path.join(tempDir, "clipboard.tiff"),
+  ]).catch(() => "");
+  if (!written) {
+    await fs.rm(tempDir, { recursive: true, force: true });
+    throw new InputError("No image on the clipboard", "Copy an image or an image file first");
   }
-
-  const data = (await response.json()) as VectorizeResult;
-  return data;
-}
-
-function formatStage(stage: string): string {
-  return stage.charAt(0).toUpperCase() + stage.slice(1);
-}
-
-function fileUrlToPath(fileUrl: string): string {
-  try {
-    return decodeURIComponent(new URL(fileUrl).pathname);
-  } catch {
-    return fileUrl.replace("file://", "");
-  }
+  return { filePath: written, name: "Clipboard Image", tempDir };
 }
 
 export default async function Command() {
-  const { apiKey } = getPreferenceValues<{ apiKey: string }>();
-
+  let tempDir: string | undefined;
   try {
-    const clipboard = await Clipboard.read();
+    const clipboard = await clipboardImage();
+    tempDir = clipboard.tempDir;
 
-    if (!clipboard.file) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No image in clipboard",
-        message: "Copy an image first",
-      });
-      return;
-    }
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Reading clipboard image…" });
+    const image = await readImageAsDataUrl(clipboard.filePath);
 
-    const filePath = fileUrlToPath(clipboard.file);
-    const ext = path.extname(filePath).toLowerCase();
+    toast.title = "Vectorizing…";
+    const result = await vectorize(image, { onProgress: showProgress(toast, "Vectorizing…") });
 
-    if (!VALID_EXTS.includes(ext)) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Unsupported image format",
-        message: `Supported: ${VALID_EXTS.join(", ")}`,
-      });
-      return;
-    }
-
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Reading clipboard image...",
-    });
-
-    const buffer = fs.readFileSync(filePath);
-    const mime = MIME_MAP[ext] || "image/png";
-    const base64 = `data:${mime};base64,${buffer.toString("base64")}`;
-
-    const { svg } = await vectorize(base64, apiKey, (progress) => {
-      toast.title = `${formatStage(progress.stage)}...`;
-      toast.message = `${progress.percent}%`;
-    });
-
-    toast.title = "Saving SVG...";
-    const outputDir = path.join(process.env.HOME || "/tmp", "Downloads");
-    const outputPath = path.join(outputDir, `vectorized-${Date.now()}.svg`);
-    fs.writeFileSync(outputPath, svg);
-
+    toast.title = "Saving SVG…";
+    toast.message = undefined;
+    const svg = await svgText(result);
+    const downloads = path.join(os.homedir(), "Downloads");
+    const [outputPath] = availablePaths(downloads, clipboard.name, [".svg"]);
+    await fs.writeFile(outputPath, svg);
     await Clipboard.copy(svg);
 
-    toast.style = Toast.Style.Success;
-    toast.title = "Done";
-    toast.message = "SVG saved to Downloads and copied to clipboard";
-
-    await showHUD(`✓ SVG saved to Downloads and copied to clipboard`);
+    await showHUD(
+      `Saved ${path.basename(outputPath)} to Downloads and copied the SVG${creditsNote(result.creditsRemaining)}`,
+    );
     await open(outputPath);
-  } catch (error: unknown) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Conversion failed",
-      message: error instanceof Error ? error.message : String(error),
-    });
+  } catch (error) {
+    await showError(error, "Could not convert image");
+  } finally {
+    if (tempDir) await fs.rm(tempDir, { recursive: true, force: true });
   }
 }
