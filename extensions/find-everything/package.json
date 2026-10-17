@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "find-everything",
+  "title": "Find Everything",
+  "description": "Instant Spotlight-free file search: persistent fd index, rg filter, fzf ranking. Finds more than Spotlight ever did.",
+  "icon": "icon.png",
+  "author": "supersynergy",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "search-files",
+      "title": "Find Everything",
+      "subtitle": "better than Spotlight",
+      "description": "Fuzzy-search indexed files and folders without Spotlight.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "includeHidden",
+          "title": "Include Hidden Files",
+          "label": "Index dotfiles and hidden directories",
+          "description": "When enabled, fd scans hidden files too (configs, dotfiles).",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "includeIgnored",
+          "title": "Include Ignored Files",
+          "label": "Ignore .gitignore/.ignore rules",
+          "description": "When enabled, files excluded by .gitignore are indexed too. Larger index.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "extraExcludes",
+          "title": "Extra Excludes",
+          "type": "textfield",
+          "description": "Comma-separated fd exclude patterns on top of the built-in defaults.",
+          "placeholder": "e.g. Backups,Virtual Machines",
+          "default": "",
+          "required": false
+        },
+        {
+          "name": "customSearchPaths",
+          "title": "Custom Search Paths",
+          "type": "textfield",
+          "description": "Comma-separated absolute directories for the Custom scope.",
+          "placeholder": "/Users/master/BASE/projects,/opt",
+          "default": "",
+          "required": false
+        },
+        {
+          "name": "indexMaxAgeMinutes",
+          "title": "Index Max Age (min)",
+          "type": "textfield",
+          "description": "Index older than this is rebuilt in the background on open.",
+          "default": "60",
+          "required": false
+        },
+        {
+          "name": "resultLimit",
+          "title": "Result Limit",
+          "type": "textfield",
+          "description": "Maximum number of results rendered.",
+          "default": "300",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3"
+  },
+  "devDependencies": {
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "cli": "bun run src/cli.ts",
+    "build-cli": "bun build --compile ./src/cli.ts --outfile dist-bin/fe"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
