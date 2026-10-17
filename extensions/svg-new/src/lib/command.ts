@@ -1,6 +1,7 @@
 import { getSelectedFinderItems, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { existsSync, promises as fs } from "fs";
+import { constants, existsSync, promises as fs } from "fs";
+import os from "os";
 import path from "path";
 import { InputError, isSupportedImage, unsupportedImageError } from "./image";
 import { ApiError, Progress } from "./svgnew";
@@ -19,6 +20,25 @@ export async function selectedImagePath(): Promise<string> {
 }
 
 /**
+ * Where to save results for the image at `filePath`: next to it, or in Downloads when that folder
+ * isn't writable (a read-only volume, say). Commands check this before spending a credit.
+ */
+export async function outputDir(filePath: string): Promise<string> {
+  const dir = path.dirname(filePath);
+  try {
+    await fs.access(dir, constants.W_OK);
+    return dir;
+  } catch {
+    return path.join(os.homedir(), "Downloads");
+  }
+}
+
+/** " to Downloads" when results went somewhere other than next to the image, for the HUD. */
+export function savedWhere(filePath: string, dir: string): string {
+  return dir === path.dirname(filePath) ? "" : ` to ${path.basename(dir)}`;
+}
+
+/**
  * Saves each file in `dir` as `name` plus its extension, numbered when a name is taken ("logo 2.svg"),
  * and returns the paths. Files are created exclusively, so one that appears in the meantime (another
  * save, say) is never replaced: the attempt is undone and the next number is tried.
@@ -34,8 +54,14 @@ export async function saveNewFiles(
     const written: string[] = [];
     try {
       for (const [i, file] of files.entries()) {
-        await fs.writeFile(paths[i], file.data, { flag: "wx" });
+        const handle = await fs.open(paths[i], "wx");
+        // Ours from here on, so a write that fails partway (a full disk) is removed below.
         written.push(paths[i]);
+        try {
+          await handle.writeFile(file.data);
+        } finally {
+          await handle.close();
+        }
       }
       return paths;
     } catch (error) {

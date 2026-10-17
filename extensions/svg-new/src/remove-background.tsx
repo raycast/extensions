@@ -1,12 +1,13 @@
 import { open, showHUD, showToast, Toast } from "@raycast/api";
 import path from "path";
-import { saveNewFiles, selectedImagePath, showError, showProgress } from "./lib/command";
+import { outputDir, savedWhere, saveNewFiles, selectedImagePath, showError, showProgress } from "./lib/command";
 import { readImageAsDataUrl } from "./lib/image";
 import { download, removeBackground, svgText, vectorize } from "./lib/svgnew";
 
 export default async function Command() {
   try {
     const filePath = await selectedImagePath();
+    const dir = await outputDir(filePath);
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Reading image…",
@@ -28,12 +29,12 @@ export default async function Command() {
     const png = result.png ?? (await download(result.pngUrl as string));
     const svg = await svgText(result);
     const name = `${path.parse(filePath).name}-no-bg`;
-    const [pngPath, svgPath] = await saveNewFiles(path.dirname(filePath), name, [
+    const [pngPath, svgPath] = await saveNewFiles(dir, name, [
       { ext: ".png", data: png },
       { ext: ".svg", data: svg },
     ]);
 
-    await showHUD(`Saved ${path.basename(pngPath)} and ${path.basename(svgPath)}`);
+    await showHUD(`Saved ${path.basename(pngPath)} and ${path.basename(svgPath)}${savedWhere(filePath, dir)}`);
     await open(pngPath);
   } catch (error) {
     await showError(error, "Could not remove background");
