@@ -18,7 +18,9 @@ type Values = {
   speechLanguage: string;
 };
 
-export default function CreateConversation() {
+export default function CreateConversation({
+  onCreated,
+}: { onCreated?: () => void } = {}) {
   const [loading, setLoading] = useState(false);
   const [titleError, setTitleError] = useState<string>();
   const pending = useRef(false);
@@ -49,6 +51,7 @@ export default function CreateConversation() {
       );
       saved = result.conversation;
       setCreated(saved);
+      onCreated?.();
       await showToast({
         style: Toast.Style.Success,
         title: "Conversation Created",

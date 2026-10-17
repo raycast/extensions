@@ -23,6 +23,7 @@ export default function SearchConversations() {
   const [loading, setLoading] = useState(true);
   const [nextOffset, setNextOffset] = useState<number | null>(null);
   const [error, setError] = useState<string>();
+  const [requestVersion, setRequestVersion] = useState(0);
   const generation = useRef(0);
 
   useEffect(() => {
@@ -58,7 +59,22 @@ export default function SearchConversations() {
     return () => {
       generation.current++;
     };
-  }, [query, offset]);
+  }, [query, offset, requestVersion]);
+
+  function refreshConversations() {
+    setItems([]);
+    setOffset(0);
+    setNextOffset(null);
+    setRequestVersion((previous) => previous + 1);
+  }
+
+  const retryAction = error && (
+    <Action
+      title="Retry Loading Conversations"
+      icon={Icon.ArrowClockwise}
+      onAction={() => setRequestVersion((previous) => previous + 1)}
+    />
+  );
 
   return (
     <List
@@ -88,9 +104,10 @@ export default function SearchConversations() {
         }
         actions={
           <ActionPanel>
+            {retryAction}
             <Action.Push
               title="Create Conversation"
-              target={<CreateConversation />}
+              target={<CreateConversation onCreated={refreshConversations} />}
             />
           </ActionPanel>
         }
@@ -104,6 +121,7 @@ export default function SearchConversations() {
           accessories={[{ text: item.projectTitle || item.purpose }]}
           actions={
             <ActionPanel>
+              {retryAction}
               <Action.OpenInBrowser
                 title="Open Conversation"
                 url={conversationUrl(item)}
@@ -115,7 +133,7 @@ export default function SearchConversations() {
               />
               <Action.Push
                 title="Create Conversation"
-                target={<CreateConversation />}
+                target={<CreateConversation onCreated={refreshConversations} />}
                 shortcut={Keyboard.Shortcut.Common.New}
               />
             </ActionPanel>

@@ -24,7 +24,7 @@ export async function callTool<T>(
   args: Record<string, unknown>,
   write = false,
 ): Promise<T> {
-  const { apiToken } = getPreferenceValues<{ apiToken: string }>();
+  const { apiToken } = getPreferenceValues<Preferences>();
   const client = new Client({
     name: "magicinterview-raycast",
     version: "1.0.0",
