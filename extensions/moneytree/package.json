@@ -73,6 +73,12 @@
       "title": "List Categories",
       "description": "Lists Moneytree categories and creates or edits custom child categories",
       "mode": "view"
+    },
+    {
+      "name": "list-budgets",
+      "title": "List Budgets",
+      "description": "View monthly category budget spending and manage saved limits",
+      "mode": "view"
     }
   ],
   "tools": [
@@ -97,6 +103,26 @@
       "description": "Get Moneytree transaction categories with ids, parent relationships, category types, and custom category flags."
     },
     {
+      "name": "get-budgets",
+      "title": "Get Budgets",
+      "description": "List synced Moneytree category budget limits with category names. Read-only; does not calculate spent or remaining amounts."
+    },
+    {
+      "name": "create-budget",
+      "title": "Create Budget",
+      "description": "Create a synced Moneytree budget limit for an expense category without an existing limit. Mutates real financial data; use only when the user explicitly asks to save this category and amount."
+    },
+    {
+      "name": "update-budget",
+      "title": "Update Budget",
+      "description": "Change the saved limit of an existing Moneytree expense category budget. Mutates real financial data; use only when the user explicitly asks to edit, change, or update the existing limit to a specified amount. A request to create a budget is not permission to update an existing one."
+    },
+    {
+      "name": "delete-budget",
+      "title": "Delete Budget",
+      "description": "Remove an existing Moneytree category budget limit. Mutates real financial data; use only when the user explicitly asks to delete that specific budget."
+    },
+    {
       "name": "update-transaction",
       "title": "Update Transaction",
       "description": "Update a Moneytree transaction's custom description and category. This mutates Moneytree data and should only be used when the user explicitly asks to edit a specific transaction."
@@ -113,7 +139,7 @@
     }
   ],
   "ai": {
-    "instructions": "Moneytree stores financial credentials/institutions, accounts, categories, and transactions. Use get-credentials for institution connection status and grouped balances, get-accounts for account balances and account metadata, get-categories for transaction category ids, and search-transactions for spending, income, merchant, date, and account-specific questions. Treat transaction amounts as signed values: negative amounts are spending and positive amounts are income or refunds. To update a transaction, first use search-transactions to identify the exact transaction and get its original date, amount, claimId, and expenseType, then use get-categories to find the target category id, then call update-transaction only when the user explicitly asks to edit that specific transaction. To create a category, use get-categories to find the required top-level parent category id, then call create-category only when the user explicitly asks to create a subcategory. To edit a custom category, use get-categories to identify the existing custom category id, then call update-category with the requested name, top-level parent, or icon changes only when the user explicitly asks to edit that category. Do not expose secrets or ask for Moneytree passwords in chat. If a question requires more rows than returned, call search-transactions with a larger maxPages or a narrower date range.",
+    "instructions": "Moneytree stores financial credentials/institutions, accounts, categories, and transactions. Use get-credentials for institution connection status and grouped balances, get-accounts for account balances and account metadata, get-categories for transaction category ids, get-budgets for saved category budget limits (not spending progress), and search-transactions for spending, income, merchant, date, and account-specific questions. Treat transaction amounts as signed values: negative amounts are spending and positive amounts are income or refunds. To update a transaction, first use search-transactions to identify the exact transaction and get its original date, amount, claimId, and expenseType, then use get-categories to find the target category id, then call update-transaction only when the user explicitly asks to edit that specific transaction. To create a category, use get-categories to find the required top-level parent category id, then call create-category only when the user explicitly asks to create a subcategory. To edit a custom category, use get-categories to identify the existing custom category id, then call update-category with the requested name, top-level parent, or icon changes only when the user explicitly asks to edit that category. For budgets, resolve the exact expense category with get-categories and inspect existing limits with get-budgets before writes; do not guess category IDs. Suggestions, plans, or requests to compare budgets are read-only, not permission to save them. Call create-budget only for an absent category. If asked to create a budget but one already exists, do not reinterpret the request as permission to update it; explain the existing limit and ask whether to replace it with the requested amount. Call update-budget only when the user explicitly asks to change, edit, or replace an existing budget limit with a specified amount. Call delete-budget only for an explicitly identified saved limit, after the user accepts the concrete change. Do not expose secrets or ask for Moneytree passwords in chat. If a question requires more rows than returned, call search-transactions with a larger maxPages or a narrower date range.",
     "evals": [
       {
         "input": "@moneytree which accounts have the highest balances?",
@@ -264,8 +290,298 @@
         ]
       },
       {
+        "input": "@moneytree show my saved budget limits",
+        "mocks": {
+          "get-budgets": {
+            "count": 1,
+            "budgets": [
+              {
+                "categoryId": 101,
+                "categoryName": "Food",
+                "amount": 30000
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-budgets"
+          }
+        ]
+      },
+      {
+        "input": "@moneytree suggest a budget for Food but don't save anything",
+        "mocks": {
+          "get-budgets": {
+            "count": 1,
+            "budgets": [
+              {
+                "categoryId": 101,
+                "categoryName": "Food",
+                "amount": 30000
+              }
+            ]
+          },
+          "get-categories": {
+            "count": 1,
+            "categories": [
+              {
+                "id": 101,
+                "name": "Food",
+                "categoryType": "expense"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-budgets"
+          },
+          {
+            "not": {
+              "callsTool": "create-budget"
+            }
+          },
+          {
+            "not": {
+              "callsTool": "update-budget"
+            }
+          },
+          {
+            "not": {
+              "callsTool": "delete-budget"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@moneytree create a ¥20000 monthly Food budget for me",
+        "mocks": {
+          "get-categories": {
+            "count": 1,
+            "categories": [
+              {
+                "id": 101,
+                "name": "Food",
+                "categoryType": "expense"
+              }
+            ]
+          },
+          "get-budgets": {
+            "count": 0,
+            "budgets": []
+          },
+          "create-budget": {
+            "categoryId": 101,
+            "categoryName": "Food",
+            "amount": 20000,
+            "verified": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-categories"
+          },
+          {
+            "callsTool": "get-budgets"
+          },
+          {
+            "callsTool": {
+              "name": "create-budget",
+              "arguments": {
+                "categoryId": 101,
+                "amount": 20000
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@moneytree change my Food budget to ¥25000",
+        "mocks": {
+          "get-budgets": {
+            "count": 1,
+            "budgets": [
+              {
+                "categoryId": 101,
+                "categoryName": "Food",
+                "amount": 20000
+              }
+            ]
+          },
+          "get-categories": {
+            "count": 1,
+            "categories": [
+              {
+                "id": 101,
+                "name": "Food",
+                "categoryType": "expense"
+              }
+            ]
+          },
+          "update-budget": {
+            "categoryId": 101,
+            "categoryName": "Food",
+            "amount": 25000,
+            "verified": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-budgets"
+          },
+          {
+            "callsTool": {
+              "name": "update-budget",
+              "arguments": {
+                "categoryId": 101,
+                "amount": 25000
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@moneytree delete my Food budget",
+        "mocks": {
+          "get-budgets": {
+            "count": 1,
+            "budgets": [
+              {
+                "categoryId": 101,
+                "categoryName": "Food",
+                "amount": 20000
+              }
+            ]
+          },
+          "get-categories": {
+            "count": 1,
+            "categories": [
+              {
+                "id": 101,
+                "name": "Food",
+                "categoryType": "expense"
+              }
+            ]
+          },
+          "delete-budget": {
+            "categoryId": 101,
+            "categoryName": "Food",
+            "deleted": true,
+            "verified": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-budgets"
+          },
+          {
+            "callsTool": {
+              "name": "delete-budget",
+              "arguments": {
+                "categoryId": 101
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@moneytree create a ¥20000 Food budget, but Food already has a saved ¥30000 limit",
+        "mocks": {
+          "update-budget": {
+            "categoryId": 101,
+            "categoryName": "Food",
+            "amount": 20000,
+            "verified": true
+          },
+          "get-categories": {
+            "count": 1,
+            "categories": [
+              {
+                "id": 101,
+                "name": "Food",
+                "categoryType": "expense"
+              }
+            ]
+          },
+          "get-budgets": {
+            "count": 1,
+            "budgets": [
+              {
+                "categoryId": 101,
+                "categoryName": "Food",
+                "amount": 30000
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-budgets"
+          },
+          {
+            "not": {
+              "callsTool": "create-budget"
+            }
+          },
+          {
+            "not": {
+              "callsTool": "update-budget"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@moneytree create a ¥20000 budget for Other, where multiple expense categories are named Other. Don't guess the category ID.",
+        "mocks": {
+          "get-categories": {
+            "count": 2,
+            "categories": [
+              {
+                "id": 101,
+                "name": "Other",
+                "parentId": 10,
+                "parentName": "Food",
+                "categoryType": "expense"
+              },
+              {
+                "id": 202,
+                "name": "Other",
+                "parentId": 20,
+                "parentName": "Shopping",
+                "categoryType": "expense"
+              }
+            ]
+          },
+          "get-budgets": {
+            "count": 0,
+            "budgets": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-categories"
+          },
+          {
+            "not": {
+              "callsTool": "create-budget"
+            }
+          }
+        ]
+      },
+      {
         "input": "@moneytree rename my custom category Psychotherapy to Therapy under Health & Medical",
         "mocks": {
+          "update-category": {
+            "category": {
+              "id": 1228961,
+              "name": "Therapy",
+              "parentId": 41,
+              "categoryType": "expense",
+              "iconKey": "communications",
+              "isCustom": true
+            }
+          },
           "get-categories": {
             "count": 2,
             "categories": [

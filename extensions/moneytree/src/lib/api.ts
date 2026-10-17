@@ -68,26 +68,30 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
       });
 
       if (!retryResponse.ok) {
-        console.debug(`[API] Retry failed: ${retryResponse.status} ${retryResponse.statusText}`);
-        throw new Error(`API request failed: ${retryResponse.status} ${retryResponse.statusText}`);
+        console.debug(`[API] Retry failed: ${retryResponse.status}`);
+        throw new Error(`API request failed: ${retryResponse.status}`);
       }
 
       console.debug(`[API] ${method} ${url} - Success (after refresh)`);
-      return retryResponse.json() as Promise<T>;
-    } catch (error) {
-      console.debug(`[API] Authentication failed for ${url}: ${error}`);
+      return parseApiResponse<T>(retryResponse);
+    } catch {
+      console.debug(`[API] Retried request failed for ${url}`);
       throw new Error("Authentication failed. Please check your credentials.");
     }
   }
 
   if (!response.ok) {
-    const errorText = await response.text();
-    console.debug(`[API] ${method} ${url} - Error ${response.status}: ${errorText.substring(0, 200)}`);
-    throw new Error(`API request failed: ${response.status} ${errorText}`);
+    console.debug(`[API] ${method} ${url} - Error ${response.status}`);
+    throw new Error(`API request failed: ${response.status}`);
   }
 
   console.debug(`[API] ${method} ${url} - Success (${response.status})`);
-  return response.json() as Promise<T>;
+  return parseApiResponse<T>(response);
+}
+
+async function parseApiResponse<T>(response: Response): Promise<T> {
+  const body = await response.text();
+  return (body ? JSON.parse(body) : undefined) as T;
 }
 
 /**
@@ -134,6 +138,56 @@ export async function getCredentials(): Promise<CredentialWithAccounts[]> {
 export async function getCategories(): Promise<Category[]> {
   const response = await apiRequest<CategoriesResponse>("/presenter/categories.json?locale=en", { method: "GET" });
   return response.categories;
+}
+
+/**
+ * Read saved category budgets.
+ * The response contains budget definitions, not calculated spending progress.
+ */
+export type Budget = { category_id: number; amount: number };
+
+export async function getBudgets(): Promise<Budget[]> {
+  const response = await apiRequest<{ budgets: Budget[] }>("/budgets.json", { method: "GET" });
+  if (!Array.isArray(response?.budgets)) {
+    throw new Error("Unexpected Moneytree budgets response");
+  }
+  return response.budgets;
+}
+
+/** Monthly spending totals per category for each period. */
+export type SpendingPeriod = {
+  start_date: string;
+  end_date: string;
+  total: number;
+  categories: Record<string, number>;
+};
+
+export async function getMonthlySpending(startDate: string, endDate: string): Promise<SpendingPeriod[]> {
+  const params = new URLSearchParams({
+    group_by: "monthly_period",
+    start_date: startDate,
+    end_date: endDate,
+    end_of_month: "0",
+    include_gap: "true",
+  });
+  const response = await apiRequest<{ category_totals: SpendingPeriod[] }>(
+    `/presenter/spending_historical.json?${params.toString()}`,
+  );
+  if (!Array.isArray(response?.category_totals)) throw new Error("Unexpected Moneytree spending response");
+  return response.category_totals;
+}
+
+/** This PUT route both sets an existing limit and creates a new one. */
+export async function putBudget(categoryId: number, amount: number): Promise<void> {
+  await apiRequest<unknown>(`/budgets/${categoryId}.json`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount }),
+  });
+}
+
+export async function removeBudget(categoryId: number): Promise<void> {
+  await apiRequest<void>(`/budgets/${categoryId}.json`, { method: "DELETE" });
 }
 
 /**
