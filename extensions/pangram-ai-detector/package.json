@@ -1,0 +1,121 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pangram-ai-detector",
+  "title": "Pangram AI Detector",
+  "description": "Check selected or copied text for AI writing with your Pangram API key and prepaid credits.",
+  "icon": "extension-icon.png",
+  "author": "mygirleatsmayo",
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "check-text",
+      "title": "Check Text",
+      "description": "Check the selected text, or the clipboard if nothing is selected, for AI writing.",
+      "keywords": ["ai", "detect", "detector", "gpt", "pangram"],
+      "mode": "view"
+    },
+    {
+      "name": "check-selected-text",
+      "title": "Check Selected Text",
+      "description": "Check the selected text for AI writing.",
+      "keywords": ["ai", "detect", "detector", "gpt", "pangram"],
+      "mode": "view"
+    },
+    {
+      "name": "check-clipboard-text",
+      "title": "Check Clipboard Text",
+      "description": "Check the clipboard text for AI writing.",
+      "keywords": ["ai", "detect", "detector", "gpt", "pangram"],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Get your key and add prepaid credits at pangram.com/apikey. Each new Check costs about $0.05 per started 100 words.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "Choose the Model for new Checks. Default uses Pangram's current Model.",
+      "type": "dropdown",
+      "required": false,
+      "default": "default",
+      "data": [
+        { "title": "Default", "value": "default" },
+        { "title": "Pangram 4", "value": "pangram-4" }
+      ]
+    },
+    {
+      "name": "versionInvalidatesCache",
+      "title": "Cache",
+      "label": "Invalidate older Cached Results",
+      "description": "Ignore older Cached Results after detecting a new Model Version. Reusing a Cached Result costs no credits.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "literalSegmentText",
+      "title": "Segments",
+      "label": "Show Segment text literally",
+      "description": "Show Pangram's Segment text exactly as returned, in a code block. Turn off to render it as Markdown.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "confirmAboveWords",
+      "title": "Confirm Above (Words)",
+      "description": "Ask before sending texts above this estimated word count. Default: 2000.",
+      "type": "textfield",
+      "required": false,
+      "default": "2000"
+    },
+    {
+      "name": "limitedConfidenceBelowWords",
+      "title": "Limited Confidence Below (Words)",
+      "description": "Show the extension's Limited Confidence warning below this word count. Separate from Pangram's Segment confidence. Default: 200.",
+      "type": "textfield",
+      "required": false,
+      "default": "200"
+    },
+    {
+      "name": "timeoutSeconds",
+      "title": "Timeout (Seconds)",
+      "description": "Time to wait for a Check to finish. Default: 300 seconds.",
+      "type": "textfield",
+      "required": false,
+      "default": "300"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
