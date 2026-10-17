@@ -260,8 +260,6 @@ export class PassboltClient {
 
   private async runAuthentication() {
     try {
-      console.log("Starting GPGAuth authentication...");
-
       // Start unlocking the user private key early so it overlaps the server-key request.
       const userKeyPromise = this.getPrivateKey();
       // The failure is surfaced below; swallow it here so a failed request cannot leave it unhandled.
@@ -334,8 +332,6 @@ export class PassboltClient {
 
       // Check if MFA is required
       if (login2Json.body && login2Json.body.mfa_providers) {
-        console.log("MFA verification required");
-
         if (!this.totpSecret) {
           throw new Error(
             "MFA is required but no TOTP secret provided. Please add your TOTP secret in the extension preferences.",
@@ -382,8 +378,6 @@ export class PassboltClient {
     if (res.status === 403) {
       const errorJson = (await res.json()) as PassboltResponse<MFAProvider>;
       if (errorJson.body && errorJson.body.mfa_providers) {
-        console.log("MFA verification required for resource access");
-
         if (!this.totpSecret) {
           throw new Error(
             "MFA is required but no TOTP secret provided. Please add your TOTP secret in the extension preferences.",
@@ -407,8 +401,6 @@ export class PassboltClient {
         if ((mfaJson as PassboltResponse).header && (mfaJson as PassboltResponse).header.status === "error") {
           throw new Error(`MFA verification failed: ${(mfaJson as PassboltResponse).header.message}`);
         }
-
-        console.log("MFA verification successful. Retrying resource request...");
 
         // Retry the request after MFA verification
         res = await this.request(resourcesPath, { signal });

@@ -26,6 +26,7 @@
 - Decrypt Passbolt v5 metadata with personal and shared metadata keys before searching.
 - Search all resource URLs and preserve support for legacy resources with missing fields.
 - Show metadata decryption failures without preventing readable entries from loading.
+
 ## [Fix Search Crash on Resources Without a Name] - 2026-10-16
 
 - Fix `TypeError: Cannot read properties of undefined (reading 'toLowerCase')` when searching resources returned without a `name` by a self-hosted Passbolt instance ([#32415](https://github.com/raycast/extensions/issues/32415))
