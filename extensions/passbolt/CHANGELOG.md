@@ -1,6 +1,6 @@
 # Passbolt Changelog
 
-## [Faster TOTP Codes and Leaner Loading] - {PR_MERGE_DATE}
+## [Faster TOTP Codes and Leaner Loading] - 2026-10-17
 
 - Load the vault list without secret payloads and download secrets only for TOTP-capable entries, in ID-filtered batches.
 - Resolve each account independently so one slow secret no longer delays the codes behind it, and show first codes sooner.
@@ -8,7 +8,7 @@
 - Show the paste shortcut for TOTP codes in the action bar: `⌘↵` pastes the code into the previous app.
 - Stop logging cookies, CSRF tokens, authentication nonces, response bodies, and private key paths.
 
-## [Faster Authenticator and Complete Account Search] - {PR_MERGE_DATE}
+## [Faster Authenticator and Complete Account Search] - 2026-10-17
 
 - Select TOTP-capable entries before decryption, reuse included secrets, and unlock the private key once per command.
 - Load accounts progressively and include password-plus-TOTP entries that were previously omitted.
@@ -21,7 +21,7 @@
 - Speed up loading with a shared client, parallel authentication and schema requests, streamed metadata
   decryption, and cached search indexing.
 
-## [Fix Search for Encrypted Metadata] - {PR_MERGE_DATE}
+## [Fix Search for Encrypted Metadata] - 2026-10-17
 
 - Decrypt Passbolt v5 metadata with personal and shared metadata keys before searching.
 - Search all resource URLs and preserve support for legacy resources with missing fields.
