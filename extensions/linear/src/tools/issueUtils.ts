@@ -5,6 +5,7 @@ import {
   resolveCycle,
   resolveIssue,
   resolveIssueLabel,
+  resolveIssueLabelForTeam,
   resolveMilestone,
   resolveProject,
   resolveRelease,
@@ -27,6 +28,8 @@ export async function resolveWorkflowState(query: string, teamQuery: string) {
 
 export async function issueInput(input: {
   team?: string;
+  /** Team of the issue being updated, used to resolve label names when `team` is not changing. */
+  currentTeamId?: string;
   cycle?: string | null;
   milestone?: string;
   project?: string | null;
@@ -70,9 +73,7 @@ export async function issueInput(input: {
         : typeof input.delegate === "string"
           ? (await resolveUser(input.delegate)).id
           : undefined,
-    labelIds: input.labels
-      ? await Promise.all(input.labels.map(async (label) => (await resolveIssueLabel(label)).id))
-      : undefined,
+    labelIds: input.labels ? await resolveLabelIds(input.labels, team?.id ?? input.currentTeamId) : undefined,
     dueDate: input.dueDate,
     slaBreachesAt:
       input.slaBreachesAt === null ? null : input.slaBreachesAt ? new Date(input.slaBreachesAt) : undefined,
@@ -176,3 +177,12 @@ export async function setIssueReleases(
 }
 
 export type IssueUpdateInput = Parameters<LinearClient["updateIssue"]>[1];
+
+/** Resolves label names within the issue's team when known, since names like "Bug" repeat across teams and are only unambiguous per team. */
+async function resolveLabelIds(labels: string[], teamId?: string) {
+  return Promise.all(
+    labels.map(async (label) =>
+      teamId ? (await resolveIssueLabelForTeam(label, teamId)).id : (await resolveIssueLabel(label)).id,
+    ),
+  );
+}

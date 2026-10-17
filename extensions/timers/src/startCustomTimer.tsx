@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Form, getPreferenceValues, Toast, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { Action, ActionPanel, Form, getPreferenceValues, useNavigation } from "@raycast/api";
+import { showError } from "@chrismessina/raycast-kit";
+import { useEffect, useState } from "react";
 import { soundData } from "./backend/soundData";
 import { checkForOverlyLoudAlert, createCustomTimer, ensureCTFileExists, startTimer } from "./backend/timerBackend";
 import { CTInlineArgs, InputField, Preferences, RayFormEvent, Values } from "./backend/types";
@@ -13,22 +14,24 @@ export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
 
   const prefs: Preferences = getPreferenceValues();
 
-  if (hasArgs && prefs.customTimerFormBypass) {
+  const bypass = hasArgs && prefs.customTimerFormBypass;
+  useEffect(() => {
+    if (!bypass) return;
     const [hours, minutes, seconds] = (["hours", "minutes", "seconds"] as const)
       .map((k) => props.arguments[k])
       .map(Number)
       .map((n) => (Number.isNaN(n) ? 0 : n));
 
-    startTimer({ timeInSeconds: 3600 * hours + 60 * minutes + seconds });
+    startTimer({ timeInSeconds: 3600 * hours + 60 * minutes + seconds }).catch((error) =>
+      showError(error, { title: "Could Not Start Timer" }),
+    );
+  }, []);
+  if (bypass) return null;
 
-    return null;
-  }
-
-  const handleSubmit = (values: Values) => {
+  const handleSubmit = async (values: Values) => {
     ensureCTFileExists();
     if (values.hours === "" && values.minutes === "" && values.seconds === "") {
-      const toast = new Toast({ style: Toast.Style.Failure, title: "No values set for timer length!" });
-      toast.show();
+      await showError(new Error("Enter a timer duration"), { title: "Could Not Start Timer" });
     } else if (isNaN(Number(values.hours))) {
       setHourErr("Hours must be a number!");
     } else if (isNaN(Number(values.minutes))) {
@@ -39,18 +42,24 @@ export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
       if (!checkForOverlyLoudAlert()) return;
       const timerName = values.name ? values.name : "Untitled";
       const timeInSeconds = 3600 * Number(values.hours) + 60 * Number(values.minutes) + Number(values.seconds);
-      startTimer({
-        timeInSeconds: timeInSeconds,
-        timerName: timerName,
-        selectedSound: values.selectedSound,
-      }).then(() => pop());
-      if (values.willBeSaved)
-        createCustomTimer({
-          name: values.name,
+      try {
+        const started = await startTimer({
           timeInSeconds: timeInSeconds,
+          timerName: timerName,
           selectedSound: values.selectedSound,
-          showInMenuBar: true,
         });
+        if (!started) return;
+        if (values.willBeSaved)
+          createCustomTimer({
+            name: values.name,
+            timeInSeconds: timeInSeconds,
+            selectedSound: values.selectedSound,
+            showInMenuBar: true,
+          });
+        pop();
+      } catch (error) {
+        await showError(error, { title: "Could Not Start Timer" });
+      }
     }
   };
 

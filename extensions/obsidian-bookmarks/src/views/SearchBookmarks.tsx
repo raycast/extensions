@@ -24,7 +24,7 @@ function midnight(daysAgo: number): Date {
 }
 
 export default function SearchBookmarks() {
-  const { files, loading, updateFile } = useFiles();
+  const { files, loading, updateFile, deleteFile } = useFiles();
   const [showDetail, setShowDetail] = useState(false);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
@@ -132,9 +132,9 @@ export default function SearchBookmarks() {
     const items = searched().filter((file) => matchesTags(file, searchTags));
     const filteredItems = filtered(items);
     setFileResult(filteredItems);
-  }, [text, searchTags, filter, urlFuse, contentFuse]);
+  }, [text, searchTags, filter, urlFuse, contentFuse, files]);
 
-  const actionProps = { showDetail, setShowDetail, onFileUpdated: updateFile };
+  const actionProps = { showDetail, setShowDetail, onFileUpdated: updateFile, onFileDeleted: deleteFile };
   const favoriteResults = getFavorites(fileResult);
   const otherResults = fileResult.filter((file) => !isFavorite(file));
 

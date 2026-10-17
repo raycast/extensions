@@ -1,5 +1,6 @@
 import { listUploads } from "../api/client";
 import { formatBytes } from "../lib/format";
+import { cleanText } from "../lib/markdown";
 import { findDestination } from "../lib/destinations";
 
 type Input = {
@@ -8,7 +9,7 @@ type Input = {
    * Leave empty to get the most recent uploads.
    */
   query?: string;
-  /** Only search uploads to this destination (its name or bucket). Leave empty for all destinations. */
+  /** Only search uploads to this destination (its exact name or bucket). Leave empty for all destinations. */
   destination?: string;
   /** How many uploads to return at most. Defaults to 20. */
   limit?: number;
@@ -16,7 +17,7 @@ type Input = {
 
 /**
  * Search the files the user uploaded with Aktar, newest first. Returns each
- * file's public link along with ready-to-paste Markdown.
+ * file's public link, its short link when it has one, and ready-to-paste Markdown.
  */
 export default async function tool(input: Input) {
   const destination = input.destination ? await findDestination(input.destination) : undefined;
@@ -28,9 +29,12 @@ export default async function tool(input: Input) {
   return {
     count: uploads.length,
     uploads: uploads.map((upload) => ({
-      filename: upload.filename,
+      filename: cleanText(upload.filename),
+      /** Exact object key: pass it back to other tools as it is. */
       key: upload.objectKey,
       url: upload.url,
+      /** The upload's short link, or null; markdown uses it when there is one. */
+      shortUrl: upload.shortUrl ?? null,
       markdown: upload.formats.markdown,
       destination: upload.destinationName,
       size: formatBytes(upload.size),

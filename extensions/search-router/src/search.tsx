@@ -18,6 +18,7 @@ import { getSearchEngine } from "./data/search-engines";
 import { getCustomSearchEngines } from "./data/custom-search-engines";
 import type { SearchEngine } from "./types";
 import { isValidUrl } from "./utils";
+import { getEngineTriggerPreference } from "./preferences";
 
 async function safeOpenUrl(url: string): Promise<void> {
   if (!isValidUrl(url)) {
@@ -35,14 +36,22 @@ type SearchFormValues = {
 // Form.Description collapses ordinary newlines; Unicode line separators keep examples on separate lines.
 const lineSeparator = "\u2028";
 
-function formatSearchExamples(examples: [string, string][], customSearchEngines: SearchEngine[]) {
+function formatSearchExamples(
+  examples: [string, string][],
+  customSearchEngines: SearchEngine[],
+  triggerPrefix: string,
+) {
   return examples
-    .map(([trigger, query]) => `!${trigger} ${query} — ${getSearchEngine(trigger, customSearchEngines)?.s ?? trigger}`)
+    .map(
+      ([trigger, query]) =>
+        `${triggerPrefix}${trigger} ${query} — ${getSearchEngine(trigger, customSearchEngines)?.s ?? trigger}`,
+    )
     .join(lineSeparator);
 }
 
 export default function SearchTheWeb(props: SearchProps) {
   const initialQuery = props.arguments.query || props.fallbackText || "";
+  const { triggerPrefix, warning } = getEngineTriggerPreference();
   const didRunInitialQuery = useRef(false);
   const examples = useMemo(() => {
     if (initialQuery) return undefined;
@@ -57,6 +66,7 @@ export default function SearchTheWeb(props: SearchProps) {
           ["gi", "northern lights"],
         ],
         customSearchEngines,
+        triggerPrefix,
       ),
       forums: formatSearchExamples(
         [
@@ -65,10 +75,11 @@ export default function SearchTheWeb(props: SearchProps) {
           ["r", "mechanical keyboards"],
         ],
         customSearchEngines,
+        triggerPrefix,
       ),
       siteName: getSearchEngine("gh", customSearchEngines)?.s ?? "GitHub",
     };
-  }, [initialQuery]);
+  }, [initialQuery, triggerPrefix]);
 
   useEffect(() => {
     if (!initialQuery || didRunInitialQuery.current) return;
@@ -89,7 +100,13 @@ export default function SearchTheWeb(props: SearchProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="query" title="Query" placeholder="Search with !bangs" defaultValue={initialQuery} />
+      <Form.TextField
+        id="query"
+        title="Query"
+        placeholder={`Search with ${triggerPrefix}yt`}
+        defaultValue={initialQuery}
+      />
+      {warning && <Form.Description title="Invalid Engine Trigger Prefix" text={warning} />}
       {examples && (
         <>
           <Form.Separator />
@@ -99,10 +116,12 @@ export default function SearchTheWeb(props: SearchProps) {
           <Form.Description
             title="Tips"
             text={[
-              "Plain text uses your default search engine.",
-              "Bangs work at the end too: cats !g",
+              triggerPrefix
+                ? "Plain text uses your default search engine."
+                : "Bare triggers such as go can redirect plain text away from your default engine.",
+              "Legacy !bangs still work mid-query or at the end: cats !g",
               `Search within ${examples.siteName}: markdown parser @gh`,
-              "A bang alone opens its website: !w",
+              `A trigger alone opens its website: ${triggerPrefix}w`,
             ].join(lineSeparator)}
           />
         </>
@@ -158,10 +177,25 @@ async function runSearch(rawQuery: string) {
 function processQuery(rawQuery: string) {
   let query = rawQuery?.trim() ?? "";
   const customSearchEngines = getCustomSearchEngines();
+  const { triggerPrefix } = getEngineTriggerPreference();
 
-  const searchEngineKeyMatch = query.match(/(?:^|\s)!(\S+)/i);
-  const searchEngineKey = searchEngineKeyMatch?.[1]?.toLowerCase();
-  const searchEngine = getSearchEngine(searchEngineKey, customSearchEngines);
+  const firstToken = query.split(/\s+/, 1)[0];
+  let searchEngineKey =
+    triggerPrefix !== "!" && firstToken.startsWith(triggerPrefix)
+      ? firstToken.slice(triggerPrefix.length).toLowerCase()
+      : undefined;
+  let searchEngine = getSearchEngine(searchEngineKey, customSearchEngines);
+  let legacyMatch = query.match(/(?:^|\s)!(\S+)/i);
+  const legacyEngine = getSearchEngine(legacyMatch?.[1], customSearchEngines);
+
+  // Explicit bangs win over inferred bare triggers, not explicit custom prefixes.
+  if (searchEngine && (triggerPrefix !== "" || !legacyEngine)) {
+    query = query.slice(firstToken.length).trim();
+    legacyMatch = null;
+  } else {
+    searchEngineKey = legacyMatch?.[1]?.toLowerCase();
+    searchEngine = legacyEngine;
+  }
 
   // Use the first recognized standalone @token, leaving emails and unknown mentions intact.
   for (const siteMatch of query.matchAll(/(^|\s)@(\S+)/g)) {
@@ -177,7 +211,7 @@ function processQuery(rawQuery: string) {
     break;
   }
 
-  const cleanQuery = query.replace(/(^|\s)!\S+\s*/i, "$1").trim();
+  const cleanQuery = (legacyMatch ? query.replace(/(^|\s)!\S+\s*/i, "$1") : query).trim();
   let finalQuery = cleanQuery;
   if (!searchEngine && searchEngineKey) {
     finalQuery = `${searchEngineKey} ${cleanQuery}`;

@@ -1,5 +1,13 @@
 # Brand Icons Changelog
 
+## [Bugfix] - 2026-10-08
+
+- Check the selected icon package on every command launch and apply confirmed updates without restarting Raycast
+- Download the resolved package version to keep cached icon packs consistent
+- Keep the working icons and their version available if an update fails
+- Show the selected and loaded icon packages
+- Support icon packs without source URLs, such as `simple-icons-extreme`
+
 ## [Bugfix] - 2026-09-16
 
 - Fix `ENOENT` errors when copying icons from an incompletely downloaded asset pack (e.g. interrupted download on Windows); the pack is now re-downloaded automatically

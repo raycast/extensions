@@ -1,5 +1,14 @@
 # shiori.sh Changelog
 
+## [AI Tools and Pagination] - 2026-10-13
+
+- Add AI tools to save bookmarks with confirmation, search saved links, and find unread links about a topic.
+- Support documented starred, tag, saved-since, read-status, and sort filters in AI search.
+- Browse past the first 100 links, cancel outdated searches, and recover from page errors without losing loaded links.
+- Keep loaded pages visible after read-status changes, edits, and deletions, with adjusted pagination offsets when rows leave the current filter.
+- Distinguish request errors from empty results.
+- Validate save URLs and handle minimal save responses, timeouts, and authentication errors without exposing API keys.
+
 ## [0.1.2] - 2026-03-09
 
 - Add server-side search with debounce, replacing client-side filtering

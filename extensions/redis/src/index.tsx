@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List, showToast, Toast, Detail, Icon } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { clearRedisCommands, getRedisCommands, setRedisCommands } from "./lib/storage";
 import { fetchRedisCommands, RedisCommand } from "./lib/redis";
 import { useFetch } from "@raycast/utils";
@@ -8,17 +8,30 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [commands, setCommands] = useState<RedisCommand[]>([]);
   const [searchText, setSearchText] = useState<string>("");
+
+  const controllerRef = useRef<AbortController | null>(null);
+
   const search = useCallback(
     (text: string) => {
       text = text.toLowerCase();
+      controllerRef.current?.abort();
+
       const abortCtrl = new AbortController();
+      controllerRef.current = abortCtrl;
+
+      setSearchText(text);
+      setIsLoading(true);
       const fn = async () => {
         try {
-          setIsLoading(true);
           let result = await getRedisCommands();
+          if (abortCtrl.signal.aborted) return;
+
           if (result.length === 0) {
             result = await fetchRedisCommands(abortCtrl.signal);
+            if (abortCtrl.signal.aborted) return;
+
             await setRedisCommands(result);
+            if (abortCtrl.signal.aborted) return;
           }
 
           result = result.filter((command) => command.name.toLowerCase().includes(text));
@@ -30,28 +43,28 @@ export default function Command() {
               break;
             }
           }
-
           setCommands(result);
-          setSearchText(text);
         } catch (err) {
+          if (abortCtrl.signal.aborted || (err as Error)?.name === "AbortError") return;
           showToast({
             style: Toast.Style.Failure,
             title: "Failed to fetch commands",
             message: String(err),
           });
         } finally {
-          setIsLoading(false);
+          if (!abortCtrl.signal.aborted) setIsLoading(false);
         }
       };
       fn();
-      return () => abortCtrl.abort();
     },
     [setIsLoading, setCommands, setSearchText]
   );
 
   useEffect(() => {
     search("");
-  }, []);
+
+    return () => controllerRef.current?.abort();
+  }, [search]);
 
   return (
     <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search redis commands..." throttle>

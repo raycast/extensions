@@ -26,11 +26,14 @@ import {
 import type { BucketFolder, BucketObject, Destination } from "../api/types";
 import { showAktarFailure } from "../lib/errors";
 import { FORMAT_TITLES, formatBytes, formatLink, isImageName } from "../lib/format";
+import { escapeMarkdown, markdownURL } from "../lib/markdown";
 import { isWindows, primaryShortcut } from "../lib/platform";
 import { thumbnailIcon, thumbnailMarkdown, useDetailThumbnail, useThumbnailIcons } from "../lib/thumbnails";
 import { resolveFormat } from "../lib/output";
+import { moveStatusNote } from "../lib/short-links";
 import { ConnectionEmptyView } from "./ConnectionEmptyView";
 import { QRCodeView } from "./QRCodeView";
+import { ReplaceForm } from "./ReplaceForm";
 import { UploadForm } from "./UploadForm";
 
 type Entry = { type: "folder"; folder: BucketFolder } | { type: "object"; object: BucketObject };
@@ -274,6 +277,17 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                     shortcut={Keyboard.Shortcut.Common.Edit}
                     target={<MoveForm destination={destination} object={object} onMoved={revalidate} />}
                   />
+                  <Action.Push
+                    title="Replace File"
+                    icon={Icon.Repeat}
+                    shortcut={primaryShortcut("r", "shift")}
+                    target={
+                      <ReplaceForm
+                        target={{ kind: "object", destinationId: destination.id, key: object.key, name: object.name }}
+                        onReplaced={revalidate}
+                      />
+                    }
+                  />
                   <Action
                     title="Delete"
                     icon={Icon.Trash}
@@ -302,12 +316,17 @@ function ObjectDetail({
   object: BucketObject;
   preview?: string | null;
 }) {
-  const image = object.url && isImageName(object.name) ? `![](${object.url})` : "";
+  // The date in the URL makes Raycast load a replaced image instead of its cached copy.
+  const version = object.lastModified ? Date.parse(object.lastModified) : NaN;
+  const imageURL = object.url && !Number.isNaN(version) ? `${object.url}?v=${version}` : object.url;
+  const image = imageURL && isImageName(object.name) ? `![](${markdownURL(imageURL)})` : "";
   const thumbnail = preview ? thumbnailMarkdown(preview) : "";
   return (
     <List.Item.Detail
       markdown={
-        image || thumbnail || `### ${object.name}\n\n${preview === undefined ? "" : "No preview for this file."}`
+        image ||
+        thumbnail ||
+        `### ${escapeMarkdown(object.name)}\n\n${preview === undefined ? "" : "No preview for this file."}`
       }
       metadata={
         <List.Item.Detail.Metadata>
@@ -426,10 +445,11 @@ function MoveForm({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: `Moving ${object.name}` });
       try {
-        await moveObject(destination.id, object.key, values.key.trim());
-        toast.style = Toast.Style.Success;
+        const shortLinkStatus = await moveObject(destination.id, object.key, values.key.trim());
+        const note = moveStatusNote(shortLinkStatus);
+        toast.style = note?.warning ? Toast.Style.Failure : Toast.Style.Success;
         toast.title = "Moved";
-        toast.message = values.key.trim();
+        toast.message = note ? `${values.key.trim()}. ${note.message}` : values.key.trim();
         onMoved();
         pop();
       } catch (error) {
@@ -449,7 +469,7 @@ function MoveForm({
     >
       <Form.TextField
         title="Key"
-        info="The full path inside the bucket. Change the name to rename, or the folder part to move. Links to the old key stop working."
+        info="The full path inside the bucket. Change the name to rename, or the folder part to move. Links to the old key stop working. Aktar points the file's short link at the new key when its shortener can."
         {...itemProps.key}
       />
       <Form.Description text="S3 has no real rename: Aktar copies the file to the new key, then deletes the old one." />

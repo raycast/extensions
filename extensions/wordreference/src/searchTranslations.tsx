@@ -44,6 +44,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
 
   return (
     <List
+      throttle
       onSearchTextChange={setSearchText}
       actions={
         <ActionPanel>

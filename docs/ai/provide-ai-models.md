@@ -143,18 +143,19 @@ Declare the `tools` capability to receive tool definitions on the request when u
 
 ### Provider options
 
-Raycast passes request context in `request.providerOptions.raycast`. The options and their individual fields are optional:
+Raycast passes request context in `request.providerOptions.raycast`.
 
 | Property | Description | Type |
 | :-- | :-- | :-- |
-| `locale` | The locale supplied with the request. | `string` |
-| `currentDate` | The current date supplied with the request. | `string` |
-| `reasoningEffort` | The reasoning effort requested for the model. Declare the supported levels with `capabilities.reasoningEffort`. | `string` |
+| sessionId<mark style="color:red;">\*</mark> | The chat/session ID, stable across turns in the same conversation. | `string` |
+| locale<mark style="color:red;">\*</mark> | The locale supplied with the request. | `string` |
+| currentDate<mark style="color:red;">\*</mark> | The current date supplied with the request. | `string` |
+| reasoningEffort | The reasoning effort requested for the model. Declare the supported levels with `capabilities.reasoningEffort`. | `string` |
 
 The `raycast` namespace carries Raycast context; AI SDK providers do not automatically translate it into their own options. Read the values you support and map them to your provider's namespace and accepted values. For example, when using the [AI SDK OpenAI provider](https://ai-sdk.dev/providers/ai-sdk-providers/openai) with a model that accepts the same reasoning effort values:
 
 ```typescript
-const reasoningEffort = request.providerOptions?.raycast.reasoningEffort;
+const reasoningEffort = request.providerOptions.raycast.reasoningEffort;
 const providerOptions = reasoningEffort === undefined ? undefined : { openai: { reasoningEffort } };
 ```
 

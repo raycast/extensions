@@ -1,5 +1,5 @@
 import { Action, Icon, showToast, Toast } from "@raycast/api";
-import { signOutTeak } from "../lib/oauth";
+import { type SignOutResult, signOutTeak } from "../lib/oauth";
 import { getPreferences } from "../lib/preferences";
 
 interface SignOutActionProps {
@@ -17,8 +17,9 @@ export function SignOutAction({ onSignedOut }: SignOutActionProps) {
     <Action
       icon={Icon.Logout}
       onAction={async () => {
+        let result: SignOutResult;
         try {
-          await signOutTeak();
+          result = await signOutTeak();
         } catch (error) {
           await showToast({
             style: Toast.Style.Failure,
@@ -29,7 +30,13 @@ export function SignOutAction({ onSignedOut }: SignOutActionProps) {
         }
         await showToast({
           style: Toast.Style.Success,
-          title: "Signed out of Teak",
+          title:
+            result === "local-only"
+              ? "Signed out on this Mac"
+              : "Signed out of Teak",
+          ...(result === "local-only"
+            ? { message: "Other installations may still be connected." }
+            : {}),
         });
         onSignedOut?.();
       }}

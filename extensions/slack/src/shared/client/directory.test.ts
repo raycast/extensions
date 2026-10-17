@@ -3,6 +3,7 @@ import test from "node:test";
 import { searchConversationDirectory } from "./conversationSearch";
 import {
   createDirectoryUserSearch,
+  directoryUsersToShow,
   mergeDirectorySearchResults,
   mergeVisitedDirectoryItems,
   rememberVisitedDirectoryItem,
@@ -19,6 +20,15 @@ test("member rows and group names share one user lookup per query", async () => 
   const [users, names] = await Promise.all([search.getUsers(), search.getUserNames()]);
   assert.equal(calls, 1);
   assert.equal(names.get(users[0].username), users[0].name);
+});
+
+test("a new query does not keep the previous query's users while loading", () => {
+  const previous = [{ id: "U1" }];
+  assert.equal(directoryUsersToShow("bob", true, { query: "alice", users: previous }, previous), undefined);
+  assert.deepEqual(directoryUsersToShow("bob", true, { query: "bob", users: [{ id: "U2" }] }, previous), [
+    { id: "U2" },
+  ]);
+  assert.deepEqual(directoryUsersToShow("bob", false, undefined, [{ id: "U2" }]), [{ id: "U2" }]);
 });
 
 test("channels are published when neither users nor groups have finished", () => {

@@ -67,7 +67,7 @@ export function normalizeUrl(value: string): string {
   return url.toString();
 }
 
-async function request(url: string): Promise<{ statusCode: number; body: string }> {
+async function request(url: string, signal?: AbortSignal): Promise<{ statusCode: number; body: string }> {
   return new Promise((resolve, reject) => {
     let settled = false;
     const finish = <T>(callback: (value: T) => void, value: T) => {
@@ -76,7 +76,7 @@ async function request(url: string): Promise<{ statusCode: number; body: string 
       clearTimeout(timeout);
       callback(value);
     };
-    const request = get(`${API_URL}?${new URLSearchParams({ url })}`, (response) => {
+    const request = get(`${API_URL}?${new URLSearchParams({ url })}`, { signal }, (response) => {
       const chunks: Buffer[] = [];
       response.on("data", (chunk: Buffer) => chunks.push(chunk));
       response.once("aborted", () =>
@@ -99,8 +99,8 @@ async function request(url: string): Promise<{ statusCode: number; body: string 
   });
 }
 
-export async function getReport(url: string): Promise<Report> {
-  const response = await request(url);
+export async function getReport(url: string, signal?: AbortSignal): Promise<Report> {
+  const response = await request(url, signal);
   let payload: Report | ProblemDetails;
 
   try {

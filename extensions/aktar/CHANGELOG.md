@@ -1,5 +1,31 @@
 # Aktar Changelog
 
+## [Short Links] - 2026-10-12
+
+- Uploads get the short link from the link shortener set up for their destination in Aktar (Shlink, YOURLS, Kutt, Dub, Short.io, or your own HTTP request), and the extension copies and pastes it like Aktar does. Show QR Code uses it too
+- Search Uploads shows an upload's short link with its shortener, clicks, and last click. Copy Short Link (⌘⇧L, Ctrl+Shift+L on Windows) and Copy Original Link copy either one, and Create Short Link makes one for an upload that has none
+- Upload File has a Short Link choice: the destination's setting, always make one, or keep the original link
+- When a short link can't be made, the upload still works, the original link is copied, and the message says why
+- Renaming or moving a file in Browse Buckets says when its short link now points to the new key, or when it couldn't be moved along
+- New AI tool: ask `@aktar` for a short link to an upload. Raycast asks before the AI makes one, since the shortener sees the link
+- Search Uploads finds an upload by its short link, and shows a link icon for uploads that have one
+
+## [Security Improvements] - 2026-10-09
+
+- Before sending its token, the extension asks the app on Aktar's port to prove it has the same token, so if Aktar isn't running and another program listens on its port, that program gets neither the token nor your files. Needs Aktar for Mac 0.18.0 or Aktar for Windows 0.11.0 or later; older versions show a message asking you to update
+- Raycast asks before the AI creates a temporary link, since anyone with it can download the file, even from a private bucket. AI links last 1 hour unless you ask for longer, and 24 hours at most
+- AI tools only use a destination you name exactly (its name or bucket), instead of the first one whose name contains the words
+- File names from your buckets show as plain text in previews, so a crafted name can't load an image from elsewhere, and links copied as Markdown stay whole when a key has spaces or parentheses
+- File names the AI reads lose control and text-direction characters, while the exact keys stay separate so the AI always asks for the right file
+- The proof is checked again right before every request that carries the token, so a program that takes Aktar's port after Aktar quits is never trusted
+
+## [Replace Files and Automatic Destination] - 2026-10-07
+
+- Replace File (⌘⇧R, Ctrl+Shift+R on Windows) in Search Uploads and Browse Buckets: pick a new file and Aktar writes it at the same key, so every link already shared shows the new file. The link is copied again, and the list and thumbnails refresh. Needs Aktar for Mac 0.14.0 or Aktar for Windows 0.7.0; older versions ask you to update
+- Upload File starts on Automatic: Aktar sends each file to the destination whose Use For claims its type or extension, else to the one selected in Aktar. Pick a destination to upload into a folder
+- Search Uploads shows when an upload was replaced
+- Upload Clipboard and Upload Selected Files follow Use For too, as they don't name a destination
+
 ## [Windows] - 2026-10-05
 
 - The extension now works with Raycast for Windows and Aktar for Windows 0.1.0 or later. Connect to Aktar finds Aktar from the Microsoft Store or from the installer

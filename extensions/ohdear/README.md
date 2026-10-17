@@ -1,6 +1,6 @@
 # Oh Dear
 
-[Oh Dear](https://ohdear.app) is the all-in-one monitoring tool for your entire website.
+[Oh Dear](https://ohdear.app) is website health monitoring for your entire site, not just the homepage.
 
 It monitors uptime, SSL certificates, broken links, scheduled tasks, application health, DNS, domain expiry and more.
 

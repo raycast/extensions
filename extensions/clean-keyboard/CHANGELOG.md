@@ -1,5 +1,9 @@
 # Clean Keyboard Changelog
 
+## [Default Duration] - 2026-10-15
+
+- Added a default duration preference to lock the keyboard immediately on open ([#30864](https://github.com/raycast/extensions/issues/30864))
+
 ## [Add Ask AI Raycast Command] - 2026-09-29
 
 - Added an Ask AI tool that locks the keyboard for a requested duration

@@ -7,6 +7,9 @@ import { onlyFiles, uploadPaths } from "../lib/upload";
 import { showAktarFailure } from "../lib/errors";
 import { DELETE_AFTER_OPTIONS, parseExpiry, preferredExpiry } from "../lib/expiry";
 
+/** The destination choice that leaves picking to Aktar's Use For rules. */
+const AUTOMATIC = "automatic";
+
 type Values = {
   files: string[];
   /** Optional new name for a single file; the extension is kept when left out. */
@@ -15,7 +18,17 @@ type Values = {
   folder: string;
   /** Days as a string, "0" meaning never. */
   deleteAfter: string;
+  /** A ShortLinkChoice. */
+  shortLink: string;
 };
+
+type ShortLinkChoice = "destination" | "always" | "never";
+
+const SHORT_LINK_CHOICES: { value: ShortLinkChoice; title: string }[] = [
+  { value: "destination", title: "Destination's Setting" },
+  { value: "always", title: "Make a Short Link" },
+  { value: "never", title: "Original Link" },
+];
 
 type Props = {
   /** Preselects this destination and folder, e.g. when opened from the bucket browser. */
@@ -33,7 +46,8 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
       showAktarFailure(error, "Couldn't load destinations");
     },
   });
-  const defaultDestination = destinationId ?? destinations?.find((destination) => destination.isDefault)?.id;
+  // Opened for a bucket, the form uploads there; otherwise Aktar picks by Use For.
+  const defaultDestination = destinationId ?? (destinations ? AUTOMATIC : undefined);
 
   const { handleSubmit, itemProps, setValidationError, values } = useForm<Values>({
     initialValues: {
@@ -43,6 +57,7 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
       folder: prefix === undefined ? "" : prefix || "/",
       // Aktar can't auto-delete into a chosen folder, so a preset folder starts at Never.
       deleteAfter: String(prefix === undefined ? preferredExpiry() : 0),
+      shortLink: "destination",
     },
     validation: {
       files: (value) => (value && value.length > 0 ? undefined : "Pick at least one file"),
@@ -54,6 +69,12 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
         return false;
       }
       const folder = values.folder.trim();
+      const automatic = values.destinationId === AUTOMATIC;
+      if (folder && automatic) {
+        setValidationError("folder", "Pick a destination instead of Automatic to upload into a folder.");
+        return false;
+      }
+      setValidationError("folder", undefined);
       const expires = parseExpiry(values.deleteAfter);
       if (folder && expires) {
         setValidationError("deleteAfter", "Not available with a folder. Clear Folder or pick Never.");
@@ -61,11 +82,13 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
       }
       setValidationError("deleteAfter", undefined);
       const uploads = await uploadPaths(files, {
-        destinationId: values.destinationId || undefined,
+        // Automatic sends no destination, so Aktar's Use For rules (or its selected destination) decide.
+        destinationId: automatic ? undefined : values.destinationId || undefined,
         // An empty folder means "use the destination's path template".
         prefix: folder ? folder : undefined,
         expires,
         filename: files.length === 1 ? uploadName(values.name, files[0]) : undefined,
+        short: values.shortLink === "destination" ? undefined : values.shortLink === "always",
       });
       if (uploads.length === 0) return false;
       if (onUploaded) {
@@ -82,7 +105,7 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle={prefix ? `Upload to ${prefix}` : "Upload File"}
+      navigationTitle={prefix ? `Upload to ${prefix}` : undefined}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Upload" icon={Icon.Upload} onSubmit={handleSubmit} />
@@ -104,7 +127,9 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
         // Rendered only once destinations load, so the default one is preselected.
         key={defaultDestination ?? "loading"}
         defaultValue={defaultDestination}
+        info="Automatic lets Aktar choose: each file goes to the destination whose Use For claims its type or extension, else to the one selected in Aktar. Use For needs Aktar for Mac 0.14.0 or Aktar for Windows 0.7.0; older versions use the selected destination."
       >
+        <Form.Dropdown.Item value={AUTOMATIC} title="Automatic" icon={Icon.Wand} />
         {(destinations ?? []).map((destination) => (
           <Form.Dropdown.Item
             key={destination.id}
@@ -127,6 +152,15 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
       >
         {DELETE_AFTER_OPTIONS.map((option) => (
           <Form.Dropdown.Item key={option.days} value={String(option.days)} title={option.title} />
+        ))}
+      </Form.Dropdown>
+      <Form.Dropdown
+        title="Short Link"
+        info="Destination's Setting makes a short link when the destination has a link shortener set up in Aktar and its rules apply to the file. Make a Short Link always makes one with that shortener (the upload fails if the destination has none), and Original Link makes none. The short link is what gets copied."
+        {...itemProps.shortLink}
+      >
+        {SHORT_LINK_CHOICES.map((choice) => (
+          <Form.Dropdown.Item key={choice.value} value={choice.value} title={choice.title} />
         ))}
       </Form.Dropdown>
     </Form>

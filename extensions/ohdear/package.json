@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ohdear",
   "title": "Oh Dear",
-  "description": "Manage your Oh Dear sites easy directly from Raycast",
+  "description": "Check the health of your Oh Dear monitors and add new ones from Raycast.",
   "icon": "command-icon.png",
   "author": "andreaselia",
   "owner": "oh-dear",
@@ -149,5 +149,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

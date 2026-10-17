@@ -28,7 +28,7 @@ export const DEFAULT_COMMANDS: Record<string, Command> = {
       "extra information; only provide the corrected text. After receiving corrections, the user can request " +
       "clarifications, and you need to answer them in detail.",
     model: "gpt-5-nano",
-    temperature: "0.7",
+    temperature: "1",
     contentSource: "selectedText",
     isDisplayInput: true,
   },
@@ -51,7 +51,7 @@ Strictly follow these rules:
 - NEVER surround the improved text with quotes or any additional formatting
 - If the text is already well-written and requires no improvement, don't change the given text`,
     model: "gpt-5-nano",
-    temperature: "0.7",
+    temperature: "1",
     contentSource: "selectedText",
     isDisplayInput: true,
   },

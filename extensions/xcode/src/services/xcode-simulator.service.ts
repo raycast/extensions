@@ -12,7 +12,7 @@ import {
   XcodeSimulatorOpenUrlErrorReason,
 } from "../models/xcode-simulator/xcode-simulator-open-url-error.model";
 import { XcodeSimulatorStateFilter } from "../models/xcode-simulator/xcode-simulator-state-filter.model";
-import { LocalStorage } from "@raycast/api";
+import { getDefaultApplication, LocalStorage, open } from "@raycast/api";
 
 /**
  * LocalStorage key prefix for the recent simulators history.
@@ -26,10 +26,22 @@ const RECENT_SIMULATOR_KEY_PREFIX = "xcode_recent_simulator_";
 export class XcodeSimulatorService {
   /**
    * Launches the simulator GUI application.
-   * Xcode 27+ replaced Simulator.app with Device Hub, so try that first
-   * and fall back to Simulator.app on older Xcode versions.
+   * Respect the default device-link handler, including third-party viewers.
+   * Fall back to Apple's viewers when no device-link handler can be opened.
    */
-  static async launchSimulatorApplication(): Promise<void> {
+  static async launchSimulatorApplication(simulatorUDID?: string): Promise<void> {
+    try {
+      if (simulatorUDID) {
+        await open(`devices://device/open?id=${encodeURIComponent(simulatorUDID)}`);
+      } else {
+        // Opening the app avoids sending an unsupported, device-less URL.
+        const application = await getDefaultApplication("devices://");
+        await open(application.path);
+      }
+      return;
+    } catch {
+      // Older Xcode versions may not register a device-link handler.
+    }
     try {
       // Device Hub (Xcode 27+)
       await execAsync(`open -b "com.apple.dt.Devices"`);
@@ -123,7 +135,7 @@ export class XcodeSimulatorService {
       // Track usage for recent history
       XcodeSimulatorService.trackSimulatorUsage(xcodeSimulatorUDID);
       // Silently launch Simulator application
-      XcodeSimulatorService.launchSimulatorApplication();
+      return XcodeSimulatorService.launchSimulatorApplication(xcodeSimulatorUDID);
     });
   }
 
@@ -176,7 +188,11 @@ export class XcodeSimulatorService {
       // eslint-disable-next-line no-empty
     } catch {}
     // Launch application by bundle identifier
-    return execAsync(["xcrun", "simctl", action, xcodeSimulator.udid, bundleIdentifier].join(" ")).then();
+    await execAsync(["xcrun", "simctl", action, xcodeSimulator.udid, bundleIdentifier].join(" "));
+    if (action === XcodeSimulatorAppAction.launch) {
+      // boot() rejects for an already-booted simulator, so show its viewer here too.
+      await XcodeSimulatorService.launchSimulatorApplication(xcodeSimulator.udid);
+    }
   }
 
   /**
@@ -241,7 +257,7 @@ export class XcodeSimulatorService {
     return execAsync(["xcrun", "simctl", "openurl", simulatorUDID ?? "booted", `"${trimmedUrl}"`].join(" ")).then(
       () => {
         // Silently launch Simulator application
-        XcodeSimulatorService.launchSimulatorApplication();
+        return XcodeSimulatorService.launchSimulatorApplication(simulatorUDID);
       }
     );
   }

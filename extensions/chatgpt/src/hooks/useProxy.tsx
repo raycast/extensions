@@ -4,7 +4,7 @@ import https from "https";
 import { ProxyAgent } from "proxy-agent";
 import { getConfigUrl } from "../utils";
 
-export function useProxy(): Agent {
+export function getProxyAgent(): Agent {
   const prefs = getPreferenceValues<Preferences>();
 
   if (!prefs.useProxy || !prefs.proxyProtocol || !prefs.proxyHost || !prefs.proxyPort) {

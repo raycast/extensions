@@ -1,12 +1,14 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import { CHARACTERS, CATEGORY_LABELS } from "../data/characters";
 import { ChiikawaCharacter } from "../types/character";
+import { existsSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 
 interface Props {
   character: ChiikawaCharacter;
 }
 
-function toMarkdown(character: ChiikawaCharacter): string {
+function toMarkdown(character: ChiikawaCharacter, includeImage = false): string {
   const personality = character.personality.join(" · ");
   const relationships = character.relationships
     .map((item) => `- **${item.character}** - ${item.description}`)
@@ -19,6 +21,9 @@ function toMarkdown(character: ChiikawaCharacter): string {
   return [
     `# ${character.nameEn} (${character.nameJp})`,
     "",
+    ...(includeImage && character.icon && existsSync(character.icon)
+      ? [`![${character.nameEn}](${pathToFileURL(character.icon).href}?raycast-width=250&raycast-height=250)`, ""]
+      : []),
     `**Category:** ${CATEGORY_LABELS[character.category]}`,
     "",
     character.description,
@@ -41,7 +46,7 @@ function getRandomCharacter(excludingId: string): ChiikawaCharacter {
 }
 
 export function CharacterDetail({ character }: Props) {
-  const markdown = toMarkdown(character);
+  const markdown = toMarkdown(character, true);
   const randomCharacter = getRandomCharacter(character.id);
 
   return (
@@ -91,7 +96,7 @@ export function CharacterDetail({ character }: Props) {
             <Action.CopyToClipboard
               icon={Icon.Document}
               title="Copy as Markdown"
-              content={markdown}
+              content={toMarkdown(character)}
               shortcut={{ modifiers: ["cmd"], key: "m" }}
             />
           </ActionPanel.Section>

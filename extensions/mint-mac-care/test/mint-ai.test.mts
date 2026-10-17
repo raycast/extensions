@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
-import { diskOverview, growthOverview, memoryOverview } from "../src/mint-ai.ts";
+import { diskOverview, growthOverview, memoryOverview, readStatus, readyMintCLI } from "../src/mint-ai.ts";
 import type { MemoryScan } from "../src/mint-panes.ts";
 
 const manifest = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
@@ -31,10 +33,73 @@ test("the disk answer is the menu bar's: used and free now, the four groups of t
   assert.equal(answer.lastScan, "2026-10-04T22:42:00Z");
 });
 
-test("an older CLI without groups answers from the file Mint saved after its Scan", () => {
-  const answer = diskOverview({ disk: { totalGB: 500, freeGB: 50 } }, { optimizableBytes: 1_000_000_000 });
+test("an older CLI without groups answers from the file Mint saved after its Scan, its GB read as GiB", () => {
+  const answer = diskOverview({ disk: { totalGB: 460.43, freeGB: 37.28 } }, { optimizableBytes: 1_000_000_000 });
   assert.equal(answer.groups[0].size, "1 GB");
-  assert.equal(answer.disk?.used, "450 GB");
+  assert.equal(answer.disk?.total, "494.38 GB");
+  assert.equal(answer.disk?.used, "454.35 GB");
+});
+
+test("a full disk's 0 bytes free is still a size", () => {
+  assert.equal(diskOverview({ disk: { totalGB: 460.43, freeGB: 0 } }).disk?.free, "0 B");
+  assert.equal(diskOverview({ volume: { totalBytes: 494_384_795_648, freeBytes: 0 } }).disk?.used, "494.38 GB");
+});
+
+test("a failed status read says Mint did not answer, never that it has not scanned", async (t) => {
+  const dir = mkdtempSync(join(tmpdir(), "mint-ai-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const cli = join(dir, "mint-cli");
+  writeFileSync(cli, "#!/bin/sh\necho 'database is locked' >&2\nexit 1\n");
+  chmodSync(cli, 0o755);
+  await assert.rejects(readStatus(cli), /Mint did not report the disk \(database is locked\)/);
+});
+
+for (const exitCode of [0, 1]) {
+  test(`a valid status envelope with a Mint error rejects, even with exit ${exitCode}`, async (t) => {
+    const dir = mkdtempSync(join(tmpdir(), "mint-ai-"));
+    t.after(() => rmSync(dir, { recursive: true, force: true }));
+    const cli = join(dir, "mint-cli");
+    writeFileSync(
+      cli,
+      `#!/bin/sh\necho '{"schemaVersion":2,"capability":"status.v1","error":"database is locked"}'\nexit ${exitCode}\n`,
+    );
+    chmodSync(cli, 0o755);
+    await assert.rejects(readStatus(cli), /Mint did not report the disk \(database is locked\)/);
+  });
+}
+
+test("a failed process rejects even when stdout contains valid disk figures", async (t) => {
+  const dir = mkdtempSync(join(tmpdir(), "mint-ai-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const cli = join(dir, "mint-cli");
+  writeFileSync(
+    cli,
+    '#!/bin/sh\necho \'{"schemaVersion":2,"capability":"status.v1","volume":{"totalBytes":100,"freeBytes":0}}\'\necho \'status incomplete\' >&2\nexit 1\n',
+  );
+  chmodSync(cli, 0o755);
+  await assert.rejects(readStatus(cli), /status incomplete/);
+});
+
+test("a successful status read preserves zero free space and allows diagnostic stderr", async (t) => {
+  const dir = mkdtempSync(join(tmpdir(), "mint-ai-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const cli = join(dir, "mint-cli");
+  writeFileSync(
+    cli,
+    '#!/bin/sh\necho \'{"schemaVersion":2,"capability":"status.v1","volume":{"totalBytes":100,"freeBytes":0}}\'\necho \'diagnostic note\' >&2\n',
+  );
+  chmodSync(cli, 0o755);
+  assert.equal(diskOverview(await readStatus(cli)).disk?.free, "0 B");
+});
+
+test("unverified, missing and incompatible Mint give different actionable advice", () => {
+  assert.throws(() => readyMintCLI({ status: "untrusted" }), /signature could not be verified/);
+  assert.throws(() => readyMintCLI({ status: "not-found" }), /Mac App Store and Setapp editions do not include it/);
+  assert.throws(() => readyMintCLI({ status: "incompatible" }), /Check for Updates/);
+  assert.equal(
+    readyMintCLI({ status: "ready", path: "/signed/mint-cli", version: { appVersion: "1.0.95" } }),
+    "/signed/mint-cli",
+  );
 });
 
 test("a Mac Mint never scanned says so instead of reporting empty groups", () => {

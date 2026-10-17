@@ -74,13 +74,15 @@ Respond concisely in helpful Markdown (use the same language as the user's quest
         await stream;
       } catch (err) {
         const msg =
-          err instanceof Error ? err.message : "Failed to run Ask Tweek AI.";
+          err instanceof Error
+            ? err.message
+            : "Failed to summarize tasks with AI.";
         if (!cancelled) {
           setAnswer(`### Error\n\n${msg}`);
         }
         await showToast({
           style: Toast.Style.Failure,
-          title: "Ask Tweek AI Error",
+          title: "Summarize My Tasks Error",
           message: msg,
         });
       } finally {

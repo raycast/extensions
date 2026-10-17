@@ -18,7 +18,8 @@
     "xmok",
     "byheaven",
     "christianmagill",
-    "0xdhrv"
+    "0xdhrv",
+    "shanto462"
   ],
   "license": "MIT",
   "keywords": [
@@ -126,6 +127,32 @@
       "subtitle": "Apple Music",
       "description": "Skip to the previous track in Music.",
       "mode": "no-view"
+    },
+    {
+      "name": "rewind",
+      "title": "Rewind",
+      "subtitle": "Apple Music",
+      "description": "Rewind the current track by 15 seconds.",
+      "disabledByDefault": true,
+      "mode": "no-view",
+      "keywords": [
+        "seek",
+        "back",
+        "skip back"
+      ]
+    },
+    {
+      "name": "fast-forward",
+      "title": "Fast Forward",
+      "subtitle": "Apple Music",
+      "description": "Fast forward the current track by 15 seconds.",
+      "disabledByDefault": true,
+      "mode": "no-view",
+      "keywords": [
+        "seek",
+        "ahead",
+        "skip ahead"
+      ]
     },
     {
       "name": "currently-playing",
@@ -348,6 +375,20 @@
         "album",
         "song",
         "library"
+      ]
+    },
+    {
+      "name": "view-recommendations",
+      "title": "View Recommendations",
+      "subtitle": "Apple Music",
+      "description": "Browse your personal Apple Music recommendations, add albums, playlists, and songs to your library, and play the ones already there.",
+      "disabledByDefault": true,
+      "mode": "view",
+      "keywords": [
+        "recommendations",
+        "for you",
+        "discover",
+        "catalog"
       ]
     },
     {
