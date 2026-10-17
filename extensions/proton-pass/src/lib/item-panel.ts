@@ -27,7 +27,7 @@ export interface PanelInput {
   /** Loaded details of the item, when it's selected. */
   detail?: ItemDetail;
   totp?: { code: string; remainingSeconds?: number };
-  /** The 2FA code couldn't be fetched. */
+  /** The TOTP code couldn't be fetched. */
   totpFailed?: boolean;
   isLoading: boolean;
   error?: string;
@@ -77,7 +77,7 @@ export function getPanelRows({ item, detail, totp, totpFailed, isLoading, error,
       { id: "username", title: "Username", value: text((detail ?? item).username) },
       { id: "email", title: "Email", value: text((detail ?? item).email) },
       { id: "password", title: "Password", value: password },
-      { id: "totp", title: "2FA Code", value: code },
+      { id: "totp", title: "TOTP Code", value: code },
       { id: "website", title: "Website", value: websites },
       { id: "note", title: "Note", value: note },
     ],

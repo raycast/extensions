@@ -69,7 +69,7 @@ export function createSerialQueue() {
 }
 
 /**
- * Orders the saves of complete listings across views: List Vaults and the Search Items it opens list in parallel,
+ * Orders the saves of complete listings across views: the vault list and the item lists it opens list in parallel,
  * and a listing that started before the one saved last must not replace it.
  */
 export function createListingSaves() {
@@ -91,5 +91,10 @@ export function createListingSaves() {
   };
 }
 
-/** Shared by the views of a command, e.g. List Vaults and the Search Items it opens. */
+/** Shared by the views of a command, e.g. the vault list and the item lists it opens. */
 export const listingSaves = createListingSaves();
+
+/** `promise`'s value, or nothing if it takes longer than `ms`. */
+export function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | undefined> {
+  return Promise.race([promise, new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), ms))]);
+}

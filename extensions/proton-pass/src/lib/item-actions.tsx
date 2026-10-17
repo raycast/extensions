@@ -29,7 +29,7 @@ export const ItemActions = memo(function ItemActions({
   onRefresh,
   onUse,
 }: ItemActionsProps) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.SearchItems>();
   // Keeps secrets out of Raycast's clipboard history.
   const concealSecrets = preferences.copyPasswordTransient ?? true;
   // Loaded details are newer than the cached item, e.g. when a password was added since.
@@ -77,7 +77,7 @@ export const ItemActions = memo(function ItemActions({
     return getCurrentTotpCode(item, store.peek(item));
   }
 
-  /** Pastes into the app that was in front of Raycast; the 2FA code is then left in the clipboard. */
+  /** Pastes into the app that was in front of Raycast; the TOTP code is then left in the clipboard. */
   async function fill(fields: "login" | "email" | "username" | "password") {
     try {
       // Taken first: loading the item can take a moment, during which another app could come in front.
@@ -107,8 +107,8 @@ export const ItemActions = memo(function ItemActions({
         submit: fields === "login" && preferences.submitAfterFill,
         getClipboardValue:
           fields === "login" || fields === "password" ? (item.hasTotp ? getTotpCode : undefined) : undefined,
-        clipboardValueHud: "2FA code copied, paste it with ⌘V",
-        clipboardValueFailureHud: "Filled, but couldn't copy the 2FA code",
+        clipboardValueHud: "TOTP code copied, paste it with ⌘V",
+        clipboardValueFailureHud: "Filled, but couldn't copy the TOTP code",
       });
     } catch (error: unknown) {
       await showToast({
@@ -128,7 +128,7 @@ export const ItemActions = memo(function ItemActions({
     } catch (error: unknown) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to Paste 2FA Code",
+        title: "Failed to Paste TOTP Code",
         message: error instanceof Error ? error.message : String(error),
       });
     }
@@ -195,10 +195,10 @@ export const ItemActions = memo(function ItemActions({
         )}
         {item.hasTotp && (
           <Action
-            title="Copy 2FA Code"
+            title="Copy TOTP Code"
             icon={Icon.Clock}
             shortcut={platformShortcut(["cmd"], "t")}
-            onAction={() => copy("2FA Code", getTotpCode, true)}
+            onAction={() => copy("TOTP Code", getTotpCode, true)}
           />
         )}
         <Action
@@ -216,7 +216,7 @@ export const ItemActions = memo(function ItemActions({
           {hasPassword && <Action title="Paste Password" icon={Icon.Key} onAction={() => fill("password")} />}
           {item.hasTotp && (
             <Action
-              title="Paste 2FA Code"
+              title="Paste TOTP Code"
               icon={Icon.Clock}
               shortcut={platformShortcut(["cmd", "shift"], "t")}
               onAction={pasteTotpCode}

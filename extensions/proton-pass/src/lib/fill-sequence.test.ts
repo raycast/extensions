@@ -41,12 +41,12 @@ function fakeDriver(failures: { onReturn?: Error; onKey?: { keyCode: number; err
   return { driver, calls };
 }
 
-test("pastes each value, with Tab in between, then leaves the 2FA code in the clipboard", async () => {
+test("pastes each value, with Tab in between, then leaves the TOTP code in the clipboard", async () => {
   const { driver, calls } = fakeDriver();
   await runFill(driver, {
     values: ["alice@example.com", "secret"],
     getClipboardValue: async () => "123456",
-    clipboardValueHud: "2FA code copied",
+    clipboardValueHud: "TOTP code copied",
   });
 
   assert.deepEqual(calls, [
@@ -60,7 +60,7 @@ test("pastes each value, with Tab in between, then leaves the 2FA code in the cl
     `key command+${KeyCode.V}`,
     "wait 300",
     "copy 123456",
-    "hud 2FA code copied",
+    "hud TOTP code copied",
     "finish",
   ]);
 });
@@ -72,16 +72,16 @@ test("restores the previous clipboard when there's nothing to leave in it", asyn
   assert.deepEqual(calls.slice(-2), ["restore previous clipboard", "finish"]);
 });
 
-test("says so when the 2FA code couldn't be copied", async () => {
+test("says so when the TOTP code couldn't be copied", async () => {
   const { driver, calls } = fakeDriver();
   await runFill(driver, {
     values: ["secret"],
     getClipboardValue: async () => Promise.reject(new Error("no code")),
-    clipboardValueHud: "2FA code copied",
-    clipboardValueFailureHud: "Couldn't copy the 2FA code",
+    clipboardValueHud: "TOTP code copied",
+    clipboardValueFailureHud: "Couldn't copy the TOTP code",
   });
 
-  assert.deepEqual(calls.slice(-3), ["restore previous clipboard", "hud Couldn't copy the 2FA code", "finish"]);
+  assert.deepEqual(calls.slice(-3), ["restore previous clipboard", "hud Couldn't copy the TOTP code", "finish"]);
 });
 
 test("presses Return after the last value when submitting", async () => {

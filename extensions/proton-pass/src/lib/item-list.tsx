@@ -31,7 +31,6 @@ export interface ItemListProps {
   suggestedItems?: Item[];
   suggestionsTitle?: string;
   isLoading: boolean;
-  navigationTitle?: string;
   searchBarAccessory?: List.Props["searchBarAccessory"];
   emptyView: { icon: Image.ImageLike; title: string; description: string; onRetry?: () => void };
   onRefresh?: () => void;
@@ -42,12 +41,11 @@ export function ItemList({
   suggestedItems = [],
   suggestionsTitle = "Suggested",
   isLoading,
-  navigationTitle,
   searchBarAccessory,
   emptyView,
   onRefresh,
 }: ItemListProps) {
-  const showWebsiteIcons = getPreferenceValues<Preferences>().showWebsiteIcons ?? false;
+  const showWebsiteIcons = getPreferenceValues<Preferences.SearchItems>().showWebsiteIcons ?? false;
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-item-details", true);
   // A new store whenever the list is refreshed, so loaded details are never older than the items.
   const store = useMemo(() => new ItemDetailStore(), [items]);
@@ -105,7 +103,7 @@ export function ItemList({
         keywords={getKeywords(item)}
         accessories={[
           ...(item.hasNote ? [{ icon: Icon.Document, tooltip: "Has a note" }] : []),
-          ...(item.hasTotp ? [{ icon: Icon.Clock, tooltip: "Has a 2FA code" }] : []),
+          ...(item.hasTotp ? [{ icon: Icon.Clock, tooltip: "Has a TOTP code" }] : []),
           ...(isShowingDetail ? [] : [{ text: item.vaultName }]),
         ]}
         detail={
@@ -137,7 +135,6 @@ export function ItemList({
     <List
       isLoading={isLoading}
       isShowingDetail={isShowingDetail && items.length > 0}
-      navigationTitle={navigationTitle}
       searchBarPlaceholder="Search by name, username or website…"
       filtering={true}
       selectedItemId={isInitialSelectionApplied ? undefined : (initialSelection.current ?? undefined)}
