@@ -1,6 +1,6 @@
 # Pomodoro Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-10-17
 
 - Added a new work and break interval of 52 minutes and 17 minutes respectively.
 
