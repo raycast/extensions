@@ -1,6 +1,6 @@
 # Apple Music Changelog
 
-## [Album Art in Menu Bar] - {PR_MERGE_DATE}
+## [Album Art in Menu Bar] - 2026-10-17
 
 - Added a "Menu Bar Icon" preference to the Menu Bar Player: choose the Apple Music icon (default), the current track's cover art, or no icon. Covers are extracted from Music, resized, and cached per track, and fall back to the Apple Music icon when unavailable.
 - Added a "Hide Track Title" preference. The icon, track title and artist name can each be shown or hidden independently, and the dropdown always shows the full track title and artist.
