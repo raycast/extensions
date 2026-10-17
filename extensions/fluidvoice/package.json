@@ -1,0 +1,91 @@
+{
+  "name": "fluidvoice",
+  "title": "FluidVoice",
+  "description": "Transcribe audio and video files or web media with the FluidVoice Local API",
+  "icon": "fluidvoice-icon.png",
+  "author": "volkmar_eich",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "commands": [
+    {
+      "name": "transcribe-audio",
+      "title": "Transcribe Audio",
+      "description": "Transcribe a URL or local audio/video file",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "source",
+          "type": "text",
+          "required": false,
+          "placeholder": "URL or file path"
+        }
+      ],
+      "subtitle": "FluidVoice"
+    },
+    {
+      "name": "history",
+      "title": "Browse Dictation History",
+      "description": "Browse dictation history from FluidVoice",
+      "mode": "view",
+      "subtitle": "FluidVoice"
+    },
+    {
+      "name": "connection",
+      "title": "Check Connection",
+      "description": "Check the FluidVoice Local API version and connection",
+      "mode": "view",
+      "subtitle": "FluidVoice"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "node --test tests/*.test.cjs",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.8.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
+  },
+  "tools": [
+    {
+      "name": "transcribe",
+      "title": "Transcribe Media",
+      "description": "Transcribe one audio/video URL, file URL, or absolute local file path using the speech model selected in FluidVoice. Downloads web media locally and returns the transcript for questions or summaries. FluidVoice must be running with Local API enabled."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "fluidVoicePort",
+      "type": "textfield",
+      "required": false,
+      "title": "Local API Port",
+      "description": "Port configured in FluidVoice Local API settings",
+      "default": "47733"
+    },
+    {
+      "name": "retainedDownloads",
+      "type": "textfield",
+      "required": false,
+      "title": "Downloaded Files to Keep",
+      "description": "Number of completed media downloads to keep; 0 deletes them after transcription. Original local files are never deleted.",
+      "default": "5"
+    }
+  ],
+  "$schema": "https://www.raycast.com/schemas/extension.json"
+}
