@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Posy MCP Server] - {PR_MERGE_DATE}
+## [Add Posy MCP Server] - 2026-10-17
 
 - Add Posy to the official registry: build and edit a hand-made link-in-bio page, add, update, move and remove link tiles, set the theme and profile, import an existing page and publish. Hosted Streamable HTTP server at https://posy.page/api/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
