@@ -1,0 +1,6 @@
+{"type":"synthetic_fixture","payload":{"synthetic":true,"description":"Invented rollout for stats unit tests; no recorded session content"}}
+{"type":"session_meta","payload":{"creator_account_id":"workspace-synthetic","timestamp":"2026-09-01T12:00:00Z"}}
+{"type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":50,"cached_input_tokens":10,"output_tokens":10,"reasoning_output_tokens":2,"total_tokens":60},"last_token_usage":{"input_tokens":50,"cached_input_tokens":10,"output_tokens":10,"reasoning_output_tokens":2,"total_tokens":60}}}}
+{malformed synthetic line
+{"type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":120,"cached_input_tokens":30,"output_tokens":20,"reasoning_output_tokens":5,"total_tokens":140},"last_token_usage":{"input_tokens":7,"total_tokens":9}}}}
+{"type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":

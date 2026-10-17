@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "labelsByWorkspaceAccountID": {
+    "ws-alice-personal-0003": "Personal",
+    "ws-bob-personal-0001": "Personal",
+    "WS-CAROL-EDU-0002": "Example University Pro (Edu)",
+    "ws-empty-label-0004": "   "
+  }
+}
