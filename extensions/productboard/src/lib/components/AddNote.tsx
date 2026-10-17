@@ -33,19 +33,31 @@ export default function AddNote({ onNoteAdded }: AddNoteProps) {
         const markdownConverter = new showdown.Converter();
         const htmlContent = markdownConverter.makeHtml(values.content);
 
+        const relationships = values.saidBy
+          ? [{ type: "customer", target: { type: "user", email: values.saidBy } }]
+          : undefined;
         const response = await fetch(API_URL + "notes", {
           method: "POST",
           headers: API_HEADERS,
           body: JSON.stringify({
-            title: values.title,
-            content: htmlContent,
-            customer_email: values.saidBy,
-            tags: tags,
+            data: {
+              type: "textNote",
+              fields: {
+                name: values.title,
+                content: htmlContent,
+                tags: tags.map((name) => ({ name: name.trim() })).filter(({ name }) => name),
+              },
+              relationships,
+            },
           }),
         });
         const result = (await response.json()) as POSTResponse;
 
-        await Clipboard.copy(result.links.html);
+        if (!response.ok || !("data" in result)) {
+          throw new Error("errors" in result ? result.errors[0].detail : "Productboard rejected the note");
+        }
+
+        await Clipboard.copy(result.data.links.html);
         toast.style = Toast.Style.Success;
         toast.title = "Note created";
         toast.message = "Copied link to clipboard";
@@ -67,8 +79,7 @@ export default function AddNote({ onNoteAdded }: AddNoteProps) {
       title: FormValidation.Required,
       content: FormValidation.Required,
       saidBy(value) {
-        if (!value) return "The item is required";
-        else if (!EmailValidator.validate(value)) return "The item is invalid";
+        if (value && !EmailValidator.validate(value)) return "The item is invalid";
       },
     },
   });
