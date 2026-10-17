@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-code-usage",
+  "title": "Claude Code Usage",
+  "description": "Monitor your Claude Code rate limits, extra usage, and spending from the menu bar or a detailed dashboard.",
+  "icon": "command-icon.png",
+  "author": "andrea_scamporrino",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "usage",
+      "title": "Menu Bar Usage",
+      "subtitle": "Claude Code",
+      "description": "Display real-time Claude Code rate limits, spending, and usage percentage in the menu bar.",
+      "icon": "command-icon.png",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "refreshInterval",
+          "title": "Refresh Interval",
+          "description": "How often to fetch updated usage data in the background.",
+          "type": "dropdown",
+          "required": false,
+          "default": "2",
+          "data": [
+            {
+              "title": "Every Minute",
+              "value": "1"
+            },
+            {
+              "title": "Every 2 Minutes",
+              "value": "2"
+            },
+            {
+              "title": "Every 5 Minutes",
+              "value": "5"
+            },
+            {
+              "title": "Every 10 Minutes",
+              "value": "10"
+            },
+            {
+              "title": "Every 15 Minutes",
+              "value": "15"
+            },
+            {
+              "title": "Every 30 Minutes",
+              "value": "30"
+            },
+            {
+              "title": "Every Hour",
+              "value": "60"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "usage-details",
+      "title": "View Usage",
+      "subtitle": "Claude Code",
+      "description": "View detailed Claude Code rate limits, spending breakdown, account plan, and reset countdowns.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.11.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "pre-publish": "npm run build && npm run lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "esbuild": "^0.28.2"
+  }
+}
