@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-profiles",
+  "title": "Claude Profiles",
+  "description": "Switch between isolated Claude Desktop accounts without logging out",
+  "icon": "icon.png",
+  "author": "caleb_barzee",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "switch-profile",
+      "title": "Switch Profile",
+      "subtitle": "Claude Profiles",
+      "description": "Open a Claude Desktop profile in its own window",
+      "mode": "view",
+      "keywords": [
+        "claude",
+        "anthropic",
+        "account",
+        "open"
+      ],
+      "arguments": [
+        {
+          "name": "profile",
+          "type": "text",
+          "placeholder": "Profile",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-profile",
+      "title": "Create Profile",
+      "subtitle": "Claude Profiles",
+      "description": "Create an isolated Claude Desktop profile with its own login",
+      "mode": "view",
+      "keywords": [
+        "claude",
+        "anthropic",
+        "account",
+        "new"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.0",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "20.8.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test \"src/**/*.test.ts\""
+  }
+}
