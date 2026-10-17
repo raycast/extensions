@@ -1,4 +1,4 @@
-import { getSelectedText, openExtensionPreferences, showHUD, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, getSelectedText, openExtensionPreferences, showHUD, showToast, Toast } from "@raycast/api";
 import { insertNode } from "./lib/api";
 import { insertNodeOptimistically } from "./lib/cache";
 import { resolveDefaultCaptureDestination } from "./lib/capture-options";
@@ -48,6 +48,7 @@ export default async function Command(props: { arguments: Arguments.QuickCapture
     }
 
     await showHUD(`Added to ${destination.title} · ${typeLabel}`);
+    await closeMainWindow({ clearRootSearch: true });
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,

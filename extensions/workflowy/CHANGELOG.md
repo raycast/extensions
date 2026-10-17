@@ -1,5 +1,9 @@
 # Changelog
 
+## [Clear the Search Bar After a Successful Capture] - {PR_MERGE_DATE}
+
+- Clear the root search bar after Quick Capture and Add to Today succeed, so the previously captured item is no longer pre-filled when reopening Raycast
+
 ## [Windows Support] - 2026-08-03
 
 - Add Windows support with platform-specific keyboard shortcuts
