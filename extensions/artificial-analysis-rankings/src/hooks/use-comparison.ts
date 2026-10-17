@@ -26,23 +26,20 @@ export function useComparison() {
   return {
     ids,
     toggle: async (id: string) => {
-      if (!ids.has(id) && ids.size >= MAX_COMPARED_MODELS) {
+      try {
+        if (await store.toggle(id, MAX_COMPARED_MODELS)) return;
         await showToast({
           style: Toast.Style.Failure,
           title: `Comparison Holds up to ${MAX_COMPARED_MODELS} Models`,
           message: "Remove one before adding another.",
         });
-        return;
-      }
-      try {
-        await store.toggle(id);
       } catch {
         await saveFailed();
       }
     },
     clear: async () => {
       try {
-        for (const id of [...ids]) await store.toggle(id);
+        await store.clear();
       } catch {
         await saveFailed();
       }

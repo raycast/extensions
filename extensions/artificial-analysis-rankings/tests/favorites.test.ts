@@ -53,6 +53,25 @@ describe("favorites persistence", () => {
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
+  it("enforces a limit against the latest set, even for rapid additions", async () => {
+    const store = new FavoritesStore({ read: async () => '["a","b","c"]', write: async () => {} });
+    const results = await Promise.all([store.toggle("d", 4), store.toggle("e", 4), store.toggle("a", 4)]);
+    expect(results).toEqual([true, false, true]);
+    expect([...store.getSnapshot()]).toEqual(["b", "c", "d"]);
+    expect(await store.toggle("e", 4)).toBe(true);
+  });
+
+  it("clears every ID in one write and restores them all if it fails", async () => {
+    const write = vi.fn().mockRejectedValueOnce(new Error("Disk failure")).mockResolvedValue(undefined);
+    const store = new FavoritesStore({ read: async () => '["a","b","c"]', write });
+    await expect(store.clear()).rejects.toThrow("Disk failure");
+    expect([...store.getSnapshot()]).toEqual(["a", "b", "c"]);
+    expect(await store.clear()).toBe(true);
+    expect(write).toHaveBeenCalledTimes(2);
+    expect(write.mock.calls.at(-1)?.[0]).toBe("[]");
+    expect(await store.clear()).toBe(false);
+  });
+
   it("recovers from corrupt storage and removes invalid or duplicate IDs", () => {
     expect([...parseFavorites("bad json")]).toEqual([]);
     expect([...parseFavorites('["one","one",null,42,""]')]).toEqual(["one"]);

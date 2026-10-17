@@ -1,4 +1,4 @@
-import { METRICS, type MetricKey } from "./metrics";
+import { METRIC_ORDER, METRICS, type MetricKey } from "./metrics";
 
 export interface Model {
   id: string;
@@ -53,7 +53,26 @@ export function rankModels(models: Model[], metric: MetricKey = "intelligence"):
   });
 }
 
-export function filterRankings(models: RankedModel[], query: string): RankedModel[] {
+/** The model ranked by `preferred`, or by the first metric it has a measurement for. */
+export function findRanked(models: Model[], id: string, preferred: MetricKey): RankedModel | undefined {
+  for (const metric of [preferred, ...METRIC_ORDER]) {
+    const entry = rankModels(models, metric).find((model) => model.id === id);
+    if (entry) return entry;
+  }
+  return undefined;
+}
+
+/** Every model for pickers: those with an Intelligence Index score by rank, then the rest by name. */
+export function pickerOrder(models: Model[]): (Model & { rank?: number })[] {
+  const ranked = rankModels(models);
+  const rankedIds = new Set(ranked.map((model) => model.id));
+  const rest = models
+    .filter((model) => !rankedIds.has(model.id))
+    .toSorted((a, b) => a.name.localeCompare(b.name, "en") || a.id.localeCompare(b.id, "en"));
+  return [...ranked, ...rest];
+}
+
+export function filterRankings<T extends Model>(models: T[], query: string): T[] {
   const terms = query.toLocaleLowerCase("en").trim().split(/\s+/).filter(Boolean);
   return models.filter((model) => {
     const text = `${model.name} ${model.creator}`.toLocaleLowerCase("en");

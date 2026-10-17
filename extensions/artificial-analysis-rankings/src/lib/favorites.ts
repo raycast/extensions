@@ -45,13 +45,32 @@ export class FavoritesStore {
     });
   }
 
-  toggle(id: string): Promise<void> {
+  /**
+   * Adds or removes an ID. With a limit, an addition that would exceed it is refused and resolves to false.
+   * The limit is checked against the latest saved set, so rapid additions cannot overshoot it.
+   */
+  toggle(id: string, limit = Infinity): Promise<boolean> {
+    return this.update((ids) => {
+      const next = new Set(ids);
+      if (next.has(id)) next.delete(id);
+      else if (next.size >= limit) return undefined;
+      else next.add(id);
+      return next;
+    });
+  }
+
+  /** Removes every ID in one write, so a failure restores the whole set. */
+  clear(): Promise<boolean> {
+    return this.update((ids) => (ids.size ? new Set<string>() : undefined));
+  }
+
+  /** Applies changes one at a time to the latest set; `change` returns undefined to leave it as is. */
+  private update(change: (ids: ReadonlySet<string>) => Set<string> | undefined): Promise<boolean> {
     const operation = this.queue.then(async () => {
       await this.load();
       const previous = this.ids;
-      const next = new Set(previous);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      const next = change(previous);
+      if (!next) return false;
       this.publish(next);
       try {
         await this.storage.write(JSON.stringify([...next]));
@@ -59,8 +78,12 @@ export class FavoritesStore {
         this.publish(previous);
         throw error;
       }
+      return true;
     });
-    this.queue = operation.catch(() => {});
+    this.queue = operation.then(
+      () => undefined,
+      () => undefined,
+    );
     return operation;
   }
 }

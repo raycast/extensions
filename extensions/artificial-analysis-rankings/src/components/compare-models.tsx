@@ -8,7 +8,7 @@ import { configurationLabel, familyName } from "../lib/families";
 import { modelUrl } from "../lib/format";
 import { logoSvg, providerIcon, svgImage } from "../lib/images";
 import { METRIC_ORDER, METRICS } from "../lib/metrics";
-import { filterRankings, rankModels, type Model } from "../lib/models";
+import { filterRankings, pickerOrder, type Model } from "../lib/models";
 import { unavailableState } from "./load-states";
 import { GeneralActions } from "./model-actions";
 import { ModelDetails } from "./model-details";
@@ -36,8 +36,8 @@ export function CompareModels() {
     const byId = new Map((data.snapshot?.models ?? []).map((model) => [model.id, model]));
     return [...data.comparison.ids].flatMap((id) => byId.get(id) ?? []);
   }, [data.snapshot, data.comparison.ids]);
-  const ranked = useMemo(() => rankModels(data.snapshot?.models ?? []), [data.snapshot]);
-  const matches = useMemo(() => (search.trim() ? filterRankings(ranked, search).slice(0, 12) : []), [ranked, search]);
+  const choices = useMemo(() => pickerOrder(data.snapshot?.models ?? []), [data.snapshot]);
+  const matches = useMemo(() => (search.trim() ? filterRankings(choices, search).slice(0, 12) : []), [choices, search]);
   const layout = comparisonLayout(models.length);
   const cards = useMemo(() => {
     const verdicts = METRIC_ORDER.map((metric) => compareMetric(models, metric));
@@ -102,7 +102,7 @@ export function CompareModels() {
             ) : null}
             {full ? null : (
               <Grid.Dropdown.Section title="Add">
-                {ranked
+                {choices
                   .filter((model) => !data.comparison.ids.has(model.id))
                   .map((model) => (
                     <Grid.Dropdown.Item
@@ -225,13 +225,13 @@ function ComparisonActions({ data, model }: { data: RankingsData; model?: Model 
   );
 }
 
-/** Every ranked model; press ↵ to add or remove one, then go back to see the comparison. */
+/** Every model, ranked ones first; press ↵ to add or remove one, then go back to see the comparison. */
 function ModelPicker() {
   const data = useRankingsData();
   const { pop } = useNavigation();
   const [search, setSearch] = useState("");
-  const ranked = useMemo(() => rankModels(data.snapshot?.models ?? []), [data.snapshot]);
-  const rows = useMemo(() => filterRankings(ranked, search), [ranked, search]);
+  const choices = useMemo(() => pickerOrder(data.snapshot?.models ?? []), [data.snapshot]);
+  const rows = useMemo(() => filterRankings(choices, search), [choices, search]);
   const selected = data.comparison.ids.size;
   return (
     <List
@@ -254,11 +254,14 @@ function ModelPicker() {
               key={model.id}
               id={model.id}
               icon={{ value: providerIcon(model.creator), tooltip: model.creator }}
-              title={{ value: `${model.rank}. ${familyName(model.name)}`, tooltip: model.name }}
+              title={{
+                value: `${model.rank ? `${model.rank}. ` : ""}${familyName(model.name)}`,
+                tooltip: model.name,
+              }}
               subtitle={configurationLabel(model.name)}
               accessories={[
                 ...(added ? [{ icon: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "Added" }] : []),
-                { text: METRICS.intelligence.format(model.value) },
+                { text: METRICS.intelligence.format(model.intelligence) },
               ]}
               actions={
                 <ActionPanel>

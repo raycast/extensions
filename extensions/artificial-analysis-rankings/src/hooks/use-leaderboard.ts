@@ -1,91 +1,63 @@
 import { Cache, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { errorMessage, LeaderboardError, type ErrorKind } from "../lib/api";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import { LeaderboardService } from "../lib/cache";
-import { formatRetrievedAt } from "../lib/format";
-import type { LeaderboardSnapshot } from "../lib/models";
+import { describeLoadError, LeaderboardStore, type LeaderboardState } from "../lib/leaderboard-store";
 
-export interface LoadError {
-  kind?: ErrorKind;
-  message: string;
-  retryAt?: number;
+export { describeLoadError, type LoadError } from "../lib/leaderboard-store";
+
+// One store per API key, shared by every screen of the command.
+const stores = new Map<string, LeaderboardStore>();
+
+function storeFor(key: string): LeaderboardStore {
+  let store = stores.get(key);
+  if (!store) {
+    store = new LeaderboardStore(new LeaderboardService(key, new Cache({ namespace: "leaderboard" })));
+    stores.set(key, store);
+  }
+  return store;
 }
 
-/** The error message, plus when a rate-limited refresh may be retried. */
-export function describeLoadError(error: LoadError): string {
-  return `${error.message}${error.retryAt ? ` Retry after ${formatRetrievedAt(error.retryAt)}.` : ""}`;
-}
-
-interface LeaderboardState {
-  snapshot?: LeaderboardSnapshot;
-  error?: LoadError;
-  isLoading: boolean;
-}
+const NO_KEY: LeaderboardState = { isLoading: false };
+const noKeySnapshot = () => NO_KEY;
+const noKeySubscribe = () => () => {};
 
 export function useLeaderboard(apiKey: string | undefined) {
   const key = apiKey?.trim() ?? "";
-  const service = useMemo(
-    () => (key ? new LeaderboardService(key, new Cache({ namespace: "leaderboard" })) : undefined),
-    [key],
+  const store = key ? storeFor(key) : undefined;
+  const state = useSyncExternalStore(
+    store?.subscribe ?? noKeySubscribe,
+    store?.getSnapshot ?? noKeySnapshot,
+    store?.getSnapshot ?? noKeySnapshot,
   );
-  const [state, setState] = useState<LeaderboardState>(() => ({
-    snapshot: service?.readSnapshot(),
-    isLoading: !!service,
-  }));
-  const request = useRef<AbortController | null>(null);
 
   const refresh = useCallback(
     async (force = true) => {
-      if (!service) {
-        setState({ isLoading: false });
-        return;
-      }
-      if (request.current) return;
-      const controller = new AbortController();
-      request.current = controller;
-      setState((previous) => ({ ...previous, isLoading: true, error: undefined }));
-      // Manual refreshes report progress; opening a command refreshes quietly.
+      if (!store) return;
+      // Manual refreshes report progress; opening a screen refreshes quietly.
       const toast = force ? await showToast({ style: Toast.Style.Animated, title: "Refreshing Rankings…" }) : undefined;
-      try {
-        const snapshot = await service.refresh(force, controller.signal);
-        if (!controller.signal.aborted) {
-          setState({ snapshot, isLoading: false });
-          if (toast) {
-            toast.style = Toast.Style.Success;
-            toast.title = "Rankings Updated";
-            toast.message = `${snapshot.models.length} models from Artificial Analysis`;
-          }
-        }
-      } catch (error) {
-        if (!controller.signal.aborted) {
-          const failure: LoadError = {
-            kind: error instanceof LeaderboardError ? error.kind : undefined,
-            message: errorMessage(error),
-            retryAt: error instanceof LeaderboardError ? error.retryAt : undefined,
-          };
-          setState((previous) => ({ ...previous, error: failure, isLoading: false }));
-          if (toast) {
-            toast.style = Toast.Style.Failure;
-            toast.title = "Couldn’t Refresh Rankings";
-            toast.message = describeLoadError(failure);
-          }
-        }
-      } finally {
-        if (request.current === controller) request.current = null;
-        if (controller.signal.aborted) await toast?.hide();
+      const outcome = await store.refresh(force);
+      if (!toast) return;
+      if (outcome.status === "updated") {
+        toast.style = Toast.Style.Success;
+        toast.title = "Rankings Updated";
+        toast.message = `${outcome.snapshot.models.length} models from Artificial Analysis`;
+      } else if (outcome.status === "failed") {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Couldn’t Refresh Rankings";
+        toast.message = describeLoadError(outcome.error);
+      } else {
+        await toast.hide();
       }
     },
-    [service],
+    [store],
   );
 
   useEffect(() => {
-    setState({ snapshot: service?.readSnapshot(), isLoading: !!service });
-    if (service) void refresh(false);
-    return () => {
-      request.current?.abort();
-      request.current = null;
-    };
-  }, [service, refresh]);
+    if (!store) return;
+    const release = store.retain();
+    void store.refresh(false);
+    return release;
+  }, [store]);
 
   return { ...state, needsApiKey: !key, refresh };
 }

@@ -6,7 +6,7 @@ import { detailMetrics, formatRetrievedAt, formatStanding, modelUrl, type Metric
 import { providerIcon } from "../lib/images";
 import { modelDetailsMarkdown } from "../lib/markdown";
 import { METRIC_GROUPS, METRICS, type MetricKey } from "../lib/metrics";
-import { rankModels, type RankedModel } from "../lib/models";
+import { findRanked, type RankedModel } from "../lib/models";
 import { buildStandings, standingsFor, type StandingsTable } from "../lib/standings";
 import { ModelActions } from "./model-actions";
 import { Setup } from "./setup";
@@ -14,8 +14,9 @@ import { Setup } from "./setup";
 export function ModelDetails({ modelId, metric }: { modelId: string; metric: MetricKey }) {
   const data = useRankingsData();
   const standings = useMemo(() => buildStandings(data.snapshot?.models ?? []), [data.snapshot]);
+  // Falls back to a metric the model has, e.g. when a comparison opens a model without the requested score.
   const model = useMemo(
-    () => rankModels(data.snapshot?.models ?? [], metric).find((entry) => entry.id === modelId),
+    () => findRanked(data.snapshot?.models ?? [], modelId, metric),
     [data.snapshot, modelId, metric],
   );
   if (data.needsApiKey) return <Setup />;
@@ -26,14 +27,14 @@ export function ModelDetails({ modelId, metric }: { modelId: string; metric: Met
         markdown={
           data.isLoading
             ? "Loading model…"
-            : `# Model Unavailable\n\nThis configuration has no ${METRICS[metric].title} measurement in the latest data.`
+            : "# Model Unavailable\n\nThis configuration has no measurements in the latest data."
         }
         actions={<ModelActions data={data} />}
       />
     );
   }
   const warning = failureMessage(data);
-  const rows = standingsFor(model, standings, detailMetrics(data.preferences, metric));
+  const rows = standingsFor(model, standings, detailMetrics(data.preferences, model.metric));
   return (
     <Detail
       navigationTitle={familyName(model.name)}
