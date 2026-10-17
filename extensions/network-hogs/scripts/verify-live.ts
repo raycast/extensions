@@ -39,7 +39,8 @@ async function main() {
     });
   });
   const elapsed = Math.round(performance.now() - streamStart);
-  assert.ok(elapsed < 2500, `First live result took ${elapsed} ms`);
+  // The third header confirms the second sample, after two sampling intervals.
+  assert.ok(elapsed < 4500, `First live result took ${elapsed} ms`);
   console.log(`First live result: ${elapsed} ms`);
 
   // A loopback-only transfer checks measured rates without contacting an external host.

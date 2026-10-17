@@ -23,7 +23,7 @@ function csvFields(line: string): string[] {
   return fields;
 }
 
-/** Headers delimit frames. flush() also finishes the last frame after stdout settles. */
+/** Headers and process exit delimit frames; pauses in stdout do not. */
 export class NettopDecoder {
   private buffer = "";
   private columns: { incoming: number; outgoing: number } | null = null;
@@ -34,6 +34,11 @@ export class NettopDecoder {
   push(chunk: string, timestamp = Date.now(), monotonicMs = performance.now()) {
     this.buffer += chunk;
     if (this.buffer.length > 4 * 1024 * 1024) throw new Error("nettop returned an oversized CSV frame.");
+    this.flush(timestamp, monotonicMs);
+  }
+
+  /** Parse complete rows while keeping the current sample open for later rows. */
+  flush(timestamp = Date.now(), monotonicMs = performance.now()) {
     let end: number;
     while ((end = this.buffer.indexOf("\n")) !== -1) {
       // script emits an EOF keystroke when its stdin is /dev/null.
@@ -66,11 +71,6 @@ export class NettopDecoder {
       if (!Number.isSafeInteger(row.pid) || row.pid < 1) throw new Error("nettop returned an invalid PID.");
       this.sample.rows.push(row);
     }
-  }
-
-  flush() {
-    // Never publish half a row if a pipe chunk ended in the middle of it.
-    if (!this.buffer.trim()) this.finishSample();
   }
 
   end() {
@@ -117,7 +117,6 @@ export function startNettop(options: {
   );
   let stopped = false;
   let stderr = "";
-  let flushTimer: NodeJS.Timeout | undefined;
   let watchdog: NodeJS.Timeout | undefined;
   const decoder = new NettopDecoder(options.onSample);
 
@@ -133,7 +132,6 @@ export function startNettop(options: {
   function stop() {
     if (stopped) return;
     stopped = true;
-    clearTimeout(flushTimer);
     clearTimeout(watchdog);
     process.off("exit", killGroup);
     killGroup();
@@ -156,21 +154,11 @@ export function startNettop(options: {
   child.stdout.on("data", (chunk: string) => {
     if (stopped) return;
     armWatchdog();
-    clearTimeout(flushTimer);
     try {
       decoder.push(chunk);
     } catch (error) {
       fail(error instanceof Error ? error : new Error(String(error)));
-      return;
     }
-    // nettop has no end-of-frame marker. Its PTY writes each frame in a burst.
-    flushTimer = setTimeout(() => {
-      try {
-        decoder.flush();
-      } catch (error) {
-        fail(error instanceof Error ? error : new Error(String(error)));
-      }
-    }, 60);
   });
   child.stderr.setEncoding("utf8");
   child.stderr.on("data", (chunk: string) => {

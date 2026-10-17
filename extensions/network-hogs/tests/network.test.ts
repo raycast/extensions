@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { test } from "node:test";
 import { NettopDecoder } from "../src/lib/nettop";
 import { attributeProcess, canQuitApp, outerAppPath, parseProcesses, sameProcess } from "../src/lib/processes";
@@ -29,7 +30,7 @@ function sample(ms: number, rows: Counters[]): RawSample {
 }
 
 test("parses captured macOS 27 CSV across arbitrary chunks and preserves every frame", () => {
-  const csv = readFileSync(new URL("./fixtures/nettop-macos-27.csv", import.meta.url), "utf8");
+  const csv = readFileSync(join(__dirname, "fixtures", "nettop-macos-27.csv"), "utf8");
   const frames: RawSample[] = [];
   const decoder = new NettopDecoder((frame) => frames.push(frame));
   for (let i = 0; i < csv.length; i += 7) decoder.push(csv.slice(i, i + 7));
@@ -43,8 +44,40 @@ test("reads counters by header name, CSV quoting, and the final dot before PID",
   const frames: RawSample[] = [];
   const decoder = new NettopDecoder((frame) => frames.push(frame));
   decoder.push('^D\b\b,bytes_out,ignored,bytes_in,\r\n"My, App.Helper.42",20,foo,120,\r\n', 1000, 0);
-  decoder.flush();
+  decoder.end();
   assert.deepEqual(frames[0].rows, [{ pid: 42, name: "My, App.Helper", bytesIn: 120, bytesOut: 20 }]);
+});
+
+test("keeps accepting complete rows after an idle flush until a header or exit", () => {
+  const frames: RawSample[] = [];
+  const decoder = new NettopDecoder((frame) => frames.push(frame));
+  decoder.push(",bytes_in,bytes_out,\nA.1,10,20,\n", 1000, 0);
+  decoder.flush();
+  decoder.push("B.2,30,40,\n", 1100, 100);
+  decoder.flush();
+  assert.equal(frames.length, 0);
+
+  decoder.push(",bytes_in,bytes_out,\nA.1,50,60,\n", 2000, 1000);
+  assert.deepEqual(frames, [
+    {
+      timestamp: 1000,
+      monotonicMs: 0,
+      rows: [
+        { pid: 1, name: "A", bytesIn: 10, bytesOut: 20 },
+        { pid: 2, name: "B", bytesIn: 30, bytesOut: 40 },
+      ],
+    },
+  ]);
+  decoder.flush();
+  assert.equal(frames.length, 1);
+  decoder.end();
+  decoder.end();
+  assert.equal(frames.length, 2);
+  assert.deepEqual(frames[1], {
+    timestamp: 2000,
+    monotonicMs: 1000,
+    rows: [{ pid: 1, name: "A", bytesIn: 50, bytesOut: 60 }],
+  });
 });
 
 test("does not flush a partial row or publish frames twice", () => {
@@ -55,7 +88,9 @@ test("does not flush a partial row or publish frames twice", () => {
   assert.equal(frames.length, 0);
   decoder.push("0,20,\n");
   decoder.flush();
+  assert.equal(frames.length, 0);
   decoder.push(",bytes_in,bytes_out,\nA.1,30,40,\n");
+  assert.equal(frames.length, 1);
   decoder.end();
   assert.equal(frames.length, 2);
   assert.equal(frames[0].rows[0].bytesIn, 10);
