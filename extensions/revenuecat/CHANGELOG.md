@@ -1,5 +1,11 @@
 # RevenueCat Changelog
 
+## [Charts v3 Current Metrics] - {PR_MERGE_DATE}
+
+- Use today’s Charts v3 values for MRR, active subscriptions, and active trials in the dashboard and menu bar.
+- Refresh the menu bar cache so previous legacy values are not reused with Charts v3 enabled.
+- Round dashboard and menu bar currency values to whole amounts.
+
 ## [Menu Bar Metrics] - 2026-10-12
 
 - Add Menu Bar Metrics on macOS with a text-only value and a metric picker in command settings.
