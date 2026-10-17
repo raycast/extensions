@@ -28,7 +28,12 @@ export const TaskListItem: FC<{task: Task; lists: Checklist[]}> = ({
         icon
           ? {
               source: icon,
-              tintColor: color,
+              tintColor:
+                typeof color === "string"
+                  ? color
+                  : color?.dark === undefined || color?.light === undefined
+                    ? null
+                    : {dark: color.dark, light: color.light},
             }
           : undefined
       }

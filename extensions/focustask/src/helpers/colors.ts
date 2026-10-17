@@ -32,5 +32,5 @@ const colorFromClassName = (name: string | undefined) => {
 
   const group = tailwindColors[color as keyof typeof tailwindColors]
 
-  return group?.[value as keyof typeof group]
+  return group?.[value as keyof typeof group] as string
 }

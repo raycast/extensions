@@ -22,7 +22,19 @@ export const ChecklistListItem: FC<{checklist: Checklist}> = ({checklist}) => {
           // maybe print the task count here?
         ]
       }
-      icon={icon ? {source: icon, tintColor: color} : undefined}
+      icon={
+        icon
+          ? {
+              source: icon,
+              tintColor:
+                typeof color === "string"
+                  ? color
+                  : color?.dark === undefined || color?.light === undefined
+                    ? null
+                    : {dark: color.dark, light: color.light},
+            }
+          : undefined
+      }
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
