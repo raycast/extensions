@@ -1,6 +1,6 @@
 # Granola Changelog
 
-## [2.2.2 - Resume Sign-in After Browser Approval] - {PR_MERGE_DATE}
+## [2.2.2 - Resume Sign-in After Browser Approval] - 2026-10-17
 
 - Fix sign-in not completing when Raycast closes while you approve access in the browser. The pending sign-in is now saved and finishes automatically the next time you open any Granola command.
 
