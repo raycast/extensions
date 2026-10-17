@@ -1,12 +1,15 @@
 import { PaginationOptions, useCachedPromise } from "@raycast/utils";
 import { getProjectWorkItems } from "../api/work-items";
-import { Issue } from "@makeplane/plane-node-sdk";
+import { WorkItemSummary } from "../api/types";
+import { errorShownInline } from "../helpers/errors";
 
-export function useProjectWorkItems(projectId: string) {
-  const { data, error, isLoading, mutate, pagination } = useCachedPromise(
-    (projectId: string) => async (pagination: PaginationOptions<Issue[]>) =>
-      getProjectWorkItems({ projectId, cursor: pagination.cursor }),
-    [projectId],
+export function useProjectWorkItems(project: { id: string; identifier: string; name?: string }) {
+  const { data, error, isLoading, mutate, pagination, revalidate } = useCachedPromise(
+    (projectId: string, identifier: string, name?: string) =>
+      async (pagination: PaginationOptions<WorkItemSummary[]>) =>
+        getProjectWorkItems({ project: { id: projectId, identifier, name }, cursor: pagination.cursor }),
+    [project.id, project.identifier, project.name],
+    { keepPreviousData: true, onError: errorShownInline },
   );
   return {
     workItems: data || [],
@@ -14,5 +17,6 @@ export function useProjectWorkItems(projectId: string) {
     isLoading,
     mutate,
     pagination,
+    revalidate,
   };
 }

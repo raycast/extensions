@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Action, ActionPanel, Icon, launchCommand, LaunchType, List } from "@raycast/api";
 import { useState } from "react";
 
 import { useWorkItems } from "./hooks/useWorkItems";
@@ -6,13 +6,19 @@ import WorkItemListItem from "./components/WorkItemListItem";
 import AuthorizedView from "./components/AuthorizedView";
 import { useProjects } from "./hooks/useProjects";
 import { getProjectIcon } from "./helpers/icons";
+import { searchItemToSummary } from "./api/work-items";
+import ErrorEmptyView from "./components/ErrorEmptyView";
+import ChangeWorkspaceAction from "./components/actions/ChangeWorkspaceAction";
+import useMe from "./hooks/useMe";
 
 function SearchWorkItems() {
   const [query, setQuery] = useState("");
   const [projectId, setProjectId] = useState("");
 
   const { projects } = useProjects({});
-  const { isLoading, workItems, mutate } = useWorkItems(query, projectId);
+  const { isLoading, workItems, error, revalidate } = useWorkItems(query, projectId);
+  const { me } = useMe();
+  const hasQuery = query.trim().length > 0;
 
   const workItemsSectionSubtitle = workItems?.length === 1 ? "1 work item" : `${workItems?.length} work items`;
 
@@ -22,7 +28,7 @@ function SearchWorkItems() {
       isLoading={isLoading}
       onSearchTextChange={setQuery}
       throttle
-      searchBarPlaceholder="Globally search work items across projects"
+      searchBarPlaceholder="Search work items by title or ID (e.g. ENG-123)"
       searchBarAccessory={
         <List.Dropdown tooltip="Select Project" onChange={setProjectId}>
           <List.Dropdown.Item title="All Projects" value="" />
@@ -41,10 +47,37 @@ function SearchWorkItems() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView title={!query ? "Search for work items" : "No work items found"} />
+      {error && hasQuery ? (
+        <ErrorEmptyView error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={hasQuery ? Icon.MagnifyingGlass : Icon.BullsEye}
+          title={hasQuery ? "No work items found" : "Search for work items"}
+          description={
+            hasQuery
+              ? "Plane matches titles, sequence numbers, and project identifiers."
+              : "Type a title or an ID such as ENG-123. Press ↵ to see the work items assigned to you."
+          }
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open My Work Items"
+                icon={Icon.Person}
+                onAction={() => launchCommand({ name: "my-work-items", type: LaunchType.UserInitiated })}
+              />
+              <ChangeWorkspaceAction />
+            </ActionPanel>
+          }
+        />
+      )}
       <List.Section title="Work Items" subtitle={workItemsSectionSubtitle}>
         {workItems?.map((workItem) => (
-          <WorkItemListItem workItem={workItem} key={workItem.id} mutateWorkItemList={mutate} />
+          <WorkItemListItem
+            workItem={searchItemToSummary(workItem)}
+            key={workItem.id}
+            mutateWorkItemList={revalidate}
+            currentUserId={me?.id}
+          />
         ))}
       </List.Section>
     </List>
