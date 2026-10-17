@@ -398,18 +398,20 @@ async function refreshTeam(
   }
 
   await Promise.all(fileRequests);
-  // Only now does the saved folder list match the tree; marking it earlier would let a progress save
-  // pair a fresh tree with a partial folder list if Raycast closes mid-refresh
-  if (fetchedTree && tree.complete) {
-    markFresh(times, treeKey);
-  }
 
-  return {
+  const result: TeamFiles = {
     id: teamId,
     name: tree.name,
     source: tree.source,
     folders: tree.folders.map((folder) => ({ ...folder, files: filesByFolder.get(folder.id) ?? [] })),
   };
+  // Mark the tree fresh and hand over the complete folder list in the same step. Progress saves for other
+  // teams still loading would otherwise pair a fresh tree with this team's partial or old folder list.
+  if (fetchedTree && tree.complete) {
+    markFresh(times, treeKey);
+  }
+  onProgress(result);
+  return result;
 }
 
 // How often partial results are shown and saved while a refresh is running
