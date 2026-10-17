@@ -1,6 +1,6 @@
 # Badges Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-10-17
 
 - Bump `raycast-cross-extension@0.3.0` to fix asset path compatibility issues
 
