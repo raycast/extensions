@@ -31,27 +31,29 @@ export default function Command() {
     onError: () => undefined,
   });
   const { data: applications } = useCachedPromise(getApplications, [], { keepPreviousData: true });
-  const { ignored, isLoading: ignoredLoading, setIgnored } = useIgnoredApps();
+  const { isIgnored, isLoading: ignoredLoading, setIgnored } = useIgnoredApps(data);
 
   const tiles = (data ?? []).map((tile) => ({ tile, ...resolvePaths(tile, applications) }));
-  const badged = tiles.filter(({ tile }) => tile.count > 0 && !ignored.has(tile.name));
-  const ignoredTiles = tiles.filter(({ tile }) => ignored.has(tile.name));
+  const badged = tiles.filter(({ tile }) => tile.count > 0 && !isIgnored(tile));
+  const ignoredTiles = tiles.filter(({ tile }) => isIgnored(tile));
   const total = badged.reduce((sum, { tile }) => sum + tile.count, 0);
 
   async function toggleIgnored(tile: DockTile) {
-    await setIgnored(tile.name, !ignored.has(tile.name));
+    await setIgnored(tile, !isIgnored(tile));
     await refreshMenuBar();
   }
 
   const row = ({ tile, iconPath, openPath }: (typeof tiles)[number]) => {
-    const isIgnored = ignored.has(tile.name);
+    const ignoredTile = isIgnored(tile);
     return (
       <List.Item
         key={`${tile.name}-${tile.ordinal}`}
         title={tile.name}
         icon={iconPath ? { fileIcon: iconPath } : Icon.AppWindow}
         accessories={
-          tile.badge ? [{ tag: { value: tile.badge, color: isIgnored ? Color.SecondaryText : BADGE_RED } }] : undefined
+          tile.badge
+            ? [{ tag: { value: tile.badge, color: ignoredTile ? Color.SecondaryText : BADGE_RED } }]
+            : undefined
         }
         actions={
           <ActionPanel>
@@ -66,8 +68,8 @@ export default function Command() {
               }}
             />
             <Action
-              title={isIgnored ? "Stop Ignoring App" : "Ignore App"}
-              icon={isIgnored ? Icon.Eye : Icon.EyeDisabled}
+              title={ignoredTile ? "Stop Ignoring App" : "Ignore App"}
+              icon={ignoredTile ? Icon.Eye : Icon.EyeDisabled}
               shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
               onAction={() => toggleIgnored(tile)}
             />
