@@ -49,7 +49,7 @@ export function getBudgetProgress(
   if (!Number.isSafeInteger(budget.amount) || budget.amount <= 0) return undefined;
   const value = period.categories[String(budget.category_id)] ?? 0;
   if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
-  // Android expense amounts are signed; an unexpected positive value must not appear as zero spending.
+  // Expense amounts are negative; an unexpected positive value must not appear as zero spending.
   if (value > 0) return undefined;
   const spent = Math.max(0, -value);
   return { spent, percent: (spent / budget.amount) * 100 };

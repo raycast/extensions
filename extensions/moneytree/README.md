@@ -60,7 +60,7 @@ Ask Raycast AI about your Moneytree data using the extension's tools:
 
 AI tools that update transactions, categories, or budgets mutate your
 Moneytree data. Suggestions and budget plans alone do not save limits.
-Budget management and monthly spending use Moneytree endpoints identified from its Android app; these are not a documented public API and may change. Saved limits and spending come from separate responses; if the spending response is unavailable, the saved limit remains visible.
+The extension uses the same endpoints as Moneytree's web and mobile apps. They aren't a documented public API and may change. Saved limits and spending come from separate responses; if the spending response is unavailable, the saved limit remains visible.
 
 ## Setup
 

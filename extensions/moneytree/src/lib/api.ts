@@ -141,7 +141,7 @@ export async function getCategories(): Promise<Category[]> {
 }
 
 /**
- * Read category budgets using the route exposed by the Moneytree Android client.
+ * Read saved category budgets.
  * The response contains budget definitions, not calculated spending progress.
  */
 export type Budget = { category_id: number; amount: number };
@@ -154,7 +154,7 @@ export async function getBudgets(): Promise<Budget[]> {
   return response.budgets;
 }
 
-/** Android's monthly spending presenter returns category totals for each period. */
+/** Monthly spending totals per category for each period. */
 export type SpendingPeriod = {
   start_date: string;
   end_date: string;
@@ -177,7 +177,7 @@ export async function getMonthlySpending(startDate: string, endDate: string): Pr
   return response.category_totals;
 }
 
-/** Android uses this PUT route both to set an existing limit and to create a new one. */
+/** This PUT route both sets an existing limit and creates a new one. */
 export async function putBudget(categoryId: number, amount: number): Promise<void> {
   await apiRequest<unknown>(`/budgets/${categoryId}.json`, {
     method: "PUT",
