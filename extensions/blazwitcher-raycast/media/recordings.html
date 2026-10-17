@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Blazwitcher Raycast 演示素材</title>
+    <style>
+      body {
+        margin: 0;
+        background: #f3f4f6;
+        color: #202530;
+        font: 16px/1.7 system-ui;
+      }
+      main {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 0 24px;
+      }
+      article {
+        padding: 24px;
+        background: white;
+        border-radius: 16px;
+        margin: 24px 0;
+      }
+      video,
+      img {
+        display: block;
+        max-width: 100%;
+        max-height: 700px;
+        margin: auto;
+      }
+      a {
+        color: #355bd8;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Blazwitcher for Raycast</h1>
+      <p>
+        2026-10-16 · master 232b014 · raycast-blaz · 11 个公开页面、5 个 Chrome
+        分组
+      </p>
+      <p>
+        5 组实录：只裁剪真实窗口和静止等待，不改写界面。<a
+          href="recording-manifest.json"
+          >录制与验证记录</a
+        >
+      </p>
+      <article>
+        <h2>拼音与首字母</h2>
+        <p>
+          sxw → sxwlx；shangxiawen → shangxiawen tq。相近中文标题由 3 条收窄到 1
+          条。
+        </p>
+        <video
+          controls
+          loop
+          muted
+          playsinline
+          preload="metadata"
+          poster="pinyin-search.gif"
+        >
+          <source src="pinyin-search.mp4" type="video/mp4" />
+        </video>
+        <p>
+          <a href="pinyin-search.gif">GIF</a> ·
+          <a href="pinyin-search.mp4">MP4</a>
+        </p>
+      </article>
+      <article>
+        <h2>英文项目关键词</h2>
+        <p>
+          skills github.com → skills github.com openai。由 3 条收窄到 2
+          条，openai/skills 排在首位。
+        </p>
+        <video
+          controls
+          loop
+          muted
+          playsinline
+          preload="metadata"
+          poster="english-search.gif"
+        >
+          <source src="english-search.mp4" type="video/mp4" />
+        </video>
+        <p>
+          <a href="english-search.gif">GIF</a> ·
+          <a href="english-search.mp4">MP4</a>
+        </p>
+      </article>
+      <article>
+        <h2>标题、域名与无序分词</h2>
+        <p>
+          kuaisu → kuaisu rm → kuaisu rm claude.com → rm claude.com kuaisu。
+        </p>
+        <video
+          controls
+          loop
+          muted
+          playsinline
+          preload="metadata"
+          poster="domain-search.gif"
+        >
+          <source src="domain-search.mp4" type="video/mp4" />
+        </video>
+        <p>
+          <a href="domain-search.gif">GIF</a> ·
+          <a href="domain-search.mp4">MP4</a>
+        </p>
+      </article>
+      <article>
+        <h2>书签与历史</h2>
+        <p>
+          /b zhishi zl → /h openviking.ai
+          zhibiao。分别找到公开演示书签和历史记录。
+        </p>
+        <video
+          controls
+          loop
+          muted
+          playsinline
+          preload="metadata"
+          poster="source-filters.gif"
+        >
+          <source src="source-filters.mp4" type="video/mp4" />
+        </video>
+        <p>
+          <a href="source-filters.gif">GIF</a> ·
+          <a href="source-filters.mp4">MP4</a>
+        </p>
+      </article>
+      <article>
+        <h2>⌘D 网页预览</h2>
+        <p>
+          展开命中高亮、Tab 来源标签和真实正文，切换结果，再收起。需要官方
+          Raycast Browser Extension。
+        </p>
+        <video
+          controls
+          loop
+          muted
+          playsinline
+          preload="metadata"
+          poster="page-preview.gif"
+        >
+          <source src="page-preview.mp4" type="video/mp4" />
+        </video>
+        <p>
+          <a href="page-preview.gif">GIF</a> ·
+          <a href="page-preview.mp4">MP4</a>
+        </p>
+      </article>
+      <article>
+        <h2>搜索配置</h2>
+        <p>当前设置截图；本轮没有修改设置。</p>
+        <img src="search-settings.png" alt="Blazwitcher preferences" />
+      </article>
+      <p>
+        <a href="../README.zh-CN.md">中文 README</a> ·
+        <a href="../README.md">English README</a>
+      </p>
+    </main>
+  </body>
+</html>
