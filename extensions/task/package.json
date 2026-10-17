@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "task",
+  "title": "Task",
+  "description": "Start a task with a time limit and show the remaining time in the menu bar",
+  "icon": "extension-icon.png",
+  "author": "takutosan",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "task",
+      "title": "task",
+      "subtitle": "Start a timed task",
+      "description": "Start a task with a time limit and show the remaining time in the menu bar.",
+      "mode": "no-view",
+      "keywords": [
+        "task",
+        "timer"
+      ],
+      "arguments": [
+        {
+          "name": "task",
+          "type": "text",
+          "placeholder": "Task",
+          "required": true
+        },
+        {
+          "name": "minutes",
+          "type": "text",
+          "placeholder": "Minutes",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "task-history",
+      "title": "Task History",
+      "keywords": [
+        "task history",
+        "history"
+      ],
+      "description": "Browse locally saved task sessions and their working time.",
+      "mode": "view"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^2.6.2",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
