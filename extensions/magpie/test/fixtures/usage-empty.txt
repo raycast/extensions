@@ -1,0 +1,2 @@
+no calls last 30 days · route an agent through magpie and its usage shows up here
+  /Users/me/.config/magpie/usage.jsonl

@@ -1,0 +1,6 @@
+  Claude Code  —                                                            ~/.claude/settings.json
+  Codex        —  ·  effort medium                                          ~/.codex/config.toml
+  Gemini CLI   auth google  ·  gemini-3.8-flash                             ~/.gemini/settings.json
+  OpenCode     magpie/autolink/gpt-6-sol  ·  small deepseek/deepseek-flash  ~/.config/opencode/opencode.jsonc
+  Pi           deepseek/deepseek-flash  ·  thinking medium                  ~/.pi/agent/settings.json
+  Cursor       —                                                            ~/.cursor/cli-config.json
