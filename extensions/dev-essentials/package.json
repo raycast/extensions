@@ -1,0 +1,144 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dev-essentials",
+  "title": "Dev Essentials",
+  "description": "Generate UUIDs, convert Unix timestamps, and decode, verify, sign or encrypt JWT, JWS and JWE tokens.",
+  "icon": "icon.png",
+  "author": "vinh_bachsy",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "uuid",
+      "title": "Generate UUID",
+      "description": "Generate a UUID (v4 by default, or v7), show it and copy it to the clipboard.",
+      "keywords": [
+        "uuid",
+        "guid",
+        "v4",
+        "v7"
+      ],
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "version",
+          "placeholder": "v4 | v7",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ts",
+      "title": "Convert Timestamp",
+      "description": "Show the current Unix timestamp, or convert a timestamp, ISO date-time or relative duration (e.g. \"10 seconds ago\").",
+      "keywords": [
+        "ts",
+        "unix",
+        "epoch",
+        "date",
+        "time",
+        "iso"
+      ],
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "input",
+          "placeholder": "timestamp | ISO date | 1 day ago",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "jwt",
+      "title": "Decode JWT",
+      "description": "Decode, verify and sign JSON Web Tokens.",
+      "keywords": [
+        "jwt",
+        "token",
+        "decode",
+        "verify",
+        "sign"
+      ],
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "token",
+          "placeholder": "token",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "jws",
+      "title": "Decode JWS",
+      "description": "Decode, verify and sign JSON Web Signatures with arbitrary payloads.",
+      "keywords": [
+        "jws",
+        "signature",
+        "decode",
+        "verify",
+        "sign"
+      ],
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "token",
+          "placeholder": "token",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "jwe",
+      "title": "Decode JWE",
+      "description": "Inspect, decrypt and encrypt JSON Web Encryption tokens.",
+      "keywords": [
+        "jwe",
+        "encryption",
+        "decrypt",
+        "encrypt"
+      ],
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "token",
+          "placeholder": "token",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.6.2",
+    "@raycast/utils": "^2.3.2",
+    "chrono-node": "^2.10.2",
+    "jose": "^6.2.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.0",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  }
+}
