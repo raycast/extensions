@@ -1,6 +1,9 @@
 import { Icon } from "@raycast/api";
+import type { WindowsWorkerConfig } from "./windowsBackend";
 
 export interface Timer {
+  workerId?: string;
+  workerError?: string;
   name: string;
   secondsSet: number;
   timeLeft: number;
@@ -13,6 +16,8 @@ export interface Timer {
 }
 
 export interface RawTimer {
+  workerId?: string;
+  windows?: WindowsWorkerConfig;
   name: string;
   pid: number | undefined; // undefined when timer is paused
   lastPaused: Date | "---"; // "---" when timer is unpaused

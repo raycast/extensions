@@ -2,7 +2,7 @@
 
 [Link to the original repo](https://github.com/ThatNerdSquared/timers-for-raycast)
 
-This is a lightweight extension allowing you to start and stop countdown timers, stopwatches, and alarms. It works directly in Raycast, no external apps or dependencies required. Now available in the Raycast Store!
+This is a lightweight extension allowing you to start and stop countdown timers and stopwatches on macOS and Windows. It works directly in Raycast, with no separately installed timer app required.
 
 <a id="install-extension-button" title="Install Timers Raycast Extension" href="https://www.raycast.com/ThatNerd/timers#install">
         <img height="64" style="height: 64px" src="https://assets.raycast.com/ThatNerd/timers/install_button@2x.png">
@@ -14,9 +14,9 @@ If you enjoy using Timers for Raycast and/or want to support further development
 
 ## Commands
 
-_Note: if you do not receive notifications from the timer completion, you may need to allow Script Editor notifications in your Focus settings._
+_On macOS, allow Script Editor notifications in Focus settings. On Windows, allow Raycast notifications in Windows settings._
 
-- [x] Start Timer (2, 5, 10, 15, 25, 30, 45, 60, and 90 minute variations)
+- [x] Start Timer (1, 2, 5, 10, 15, 25, 30, 45, 60, and 90 minute variations)
 - [x] Start Custom Timer (allows you to set a custom countdown and optionally save it for future use)
 - [x] Manage Timers (view/rename/start/stop running or preset countdown timers)
 - [x] Start Stopwatch
@@ -38,7 +38,7 @@ If you'd like to file an issue, make a feature request, or improve the code in t
 - If you decide to file an issue on the main `raycast/extensions` repo, please ping me (`@ThatNerdSquared`) so that I don't miss your request!
 - Feel free to reach out to me on the Raycast Slack (`@ThatNerd(Squared)`) if I have not responded to you in a timely manner.
 - `src/hooks/useTimers.ts` contains the custom React hook that I use for state management across various commands, and `timerUtils.ts` contains backend functions I use to create the actual timer files.
-- Custom timers are saved in a `customTimers.json` file as an array of [`CustomTimers`](https://github.com/ThatNerdSquared/timers-for-raycast/blob/3ea18a109a357ade47a2f854883e21c1680f497b/src/types.ts#L16), and running timers are stored as text files where the filename is `[date and time started, with illegal characters replaced with __]---[length of timer in seconds]` and the file content is a single line with the name of the timer.
+- Custom timer presets are stored in `customTimers.json`, keyed by UUID. Running `.timer` files store JSON records with name, pause state, selected sound, and execution metadata. New filenames include the start timestamp, duration, and a UUID to prevent simultaneous timers overwriting each other. Legacy timer filenames and text records can still be read.
 - If you submit changes, please update these contributing guidelines as necessary to prevent confusion :)
 
 ## Acknowledgements

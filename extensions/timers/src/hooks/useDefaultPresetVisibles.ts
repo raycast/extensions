@@ -4,6 +4,7 @@ import { readDefaultPresetVisibles, toggleDefaultPresetVisibility } from "../bac
 
 export default function useDefaultPresetVisibles() {
   const defaultPresets: DefaultTimerPreset[] = [
+    { key: "1M", title: "1 Minute Timer", seconds: 60 },
     {
       key: "2M",
       title: "2 Minute Timer",
@@ -23,6 +24,11 @@ export default function useDefaultPresetVisibles() {
       key: "15M",
       title: "15 Minute Timer",
       seconds: 60 * 15,
+    },
+    {
+      key: "25M",
+      title: "25 Minute Timer",
+      seconds: 60 * 25,
     },
     {
       key: "30M",

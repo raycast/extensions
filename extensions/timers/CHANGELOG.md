@@ -1,5 +1,23 @@
 # Timers Changelog
 
+## [Windows support] - 2026-10-17
+
+### ✨ New
+
+- Added native Windows countdown workers, completion notifications, WAV alerts, speech, and sound previews.
+- Added preset editing for names, durations, and sounds; preserved selected sounds when saving running timers as presets.
+
+### 💎 Improvements
+
+- Added copyable error details with `raycast-kit` and a Show Alert Error action.
+- Added stoppable sound previews with isolated Windows playback tokens and cleanup when leaving the command.
+- Marked menu bar preferences and preset configuration as macOS only.
+
+### 🐞 Fixes
+
+- Fixed Windows timer paths and legacy stopwatch migration; added platform-appropriate shortcuts.
+- Added missing 25-minute menu-bar preset.
+
 ## [Security Maintenance] - 2026-05-21
 
 - Updated the extension to address security advisories.
