@@ -1,0 +1,2 @@
+# Empty unified-diff context lines require a space; preserve the upstream patch.
+native/scripts/llama.cpp-no-logits.patch -whitespace
