@@ -1,8 +1,10 @@
 /**
- * Articles carried in a Nuxt app's data payload (`<script id="__NUXT_DATA__">`).
+ * Articles carried in a page's data payload: Nuxt's `<script id="__NUXT_DATA__">` or Next.js's
+ * `<script id="__NEXT_DATA__">`.
  *
- * A Nuxt site ships the data its pages render from as JSON, and some ship the whole article
- * there while the visible page shows only a teaser behind a subscribe wall (bizjournals.com).
+ * These sites ship the data their pages render from as JSON, and some ship the whole article
+ * there while the visible page shows only a teaser behind a subscribe wall (bizjournals.com on
+ * Nuxt, theatlantic.com on Next.js).
  * Readability reads only the visible page, so it sees the teaser and gives up.
  *
  * Sites name their fields differently, so this doesn't look for a known path. It looks for the
@@ -45,7 +47,7 @@ const SHARED_OPENING_LENGTH = 40;
 const OPENING_BLOCKS = 3;
 
 /** The fields a block keeps its markup or text in, in the order they're tried. */
-const BODY_FIELDS = ["html", "text", "body", "content"];
+const BODY_FIELDS = ["html", "innerHtml", "text", "body", "content"];
 
 /** Keys that mark an object as a `<head>` tag (`{ name, content }`), not an article block. */
 const HEAD_TAG_KEYS = ["name", "property", "rel", "hid", "charset", "http-equiv"];
@@ -73,6 +75,62 @@ function resolve(payload: Payload, index: unknown): number {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * The most entries a Next.js payload may flatten to. Each costs a slot and an object, so a few
+ * megabytes of small values would otherwise fill the extension's heap before any list is weighed.
+ */
+const MAX_FLATTENED_ENTRIES = 200_000;
+
+/** A payload and the entries its walk starts from. */
+interface Flat {
+  payload: Payload;
+  roots: number[];
+}
+
+/**
+ * A Next.js payload as the flat array Nuxt's is, so one walk reads both: objects and arrays hold
+ * indexes. A string holding JSON is also parsed, because a data cache (urql, on The Atlantic) keeps
+ * its results as text; the parse becomes a root of its own and the string stays as it was, so a
+ * block whose text is JSON keeps its text. Every string parsed counts against the payload's size
+ * limit. Null when the payload has too many entries.
+ */
+function flatten(root: unknown): Flat | null {
+  const payload: Payload = [null];
+  const roots = [0];
+  let budget = MAX_PAYLOAD_LENGTH;
+  const stack: { value: unknown; at: number }[] = [{ value: root, at: 0 }];
+  const slot = (value: unknown) => {
+    const at = payload.push(null) - 1;
+    stack.push({ value, at });
+    return at;
+  };
+  while (stack.length) {
+    if (payload.length > MAX_FLATTENED_ENTRIES) return null;
+    const { value, at } = stack.pop()!;
+    if (Array.isArray(value)) {
+      const node: number[] = [];
+      for (let i = 0; i < value.length && payload.length <= MAX_FLATTENED_ENTRIES; i++) node.push(slot(value[i]));
+      payload[at] = node;
+    } else if (isRecord(value)) {
+      // No prototype, so a "__proto__" key is a key like any other.
+      const node: Record<string, number> = Object.create(null);
+      for (const key of Object.keys(value)) node[key] = slot(value[key]);
+      payload[at] = node;
+    } else {
+      payload[at] = value;
+      if (typeof value === "string" && /^\s*[[{]/.test(value) && value.length <= budget) {
+        budget -= value.length;
+        try {
+          roots.push(slot(JSON.parse(value)));
+        } catch {
+          // Text that only looks like JSON
+        }
+      }
+    }
+  }
+  return { payload, roots };
 }
 
 /** Removes script, style, iframe, and noscript elements, one pass; an unclosed one runs to the end. */
@@ -148,7 +206,7 @@ interface Candidate {
  * visiting each entry once, so a payload that references itself can't loop. Each string is
  * read once and each list counts a block once, so the walk is linear in the payload's size.
  */
-function findCandidates(payload: Payload): Candidate[] {
+function findCandidates({ payload, roots }: Flat): Candidate[] {
   const candidates: Candidate[] = [];
   const markup = new Map<number, Markup>();
   const readMarkup = (index: number): Markup | null => {
@@ -186,7 +244,7 @@ function findCandidates(payload: Payload): Candidate[] {
   const listed = new Set<string>();
 
   const seen = new Set<number>();
-  const queue: number[] = [0];
+  const queue = [...roots];
   while (queue.length) {
     const index = queue.pop()!;
     if (seen.has(index)) continue;
@@ -273,7 +331,7 @@ export interface PayloadArticle {
   shownLength: number;
 }
 
-export interface NuxtArticles {
+export interface PayloadArticles {
   /**
    * The longest candidate that opens with a paragraph `pageText` shows (the article as the page
    * shows it), built as HTML, or null. A candidate that comes out under 500 characters once
@@ -284,22 +342,30 @@ export interface NuxtArticles {
   readonly candidates: number;
 }
 
+/** The page's payload as a flat array, or null when it has none it can read. */
+function readPayload(document: LinkedomDocument): Flat | null {
+  for (const [id, toPayload] of [
+    ["__NUXT_DATA__", (data: unknown) => (Array.isArray(data) ? { payload: data, roots: [0] } : null)],
+    ["__NEXT_DATA__", flatten],
+  ] as const) {
+    const json = document.querySelector(`script#${id}`)?.textContent ?? "";
+    if (!json || json.length > MAX_PAYLOAD_LENGTH) continue;
+    try {
+      return toPayload(JSON.parse(json));
+    } catch {
+      // Not JSON; try the next
+    }
+  }
+  return null;
+}
+
 /**
- * The article candidates in the page's Nuxt payload, or null when the page has none. Must run
+ * The article candidates in the page's data payload, or null when the page has none. Must run
  * before the page is cleaned, which may drop the script that holds the payload.
  */
-export function findNuxtArticles(document: LinkedomDocument, url: string): NuxtArticles | null {
-  const script = document.querySelector("script#__NUXT_DATA__");
-  const json = script?.textContent ?? "";
-  if (!json || json.length > MAX_PAYLOAD_LENGTH) return null;
-
-  let payload: unknown;
-  try {
-    payload = JSON.parse(json);
-  } catch {
-    return null;
-  }
-  if (!Array.isArray(payload)) return null;
+export function findPayloadArticles(document: LinkedomDocument, url: string): PayloadArticles | null {
+  const payload = readPayload(document);
+  if (!payload) return null;
 
   const candidates = findCandidates(payload);
   if (!candidates.length) return null;

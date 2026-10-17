@@ -6,7 +6,7 @@
 
 - Reader opens Markdown files. A link to a `.md` file used to fail with "Cannot destructure property 'firstElementChild'"; it now shows the article.
 - When a page offers a Markdown version of itself, Reader reads that version instead of the page's HTML, keeping the page's title, author, and image. If the Markdown version is missing or broken, Reader falls back to the page.
-- Reader reads the whole article on sites that show a teaser but ship the full text in the page's data, such as the Business Journals (bizjournals.com) sites.
+- Reader reads the whole article on sites that show a teaser but ship the full text in the page's data, such as the Business Journals (bizjournals.com) sites and The Atlantic.
 
 ### Fixed
 

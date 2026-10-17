@@ -27,6 +27,7 @@ import {
 } from "../scripts/summary-models.mjs";
 import { DEFAULT_SUMMARY_MODEL, getAIConfigForStyle, SUMMARY_MODELS } from "../src/config/ai";
 import { loadArticleFromUrl, loadArticleViaPaywallHopper } from "../src/utils/article-loader";
+import { findPayloadArticles } from "../src/utils/data-payload";
 import {
   BINGBOT_USER_AGENT,
   fetchHtmlAsBingbot,
@@ -35,7 +36,6 @@ import {
 } from "../src/utils/fetcher";
 import { preCleanHtml } from "../src/utils/html-cleaner";
 import { findMarkdownAlternate, isMarkdownResponse, parseMarkdownArticle } from "../src/utils/markdown-source";
-import { findNuxtArticles } from "../src/utils/nuxt-payload";
 import { detectPaywall } from "../src/utils/paywall-detector";
 import { tryBypassPaywall } from "../src/utils/paywall-hopper";
 import { parseArticle } from "../src/utils/readability";
@@ -1459,7 +1459,7 @@ describe("Nuxt data payload", () => {
     const blocks = articleParagraphs.map((p) => payload.push({ type: 1, html: payload.push(p) - 1 }) - 1);
     for (let i = 0; i < 250_000; i++) (payload[0] as number[]).push(payload.push(blocks) - 1);
     const { document } = parseHTML(`<!DOCTYPE html><html><body>${nuxt(payload)}</body></html>`);
-    assert.equal(findNuxtArticles(document, TEASER_URL)?.candidates, 1);
+    assert.equal(findPayloadArticles(document, TEASER_URL)?.candidates, 1);
   });
 
   it("doesn't let a comment list that opens by quoting the article replace it", () => {
@@ -1490,6 +1490,93 @@ describe("Nuxt data payload", () => {
     const result = parseArticle(page(shown, nuxt(payloadWith(paragraphs(renamed)))), TEASER_URL);
     assert.ok(result.success && /SENTINEL-LAST-PARAGRAPH/.test(result.article.textContent), "&eacute; broke the match");
   });
+
+  it("reads the article from a Next.js payload, including results a data cache keeps as JSON text", () => {
+    // The Atlantic: the page shows four paragraphs, and __NEXT_DATA__ holds every paragraph inside a
+    // urql cache entry whose `data` is a JSON string.
+    const blocks = articleParagraphs.map((html) => ({ __typename: "ArticleParagraphContent", innerHtml: html }));
+    const data = JSON.stringify({ article: { content: blocks } });
+    const next = JSON.stringify({ props: { pageProps: { urqlState: { "1781377907": { data } } } } });
+    const shown = articleParagraphs
+      .slice(0, 2)
+      .map((p) => `<p>${p}</p>`)
+      .join("");
+    const html = page(
+      `<article><h1>Example</h1>${shown}</article>`,
+      `<script id="__NEXT_DATA__" type="application/json">${next.replace(/</g, "\\u003c")}</script>`,
+    );
+    const result = parseArticle(html, TEASER_URL);
+    assert.ok(result.success);
+    assert.match(result.article.textContent, /SENTINEL-LAST-PARAGRAPH/, "the last payload paragraph is missing");
+    assert.equal(result.article.recoveredFromPayload, true);
+  });
+
+  const nextPage = (body: string, data: unknown) =>
+    page(
+      body,
+      `<script id="__NEXT_DATA__" type="application/json">${JSON.stringify(data).replace(/</g, "\\u003c")}</script>`,
+    );
+  const nextBlocks = (texts: string[]) => texts.map((text) => ({ text }));
+
+  it("gives up on a Next.js payload with too many entries instead of exhausting the heap", () => {
+    // Two million characters, under the size limit, but a million entries to flatten.
+    const data = {
+      props: { pageProps: { content: nextBlocks(articleParagraphs), unused: new Array(1_000_000).fill(0) } },
+    };
+    const { document } = parseHTML(nextPage(fullArticle, data));
+    assert.equal(findPayloadArticles(document, TEASER_URL), null);
+  });
+
+  it("keeps a block whose text is JSON, like a code sample", () => {
+    const code = '{"criticalExample":"JSON-CODE-SENTINEL","detail":"a code sample in the article"}';
+    const data = {
+      props: { pageProps: { content: [...nextBlocks(articleParagraphs), { type: "code", text: code }] } },
+    };
+    const shown = `<article><p>${articleParagraphs[0]}</p></article>`;
+    const result = parseArticle(nextPage(shown, data), TEASER_URL);
+    assert.ok(result.success && /JSON-CODE-SENTINEL/.test(result.article.textContent), "the code block was dropped");
+  });
+
+  it("doesn't let a comment that quotes a short article's opening replace it", () => {
+    const article = articleParagraphs.slice(0, 3);
+    const shown = `<article><h1>Example</h1>${article.map((p) => `<p>${p}</p>`).join("")}</article>`;
+    const comments = [
+      article[0],
+      `COMMENT-SENTINEL ${"I have opinions about this acquisition and here they are at length. ".repeat(15)}`,
+      `Another comment. ${"More opinions about the deal, the buyer, and the price. ".repeat(15)}`,
+    ];
+    const result = parseArticle(
+      nextPage(shown, { props: { pageProps: { comments: nextBlocks(comments) } } }),
+      TEASER_URL,
+    );
+    assert.ok(result.success);
+    assert.doesNotMatch(result.article.textContent, /COMMENT-SENTINEL/, "comments replaced the article");
+  });
+
+  it("reads blocks under a __proto__ key", () => {
+    const html = nextPage(
+      fullArticle,
+      JSON.parse(`{"__proto__":{"content":${JSON.stringify(nextBlocks(articleParagraphs))}}}`),
+    );
+    const { document } = parseHTML(html);
+    assert.equal(findPayloadArticles(document, TEASER_URL)?.candidates, 1);
+  });
+
+  it(
+    "reads the real Atlantic capture from its Next.js payload",
+    { skip: !hasPrivateFixture("atlantic-teaser-tab.html") && "no private corpus" },
+    () => {
+      const url = "https://www.theatlantic.com/ideas/2026/10/katie-zacharia-press-secretary-trump/689055/";
+      const result = parseArticle(loadPrivateFixture("atlantic-teaser-tab.html"), url);
+      assert.ok(result.success);
+      assert.match(
+        result.article.textContent,
+        /People who aren’t Donald Trump\./,
+        "the article's last line is missing",
+      );
+      assert.equal(result.article.recoveredFromPayload, true);
+    },
+  );
 
   it(
     "reads the real bizjournals capture",

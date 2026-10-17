@@ -60,9 +60,9 @@ Need custom article container selector?
 Need to completely restructure content?
   └─→ Create an extractor (rare)
 
-Page shows a teaser, but the full article is in <script id="__NUXT_DATA__"> as a list of
-html/text blocks?
-  └─→ utils/nuxt-payload.ts already reads it, for any site without a registered extractor.
+Page shows a teaser, but the full article is in <script id="__NUXT_DATA__"> or
+<script id="__NEXT_DATA__"> as a list of html/text blocks?
+  └─→ utils/data-payload.ts already reads it, for any site without a registered extractor.
       A payload holding the article as one string isn't covered.
 ```
 
@@ -104,8 +104,8 @@ src/
 │   └── site-config.ts   # Site-specific selectors (works WITH Readability)
 ├── utils/
 │   ├── html-cleaner.ts  # Pre-cleaning logic using site configs
-│   ├── readability.ts   # Main extraction pipeline (one DOM: metadata → Nuxt payload → clean → parse)
-│   ├── nuxt-payload.ts  # Reads an article from a Nuxt __NUXT_DATA__ payload (teaser pages)
+│   ├── readability.ts   # Main extraction pipeline (one DOM: metadata → data payload → clean → parse)
+│   ├── data-payload.ts  # Reads an article from a Nuxt or Next.js data payload (teaser pages)
 │   ├── markdown-source.ts   # .md URLs and <link rel="alternate" type="text/markdown"> pages
 │   ├── paywall-detector.ts  # Evidence-based paywall scoring (no domain allowlist)
 │   ├── host-api.ts      # Bounded/guarded Raycast host API calls (Windows-safe)

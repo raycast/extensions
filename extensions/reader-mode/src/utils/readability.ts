@@ -2,10 +2,10 @@ import { isProbablyReaderable, Readability } from "@mozilla/readability";
 import { parseHTML } from "linkedom";
 import { getSiteConfig } from "../config/site-config";
 import { getExtractor } from "../extractors";
+import { findPayloadArticles, PayloadArticle } from "./data-payload";
 import { preCleanHtml } from "./html-cleaner";
 import { parseLog } from "./logger";
 import { MetadataExtractor } from "./metadata-extractor";
-import { findNuxtArticles, PayloadArticle } from "./nuxt-payload";
 
 type LinkedomDocument = ReturnType<typeof parseHTML>["document"];
 
@@ -84,11 +84,11 @@ const PAYLOAD_PREFERENCE_RATIO = 1.5;
 
 /**
  * How much of Readability's article a payload article must contain to replace it. A
- * continuation of a teaser contains the teaser, which can be under half of what Readability
- * found when it also kept the subscribe box; a comment quoting the article's opening contains
- * one sentence of it.
+ * continuation of a teaser contains the teaser: all of it on The Atlantic's real capture. A
+ * comment quoting the article's opening contains one paragraph of it, which on a short article
+ * is a third.
  */
-const MIN_CONTINUATION_SHARE = 0.25;
+const MIN_CONTINUATION_SHARE = 0.5;
 
 /** Elements whose subtree is never text the page shows. */
 const UNSHOWN_ELEMENTS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE", "IFRAME"]);
@@ -232,18 +232,18 @@ export function parseArticle(
       }
     }
 
-    // Some pages show a teaser but ship the whole article in their Nuxt data payload. Read it,
+    // Some pages show a teaser but ship the whole article in their Nuxt or Next.js data payload. Read it,
     // and the article text the page shows, before cleaning, which can remove both.
-    const nuxt = findNuxtArticles(document, url);
-    const pageText = nuxt ? shownText(document) : "";
+    const dataPayload = findPayloadArticles(document, url);
+    const pageText = dataPayload ? shownText(document) : "";
     const fromPayload = (payload: PayloadArticle, reason: string) => {
       const recoveredFromPayload = payload.textContent.length > payload.shownLength * PAYLOAD_PREFERENCE_RATIO;
-      parseLog.log("parse:nuxt-payload", {
+      parseLog.log("parse:data-payload", {
         url,
         reason,
         textLength: payload.textContent.length,
         recoveredFromPayload,
-        candidates: nuxt?.candidates,
+        candidates: dataPayload?.candidates,
       });
       return {
         success: true as const,
@@ -265,7 +265,7 @@ export function parseArticle(
       };
     };
     // When Readability can't read the page, the payload article must still share a paragraph with it.
-    const payloadForPage = () => nuxt?.pick(pageText) ?? null;
+    const payloadForPage = () => dataPayload?.pick(pageText) ?? null;
 
     // Strip sidebars, ads, comments, subscription boxes, and other non-article chrome.
     // Mutates the document in place; only Readability sees the result, and site
@@ -347,7 +347,7 @@ export function parseArticle(
     const textContent = article.textContent || "";
     // The payload replaces Readability's article only when it continues it: it contains a real
     // share of what Readability found, and holds well over that much text.
-    const payload = nuxt?.pick(textContent) ?? null;
+    const payload = dataPayload?.pick(textContent) ?? null;
     const shown = textContent.trim().length;
     if (
       payload &&
