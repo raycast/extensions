@@ -122,10 +122,10 @@ function ensureUniqueIds(results: SearchResult[]): SearchResult[] {
   });
 }
 
-export async function getSuggestions(searchTerm: string): Promise<SearchResult[]> {
+export async function getSuggestions(searchTerm: string, signal?: AbortSignal): Promise<SearchResult[]> {
   const searchQuery = encodeURIComponent(searchTerm.trim());
   const endpoint = `${BINGE_CLOCK_BASE_URL}/api/search_new/${searchQuery}`;
-  const response = await fetch(endpoint);
+  const response = await fetch(endpoint, { signal });
 
   if (!response.ok) {
     throw new Error(`Search request failed with status ${response.status}`);
@@ -136,7 +136,7 @@ export async function getSuggestions(searchTerm: string): Promise<SearchResult[]
 
   const mappedResults = results
     .filter((result): result is BingeClockSearchItem & { media_type: SearchResultType } =>
-      isSupportedResultType(result.media_type)
+      isSupportedResultType(result.media_type),
     )
     .map((result, index) => ({
       id: buildResultId(result.media_type, result.urlname, result.title, index),
