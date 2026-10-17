@@ -1,5 +1,13 @@
 # Apple Music Changelog
 
+## [Album Art in Menu Bar] - 2026-10-17
+
+- Added a "Menu Bar Icon" preference to the Menu Bar Player: choose the Apple Music icon (default), the current track's cover art, or no icon. Covers are extracted from Music, resized, and cached per track, and fall back to the Apple Music icon when unavailable.
+- Added a "Hide Track Title" preference. The icon, track title and artist name can each be shown or hidden independently, and the dropdown always shows the full track title and artist.
+- Menu Bar Player preference names are now Title Cased.
+- The Menu Bar Player dropdown now shows the track title and artist statically instead of a scrolling title, which froze at a random point while the menu was open. Long names are shortened with an ellipsis, and the full text is shown on hover.
+- The Menu Bar Player now refreshes right after the Next, Previous, Play, Pause, Play/Pause, and Dislike & Skip commands instead of waiting for its next interval run.
+
 ## [Rewind and Fast Forward Commands] - 2026-10-17
 
 - Added "Rewind" and "Fast Forward" commands that move the current track back or ahead by 15 seconds, stopping at the start or end of the track.
