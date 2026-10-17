@@ -1,0 +1,329 @@
+import { describe, expect, it } from "vitest";
+import {
+  formatRemaining,
+  parseBattery,
+  MAX_CUSTOM_MINUTES,
+  parseBootTime,
+  parseDuration,
+  parseSleepDisabled,
+  shouldAutoDisable,
+  type Battery,
+  type Session,
+} from "../src/lib/parse";
+
+const ON_BATTERY_87 =
+  "Now drawing from 'Battery Power'\n -InternalBattery-0 (id=4653155)\t87%; discharging; 4:12 remaining present: true\n";
+const ON_AC_100 =
+  "Now drawing from 'AC Power'\n -InternalBattery-0 (id=4653155)\t100%; charged; 0:00 remaining present: true\n";
+const DESKTOP = "Now drawing from 'AC Power'\n";
+
+const BATTERY_OK: Battery = { hasBattery: true, percent: 80, onAC: false };
+const BOOT = 1728633600;
+
+describe("parseDuration", () => {
+  it.each<[string, number]>([
+    ["45", 45],
+    ["45m", 45],
+    ["45 min", 45],
+    ["45 mins", 45],
+    ["45 minutes", 45],
+    ["1 minute", 1],
+    ["2h", 120],
+    ["2 hr", 120],
+    ["2 hours", 120],
+    ["1 hour", 60],
+    ["2.5h", 150],
+    ["0.5h", 30],
+    ["1h30", 90],
+    ["1h30m", 90],
+    ["1h 30m", 90],
+    ["1 hour 30 minutes", 90],
+    ["1:30", 90],
+    ["0:05", 5],
+    ["  90  ", 90],
+    ["2H", 120],
+    ["1.4", 1],
+  ])("reads %j as %i minutes", (text, minutes) => {
+    expect(parseDuration(text)).toBe(minutes);
+  });
+
+  it.each(["", "   ", "abc", "h", "m", "1d", "-5", "1:5", "1:60", "30m 1h", "1h1h", "0", "0m", "0.4"])(
+    "rejects %j",
+    (text) => {
+      expect(parseDuration(text)).toBeNull();
+    },
+  );
+
+  it("accepts the maximum and rejects anything longer", () => {
+    expect(parseDuration(String(MAX_CUSTOM_MINUTES))).toBe(MAX_CUSTOM_MINUTES);
+    expect(parseDuration(String(MAX_CUSTOM_MINUTES + 1))).toBeNull();
+    expect(parseDuration("169h")).toBeNull();
+  });
+});
+
+describe("parseSleepDisabled", () => {
+  it("returns true when SleepDisabled is 1", () => {
+    const out = "System-wide power settings:\n SleepDisabled\t\t1\nCurrently in use:\n standby 1\n";
+    expect(parseSleepDisabled(out)).toBe(true);
+  });
+
+  it("returns false when SleepDisabled is 0", () => {
+    const out = "System-wide power settings:\n SleepDisabled\t\t0\nCurrently in use:\n standby 1\n";
+    expect(parseSleepDisabled(out)).toBe(false);
+  });
+
+  it("returns false when the SleepDisabled line is missing", () => {
+    expect(parseSleepDisabled("System-wide power settings:\n sleep 1\n")).toBe(false);
+  });
+
+  it("finds SleepDisabled in full pmset -g output when it is separated by a mix of tabs and spaces", () => {
+    const out = [
+      "System-wide power settings:",
+      " SleepDisabled \t 1",
+      "Currently in use:",
+      " standby              1",
+      " powernap             1",
+      " lowpowermode         0",
+      "",
+    ].join("\n");
+    expect(parseSleepDisabled(out)).toBe(true);
+  });
+
+  it("returns false when SleepDisabled is a value other than 0 or 1", () => {
+    expect(parseSleepDisabled("System-wide power settings:\n SleepDisabled\t\t2\n")).toBe(false);
+  });
+});
+
+describe("parseBattery", () => {
+  it("reads percent and battery power on battery", () => {
+    expect(parseBattery(ON_BATTERY_87)).toEqual({ hasBattery: true, percent: 87, onAC: false });
+  });
+
+  it("reads percent and AC power when plugged in", () => {
+    expect(parseBattery(ON_AC_100)).toEqual({ hasBattery: true, percent: 100, onAC: true });
+  });
+
+  it("reports no battery on a desktop Mac", () => {
+    expect(parseBattery(DESKTOP)).toEqual({ hasBattery: false, percent: null, onAC: true });
+  });
+
+  it("parses a single-digit percentage", () => {
+    const out =
+      "Now drawing from 'Battery Power'\n -InternalBattery-0 (id=4653155)\t5%; discharging; 0:20 remaining present: true\n";
+    expect(parseBattery(out)).toEqual({ hasBattery: true, percent: 5, onAC: false });
+  });
+
+  it("reads a battery that is charging on AC power", () => {
+    const out =
+      "Now drawing from 'AC Power'\n -InternalBattery-0 (id=4653155)\t45%; charging; 1:20 remaining present: true\n";
+    expect(parseBattery(out)).toEqual({ hasBattery: true, percent: 45, onAC: true });
+  });
+
+  it("reads a battery that is finishing its charge on AC power", () => {
+    const out =
+      "Now drawing from 'AC Power'\n -InternalBattery-0 (id=4653155)\t98%; finishing charge; 0:05 remaining present: true\n";
+    expect(parseBattery(out)).toEqual({ hasBattery: true, percent: 98, onAC: true });
+  });
+
+  it("reports no battery for a UPS, even when it shows a percentage", () => {
+    const out = "Now drawing from 'Battery Power'\n -UPS-0 (id=12345)\t35%; discharging; present: true\n";
+    expect(parseBattery(out)).toEqual({ hasBattery: false, percent: null, onAC: false });
+  });
+
+  it("reports no battery and unknown power source for empty output", () => {
+    expect(parseBattery("")).toEqual({ hasBattery: false, percent: null, onAC: false });
+  });
+});
+
+describe("parseBootTime", () => {
+  it("extracts the seconds value from sysctl kern.boottime", () => {
+    expect(parseBootTime("{ sec = 1728633600, usec = 123456 } Fri Oct 11 09:00:00 2024\n")).toBe(1728633600);
+  });
+
+  it("returns null for unexpected output", () => {
+    expect(parseBootTime("not a boot time")).toBeNull();
+  });
+
+  it("returns null for empty output", () => {
+    expect(parseBootTime("")).toBeNull();
+  });
+});
+
+describe("formatRemaining", () => {
+  it("shows <1m for anything under a minute", () => {
+    expect(formatRemaining(0)).toBe("<1m");
+    expect(formatRemaining(59_999)).toBe("<1m");
+  });
+
+  it("shows whole minutes from one minute up", () => {
+    expect(formatRemaining(60_000)).toBe("1m");
+    expect(formatRemaining(42 * 60_000)).toBe("42m");
+  });
+
+  it("shows hours and zero-padded minutes", () => {
+    expect(formatRemaining(65 * 60_000)).toBe("1h 05m");
+    expect(formatRemaining(4 * 60 * 60_000)).toBe("4h 00m");
+  });
+
+  it("shows 1h 00m at exactly 60 minutes", () => {
+    expect(formatRemaining(60 * 60_000)).toBe("1h 00m");
+  });
+
+  it("stays on minutes for 59 minutes and 59 seconds", () => {
+    expect(formatRemaining(59 * 60_000 + 59_000)).toBe("59m");
+  });
+
+  it("shows <1m for a negative duration", () => {
+    expect(formatRemaining(-1)).toBe("<1m");
+    expect(formatRemaining(-60_000)).toBe("<1m");
+  });
+
+  it("shows hours and zero-padded minutes for a multi-hour duration", () => {
+    expect(formatRemaining(4 * 60 * 60_000 + 5 * 60_000)).toBe("4h 05m");
+  });
+});
+
+describe("shouldAutoDisable", () => {
+  const base = {
+    now: BOOT + 1000,
+    currentBootTime: BOOT,
+    battery: BATTERY_OK,
+    thresholdPercent: 20,
+  };
+  const session = (overrides: Partial<Session> = {}): Session => ({
+    startedAt: BOOT,
+    endsAt: null,
+    bootTime: BOOT,
+    ...overrides,
+  });
+
+  describe("restart", () => {
+    it("returns restart when the boot time changed", () => {
+      const result = shouldAutoDisable({
+        ...base,
+        session: session({ bootTime: BOOT }),
+        currentBootTime: BOOT + 3600,
+      });
+      expect(result).toBe("restart");
+    });
+
+    it("does not return restart when the session boot time is null", () => {
+      expect(shouldAutoDisable({ ...base, session: session({ bootTime: null }), currentBootTime: BOOT })).toBeNull();
+    });
+
+    it("does not return restart when the current boot time is null", () => {
+      expect(shouldAutoDisable({ ...base, session: session(), currentBootTime: null })).toBeNull();
+    });
+
+    it("returns restart even when the timer has not ended yet", () => {
+      const result = shouldAutoDisable({
+        ...base,
+        session: session({ bootTime: BOOT, endsAt: base.now + 60 * 60_000 }),
+        currentBootTime: BOOT + 3600,
+      });
+      expect(result).toBe("restart");
+    });
+  });
+
+  describe("timer", () => {
+    it("returns timer when now equals endsAt", () => {
+      const endsAt = base.now;
+      expect(shouldAutoDisable({ ...base, session: session({ endsAt }) })).toBe("timer");
+    });
+
+    it("returns timer when now is past endsAt", () => {
+      expect(shouldAutoDisable({ ...base, session: session({ endsAt: base.now - 1 }) })).toBe("timer");
+    });
+
+    it("does not return timer one millisecond before endsAt", () => {
+      expect(shouldAutoDisable({ ...base, session: session({ endsAt: base.now + 1 }) })).toBeNull();
+    });
+
+    it("returns null for a timer that has not ended, even on low battery plugged into AC power", () => {
+      const battery: Battery = { hasBattery: true, percent: 5, onAC: true };
+      expect(shouldAutoDisable({ ...base, session: session({ endsAt: base.now + 60_000 }), battery })).toBeNull();
+    });
+
+    it("never times out an indefinite session (endsAt null)", () => {
+      const farFuture = base.now + 365 * 24 * 60 * 60_000;
+      expect(shouldAutoDisable({ ...base, now: farFuture, session: session({ endsAt: null }) })).toBeNull();
+    });
+  });
+
+  describe("battery", () => {
+    const onBattery = (percent: number): Battery => ({ hasBattery: true, percent, onAC: false });
+
+    it("returns battery when the charge is below the threshold", () => {
+      expect(shouldAutoDisable({ ...base, session: session(), battery: onBattery(19) })).toBe("battery");
+    });
+
+    it("returns battery when the charge equals the threshold", () => {
+      expect(shouldAutoDisable({ ...base, session: session(), battery: onBattery(20) })).toBe("battery");
+    });
+
+    it("does not return battery when the charge is above the threshold", () => {
+      expect(shouldAutoDisable({ ...base, session: session(), battery: onBattery(21) })).toBeNull();
+    });
+
+    it("does not return battery when plugged into AC power", () => {
+      const battery: Battery = { hasBattery: true, percent: 10, onAC: true };
+      expect(shouldAutoDisable({ ...base, session: session(), battery })).toBeNull();
+    });
+
+    it("does not return battery when the cutoff is 0 (Off)", () => {
+      expect(shouldAutoDisable({ ...base, session: session(), battery: onBattery(5), thresholdPercent: 0 })).toBeNull();
+    });
+
+    it("does not return battery at 0% when the cutoff is 0 (Off)", () => {
+      expect(shouldAutoDisable({ ...base, session: session(), battery: onBattery(0), thresholdPercent: 0 })).toBeNull();
+    });
+
+    it("does not return battery on a desktop Mac without a battery", () => {
+      const battery: Battery = { hasBattery: false, percent: null, onAC: true };
+      expect(shouldAutoDisable({ ...base, session: session(), battery })).toBeNull();
+    });
+
+    it("never returns battery when hasBattery is false, even if a percentage is present", () => {
+      const battery: Battery = { hasBattery: false, percent: 10, onAC: false };
+      expect(shouldAutoDisable({ ...base, session: session(), battery })).toBeNull();
+    });
+
+    it("does not return battery when the percentage is unknown", () => {
+      const battery: Battery = { hasBattery: true, percent: null, onAC: false };
+      expect(shouldAutoDisable({ ...base, session: session(), battery })).toBeNull();
+    });
+
+    it("returns null when there is no session, even on low battery", () => {
+      // Auto-off only applies to sessions the extension started.
+      expect(shouldAutoDisable({ ...base, session: null, battery: onBattery(10) })).toBeNull();
+    });
+  });
+
+  describe("precedence", () => {
+    it("prefers restart over timer and battery", () => {
+      const result = shouldAutoDisable({
+        now: BOOT + 10_000,
+        session: session({ endsAt: BOOT, bootTime: BOOT }),
+        currentBootTime: BOOT + 1,
+        battery: { hasBattery: true, percent: 1, onAC: false },
+        thresholdPercent: 20,
+      });
+      expect(result).toBe("restart");
+    });
+
+    it("prefers timer over battery", () => {
+      const result = shouldAutoDisable({
+        now: BOOT + 10_000,
+        session: session({ endsAt: BOOT + 5_000 }),
+        currentBootTime: BOOT,
+        battery: { hasBattery: true, percent: 1, onAC: false },
+        thresholdPercent: 20,
+      });
+      expect(result).toBe("timer");
+    });
+
+    it("returns null when no rule applies", () => {
+      expect(shouldAutoDisable({ ...base, session: session({ endsAt: base.now + 60_000 }) })).toBeNull();
+    });
+  });
+});
