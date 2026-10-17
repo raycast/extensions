@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { CommandLinkParams, CustomTimer } from "../backend/types";
 import { formatTime } from "../backend/formatUtils";
 import useTimers from "../hooks/useTimers";
-import RenameAction from "./RenameAction";
+import EditPresetView from "./EditPresetView";
 
 const createPresetLink = (ctID: string): string => {
   const payload: CommandLinkParams = { timerID: ctID };
@@ -24,19 +24,17 @@ export default function CustomTimerListItem(props: { customTimer: CustomTimer; i
             icon={Icon.Hourglass}
             onAction={() => handleStartCT({ customTimer: props.customTimer })}
           />
-          <RenameAction
-            renameLabel="Timer"
-            currentName={props.customTimer.name}
-            originalFile={"customTimer"}
-            ctID={props.id}
+          <Action.Push
+            title="Edit Preset"
+            icon={Icon.Pencil}
+            shortcut={Keyboard.Shortcut.Common.Edit}
+            target={<EditPresetView id={props.id} preset={props.customTimer} />}
           />
           <Action
             title="Delete Custom Timer"
             icon={Icon.Trash}
-            shortcut={{
-              modifiers: ["ctrl"],
-              key: "x",
-            }}
+            style={Action.Style.Destructive}
+            shortcut={Keyboard.Shortcut.Common.Remove}
             onAction={() => handleDeleteCT(props.id)}
           />
           <Action.CreateQuicklink

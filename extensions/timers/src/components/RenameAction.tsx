@@ -1,4 +1,4 @@
-import { Action, Icon, useNavigation } from "@raycast/api";
+import { Action, Icon, Keyboard, useNavigation } from "@raycast/api";
 import { RenameView, RenameViewProps } from "./RenameView";
 
 interface RenameActionProps extends RenameViewProps {
@@ -15,6 +15,7 @@ export default function RenameAction(props: RenameActionProps) {
       onAction={() =>
         push(<RenameView currentName={props.currentName} originalFile={props.originalFile} ctID={props.ctID} />)
       }
+      shortcut={Keyboard.Shortcut.Common.Edit}
     />
   );
 }
