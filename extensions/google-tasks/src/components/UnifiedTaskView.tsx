@@ -320,15 +320,6 @@ export default function UnifiedTaskView() {
             target={<EditTaskForm listId={task.listId} task={task} onEdit={handleEdit} />}
           />
         ) : null}
-        {assignment?.linkToTask ? (
-          <Action.OpenInBrowser
-            title={`Open in ${assignment.source}`}
-            icon={assignment.icon}
-            url={assignment.linkToTask}
-            shortcut={shortcut("o")}
-          />
-        ) : null}
-        {task?.webViewLink ? <Action.OpenInBrowser title="Open in Google Tasks" url={task.webViewLink} /> : null}
         <Action
           title={isShowingDetails ? "Hide Details" : "Show Details"}
           icon={isShowingDetails ? Icon.EyeDisabled : Icon.Eye}
@@ -373,6 +364,15 @@ export default function UnifiedTaskView() {
           }
         />
         <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={shortcut("r")} onAction={() => void refresh()} />
+        {assignment?.linkToTask ? (
+          <Action.OpenInBrowser
+            title={`Open in ${assignment.source}`}
+            icon={assignment.icon}
+            url={assignment.linkToTask}
+            shortcut={shortcut("o")}
+          />
+        ) : null}
+        {task?.webViewLink ? <Action.OpenInBrowser title="Open in Google Tasks" url={task.webViewLink} /> : null}
       </ActionPanel>
     );
   };
