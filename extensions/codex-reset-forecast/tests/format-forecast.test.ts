@@ -55,24 +55,10 @@ describe("forecast presentation", () => {
       expected,
     );
   });
-  it("flags stale source status and incomplete collection", () => {
+  it("distinguishes overdue published data from a healthy forecast", () => {
     expect(sourceWarning(response, now)).toBeUndefined();
-    expect(sourceWarning({ ...response, forecastStatus: "stale" }, now)).toMatch(/current forecast/);
-    expect(sourceWarning({ ...response, ingestion: { ...response.ingestion!, accountsSucceeded: 2 } }, now)).toMatch(
-      /did not respond/,
-    );
-  });
-  it("keeps an unchanged current forecast healthy until its scheduled reassessment", () => {
-    const current = {
-      ...response,
-      updatedAt: "2026-09-09T01:00:00Z",
-      forecast: { ...response.forecast!, nextReassessmentAt: "2026-09-09T19:00:00Z" },
-    };
-    expect(sourceWarning(current, now)).toBeUndefined();
-    expect(
-      sourceWarning({ ...current, forecast: { ...current.forecast, nextReassessmentAt: undefined } }, now),
-    ).toBeUndefined();
-    const overdue = new Date("2026-09-09T19:01:00Z");
-    expect(sourceWarning(current, overdue)).toMatch(/scheduled reassessment/);
+    expect(sourceWarning({ ...response, forecast: null }, now)).toMatch(/not published/);
+    expect(sourceWarning({ ...response, publishedExpiresAt: "2026-09-09T06:00:00Z" }, now)).toMatch(/overdue/);
+    expect(sourceWarning({ ...response, publishedExpiresAt: "2026-09-09T07:01:00Z" }, now)).toBeUndefined();
   });
 });

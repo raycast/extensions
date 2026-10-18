@@ -1,84 +1,67 @@
 # Codex Reset Forecast
 
-See how likely a shared Codex quota reset is within **24 hours** and **48 hours**,
-then browse the evidence behind previous resets. Powered by
-[Codex Reset Monitor](https://codexreset.org/).
+See the estimated chance of a shared Codex quota reset within **24 hours** and
+**48 hours**, model confidence, and the latest reset notice.
+Data: [codex-reset.com](https://codex-reset.com/).
 
 ## In Raycast
 
-**Check Reset Forecast** opens a split view with the current outlook, the latest
-confirmed reset, and a searchable history. Select a record to read its original
-post, reset details, scope, and source link without leaving the list. Filter the
-history to confirmed resets, announcements, or banked resets. Dates and times
-use your system time zone.
+**Check Reset Forecast** opens the current outlook and searchable reset history.
+The outlook shows both probabilities, the provider's confidence, the last
+global reset, and whether an official watch is active. **Last Global Reset** combines
+the elapsed time with the provider's notice when both refer to the same reset.
+Watches and notices about a different event appear separately. Notice text and
+source information come from codex-reset.com.
 
-The extension preserves the site's ledger records. Multiple source records can
-refer to the same reset. Banked resets and future announcements do not advance
-the last-confirmed-reset clock.
+Select a history record to read its summary, record source, and original source.
+The timeline follows the website's **Reset**, **Note**, and **Banked** categories,
+with banked statuses such as **Announced**, **Arriving**, **Available**, or **Update**.
+Filter to resets, notes, or banked grants and updates.
+Banked grants do not advance the last-reset clock. Separate source records are
+preserved even when they describe the same reset. The main timeline uses your
+system time zone; the calendar and its records use the source's UTC dates.
+Forecasts are experimental estimates, not guarantees or your personal quota timer.
 
-**View Reset Calendar** shows the current and previous month side by side.
-The current month is selected when the command opens.
-Green circles mark days with a confirmed reset or compensation, and future
-dates are dimmed. Each day counts once even when it has multiple source records.
-Select a month and press Return to read its records.
-The calendar starts on Monday and uses your system time zone. You can also open
-it from the forecast's Actions menu or the menu bar.
+**View Reset Calendar** displays the current and previous month, with the current
+month selected initially. Green circles mark reset days; orange squares mark
+banked updates. A day with both shows both markers. Each category counts a day
+once, even when it has several source records; banked updates do not add to the
+reset-day count. Future dates are dimmed. Press Return on a month to browse its
+reset and banked records. The calendar starts on Monday and follows the UTC
+dates published by codex-reset.com.
 
-**Show Reset Forecast in Menu Bar** displays the menu bar indicator. Its command
-settings contain all menu bar preferences. Choose **Menu Bar Settings…** in its
-dropdown to display one of:
+**Show Reset Forecast in Menu Bar** displays one of:
 
-- **Reset Likelihood (24 Hours)** — for example, `24% · 24h`.
-- **Reset Likelihood (48 Hours)** — for example, `43% · 48h`.
-- **Time Since Last Reset** — for example, `1d`.
+- **Reset Likelihood (24 Hours)** — for example, `21% · 24h`.
+- **Reset Likelihood (48 Hours)** — for example, `37% · 48h`.
+- **Time Since Last Reset** — for example, `5h`.
 
-The dropdown always includes both forecast horizons, the last reset's exact
-time, recent reset records, and a link to the full history. Select either
-forecast horizon to open the outlook. Use **Refresh Now**
-or **⌘R** to update. Raycast can also refresh the menu bar approximately every
-30 minutes when its native background refresh is enabled.
-Choose **Hide from Menu Bar** in the dropdown to hide the indicator; background
-updates keep it hidden until you run **Show Reset Forecast in Menu Bar** again.
+Use **Menu Bar Settings…** in its dropdown to choose the display. The dropdown
+includes both probabilities, confidence, watch status, recent verified resets,
+and links to the outlook, calendar, and data source.
+**Hide from Menu Bar** keeps it hidden until you run the command again.
+
+Use **Refresh Now** or **⌘R** to refresh. Refreshes within one minute reuse saved
+data to respect the provider's request limit; rate-limit responses can extend
+that wait. Raycast can also refresh approximately every 30 minutes when its
+native background refresh is enabled.
 
 ## Data and Privacy
 
-Forecasts, explanations, and reset records come from the public structured
-snapshot used by codexreset.org. Probabilities are the source's estimates; the
-extension does not calculate predictions or track your personal quota.
+The extension reads the public [`/api/forecast`](https://codex-reset.com/api/forecast)
+and [`/api/timeline`](https://codex-reset.com/api/timeline) endpoints. It sends an
+identifying User-Agent naming this project and its public GitHub repository,
+as required by the provider's [API terms](https://codex-reset.com/developers).
+It does not send account credentials, personal usage, or analytics.
 
-The last valid snapshot is saved locally. If a refresh fails, the extension
-keeps the existing data and its original **Last Checked** time, and shows a
-failure toast. The menu bar icon stays the same. An empty error state appears
-only when no saved data is available.
-Source status messages still explain when a forecast is awaiting reassessment
-or some monitored sources did not respond. An unchanged forecast stays current
-until the source says otherwise or its scheduled reassessment is due.
-No account setup, analytics, or personal data collection is included.
+The last complete, validated forecast and timeline are saved locally. A failed
+refresh retains those data and their original **Last Checked** time and shows a
+failure toast. With no saved data, an error view offers refresh and the source
+website. The provider's publication expiry is used to flag overdue data.
+Snapshots from the previous data provider are not reused under the new source.
 
-Unofficial and not affiliated with OpenAI or Codex Reset Monitor.
-The extension uses the [Codex Reset Monitor icon](https://codexreset.org/codex-reset-icon.png?v=3)
-with its exterior white corners made transparent.
+Data: [codex-reset.com](https://codex-reset.com/). Source links and attribution
+are included in the views and copied summaries. The extension displays the
+provider's classifications and probabilities; it does not compute predictions.
 
-## Development
-
-Use Node.js 24 and npm:
-
-```bash
-nvm use
-npm ci
-npm run dev
-```
-
-Validate with:
-
-```bash
-npm test
-npm run typecheck
-npm run lint
-npm run build
-npm run test:contract
-```
-
-The live contract test requires internet access. It checks the public server
-function used by the source website; this endpoint is not a versioned API and
-may change when the website is deployed.
+Unofficial and not affiliated with OpenAI or codex-reset.com.

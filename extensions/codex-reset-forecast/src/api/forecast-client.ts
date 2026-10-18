@@ -1,20 +1,23 @@
-import { parseSnapshotPayload, type ForecastResponse } from "./forecast-schema";
+import { parseSourceResponses, timestampSchema, type ForecastResponse } from "./forecast-schema";
 
-// Public GET function used by the codexreset.org homepage. See .github/DESIGN.md
-// for the observed wire contract and the live contract check when upstream changes.
-export const FORECAST_URL =
-  "https://codexreset.org/_serverFn/265792b9fbf2f0d07fea84fe2c15432450c2afaf3552f5e75c04dc9540f99dbf";
+export const WEBSITE_URL = "https://codex-reset.com/";
+export const FORECAST_URL = `${WEBSITE_URL}api/forecast`;
+export const TIMELINE_URL = `${WEBSITE_URL}api/timeline`;
+export const SOURCE_CREDIT = "Data: codex-reset.com";
+export const USER_AGENT = "codex-reset-forecast/1.0 (+https://github.com/Astatine-213-Tian/raycast)";
+const MIN_REFRESH_MILLISECONDS = 60_000;
 
 export type ForecastSnapshot = {
   response: ForecastResponse;
   lastSuccessfulRequestAt: string;
 };
-
+export type RefreshState = { nextRequestAt: string; error?: string };
 export interface ForecastStore {
   read(): ForecastSnapshot | undefined;
   write(snapshot: ForecastSnapshot): void;
+  readRefreshState(): RefreshState | undefined;
+  writeRefreshState(state: RefreshState): void;
 }
-
 type FetchForecastOptions = {
   store: ForecastStore;
   fetchImpl?: typeof fetch;
@@ -22,49 +25,96 @@ type FetchForecastOptions = {
   timeoutMilliseconds?: number;
   onCacheFallback?: (error: Error) => void | Promise<void>;
 };
-
-function snapshotTime(response: ForecastResponse): number {
-  return Math.max(Date.parse(response.updatedAt), Date.parse(response.ingestion?.completedAt ?? response.updatedAt));
+function retryTime(value: string | null, now: number): number {
+  if (!value) return now + MIN_REFRESH_MILLISECONDS;
+  const time = /^\d+$/.test(value) ? now + Number(value) * 1000 : Date.parse(value);
+  return Number.isFinite(time) ? Math.max(time, now + MIN_REFRESH_MILLISECONDS) : now + MIN_REFRESH_MILLISECONDS;
 }
 
-export async function fetchForecast({
+const inFlight = new WeakMap<ForecastStore, Promise<ForecastSnapshot>>();
+
+export function fetchForecast(options: FetchForecastOptions): Promise<ForecastSnapshot> {
+  const pending = inFlight.get(options.store);
+  if (pending) return pending;
+  const request = refreshForecast(options).finally(() => inFlight.delete(options.store));
+  inFlight.set(options.store, request);
+  return request;
+}
+
+async function refreshForecast({
   store,
   fetchImpl = fetch,
   now = () => new Date(),
   timeoutMilliseconds = 15_000,
   onCacheFallback,
 }: FetchForecastOptions): Promise<ForecastSnapshot> {
+  const startedAt = now().getTime();
+  const refresh = store.readRefreshState();
+  if (refresh && Date.parse(refresh.nextRequestAt) > startedAt) {
+    const cached = store.read();
+    if (cached) {
+      if (refresh.error) await onCacheFallback?.(new Error(refresh.error));
+      return cached;
+    }
+    throw new Error(refresh.error ?? "The source allows one refresh per minute. Try again shortly.");
+  }
+  let nextRequestAt = new Date(startedAt + MIN_REFRESH_MILLISECONDS).toISOString();
+  store.writeRefreshState({ nextRequestAt });
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMilliseconds);
-
   try {
-    const response = await fetchImpl(FORECAST_URL, {
-      headers: { Accept: "application/json", "x-tsr-serverFn": "true" },
-      signal: controller.signal,
-    });
-    if (!response.ok) throw new Error(`Codex Reset Monitor returned HTTP ${response.status}.`);
-
+    const results = await Promise.allSettled(
+      [FORECAST_URL, TIMELINE_URL].map((url) =>
+        fetchImpl(url, {
+          headers: { Accept: "application/json", "User-Agent": USER_AGENT },
+          signal: controller.signal,
+        }),
+      ),
+    );
+    const responses = results.filter((result) => result.status === "fulfilled").map((result) => result.value);
+    const limited = responses.filter((response) => response.status === 429);
+    if (limited.length) {
+      nextRequestAt = new Date(
+        Math.max(...limited.map((response) => retryTime(response.headers.get("Retry-After"), now().getTime()))),
+      ).toISOString();
+      throw new Error(
+        `codex-reset.com is rate limiting requests. Retry after ${new Date(nextRequestAt).toLocaleTimeString()}.`,
+      );
+    }
+    const rejected = results.find((result) => result.status === "rejected");
+    if (rejected) throw rejected.reason;
+    const failed = responses.find((response) => !response.ok);
+    if (failed) throw new Error(`codex-reset.com returned HTTP ${failed.status}.`);
     let parsed: ForecastResponse;
     try {
-      parsed = parseSnapshotPayload(await response.json());
+      const [forecast, timeline] = await Promise.all(responses.map((response) => response.json()));
+      parsed = parseSourceResponses(forecast, timeline);
     } catch {
-      throw new Error("Codex Reset Monitor returned an unreadable snapshot. Try refreshing later.");
+      throw new Error("codex-reset.com returned unreadable forecast or timeline data. Try refreshing later.");
     }
-
-    // A slower request must not replace a newer snapshot from the other command.
+    const expiries = responses
+      .map((response) => timestampSchema.safeParse(response.headers.get("x-published-expires-at")))
+      .filter((result) => result.success)
+      .map((result) => Date.parse(result.data!));
+    if (expiries.length) parsed.publishedExpiresAt = new Date(Math.min(...expiries)).toISOString();
+    // Never replace either half of the shared snapshot with an older published copy.
     const current = store.read();
-    if (current && snapshotTime(current.response) > snapshotTime(parsed)) return current;
-
-    const snapshot: ForecastSnapshot = { response: parsed, lastSuccessfulRequestAt: now().toISOString() };
+    if (
+      current &&
+      (Date.parse(current.response.updatedAt) > Date.parse(parsed.updatedAt) ||
+        Date.parse(current.response.timelineUpdatedAt) > Date.parse(parsed.timelineUpdatedAt))
+    )
+      return current;
+    const snapshot = { response: parsed, lastSuccessfulRequestAt: now().toISOString() };
     store.write(snapshot);
     return snapshot;
   } catch (error) {
-    // A failed refresh does not invalidate a successful snapshot or its check time.
     const warning = controller.signal.aborted
       ? "The request timed out. Try refreshing."
       : error instanceof Error
         ? error.message
-        : "The reset monitor could not be reached.";
+        : "codex-reset.com could not be reached.";
+    store.writeRefreshState({ nextRequestAt, error: warning });
     const cached = store.read();
     if (cached) {
       await onCacheFallback?.(new Error(warning));
@@ -73,5 +123,6 @@ export async function fetchForecast({
     throw new Error(warning);
   } finally {
     clearTimeout(timeout);
+    controller.abort();
   }
 }
