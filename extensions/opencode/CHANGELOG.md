@@ -1,6 +1,6 @@
 # OpenCode Changelog
 
-## [Client Header] - {PR_MERGE_DATE}
+## [Client Header] - 2026-10-18
 
 - Identify Raycast requests in the OpenCode Console
 
