@@ -75,7 +75,7 @@ function parseID(id: string) {
 function languageModel(source: Source, format: Format, modelID: string, apiKey: string, session: string) {
   const baseURL = source === "go" ? `${INFERENCE_URL}/go` : INFERENCE_URL;
   // Go rejects requests without a session, which it uses to keep a conversation on one route.
-  const headers = source === "go" ? { "x-opencode-session": session } : undefined;
+  const headers = { "x-opencode-client": "raycast", ...(source === "go" ? { "x-opencode-session": session } : {}) };
   switch (format) {
     case "anthropic":
       return createAnthropic({ baseURL: `${baseURL}/anthropic/v1`, apiKey, headers })(modelID);
