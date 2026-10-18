@@ -4,32 +4,14 @@ import { getCurrentLocalMonth } from "../utils/date-formatter";
 
 export const useMonthlyUsage = (): {
   data: MonthlyUsageData | undefined;
+  previousMonthData: MonthlyUsageData | undefined;
   isLoading: boolean;
   error: Error | undefined;
   revalidate: () => void;
 } => {
   const { data: rawData, isLoading, error, revalidate } = useCCUsageMonthlyCli();
-
-  const data: MonthlyUsageData | undefined = (() => {
-    if (!rawData || !rawData.monthly || rawData.monthly.length === 0) {
-      return undefined;
-    }
-
-    const currentMonth = getCurrentLocalMonth();
-    const currentMonthEntry = rawData.monthly.find((entry) => entry.month === currentMonth);
-
-    if (currentMonthEntry) {
-      return currentMonthEntry;
-    }
-
-    const latest = rawData.monthly[rawData.monthly.length - 1];
-    return latest;
-  })();
-
-  return {
-    data,
-    isLoading,
-    error,
-    revalidate,
-  };
+  const months = rawData?.monthly ?? [];
+  const data = months.find((entry) => entry.month === getCurrentLocalMonth());
+  const previousMonthData = data ? months.filter((entry) => entry.month < data.month).at(-1) : undefined;
+  return { data, previousMonthData, isLoading, error, revalidate };
 };
