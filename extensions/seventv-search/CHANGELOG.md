@@ -1,5 +1,14 @@
 # Changelog
 
+## [Providers and Search Fixes] - {PR_MERGE_DATE}
+
+- Add BetterTTV and FrankerFaceZ to Search Emotes.
+- Use native GIF files for animated emotes and PNG for static emotes when available.
+- Fix 7TV Popular, Recently Created, and Trending with its current API.
+- Add pagination, matching-result counts where available, and an animated-only filter.
+- Keep existing 7TV favorites and history compatible.
+- Hide 7TV alphabetical sorting while its API returns an error.
+
 ## [1.0.0] - 2026-04-25
 
 ### Added

@@ -3,7 +3,7 @@
   "name": "seventv-search",
   "version": "1.0.0",
   "title": "7TV Emotes Search",
-  "description": "Search, preview, copy, and paste 7TV emotes from Raycast.",
+  "description": "Search, preview, copy, and paste emotes from 7TV, BetterTTV, and FrankerFaceZ.",
   "icon": "icon.png",
   "author": "Paranjayy",
   "categories": [
@@ -14,7 +14,7 @@
     {
       "name": "search",
       "title": "Search Emotes",
-      "description": "Find any 7TV emote",
+      "description": "Find emotes across 7TV, BetterTTV, and FrankerFaceZ",
       "mode": "view"
     }
   ],
@@ -38,10 +38,15 @@
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "eslint src --fix",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/*.test.ts",
+    "test:live": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/providers.live.ts"
   },
   "platforms": [
     "macOS",
     "Windows"
+  ],
+  "contributors": [
+    "nakama"
   ]
 }
