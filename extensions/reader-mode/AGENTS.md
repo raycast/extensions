@@ -9,6 +9,8 @@
 - `docs/content-extraction.md` — Explains the extraction pipeline architecture
 - `docs/paywall-hopper.md` — The paywall bypass flow (detection is now evidence-based; see `src/utils/paywall-detector.ts`)
 - The `### Logging` section in `CONTRIBUTING.md` — Logging conventions
+- `docs/solutions/` — Write-ups of problems solved in this extension: what broke, what didn't work, and why the fix holds. Organized by category, with YAML frontmatter (`module`, `tags`, `problem_type`). Relevant when working in an area one covers
+- `docs/CONCEPTS.md` — The project's domain vocabulary (content gate, barrier, paywall signal, Paywall Hopper, data payload)
 - Existing code in the area you're modifying
 
 ## Content Extraction: Site Config vs Extractors
