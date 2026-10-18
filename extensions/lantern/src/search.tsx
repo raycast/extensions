@@ -427,18 +427,18 @@ function openActions(h: FileHit, ctx: Ctx, photo: boolean, thumb: string | null 
                   : "Open"
           }
           icon={media ? Icon.Play : Icon.ArrowRight}
-          onAction={() => {
+          onAction={async () => {
             opened(ctx.eventId, h.chunk_id, fileKey(h));
-            openAt(h.path, h.start_line, h.start_ms, true, h.page);
+            await openAt(h.path, h.start_line, h.start_ms, true, h.page);
           }}
         />
         <Action
           title={media ? "Play from the Start" : "Open from the Start"}
           icon={Icon.ArrowCounterClockwise}
           shortcut={{ modifiers: ["opt"], key: "return" }}
-          onAction={() => {
+          onAction={async () => {
             opened(ctx.eventId, h.chunk_id, fileKey(h));
-            openAt(h.path, null, null, true, null);
+            await openAt(h.path, null, null, true, null);
           }}
         />
         <Action

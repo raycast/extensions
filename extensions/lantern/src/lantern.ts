@@ -1,6 +1,6 @@
 // Talks to the Lantern daemon over its Unix socket (one JSON line in, one out; daemon/lantern/api/protocol.py) and
 // opens results where the app would: the line in your editor, the moment in QuickTime Player. Nothing leaves the Mac.
-import { getDefaultApplication, open, showInFinder } from "@raycast/api";
+import { getDefaultApplication, open, showInFinder, showToast, Toast } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import net from "node:net";
@@ -187,15 +187,13 @@ const PDF_PREVIEW = `on run argv
     activate
     open f
   end tell
-  try
-    tell application "System Events"
-      tell process "Preview"
-        keystroke "g" using {option down, command down}
-        keystroke (p as text)
-        key code 36
-      end tell
+  tell application "System Events"
+    tell process "Preview"
+      keystroke "g" using {option down, command down}
+      keystroke (p as text)
+      key code 36
     end tell
-  end try
+  end tell
 end run`;
 
 const PDF_SKIM = `on run argv
@@ -232,9 +230,14 @@ export async function openAt(
     if (id === "net.sourceforge.skim-app.skim") {
       const args = ["-e", PDF_SKIM, file, String(page)];
       if (await run("/usr/bin/osascript", args)) return;
-    } else {
+    } else if (id === "com.apple.Preview") {
       const args = ["-e", PDF_PREVIEW, file, String(page)];
       if (await run("/usr/bin/osascript", args)) return;
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not jump to PDF page",
+        message: "Grant Raycast Accessibility permissions in System Settings to control Preview",
+      });
     }
   }
   if (line != null) {
