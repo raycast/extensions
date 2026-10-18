@@ -18,7 +18,19 @@ export function parseDetail(text: string) {
       break;
     }
   }
-  const body = lines.join("\n").trim();
+  // The helper ends with hints for agents about this capture's id: how many
+  // words `read` returns, and the trail of who touched it. Neither is its text.
+  const id = fields.id ?? "";
+  const trail = id
+    ? lines.findIndex((line) => line.startsWith("trail (latest ") && line.endsWith(`trail id="${id}"):`))
+    : -1;
+  const body = (trail === -1 ? lines : lines.slice(0, trail))
+    .filter(
+      (line) =>
+        !(id && /^words: \d+ characters of markdown, read with read id=/.test(line) && line.endsWith(`"${id}"`)),
+    )
+    .join("\n")
+    .trim();
   let tags: string[] = [];
   try {
     tags = JSON.parse(fields.tags ?? "[]").filter((tag: unknown) => typeof tag === "string");

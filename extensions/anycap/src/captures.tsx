@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { getFavicon, useCachedPromise } from "@raycast/utils";
+import { getFavicon, showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { callTool, CaptureRow, deepLink, Folder, openInAnycap, parseCaptureLines, parseFolders } from "./anycap";
 import { loadDetail } from "./detail";
@@ -46,6 +46,7 @@ export function CaptureList(props: {
     [query, kind],
     { keepPreviousData: true },
   );
+  const folders = useFolders();
   // The kind is kept here as well: recent and list take none of their own.
   const rows = (data ?? []).filter((row) => !kind || row.kind === kind);
   const hits = rows.filter((row) => !row.related);
@@ -73,19 +74,28 @@ export function CaptureList(props: {
       )}
       <List.Section title={query ? "Results" : undefined}>
         {hits.map((row) => (
-          <CaptureItem key={row.id} row={row} onChange={revalidate} />
+          <CaptureItem key={row.id} row={row} folders={folders} onChange={revalidate} />
         ))}
       </List.Section>
       <List.Section title="Related by Meaning">
         {related.map((row) => (
-          <CaptureItem key={`related-${row.id}`} row={row} onChange={revalidate} />
+          <CaptureItem key={`related-${row.id}`} row={row} folders={folders} onChange={revalidate} />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function CaptureItem(props: { row: CaptureRow; onChange: () => void }) {
+/// The folders Move to Folder offers, asked for once by the list or the detail
+/// screen: every row's action panel is rendered, so a hook there runs per row.
+function useFolders(): Folder[] {
+  const { data } = useCachedPromise(async () => parseFolders(await callTool("categories", {})), [], {
+    keepPreviousData: true,
+  });
+  return data ?? [];
+}
+
+function CaptureItem(props: { row: CaptureRow; folders: Folder[]; onChange: () => void }) {
   const { row } = props;
   return (
     <List.Item
@@ -98,12 +108,17 @@ function CaptureItem(props: { row: CaptureRow; onChange: () => void }) {
       subtitle={row.subtitle}
       keywords={[row.kind, host(row.url) ?? ""]}
       accessories={[{ text: host(row.url) ?? row.kind }]}
-      actions={<CaptureActions row={row} onChange={props.onChange} />}
+      actions={<CaptureActions row={row} folders={props.folders} onChange={props.onChange} />}
     />
   );
 }
 
-export function CaptureActions(props: { row: CaptureRow; onChange?: () => void; inDetail?: boolean }) {
+export function CaptureActions(props: {
+  row: CaptureRow;
+  folders: Folder[];
+  onChange?: () => void;
+  inDetail?: boolean;
+}) {
   const { row } = props;
   return (
     <ActionPanel>
@@ -142,7 +157,7 @@ export function CaptureActions(props: { row: CaptureRow; onChange?: () => void; 
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <MoveAction row={row} onChange={props.onChange} />
+        <MoveAction row={row} folders={props.folders} onChange={props.onChange} />
         <Action
           title="Archive"
           icon={Icon.Tray}
@@ -164,9 +179,7 @@ export function CaptureActions(props: { row: CaptureRow; onChange?: () => void; 
               };
               props.onChange?.();
             } catch (error) {
-              toast.style = Toast.Style.Failure;
-              toast.title = "Could not archive";
-              toast.message = error instanceof Error ? error.message : String(error);
+              await showFailureToast(error, { title: "Could not archive" });
             }
           }}
         />
@@ -175,14 +188,10 @@ export function CaptureActions(props: { row: CaptureRow; onChange?: () => void; 
   );
 }
 
-function MoveAction(props: { row: CaptureRow; onChange?: () => void }) {
-  const { data } = useCachedPromise(async () => parseFolders(await callTool("categories", {})), [], {
-    keepPreviousData: true,
-  });
-  const folders: Folder[] = data ?? [];
+function MoveAction(props: { row: CaptureRow; folders: Folder[]; onChange?: () => void }) {
   return (
     <ActionPanel.Submenu title="Move to Folder" icon={Icon.Folder} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}>
-      {folders.map((folder) => (
+      {props.folders.map((folder) => (
         <Action
           key={folder.name}
           title={folder.name}
@@ -194,11 +203,7 @@ function MoveAction(props: { row: CaptureRow; onChange?: () => void }) {
               await showToast({ style: Toast.Style.Success, title: `Moved to ${folder.name}` });
               props.onChange?.();
             } catch (error) {
-              await showToast({
-                style: Toast.Style.Failure,
-                title: "Could not move",
-                message: error instanceof Error ? error.message : String(error),
-              });
+              await showFailureToast(error, { title: "Could not move" });
             }
           }}
         />
@@ -212,6 +217,7 @@ function MoveAction(props: { row: CaptureRow; onChange?: () => void }) {
 export function CaptureDetail(props: { row: CaptureRow; onChange?: () => void }) {
   const { row } = props;
   const { data, isLoading, revalidate } = useCachedPromise(loadDetail, [row.id]);
+  const folders = useFolders();
   const refresh = () => {
     revalidate();
     props.onChange?.();
@@ -249,7 +255,7 @@ export function CaptureDetail(props: { row: CaptureRow; onChange?: () => void })
           {row.url ? <Detail.Metadata.Link title="Source" target={row.url} text={host(row.url) ?? row.url} /> : null}
         </Detail.Metadata>
       }
-      actions={<CaptureActions row={row} inDetail onChange={refresh} />}
+      actions={<CaptureActions row={row} folders={folders} inDetail onChange={refresh} />}
     />
   );
 }

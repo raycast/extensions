@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, showToast, Toast, popToRoot } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { callTool, parseFolders } from "./anycap";
 import { captureArguments, CaptureValues, submitCapture } from "./capture-input";
@@ -26,11 +26,7 @@ export default function CaptureForm() {
       await showToast({ style: Toast.Style.Success, title: "Saved to Anycap" });
       await popToRoot();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not save",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailureToast(error, { title: "Could not save" });
     } finally {
       setSaving(false);
     }

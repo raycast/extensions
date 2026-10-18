@@ -89,6 +89,84 @@
     { "name": "save-capture", "title": "Save Capture", "description": "Save a user's link or note to their local Anycap library, with optional title, existing folder and tags. Asks for confirmation before saving. Preserve the user's words." },
     { "name": "list-folders", "title": "List Folders", "description": "List available Anycap folders and counts before choosing a folder for a capture." }
   ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@anycap save https://example.com/fern-guide to my Reading folder",
+        "mocks": {
+          "list-folders": [
+            {
+              "name": "Reading",
+              "count": 12
+            },
+            {
+              "name": "Inbox",
+              "count": 40,
+              "description": "captured, not yet filed"
+            }
+          ],
+          "save-capture": "Saved link 3F2A9C1E-7B4D-4E8A-9C21-5D6F7A8B9C0D to Reading."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "save-capture",
+              "arguments": {
+                "content": "https://example.com/fern-guide",
+                "folder": "Reading"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@anycap remember this note: call the plumber before Friday",
+        "mocks": {
+          "save-capture": "Saved note 8C1D2E3F-4A5B-4C6D-8E7F-9A0B1C2D3E4F to Inbox."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "save-capture",
+              "arguments": {
+                "content": {
+                  "includes": "call the plumber before Friday"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@anycap which folders do I have?",
+        "mocks": {
+          "list-folders": [
+            {
+              "name": "Reading",
+              "count": 12
+            },
+            {
+              "name": "Recipes",
+              "count": 7
+            },
+            {
+              "name": "Inbox",
+              "count": 40,
+              "description": "captured, not yet filed"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "list-folders"
+          },
+          {
+            "includes": "Recipes"
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "appPath",

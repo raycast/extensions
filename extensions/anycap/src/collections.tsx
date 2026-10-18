@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { callTool, parseCollections } from "./anycap";
 import { CaptureList } from "./captures";
 
@@ -45,11 +45,7 @@ export default function BrowseCollections() {
                     await Clipboard.copy(await callTool("brief", { collection: collection.name }));
                     await showToast({ style: Toast.Style.Success, title: "Copied brief" });
                   } catch (error) {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Could not copy brief",
-                      message: error instanceof Error ? error.message : String(error),
-                    });
+                    await showFailureToast(error, { title: "Could not copy brief" });
                   }
                 }}
               />
