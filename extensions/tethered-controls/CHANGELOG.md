@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-- Reserve Toggle Companion Sync for the upcoming feature; requests currently have no effect.
+- Reserve Toggle Companion Sync for the upcoming feature, with app-confirmed unavailable errors and success/failure acknowledgments.
 
 - Toggle the MCP bridge and view its enabled state and status.
 
