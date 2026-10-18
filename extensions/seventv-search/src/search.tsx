@@ -170,10 +170,7 @@ export default function Command() {
     await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavs));
   }
 
-  async function handleDropEmote(
-    item: Emote,
-    mode: "smart" | "url" | "bruteforce" = "smart",
-  ) {
+  async function pasteEmote(item: Emote, mode: "file" | "url" = "file") {
     const { url, ext } = getEmoteFile(item);
     await addToHistory(item);
 
@@ -185,8 +182,7 @@ export default function Command() {
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title:
-        mode === "bruteforce" ? "Dropping Emote..." : "Processing Emote...",
+      title: "Pasting Emote...",
     });
     try {
       const res = await fetch(url);
@@ -208,17 +204,12 @@ export default function Command() {
           html: `<img src="${url}" alt="${item.name}" />`,
         });
 
-        if (mode === "bruteforce") {
-          await Clipboard.paste({ text: url });
-          await Clipboard.paste({ file: tempPath });
-        } else {
-          await Clipboard.paste({ file: tempPath });
-        }
+        await Clipboard.paste({ file: tempPath });
 
         toast.style = Toast.Style.Success;
-        toast.title = "Emote Dropped!";
+        toast.title = "Emote Pasted";
       } catch (clipError) {
-        console.error("Drop failed:", clipError);
+        console.error("Paste failed:", clipError);
         await Clipboard.paste(url);
         toast.style = Toast.Style.Success;
         toast.title = "URL Pasted (Fallback)";
@@ -240,14 +231,9 @@ export default function Command() {
       <ActionPanel>
         <ActionPanel.Section>
           <Action
-            title="Drop Emote"
-            icon={Icon.ChevronRight}
-            onAction={() => handleDropEmote(item, "smart")}
-          />
-          <Action
-            title="Quick Drop"
-            icon={Icon.Bolt}
-            onAction={() => handleDropEmote(item, "bruteforce")}
+            title="Paste Emote File"
+            icon={Icon.Clipboard}
+            onAction={() => pasteEmote(item)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
           />
           <Action
@@ -260,9 +246,9 @@ export default function Command() {
 
         <ActionPanel.Section>
           <Action
-            title="Force Paste URL"
+            title="Paste Emote URL"
             icon={Icon.Link}
-            onAction={() => handleDropEmote(item, "url")}
+            onAction={() => pasteEmote(item, "url")}
             shortcut={{ modifiers: ["cmd"], key: "u" }}
           />
           <Action.CopyToClipboard title="Copy Emote URL" content={highResUrl} />

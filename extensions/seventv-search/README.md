@@ -7,7 +7,7 @@ Search emotes from 7TV, BetterTTV, and FrankerFaceZ in Raycast. Copy or paste an
 1. Open **Search Emotes**.
 2. Choose a provider and sort order from the search dropdown.
 3. Enter an emote name, or browse without a query.
-4. Press Enter to drop the selected emote into the active app.
+4. Press Enter to paste the selected emote file into the active app.
 
 The dropdown includes Popular and Recent for all providers, daily Trending for 7TV, weekly Trending for BetterTTV, and alphabetical sorting for FrankerFaceZ. BetterTTV text search uses its search ranking. Its browse sorts return when you clear the query. 7TV alphabetical sorting is hidden because its API currently fails for that mode.
 
@@ -38,6 +38,13 @@ npm run dev
 
 Run `npm run test:live` to check provider searches, pagination, and GIF downloads against the current services. This requires network access.
 
-Clipboard support depends on the destination app. GIF copy and manual paste were tested in TextEdit on macOS. Direct paste into chat apps and Windows clipboard behavior still need testing.
+Clipboard support depends on the destination app. GIF copy and manual paste were verified in TextEdit on macOS. The maintainer also tested GIF pasting in chat apps. Windows clipboard behavior still needs testing.
 
-The API layer uses native provider files. It does not require FFmpeg, ImageMagick, or API keys. Native 7TV GIF/PNG selection follows the approach in [n4kama's format fix](https://github.com/raycast/extensions/pull/32501). The provider comparison included [Emotecast](https://github.com/raycast/extensions/pull/30619). The Raycast extensions repository and these extensions declare the MIT license.
+The API layer uses native provider files. It does not require FFmpeg, ImageMagick, or API keys.
+
+## Credits
+
+- [n4kama / Nakama](https://github.com/n4kama) contributed native GIF/PNG selection in [#32501](https://github.com/raycast/extensions/pull/32501), following the earlier [Snag proposal](https://github.com/raycast/extensions/pull/30734). The GIF/PNG behavior comes from that contribution.
+- [Kan-A-Pesh](https://github.com/Kan-A-Pesh) built [Emotecast](https://github.com/raycast/extensions/pull/30619). Its provider adapters and unified-provider workflow informed this expansion. This extension uses a separately implemented API layer and provider-native files rather than Emotecast's conversion pipeline.
+
+The Raycast extensions repository and both contributions declare the MIT license.
