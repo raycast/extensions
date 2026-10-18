@@ -92,6 +92,13 @@ export function normalizeTag(value: string): string {
     .replace(/^\/+|\/+$/g, "");
 }
 
+/** A step that runs after a note or task was saved. Steps can fail and be retried on their own. */
+export type NoteStep = { kind: "content"; markdown: string } | { kind: "taskDomain"; taskDomainUUID: string };
+
+export function describeNoteSteps(steps: NoteStep[]): string {
+  return steps.map((step) => (step.kind === "content" ? "add its content" : "add it to the task domain")).join(" or ");
+}
+
 export function isTemporaryId(noteUUID: string): boolean {
   return noteUUID.startsWith("local-");
 }
@@ -193,6 +200,19 @@ export function createApi(call: ToolCaller, { dailyJotTag = "daily-jots" } = {})
         }
       }
       return { domains, tasks: [...byUUID.values()] };
+    },
+
+    /** Runs every step and returns the ones that failed, so callers can retry only those. */
+    applyNoteSteps: async (noteUUID: string, steps: NoteStep[]): Promise<NoteStep[]> => {
+      const failed: NoteStep[] = [];
+      for (const step of steps) {
+        const run =
+          step.kind === "content"
+            ? api.insertNoteContent(noteUUID, step.markdown)
+            : api.addNoteToTaskDomain(noteUUID, step.taskDomainUUID);
+        await run.catch(() => failed.push(step));
+      }
+      return failed;
     },
 
     addNoteToTaskDomain: (noteUUID: string, taskDomainUUID: string) =>

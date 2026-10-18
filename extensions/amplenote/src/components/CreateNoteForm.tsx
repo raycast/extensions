@@ -13,8 +13,8 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { useState } from "react";
-import { normalizeTag, noteAppUrl, Tag, TAG_PATTERN } from "../lib/api";
+import { useRef, useState } from "react";
+import { describeNoteSteps, normalizeTag, NoteStep, noteAppUrl, Tag, TAG_PATTERN } from "../lib/api";
 import { amplenote } from "../lib/amplenote";
 
 const NO_DOMAIN = "none";
@@ -84,43 +84,63 @@ export default function CreateNoteForm(props: {
     setSelectedTags((previous) => [...new Set([...previous, tag])]);
   };
 
+  // Set once the note is saved but a later step failed: submitting again retries only those steps.
+  const pending = useRef<{ noteUUID: string; name: string; steps: NoteStep[] }>(undefined);
+
+  const finish = async (noteUUID: string, name: string, steps: NoteStep[], values: Values) => {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: pending.current ? "Retrying…" : "Saving note…",
+    });
+    const failed = await amplenote.applyNoteSteps(noteUUID, steps);
+    if (failed.length > 0) {
+      pending.current = { noteUUID, name, steps: failed };
+      toast.style = Toast.Style.Failure;
+      toast.title = `Created "${name}", but could not ${describeNoteSteps(failed)}`;
+      toast.message = "Submit again to retry only that step.";
+      toast.primaryAction = { title: "Retry", onAction: () => void finish(noteUUID, name, failed, values) };
+      toast.secondaryAction = { title: "Open in Amplenote", onAction: () => void open(noteAppUrl(noteUUID)) };
+      return;
+    }
+    pending.current = undefined;
+    props.onCreated?.();
+    if (props.closeOnSubmit || values.openAfterCreate) {
+      toast.hide();
+      if (values.openAfterCreate) await open(noteAppUrl(noteUUID));
+      // Must be the last step: popping to root ends the command.
+      await showHUD(`Created "${name}"`, { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+    } else {
+      toast.style = Toast.Style.Success;
+      toast.title = `Created "${name}"`;
+      toast.primaryAction = { title: "Open in Amplenote", onAction: () => void open(noteAppUrl(noteUUID)) };
+      await popToRoot();
+    }
+  };
+
   const submit = async (values: Values) => {
+    if (pending.current) {
+      await finish(pending.current.noteUUID, pending.current.name, pending.current.steps, values);
+      return;
+    }
     const name = values.name.trim();
     if (!name) {
       setNameError("Enter a title");
       return;
     }
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Creating note…" });
+    let noteUUID: string;
     try {
-      const noteUUID = await amplenote.createNote(name, selectedTags);
-      // The note exists from here on, so later steps report failures instead of aborting (a retry would duplicate it).
-      const failed: string[] = [];
-      if (values.content.trim()) {
-        await amplenote.insertNoteContent(noteUUID, values.content).catch(() => failed.push("add its content"));
-      }
-      if (values.taskDomain && values.taskDomain !== NO_DOMAIN) {
-        await amplenote
-          .addNoteToTaskDomain(noteUUID, values.taskDomain)
-          .catch(() => failed.push("add it to the task domain"));
-      }
-      const contentFailed = failed.length > 0;
-      const message = contentFailed ? `Created "${name}", but could not ${failed.join(" or ")}` : `Created "${name}"`;
-      props.onCreated?.();
-      if (props.closeOnSubmit || values.openAfterCreate) {
-        toast.hide();
-        if (values.openAfterCreate) await open(noteAppUrl(noteUUID));
-        // Must be the last step: popping to root ends the command.
-        await showHUD(message, { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
-      } else {
-        toast.style = contentFailed ? Toast.Style.Failure : Toast.Style.Success;
-        toast.title = message;
-        toast.primaryAction = { title: "Open in Amplenote", onAction: () => void open(noteAppUrl(noteUUID)) };
-        await popToRoot();
-      }
+      noteUUID = await amplenote.createNote(name, selectedTags);
     } catch (error) {
-      toast.hide();
       await showFailureToast(error, { title: "Could not create note" });
+      return;
     }
+    const steps: NoteStep[] = [
+      ...(values.content.trim() ? [{ kind: "content" as const, markdown: values.content }] : []),
+      ...(values.taskDomain && values.taskDomain !== NO_DOMAIN
+        ? [{ kind: "taskDomain" as const, taskDomainUUID: values.taskDomain }]
+        : []),
+    ];
+    await finish(noteUUID, name, steps, values);
   };
 
   return (

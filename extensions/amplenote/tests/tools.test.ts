@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AmplenoteApi, createApi, dailyJotName, Note, Task } from "../src/lib/api";
 import { aNote, aTask, aTaskDomain, fakeAmplenote, secondsFromNow } from "./builders";
+import { AmplenoteUnavailableError } from "../src/lib/mcp";
 
 const state = vi.hoisted(() => ({ api: undefined as unknown as AmplenoteApi }));
 
@@ -353,6 +354,21 @@ describe("review fixes", () => {
     expect(result.noteUUID).toBe("real-1");
     expect(result.contentError).toMatch(/append-to-note/);
     expect(fake.callsTo("createNote")).toHaveLength(1);
+  });
+
+  it("create-note still returns the created note when the connection drops while adding content", async () => {
+    const fake = fakeAmplenote({
+      createNote: () => ({ noteUUID: "real-1" }),
+      insertNoteContent: () => {
+        throw new AmplenoteUnavailableError("Amplenote's MCP server isn't reachable.");
+      },
+    });
+    state.api = createApi(fake.call);
+
+    const result = (await createNoteTool({ name: "Plan", content: "Body" })) as Record<string, unknown>;
+
+    expect(result.noteUUID).toBe("real-1");
+    expect(result.contentError).toMatch(/append-to-note/);
   });
 
   it("get-note-tasks never creates today's Daily Jot", async () => {

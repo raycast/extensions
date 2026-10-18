@@ -44,8 +44,10 @@ export default async function (input: Input) {
     let contentError: string | undefined;
     if (input.content?.trim()) {
       await amplenote.insertNoteContent(createdUUID, input.content).catch((error) => {
-        if (isConnectionError(error)) throw error;
-        contentError = "The note was created, but its content could not be added. Use append-to-note to retry.";
+        // Never throw here, not even when Amplenote stops responding: the caller needs the id to avoid a duplicate.
+        contentError = isConnectionError(error)
+          ? "The note was created, but Amplenote stopped responding before its content was added. Use append-to-note with this noteUUID to retry."
+          : "The note was created, but its content could not be added. Use append-to-note with this noteUUID to retry.";
       });
     }
     // Callers often keep the id, so wait briefly for the permanent one instead of returning the temporary id.

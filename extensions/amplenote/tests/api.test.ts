@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { createApi, dailyJotName, isInTaskDomain, matchNoteByName, normalizeTag, TAG_PATTERN } from "../src/lib/api";
+import {
+  createApi,
+  dailyJotName,
+  describeNoteSteps,
+  isInTaskDomain,
+  matchNoteByName,
+  normalizeTag,
+  TAG_PATTERN,
+} from "../src/lib/api";
 import { aNote, aTask, aTaskDomain, fakeAmplenote } from "./builders";
 
 describe("notes", () => {
@@ -205,5 +213,43 @@ describe("waitForPermanentId", () => {
     const fake = fakeAmplenote({});
     expect(await createApi(fake.call).waitForPermanentId("real-1")).toBe("real-1");
     expect(fake.calls).toHaveLength(0);
+  });
+});
+
+describe("applyNoteSteps", () => {
+  it("runs every step and returns only the ones that failed", async () => {
+    const fake = fakeAmplenote({
+      insertNoteContent: () => ({}),
+      addTaskDomainNote: () => {
+        throw new Error("tool error");
+      },
+    });
+    const failed = await createApi(fake.call).applyNoteSteps("note-1", [
+      { kind: "content", markdown: "Body" },
+      { kind: "taskDomain", taskDomainUUID: "domain-1" },
+    ]);
+
+    expect(failed).toEqual([{ kind: "taskDomain", taskDomainUUID: "domain-1" }]);
+    expect(fake.callsTo("insertNoteContent")).toHaveLength(1);
+  });
+
+  it("retries only the failed steps", async () => {
+    const fake = fakeAmplenote({ insertNoteContent: () => ({}), addTaskDomainNote: () => ({ success: true }) });
+    const failed = await createApi(fake.call).applyNoteSteps("note-1", [
+      { kind: "taskDomain", taskDomainUUID: "domain-1" },
+    ]);
+
+    expect(failed).toEqual([]);
+    expect(fake.callsTo("insertNoteContent")).toHaveLength(0);
+    expect(fake.callsTo("addTaskDomainNote")).toHaveLength(1);
+  });
+
+  it("describes failed steps for the user", () => {
+    expect(
+      describeNoteSteps([
+        { kind: "content", markdown: "x" },
+        { kind: "taskDomain", taskDomainUUID: "d" },
+      ]),
+    ).toBe("add its content or add it to the task domain");
   });
 });
