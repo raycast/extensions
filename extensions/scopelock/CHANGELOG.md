@@ -1,6 +1,6 @@
 # ScopeLock Changelog
 
-## [Initial Release] - 2026-10-15
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Added **Calculate Scope Creep Exposure** command to audit unbilled scope drift.
 - Added **Generate Change Order Notice** command to produce formal engineering change orders.
