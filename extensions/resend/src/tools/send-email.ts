@@ -2,6 +2,7 @@ import { Tool, getPreferenceValues } from "@raycast/api";
 import fs from "fs";
 import { Attachment, Tag } from "resend";
 import { getResend, withResend } from "../lib/oauth";
+import { formatDefaultSender } from "../lib/sender";
 import { parseAttachmentReferences } from "./email-attachments";
 
 // Get preferences
@@ -11,9 +12,7 @@ const preferences = getPreferenceValues<{
 }>();
 
 // Create default sender string from preferences
-const senderEmail = preferences.sender_email?.trim();
-const senderName = preferences.sender_name?.trim();
-const defaultSender = senderEmail ? (senderName ? `${senderName} <${senderEmail}>` : senderEmail) : "";
+const defaultSender = formatDefaultSender(preferences);
 
 type Input = {
   /**

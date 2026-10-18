@@ -457,8 +457,9 @@ test("long application questions stay in description text instead of field label
   }
 });
 
-test("questions 6 through 8 use single-line inputs and retain their answers", () => {
-  const f = uiFixture(Array.from({ length: 9 }, (_, index) => question({ path: `question-${index + 1}` })));
+test("question controls follow field types and retain answers when questions reorder", () => {
+  const types = ["LongText", "String", "Text", "Email", "Number", "LongText", "Text", "String", "Location"];
+  const f = uiFixture(types.map((type, index) => question({ path: `question-${index + 1}`, type })));
   const controls = (form) =>
     form.props.children
       .flat()
@@ -468,11 +469,18 @@ test("questions 6 through 8 use single-line inputs and retain their answers", ()
   const inputs = controls(f.mount(f.formElement));
   assert.equal(inputs.length, 9);
   inputs.forEach((input, index) => {
-    assert.equal(input.type, index >= 5 && index <= 7 ? "Form.TextField" : "Form.TextArea");
+    assert.equal(input.type, ["Text", "LongText"].includes(types[index]) ? "Form.TextArea" : "Form.TextField");
     input.props.onChange(`Answer ${index + 1}`);
   });
   controls(f.render(f.formElement)).forEach((input, index) => {
     assert.equal(input.props.value, `Answer ${index + 1}`);
+  });
+  f.position.fields.reverse();
+  controls(f.render(f.formElement)).forEach((input, index) => {
+    const originalIndex = types.length - index - 1;
+    assert.equal(input.props.id, `question-${originalIndex + 1}`);
+    assert.equal(input.type, ["Text", "LongText"].includes(types[originalIndex]) ? "Form.TextArea" : "Form.TextField");
+    assert.equal(input.props.value, `Answer ${originalIndex + 1}`);
   });
 });
 
@@ -551,16 +559,22 @@ test("email sending without sender preferences requires an explicit sender", asy
   assert.equal(send.mock.calls[0].arguments[0].from, explicit.from);
 });
 
-test("sender email without an optional display name is a valid default", async () => {
+test("default sender trims preferences and supports an optional display name", async () => {
   const f = fixture();
   const send = mock.fn(async () => ({ data: { id: "sent-1" }, error: null }));
   f.sdk.emails = { send };
-  const tool = loadSource("src/tools/send-email.ts", {
-    ...f.mocks,
-    "@raycast/api": { getPreferenceValues: () => ({ sender_email: "ada@example.com" }) },
-  });
   const input = { to: ["test@example.com"], subject: "Hello", text: "Hello" };
-  assert.equal((await tool.confirmation(input)).info[0].value, "ada@example.com");
-  await tool.default(input);
-  assert.equal(send.mock.calls[0].arguments[0].from, "ada@example.com");
+  for (const [preferences, expected] of [
+    [{ sender_email: "ada@example.com" }, "ada@example.com"],
+    [{ sender_name: "   ", sender_email: " ada@example.com " }, "ada@example.com"],
+    [{ sender_name: " Ada Lovelace ", sender_email: " ada@example.com " }, "Ada Lovelace <ada@example.com>"],
+  ]) {
+    const tool = loadSource("src/tools/send-email.ts", {
+      ...f.mocks,
+      "@raycast/api": { getPreferenceValues: () => preferences },
+    });
+    assert.equal((await tool.confirmation(input)).info[0].value, expected);
+    await tool.default(input);
+    assert.equal(send.mock.calls.at(-1).arguments[0].from, expected);
+  }
 });

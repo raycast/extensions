@@ -183,7 +183,6 @@ function ApplicationForm({ position }: { position: Position }) {
           />
           <ApplicationField
             field={field}
-            singleLine={index >= 5 && index <= 7}
             value={answers[field.path] ?? ""}
             onChange={(value) => setAnswers((previous) => ({ ...previous, [field.path]: value }))}
           />
@@ -195,12 +194,10 @@ function ApplicationForm({ position }: { position: Position }) {
 
 function ApplicationField({
   field,
-  singleLine,
   value,
   onChange,
 }: {
   field: PositionField;
-  singleLine: boolean;
   value: string;
   onChange: (value: string) => void;
 }) {
@@ -230,7 +227,7 @@ function ApplicationField({
       </Form.Dropdown>
     );
   const props = { id: field.path, title, value, onChange, info: field.description };
-  if (!singleLine && ["Text", "LongText", "String"].includes(field.type)) return <Form.TextArea {...props} />;
+  if (["Text", "LongText"].includes(field.type)) return <Form.TextArea {...props} />;
   return (
     <Form.TextField
       {...props}
