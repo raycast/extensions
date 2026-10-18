@@ -40,9 +40,9 @@
     {
       "name": "clientId",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "Google OAuth Client ID",
-      "description": "One-time setup. This is not an API key. Create an iOS OAuth client with Bundle ID com.raycast.",
+      "description": "Optional. Leave empty and open View Tasks for a guided setup that saves the Client ID for you. Overrides the saved Client ID when set.",
       "placeholder": "123...apps.googleusercontent.com"
     }
   ],

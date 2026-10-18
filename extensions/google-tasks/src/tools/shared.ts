@@ -10,7 +10,10 @@ export async function ensureAuth(): Promise<void> {
   try {
     await google.authorize();
   } catch (error) {
-    throw new Error(google.describeAuthorizationError(error).message);
+    const details = google.describeAuthorizationError(error);
+    throw new Error(
+      details.needsPreferences ? `${details.message} Open View Tasks for setup instructions.` : details.message,
+    );
   }
 }
 
