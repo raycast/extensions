@@ -28,7 +28,7 @@ const config: Config = {
 	coverageDirectory: "coverage",
 
 	// An array of regexp pattern strings used to skip coverage collection
-	coveragePathIgnorePatterns: ["src/node_modules/"],
+	coveragePathIgnorePatterns: ["/node_modules/"],
 
 	// Indicates which provider should be used to instrument code for coverage
 	coverageProvider: "v8",
@@ -140,6 +140,8 @@ const config: Config = {
 
 	// The test environment that will be used for testing
 	testEnvironment: "node",
+	// UI tests use jsdom, but Raycast dependencies still run in Node.
+	testEnvironmentOptions: { customExportConditions: ["node", "node-addons"] },
 
 	// Options that will be passed to the testEnvironment
 	// testEnvironmentOptions: {},

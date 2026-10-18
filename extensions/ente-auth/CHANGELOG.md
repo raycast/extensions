@@ -1,5 +1,15 @@
 # Ente Auth Changelog
 
+## [Cloud sign-in and automatic sync] - {PR_MERGE_DATE}
+
+- Added Ente password sign-in without CLI exports.
+- Added support for custom API servers.
+- Supports accounts with email verification and TOTP enabled.
+- Added sync on Get TOTP launch, Sync Now, an encrypted offline cache, and Sign Out.
+- Kept import mode and added confirmed removal of old imported entries.
+- Applied each entry's algorithm, digit count, and period to current codes, next codes, and countdowns.
+- Load service icons for entries added or changed during sync.
+
 ## [Fix import with null OTP parameters] - 2026-07-09
 
 - Fixed imports skipping Ente Auth export entries with `algorithm=null`, `digits=null`, or `period=null` by using standard TOTP defaults
