@@ -6,17 +6,19 @@ import { parseAttachmentReferences } from "./email-attachments";
 
 // Get preferences
 const preferences = getPreferenceValues<{
-  sender_name: string;
-  sender_email: string;
+  sender_name?: string;
+  sender_email?: string;
 }>();
 
 // Create default sender string from preferences
-const defaultSender = `${preferences.sender_name} <${preferences.sender_email}>`;
+const senderEmail = preferences.sender_email?.trim();
+const senderName = preferences.sender_name?.trim();
+const defaultSender = senderEmail ? (senderName ? `${senderName} <${senderEmail}>` : senderEmail) : "";
 
 type Input = {
   /**
    * The sender of the email.
-   * This field will use the default sender from preferences if not provided.
+   * Uses the default sender from preferences if not provided. Required when Sender Email is not configured.
    * Default: "{sender_name} <{sender_email}>" from preferences
    */
   from?: string;
@@ -83,7 +85,7 @@ type Input = {
 };
 
 const tool = async (input: Input) => {
-  const sender = input.from || defaultSender;
+  const sender = getSender(input.from);
   const html = input.html || input.content;
   if (!html && !input.text) {
     throw new Error("Provide html or text content for the email");
@@ -128,7 +130,7 @@ const tool = async (input: Input) => {
 };
 
 export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
-  const sender = input.from || defaultSender;
+  const sender = getSender(input.from);
   const content = input.html || input.text || input.content || "";
 
   const infoItems = [
@@ -170,6 +172,12 @@ export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
     info: infoItems,
   };
 };
+
+function getSender(from?: string) {
+  const sender = from?.trim() || defaultSender;
+  if (!sender) throw new Error("Provide a sender address or set Sender Email in extension preferences");
+  return sender;
+}
 
 function parseHeaders(value?: string) {
   return value ? Object.fromEntries(parsePairs(value, "header").map(({ name, value }) => [name, value])) : undefined;

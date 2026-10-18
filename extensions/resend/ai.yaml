@@ -10,6 +10,8 @@ instructions: |
   Use get-email-metrics for aggregate delivery and engagement reporting. To investigate API failures, use list-logs and then retrieve the relevant failed request before explaining its request and response bodies.
   Use list-domains, list-templates, and list-broadcasts before retrieving a named resource. Use list-topics and list-webhooks for account configuration questions.
   Create or remove an API key only when explicitly requested. Prefer sending_access over full_access when sending is the only requirement, restrict it to the requested domain when possible, and treat returned key material as sensitive.
+  Careers concerns jobs at Resend, not the user's company. Use list-positions to find a role and retrieve-position to inspect its exact questions and option values before applying. Never invent position IDs or answer paths. Ask which role the user means if multiple positions match.
+  Call apply-to-position only when the user explicitly asks to submit an application and provides their own name, email, local resume path, and all required answers. Do not infer identity from sender preferences or contacts, invent eligibility answers, or apply while merely browsing. Ask for missing information without calling apply-to-position. The tool provides the final confirmation; do not request redundant chat approval. Do not claim submission succeeded until the tool succeeds. Never automatically retry an application after an uncertain response. Unsupported form fields must be completed on the Resend careers website.
 
 evals:
   - input: "@resend Send laura@acme.app an email with subject Hotel check-in and body Please check us in at the hotel."
@@ -496,3 +498,83 @@ evals:
             name: "Production Mailer"
             permission: "sending_access"
             domainId: "domain-acme"
+
+  - input: "@resend Show me open jobs at Resend."
+    mocks:
+      list-positions:
+        object: "list"
+        data:
+          - id: "position-devtools"
+            title: "Developer Tools Engineer"
+            location: "Americas"
+    expected:
+      - callsTool: "list-positions"
+      - not:
+          callsTool: "apply-to-position"
+
+  - input: "@resend What questions are required for position-devtools?"
+    mocks:
+      retrieve-position:
+        id: "position-devtools"
+        title: "Developer Tools Engineer"
+        fields:
+          - path: "motivation-uuid"
+            title: "Why Resend?"
+            type: "LongText"
+            required: true
+    expected:
+      - callsTool:
+          name: "retrieve-position"
+          arguments:
+            positionId: "position-devtools"
+      - includes: "Why Resend"
+      - not:
+          callsTool: "apply-to-position"
+
+  - input: "@resend Apply to position-devtools for me. I have not provided my resume or applicant details."
+    mocks:
+      retrieve-position:
+        id: "position-devtools"
+        title: "Developer Tools Engineer"
+        fields: []
+    expected:
+      - not:
+          callsTool: "apply-to-position"
+
+  - input: "@resend Apply for the backend engineer role."
+    mocks:
+      list-positions:
+        object: "list"
+        data:
+          - id: "backend-americas"
+            title: "Backend Engineer"
+            location: "Americas"
+          - id: "backend-europe"
+            title: "Backend Engineer"
+            location: "Europe"
+    expected:
+      - callsTool: "list-positions"
+      - not:
+          callsTool: "apply-to-position"
+
+  - input: "@resend Submit my application for position-devtools. My name is Ada Lovelace, my email is ada@example.com, my resume is /tmp/ada-resume.pdf, and my answer to Why Resend is I build email tools."
+    mocks:
+      retrieve-position:
+        id: "position-devtools"
+        title: "Developer Tools Engineer"
+        fields:
+          - path: "motivation-uuid"
+            title: "Why Resend?"
+            type: "LongText"
+            required: true
+      apply-to-position:
+        success: true
+    expected:
+      - callsTool: "retrieve-position"
+      - callsTool:
+          name: "apply-to-position"
+          arguments:
+            positionId: "position-devtools"
+            name: "Ada Lovelace"
+            email: "ada@example.com"
+            resumePath: "/tmp/ada-resume.pdf"

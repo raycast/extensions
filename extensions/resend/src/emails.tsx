@@ -30,7 +30,9 @@ import { getResend, withResend } from "./lib/oauth";
 const preferences = getPreferenceValues<ExtensionPreferences>();
 
 // Create default sender string from preferences
-const defaultSender = `${preferences.sender_name} <${preferences.sender_email}>`;
+const senderEmail = preferences.sender_email?.trim();
+const senderName = preferences.sender_name?.trim();
+const defaultSender = senderEmail ? (senderName ? `${senderName} <${senderEmail}>` : senderEmail) : "";
 
 export default withResend(Emails);
 function Emails() {
