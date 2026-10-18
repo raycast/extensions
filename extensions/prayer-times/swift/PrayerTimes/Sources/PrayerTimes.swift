@@ -382,7 +382,8 @@ private func sync(_ payload: SyncPayload) async throws -> SyncResult {
         if reminder.isCompleted, kept.refresh(), !kept.isCompleted {
           kept.isCompleted = true
           kept.completionDate = reminder.completionDate
-          if let line = statusLine(in: reminder.notes) { kept.notes = withStatusLine(kept.notes, line) }
+          // The source result replaces the target's line, which may be left over from an earlier mark.
+          kept.notes = withStatusLine(kept.notes, statusLine(in: reminder.notes))
           try store.save(kept, commit: false)
           changed = true
         }

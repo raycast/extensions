@@ -197,7 +197,7 @@ export async function setStatus(
 }
 
 /**
- * Mark a prayer prayed (on time or late by the clock), or unmark it.
+ * Mark a prayer prayed (on time, late or made up by the clock), or unmark it.
  *
  * @param slot - Prayer slot.
  * @param settings - Settings.

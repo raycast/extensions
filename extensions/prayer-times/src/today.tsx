@@ -104,7 +104,7 @@ function TodayList({ settings }: { settings: Settings }) {
       <>
         {/* Default: the clock decides on time vs late (by the same late boundary history uses). */}
         {!prayed && (
-          <Action title="Mark as Prayed" icon={Icon.CheckCircle} onAction={() => mark(clockStatus(slot, now))} />
+          <Action title="Mark as Prayed" icon={Icon.CheckCircle} onAction={() => mark(clockStatus(slot, new Date()))} />
         )}
         {markOptions(slot, prayed, now).map((status) => (
           <Action

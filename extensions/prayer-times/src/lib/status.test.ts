@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { PrayerSlot } from "./prayers";
-import { MARK_TITLES, markOptions, parseStatus, prayedAt, STATUS_LABELS, statusOf, validStatus } from "./status";
+import {
+  clockStatus,
+  MARK_TITLES,
+  markOptions,
+  parseStatus,
+  prayedAt,
+  STATUS_LABELS,
+  statusOf,
+  validStatus,
+} from "./status";
 
 const at = (h: number, m: number, day = 8) => new Date(2026, 9, day, h, m);
 const asr: PrayerSlot = {
@@ -37,7 +46,8 @@ describe("statusOf", () => {
 
   it("falls back to the clock without a line or with a stale one", () => {
     expect(statusOf(asr, true, at(17, 0), undefined, at(22, 0))).toBe("ontime");
-    expect(statusOf(asr, true, at(19, 0), "missed", at(22, 0))).toBe("late");
+    expect(statusOf(asr, true, at(19, 0), "missed", at(22, 0))).toBe("madeup");
+    expect(statusOf({ ...asr, late: at(17, 52) }, true, at(18, 0), undefined, at(22, 0))).toBe("late");
     expect(statusOf(asr, false, undefined, "jamaat", at(22, 0))).toBe("missed");
     expect(statusOf(asr, false, undefined, undefined, at(17, 0))).toBeUndefined();
   });
@@ -65,6 +75,15 @@ describe("prayedAt", () => {
   });
 });
 
+describe("clockStatus", () => {
+  it("is on time before the late boundary, late within the time, made up after it ends", () => {
+    const preferred = { ...asr, late: at(17, 52) };
+    expect(clockStatus(preferred, at(17, 0))).toBe("ontime");
+    expect(clockStatus(preferred, at(18, 0))).toBe("late");
+    expect(clockStatus(preferred, at(18, 12))).toBe("madeup");
+  });
+});
+
 describe("markOptions", () => {
   it("offers late while on time (a plain mark is already on time), jamaat only after it", () => {
     expect(markOptions(asr, undefined, at(16, 40))).toEqual(["late"]);
@@ -75,9 +94,9 @@ describe("markOptions", () => {
     expect(markOptions({ ...asr, jamaat: undefined }, undefined, at(16, 40))).toEqual(["jamaat", "late"]);
   });
 
-  it("offers on time and made up once the time has ended", () => {
-    expect(markOptions(asr, undefined, at(21, 0))).toEqual(["jamaat", "ontime", "madeup"]);
-    expect(markOptions(asr, "missed", at(21, 0))).toEqual(["jamaat", "ontime", "madeup"]);
+  it("offers on time and late once the time has ended, when a plain mark is made up", () => {
+    expect(markOptions(asr, undefined, at(21, 0))).toEqual(["jamaat", "ontime", "late"]);
+    expect(markOptions(asr, "missed", at(21, 0))).toEqual(["jamaat", "ontime", "late"]);
   });
 
   it("offers every other status for a prayed one", () => {

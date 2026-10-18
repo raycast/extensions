@@ -54,8 +54,8 @@ export function validStatus(text: string | null | undefined, isCompleted: boolea
 }
 
 /**
- * A prayer's status: the written one when valid, otherwise from the clock: on time if completed before the
- * late boundary, late after it, and missed once its time has ended unmarked.
+ * A prayer's status: the written one when valid, otherwise from the clock ({@link clockStatus} at its
+ * completion time), and missed once its time has ended unmarked.
  *
  * @param slot - Prayer slot.
  * @param isCompleted - Whether it is marked prayed.
@@ -73,7 +73,7 @@ export function statusOf(
 ): PrayerStatusValue | undefined {
   const valid = validStatus(written, isCompleted);
   if (valid) return valid;
-  if (isCompleted) return !completedAt || completedAt < slot.late ? "ontime" : "late";
+  if (isCompleted) return completedAt ? clockStatus(slot, completedAt) : "ontime";
   return now >= slot.end ? "missed" : undefined;
 }
 
@@ -88,14 +88,16 @@ export function countsOnTime(status: PrayerStatusValue | undefined): boolean {
 }
 
 /**
- * The status a plain "mark prayed" records: on time before the late boundary, late after it.
+ * The status the clock gives a prayer prayed at `at`: on time before the late boundary, late after it while
+ * its time lasts, made up (qaza) once its time has ended. A plain "mark prayed" records this.
  *
  * @param slot - Prayer slot.
- * @param now - When it is marked.
- * @returns On time or late.
+ * @param at - When it was prayed.
+ * @returns On time, late or made up.
  */
-export function clockStatus(slot: PrayerSlot, now: Date): "ontime" | "late" {
-  return now < slot.late ? "ontime" : "late";
+export function clockStatus(slot: PrayerSlot, at: Date): "ontime" | "late" | "madeup" {
+  if (at < slot.late) return "ontime";
+  return at < slot.end ? "late" : "madeup";
 }
 
 /**
