@@ -1,6 +1,6 @@
+import { format, subMonths } from "date-fns";
 import { useCCUsageMonthlyCli } from "./useCCUsageMonthlyCli";
 import { MonthlyUsageData } from "../types/usage-types";
-import { getCurrentLocalMonth } from "../utils/date-formatter";
 
 export const useMonthlyUsage = (): {
   data: MonthlyUsageData | undefined;
@@ -11,7 +11,9 @@ export const useMonthlyUsage = (): {
 } => {
   const { data: rawData, isLoading, error, revalidate } = useCCUsageMonthlyCli();
   const months = rawData?.monthly ?? [];
-  const data = months.find((entry) => entry.month === getCurrentLocalMonth());
-  const previousMonthData = data ? months.filter((entry) => entry.month < data.month).at(-1) : undefined;
+  const now = new Date();
+  const data = months.find((entry) => entry.month === format(now, "yyyy-MM"));
+  const previousMonth = format(subMonths(now, 1), "yyyy-MM");
+  const previousMonthData = data ? months.find((entry) => entry.month === previousMonth) : undefined;
   return { data, previousMonthData, isLoading, error, revalidate };
 };

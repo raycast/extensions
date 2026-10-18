@@ -21,7 +21,16 @@ export function useCCUsageReport<T>(kind: ReportKind, load: (force?: boolean) =>
     return load(force);
   }, [load]);
   const result = usePromise(invoke, [], {
-    failureToastOptions: { title: "Failed to fetch usage data" },
+    failureToastOptions: {
+      title: "Failed to fetch usage data",
+      primaryAction: {
+        title: "Retry",
+        onAction: (toast) => {
+          void toast.hide();
+          void revalidate();
+        },
+      },
+    },
   });
   const revalidate = useCallback(() => {
     forceNext.current = true;
