@@ -38,25 +38,28 @@ export default function SearchTasks() {
     [notes.data],
   );
 
-  const error = data.error ?? notes.error;
-  if (error && isConnectionError(error)) {
+  const error = [data.error, notes.error, tags.error, showCompleted ? completed.error : undefined].find(
+    isConnectionError,
+  );
+  if (error) {
     return (
       <ConnectionErrorView
         error={error}
+        isLoading={data.isLoading || notes.isLoading}
         onRetry={() => {
           data.revalidate();
           notes.revalidate();
           tags.revalidate();
+          if (showCompleted) completed.revalidate();
         }}
       />
     );
   }
 
-  const refresh = () => {
-    void Promise.all([data.revalidate(), notes.revalidate(), showCompleted ? completed.revalidate() : null]).finally(
-      changes.reset,
+  const refresh = () =>
+    changes.refresh(() =>
+      Promise.allSettled([data.revalidate(), notes.revalidate(), showCompleted ? completed.revalidate() : null]),
     );
-  };
 
   const matching = changes.apply(data.data?.tasks ?? []).filter((task) => {
     if (filter.startsWith("domain:")) return task.domainUUIDs.includes(filter.slice("domain:".length));
@@ -160,7 +163,10 @@ export default function SearchTasks() {
                   note={notesByUUID.get(task.noteUUID)}
                   tags={tags.data}
                   isHighlighted={isHighlighted}
-                  onChange={changes.record}
+                  onChange={(changed, change, updates) => {
+                    changes.record(changed, change, updates);
+                    if (change === "reopened") void data.revalidate();
+                  }}
                   onRefresh={refresh}
                 />
               ))}

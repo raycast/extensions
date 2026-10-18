@@ -6,6 +6,7 @@ import { reportError } from "../lib/errors";
 import { useTaskChanges } from "../lib/useTaskChanges";
 import { useHighlightedTags } from "../lib/tags";
 import AddTaskForm from "./AddTaskForm";
+import ConnectionErrorView, { isConnectionError } from "./ConnectionErrorView";
 import TaskListItem from "./TaskListItem";
 
 export default function NoteTasks(props: { note: Note; tags?: Tag[] }) {
@@ -14,6 +15,10 @@ export default function NoteTasks(props: { note: Note; tags?: Tag[] }) {
   const changes = useTaskChanges();
   const { isHighlighted } = useHighlightedTags();
   const visible = changes.apply(tasks.data ?? []);
+
+  if (isConnectionError(tasks.error)) {
+    return <ConnectionErrorView error={tasks.error} isLoading={tasks.isLoading} onRetry={() => tasks.revalidate()} />;
+  }
 
   return (
     <List navigationTitle={noteTitle(note)} isLoading={tasks.isLoading} searchBarPlaceholder="Filter tasks">
@@ -43,7 +48,7 @@ export default function NoteTasks(props: { note: Note; tags?: Tag[] }) {
           tags={props.tags}
           isHighlighted={isHighlighted}
           onChange={changes.record}
-          onRefresh={() => void tasks.revalidate().finally(changes.reset)}
+          onRefresh={() => changes.refresh(tasks.revalidate)}
           addTaskNote={note}
         />
       ))}

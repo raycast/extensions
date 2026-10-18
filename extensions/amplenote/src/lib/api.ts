@@ -154,37 +154,49 @@ export function dailyJotName(date: Date): string {
 }
 
 export function createApi(call: ToolCaller, { dailyJotTag = "daily-jots" } = {}) {
+  // For tools whose response fields are read: anything but an object means Amplenote answered something unexpected.
+  const read = async <T extends object>(tool: string, args: Record<string, unknown> = {}): Promise<T> => {
+    const result = await call<unknown>(tool, args);
+    if (result === null || typeof result !== "object") {
+      throw new Error(`Amplenote returned an unexpected response for ${tool}.`);
+    }
+    return result as T;
+  };
+  // Name lookups see every note; lists and search results hide plugin notes.
+  const allNotesFrom = async (tool: string, args: Record<string, unknown>) =>
+    (await read<{ notes: Note[] }>(tool, args)).notes;
   const notesFrom = async (tool: string, args: Record<string, unknown>) =>
-    withoutPluginNotes((await call<{ notes: Note[] }>(tool, args)).notes);
+    withoutPluginNotes(await allNotesFrom(tool, args));
   const pendingJots = new Map<string, Promise<Note>>();
   const api = {
     listNotes: async (sortOrder: NoteSortOrder = "opened") => notesFrom("filterNotes", { sortOrder }),
 
     searchNotes: async (query: string) => notesFrom("searchNotes", { query }),
 
-    getTags: async () => (await call<{ tags: Tag[] }>("getTags")).tags.filter((tag) => !isPluginTag(tag.text)),
+    getTags: async () => (await read<{ tags: Tag[] }>("getTags")).tags.filter((tag) => !isPluginTag(tag.text)),
 
+    /** null when Amplenote has no readable content, for example for locked Vault notes. */
     getNoteContent: async (noteUUID: string) =>
-      (await call<{ markdown: string | null }>("getNoteContent", { noteUUID })).markdown ?? "",
+      (await read<{ markdown: string | null }>("getNoteContent", { noteUUID })).markdown,
 
     getNoteMetadata: async (noteUUID: string) =>
-      (await call<{ note: Note | null }>("getNoteMetadata", { noteUUID })).note,
+      (await read<{ note: Note | null }>("getNoteMetadata", { noteUUID })).note,
 
-    getTask: async (taskUUID: string) => (await call<{ task: Task | null }>("getTask", { taskUUID })).task,
+    getTask: async (taskUUID: string) => (await read<{ task: Task | null }>("getTask", { taskUUID })).task,
 
     getNoteTasks: async (noteUUID: string, includeDone = false) =>
-      (await call<{ tasks: Task[] }>("getNoteTasks", { noteUUID, includeDone })).tasks,
+      (await read<{ tasks: Task[] }>("getNoteTasks", { noteUUID, includeDone })).tasks,
 
     getNoteBacklinks: async (noteUUID: string) => notesFrom("getNoteBacklinks", { noteUUID }),
 
     getNoteOpenCounts: async (noteUUID: string) =>
       (
-        await call<{ openCounts: { week: number; month: number; quarter: number } | null }>("getNoteOpenCounts", {
+        await read<{ openCounts: { week: number; month: number; quarter: number } | null }>("getNoteOpenCounts", {
           noteUUID,
         })
       ).openCounts,
 
-    getCompletedTasks: async (from: number) => (await call<{ tasks: Task[] }>("getCompletedTasks", { from })).tasks,
+    getCompletedTasks: async (from: number) => (await read<{ tasks: Task[] }>("getCompletedTasks", { from })).tasks,
 
     listOpenTasks: async () => {
       const domains = await api.getTaskDomains();
@@ -218,10 +230,10 @@ export function createApi(call: ToolCaller, { dailyJotTag = "daily-jots" } = {})
     addNoteToTaskDomain: (noteUUID: string, taskDomainUUID: string) =>
       call("addTaskDomainNote", { noteUUID, taskDomainUUID }),
 
-    getTaskDomains: async () => (await call<{ taskDomains: TaskDomain[] }>("getTaskDomains")).taskDomains,
+    getTaskDomains: async () => (await read<{ taskDomains: TaskDomain[] }>("getTaskDomains")).taskDomains,
 
     getTaskDomainTasks: async (taskDomainUUID: string) =>
-      (await call<{ tasks: Task[] }>("getTaskDomainTasks", { taskDomainUUID })).tasks,
+      (await read<{ tasks: Task[] }>("getTaskDomainTasks", { taskDomainUUID })).tasks,
 
     updateTask: (taskUUID: string, updates: Partial<Omit<Task, "uuid">>) =>
       call<{ success: boolean }>("updateTask", { taskUUID, updates }),
@@ -235,7 +247,7 @@ export function createApi(call: ToolCaller, { dailyJotTag = "daily-jots" } = {})
     // New notes start with a temporary "local-" id until Amplenote has saved them. The temporary id works for
     // links and later calls; this returns the permanent one when it is already available.
     createNote: async (name: string, tags: string[] = []) => {
-      const { noteUUID } = await call<{ noteUUID: string }>("createNote", { name, tags });
+      const { noteUUID } = await read<{ noteUUID: string }>("createNote", { name, tags });
       if (!isTemporaryId(noteUUID)) return noteUUID;
       const note = await api.getNoteMetadata(noteUUID).catch(() => null);
       return note?.uuid ?? noteUUID;
@@ -257,7 +269,7 @@ export function createApi(call: ToolCaller, { dailyJotTag = "daily-jots" } = {})
 
     insertTask: async (noteUUID: string, task: NewTask) =>
       (
-        await call<{ taskUUID: string }>("insertTask", {
+        await read<{ taskUUID: string }>("insertTask", {
           noteUUID,
           task: {
             uuid: randomUUID(),
@@ -274,11 +286,11 @@ export function createApi(call: ToolCaller, { dailyJotTag = "daily-jots" } = {})
       ).taskUUID,
 
     findNoteByName: async (name: string) =>
-      matchNoteByName(await notesFrom("filterNotes", { query: name.trim() }), name),
+      matchNoteByName(await allNotesFrom("filterNotes", { query: name.trim() }), name),
 
     findDailyJot: async (date = new Date()): Promise<Note | undefined> => {
       const name = dailyJotName(date);
-      const notes = await notesFrom("filterNotes", { query: name });
+      const notes = await allNotesFrom("filterNotes", { query: name });
       return notes.find((note) => note.name === name && note.tags.includes(dailyJotTag));
     },
 

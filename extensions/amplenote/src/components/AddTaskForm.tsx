@@ -1,5 +1,6 @@
 import {
   Action,
+  confirmAlert,
   ActionPanel,
   Color,
   Form,
@@ -26,6 +27,7 @@ import {
 } from "../lib/api";
 import { cmd } from "../lib/shortcuts";
 import { amplenote, isDailyJot } from "../lib/amplenote";
+import { AmplenoteTimeoutError } from "../lib/mcp";
 
 const DAILY_JOT = "daily-jot";
 const NO_DOMAIN = "none";
@@ -77,40 +79,41 @@ export default function AddTaskForm(props: {
     return [props.note, ...(notes.data ?? [])].find((item) => item?.uuid === value);
   };
 
-  // Set once the task is saved but adding its note to a task domain failed: submitting again retries only that.
-  const pending = useRef<{ noteUUID: string; noteName: string; steps: NoteStep[] }>(undefined);
+  // Set once the task is saved but adding its note to a task domain failed. The form then only retries that.
+  const [pending, setPending] = useState<{ noteUUID: string; noteName: string; steps: NoteStep[] }>();
+  // One submit at a time: a second ⌘↵ while saving must not add the task twice.
+  const busy = useRef(false);
+  const maybeAdded = useRef(false);
+  const [saving, setSaving] = useState(false);
 
   const finish = async (noteUUID: string, noteName: string, steps: NoteStep[]) => {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: pending.current ? "Retrying…" : "Saving task…",
-    });
     const failed = await amplenote.applyNoteSteps(noteUUID, steps);
     if (failed.length > 0) {
-      pending.current = { noteUUID, noteName, steps: failed };
-      toast.style = Toast.Style.Failure;
-      toast.title = `Added to ${noteName}, but could not ${describeNoteSteps(failed).replace("add it", "add the note")}`;
-      toast.message = "Submit again to retry only that step.";
-      toast.primaryAction = { title: "Retry", onAction: () => void finish(noteUUID, noteName, failed) };
+      setPending({ noteUUID, noteName, steps: failed });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Added to ${noteName}, but could not ${describeNoteSteps(failed).replace("add it", "add the note")}`,
+        message: "Press ⌘↵ to retry only that step.",
+      });
       return;
     }
-    pending.current = undefined;
+    setPending(undefined);
     if (props.closeOnSubmit) {
-      toast.hide();
       // Must be the last step: popping to root ends the command.
       await showHUD(`Added to ${noteName}`, { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
       return;
     }
-    toast.style = Toast.Style.Success;
-    toast.title = `Added to ${noteName}`;
-    toast.primaryAction = { title: "Open Note", onAction: () => void open(noteAppUrl(noteUUID)) };
-    props.onCreated?.();
+    await showToast({
+      style: Toast.Style.Success,
+      title: `Added to ${noteName}`,
+      primaryAction: { title: "Open Note", onAction: () => void open(noteAppUrl(noteUUID)) },
+    });
     pop();
   };
 
-  const submit = async (values: Values) => {
-    if (pending.current) {
-      await finish(pending.current.noteUUID, pending.current.noteName, pending.current.steps);
+  const save = async (values: Values) => {
+    if (pending) {
+      await finish(pending.noteUUID, pending.noteName, pending.steps);
       return;
     }
     const content = values.content.trim();
@@ -118,12 +121,22 @@ export default function AddTaskForm(props: {
       setContentError("Enter a task");
       return;
     }
+    if (maybeAdded.current) {
+      const again = await confirmAlert({
+        title: "Add the task again?",
+        message: "The last attempt timed out, so Amplenote may have added the task already.",
+        primaryAction: { title: "Add Again" },
+      });
+      if (!again) return;
+    }
     const toast = await showToast({ style: Toast.Style.Animated, title: "Adding task…" });
     let note: Note | undefined;
     let noteUUID: string;
+    let inserting = false;
     try {
       note = await resolveNote(values.noteUUID);
       noteUUID = note?.uuid ?? values.noteUUID;
+      inserting = true;
       await amplenote.insertTask(noteUUID, {
         content,
         startAt: values.startAt ? Math.floor(values.startAt.getTime() / 1000) : null,
@@ -132,15 +145,39 @@ export default function AddTaskForm(props: {
       });
     } catch (error) {
       toast.hide();
-      await showFailureToast(error, { title: "Could not add task" });
+      // A timed-out insert may still land in Amplenote, so warn instead of inviting a blind retry.
+      // Only a timed-out insert may have added the task; only a successful add clears this.
+      const insertTimedOut = inserting && error instanceof AmplenoteTimeoutError;
+      if (insertTimedOut) maybeAdded.current = true;
+      await showFailureToast(error, {
+        title: "Could not add task",
+        message: insertTimedOut
+          ? "Amplenote didn't respond in time. The task may have been added anyway; check Amplenote before trying again."
+          : undefined,
+      });
       return;
     }
+    maybeAdded.current = false;
     toast.hide();
+    // The task exists now: refresh lists right away, even if the task-domain step fails.
+    props.onCreated?.();
     const steps: NoteStep[] =
       values.taskDomain && values.taskDomain !== NO_DOMAIN && !isInTaskDomain(domains.data ?? [], noteUUID)
         ? [{ kind: "taskDomain", taskDomainUUID: values.taskDomain }]
         : [];
     await finish(noteUUID, note?.name ?? "note", steps);
+  };
+
+  const submit = async (values: Values) => {
+    if (busy.current) return;
+    busy.current = true;
+    setSaving(true);
+    try {
+      await save(values);
+    } finally {
+      busy.current = false;
+      setSaving(false);
+    }
   };
 
   const selectedNote = [props.note, ...(notes.data ?? [])].find((note) => note?.uuid === noteValue);
@@ -159,10 +196,14 @@ export default function AddTaskForm(props: {
   return (
     <Form
       navigationTitle={props.title ?? "Add Task"}
-      isLoading={notes.isLoading}
+      isLoading={notes.isLoading || saving}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={`Add to ${shorten(targetTitle, 30)}`} icon={Icon.Plus} onSubmit={submit} />
+          <Action.SubmitForm
+            title={pending ? "Retry" : `Add to ${shorten(targetTitle, 30)}`}
+            icon={pending ? Icon.ArrowClockwise : Icon.Plus}
+            onSubmit={submit}
+          />
           <ActionPanel.Section title="Task Options">
             <Action
               title={important ? "Unmark Important" : "Mark Important"}
@@ -195,6 +236,12 @@ export default function AddTaskForm(props: {
         </ActionPanel>
       }
     >
+      {pending ? (
+        <Form.Description
+          title="Task Added"
+          text={`The task was added to ${pending.noteName}, but the extension could not ${describeNoteSteps(pending.steps).replace("add it", "add the note")}. Press ⌘↵ to retry only that step. Other changes in this form are not applied anymore.`}
+        />
+      ) : null}
       <Form.TextField
         id="content"
         title="Task"

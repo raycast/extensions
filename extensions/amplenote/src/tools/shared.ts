@@ -1,7 +1,7 @@
 import { Tool } from "@raycast/api";
 import { Note, noteTitle, noteUrl, Task } from "../lib/api";
 import { amplenote } from "../lib/amplenote";
-import { AmplenoteAuthError, isConnectionError } from "../lib/mcp";
+import { AmplenoteAuthError, AmplenoteTimeoutError, isConnectionError } from "../lib/mcp";
 import { taskGroup, taskTitle } from "../lib/tasks";
 
 export function toIsoDate(seconds: number | null | undefined): string | null {
@@ -15,8 +15,18 @@ export function compactNote(note: Note) {
     tags: note.tags,
     changed: note.changed ?? note.updated ?? null,
     archived: !!note.archived,
+    vault: !!note.vault,
     url: noteUrl(note.uuid),
   };
+}
+
+/**
+ * Amplenote answers lookups of unknown ids with an output validation error instead of an empty result.
+ * Only that (or a null result) means "not found"; every other error is a real failure and is rethrown.
+ */
+export function nullIfNotFound(error: unknown): null {
+  if (error instanceof Error && /output validation error/i.test(error.message)) return null;
+  throw error;
 }
 
 export function compactTask(task: Task, notes: Map<string, Note>) {
@@ -69,10 +79,7 @@ export async function resolveNote(input: { noteUUID?: string; noteName?: string 
  */
 export async function findNote(input: { noteUUID?: string; noteName?: string }): Promise<Note | undefined> {
   if (input.noteUUID?.trim()) {
-    const note = await amplenote.getNoteMetadata(input.noteUUID.trim()).catch((error) => {
-      if (isConnectionError(error)) throw error;
-      return null;
-    });
+    const note = await amplenote.getNoteMetadata(input.noteUUID.trim()).catch(nullIfNotFound);
     if (!note) throw new Error(`No note with id "${input.noteUUID}". Use search-notes to find note ids.`);
     return note;
   }
@@ -81,10 +88,7 @@ export async function findNote(input: { noteUUID?: string; noteName?: string }):
 }
 
 export async function requireTask(taskUUID: string): Promise<Task> {
-  const task = await amplenote.getTask(taskUUID).catch((error) => {
-    if (isConnectionError(error)) throw error;
-    return null;
-  });
+  const task = await amplenote.getTask(taskUUID).catch(nullIfNotFound);
   if (!task) {
     throw new Error(`No task with id "${taskUUID}". Use search-tasks to find task ids.`);
   }
@@ -92,6 +96,11 @@ export async function requireTask(taskUUID: string): Promise<Task> {
 }
 
 export function describeError(error: unknown): never {
+  if (error instanceof AmplenoteTimeoutError) {
+    throw new Error(
+      "Amplenote didn't respond in time. If this was a change, it may have been saved anyway: check with search-notes or search-tasks before retrying, so nothing is created twice.",
+    );
+  }
   if (!isConnectionError(error)) throw error;
   const fix =
     error instanceof AmplenoteAuthError

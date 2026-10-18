@@ -3,7 +3,7 @@ import { AmplenoteAuthError } from "../lib/mcp";
 
 export { isConnectionError } from "../lib/mcp";
 
-export default function ConnectionErrorView(props: { error: unknown; onRetry: () => void }) {
+export default function ConnectionErrorView(props: { error: unknown; onRetry: () => void; isLoading?: boolean }) {
   const markdown =
     props.error instanceof AmplenoteAuthError
       ? `## Check Your MCP Token
@@ -26,6 +26,7 @@ Amplenote must stay open while you use this extension.`;
 
   return (
     <Detail
+      isLoading={props.isLoading}
       markdown={markdown}
       actions={
         <ActionPanel>

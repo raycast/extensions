@@ -1,6 +1,6 @@
 import { Tool } from "@raycast/api";
 import { describeError, parseDate, resolveTargetNote } from "./shared";
-import { isInTaskDomain } from "../lib/api";
+import { isInTaskDomain, isTemporaryId } from "../lib/api";
 import { amplenote } from "../lib/amplenote";
 
 type Input = {
@@ -56,7 +56,7 @@ export default async function (input: Input) {
     if (!content) throw new Error("The task text is empty.");
     const startAt = input.startDate ? parseDate(input.startDate) : null;
     const deadline = input.deadline ? parseDate(input.deadline) : null;
-    const [note, domains] = await Promise.all([resolveTargetNote(input.noteName), amplenote.getTaskDomains()]);
+    const note = await resolveTargetNote(input.noteName);
     const taskUUID = await amplenote.insertTask(note.uuid, {
       content,
       startAt,
@@ -64,12 +64,15 @@ export default async function (input: Input) {
       important: input.important ?? false,
       urgent: input.urgent ?? false,
     });
+    // The task is saved; checking task domains is best effort. null means "unknown": the domains couldn't be
+    // loaded, or the note is so new (temporary id) that domain rules may not have picked it up yet.
+    const domains = isTemporaryId(note.uuid) ? null : await amplenote.getTaskDomains().catch(() => null);
     return {
       taskUUID,
       noteUUID: note.uuid,
       noteName: note.name,
       content,
-      inTaskDomain: isInTaskDomain(domains, note.uuid),
+      inTaskDomain: domains ? isInTaskDomain(domains, note.uuid) : null,
     };
   } catch (error) {
     describeError(error);

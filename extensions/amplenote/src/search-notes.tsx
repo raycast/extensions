@@ -46,14 +46,16 @@ export default function SearchNotes() {
   const search = usePromise(amplenote.searchNotes, [query], { execute: query.length > 0, onError: reportError });
   const { highlighted, isHighlighted, toggle } = useHighlightedTags();
 
-  const error = notes.error ?? tags.error;
-  if (error && isConnectionError(error)) {
+  const error = [notes.error, tags.error, query ? search.error : undefined].find(isConnectionError);
+  if (error) {
     return (
       <ConnectionErrorView
         error={error}
+        isLoading={notes.isLoading || tags.isLoading}
         onRetry={() => {
           notes.revalidate();
           tags.revalidate();
+          if (query) search.revalidate();
         }}
       />
     );
@@ -94,7 +96,13 @@ export default function SearchNotes() {
             <Action.Push
               title="Create Note"
               icon={Icon.NewDocument}
-              target={<CreateNoteForm name={query} tags={tags.data} />}
+              target={<CreateNoteForm name={query} tags={tags.data} onCreated={refresh} />}
+            />
+            <Action
+              title="Refresh"
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={refresh}
             />
           </ActionPanel>
         }

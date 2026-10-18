@@ -10,6 +10,9 @@ import { TaskChange } from "../lib/useTaskChanges";
 
 const MAX_NOTE_NAME = 20;
 
+// Tasks with a change still on its way to Amplenote, shared across rows so re-renders can't bypass it.
+const inFlight = new Set<string>();
+
 /** Dates picked without a time are scheduled at 9:00, like in the task form and the AI tools. */
 function atNine(date: Date): number {
   const scheduled = new Date(date);
@@ -41,6 +44,9 @@ export default function TaskListItem(props: {
     action: () => Promise<unknown>,
     updates?: Partial<Task>,
   ) => {
+    // One change per task at a time, e.g. Complete followed quickly by Dismiss, or Undo pressed twice.
+    if (inFlight.has(task.uuid)) return;
+    inFlight.add(task.uuid);
     const toast = await showToast({ style: Toast.Style.Animated, title: pending });
     try {
       await action();
@@ -57,6 +63,8 @@ export default function TaskListItem(props: {
     } catch (error) {
       toast.hide();
       await showFailureToast(error, { title: `Could not update "${title}"` });
+    } finally {
+      inFlight.delete(task.uuid);
     }
   };
 

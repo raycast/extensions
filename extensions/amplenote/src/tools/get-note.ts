@@ -1,6 +1,6 @@
 import { amplenote } from "../lib/amplenote";
 import { isConnectionError } from "../lib/mcp";
-import { compactNote, describeError } from "./shared";
+import { compactNote, describeError, nullIfNotFound } from "./shared";
 
 type Input = {
   /**
@@ -37,12 +37,8 @@ async function loadBacklinks(noteUUID: string) {
  */
 export default async function (input: Input) {
   try {
-    const notFound = (error: unknown) => {
-      if (isConnectionError(error)) throw error;
-      return null;
-    };
     const [metadata, markdown, backlinks] = await Promise.all([
-      amplenote.getNoteMetadata(input.noteUUID).catch(notFound),
+      amplenote.getNoteMetadata(input.noteUUID).catch(nullIfNotFound),
       amplenote.getNoteContent(input.noteUUID).catch((error) => {
         if (isConnectionError(error)) throw error;
         return undefined;
@@ -52,12 +48,16 @@ export default async function (input: Input) {
     if (!metadata) {
       throw new Error(`No note with id "${input.noteUUID}". Use search-notes to find note ids.`);
     }
+    // Raw Markdown so footnotes and link targets survive. A failed load or a locked Vault note is reported
+    // as such, never as an empty note.
+    const content = metadata.vault
+      ? { content: null, contentError: "This is a locked Vault note. Open it in Amplenote to read it." }
+      : markdown === undefined || markdown === null
+        ? { content: null, contentError: "Could not load this note's content." }
+        : { content: shortenMarkdown(markdown) };
     return {
       ...compactNote(metadata),
-      // Raw Markdown so footnotes and link targets survive; undefined means loading failed, not an empty note.
-      ...(markdown === undefined
-        ? { content: null, contentError: "Could not load this note's content." }
-        : { content: shortenMarkdown(markdown) }),
+      ...content,
       ...backlinks,
     };
   } catch (error) {
