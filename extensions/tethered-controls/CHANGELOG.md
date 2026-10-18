@@ -1,6 +1,22 @@
 # Tethered Changelog
 
-## [Initial Release] - 2026-10-14
+## [Unreleased]
+
+- Reserve Toggle Companion Sync for the upcoming feature; requests currently have no effect.
+
+- Toggle the MCP bridge and view its enabled state and status.
+
+- Show the next enabled upcoming event beside Events in root search, with background subtitle refresh.
+
+- Browse upcoming events and edit or delete them from Raycast.
+- Enable and disable repeating events while preserving their settings.
+- Create Quick Events from typed phrases with a live preview and optional form editing.
+
+- Create scheduled and weekly repeating events for every Tethered Schedule action.
+- Configure durations, wait for AC, and brightness/fan percentages from the launcher.
+- Confirm event creation through the running app and protect existing repeating power events.
+
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Control Tethered power modes, Caffeinate, Topup, Sailing, and Heat Protection from Raycast.
 - Search saved profiles and Caffeinate presets.
