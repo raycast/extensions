@@ -83,20 +83,23 @@ export default function AddTaskForm(props: {
         important,
         urgent,
       });
+      // The task is saved from here on, so a failed domain step is reported instead of aborting.
+      let domainFailed = false;
       if (values.taskDomain && values.taskDomain !== NO_DOMAIN && !isInTaskDomain(domains.data ?? [], noteUUID)) {
-        await amplenote.addNoteToTaskDomain(noteUUID, values.taskDomain);
+        await amplenote.addNoteToTaskDomain(noteUUID, values.taskDomain).catch(() => (domainFailed = true));
       }
+      const added = `Added to ${note?.name ?? "note"}${domainFailed ? ", but could not add the note to the task domain" : ""}`;
       if (props.closeOnSubmit) {
         toast.hide();
         // Must be the last step: popping to root ends the command.
-        await showHUD(`Added to ${note?.name ?? "note"}`, {
+        await showHUD(added, {
           clearRootSearch: true,
           popToRootType: PopToRootType.Immediate,
         });
         return;
       }
-      toast.style = Toast.Style.Success;
-      toast.title = `Added to ${note?.name ?? "note"}`;
+      toast.style = domainFailed ? Toast.Style.Failure : Toast.Style.Success;
+      toast.title = added;
       toast.primaryAction = { title: "Open Note", onAction: () => void open(noteAppUrl(noteUUID)) };
       props.onCreated?.();
       pop();

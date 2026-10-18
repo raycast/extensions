@@ -1,6 +1,7 @@
 import { Tool } from "@raycast/api";
 import { isTemporaryId, normalizeTag, noteUrl, TAG_PATTERN } from "../lib/api";
 import { amplenote } from "../lib/amplenote";
+import { isConnectionError } from "../lib/mcp";
 import { describeError } from "./shared";
 
 type Input = {
@@ -38,10 +39,25 @@ export default async function (input: Input) {
     const invalid = tags.find((tag) => !TAG_PATTERN.test(tag));
     if (invalid) throw new Error(`"${invalid}" is not a valid tag. Use lowercase letters, numbers, dashes, and /.`);
     const createdUUID = await amplenote.createNote(name, tags);
-    if (input.content?.trim()) await amplenote.insertNoteContent(createdUUID, input.content);
+    // The note exists from here on. Report a failed content step instead of throwing, so a retry doesn't
+    // create a duplicate; append-to-note with the returned noteUUID can add the content later.
+    let contentError: string | undefined;
+    if (input.content?.trim()) {
+      await amplenote.insertNoteContent(createdUUID, input.content).catch((error) => {
+        if (isConnectionError(error)) throw error;
+        contentError = "The note was created, but its content could not be added. Use append-to-note to retry.";
+      });
+    }
     // Callers often keep the id, so wait briefly for the permanent one instead of returning the temporary id.
     const noteUUID = await amplenote.waitForPermanentId(createdUUID);
-    return { noteUUID, temporary: isTemporaryId(noteUUID), name, tags, url: noteUrl(noteUUID) };
+    return {
+      noteUUID,
+      temporary: isTemporaryId(noteUUID),
+      name,
+      tags,
+      url: noteUrl(noteUUID),
+      ...(contentError ? { contentError } : {}),
+    };
   } catch (error) {
     describeError(error);
   }

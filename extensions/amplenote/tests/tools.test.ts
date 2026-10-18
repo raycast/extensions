@@ -20,6 +20,7 @@ const { default: updateTask } = await import("../src/tools/update-task");
 const { default: appendToNote } = await import("../src/tools/append-to-note");
 const { default: getNoteTasks } = await import("../src/tools/get-note-tasks");
 const { default: getDailyJot } = await import("../src/tools/get-daily-jot");
+const { default: createNoteTool } = await import("../src/tools/create-note");
 
 function useAmplenote(data: { notes?: Note[]; tasks?: Task[]; completed?: Task[] }) {
   const domain = aTaskDomain();
@@ -310,5 +311,57 @@ describe("get-note backlinks", () => {
     const result = (await getNote({ noteUUID: note.uuid, includeBacklinks: true })) as Record<string, unknown>;
     expect(result.backlinks).toBeNull();
     expect(result.backlinksError).toMatch(/Could not load backlinks/);
+  });
+});
+
+describe("review fixes", () => {
+  it("get-note returns the raw Markdown, keeping footnotes and link targets", async () => {
+    const note = aNote({ name: "Errands" });
+    const markdown = "Go to the [corner store][^1]\n\n[^1]: [corner store]()\n\n    At 123 Street.";
+    state.api = createApi(
+      fakeAmplenote({ getNoteMetadata: () => ({ note }), getNoteContent: () => ({ markdown }) }).call,
+    );
+    expect((await getNote({ noteUUID: note.uuid }))?.content).toBe(markdown);
+  });
+
+  it("get-note says when the content could not be loaded instead of returning an empty note", async () => {
+    const note = aNote();
+    state.api = createApi(
+      fakeAmplenote({
+        getNoteMetadata: () => ({ note }),
+        getNoteContent: () => {
+          throw new Error("tool error");
+        },
+      }).call,
+    );
+    const result = (await getNote({ noteUUID: note.uuid })) as Record<string, unknown>;
+    expect(result.content).toBeNull();
+    expect(result.contentError).toMatch(/Could not load/);
+  });
+
+  it("create-note returns the created note when adding its content fails, so a retry doesn't duplicate it", async () => {
+    const fake = fakeAmplenote({
+      createNote: () => ({ noteUUID: "real-1" }),
+      insertNoteContent: () => {
+        throw new Error("tool error");
+      },
+    });
+    state.api = createApi(fake.call);
+
+    const result = (await createNoteTool({ name: "Plan", content: "Body" })) as Record<string, unknown>;
+
+    expect(result.noteUUID).toBe("real-1");
+    expect(result.contentError).toMatch(/append-to-note/);
+    expect(fake.callsTo("createNote")).toHaveLength(1);
+  });
+
+  it("get-note-tasks never creates today's Daily Jot", async () => {
+    const fake = fakeAmplenote({ filterNotes: () => ({ notes: [] }) });
+    state.api = createApi(fake.call);
+
+    const result = await getNoteTasks({});
+
+    expect(result).toMatchObject({ noteUUID: null, exists: false, total: 0, tasks: [] });
+    expect(fake.callsTo("createNote")).toHaveLength(0);
   });
 });

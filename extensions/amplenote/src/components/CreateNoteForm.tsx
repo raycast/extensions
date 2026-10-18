@@ -93,17 +93,18 @@ export default function CreateNoteForm(props: {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Creating note…" });
     try {
       const noteUUID = await amplenote.createNote(name, selectedTags);
-      if (values.taskDomain && values.taskDomain !== NO_DOMAIN) {
-        await amplenote.addNoteToTaskDomain(noteUUID, values.taskDomain);
-      }
-      let contentFailed = false;
+      // The note exists from here on, so later steps report failures instead of aborting (a retry would duplicate it).
+      const failed: string[] = [];
       if (values.content.trim()) {
-        contentFailed = await amplenote.insertNoteContent(noteUUID, values.content).then(
-          () => false,
-          () => true,
-        );
+        await amplenote.insertNoteContent(noteUUID, values.content).catch(() => failed.push("add its content"));
       }
-      const message = contentFailed ? `Created "${name}", but could not add its content` : `Created "${name}"`;
+      if (values.taskDomain && values.taskDomain !== NO_DOMAIN) {
+        await amplenote
+          .addNoteToTaskDomain(noteUUID, values.taskDomain)
+          .catch(() => failed.push("add it to the task domain"));
+      }
+      const contentFailed = failed.length > 0;
+      const message = contentFailed ? `Created "${name}", but could not ${failed.join(" or ")}` : `Created "${name}"`;
       props.onCreated?.();
       if (props.closeOnSubmit || values.openAfterCreate) {
         toast.hide();

@@ -1,4 +1,4 @@
-import { Action, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import ConnectionErrorView, { isConnectionError } from "./components/ConnectionErrorView";
@@ -58,14 +58,14 @@ export default function SearchTasks() {
     );
   };
 
-  const visible = changes
-    .apply(data.data?.tasks ?? [])
+  const matching = changes.apply(data.data?.tasks ?? []).filter((task) => {
+    if (filter.startsWith("domain:")) return task.domainUUIDs.includes(filter.slice("domain:".length));
+    const note = notesByUUID.get(task.noteUUID);
+    return note ? matchesTagFilter(note.tags, filter) : filter === ALL;
+  });
+  const hiddenCount = showHidden ? 0 : matching.filter((task) => isHidden(task)).length;
+  const visible = matching
     .filter((task) => showHidden || !isHidden(task))
-    .filter((task) => {
-      if (filter.startsWith("domain:")) return task.domainUUIDs.includes(filter.slice("domain:".length));
-      const note = notesByUUID.get(task.noteUUID);
-      return note ? matchesTagFilter(note.tags, filter) : filter === ALL;
-    })
     .sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
 
   const completedDays = [
@@ -132,7 +132,22 @@ export default function SearchTasks() {
         icon={Icon.CheckCircle}
         title={showCompleted ? "No completed tasks" : "No open tasks"}
         description={
-          showCompleted ? `Nothing completed in the last ${COMPLETED_DAYS} days.` : "Nothing matches this filter."
+          showCompleted
+            ? `Nothing completed in the last ${COMPLETED_DAYS} days.`
+            : hiddenCount > 0
+              ? `${hiddenCount} hidden ${hiddenCount === 1 ? "task" : "tasks"}. Press ⌘⇧H to show ${hiddenCount === 1 ? "it" : "them"}.`
+              : "Nothing matches this filter."
+        }
+        actions={
+          <ActionPanel>
+            {hiddenToggle}
+            <Action
+              title="Refresh"
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={refresh}
+            />
+          </ActionPanel>
         }
       />
       {showCompleted

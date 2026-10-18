@@ -60,6 +60,14 @@ export async function resolveTargetNote(noteName?: string): Promise<Note> {
 
 /** Finds the note an AI tool refers to: by id, by exact name, or today's Daily Jot when neither is given. */
 export async function resolveNote(input: { noteUUID?: string; noteName?: string }): Promise<Note> {
+  const note = await findNote(input);
+  return note ?? amplenote.findOrCreateDailyJot();
+}
+
+/**
+ * Like resolveNote, but never creates anything: returns undefined when today's Daily Jot doesn't exist yet.
+ */
+export async function findNote(input: { noteUUID?: string; noteName?: string }): Promise<Note | undefined> {
   if (input.noteUUID?.trim()) {
     const note = await amplenote.getNoteMetadata(input.noteUUID.trim()).catch((error) => {
       if (isConnectionError(error)) throw error;
@@ -68,7 +76,8 @@ export async function resolveNote(input: { noteUUID?: string; noteName?: string 
     if (!note) throw new Error(`No note with id "${input.noteUUID}". Use search-notes to find note ids.`);
     return note;
   }
-  return resolveTargetNote(input.noteName);
+  if (input.noteName?.trim()) return resolveTargetNote(input.noteName);
+  return amplenote.findDailyJot();
 }
 
 export async function requireTask(taskUUID: string): Promise<Task> {

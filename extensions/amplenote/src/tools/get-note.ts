@@ -1,4 +1,3 @@
-import { displayMarkdown } from "../lib/api";
 import { amplenote } from "../lib/amplenote";
 import { isConnectionError } from "../lib/mcp";
 import { compactNote, describeError } from "./shared";
@@ -15,6 +14,12 @@ type Input = {
 };
 
 const MAX_BACKLINKS = 50;
+const MAX_CONTENT = 30_000;
+
+function shortenMarkdown(markdown: string): string {
+  if (markdown.length <= MAX_CONTENT) return markdown;
+  return `${markdown.slice(0, MAX_CONTENT)}\n\n_Note shortened. Open it in Amplenote to read all of it._`;
+}
 
 async function loadBacklinks(noteUUID: string) {
   try {
@@ -38,7 +43,10 @@ export default async function (input: Input) {
     };
     const [metadata, markdown, backlinks] = await Promise.all([
       amplenote.getNoteMetadata(input.noteUUID).catch(notFound),
-      amplenote.getNoteContent(input.noteUUID).catch(notFound),
+      amplenote.getNoteContent(input.noteUUID).catch((error) => {
+        if (isConnectionError(error)) throw error;
+        return undefined;
+      }),
       input.includeBacklinks ? loadBacklinks(input.noteUUID) : undefined,
     ]);
     if (!metadata) {
@@ -46,7 +54,10 @@ export default async function (input: Input) {
     }
     return {
       ...compactNote(metadata),
-      content: displayMarkdown(markdown ?? "", { headingOffset: 0, limit: 30_000 }),
+      // Raw Markdown so footnotes and link targets survive; undefined means loading failed, not an empty note.
+      ...(markdown === undefined
+        ? { content: null, contentError: "Could not load this note's content." }
+        : { content: shortenMarkdown(markdown) }),
       ...backlinks,
     };
   } catch (error) {
