@@ -9,7 +9,6 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { ExtensionPreferences } from "./preferences";
 import { useEffect, useRef, useState } from "react";
 import {
   failureMessage,
@@ -73,7 +72,7 @@ function ModePicker() {
     applying.current = true;
     setIsApplying(true);
     try {
-      const { closeWindow } = getPreferenceValues<ExtensionPreferences>();
+      const { closeWindow } = getPreferenceValues<Preferences>();
       // Apply even the highlighted mode: another app may have changed it since
       // the picker loaded. Only the helper's confirmed result is authoritative.
       const status = await setMenuBarMode(mode);

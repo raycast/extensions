@@ -6,7 +6,7 @@ import {
   updateCommandSubtitle,
   updateStatusSubtitle,
 } from "./menu-bar";
-import { ExtensionPreferences, togglePreferences } from "./preferences";
+import { togglePreferences } from "./preferences";
 
 export default async function command() {
   if (environment.launchType === LaunchType.Background) {
@@ -20,7 +20,7 @@ export default async function command() {
   }
 
   try {
-    const { firstMode, secondMode, closeWindow } = togglePreferences(getPreferenceValues<ExtensionPreferences>());
+    const { firstMode, secondMode, closeWindow } = togglePreferences(getPreferenceValues<Preferences>());
     if (closeWindow) await closeMainWindow();
     const status = await toggleMenuBarModes(firstMode, secondMode);
     await updateStatusSubtitle(status.label);

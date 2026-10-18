@@ -2,10 +2,14 @@
 #import <Foundation/Foundation.h>
 
 #include <dlfcn.h>
+#include <fcntl.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/file.h>
 #include <unistd.h>
 
 typedef uint32_t CGSConnectionID;
@@ -167,27 +171,144 @@ static int readCurrentOption(void) {
   return visibleInFullScreen ? 3 : 2;
 }
 
+static int readControlCenterOption(void) {
+  CFPropertyListRef storedValue = CFPreferencesCopyAppValue(
+      CFSTR("AutoHideMenuBarOption"), CFSTR("com.apple.controlcenter"));
+  if (storedValue == NULL ||
+      CFGetTypeID(storedValue) != CFNumberGetTypeID()) {
+    if (storedValue != NULL) {
+      CFRelease(storedValue);
+    }
+    return -1;
+  }
+
+  int32_t option = -1;
+  const bool valid = CFNumberGetValue((CFNumberRef)storedValue,
+                                      kCFNumberSInt32Type, &option) &&
+                     option >= 0 && option <= 3;
+  CFRelease(storedValue);
+  return valid ? (int)option : -1;
+}
+
+static int readCurrentOptionWithFallback(void) {
+  const int option = readCurrentOption();
+  if (option >= 0) {
+    return option;
+  }
+  // The global preferences are authoritative. The Control Center value only
+  // mirrors the popup selection and can lag behind, but it is better than
+  // failing when the globals are temporarily unreadable.
+  return readControlCenterOption();
+}
+
+static bool parseOption(const char *text, int *option) {
+  char *end = NULL;
+  const long value = strtol(text, &end, 10);
+  if (end == text || *end != '\0' || value < 0 || value > 3) {
+    return false;
+  }
+  *option = (int)value;
+  return true;
+}
+
+static void mutationLockPath(char *buffer, size_t capacity) {
+  const char *override = getenv("MENU_BAR_MUTATION_LOCK_FILE");
+  if (override != NULL && *override != '\0') {
+    snprintf(buffer, capacity, "%s", override);
+    return;
+  }
+  const char *tmpdir = getenv("TMPDIR");
+  if (tmpdir == NULL || *tmpdir == '\0') {
+    tmpdir = "/tmp";
+  }
+  snprintf(buffer, capacity, "%s/toggle-menu-bar-mutation.lock", tmpdir);
+}
+
+static int acquireModeLock(bool shared) {
+  char path[PATH_MAX];
+  mutationLockPath(path, sizeof(path));
+
+  const int fd = open(path, O_CREAT | O_RDWR, 0600);
+  if (fd < 0) {
+    fprintf(stderr, "Could not open the menu bar mutation lock (%s)\n", path);
+    return -1;
+  }
+  // Shared reads wait for an exclusive pulse to finish. Mutations retain the
+  // exclusive lock across their read, target choice, and pulse. The kernel
+  // releases either lock automatically if the process dies.
+  if (flock(fd, shared ? LOCK_SH : LOCK_EX) != 0) {
+    fprintf(stderr, "Could not acquire the menu bar mode lock\n");
+    close(fd);
+    return -1;
+  }
+  return fd;
+}
+
 int main(int argc, const char *argv[]) {
   @autoreleasepool {
-    if (argc != 2) {
-      fprintf(stderr, "Expected one menu bar option (0-3)\n");
+    int firstOption = -1;
+    int secondOption = -1;
+    int targetOption = -1;
+    bool resolveToggle = false;
+    bool readStatus = false;
+
+    if (argc == 2 && strcmp(argv[1], "status") == 0) {
+      readStatus = true;
+    } else if (argc == 3 && strcmp(argv[1], "set") == 0) {
+      if (!parseOption(argv[2], &targetOption)) {
+        fprintf(stderr, "Invalid menu bar option: %s\n", argv[2]);
+        return 2;
+      }
+    } else if (argc == 4 && strcmp(argv[1], "toggle") == 0) {
+      if (!parseOption(argv[2], &firstOption) ||
+          !parseOption(argv[3], &secondOption)) {
+        fprintf(stderr, "Invalid toggle options: %s %s\n", argv[2], argv[3]);
+        return 2;
+      }
+      resolveToggle = true;
+    } else {
+      fprintf(stderr,
+              "Usage: %s status | set OPTION | toggle FIRST SECOND\n"
+              "Options: 0 (Always), 1 (On Desktop Only), 2 (In Full Screen "
+              "Only), 3 (Never)\n",
+              argv[0]);
       return 2;
     }
 
-    char *end = NULL;
-    long parsedOption = strtol(argv[1], &end, 10);
-    if (end == argv[1] || *end != '\0' || parsedOption < 0 ||
-        parsedOption > 3) {
-      fprintf(stderr, "Invalid menu bar option: %s\n", argv[1]);
-      return 2;
+    const int lockFd = acquireModeLock(readStatus);
+    if (lockFd < 0) {
+      return 1;
+    }
+
+    if (readStatus) {
+      const int currentOption = readCurrentOptionWithFallback();
+      if (currentOption < 0) {
+        fprintf(stderr, "Could not determine the current menu bar mode\n");
+        close(lockFd);
+        return 1;
+      }
+      printf("option=%d\n", currentOption);
+      close(lockFd);
+      return 0;
     }
 
     SkyLightFunctions skyLight = {0};
     if (!loadSkyLightFunctions(&skyLight)) {
+      close(lockFd);
       return 1;
     }
 
-    const int targetOption = (int)parsedOption;
+    if (resolveToggle) {
+      const int currentOption = readCurrentOptionWithFallback();
+      if (currentOption < 0) {
+        fprintf(stderr, "Could not determine the current menu bar mode\n");
+        dlclose(skyLight.handle);
+        close(lockFd);
+        return 1;
+      }
+      targetOption =
+          (currentOption == firstOption) ? secondOption : firstOption;
+    }
 
     // Traverse the four states in Gray-code order, starting and ending on the
     // target. Every notified transition flips exactly one real preference, so
@@ -225,6 +346,7 @@ int main(int argc, const char *argv[]) {
       (void)writeMode(targetOption, true, &skyLight);
       postRefreshNotifications();
       dlclose(skyLight.handle);
+      close(lockFd);
       return 1;
     }
 
@@ -239,6 +361,7 @@ int main(int argc, const char *argv[]) {
     // the deliberately transient pulse modes.
     if (!writeMode(targetOption, true, &skyLight)) {
       dlclose(skyLight.handle);
+      close(lockFd);
       return 1;
     }
     usleep(100000);
@@ -248,12 +371,14 @@ int main(int argc, const char *argv[]) {
     if (appliedOption != targetOption) {
       fprintf(stderr, "macOS did not retain the requested menu bar mode\n");
       dlclose(skyLight.handle);
+      close(lockFd);
       return 1;
     }
 
     printf("option=%d\n", appliedOption);
 
     dlclose(skyLight.handle);
+    close(lockFd);
   }
 
   return 0;
