@@ -238,6 +238,43 @@ test.each(["first", ""])("pushed creation can select another account from %j", a
   expect(await listRecovery("first")).toHaveLength(0);
   expect(await listRecovery("second")).toEqual([expect.objectContaining({ id: 41, verified: true })]);
 });
+test("returning from creation refreshes the account selected in the pushed form", async () => {
+  await saveAccount(account);
+  await saveAccount(other);
+  await setDefaultAccount("first");
+  const requestedCookies: string[] = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (_url: RequestInfo | URL, options?: RequestInit) => {
+      const cookie = new Headers(options?.headers).get("Cookie") ?? "";
+      requestedCookies.push(cookie);
+      const second = cookie.includes("substack.sid=other");
+      return Response.json({
+        posts: [
+          {
+            id: second ? 2 : 1,
+            draft_title: second ? "Second account draft" : "First account draft",
+            type: "newsletter",
+            is_published: false,
+          },
+        ],
+        offset: 0,
+        limit: 25,
+        total: 1,
+      });
+    }),
+  );
+  render(<ListMyDrafts />);
+  await screen.findByRole("heading", { name: "First account draft" });
+  fireEvent.click(screen.getAllByRole("button", { name: "Create Draft" })[0]);
+  change("Account", "second");
+  await screen.findByRole("heading", { name: "Second account draft" });
+  fireEvent.click(screen.getByRole("button", { name: "Back" }));
+  await waitFor(() => expect(requestedCookies).toHaveLength(3));
+  expect(requestedCookies[2]).toBe("substack.sid=other");
+  await screen.findByRole("heading", { name: "Second account draft" });
+  expect((screen.getByLabelText("Select a Substack account") as HTMLSelectElement).value).toBe("second");
+});
 test("draft list paginates remote results, merges recovery and refreshes", async () => {
   await saveAccount(account);
   await rememberDraft("first", "Remote", { id: 42, editorUrl: "https://example.substack.com/publish/post/42" }, false);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Action, ActionPanel, Clipboard, Icon, Keyboard, List, open } from "@raycast/api";
 
@@ -47,6 +47,9 @@ export default function ListMyDrafts() {
     refresh,
     loadMore,
   } = useDrafts(account);
+  // Pushed screens retain their original onPop callback across account changes.
+  const refreshOnReturn = useRef(refresh);
+  refreshOnReturn.current = refresh;
   if (error || (!isLoading && !accounts.length))
     return (
       <AccountSetup
@@ -62,7 +65,7 @@ export default function ListMyDrafts() {
       shortcut={Keyboard.Shortcut.Common.New}
       target={<CreateDraftView accounts={accounts} initialAccountId={selectedId} onAccountChange={setSelectedId} />}
       onPop={() => {
-        void refresh();
+        void refreshOnReturn.current();
       }}
     />
   );
@@ -86,13 +89,12 @@ export default function ListMyDrafts() {
       shortcut={Keyboard.Shortcut.Common.Edit}
       target={<EditDraftForm accountId={selectedId} draftId={draft.id} editorUrl={draft.editorUrl} />}
       onPop={() => {
-        void refresh();
+        void refreshOnReturn.current();
       }}
     />
   );
   return (
     <List
-      navigationTitle="My Substack Drafts"
       isLoading={isLoading || loadingDrafts}
       searchBarPlaceholder="Search unpublished drafts"
       searchBarAccessory={<AccountSelector accounts={accounts} value={selectedId} onChange={setSelectedId} />}

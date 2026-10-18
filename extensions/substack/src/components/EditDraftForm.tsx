@@ -111,10 +111,10 @@ export default function EditDraftForm({
       }
     >
       <Form.Description title="Account" text={`${loaded.account.label} (${loaded.account.publication})`} />
-      <Form.TextField title="Title" {...itemProps.title} />
-      <Form.TextField title="Subtitle" {...itemProps.subtitle} />
+      <Form.TextField title="Title" placeholder="Newsletter title" {...itemProps.title} />
+      <Form.TextField title="Subtitle" placeholder="Optional subtitle" {...itemProps.subtitle} />
       {loaded.markdown !== undefined ? (
-        <Form.TextArea title="Markdown" {...itemProps.markdown} />
+        <Form.TextArea title="Markdown" placeholder="Paste your newsletter body" {...itemProps.markdown} />
       ) : (
         <Form.Description text="This draft has rich content. Its body will be preserved when you save title or subtitle changes. Open it in Substack to edit the full body." />
       )}

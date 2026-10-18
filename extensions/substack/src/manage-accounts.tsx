@@ -95,7 +95,7 @@ function AccountForm({ accountId, onSaved }: { accountId?: string; onSaved: () =
       <Form.PasswordField title="Substack Session Cookie" {...itemProps.sessionCookie} />
       <Form.PasswordField title="Connect Session Cookie (Optional)" {...itemProps.connectCookie} />
       <Form.TextField title="Account Label (Optional)" placeholder="Defaults to Publication" {...itemProps.label} />
-      <Form.Description text="Use the canonical Substack publication name. Paste cookie values only. Leave the connect session cookie blank unless your account requires it. Saved connections and recovery links use Raycast's encrypted local storage." />
+      <Form.Description text="Use the canonical Substack publication name. Paste cookie values only (`substack.sid`). Leave the connect session cookie blank unless your account requires it. Saved connections and recovery links use Raycast's encrypted local storage." />
     </Form>
   );
 }
@@ -133,6 +133,7 @@ export default function ManageAccounts() {
   return (
     <List
       isLoading={isLoading}
+      searchBarPlaceholder="Search accounts"
       actions={
         <ActionPanel>
           {add}
