@@ -15,5 +15,5 @@
     "resolveJsonModule": true,
     "types": ["node"]
   },
-  "include": ["src", "tests", "raycast-env.d.ts"]
+  "include": ["src", "raycast-env.d.ts"]
 }
