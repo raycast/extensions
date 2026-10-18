@@ -115,12 +115,13 @@ export function parseEvent(input: string, now = new Date()): ParsedEvent {
   }
   const [hour, minute] = time.split(":").map(Number);
   const date = new Date(now);
-  date.setHours(hour, minute, 0, 0);
+  date.setHours(12, 0, 0, 0);
+  const clockHasPassed = hour * 60 + minute <= now.getHours() * 60 + now.getMinutes();
   if (day === "tomorrow") date.setDate(date.getDate() + 1);
   else if (day === "today") {
     date.setDate(now.getDate());
   } else if (!day) {
-    if (date <= now) date.setDate(date.getDate() + 1);
+    if (clockHasPassed) date.setDate(date.getDate() + 1);
   } else if (/^\d{4}-\d{2}-\d{2}$/.test(day)) {
     const [year, month, dayOfMonth] = day.split("-").map(Number);
     date.setFullYear(year, month - 1, dayOfMonth);
@@ -131,9 +132,10 @@ export function parseEvent(input: string, now = new Date()): ParsedEvent {
     if (!token) throw new Error("Use today, tomorrow, YYYY-MM-DD, or a weekday. Prefix every for weekly repetition.");
     const target = ["U", "M", "T", "W", "R", "F", "S"].indexOf(token);
     let offset = (target - now.getDay() + 7) % 7;
-    if (offset === 0 && (date <= now || day.startsWith("next "))) offset = 7;
+    if (offset === 0 && (clockHasPassed || day.startsWith("next "))) offset = 7;
     date.setDate(date.getDate() + offset);
   }
+  date.setHours(hour, minute, 0, 0);
   if (date.getHours() !== hour || date.getMinutes() !== minute)
     throw new Error("That local time does not exist on this date because of a clock change. Choose another time.");
   values.date = date;

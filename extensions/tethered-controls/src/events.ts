@@ -63,7 +63,11 @@ export async function eventRequest(path: "create" | "manage", values: Record<str
   await sendToTethered(`tethered://control/events/${path}?${query}`);
   const deadline = Date.now() + (values.operation === "list" ? 12000 : 120000);
   while (Date.now() < deadline) {
-    const result = await readStoredData("raycastEventResult").catch(() => undefined);
+    const responses = await readStoredData("raycastEventResponses").catch(() => undefined);
+    const result =
+      typeof responses === "object" && responses !== null
+        ? (responses as Record<string, unknown>)[query.get("request")!]
+        : undefined;
     if (
       typeof result === "object" &&
       result !== null &&

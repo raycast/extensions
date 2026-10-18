@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { refreshEventsSubtitle } from "./event-subtitle";
 import {
   actions,
@@ -37,15 +37,20 @@ export default function EventForm({ repeating, event, initial, onSaved, refreshS
   );
   const [isLoading, setIsLoading] = useState(false);
   const [saved, setSaved] = useState(false);
+  const revision = useRef(0);
+  const saving = useRef(false);
   const { pop } = useNavigation();
   const control = values.action === "brightness" || values.action === "fans";
   const update = (change: Partial<EventValues>) => {
+    revision.current += 1;
     setValues((previous) => ({ ...previous, ...change }));
     setSaved(false);
   };
 
   async function submit() {
-    if (isLoading || saved) return;
+    if (saving.current || saved) return;
+    saving.current = true;
+    const submittedRevision = revision.current;
     setIsLoading(true);
     let toast: Toast | undefined;
     try {
@@ -53,17 +58,19 @@ export default function EventForm({ repeating, event, initial, onSaved, refreshS
       if (event) query.id = event.id;
       toast = await showToast({ style: Toast.Style.Animated, title: event ? "Updating event" : "Saving event" });
       const result = await eventRequest("create", query);
-      setSaved(true);
-      toast.style = Toast.Style.Success;
-      toast.title = event ? "Event updated" : "Event saved";
-      toast.message = result.message;
       if (refreshSubtitleOnSave) await refreshEventsSubtitle();
+      const unchanged = revision.current === submittedRevision;
+      setSaved(unchanged);
+      toast.style = Toast.Style.Success;
+      toast.title = unchanged ? (event ? "Event updated" : "Event saved") : "Previous settings saved";
+      toast.message = unchanged ? result.message : "Your newer changes are still unsaved. Save again to apply them.";
       onSaved?.();
-      if (event) pop();
+      if (event && unchanged) pop();
     } catch (error) {
       await toast?.hide();
       await showFailureToast(error, { title: "Could not confirm event save" });
     } finally {
+      saving.current = false;
       setIsLoading(false);
     }
   }

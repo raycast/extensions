@@ -1,6 +1,6 @@
 # Tethered Changelog
 
-## [Unreleased]
+## [Event Scheduling and Bridge Controls] - {PR_MERGE_DATE}
 
 - Reserve Toggle Companion Sync for the upcoming feature, with app-confirmed unavailable errors and success/failure acknowledgments.
 
