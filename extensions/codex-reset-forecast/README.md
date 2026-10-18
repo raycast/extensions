@@ -37,7 +37,7 @@ dates published by codex-reset.com.
 - **Time Since Last Reset** — for example, `5h`.
 
 Use **Menu Bar Settings…** in its dropdown to choose the display. The dropdown
-includes both probabilities, confidence, watch status, recent verified resets,
+includes both probabilities, the last global reset, recent reset records,
 and links to the outlook, calendar, and data source.
 **Hide from Menu Bar** keeps it hidden until you run the command again.
 

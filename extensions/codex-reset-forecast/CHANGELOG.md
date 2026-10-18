@@ -9,6 +9,7 @@
 - Add visible data-source credit, one-minute refresh limits, and rate-limit handling.
 - Use a fresh source-specific cache to exclude data from the retired provider.
 - Wait for shared data when commands overlap during the first load.
+- Simplify the menu bar to probabilities, the last global reset, and recent reset records.
 
 ## [Initial Version] - 2026-09-11
 

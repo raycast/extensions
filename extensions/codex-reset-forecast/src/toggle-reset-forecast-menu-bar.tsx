@@ -13,7 +13,6 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { SOURCE_CREDIT, WEBSITE_URL } from "./api/forecast-client";
-import { alertTitle, confidenceLabel } from "./domain/forecast-copy";
 import { forecastIconAsset } from "./domain/forecast-icon";
 import {
   forecastTooltip,
@@ -84,16 +83,6 @@ function ForecastMenuBar({ onHide }: { onHide: () => void }) {
               icon={Icon.Clock}
               onAction={openHistory}
             />
-          </MenuBarExtra.Section>
-          <MenuBarExtra.Section title="Source Outlook">
-            <MenuBarExtra.Item title="Model Confidence" subtitle={confidenceLabel(response)} onAction={openHistory} />
-            <MenuBarExtra.Item
-              title={response.forecast?.hasOfficialSignal ? "Official Reset Watch Active" : "No Active Official Watch"}
-              onAction={openHistory}
-            />
-            {response.forecast?.latestAlert ? (
-              <MenuBarExtra.Item title={alertTitle(response.forecast.latestAlert)} onAction={openHistory} />
-            ) : null}
           </MenuBarExtra.Section>
           <MenuBarExtra.Section title="Last Global Reset">
             <MenuBarExtra.Item
