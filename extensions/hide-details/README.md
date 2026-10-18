@@ -13,14 +13,15 @@
     <br/>
 </div>
 
-Hide Details is a Raycast extension that detects sensitive text and faces in clipboard images so you can redact them before sharing. Review what it found or copy a redacted image with a single command. All processing happens locally on your Mac using Apple Vision.
+Hide Details is a Raycast extension that detects sensitive text and faces in clipboard images so you can redact them before sharing. Review what it found or copy a redacted image with a single command. All processing happens locally: on macOS with Apple Vision, and on Windows with the built-in Windows OCR and face detection APIs.
 
 ## Commands
 
-| Command                | Description                                                                                   |
-| ---------------------- | --------------------------------------------------------------------------------------------- |
-| Redact Clipboard Image | Scan the clipboard image, review the detected details, and copy the redacted image.           |
-| Redact and Copy        | Scan and redact the clipboard image immediately, then copy the result without opening a view. |
+| Command                        | Description                                                                                   |
+| ------------------------------ | --------------------------------------------------------------------------------------------- |
+| Redact Clipboard Image         | Scan the clipboard image, review the detected details, and copy the redacted image.           |
+| Redact and Copy                | Scan and redact the clipboard image immediately, then copy the result without opening a view. |
+| Redact Image File from History | Pick a recently copied image file, then review it or copy a redacted version.                 |
 
 ## How to use
 
@@ -32,6 +33,14 @@ Hide Details is a Raycast extension that detects sensitive text and faces in cli
 For a quicker workflow, assign a hotkey to **Redact and Copy** in Raycast. Copy an image, press the hotkey, then paste.
 
 If you copy something else while **Redact and Copy** is processing, it preserves the newer clipboard and asks you to run the command again. Copying from the review view is an explicit action and replaces the current clipboard.
+
+## Clipboard history
+
+If the clipboard holds text or another non-image item, both clipboard commands use the newest copied image file in recent Raycast clipboard history instead. The review view marks this result with a **History** tag and says which entry it used. **Redact and Copy** includes the entry in its confirmation. It still keeps anything you copy while it is processing.
+
+Run **Redact Image File from History** to choose a recently copied image file. Copy the file in Finder or Explorer first. The command checks the six latest history entries available to extensions. Select a file to review it, or choose **Redact and Copy** to copy the redacted version right away. Thumbnails show the original, unredacted files. The time under each file is its modification time.
+
+Screenshot images in history are unavailable through Raycast's clipboard API. To redact a screenshot, copy it onto the current clipboard and run **Redact Clipboard Image** or **Redact and Copy**. The history picker and fallback support copied image files only.
 
 Use **Scan Current Clipboard Again** to retry with your saved preferences. Use **Scan Current Clipboard with Accurate OCR** for difficult text. These actions read the image currently on your clipboard and replace the previous preview. The Accurate OCR action applies to that scan without changing your saved Text Recognition preference.
 
@@ -58,6 +67,16 @@ Copying saves readable clipboard data in memory for recovery if the image write 
 Text detections redact the full line recognized by OCR. Automatic detection can miss details, so check the resulting image before sharing it.
 
 Card and phone detection checks numbers separately from neighboring numeric details. This includes cards beside expiry dates, phones beside ticket numbers, adjacent phone numbers, and phones beside IPv4 addresses. Other long numeric identifiers can resemble phone numbers and cause extra lines to be masked.
+
+## Windows
+
+On Windows, Hide Details runs a bundled Windows PowerShell script that uses Windows OCR, Windows face detection, and System.Drawing. It needs Windows 10 or later and a display language with OCR support installed. Some features differ from macOS:
+
+- Personal names are detected only from **Always Hide These Words**. Windows has no built-in name recognition.
+- Windows OCR and face detection don't report confidence, so the review list shows no percentages.
+- **Accurate** text recognition scans an image upscaled 2x, which helps with small text.
+- **Custom Regex** uses [.NET regular expression syntax](https://learn.microsoft.com/dotnet/standard/base-types/regular-expression-language-quick-reference). Common patterns, including `(?i)`, work the same on both platforms.
+- **Smooth Blur** downsamples and smooths each region rather than applying a Gaussian blur.
 
 ## Preferences
 
@@ -107,7 +126,7 @@ Custom Regex applies independently of **What to Hide**. Uncheck all categories i
 
 ## Privacy
 
-Images are processed on your Mac without uploads. Clipboard images are read directly into memory. The extension does not write unencrypted originals to disk. To let you reverse exclusions without rereading a changed clipboard, an active review retains an AES-GCM encrypted snapshot in its private temporary directory. Its random key stays in command memory. The immediate command does not create this snapshot.
+Images are processed on your computer without uploads. Clipboard images are read directly into memory. The extension does not write unencrypted originals to disk. To let you reverse exclusions without rereading a changed clipboard, an active review retains an AES-GCM encrypted snapshot in its private temporary directory. Its random key stays in command memory. The immediate command does not create this snapshot.
 
 Each scan owns an output image (which may reveal explicitly excluded detections) in a private temporary directory. The immediate command removes it after copying or a copy failure. The review command removes its output and encrypted snapshot when the scan is replaced or the view closes, and discards the snapshot key. Each successful edit removes the previous output. Output files abandoned by a stopped process are removed after 24 hours on a later run. Live review results are preserved. Temporary files from older versions use a 24-hour cleanup threshold.
 
@@ -117,7 +136,7 @@ The output is a flattened PNG with no editable layers.
 
 | Issue                                       | What to do                                                                                                                                             |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Clipboard has no image                      | Copy the image itself, then choose **Scan Current Clipboard Again**. A text-only clipboard cannot be redacted.                                         |
+| Clipboard has no image                      | Copy a screenshot onto the current clipboard or copy an image file in Finder or Explorer. Screenshot images stored only in history are unavailable.    |
 | Clipboard changed while scanning            | The scan or automatic copy stopped. Run the command again for the image currently on your clipboard.                                                   |
 | Small or difficult text was missed          | Use **Scan Current Clipboard with Accurate OCR** and inspect the new preview. The first Accurate scan can take longer while macOS prepares its models. |
 | Unknown category or invalid padding         | Open **Configure What to Hide** to save a valid category selection, or set padding from `0` to `1000` in extension preferences.                        |
@@ -125,6 +144,8 @@ The output is a flattened PNG with no editable layers.
 | Preview expired or output could not be read | Scan the current clipboard again to create a new result.                                                                                               |
 
 ## Development
+
+Windows code lives in `assets/windows/hide-details.ps1` (image I/O, OCR, faces, rendering, clipboard) and `src/detection.ts` (text classification and OCR coordinate conversion). Windows OCR boxes are rotated by the reported text angle around the OCR image's center, then scaled to the original dimensions before masking. `npm test` checks this conversion, the helper protocol, and the TypeScript rules against the Swift rules on the same text. The PowerShell script itself needs manual testing on Windows.
 
 Requires macOS 14 or newer, Raycast, Node.js 22.22.2 or newer, and Xcode with Swift 6.3 or newer for the Swift build plugins.
 

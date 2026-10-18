@@ -6,6 +6,13 @@
 - Configure What to Hide with checkboxes shared by both commands, preserving legacy category preferences and offering a reversible migration.
 - Retain an encrypted temporary snapshot during review so exclusions can be reversed without rereading the clipboard; remove it when the scan closes.
 
+## [Windows Support and Clipboard History] - {PR_MERGE_DATE}
+
+- Add Windows support with on-device Windows OCR and face detection.
+- Add **Redact Image File from History** to pick a recently copied image file, then review it or copy a redacted version.
+- When the clipboard has no image, use the newest copied image file in recent history. Screenshot images stored only in history are unavailable.
+- Keep Windows text masks aligned with rotated text and resized OCR images.
+
 ## Initial Version - 2026-10-08
 
 - Redact sensitive details in clipboard images using on-device text and face detection.
