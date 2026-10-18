@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Fix Multiline Skill Descriptions] - {PR_MERGE_DATE}
+## [Fix Multiline Skill Descriptions] - 2026-10-18
 
 - Show complete descriptions from multiline YAML frontmatter in Search Skills and Manage Skills details
 - Ignore invalid frontmatter metadata so skill details remain readable
