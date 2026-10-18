@@ -7,7 +7,8 @@ import RaycastSwiftMacros
 //   prayer-times://<YYYY-MM-DD>/<fajr|dhuhr|asr|maghrib|isha>
 // (iCloud Reminders doesn't keep EKReminder.url, so the url is set too but only read as a fallback.)
 // Other tools that sync these reminders should treat the marker as the key and leave title, dates
-// and alarms alone; the title can change (Friday's Dhuhr is titled for Jumu'ah). This file only writes isCompleted from setPrayerCompleted.
+// and alarms alone; the title can change (Friday's Dhuhr is titled for Jumu'ah). This file only writes isCompleted
+// from setPrayerCompleted, and keeps any `prayer-status:` line (StatusLine.swift) on a sync.
 //
 // The `@raycast` functions are called from src/lib/helper.ts through Raycast's Swift bridge.
 // `locate` also runs inside "Prayer Times Location.app", which the extension assembles from this
@@ -231,14 +232,16 @@ private func dueComponents(_ date: Date) -> DateComponents {
 private func needsUpdate(_ reminder: EKReminder, due: Date, alarms: [Date], notes: String, now: Date) -> Bool {
   let currentDue = dueDate(of: reminder).map(minuteStamp)
   let currentAlarms = Set((reminder.alarms ?? []).compactMap { $0.absoluteDate }.filter { $0 > now }.map(minuteStamp))
+  // The status line isn't part of the plan; only the planned lines are compared.
   return currentDue != minuteStamp(due) || currentAlarms != Set(alarms.map(minuteStamp))
-    || reminder.notes != notes
+    || withoutStatus(reminder.notes) != notes
 }
 
+/// Planned notes keep the reminder's status line, if it has one.
 private func apply(_ reminder: EKReminder, due: Date, alarms: [Date], notes: String) {
   reminder.dueDateComponents = dueComponents(due)
   reminder.alarms = alarms.map { EKAlarm(absoluteDate: $0) }
-  reminder.notes = notes
+  reminder.notes = withStatusLine(notes, statusLine(in: reminder.notes))
 }
 
 /// Runs `body` while holding a lock shared by every process of this extension. The background tick,
@@ -304,7 +307,7 @@ private func sync(_ payload: SyncPayload) async throws -> SyncResult {
       if reminder.isCompleted {
         // Completion, due date and alarms stay as they are; only make sure the key is in the notes.
         if markerKey(in: reminder.notes) != plan.key {
-          reminder.notes = plan.notes
+          reminder.notes = withStatusLine(plan.notes, statusLine(in: reminder.notes))
           try store.save(reminder, commit: true)
           updated += 1
         } else {
@@ -312,9 +315,9 @@ private func sync(_ payload: SyncPayload) async throws -> SyncResult {
         }
         continue
       }
-      // Open reminders also follow title changes (e.g. Friday's Dhuhr titled for Jumu'ah).
-      guard needsUpdate(reminder, due: due, alarms: alarms, notes: plan.notes, now: now) || reminder.title != plan.title
-      else {
+      // Matched by key: a title that differs alone is left as it is (other tools match prayers by key and
+      // keep their own titles); it follows the plan when the times change.
+      guard needsUpdate(reminder, due: due, alarms: alarms, notes: plan.notes, now: now) else {
         unchanged += 1
         continue
       }
@@ -372,9 +375,11 @@ private func sync(_ payload: SyncPayload) async throws -> SyncResult {
       if let kept = existing[key] {
         // The target list's copy stays (e.g. switching back to a list used before). A prayer marked in
         // the source list must stay marked: carry the completion over, which also stops its alarms.
-        if reminder.isCompleted, !kept.isCompleted, kept.refresh() {
+        // Refresh before checking: a completion made there in the meantime must not be overwritten.
+        if reminder.isCompleted, kept.refresh(), !kept.isCompleted {
           kept.isCompleted = true
           kept.completionDate = reminder.completionDate
+          if let line = statusLine(in: reminder.notes) { kept.notes = withStatusLine(kept.notes, line) }
           try store.save(kept, commit: false)
           changed = true
         }
