@@ -63,7 +63,11 @@ export default function EventForm({ repeating, event, initial, onSaved, refreshS
       setSaved(unchanged);
       toast.style = Toast.Style.Success;
       toast.title = unchanged ? (event ? "Event updated" : "Event saved") : "Previous settings saved";
-      toast.message = unchanged ? result.message : "Your newer changes are still unsaved. Save again to apply them.";
+      toast.message = unchanged
+        ? result.message
+        : event
+          ? "Your newer changes are still unsaved. Save again to apply them."
+          : "An event was created with the earlier values. Your newer values remain here; submitting again creates another event.";
       onSaved?.();
       if (event && unchanged) pop();
     } catch (error) {
