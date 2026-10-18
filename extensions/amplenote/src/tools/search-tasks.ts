@@ -30,6 +30,7 @@ type Input = {
 
 /**
  * Search Amplenote tasks across all task domains. Returns compact results with task and note ids.
+ * Each task has a plain-text title and its raw Markdown content, which keeps links and their URLs.
  * Open tasks are sorted by Amplenote's task score, completed tasks by completion time.
  */
 export default async function (input: Input = {}) {

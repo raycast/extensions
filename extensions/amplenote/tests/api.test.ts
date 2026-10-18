@@ -183,3 +183,27 @@ describe("createNote", () => {
     expect(await createApi(fake.call).createNote("Test")).toBe("local-123");
   });
 });
+
+describe("waitForPermanentId", () => {
+  it("returns as soon as Amplenote reports the permanent id", async () => {
+    let lookups = 0;
+    const fake = fakeAmplenote({
+      getNoteMetadata: () => ({ note: aNote({ uuid: ++lookups < 3 ? "local-1" : "real-1" }) }),
+    });
+    const id = await createApi(fake.call).waitForPermanentId("local-1", { intervalMs: 1 });
+    expect(id).toBe("real-1");
+    expect(lookups).toBe(3);
+  });
+
+  it("gives up after the timeout and keeps the temporary id", async () => {
+    const fake = fakeAmplenote({ getNoteMetadata: () => ({ note: aNote({ uuid: "local-1" }) }) });
+    const id = await createApi(fake.call).waitForPermanentId("local-1", { intervalMs: 1, timeoutMs: 20 });
+    expect(id).toBe("local-1");
+  });
+
+  it("does not poll for ids that are already permanent", async () => {
+    const fake = fakeAmplenote({});
+    expect(await createApi(fake.call).waitForPermanentId("real-1")).toBe("real-1");
+    expect(fake.calls).toHaveLength(0);
+  });
+});

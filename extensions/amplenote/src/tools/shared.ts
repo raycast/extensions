@@ -23,6 +23,7 @@ export function compactTask(task: Task, notes: Map<string, Note>) {
   return {
     taskUUID: task.uuid,
     title: taskTitle(task.content),
+    content: task.content ?? "",
     noteUUID: task.noteUUID,
     noteName: notes.get(task.noteUUID)?.name ?? null,
     group: task.completedAt ? "completed" : taskGroup(task),
@@ -55,6 +56,19 @@ export async function resolveTargetNote(noteName?: string): Promise<Note> {
     throw new Error(`No note named "${noteName}". Use search-notes to find the exact name.`);
   }
   return note;
+}
+
+/** Finds the note an AI tool refers to: by id, by exact name, or today's Daily Jot when neither is given. */
+export async function resolveNote(input: { noteUUID?: string; noteName?: string }): Promise<Note> {
+  if (input.noteUUID?.trim()) {
+    const note = await amplenote.getNoteMetadata(input.noteUUID.trim()).catch((error) => {
+      if (isConnectionError(error)) throw error;
+      return null;
+    });
+    if (!note) throw new Error(`No note with id "${input.noteUUID}". Use search-notes to find note ids.`);
+    return note;
+  }
+  return resolveTargetNote(input.noteName);
 }
 
 export async function requireTask(taskUUID: string): Promise<Task> {

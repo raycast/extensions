@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { AmplenoteApi, createApi, Note, Task } from "../src/lib/api";
+import { AmplenoteApi, createApi, dailyJotName, Note, Task } from "../src/lib/api";
 import { aNote, aTask, aTaskDomain, fakeAmplenote, secondsFromNow } from "./builders";
 
 const state = vi.hoisted(() => ({ api: undefined as unknown as AmplenoteApi }));
@@ -17,6 +17,9 @@ const { default: addTask } = await import("../src/tools/add-task");
 const { default: getNote } = await import("../src/tools/get-note");
 const { default: searchNotes } = await import("../src/tools/search-notes");
 const { default: updateTask } = await import("../src/tools/update-task");
+const { default: appendToNote } = await import("../src/tools/append-to-note");
+const { default: getNoteTasks } = await import("../src/tools/get-note-tasks");
+const { default: getDailyJot } = await import("../src/tools/get-daily-jot");
 
 function useAmplenote(data: { notes?: Note[]; tasks?: Task[]; completed?: Task[] }) {
   const domain = aTaskDomain();
@@ -153,5 +156,159 @@ describe("update-task tool", () => {
     await updateTask({ taskUUID: task.uuid, deadline: "" });
 
     expect(fake.callsTo("updateTask")[0].args.updates).toEqual({ deadline: null });
+  });
+});
+
+describe("append-to-note tool", () => {
+  it("appends to the end of today's Daily Jot by default", async () => {
+    const fake = fakeAmplenote({
+      filterNotes: () => ({ notes: [] }),
+      createNote: () => ({ noteUUID: "jot" }),
+      insertNoteContent: () => ({}),
+    });
+    state.api = createApi(fake.call);
+
+    const result = await appendToNote({ content: "- Ask Sam about the venue" });
+
+    expect(result).toMatchObject({ noteUUID: "jot", position: "end" });
+    expect(fake.callsTo("insertNoteContent")[0].args).toEqual({
+      noteUUID: "jot",
+      markdownContent: "- Ask Sam about the venue",
+      atEnd: true,
+    });
+  });
+
+  it("can add to the start of a note chosen by id", async () => {
+    const note = aNote({ name: "Inbox" });
+    const fake = fakeAmplenote({ getNoteMetadata: () => ({ note }), insertNoteContent: () => ({}) });
+    state.api = createApi(fake.call);
+
+    await appendToNote({ content: "Top line", noteUUID: note.uuid, position: "start" });
+
+    expect(fake.callsTo("insertNoteContent")[0].args).toMatchObject({ noteUUID: note.uuid, atEnd: false });
+  });
+
+  it("explains unknown note ids", async () => {
+    state.api = createApi(
+      fakeAmplenote({
+        getNoteMetadata: () => {
+          throw new Error("Output validation error");
+        },
+      }).call,
+    );
+    await expect(appendToNote({ content: "x", noteUUID: "missing" })).rejects.toThrow('No note with id "missing"');
+  });
+});
+
+describe("get-note-tasks tool", () => {
+  it("lists a note's tasks by name, optionally including done ones", async () => {
+    const inbox = aNote({ name: "Inbox" });
+    const fake = fakeAmplenote({
+      filterNotes: () => ({ notes: [inbox] }),
+      getNoteTasks: () => ({ tasks: [aTask({ noteUUID: inbox.uuid, content: "Call Bob" })] }),
+    });
+    state.api = createApi(fake.call);
+
+    const result = await getNoteTasks({ noteName: "inbox", includeDone: true });
+
+    expect(result?.tasks.map((task) => [task.title, task.noteName])).toEqual([["Call Bob", "Inbox"]]);
+    expect(fake.callsTo("getNoteTasks")[0].args).toEqual({ noteUUID: inbox.uuid, includeDone: true });
+  });
+});
+
+describe("get-daily-jot tool", () => {
+  it("returns yesterday's jot and its date without creating anything", async () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const jot = aNote({ name: dailyJotName(yesterday), tags: ["daily-jots"] });
+    const fake = fakeAmplenote({ filterNotes: () => ({ notes: [jot] }) });
+    state.api = createApi(fake.call);
+
+    const result = await getDailyJot({ daysFromToday: -1 });
+
+    expect(result?.dailyJot).toMatchObject({ name: jot.name, exists: true, noteUUID: jot.uuid });
+    expect(result?.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(result?.weekday).toBe(yesterday.toLocaleDateString("en-US", { weekday: "long" }));
+    expect(fake.callsTo("createNote")).toHaveLength(0);
+  });
+
+  it("reports a missing jot", async () => {
+    state.api = createApi(fakeAmplenote({ filterNotes: () => ({ notes: [] }) }).call);
+    expect((await getDailyJot({}))?.dailyJot).toMatchObject({ exists: false, noteUUID: null, url: null });
+  });
+});
+
+describe("task results", () => {
+  it("keep the raw Markdown next to the plain title, so links survive", async () => {
+    const note = aNote({ name: "Work" });
+    const content = "Review doc [↗](https://docs.example.com/d/abc?gtask=123)";
+    state.api = createApi(
+      fakeAmplenote({
+        filterNotes: () => ({ notes: [note] }),
+        getNoteTasks: () => ({ tasks: [aTask({ noteUUID: note.uuid, content })] }),
+      }).call,
+    );
+
+    const [task] = (await getNoteTasks({ noteName: "Work" }))!.tasks;
+
+    expect(task.title).toBe("Review doc ↗");
+    expect(task.content).toBe(content);
+  });
+});
+
+describe("get-note backlinks", () => {
+  const note = aNote({ name: "Olga" });
+  const linking = aNote({ name: "1 on 1 - Olga", tags: ["people"] });
+
+  function useFake() {
+    const fake = fakeAmplenote({
+      getNoteMetadata: () => ({ note }),
+      getNoteContent: () => ({ markdown: "# Olga" }),
+      getNoteBacklinks: () => ({ notes: [linking] }),
+    });
+    state.api = createApi(fake.call);
+    return fake;
+  }
+
+  it("returns backlinks only when asked", async () => {
+    const fake = useFake();
+    const plain = await getNote({ noteUUID: note.uuid });
+    expect(plain).not.toHaveProperty("backlinks");
+    expect(fake.callsTo("getNoteBacklinks")).toHaveLength(0);
+
+    const withLinks = (await getNote({ noteUUID: note.uuid, includeBacklinks: true })) as Record<string, unknown>;
+    expect(withLinks.backlinkCount).toBe(1);
+    expect(withLinks.backlinks).toEqual([
+      expect.objectContaining({ noteUUID: linking.uuid, name: "1 on 1 - Olga", tags: ["people"], archived: false }),
+    ]);
+  });
+
+  it("caps long backlink lists and reports the full count", async () => {
+    const many = Array.from({ length: 80 }, (_, index) => aNote({ name: `Mention ${index}` }));
+    state.api = createApi(
+      fakeAmplenote({
+        getNoteMetadata: () => ({ note }),
+        getNoteContent: () => ({ markdown: "" }),
+        getNoteBacklinks: () => ({ notes: many }),
+      }).call,
+    );
+    const result = (await getNote({ noteUUID: note.uuid, includeBacklinks: true })) as Record<string, unknown>;
+    expect(result.backlinkCount).toBe(80);
+    expect(result.backlinks).toHaveLength(50);
+  });
+
+  it("says when backlinks could not be loaded instead of returning an empty list", async () => {
+    state.api = createApi(
+      fakeAmplenote({
+        getNoteMetadata: () => ({ note }),
+        getNoteContent: () => ({ markdown: "" }),
+        getNoteBacklinks: () => {
+          throw new Error("Unknown tool");
+        },
+      }).call,
+    );
+    const result = (await getNote({ noteUUID: note.uuid, includeBacklinks: true })) as Record<string, unknown>;
+    expect(result.backlinks).toBeNull();
+    expect(result.backlinksError).toMatch(/Could not load backlinks/);
   });
 });

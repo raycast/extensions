@@ -1,5 +1,5 @@
 import { Tool } from "@raycast/api";
-import { normalizeTag, noteUrl, TAG_PATTERN } from "../lib/api";
+import { isTemporaryId, normalizeTag, noteUrl, TAG_PATTERN } from "../lib/api";
 import { amplenote } from "../lib/amplenote";
 import { describeError } from "./shared";
 
@@ -28,6 +28,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => ({
 
 /**
  * Create a new Amplenote note with optional tags and Markdown content.
+ * Returns the permanent noteUUID once Amplenote has saved the note; temporary is true if that took too long.
  */
 export default async function (input: Input) {
   try {
@@ -36,9 +37,11 @@ export default async function (input: Input) {
     const tags = (input.tags ?? []).map(normalizeTag);
     const invalid = tags.find((tag) => !TAG_PATTERN.test(tag));
     if (invalid) throw new Error(`"${invalid}" is not a valid tag. Use lowercase letters, numbers, dashes, and /.`);
-    const noteUUID = await amplenote.createNote(name, tags);
-    if (input.content?.trim()) await amplenote.insertNoteContent(noteUUID, input.content);
-    return { noteUUID, name, tags, url: noteUrl(noteUUID) };
+    const createdUUID = await amplenote.createNote(name, tags);
+    if (input.content?.trim()) await amplenote.insertNoteContent(createdUUID, input.content);
+    // Callers often keep the id, so wait briefly for the permanent one instead of returning the temporary id.
+    const noteUUID = await amplenote.waitForPermanentId(createdUUID);
+    return { noteUUID, temporary: isTemporaryId(noteUUID), name, tags, url: noteUrl(noteUUID) };
   } catch (error) {
     describeError(error);
   }

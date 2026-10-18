@@ -168,7 +168,7 @@
     {
       "name": "get-note",
       "title": "Get Note",
-      "description": "Read the full Markdown content of an Amplenote note."
+      "description": "Read the full Markdown content of an Amplenote note, optionally with its backlinks."
     },
     {
       "name": "list-tags",
@@ -201,13 +201,28 @@
       "description": "Change a task's important or urgent flag, start date, or deadline."
     },
     {
+      "name": "get-daily-jot",
+      "title": "Get Daily Jot",
+      "description": "Look up a Daily Jot and the date it belongs to, without creating it."
+    },
+    {
+      "name": "append-to-note",
+      "title": "Append to Note",
+      "description": "Add Markdown content to a note, by default today's Daily Jot."
+    },
+    {
+      "name": "get-note-tasks",
+      "title": "Get Note Tasks",
+      "description": "List the tasks in one note."
+    },
+    {
       "name": "create-note",
       "title": "Create Note",
       "description": "Create an Amplenote note with tags and Markdown content."
     }
   ],
   "ai": {
-    "instructions": "- Amplenote must be running with its MCP server turned on. If a tool says the server isn't reachable or the token was rejected, tell the user exactly that.\n- Use search-notes to find notes and get-note to read one. Never invent noteUUIDs or taskUUIDs; always take them from tool results.\n- search-tasks defaults to all open tasks. Use view=overdue, today, upcoming, or unscheduled for those groups, and view=completed for recently completed tasks.\n- add-task adds to today's Daily Jot unless the user names a note. Pass the exact note name from search-notes as noteName.\n- If add-task returns inTaskDomain: false, tell the user the task was added but will not appear in task lists until the note is added to a task domain in Amplenote.\n- Convert relative dates like \"tomorrow\" or \"next Monday\" to YYYY-MM-DD before passing startDate or deadline.\n- A task is overdue when its deadline has passed. To reschedule an overdue task, move its deadline with update-task (and its startDate too if it has one).\n- complete-task can be undone with reopen-task.\n- Summarize results instead of dumping long lists or whole notes into the chat.",
+    "instructions": "- Amplenote must be running with its MCP server turned on. If a tool says the server isn't reachable or the token was rejected, tell the user exactly that.\n- Use search-notes to find notes and get-note to read one. Never invent noteUUIDs or taskUUIDs; always take them from tool results.\n- Pass includeBacklinks to get-note when the user asks which notes mention or link to a note, such as a person or project.\n- search-tasks defaults to all open tasks. Use view=overdue, today, upcoming, or unscheduled for those groups, and view=completed for recently completed tasks.\n- add-task adds to today's Daily Jot unless the user names a note. Pass the exact note name from search-notes as noteName.\n- Use append-to-note to jot down notes, ideas, or several lines of text; it defaults to today's Daily Jot. Use add-task for a single task with dates or priority.\n- Use get-note-tasks for the tasks of one specific note; search-tasks only covers notes in task domains.\n- If add-task returns inTaskDomain: false, tell the user the task was added but will not appear in task lists until the note is added to a task domain in Amplenote.\n- Convert relative dates like \"tomorrow\" or \"next Monday\" to YYYY-MM-DD before passing startDate or deadline. If you are not sure what today is, call get-daily-jot first; it returns today's date, weekday, and time zone.\n- For questions about a Daily Jot (\"what did I jot down yesterday?\"), call get-daily-jot with daysFromToday, then get-note with its noteUUID.\n- A task is overdue when its deadline has passed. To reschedule an overdue task, move its deadline with update-task (and its startDate too if it has one).\n- complete-task can be undone with reopen-task.\n- Summarize results instead of dumping long lists or whole notes into the chat.",
     "evals": [
       {
         "input": "@amplenote what is overdue?",
@@ -340,6 +355,18 @@
             "updated": [
               "deadline"
             ]
+          },
+          "get-daily-jot": {
+            "date": "2026-10-18",
+            "weekday": "Sunday",
+            "currentTime": "10:00",
+            "timeZone": "Europe/Berlin",
+            "dailyJot": {
+              "name": "October 18th, 2026",
+              "exists": true,
+              "noteUUID": "note-jot",
+              "url": "https://www.amplenote.com/notes/note-jot"
+            }
           }
         },
         "expected": [
@@ -349,8 +376,77 @@
               "arguments": {
                 "taskUUID": "task-invoice",
                 "deadline": {
-                  "includes": "-"
+                  "includes": "2026-10-19"
                 }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@amplenote jot down: ask Sam about the venue deposit",
+        "mocks": {
+          "append-to-note": {
+            "noteUUID": "note-jot",
+            "noteName": "October 18th, 2026",
+            "position": "end",
+            "url": "https://www.amplenote.com/notes/note-jot"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "append-to-note",
+              "arguments": {
+                "content": {
+                  "includes": "venue"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@amplenote what did I jot down yesterday?",
+        "mocks": {
+          "get-daily-jot": {
+            "date": "2026-10-17",
+            "weekday": "Saturday",
+            "currentTime": "10:00",
+            "timeZone": "Europe/Berlin",
+            "dailyJot": {
+              "name": "October 17th, 2026",
+              "exists": true,
+              "noteUUID": "note-jot-17",
+              "url": "https://www.amplenote.com/notes/note-jot-17"
+            }
+          },
+          "get-note": {
+            "noteUUID": "note-jot-17",
+            "name": "October 17th, 2026",
+            "tags": [
+              "daily-jots"
+            ],
+            "changed": null,
+            "archived": false,
+            "url": "https://www.amplenote.com/notes/note-jot-17",
+            "content": "- Called the bank about the mortgage\n- [ ] Buy a birthday card for Sam"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-daily-jot",
+              "arguments": {
+                "daysFromToday": -1
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-note",
+              "arguments": {
+                "noteUUID": "note-jot-17"
               }
             }
           }

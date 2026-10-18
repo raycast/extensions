@@ -92,6 +92,10 @@ export function normalizeTag(value: string): string {
     .replace(/^\/+|\/+$/g, "");
 }
 
+export function isTemporaryId(noteUUID: string): boolean {
+  return noteUUID.startsWith("local-");
+}
+
 export function matchNoteByName(notes: Note[], name: string): Note | undefined {
   const wanted = name.trim().toLowerCase();
   const matches = notes.filter((note) => note.name?.trim().toLowerCase() === wanted);
@@ -161,8 +165,8 @@ export function createApi(call: ToolCaller, { dailyJotTag = "daily-jots" } = {})
 
     getTask: async (taskUUID: string) => (await call<{ task: Task | null }>("getTask", { taskUUID })).task,
 
-    getNoteTasks: async (noteUUID: string) =>
-      (await call<{ tasks: Task[] }>("getNoteTasks", { noteUUID, includeDone: false })).tasks,
+    getNoteTasks: async (noteUUID: string, includeDone = false) =>
+      (await call<{ tasks: Task[] }>("getNoteTasks", { noteUUID, includeDone })).tasks,
 
     getNoteBacklinks: async (noteUUID: string) => notesFrom("getNoteBacklinks", { noteUUID }),
 
@@ -208,13 +212,24 @@ export function createApi(call: ToolCaller, { dailyJotTag = "daily-jots" } = {})
 
     reopenTask: (taskUUID: string) => api.updateTask(taskUUID, { completedAt: 0, dismissedAt: 0 }),
 
-    // New notes start with a temporary "local-" id. Amplenote's metadata returns the permanent one,
-    // which the desktop app needs for amplenote://notes/<uuid> links.
+    // New notes start with a temporary "local-" id until Amplenote has saved them. The temporary id works for
+    // links and later calls; this returns the permanent one when it is already available.
     createNote: async (name: string, tags: string[] = []) => {
       const { noteUUID } = await call<{ noteUUID: string }>("createNote", { name, tags });
-      if (!noteUUID.startsWith("local-")) return noteUUID;
+      if (!isTemporaryId(noteUUID)) return noteUUID;
       const note = await api.getNoteMetadata(noteUUID).catch(() => null);
       return note?.uuid ?? noteUUID;
+    },
+
+    /** Polls until Amplenote has saved a new note and reports its permanent id, or gives up after timeoutMs. */
+    waitForPermanentId: async (noteUUID: string, { timeoutMs = 3000, intervalMs = 100 } = {}) => {
+      const deadline = Date.now() + timeoutMs;
+      let current = noteUUID;
+      while (isTemporaryId(current) && Date.now() < deadline) {
+        await new Promise((resolve) => setTimeout(resolve, intervalMs));
+        current = (await api.getNoteMetadata(noteUUID).catch(() => null))?.uuid ?? current;
+      }
+      return current;
     },
 
     insertNoteContent: (noteUUID: string, markdownContent: string, atEnd = true) =>
@@ -241,18 +256,22 @@ export function createApi(call: ToolCaller, { dailyJotTag = "daily-jots" } = {})
     findNoteByName: async (name: string) =>
       matchNoteByName(await notesFrom("filterNotes", { query: name.trim() }), name),
 
-    findOrCreateDailyJot: (date = new Date()): Promise<Note> => {
-      const tag = dailyJotTag;
+    findDailyJot: async (date = new Date()): Promise<Note | undefined> => {
       const name = dailyJotName(date);
-      const key = `${tag}:${name}`;
+      const notes = await notesFrom("filterNotes", { query: name });
+      return notes.find((note) => note.name === name && note.tags.includes(dailyJotTag));
+    },
+
+    findOrCreateDailyJot: (date = new Date()): Promise<Note> => {
+      const name = dailyJotName(date);
+      const key = `${dailyJotTag}:${name}`;
       const pending = pendingJots.get(key);
       if (pending) return pending;
       const lookup = (async () => {
-        const notes = await notesFrom("filterNotes", { query: name });
-        const existing = notes.find((note) => note.name === name && note.tags.includes(tag));
+        const existing = await api.findDailyJot(date);
         if (existing) return existing;
-        const uuid = await api.createNote(name, [tag]);
-        return { uuid, name, tags: [tag] };
+        const uuid = await api.createNote(name, [dailyJotTag]);
+        return { uuid, name, tags: [dailyJotTag] };
       })();
       pendingJots.set(key, lookup);
       return lookup.finally(() => pendingJots.delete(key));
