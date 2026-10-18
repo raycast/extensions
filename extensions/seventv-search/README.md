@@ -21,7 +21,7 @@ Use the action menu to:
 - Copy an image file, URL, Markdown image, or ID.
 - Paste a URL when the target app does not accept image files.
 
-Favorites and recent history remain in Raycast's local storage. Entries saved before provider support are treated as 7TV emotes. Each provider shows its own saved entries.
+Favorites and recent history remain in Raycast's local storage when this existing extension updates. Loading saved data does not rewrite it. Paste and favorite actions wait for that load before saving, so an early action cannot replace the old entries. Entries saved before provider support are treated as 7TV emotes. Each provider shows its own saved entries.
 
 ## Development
 
@@ -44,7 +44,6 @@ The API layer uses native provider files. It does not require FFmpeg, ImageMagic
 
 ## Credits
 
-- [n4kama / Nakama](https://github.com/n4kama) contributed native GIF/PNG selection in [#32501](https://github.com/raycast/extensions/pull/32501), following the earlier [Snag proposal](https://github.com/raycast/extensions/pull/30734). The GIF/PNG behavior comes from that contribution.
 - [Kan-A-Pesh](https://github.com/Kan-A-Pesh) built [Emotecast](https://github.com/raycast/extensions/pull/30619). Its provider adapters and unified-provider workflow informed this expansion. This extension uses a separately implemented API layer and provider-native files rather than Emotecast's conversion pipeline.
 
 The Raycast extensions repository and both contributions declare the MIT license.

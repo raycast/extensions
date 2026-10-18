@@ -30,8 +30,7 @@ import {
   getEmotePage,
 } from "./providers";
 
-const FAVORITES_KEY = "favorites_v1";
-const HISTORY_KEY = "history_v1";
+import { createSavedEmotesStore } from "./saved-emotes";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -40,6 +39,15 @@ export default function Command() {
   const [history, setHistory] = useState<Emote[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isGridView, setIsGridView] = useState(true);
+  const savedStoreRef =
+    useRef<ReturnType<typeof createSavedEmotesStore>>(undefined);
+  savedStoreRef.current ??= createSavedEmotesStore(
+    {
+      getItem: (key) => LocalStorage.getItem<string>(key),
+      setItem: (key, value) => LocalStorage.setItem(key, value),
+    },
+    getEmoteKey,
+  );
   const fetchIdRef = useRef(0);
   const nextCursorRef = useRef<string>(undefined);
 
@@ -58,15 +66,26 @@ export default function Command() {
       ? `${items.length} loaded`
       : `${items.length} of ${total.toLocaleString()}`;
 
-  // Load Persistent State
   useEffect(() => {
-    async function loadStorage() {
-      const storedFavs = await LocalStorage.getItem<string>(FAVORITES_KEY);
-      const storedHist = await LocalStorage.getItem<string>(HISTORY_KEY);
-      if (storedFavs) setFavorites(JSON.parse(storedFavs));
-      if (storedHist) setHistory(JSON.parse(storedHist));
-    }
-    loadStorage();
+    let active = true;
+    savedStoreRef
+      .current!.load()
+      .then((saved) => {
+        if (!active) return;
+        setFavorites(saved.favorites);
+        setHistory(saved.history);
+      })
+      .catch((error) => {
+        if (active)
+          void showToast({
+            style: Toast.Style.Failure,
+            title: "Could Not Load Saved Emotes",
+            message: String(error),
+          });
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -148,26 +167,35 @@ export default function Command() {
   }
 
   async function addToHistory(item: Emote) {
-    const newHistory = [
-      item,
-      ...history.filter((h) => getEmoteKey(h) !== getEmoteKey(item)),
-    ].slice(0, 20);
-    setHistory(newHistory);
-    await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+    try {
+      const saved = await savedStoreRef.current!.recordRecent(item);
+      setHistory(saved.history);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could Not Save Recent Emote",
+        message: String(error),
+      });
+    }
   }
 
   async function toggleFavorite(item: Emote) {
-    const isFav = favorites.some((f) => getEmoteKey(f) === getEmoteKey(item));
-    let newFavs;
-    if (isFav) {
-      newFavs = favorites.filter((f) => getEmoteKey(f) !== getEmoteKey(item));
-      await showToast({ title: "Removed from Favorites" });
-    } else {
-      newFavs = [item, ...favorites];
-      await showToast({ title: "Added to Favorites" });
+    try {
+      const saved = await savedStoreRef.current!.toggleFavorite(item);
+      setFavorites(saved.favorites);
+      const isFavorite = saved.favorites.some(
+        (e) => getEmoteKey(e) === getEmoteKey(item),
+      );
+      await showToast({
+        title: isFavorite ? "Added to Favorites" : "Removed from Favorites",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could Not Save Favorite",
+        message: String(error),
+      });
     }
-    setFavorites(newFavs);
-    await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavs));
   }
 
   async function pasteEmote(item: Emote, mode: "file" | "url" = "file") {
