@@ -1,4 +1,4 @@
-# Bitcoin Block Explorer
+# Bitcoin Toolkit
 
 A **Raycast** extension for Bitcoin data — look up blocks, transactions, the current BTC price, and convert between satoshis and USD without leaving your keyboard.
 
@@ -44,12 +44,12 @@ Convert between satoshis and US dollars at the live Bitcoin price:
 ### Prerequisites
 
 - [Raycast](https://raycast.com) installed
-- Node.js 18+
+- Node.js 22.22.2+
 
 ### Setup
 
 ```bash
-cd bitcoin-block-explorer
+cd bitcoin-toolkit
 npm install
 npm run dev
 ```
@@ -68,7 +68,7 @@ Raycast will open a development window. All four commands are available from the
 ## Project Structure
 
 ```
-bitcoin-block-explorer/
+bitcoin-toolkit/
   assets/
     icon.png                      512×512 extension icon
   src/
