@@ -1,5 +1,10 @@
 # Skills Changelog
 
+## [Fix Multiline Skill Descriptions] - {PR_MERGE_DATE}
+
+- Show complete descriptions from multiline YAML frontmatter in Search Skills and Manage Skills details
+- Ignore invalid frontmatter metadata so skill details remain readable
+
 ## [Fix Skills List Troubleshooting] - 2026-10-17
 
 - Include `--json` in the troubleshooting commands so they match the installed-skills list command used by the extension
