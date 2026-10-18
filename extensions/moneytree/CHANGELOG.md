@@ -4,7 +4,7 @@
 
 - Add List Budgets: see each category's spending against its limit with color-coded progress, a monthly total, sorting, and over-budget filters.
 - Add budget details with a chart of this month's spending, last month, and a 12-month average, alongside the month's transactions.
-- Create, edit, and delete budgets from Raycast or AI. Each budget counts only its own category, matching the Moneytree app.
+- Create, edit, and delete budgets and edit their custom categories from Raycast or AI. Each budget counts only its own category, matching the Moneytree app.
 - Ask AI how much you've spent in a budget category; it asks for clarification when a name is ambiguous.
 - Add a refresh action when budgets fail to load, clearer error messages, and consistent command titles.
 

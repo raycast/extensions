@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BudgetForm } from "./components/BudgetForm";
 import { TransactionsList } from "./components/TransactionsList";
 import { BudgetDetails } from "./components/BudgetDetails";
+import { EditCategoryAction } from "./components/EditCategoryAction";
 import { budgetProgressColor } from "./lib/budget-chart";
 import { getMonthlySpending } from "./lib/api";
 import {
@@ -178,6 +179,11 @@ export default function Command() {
                         onSaved={onSaved}
                       />
                     }
+                  />
+                  <EditCategoryAction
+                    category={budget.category}
+                    categories={data?.categories ?? []}
+                    onSaved={() => onSaved(budget.category_id)}
                   />
                   <Action.Push
                     title="Show Transactions"

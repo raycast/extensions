@@ -2,6 +2,7 @@ import { Action, ActionPanel, environment, Icon, Keyboard, List } from "@raycast
 import { useCachedPromise } from "@raycast/utils";
 import { budgetChartMarkdown } from "../lib/budget-chart";
 import { BudgetForm } from "./BudgetForm";
+import { EditCategoryAction } from "./EditCategoryAction";
 import { TransactionsList } from "./TransactionsList";
 import {
   getAverageMonthlySpending,
@@ -99,6 +100,11 @@ export function BudgetDetails({
         icon={Icon.Pencil}
         shortcut={Keyboard.Shortcut.Common.Edit}
         target={<BudgetForm categories={categories} budgets={budgets} editing={budget} onSaved={onSaved} fromDetails />}
+      />
+      <EditCategoryAction
+        category={budget.category}
+        categories={categories}
+        onSaved={() => onSaved(budget.category_id)}
       />
       <Action
         title="Refresh Spending"
