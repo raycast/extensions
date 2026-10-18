@@ -1,6 +1,6 @@
 # Codex Reset Forecast Changelog
 
-## [New Forecast Source] - {PR_MERGE_DATE}
+## [New Forecast Source] - 2026-10-18
 
 - Switch forecasts and reset history to the documented codex-reset.com public APIs.
 - Show model confidence and the latest official watch or provider-observed reset notice.
