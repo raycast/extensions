@@ -16,7 +16,8 @@
     "raulg",
     "ridemountainpig",
     "bendrucker",
-    "zeev"
+    "zeev",
+    "Astatine-213"
   ],
   "license": "MIT",
   "commands": [
@@ -25,7 +26,65 @@
       "title": "Claude Usage",
       "subtitle": "ccusage",
       "description": "Monitor Claude Code usage with real-time tracking",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showToday",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Today",
+          "description": "Daily tokens and costs.",
+          "default": true
+        },
+        {
+          "name": "showThisWeek",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show This Week",
+          "description": "Weekly totals and comparisons.",
+          "default": true
+        },
+        {
+          "name": "showThisMonth",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show This Month",
+          "description": "Monthly totals and comparisons.",
+          "default": true
+        },
+        {
+          "name": "showSessions",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Sessions",
+          "description": "Recent usage sessions.",
+          "default": true
+        },
+        {
+          "name": "showCosts",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Costs",
+          "description": "Total spending and costs by model.",
+          "default": true
+        },
+        {
+          "name": "showModels",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Models",
+          "description": "Tokens and costs by model.",
+          "default": true
+        },
+        {
+          "name": "showUsageLimits",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Usage Limits",
+          "description": "Claude OAuth usage limits.",
+          "default": true
+        }
+      ]
     },
     {
       "name": "menubar-ccusage",
@@ -268,6 +327,10 @@
         {
           "title": "This Week",
           "value": "week"
+        },
+        {
+          "title": "This Month",
+          "value": "month"
         },
         {
           "title": "Session Usage",
