@@ -15,6 +15,8 @@ export interface EstimatedResult {
   kind: "estimate";
   height: number;
   timestamp: number;
+  /** Height of the chain tip used to compute the estimate */
+  referenceHeight: number;
 }
 
 export type BlockResult = ExactResult | EstimatedResult;

@@ -1,9 +1,5 @@
-process.noDeprecation = true;
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Detail, ActionPanel, Action, Icon } = require("@raycast/api");
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { usePromise } = require("@raycast/utils");
+import { Detail, ActionPanel, Action, Icon, LaunchProps } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 
 import { Transaction } from "./lib/types";
 import { relativeAge, formatDate } from "./lib/utils";
@@ -13,7 +9,7 @@ async function fetchTransaction(txid: string): Promise<Transaction> {
   if (!res.ok) {
     throw new Error(`Transaction not found (${res.status})`);
   }
-  return res.json();
+  return (await res.json()) as Transaction;
 }
 
 function truncateTxid(txid: string): string {
@@ -22,9 +18,7 @@ function truncateTxid(txid: string): string {
 
 export default function Command({
   arguments: { txid },
-}: {
-  arguments: { txid: string };
-}) {
+}: LaunchProps<{ arguments: Arguments.LookUpTransaction }>) {
   const raw = txid.trim();
 
   if (!raw) {

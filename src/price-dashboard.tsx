@@ -1,9 +1,5 @@
-process.noDeprecation = true;
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Detail, ActionPanel, Action, Icon } = require("@raycast/api");
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { usePromise } = require("@raycast/utils");
+import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 
 import { fetchPrices } from "./lib/prices";
 import { formatDate, formatUsd } from "./lib/utils";

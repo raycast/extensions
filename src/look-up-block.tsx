@@ -1,22 +1,17 @@
-process.noDeprecation = true;
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Detail, ActionPanel, Action, Icon } = require("@raycast/api");
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { usePromise } = require("@raycast/utils");
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { useRef } = require("react");
+import { Detail, ActionPanel, Action, Icon, LaunchProps } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useRef } from "react";
 
 import { resolveBlock } from "./lib/api";
 import { relativeAge, formatDate } from "./lib/utils";
 
 export default function Command({
   arguments: { height },
-}: {
-  arguments: { height: string };
-}) {
-  const heightNum = parseInt(height.replace(/,/g, ""), 10);
-  const abortable = useRef<AbortController>();
+}: LaunchProps<{ arguments: Arguments.LookUpBlock }>) {
+  const trimmed = height.replace(/,/g, "").trim();
+  const isValidHeight = /^\d+$/.test(trimmed);
+  const heightNum = parseInt(trimmed, 10);
+  const abortable = useRef<AbortController | undefined>(undefined);
 
   const {
     isLoading,
@@ -24,13 +19,13 @@ export default function Command({
     error,
   } = usePromise(resolveBlock, [heightNum], {
     abortable,
-    execute: !isNaN(heightNum) && heightNum > 0,
+    execute: isValidHeight,
   });
 
-  if (isNaN(heightNum) || heightNum <= 0) {
+  if (!isValidHeight) {
     return (
       <Detail
-        markdown="## Invalid block height\n\nPlease enter a valid positive integer."
+        markdown="## Invalid block height\n\nPlease enter a valid non-negative integer (e.g. 0 or 680000)."
         actions={
           <ActionPanel>
             <Action.OpenInBrowser
@@ -67,8 +62,6 @@ export default function Command({
     const ts = result.timestamp;
     const formattedDate = formatDate(ts);
     const age = relativeAge(ts);
-    const now = Math.floor(Date.now() / 1000);
-    const blocksAhead = result.height - Math.round((now - ts) / 600);
 
     const markdown = `
 ## ⚠️ Block #${result.height.toLocaleString()} (Estimated)
@@ -78,7 +71,7 @@ export default function Command({
 | **Estimated Time** | ${formattedDate} |
 | **Estimated Age** | ${age} |
 | **Estimated Unix Timestamp** | ${ts} |
-| **Reference** | Based on block #${blocksAhead.toLocaleString()} and 10 min average interval |
+| **Reference** | Based on block #${result.referenceHeight.toLocaleString()} and 10 min average interval |
     `;
 
     return (

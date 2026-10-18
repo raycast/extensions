@@ -5,5 +5,5 @@ export async function fetchPrices(): Promise<PriceData> {
   if (!res.ok) {
     throw new Error(`Failed to fetch prices (${res.status})`);
   }
-  return res.json();
+  return (await res.json()) as PriceData;
 }

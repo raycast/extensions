@@ -1,29 +1,36 @@
-process.noDeprecation = true;
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Detail, ActionPanel, Action, Icon } = require("@raycast/api");
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { usePromise } = require("@raycast/utils");
+import { Detail, ActionPanel, Action, Icon, LaunchProps } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 
 import { fetchPrices } from "./lib/prices";
-import { formatDate, formatUsd, satsToUsd, usdToSats } from "./lib/utils";
+import {
+  formatDate,
+  formatUsd,
+  satsToUsd,
+  usdToSats,
+  btcToSats,
+} from "./lib/utils";
 
 export default function Command({
   arguments: { amount, direction },
-}: {
-  arguments: { amount: string; direction?: string };
-}) {
+}: LaunchProps<{ arguments: Arguments.SatsUsdConverter }>) {
   const isSatsToUsd = direction !== "usd-to-sats";
   const raw = amount.replace(/,/g, "").trim();
-  const parsedAmount = parseFloat(raw);
+  const btcMatch = raw.match(/^(\d*\.?\d+)\s*btc$/i);
+  const numericValue = btcMatch ? parseFloat(btcMatch[1]) : parseFloat(raw);
 
-  if (isNaN(parsedAmount) || parsedAmount < 0) {
+  if (btcMatch && !isSatsToUsd) {
+    return (
+      <Detail markdown="## Invalid amount\n\nPlease enter a USD amount for the **USD → Sats** direction." />
+    );
+  }
+
+  if (isNaN(numericValue) || numericValue < 0) {
     return (
       <Detail markdown="## Invalid amount\n\nPlease enter a non-negative number." />
     );
   }
 
-  if (parsedAmount === 0) {
+  if (numericValue === 0) {
     return <Detail markdown="## Enter an amount above zero to convert." />;
   }
 
@@ -59,12 +66,15 @@ export default function Command({
   let toLabel: string;
 
   if (isSatsToUsd) {
-    result = satsToUsd(parsedAmount, btcPrice);
-    fromLabel = `${parsedAmount.toLocaleString()} sats`;
+    const sats = btcMatch ? btcToSats(numericValue) : numericValue;
+    result = satsToUsd(sats, btcPrice);
+    fromLabel = btcMatch
+      ? `${btcMatch[1]} BTC`
+      : `${sats.toLocaleString()} sats`;
     toLabel = formatUsd(result);
   } else {
-    result = usdToSats(parsedAmount, btcPrice);
-    fromLabel = formatUsd(parsedAmount);
+    result = usdToSats(numericValue, btcPrice);
+    fromLabel = formatUsd(numericValue);
     toLabel = `${result.toLocaleString()} sats`;
   }
 
