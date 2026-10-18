@@ -1,6 +1,6 @@
 # FocusTask Changelog
 
-## [Detail View + Enhancements + Modernize] - {PR_MERGE_DATE}
+## [Detail View + Enhancements + Modernize] - 2026-10-18
 
 - `add`: `Detail` view in "search"
 - `show`: `isLoading` indicator proprly in "search"
