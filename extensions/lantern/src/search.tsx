@@ -11,9 +11,11 @@ import {
   Keyboard,
   LaunchProps,
   List,
+  Toast,
   environment,
   getPreferenceValues,
   open,
+  showToast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
@@ -40,10 +42,6 @@ import {
 } from "./lantern";
 import { MusicHit, play, show } from "./music";
 
-interface Preferences {
-  includeApps: boolean;
-}
-
 /* The panel's filters on the panel's digits (search/hybrid.py CATEGORIES; 4 is the clipboard, which lives only in the
    Lantern app's memory), with ⌃: Raycast reserves ⌘1…⌘9 for opening the Nth result. */
 const CATEGORIES: { value: string; title: string; icon: Icon; key?: Keyboard.KeyEquivalent }[] = [
@@ -68,10 +66,10 @@ interface Ctx {
 
 // As a Fallback Command (Raycast settings → Fallback Commands) it opens with the text typed in Raycast's root search.
 export default function Command(props: LaunchProps) {
-  const { includeApps } = getPreferenceValues<Preferences>();
+  const { includeApps } = getPreferenceValues<Preferences.Search>();
   const [query, setQuery] = useState(props.fallbackText ?? "");
   const [category, setCategory] = useState("");
-  const { data, isLoading, error } = usePromise(
+  const { data, isLoading, error, revalidate } = usePromise(
     async (q: string, c: string) => (q.trim() ? search(q.trim(), c || undefined) : undefined),
     [query, category],
   );
@@ -89,7 +87,20 @@ export default function Command(props: LaunchProps) {
           description="Start the Lantern app; its background daemon answers these searches."
           actions={
             <ActionPanel>
-              <Action title="Open Lantern" icon={Icon.AppWindow} onAction={() => open("/Applications/Lantern.app")} />
+              <Action
+                title="Open Lantern"
+                icon={Icon.AppWindow}
+                onAction={async () => {
+                  await open("/Applications/Lantern.app");
+                  setTimeout(revalidate, 1500);
+                }}
+              />
+              <Action
+                title="Retry Search"
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={() => revalidate()}
+              />
             </ActionPanel>
           }
         />
@@ -130,7 +141,17 @@ export default function Command(props: LaunchProps) {
           icon={Icon.Warning}
           title="Lantern could not search"
           description={String(error.message)}
-          actions={<ActionPanel>{FilterActions({ ctx })}</ActionPanel>}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry Search"
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={() => revalidate()}
+              />
+              {FilterActions({ ctx })}
+            </ActionPanel>
+          }
         />
       ) : rows.length ? (
         rows
@@ -396,11 +417,19 @@ function openActions(h: FileHit, ctx: Ctx, photo: boolean, thumb: string | null 
     <>
       <ActionPanel.Section>
         <Action
-          title={media ? "Play from Here" : h.start_line != null ? "Open at Line" : "Open"}
+          title={
+            media
+              ? "Play from Here"
+              : h.start_line != null
+                ? "Open at Line"
+                : h.page != null
+                  ? "Open at Page"
+                  : "Open"
+          }
           icon={media ? Icon.Play : Icon.ArrowRight}
           onAction={() => {
             opened(ctx.eventId, h.chunk_id, fileKey(h));
-            openAt(h.path, h.start_line, h.start_ms);
+            openAt(h.path, h.start_line, h.start_ms, true, h.page);
           }}
         />
         <Action
@@ -409,7 +438,7 @@ function openActions(h: FileHit, ctx: Ctx, photo: boolean, thumb: string | null 
           shortcut={{ modifiers: ["opt"], key: "return" }}
           onAction={() => {
             opened(ctx.eventId, h.chunk_id, fileKey(h));
-            openAt(h.path, null, null);
+            openAt(h.path, null, null, true, null);
           }}
         />
         <Action
@@ -621,16 +650,34 @@ function MusicItem({ m, ctx }: { m: MusicHit; ctx: Ctx }) {
           <Action
             title="Play"
             icon={Icon.Play}
-            onAction={() => {
+            onAction={async () => {
               opened(ctx.eventId, 0, key);
-              play(m).catch(() => undefined);
+              try {
+                await play(m);
+              } catch (err) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: m.source === "spotify" ? "Could not play in Spotify" : "Could not play in Music",
+                  message: String(err instanceof Error ? err.message : err),
+                });
+              }
             }}
           />
           <Action
             title={m.source === "spotify" ? "Show in Spotify" : "Show in Music"}
             icon={Icon.Eye}
             shortcut={{ modifiers: ["cmd"], key: "return" }}
-            onAction={() => show(m).catch(() => undefined)}
+            onAction={async () => {
+              try {
+                await show(m);
+              } catch (err) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: m.source === "spotify" ? "Could not show in Spotify" : "Could not show in Music",
+                  message: String(err instanceof Error ? err.message : err),
+                });
+              }
+            }}
           />
           <FilterActions ctx={ctx} />
         </ActionPanel>

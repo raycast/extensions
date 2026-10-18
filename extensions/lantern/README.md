@@ -19,15 +19,19 @@ bold, under a thumbnail for photos and videos.
 
 Preference: *Also show apps and System Settings* (off: Raycast finds those itself; ⌃1 / ⌃2 show them anyway).
 
-## Install (until it is in the Raycast Store)
+## Prerequisites
 
-Needs Node.js (`brew install node`).
+Lantern for Raycast connects to the local [Lantern](https://github.com/misterekkk/lantern) macOS application over a Unix domain socket. Make sure the Lantern app is installed and running on your Mac.
 
-```bash
-cd integrations/raycast
-npm ci
-npm run dev        # adds "Search Lantern" to Raycast and rebuilds on changes; Ctrl+C stops watching, the command stays
-```
+## Installation
+
+- **Raycast Store:** Install the **Lantern** extension directly from the Raycast Store.
+- **Development / Contributing:** To test or develop locally using the Raycast extensions repository:
+  ```bash
+  cd extensions/lantern
+  npm install
+  npm run dev
+  ```
 
 Then in Lantern: Settings → General → Search from: **Raycast** (turns Lantern's own shortcut off), and in Raycast's
 settings (sidebar → Lantern) give "Search Lantern" a hotkey or an alias such as `l`. Raycast itself opens on ⌥Space by

@@ -119,10 +119,20 @@ export async function show(m: MusicHit): Promise<void> {
     await open(view);
     return;
   }
-  if (!APPLE_ID.test(m.id)) return;
-  const find =
-    m.kind === "playlist"
-      ? `set t to first playlist whose persistent ID is "${m.id}"`
-      : `set t to (first track of library playlist 1 whose persistent ID is "${m.id}")`;
+  if (!APPLE_ID.test(m.id) || (m.playlist_id && !APPLE_ID.test(m.playlist_id))) return;
+  let find: string;
+  if (m.kind === "playlist") {
+    find = `set t to first playlist whose persistent ID is "${m.id}"`;
+  } else {
+    const fallback = m.playlist_id
+      ? `on error
+      set p to first playlist whose persistent ID is "${m.playlist_id}"
+      set t to (first track of p whose persistent ID is "${m.id}")`
+      : "";
+    find = `try
+      set t to (first track of library playlist 1 whose persistent ID is "${m.id}")
+    ${fallback}
+    end try`;
+  }
   await osascript(script("Music", "get name of library playlist 1", `${find}\nreveal t\nactivate`));
 }

@@ -1,6 +1,6 @@
 # Lantern Changelog
 
-## [Initial Version] - 2026-10-18
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release of the Lantern extension for Raycast.
 - Search your Mac by meaning across files, code, PDFs, photos, audio, and videos.

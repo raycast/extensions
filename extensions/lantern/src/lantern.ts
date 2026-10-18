@@ -180,23 +180,73 @@ const QUICKTIME = `on run argv
   end tell
 end run`;
 
+const PDF_PREVIEW = `on run argv
+  set f to POSIX file (item 1 of argv)
+  set p to (item 2 of argv) as integer
+  tell application "Preview"
+    activate
+    open f
+  end tell
+  try
+    tell application "System Events"
+      tell process "Preview"
+        keystroke "g" using {option down, command down}
+        keystroke (p as text)
+        key code 36
+      end tell
+    end tell
+  end try
+end run`;
+
+const PDF_SKIM = `on run argv
+  set f to POSIX file (item 1 of argv)
+  set p to (item 2 of argv) as integer
+  tell application "Skim"
+    activate
+    open f
+    go document 1 to page p
+  end tell
+end run`;
+
 const QUICKTIME_TYPES = new Set([".mp4", ".mov", ".m4v", ".m4a", ".mp3", ".wav", ".aiff", ".aif", ".caf"]);
 
 /**
  * Opens a file where the result is, in the app macOS would open it with (never a different one), as the Lantern
  * app does (app/Sources/LanternCore/Editors.swift): VS Code, Cursor, Xcode and JetBrains at the line; recordings in
- * QuickTime at the moment; anything else opens normally.
+ * QuickTime at the moment; PDFs at the page; anything else opens normally.
  */
-export async function openAt(file: string, line: number | null, ms: number | null, play = true): Promise<void> {
+export async function openAt(
+  file: string,
+  line: number | null,
+  ms: number | null,
+  play = true,
+  page: number | null = null,
+): Promise<void> {
   if (ms != null && QUICKTIME_TYPES.has(path.extname(file).toLowerCase())) {
     const args = ["-e", QUICKTIME, file, String(Math.floor(ms / 1000)), play ? "play" : "pause"];
     if (await run("/usr/bin/osascript", args)) return;
   }
+  if (page != null && path.extname(file).toLowerCase() === ".pdf") {
+    const app = await getDefaultApplication(file).catch(() => undefined);
+    const id = app?.bundleId ?? "";
+    if (id === "net.sourceforge.skim-app.skim") {
+      const args = ["-e", PDF_SKIM, file, String(page)];
+      if (await run("/usr/bin/osascript", args)) return;
+    } else {
+      const args = ["-e", PDF_PREVIEW, file, String(page)];
+      if (await run("/usr/bin/osascript", args)) return;
+    }
+  }
   if (line != null) {
     const app = await getDefaultApplication(file).catch(() => undefined);
     const id = app?.bundleId ?? "";
-    const url = (scheme: string) => `${scheme}://file${encodeURI(file)}:${line}`;
-    if (["com.microsoft.VSCode", "com.microsoft.VSCodeInsiders"].includes(id)) return open(url("vscode"));
+    const encodedPath = file
+      .split("/")
+      .map(encodeURIComponent)
+      .join("/");
+    const url = (scheme: string) => `${scheme}://file${encodedPath}:${line}`;
+    if (id === "com.microsoft.VSCode") return open(url("vscode"));
+    if (id === "com.microsoft.VSCodeInsiders") return open(url("vscode-insiders"));
     if (id === "com.vscodium") return open(url("vscodium"));
     if (id === "com.todesktop.230313mzl4w4u92") return open(url("cursor"));
     if (id === "com.apple.dt.Xcode" && app) {
