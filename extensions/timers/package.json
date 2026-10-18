@@ -10,15 +10,10 @@
     "pernielsentikaer",
     "lokot0k",
     "mitchwu",
-    "a-laughlin",
-    "muhammadrizo"
+    "a-laughlin"
   ],
   "pastContributors": [
     "marcjulian"
-  ],
-  "platforms": [
-    "macOS",
-    "Windows"
   ],
   "categories": [
     "Productivity",
@@ -35,13 +30,6 @@
   ],
   "license": "MIT",
   "commands": [
-    {
-      "name": "start1MinuteTimer",
-      "title": "Start 1 Minute Timer",
-      "description": "Set a countdown for 1 minute.",
-      "mode": "no-view",
-      "disabledByDefault": true
-    },
     {
       "name": "start2MinuteTimer",
       "title": "Start 2 Minute Timer",
@@ -199,7 +187,7 @@
     {
       "name": "configureMenubarPresets",
       "title": "Configure Presets in Menu Bar",
-      "description": "Configure which presets to show in the Timers Menu Bar. macOS only.",
+      "description": "Configure which presets to show in the Timers Menu Bar.",
       "mode": "view"
     }
   ],
@@ -222,7 +210,7 @@
       "required": true,
       "title": "Selected Sound",
       "description": "Sound played when a timer finishes.",
-      "default": "pianoChime.wav",
+      "default": "Submarine",
       "data": [
         {
           "title": "Alarm Clock",
@@ -276,7 +264,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Show Menu Bar Icon When",
-      "description": "When to show icon in menubar. macOS only.",
+      "description": "When to show icon in menubar.",
       "default": "always",
       "data": [
         {
@@ -302,7 +290,7 @@
       "type": "checkbox",
       "required": false,
       "title": "Show Title in Menu Bar",
-      "description": "Whether or not to show the timer or stopwatch title in the menu bar. macOS only.",
+      "description": "Whether or not to show the timer or stopwatch title in the menu bar.",
       "label": "Show title",
       "default": true
     },
@@ -353,23 +341,20 @@
     }
   ],
   "dependencies": {
-    "@chrismessina/raycast-kit": "^0.2.0",
-    "@raycast/api": "^2.8.2"
+    "@raycast/api": "^1.91.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "~26.6.5",
-    "@types/react": "^19.3.0",
-    "eslint": "^10.13.0",
-    "prettier": "^3.9.10",
-    "typescript": "^6.0.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "~20.14.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.56.0",
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "lint-fix": "ray lint --fix"
   },
   "ai": {
     "instructions": "The user will request for a timer of a certain length to be started, in hours, minutes, and seconds. Some of these may be left out. For example, the user may ask, 'Start a 25 minute timer'. In this case the input is hours: 0, minutes: 25, seconds: 0. Always respond telling the user a timer has been successfully started, and include the length of the timer in hours, minutes, and seconds. The user can also add a name for the timer. Do not change the capitalisation or formatting of the name.",

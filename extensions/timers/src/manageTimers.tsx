@@ -1,5 +1,4 @@
-import { Action, ActionPanel, Icon, LaunchProps, List, popToRoot, useNavigation } from "@raycast/api";
-import { showError } from "@chrismessina/raycast-kit";
+import { Action, ActionPanel, Icon, LaunchProps, List, Toast, popToRoot, showToast, useNavigation } from "@raycast/api";
 import { useEffect } from "react";
 import useTimers from "./hooks/useTimers";
 import CustomTimerView from "./startCustomTimer";
@@ -9,44 +8,38 @@ import RunningTimerListItem from "./components/RunningTimerListItem";
 import CustomTimerListItem from "./components/CustomTimerListItem";
 
 export default function Command(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
+  if (props.launchContext?.timerID) {
+    const customTimers = readCustomTimers();
+    const ct = customTimers[props.launchContext.timerID];
+    if (ct == undefined) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "This custom timer no longer exists!",
+      });
+    } else {
+      startTimer({
+        timeInSeconds: ct.timeInSeconds,
+        timerName: ct.name,
+        selectedSound: ct.selectedSound,
+      }).then(() => popToRoot());
+      return;
+    }
+  }
+
   const { timers, customTimers, isLoading, refreshTimers } = useTimers();
   const { push } = useNavigation();
-  const timerID = props.launchContext?.timerID;
 
   useEffect(() => {
-    let disposed = false;
-    if (timerID) {
-      void (async () => {
-        try {
-          const ct = readCustomTimers()[timerID];
-          if (!ct) throw new Error("This preset no longer exists");
-          const started = await startTimer({
-            timeInSeconds: ct.timeInSeconds,
-            timerName: ct.name,
-            selectedSound: ct.selectedSound,
-          });
-          if (started && !disposed) await popToRoot();
-        } catch (error) {
-          if (!disposed) await showError(error, { title: "Could Not Start Preset" });
-        }
-      })();
-    }
     refreshTimers();
-    const interval = setInterval(() => {
+    setInterval(() => {
       refreshTimers();
     }, 1000);
-    return () => {
-      disposed = true;
-      clearInterval(interval);
-    };
-  }, [timerID]);
+  }, []);
 
   return (
     <List isLoading={isLoading}>
       <List.Section title={timers?.length !== 0 && timers != null ? "Currently Running" : "No Timers Running"}>
-        {timers?.map((timer) => (
-          <RunningTimerListItem key={timer.originalFile} timer={timer} />
-        ))}
+        {timers?.map((timer) => <RunningTimerListItem key={timer.originalFile} timer={timer} />)}
         <List.Item
           key={0}
           icon={Icon.Clock}
@@ -68,9 +61,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLinkP
           ?.sort((a, b) => {
             return customTimers[a].timeInSeconds - customTimers[b].timeInSeconds;
           })
-          .map((ctID) => (
-            <CustomTimerListItem key={ctID} customTimer={customTimers[ctID]} id={ctID} />
-          ))}
+          .map((ctID) => <CustomTimerListItem key={ctID} customTimer={customTimers[ctID]} id={ctID} />)}
       </List.Section>
     </List>
   );
