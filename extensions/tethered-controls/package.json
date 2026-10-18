@@ -17,7 +17,7 @@
     {
       "name": "toggle-companion-sync",
       "title": "Toggle Companion Sync",
-      "description": "Reserved for upcoming Companion Sync controls; currently has no effect",
+      "description": "Request a Companion Sync toggle; requires a supporting Tethered app version",
       "mode": "no-view"
     },
     {

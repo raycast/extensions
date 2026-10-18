@@ -58,4 +58,4 @@ The **Next Event** command shows the next enabled upcoming event in its root-sea
 
 **Toggle MCP Bridge** requires the updated Tethered app to be running. Use **Show Status** to confirm whether the bridge is enabled and inspect its current status.
 
-**Toggle Companion Sync** is reserved for the upcoming feature. The app currently ignores this request, and the command reports that Companion Sync controls are not available yet.
+**Toggle Companion Sync** is reserved for the upcoming feature. The current app ignores this request. The command reports only that the toggle was requested; a future supporting app can handle the same request without an extension update.
