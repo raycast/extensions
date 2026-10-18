@@ -6,6 +6,7 @@ import {
   logoutArgs,
   createPassCliAdapter,
   itemListArgs,
+  itemShareListArgs,
   itemTotpArgs,
   itemViewArgs,
   vaultListArgs,
@@ -99,6 +100,7 @@ test("returns false for the real unauthenticated CLI failure", async () => {
 test("uses exact list, view, and TOTP CLI arguments", () => {
   assert.deepEqual(vaultListArgs(), ["vault", "list", "--output", "json"]);
   assert.deepEqual(vaultShareListArgs(), ["share", "list", "--only-vaults", "true", "--output", "json"]);
+  assert.deepEqual(itemShareListArgs(), ["share", "list", "--only-items", "true", "--output", "json"]);
   assert.deepEqual(vaultMemberListArgs("X"), ["vault", "member", "list", "--share-id=X", "--output", "json"]);
   assert.deepEqual(itemListArgs("X"), ["item", "list", "--share-id=X", "--output", "json", "--show-secrets"]);
   assert.deepEqual(itemViewArgs("X", "Y"), ["item", "view", "--share-id=X", "--item-id=Y", "--output", "json"]);
@@ -128,6 +130,11 @@ test("reads the user's role on each vault from the share list", async () => {
       ["vault-2", "viewer"],
     ]),
   );
+});
+
+test("lists the shares of the items shared with the user on their own", async () => {
+  const shareIds = await createPassCliAdapter(fakeCommand("json:item-shares")).listItemShares();
+  assert.deepEqual(shareIds, ["item-share-1", "item-share-2"]);
 });
 
 test("counts the members of a vault, the user included", async () => {

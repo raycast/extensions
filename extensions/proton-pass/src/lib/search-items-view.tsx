@@ -10,6 +10,7 @@ import { hostnameOf } from "./format";
 import { countItemsByVault, refreshItemCounts, titleWithCount, totalItemCount } from "./item-counts";
 import { ItemList } from "./item-list";
 import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves, withTimeout } from "./refresh";
+import { isSharedWithMe, listedUnder, SHARED_WITH_ME } from "./shared-items";
 
 /** How long items wait for the active browser tab, so that its suggestions are in place when the list appears. */
 const ACTIVE_TAB_TIMEOUT_MS = 500;
@@ -41,6 +42,7 @@ interface VaultDropdownProps {
 }
 
 function VaultDropdown({ vaults, itemCounts, value, onVaultChange }: VaultDropdownProps) {
+  const listedVaults = vaults.filter((vault) => !isSharedWithMe(vault));
   // The selected item's title stays in the search bar, so the count of the vault shown is always visible.
   return (
     <List.Dropdown
@@ -56,7 +58,7 @@ function VaultDropdown({ vaults, itemCounts, value, onVaultChange }: VaultDropdo
         icon={Icon.Globe}
       />
       <List.Dropdown.Section title="Vaults">
-        {vaults.map((vault) => (
+        {listedVaults.map((vault) => (
           <List.Dropdown.Item
             key={vault.shareId}
             title={titleWithCount(vault.name, itemCounts.get(vault.shareId))}
@@ -65,6 +67,15 @@ function VaultDropdown({ vaults, itemCounts, value, onVaultChange }: VaultDropdo
           />
         ))}
       </List.Dropdown.Section>
+      {vaults.some(isSharedWithMe) && (
+        <List.Dropdown.Section>
+          <List.Dropdown.Item
+            title={titleWithCount(SHARED_WITH_ME.name, itemCounts.get(SHARED_WITH_ME.shareId))}
+            value={SHARED_WITH_ME.shareId}
+            icon={Icon.TwoPeople}
+          />
+        </List.Dropdown.Section>
+      )}
     </List.Dropdown>
   );
 }
@@ -145,14 +156,14 @@ export function SearchItemsView({ initialVault, allVaults = false, sessionConfir
       initialVault ? getCachedItems(initialVault.shareId) : null,
       withTimeout(sessionCheck, SESSION_CHECK_WAIT_MS),
     ]);
-    const sharedHasVault = sharedItems?.data.some((item) => item.shareId === initialVault?.shareId);
+    const sharedHasVault = sharedItems?.data.some((item) => listedUnder(item) === initialVault?.shareId);
     // Prefer a newer vault snapshot, or fill a gap from an earlier partial account listing.
     // Replace that vault's items rather than unioning snapshots, so deleted items do not return.
     const cachedItems =
       legacyItems && (!sharedHasVault || legacyItems.timestamp > (sharedItems?.timestamp ?? 0))
         ? {
             data: [
-              ...(sharedItems?.data.filter((item) => item.shareId !== initialVault?.shareId) ?? []),
+              ...(sharedItems?.data.filter((item) => listedUnder(item) !== initialVault?.shareId) ?? []),
               ...legacyItems.data,
             ],
             isStale: true,
@@ -252,7 +263,8 @@ export function SearchItemsView({ initialVault, allVaults = false, sessionConfir
   }
 
   const filteredItems = useMemo(
-    () => (selectedVaultId === ALL_VAULTS_VALUE ? items : items.filter((item) => item.shareId === selectedVaultId)),
+    () =>
+      selectedVaultId === ALL_VAULTS_VALUE ? items : items.filter((item) => listedUnder(item) === selectedVaultId),
     [items, selectedVaultId],
   );
   const emptyFailureMessage =
@@ -289,7 +301,11 @@ export function SearchItemsView({ initialVault, allVaults = false, sessionConfir
         title: emptyFailureMessage ? "Couldn't Load Items" : "No Items Found",
         description:
           emptyFailureMessage?.split("\n")[0] ??
-          (selectedVaultId === ALL_VAULTS_VALUE ? "Your vaults are empty" : "No items in this vault"),
+          (selectedVaultId === ALL_VAULTS_VALUE
+            ? "Your vaults are empty"
+            : isSharedWithMe({ shareId: selectedVaultId })
+              ? "No items are shared with you"
+              : "No items in this vault"),
         onRetry: emptyFailureMessage ? loadItems : undefined,
       }}
       onRefresh={loadItems}

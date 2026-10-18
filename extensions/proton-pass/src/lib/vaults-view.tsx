@@ -17,6 +17,7 @@ import { createListingSaves, createRequestTracker, listingSaves, withTimeout } f
 import { platformShortcut } from "./shortcuts";
 import { mergeSharing, sharedVaultTooltip, withSharing } from "./vault-sharing";
 import { CliNotFoundView } from "./error-views";
+import { isSharedWithMe, SHARED_WITH_ME } from "./shared-items";
 
 /** Only the vault list lists sharing: overlapping loads, e.g. a refresh and Retry, save it in the order they started. */
 const sharingSaves = createListingSaves();
@@ -143,6 +144,8 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
     () => vaults.map((vault) => ({ ...vault, itemCount: itemCounts.get(vault.shareId) ?? vault.itemCount })),
     [vaults, itemCounts],
   );
+  const listedVaults = shownVaults.filter((vault) => !isSharedWithMe(vault));
+  const sharedWithMe = shownVaults.find(isSharedWithMe);
   const allItemsCount = totalItemCount(vaults, itemCounts);
 
   if (error?.type === "not_installed") {
@@ -250,7 +253,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
               }
             />
           )}
-          {shownVaults.map((vault) => (
+          {listedVaults.map((vault) => (
             <List.Item
               key={vault.shareId}
               icon={Icon.Folder}
@@ -280,6 +283,26 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
               }
             />
           ))}
+          {sharedWithMe && (
+            <List.Item
+              key={SHARED_WITH_ME.shareId}
+              icon={Icon.TwoPeople}
+              title={SHARED_WITH_ME.name}
+              subtitle="Items shared with you on their own"
+              accessories={
+                sharedWithMe.itemCount === undefined ? [] : [{ text: formatItemCount(sharedWithMe.itemCount) }]
+              }
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="View Items"
+                    icon={Icon.List}
+                    target={<SearchItemsView initialVault={sharedWithMe} />}
+                  />
+                </ActionPanel>
+              }
+            />
+          )}
         </>
       )}
     </List>

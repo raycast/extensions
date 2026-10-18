@@ -1,3 +1,4 @@
+import { listedUnder } from "./shared-items";
 import { Item } from "./types";
 
 /** Items after a refresh: the fresh ones, plus the already known items of vaults that failed to load. */
@@ -8,7 +9,7 @@ export function mergeRefreshedItems(
 ): Item[] {
   const failed = new Set(failedShareIds);
   if (failed.size === 0) return freshItems;
-  return [...freshItems, ...previousItems.filter((item) => failed.has(item.shareId))];
+  return [...freshItems, ...previousItems.filter((item) => failed.has(listedUnder(item)))];
 }
 
 /** A vault whose items couldn't be listed, as listVaultsAndItems() reports it. */

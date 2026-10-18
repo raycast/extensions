@@ -37,6 +37,10 @@ export function vaultShareListArgs(): string[] {
   return ["share", "list", "--only-vaults", "true", "--output", "json"];
 }
 
+export function itemShareListArgs(): string[] {
+  return ["share", "list", "--only-items", "true", "--output", "json"];
+}
+
 export function vaultMemberListArgs(shareId: string): string[] {
   return ["vault", "member", "list", `--share-id=${shareId}`, "--output", "json"];
 }
@@ -88,6 +92,15 @@ function trimOrUndefined(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
+function parseShares(text: string): unknown[] {
+  const data = parseJson(text, "share list");
+  const rawShares = Array.isArray(data) ? data : isRecord(data) ? data.shares : undefined;
+  if (!Array.isArray(rawShares)) {
+    throw new PassCliError("Unexpected share list output from pass-cli.", "invalid_output");
+  }
+  return rawShares;
+}
+
 export interface PassCliAdapter {
   generatePassword(options: PasswordOptions): Promise<string>;
   checkAuth(): Promise<boolean>;
@@ -95,6 +108,8 @@ export interface PassCliAdapter {
   listVaults(): Promise<Vault[]>;
   /** The user's role on each vault, by share ID. */
   listVaultRoles(): Promise<Map<string, VaultRole>>;
+  /** Share IDs of the items shared with the user on their own, outside their vaults. */
+  listItemShares(): Promise<string[]>;
   /** Number of people with access to a vault, the user included. */
   countVaultMembers(shareId: string): Promise<number>;
   listItems(shareId: string, vaultName: string): Promise<Item[]>;
@@ -134,14 +149,12 @@ export function createPassCliAdapter(command: CommandDescriptor, execOptions: Ex
       }
       return rawVaults.map(normalizeVault);
     },
-    listVaultRoles: async () => {
-      const data = parseJson(await run(vaultShareListArgs()), "share list");
-      const rawShares = Array.isArray(data) ? data : isRecord(data) ? data.shares : undefined;
-      if (!Array.isArray(rawShares)) {
-        throw new PassCliError("Unexpected share list output from pass-cli.", "invalid_output");
-      }
-      return normalizeShareRoles(rawShares);
-    },
+    listVaultRoles: async () => normalizeShareRoles(parseShares(await run(vaultShareListArgs()))),
+    listItemShares: async () =>
+      parseShares(await run(itemShareListArgs())).flatMap((raw) => {
+        const shareId = isRecord(raw) ? trimOrUndefined(raw.id ?? raw.share_id) : undefined;
+        return shareId ? [shareId] : [];
+      }),
     countVaultMembers: async (shareId) => {
       const data = parseJson(await run(vaultMemberListArgs(shareId)), "vault member list");
       const members = Array.isArray(data) ? data : isRecord(data) ? data.members : undefined;

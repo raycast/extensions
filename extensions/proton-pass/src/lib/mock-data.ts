@@ -131,6 +131,28 @@ export const MOCK_ITEMS: Item[] = [
     email: "team@project.io",
     hasTotp: true,
   },
+  {
+    shareId: "item-share-1",
+    itemId: "item-13",
+    title: "Streaming Family Plan",
+    type: "login",
+    vaultName: "Shared with Me",
+    email: "family@example.com",
+    hasTotp: false,
+    urls: ["https://streaming.example.com"],
+    hasPassword: true,
+    sharedWithMe: true,
+  },
+  {
+    shareId: "item-share-2",
+    itemId: "item-14",
+    title: "Office Door Code",
+    type: "note",
+    vaultName: "Shared with Me",
+    hasTotp: false,
+    hasNote: true,
+    sharedWithMe: true,
+  },
 ];
 
 export const MOCK_ITEM_DETAILS: Record<string, ItemDetail> = {

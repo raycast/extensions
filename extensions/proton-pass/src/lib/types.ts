@@ -40,6 +40,8 @@ export interface Item {
   modifiedAt?: string;
   /** Whether the item has a note. The note itself is never part of `Item`. */
   hasNote?: boolean;
+  /** Shared with the user on its own: `shareId` is then that item's share, not a vault's. */
+  sharedWithMe?: boolean;
 }
 
 export interface CustomField {

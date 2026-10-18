@@ -11,7 +11,8 @@ import * as format from "./format";
 import * as shortcuts from "./shortcuts";
 import * as fillSequence from "./fill-sequence";
 import * as keyPress from "./key-press";
-import { Item, ItemDetail, PassCliError } from "./types";
+import * as sharedItems from "./shared-items";
+import { Item, ItemDetail, PassCliError, Vault } from "./types";
 
 type Element = { props: Record<string, unknown> };
 type Component = (props: Record<string, unknown>) => Element;
@@ -34,6 +35,7 @@ function loadView(
     require: (name: string) => {
       if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
       if (name in services) return services[name];
+      if (name === "./shared-items") return sharedItems;
       throw new Error(`Unexpected dependency: ${name}`);
     },
     URL,
@@ -452,6 +454,7 @@ test("item-list authentication failures clear saved session metadata on both lis
     "./core/adapter": {
       createPassCliAdapter: () => ({
         listVaults: async () => [vault],
+        listItemShares: async () => [],
         listItems: async () => {
           throw new PassCliError("Session ended", "not_authenticated");
         },
@@ -467,6 +470,70 @@ test("item-list authentication failures clear saved session metadata on both lis
   await assert.rejects(api.listItems("vault", [vault]), /Session ended/);
   await assert.rejects(api.listVaultsAndItems(), /Session ended/);
   assert.equal(clears, 2);
+});
+
+function passCliWithAdapter(adapter: Record<string, unknown>) {
+  return loadView("pass-cli.ts", {
+    "@raycast/api": { environment: { isDevelopment: false, supportPath: "/fixture" }, getPreferenceValues: () => ({}) },
+    "node:os": { homedir: () => "/fixture" },
+    "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+    "./cache": { clearCache: async () => undefined },
+    "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/adapter": { createPassCliAdapter: () => adapter },
+    "./core/login": { isDetachedLoginRunning: async () => false },
+    "./mock-data": {},
+    "./types": { PassCliError },
+  }) as unknown as {
+    listVaultsAndItems: () => Promise<{
+      vaults: Vault[];
+      items: Item[];
+      failedVaults: { vault: Vault; message: string }[];
+    }>;
+  };
+}
+
+test("items shared one by one are listed under Shared with Me, through their own share", async () => {
+  const listed: string[] = [];
+  const api = passCliWithAdapter({
+    listVaults: async () => [{ shareId: "vault", name: "Personal" }],
+    listItemShares: async () => ["item-share", "also-in-vault"],
+    listItems: async (shareId: string, vaultName: string) => {
+      listed.push(shareId);
+      if (shareId === "vault") return [{ ...item, shareId, itemId: "in-vault", vaultName }];
+      // The share printed can be the one of the vault the item comes from, which the user can't open.
+      return [{ ...item, shareId: "owner-vault", itemId: shareId === "item-share" ? "shared" : "in-vault", vaultName }];
+    },
+  });
+  const { vaults, items, failedVaults } = await api.listVaultsAndItems();
+  assert.equal(listed.sort().join(), "also-in-vault,item-share,vault");
+  assert.equal(vaults.map((vault) => vault.name).join(), "Personal,Shared with Me");
+  assert.equal(
+    items.map((entry) => `${entry.itemId} ${entry.shareId} ${entry.vaultName} ${entry.sharedWithMe === true}`).join(),
+    "in-vault vault Personal false,shared item-share Shared with Me true",
+  );
+  assert.equal(failedVaults.length, 0);
+});
+
+test("Shared with Me failing to load doesn't hold the vaults back, unlike an ended session", async () => {
+  let shareError = new PassCliError("Network unavailable", "network_error");
+  const api = passCliWithAdapter({
+    listVaults: async () => [{ shareId: "vault", name: "Personal" }],
+    listItemShares: async () => {
+      throw shareError;
+    },
+    listItems: async (shareId: string, vaultName: string) => [{ ...item, shareId, vaultName }],
+  });
+  const { vaults, items, failedVaults } = await api.listVaultsAndItems();
+  // Shared with Me stays listed, so that the shared items known already keep showing.
+  assert.equal(vaults.map((vault) => vault.name).join(), "Personal,Shared with Me");
+  assert.equal(items.length, 1);
+  assert.equal(
+    failedVaults.map(({ vault, message }) => `${vault.name}: ${message}`).join(),
+    "Shared with Me: Network unavailable",
+  );
+
+  shareError = new PassCliError("Session ended", "not_authenticated");
+  await assert.rejects(api.listVaultsAndItems(), /Session ended/);
 });
 
 test("only the user's own vaults have their members counted, to know whether they're shared", async () => {
