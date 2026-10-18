@@ -1,6 +1,6 @@
 # Mint Changelog
 
-## [The current free allowance] - {PR_MERGE_DATE}
+## [The current free allowance] - 2026-10-18
 
 - The first page before Mint is installed states today's free use: cleaning, organizing, Optimize and app uninstall share one free 1 GB each week. It no longer promises a free first clean of any size, which Mint stopped offering in 1.0.97.
 
