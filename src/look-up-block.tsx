@@ -7,8 +7,8 @@ const { usePromise } = require("@raycast/utils");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { useRef } = require("react");
 
-import { resolveBlock } from "./api";
-import { relativeAge, formatDate } from "./utils";
+import { resolveBlock } from "./lib/api";
+import { relativeAge, formatDate } from "./lib/utils";
 
 export default function Command({
   arguments: { height },

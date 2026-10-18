@@ -1,15 +1,15 @@
 {
-  "name": "bitcoin-block-explorer",
-  "title": "Bitcoin Block Explorer",
-  "description": "Look up Bitcoin mainnet blocks by height — view hash, mined date, timestamp, and open on mempool.space",
+  "name": "bitcoin-toolkit",
+  "title": "Bitcoin Toolkit",
+  "description": "Look up Bitcoin mainnet blocks, transactions, prices, and sats vs Fiat conversion — all from Raycast",
   "icon": "icon.png",
-  "author": "thomas",
+  "author": "alexxie16",
   "platforms": ["macOS"],
-  "categories": ["Finance", "Web"],
+  "categories": ["Productivity", "Developer Tools", "Finance", "Web"],
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "look-up-block",
       "title": "Look up Block",
       "description": "Enter a Bitcoin mainnet block height to fetch and display its details",
       "mode": "view",
@@ -18,6 +18,56 @@
           "name": "height",
           "type": "text",
           "placeholder": "Block height (e.g. 680000)",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "price-dashboard",
+      "title": "Bitcoin Price Dashboard",
+      "description": "View the current Bitcoin price in USD, EUR, GBP, and more",
+      "mode": "view",
+      "arguments": []
+    },
+    {
+      "name": "sats-usd-converter",
+      "title": "Convert Sats ↔ USD",
+      "description": "Convert between satoshis and US dollar at the current Bitcoin price",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "amount",
+          "type": "text",
+          "placeholder": "Amount (e.g. 100000 or 0.005 BTC)",
+          "required": true
+        },
+        {
+          "name": "direction",
+          "type": "dropdown",
+          "placeholder": "Direction",
+          "data": [
+            {
+              "title": "Sats → USD",
+              "value": "sats-to-usd"
+            },
+            {
+              "title": "USD → Sats",
+              "value": "usd-to-sats"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "look-up-transaction",
+      "title": "Look up Transaction",
+      "description": "Enter a Bitcoin transaction ID (TXID) to fetch and display its details — fee, inputs, outputs, and confirmation status",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "txid",
+          "type": "text",
+          "placeholder": "Transaction ID (TXID)",
           "required": true
         }
       ]
@@ -37,7 +87,7 @@
   "scripts": {
     "build": "NODE_OPTIONS='--no-deprecation' ray build",
     "dev": "NODE_OPTIONS='--no-deprecation' ray develop",
-    "fix-lint": "NODE_OPTIONS='--no-deprecation' ray lint --fix",
+    "lint-fix": "NODE_OPTIONS='--no-deprecation' ray lint --fix",
     "lint": "NODE_OPTIONS='--no-deprecation' ray lint",
     "publish": "NODE_OPTIONS='--no-deprecation' ray publish"
   }

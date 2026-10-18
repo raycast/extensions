@@ -13,7 +13,6 @@ export async function fetchBlock(height: number): Promise<MempoolBlock> {
     throw new Error(`Block height ${height} not found (${hashRes.status})`);
   }
   const hash = await hashRes.text();
-
   const blockRes = await fetch(`https://mempool.space/api/block/${hash}`);
   if (!blockRes.ok) {
     throw new Error(`Failed to fetch block ${hash} (${blockRes.status})`);
@@ -27,7 +26,6 @@ export async function fetchLatestBlock(): Promise<MempoolBlock> {
     throw new Error(`Failed to fetch chain tip (${hashRes.status})`);
   }
   const hash = await hashRes.text();
-
   const blockRes = await fetch(`https://mempool.space/api/block/${hash}`);
   if (!blockRes.ok) {
     throw new Error(`Failed to fetch latest block (${blockRes.status})`);
