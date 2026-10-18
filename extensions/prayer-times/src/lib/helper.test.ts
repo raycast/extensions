@@ -5,7 +5,7 @@ vi.mock("@raycast/api", () => ({ environment: {} }));
 import { locationAppNeedsBuild } from "./helper";
 
 describe("locationAppNeedsBuild", () => {
-  it("builds the location app when it is missing", () => {
+  it("builds the location app when it is missing or a build stopped part way", () => {
     expect(locationAppNeedsBuild("", false)).toBe(true);
     expect(locationAppNeedsBuild("v1", false)).toBe(true);
   });

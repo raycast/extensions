@@ -161,11 +161,12 @@ const LOCATION_APP_VERSION = 1;
  * Whether the location app needs (re)building.
  *
  * @param stamp - Saved stamp: `v<version>`, an older `size:mtime:length` stamp, or "" when none.
- * @param exists - Whether the app's binary exists.
+ * @param complete - Whether the app's binary, Info.plist and signature all exist (a build that stopped
+ *   part way leaves one of them missing).
  * @returns True to build it.
  */
-export function locationAppNeedsBuild(stamp: string, exists: boolean): boolean {
-  if (!exists) return true;
+export function locationAppNeedsBuild(stamp: string, complete: boolean): boolean {
+  if (!complete) return true;
   // Apps built before versioning already hold the user's permission; keep them rather than re-prompt.
   if (!stamp.startsWith("v")) return false;
   return stamp !== `v${LOCATION_APP_VERSION}`;
@@ -187,11 +188,13 @@ async function locationApp(): Promise<string> {
   const target = join(app, "Contents", "MacOS", EXECUTABLE);
   const stampFile = join(environment.supportPath, "location-app-source");
   const stamp = `v${LOCATION_APP_VERSION}`;
-  const [previous, existing] = await Promise.all([
+  // Written in this order by the build below; the signature is last.
+  const parts = [target, join(app, "Contents", "Info.plist"), join(app, "Contents", "_CodeSignature", "CodeResources")];
+  const [previous, ...found] = await Promise.all([
     readFile(stampFile, "utf8").catch(() => ""),
-    stat(target).catch(() => undefined),
+    ...parts.map((part) => stat(part).then(Boolean, () => false)),
   ]);
-  if (!locationAppNeedsBuild(previous, Boolean(existing))) {
+  if (!locationAppNeedsBuild(previous, found.every(Boolean))) {
     if (previous !== stamp) await writeFile(stampFile, stamp);
     return app;
   }
