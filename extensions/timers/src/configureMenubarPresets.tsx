@@ -33,7 +33,7 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action
-                    title={customTimers[ctID].showInMenuBar ? "Hide in Menu Bar" : "Show in Menu Bar"}
+                    title={customTimers[ctID].showInMenuBar ? "Hide In Menu Bar" : "Show In Menu Bar"}
                     onAction={() => handleToggleCTVisibility(ctID)}
                   />
                 </ActionPanel>
@@ -51,7 +51,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action
-                  title={defaultVisibles?.[defaultPreset.key] ? "Hide in Menu Bar" : "Show in Menu Bar"}
+                  title={defaultVisibles?.[defaultPreset.key] ? "Hide In Menu Bar" : "Show In Menu Bar"}
                   onAction={() => handleDefaultPresetToggle(defaultPreset.key)}
                 />
               </ActionPanel>

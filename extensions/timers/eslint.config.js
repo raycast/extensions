@@ -1,8 +1,10 @@
-import { defineConfig } from "eslint/config";
-import raycastConfig from "@raycast/eslint-config";
+const raycastConfig = require("@raycast/eslint-config");
 
-export default defineConfig([
-  ...raycastConfig,
+module.exports = [
+  {
+    files: ["src/**/*.{js,jsx,ts,tsx}"],
+  },
+  ...raycastConfig.flat(),
   {
     files: ["src/**/*.{js,jsx,ts,tsx}"],
     rules: {
@@ -14,4 +16,4 @@ export default defineConfig([
       ]
     },
   },
-]);
+];
