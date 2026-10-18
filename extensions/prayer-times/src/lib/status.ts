@@ -104,7 +104,8 @@ export function clockStatus(slot: PrayerSlot, at: Date): "ontime" | "late" | "ma
  * When the prayer was prayed, recorded as the reminder's completion date, for a mark made at `now`:
  * - on time: now while it is still on time, else the jamaat if that was before the late boundary, else the start;
  * - with jamaat: the jamaat once it has happened, else as on time;
- * - late: now once it is late, else the late boundary;
+ * - late: now once it is late, else the late boundary, but no later than a minute before the end, so it
+ *   still reads as late from the time alone;
  * - made up: now.
  *
  * @param slot - Prayer slot.
@@ -120,7 +121,7 @@ export function prayedAt(slot: PrayerSlot, status: PrayedStatus, now: Date): Dat
       if (now < slot.late) return now;
       return slot.jamaat && slot.jamaat < slot.late ? slot.jamaat : slot.start;
     case "late":
-      return now > slot.late ? now : slot.late;
+      return new Date(Math.min(Math.max(now.getTime(), slot.late.getTime()), slot.end.getTime() - 60_000));
     case "madeup":
       return now;
   }

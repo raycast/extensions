@@ -63,9 +63,12 @@ describe("prayedAt", () => {
     expect(prayedAt({ ...asr, jamaat: undefined }, "ontime", at(21, 0))).toEqual(at(16, 33));
   });
 
-  it("records late as the end of the prayer time, or now if later", () => {
-    expect(prayedAt(asr, "late", at(17, 0))).toEqual(at(18, 12));
-    expect(prayedAt(asr, "late", at(21, 0))).toEqual(at(21, 0));
+  it("records late at now within the late window, kept a minute before the end", () => {
+    const preferred = { ...asr, late: at(17, 52) };
+    expect(prayedAt(preferred, "late", at(17, 0))).toEqual(at(17, 52));
+    expect(prayedAt(preferred, "late", at(18, 0))).toEqual(at(18, 0));
+    expect(prayedAt(preferred, "late", at(21, 0))).toEqual(at(18, 11));
+    expect(clockStatus(preferred, prayedAt(preferred, "late", at(21, 0)))).toBe("late");
   });
 
   it("records jamaat at the jamaat once it has happened, and made up at now", () => {
