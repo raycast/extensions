@@ -51,12 +51,21 @@ async function refreshForecast({
   const startedAt = now().getTime();
   const refresh = store.readRefreshState();
   if (refresh && Date.parse(refresh.nextRequestAt) > startedAt) {
-    const cached = store.read();
+    let cached = store.read();
+    let sharedError = refresh.error;
+    // Another command runtime may own the first request. Wait for its shared
+    // cache write without spending another request, bounded in case it exits.
+    const waitUntil = Date.now() + Math.min(timeoutMilliseconds, Date.parse(refresh.nextRequestAt) - startedAt);
+    while (!cached && !sharedError && Date.now() < waitUntil) {
+      await new Promise((resolve) => setTimeout(resolve, Math.min(100, waitUntil - Date.now())));
+      cached = store.read();
+      sharedError = store.readRefreshState()?.error;
+    }
     if (cached) {
-      if (refresh.error) await onCacheFallback?.(new Error(refresh.error));
+      if (sharedError) await onCacheFallback?.(new Error(sharedError));
       return cached;
     }
-    throw new Error(refresh.error ?? "The source allows one refresh per minute. Try again shortly.");
+    throw new Error(sharedError ?? "The source allows one refresh per minute. Try again shortly.");
   }
   let nextRequestAt = new Date(startedAt + MIN_REFRESH_MILLISECONDS).toISOString();
   store.writeRefreshState({ nextRequestAt });

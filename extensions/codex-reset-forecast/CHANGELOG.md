@@ -8,6 +8,7 @@
 - Show reset and banked updates separately in the calendar using the source's UTC dates.
 - Add visible data-source credit, one-minute refresh limits, and rate-limit handling.
 - Use a fresh source-specific cache to exclude data from the retired provider.
+- Wait for shared data when commands overlap during the first load.
 
 ## [Initial Version] - 2026-09-11
 

@@ -170,6 +170,65 @@ describe("fetchForecast", () => {
     expect(first).toBe(second);
     expect(fetchImpl).toHaveBeenCalledTimes(2);
   });
+  it("waits for the first snapshot shared by a separate command runtime without refetching", async () => {
+    const store = new MemoryStore();
+    // Separate command runtimes have distinct store objects backed by the same Raycast cache.
+    const otherStore: ForecastStore = {
+      read: () => store.read(),
+      write: (snapshot) => store.write(snapshot),
+      readRefreshState: () => store.readRefreshState(),
+      writeRefreshState: (state) => store.writeRefreshState(state),
+    };
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const fetchImpl = vi.fn<typeof fetch>(async (url) => {
+      await gate;
+      return jsonResponse(url === FORECAST_URL ? forecast : timeline);
+    });
+    const both = Promise.all([
+      fetchForecast({ store, fetchImpl, now: now() }),
+      fetchForecast({ store: otherStore, fetchImpl, now: now() }),
+    ]);
+    release();
+    const [first, second] = await both;
+    expect(second).toBe(first);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+  it("reports a first-load failure published by another command without refetching", async () => {
+    vi.useFakeTimers();
+    try {
+      const store = new MemoryStore();
+      store.refresh = { nextRequestAt: now(60)().toISOString() };
+      const fetchImpl = successfulFetch();
+      const result = fetchForecast({ store, fetchImpl, now: now(), timeoutMilliseconds: 1000 });
+      const failure = expect(result).rejects.toThrow("HTTP 500");
+      store.refresh = { ...store.refresh, error: "codex-reset.com returned HTTP 500." };
+      await vi.advanceTimersByTimeAsync(100);
+      await failure;
+      expect(fetchImpl).not.toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+  it("bounds the first-load wait if another command exits before saving data", async () => {
+    vi.useFakeTimers();
+    try {
+      const store = new MemoryStore();
+      store.refresh = { nextRequestAt: now(60)().toISOString() };
+      const fetchImpl = successfulFetch();
+      const result = fetchForecast({ store, fetchImpl, now: now(), timeoutMilliseconds: 250 });
+      const failure = expect(result).rejects.toThrow(/one refresh per minute/);
+      await vi.advanceTimersByTimeAsync(250);
+      await failure;
+      expect(fetchImpl).not.toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
   it("honours a rate limit even when the other endpoint has a network error", async () => {
     const store = new MemoryStore();
     const fetchImpl = vi.fn<typeof fetch>(async (url) => {
