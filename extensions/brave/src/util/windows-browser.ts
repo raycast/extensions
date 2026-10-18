@@ -1,4 +1,5 @@
 import { spawn } from "child_process";
+import { getPreferenceValues } from "@raycast/api";
 import { switch_tab, new_tab } from "rust:../../rust";
 import { getWindowsUserDataPath, requireBraveExecutable } from "./platform";
 
@@ -23,6 +24,7 @@ export async function switchToTabByTitle(title: string): Promise<void> {
 }
 
 export async function createNewTab(): Promise<void> {
-  if (await new_tab(requireBraveExecutable())) return;
+  const { userDataPath } = getPreferenceValues<Preferences>();
+  if (!userDataPath?.trim() && (await new_tab(requireBraveExecutable()))) return;
   await launchBrave(["brave://newtab/"]);
 }
