@@ -32,7 +32,7 @@ export function SignInForm({ signIn }: { signIn: SignInController }) {
 				</ActionPanel>
 			}
 		>
-			{(step !== "email" || busy) && signIn.apiOrigin ? (
+			{step !== "email" && signIn.apiOrigin ? (
 				<Form.Description title="Server" text={signIn.apiOrigin} />
 			) : null}
 			{step === "done" && <Form.Description text="Signed in. Select Open Get TOTP to view your codes." />}
@@ -69,7 +69,7 @@ export function SignInForm({ signIn }: { signIn: SignInController }) {
 					info="Your password is used on this device to sign in and unlock your keys. It is not sent to Ente or saved."
 				/>
 			)}
-			{step === "email" && !busy && (
+			{step === "email" && (
 				<Form.TextField
 					id="serverURL"
 					title="Server URL (optional)"

@@ -9,7 +9,6 @@ import { CodeDetails } from "./CodeDetails";
 interface CodeListItemProps {
 	item: JsonFormat;
 	state: TOTPState;
-	lastSync: string;
 	primaryAction: Preferences["primaryAction"];
 	managementActions: ReactNode;
 	onVisit: () => unknown;
@@ -33,7 +32,6 @@ function codeIcon(item: JsonFormat) {
 export function CodeListItem({
 	item,
 	state,
-	lastSync,
 	primaryAction,
 	managementActions,
 	onVisit,
@@ -66,7 +64,7 @@ export function CodeListItem({
 			subtitle={item.username}
 			icon={codeIcon(item)}
 			keywords={[item.service_name, item.username ?? "", ...item.tags]}
-			detail={<CodeDetails item={item} state={state} lastSync={lastSync} />}
+			detail={<CodeDetails item={item} state={state} />}
 			accessories={[
 				{
 					icon: {

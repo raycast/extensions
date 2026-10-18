@@ -59,7 +59,7 @@ export function CodeList({ items, state, managementActions }: CodeListProps) {
 		<List
 			navigationTitle={cloud && state.apiOrigin ? `Get TOTP — ${state.apiOrigin}` : "Get TOTP"}
 			isLoading={state.loading || state.status === "Syncing"}
-			searchBarPlaceholder="Search accounts..."
+			searchBarPlaceholder="Search..."
 			isShowingDetail
 		>
 			{items.length === 0 && (
@@ -75,7 +75,6 @@ export function CodeList({ items, state, managementActions }: CodeListProps) {
 						key={item.id ?? index}
 						item={item}
 						state={state}
-						lastSync={lastSync}
 						primaryAction={preferredAction}
 						managementActions={managementActions}
 						onVisit={() => visitItem(item)}

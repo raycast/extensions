@@ -2,6 +2,7 @@ import { LocalStorage } from "@raycast/api";
 import { readFileSync } from "node:fs";
 import { getSecrets, parseSecrets, storeSecrets } from "../src/helpers/secrets";
 import { STORAGE_KEY } from "../src/constants/secrets";
+import { mapSecretsToJsonFormat } from "../src/helpers";
 import db from "./__mocks__/db.json";
 
 jest.mock("node:fs");
@@ -130,5 +131,33 @@ describe("storeSecrets", () => {
 		await storeSecrets(db);
 
 		expect(mockedSetItem).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify(db));
+	});
+});
+
+describe("TOTP codes", () => {
+	it.each([
+		["SHA1", "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ", "94287082"],
+		["SHA256", "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZA", "46119246"],
+		[
+			"SHA512",
+			"GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQGEZDGNA",
+			"90693936",
+		],
+	])("matches the RFC 6238 %s vector", (algorithm, secret, expected) => {
+		const entries = parseSecrets([
+			`otpauth://totp/test?secret=${secret}&algorithm=${algorithm}&digits=8&period=30`,
+		]);
+		expect(mapSecretsToJsonFormat(entries, 59_000)[0].current_totp).toBe(expected);
+	});
+
+	it("uses the entry period for next codes and countdowns", () => {
+		const entries = parseSecrets([
+			"otpauth://totp/test?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ&digits=8&period=60",
+		]);
+		expect(mapSecretsToJsonFormat(entries, 89_000)[0]).toMatchObject({
+			current_totp: "94287082",
+			next_totp: "37359152",
+			current_totp_time_remaining: 31,
+		});
 	});
 });
