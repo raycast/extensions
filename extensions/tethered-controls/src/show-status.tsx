@@ -129,7 +129,9 @@ export default function Command() {
         `Heat Protection: ${yesNo(status.heatProtectionEnabled)} (active: ${yesNo(status.heatProtectionActive)})`,
         `Profile: ${status.activeProfile ? escapeMarkdown(status.activeProfile) : "None"}`,
         ...(typeof status.mcpBridgeEnabled === "boolean"
-          ? [`MCP Bridge: ${yesNo(status.mcpBridgeEnabled)}${status.mcpBridgeStatus ? ` (${escapeMarkdown(status.mcpBridgeStatus)})` : ""}`]
+          ? [
+              `MCP Bridge: ${yesNo(status.mcpBridgeEnabled)}${status.mcpBridgeStatus ? ` (${escapeMarkdown(status.mcpBridgeStatus)})` : ""}`,
+            ]
           : []),
         `Updated: ${new Date(status.updatedAt * 1000).toLocaleTimeString()}`,
       ].join("\n\n")
