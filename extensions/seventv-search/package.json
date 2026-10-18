@@ -6,6 +6,9 @@
   "description": "Search, preview, copy, and paste 7TV emotes from Raycast.",
   "icon": "icon.png",
   "author": "Paranjayy",
+  "contributors": [
+    "nakama"
+  ],
   "categories": [
     "Media"
   ],

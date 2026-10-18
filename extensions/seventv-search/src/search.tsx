@@ -175,6 +175,22 @@ export default function Command() {
     return `https:${hostUrl}/${size}.webp`;
   };
 
+  // Chat apps take GIF and PNG but often not WebP. 7TV lists a GIF for animated emotes and
+  // a PNG for static ones, so deliver that, at the largest size available.
+  const getEmoteFile = (item: Emote) => {
+    const names = item.host.files.map((f) => f.name);
+    const largest = (ext: string) =>
+      ["4x", "3x", "2x", "1x"]
+        .map((size) => `${size}.${ext}`)
+        .find((name) => names.includes(name));
+    const file =
+      (item.animated && largest("gif")) ||
+      largest("png") ||
+      largest("webp") ||
+      "4x.webp";
+    return { url: `https:${item.host.url}/${file}`, ext: file.split(".")[1] };
+  };
+
   async function addToHistory(item: Emote) {
     const newHistory = [item, ...history.filter((h) => h.id !== item.id)].slice(
       0,
@@ -202,7 +218,7 @@ export default function Command() {
     item: Emote,
     mode: "smart" | "url" | "bruteforce" = "smart",
   ) {
-    const url = getEmoteUrl(item, "4x");
+    const { url, ext } = getEmoteFile(item);
     await addToHistory(item);
 
     if (mode === "url") {
@@ -224,7 +240,7 @@ export default function Command() {
       const data = new Uint8Array(arrayBuffer);
 
       const safeName = item.name.replace(/[^a-z0-9]/gi, "_").toLowerCase();
-      const tempPath = join(tmpdir(), `vault_${safeName}_${item.id}.webp`);
+      const tempPath = join(tmpdir(), `vault_${safeName}_${item.id}.${ext}`);
       await writeFile(tempPath, data);
 
       try {
@@ -258,7 +274,7 @@ export default function Command() {
 
   const renderActions = (item: Emote) => {
     const isFav = favorites.some((f) => f.id === item.id);
-    const highResUrl = getEmoteUrl(item, "4x");
+    const { url: highResUrl, ext } = getEmoteFile(item);
     const markdown = `![${item.name}](${highResUrl})`;
 
     return (
@@ -311,7 +327,7 @@ export default function Command() {
                 const safeName = item.name
                   .replace(/[^a-z0-9]/gi, "_")
                   .toLowerCase();
-                const tempPath = join(tmpdir(), `copy_${safeName}.webp`);
+                const tempPath = join(tmpdir(), `copy_${safeName}.${ext}`);
                 await writeFile(tempPath, data);
                 await Clipboard.copy({ file: tempPath });
                 toast.style = Toast.Style.Success;
