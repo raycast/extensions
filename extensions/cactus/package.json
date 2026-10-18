@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cactus",
+  "title": "Cactus",
+  "description": "Cactus for Mac is a scheduled website blocker. See when protection is on and edit your next recurring block.",
+  "icon": "icon.png",
+  "author": "onmax",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "status",
+      "title": "Cactus Status",
+      "description": "See whether Cactus is blocking now, when access returns, and your schedule",
+      "mode": "view"
+    },
+    {
+      "name": "edit-schedule",
+      "title": "Edit Next Schedule",
+      "description": "Edit the schedule Cactus applies to the next block",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^22.0.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "keywords": [
+    "website blocker",
+    "block websites",
+    "focus",
+    "schedule",
+    "distraction",
+    "productivity"
+  ]
+}
