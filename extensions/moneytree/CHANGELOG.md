@@ -1,16 +1,12 @@
 # Moneytree Changelog
 
-## [Category Budget Management] - {PR_MERGE_DATE}
+## [Category Budgets] - {PR_MERGE_DATE}
 
-- Add List Budgets to view saved category limits and current-month spending, percentage used, and remaining balance; Enter opens a detail view with transactions and previous-month spending when available. Edit from the action panel using the standard shortcut; deletion requires confirmation.
-- Navigate between budgets and transactions; budget details show this month's transactions for the budget's own category. Spending totals come from Moneytree's monthly presenter rather than a partial transaction search.
-- Add AI tools to read, create, update, and delete category budget limits. Writes require an explicitly requested category and amount or deletion target, validate expense categories, and verify results with a fresh read.
-- Add AI eval scenarios for read-only suggestions, duplicate budgets, and ambiguous categories.
-- Show total budget spending and limits, with progress rings and percentages coloured from green through amber to red as spending approaches the limit.
-- Budget details show a searchable list of this month's transactions beside a chart of the amount left or over budget, spending against the limit, a calculated 12-completed-month average, and last month's spending.
-- Sort budgets by percentage used (default, remembered), amount spent, limit, or name, and filter to over-budget or nearly used budgets. Stay on the list after creating, editing, or deleting a budget.
-- Count each budget only by its own category, matching the Moneytree app; a parent category's budget does not include its subcategories.
-- Keep saved limits visible if Moneytree's monthly spending endpoint is unavailable.
+- Add List Budgets: see each category's spending against its limit with color-coded progress, a monthly total, sorting, and over-budget filters.
+- Add budget details with a chart of this month's spending, last month, and a 12-month average, alongside the month's transactions.
+- Create, edit, and delete budgets from Raycast or AI. Each budget counts only its own category, matching the Moneytree app.
+- Ask AI how much you've spent in a budget category; it asks for clarification when a name is ambiguous.
+- Add a refresh action when budgets fail to load, clearer error messages, and consistent command titles.
 
 ## [Improved Category Management & Metadata Updates] - 2026-06-03
 
