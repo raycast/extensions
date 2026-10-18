@@ -1,5 +1,11 @@
 # Bitwarden Changelog
 
+## [Unlock Form Improvements] - {PR_MERGE_DATE}
+
+- Press Enter to submit the master password (⌘ + Enter still works)
+- Lock the unlock form while the vault is unlocking, so the password can't be edited mid-unlock
+- Fix pressing Enter during an unlock triggering the "Copy Last Errors" action
+
 ## [Fix File Resource Cleanup] - 2026-10-15
 
 - Clear the file-wait timeout when the file becomes available
