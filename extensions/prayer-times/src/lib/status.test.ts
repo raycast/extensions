@@ -71,6 +71,10 @@ describe("markOptions", () => {
     expect(markOptions(asr, undefined, at(17, 0))).toEqual(["jamaat", "late"]);
   });
 
+  it("offers jamaat on a prayer with no jamaat time set", () => {
+    expect(markOptions({ ...asr, jamaat: undefined }, undefined, at(16, 40))).toEqual(["jamaat", "late"]);
+  });
+
   it("offers on time and made up once the time has ended", () => {
     expect(markOptions(asr, undefined, at(21, 0))).toEqual(["jamaat", "ontime", "madeup"]);
     expect(markOptions(asr, "missed", at(21, 0))).toEqual(["jamaat", "ontime", "madeup"]);

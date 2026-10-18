@@ -126,7 +126,8 @@ export function prayedAt(slot: PrayerSlot, status: PrayedStatus, now: Date): Dat
 
 /**
  * The statuses a started prayer can be marked or changed to, besides a plain "mark prayed" (which records
- * {@link clockStatus}) and unmark. With jamaat only once the jamaat has happened; made up only after the
+ * {@link clockStatus}) and unmark. With jamaat once its jamaat has happened, or any time when it has no jamaat
+ * time set (many never set one for Maghrib); made up only after the
  * prayer's time has ended.
  *
  * @param slot - Prayer slot, already started.
@@ -137,7 +138,7 @@ export function prayedAt(slot: PrayerSlot, status: PrayedStatus, now: Date): Dat
 export function markOptions(slot: PrayerSlot, current: PrayerStatusValue | undefined, now: Date): PrayedStatus[] {
   const prayed = current && current !== "missed";
   const options: PrayedStatus[] = [];
-  if (slot.jamaat && slot.jamaat <= now) options.push("jamaat");
+  if (!slot.jamaat || slot.jamaat <= now) options.push("jamaat");
   options.push("ontime", "late");
   if (now >= slot.end) options.push("madeup");
   return options.filter((status) => status !== (prayed ? current : clockStatus(slot, now)));
