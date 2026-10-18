@@ -1,6 +1,6 @@
 # Changelog
 
-## Initial Version - {PR_MERGE_DATE}
+## Initial Version - 2026-10-18
 
 - Render Mermaid diagrams locally with Pele from selected text, the clipboard, or the built-in editor.
 - Preview diagrams with light, dark, and Flexoki themes and optional transparent backgrounds.
