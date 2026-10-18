@@ -1,5 +1,9 @@
 # Links Folder Changelog
 
+## [Delete Folder, Keep Contents] - {PR_MERGE_DATE}
+
+- Delete Folder, Keep Contents (⌃⇧D): remove a folder and move its items up to the folder's level.
+
 ## [Search, Emoji Picker and Export Update] - 2026-09-19
 
 - Search now matches text anywhere in a title (for example `2` finds `y2-s2`), ranks the best matches first and selects the top result automatically. Move up/down is hidden while searching, since the list is reordered then.
