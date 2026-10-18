@@ -1,6 +1,6 @@
 # Claude Usage (ccusage) Changelog
 
-## [Fix loading and add section preferences] - {PR_MERGE_DATE}
+## [Fix loading and add section preferences] - 2026-10-18
 
 ### Fixed
 
