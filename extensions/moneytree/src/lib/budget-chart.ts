@@ -90,7 +90,7 @@ export function renderBudgetChart(input: BudgetChartInput): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${height}" viewBox="0 0 ${WIDTH} ${height}">
     <text x="${PAD}" y="44" font-size="28" font-weight="700" fill="${statusColor}" ${font}>${escape(status)}</text>
     <text x="${PAD}" y="66" font-size="12" fill="${muted}" ${font}>${escape(input.periodLabel)} · Day ${input.day} of ${input.daysInMonth}</text>
-    ${bar(104, "This month", input.spent, 14)}
+    ${bar(104, "This month", input.spent, 8)}
     ${bar(166, "12-month average", input.average, 8)}
     ${footer ? `<text x="${PAD}" y="210" font-size="12" fill="${muted}" ${font}>${escape(footer)}</text>` : ""}
   </svg>`;

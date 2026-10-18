@@ -74,7 +74,6 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle="Budgets"
       searchBarPlaceholder={`Search budgets · Sorted by ${BUDGET_SORT_LABELS[sort]}`}
       selectedItemId={selectedItemId}
       onSelectionChange={(id) => setSelectedItemId(id ?? undefined)}
@@ -87,7 +86,24 @@ export default function Command() {
       }
     >
       {error ? (
-        <List.EmptyView icon={Icon.ExclamationMark} title="Could Not Load Budgets" description={error.message} />
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could Not Load Budgets"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Refresh Budgets"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={() => {
+                  revalidate();
+                  revalidateSpending();
+                }}
+              />
+            </ActionPanel>
+          }
+        />
       ) : !isLoading && !budgets.length ? (
         <List.EmptyView
           icon={Icon.List}

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, LaunchType, List, launchCommand } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { Account, Transaction } from "../lib/types";
 import { formatCurrency } from "../lib/format";
@@ -220,6 +220,14 @@ function getTransactionDetails(transaction: Transaction): string {
   return `${formatDate(transaction.date)} - ${description}: ${isExpense ? "-" : "+"}${formatCurrency(Math.abs(transaction.amount))}`;
 }
 
+async function showBudgets() {
+  try {
+    await launchCommand({ name: "list-budgets", type: LaunchType.UserInitiated });
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not open List Budgets" });
+  }
+}
+
 export function TransactionsList({
   accountId,
   initialQuery,
@@ -298,7 +306,7 @@ export function TransactionsList({
       onSearchTextChange={setSearchText}
       searchText={searchText}
       searchBarPlaceholder="Query"
-      navigationTitle={budgetCategory ? `${budgetCategory.name} Transactions` : "Transactions"}
+      navigationTitle={budgetCategory ? `${budgetCategory.name} Transactions` : accountId ? "Transactions" : undefined}
       throttle
       pagination={budgetCategory ? undefined : pagination}
       searchBarAccessory={
@@ -334,13 +342,7 @@ export function TransactionsList({
           }
           actions={
             <ActionPanel>
-              {!budgetCategory && (
-                <Action
-                  title="Show Budgets"
-                  icon={Icon.Coins}
-                  onAction={() => launchCommand({ name: "list-budgets", type: LaunchType.UserInitiated })}
-                />
-              )}
+              {!budgetCategory && <Action title="Show Budgets" icon={Icon.Coins} onAction={showBudgets} />}
               <LogoutAction />
             </ActionPanel>
           }
@@ -377,13 +379,7 @@ export function TransactionsList({
                         icon={Icon.Clipboard}
                         content={getTransactionDetails(transaction)}
                       />
-                      {!budgetCategory && (
-                        <Action
-                          title="Show Budgets"
-                          icon={Icon.Coins}
-                          onAction={() => launchCommand({ name: "list-budgets", type: LaunchType.UserInitiated })}
-                        />
-                      )}
+                      {!budgetCategory && <Action title="Show Budgets" icon={Icon.Coins} onAction={showBudgets} />}
                       <LogoutAction />
                     </ActionPanel>
                   }

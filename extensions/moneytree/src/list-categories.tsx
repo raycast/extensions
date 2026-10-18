@@ -122,11 +122,7 @@ export default function Command() {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle="Categories"
-      searchBarAccessory={<CategoryTypeDropdown value={filter} onChange={setFilter} />}
-    >
+    <List isLoading={isLoading} searchBarAccessory={<CategoryTypeDropdown value={filter} onChange={setFilter} />}>
       {groupedCategories.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Tag}

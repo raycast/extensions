@@ -56,28 +56,32 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
     // Token might be expired, try to refresh
     try {
       await ensureValidToken();
-      // Retry the request with new token
-      const newHeaders = await getDefaultHeaders();
-      console.debug(`[API] Retrying ${method} ${url} with refreshed token`);
-      const retryResponse = await fetch(url, {
-        ...options,
-        headers: {
-          ...newHeaders,
-          ...options.headers,
-        },
-      });
-
-      if (!retryResponse.ok) {
-        console.debug(`[API] Retry failed: ${retryResponse.status}`);
-        throw new Error(`API request failed: ${retryResponse.status}`);
-      }
-
-      console.debug(`[API] ${method} ${url} - Success (after refresh)`);
-      return parseApiResponse<T>(retryResponse);
     } catch {
-      console.debug(`[API] Retried request failed for ${url}`);
+      console.debug(`[API] Token refresh failed for ${url}`);
       throw new Error("Authentication failed. Please check your credentials.");
     }
+    // Retry the request with the refreshed token; only a second 401 points to credentials.
+    const newHeaders = await getDefaultHeaders();
+    console.debug(`[API] Retrying ${method} ${url} with refreshed token`);
+    const retryResponse = await fetch(url, {
+      ...options,
+      headers: {
+        ...newHeaders,
+        ...options.headers,
+      },
+    });
+
+    if (retryResponse.status === 401) {
+      console.debug(`[API] Retry still unauthorized for ${url}`);
+      throw new Error("Authentication failed. Please check your credentials.");
+    }
+    if (!retryResponse.ok) {
+      console.debug(`[API] Retry failed: ${retryResponse.status}`);
+      throw new Error(`API request failed: ${retryResponse.status}`);
+    }
+
+    console.debug(`[API] ${method} ${url} - Success (after refresh)`);
+    return parseApiResponse<T>(retryResponse);
   }
 
   if (!response.ok) {
