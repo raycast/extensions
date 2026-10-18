@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "codex-reset-forecast",
   "title": "Codex Reset Forecast",
-  "description": "See the 24-hour and 48-hour Codex reset likelihood, announcements, and reset history from codexreset.org. Unofficial and not affiliated with OpenAI.",
+  "description": "See 24-hour and 48-hour Codex reset forecasts, confidence, official watches, and verified reset history. Data: codex-reset.com. Unofficial and not affiliated with OpenAI.",
   "icon": "codexreset-icon-transparent.png",
   "author": "Astatine-213",
   "platforms": [
@@ -34,7 +34,6 @@
   "dependencies": {
     "@raycast/api": "^2.2.1",
     "@raycast/utils": "^2.3.1",
-    "seroval": "^1.6.7",
     "zod": "^4.6.0"
   },
   "devDependencies": {
@@ -50,7 +49,7 @@
     {
       "name": "check-reset-forecast",
       "title": "Check Reset Forecast",
-      "description": "View the reset outlook, announcements, and sourced reset records from Codex Reset Monitor.",
+      "description": "View reset forecasts, confidence, the latest watch, and verified history. Data: codex-reset.com.",
       "mode": "view",
       "keywords": [
         "codex",
@@ -63,7 +62,7 @@
     {
       "name": "reset-history-calendar",
       "title": "View Reset Calendar",
-      "description": "See confirmed Codex reset days across the current and previous month at a glance.",
+      "description": "See reset days and banked updates across the current and previous month. Data: codex-reset.com.",
       "mode": "view",
       "keywords": [
         "codex",

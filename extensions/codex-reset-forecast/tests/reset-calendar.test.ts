@@ -1,22 +1,33 @@
 import { describe, expect, it } from "vitest";
 import fixture from "./fixtures/forecast-valid.json";
-import { parseForecastResponse, type ResetRecord } from "../src/api/forecast-schema";
+import forecast from "./fixtures/forecast-api.json";
+import timeline from "./fixtures/timeline-api.json";
+import { parseForecastResponse, parseSourceResponses, type ResetRecord } from "../src/api/forecast-schema";
 import { calendarMonthDescription, calendarMonthSummary, resetCalendar } from "../src/domain/reset-calendar";
 
 const response = parseForecastResponse(fixture);
 const now = new Date("2026-09-09T07:00:00Z");
 
-function record(id: string, dateTime: string, type = "forced-reset"): ResetRecord {
-  return { ...response.history[0], id, dateTime, type };
+function record(id: string, dateTime: string, type = "reset"): ResetRecord {
+  return { ...response.history[0], id, sourceDate: dateTime.slice(0, 10), dateTime, type };
 }
 
 function withHistory(history: ResetRecord[]) {
-  return { ...response, history, evidence: [] };
+  return { ...response, history };
 }
 
 describe("recent reset calendar", () => {
+  it("shows the site's reset and banked updates on their published calendar dates", () => {
+    const snapshot = parseSourceResponses(forecast, timeline);
+    const october = resetCalendar(snapshot, new Date("2026-10-18T03:00:00Z"))[1];
+    expect(october).toMatchObject({ resetDays: 6, bankedDays: 1 });
+    expect(october.days[6].records.map((item) => item.type)).toEqual(["banked-reset", "banked-reset", "reset"]);
+    expect(october.days[5].records).toEqual([]);
+    expect(october.days.flatMap((day) => day.records).some((item) => item.type === "announcement")).toBe(false);
+    expect(calendarMonthDescription(october)).toContain("Banked update dates: 7.");
+  });
   it("shows the previous and current calendar months, even on the 31st", () => {
-    const months = resetCalendar(withHistory([]), new Date("2026-03-31T12:00:00Z"), "UTC");
+    const months = resetCalendar(withHistory([]), new Date("2026-03-31T12:00:00Z"));
     expect(months.map((month) => month.key)).toEqual(["2026-02", "2026-03"]);
     expect(months.map((month) => month.days.length)).toEqual([28, 31]);
     expect(months.map((month) => month.firstWeekday)).toEqual([6, 6]);
@@ -24,9 +35,9 @@ describe("recent reset calendar", () => {
   });
 
   it("handles year boundaries and leap years", () => {
-    const january = resetCalendar(withHistory([]), new Date("2026-01-15T12:00:00Z"), "UTC");
+    const january = resetCalendar(withHistory([]), new Date("2026-01-15T12:00:00Z"));
     expect(january.map((month) => month.key)).toEqual(["2025-12", "2026-01"]);
-    const leap = resetCalendar(withHistory([]), new Date("2024-03-01T12:00:00Z"), "UTC");
+    const leap = resetCalendar(withHistory([]), new Date("2024-03-01T12:00:00Z"));
     expect(leap[0].days.at(-1)?.key).toBe("2024-02-29");
     expect(leap[0].firstWeekday).toBe(3); // Thursday, in a Monday-first calendar.
   });
@@ -36,11 +47,10 @@ describe("recent reset calendar", () => {
       withHistory([
         record("first", "2026-09-08T04:00:00Z"),
         record("second-source", "2026-09-08T05:00:00Z"),
-        record("compensation", "2026-09-03T12:00:00Z", "compensation"),
+        record("another-reset", "2026-09-03T12:00:00Z"),
         record("old", "2026-07-31T12:00:00Z"),
       ]),
       now,
-      "UTC",
     );
     expect(months.map((month) => month.resetDays)).toEqual([0, 2]);
     expect(months[1].days[7].records.map((item) => item.id)).toEqual(["second-source", "first"]);
@@ -48,7 +58,7 @@ describe("recent reset calendar", () => {
     expect(calendarMonthDescription(months[1])).toContain("Reset dates: 3, 8.");
   });
 
-  it("excludes announcements, banked records, unknown types, and future resets", () => {
+  it("keeps banked updates separate and excludes notes, unknown types, and future events", () => {
     const months = resetCalendar(
       withHistory([
         record("banked", "2026-09-01T12:00:00Z", "banked-reset"),
@@ -58,24 +68,21 @@ describe("recent reset calendar", () => {
         record("tomorrow", "2026-09-10T01:00:00Z"),
       ]),
       now,
-      "UTC",
     );
     expect(months[1].resetDays).toBe(0);
+    expect(months[1].bankedDays).toBe(1);
+    expect(months[1].days[0].records[0].id).toBe("banked");
     expect(months[1].days[8]).toMatchObject({ isFuture: false, records: [] });
     expect(months[1].days[9]).toMatchObject({ isFuture: true, records: [] });
     expect(months[0].days.every((day) => !day.isFuture)).toBe(true);
   });
 
-  it("uses the system time zone for both month boundaries and reset dates", () => {
-    const boundary = new Date("2026-09-01T01:00:00Z");
-    const history = withHistory([record("boundary", "2026-09-01T00:30:00Z")]);
-    const local = resetCalendar(history, boundary, "America/Toronto");
-    expect(local.map((month) => month.key)).toEqual(["2026-07", "2026-08"]);
-    expect(local[1].days[30]).toMatchObject({ isFuture: false, key: "2026-08-31" });
-    expect(local[1].days[30].records[0].id).toBe("boundary");
-    const utc = resetCalendar(history, boundary, "UTC");
-    expect(utc[1].key).toBe("2026-09");
-    expect(utc[1].days[0].records[0].id).toBe("boundary");
+  it("preserves the published calendar date instead of shifting it to local time", () => {
+    const event = record("boundary", "2026-09-01T00:30:00Z");
+    const months = resetCalendar(withHistory([event]), new Date("2026-09-01T01:00:00Z"));
+    expect(months.map((month) => month.key)).toEqual(["2026-08", "2026-09"]);
+    expect(months[1].days[0].records[0].id).toBe("boundary");
+    expect(calendarMonthDescription(months[1])).toContain("codex-reset.com (UTC)");
   });
 
   it("groups both occurrences of a daylight-saving hour on the same day", () => {
@@ -85,7 +92,6 @@ describe("recent reset calendar", () => {
         record("after-fallback", "2026-11-01T06:30:00Z"),
       ]),
       new Date("2026-11-02T12:00:00Z"),
-      "America/Toronto",
     );
     expect(months[1].resetDays).toBe(1);
     expect(months[1].days[0].records).toHaveLength(2);
@@ -93,7 +99,7 @@ describe("recent reset calendar", () => {
   });
 
   it("keeps empty months visible without implying that future days were observed", () => {
-    const months = resetCalendar(withHistory([]), now, "UTC");
+    const months = resetCalendar(withHistory([]), now);
     expect(calendarMonthSummary(months[0])).toBe("0 reset days");
     expect(calendarMonthDescription(months[1])).toContain("No confirmed resets recorded.");
     expect(months[1].days.filter((day) => day.isFuture)).toHaveLength(21);
