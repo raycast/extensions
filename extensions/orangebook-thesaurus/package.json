@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "orangebook-thesaurus",
+  "title": "OrangeBook Thesaurus",
+  "description": "Search synonyms and antonyms as you type.",
+  "icon": "icon.png",
+  "author": "gcrft123",
+  "platforms": ["macOS", "Windows"],
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "keywords": ["thesaurus", "synonyms", "antonyms", "datamuse", "dictionary"],
+  "commands": [
+    {
+      "name": "search-thesaurus",
+      "title": "Search Thesaurus",
+      "description": "Look up synonyms and antonyms",
+      "mode": "view",
+      "keywords": ["synonym", "antonym", "dictionary"]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.36.0",
+    "prettier": "^3.5.3",
+    "react": "19.0.0",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "ray publish"
+  }
+}
