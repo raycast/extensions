@@ -111,12 +111,19 @@ function flatten(root: unknown): Flat | null {
     const { value, at } = stack.pop()!;
     if (Array.isArray(value)) {
       const node: number[] = [];
-      for (let i = 0; i < value.length && payload.length <= MAX_FLATTENED_ENTRIES; i++) node.push(slot(value[i]));
+      for (const child of value) {
+        if (payload.length >= MAX_FLATTENED_ENTRIES) return null;
+        node.push(slot(child));
+      }
       payload[at] = node;
     } else if (isRecord(value)) {
-      // No prototype, so a "__proto__" key is a key like any other.
+      // No prototype, so a "__proto__" key is a key like any other. for...in, so a huge object's
+      // keys aren't listed before the limit is checked; a parsed object has no inherited keys.
       const node: Record<string, number> = Object.create(null);
-      for (const key of Object.keys(value)) node[key] = slot(value[key]);
+      for (const key in value) {
+        if (payload.length >= MAX_FLATTENED_ENTRIES) return null;
+        node[key] = slot(value[key]);
+      }
       payload[at] = node;
     } else {
       payload[at] = value;
