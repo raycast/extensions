@@ -1,7 +1,7 @@
 import { Color, Icon, List } from "@raycast/api";
 import { ReactNode } from "react";
 import { TaskWithList } from "../types";
-import { assignmentDetails, assignmentIcon, dueDay, getIcon, todayValue } from "../utils";
+import { assignmentDetails, dueDay, getIcon, todayValue } from "../utils";
 
 export default function TaskItem(props: {
   tasks: TaskWithList[];
@@ -25,9 +25,7 @@ export default function TaskItem(props: {
       id={`${props.task.listId}-${props.task.id}`}
       title={props.task.title}
       accessories={[
-        ...(assignment
-          ? [{ icon: assignmentIcon(props.task.assignmentInfo), tooltip: `Assigned from ${assignment.source}` }]
-          : []),
+        ...(assignment ? [{ icon: assignment.icon, tooltip: `Assigned from ${assignment.source}` }] : []),
         ...(listTitle ? [{ text: { value: listTitle, color: Color.SecondaryText } }] : []),
         ...(dueText ? [{ text: { value: dueText, color: dueColor }, icon: Icon.Calendar }] : []),
       ]}

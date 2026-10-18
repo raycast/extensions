@@ -18,11 +18,12 @@ type Input = {
 export default async function (input: Input) {
   const task = await requireTask(input.listId, input.taskId);
   const compact = compactTask(task);
+  const assignment = assignmentDetails(task.assignmentInfo);
   return {
     ...compact,
     notes: task.notes ?? "",
     completed: task.completed ?? null,
     webViewLink: task.webViewLink ?? null,
-    assignment: assignmentDetails(task.assignmentInfo) ?? null,
+    assignment: assignment ? { ...assignment, icon: undefined } : null,
   };
 }

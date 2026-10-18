@@ -12,7 +12,7 @@ import {
   toggleTask,
 } from "../api/endpoints";
 import { EditableTask, TaskForm, TaskList, TaskWithList } from "../types";
-import { assignmentDetails, assignmentIcon, dueDay, isCompleted, todayValue } from "../utils";
+import { assignmentDetails, dueDay, isCompleted, todayValue } from "../utils";
 import AuthRecoveryView from "./AuthRecoveryView";
 import CreateTaskForm from "./CreateTaskForm";
 import EditTaskForm from "./EditTaskForm";
@@ -302,77 +302,80 @@ export default function UnifiedTaskView() {
       />
     </ActionPanel.Submenu>
   );
-  const actions = (task?: TaskWithList) => (
-    <ActionPanel>
-      {task ? (
-        <Action
-          title={isCompleted(task) ? "Reopen Task" : "Complete Task"}
-          icon={isCompleted(task) ? Icon.ArrowClockwise : Icon.CheckCircle}
-          onAction={() => handleToggle(task)}
-        />
-      ) : null}
-      {task ? (
-        <Action.Push
-          title="Edit Task"
-          icon={Icon.Pencil}
-          target={<EditTaskForm listId={task.listId} task={task} onEdit={handleEdit} />}
-        />
-      ) : null}
-      {task?.assignmentInfo?.linkToTask ? (
-        <Action.OpenInBrowser
-          title={`Open in ${assignmentDetails(task.assignmentInfo)?.source ?? "Source"}`}
-          icon={assignmentIcon(task.assignmentInfo)}
-          url={task.assignmentInfo.linkToTask}
-          shortcut={shortcut("o")}
-        />
-      ) : null}
-      {task?.webViewLink ? <Action.OpenInBrowser title="Open in Google Tasks" url={task.webViewLink} /> : null}
-      <Action
-        title={isShowingDetails ? "Hide Details" : "Show Details"}
-        icon={isShowingDetails ? Icon.EyeDisabled : Icon.Eye}
-        shortcut={shortcut("d")}
-        onAction={() => setIsShowingDetails((value) => !value)}
-      />
-      {lastCompletedTask ? (
-        <Action
-          title="Undo Last Completion"
-          icon={Icon.ArrowCounterClockwise}
-          shortcut={shortcut("z")}
-          onAction={() => void handleUndoCompletion()}
-        />
-      ) : null}
-      {task ? (
-        <Action
-          title="Delete Task"
-          icon={Icon.Trash}
-          style={Action.Style.Destructive}
-          shortcut={shortcut("backspace")}
-          onAction={() => handleDelete(task)}
-        />
-      ) : null}
-      {selection === completed && Object.keys(completedPageTokens).length > 0 ? (
-        <Action
-          title="Load More Completed Tasks"
-          icon={Icon.ArrowDown}
-          onAction={() => void loadMoreCompletedTasks()}
-        />
-      ) : null}
-      {sortActions}
-      <Action.Push
-        title="Create Task"
-        icon={Icon.NewDocument}
-        shortcut={shortcut("n")}
-        target={
-          <CreateTaskForm
-            listId={lists.some((list) => list.id === selection) ? selection : undefined}
-            title={searchText}
-            onCreate={handleCreate}
+  const actions = (task?: TaskWithList) => {
+    const assignment = assignmentDetails(task?.assignmentInfo);
+    return (
+      <ActionPanel>
+        {task ? (
+          <Action
+            title={isCompleted(task) ? "Reopen Task" : "Complete Task"}
+            icon={isCompleted(task) ? Icon.ArrowClockwise : Icon.CheckCircle}
+            onAction={() => handleToggle(task)}
           />
-        }
-      />
-      <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={shortcut("r")} onAction={() => void refresh()} />
-    </ActionPanel>
-  );
+        ) : null}
+        {task ? (
+          <Action.Push
+            title="Edit Task"
+            icon={Icon.Pencil}
+            target={<EditTaskForm listId={task.listId} task={task} onEdit={handleEdit} />}
+          />
+        ) : null}
+        {assignment?.linkToTask ? (
+          <Action.OpenInBrowser
+            title={`Open in ${assignment.source}`}
+            icon={assignment.icon}
+            url={assignment.linkToTask}
+            shortcut={shortcut("o")}
+          />
+        ) : null}
+        {task?.webViewLink ? <Action.OpenInBrowser title="Open in Google Tasks" url={task.webViewLink} /> : null}
+        <Action
+          title={isShowingDetails ? "Hide Details" : "Show Details"}
+          icon={isShowingDetails ? Icon.EyeDisabled : Icon.Eye}
+          shortcut={shortcut("d")}
+          onAction={() => setIsShowingDetails((value) => !value)}
+        />
+        {lastCompletedTask ? (
+          <Action
+            title="Undo Last Completion"
+            icon={Icon.ArrowCounterClockwise}
+            shortcut={shortcut("z")}
+            onAction={() => void handleUndoCompletion()}
+          />
+        ) : null}
+        {task ? (
+          <Action
+            title="Delete Task"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            shortcut={shortcut("backspace")}
+            onAction={() => handleDelete(task)}
+          />
+        ) : null}
+        {selection === completed && Object.keys(completedPageTokens).length > 0 ? (
+          <Action
+            title="Load More Completed Tasks"
+            icon={Icon.ArrowDown}
+            onAction={() => void loadMoreCompletedTasks()}
+          />
+        ) : null}
+        {sortActions}
+        <Action.Push
+          title="Create Task"
+          icon={Icon.NewDocument}
+          shortcut={shortcut("n")}
+          target={
+            <CreateTaskForm
+              listId={lists.some((list) => list.id === selection) ? selection : undefined}
+              title={searchText}
+              onCreate={handleCreate}
+            />
+          }
+        />
+        <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={shortcut("r")} onAction={() => void refresh()} />
+      </ActionPanel>
+    );
+  };
 
   // Windows initializes dropdown state when the List mounts. Adding the picker
   // later makes it fall back to its first option and overwrite the saved view.

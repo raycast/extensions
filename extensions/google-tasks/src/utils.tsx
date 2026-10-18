@@ -30,24 +30,31 @@ export function getIcon(task: Task): { source: Icon; tintColor?: Color } {
   return { source: Icon.Circle };
 }
 
+const surfaces = {
+  DOCUMENT: { source: "Google Docs", icon: Icon.Document },
+  SPACE: { source: "Google Chat", icon: Icon.SpeechBubble },
+  SURFACE_TYPE_UNSPECIFIED: { source: "Other", icon: Icon.Document },
+};
+
+export function assignmentSurface(info?: AssignmentInfo) {
+  return info ? surfaces[info.surfaceType ?? "SURFACE_TYPE_UNSPECIFIED"] : undefined;
+}
+
 export function assignmentDetails(info?: AssignmentInfo) {
-  if (!info) return undefined;
+  const surface = assignmentSurface(info);
+  if (!info || !surface) return undefined;
   const fileId = info.driveResourceInfo?.driveFileId;
   const resourceKey = info.driveResourceInfo?.resourceKey;
   const spaceId = info.spaceInfo?.space?.replace(/^spaces\//, "");
   return {
-    source: info.surfaceType === "DOCUMENT" ? "Google Docs" : info.surfaceType === "SPACE" ? "Google Chat" : "Other",
+    ...surface,
     linkToTask: info.linkToTask,
     fileUrl: fileId
-      ? `https://drive.google.com/open?id=${fileId}${resourceKey ? `&resourcekey=${encodeURIComponent(resourceKey)}` : ""}`
+      ? `https://drive.google.com/open?${new URLSearchParams({ id: fileId, ...(resourceKey ? { resourcekey: resourceKey } : {}) })}`
       : undefined,
     driveFileId: fileId,
     resourceKey,
     spaceUrl: spaceId ? `https://mail.google.com/chat/#chat/space/${spaceId}` : undefined,
     space: info.spaceInfo?.space,
   };
-}
-
-export function assignmentIcon(info?: AssignmentInfo): Icon {
-  return info?.surfaceType === "SPACE" ? Icon.SpeechBubble : Icon.Document;
 }
