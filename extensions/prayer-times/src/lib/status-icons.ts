@@ -9,11 +9,14 @@ const ICONS: Record<PrayerStatusValue, Icon> = {
   missed: Icon.XMarkCircle,
 };
 
-export const STATUS_COLORS: Record<PrayerStatusValue, Color> = {
+/** Late is an olive green (still prayed in its time); Raycast has only one green. */
+const LATE_GREEN: Color.Dynamic = { light: "#5E7F1A", dark: "#A4C639", adjustContrast: true };
+
+export const STATUS_COLORS: Record<PrayerStatusValue, Color.ColorLike> = {
   jamaat: Color.Green,
   ontime: Color.Green,
-  late: Color.Orange,
-  madeup: Color.Purple,
+  late: LATE_GREEN,
+  madeup: Color.Orange,
   missed: Color.Red,
 };
 
