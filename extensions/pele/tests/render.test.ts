@@ -84,6 +84,20 @@ test("renders every built-in example with visible content and portable SVG text 
   }
 });
 
+test("renders emoji as real portable outlines instead of missing-glyph boxes", async () => {
+  for (const label of ["🥚", "🐟", "🐸", "👩🏽‍💻", "🇮🇳"]) {
+    const diagram = await renderDiagram(`flowchart LR\nA["${label}"]`, options, assets);
+    const document = new DOMParser().parseFromString(diagram.svg, "image/svg+xml");
+    const paths = Array.from(document.getElementsByTagName("path"));
+    assert.ok(
+      paths.some((element) => (element.getAttribute("d")?.match(/[MLCQZ]/g)?.length ?? 0) > 50),
+      `${label} has a detailed glyph outline, not a missing-glyph rectangle`,
+    );
+    assert.doesNotMatch(diagram.svg, /<text[\s>]|<image[\s>]/);
+    assert.ok(PNG.sync.read(diagram.png).data.some((channel, index) => index % 4 !== 3 && channel < 100));
+  }
+});
+
 test("uses theme colors and preserves transparency and custom diagram styles", async () => {
   for (const theme of THEMES) {
     const diagram = await renderDiagram(flowchart, { ...options, theme: theme.id }, assets);

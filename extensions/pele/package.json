@@ -28,7 +28,7 @@
     {
       "name": "generate-diagram",
       "title": "Generate Diagram",
-      "description": "Render complete Mermaid syntax with Pele and save a PNG or SVG image locally. Returns the saved file path and dimensions."
+      "description": "Render complete Mermaid syntax with Pele and save a PNG or SVG image locally. Returns a link to the actual rendered file and its dimensions. Local images cannot be displayed inline in Raycast AI Chat."
     }
   ],
   "dependencies": {
@@ -136,7 +136,7 @@
     }
   ],
   "ai": {
-    "instructions": "When asked to create or convert a diagram, produce complete valid Mermaid syntax and pass it as mermaid to generate-diagram. Preserve supplied YAML frontmatter config. Express requested diagram settings such as Sankey showValues, nodeWidth, and nodePadding in the frontmatter config. Use the requested theme, format, and transparency when specified. The tool renders locally with Pele and saves the file. Report the returned filePath and format. Do not claim the image was copied, opened, or uploaded. Do not call the tool again after a successful result unless the user requests a change. Pele supports built-in Mermaid diagram types, but uses its own layout and themes. Remote images and links are disabled.",
+    "instructions": "When asked to create or convert a diagram, produce complete valid Mermaid syntax and pass it as mermaid to generate-diagram. Preserve supplied YAML frontmatter config. Express requested diagram settings such as Sankey showValues, nodeWidth, and nodePadding in the frontmatter config. Use the requested theme, format, and transparency when specified. The tool renders locally with Pele and saves the file. After success, output the returned markdown verbatim as your response. It links to the actual Pele image and explains that Raycast AI Chat cannot display local images inline. Never output a Mermaid code block as a preview: Raycast would redraw it with a different renderer, layout, and styling. Do not replace the link with a bare file path, invent sandbox paths, or use Markdown image tags for local files. Do not claim the image was copied, opened, uploaded, or displayed inline. Do not call the tool again after a successful result unless the user requests a change. Pele supports built-in Mermaid diagram types, but uses its own layout and themes. Remote images and links are disabled.",
     "evals": [
       {
         "input": "@pele Create a flowchart for user login and save it as a PNG.",
@@ -147,7 +147,9 @@
             "diagramType": "flowchart",
             "theme": "light",
             "width": 1000,
-            "height": 600
+            "height": 600,
+            "fileUrl": "file:///Users/example/Downloads/Pele/flowchart-example.png",
+            "markdown": "[Open Pele PNG](<file:///Users/example/Downloads/Pele/flowchart-example.png>)\n\nRaycast AI Chat cannot display the local image inline. Open the file to see the rendered diagram."
           }
         },
         "expected": [
@@ -163,6 +165,12 @@
           },
           {
             "includes": ".png"
+          },
+          {
+            "includes": "[Open Pele PNG](<file:///Users/example/Downloads/Pele/flowchart-example.png>)"
+          },
+          {
+            "includes": "cannot display the local image inline"
           }
         ]
       },
@@ -175,7 +183,9 @@
             "diagramType": "sequence",
             "theme": "dark",
             "width": 500,
-            "height": 300
+            "height": 300,
+            "fileUrl": "file:///Users/example/Downloads/Pele/sequence-example.svg",
+            "markdown": "[Open Pele SVG](<file:///Users/example/Downloads/Pele/sequence-example.svg>)\n\nRaycast AI Chat cannot display the local image inline. Open the file to see the rendered diagram."
           }
         },
         "expected": [
@@ -194,6 +204,12 @@
           },
           {
             "includes": ".svg"
+          },
+          {
+            "includes": "[Open Pele SVG](<file:///Users/example/Downloads/Pele/sequence-example.svg>)"
+          },
+          {
+            "includes": "cannot display the local image inline"
           }
         ]
       },
@@ -206,7 +222,9 @@
             "diagramType": "sankey",
             "theme": "light",
             "width": 1296,
-            "height": 896
+            "height": 896,
+            "fileUrl": "file:///Users/example/Downloads/Pele/sankey-example.png",
+            "markdown": "[Open Pele PNG](<file:///Users/example/Downloads/Pele/sankey-example.png>)\n\nRaycast AI Chat cannot display the local image inline. Open the file to see the rendered diagram."
           }
         },
         "expected": [
@@ -242,6 +260,40 @@
           },
           {
             "includes": ".png"
+          },
+          {
+            "includes": "[Open Pele PNG](<file:///Users/example/Downloads/Pele/sankey-example.png>)"
+          },
+          {
+            "includes": "cannot display the local image inline"
+          }
+        ]
+      },
+      {
+        "input": "@pele Create a frog life cycle diagram as a closed loop and show it here.",
+        "mocks": {
+          "generate-diagram": {
+            "filePath": "/Users/example/Downloads/Pele/frog.png",
+            "fileUrl": "file:///Users/example/Downloads/Pele/frog.png",
+            "format": "png",
+            "diagramType": "flowchart",
+            "theme": "light",
+            "width": 1200,
+            "height": 800,
+            "markdown": "[Open Pele PNG](<file:///Users/example/Downloads/Pele/frog.png>)\n\nRaycast AI Chat cannot display the local image inline. Open the file to see the rendered diagram."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "generate-diagram"
+            }
+          },
+          {
+            "includes": "[Open Pele PNG](<file:///Users/example/Downloads/Pele/frog.png>)"
+          },
+          {
+            "includes": "cannot display the local image inline"
           }
         ]
       }

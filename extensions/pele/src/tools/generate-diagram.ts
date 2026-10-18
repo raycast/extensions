@@ -1,7 +1,10 @@
 import { environment } from "@raycast/api";
+import { rm } from "node:fs/promises";
+import path from "node:path";
 import { renderDiagram } from "../lib/render";
 import { saveDiagram, writeDiagram } from "../lib/files";
 import { getSettings } from "../settings";
+import { createDiagramResponse } from "../lib/ai-response";
 
 type Input = {
   /** Complete Mermaid syntax, including any YAML frontmatter config. Preserve supplied config or generate valid Mermaid code from the user's description. */
@@ -14,7 +17,7 @@ type Input = {
   transparent?: boolean;
 };
 
-/** Render a Mermaid diagram locally and save the image to the user's Save Folder (Downloads/Pele by default). */
+/** Render and save a diagram locally. Return the result's markdown verbatim to link to the actual Pele image. */
 export default async function generateDiagram(input: Input) {
   const settings = getSettings();
   const diagram = await renderDiagram(
@@ -27,14 +30,11 @@ export default async function generateDiagram(input: Input) {
     environment.assetsPath,
   );
   const files = await writeDiagram(diagram, settings.cachePath);
-  const format = input.format ?? "png";
-  const filePath = await saveDiagram(format === "svg" ? files.svgPath : files.pngPath, settings.saveFolder);
-  return {
-    filePath,
-    format,
-    diagramType: diagram.type,
-    theme: diagram.theme,
-    width: format === "png" ? diagram.pngWidth : diagram.width,
-    height: format === "png" ? diagram.pngHeight : diagram.height,
-  };
+  try {
+    const format = input.format ?? "png";
+    const filePath = await saveDiagram(format === "svg" ? files.svgPath : files.pngPath, settings.saveFolder);
+    return createDiagramResponse(diagram, filePath, format);
+  } finally {
+    await rm(path.dirname(files.pngPath), { recursive: true, force: true });
+  }
 }

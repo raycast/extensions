@@ -10,6 +10,23 @@ test("accepts plain source, BOM, Windows line endings, and Markdown Mermaid fenc
   assert.equal(normalizeSource(`~~~mermaid\n${source}\n~~~`), source);
 });
 
+test("accepts longer closing fences of the same kind", () => {
+  const source = "flowchart LR\n A --> B";
+  for (const fence of ["`", "~"]) {
+    for (const openingLength of [3, 4]) {
+      const input = `Here is a diagram:\n${fence.repeat(openingLength)}mermaid\n${source}\n${fence.repeat(openingLength + 1)}\nSome notes.`;
+      assert.equal(normalizeSource(input), source);
+    }
+  }
+});
+
+test("does not close a Mermaid block with a shorter or different fence", () => {
+  for (const closing of ["```", "~~~~"]) {
+    const source = `flowchart LR\n A --> B\n${closing}\n C --> D`;
+    assert.equal(normalizeSource(`\`\`\`\`mermaid\n${source}\n\`\`\`\``), source);
+  }
+});
+
 test("preserves YAML frontmatter and recognizes configured diagrams inside Markdown fences", () => {
   const source =
     "---\nconfig:\n  sankey:\n    showValues: false\n    nodeWidth: 15\n    nodePadding: 20\n---\nsankey\nA,B,10";

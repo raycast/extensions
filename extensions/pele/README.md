@@ -154,15 +154,19 @@ Mention `@pele` in Raycast AI and describe the diagram you want. For example:
 
 The **Generate Diagram** tool accepts complete Mermaid code, an optional theme, an export format, and a transparency setting. PNG is the default format. Omitted theme and transparency settings use your preferences, and PNG resolution uses your preferred value.
 
-The tool renders the diagram locally, saves it in your Save Folder, and returns the file path, format, diagram type, theme, and dimensions. It does not copy the image to your clipboard or open another app. Raycast AI's normal processing applies to the prompt and tool input.
+The tool renders the diagram locally and saves it in your Save Folder. The AI response includes an **Open Pele PNG** or **Open Pele SVG** link to the actual rendered image. The tool also returns the file path, URL, format, diagram type, theme, and dimensions.
+
+Raycast AI Chat cannot embed local PNG or SVG files. Its inline Mermaid blocks redraw the source with a different renderer, which can change the layout, colors, and config. The tool returns a file link instead so you view the exact Pele output. Use **Create Diagram** for an image preview inside Raycast.
+
+Generating a diagram does not copy it to your clipboard or open another app. Raycast AI's normal processing applies to the prompt and tool input.
 
 ## Fonts and compatibility
 
-Diagrams use bundled Inter and IBM Plex Mono from [Pele's example-site font stacks](https://pele.run/examples). Base labels are 16px, with regular, bold, and italic styles. The renderer measures text using the same fonts it uses for export, keeping node sizing and wrapping consistent with the output.
+Diagrams use bundled Inter and IBM Plex Mono from [Pele's example-site font stacks](https://pele.run/examples). Base labels are 16px, with regular, bold, and italic styles. Bundled Noto Emoji supplies monochrome emoji, including joined sequences and flags, in both PNG and SVG. The renderer measures text using the same fonts it uses for export, keeping node sizing and wrapping consistent with the output.
 
 Pele has its own layout engine and visual style. Positions and spacing can differ from Mermaid's renderer. Explicit source styles are preserved where Pele supports them.
 
-Characters outside the bundled fonts' coverage, including some emoji and CJK scripts, may not render correctly. External images, clickable links, and custom icon resolvers are disabled. Source input is limited to 50,000 characters; Pele also enforces its own edge and SVG output limits. See [Pele compatibility](https://pele.run/compatibility) for renderer details.
+Characters outside the bundled fonts' coverage, such as CJK scripts and emoji newer than the bundled Noto release, may not render correctly. External images, clickable links, and custom icon resolvers are disabled. Source input is limited to 50,000 characters; Pele also enforces its own edge and SVG output limits. See [Pele compatibility](https://pele.run/compatibility) for renderer details.
 
 ## Local files and privacy
 
@@ -183,7 +187,7 @@ The extension retains exported files until you remove them. Preview storage is t
 | The PNG is smaller than the requested scale | Check the dimensions in the preview. The image may have reached the pixel limits. Save an SVG for scalable output.                         |
 | Pasting an image does not work              | Paste into an app that accepts image data, or save the PNG and insert the file. Use **Copy SVG Code** when you need text markup.           |
 | Saving fails                                | Choose a writable Save Folder in the extension preferences, then save again.                                                               |
-| Labels contain missing glyphs               | Use characters covered by the bundled fonts. Some emoji and CJK scripts are unavailable.                                                   |
+| Labels contain missing glyphs               | Use characters covered by the bundled fonts. CJK scripts and emoji newer than the bundled Noto release are unavailable.                    |
 
 ## Development
 
@@ -204,7 +208,7 @@ npm run build
 npx ray evals
 ```
 
-Tests exercise the real Pele and WebAssembly renderers, including font metrics, SVG theming, PNG pixels, all bundled examples, frontmatter and init config, source selection, image limits, exports, and preview cleanup. AI evals use synthetic mocks and require Raycast authentication.
+Tests exercise the real Pele and WebAssembly renderers, including fallback font metrics and emoji outlines, SVG theming, PNG pixels, all bundled examples, frontmatter and init config, source selection, image limits, exports, and preview cleanup. AI evals use synthetic mocks and require Raycast authentication.
 
 For manual checks on macOS and Windows, render selected and clipboard code, load an example, edit its config, change theme and transparency, paste a copied image into an image-aware app, and save and open both formats. Verify that malformed input remains editable. Windows image copying uses the built-in Windows PowerShell and .NET clipboard APIs.
 
@@ -215,6 +219,7 @@ The pinned `@resvg/resvg-wasm` package must match `assets/resvg.wasm`. When upda
 - [Pele](https://github.com/obsidianmd/pele) by Obsidian, licensed under MIT.
 - [resvg-js](https://github.com/yisibl/resvg-js/tree/v2.6.2), licensed under MPL-2.0. Its unmodified WebAssembly renderer is bundled; corresponding source is available at the linked version.
 - [Inter 4.1](https://github.com/rsms/inter/releases/tag/v4.1) and [IBM Plex Mono](https://github.com/IBM/plex/tree/71f558992315a12ca1f06a2215d57962a1992162), licensed under the SIL Open Font License. Bundled font and renderer license notices are in `assets/licenses`.
+- [Noto Emoji](https://github.com/google/fonts/tree/8b0a1d0f5983c89bc2b93f1b5fb55f9e252744b5/ofl/notoemoji), licensed under the SIL Open Font License. Its license is bundled in `assets/licenses/NotoEmoji-OFL.txt`.
 - Inspired by the workflow of [Mermaid to Image](https://www.raycast.com/chihkang/mermaid-to-image) by ChihKang Lin.
 
 This is an independent Raycast extension, not an official Obsidian product.
