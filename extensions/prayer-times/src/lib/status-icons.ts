@@ -9,14 +9,16 @@ const ICONS: Record<PrayerStatusValue, Icon> = {
   missed: Icon.XMarkCircle,
 };
 
-/** Late is an olive green (still prayed in its time); Raycast has only one green. */
-const LATE_GREEN: Color.Dynamic = { light: "#5E7F1A", dark: "#A4C639", adjustContrast: true };
+// Late and made up use the phone app's tokens (design/tokens/themes.json, light = classic, dark = night),
+// converted from OKLCH: late oklch(52% 0.12 65) / oklch(80% 0.13 80), made up oklch(43% 0.02 175) / oklch(76% 0.015 170).
+const LATE_AMBER: Color.Dynamic = { light: "#975800", dark: "#E9B452", adjustContrast: true };
+const MADE_UP_GREY: Color.Dynamic = { light: "#45544F", dark: "#A8B4AF", adjustContrast: true };
 
 export const STATUS_COLORS: Record<PrayerStatusValue, Color.ColorLike> = {
   jamaat: Color.Green,
   ontime: Color.Green,
-  late: LATE_GREEN,
-  madeup: Color.Orange,
+  late: LATE_AMBER,
+  madeup: MADE_UP_GREY,
   missed: Color.Red,
 };
 
