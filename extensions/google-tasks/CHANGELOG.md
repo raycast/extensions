@@ -1,5 +1,9 @@
 # Google Tasks Changelog
 
+## [Show Assigned Tasks] - {PR_MERGE_DATE}
+
+- Show tasks assigned from Google Docs and Chat spaces in task lists and AI tools.
+
 ## [Improve Google Tasks] - 2026-09-11
 
 - Browse tasks across every list by date, completion status, or individual task list.
