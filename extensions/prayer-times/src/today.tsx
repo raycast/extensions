@@ -109,7 +109,7 @@ function TodayList({ settings }: { settings: Settings }) {
         {markOptions(slot, prayed, now).map((status) => (
           <Action
             key={status}
-            title={`${prayed ? "Change to" : "Mark as"} ${MARK_TITLES[status]}`}
+            title={`${prayed ? "Change to" : "Mark"} ${MARK_TITLES[status]}`}
             icon={statusIcon(status)}
             onAction={() => mark(status)}
           />

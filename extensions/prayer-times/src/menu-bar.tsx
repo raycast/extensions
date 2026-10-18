@@ -167,7 +167,7 @@ function PrayerMenuBar({ settings }: { settings: Settings }) {
           {markOptions(shown, undefined, now).map((status) => (
             <MenuBarExtra.Item
               key={status}
-              title={`Mark ${ltrName(shown.name)} as ${MARK_TITLES[status]}`}
+              title={`Mark ${ltrName(shown.name)} ${MARK_TITLES[status]}`}
               icon={statusIcon(status)}
               onAction={() =>
                 run(`${ltrName(shown.name)} marked ${STATUS_LABELS[status].toLowerCase()}`, () =>
@@ -230,11 +230,7 @@ function PrayerMenuBar({ settings }: { settings: Settings }) {
                 onTimeAction ? (
                   <MenuBarExtra.Item
                     icon={statusIcon("ontime")}
-                    title={
-                      done
-                        ? `Change ${ltrName(slot.name)} to Prayed on Time`
-                        : `Mark ${ltrName(slot.name)} Prayed on Time`
-                    }
+                    title={done ? `Change ${ltrName(slot.name)} to On Time` : `Mark ${ltrName(slot.name)} On Time`}
                     onAction={() =>
                       run(`${ltrName(slot.name)} marked on time`, () => setStatus(slot, settings, "ontime"))
                     }

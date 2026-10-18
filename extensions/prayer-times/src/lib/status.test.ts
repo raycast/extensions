@@ -84,7 +84,7 @@ describe("markOptions", () => {
 
 describe("labels", () => {
   it("calls only a made-up prayer qaza; late is still within its time", () => {
-    expect(MARK_TITLES.late).toBe("Prayed Late");
+    expect(MARK_TITLES.late).toBe("Late");
     expect(MARK_TITLES.madeup).toBe("Made Up (Qaza)");
     expect(STATUS_LABELS.late).not.toMatch(/qaza/i);
     expect(STATUS_LABELS.madeup).toMatch(/qaza/i);

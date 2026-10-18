@@ -12,19 +12,19 @@ export type PrayedStatus = Exclude<PrayerStatusValue, "missed">;
 
 export const PRAYER_STATUSES: readonly PrayerStatusValue[] = ["jamaat", "ontime", "late", "missed", "madeup"];
 
-/** Action wording per prayed status: "Mark as …" / "Change to …". */
+/** Action wording per prayed status: "Mark …" / "Change to …". */
 export const MARK_TITLES: Record<PrayedStatus, string> = {
-  jamaat: "Prayed with Jamaat",
-  ontime: "Prayed on Time",
-  late: "Prayed Late",
+  jamaat: "With Jamaat",
+  ontime: "On Time",
+  late: "Late",
   madeup: "Made Up (Qaza)",
 };
 
-/** Short label per status, for lists and the menu bar. */
+/** Short label per status, for lists and the menu bar; the same wording as the phone and watch app. */
 export const STATUS_LABELS: Record<PrayerStatusValue, string> = {
-  jamaat: "Prayed with jamaat",
-  ontime: "Prayed",
-  late: "Prayed late",
+  jamaat: "With jamaat",
+  ontime: "On time",
+  late: "Late",
   missed: "Missed",
   madeup: "Made up (qaza)",
 };
