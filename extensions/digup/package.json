@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "digup",
+  "title": "DigUp",
+  "description": "Search your files by meaning with DigUp's on-device index.",
+  "icon": "command-icon.png",
+  "author": "giulio_colleluori",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Files with DigUp",
+      "subtitle": "DigUp",
+      "description": "Search your files by what is in them. Enter copies the path, Cmd+Enter opens the file.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "digup CLI path",
+      "description": "The digup helper bundled inside DigUp.app.",
+      "type": "textfield",
+      "required": false,
+      "default": "/Applications/DigUp.app/Contents/Helpers/digup"
+    },
+    {
+      "name": "limit",
+      "title": "Max results",
+      "description": "How many results to ask DigUp for.",
+      "type": "textfield",
+      "required": false,
+      "default": "40"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
