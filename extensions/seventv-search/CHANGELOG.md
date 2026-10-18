@@ -10,6 +10,7 @@
 - Fix 7TV Popular, Recently Created, and Trending with its current API.
 - Add pagination, matching-result counts where available, and an animated-only filter.
 - Preserve existing 7TV favorites and recent history across updates, including actions taken while saved data is still loading.
+- Keep the animated-only filter action available in empty grid and list results.
 - Hide 7TV alphabetical sorting while its API returns an error.
 
 ## [1.0.0] - 2026-04-25

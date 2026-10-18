@@ -250,6 +250,18 @@ export default function Command() {
     }
   }
 
+  const renderFilterAction = () => (
+    <Action
+      title={animatedOnly ? "Show All Emotes" : "Show Animated Only"}
+      icon={Icon.Filter}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+      onAction={() => {
+        resetResults();
+        setAnimatedOnly((value) => !value);
+      }}
+    />
+  );
+
   const renderActions = (item: Emote) => {
     const isFav = favorites.some((f) => getEmoteKey(f) === getEmoteKey(item));
     const { url: highResUrl, ext } = getEmoteFile(item);
@@ -318,15 +330,7 @@ export default function Command() {
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action
-            title={animatedOnly ? "Show All Emotes" : "Show Animated Only"}
-            icon={Icon.Filter}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-            onAction={() => {
-              resetResults();
-              setAnimatedOnly(!animatedOnly);
-            }}
-          />
+          {renderFilterAction()}
           <Action
             title="Reload Results"
             icon={Icon.ArrowClockwise}
@@ -468,6 +472,7 @@ export default function Command() {
                   title="Retry Search"
                   onAction={() => setRetry((value) => value + 1)}
                 />
+                {renderFilterAction()}
               </ActionPanel>
             }
           />
@@ -518,6 +523,7 @@ export default function Command() {
                 title="Retry Search"
                 onAction={() => setRetry((value) => value + 1)}
               />
+              {renderFilterAction()}
             </ActionPanel>
           }
         />
