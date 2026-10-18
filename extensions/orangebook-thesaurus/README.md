@@ -16,7 +16,7 @@ Synonyms and antonyms come from the [Datamuse API](https://www.datamuse.com/api/
 
 ## Development
 
-The Raycast CLI needs Node.js 22.22 or newer.
+The Raycast CLI needs Node.js 22.22.2 or newer.
 
 ```bash
 npm install
