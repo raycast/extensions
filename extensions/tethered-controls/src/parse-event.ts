@@ -136,6 +136,12 @@ export function parseEvent(input: string, now = new Date()): ParsedEvent {
     date.setDate(date.getDate() + offset);
   }
   date.setHours(hour, minute, 0, 0);
+  const rolloverDays = !day ? 1 : weekdayTokens[day.replace(/^next /, "")] ? 7 : 0;
+  if (date <= now && rolloverDays > 0) {
+    date.setHours(12, 0, 0, 0);
+    date.setDate(date.getDate() + rolloverDays);
+    date.setHours(hour, minute, 0, 0);
+  }
   if (date.getHours() !== hour || date.getMinutes() !== minute)
     throw new Error("That local time does not exist on this date because of a clock change. Choose another time.");
   values.date = date;
