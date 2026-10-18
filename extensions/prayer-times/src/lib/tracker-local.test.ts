@@ -13,7 +13,7 @@ vi.mock("@raycast/api", () => ({
   environment: {},
 }));
 
-import { loadHistory, setPrayed } from "./tracker";
+import { loadHistory, setPrayed, setStatus } from "./tracker";
 import { buildSettings } from "./settings";
 import { addDays, getDaySchedule, toDateKey } from "./prayers";
 
@@ -32,8 +32,21 @@ describe("local history before tracking started", () => {
 
     const history = await loadHistory(settings, yesterday, today);
     expect(history[toDateKey(yesterday)]).toEqual({
-      asr: { completed: true, completedAt: asr.start, onTime: true },
+      asr: { completed: true, completedAt: asr.start, onTime: true, status: "ontime" },
     });
+  });
+
+  it("keeps the status of a local mark, and reads marks saved before statuses", async () => {
+    const [fajr, dhuhr] = getDaySchedule(yesterday, settings.schedule);
+    await setStatus(fajr, settings, "madeup");
+    store.items.localLog = JSON.stringify({
+      ...JSON.parse(store.items.localLog),
+      [dhuhr.date]: { ...JSON.parse(store.items.localLog)[dhuhr.date], dhuhr: dhuhr.start.toISOString() },
+    });
+
+    const day = (await loadHistory(settings, yesterday, yesterday))[toDateKey(yesterday)];
+    expect(day.fajr).toMatchObject({ completed: true, status: "madeup", onTime: false });
+    expect(day.dhuhr).toMatchObject({ completed: true, status: "ontime", completedAt: dhuhr.start });
   });
 
   it("still counts every prayer from the day tracking started", async () => {

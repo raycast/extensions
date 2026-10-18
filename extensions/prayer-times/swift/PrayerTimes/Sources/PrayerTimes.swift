@@ -8,7 +8,7 @@ import RaycastSwiftMacros
 // (iCloud Reminders doesn't keep EKReminder.url, so the url is set too but only read as a fallback.)
 // Other tools that sync these reminders should treat the marker as the key and leave title, dates
 // and alarms alone; the title can change (Friday's Dhuhr is titled for Jumu'ah). This file only writes isCompleted
-// from setPrayerCompleted, and keeps any `prayer-status:` line (StatusLine.swift) on a sync.
+// and the `prayer-status:` line (StatusLine.swift) from setPrayerCompleted, and keeps any status line on a sync.
 //
 // The `@raycast` functions are called from src/lib/helper.ts through Raycast's Swift bridge.
 // `locate` also runs inside "Prayer Times Location.app", which the extension assembles from this
@@ -52,6 +52,9 @@ struct PrayerStatus: Codable {
   let key: String
   let isCompleted: Bool
   let completionDate: String?
+  /// The `prayer-status:` value as written (trimmed, lowercased), or nil. The caller checks it agrees with
+  /// isCompleted before trusting it.
+  let status: String?
 }
 
 enum PrayerRemindersError: Error, LocalizedError, CustomStringConvertible {
@@ -411,16 +414,17 @@ private func sync(_ payload: SyncPayload) async throws -> SyncResult {
       PrayerStatus(
         key: key,
         isCompleted: reminder.isCompleted,
-        completionDate: reminder.completionDate.map(formatDate))
+        completionDate: reminder.completionDate.map(formatDate),
+        status: statusValue(in: reminder.notes))
     }
     .sorted { $0.key < $1.key }
 }
 
-/// Tick or untick one prayer reminder, optionally with an explicit ISO 8601 completion time.
-/// Returns false when no reminder exists for the key.
-@raycast func setPrayerCompleted(listName: String, key: String, completed: Bool, completionDate: String?) async throws
-  -> Bool
-{
+/// Tick or untick one prayer reminder, optionally with an explicit ISO 8601 completion time, and set its
+/// `prayer-status:` line to `status` (nil removes it). Returns false when no reminder exists for the key.
+@raycast func setPrayerCompleted(
+  listName: String, key: String, completed: Bool, completionDate: String?, status: String?
+) async throws -> Bool {
   let completionDate = try completionDate.map(parseDate)
   let store = try await authorizedStore()
   guard let calendar = try findList(store, named: listName),
@@ -429,16 +433,24 @@ private func sync(_ payload: SyncPayload) async throws -> SyncResult {
     reminder.refresh()
   else { return false }
 
+  var changed = false
   if completed, let completionDate {
     if !reminder.isCompleted || reminder.completionDate.map(minuteStamp) != minuteStamp(completionDate) {
       reminder.isCompleted = true
       reminder.completionDate = completionDate
-      try store.save(reminder, commit: true)
+      changed = true
     }
   } else if reminder.isCompleted != completed {
     reminder.isCompleted = completed
-    try store.save(reminder, commit: true)
+    changed = true
   }
+  // Only the status line changes; the rest of the notes is kept as read right above.
+  let notes = withStatus(reminder.notes, status)
+  if notes != (reminder.notes ?? "") {
+    reminder.notes = notes
+    changed = true
+  }
+  if changed { try store.save(reminder, commit: true) }
   return true
 }
 

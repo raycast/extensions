@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   setPrayerCompleted: vi.fn(),
   syncPrayerReminders: vi.fn(),
   movePrayerReminders: vi.fn(),
+  getPrayerStatuses: vi.fn(),
 }));
 vi.mock("@raycast/api", () => ({
   getPreferenceValues: () => ({}),
@@ -24,10 +25,10 @@ vi.mock("./helper", () => ({
   setPrayerCompleted: mocks.setPrayerCompleted,
   syncPrayerReminders: mocks.syncPrayerReminders,
   movePrayerReminders: mocks.movePrayerReminders,
-  getPrayerStatuses: vi.fn(),
+  getPrayerStatuses: mocks.getPrayerStatuses,
 }));
 
-import { setPrayed, syncReminders } from "./tracker";
+import { loadHistory, setPrayed, setStatus, syncReminders } from "./tracker";
 import { readPlanState, writePlanState } from "./storage";
 import { buildSettings } from "./settings";
 import { addDays, getDaySchedule } from "./prayers";
@@ -88,5 +89,39 @@ describe("changing the Reminders List setting", () => {
     await syncReminders(settings, new Date(), true);
     expect(mocks.movePrayerReminders).not.toHaveBeenCalled();
     expect(mocks.syncPrayerReminders).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("prayer status in Reminders", () => {
+  const day = addDays(new Date(), -2);
+  const asr = slotOn(day, "asr");
+
+  it("writes the status line with the prayed time", async () => {
+    mocks.setPrayerCompleted.mockReset().mockResolvedValue(true);
+    await setStatus(asr, settings, "jamaat");
+    expect(mocks.setPrayerCompleted).toHaveBeenCalledWith("Prayer", asr.id, true, asr.jamaat ?? asr.start, "jamaat");
+
+    await setPrayed(asr, settings, true, asr.start);
+    expect(mocks.setPrayerCompleted).toHaveBeenLastCalledWith("Prayer", asr.id, true, asr.start, "ontime");
+  });
+
+  it("unmarking removes the line", async () => {
+    mocks.setPrayerCompleted.mockReset().mockResolvedValue(true);
+    await setStatus(asr, settings, undefined);
+    expect(mocks.setPrayerCompleted).toHaveBeenCalledWith("Prayer", asr.id, false, undefined, undefined);
+  });
+
+  it("reads a valid line and ignores one that disagrees with the reminder", async () => {
+    const isha = slotOn(day, "isha");
+    const fajr = slotOn(day, "fajr");
+    mocks.getPrayerStatuses.mockResolvedValue([
+      { key: asr.id, isCompleted: true, completionDate: asr.end.toISOString(), status: "madeup" },
+      { key: isha.id, isCompleted: false, status: "jamaat" },
+      { key: fajr.id, isCompleted: true, completionDate: fajr.start.toISOString(), status: "Jamaat " },
+    ]);
+    const history = (await loadHistory(settings, day, day))[asr.date];
+    expect(history.asr).toMatchObject({ completed: true, status: "madeup", onTime: false });
+    expect(history.isha).toMatchObject({ completed: false, status: "missed" });
+    expect(history.fajr).toMatchObject({ status: "jamaat", onTime: true });
   });
 });

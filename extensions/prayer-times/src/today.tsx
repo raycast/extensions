@@ -15,7 +15,9 @@ import { loadSettings, Settings } from "./lib/settings";
 import SetLocation from "./set-location";
 import { addDays, getDaySchedule, PRAYER_KEYS, prayerName, PrayerSlot, toDateKey } from "./lib/prayers";
 import { readSyncError } from "./lib/storage";
-import { History, loadHistory, prayedSet, PrayerRecord, setOnTime, setPrayed, syncReminders } from "./lib/tracker";
+import { History, loadHistory, prayedSet, PrayerRecord, setStatus, syncReminders } from "./lib/tracker";
+import { clockStatus, MARK_TITLES, markOptions, PrayedStatus, STATUS_LABELS } from "./lib/status";
+import { STATUS_COLORS, statusIcon } from "./lib/status-icons";
 import { fullDayStreak, summarize } from "./lib/stats";
 import { formatRelative, formatTime, ltrName } from "./lib/format";
 
@@ -28,10 +30,8 @@ async function loadData(settings: Settings): Promise<{ history: History; syncErr
 }
 
 function statusAccessory(slot: PrayerSlot, record: PrayerRecord | undefined, now: Date): List.Item.Accessory {
-  if (record?.completed) {
-    return record.onTime
-      ? { tag: { value: "Prayed", color: Color.Green }, icon: Icon.CheckCircle }
-      : { tag: { value: "Prayed late", color: Color.Orange }, icon: Icon.CheckCircle };
+  if (record?.completed && record.status) {
+    return { tag: { value: STATUS_LABELS[record.status], color: STATUS_COLORS[record.status] } };
   }
   if (now < slot.start) return { text: formatRelative(slot.start, now), icon: Icon.Clock };
   if (slot.preferredEnd && now >= slot.preferredEnd && now < slot.end) {
@@ -39,7 +39,7 @@ function statusAccessory(slot: PrayerSlot, record: PrayerRecord | undefined, now
   }
   if (now < slot.end) return { tag: { value: `Ends ${formatRelative(slot.end, now)}`, color: Color.Blue } };
   if (!record) return { tag: { value: "No reminder", color: Color.SecondaryText } };
-  return { tag: { value: "Not marked", color: Color.Red } };
+  return { tag: { value: STATUS_LABELS.missed, color: STATUS_COLORS.missed } };
 }
 
 export default function Command() {
@@ -91,57 +91,30 @@ function TodayList({ settings }: { settings: Settings }) {
     revalidate();
   };
 
-  /** Mark/unmark and on-time/late actions for one prayer; nothing for prayers that haven't started. */
+  /** Mark, change-status and unmark actions for one prayer; nothing for prayers that haven't started. */
   const prayerActions = (slot: PrayerSlot, record: PrayerRecord | undefined) => {
     if (slot.start > now) return null;
-    // Late by the same boundary history uses (the preferred end when Counts as Late After is Preferred).
-    const ended = now >= slot.late;
-    if (record?.completed) {
-      return (
-        <>
-          {record.onTime ? (
-            <Action
-              title="Change to Prayed Late (Qaza)"
-              icon={Icon.Clock}
-              onAction={() => update(`${ltrName(slot.name)} marked late`, () => setOnTime(slot, settings, false))}
-            />
-          ) : (
-            <Action
-              title="Change to Prayed on Time"
-              icon={Icon.CheckCircle}
-              onAction={() => update(`${ltrName(slot.name)} marked on time`, () => setOnTime(slot, settings, true))}
-            />
-          )}
-          <Action
-            title="Unmark Prayed"
-            icon={Icon.XMarkCircle}
-            onAction={() => update(`${ltrName(slot.name)} unmarked`, () => setPrayed(slot, settings, false))}
-          />
-        </>
+    const name = ltrName(slot.name);
+    const prayed = record?.completed ? record.status : undefined;
+    const mark = (status: PrayedStatus | undefined) =>
+      update(`${name} ${status ? `marked ${STATUS_LABELS[status].toLowerCase()}` : "unmarked"}`, () =>
+        setStatus(slot, settings, status),
       );
-    }
-    // Default: the current time decides on time vs late. The second action overrides it.
-    const markLabel = `${ltrName(slot.name)} marked prayed ${ended ? "late" : "on time"}`;
     return (
       <>
-        <Action
-          title="Mark as Prayed"
-          icon={Icon.CheckCircle}
-          onAction={() => update(markLabel, () => setPrayed(slot, settings, true))}
-        />
-        {ended ? (
-          <Action
-            title="Mark as Prayed on Time"
-            icon={Icon.CheckCircle}
-            onAction={() => update(`${ltrName(slot.name)} marked on time`, () => setOnTime(slot, settings, true))}
-          />
-        ) : (
-          <Action
-            title="Mark as Prayed Late (Qaza)"
-            icon={Icon.Clock}
-            onAction={() => update(`${ltrName(slot.name)} marked late`, () => setOnTime(slot, settings, false))}
-          />
+        {/* Default: the clock decides on time vs late (by the same late boundary history uses). */}
+        {!prayed && (
+          <Action title="Mark as Prayed" icon={Icon.CheckCircle} onAction={() => mark(clockStatus(slot, now))} />
         )}
+        {markOptions(slot, prayed, now).map((status) => (
+          <Action
+            key={status}
+            title={`${prayed ? "Change to" : "Mark as"} ${MARK_TITLES[status]}`}
+            icon={statusIcon(status)}
+            onAction={() => mark(status)}
+          />
+        ))}
+        {prayed && <Action title="Unmark Prayed" icon={Icon.XMarkCircle} onAction={() => mark(undefined)} />}
       </>
     );
   };
@@ -211,7 +184,7 @@ function TodayList({ settings }: { settings: Settings }) {
           return (
             <List.Item
               key={slot.id}
-              icon={done ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
+              icon={done && record?.status ? statusIcon(record.status) : Icon.Circle}
               title={slot.name}
               subtitle={formatTime(slot.start)}
               accessories={accessories}
@@ -228,7 +201,10 @@ function TodayList({ settings }: { settings: Settings }) {
       <List.Section
         title={`Last ${HISTORY_DAYS} Days`}
         subtitle={
-          week.knownDays ? `${week.prayed}/${week.total} prayed · ${week.onTime} on time` : "No reminder history yet"
+          week.knownDays
+            ? `${week.prayed}/${week.total} prayed · ${week.onTime} on time · ${week.jamaat} with jamaat` +
+              (week.madeUp ? ` · ${week.madeUp} made up` : "")
+            : "No reminder history yet"
         }
       >
         <List.Item

@@ -2,6 +2,7 @@ import { getPrayerStatuses, movePrayerReminders, setPrayerCompleted, syncPrayerR
 import { addDays, getDaySchedule, PRAYER_KEYS, PrayerKey, PrayerSlot, toDateKey } from "./prayers";
 import { planHash, planReminders } from "./plan";
 import { Settings } from "./settings";
+import { clockStatus, countsOnTime, PrayedStatus, prayedAt, PrayerStatusValue, statusOf } from "./status";
 import {
   clearSnoozes,
   readLocalLog,
@@ -19,8 +20,10 @@ const RESYNC_INTERVAL = 6 * 60 * 60_000;
 export interface PrayerRecord {
   completed: boolean;
   completedAt?: Date;
-  /** Completed before the prayer's time ended. */
+  /** Prayed with jamaat or on time. */
   onTime: boolean;
+  /** How it was prayed, or missed; undefined while an unmarked prayer's time is still running. */
+  status?: PrayerStatusValue;
 }
 
 /** Reminder state keyed by local date, then prayer. */
@@ -70,8 +73,8 @@ export async function syncReminders(settings: Settings, now = new Date(), force 
   }
 }
 
-/** Completion by slot id, from Reminders or the local log. */
-type CompletionMap = Map<string, { isCompleted: boolean; completionDate?: string }>;
+/** Completion and written status by slot id, from Reminders or the local log. */
+type CompletionMap = Map<string, { isCompleted: boolean; completionDate?: string; status?: string }>;
 
 async function localCompletions(from: Date, to: Date): Promise<CompletionMap> {
   const [log, since] = await Promise.all([readLocalLog(), trackingSince(toDateKey(new Date()))]);
@@ -79,17 +82,18 @@ async function localCompletions(from: Date, to: Date): Promise<CompletionMap> {
   for (let day = from; toDateKey(day) <= toDateKey(to); day = addDays(day, 1)) {
     const date = toDateKey(day);
     for (const key of PRAYER_KEYS) {
-      const at = log[date]?.[key];
+      const saved = log[date]?.[key];
+      const mark = typeof saved === "string" ? { at: saved } : saved;
       // Before tracking started, only saved marks count; unmarked prayers stay "no data", not missed.
-      if (date < since && !at) continue;
-      map.set(`${date}/${key}`, { isCompleted: Boolean(at), completionDate: at });
+      if (date < since && !mark) continue;
+      map.set(`${date}/${key}`, { isCompleted: Boolean(mark), completionDate: mark?.at, status: mark?.status });
     }
   }
   return map;
 }
 
 /**
- * Read prayer completion for a date range and attach on-time status. Uses Apple Reminders, or the
+ * Read prayer completion for a date range and attach each prayer's status. Uses Apple Reminders, or the
  * local log when Reminders is off. Prayers with no record are left out (shown as "no data").
  *
  * @param settings - Settings.
@@ -107,17 +111,20 @@ export async function loadHistory(settings: Settings, from: Date, to: Date): Pro
       )
     : await localCompletions(from, to);
   const history: History = {};
+  const now = new Date();
 
   for (let day = from; toDateKey(day) <= toDateKey(to); day = addDays(day, 1)) {
     for (const slot of getDaySchedule(day, settings.schedule)) {
       const status = byKey.get(slot.id);
       if (!status) continue;
       const completedAt = status.completionDate ? new Date(status.completionDate) : undefined;
+      const value = statusOf(slot, status.isCompleted, completedAt, status.status, now);
       history[slot.date] ??= {};
       history[slot.date][slot.key] = {
         completed: status.isCompleted,
         completedAt,
-        onTime: status.isCompleted && (!completedAt || completedAt < slot.late),
+        onTime: countsOnTime(value),
+        status: value,
       };
     }
   }
@@ -155,53 +162,48 @@ async function createPastReminder(slot: PrayerSlot, settings: Settings): Promise
 }
 
 /**
- * Mark or unmark a prayer. With Reminders on, ticks its reminder (creating it first if it doesn't exist
- * yet: a full sync for today and later, just that reminder for a past day); otherwise writes the local log.
+ * Mark a prayer with a status, or unmark it. With Reminders on, ticks its reminder and writes its
+ * `prayer-status:` line (creating the reminder first if it doesn't exist yet: a full sync for today and
+ * later, just that reminder for a past day); otherwise writes the local log. The completion time is when
+ * it was prayed, from {@link prayedAt}.
+ *
+ * @param slot - Prayer slot.
+ * @param settings - Settings.
+ * @param status - How it was prayed; undefined unmarks it.
+ * @param now - When it is marked.
+ * @throws Error when the reminder still can't be found.
+ */
+export async function setStatus(
+  slot: PrayerSlot,
+  settings: Settings,
+  status: PrayedStatus | undefined,
+  now = new Date(),
+): Promise<void> {
+  const at = status && prayedAt(slot, status, now);
+  if (!settings.reminders.enabled) {
+    await writeLocalPrayed(slot.date, slot.key, at && status ? { at: at.toISOString(), status } : undefined);
+  } else {
+    const { listName } = settings.reminders;
+    const write = () => setPrayerCompleted(listName, slot.id, Boolean(status), at, status);
+    let found = await write();
+    if (!found) {
+      if (slot.date < toDateKey(new Date())) await createPastReminder(slot, settings);
+      else await syncReminders(settings, new Date(), true);
+      found = await write();
+    }
+    if (!found) throw new Error(`No reminder for ${slot.name} on ${slot.date} in "${listName}"`);
+  }
+  if (status) await clearSnoozes(slot.id);
+}
+
+/**
+ * Mark a prayer prayed (on time or late by the clock), or unmark it.
  *
  * @param slot - Prayer slot.
  * @param settings - Settings.
  * @param completed - True to mark prayed.
- * @param at - Completion time; defaults to now.
- * @throws Error when the reminder still can't be found.
+ * @param now - When it is marked.
  */
-export async function setPrayed(slot: PrayerSlot, settings: Settings, completed: boolean, at?: Date): Promise<void> {
-  if (!settings.reminders.enabled) {
-    await writeLocalPrayed(slot.date, slot.key, completed ? (at ?? new Date()).toISOString() : undefined);
-  } else {
-    const { listName } = settings.reminders;
-    let found = await setPrayerCompleted(listName, slot.id, completed, completed ? at : undefined);
-    if (!found) {
-      if (slot.date < toDateKey(new Date())) await createPastReminder(slot, settings);
-      else await syncReminders(settings, new Date(), true);
-      found = await setPrayerCompleted(listName, slot.id, completed, completed ? at : undefined);
-    }
-    if (!found) throw new Error(`No reminder for ${slot.name} on ${slot.date} in "${listName}"`);
-  }
-  if (completed) await clearSnoozes(slot.id);
-}
-
-/**
- * The completion time recorded when a prayer is marked on time or late after the fact.
- * On time: now if the prayer isn't late yet, else the jamaat if it was before the late boundary, else the start.
- * Late: the moment it became late (its `late` boundary), or now if that is later.
- *
- * @param slot - Prayer slot.
- * @param onTime - Desired status.
- * @param now - Current instant.
- * @returns Completion time to store.
- */
-export function completionTimeFor(slot: PrayerSlot, onTime: boolean, now = new Date()): Date {
-  if (onTime) return now < slot.late ? now : slot.jamaat && slot.jamaat < slot.late ? slot.jamaat : slot.start;
-  return now > slot.late ? now : slot.late;
-}
-
-/**
- * Mark a prayer prayed and set whether it counts as on time.
- *
- * @param slot - Prayer slot.
- * @param settings - Settings.
- * @param onTime - True for on time, false for late (qaza).
- */
-export function setOnTime(slot: PrayerSlot, settings: Settings, onTime: boolean): Promise<void> {
-  return setPrayed(slot, settings, true, completionTimeFor(slot, onTime));
+export function setPrayed(slot: PrayerSlot, settings: Settings, completed: boolean, now = new Date()): Promise<void> {
+  return setStatus(slot, settings, completed ? clockStatus(slot, now) : undefined, now);
 }

@@ -143,8 +143,11 @@ export function writeSyncError(message: string): Promise<void> {
   return LocalStorage.setItem(KEYS.syncError, message);
 }
 
-/** Prayed marks kept in Raycast when Apple Reminders is off: date → prayer → ISO completion time. */
-export type LocalLog = Record<string, Partial<Record<string, string>>>;
+/** A prayed mark kept in Raycast. Marks saved before statuses existed are a bare ISO completion time. */
+export type LocalMark = string | { at: string; status?: string };
+
+/** Prayed marks kept in Raycast when Apple Reminders is off: date → prayer → mark. */
+export type LocalLog = Record<string, Partial<Record<string, LocalMark>>>;
 
 const LOCAL_KEYS = { log: "localLog", since: "trackingSince" } as const;
 
@@ -162,12 +165,16 @@ export function readLocalLog(): Promise<LocalLog> {
  *
  * @param date - Local date key.
  * @param key - Prayer key.
- * @param completedAt - ISO completion time, or undefined to clear.
+ * @param mark - ISO completion time and status, or undefined to clear.
  */
-export async function writeLocalPrayed(date: string, key: string, completedAt: string | undefined): Promise<void> {
+export async function writeLocalPrayed(
+  date: string,
+  key: string,
+  mark: { at: string; status: string } | undefined,
+): Promise<void> {
   const log = await readLocalLog();
   const day = log[date] ?? {};
-  if (completedAt) day[key] = completedAt;
+  if (mark) day[key] = mark;
   else delete day[key];
   log[date] = day;
   await writeJson(LOCAL_KEYS.log, log);

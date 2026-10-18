@@ -1,9 +1,11 @@
 import { PRAYER_KEYS, PrayerKey } from "./prayers";
+import { PrayerStatusValue } from "./status";
 
 /** Minimal per-prayer record the stats need; matches tracker's PrayerRecord. */
 export interface StatRecord {
   completed: boolean;
   onTime: boolean;
+  status?: PrayerStatusValue;
 }
 
 /** Reminder records keyed by date, then prayer. A missing date means no data, not "not prayed". */
@@ -16,7 +18,10 @@ export interface Summary {
   prayed: number;
   /** Prayers on days with data. */
   total: number;
+  /** Prayed with jamaat or on time. */
   onTime: number;
+  jamaat: number;
+  madeUp: number;
   perPrayer: Record<PrayerKey, number>;
 }
 
@@ -33,6 +38,8 @@ export function summarize(history: StatHistory, dates: string[]): Summary {
   let knownDays = 0;
   let prayed = 0;
   let onTime = 0;
+  let jamaat = 0;
+  let madeUp = 0;
   for (const date of dates) {
     const day = history[date];
     if (!day || Object.keys(day).length === 0) continue;
@@ -43,9 +50,11 @@ export function summarize(history: StatHistory, dates: string[]): Summary {
       prayed++;
       perPrayer[key]++;
       if (record.onTime) onTime++;
+      if (record.status === "jamaat") jamaat++;
+      if (record.status === "madeup") madeUp++;
     }
   }
-  return { knownDays, prayed, total: knownDays * PRAYER_KEYS.length, onTime, perPrayer };
+  return { knownDays, prayed, total: knownDays * PRAYER_KEYS.length, onTime, jamaat, madeUp, perPrayer };
 }
 
 /**

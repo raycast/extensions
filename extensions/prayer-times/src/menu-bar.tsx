@@ -14,7 +14,9 @@ import { loadSettings, Settings } from "./lib/settings";
 import { addDays, getReferenceTimes, getTimeline, PrayerSlot, ReferenceTime, toDateKey } from "./lib/prayers";
 import { activeSlot, AlertKind, menuBarState } from "./lib/state";
 import { snooze } from "./lib/storage";
-import { loadHistory, prayedSet, PrayerRecord, setOnTime, setPrayed } from "./lib/tracker";
+import { loadHistory, prayedSet, PrayerRecord, setPrayed, setStatus } from "./lib/tracker";
+import { MARK_TITLES, markOptions, STATUS_LABELS } from "./lib/status";
+import { statusIcon } from "./lib/status-icons";
 import { formatTime, ltrName } from "./lib/format";
 import { menuBarTitle, TitleTone } from "./lib/menubar-title";
 
@@ -54,16 +56,16 @@ function dropdownRows(slots: PrayerSlot[], references: ReferenceTime[], active: 
 
 /** Color and status text for a prayer in the dropdown. */
 function prayerStatus(slot: PrayerSlot, record: PrayerRecord | undefined, active: boolean, now: Date) {
-  if (record?.completed) {
-    return record.onTime
-      ? { icon: { source: Icon.CheckCircle, tintColor: Color.Green }, subtitle: "Prayed" }
-      : { icon: { source: Icon.CheckCircle, tintColor: Color.Orange }, subtitle: "Prayed late" };
+  if (record?.completed && record.status) {
+    return { icon: statusIcon(record.status), subtitle: STATUS_LABELS[record.status] };
   }
   if (slot.start > now) {
     const subtitle = slot.preferredEnd ? `Preferred until ${formatTime(slot.preferredEnd)}` : "";
     return { icon: { source: Icon.Clock, tintColor: Color.SecondaryText }, subtitle };
   }
-  if (now >= slot.end) return { icon: { source: Icon.XMarkCircle, tintColor: Color.Red }, subtitle: "Missed" };
+  if (now >= slot.end || record?.status === "missed") {
+    return { icon: statusIcon("missed"), subtitle: STATUS_LABELS.missed };
+  }
   if (active && slot.preferredEnd && now >= slot.preferredEnd) {
     return {
       icon: { source: Icon.CircleProgress75, tintColor: Color.Orange },
@@ -162,13 +164,18 @@ function PrayerMenuBar({ settings }: { settings: Settings }) {
             icon={Icon.CheckCircle}
             onAction={() => run(`${ltrName(shown.name)} marked prayed`, () => setPrayed(shown, settings, true))}
           />
-          {now >= shown.late && (
+          {markOptions(shown, undefined, now).map((status) => (
             <MenuBarExtra.Item
-              title={`Mark ${ltrName(shown.name)} as Prayed on Time`}
-              icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
-              onAction={() => run(`${ltrName(shown.name)} marked on time`, () => setOnTime(shown, settings, true))}
+              key={status}
+              title={`Mark ${ltrName(shown.name)} as ${MARK_TITLES[status]}`}
+              icon={statusIcon(status)}
+              onAction={() =>
+                run(`${ltrName(shown.name)} marked ${STATUS_LABELS[status].toLowerCase()}`, () =>
+                  setStatus(shown, settings, status),
+                )
+              }
             />
-          )}
+          ))}
           {snoozeKind &&
             (settings.notify.banner || settings.notify.popup) &&
             [5, 10, 15].map((minutes) => (
@@ -222,13 +229,15 @@ function PrayerMenuBar({ settings }: { settings: Settings }) {
               alternate={
                 onTimeAction ? (
                   <MenuBarExtra.Item
-                    icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+                    icon={statusIcon("ontime")}
                     title={
                       done
                         ? `Change ${ltrName(slot.name)} to Prayed on Time`
                         : `Mark ${ltrName(slot.name)} Prayed on Time`
                     }
-                    onAction={() => run(`${ltrName(slot.name)} marked on time`, () => setOnTime(slot, settings, true))}
+                    onAction={() =>
+                      run(`${ltrName(slot.name)} marked on time`, () => setStatus(slot, settings, "ontime"))
+                    }
                   />
                 ) : undefined
               }

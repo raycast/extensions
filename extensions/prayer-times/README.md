@@ -9,12 +9,16 @@ reminders in Apple Reminders, and tracks which prayers were prayed on time.
 
 - **Menu bar countdown**: `Asr -5` (until start), `Asr +12` (since start), mosque icon `Asr -5`
   (until jamaat), `Asr (-5)` in red (time left). Icon color shows the state. The dropdown lists every
-  prayer plus sunrise, midnight and tahajjud, color-coded as prayed, prayed late, current or missed,
+  prayer plus sunrise, midnight and tahajjud, color-coded as prayed with jamaat, prayed, prayed late,
+  made up, current or missed,
   with each prayer's preferred time. Click a prayer to mark it; hold ⌥ to mark a late one (or one
   recorded late) as prayed on time.
 - **Next Prayer** command: live root-search subtitle. Add it to Favorites to keep it on top.
-- **Today's Prayers**: mark as prayed (on time or late is decided by the clock), override either way,
-  and see the last 7 days.
+- **Today's Prayers**: mark as prayed (on time or late is decided by the clock), or as prayed with
+  jamaat, on time, late, or made up after its time ended; change or unmark it later, and see the last
+  7 days with jamaat and made-up counts. With Apple Reminders on, the status is kept in the reminder's
+  notes as a `prayer-status: jamaat|ontime|late|missed|madeup` line above the `prayer-times://` key, so
+  other tools that sync these reminders can read and keep it.
 - **Apple Reminders**: one timed reminder per prayer, kept 14 days ahead, with heads-up, start,
   jamaat and ending alarms, so alerts fire even when Raycast isn't running.
 - **Jamaat rules** per prayer: `13:30`, `+10`, `floor5+15`, `ceil5+10`, `end-30`, plus a Jumu'ah rule.

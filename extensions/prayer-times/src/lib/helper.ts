@@ -29,6 +29,8 @@ export interface PrayerStatus {
   key: string;
   isCompleted: boolean;
   completionDate?: string;
+  /** The `prayer-status:` value as written; check it with `validStatus` before use. */
+  status?: string;
 }
 
 /** Matches the Swift LocateResult. Coordinates are rounded to 2 decimals (about 1 km). */
@@ -100,12 +102,13 @@ export function getPrayerStatuses(listName: string, fromDate: string, toDate: st
 }
 
 /**
- * Tick or untick one prayer reminder.
+ * Tick or untick one prayer reminder and set its `prayer-status:` line.
  *
  * @param listName - Reminders list.
  * @param key - `YYYY-MM-DD/<slug>`.
  * @param completed - New state.
  * @param completionDate - Explicit completion time; defaults to now when completing.
+ * @param status - Status line value; undefined removes the line.
  * @returns False when no reminder exists for the key.
  */
 export function setPrayerCompleted(
@@ -113,8 +116,11 @@ export function setPrayerCompleted(
   key: string,
   completed: boolean,
   completionDate?: Date,
+  status?: string,
 ): Promise<boolean> {
-  return withTimeout(swiftSetPrayerCompleted(listName, key, completed, completionDate?.toISOString() ?? null));
+  return withTimeout(
+    swiftSetPrayerCompleted(listName, key, completed, completionDate?.toISOString() ?? null, status ?? null),
+  );
 }
 
 const LOCATION_APP = "Prayer Times Location.app";

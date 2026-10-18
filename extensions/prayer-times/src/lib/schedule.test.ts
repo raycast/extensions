@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getDaySchedule, getTimeline, ScheduleConfig } from "./prayers";
 import { alertsForSlot, AlertWindows, currentSlot, dueAlerts, menuBarState, nextSlot, passedAlertIds } from "./state";
 import { alarmTimes, planHash, planReminders, PlanOptions } from "./plan";
-import { fullDayStreak, summarize } from "./stats";
+import { fullDayStreak, StatHistory, summarize } from "./stats";
 import { formatMinutes, menuBarTitle } from "./menubar-title";
 import { ltrName } from "./format";
 
@@ -205,7 +205,7 @@ describe("planReminders", () => {
 });
 
 describe("stats", () => {
-  const history = {
+  const history: StatHistory = {
     "2026-10-06": {
       fajr: { completed: true, onTime: true },
       dhuhr: { completed: true, onTime: true },
@@ -220,12 +220,23 @@ describe("stats", () => {
       maghrib: { completed: true, onTime: true },
       isha: { completed: true, onTime: true },
     },
-    "2026-10-05": { fajr: { completed: false, onTime: false } },
+    "2026-10-05": {
+      fajr: { completed: false, onTime: false },
+      dhuhr: { completed: true, onTime: true, status: "jamaat" },
+      asr: { completed: true, onTime: false, status: "madeup" },
+    },
   };
   const dates = ["2026-10-04", "2026-10-05", "2026-10-06", "2026-10-07"];
 
   it("leaves days without reminders out of the total", () => {
-    expect(summarize(history, dates)).toMatchObject({ knownDays: 3, prayed: 10, total: 15, onTime: 9 });
+    expect(summarize(history, dates)).toMatchObject({
+      knownDays: 3,
+      prayed: 12,
+      total: 15,
+      onTime: 10,
+      jamaat: 1,
+      madeUp: 1,
+    });
   });
 
   it("counts the full-day streak back from the last day", () => {

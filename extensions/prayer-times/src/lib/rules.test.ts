@@ -15,7 +15,7 @@ import { resolveRules, SCHOOL_RULES } from "./rules";
 import { alertsForSlot, currentSlot, menuBarState } from "./state";
 import { menuBarTitle } from "./menubar-title";
 import { alarmTimes } from "./plan";
-import { completionTimeFor } from "./tracker";
+import { prayedAt } from "./status";
 
 // Tests run with TZ=Asia/Karachi. Karachi, Thursday 8 October 2026 (Karachi method unless stated):
 // one shadow 15:41, two shadows 16:33, sunset 18:12, eastern redness (4°) 18:26, red twilight 12° 19:01,
@@ -192,15 +192,15 @@ describe("the late boundary drives alerts, the menu bar and history", () => {
 
   it("records a late override at the late boundary", () => {
     const asr = day({ lateAt: "preferred" }).asr;
-    expect(hm(completionTimeFor(asr, false, at(17, 0)))).toBe("17:52");
+    expect(hm(prayedAt(asr, "late", at(17, 0)))).toBe("17:52");
   });
 
   it("records an on-time correction at the jamaat only when the jamaat was before the late boundary", () => {
     const early = day({ lateAt: "preferred", jamaatAsr: "17:00" }).asr;
-    expect(hm(completionTimeFor(early, true, at(18, 5)))).toBe("17:00");
+    expect(hm(prayedAt(early, "ontime", at(18, 5)))).toBe("17:00");
     const afterPreferred = day({ lateAt: "preferred", jamaatAsr: "18:00" }).asr; // disliked time, before sunset
     expect(hm(afterPreferred.jamaat)).toBe("18:00");
-    expect(hm(completionTimeFor(afterPreferred, true, at(18, 5)))).toBe("16:33");
+    expect(hm(prayedAt(afterPreferred, "ontime", at(18, 5)))).toBe("16:33");
   });
 });
 
