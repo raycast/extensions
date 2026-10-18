@@ -135,7 +135,7 @@ Use `⌘Enter` for a new tab or `⇧Enter` for the captured current tab. See the
 | Open Actions                            | `⌘K`                 |
 | Expand or collapse the optional preview | `⌘D`, when available |
 
-Open Actions → **Shortcut Settings** to customize additional bindings or restore defaults. Changes persist across command sessions. Raycast controls the primary `Enter` and `⌘Enter` actions.
+Open Actions → **Shortcut Settings** to customize additional bindings or restore defaults. Changes persist across command sessions. When preview is unavailable, you can reuse its shortcut for another action; saving disables the conflicting preview binding. Raycast controls the primary `Enter` and `⌘Enter` actions.
 
 To launch the command directly, assign a hotkey or alias in Raycast Settings → Extensions. The Raycast edition has no predefined global activation hotkey.
 

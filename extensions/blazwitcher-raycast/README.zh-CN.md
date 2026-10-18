@@ -135,7 +135,7 @@ JXA 通过 macOS 的 `osascript` 执行，与 AppleScript 使用同一套自动�
 | 打开动作菜单             | `⌘K`             |
 | 展开／收起可选预览       | `⌘D`，预览可用时 |
 
-打开动作菜单 → **Shortcut Settings**，可以修改额外绑定或恢复默认，修改结果会跨次启动保留。主要的 `Enter` 和 `⌘Enter` 动作由 Raycast 管理。
+打开动作菜单 → **Shortcut Settings**，可以修改额外绑定或恢复默认，修改结果会跨次启动保留。预览不可用时，可以把它的快捷键分配给其他动作；保存时会停用冲突的预览绑定。主要的 `Enter` 和 `⌘Enter` 动作由 Raycast 管理。
 
 需要一键启动时，在 Raycast Settings → Extensions 中为命令设置热键或别名。Raycast 版没有预设全局唤醒热键。
 

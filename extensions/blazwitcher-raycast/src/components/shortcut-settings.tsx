@@ -75,6 +75,19 @@ export function ShortcutSettings({
       setErrors([(error as Error).message]);
       return;
     }
+    // Keep hidden preferences unless a visible action needs the same key.
+    if (
+      !detailAvailable &&
+      Object.entries(requested).some(
+        ([id, value]) =>
+          id !== "toggleDetail" &&
+          value !== null &&
+          value === requested.toggleDetail,
+      )
+    ) {
+      requested.toggleDetail = null;
+      next.toggleDetail = null;
+    }
     const validation = validateShortcuts(requested);
     if (validation.length) {
       setErrors(validation);
