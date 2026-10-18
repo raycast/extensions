@@ -29,6 +29,10 @@ export interface HistoryEntry {
   readonly lastVisited: Date;
 }
 
+export interface BookmarkEntry extends HistoryEntry {
+  readonly folderPath: string;
+}
+
 export type GroupedEntries = Map<string, HistoryEntry[]>;
 
 export class Tab {

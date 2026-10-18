@@ -1,3 +1,4 @@
+import { showError } from "@chrismessina/raycast-kit";
 import { List } from "@raycast/api";
 import { useEffect } from "react";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
@@ -17,7 +18,7 @@ async function loadBraveProfiles(): Promise<BraveProfile[]> {
   }
 
   const braveState = await promises.readFile(path, "utf-8");
-  const profiles = JSON.parse(braveState).profile.info_cache;
+  const profiles = JSON.parse(braveState).profile?.info_cache ?? {};
   return Object.entries<{ name: string }>(profiles).map(([key, val]) => ({
     name: val.name,
     id: key,
@@ -29,7 +30,11 @@ export default function BraveProfileDropDown({ onProfileSelected }: Props) {
   const [profiles, setProfiles] = useCachedState<BraveProfile[]>(BRAVE_PROFILES_KEY, [
     { name: "Default", id: DEFAULT_BRAVE_PROFILE_ID },
   ]);
-  const { data: loadedProfiles } = useCachedPromise(loadBraveProfiles);
+  const { data: loadedProfiles } = useCachedPromise(loadBraveProfiles, [], {
+    onError: (error) => {
+      void showError(error, { title: "Could Not Load Profiles" });
+    },
+  });
 
   useEffect(() => {
     if (loadedProfiles) {

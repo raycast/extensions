@@ -1,5 +1,25 @@
 # Brave Changelog
 
+## [Windows support] - {PR_MERGE_DATE}
+
+### ✨ New
+
+- Added Windows support.
+- Added `Open New Window` command.
+- Added `Open New Incognito Window` command.
+- Added custom executable and User Data directory preferences for Windows.
+
+### 💎 Improvements
+
+- Support Brave, Beta, and Nightly on Windows.
+- Added copyable error reports and count-aware bookmark labels with `raycast-kit`.
+- Tab-switching now uses a Rust helper for more reliable and faster behaviour.
+- Improved and added new keyboard shortcuts.
+
+### 🐞 Fixes
+
+- Fixed `Search Tabs` items sometimes opening a new tab.
+
 ## [Fix Missing History Database] - 2026-08-16
 
 - Fixed New Brave Tab crashing when the selected Brave profile has not created a History database yet.

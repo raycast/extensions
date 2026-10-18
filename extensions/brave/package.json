@@ -10,7 +10,8 @@
     "crisboarna",
     "tleo19",
     "faridrashidi",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "muhammadrizo"
   ],
   "categories": [
     "Applications",
@@ -20,36 +21,43 @@
   "commands": [
     {
       "name": "new-tab",
-      "title": "New Brave Tab",
-      "subtitle": "Brave",
+      "title": "Open New Tab",
       "description": "Open a new Brave tab.",
-      "mode": "view"
+      "mode": "no-view"
+    },
+    {
+      "name": "open-new-window",
+      "title": "Open New Window",
+      "description": "Open a new Brave window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-new-incognito-window",
+      "title": "Open New Incognito Window",
+      "description": "Open a new Brave incognito window.",
+      "mode": "no-view"
     },
     {
       "name": "search-tab",
-      "title": "Search Brave Tabs",
-      "subtitle": "Brave",
+      "title": "Search Tabs",
       "description": "List all tabs and go to the selected.",
       "mode": "view"
     },
     {
       "name": "search-history",
-      "title": "Search Brave History",
-      "subtitle": "Brave",
+      "title": "Search History",
       "description": "Search browser history.",
       "mode": "view"
     },
     {
       "name": "search-bookmarks",
-      "title": "Search Brave Bookmarks",
-      "subtitle": "Brave",
+      "title": "Search Bookmarks",
       "description": "Search browser bookmarks.",
       "mode": "view"
     },
     {
       "name": "search-bookmark-folders",
-      "title": "Search Brave Bookmark Folders",
-      "subtitle": "Brave",
+      "title": "Search Bookmark Folders",
       "description": "Search browser bookmark folders.",
       "mode": "view"
     }
@@ -57,7 +65,7 @@
   "preferences": [
     {
       "name": "useOriginalFavicon",
-      "title": "Fav icon",
+      "title": "Favicon (macOS only)",
       "label": "Extract the favicon from every open tab",
       "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Brave profile.",
       "required": false,
@@ -92,7 +100,7 @@
       "description": "Select the Brave Browser you want to use.",
       "type": "dropdown",
       "required": false,
-      "default": "default",
+      "default": "Brave Browser",
       "data": [
         {
           "title": "Brave Browser",
@@ -107,19 +115,34 @@
           "value": "Brave Browser Nightly"
         }
       ]
+    },
+    {
+      "name": "bravePath",
+      "title": "Brave Executable (Windows)",
+      "description": "Optional full path to brave.exe for custom or portable installations. Overrides browser channel selection for launching.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "userDataPath",
+      "title": "User Data Directory (Windows)",
+      "description": "Optional path to the User Data folder containing Local State and profile folders for a custom or portable installation.",
+      "type": "directory",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.7"
+    "@chrismessina/raycast-kit": "^0.2.0",
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
@@ -130,10 +153,11 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "overrides": {
-    "brace-expansion": "5.0.9",
+    "brace-expansion": "5.0.12",
     "js-yaml@4": "4.3.2"
   }
 }
