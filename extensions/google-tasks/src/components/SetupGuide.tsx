@@ -39,7 +39,7 @@ function steps(accountType: AccountType): Step[] {
     {
       title: "Enable the Google Tasks API",
       markdown: [
-        "Press **↵** to open the **Google Tasks API** page in the Google Cloud console.",
+        "Press **⌘O** to open the **Google Tasks API** page in the Google Cloud console.",
         "1. Check the project picker in the top bar. It must show the project from step 1. If it doesn't, click it and select your project.",
         "2. Click the blue **Enable** button and wait a few seconds.",
         "3. The API is enabled once the page shows **API Enabled** or switches to a **Manage** button.",
@@ -103,21 +103,21 @@ const accountTypes: { value: AccountType; title: string; icon: Icon; markdown: s
 
 export default function SetupGuide(props: { title: string; message: string; onRetry: () => void }) {
   const [accountType, setAccountType] = useState<AccountType>();
-  const [selectedId, setSelectedId] = useState<string>("status");
+  const [jumpTo, setJumpTo] = useState<string>();
   const [done, setDone] = useState<Set<string>>(new Set());
   const guide = accountType ? steps(accountType) : [];
 
   const advance = (fromId: string, toId: string) => {
     setDone((previous) => new Set(previous).add(fromId));
-    setSelectedId(toId);
+    setJumpTo(toId);
   };
 
   return (
     <List
       navigationTitle={props.title}
       isShowingDetail
-      selectedItemId={selectedId}
-      onSelectionChange={(id) => id && setSelectedId(id)}
+      selectedItemId={jumpTo}
+      onSelectionChange={(id) => id === jumpTo && setJumpTo(undefined)}
       searchBarPlaceholder="Set up Google Tasks"
     >
       <List.Section title="Status">
@@ -135,7 +135,7 @@ export default function SetupGuide(props: { title: string; message: string; onRe
               <Action
                 title="Start Setup"
                 icon={Icon.ArrowRight}
-                onAction={() => setSelectedId(accountType ?? "personal")}
+                onAction={() => setJumpTo(accountType ?? "personal")}
               />
               <Action.Push title="Enter Client ID" icon={Icon.Key} target={<ClientIdForm onSaved={props.onRetry} />} />
               <Action title="Retry" icon={Icon.ArrowClockwise} onAction={props.onRetry} />
@@ -165,7 +165,7 @@ export default function SetupGuide(props: { title: string; message: string; onRe
                   icon={Icon.ArrowRight}
                   onAction={() => {
                     setAccountType(type.value);
-                    setSelectedId(steps(type.value)[0].title);
+                    setJumpTo(steps(type.value)[0].title);
                   }}
                 />
               </ActionPanel>
