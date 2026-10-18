@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { Action, ActionPanel, Color, Icon, Keyboard, List, open } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 
 import type { Profile, WithDetails } from "@/types";
@@ -38,15 +38,24 @@ export default function ProfileItem({ profile, toggleDetails, detailsShown }: Pr
       accessories={accessories}
       actions={
         <ActionPanel>
-          <Action title={detailsShown ? "Hide Details" : "Show Details"} onAction={toggleDetails} />
+          <Action
+            title={detailsShown ? "Hide Details" : "Show Details"}
+            onAction={toggleDetails}
+            icon={{ source: Icon.AppWindowSidebarLeft, tintColor: "#FF6719" }}
+          />
           {profile.handle && (
-            <Action title="Open on Substack" onAction={() => open(`https://substack.com/@${profile.handle}`)} />
+            <Action.OpenInBrowser
+              title="Open on Substack"
+              url={`https://substack.com/@${profile.handle}`}
+              icon={{ source: "substack.svg" }}
+            />
           )}
           {profile.hasPosts && (
             <Action.Push
               title="Show Posts"
               target={<UserProfilePosts profile={profile} />}
-              shortcut={Keyboard.Shortcut.Common.Open}
+              icon={{ source: Icon.List, tintColor: "#FF6719" }}
+              shortcut={{ key: "o", modifiers: ["cmd"] }}
             />
           )}
         </ActionPanel>
