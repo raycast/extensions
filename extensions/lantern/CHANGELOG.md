@@ -1,0 +1,9 @@
+# Lantern Changelog
+
+## [Initial Version] - 2026-10-18
+
+- Initial release of the Lantern extension for Raycast.
+- Search your Mac by meaning across files, code, PDFs, photos, audio, and videos.
+- Interactive detail pane with syntax-highlighted code snippets, thumbnails, and transcripts.
+- Keyboard shortcuts to open at specific lines, pages, or video timestamps.
+- Category filtering with keyboard shortcuts (`⌃1` ... `⌃0`).
