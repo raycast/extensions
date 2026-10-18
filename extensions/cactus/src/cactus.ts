@@ -36,22 +36,21 @@ export async function configure(request: ConfigureRequest): Promise<CactusStatus
 }
 
 export async function cactusAppPath(): Promise<string> {
-  return (await findCactus()).appPath;
-}
-
-async function findCactus(): Promise<{ appPath: string; controlPath: string }> {
   const app = (await getApplications()).find(({ bundleId }) => bundleId === "app.cactus");
   if (!app) throw new Error("Cactus is not installed. Download it from usecactus.app.");
+  return app.path;
+}
 
-  const controlPath = resolve(app.path, "Contents", "Resources", "cactusctl");
-  if (!existsSync(controlPath)) throw new Error("Install the latest version of Cactus, then try again.");
-  return { appPath: app.path, controlPath };
+async function controlPath(): Promise<string> {
+  const path = resolve(await cactusAppPath(), "Contents", "Resources", "cactusctl");
+  if (!existsSync(path)) throw new Error("Install the latest version of Cactus, then try again.");
+  return path;
 }
 
 async function runControl(arguments_: string[], input?: string): Promise<string> {
-  const { controlPath } = await findCactus();
+  const path = await controlPath();
   return new Promise((resolvePromise, rejectPromise) => {
-    const child = spawn(controlPath, arguments_, { stdio: ["pipe", "pipe", "pipe"] });
+    const child = spawn(path, arguments_, { stdio: ["pipe", "pipe", "pipe"] });
     let stdout = "";
     let stderr = "";
     const timeout = setTimeout(() => {
@@ -69,6 +68,11 @@ async function runControl(arguments_: string[], input?: string): Promise<string>
       clearTimeout(timeout);
       if (code === 0) resolvePromise(stdout);
       else rejectPromise(new Error(stderr.trim().replace(/^error:\s*/, "") || `Cactus exited with status ${code}.`));
+    });
+    // cactusctl can exit before reading its input; report that as a failure instead of crashing.
+    child.stdin.on("error", (error) => {
+      clearTimeout(timeout);
+      rejectPromise(error);
     });
     child.stdin.end(input);
   });

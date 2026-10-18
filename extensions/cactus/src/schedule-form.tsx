@@ -150,10 +150,10 @@ export default function ScheduleForm({ initialStatus }: { initialStatus?: Cactus
   );
 }
 
+// Formats in UTC so a clock change today cannot skip or repeat the labelled hour.
 function clockTime(value: number): string {
-  const date = new Date();
-  date.setHours(Math.floor(value / 60), value % 60, 0, 0);
-  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const date = new Date(Date.UTC(2000, 0, 1, Math.floor(value / 60), value % 60));
+  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", timeZone: "UTC" });
 }
 
 function message(value: unknown): string {
