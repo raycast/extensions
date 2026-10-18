@@ -15,7 +15,7 @@ reminders in Apple Reminders, and tracks which prayers were prayed on time.
   recorded late) as prayed on time.
 - **Next Prayer** command: live root-search subtitle. Add it to Favorites to keep it on top.
 - **Today's Prayers**: mark as prayed (on time or late is decided by the clock), or as prayed with
-  jamaat, on time, late, or made up after its time ended; change or unmark it later, and see the last
+  jamaat, on time, late (still within its time), or made up (qaza, after its time ended); change or unmark it later, and see the last
   7 days with jamaat and made-up counts. With Apple Reminders on, the status is kept in the reminder's
   notes as a `prayer-status: jamaat|ontime|late|missed|madeup` line above the `prayer-times://` key, so
   other tools that sync these reminders can read and keep it.

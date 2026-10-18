@@ -2,7 +2,8 @@ import { PrayerSlot } from "./prayers";
 
 /**
  * How a prayer was prayed. Written as a `prayer-status: <value>` line in the reminder's notes, second to
- * last above the key, and shared with the phone app and the Unify bridge.
+ * last above the key, and shared with the phone app and the Unify bridge. `late` is still within the
+ * prayer's time (after its late boundary); `madeup` is qaza, prayed after its time ended.
  */
 export type PrayerStatusValue = "jamaat" | "ontime" | "late" | "missed" | "madeup";
 
@@ -15,8 +16,8 @@ export const PRAYER_STATUSES: readonly PrayerStatusValue[] = ["jamaat", "ontime"
 export const MARK_TITLES: Record<PrayedStatus, string> = {
   jamaat: "Prayed with Jamaat",
   ontime: "Prayed on Time",
-  late: "Prayed Late (Qaza)",
-  madeup: "Made Up",
+  late: "Prayed Late",
+  madeup: "Made Up (Qaza)",
 };
 
 /** Short label per status, for lists and the menu bar. */
@@ -25,7 +26,7 @@ export const STATUS_LABELS: Record<PrayerStatusValue, string> = {
   ontime: "Prayed",
   late: "Prayed late",
   missed: "Missed",
-  madeup: "Made up",
+  madeup: "Made up (qaza)",
 };
 
 /**

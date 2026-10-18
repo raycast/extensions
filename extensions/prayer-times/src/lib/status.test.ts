@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PrayerSlot } from "./prayers";
-import { markOptions, parseStatus, prayedAt, statusOf, validStatus } from "./status";
+import { MARK_TITLES, markOptions, parseStatus, prayedAt, STATUS_LABELS, statusOf, validStatus } from "./status";
 
 const at = (h: number, m: number, day = 8) => new Date(2026, 9, day, h, m);
 const asr: PrayerSlot = {
@@ -79,5 +79,14 @@ describe("markOptions", () => {
   it("offers every other status for a prayed one", () => {
     expect(markOptions(asr, "ontime", at(17, 0))).toEqual(["jamaat", "late"]);
     expect(markOptions(asr, "jamaat", at(21, 0))).toEqual(["ontime", "late", "madeup"]);
+  });
+});
+
+describe("labels", () => {
+  it("calls only a made-up prayer qaza; late is still within its time", () => {
+    expect(MARK_TITLES.late).toBe("Prayed Late");
+    expect(MARK_TITLES.madeup).toBe("Made Up (Qaza)");
+    expect(STATUS_LABELS.late).not.toMatch(/qaza/i);
+    expect(STATUS_LABELS.madeup).toMatch(/qaza/i);
   });
 });
