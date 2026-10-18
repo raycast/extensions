@@ -61,12 +61,6 @@ This extension provides the following commands:
   - Read inbound email
   - Open received attachments
 
-### Applying to a position
-
-Careers uses your existing Resend login or API key. Browsing positions does not require Sender Name or Sender Email preferences. Your name and email are required only in the application form. If your login cannot access Careers, enter a Resend API key in Preferences. Your application is independent of the key's team. Provide your own name and email; sender preferences are not used.
-
-Select one local resume file, up to 10 MB, with PDF recommended. Each position can have different required questions. Review all answers before choosing Submit Application. For unsupported questions or the full job description, choose Apply in Browser or View Job in Browser. Applications are submitted to Resend, and duplicate applications with the same email may be rejected. If submission cannot be confirmed, check before submitting again.
-
 ## ✨ AI Tools
 
 Mention `@resend` to work with Resend using natural language. In addition to sending and scheduling email, the extension can:
