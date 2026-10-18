@@ -105,6 +105,8 @@ export default function CreateNoteForm(props: {
       return;
     }
     setPending(undefined);
+    // Refresh again now that the remaining steps (e.g. joining a task domain) are done.
+    if (steps.length > 0) props.onCreated?.();
     if (props.closeOnSubmit || values.openAfterCreate) {
       toast.hide();
       if (values.openAfterCreate) await open(noteAppUrl(noteUUID));

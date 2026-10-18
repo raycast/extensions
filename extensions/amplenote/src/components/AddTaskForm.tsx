@@ -98,6 +98,8 @@ export default function AddTaskForm(props: {
       return;
     }
     setPending(undefined);
+    // Refresh again now that the remaining steps (e.g. joining a task domain) are done.
+    if (steps.length > 0) props.onCreated?.();
     if (props.closeOnSubmit) {
       // Must be the last step: popping to root ends the command.
       await showHUD(`Added to ${noteName}`, { clearRootSearch: true, popToRootType: PopToRootType.Immediate });

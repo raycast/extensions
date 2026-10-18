@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { useRef, useState } from "react";
 import { Note, noteAppUrl, nowSeconds, shorten, Tag, Task } from "../lib/api";
 import { cmd } from "../lib/shortcuts";
 import { amplenote } from "../lib/amplenote";
@@ -9,9 +10,6 @@ import AddTaskForm from "./AddTaskForm";
 import { TaskChange } from "../lib/useTaskChanges";
 
 const MAX_NOTE_NAME = 20;
-
-// Tasks with a change still on its way to Amplenote, shared across rows so re-renders can't bypass it.
-const inFlight = new Set<string>();
 
 /** Dates picked without a time are scheduled at 9:00, like in the task form and the AI tools. */
 function atNine(date: Date): number {
@@ -36,6 +34,10 @@ export default function TaskListItem(props: {
   const highlightedTags = (note?.tags ?? []).filter(props.isHighlighted);
   const references = taskReferenceCount(task.content);
   const done = !isOpen(task);
+  // One change per task at a time. While it saves, the row shows that and offers no other changes, so a second
+  // action can't be silently dropped or race the first. The ref catches key presses before the next render.
+  const savingRef = useRef(false);
+  const [saving, setSaving] = useState(false);
 
   const run = async (
     change: TaskChange,
@@ -44,15 +46,17 @@ export default function TaskListItem(props: {
     action: () => Promise<unknown>,
     updates?: Partial<Task>,
   ) => {
-    // One change per task at a time, e.g. Complete followed quickly by Dismiss, or Undo pressed twice.
-    if (inFlight.has(task.uuid)) return;
-    inFlight.add(task.uuid);
+    if (savingRef.current) return;
+    savingRef.current = true;
+    setSaving(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: pending });
     try {
       await action();
       toast.style = Toast.Style.Success;
       toast.title = success;
       props.onChange(task, change, updates);
+      // A reopened task may no longer be in the loaded list (e.g. after a refresh), so reload to bring it back.
+      if (change === "reopened") props.onRefresh();
       if (change === "completed" || change === "dismissed") {
         toast.primaryAction = {
           title: "Undo",
@@ -64,7 +68,8 @@ export default function TaskListItem(props: {
       toast.hide();
       await showFailureToast(error, { title: `Could not update "${title}"` });
     } finally {
-      inFlight.delete(task.uuid);
+      savingRef.current = false;
+      setSaving(false);
     }
   };
 
@@ -81,6 +86,7 @@ export default function TaskListItem(props: {
       }
       keywords={[...(note?.tags ?? []), note?.name ?? ""]}
       accessories={[
+        ...(saving ? [{ icon: Icon.Clock, tooltip: "Saving…" }] : []),
         ...(note?.name ? [{ icon: Icon.Document, text: shorten(note.name, MAX_NOTE_NAME), tooltip: note.name }] : []),
         ...highlightedTags.map((tag) => ({ tag: { value: tag, color: tagColor(tag, props.tags) } })),
         ...(task.important
@@ -110,7 +116,13 @@ export default function TaskListItem(props: {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {done ? (
+            {saving ? (
+              <Action
+                title="Saving…"
+                icon={Icon.Clock}
+                onAction={() => void showToast({ style: Toast.Style.Animated, title: "Still saving this task…" })}
+              />
+            ) : done ? (
               <Action
                 title={task.completedAt ? "Reopen Task" : "Restore Task"}
                 icon={Icon.ArrowCounterClockwise}
@@ -135,7 +147,7 @@ export default function TaskListItem(props: {
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            {!done ? (
+            {!done && !saving ? (
               <>
                 <Action
                   title={task.important ? "Unmark Important" : "Mark Important"}

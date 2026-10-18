@@ -4,7 +4,7 @@ import { cmd } from "../lib/shortcuts";
 import AddTaskForm from "./AddTaskForm";
 import NoteTasks from "./NoteTasks";
 
-export function NoteOpenActions(props: { note: Note; tags?: Tag[]; notes?: Note[] }) {
+export function NoteOpenActions(props: { note: Note; tags?: Tag[]; notes?: Note[]; onTasksChanged?: () => void }) {
   const { note } = props;
   return (
     <>
@@ -14,13 +14,13 @@ export function NoteOpenActions(props: { note: Note; tags?: Tag[]; notes?: Note[
         title="Show Tasks"
         icon={Icon.CheckList}
         shortcut={cmd("t")}
-        target={<NoteTasks note={note} tags={props.tags} />}
+        target={<NoteTasks note={note} tags={props.tags} onTasksChanged={props.onTasksChanged} />}
       />
       <Action.Push
         title="Add Task to Note"
         icon={Icon.Plus}
         shortcut={cmd("t", { shift: true })}
-        target={<AddTaskForm note={note} notes={props.notes} />}
+        target={<AddTaskForm note={note} notes={props.notes} onCreated={props.onTasksChanged} />}
       />
     </>
   );

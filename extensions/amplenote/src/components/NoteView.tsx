@@ -76,7 +76,7 @@ export default function NoteView(props: { note: Note; tags?: Tag[] }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <NoteOpenActions note={note} tags={props.tags} />
+            <NoteOpenActions note={note} tags={props.tags} onTasksChanged={() => void tasks.revalidate()} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <NoteCopyActions note={note} />

@@ -9,7 +9,7 @@ import AddTaskForm from "./AddTaskForm";
 import ConnectionErrorView, { isConnectionError } from "./ConnectionErrorView";
 import TaskListItem from "./TaskListItem";
 
-export default function NoteTasks(props: { note: Note; tags?: Tag[] }) {
+export default function NoteTasks(props: { note: Note; tags?: Tag[]; onTasksChanged?: () => void }) {
   const { note } = props;
   const tasks = usePromise(amplenote.getNoteTasks, [note.uuid], { onError: reportError });
   const changes = useTaskChanges();
@@ -30,7 +30,15 @@ export default function NoteTasks(props: { note: Note; tags?: Tag[] }) {
             <Action.Push
               title="Add Task"
               icon={Icon.Plus}
-              target={<AddTaskForm note={note} onCreated={tasks.revalidate} />}
+              target={
+                <AddTaskForm
+                  note={note}
+                  onCreated={() => {
+                    void tasks.revalidate();
+                    props.onTasksChanged?.();
+                  }}
+                />
+              }
             />
             <Action.Open
               title="Open Note in Amplenote"
@@ -47,7 +55,10 @@ export default function NoteTasks(props: { note: Note; tags?: Tag[] }) {
           task={task}
           tags={props.tags}
           isHighlighted={isHighlighted}
-          onChange={changes.record}
+          onChange={(changed, change, updates) => {
+            changes.record(changed, change, updates);
+            props.onTasksChanged?.();
+          }}
           onRefresh={() => changes.refresh(tasks.revalidate)}
           addTaskNote={note}
         />
