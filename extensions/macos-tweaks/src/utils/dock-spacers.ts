@@ -1,7 +1,4 @@
 import { execFile, execFileSync } from "child_process";
-import { mkdtemp, rm } from "fs/promises";
-import { tmpdir } from "os";
-import { join } from "path";
 import { promisify } from "util";
 import { restartProcess } from "./defaults";
 
@@ -40,69 +37,55 @@ export function getSpacerCommandString(size: SpacerSize, side: DockSide): string
 }
 
 /**
- * Run `fn` on a throwaway export of the Dock preferences. `defaults read` prints the tile arrays in
- * a format meant for people, while `plutil` can address one element of an exported file by index.
+ * Counts the spacers on both sides and, in "remove" mode, writes each side back without them —
+ * all in one process. `defaults` cannot delete one element of an array, and the alternative, an
+ * export imported back whole, would undo any other Dock change made while it was edited; this
+ * touches only the two tile arrays, within milliseconds of reading them. A missing array (a Dock
+ * never customised) holds no spacers; anything else that goes wrong makes osascript fail.
  */
-async function withDockExport<T>(fn: (file: string) => Promise<T>): Promise<T> {
-  const dir = await mkdtemp(join(tmpdir(), "macos-tweaks-"));
-  const file = join(dir, "dock.plist");
-  try {
-    await execFileAsync("defaults", ["export", DOCK_DOMAIN, file], { timeout: 5000 });
-    return await fn(file);
-  } finally {
-    await rm(dir, { recursive: true, force: true });
+const SPACERS_SCRIPT = `
+ObjC.import("Foundation");
+function run(argv) {
+  const [domain, mode] = argv;
+  const keys = JSON.parse(argv[2]);
+  const spacerTypes = JSON.parse(argv[3]);
+  const prefs = $.NSUserDefaults.alloc.initWithSuiteName(domain);
+  let count = 0;
+  for (const key of keys) {
+    const tiles = prefs.arrayForKey(key);
+    if (tiles.isNil()) continue;
+    const kept = $.NSMutableArray.array;
+    for (let i = 0; i < tiles.count; i++) {
+      const tile = tiles.objectAtIndex(i);
+      if (spacerTypes.includes(ObjC.unwrap(tile.objectForKey("tile-type")))) count++;
+      else kept.addObject(tile);
+    }
+    if (mode === "remove" && kept.count < tiles.count) prefs.setObjectForKey(kept, key);
   }
-}
+  if (mode === "remove") prefs.synchronize;
+  return String(count);
+}`;
 
-async function plutilRaw(file: string, keyPath: string): Promise<string | undefined> {
-  try {
-    const { stdout } = await execFileAsync("plutil", ["-extract", keyPath, "raw", "-o", "-", file], {
-      encoding: "utf-8",
-      timeout: 5000,
-    });
-    return stdout.trim();
-  } catch {
-    return undefined;
-  }
-}
-
-/** The `tile-type` of every tile on one side, in Dock order. `raw` on an array prints its length. */
-async function readTileTypes(file: string, key: string): Promise<string[]> {
-  const count = Number(await plutilRaw(file, key));
-  // The array is absent on a Dock that was never customised
-  if (!Number.isInteger(count)) return [];
-  return Promise.all(
-    Array.from({ length: count }, async (_, i) => (await plutilRaw(file, `${key}.${i}.tile-type`)) ?? ""),
-  );
+async function runSpacersScript(mode: "count" | "remove"): Promise<number> {
+  const args = [DOCK_DOMAIN, mode, JSON.stringify(Object.values(SIDE_KEYS)), JSON.stringify([...SPACER_TYPES])];
+  const { stdout } = await execFileAsync("osascript", ["-l", "JavaScript", "-e", SPACERS_SCRIPT, ...args], {
+    encoding: "utf-8",
+    timeout: 5000,
+  });
+  const output = stdout.trim();
+  // Number("") is 0: an empty answer must not read as "no spacers"
+  if (!/^\d+$/.test(output)) throw new Error(`Could not read the Dock spacers: unexpected output "${output}"`);
+  return Number(output);
 }
 
 /** How many spacers the Dock holds, on both sides. */
 export async function countDockSpacers(): Promise<number> {
-  return withDockExport(async (file) => {
-    const sides = await Promise.all(Object.values(SIDE_KEYS).map((key) => readTileTypes(file, key)));
-    return sides.flat().filter((type) => SPACER_TYPES.has(type)).length;
-  });
+  return runSpacersScript("count");
 }
 
-/**
- * Take every spacer out of the Dock and return how many there were. `defaults` cannot delete one
- * element of an array, so the spacers are removed from an export, which is imported back whole.
- */
+/** Take every spacer out of the Dock and return how many there were. */
 export async function removeDockSpacers(): Promise<number> {
-  const removed = await withDockExport(async (file) => {
-    let count = 0;
-    for (const key of Object.values(SIDE_KEYS)) {
-      const types = await readTileTypes(file, key);
-      // From the end, so the indices still to remove do not shift
-      for (let i = types.length - 1; i >= 0; i--) {
-        if (!SPACER_TYPES.has(types[i])) continue;
-        await execFileAsync("plutil", ["-remove", `${key}.${i}`, file], { timeout: 5000 });
-        count++;
-      }
-    }
-    if (count > 0) await execFileAsync("defaults", ["import", DOCK_DOMAIN, file], { timeout: 5000 });
-    return count;
-  });
+  const removed = await runSpacersScript("remove");
   if (removed > 0) restartProcess("Dock");
   return removed;
 }
