@@ -1,6 +1,6 @@
 # Reader Mode Changelog
 
-## [Markdown Articles and Summary Models] - {PR_MERGE_DATE}
+## [Markdown Articles and Summary Models] - 2026-10-18
 
 ### Added
 
