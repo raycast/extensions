@@ -9,6 +9,8 @@ namespace BricksRaycastHelper;
 defined( 'ABSPATH' ) || exit;
 
 const LICENSE_OPTION      = 'bricks_raycast_license';
+/** Deactivations the license server didn't confirm, retried daily: [ [ 'key' => …, 'instance_id' => … ], … ]. */
+const PENDING_DEACTIVATIONS = 'bricks_raycast_pending_deactivations';
 const LICENSE_CRON        = 'bricks_raycast_license_check';
 const UPDATE_INFO_OPTION  = 'bricks_raycast_update_info';
 const PLUGIN_SLUG         = 'bricks-raycast-helper';
@@ -128,6 +130,9 @@ function activate_license( string $key ) {
 		return validate_license();
 	}
 
+	// Free activations an earlier deactivation couldn't, so they don't count against the limit.
+	retry_pending_deactivations();
+
 	// Activate the new key first: if it fails, the site keeps the license it has.
 	$result = license_request( '/v1/activate', [ 'key' => $key, 'site' => home_url() ] );
 	if ( is_wp_error( $result ) ) {
@@ -198,18 +203,58 @@ function deactivate_license(): array {
 	if ( ! empty( $license['key'] ) && ! empty( $license['instance_id'] ) ) {
 		$result = license_request( '/v1/deactivate', [ 'key' => $license['key'], 'instance_id' => $license['instance_id'] ] );
 		if ( is_wp_error( $result ) && is_transient_license_error( $result ) ) {
-			$warning = 'The license server couldn\'t be reached, so the activation may still count on the license.';
+			// Keep what's needed to free the activation later, so the seat can still move to another site.
+			add_pending_deactivation( (string) $license['key'], (string) $license['instance_id'] );
+			$warning = 'The license server couldn\'t be reached, so this site\'s activation isn\'t freed yet. The site retries daily until it is.';
 		}
 	}
 	$was_pro = is_pro();
 	delete_option( LICENSE_OPTION );
-	wp_clear_scheduled_hook( LICENSE_CRON );
+	if ( pending_deactivations() ) {
+		schedule_license_check();
+	} else {
+		wp_clear_scheduled_hook( LICENSE_CRON );
+	}
 	if ( $was_pro ) {
 		forget_update_offer();
 	} else {
 		forget_update_info();
 	}
 	return $warning ? [ 'warning' => $warning ] : [];
+}
+
+function pending_deactivations(): array {
+	$pending = get_option( PENDING_DEACTIVATIONS, [] );
+	return is_array( $pending ) ? array_values( $pending ) : [];
+}
+
+function add_pending_deactivation( string $key, string $instance_id ): void {
+	$pending   = array_filter( pending_deactivations(), fn( $item ) => ( $item['instance_id'] ?? '' ) !== $instance_id );
+	$pending[] = [
+		'key'         => $key,
+		'instance_id' => $instance_id,
+	];
+	update_option( PENDING_DEACTIVATIONS, array_values( $pending ), false );
+}
+
+/** Frees activations an earlier deactivation couldn't; keeps the ones the server still can't be reached for. */
+function retry_pending_deactivations(): void {
+	$pending = pending_deactivations();
+	if ( ! $pending ) {
+		return;
+	}
+	$left = [];
+	foreach ( $pending as $item ) {
+		$result = license_request( '/v1/deactivate', [ 'key' => (string) ( $item['key'] ?? '' ), 'instance_id' => (string) ( $item['instance_id'] ?? '' ) ] );
+		if ( is_wp_error( $result ) && is_transient_license_error( $result ) ) {
+			$left[] = $item;
+		}
+	}
+	if ( $left ) {
+		update_option( PENDING_DEACTIVATIONS, $left, false );
+	} else {
+		delete_option( PENDING_DEACTIVATIONS );
+	}
 }
 
 /**
@@ -240,6 +285,7 @@ function license_summary(): array {
 		'settings_url'     => admin_url( 'options-general.php?page=' . PLUGIN_SLUG ),
 	];
 	if ( can_manage() ) {
+		$summary['pending_deactivations'] = count( pending_deactivations() );
 		$summary['key_hint']         = empty( $license['key'] ) ? null : '…' . substr( (string) $license['key'], -4 );
 		$summary['activations']      = $license['activations'] ?? null;
 		$summary['activation_limit'] = $license['activation_limit'] ?? null;
@@ -348,10 +394,11 @@ function schedule_license_check(): void {
 }
 
 add_action( LICENSE_CRON, __NAMESPACE__ . '\validate_license' );
+add_action( LICENSE_CRON, __NAMESPACE__ . '\retry_pending_deactivations' );
 add_action(
 	'init',
 	function () {
-		if ( ! empty( license()['key'] ) ) {
+		if ( ! empty( license()['key'] ) || pending_deactivations() ) {
 			schedule_license_check();
 		}
 	}
@@ -742,6 +789,10 @@ function render_settings_page(): void {
 						<?php elseif ( ! empty( $summary['error'] ) ) : ?>
 							<p class="brx-message"><?php echo esc_html( 'Last check failed: ' . $summary['error'] ); ?></p>
 						<?php endif; ?>
+					<?php endif; ?>
+
+					<?php if ( pending_deactivations() ) : ?>
+						<p class="brx-message">An earlier deactivation couldn't reach the license server, so its activation still counts on the license. This site retries daily.</p>
 					<?php endif; ?>
 
 					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">

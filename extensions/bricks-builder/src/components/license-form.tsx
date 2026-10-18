@@ -100,9 +100,16 @@ export function LicenseActions(props: { site: Site; onChange?: () => void; hasLi
     if (!confirmed) return;
     const toast = await showToast({ style: Toast.Style.Animated, title: "Deactivating…" });
     try {
-      await deactivateLicense(props.site);
-      toast.style = Toast.Style.Success;
-      toast.title = `License deactivated on ${props.site.name}`;
+      const result = await deactivateLicense(props.site);
+      if (result.warning) {
+        // The key is gone from the site, but the license server hasn't freed the activation yet.
+        toast.style = Toast.Style.Failure;
+        toast.title = `License removed from ${props.site.name}, activation not freed yet`;
+        toast.message = result.warning;
+      } else {
+        toast.style = Toast.Style.Success;
+        toast.title = `License deactivated on ${props.site.name}`;
+      }
       props.onChange?.();
     } catch (error) {
       toast.style = Toast.Style.Failure;

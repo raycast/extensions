@@ -12,6 +12,7 @@ function bricks_raycast_helper_uninstall_site(): void {
 	global $wpdb;
 
 	delete_option( 'bricks_raycast_license' );
+	delete_option( 'bricks_raycast_pending_deactivations' );
 	delete_option( 'bricks_raycast_scan_version' );
 	delete_option( 'bricks_raycast_update_info' );
 	wp_clear_scheduled_hook( 'bricks_raycast_license_check' );

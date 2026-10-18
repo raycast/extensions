@@ -23,6 +23,10 @@ export interface LicenseSummary {
   key_hint?: string | null;
   activations?: number | null;
   activation_limit?: number | null;
+  /** Administrators only: deactivations the license server hasn't confirmed yet (the site retries daily). */
+  pending_deactivations?: number;
+  /** Set when removing the key couldn't reach the license server. */
+  warning?: string;
 }
 
 /** Site Audit, element and dynamic data search, Form Submissions, the Template Library and site tools answer this without a Pro license. */
