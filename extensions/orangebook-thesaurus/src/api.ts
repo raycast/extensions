@@ -84,8 +84,8 @@ function buildEntries(
       query,
       pos,
       definitions.get(pos) ?? [],
-      synonymWords.filter((word) => primaryPos(word.tags) === pos),
-      antonymWords.filter((word) => primaryPos(word.tags) === pos),
+      synonymWords.filter((word) => hasPos(word.tags, pos)),
+      antonymWords.filter((word) => hasPos(word.tags, pos)),
     );
     return entry ? [entry] : [];
   });
@@ -103,7 +103,9 @@ function senseOrder(
 
   for (const tag of head?.tags ?? []) add(tag);
   for (const pos of definitions.keys()) add(pos);
-  for (const word of words) add(primaryPos(word.tags));
+  for (const word of words) {
+    for (const tag of word.tags ?? []) add(tag);
+  }
   return order;
 }
 
@@ -179,8 +181,8 @@ function rankedWords(words: DatamuseWord[], query: string): DatamuseWord[] {
     .sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
 }
 
-function primaryPos(tags: string[] | undefined): string | undefined {
-  return tags?.find((tag) => POS_NAMES[tag]);
+function hasPos(tags: string[] | undefined, pos: string): boolean {
+  return tags?.includes(pos) ?? false;
 }
 
 function uniqueWords(words: string[]): string[] {
