@@ -228,13 +228,42 @@ function pending_deactivations(): array {
 	return is_array( $pending ) ? array_values( $pending ) : [];
 }
 
+/**
+ * Changes the queue under a database lock, reading it fresh, so a retry and a new failed deactivation
+ * running at the same time can't overwrite each other's entries.
+ */
+function update_pending_deactivations( callable $change ): void {
+	global $wpdb;
+	// GET_LOCK is atomic across requests and released if the request dies.
+	$locked = (bool) $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 5)', $wpdb->options . '_bricks_raycast_pending' ) );
+	try {
+		// Another request may have changed the option since this one cached it.
+		wp_cache_delete( PENDING_DEACTIVATIONS, 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
+		$pending = array_values( $change( pending_deactivations() ) );
+		if ( $pending ) {
+			update_option( PENDING_DEACTIVATIONS, $pending, false );
+		} else {
+			delete_option( PENDING_DEACTIVATIONS );
+		}
+	} finally {
+		if ( $locked ) {
+			$wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $wpdb->options . '_bricks_raycast_pending' ) );
+		}
+	}
+}
+
 function add_pending_deactivation( string $key, string $instance_id ): void {
-	$pending   = array_filter( pending_deactivations(), fn( $item ) => ( $item['instance_id'] ?? '' ) !== $instance_id );
-	$pending[] = [
-		'key'         => $key,
-		'instance_id' => $instance_id,
-	];
-	update_option( PENDING_DEACTIVATIONS, array_values( $pending ), false );
+	update_pending_deactivations(
+		function ( array $pending ) use ( $key, $instance_id ): array {
+			$pending   = array_filter( $pending, fn( $item ) => ( $item['instance_id'] ?? '' ) !== $instance_id );
+			$pending[] = [
+				'key'         => $key,
+				'instance_id' => $instance_id,
+			];
+			return $pending;
+		}
+	);
 }
 
 /** Frees activations an earlier deactivation couldn't; keeps the ones the server still can't be reached for. */
@@ -243,18 +272,20 @@ function retry_pending_deactivations(): void {
 	if ( ! $pending ) {
 		return;
 	}
-	$left = [];
+	$done = [];
 	foreach ( $pending as $item ) {
 		$result = license_request( '/v1/deactivate', [ 'key' => (string) ( $item['key'] ?? '' ), 'instance_id' => (string) ( $item['instance_id'] ?? '' ) ] );
-		if ( is_wp_error( $result ) && is_transient_license_error( $result ) ) {
-			$left[] = $item;
+		if ( ! is_wp_error( $result ) || ! is_transient_license_error( $result ) ) {
+			$done[] = (string) ( $item['instance_id'] ?? '' );
 		}
 	}
-	if ( $left ) {
-		update_option( PENDING_DEACTIVATIONS, $left, false );
-	} else {
-		delete_option( PENDING_DEACTIVATIONS );
+	if ( ! $done ) {
+		return;
 	}
+	// Remove only what this retry finished; entries queued meanwhile stay.
+	update_pending_deactivations(
+		fn( array $current ) => array_filter( $current, fn( $item ) => ! in_array( (string) ( $item['instance_id'] ?? '' ), $done, true ) )
+	);
 }
 
 /**
