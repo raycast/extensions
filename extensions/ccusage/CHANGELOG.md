@@ -1,5 +1,18 @@
 # Claude Usage (ccusage) Changelog
 
+## [Fix loading and add section preferences] - 2026-10-18
+
+### Fixed
+
+- Share summary and session requests across views to avoid duplicate scans and timeouts on large histories.
+- Cache compact session results while preserving model totals from the full history. Reuse fresh reports across launches and keep cached data visible when a refresh fails.
+- Show completed summaries while session details are still loading, and distinguish loading from empty results.
+
+### Added
+
+- Main-command preferences to show or hide each section. Reports and refresh timers run only when a visible section needs them.
+- A This Month section after This Week, with monthly totals and comparisons.
+
 ## [Fix npx failure with missing npm prefix and surface CLI errors] - 2026-09-07
 
 ### Fixed
