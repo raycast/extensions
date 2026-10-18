@@ -10,6 +10,6 @@ Each result offers three actions:
 
 - **Copy Schema URL** (default): copy the schema's URL to the clipboard
 - **Open in Browser**: open the schema in your browser
-- **Paste**: paste the schema URL into the frontmost app
+- **Paste in Active App**: paste the schema URL into the frontmost app
 
 The catalog is fetched from <https://www.schemastore.org/api/json/catalog.json> and cached between launches.
