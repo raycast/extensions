@@ -1,6 +1,6 @@
 import {Image, open} from "@raycast/api"
-import {getApiRoot} from "api/helpers"
-import {Task} from "api/types"
+import {getApiRoot} from "../api/helpers"
+import {Task} from "../api/types"
 
 export const labelForTaskColumn = (column: string): string | undefined => {
   switch (column) {

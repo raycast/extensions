@@ -11,98 +11,79 @@ import {
   stopTimer,
   toggleCustomTimerMenubarVisibility,
   unpauseTimer,
-  recoverWindowsTimers,
 } from "../backend/timerBackend";
 import { CTLaunchConfig, CustomTimer, Timer, TimerLaunchConfig } from "../backend/types";
-import { Alert, Icon, confirmAlert } from "@raycast/api";
-import { showError } from "@chrismessina/raycast-kit";
+import { Alert, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 
 export default function useTimers() {
   const [timers, setTimers] = useState<Timer[] | undefined>(undefined);
   const [customTimers, setCustomTimers] = useState<Record<string, CustomTimer>>({});
   const [isLoading, setIsLoading] = useState<boolean>(timers === undefined);
 
-  const refreshTimers = async () => {
-    try {
-      await recoverWindowsTimers();
-      ensureCTFileExists();
-      const setOfTimers: Timer[] = getTimers();
-      setTimers(setOfTimers);
-      const setOfCustomTimers: Record<string, CustomTimer> = readCustomTimers();
-      setCustomTimers(setOfCustomTimers);
-    } catch (error) {
-      await showError(error, { title: "Could Not Load Timers" });
-    } finally {
-      setIsLoading(false);
-    }
+  const refreshTimers = () => {
+    ensureCTFileExists();
+    const setOfTimers: Timer[] = getTimers();
+    setTimers(setOfTimers);
+    const setOfCustomTimers: Record<string, CustomTimer> = readCustomTimers();
+    setCustomTimers(setOfCustomTimers);
+    setIsLoading(false);
   };
 
-  const handleStartTimer = async (launchConf: TimerLaunchConfig) => {
+  const handleStartTimer = (launchConf: TimerLaunchConfig) => {
     if (!checkForOverlyLoudAlert(launchConf.launchedFromMenuBar)) return;
-    try {
-      await startTimer(launchConf);
-      await refreshTimers();
-    } catch (error) {
-      await showError(error, { title: "Could Not Start Timer" });
-    }
+    startTimer(launchConf);
+    refreshTimers();
   };
 
-  const handleStopTimer = async (timer: Timer) => {
-    try {
-      stopTimer(timer.originalFile);
-      setTimers((current) => current?.filter((t: Timer) => t.originalFile !== timer.originalFile));
-      await refreshTimers();
-    } catch (error) {
-      await showError(error, { title: "Could Not Stop Timer" });
-    }
+  const handleStopTimer = (timer: Timer) => {
+    setTimers(timers?.filter((t: Timer) => t.originalFile !== timer.originalFile));
+    stopTimer(timer.originalFile);
+    refreshTimers();
   };
 
-  const handlePauseTimer = async (timer: Timer) => {
+  const handlePauseTimer = (timer: Timer) => {
     // cannot migrate old timers as we don't know PID
-    if (timer.pid == undefined && !timer.workerId && timer.lastPaused === "---")
-      return showError(new Error("Restart this legacy timer to enable pausing"), { title: "Could Not Pause Timer" });
-    try {
-      pauseTimer(timer.originalFile, timer.pid!);
-      await refreshTimers();
-    } catch (error) {
-      await showError(error, { title: "Could Not Pause Timer" });
-    }
+    if (timer.pid == undefined && timer.lastPaused === "---")
+      return showToast({
+        style: Toast.Style.Failure,
+        title: "This timer does not support pausing. Try restarting it to enable pausing.",
+      });
+    pauseTimer(timer.originalFile, timer.pid!);
+    refreshTimers();
   };
 
-  const handleUnpauseTimer = async (timer: Timer) => {
+  const handleUnpauseTimer = (timer: Timer) => {
     // cannot migrate old timers as we don't know PID
-    if (timer.pid == undefined && !timer.workerId && timer.lastPaused === "---")
-      return showError(new Error("Restart this legacy timer to enable pausing"), { title: "Could Not Resume Timer" });
-    try {
-      await unpauseTimer(timer);
-      await refreshTimers();
-    } catch (error) {
-      await showError(error, { title: "Could Not Resume Timer" });
-    }
+    if (timer.pid == undefined && timer.lastPaused === "---")
+      return showToast({
+        style: Toast.Style.Failure,
+        title: "This timer does not support pausing. Try restarting it to enable pausing.",
+      });
+    unpauseTimer(timer);
+    refreshTimers();
   };
 
   const handleStartCT = ({ customTimer, launchedFromMenuBar }: CTLaunchConfig) => {
-    return handleStartTimer({
+    if (!checkForOverlyLoudAlert(launchedFromMenuBar)) return;
+    startTimer({
       timeInSeconds: customTimer.timeInSeconds,
       launchedFromMenuBar: launchedFromMenuBar,
       timerName: customTimer.name,
       selectedSound: customTimer.selectedSound,
     });
+    refreshTimers();
   };
 
-  const handleCreateCT = async (timer: Timer) => {
+  const handleCreateCT = (timer: Timer) => {
+    // TODO: make it possible to provide selected sound into CustomTimer
     const customTimer: CustomTimer = {
       name: timer.name,
       timeInSeconds: timer.secondsSet,
-      selectedSound: timer.selectedSound,
+      selectedSound: "default",
       showInMenuBar: true,
     };
-    try {
-      createCustomTimer(customTimer);
-      await refreshTimers();
-    } catch (error) {
-      await showError(error, { title: "Could Not Save Preset" });
-    }
+    createCustomTimer(customTimer);
+    refreshTimers();
   };
 
   const handleDeleteCT = async (ctID: string) => {
@@ -114,12 +95,8 @@ export default function useTimers() {
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     };
     if (await confirmAlert(options)) {
-      try {
-        deleteCustomTimer(ctID);
-        await refreshTimers();
-      } catch (error) {
-        await showError(error, { title: "Could Not Delete Preset" });
-      }
+      deleteCustomTimer(ctID);
+      refreshTimers();
     }
   };
 

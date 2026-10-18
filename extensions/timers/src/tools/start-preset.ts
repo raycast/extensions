@@ -14,10 +14,9 @@ export default async function (input: StartPresetToolInput): Promise<string | nu
 
   if (selectedPreset === undefined) return null;
 
-  await startTimer({
+  startTimer({
     timeInSeconds: selectedPreset.timeInSeconds,
     timerName: selectedPreset.name,
-    selectedSound: selectedPreset.selectedSound,
     launchedFromMenuBar: false,
     skipRingContinuouslyWarning: true,
   });

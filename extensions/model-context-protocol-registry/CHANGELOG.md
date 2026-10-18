@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add ppl MCP Server] - 2026-10-18
+
+- Add ppl to the official registry: a personal CRM for AI agents to look up and update contacts, log interactions, keep notes and set reminders about the people in your life. Hosted Streamable HTTP server at https://withppl.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add AffixIO MCP Server] - 2026-10-17
 
 - Add AffixIO to the official registry: generate and verify zero-knowledge proofs with post-quantum ML-DSA-65 attestations for AI agents, without exposing personal data. Hosted Streamable HTTP server at https://www.affix-io.com/mcp/ with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.

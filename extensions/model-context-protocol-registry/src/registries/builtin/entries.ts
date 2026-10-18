@@ -866,6 +866,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://posy.page/api/mcp",
   },
   {
+    name: "ppl",
+    title: "ppl",
+    description:
+      "Personal CRM for people who work with AI agents: look up and update contacts, log interactions and calls, keep notes, track birthdays, life events and gifts, and set reminders about the people in your life. About 120 tools. Hosted remote Streamable HTTP server at https://withppl.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key to paste. Free beta up to 1,000 contacts, no credit card.",
+    icon: "https://withppl.com/img/icons/ppl-app-180.png",
+    homepage: "https://withppl.com/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://withppl.com/mcp"],
+    },
+    remoteUrl: "https://withppl.com/mcp",
+  },
+  {
     name: "prisma",
     title: "Prisma",
     description:
