@@ -1,6 +1,6 @@
 # Figma Files Changelog
 
-## [Nested folders support] - {PR_MERGE_DATE}
+## [Nested folders support] - 2026-10-18
 
 - Lists files in nested folders using Figma's folders API. Requires a personal
   access token with the `folders:read` scope; the browser sign-in still lists
