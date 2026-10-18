@@ -1,4 +1,4 @@
-import { Action, ActionPanel, environment, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, environment, Icon, Keyboard, List, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { budgetChartMarkdown } from "../lib/budget-chart";
 import { BudgetForm } from "./BudgetForm";
@@ -28,6 +28,7 @@ export function BudgetDetails({
   categories: Category[];
   onSaved: (categoryId: number) => void | Promise<void>;
 }) {
+  const { pop } = useNavigation();
   const today = new Date();
   const dates = getSpendingPeriodDates(today);
   const averageDates = getAverageSpendingPeriodDates(today);
@@ -104,7 +105,11 @@ export function BudgetDetails({
       <EditCategoryAction
         category={budget.category}
         categories={categories}
-        onSaved={() => onSaved(budget.category_id)}
+        onSaved={() => {
+          // These details hold the old category, so return to the refreshed budget list, like BudgetForm does.
+          void onSaved(budget.category_id);
+          pop();
+        }}
       />
       <Action
         title="Refresh Spending"

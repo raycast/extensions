@@ -24,7 +24,8 @@ type Input = {
    */
   endDate?: string;
   /**
-   * First result page to fetch. Defaults to 1.
+   * First result page to fetch. Defaults to 1. With categoryId, pass the returned nextPage to continue an incomplete
+   * search.
    */
   page?: number;
   /**
@@ -38,9 +39,9 @@ type Input = {
  */
 export default async function tool(input: Input = {}) {
   const { categoryId, ...query } = input;
-  // The transactions endpoint has no category filter, so read the whole range (up to 10 pages) and filter here.
+  // The transactions endpoint has no category filter, so read up to 10 pages from the requested page and filter here.
   const [result, accounts] = await Promise.all([
-    fetchTransactions(categoryId === undefined ? query : { ...query, page: 1, maxPages: 10 }),
+    fetchTransactions(categoryId === undefined ? query : { ...query, maxPages: 10, filtered: true }),
     getCachedAccounts({ includeUnsupported: true }),
   ]);
   const { details } = result;
@@ -49,6 +50,9 @@ export default async function tool(input: Input = {}) {
       ? result.transactions
       : result.transactions.filter((transaction) => transaction.category_id === categoryId);
   const accountById = new Map(accounts.map((account) => [account.id, account]));
+  const startPage = query.page ?? 1;
+  const fetchedPages = Math.ceil(result.transactions.length / details.per_page);
+  const complete = (startPage - 1) * details.per_page + result.transactions.length >= details.transactions_count;
 
   return {
     page: details.page,
@@ -60,7 +64,8 @@ export default async function tool(input: Input = {}) {
         ? details.transactions_total
         : transactions.reduce((sum, transaction) => sum + transaction.amount, 0),
     ...(categoryId !== undefined && {
-      complete: result.transactions.length >= details.transactions_count,
+      complete,
+      ...(!complete && { nextPage: startPage + fetchedPages }),
     }),
     startDate: details.start_date,
     endDate: details.end_date,
