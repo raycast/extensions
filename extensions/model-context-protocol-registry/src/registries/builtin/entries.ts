@@ -384,6 +384,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://dropthehassle.com/mcp",
   },
   {
+    name: "dynamic-document-api",
+    title: "Dynamic Document API",
+    description:
+      "Render PDFs and images from saved templates plus JSON, from HTML or from Markdown, merge PDFs, and create validated e-invoices (XRechnung, EN 16931, Factur-X / ZUGFeRD). 9 tools; renders are free, watermarked test renders until a call passes `test: false`. Hosted remote Streamable HTTP server in the EU; OAuth 2.1 sign-in with dynamic client registration and PKCE, free plan, no API key to paste.",
+    icon: "https://dynamicdocumentapi.com/assets/img/icon-512.png",
+    homepage: "https://dynamicdocumentapi.com/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.dynamicdocumentapi.com/mcp"],
+    },
+    remoteUrl: "https://mcp.dynamicdocumentapi.com/mcp",
+  },
+  {
     name: "git",
     title: "Git",
     description:
