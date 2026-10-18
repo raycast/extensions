@@ -12,7 +12,7 @@ import {
   toggleTask,
 } from "../api/endpoints";
 import { EditableTask, TaskForm, TaskList, TaskWithList } from "../types";
-import { dueDay, isCompleted, todayValue } from "../utils";
+import { assignmentDetails, assignmentIcon, dueDay, isCompleted, todayValue } from "../utils";
 import AuthRecoveryView from "./AuthRecoveryView";
 import CreateTaskForm from "./CreateTaskForm";
 import EditTaskForm from "./EditTaskForm";
@@ -318,6 +318,15 @@ export default function UnifiedTaskView() {
           target={<EditTaskForm listId={task.listId} task={task} onEdit={handleEdit} />}
         />
       ) : null}
+      {task?.assignmentInfo?.linkToTask ? (
+        <Action.OpenInBrowser
+          title={`Open in ${assignmentDetails(task.assignmentInfo)?.source ?? "Source"}`}
+          icon={assignmentIcon(task.assignmentInfo)}
+          url={task.assignmentInfo.linkToTask}
+          shortcut={shortcut("o")}
+        />
+      ) : null}
+      {task?.webViewLink ? <Action.OpenInBrowser title="Open in Google Tasks" url={task.webViewLink} /> : null}
       <Action
         title={isShowingDetails ? "Hide Details" : "Show Details"}
         icon={isShowingDetails ? Icon.EyeDisabled : Icon.Eye}

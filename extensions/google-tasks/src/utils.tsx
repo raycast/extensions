@@ -1,5 +1,5 @@
 import { Color, Icon } from "@raycast/api";
-import { Task } from "./types";
+import { AssignmentInfo, Task } from "./types";
 
 export const defaultListKey = "task-default-list-v1";
 
@@ -28,4 +28,26 @@ export function getIcon(task: Task): { source: Icon; tintColor?: Color } {
     return { source: Icon.Checkmark, tintColor: Color.Green };
   }
   return { source: Icon.Circle };
+}
+
+export function assignmentDetails(info?: AssignmentInfo) {
+  if (!info) return undefined;
+  const fileId = info.driveResourceInfo?.driveFileId;
+  const resourceKey = info.driveResourceInfo?.resourceKey;
+  const spaceId = info.spaceInfo?.space?.replace(/^spaces\//, "");
+  return {
+    source: info.surfaceType === "DOCUMENT" ? "Google Docs" : info.surfaceType === "SPACE" ? "Google Chat" : "Other",
+    linkToTask: info.linkToTask,
+    fileUrl: fileId
+      ? `https://drive.google.com/open?id=${fileId}${resourceKey ? `&resourcekey=${encodeURIComponent(resourceKey)}` : ""}`
+      : undefined,
+    driveFileId: fileId,
+    resourceKey,
+    spaceUrl: spaceId ? `https://mail.google.com/chat/#chat/space/${spaceId}` : undefined,
+    space: info.spaceInfo?.space,
+  };
+}
+
+export function assignmentIcon(info?: AssignmentInfo): Icon {
+  return info?.surfaceType === "SPACE" ? Icon.SpeechBubble : Icon.Document;
 }

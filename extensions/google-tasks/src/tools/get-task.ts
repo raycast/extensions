@@ -1,3 +1,4 @@
+import { assignmentDetails } from "../utils";
 import { compactTask, requireTask } from "./shared";
 
 type Input = {
@@ -21,5 +22,7 @@ export default async function (input: Input) {
     ...compact,
     notes: task.notes ?? "",
     completed: task.completed ?? null,
+    webViewLink: task.webViewLink ?? null,
+    assignment: assignmentDetails(task.assignmentInfo) ?? null,
   };
 }

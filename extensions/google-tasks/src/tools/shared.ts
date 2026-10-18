@@ -2,7 +2,7 @@ import { LocalStorage } from "@raycast/api";
 import * as google from "../api/oauth";
 import { fetchList, fetchListPage, fetchLists } from "../api/endpoints";
 import { Task, TaskList, TaskWithList } from "../types";
-import { defaultListKey, dueDay, isCompleted, todayValue } from "../utils";
+import { assignmentDetails, defaultListKey, dueDay, isCompleted, todayValue } from "../utils";
 
 export type TaskView = "open" | "overdue" | "today" | "upcoming" | "undated" | "completed";
 
@@ -43,6 +43,7 @@ export function compactTask(task: TaskWithList) {
     due: due ?? null,
     status: completed ? "completed" : "open",
     overdue: !completed && !!due && due < today,
+    assignedFrom: assignmentDetails(task.assignmentInfo)?.source,
   };
 }
 
