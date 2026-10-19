@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Remove Datacircle MCP Server] - {PR_MERGE_DATE}
+
+- Remove Datacircle from the official registry: its MCP server at https://api.datacircle.dev/mcp no longer works.
+
 ## [Add ppl MCP Server] - 2026-10-18
 
 - Add ppl to the official registry: a personal CRM for AI agents to look up and update contacts, log interactions, keep notes and set reminders about the people in your life. Hosted Streamable HTTP server at https://withppl.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
