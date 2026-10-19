@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Local Commander MCP Server] - {PR_MERGE_DATE}
+## [Add Local Commander MCP Server] - 2026-10-19
 
 - Add Local Commander to the official registry: connect Raycast AI to Windows 11 computers you own to read approved project files and Git state, run the checks and commands you authorize, and check local services. Hosted Streamable HTTP server at https://localcmd.app/mcp with OAuth 2.0 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
