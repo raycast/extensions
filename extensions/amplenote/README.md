@@ -21,7 +21,7 @@ The server address defaults to `http://127.0.0.1:39377/mcp`. Change it in the ex
 
 ## Raycast AI
 
-Mention `@amplenote` in AI Chat to search and read notes, jot things down in your Daily Jot or any note, list tasks (open, overdue, today, upcoming, unscheduled, recently completed, or of a single note), add tasks, complete, reopen, reschedule, or reprioritize them, and create notes. Raycast asks before the extension adds tasks, changes them, or creates notes.
+Mention `@amplenote` in AI Chat to search and read notes, jot things down in your Daily Jot or any note, list tasks (open, overdue, today, upcoming, unscheduled, recently completed, or of a single note), add tasks (including tasks that repeat on a fixed schedule), complete, reopen, reschedule, or reprioritize them, and create notes. Raycast asks before the extension adds tasks, changes them, or creates notes.
 
 ## Privacy
 

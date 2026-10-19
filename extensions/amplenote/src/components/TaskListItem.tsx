@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast } fr
 import { showFailureToast } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { Note, noteAppUrl, nowSeconds, shorten, Tag, Task } from "../lib/api";
+import { describeRepeat } from "../lib/repeat";
 import { cmd } from "../lib/shortcuts";
 import { amplenote } from "../lib/amplenote";
 import { tagColor } from "../lib/tags";
@@ -93,7 +94,9 @@ export default function TaskListItem(props: {
           ? [{ icon: { source: Icon.Exclamationmark, tintColor: Color.Red }, tooltip: "Important" }]
           : []),
         ...(task.urgent ? [{ icon: { source: Icon.Alarm, tintColor: Color.Orange }, tooltip: "Urgent" }] : []),
-        ...(task.isRepeating ? [{ icon: Icon.Repeat, tooltip: "Repeating" }] : []),
+        ...(task.isRepeating
+          ? [{ icon: Icon.Repeat, tooltip: task.repeat ? describeRepeat(task.repeat) : "Repeating" }]
+          : []),
         ...(references > 0
           ? [
               {

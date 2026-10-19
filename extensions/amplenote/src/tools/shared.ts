@@ -2,6 +2,7 @@ import { Tool } from "@raycast/api";
 import { Note, noteTitle, noteUrl, Task } from "../lib/api";
 import { amplenote } from "../lib/amplenote";
 import { AmplenoteAuthError, AmplenoteTimeoutError, isConnectionError } from "../lib/mcp";
+import { describeRepeat, firstOccurrence, HideRule, hideUntilFor, normalizeRepeat } from "../lib/repeat";
 import { taskGroup, taskTitle } from "../lib/tasks";
 
 export function toIsoDate(seconds: number | null | undefined): string | null {
@@ -55,6 +56,81 @@ export function parseDate(value: string): number {
     throw new Error(`"${value}" is not a valid date. Use YYYY-MM-DD or an ISO date-time.`);
   }
   return Math.floor(date.getTime() / 1000);
+}
+
+export type ScheduleInput = { startDate?: string; repeat?: string; hideUntil?: HideRule };
+
+/**
+ * Works out when a task starts, how it repeats, and when it is hidden until, and checks the combination.
+ * Shared by the tools and their confirmations, so the confirmation shows exactly what will be saved.
+ */
+export function planSchedule(input: ScheduleInput, existingStartAt?: number | null) {
+  const given = input.startDate ? new Date(parseDate(input.startDate) * 1000) : undefined;
+  const fallback = existingStartAt ? new Date(existingStartAt * 1000) : undefined;
+  const base = given ?? fallback;
+  if (input.repeat && !base) {
+    throw new Error(
+      "A repeating task needs a start date for its first occurrence. Pass startDate (YYYY-MM-DD or an ISO date-time).",
+    );
+  }
+  if (input.hideUntil && !base) {
+    throw new Error("hideUntil is relative to the start date. Pass startDate (YYYY-MM-DD or an ISO date-time).");
+  }
+  if (input.repeat && input.hideUntil) {
+    throw new Error(
+      "hideUntil can't be combined with repeat: Amplenote's MCP would only hide the first occurrence. Leave hideUntil out for repeating tasks.",
+    );
+  }
+  const start = base && input.repeat ? firstOccurrence(base, input.repeat) : base;
+  const repeat = input.repeat && start ? normalizeRepeat(input.repeat, start) : undefined;
+  return {
+    startAt: start ? Math.floor(start.getTime() / 1000) : undefined,
+    startChanged: !!start && (!!given || start !== fallback),
+    repeat,
+    repeatText: repeat ? describeRepeat(repeat) : undefined,
+    hideUntil: input.hideUntil && start ? hideUntilFor(start, input.hideUntil) : undefined,
+  };
+}
+
+const HIDE_LABELS: Record<HideRule, string> = {
+  "day-due": "Day task is due",
+  "1-day": "1 day before due",
+  "2-days": "2 days before due",
+  "3-days": "3 days before due",
+  "1-week": "1 week before due",
+  "1-month": "1 month before due",
+};
+
+/** Confirmation rows for repeat and hide-until, built from the same plan the tool will save. */
+function formatStart(seconds: number): string {
+  return new Date(seconds * 1000).toLocaleString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  });
+}
+
+export function scheduleInfo(input: ScheduleInput, existingStartAt?: number | null) {
+  try {
+    const plan = planSchedule(input, existingStartAt);
+    // The planned start, which may differ from the request (moved to the first day the repeat rule allows).
+    const showStart = plan.startAt && (input.startDate || plan.startChanged);
+    return [
+      ...(showStart ? [{ name: "Start", value: formatStart(plan.startAt!) }] : []),
+      ...(plan.repeatText ? [{ name: "Repeats", value: plan.repeatText }] : []),
+      ...(input.hideUntil ? [{ name: "Hidden Until", value: HIDE_LABELS[input.hideUntil] }] : []),
+    ];
+  } catch {
+    // The tool itself reports invalid combinations; the confirmation just shows the raw request.
+    return [
+      ...(input.startDate ? [{ name: "Start", value: input.startDate }] : []),
+      ...(input.repeat ? [{ name: "Repeats", value: input.repeat }] : []),
+      ...(input.hideUntil ? [{ name: "Hidden Until", value: HIDE_LABELS[input.hideUntil] }] : []),
+    ];
+  }
 }
 
 export async function resolveTargetNote(noteName?: string): Promise<Note> {

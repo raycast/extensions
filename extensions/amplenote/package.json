@@ -183,7 +183,7 @@
     {
       "name": "add-task",
       "title": "Add Task",
-      "description": "Add a task to today's Daily Jot or a named note."
+      "description": "Add a task to today's Daily Jot or a named note, optionally repeating on a fixed schedule."
     },
     {
       "name": "complete-task",
@@ -198,7 +198,7 @@
     {
       "name": "update-task",
       "title": "Update Task",
-      "description": "Change a task's important or urgent flag, start date, or deadline."
+      "description": "Change a task's flags, start date, deadline, repeat schedule, or hide-until."
     },
     {
       "name": "get-daily-jot",
@@ -222,7 +222,7 @@
     }
   ],
   "ai": {
-    "instructions": "- Amplenote must be running with its MCP server turned on. If a tool says the server isn't reachable or the token was rejected, tell the user exactly that.\n- Use search-notes to find notes and get-note to read one. Never invent noteUUIDs or taskUUIDs; always take them from tool results.\n- Pass includeBacklinks to get-note when the user asks which notes mention or link to a note, such as a person or project.\n- search-tasks defaults to all open tasks. Use view=overdue, today, upcoming, or unscheduled for those groups, and view=completed for recently completed tasks.\n- add-task adds to today's Daily Jot unless the user names a note. Pass the exact note name from search-notes as noteName.\n- Use append-to-note to jot down notes, ideas, or several lines of text; it defaults to today's Daily Jot. Use add-task for a single task with dates or priority.\n- Use get-note-tasks for the tasks of one specific note; search-tasks only covers notes in task domains.\n- If add-task returns inTaskDomain: false, tell the user the task was added but will not appear in task lists until the note is added to a task domain in Amplenote. null means it could not be checked; do not mention it then.\n- Convert relative dates like \"tomorrow\" or \"next Monday\" to YYYY-MM-DD before passing startDate or deadline. If you are not sure what today is, call get-daily-jot first; it returns today's date, weekday, and time zone.\n- For questions about a Daily Jot (\"what did I jot down yesterday?\"), call get-daily-jot with daysFromToday, then get-note with its noteUUID.\n- A task is overdue when its deadline has passed. To reschedule an overdue task, move its deadline with update-task (and its startDate too if it has one).\n- complete-task can be undone with reopen-task.\n- Summarize results instead of dumping long lists or whole notes into the chat.",
+    "instructions": "- Amplenote must be running with its MCP server turned on. If a tool says the server isn't reachable or the token was rejected, tell the user exactly that.\n- Use search-notes to find notes and get-note to read one. Never invent noteUUIDs or taskUUIDs; always take them from tool results.\n- Pass includeBacklinks to get-note when the user asks which notes mention or link to a note, such as a person or project.\n- search-tasks defaults to all open tasks. Use view=overdue, today, upcoming, or unscheduled for those groups, and view=completed for recently completed tasks.\n- add-task adds to today's Daily Jot unless the user names a note. Pass the exact note name from search-notes as noteName.\n- Use append-to-note to jot down notes, ideas, or several lines of text; it defaults to today's Daily Jot. Use add-task for a single task with dates or priority.\n- Use get-note-tasks for the tasks of one specific note; search-tasks only covers notes in task domains.\n- If add-task returns inTaskDomain: false, tell the user the task was added but will not appear in task lists until the note is added to a task domain in Amplenote. null means it could not be checked; do not mention it then.\n- Convert relative dates like \"tomorrow\" or \"next Monday\" to YYYY-MM-DD before passing startDate or deadline. Before resolving any relative date (today, tomorrow, next Monday, every Monday), call get-daily-jot to get today's date, weekday, and time zone, unless the conversation already states the current date. Never guess the year.\n- For questions about a Daily Jot (\"what did I jot down yesterday?\"), call get-daily-jot with daysFromToday, then get-note with its noteUUID.\n- A task is overdue when its deadline has passed. To reschedule an overdue task, move its deadline with update-task (and its startDate too if it has one).\n- For repeating tasks (\"every Monday\", \"every 2 weeks\", \"monthly on the 1st\"), pass repeat as an RRULE such as FREQ=WEEKLY;BYDAY=MO, plus startDate with the first occurrence and time. Repeating a set time after completion isn't possible; say so and suggest setting it up in Amplenote.\n- hideUntil keeps a one-off task out of lists until shortly before it starts. Don't combine it with repeat.\n- complete-task can be undone with reopen-task.\n- Summarize results instead of dumping long lists or whole notes into the chat.",
     "evals": [
       {
         "input": "@amplenote what is overdue?",
@@ -244,7 +244,25 @@
                 "urgent": false
               }
             ]
-          }
+          },
+          "get-daily-jot": {
+            "date": "2026-10-19",
+            "weekday": "Monday",
+            "currentTime": "10:00",
+            "timeZone": "Europe/Berlin",
+            "dailyJot": {
+              "name": "October 19th, 2026",
+              "exists": true,
+              "noteUUID": "note-jot",
+              "url": "https://www.amplenote.com/notes/note-jot"
+            }
+          },
+          "list-tags": [
+            {
+              "tag": "work",
+              "noteCount": 12
+            }
+          ]
         },
         "expected": [
           {
@@ -268,6 +286,24 @@
             "noteUUID": "note-jot",
             "noteName": "October 18th, 2026",
             "content": "Call the plumber"
+          },
+          "list-tags": [
+            {
+              "tag": "work",
+              "noteCount": 12
+            }
+          ],
+          "get-daily-jot": {
+            "date": "2026-10-19",
+            "weekday": "Monday",
+            "currentTime": "10:00",
+            "timeZone": "Europe/Berlin",
+            "dailyJot": {
+              "name": "October 19th, 2026",
+              "exists": true,
+              "noteUUID": "note-jot",
+              "url": "https://www.amplenote.com/notes/note-jot"
+            }
           }
         },
         "expected": [
@@ -312,6 +348,24 @@
             "archived": false,
             "url": "https://www.amplenote.com/notes/note-homelab",
             "content": "### Plan\n\n- [ ] Migrate DNS to the new router\n- [ ] Update the README"
+          },
+          "list-tags": [
+            {
+              "tag": "work",
+              "noteCount": 12
+            }
+          ],
+          "get-daily-jot": {
+            "date": "2026-10-19",
+            "weekday": "Monday",
+            "currentTime": "10:00",
+            "timeZone": "Europe/Berlin",
+            "dailyJot": {
+              "name": "October 19th, 2026",
+              "exists": true,
+              "noteUUID": "note-jot",
+              "url": "https://www.amplenote.com/notes/note-jot"
+            }
           }
         },
         "expected": [
@@ -367,7 +421,13 @@
               "noteUUID": "note-jot",
               "url": "https://www.amplenote.com/notes/note-jot"
             }
-          }
+          },
+          "list-tags": [
+            {
+              "tag": "work",
+              "noteCount": 12
+            }
+          ]
         },
         "expected": [
           {
@@ -391,6 +451,24 @@
             "noteName": "October 18th, 2026",
             "position": "end",
             "url": "https://www.amplenote.com/notes/note-jot"
+          },
+          "list-tags": [
+            {
+              "tag": "work",
+              "noteCount": 12
+            }
+          ],
+          "get-daily-jot": {
+            "date": "2026-10-19",
+            "weekday": "Monday",
+            "currentTime": "10:00",
+            "timeZone": "Europe/Berlin",
+            "dailyJot": {
+              "name": "October 19th, 2026",
+              "exists": true,
+              "noteUUID": "note-jot",
+              "url": "https://www.amplenote.com/notes/note-jot"
+            }
           }
         },
         "expected": [
@@ -431,7 +509,13 @@
             "archived": false,
             "url": "https://www.amplenote.com/notes/note-jot-17",
             "content": "- Called the bank about the mortgage\n- [ ] Buy a birthday card for Sam"
-          }
+          },
+          "list-tags": [
+            {
+              "tag": "work",
+              "noteCount": 12
+            }
+          ]
         },
         "expected": [
           {
@@ -447,6 +531,53 @@
               "name": "get-note",
               "arguments": {
                 "noteUUID": "note-jot-17"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@amplenote remind me every Monday at 8:30 to water the plants",
+        "mocks": {
+          "get-daily-jot": {
+            "date": "2026-10-21",
+            "weekday": "Wednesday",
+            "currentTime": "10:00",
+            "timeZone": "Europe/Berlin",
+            "dailyJot": {
+              "name": "October 21st, 2026",
+              "exists": true,
+              "noteUUID": "note-jot",
+              "url": "https://www.amplenote.com/notes/note-jot"
+            }
+          },
+          "add-task": {
+            "taskUUID": "task-plants",
+            "noteUUID": "note-jot",
+            "noteName": "October 21st, 2026",
+            "content": "Water the plants",
+            "startAt": "2026-10-26T07:30:00.000Z",
+            "repeats": "Every week on Monday at 08:30",
+            "inTaskDomain": true
+          },
+          "list-tags": [
+            {
+              "tag": "work",
+              "noteCount": 12
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "add-task",
+              "arguments": {
+                "repeat": {
+                  "includes": "BYDAY=MO"
+                },
+                "startDate": {
+                  "includes": "08:30"
+                }
               }
             }
           }

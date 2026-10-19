@@ -54,6 +54,9 @@ export type NewTask = {
   deadline?: number | null;
   important?: boolean;
   urgent?: boolean;
+  /** Fixed-schedule repeat in Amplenote's "DTSTART:…\nRRULE:…" format. */
+  repeat?: string | null;
+  hideUntil?: number | null;
 };
 
 export function isInTaskDomain(domains: TaskDomain[], noteUUID: string): boolean {
@@ -277,10 +280,11 @@ export function createApi(call: ToolCaller, { dailyJotTag = "daily-jots" } = {})
             content: task.content,
             startAt: task.startAt ?? null,
             deadline: task.deadline ?? null,
-            hideUntil: null,
+            hideUntil: task.hideUntil ?? null,
             important: task.important ?? false,
             urgent: task.urgent ?? false,
-            isRepeating: false,
+            isRepeating: !!task.repeat,
+            ...(task.repeat ? { repeat: task.repeat } : {}),
           },
         })
       ).taskUUID,

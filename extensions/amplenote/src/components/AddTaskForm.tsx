@@ -27,10 +27,12 @@ import {
 } from "../lib/api";
 import { cmd } from "../lib/shortcuts";
 import { amplenote, isDailyJot } from "../lib/amplenote";
+import { buildRepeat, firstOccurrence, HideRule, hideUntilFor, RepeatPreset } from "../lib/repeat";
 import { AmplenoteTimeoutError } from "../lib/mcp";
 
 const DAILY_JOT = "daily-jot";
 const NO_DOMAIN = "none";
+const NONE = "none";
 
 type Values = {
   content: string;
@@ -38,6 +40,19 @@ type Values = {
   startAt: Date | null;
   taskDomain?: string;
 };
+
+/** The first occurrence, repeat rule, and hide-until for the form's choices. */
+function taskSchedule(start: Date | null, repeat: RepeatPreset | typeof NONE, hideRule: HideRule | typeof NONE) {
+  if (!start) return { startAt: null, repeat: null, hideUntil: null };
+  // A date picked without a time starts at 9:00, like everywhere else, instead of at midnight.
+  const timed = Form.DatePicker.isFullDay(start) ? new Date(new Date(start).setHours(9, 0, 0, 0)) : start;
+  const first = repeat === NONE ? timed : firstOccurrence(timed, buildRepeat(timed, repeat));
+  return {
+    startAt: Math.floor(first.getTime() / 1000),
+    repeat: repeat === NONE ? null : buildRepeat(first, repeat),
+    hideUntil: repeat === NONE && hideRule !== NONE ? hideUntilFor(first, hideRule) : null,
+  };
+}
 
 export default function AddTaskForm(props: {
   note?: Note;
@@ -57,6 +72,9 @@ export default function AddTaskForm(props: {
   const [important, setImportant] = useState(false);
   const [urgent, setUrgent] = useState(false);
   const [startAt, setStartAt] = useState<Date | null>(null);
+  const [repeat, setRepeat] = useState<RepeatPreset | typeof NONE>(NONE);
+  const [hideRule, setHideRule] = useState<HideRule | typeof NONE>(NONE);
+  const [scheduleError, setScheduleError] = useState<string>();
   const noteTouched = useRef(false);
 
   useEffect(() => {
@@ -123,6 +141,11 @@ export default function AddTaskForm(props: {
       setContentError("Enter a task");
       return;
     }
+    if ((repeat !== NONE || hideRule !== NONE) && !startAt) {
+      setScheduleError("Pick a start date first");
+      return;
+    }
+    const schedule = taskSchedule(startAt, repeat, hideRule);
     if (maybeAdded.current) {
       const again = await confirmAlert({
         title: "Add the task again?",
@@ -141,7 +164,9 @@ export default function AddTaskForm(props: {
       inserting = true;
       await amplenote.insertTask(noteUUID, {
         content,
-        startAt: values.startAt ? Math.floor(values.startAt.getTime() / 1000) : null,
+        startAt: schedule.startAt,
+        repeat: schedule.repeat,
+        hideUntil: schedule.hideUntil,
         important,
         urgent,
       });
@@ -302,7 +327,55 @@ export default function AddTaskForm(props: {
         </Form.Dropdown>
       ) : null}
       <Form.Separator />
-      <Form.DatePicker id="startAt" title="Start" value={startAt} onChange={setStartAt} />
+      <Form.DatePicker
+        id="startAt"
+        title="Start"
+        value={startAt}
+        onChange={(value) => {
+          setStartAt(value);
+          setScheduleError(undefined);
+        }}
+      />
+      <Form.Dropdown
+        id="repeat"
+        title="Repeat"
+        value={repeat}
+        error={repeat !== NONE ? scheduleError : undefined}
+        info="Repeats on a fixed schedule from the start date and time. Repeating after completion can only be set in Amplenote."
+        onChange={(value) => {
+          setRepeat(value as RepeatPreset | typeof NONE);
+          setScheduleError(undefined);
+        }}
+      >
+        <Form.Dropdown.Item title="Doesn't Repeat" value={NONE} icon={Icon.Minus} />
+        <Form.Dropdown.Item title="Daily" value="daily" icon={Icon.Repeat} />
+        <Form.Dropdown.Item title="Weekdays" value="weekdays" icon={Icon.Repeat} />
+        <Form.Dropdown.Item title="Weekly" value="weekly" icon={Icon.Repeat} />
+        <Form.Dropdown.Item title="Every 2 Weeks" value="biweekly" icon={Icon.Repeat} />
+        <Form.Dropdown.Item title="Monthly" value="monthly" icon={Icon.Repeat} />
+        <Form.Dropdown.Item title="Yearly" value="yearly" icon={Icon.Repeat} />
+      </Form.Dropdown>
+      {repeat === NONE ? (
+        <Form.Dropdown
+          id="hideUntil"
+          title="Hide Until"
+          value={hideRule}
+          error={hideRule !== NONE ? scheduleError : undefined}
+          info="Keeps the task out of your lists until shortly before it starts."
+          onChange={(value) => {
+            setHideRule(value as HideRule | typeof NONE);
+            setScheduleError(undefined);
+          }}
+        >
+          <Form.Dropdown.Item title="Always Show" value={NONE} />
+          <Form.Dropdown.Item title="Day Task Is Due" value="day-due" />
+          <Form.Dropdown.Item title="1 Day Before" value="1-day" />
+          <Form.Dropdown.Item title="2 Days Before" value="2-days" />
+          <Form.Dropdown.Item title="3 Days Before" value="3-days" />
+          <Form.Dropdown.Item title="1 Week Before" value="1-week" />
+          <Form.Dropdown.Item title="1 Month Before" value="1-month" />
+        </Form.Dropdown>
+      ) : null}
       <Form.Dropdown
         id="priority"
         title="Priority"
