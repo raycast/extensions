@@ -1,6 +1,6 @@
 # VocaBuilder Changelog
 
-## [More AI providers, clearer word details, and Anki export] - {PR_MERGE_DATE}
+## [More AI providers, clearer word details, and Anki export] - 2026-10-19
 
 - Translation now works with Gemini, Anthropic, OpenAI, or any server that speaks the OpenAI Chat Completions API, such as OpenRouter, Ollama, or LM Studio. With the new `Provider` preference left on Auto-Detect, the provider is recognized from your API key.
 - The `Gemini API Key` preference is now `API Key`, so Raycast asks for your key once after this update. Paste the same Gemini key to keep using Gemini.
