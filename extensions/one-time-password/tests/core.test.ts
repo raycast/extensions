@@ -92,7 +92,7 @@ test('secrets with spaces, hyphens and lowercase normalize to the canonical valu
 
 const make = (id: string, extra: Record<string, unknown> = {}) => Account.parse({ id, name: id, secret, ...extra });
 
-test('account sections: no duplicates, favourites excluded from recent, recent capped and newest first', () => {
+test('account sections: recent accounts stay in Accounts, favourites excluded from recent, recent capped and newest first', () => {
   const accounts = [
     make('a', { favorite: true, lastUsedAt: 50 }), make('b'), make('c', { lastUsedAt: 10 }), make('d', { lastUsedAt: 40 }),
     make('e', { favorite: true }), make('f', { lastUsedAt: 30 }), make('g', { lastUsedAt: 20 }), make('h', { lastUsedAt: 60 }),
@@ -104,12 +104,11 @@ test('account sections: no duplicates, favourites excluded from recent, recent c
   assert.deepEqual(all.map((section) => [section.title, ids(section.items), section.reorderable]), [
     ['Favourites', ['a', 'e'], true],
     ['Recent', ['h', 'd', 'f', 'g', 'c'], false],
-    ['Accounts', ['b', 'i', 'j'], true],
+    ['Accounts', ['b', 'c', 'd', 'f', 'g', 'h', 'i', 'j'], true],
   ]);
   assert.equal(RECENT_LIMIT, 5);
-  const flat = all.flatMap((section) => ids(section.items));
-  assert.equal(flat.length, accounts.length);
-  assert.equal(new Set(flat).size, accounts.length);
+  const listed = all.filter((section) => section.reorderable).flatMap((section) => ids(section.items));
+  assert.deepEqual([...listed].sort(), ids(accounts).sort());
   assert.deepEqual(groupAccounts(accounts, 'favorites').map((section) => [ids(section.items), section.reorderable]), [[['a', 'e'], true]]);
   assert.deepEqual(groupAccounts(accounts, 'recent').map((section) => [ids(section.items), section.reorderable]), [[['h', 'a', 'd', 'f', 'g', 'c', 'i'], false]]);
   assert.deepEqual(ids(accounts), before);

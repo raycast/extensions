@@ -269,7 +269,8 @@ export type AccountSection = { title: string; items: Account[]; reorderable: boo
 
 export const RECENT_LIMIT = 5;
 
-// Each account lands in exactly one section; only manually ordered sections can be reordered.
+// Recent is a shortcut: its accounts keep their place under Accounts too, so using a code never moves an account.
+// Only manually ordered sections can be reordered.
 export function groupAccounts(accounts: Account[], filter: AccountFilter = 'all'): AccountSection[] {
   const favourites = accounts.filter((account) => account.favorite);
   const used = accounts
@@ -282,11 +283,10 @@ export function groupAccounts(accounts: Account[], filter: AccountFilter = 'all'
     sections = [{ title: 'Recently Used', items: used, reorderable: false }];
   } else {
     const recent = used.filter((account) => !account.favorite).slice(0, RECENT_LIMIT);
-    const taken = new Set(recent);
     sections = [
       { title: 'Favourites', items: favourites, reorderable: true },
       { title: 'Recent', items: recent, reorderable: false },
-      { title: 'Accounts', items: accounts.filter((a) => !a.favorite && !taken.has(a)), reorderable: true },
+      { title: 'Accounts', items: accounts.filter((account) => !account.favorite), reorderable: true },
     ];
   }
   return sections.filter((section) => section.items.length);

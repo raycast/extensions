@@ -4,7 +4,7 @@ import { accountLabel, findBestAccount } from './model';
 import { getAccounts, setLastUsedAccountId } from './store';
 import { generateToken } from './totp';
 
-export default async function Command(props: LaunchProps<{ arguments: { query: string } }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.PasteOtp }>) {
   const query = props.arguments.query?.trim() ?? '';
   const account = findBestAccount(await getAccounts(), query);
   if (!account) {

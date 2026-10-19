@@ -33,15 +33,13 @@ import { initials } from './services';
 import { codeTile } from './code-tile';
 import { RearrangeAccounts } from './rearrange';
 
-type Preferences = { passwordVisibility?: boolean; primaryAction?: 'copy' | 'paste' };
-
 // Scanning runs as its own no-view command so the Raycast window is closed before the screen is captured.
 function scanQr(mode: 'scan' | 'select') {
   return launchCommand({ name: 'scan-qr-code', type: LaunchType.UserInitiated, context: { mode } });
 }
 
 export default function Command(props: LaunchProps) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.OneTimePassword>();
   const navigation = useNavigation();
   const [accounts, setAccounts] = useState<store.Account[]>([]);
   const [loading, setLoading] = useState(true);
@@ -305,6 +303,9 @@ export default function Command(props: LaunchProps) {
   }
   const orderOf = (group: AccountSection) =>
     group.reorderable && !searchText ? group.items.map((account) => account.id) : undefined;
+  // Recent repeats accounts that are also listed under Accounts, and item ids must be unique.
+  const itemId = (group: AccountSection, account: store.Account) =>
+    group.reorderable ? account.id : `${group.title}:${account.id}`;
   const remainingOf = (account: store.Account) => account.period - (Math.floor(now / 1000) % account.period);
   const keywords = (account: store.Account) => [account.name, account.issuer ?? '', ...account.name.split(/[@.\s_-]+/)];
   const filterItems: Array<[string, AccountFilter, Icon]> = [
@@ -313,7 +314,7 @@ export default function Command(props: LaunchProps) {
     ['Recent', 'recent', Icon.Clock],
   ];
   const emptyIcon = accounts.length ? Icon.MagnifyingGlass : Icon.Key;
-  const emptyActions = <ActionPanel>{accounts.length ? globalActions : addActions}</ActionPanel>;
+  const emptyActions = <ActionPanel>{globalActions}</ActionPanel>;
   const searchProps = {
     isLoading: loading,
     searchText,
@@ -340,8 +341,8 @@ export default function Command(props: LaunchProps) {
           <Grid.Section key={group.title} title={group.title} subtitle={String(group.items.length)}>
             {group.items.map((account) => (
               <Grid.Item
-                key={account.id}
-                id={account.id}
+                key={itemId(group, account)}
+                id={itemId(group, account)}
                 content={codeTile({
                   title: accountLabel(account),
                   subtitle: account.issuer ? account.name : undefined,
@@ -380,8 +381,8 @@ export default function Command(props: LaunchProps) {
             const code = codeOf(account);
             return (
               <List.Item
-                key={account.id}
-                id={account.id}
+                key={itemId(group, account)}
+                id={itemId(group, account)}
                 title={accountLabel(account)}
                 subtitle={account.issuer ? account.name : undefined}
                 icon={accountIcon(account)}

@@ -99,3 +99,19 @@ test('records the original extension saved unvalidated neither hide other accoun
   assert.deepEqual(saved.slice(2), unreadable);
   assert.equal((await store.getAccounts())[0].favorite, true);
 });
+
+test('accounts the original extension saved twice under one id each stay separate', async () => {
+  values.clear();
+  // The original id was a hash of the name and key, and the same account could be added more than once.
+  const copy = { id: 'hash', name: 'Twice', secret };
+  values.set('one-time-password-accounts', JSON.stringify([copy, { id: 'other', name: 'Other', secret }, copy]));
+  const ids = async () => (await store.getAccounts()).map((account) => account.id);
+  const first = await ids();
+  assert.equal(new Set(first).size, 3);
+  assert.deepEqual(await ids(), first);
+  await store.setOrder([first[2], first[0]]);
+  assert.deepEqual(await ids(), [first[2], first[1], first[0]]);
+  await store.removeAccount(first[0]);
+  assert.deepEqual(await ids(), [first[2], first[1]]);
+  assert.equal(JSON.parse(values.get('one-time-password-accounts')!).length, 2);
+});

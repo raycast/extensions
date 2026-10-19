@@ -16,7 +16,7 @@ function initialsIcon(account: Pick<Account, 'issuer' | 'name'>): Image.Fallback
 }
 
 function logoDomain(account: Pick<Account, 'issuer'>): string | undefined {
-  return getPreferenceValues<{ showLogos?: boolean }>().showLogos === false ? undefined : serviceDomain(account.issuer);
+  return getPreferenceValues<Preferences>().showLogos === false ? undefined : serviceDomain(account.issuer);
 }
 
 // Only the service's domain is sent to the favicon provider chosen in Raycast settings, never account details.

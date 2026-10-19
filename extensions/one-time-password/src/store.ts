@@ -31,8 +31,25 @@ function parseRecord(record: unknown): Account | undefined {
   }
 }
 
+// The original extension derived ids from the name and key, so an account added twice shares one id. Later copies
+// get an id derived from it, which stays the same between reads and is saved with the next change.
+function withUniqueIds(accounts: Account[]): Account[] {
+  const taken = new Set(accounts.map((account) => account.id));
+  const seen = new Set<string>();
+  for (const account of accounts) {
+    if (seen.has(account.id)) {
+      let copy = 2;
+      while (taken.has(`${account.id}-${copy}`)) copy++;
+      account.id = `${account.id}-${copy}`;
+      taken.add(account.id);
+    }
+    seen.add(account.id);
+  }
+  return accounts;
+}
+
 async function readAccounts(): Promise<Account[]> {
-  return (await readRecords()).flatMap((record) => parseRecord(record) ?? []);
+  return withUniqueIds((await readRecords()).flatMap((record) => parseRecord(record) ?? []));
 }
 
 // Earlier versions saved names and keys without validating them. Records that can't be read are skipped so they

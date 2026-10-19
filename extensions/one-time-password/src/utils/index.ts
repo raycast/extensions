@@ -82,7 +82,9 @@ const IMAGE_FILE = /\.(png|jpe?g|gif|bmp|tiff?)$/i;
 // A copied otpauth:// link, a copied image file, or copied image data (e.g. a screenshot).
 export async function readDataFromClipboard(): Promise<string | undefined> {
   const { text, file } = await Clipboard.read();
-  if (SETUP_LINK.test(text.trim())) return text.trim();
+  // Typed as always present, but guarded so a clipboard holding only an image still reaches the image readers.
+  const link = text?.trim() ?? '';
+  if (SETUP_LINK.test(link)) return link;
   if (file) {
     const path = file.startsWith('file://') ? fileURLToPath(file) : file;
     return IMAGE_FILE.test(path) ? extractQRCodeFromImage(path).catch(() => undefined) : undefined;

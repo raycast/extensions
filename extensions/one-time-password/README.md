@@ -30,7 +30,7 @@ Generate time-based one-time passwords without leaving Raycast. Copy or paste a 
 | ⏱️ **Per-Account Countdown** | Each account counts down on its own period, turning red at 5 seconds |
 | ⭐ **Favourites**            | Pin important accounts to the top and filter by favourites           |
 | ↕️ **Your Own Order**        | Rearrange accounts by picking one up and dropping it in a new place  |
-| 🕘 **Recents**               | The last 5 used accounts sit above the rest, with a dedicated filter |
+| 🕘 **Recents**               | The last 5 used accounts also show at the top, with their own filter |
 | 📋 **Copy & Paste**          | Copy or paste the current code, or copy the next one ahead of time   |
 | 👤 **Copy Username**         | Copy the account's username or email to fill in the login form       |
 | ⚡ **Paste OTP**             | Type part of a service name and the matching code is pasted          |

@@ -5,7 +5,7 @@
 ### Added
 
 - SHA-256 and SHA-512, 7- and 8-digit codes, and periods other than 30 seconds, validated throughout display, copy, paste, URI and QR import.
-- Favourites, a Recent filter, and the last five used accounts listed above the rest.
+- Favourites, a Recent filter, and the last five used accounts repeated at the top of the list.
 - Rearrange Accounts: pick an account up with ↵ and drop it in a new place. Move Up/Down (Left/Right in the grid) and Move to Top/Bottom keep each section's order separate.
 - A grid view with service logos, the code in large type and a countdown ring.
 - "Scan OTP QR Code", a no-view command that reads the screen, then a copied link or screenshot, then offers region select. It saves the account and copies its first code in one step.

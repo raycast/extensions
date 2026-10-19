@@ -1,8 +1,6 @@
 import { Clipboard, getPreferenceValues } from '@raycast/api';
 import { spawn } from 'child_process';
 
-type Preferences = { clearClipboardAfter?: string };
-
 const MAC_CLEAR = 'sleep "$OTP_DELAY"; [ "$(/usr/bin/pbpaste)" = "$OTP_VALUE" ] && /usr/bin/pbcopy < /dev/null';
 const WINDOWS_CLEAR =
   'Start-Sleep -Seconds $env:OTP_DELAY; if ((Get-Clipboard -Raw) -ceq $env:OTP_VALUE) { Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Clipboard]::Clear() }';
