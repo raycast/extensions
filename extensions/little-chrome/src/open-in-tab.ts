@@ -6,6 +6,10 @@ export default async function Command() {
     const id = await frontChromeWindowId();
     const little = await littleWindowIds();
     if (!id || !little.has(id)) return showHUD("Little Chrome window is not focused");
+    // App windows always have exactly one tab; never close a window holding more.
+    if ((await osascript(`tell application "${CHROME}" to count tabs of window id ${id}`)) !== "1") {
+      return showHUD("Little Chrome window is not focused");
+    }
 
     const target = (await windowIds()).find((w) => w !== id && !little.has(w));
     await osascript(`tell application "${CHROME}"

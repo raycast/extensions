@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { closeMainWindow, LocalStorage } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -17,12 +17,19 @@ export async function windowIds(): Promise<string[]> {
 }
 
 // Returns the id of Chrome's front window, or undefined when Chrome is not the frontmost app.
+// Launched from Raycast's search, Raycast is still frontmost, so hide it and wait for focus to return.
 export async function frontChromeWindowId(): Promise<string | undefined> {
-  const out =
-    await osascript(`tell application "System Events" to set frontApp to name of first application process whose frontmost is true
-    if frontApp is not "${CHROME}" then return ""
-    tell application "${CHROME}" to return id of front window`);
-  return out || undefined;
+  await closeMainWindow();
+  for (let i = 0; i < 20; i++) {
+    const out =
+      await osascript(`tell application "System Events" to set frontApp to name of first application process whose frontmost is true
+      if frontApp is "Raycast" then return "raycast"
+      if frontApp is not "${CHROME}" then return ""
+      tell application "${CHROME}" to return id of front window`);
+    if (out !== "raycast") return out || undefined;
+    await new Promise((r) => setTimeout(r, 50));
+  }
+  return undefined;
 }
 
 // Chrome's AppleScript can't tell app windows from normal ones, so remember the ones we opened.

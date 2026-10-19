@@ -31,6 +31,12 @@
       "title": "Open Little Chrome in Tab",
       "description": "Move the focused Little Chrome window into a tab of a normal Chrome window",
       "mode": "no-view"
+    },
+    {
+      "name": "manage-hidden",
+      "title": "Manage Hidden Suggestions",
+      "description": "List suggestions hidden from Open Little Chrome and unhide them",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -40,7 +46,8 @@
       "description": "Initial window width in pixels",
       "type": "textfield",
       "required": false,
-      "default": "900"
+      "default": "900",
+      "placeholder": "900"
     },
     {
       "name": "height",
@@ -48,7 +55,8 @@
       "description": "Initial window height in pixels",
       "type": "textfield",
       "required": false,
-      "default": "700"
+      "default": "700",
+      "placeholder": "700"
     }
   ],
   "dependencies": {
