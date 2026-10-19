@@ -1,16 +1,19 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { deletePreset, getStatus, moveTo, Position, Preset, PRESET_SLOTS } from "./api";
+import { deletePreset, forgetMount, getStatus, moveTo, Position, Preset, PRESET_SLOTS } from "./api";
+import { connection } from "./connection";
+import { connectionColor } from "./connection-color";
 import { describe } from "./format";
 import PresetForm from "./preset-form";
 
 const wall: Position = { distance: 0, rotation: 0 };
 
 export default function Command() {
-  const { data, isLoading, revalidate } = useCachedPromise(getStatus, [], {
+  const { data, isLoading, error, revalidate } = useCachedPromise(getStatus, [], {
     failureToastOptions: { title: "Could not read the MotionMount" },
   });
   const presets = data?.presets ?? [];
+  const status = connection({ isLoading, error });
 
   async function remove(preset: Preset) {
     const confirmed = await confirmAlert({
@@ -40,9 +43,34 @@ export default function Command() {
   );
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search presets">
-      <List.Section title={data ? `Now: ${describe(data.position)}` : undefined}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search presets" selectedItemId="wall">
+      <List.Item
+        title="Current Position"
+        subtitle={status.state === "failed" ? status.message : data && describe(data.position)}
+        icon={Icon.Bluetooth}
+        accessories={[{ tag: { value: status.title, color: connectionColor[status.state] } }]}
+        actions={
+          <ActionPanel>
+            {status.state === "failed" && (
+              <>
+                <Action title="Try Again" icon={Icon.RotateClockwise} onAction={revalidate} />
+                <Action
+                  title="Forget Saved MotionMount"
+                  icon={Icon.Trash}
+                  onAction={async () => {
+                    await forgetMount();
+                    revalidate();
+                  }}
+                />
+              </>
+            )}
+            {saveCurrent}
+          </ActionPanel>
+        }
+      />
+      <List.Section title="Presets">
         <List.Item
+          id="wall"
           title="Wall"
           subtitle={describe(wall)}
           icon={Icon.ArrowCounterClockwise}

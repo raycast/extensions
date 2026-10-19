@@ -29,5 +29,6 @@ Tested with the **MotionMount NEXT 7355**. Other models that use the same Blueto
 ## Troubleshooting
 
 - **MotionMount not found**: close the official app on your phone, since the mount accepts only one Bluetooth connection at a time.
+- **You replaced your MotionMount**: the extension only connects to the mount it found first, so it never moves a neighbor's TV by mistake. Use **Forget Saved MotionMount** to connect to the new one.
 - **The TV stops before reaching its position**: this can happen after a lot of movement in a short time. Let the mount rest for a while and avoid running diagnostics repeatedly.
 - **The MotionMount is in bootloader mode**: the mount is waiting for a firmware update. Power cycle it and, if that does not help, update its firmware with the official app.

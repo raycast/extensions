@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Diagnostics, getDiagnostics, startDiagnostics } from "./api";
 
 const POLL_INTERVAL_MS = 2000;
+const MAX_FAILED_POLLS = 3;
 
 const intro = `# Diagnostics
 
@@ -16,7 +17,9 @@ function progressBar(step: number, total: number) {
   return "▓".repeat(filled) + "░".repeat(20 - filled);
 }
 
-function markdown(diagnostics?: Diagnostics) {
+function markdown(diagnostics?: Diagnostics, lostContact?: string) {
+  if (lostContact)
+    return `# Lost contact with your MotionMount\n\n${lostContact}\n\nThe diagnostics may still be running on the mount. Check again once it is within Bluetooth range.`;
   if (!diagnostics) return intro;
   switch (diagnostics.status) {
     case "running":
@@ -30,23 +33,34 @@ function markdown(diagnostics?: Diagnostics) {
 
 export default function Command() {
   const [diagnostics, setDiagnostics] = useState<Diagnostics>();
+  const [lostContact, setLostContact] = useState<string>();
+  const failedPolls = useRef(0);
 
   useEffect(() => {
-    if (diagnostics?.status !== "running") return;
+    if (diagnostics?.status !== "running" || lostContact) return;
     let cancelled = false;
     const timer = setTimeout(async () => {
       try {
         const next = await getDiagnostics();
+        failedPolls.current = 0;
         if (!cancelled) setDiagnostics(next);
-      } catch {
-        if (!cancelled) setDiagnostics({ ...diagnostics });
+      } catch (error) {
+        if (cancelled) return;
+        failedPolls.current += 1;
+        if (failedPolls.current >= MAX_FAILED_POLLS) setLostContact((error as Error).message);
+        else setDiagnostics({ ...diagnostics });
       }
     }, POLL_INTERVAL_MS);
     return () => {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [diagnostics]);
+  }, [diagnostics, lostContact]);
+
+  function checkAgain() {
+    failedPolls.current = 0;
+    setLostContact(undefined);
+  }
 
   async function start() {
     const confirmed = await confirmAlert({
@@ -63,17 +77,23 @@ export default function Command() {
     }
   }
 
-  const isRunning = diagnostics?.status === "running";
+  const isRunning = diagnostics?.status === "running" && !lostContact;
 
   return (
     <Detail
       isLoading={isRunning}
-      markdown={markdown(diagnostics)}
+      markdown={markdown(diagnostics, lostContact)}
       actions={
-        !isRunning && (
+        lostContact ? (
           <ActionPanel>
-            <Action title="Start Diagnostics" icon={Icon.Heartbeat} onAction={start} />
+            <Action title="Check Again" icon={Icon.RotateClockwise} onAction={checkAgain} />
           </ActionPanel>
+        ) : (
+          !isRunning && (
+            <ActionPanel>
+              <Action title="Start Diagnostics" icon={Icon.Heartbeat} onAction={start} />
+            </ActionPanel>
+          )
         )
       }
     />

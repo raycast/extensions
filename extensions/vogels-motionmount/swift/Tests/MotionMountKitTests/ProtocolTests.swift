@@ -7,6 +7,11 @@ import Testing
     #expect(position == Position(distance: 95, rotation: -88))
 }
 
+@Test func rejectsTruncatedPositionReadsInsteadOfCrashingTheCommand() {
+    #expect(Position(distance: Data(), rotation: Data([0x00, 0x00])) == nil)
+    #expect(Position(distance: Data([0x00, 0x5f]), rotation: Data([0xff])) == nil)
+}
+
 @Test func encodesTargetAsBigEndianDistanceThenRotationLikeTheOfficialApp() {
     #expect(Position(distance: 95, rotation: -86).encoded == Data([0x00, 0x5f, 0xff, 0xaa]))
 }

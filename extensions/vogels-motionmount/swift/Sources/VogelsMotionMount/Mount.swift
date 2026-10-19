@@ -7,6 +7,7 @@ struct MountError: LocalizedError, CustomStringConvertible {
     var errorDescription: String? { description }
 
     static let notFound = MountError(description: "MotionMount not found. Make sure it is powered on and within Bluetooth range.")
+    static let rememberedNotFound = MountError(description: "Your MotionMount was not found. Make sure it is powered on, within Bluetooth range and not connected to the official app. If you replaced it, use Forget Saved MotionMount.")
     static let unauthorized = MountError(description: "Raycast needs Bluetooth access. Enable it in System Settings → Privacy & Security → Bluetooth.")
     static let poweredOff = MountError(description: "Bluetooth is turned off.")
     static let unsupportedHardware = MountError(description: "This Mac does not support Bluetooth LE.")
@@ -14,6 +15,7 @@ struct MountError: LocalizedError, CustomStringConvertible {
     static let unsupportedModel = MountError(description: "This MotionMount model is not supported. Only the NEXT 7355 has been tested.")
     static let noFreeSlot = MountError(description: "All 10 preset slots are in use. Delete a preset first.")
     static let disconnected = MountError(description: "The MotionMount disconnected unexpectedly.")
+    static let invalidResponse = MountError(description: "The MotionMount sent an unexpected response. Try again.")
 }
 
 enum Characteristic {
@@ -83,7 +85,9 @@ final class Mount: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, @un
             queue.async {
                 self.connecting = continuation
                 self.central = CBCentralManager(delegate: self, queue: self.queue)
-                self.queue.asyncAfter(deadline: .now() + 15) { self.finishConnecting(MountError.notFound) }
+                self.queue.asyncAfter(deadline: .now() + 15) {
+                    self.finishConnecting(self.rememberedID == nil ? MountError.notFound : MountError.rememberedNotFound)
+                }
             }
         }
     }
@@ -142,7 +146,7 @@ final class Mount: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, @un
     }
 
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi: NSNumber) {
-        guard self.peripheral == nil else { return }
+        guard self.peripheral == nil, rememberedID == nil || peripheral.identifier == rememberedID else { return }
         connect(peripheral, with: central)
     }
 

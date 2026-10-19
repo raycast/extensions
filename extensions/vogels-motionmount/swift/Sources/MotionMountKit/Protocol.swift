@@ -9,7 +9,8 @@ public struct Position: Equatable, Codable, Sendable {
         self.rotation = rotation
     }
 
-    public init(distance: Data, rotation: Data) {
+    public init?(distance: Data, rotation: Data) {
+        guard distance.count >= 2, rotation.count >= 2 else { return nil }
         self.init(distance: Self.int16(distance), rotation: Self.int16(rotation))
     }
 

@@ -17,10 +17,10 @@ struct Diagnostics: Encodable {
 
 @raycast func getStatus(deviceID: String) async throws -> Status {
     try await Mount.session(deviceID: deviceID) { mount in
-        let position = Position(
+        guard let position = Position(
             distance: try await mount.read(Characteristic.distance),
             rotation: try await mount.read(Characteristic.rotation)
-        )
+        ) else { throw MountError.invalidResponse }
         return Status(deviceID: mount.deviceID, position: position, presets: try await mount.readPresets())
     }
 }

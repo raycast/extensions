@@ -19,6 +19,8 @@ export async function getStatus(): Promise<Status> {
   return status;
 }
 
+export const forgetMount = () => LocalStorage.removeItem(DEVICE_KEY);
+
 export const goTo = async ({ distance, rotation }: Position): Promise<Position> =>
   swift.goTo(await deviceID(), distance, rotation);
 export const addPreset = async (name: string, { distance, rotation }: Position): Promise<Preset> =>

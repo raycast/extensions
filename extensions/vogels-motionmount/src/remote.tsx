@@ -1,7 +1,9 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useRef, useState } from "react";
-import { getStatus, goTo } from "./api";
+import { forgetMount, getStatus, goTo } from "./api";
+import { Connection, connection } from "./connection";
+import { connectionColor } from "./connection-color";
 import { describe, Direction, nudge, Position } from "./format";
 import Move from "./move";
 
@@ -17,7 +19,8 @@ function rotationMeter(rotation: number) {
   return Array.from({ length: WIDTH + 1 }, (_, i) => (i === marker ? "●" : i === WIDTH / 2 ? "┃" : "─")).join("");
 }
 
-function markdown(position: Position | undefined, isReady: boolean) {
+function markdown(position: Position | undefined, isReady: boolean, status: Connection) {
+  if (status.state === "failed") return `# Could not reach your MotionMount\n\n${status.message}`;
   if (!position) return "# Connecting to your MotionMount…";
   return [
     `# ${describe(position)}`,
@@ -28,7 +31,7 @@ function markdown(position: Position | undefined, isReady: boolean) {
 }
 
 export default function Command() {
-  const { data, isLoading } = useCachedPromise(getStatus, [], {
+  const { data, isLoading, error, revalidate } = useCachedPromise(getStatus, [], {
     failureToastOptions: { title: "Could not read the MotionMount" },
   });
   const [target, setTarget] = useState<Position>();
@@ -36,7 +39,8 @@ export default function Command() {
   const pending = useRef<Position | undefined>(undefined);
   const sending = useRef(false);
   const position = target ?? data?.position;
-  const isReady = target !== undefined || (data !== undefined && !isLoading);
+  const status = connection({ isLoading, error });
+  const isReady = target !== undefined || (data !== undefined && status.state === "connected");
 
   async function send(next: Position) {
     pending.current = next;
@@ -49,6 +53,9 @@ export default function Command() {
       try {
         await goTo(current);
       } catch (error) {
+        pending.current = undefined;
+        setTarget(undefined);
+        revalidate();
         await showFailureToast(error, { title: "Could not move the MotionMount" });
       }
     }
@@ -72,52 +79,75 @@ export default function Command() {
   return (
     <Detail
       isLoading={isLoading || isMoving}
-      markdown={markdown(position, isReady)}
+      markdown={markdown(position, isReady, status)}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.TagList title="MotionMount">
+            <Detail.Metadata.TagList.Item text={status.title} color={connectionColor[status.state]} />
+          </Detail.Metadata.TagList>
+          {position && <Detail.Metadata.Label title="Distance" text={String(position.distance)} />}
+          {position && <Detail.Metadata.Label title="Rotation" text={String(position.rotation)} />}
+        </Detail.Metadata>
+      }
       actions={
-        position &&
-        isReady && (
+        status.state === "failed" && target === undefined ? (
           <ActionPanel>
-            <ActionPanel.Section>
-              <Action
-                title="Extend"
-                icon={Icon.ArrowUp}
-                shortcut={{ modifiers: ["cmd"], key: "arrowUp" }}
-                onAction={() => move("extend")}
-              />
-              <Action
-                title="Retract"
-                icon={Icon.ArrowDown}
-                shortcut={{ modifiers: ["cmd"], key: "arrowDown" }}
-                onAction={() => move("retract")}
-              />
-              <Action
-                title="Turn Left"
-                icon={Icon.ArrowLeft}
-                shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
-                onAction={() => move("left")}
-              />
-              <Action
-                title="Turn Right"
-                icon={Icon.ArrowRight}
-                shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
-                onAction={() => move("right")}
-              />
-            </ActionPanel.Section>
-            <ActionPanel.Section>
-              <Action
-                title="Move to Wall"
-                icon={Icon.ArrowCounterClockwise}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
-                onAction={moveToWall}
-              />
-              <Action.Push
-                title="Enter Exact Position"
-                icon={Icon.Pencil}
-                shortcut={Keyboard.Shortcut.Common.Edit}
-                target={<Move position={position} />}
-              />
-            </ActionPanel.Section>
+            <Action title="Try Again" icon={Icon.RotateClockwise} onAction={revalidate} />
+            <Action
+              title="Forget Saved MotionMount"
+              icon={Icon.Trash}
+              onAction={async () => {
+                await forgetMount();
+                revalidate();
+              }}
+            />
           </ActionPanel>
+        ) : (
+          position &&
+          isReady && (
+            <ActionPanel>
+              <ActionPanel.Section>
+                <Action
+                  title="Extend"
+                  icon={Icon.ArrowUp}
+                  shortcut={{ modifiers: ["cmd"], key: "arrowUp" }}
+                  onAction={() => move("extend")}
+                />
+                <Action
+                  title="Retract"
+                  icon={Icon.ArrowDown}
+                  shortcut={{ modifiers: ["cmd"], key: "arrowDown" }}
+                  onAction={() => move("retract")}
+                />
+                <Action
+                  title="Turn Left"
+                  icon={Icon.ArrowLeft}
+                  shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
+                  onAction={() => move("left")}
+                />
+                <Action
+                  title="Turn Right"
+                  icon={Icon.ArrowRight}
+                  shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+                  onAction={() => move("right")}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action
+                  title="Move to Wall"
+                  icon={Icon.ArrowCounterClockwise}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                  onAction={moveToWall}
+                />
+                <Action.Push
+                  title="Enter Exact Position"
+                  icon={Icon.Pencil}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
+                  target={<Move position={position} />}
+                />
+              </ActionPanel.Section>
+            </ActionPanel>
+          )
         )
       }
     />
