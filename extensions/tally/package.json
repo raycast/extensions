@@ -2,62 +2,47 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tally",
   "title": "Tally",
-  "description": "Tally is the simplest way to create forms, for free.",
-  "icon": "tally.png",
-  "author": "xmok",
+  "description": "Track attendance and copy Excel-compatible tables and template notes.",
+  "icon": "tally-icon.png",
+  "author": "spannmicah",
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "api_token",
-      "title": "API Token",
-      "description": "API Token from Tally Settings",
-      "type": "password",
-      "required": true,
-      "placeholder": "tly-XXX...xxx"
-    }
-  ],
+  "categories": ["Productivity"],
   "commands": [
     {
-      "name": "forms",
-      "title": "Forms",
-      "subtitle": "Tally",
-      "description": "View Forms and Submissions",
-      "mode": "view"
+      "name": "template",
+      "title": "Template",
+      "description": "Create and select attendance markdown templates",
+      "mode": "view",
+      "icon": "tally-icon.png"
     },
     {
-      "name": "workspaces",
-      "title": "Workspaces",
-      "subtitle": "Tally",
-      "description": "View and Rename Workspaces",
-      "mode": "view"
+      "name": "attendance",
+      "title": "Check In",
+      "description": "Track attendance and copy Excel-compatible tables",
+      "mode": "view",
+      "icon": "tally-icon.png"
     }
   ],
-  "platforms": [
-    "macOS",
-    "Windows"
-  ],
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "publish": "ray publish",
+    "bundle": "ray bundle"
+  },
   "dependencies": {
-    "@raycast/api": "^1.102.6",
-    "@raycast/utils": "^2.2.1"
+    "@raycast/api": "latest",
+    "react": "^19.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "latest",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
   },
-  "scripts": {
-    "build": "ray build",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
-  },
-  "overrides": {
-    "brace-expansion": "5.0.9",
-    "js-yaml@4": "4.3.2"
-  }
+  "type": "module",
+  "platforms": ["macOS", "Windows"]
 }

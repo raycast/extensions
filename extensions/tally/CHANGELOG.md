@@ -1,5 +1,11 @@
 # Tally Changelog
 
+## [Attendance templates] - {PR_MERGE_DATE}
+
+- add reusable attendance templates with separate rosters
+- preserve the selected template when Check In is reopened
+- add headings, notes, default times, backups, and spreadsheet-friendly copying
+
 ## [Paginate Submissions] - 2026-07-18
 
 - submissions are now paginated
