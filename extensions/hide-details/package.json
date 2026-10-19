@@ -92,9 +92,9 @@
     },
     {
       "name": "blurFaces",
-      "title": "Face Redaction (Windows)",
+      "title": "Face Redaction",
       "label": "Blur Faces",
-      "description": "On Windows, use smooth blur for detected faces while keeping the selected Redaction Style for text. Requires Faces in What to Hide. Blur can retain recognizable details.",
+      "description": "Use smooth blur for detected faces while keeping the selected Redaction Style for text. Requires Faces in What to Hide. Blur can retain recognizable details.",
       "type": "checkbox",
       "required": false,
       "default": false

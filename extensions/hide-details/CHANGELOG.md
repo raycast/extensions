@@ -3,7 +3,7 @@
 ## [Windows Scan Fix and Face Blur] - {PR_MERGE_DATE}
 
 - Fix a PowerShell parsing error that prevented Windows scans and clipboard operations from starting.
-- Add a **Blur Faces** preference on Windows to blur detected faces while keeping the selected redaction style for text. It is off by default and requires **Faces** to be enabled in **What to Hide**.
+- Add a **Blur Faces** preference on macOS and Windows to blur detected faces while keeping the selected redaction style for text. It is off by default and requires **Faces** to be enabled in **What to Hide**.
 - Keep overlapping text masks covered when face blur is enabled.
 
 ## [Windows Support and Clipboard History] - 2026-10-19
