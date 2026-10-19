@@ -265,13 +265,14 @@ function setupView(st: LanternStatus, ctx: Ctx, refresh: () => void) {
     );
   }
   if (st.model_download?.running) {
-    const approx = Math.max(st.model_download.approx_mb ?? 1200, 1);
-    const got = Math.min(st.model_download.downloaded_mb ?? 0, approx);
+    // the exact size of the model being downloaded (decimal MB); older Lanterns give only an estimate
+    const total = Math.max(st.model_download.size_mb ?? st.model_download.approx_mb ?? 1266, 1);
+    const got = Math.min(st.model_download.downloaded_mb ?? 0, total);
     return (
       <List.EmptyView
         icon={Icon.Download}
         title="Lantern is downloading its models"
-        description={`${got} / ~${approx} MB. You can search here as soon as it is done.`}
+        description={`${got} / ${total} MB. You can search here as soon as it is done.`}
         actions={openLantern}
       />
     );

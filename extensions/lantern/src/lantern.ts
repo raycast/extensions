@@ -48,7 +48,7 @@ export function call<T>(method: string, params: Record<string, unknown>, timeout
 /** What the extension needs from Lantern's status to explain itself (service/core.py api_status). */
 export interface LanternStatus {
   models_missing?: boolean;
-  model_download?: { running: boolean; downloaded_mb?: number; approx_mb?: number } | null;
+  model_download?: { running: boolean; downloaded_mb?: number; approx_mb?: number; size_mb?: number } | null;
   index_problem?: string | null;
   worker: { running: boolean; stage?: string; done?: number; total?: number };
   files: Record<string, number>;
