@@ -22,7 +22,7 @@ Saved profiles and Caffeinate presets are read from Tethered's local preferences
 
 Run **Get Tethered** to use the same download link as the Tethered website. Install and open the current Tethered app, then use the extension's controls. Search for **Tethered** in Raycast to find its commands. You can assign aliases or hotkeys in Raycast's Extensions settings.
 
-The extension sends requests to the running Tethered app. If **Show Status** cannot get a fresh response, check that Tethered is running and updated. Raycast's action confirmation means the request was sent; use **Show Status** or Tethered itself to confirm the resulting state.
+The extension sends requests to the running Tethered app. If **Show Status** cannot get a fresh response, check that Tethered is running and updated. Control commands wait for a matching app response and show its result or rejection reason. A timeout is not a confirmed failure; check the app before retrying. These acknowledgments require the updated Tethered app. Success confirms the app setting or accepted operation, not completion of asynchronous hardware changes.
 
 **Get Tethered Pro** requires the updated Tethered app to be running and an account signed in. It opens Tethered's checkout in your browser; payment and license activation remain handled by Tethered.
 
