@@ -105,6 +105,9 @@ test("normalizes URL input while rejecting unsupported schemes and prose", () =>
   assert.equal(normalizeUrl(" example.com/path?q=a#fragment "), "https://example.com/path?q=a#fragment");
   assert.equal(normalizeUrl("//example.com/image.png"), "https://example.com/image.png");
   assert.equal(normalizeUrl("localhost:3000/path"), "https://localhost:3000/path");
+  assert.equal(normalizeUrl("my-app:3000/page"), "https://my-app:3000/page");
+  assert.equal(normalizeUrl("devbox:8080?q=1"), "https://devbox:8080/?q=1");
+  assert.equal(normalizeUrl("my-app:80"), "https://my-app:80/");
   assert.equal(normalizeUrl("http://localhost:3000/path"), "http://localhost:3000/path");
   assert.equal(normalizeUrl("EXAMPLE.com:8080?q=1"), "https://example.com:8080/?q=1");
   for (const value of [
@@ -114,6 +117,8 @@ test("normalizes URL input while rejecting unsupported schemes and prose", () =>
     "file:///tmp/page.html",
     "javascript:123",
     "mailto:123",
+    "data:123",
+    "ftp:3000/page",
     "https://",
   ]) {
     assert.throws(() => normalizeUrl(value));

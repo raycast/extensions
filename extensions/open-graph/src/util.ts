@@ -13,10 +13,12 @@ export function resolveHttpUrl(value: string, baseUrl?: string): string | undefi
 
 export function normalizeUrl(value: string): string {
   const input = value.trim();
-  if (!input || /\s/.test(input)) throw new Error("Enter a valid HTTP or HTTPS URL.");
+  // Keep known non-HTTP schemes from being mistaken for a single-label host and port.
+  const unsupportedScheme = /^(?:about|blob|data|file|ftp|ftps|javascript|mailto|tel|ws|wss):/i.test(input);
+  if (!input || /\s/.test(input) || unsupportedScheme) throw new Error("Enter a valid HTTP or HTTPS URL.");
   const candidate = input.startsWith("//")
     ? `https:${input}`
-    : /^[a-z][a-z\d+.-]*:/i.test(input) && !/^(?:localhost|(?:[a-z\d-]+\.)+[a-z\d-]+):\d+(?:[/?#]|$)/i.test(input)
+    : /^[a-z][a-z\d+.-]*:/i.test(input) && !/^[a-z\d-]+(?:\.[a-z\d-]+)*:\d+(?:[/?#]|$)/i.test(input)
       ? input
       : `https://${input}`;
   const url = resolveHttpUrl(candidate);

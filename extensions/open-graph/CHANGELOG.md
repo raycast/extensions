@@ -7,6 +7,7 @@
 - Copy metadata as JSON, Markdown, or HTML meta tags, and copy or open absolute image URLs.
 - Check required Open Graph properties and use page titles and descriptions when social tags are missing.
 - Show the final URL after redirects, resolve relative images, and retry failed or timed-out requests.
+- Add Raycast AI tools to inspect and validate social metadata, suggest titles and descriptions, and export JSON, Markdown, or HTML meta tags.
 
 ## [Maintenance] - 2025-12-13
 

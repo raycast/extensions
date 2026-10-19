@@ -161,10 +161,10 @@ function Preview({
           <ActionPanel.Section>
             {title && <Action.CopyToClipboard title="Copy Title" content={title} />}
             {description && <Action.CopyToClipboard title="Copy Description" content={description} />}
-            <Action.OpenInBrowser title="Open Page in Browser" url={finalUrl} />
             {image?.resolvedUrl && (
               <Action.CopyToClipboard title="Copy Absolute Image URL" content={image.resolvedUrl} />
             )}
+            <Action.OpenInBrowser title="Open Page in Browser" url={finalUrl} />
             {image?.resolvedUrl && (
               <Action.OpenInBrowser title="Open Preview Image in Browser" url={image.resolvedUrl} />
             )}

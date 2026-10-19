@@ -38,6 +38,18 @@
       "mode": "no-view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-open-graph",
+      "title": "Get Open Graph Metadata",
+      "description": "Fetch Open Graph and Twitter Card tags, resolved images, preview text, and basic validation. Requires a user-supplied URL; ask for it if missing."
+    },
+    {
+      "name": "export-open-graph",
+      "title": "Export Open Graph Metadata",
+      "description": "Return social metadata as JSON, Markdown, or HTML meta tags for a user-supplied URL; ask for it if missing. Returns text without changing the page."
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.103.10",
     "node-fetch": "^3.3.2",
