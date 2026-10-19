@@ -1,5 +1,12 @@
 # Hide Details Changelog
 
+## [Windows Support and Clipboard History] - 2026-10-19
+
+- Add Windows support with on-device Windows OCR and face detection.
+- Add **Redact Image File from History** to pick a recently copied image file, then review it or copy a redacted version.
+- When the clipboard has no image, use the newest copied image file in recent history. Screenshot images stored only in history are unavailable.
+- Keep Windows text masks aligned with rotated text and resized OCR images.
+
 ## [Review Controls] - 2026-10-12
 
 - Add per-detection Don't Redact / Redact actions and restore-all control, with scan-specific selections and synchronized preview/copy output.
