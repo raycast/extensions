@@ -7,6 +7,7 @@ import type { TweakCategory, TweakRisk, TweakState } from "./types";
 import { applyTweak, getAllTweakStates, getCommandString, getResetCommandString, resetTweak } from "./utils/defaults";
 import { formatValue } from "./utils/format";
 import { TweakMetadata, tweakKeywords } from "./components/tweak-metadata";
+import { DockSpacersItem } from "./components/dock-spacers-item";
 
 type FilterMode = "all" | "modified" | "default";
 
@@ -40,6 +41,9 @@ export default function BrowseTweaks() {
   }
 
   const modifiedCount = tweakStates.filter((t) => t.isModified).length;
+
+  // Spacers are not a tweak, so they have no status or risk to filter on: show them only unfiltered
+  const showSpacers = statusFilter === "all" && riskFilter === "all";
 
   return (
     <List
@@ -94,6 +98,7 @@ export default function BrowseTweaks() {
           {tweaks.map((tweak) => (
             <TweakItem key={tweak.id} tweak={tweak} onUpdate={revalidate} />
           ))}
+          {category === "dock" && showSpacers && <DockSpacersItem />}
         </List.Section>
       ))}
     </List>
