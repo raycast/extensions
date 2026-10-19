@@ -7,6 +7,7 @@ Track project work entirely inside Raycast. Local Time Tracker uses no server, e
 - Manage client and internal projects
 - Mark one project as preferred for faster timer starts
 - Start and stop a single active timer
+- Plan daily goals with optional handwritten subtasks, and start, switch, stop, or complete tasks from Today's Plan
 - Organize related projects into named project groups
 - Keep task descriptions optional and reuse recent descriptions for each project
 - See elapsed time in the menu bar
@@ -39,6 +40,35 @@ A **Project Group** is a named collection of related projects, such as Client, I
 
 Create and manage groups in **Projects**. In **Start Work**, the selected project's group appears above the project picker. This is a read-only label that updates when you choose a different project; it does not select or change the project's group.
 
+## Today's Plan
+
+Use **Today's Plan** to choose daily goals, write optional subtasks, and track progress inside Raycast. Parent goals show completion counts and total time. Tasks show completion icons, tracked time, and a Running tag. Goals without subtasks are also trackable.
+
+Selecting a parent goal and pressing **Return** opens its editor; **⌘Return** toggles completion of all its visible children. Select a task with **↑ / ↓**, or **Control+N / Control+P** when Raycast's Emacs navigation bindings are enabled. **Return** starts or stops the selected task; **⌘Return** toggles completion. Starting another task saves the current timer first. Completing the running task stops and saves its time. Completed tasks must be marked incomplete before tracking again. Closing Raycast leaves a running timer active.
+
+Use **New Plan** (**⌘N**) to add a goal, or **Edit Plan** (**⌘E**) on an existing item. The empty view offers New Plan; edit and sort actions are available only when a plan exists. Enter the goal on the first line and each subtask on a following line in the same text area, select a project, and choose **Save Plan** (**⌘Return**). A single line creates a goal without subtasks. There is no fixed limit; about three goals is a useful starting point.
+
+```text
+Finish the contact form
+Choose input fields
+Implement validation
+Connect submission
+```
+
+The Plan dropdown in the editor switches between New Plan and existing goals. Unchanged task lines retain their identity through reordering and insertion; edits to the same number of remaining lines are treated as renames in line order. Work Logs remain saved when a goal is deleted. Stop a running task before removing its line or changing its goal's project. Stop a running goal without subtasks before adding child tasks. The editor rejects stale saves rather than overwriting newer changes.
+
+Open **Sort Subtasks** (**⌘S**) for a goal's children or **Sort Plans** (**⌘⇧S**) for the parent goals. For a standalone goal, **⌘S** opens Sort Plans. In either sorting list, **↑ / ↓** or **Control+N / Control+P** selects an item, and **⌘⌥↑ / ⌘⌥↓** moves it up or down among its siblings. Order saves immediately. **Return** finishes sorting; **Escape** navigates back according to Raycast's Escape setting. A parent sorting row also offers Sort Subtasks. Timers continue during sorting. Standard list rows do not have clickable checkboxes or drag-and-drop sorting; use **⌘Return** or the action panel (**⌘K**) for completion. Action shortcuts appear in Raycast's action panel.
+
+From today's list, press **⌘⇧I** or choose **Import Latest Plan** in Actions to bring forward unfinished plans from the most recent earlier date that still has tasks. Empty days, including weekends, are skipped. Every incomplete parent on that one date moves with all its children, including completed steps, preserving their completion states and order. Existing plans for today remain, and imported plans follow them in their previous order. Fully completed parents stay on the earlier date. If the latest date is fully complete, nothing is imported; the action does not reach back to older dates. Importing is always manual, without a date picker or confirmation step. The action remains available when there are no past tasks, and a notification explains that nothing remains to import. Importing moves plans rather than copying them, so an imported plan is no longer on its earlier date.
+
+The date dropdown still opens earlier plans. To move an individual plan, select it or any of its subtasks on an earlier date and choose **Move Plan to Today** (**⌘⇧T**). An unfinished plan without subtasks can also move. The list switches to today after the move. Today's task times include only work recorded today. Historical logs, reports, and running timers stay intact. Moved-from dates remain available even when empty.
+
+Starting work from Today's Plan starts a regular timer. To use Pomodoro with that task, enable Pomodoro in preferences, then choose **Start Pomodoro** from **Menu Bar Timer** while the task's timer is running.
+
+When a goal has children on multiple dates, each date shows its own children. Editing, sorting, completing, or deleting a day's goal affects those children only; the goal name and project remain shared. To replace all of one day's children with a standalone goal while other dates retain children, delete that day's goal and add a new standalone goal. Tasks are never carried automatically.
+
+Times are split at local midnight, consistent with Reports; totals include work started from other commands. Tracked time refreshes while the view is open, and today's list rolls over to the new day at local midnight.
+
 ## Reports
 
 Reports shows **Today**, **This Week**, or **This Month**, with totals and session counts for the overview, a project group, or an individual project. Today includes only today's time: a new day starts with zero until you track work. Earlier logs remain available in This Week, This Month, and **Work Logs**.
@@ -59,7 +89,7 @@ Editing work time leaves Pomodoro's remaining time, current interval, and comple
 
 ## Storage and Privacy
 
-Projects, work logs, and the active timer are stored as JSON in Raycast `LocalStorage`.
+Projects, daily goals and subtasks, work logs, and the active timer are stored as JSON in Raycast `LocalStorage`.
 
 - Work data never leaves the Mac through this extension.
 - No analytics, network requests, or external services are used.
