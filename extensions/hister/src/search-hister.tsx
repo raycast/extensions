@@ -35,10 +35,12 @@ import {
   webUiUrl,
 } from "./hister";
 
+// `query` is the search that produced the result. While a new search loads, the previous
+// results stay on screen, and history actions must be recorded against their own query.
 type ResultItem =
-  | { kind: "history"; key: string; item: HisterHistoryItem }
-  | { kind: "document"; key: string; doc: HisterDocument; total: number }
-  | { kind: "semantic"; key: string; hit: HisterSemanticHit; doc: HisterDocument };
+  | { kind: "history"; key: string; query: string; item: HisterHistoryItem }
+  | { kind: "document"; key: string; query: string; doc: HisterDocument; total: number }
+  | { kind: "semantic"; key: string; query: string; hit: HisterSemanticHit; doc: HisterDocument };
 
 export default function Command(props: LaunchProps) {
   const { semantic } = getPreferenceValues<Preferences>();
@@ -54,18 +56,18 @@ export default function Command(props: LaunchProps) {
         const items: ResultItem[] = [];
         if (page === 0) {
           for (const item of res.history ?? []) {
-            items.push({ kind: "history", key: `history:${item.url}`, item });
+            items.push({ kind: "history", key: `history:${item.url}`, query: text, item });
           }
         }
         const documents = res.documents ?? [];
         for (const doc of documents) {
-          items.push({ kind: "document", key: `doc:${doc.id || doc.url}`, doc, total: res.total });
+          items.push({ kind: "document", key: `doc:${doc.id || doc.url}`, query: text, doc, total: res.total });
         }
         if (page === 0) {
           for (const hit of res.semantic_hits ?? []) {
             // Hits without a document are already part of the keyword results.
             if (hit.document) {
-              items.push({ kind: "semantic", key: `semantic:${hit.doc_id}`, hit, doc: hit.document });
+              items.push({ kind: "semantic", key: `semantic:${hit.doc_id}`, query: text, hit, doc: hit.document });
             }
           }
         }
@@ -198,31 +200,50 @@ function groupResults(items: ResultItem[]) {
   return { history, documents, semantic, total };
 }
 
-// Downloads favicons for the visible results once and remembers where they were saved.
+const FAVICON_CONCURRENCY = 4;
+
+// Downloads favicons for the results on screen, a few at a time. When the results change,
+// downloads still running are cancelled and only icons still needed are fetched again.
 function useFavicons(entries: ResultItem[]): Map<string, string> {
   const [paths, setPaths] = useState<Map<string, string>>(() => cachedFavicons());
-  const requested = useRef(new Set<string>());
-  const keys = entries
-    .map((entry) => (entry.kind === "history" ? undefined : entry.doc.favicon_key))
-    .filter((key): key is string => Boolean(key));
-  const missingKey = [...new Set(keys)].filter((key) => !paths.has(key) && !requested.current.has(key)).join(",");
+  const pathsRef = useRef(paths);
+  const failed = useRef(new Set<string>());
+  const wanted = [
+    ...new Set(
+      entries
+        .map((entry) => (entry.kind === "history" ? undefined : entry.doc.favicon_key))
+        .filter((key): key is string => Boolean(key)),
+    ),
+  ].join(",");
 
   useEffect(() => {
-    const missing = missingKey ? missingKey.split(",") : [];
-    if (missing.length === 0) return;
-    missing.forEach((key) => requested.current.add(key));
-    Promise.all(missing.map(async (key) => [key, await downloadFavicon(key).catch(() => undefined)] as const)).then(
-      (results) => {
-        const found = results.filter((result): result is readonly [string, string] => Boolean(result[1]));
-        if (found.length === 0) return;
-        setPaths((previous) => {
-          const next = new Map(previous);
-          for (const [key, path] of found) next.set(key, path);
-          return next;
-        });
-      },
-    );
-  }, [missingKey]);
+    pathsRef.current = paths;
+  }, [paths]);
+
+  useEffect(() => {
+    const queue = wanted
+      ? wanted.split(",").filter((key) => !pathsRef.current.has(key) && !failed.current.has(key))
+      : [];
+    if (queue.length === 0) return;
+    const controller = new AbortController();
+
+    async function worker() {
+      for (let key = queue.shift(); key !== undefined && !controller.signal.aborted; key = queue.shift()) {
+        const current = key;
+        try {
+          const path = await downloadFavicon(current, controller.signal);
+          if (path) setPaths((previous) => new Map(previous).set(current, path));
+          else failed.current.add(current);
+        } catch {
+          // Cancelled downloads are retried the next time the icon is needed.
+          if (!controller.signal.aborted) failed.current.add(current);
+        }
+      }
+    }
+
+    for (let i = 0; i < Math.min(FAVICON_CONCURRENCY, queue.length); i++) void worker();
+    return () => controller.abort();
+  }, [wanted]);
 
   return paths;
 }
@@ -271,16 +292,16 @@ function ResultListItem({ entry, query, favicons, showDetail, toggleDetail, reva
   async function openResult() {
     await open(url);
     // Record the click like the web UI does, so Hister ranks it higher for this query next time.
-    await Promise.race([updateHistory({ url, title, query }).catch(() => undefined), delay(1500)]);
+    await Promise.race([updateHistory({ url, title, query: entry.query }).catch(() => undefined), delay(1500)]);
     await closeMainWindow({ clearRootSearch: true });
   }
 
   async function setPinned(pin: boolean) {
     const toast = await showToast({ style: Toast.Style.Animated, title: pin ? "Pinning…" : "Unpinning…" });
     try {
-      await updateHistory({ url, title, query, pin });
+      await updateHistory({ url, title, query: entry.query, pin });
       toast.style = Toast.Style.Success;
-      toast.title = pin ? `Pinned for "${query}"` : "Unpinned";
+      toast.title = pin ? `Pinned for "${entry.query}"` : "Unpinned";
       revalidate();
     } catch (err) {
       await showFailureToast(err, { title: pin ? "Couldn't pin result" : "Couldn't unpin result" });
@@ -289,7 +310,7 @@ function ResultListItem({ entry, query, favicons, showDetail, toggleDetail, reva
 
   async function forget() {
     try {
-      await updateHistory({ url, query, delete: true });
+      await updateHistory({ url, query: entry.query, delete: true });
       await showToast({ style: Toast.Style.Success, title: "Removed from opened history" });
       revalidate();
     } catch (err) {

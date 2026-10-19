@@ -203,7 +203,8 @@ export async function readWithoutHtml(res: Response): Promise<string> {
       if (byte === HTML_KEY[0]) matched = 1;
       else out[n++] = byte;
     }
-    output.push(out.subarray(0, n));
+    // Copy, so the full-size scratch buffer (mostly discarded HTML) can be freed.
+    if (n > 0) output.push(Buffer.from(out.subarray(0, n)));
   }
   if (matched > 0) output.push(HTML_KEY.subarray(0, matched));
   return Buffer.concat(output).toString("utf8");
@@ -275,20 +276,42 @@ export function cachedFavicons(): Map<string, string> {
   return paths;
 }
 
-export async function downloadFavicon(key: string): Promise<string | undefined> {
+export async function downloadFavicon(key: string, signal?: AbortSignal): Promise<string | undefined> {
   if (!FAVICON_KEY.test(key)) return undefined;
-  const res = await request(`/api/favicon?key=${encodeURIComponent(key)}`, { headers: authHeaders() });
+  const res = await request(`/api/favicon?key=${encodeURIComponent(key)}`, { headers: authHeaders(), signal });
   const type = (res.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase();
   const extension = FAVICON_EXTENSIONS[type];
-  if (!extension) return undefined;
   const declared = Number(res.headers.get("content-length") ?? 0);
-  if (declared > MAX_FAVICON_BYTES) return undefined;
-  const bytes = Buffer.from(await res.arrayBuffer());
-  if (bytes.length === 0 || bytes.length > MAX_FAVICON_BYTES) return undefined;
+  if (!extension || declared > MAX_FAVICON_BYTES) {
+    await res.body?.cancel();
+    return undefined;
+  }
+  const bytes = await readAtMost(res, MAX_FAVICON_BYTES);
+  if (!bytes || bytes.length === 0) return undefined;
   await mkdir(faviconDir(), { recursive: true });
   const path = join(faviconDir(), `${key}.${extension}`);
   await writeFile(path, bytes);
   return path;
+}
+
+// Reads the body in chunks and gives up as soon as it grows past the limit, so a
+// missing or wrong Content-Length can't make the extension buffer a huge file.
+async function readAtMost(res: Response, limit: number): Promise<Buffer | undefined> {
+  if (!res.body) return undefined;
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.length;
+    if (size > limit) {
+      await reader.cancel();
+      return undefined;
+    }
+    chunks.push(value);
+  }
+  return Buffer.concat(chunks);
 }
 
 export function docTypeLabel(type?: DocType): string {
