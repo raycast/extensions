@@ -44,7 +44,7 @@ export async function showCliFailure(
 ): Promise<void> {
   if (error instanceof CliError) {
     if (error.code === "no-device") {
-      await toast.setToFailure({ titleOverride: "Not connected", error });
+      await toast.setToFailure({ titleOverride: "Not connected", error, copyText: error.details });
       return;
     }
     if (error.code === "no-op" && options.offRequested) {
@@ -52,5 +52,5 @@ export async function showCliFailure(
       return;
     }
   }
-  await toast.setToFailure({ error });
+  await toast.setToFailure({ error, copyText: error instanceof CliError ? error.details : undefined });
 }

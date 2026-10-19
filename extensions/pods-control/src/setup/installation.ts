@@ -42,6 +42,11 @@ async function performInstallation(operation: CliOperation): Promise<CliSetup> {
     const before = await detectCliSetup();
     // Installation may have finished elsewhere while the confirmation was open.
     if (operation === "install" && before.cliPath) {
+      if (before.meetsMinimum !== true) {
+        throw new Error(
+          "Another install finished, but the CLI is not ready to use. Open CLI Setup to check the installation.",
+        );
+      }
       await showToast({ style: Toast.Style.Success, title: "pods-control CLI ready", message: READY_MESSAGE });
       return before;
     }
@@ -57,7 +62,7 @@ async function performInstallation(operation: CliOperation): Promise<CliSetup> {
       await (operation === "install" ? installCliWithBrew() : updateCliWithBrew());
       return detectCliSetup();
     });
-    if (after.state !== "update") {
+    if (after.state !== "update" || after.meetsMinimum !== true) {
       throw new Error("Homebrew finished, but the CLI is not ready to use. Open CLI Setup to check the installation.");
     }
     toast.style = Toast.Style.Success;
@@ -101,7 +106,7 @@ async function offerInstallation(): Promise<void> {
     await openCliSetup();
     return;
   }
-  if (setup.cliPath) {
+  if (setup.cliPath && setup.meetsMinimum === true) {
     await showToast({ style: Toast.Style.Success, title: "pods-control CLI ready", message: READY_MESSAGE });
     return;
   }

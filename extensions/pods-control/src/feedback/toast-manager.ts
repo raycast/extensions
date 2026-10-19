@@ -60,18 +60,20 @@ export class ToastManager {
     titleOverride,
     titleSuffix,
     error,
+    copyText,
     action,
   }: {
     titleOverride?: string;
     titleSuffix?: string;
     error?: unknown;
+    copyText?: string;
     action?: Toast.ActionOptions;
   } = {}): Promise<ToastManager> {
     const style = Toast.Style.Failure;
     const title = titleOverride ?? this.titles.failure;
     const finalTitle = titleSuffix ? `${title} - ${titleSuffix}` : title;
     const message = getErrorMessage(error);
-    const copyErrorAction = createCopyErrorAction(message);
+    const copyErrorAction = createCopyErrorAction(copyText ?? message);
     const primaryAction = action ?? copyErrorAction;
     const secondaryAction = action ? copyErrorAction : undefined;
 

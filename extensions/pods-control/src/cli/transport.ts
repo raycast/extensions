@@ -9,6 +9,7 @@ import type { CliPayload } from "./types";
  * so a slow device settle never surfaces as a spurious timeout.
  */
 const CLI_TIMEOUT_MS = 15000;
+const CLI_KILL_GRACE_MS = 2000;
 const CLI_MAX_BUFFER_BYTES = 64 * 1024;
 const CLI_DIAGNOSTIC_LIMIT = 4096;
 const CLI_TOKEN_LIMIT = 80;
@@ -35,11 +36,13 @@ function execFileAsync(file: string, args: string[], options: ExecFileOptions): 
     let settled = false;
     let timedOut = false;
     let timeoutTimer: ReturnType<typeof setTimeout> | undefined;
+    let killTimer: ReturnType<typeof setTimeout> | undefined;
 
     const finish = (error: ExecError | null, stdout: unknown, stderr: unknown) => {
       if (settled) return;
       settled = true;
       if (timeoutTimer) clearTimeout(timeoutTimer);
+      if (killTimer) clearTimeout(killTimer);
       resolve({ stdout: outputString(stdout), stderr: outputString(stderr), error, timedOut });
     };
 
@@ -56,6 +59,9 @@ function execFileAsync(file: string, args: string[], options: ExecFileOptions): 
         timeoutTimer = setTimeout(() => {
           timedOut = true;
           child?.kill("SIGTERM");
+          killTimer = setTimeout(() => {
+            if (!settled) child?.kill("SIGKILL");
+          }, CLI_KILL_GRACE_MS);
         }, timeout);
       }
     } catch (error) {
@@ -170,8 +176,11 @@ export async function runCli(args: string[]): Promise<CliPayload> {
     }
     if (payload?.result === "error") {
       const code = toErrorCode(payload.error);
-      const message = code === "unknown" ? unknownTokenMessage(payload.error, diagnostics) : ERROR_MESSAGES[code];
-      throw new CliError(code, payload, message, diagnostics);
+      if (code === "unknown") {
+        throw new CliError(code, payload, unknownTokenMessage(payload.error, diagnostics), diagnostics);
+      }
+      const message = ERROR_MESSAGES[code];
+      throw new CliError(code, payload, message, diagnostics, withDiagnostics(message, diagnostics));
     }
 
     // With no response at all there is no error token to classify. The exit

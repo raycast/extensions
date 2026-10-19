@@ -2,7 +2,7 @@ import { confirmAlert, launchCommand, showToast, Toast } from "@raycast/api";
 import { expect, vi, test } from "vitest";
 import { installCliWithBrew, updateCliWithBrew } from "../homebrew/commands";
 import { expectConsoleError } from "../test/console";
-import { cliSetup, installedCliSetup } from "../test/fixtures/cli-setup";
+import { cliSetup, installedCliSetup, outdatedCliSetup } from "../test/fixtures/cli-setup";
 import { deferred } from "../test/fixtures/deferred";
 import { fakeTimers } from "../test/fixtures/fake-timers";
 import { detectCliSetup } from "./detection";
@@ -116,6 +116,19 @@ test("skips installation if another command installed the CLI while the alert wa
   expect(installCliWithBrew).not.toHaveBeenCalled();
   expect(showToast).toHaveBeenCalledWith(expect.objectContaining({ style: Toast.Style.Success }));
   expect(launchCommand).not.toHaveBeenCalled();
+});
+
+test("opens setup instead of reporting ready when a CLI older than the minimum version appears", async () => {
+  // Given
+  using timers = fakeTimers();
+  stubHomebrewInstall();
+  vi.mocked(detectCliSetup).mockResolvedValue(outdatedCliSetup());
+  // When
+  await promptForCliInstallation();
+  // Then
+  expect(launchCommand).toHaveBeenCalledWith({ name: "manage-cli", type: "userInitiated" });
+  expect(confirmAlert).not.toHaveBeenCalled();
+  expect(showToast).not.toHaveBeenCalled();
 });
 
 test("does not install after prerequisites change during confirmation", async () => {
@@ -324,6 +337,44 @@ test("requires the active CLI to resolve to the Homebrew installation after succ
   const result = runCliInstallation("install");
   // Then
   await expect(result).rejects.toThrow("CLI is not ready to use");
+});
+
+test("fails with a setup action when Homebrew leaves a CLI older than the minimum version", async () => {
+  // Given
+  using timers = fakeTimers();
+  stubHomebrewInstall();
+  vi.mocked(detectCliSetup).mockResolvedValue(outdatedCliSetup());
+  // When
+  const result = runCliInstallation("update");
+  // Then
+  await expect(result).rejects.toThrow("CLI is not ready to use");
+  expect(updateCliWithBrew).toHaveBeenCalledOnce();
+  const toast = await progressToast();
+  expect(toast.style).toBe(Toast.Style.Failure);
+  expect(toast.primaryAction.title).toBe("Open pods-control CLI Setup");
+  // When
+  await toast.primaryAction.onAction(toast);
+  // Then
+  expect(launchCommand).toHaveBeenCalledWith({ name: "manage-cli", type: "userInitiated" });
+});
+
+test("does not report ready when an install finds a CLI older than the minimum version", async () => {
+  // Given
+  using timers = fakeTimers();
+  stubHomebrewInstall();
+  vi.mocked(detectCliSetup).mockResolvedValue(outdatedCliSetup());
+  // When
+  const result = runCliInstallation("install");
+  // Then
+  await expect(result).rejects.toThrow("CLI is not ready to use");
+  expect(installCliWithBrew).not.toHaveBeenCalled();
+  expect(showToast).toHaveBeenCalledOnce();
+  expect(showToast).toHaveBeenCalledWith(
+    expect.objectContaining({
+      style: Toast.Style.Failure,
+      primaryAction: expect.objectContaining({ title: "Open pods-control CLI Setup" }),
+    }),
+  );
 });
 
 test("shares an in-flight operation across callers", async () => {

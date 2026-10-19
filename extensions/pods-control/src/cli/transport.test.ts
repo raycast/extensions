@@ -273,6 +273,39 @@ test("reports a timeout separately from a killed process", async () => {
   expect(child.kill).toHaveBeenCalledWith("SIGTERM");
 });
 
+test("force-kills a timed-out CLI that ignores SIGTERM and reports a timeout", async () => {
+  // Given
+  installCliAt("/opt/homebrew/bin/pods-control");
+  using timers = fakeTimers();
+  let callback: ExecCallback | undefined;
+  const child = {
+    kill: vi.fn((signal: string) => {
+      if (signal === "SIGKILL") {
+        callback?.(Object.assign(new Error("killed"), { killed: true, signal }), "", "stuck CLI");
+      }
+      return true;
+    }),
+  };
+  mockExecFile.mockImplementation((_file: string, _args: string[], _options: unknown, next: ExecCallback) => {
+    callback = next;
+    return child as never;
+  });
+  // When
+  const pending = runCli(["listening-mode", "get"]);
+  const outcome = expect(pending).rejects.toMatchObject({
+    code: "unknown",
+    diagnostics: { kind: "timeout", signal: "SIGKILL", stderr: "stuck CLI" },
+  });
+  await vi.advanceTimersByTimeAsync(15000);
+  // Then
+  expect(child.kill.mock.calls).toEqual([["SIGTERM"]]);
+  // When
+  await vi.advanceTimersByTimeAsync(2000);
+  // Then
+  expect(child.kill.mock.calls).toEqual([["SIGTERM"], ["SIGKILL"]]);
+  await outcome;
+});
+
 test("preserves a valid interrupted payload and its signal", async () => {
   // Given
   installCliAt("/opt/homebrew/bin/pods-control");

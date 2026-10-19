@@ -6,7 +6,6 @@ import { LISTENING_MODE_PRESENTATION, listeningModeHud } from "../features/prese
 import { ToastManager } from "../feedback/toast-manager";
 import { publishListeningModeSubtitle } from "../subtitles/feature-subtitles";
 import { runWithSubtitleOperation, showCliFailure } from "./control-operation";
-import type { CycleCommandPreferences } from "./preferences";
 import type { ListeningModes } from "../features/types";
 interface SetListeningModeCommandOptions {
   updateCycleSubtitle: boolean;
@@ -52,7 +51,7 @@ export async function runSetListeningModeCommand(
 }
 
 function getEnabledListeningModes(): ListeningModes[] {
-  const preferences = getPreferenceValues<CycleCommandPreferences>();
+  const preferences = getPreferenceValues<Preferences.CycleListeningMode>();
   const enabledModes: ListeningModes[] = [];
   if (preferences.cycleOff) enabledModes.push("off");
   if (preferences.cycleTransparency) enabledModes.push("transparency");
@@ -102,7 +101,7 @@ export async function runCycleListeningModeCommand(): Promise<void> {
         });
         return;
       }
-      await showCliFailure(toast, error, { offRequested: enabledModes.includes("off") });
+      await showCliFailure(toast, error, { offRequested: false });
     }
   };
 

@@ -1,10 +1,10 @@
 import { accessSync, constants, statSync } from "fs";
 import { join } from "path";
 import { getPreferenceValues } from "@raycast/api";
-import { CLI_BINARY_NAME, CLI_SEARCH_PATHS, type ExtensionPreferences } from "./preferences";
+import { CLI_BINARY_NAME, CLI_SEARCH_PATHS } from "./preferences";
 
 export function getConfiguredCliPath(): string | null {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   return preferences.cliPath?.trim() || null;
 }
 

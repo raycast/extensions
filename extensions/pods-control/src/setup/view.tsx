@@ -73,18 +73,25 @@ export default function Command() {
   useEffect(() => {
     if (!brewInProgress) return;
     let active = true;
-    const timer = setInterval(() => {
-      void detectCliSetup()
-        .then((next) => {
-          if (active) dispatch({ type: "ready", setup: next });
-        })
-        .catch(() => {
-          // Keep the in-progress view; the next poll rechecks.
-        });
-    }, 3000);
+    let timer: ReturnType<typeof setTimeout>;
+    function scheduleCheck() {
+      timer = setTimeout(() => {
+        void detectCliSetup()
+          .then((next) => {
+            if (active) dispatch({ type: "ready", setup: next });
+          })
+          .catch(() => {
+            // Keep the in-progress view; the next poll rechecks.
+          })
+          .finally(() => {
+            if (active) scheduleCheck();
+          });
+      }, 3000);
+    }
+    scheduleCheck();
     return () => {
       active = false;
-      clearInterval(timer);
+      clearTimeout(timer);
     };
   }, [brewInProgress]);
 

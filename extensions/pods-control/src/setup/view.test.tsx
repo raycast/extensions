@@ -450,11 +450,13 @@ test.each([
   expect(view.actionGroups()).toEqual(groups);
 });
 
-test("shows progress for an already-running Homebrew install and refreshes when it finishes", async () => {
+test("shows progress for an already-running Homebrew install, waits for each slow check, and refreshes when it finishes", async () => {
   // Given
   using view = createSetupView();
+  const slowCheck = deferred<ReturnType<typeof cliSetup>>();
   vi.mocked(detectCliSetup)
     .mockResolvedValueOnce(cliSetup({ state: "installing" }))
+    .mockReturnValueOnce(slowCheck.promise)
     .mockResolvedValue(installedCliSetup());
   using timers = fakeTimers();
   // When
@@ -469,6 +471,26 @@ test("shows progress for an already-running Homebrew install and refreshes when 
   });
   // Then
   expect(detectCliSetup).toHaveBeenCalledTimes(2);
+  // When
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(9000);
+  });
+  // Then
+  expect(detectCliSetup).toHaveBeenCalledTimes(2);
+  // When
+  await act(async () => {
+    slowCheck.resolve(cliSetup({ state: "installing" }));
+    await vi.advanceTimersByTimeAsync(2999);
+  });
+  // Then
+  expect(detectCliSetup).toHaveBeenCalledTimes(2);
+  expect(view.container.querySelector("[data-testid='detail']")?.getAttribute("data-loading")).toBe("true");
+  // When
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(1);
+  });
+  // Then
+  expect(detectCliSetup).toHaveBeenCalledTimes(3);
   expect(view.container.querySelector("[data-testid='detail']")?.getAttribute("data-loading")).toBe("false");
   expect(view.actionGroups()).toEqual(statusActions);
 });

@@ -8,7 +8,6 @@ import { ToastManager } from "../../feedback/toast-manager";
 import { publishCommandSubtitle, resetCommandSubtitle, withSubtitleOperation } from "../../subtitles/coordination";
 import { refreshConversationAwarenessSubtitle, refreshListeningModeSubtitle } from "../../subtitles/feature-subtitles";
 import { expectConsoleError } from "../console";
-import type { CycleCommandPreferences } from "../../controls/preferences";
 
 vi.mock("../../cli/client", async (importOriginal) => ({
   ...(await importOriginal<typeof PodsControlCli>()),
@@ -39,7 +38,7 @@ const mockResetCommandSubtitle = vi.mocked(resetCommandSubtitle);
 
 const mockToastManager = vi.mocked(ToastManager);
 
-const defaultCyclePreferences: CycleCommandPreferences = {
+const defaultCyclePreferences: Preferences.CycleListeningMode = {
   cycleOff: false,
   cycleTransparency: true,
   cycleAdaptive: true,
@@ -369,15 +368,23 @@ test("publishes the confirmed state and offers command preferences when cycling 
   });
 });
 
-test("resets the subtitle when cycling fails without a confirmed mode", async () => {
+test("shows the general failure when cycling with Off enabled fails without a confirmed mode", async () => {
   // Given
-  stubControlWorkflow();
-  vi.mocked(PodsControlCli.cycleListeningMode).mockRejectedValue(new CliError("no-op"));
+  const toast = stubControlWorkflow();
+  mockGetPreferenceValues.mockReturnValue({
+    cycleOff: true,
+    cycleTransparency: true,
+    cycleAdaptive: false,
+    cycleAnc: true,
+  } as never);
+  const error = new CliError("no-op");
+  vi.mocked(PodsControlCli.cycleListeningMode).mockRejectedValue(error);
   // When
   await runCycleListeningModeCommand();
   // Then
   expect(mockPublishCommandSubtitle).not.toHaveBeenCalled();
   expect(mockResetCommandSubtitle).toHaveBeenCalledOnce();
+  expect(toast.setToFailure).toHaveBeenCalledExactlyOnceWith({ error });
 });
 
 test("publishes the confirmed state after toggling", async () => {
