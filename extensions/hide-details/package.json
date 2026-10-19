@@ -142,6 +142,7 @@
     "fix-lint": "ray lint --fix",
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node --test tests/*.test.mjs",
+    "test:windows": "node --test tests/windows.test.mjs",
     "publish": "ray publish"
   },
   "contributors": [

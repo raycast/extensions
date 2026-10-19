@@ -1,9 +1,13 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { EventEmitter } from "node:events";
 import { createRequire } from "node:module";
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { PassThrough, Writable } from "node:stream";
 import { test } from "node:test";
+import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 const require = createRequire(import.meta.url);
@@ -165,3 +169,104 @@ test("invalid OCR geometry stops the Windows helper before rendering", async () 
   assert.equal(backend.requests.length, 1);
   assert.equal(backend.killed, true);
 });
+
+test(
+  "bundled Windows helper scans and renders empty and single-item results",
+  { skip: process.platform !== "win32" },
+  async (t) => {
+    const root = fileURLToPath(new URL("..", import.meta.url));
+    const directory = mkdtempSync(path.join(tmpdir(), "hide-details-windows-test-"));
+    t.after(() => rmSync(directory, { recursive: true, force: true }));
+    const windows = loadSource("../src/windows.ts", {
+      "@raycast/api": { environment: { assetsPath: path.join(root, "assets") } },
+      "./detection": { ...detection, ocrBox, regionBox },
+    });
+    // Only Raycast and TS module loading are replaced. spawn and the shipped script run unchanged.
+    function powershell(script, report = {}) {
+      return execFileSync("powershell.exe", ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", script], {
+        encoding: "utf8",
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          HIDE_DETAILS_TEST_DIRECTORY: directory,
+          HIDE_DETAILS_TEST_REPORT: JSON.stringify(report),
+        },
+      });
+    }
+    powershell(`
+    $ErrorActionPreference = 'Stop'
+    Add-Type -AssemblyName System.Drawing
+    $bitmap = New-Object System.Drawing.Bitmap 480, 100
+    $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+    $font = New-Object System.Drawing.Font 'Arial', 28, ([System.Drawing.FontStyle]::Regular), ([System.Drawing.GraphicsUnit]::Pixel)
+    try {
+      $graphics.Clear([System.Drawing.Color]::White)
+      $bitmap.Save((Join-Path $env:HIDE_DETAILS_TEST_DIRECTORY 'blank.png'), [System.Drawing.Imaging.ImageFormat]::Png)
+      $graphics.DrawString('jane@example.com', $font, [System.Drawing.Brushes]::Black, 20, 30)
+      $bitmap.Save((Join-Path $env:HIDE_DETAILS_TEST_DIRECTORY 'email.png'), [System.Drawing.Imaging.ImageFormat]::Png)
+    } finally { $font.Dispose(); $graphics.Dispose(); $bitmap.Dispose() }
+  `);
+
+    const cases = [
+      { name: "detection disabled", input: "blank.png", categories: [], kind: null },
+      { name: "empty OCR and face arrays", input: "blank.png", categories: ["email", "face"], kind: null },
+      { name: "one OCR line with faces disabled", input: "email.png", categories: ["email"], kind: "email" },
+      { name: "one OCR line and no faces", input: "email.png", categories: ["email", "face"], kind: "email" },
+      {
+        name: "one face with OCR disabled",
+        input: path.join(root, "tests", "fixtures", "face.jpg"),
+        categories: ["face"],
+        kind: "face",
+      },
+    ];
+    for (const [index, scenario] of cases.entries()) {
+      await t.test(scenario.name, async () => {
+        const report = await windows.redactImage({
+          ...options,
+          inputPath: path.resolve(directory, scenario.input),
+          outputPath: path.join(directory, `output-${index}.png`),
+          categories: new Set(scenario.categories),
+          recognition: "fast",
+        });
+        assert.equal(report.output, path.join(directory, `output-${index}.png`));
+        assert.equal(report.clipboardChangeCount, null);
+        assert.deepEqual(
+          report.hits.map((hit) => hit.kind),
+          scenario.kind ? [scenario.kind] : [],
+        );
+        assert.equal(report.regionCount, scenario.kind ? 1 : 0);
+        if (scenario.kind === "email") assert.equal(report.hits[0].text.replace(/\s/g, ""), "jane@example.com");
+        assert.deepEqual([...readFileSync(report.output).subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+        powershell(
+          `
+        $ErrorActionPreference = 'Stop'
+        Add-Type -AssemblyName System.Drawing
+        $report = ConvertFrom-Json $env:HIDE_DETAILS_TEST_REPORT
+        $bitmap = New-Object System.Drawing.Bitmap $report.output
+        $source = New-Object System.Drawing.Bitmap $report.inputPath
+        try {
+          if ($bitmap.Width -ne $source.Width -or $bitmap.Height -ne $source.Height) { throw 'Image dimensions changed' }
+          if ($bitmap.GetPixel(0, 0).ToArgb() -ne $source.GetPixel(0, 0).ToArgb()) { throw 'Unmasked corner changed' }
+          if ($report.regionCount -eq 0) {
+            for ($y = 0; $y -lt $bitmap.Height; $y++) {
+              for ($x = 0; $x -lt $bitmap.Width; $x++) {
+                if ($bitmap.GetPixel($x, $y).ToArgb() -ne $source.GetPixel($x, $y).ToArgb()) { throw 'Empty scan changed pixels' }
+              }
+            }
+          }
+          foreach ($hit in $report.hits) {
+            $box = $hit.box
+            for ($y = $box.y; $y -lt $box.y + $box.height; $y++) {
+              for ($x = $box.x; $x -lt $box.x + $box.width; $x++) {
+                if ($bitmap.GetPixel($x, $y).ToArgb() -ne [System.Drawing.Color]::Black.ToArgb()) { throw 'Mask has an unredacted pixel' }
+              }
+            }
+          }
+        } finally { $source.Dispose(); $bitmap.Dispose() }
+      `,
+          { ...report, inputPath: path.resolve(directory, scenario.input) },
+        );
+      });
+    }
+  },
+);

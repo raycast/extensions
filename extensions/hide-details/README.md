@@ -72,6 +72,7 @@ Card and phone detection checks numbers separately from neighboring numeric deta
 
 On Windows, Hide Details runs a bundled Windows PowerShell script that uses Windows OCR, Windows face detection, and System.Drawing. It needs Windows 10 or later and a display language with OCR support installed. Some features differ from macOS:
 
+- **Don't Redact**, **Redact**, and **Redact All Detections** are unavailable. You can review and copy the result, but cannot remove individual false-positive masks. Change **What to Hide** or your custom rules, then scan again to change which details are masked.
 - Personal names are detected only from **Always Hide These Words**. Windows has no built-in name recognition.
 - Windows OCR and face detection don't report confidence, so the review list shows no percentages.
 - **Accurate** text recognition scans an image upscaled 2x, which helps with small text.
@@ -145,7 +146,7 @@ The output is a flattened PNG with no editable layers.
 
 ## Development
 
-Windows code lives in `assets/windows/hide-details.ps1` (image I/O, OCR, faces, rendering, clipboard) and `src/detection.ts` (text classification and OCR coordinate conversion). Windows OCR boxes are rotated by the reported text angle around the OCR image's center, then scaled to the original dimensions before masking. `npm test` checks this conversion, the helper protocol, and the TypeScript rules against the Swift rules on the same text. The PowerShell script itself needs manual testing on Windows.
+Windows code lives in `assets/windows/hide-details.ps1` (image I/O, OCR, faces, rendering, clipboard) and `src/detection.ts` (text classification and OCR coordinate conversion). Windows OCR boxes are rotated by the reported text angle around the OCR image's center, then scaled to the original dimensions before masking. `npm test` checks this conversion, the helper protocol, and the TypeScript rules against the Swift rules on the same text. On Windows, run `npm run test:windows` to test the bundled PowerShell script through the TypeScript adapter, including empty and single-item OCR and face results and rendered pixels. These integration tests are skipped on other platforms. Clipboard behavior still needs manual testing on Windows.
 
 Requires macOS 14 or newer, Raycast, Node.js 22.22.2 or newer, and Xcode with Swift 6.3 or newer for the Swift build plugins.
 
