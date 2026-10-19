@@ -6,7 +6,7 @@ the Mac (Raycast's own features follow Raycast's privacy policy).
 
 | Key | Action |
 |---|---|
-| ↩ | open at the line (VS Code, VSCodium, Cursor, Xcode, JetBrains), play from the moment (QuickTime), play a song |
+| ↩ | open at the line (VS Code, VSCodium, Cursor, Xcode, JetBrains), play from the moment (QuickTime), a PDF at its page (Skim; Preview through its Go to Page shortcut, which needs the Accessibility permission for Raycast), play a song |
 | ⌥↩ | open from the start (a recording from 0:00) |
 | ⌘↩ | show in Finder (a song: in Music or Spotify) |
 | ⌘Y | preview at the place: 30 lines around the code, the whole passage with your words in bold; a video in QuickTime, paused at the moment |
@@ -28,7 +28,7 @@ Lantern for Raycast connects to the local [Lantern](https://github.com/misterekk
 - **Raycast Store:** Install the **Lantern** extension directly from the Raycast Store.
 - **Development / Contributing:** To test or develop locally using the Raycast extensions repository:
   ```bash
-  cd extensions/lantern
+  cd integrations/raycast        # in the raycast/extensions repository: extensions/lantern
   npm install
   npm run dev
   ```

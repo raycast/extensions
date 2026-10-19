@@ -187,9 +187,17 @@ const PDF_PREVIEW = `on run argv
     activate
     open f
   end tell
+  -- Keystrokes go to whichever app is in front: send them only once Preview is in front with the document open.
   tell application "System Events"
+    repeat 50 times
+      if frontmost of process "Preview" and (count of windows of process "Preview") > 0 then exit repeat
+      delay 0.1
+    end repeat
+    if not (frontmost of process "Preview" and (count of windows of process "Preview") > 0) then return
     tell process "Preview"
       keystroke "g" using {option down, command down}
+      delay 0.2
+      if not frontmost then return
       keystroke (p as text)
       key code 36
     end tell
