@@ -32,7 +32,7 @@
 
 ## Supported status pages
 
-The extension auto-detects the provider when you add a URL. Detection order: **Railway → OutageDeck → AWS → Salesforce Trust → Google Cloud → AI Studio → incident.io → Better Stack → Instatus → Statuspage → OnlineOrNot → FireHydrant → Checkly → Uptime.com → RSS**.
+The extension auto-detects the provider when you add a URL. Detection order: **Railway → OutageDeck → AWS → Salesforce Trust → Google Cloud → AI Studio → incident.io → Better Stack → Instatus → Statuspage → Rootly → Datadog → OnlineOrNot → FireHydrant → Checkly → Uptime.com → RSS**.
 
 | Provider          | Examples                                                       | Detection                             |
 | ----------------- | -------------------------------------------------------------- | ------------------------------------- |
@@ -46,9 +46,11 @@ The extension auto-detects the provider when you add a URL. Detection order: **R
 | **Better Stack**  | [status.yachtway.com](https://status.yachtway.com)             | `/index.json` JSON:API                |
 | **Instatus**      | [instat.us](https://instat.us)                                 | `/summary.json`                       |
 | **Statuspage.io** | [status.claude.com](https://status.claude.com), GitHub, Vercel | `/api/v2/summary.json`                |
-| **OnlineOrNot**   | [status.openrouter.ai](https://status.openrouter.ai), `*.onlineornot.com` | Public `/v1/status_pages/{subdomain or hostname}/summary` API |
+| **Rootly**        | [status.mistral.ai](https://status.mistral.ai)                 | `/api/v1/status.json`                 |
+| **Datadog**       | [status.openrouter.ai](https://status.openrouter.ai)           | `/config.json`                        |
+| **OnlineOrNot**   | `*.onlineornot.com`, custom domains                            | Public `/v1/status_pages/{subdomain or hostname}/summary` API |
 | **FireHydrant**   | [status.redis.io](https://status.redis.io)                     | `/data/payload.json`                  |
-| **Checkly**       | [status.mistral.ai](https://status.mistral.ai)                 | `__NUXT_DATA__` payload in page HTML  |
+| **Checkly**       | [status.checklyhq.com](https://status.checklyhq.com)           | `__NUXT_DATA__` payload in page HTML  |
 | **Uptime.com**    | [status.uptime.com](https://status.uptime.com), [uptime.com/statuspage/hackerrank](https://uptime.com/statuspage/hackerrank) | React props payload in page HTML |
 | **RSS fallback**  | [status.x.ai](https://status.x.ai)                             | `/feed.xml` (and common feed paths)   |
 
@@ -56,7 +58,13 @@ incident.io is checked before Statuspage because some Statuspage hosts expose si
 
 Instatus must also be checked before Statuspage: Instatus pages serve a Statuspage-compatible `/api/v2/summary.json` shim, so the Statuspage detector matches them even though the payload lacks Statuspage-only fields.
 
-OnlineOrNot is checked after Statuspage. Hosted pages use `{subdomain}.onlineornot.com`. For custom domains such as [status.openrouter.ai](https://status.openrouter.ai), the adapter passes the hostname to the public summary API at `/v1/status_pages/status.openrouter.ai/summary`.
+Statuspage uptime comes from the `/uptime_showcase` endpoint of the page. This endpoint also feeds the 90-day bars. If a page does not have it, the adapter makes the history from `/api/v2/incidents.json`.
+
+A Cloudflare bot challenge often protects Rootly pages, but the challenge skips the public `/api/v1/status.json` API. This API gives the overall status and the active incidents. It gives no components and no uptime.
+
+Datadog Status Pages serve the full page state as `/config.json`: components and incidents, but no uptime. Detection tries Datadog before OnlineOrNot, because OnlineOrNot can still know a custom domain that moved away.
+
+Detection tries OnlineOrNot after Statuspage. Hosted pages use `{subdomain}.onlineornot.com`. For custom domains, the adapter passes the hostname to the public summary API at `/v1/status_pages/{hostname}/summary`.
 
 FireHydrant status pages expose current status at `/data/payload.json` on the page origin. The adapter runs before Checkly, which must download and parse the full HTML page.
 
