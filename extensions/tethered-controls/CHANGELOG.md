@@ -1,6 +1,6 @@
 # Tethered Changelog
 
-## [Event Scheduling and Bridge Controls] - {PR_MERGE_DATE}
+## [Event Scheduling and Bridge Controls] - 2026-10-19
 
 - Reserve Toggle Companion Sync for the upcoming feature, with app-confirmed unavailable errors and success/failure acknowledgments.
 
@@ -16,7 +16,7 @@
 - Configure durations, wait for AC, and brightness/fan percentages from the launcher.
 - Confirm event creation through the running app and protect existing repeating power events.
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-19
 
 - Control Tethered power modes, Caffeinate, Topup, Sailing, and Heat Protection from Raycast.
 - Search saved profiles and Caffeinate presets.
