@@ -1,6 +1,6 @@
 # macOS Tweaks Changelog
 
-## [Dock Spacers] - {PR_MERGE_DATE}
+## [Dock Spacers] - 2026-10-19
 
 ### New Command
 
