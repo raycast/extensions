@@ -1,7 +1,9 @@
 instructions: >-
   When users ask to convert a resume, CV, bio, or section to JSON Resume, extract their supplied
   facts into a JSON Resume object and call text-to-resume with resumeJson containing the serialized
-  JSON. Use basics.url, work.name/work.url, and education.score. Include all relevant standard
+  JSON. Use basics.url, work.name/work.url, and education.score. For grouped skills, preserve
+  each supplied proficiency heading in skills[].name and skills[].level, with its technologies
+  in skills[].keywords. Do not replace proficiency headings with invented categories. Include all relevant standard
   sections (basics, work, volunteer, education, projects, awards, certificates, publications,
   skills, languages, interests, references). For projects, keep the complete supplied project text
   in projects[].description, including user counts, star counts, and downloads. Put supplied
@@ -228,15 +230,12 @@ evals:
           arguments:
             resumeJson:
               - includes: '"projects"'
-              - includes: Built an e-commerce platform with 100k users using React and Node.js
-              - includes: React
-              - includes: Node.js
-              - includes: Created open-source library for data visualization with 5k GitHub stars
-              - includes: open-source
-              - includes: data visualization
-              - includes: Developed mobile app with React Native, 10k+ downloads
-              - includes: React Native
-              - includes: mobile
+              - matches: >-
+                  \{(?=[^{}]*"description"\s*:\s*"Built an e-commerce platform with (?:100k|100,?000) users(?: using React and Node\.js)?")(?=[^{}]*"keywords"\s*:\s*\[(?=[^\]]*"React")(?=[^\]]*"Node\.js")(?:\s*"(?:React|Node\.js)"\s*,?)*\s*\])[^{}]*\}
+              - matches: >-
+                  \{(?=[^{}]*"description"\s*:\s*"Created open-source library for data visualization(?: with |, )(?:5k|5,?000) GitHub stars")(?=[^{}]*"keywords"\s*:\s*\[(?:\s*"(?:open-source|data visualization)"\s*,?)*\s*\])[^{}]*\}
+              - matches: >-
+                  \{(?=[^{}]*"description"\s*:\s*"Developed mobile app(?: with React Native)?(?:, | with )(?:10k|10,?000)\+ downloads")(?=[^{}]*"keywords"\s*:\s*\[(?=[^\]]*"React Native")(?:\s*"(?:React Native|mobile)"\s*,?)*\s*\])[^{}]*\}
           name: text-to-resume
   - input: |-
       @json-resume parse this markdown resume:
