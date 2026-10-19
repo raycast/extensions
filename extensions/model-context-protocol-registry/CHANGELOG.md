@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add 10ML Fragrance Index MCP Server] - 2026-10-20
+
+- Add the 10ML Fragrance Index to the official registry: perfume notes, accords, families, similar scents and alternatives, houses and expert guides, curated by 10ML's fragrance editors. Hosted Streamable HTTP server at https://mcp.10ml.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add Runx, Sourcey, Frantic and Ausca MCP servers] - 2026-10-19
 
 - Add four first-party hosted MCP servers with current marks and direct HTTP connections in Raycast. Runx and Sourcey expose public read-only discovery, Frantic exposes public bounty reads and governed actions, and Ausca exposes keyless offer discovery with x402 payment required for paid calls. Other MCP clients retain the `mcp-remote` fallback.
