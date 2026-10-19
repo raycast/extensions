@@ -8,4 +8,5 @@
 - Keyboard shortcuts to open at specific lines, pages, or video timestamps.
 - Copy the file (`⌘C`), the matched text (`⌥⌘C`), or the path (`⇧⌘C`).
 - Photos and recordings show when and where they were made (with Lantern 0.2 or newer).
+- Clear states when Lantern is not installed, not running, still setting up, downloading its models or indexing for the first time.
 - Category filtering with keyboard shortcuts (`⌃1` ... `⌃0`).

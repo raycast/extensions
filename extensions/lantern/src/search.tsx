@@ -23,24 +23,30 @@ import {
 import { usePromise } from "@raycast/utils";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { around, highlight } from "./highlight";
 import {
   AppHit,
   DefinitionHit,
+  BREW_COMMAND,
+  DOWNLOAD_URL,
   FileHit,
+  LanternStatus,
   NotRunning,
   SearchReply,
   SettingHit,
   ShortcutHit,
   clock,
+  installedApp,
   lines,
+  openLanternApp,
   openAt,
   opened,
   passage,
   reveal,
   search,
   shortPath,
+  status,
   thumbnail,
   whenWhere,
 } from "./lantern";
@@ -78,9 +84,41 @@ export default function Command(props: LaunchProps) {
     [query, category],
   );
   const ctx: Ctx = { query: query.trim(), eventId: data?.event_id ?? null, category, setCategory };
+  // Lantern's own state: an unfinished setup, a download or a first indexing are explained, not shown as "no results"
+  const { data: st, revalidate: recheck } = usePromise(status, [], { onError: () => undefined });
+  const busy = !!st && (!!st.model_download?.running || (st.worker.running && (st.files.indexed ?? 0) === 0));
+  useEffect(() => {
+    if (!busy) return;
+    const timer = setInterval(recheck, 2000);
+    return () => clearInterval(timer);
+  }, [busy, recheck]);
   // Raycast only runs the shortcuts of the selected row's actions: every empty state carries the filter actions too,
   // or ⌃1…⌃0 would beep once a filter leaves nothing to select.
   const rows = data && query.trim() ? sections(data, includeApps, ctx).filter(Boolean) : [];
+
+  if (error instanceof NotRunning && !installedApp()) {
+    return (
+      <List searchText={query} onSearchTextChange={setQuery} throttle>
+        <List.EmptyView
+          icon={Icon.Download}
+          title="Lantern is not installed"
+          description="This extension searches with the Lantern app, which runs on your Mac. Install it, open it once, then search here."
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Download Lantern" url={DOWNLOAD_URL} />
+              <Action.CopyToClipboard title="Copy Homebrew Command" content={BREW_COMMAND} />
+              <Action
+                title="Retry Search"
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={() => revalidate()}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
 
   if (error instanceof NotRunning) {
     return (
@@ -95,7 +133,7 @@ export default function Command(props: LaunchProps) {
                 title="Open Lantern"
                 icon={Icon.AppWindow}
                 onAction={async () => {
-                  await open("/Applications/Lantern.app");
+                  await openLanternApp();
                   setTimeout(revalidate, 1500);
                 }}
               />
@@ -133,7 +171,9 @@ export default function Command(props: LaunchProps) {
         </List.Dropdown>
       }
     >
-      {!query.trim() ? (
+      {st && setupView(st) && (!query.trim() || !rows.length) ? (
+        setupView(st)
+      ) : !query.trim() ? (
         <List.EmptyView
           icon="icon.png"
           title="Search your Mac by what is inside"
@@ -169,6 +209,63 @@ export default function Command(props: LaunchProps) {
       ) : null}
     </List>
   );
+}
+
+/** An index needing attention, an unfinished setup, a model download, a first indexing: what to do or wait for. */
+function setupView(st: LanternStatus) {
+  const openLantern = (
+    <ActionPanel>
+      <Action
+        title="Open Lantern"
+        icon={Icon.AppWindow}
+        onAction={openLanternApp}
+      />
+    </ActionPanel>
+  );
+  if (st.index_problem) {
+    return (
+      <List.EmptyView
+        icon={Icon.Warning}
+        title="Lantern’s index needs attention"
+        description="Open Lantern from the menu bar: it explains what happened and can update or rebuild the index."
+        actions={openLantern}
+      />
+    );
+  }
+  if (st.model_download?.running) {
+    const approx = Math.max(st.model_download.approx_mb ?? 1200, 1);
+    const got = Math.min(st.model_download.downloaded_mb ?? 0, approx);
+    return (
+      <List.EmptyView
+        icon={Icon.Download}
+        title="Lantern is downloading its models"
+        description={`${got} / ~${approx} MB. You can search here as soon as it is done.`}
+        actions={openLantern}
+      />
+    );
+  }
+  if (st.models_missing) {
+    return (
+      <List.EmptyView
+        icon={Icon.Download}
+        title="Finish setting up Lantern"
+        description="Download the search model in Lantern (its icon in the menu bar). It takes one click; then search here."
+        actions={openLantern}
+      />
+    );
+  }
+  if (st.worker.running && (st.files.indexed ?? 0) === 0) {
+    const where = st.worker.total ? ` ${st.worker.done ?? 0} / ${st.worker.total} files.` : "";
+    return (
+      <List.EmptyView
+        icon={Icon.Clock}
+        title="Lantern is indexing your files for the first time"
+        description={`Results fill in as it goes.${where}`}
+        actions={openLantern}
+      />
+    );
+  }
+  return null;
 }
 
 function hasFiles(r: SearchReply): boolean {

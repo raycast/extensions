@@ -25,6 +25,8 @@ Preference: *Also show apps and System Settings* (off: Raycast finds those itsel
 
 Lantern for Raycast connects to the local [Lantern](https://github.com/misterekkk/lantern) macOS application over a Unix domain socket. Make sure the Lantern app is installed and running on your Mac.
 
+The extension does not install Lantern. Without it, "Search Lantern" shows where to download it (or the Homebrew command `brew install --cask misterekkk/tap/lantern`); while Lantern is setting up, downloading its models or indexing for the first time, it says so instead of showing no results.
+
 ## Installation
 
 - **Raycast Store:** Install the **Lantern** extension directly from the Raycast Store.
