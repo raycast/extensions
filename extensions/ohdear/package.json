@@ -131,8 +131,7 @@
   "dependencies": {
     "@raycast/api": "^2.8.2",
     "@raycast/utils": "^2.3.2",
-    "dayjs": "^1.11.23",
-    "node-fetch": "^3.3.2"
+    "dayjs": "^1.11.23"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

@@ -1,6 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import fetch, { type Response as FetchResponse } from "node-fetch";
 import {
   BrokenLinks,
   CertificateHealth,
@@ -116,7 +115,7 @@ export function getDNSRecords(site: Site) {
   });
 }
 
-async function checkResponse(response: FetchResponse) {
+async function checkResponse(response: Response) {
   if (response.ok) {
     return;
   }

@@ -36,31 +36,32 @@ const nativeApi = {
   Icon: {},
 };
 
-function loadApi(fetch) {
+function loadApi(t, fetch) {
+  t.mock.method(globalThis, "fetch", fetch);
   return loadSource("src/api.tsx", {
     "@raycast/api": nativeApi,
     "@raycast/utils": { useFetch() {} },
-    "node-fetch": fetch,
   });
 }
 
 for (const method of ["createSite", "deleteSite"]) {
   for (const status of [401, 403, 422, 429, 500]) {
-    test(`${method} rejects HTTP ${status} with the API message`, async () => {
-      const api = loadApi(async () => new Response(JSON.stringify({ message: "Request denied" }), { status }));
+    test(`${method} rejects HTTP ${status} with the API message`, async (t) => {
+      const api = loadApi(t, async () => new Response(JSON.stringify({ message: "Request denied" }), { status }));
       await assert.rejects(api[method]({ id: 1, url: "https://example.com", checks: ["uptime"] }), /Request denied/);
     });
   }
-  test(`${method} reports non-JSON HTTP failures`, async () => {
+  test(`${method} reports non-JSON HTTP failures`, async (t) => {
     const api = loadApi(
+      t,
       async () => new Response("<html>Bad gateway</html>", { status: 502, statusText: "Bad Gateway" }),
     );
     await assert.rejects(api[method]({ id: 1 }), /502/);
   });
 }
 
-test("successful create and delete do not require a JSON response body", async () => {
-  const api = loadApi(async () => new Response(null, { status: 204 }));
+test("successful create and delete do not require a JSON response body", async (t) => {
+  const api = loadApi(t, async () => new Response(null, { status: 204 }));
   await api.createSite({ url: "https://example.com", checks: ["uptime"] });
   await api.deleteSite({ id: 1 });
 });
@@ -76,6 +77,64 @@ function nodes(node) {
       .flatMap(nodes),
   ];
 }
+
+test("a rejected deletion restores the site in the list and shows a failure toast", async (t) => {
+  let completeRequest;
+  const request = new Promise((resolve) => {
+    completeRequest = resolve;
+  });
+  const api = loadApi(t, () => request);
+  const removedSite = { id: 1, label: "Example" };
+  const otherSite = { id: 2, label: "Other" };
+  let data = { Ungrouped: [removedSite, otherSite] };
+  const failures = [];
+  const { default: ShowSitesCommand } = loadSource("src/index.tsx", {
+    "@raycast/api": { ...nativeApi, List: { Section: "Section" } },
+    "@raycast/utils": {
+      showFailureToast: async (error, options) => failures.push({ error, ...options }),
+    },
+    "react/jsx-runtime": jsxRuntime,
+    react: { useState: (initial) => [initial, () => {}] },
+    "./components/empty-view": { EmptyView: "EmptyView" },
+    "./components/site-item": { SiteItem: "SiteItem" },
+    "./api": {
+      ...api,
+      getSites: () => ({
+        data,
+        isLoading: false,
+        // Model Raycast mutate's documented optimistic update and default rollback contract.
+        async mutate(promise, options) {
+          const previousData = data;
+          data = options.optimisticUpdate(data);
+          try {
+            return await promise;
+          } catch (error) {
+            if (options.rollbackOnError !== false) data = previousData;
+            throw error;
+          }
+        },
+      }),
+    },
+  });
+  const renderedSites = () => nodes(ShowSitesCommand()).filter((node) => node.type === "SiteItem");
+  const siteItem = renderedSites().find((node) => node.props.entry.id === removedSite.id);
+  const removal = siteItem.props.onRemoveItem(removedSite);
+  assert.deepEqual(
+    renderedSites().map((node) => node.props.entry),
+    [otherSite],
+  );
+
+  completeRequest(new Response(JSON.stringify({ message: "Request denied" }), { status: 403 }));
+  await removal;
+
+  assert.deepEqual(
+    renderedSites().map((node) => node.props.entry),
+    [removedSite, otherSite],
+  );
+  assert.equal(failures.length, 1);
+  assert.equal(failures[0].title, "Could Not Remove Site");
+  assert.match(failures[0].error.message, /Request denied/);
+});
 
 function addForm(createSite) {
   const failures = [];
