@@ -80,24 +80,28 @@ test('reordering a section keeps the places of accounts listed in other sections
 
 test('records the original extension saved unvalidated neither hide other accounts nor get lost', async () => {
   values.clear();
-  const unreadable = [
-    { id: 'bad-secret', name: 'Typo', secret: 'not a key!' },
-    { id: 'no-name', name: '', secret },
-  ];
+  const unreadable = [{ id: 'bad-secret', name: 'Typo', secret: 'not a key!' }];
   const stored = [
     { id: 'spaced', name: 'Spaced', issuer: '', secret: secret.toLowerCase().replace(/(.{4})/g, '$1 ').trim() },
     { id: 'uri', name: 'Edited', secret: `otpauth://totp/Example:Bob?secret=${secret}&issuer=Example` },
     ...unreadable,
+    // The original form had no required fields; pasting a setup link as the key filled in only the service.
+    { id: 'no-name', name: '', issuer: 'GitHub', secret },
+    { id: 'blank', name: '  ', secret },
   ];
   values.set('one-time-password-accounts', JSON.stringify(stored));
   assert.deepEqual((await store.getAccounts()).map((account) => [account.id, account.name, account.secret]), [
     ['spaced', 'Spaced', secret],
     ['uri', 'Bob', secret],
+    ['no-name', 'Unnamed account', secret],
+    ['blank', 'Unnamed account', secret],
   ]);
   await store.toggleFavorite('spaced');
   const saved = JSON.parse(values.get('one-time-password-accounts')!);
-  assert.deepEqual(saved.slice(2), unreadable);
+  assert.deepEqual(saved.slice(4), unreadable);
   assert.equal((await store.getAccounts())[0].favorite, true);
+  assert.equal((await store.getAccounts())[2].issuer, 'GitHub');
+  await assert.rejects(store.addAccount({ name: ' ', secret }));
 });
 
 test('accounts the original extension saved twice under one id each stay separate', async () => {

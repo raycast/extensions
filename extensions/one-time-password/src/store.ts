@@ -7,6 +7,7 @@ export type { CreateAccount } from './model';
 
 const STORAGE_KEY = 'one-time-password-accounts';
 const LAST_USED_ACCOUNT_KEY = 'one-time-password-last-used-account';
+const UNNAMED_ACCOUNT = 'Unnamed account';
 let mutationQueue: Promise<unknown> = Promise.resolve();
 
 function mutate<T>(operation: () => Promise<T>): Promise<T> {
@@ -23,9 +24,18 @@ async function readRecords(): Promise<unknown[]> {
   return Array.isArray(data) ? data : [];
 }
 
+// The original form didn't require a name, so saved accounts without one get a placeholder instead of being skipped.
+// New and edited accounts still need a name.
+function withName(record: unknown): unknown {
+  if (!record || typeof record !== 'object' || Array.isArray(record)) return record;
+  const { name } = record as { name?: unknown };
+  const unnamed = name === undefined || (typeof name === 'string' && !name.trim());
+  return unnamed ? { ...record, name: UNNAMED_ACCOUNT } : record;
+}
+
 function parseRecord(record: unknown): Account | undefined {
   try {
-    return normalizeAccount(record);
+    return normalizeAccount(withName(record));
   } catch {
     return undefined;
   }
