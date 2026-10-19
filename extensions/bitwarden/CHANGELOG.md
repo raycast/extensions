@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Unlock Form Improvements] - {PR_MERGE_DATE}
+## [Unlock Form Improvements] - 2026-10-19
 
 - Press Enter to submit the master password (⌘ + Enter still works)
 - Lock the unlock form while the vault is unlocking, so the password can't be edited mid-unlock
