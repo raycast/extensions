@@ -392,6 +392,25 @@ test("deletion wins over an update from a separate execution before and after it
   }
 });
 
+test("deletion succeeds despite cleanup failures and a fresh listing retries cleanup", async () => {
+  const { storage, api, overrides, items } = await documentEnvironment();
+  const doc = await storage.createResumeDocument({ title: "Test", resumeJson: "{}" });
+  const key = "resumeDocument:v1:" + doc.id;
+  const originalRemoveItem = api.LocalStorage.removeItem;
+  api.LocalStorage.removeItem = async () => { throw new Error("Cleanup failed"); };
+  const tool = await loadSource("src/tools/delete-resume.ts", overrides);
+  assert.deepEqual(await tool.default({ id: doc.id }), { id: doc.id, deleted: true });
+  assert.equal(items.has(key), true);
+  await assert.rejects(storage.getResumeDocument(doc.id), /not found/);
+  const fresh = await loadSource("src/utils/resumeDocuments.ts", overrides);
+  assert.deepEqual(await fresh.listResumeDocuments(), { documents: [], warnings: [] });
+  assert.equal(items.has(key), true);
+  api.LocalStorage.removeItem = originalRemoveItem;
+  assert.deepEqual(await fresh.listResumeDocuments(), { documents: [], warnings: [] });
+  assert.equal(items.has(key), false);
+  assert.equal(items.get("deletedResumeDocument:v1:" + doc.id), true);
+});
+
 test("invalid creates, edits, and unknown IDs leave storage unchanged", async () => {
   const { items, storage } = await documentEnvironment();
   const doc = await storage.createResumeDocument({ title: "Test", resumeJson: "{}" });
@@ -427,7 +446,7 @@ test("listing reports corrupt records and sorts readable documents deterministic
   await assert.rejects(storage.getResumeDocument("future"), /Invalid/);
 });
 
-test("document storage propagates read, write, list, and delete failures", async () => {
+test("document storage propagates read, write, list, and deletion-marker failures", async () => {
   const { storage, api } = await documentEnvironment();
   const doc = await storage.createResumeDocument({ title: "Test", resumeJson: "{}" });
   api.LocalStorage.allItems = async () => {
@@ -440,11 +459,9 @@ test("document storage propagates read, write, list, and delete failures", async
   };
   await assert.rejects(storage.createResumeDocument({ title: "Test", resumeJson: "{}" }), /Write failed/);
   await assert.rejects(storage.updateResumeDocument({ id: doc.id, title: "Test", resumeJson: "{}" }), /Write failed/);
+  await assert.rejects(storage.deleteResumeDocument(doc.id), /Write failed/);
   api.LocalStorage.setItem = originalSetItem;
-  api.LocalStorage.removeItem = async () => {
-    throw new Error("Delete failed");
-  };
-  await assert.rejects(storage.deleteResumeDocument(doc.id), /Delete failed/);
+  assert.equal((await storage.getResumeDocument(doc.id)).id, doc.id);
   api.LocalStorage.getItem = async () => {
     throw new Error("Read failed");
   };

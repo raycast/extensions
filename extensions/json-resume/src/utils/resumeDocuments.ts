@@ -37,12 +37,24 @@ async function readDocument(key: string, raw: unknown): Promise<ResumeDocument> 
   return record as ResumeDocument;
 }
 
+async function cleanupDeletedDocument(key: string) {
+  try {
+    await LocalStorage.removeItem(key);
+  } catch {
+    // The deletion marker is authoritative. A later listing retries cleanup.
+  }
+}
+
 export async function listResumeDocuments() {
   const items = await LocalStorage.allItems();
   const documents: ResumeDocument[] = [];
   const warnings: string[] = [];
   for (const [key, raw] of Object.entries(items)) {
-    if (!key.startsWith(PREFIX) || items[DELETED_PREFIX + key.slice(PREFIX.length)] !== undefined) continue;
+    if (!key.startsWith(PREFIX)) continue;
+    if (items[DELETED_PREFIX + key.slice(PREFIX.length)] !== undefined) {
+      await cleanupDeletedDocument(key);
+      continue;
+    }
     try {
       documents.push(await readDocument(key, raw));
     } catch {
@@ -93,7 +105,7 @@ export async function updateResumeDocument(input: { id: string; title: string; r
   const document = { ...previous, title, resume, updatedAt: new Date().toISOString() };
   await LocalStorage.setItem(PREFIX + document.id, JSON.stringify(document));
   if ((await LocalStorage.getItem(DELETED_PREFIX + document.id)) !== undefined) {
-    await LocalStorage.removeItem(PREFIX + document.id);
+    await cleanupDeletedDocument(PREFIX + document.id);
     throw new Error(`Saved resume not found: ${document.id}`);
   }
   return document;
@@ -103,5 +115,5 @@ export async function deleteResumeDocument(id: string) {
   await getResumeDocument(id);
   // Keep a permanent marker so updates in other executions cannot restore this ID.
   await LocalStorage.setItem(DELETED_PREFIX + id, true);
-  await LocalStorage.removeItem(PREFIX + id);
+  await cleanupDeletedDocument(PREFIX + id);
 }
