@@ -154,6 +154,13 @@ function run(file: string, args: string[], env?: Record<string, string>): Promis
   );
 }
 
+/** Like run, with the script's printed result (osascript prints what the script returns). */
+function runOutput(file: string, args: string[]): Promise<{ ok: boolean; out: string }> {
+  return new Promise((resolve) =>
+    execFile(file, args, (err, stdout) => resolve({ ok: !err, out: String(stdout ?? "").trim() })),
+  );
+}
+
 /** The main executable of an app bundle (JetBrains IDEs take --line on it). */
 function executable(app: string): Promise<string | undefined> {
   return new Promise((resolve) =>
@@ -193,15 +200,16 @@ const PDF_PREVIEW = `on run argv
       if frontmost of process "Preview" and (count of windows of process "Preview") > 0 then exit repeat
       delay 0.1
     end repeat
-    if not (frontmost of process "Preview" and (count of windows of process "Preview") > 0) then return
+    if not (frontmost of process "Preview" and (count of windows of process "Preview") > 0) then return "skipped"
     tell process "Preview"
       keystroke "g" using {option down, command down}
       delay 0.2
-      if not frontmost then return
+      if not frontmost then return "skipped"
       keystroke (p as text)
       key code 36
     end tell
   end tell
+  return "jumped"
 end run`;
 
 const PDF_SKIM = `on run argv
@@ -239,8 +247,17 @@ export async function openAt(
       const args = ["-e", PDF_SKIM, file, String(page)];
       if (await run("/usr/bin/osascript", args)) return;
     } else if (id === "com.apple.Preview") {
-      const args = ["-e", PDF_PREVIEW, file, String(page)];
-      if (await run("/usr/bin/osascript", args)) return;
+      const { ok, out } = await runOutput("/usr/bin/osascript", ["-e", PDF_PREVIEW, file, String(page)]);
+      if (ok && out === "jumped") return;
+      if (ok) {
+        // Preview never came to the front with the document, so no keys were sent: the PDF is open, not at the page.
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Opened without going to page ${page}`,
+          message: "Preview was not in front in time; press ↩ again to retry",
+        });
+        return;
+      }
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not jump to PDF page",
