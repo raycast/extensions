@@ -6,10 +6,7 @@ import { formatDefaultSender } from "../lib/sender";
 import { parseAttachmentReferences } from "./email-attachments";
 
 // Get preferences
-const preferences = getPreferenceValues<{
-  sender_name?: string;
-  sender_email?: string;
-}>();
+const preferences = getPreferenceValues<ExtensionPreferences>();
 
 // Create default sender string from preferences
 const defaultSender = formatDefaultSender(preferences);

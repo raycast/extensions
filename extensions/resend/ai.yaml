@@ -6,6 +6,7 @@ instructions: |
   Sending, sharing, rescheduling, canceling, deleting, creating credentials, changing contacts or segment membership, and domain verification use tool-provided confirmations. Do not ask for a redundant chat confirmation; call the correct tool and let its confirmation UI obtain approval. Do not claim success until the tool returns successfully.
   Share links are public to anyone with the URL and may last no longer than 48 hours. Use list-emails before sharing, rescheduling, canceling, or retrieving a sent email unless the exact email ID is already present in the conversation.
   Prefer segments for current contact workflows. Use list-segments to resolve a named segment and list-contacts to resolve an existing contact. Use legacy audiences only when the user explicitly asks about an audience or an existing audience ID is available.
+  To unsubscribe a contact from all future email, use list-contacts and then update-contact with unsubscribed set to true. Segment lookup is unnecessary unless the user names a segment.
   For inbound email, use list-received-emails first. Retrieve the selected message before summarizing its full contents. To obtain a downloadable attachment URL, list that message's attachments and retrieve the selected attachment.
   Use get-email-metrics for aggregate delivery and engagement reporting. To investigate API failures, use list-logs and then retrieve the relevant failed request before explaining its request and response bodies.
   Use list-domains, list-templates, and list-broadcasts before retrieving a named resource. Use list-topics and list-webhooks for account configuration questions.
@@ -182,6 +183,16 @@ evals:
             attachments:
               - id: "attachment-invoice"
                 filename: "invoice.pdf"
+      retrieve-received-email:
+        object: "email"
+        id: "received-202"
+        from: "billing@example.com"
+        to: ["accounts@example.com"]
+        subject: "August invoice"
+        text: "Your invoice is attached."
+        attachments:
+          - id: "attachment-invoice"
+            filename: "invoice.pdf"
       list-received-email-attachments:
         object: "list"
         has_more: false
@@ -514,6 +525,12 @@ evals:
 
   - input: "@resend What questions are required for position-devtools?"
     mocks:
+      list-positions:
+        object: "list"
+        data:
+          - id: "position-devtools"
+            title: "Developer Tools Engineer"
+            location: "Americas"
       retrieve-position:
         id: "position-devtools"
         title: "Developer Tools Engineer"
@@ -533,6 +550,12 @@ evals:
 
   - input: "@resend Apply to position-devtools for me. I have not provided my resume or applicant details."
     mocks:
+      list-positions:
+        object: "list"
+        data:
+          - id: "position-devtools"
+            title: "Developer Tools Engineer"
+            location: "Americas"
       retrieve-position:
         id: "position-devtools"
         title: "Developer Tools Engineer"
@@ -559,6 +582,12 @@ evals:
 
   - input: "@resend Submit my application for position-devtools. My name is Ada Lovelace, my email is ada@example.com, my resume is /tmp/ada-resume.pdf, and my answer to Why Resend is I build email tools."
     mocks:
+      list-positions:
+        object: "list"
+        data:
+          - id: "position-devtools"
+            title: "Developer Tools Engineer"
+            location: "Americas"
       retrieve-position:
         id: "position-devtools"
         title: "Developer Tools Engineer"
