@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add 10ML Fragrance Index MCP Server] - 2026-10-20
+## [Add 10ML Fragrance Index MCP Server] - {PR_MERGE_DATE}
 
 - Add the 10ML Fragrance Index to the official registry: perfume notes, accords, families, similar scents and alternatives, houses and expert guides, curated by 10ML's fragrance editors. Hosted Streamable HTTP server at https://mcp.10ml.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
