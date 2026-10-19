@@ -31,11 +31,19 @@ def run(duration, lock_mouse, timeout=8):
 
 for duration in [-1, 0, 2_147_483_648]:
     result = run(duration, False)
-    assert result.returncode != 0, (duration, result)
+    assert result.returncode == 1, (duration, result)
+    assert result.stdout == b"", (duration, result.stdout)
+    assert b"Error Domain=CleanKeyboard Code=1" in result.stderr, result.stderr
+    assert b"Choose a positive duration, or Forever." in result.stderr, result.stderr
 print("PASS: invalid durations fail before acquiring an input tap")
 
 result = run(1, "not-a-boolean")
-assert result.returncode != 0, result
+assert result.returncode == 1, result
+assert result.stdout == b"", result.stdout
+assert b'DecodingArgumentError<Optional<Bool>' in result.stderr, result.stderr
+assert b'name: "lockMouse"' in result.stderr, result.stderr
+assert b'position: 1' in result.stderr, result.stderr
+assert b'Expected to decode Bool but found a string instead.' in result.stderr, result.stderr
 print("PASS: invalid native arguments fail before acquiring an input tap")
 
 if not args.live:

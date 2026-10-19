@@ -91,6 +91,7 @@ class EventHandler {
       displayCallbackRegistered = true
     }
     if let duration { deadline = ProcessInfo.processInfo.systemUptime + TimeInterval(duration) }
+    updateRecoveryHold(now: ProcessInfo.processInfo.systemUptime)
     scheduleTimer()
     CFRunLoopRun()
     stateLock.lock()
@@ -106,7 +107,7 @@ class EventHandler {
       self.stateLock.lock()
       self.lastTick = now
       self.stateLock.unlock()
-      if let started = self.bothCommandSince, now - started >= 8 { self.stop(reason: "recovery") }
+      self.updateRecoveryHold(now: now)
     }
     timer = pulse
     RunLoop.current.add(pulse, forMode: .common)
@@ -124,6 +125,18 @@ class EventHandler {
     }
     watchdog = watch
     watch.resume()
+  }
+
+  private func updateRecoveryHold(now: TimeInterval) {
+    guard lockMouse else { return }
+    let bothHeld = CGEventSource.keyState(.hidSystemState, key: 55)
+      && CGEventSource.keyState(.hidSystemState, key: 54)
+    guard bothHeld else { bothCommandSince = nil; return }
+    if let started = bothCommandSince {
+      if now - started >= 8 { stop(reason: "recovery") }
+    } else {
+      bothCommandSince = now
+    }
   }
 
   private func setupEventTap() throws {
@@ -187,9 +200,7 @@ class EventHandler {
       } else if keyCode == 54 {
         rightCommand = CGEventSource.keyState(.combinedSessionState, key: 54)
       }
-      if leftCommand && rightCommand {
-        if bothCommandSince == nil { bothCommandSince = now }
-      } else { bothCommandSince = nil }
+      if !leftCommand || !rightCommand { bothCommandSince = nil }
       let commandDown = leftCommand || rightCommand
       if keyCode != 55 && keyCode != 54 { commandTapCount = 0 }
       else if commandDown && !commandWasDown {
