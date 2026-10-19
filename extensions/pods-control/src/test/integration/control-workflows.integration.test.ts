@@ -251,7 +251,10 @@ test("publishes a confirmed remaining state from a failed change", async () => {
     channel: "listening-mode",
     revision: "test-revision",
   });
-  expect(toast.setToFailure).toHaveBeenCalledWith({ error });
+  expect(toast.setToFailure).toHaveBeenCalledWith({
+    error,
+    copyText: "macOS did not confirm the change.",
+  });
   expect(toast.setToSuccess).not.toHaveBeenCalled();
 });
 
@@ -384,7 +387,10 @@ test("shows the general failure when cycling with Off enabled fails without a co
   // Then
   expect(mockPublishCommandSubtitle).not.toHaveBeenCalled();
   expect(mockResetCommandSubtitle).toHaveBeenCalledOnce();
-  expect(toast.setToFailure).toHaveBeenCalledExactlyOnceWith({ error });
+  expect(toast.setToFailure).toHaveBeenCalledExactlyOnceWith({
+    error,
+    copyText: "macOS did not confirm the change.",
+  });
 });
 
 test("publishes the confirmed state after toggling", async () => {
@@ -420,7 +426,10 @@ test("publishes the confirmed state from a failed toggle", async () => {
     channel: "conversation-awareness",
     revision: "test-revision",
   });
-  expect(toast.setToFailure).toHaveBeenCalledWith({ error });
+  expect(toast.setToFailure).toHaveBeenCalledWith({
+    error,
+    copyText: "macOS did not confirm the change.",
+  });
 });
 
 test("preserves unsupported-device feedback", async () => {
