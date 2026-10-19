@@ -4,6 +4,7 @@ import { Resume } from "../types/resume";
 import { parseResumeJson } from "./parseResume";
 
 const PREFIX = "resumeDocument:v1:";
+const DELETED_PREFIX = "deletedResumeDocument:v1:";
 
 export interface ResumeDocument {
   version: 1;
@@ -41,7 +42,7 @@ export async function listResumeDocuments() {
   const documents: ResumeDocument[] = [];
   const warnings: string[] = [];
   for (const [key, raw] of Object.entries(items)) {
-    if (!key.startsWith(PREFIX)) continue;
+    if (!key.startsWith(PREFIX) || items[DELETED_PREFIX + key.slice(PREFIX.length)] !== undefined) continue;
     try {
       documents.push(await readDocument(key, raw));
     } catch {
@@ -55,7 +56,11 @@ export async function listResumeDocuments() {
 export async function getResumeDocument(id: string): Promise<ResumeDocument> {
   const raw = await LocalStorage.getItem<string>(PREFIX + id);
   if (raw === undefined) throw new Error(`Saved resume not found: ${id}`);
-  return readDocument(PREFIX + id, raw);
+  const document = await readDocument(PREFIX + id, raw);
+  if ((await LocalStorage.getItem(DELETED_PREFIX + id)) !== undefined) {
+    throw new Error(`Saved resume not found: ${id}`);
+  }
+  return document;
 }
 
 function requireTitle(title: string) {
@@ -87,10 +92,16 @@ export async function updateResumeDocument(input: { id: string; title: string; r
   const previous = await getResumeDocument(input.id);
   const document = { ...previous, title, resume, updatedAt: new Date().toISOString() };
   await LocalStorage.setItem(PREFIX + document.id, JSON.stringify(document));
+  if ((await LocalStorage.getItem(DELETED_PREFIX + document.id)) !== undefined) {
+    await LocalStorage.removeItem(PREFIX + document.id);
+    throw new Error(`Saved resume not found: ${document.id}`);
+  }
   return document;
 }
 
 export async function deleteResumeDocument(id: string) {
   await getResumeDocument(id);
+  // Keep a permanent marker so updates in other executions cannot restore this ID.
+  await LocalStorage.setItem(DELETED_PREFIX + id, true);
   await LocalStorage.removeItem(PREFIX + id);
 }

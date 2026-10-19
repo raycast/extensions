@@ -361,11 +361,12 @@ evals:
           name: update-resume
           arguments:
             id:
-              - includes: resume-example-1
+              - eq: resume-example-1
+            title:
+              - eq: Engineering
             resumeJson:
-              - includes: Senior Engineer
-              - includes: Example Employer
-              - includes: "2020"
+              - matches: >-
+                  ^\s*\{\s*(?:"basics"\s*:\s*\{\s*(?:"name"\s*:\s*"Example Person"\s*,\s*"label"\s*:\s*"Senior Engineer"|"label"\s*:\s*"Senior Engineer"\s*,\s*"name"\s*:\s*"Example Person")\s*\}\s*,\s*"work"\s*:\s*\[\s*\{\s*(?:"name"\s*:\s*"Example Employer"\s*,\s*"startDate"\s*:\s*"2020"|"startDate"\s*:\s*"2020"\s*,\s*"name"\s*:\s*"Example Employer")\s*\}\s*\]|"work"\s*:\s*\[\s*\{\s*(?:"name"\s*:\s*"Example Employer"\s*,\s*"startDate"\s*:\s*"2020"|"startDate"\s*:\s*"2020"\s*,\s*"name"\s*:\s*"Example Employer")\s*\}\s*\]\s*,\s*"basics"\s*:\s*\{\s*(?:"name"\s*:\s*"Example Person"\s*,\s*"label"\s*:\s*"Senior Engineer"|"label"\s*:\s*"Senior Engineer"\s*,\s*"name"\s*:\s*"Example Person")\s*\})\s*\}\s*$
   - input: "@json-resume Rename my saved Engineering resume to Backend. Preserve its JSON."
     mocks:
       list-resumes: >-

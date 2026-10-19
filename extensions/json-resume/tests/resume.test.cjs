@@ -355,6 +355,43 @@ test("local documents persist, retain custom fields, and isolate duplicate title
   assert.equal(items.get("savedResumes"), bookmark);
 });
 
+test("deletion wins over an update from a separate execution before and after its write", async () => {
+  for (const pauseAfterWrite of [false, true]) {
+    const { storage, api, overrides, items } = await documentEnvironment();
+    const doc = await storage.createResumeDocument({ title: "Engineer", resumeJson: "{}" });
+    const updater = await loadSource("src/utils/resumeDocuments.ts", overrides);
+    const originalSetItem = api.LocalStorage.setItem;
+    let resumeWrite;
+    let signalPaused;
+    const paused = new Promise((resolve) => { signalPaused = resolve; });
+    const released = new Promise((resolve) => { resumeWrite = resolve; });
+    api.LocalStorage.setItem = async (key, value) => {
+      if (key === "resumeDocument:v1:" + doc.id) {
+        if (pauseAfterWrite) await originalSetItem(key, value);
+        signalPaused();
+        await released;
+        if (pauseAfterWrite) return;
+      }
+      await originalSetItem(key, value);
+    };
+    const update = updater.updateResumeDocument({ id: doc.id, title: "Updated", resumeJson: "{}" });
+    const rejected = assert.rejects(update, /not found/);
+    await paused;
+    await storage.deleteResumeDocument(doc.id);
+    resumeWrite();
+    await rejected;
+    await assert.rejects(storage.getResumeDocument(doc.id), /not found/);
+    assert.deepEqual((await storage.listResumeDocuments()).documents, []);
+    assert.equal(items.has("resumeDocument:v1:" + doc.id), false);
+
+    // Even a stale physical write cannot make a deleted ID visible in a fresh execution.
+    items.set("resumeDocument:v1:" + doc.id, JSON.stringify(doc));
+    const fresh = await loadSource("src/utils/resumeDocuments.ts", overrides);
+    await assert.rejects(fresh.getResumeDocument(doc.id), /not found/);
+    assert.deepEqual((await fresh.listResumeDocuments()).documents, []);
+  }
+});
+
 test("invalid creates, edits, and unknown IDs leave storage unchanged", async () => {
   const { items, storage } = await documentEnvironment();
   const doc = await storage.createResumeDocument({ title: "Test", resumeJson: "{}" });
@@ -397,11 +434,13 @@ test("document storage propagates read, write, list, and delete failures", async
     throw new Error("List failed");
   };
   await assert.rejects(storage.listResumeDocuments(), /List failed/);
+  const originalSetItem = api.LocalStorage.setItem;
   api.LocalStorage.setItem = async () => {
     throw new Error("Write failed");
   };
   await assert.rejects(storage.createResumeDocument({ title: "Test", resumeJson: "{}" }), /Write failed/);
   await assert.rejects(storage.updateResumeDocument({ id: doc.id, title: "Test", resumeJson: "{}" }), /Write failed/);
+  api.LocalStorage.setItem = originalSetItem;
   api.LocalStorage.removeItem = async () => {
     throw new Error("Delete failed");
   };
