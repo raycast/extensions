@@ -15,6 +15,18 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "share-profile",
+      "title": "Share Profile",
+      "description": "Choose a saved profile and export a .tetheredprofile file through Tethered",
+      "mode": "view"
+    },
+    {
+      "name": "post-profile",
+      "title": "Post Profile",
+      "description": "Choose a saved profile and open Tethered’s submission editor for tetheredmac.com/profiles",
+      "mode": "view"
+    },
+    {
       "name": "toggle-companion-sync",
       "title": "Toggle Companion Sync",
       "description": "Request a Companion Sync toggle; requires a supporting Tethered app version",

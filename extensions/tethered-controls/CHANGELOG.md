@@ -1,6 +1,8 @@
 # Tethered Changelog
 
-## [Control Confirmations] - {PR_MERGE_DATE}
+## [Control Confirmations and Profile Sharing] - {PR_MERGE_DATE}
+
+- Add Share Profile for .tetheredprofile exports and Post Profile for Tethered’s existing gallery submission editor.
 
 - Report app-confirmed control results and rejection reasons instead of directing users to Show Status.
 
