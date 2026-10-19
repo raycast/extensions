@@ -1,6 +1,6 @@
 # Oh Dear Changelog
 
-## [Windows Support and Reliability] - {PR_MERGE_DATE}
+## [Windows Support and Reliability] - 2026-10-19
 
 - Added Windows support with keyboard shortcuts for site actions and reports.
 - Fixed the initial group filter to show all sites by default.
