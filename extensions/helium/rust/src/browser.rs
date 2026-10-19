@@ -292,10 +292,11 @@ impl Drop for WindowInspection {
         if let Some((placement, foreground)) = self.original {
             unsafe {
                 let was_focused = GetForegroundWindow() == self.hwnd;
+                if let Some(mut placement) = placement {
+                    placement.showCmd = SW_SHOWMINNOACTIVE.0 as u32;
+                    let _ = SetWindowPlacement(self.hwnd, &placement);
+                }
                 if was_focused {
-                    if let Some(placement) = placement {
-                        let _ = SetWindowPlacement(self.hwnd, &placement);
-                    }
                     let _ = SetForegroundWindow(foreground);
                 }
             }
@@ -669,6 +670,18 @@ mod tests {
             assert_eq!(before.rcNormalPosition, after.rcNormalPosition);
             assert_eq!(foreground_before, GetForegroundWindow());
             assert_eq!(cursor_before, cursor_position().unwrap());
+            // Cleanup must restore minimized placement even after the user
+            // moves focus elsewhere during an unsuccessful inspection.
+            let _ = ShowWindow(hwnd, SW_MINIMIZE);
+            assert!(IsIconic(hwnd).as_bool());
+            let inspection = WindowInspection::begin(hwnd).unwrap();
+            assert!(!IsIconic(hwnd).as_bool());
+            let _ = ShowWindow(probe, SW_SHOW);
+            focus(probe).unwrap();
+            drop(inspection);
+            assert!(IsIconic(hwnd).as_bool());
+            assert_eq!(GetForegroundWindow(), probe);
+            focus(hwnd).unwrap();
         }
     }
 
