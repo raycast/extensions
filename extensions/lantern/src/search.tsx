@@ -42,6 +42,7 @@ import {
   search,
   shortPath,
   thumbnail,
+  whenWhere,
 } from "./lantern";
 import { MusicHit, play, show } from "./music";
 
@@ -388,6 +389,7 @@ function usePreviewMarkdown(h: FileHit, ctx: Ctx, photo: boolean, thumb: string 
 function FileDetail({ h, ctx, photo, thumb }: { h: FileHit; ctx: Ctx; photo: boolean; thumb?: string | null }) {
   const markdown = usePreviewMarkdown(h, ctx, photo, thumb, false);
   const at = where(h);
+  const made = whenWhere(h, photo);
   return (
     <List.Item.Detail
       markdown={markdown}
@@ -395,6 +397,7 @@ function FileDetail({ h, ctx, photo, thumb }: { h: FileHit; ctx: Ctx; photo: boo
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Folder" text={shortPath(path.dirname(h.path))} />
           {at ? <List.Item.Detail.Metadata.Label title="Where" text={at} /> : null}
+          {made ? <List.Item.Detail.Metadata.Label title="Made" text={made} /> : null}
           {h.symbol ? <List.Item.Detail.Metadata.Label title="In" text={h.symbol} /> : null}
         </List.Item.Detail.Metadata>
       }
@@ -525,7 +528,7 @@ function FileItem({ h, ctx, photo = false }: { h: FileHit; ctx: Ctx; photo?: boo
   return (
     <List.Item
       title={path.basename(h.path)}
-      subtitle={where(h)}
+      subtitle={where(h) || whenWhere(h, photo)}
       icon={thumb ? { source: thumb } : kindIcon(h, photo)}
       quickLook={{ path: h.path, name: path.basename(h.path) }}
       detail={<FileDetail h={h} ctx={ctx} photo={photo} thumb={thumb} />}

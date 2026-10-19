@@ -57,7 +57,35 @@ export interface FileHit {
   end_ms: number | null;
   page: number | null;
   symbol: string | null;
+  date?: string | null; // when the file was made, "2023-05-14" (Lantern 0.2: EXIF, QuickTime, its name, the disk)
+  date_source?: string | null; // exif | quicktime | name | fs
+  place?: string | null; // the city it was made in, in the system language
+  country?: string | null; // ISO code
 }
+
+/**
+ * "14 May 2023 · Kraków, Poland" for photos and recordings, or any file dated by its contents or name; "" otherwise.
+ * The country is named by the system's ICU data, in its language: nothing is looked up online.
+ */
+export function whenWhere(h: FileHit, visual: boolean): string {
+  if (!visual && h.start_ms == null && !["exif", "quicktime", "name"].includes(h.date_source ?? "")) return "";
+  const parts: string[] = [];
+  const day = h.date ? new Date(`${h.date}T00:00:00Z`) : null;
+  if (day && !Number.isNaN(day.getTime())) {
+    // a calendar day: shown in UTC so this Mac's time zone never moves it to the day before
+    parts.push(day.toLocaleDateString(undefined, { dateStyle: "long", timeZone: "UTC" }));
+  }
+  let country: string | undefined;
+  try {
+    country = h.country ? new Intl.DisplayNames(undefined, { type: "region" }).of(h.country) : undefined;
+  } catch {
+    country = h.country ?? undefined; // an unknown code: shown as it is
+  }
+  if (h.place) parts.push(country ? `${h.place}, ${country}` : h.place);
+  else if (country) parts.push(country); // a camera without GPS, in a folder named after the country
+  return parts.join(" · ");
+}
+
 export interface DefinitionHit {
   path: string;
   line: number;
