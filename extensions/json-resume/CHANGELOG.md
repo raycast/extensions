@@ -1,5 +1,12 @@
 # Changelog
 
+## [Add Local Resumes and AI Management] - {PR_MERGE_DATE}
+
+- Store complete JSON Resume documents inside the extension and view them offline.
+- Add a shared create/edit JSON form, local resume search, copy JSON, and confirmed deletion.
+- Preserve URL bookmarks and add Save Local Copy for validated remote resumes.
+- Add AI tools to list, read, save, update, and delete local documents, with mutation confirmations.
+
 ## [Schema Rendering and AI Tool Fixes] - 2026-10-13
 
 - Share schema-compatible rendering across both resume commands, including projects, volunteer work, awards, certificates, publications, interests, and references.

@@ -7,7 +7,7 @@ const vm = require("node:vm");
 const ts = require("typescript");
 
 // Compile the real TypeScript entry points with the extension's existing compiler.
-// Any attempt to use Raycast AI, clipboard, storage, or UI APIs fails immediately.
+// Raycast APIs must be explicitly mocked; unmocked side effects fail immediately.
 async function loadSource(relativePath, overrides = {}, cache = new Map()) {
   const filename = path.resolve(__dirname, "..", relativePath);
   if (cache.has(filename)) return cache.get(filename);
@@ -31,6 +31,7 @@ async function loadSource(relativePath, overrides = {}, cache = new Map()) {
   const wrapped = vm.runInThisContext(`(function(require,module,exports){${compiled}\n})`, { filename });
   wrapped(
     (specifier) => {
+      if (Object.hasOwn(overrides, specifier)) return overrides[specifier];
       if (specifier === "@raycast/api") throw new Error("Unexpected Raycast API side effect");
       return overrides[specifier] ?? dependencies[specifier] ?? require(specifier);
     },
@@ -39,6 +40,25 @@ async function loadSource(relativePath, overrides = {}, cache = new Map()) {
   );
   cache.set(filename, module.exports);
   return module.exports;
+}
+
+async function loadComponent(relativePath, mocks) {
+  const filename = path.resolve(__dirname, "..", relativePath);
+  const source = await fs.readFile(filename, "utf8");
+  const compiled = ts.transpileModule(source, {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
+    fileName: filename,
+  }).outputText;
+  const module = { exports: {} };
+  vm.runInThisContext(`(function(require,module,exports){${compiled}\n})`, { filename })(
+    (specifier) => {
+      assert.ok(Object.hasOwn(mocks, specifier), `Unexpected dependency: ${specifier}`);
+      return mocks[specifier];
+    },
+    module,
+    module.exports,
+  );
+  return module.exports.default;
 }
 
 const fixture = {
@@ -137,6 +157,303 @@ test("both commands use the shared renderer", async () => {
     const source = await fs.readFile(path.resolve(__dirname, "../src", command), "utf8");
     assert.match(source, /import \{ makeMarkdownFromResume \} from "\.\/utils\/renderResume"/);
     assert.match(source, /setMarkdown\(makeMarkdownFromResume\(resumeObj\)\)/);
+  }
+});
+
+test("Create Resume restores draft fields verbatim and keeps defaults for fresh launches", async () => {
+  const jsx = { jsx: (type, props) => ({ type, props }), jsxs: (type, props) => ({ type, props }) };
+  let initialValues;
+  const Editor = await loadComponent("src/components/ResumeEditor.tsx", {
+    "react/jsx-runtime": jsx,
+    react: { useRef: (current) => ({ current }), useState: () => [undefined, () => {}] },
+    "@raycast/api": { useNavigation: () => ({}), Action: {}, Form: {} },
+    "@raycast/utils": {
+      useForm: (options) => {
+        initialValues = options.initialValues;
+        return { itemProps: {} };
+      },
+    },
+    "../utils/resumeDocuments": {},
+  });
+  const Command = await loadComponent("src/create-resume.tsx", {
+    "react/jsx-runtime": jsx,
+    "./components/ResumeEditor": { default: Editor },
+  });
+
+  for (const draftValues of [
+    { title: "My draft", resumeJson: '{\n  "basics": { "name": "Draft Person" }\n}' },
+    { title: "", resumeJson: '{ "unfinished":' },
+    { title: "", resumeJson: "" },
+  ]) {
+    const element = Command({ draftValues });
+    assert.equal(element.props.enableDrafts, true);
+    element.type(element.props);
+    assert.deepEqual(initialValues, draftValues);
+  }
+  Editor(Command({}).props);
+  assert.deepEqual(initialValues, { title: "Untitled Resume", resumeJson: "{}" });
+});
+
+// Keep hook state across renders while running the command's real load callback.
+async function searchEnvironment({ documents = [], warnings = [], bookmarks = [] } = {}) {
+  const state = [];
+  const effects = [];
+  let cursor = 0;
+  let reads = 0;
+  const launches = [];
+  const jsx = { jsx: (type, props) => ({ type, props }), jsxs: (type, props) => ({ type, props }) };
+  const Editor = () => {};
+  const Command = await loadComponent("src/search-resumes.tsx", {
+    "react/jsx-runtime": jsx,
+    react: {
+      useState: (initial) => {
+        const index = cursor++;
+        if (!(index in state)) state[index] = initial;
+        return [
+          state[index],
+          (value) => {
+            state[index] = value;
+          },
+        ];
+      },
+      useEffect: (effect) => effects.push(effect),
+    },
+    "@raycast/api": {
+      List: { Item: "item", EmptyView: "empty", Section: "section" },
+      ActionPanel: "actions",
+      Action: Object.assign(() => {}, { Push: "push", Style: {} }),
+      Icon: {},
+      Keyboard: { Shortcut: { Common: {} } },
+      LaunchType: { UserInitiated: "user" },
+      launchCommand: async (options) => launches.push(options),
+    },
+    "@raycast/utils": {
+      showFailureToast: (error) => {
+        throw error;
+      },
+    },
+    "./utils/storage": { getSavedResumes: async () => bookmarks },
+    "./utils/resumeDocuments": {
+      listResumeDocuments: async () => {
+        reads++;
+        return { documents, warnings };
+      },
+    },
+    "./utils/validateResume": {},
+    "./utils/renderResume": {},
+    "./components/ResumeEditor": { default: Editor },
+    "./components/LocalResumeDetail": {},
+  });
+  function render() {
+    cursor = 0;
+    return Command();
+  }
+  render();
+  effects[0]();
+  await new Promise(setImmediate);
+  return { render, launches, Editor, reads: () => reads };
+}
+
+function childElements(element) {
+  if (!element || typeof element !== "object") return [];
+  if (Array.isArray(element)) return element.flatMap(childElements);
+  return [element, ...childElements(element.props?.children)];
+}
+
+async function assertRecoveryActions(panel, environment) {
+  const actions = childElements(panel)
+    .filter((element) => typeof element.type === "function")
+    .map((element) => element.type(element.props));
+  const create = actions.find((element) => element.props.title === "Create Resume");
+  const open = actions.find((element) => element.props.title === "Open Resume");
+  assert.ok(create, "Create Resume must be available");
+  assert.ok(open, "Open Resume must be available");
+  assert.equal(create.type, "push");
+  assert.equal(create.props.target.type, environment.Editor);
+  const reads = environment.reads();
+  await create.props.target.props.onSaved();
+  assert.equal(environment.reads(), reads + 1, "Saving must reload the list");
+  await open.props.onAction();
+  assert.deepEqual(environment.launches, [{ name: "open-resume", type: "user" }]);
+}
+
+test("empty saved resumes offer working Create Resume and Open Resume actions", async () => {
+  const environment = await searchEnvironment();
+  const empty = childElements(environment.render()).find((element) => element.type === "empty");
+  assert.ok(empty);
+  await assertRecoveryActions(empty.props.actions, environment);
+});
+
+test("unreadable resume rows retain recovery actions with and without readable records", async () => {
+  for (const bookmarks of [[], [{ url: "https://example.com/resume.json", title: "Readable bookmark" }]]) {
+    const warnings = ["Broken JSON", "Unsupported record version"];
+    const environment = await searchEnvironment({ warnings, bookmarks });
+    const elements = childElements(environment.render());
+    const rows = elements.filter(
+      (element) => element.type === "item" && element.props.title === "Unreadable Saved Resume",
+    );
+    assert.deepEqual(
+      rows.map((row) => row.props.subtitle),
+      warnings,
+    );
+    for (const row of rows) {
+      environment.launches.length = 0;
+      await assertRecoveryActions(row.props.actions, environment);
+    }
+    if (bookmarks.length) {
+      assert.ok(elements.some((element) => element.type === "item" && element.props.title === "Readable bookmark"));
+    }
+  }
+});
+
+async function documentEnvironment() {
+  const items = new Map([["savedResumes", JSON.stringify([{ url: "https://example.com/resume.json" }])]]);
+  const api = {
+    LocalStorage: {
+      getItem: async (key) => items.get(key),
+      setItem: async (key, value) => {
+        items.set(key, value);
+      },
+      removeItem: async (key) => {
+        items.delete(key);
+      },
+      allItems: async () => Object.fromEntries(items),
+    },
+    Action: { Style: { Destructive: "destructive" } },
+  };
+  const overrides = { "@raycast/api": api };
+  return { items, api, overrides, storage: await loadSource("src/utils/resumeDocuments.ts", overrides) };
+}
+
+test("local documents persist, retain custom fields, and isolate duplicate titles and bookmarks", async () => {
+  const { items, storage, overrides } = await documentEnvironment();
+  const bookmark = items.get("savedResumes");
+  const resume = { ...fixture, custom: { nested: [1, 2, 3] } };
+  const first = await storage.createResumeDocument({
+    title: " Engineer ",
+    resumeJson: JSON.stringify(resume),
+    sourceUrl: "https://example.com",
+  });
+  const second = await storage.createResumeDocument({ title: "Engineer", resumeJson: "{}" });
+  assert.notEqual(first.id, second.id);
+  assert.equal(first.title, "Engineer");
+  const fresh = await loadSource("src/utils/resumeDocuments.ts", overrides);
+  assert.deepEqual((await fresh.getResumeDocument(first.id)).resume, resume);
+  const updated = await fresh.updateResumeDocument({
+    id: first.id,
+    title: "Senior Engineer",
+    resumeJson: JSON.stringify({ ...resume, basics: { ...resume.basics, label: "Senior" } }),
+  });
+  assert.equal(updated.id, first.id);
+  assert.equal(updated.createdAt, first.createdAt);
+  assert.equal(updated.sourceUrl, first.sourceUrl);
+  assert.deepEqual(updated.resume.custom, resume.custom);
+  assert.deepEqual(updated.resume.work, resume.work);
+  await fresh.deleteResumeDocument(first.id);
+  await assert.rejects(fresh.getResumeDocument(first.id), /not found/);
+  assert.equal((await fresh.getResumeDocument(second.id)).title, "Engineer");
+  assert.equal(items.get("savedResumes"), bookmark);
+});
+
+test("invalid creates, edits, and unknown IDs leave storage unchanged", async () => {
+  const { items, storage } = await documentEnvironment();
+  const doc = await storage.createResumeDocument({ title: "Test", resumeJson: "{}" });
+  const before = [...items];
+  for (const resumeJson of ["invalid", "null", "[]", '"{}"', '{"work":[{"startDate":"yesterday"}]}']) {
+    await assert.rejects(storage.createResumeDocument({ title: "Invalid", resumeJson }));
+    await assert.rejects(storage.updateResumeDocument({ id: doc.id, title: "Invalid", resumeJson }));
+  }
+  await assert.rejects(storage.createResumeDocument({ title: "  ", resumeJson: "{}" }), /Title/);
+  await assert.rejects(storage.updateResumeDocument({ id: "missing", title: "Test", resumeJson: "{}" }), /not found/);
+  await assert.rejects(storage.deleteResumeDocument("missing"), /not found/);
+  assert.deepEqual([...items], before);
+});
+
+test("listing reports corrupt records and sorts readable documents deterministically", async () => {
+  const { items, storage } = await documentEnvironment();
+  const first = await storage.createResumeDocument({ title: "First", resumeJson: "{}" });
+  const second = await storage.createResumeDocument({ title: "Second", resumeJson: "{}" });
+  for (const doc of [first, second]) {
+    doc.updatedAt = "2025-01-01T00:00:00.000Z";
+    items.set("resumeDocument:v1:" + doc.id, JSON.stringify(doc));
+  }
+  items.set("resumeDocument:v1:broken", "invalid");
+  items.set("resumeDocument:v1:future", JSON.stringify({ ...first, id: "future", version: 2 }));
+  items.set("resumeDocument:v1:mismatch", JSON.stringify(first));
+  const { documents, warnings } = await storage.listResumeDocuments();
+  assert.deepEqual(
+    documents.map((doc) => doc.id),
+    [first.id, second.id].sort(),
+  );
+  assert.equal(warnings.length, 3);
+  assert.equal(items.get("resumeDocument:v1:broken"), "invalid");
+  await assert.rejects(storage.getResumeDocument("future"), /Invalid/);
+});
+
+test("document storage propagates read, write, list, and delete failures", async () => {
+  const { storage, api } = await documentEnvironment();
+  const doc = await storage.createResumeDocument({ title: "Test", resumeJson: "{}" });
+  api.LocalStorage.allItems = async () => {
+    throw new Error("List failed");
+  };
+  await assert.rejects(storage.listResumeDocuments(), /List failed/);
+  api.LocalStorage.setItem = async () => {
+    throw new Error("Write failed");
+  };
+  await assert.rejects(storage.createResumeDocument({ title: "Test", resumeJson: "{}" }), /Write failed/);
+  await assert.rejects(storage.updateResumeDocument({ id: doc.id, title: "Test", resumeJson: "{}" }), /Write failed/);
+  api.LocalStorage.removeItem = async () => {
+    throw new Error("Delete failed");
+  };
+  await assert.rejects(storage.deleteResumeDocument(doc.id), /Delete failed/);
+  api.LocalStorage.getItem = async () => {
+    throw new Error("Read failed");
+  };
+  await assert.rejects(storage.getResumeDocument(doc.id), /Read failed/);
+});
+
+test("AI tools share local storage, filter summaries, confirm mutations, and preserve edits", async () => {
+  const { items, overrides } = await documentEnvironment();
+  const tools = {};
+  for (const name of ["list", "get", "save", "update", "delete"]) {
+    tools[name] = await loadSource(`src/tools/${name}-resume${name === "list" ? "s" : ""}.ts`, overrides);
+  }
+  const saved = await tools.save.default({ title: "Engineer", resumeJson: JSON.stringify(fixture) });
+  assert.ok(saved.id);
+  assert.ok(await tools.save.confirmation({ title: "Engineer", resumeJson: "{}" }));
+  const beforeReads = [...items];
+  const list = await tools.list.default({ query: "example person" });
+  assert.equal(list.resumes[0].id, saved.id);
+  assert.equal(list.resumes[0].resume, undefined);
+  assert.deepEqual((await tools.get.default({ id: saved.id })).resume, fixture);
+  assert.deepEqual([...items], beforeReads);
+  assert.equal((await tools.list.default({ query: "unmatched" })).resumes.length, 0);
+  const input = { id: saved.id, title: "Renamed", resumeJson: JSON.stringify(fixture) };
+  assert.ok(await tools.update.confirmation(input));
+  await tools.update.default(input);
+  assert.deepEqual((await tools.get.default({ id: saved.id })).resume, fixture);
+  assert.equal((await tools.get.default({ id: saved.id })).title, "Renamed");
+  assert.equal((await tools.delete.confirmation({ id: saved.id })).style, "destructive");
+  await tools.delete.default({ id: saved.id });
+  await assert.rejects(tools.get.default({ id: saved.id }), /not found/);
+  await assert.rejects(tools.update.default(input), /not found/);
+});
+
+test("local storage and AI reads work with network access disabled", async () => {
+  const previousFetch = globalThis.fetch;
+  globalThis.fetch = () => {
+    throw new Error("Unexpected network request");
+  };
+  try {
+    const { storage, overrides } = await documentEnvironment();
+    const doc = await storage.createResumeDocument({ title: "Offline", resumeJson: JSON.stringify(fixture) });
+    const get = await loadSource("src/tools/get-resume.ts", overrides);
+    const list = await loadSource("src/tools/list-resumes.ts", overrides);
+    assert.equal((await storage.listResumeDocuments()).documents.length, 1);
+    assert.deepEqual((await get.default({ id: doc.id })).resume, fixture);
+    assert.equal((await list.default({})).resumes[0].id, doc.id);
+  } finally {
+    globalThis.fetch = previousFetch;
   }
 });
 
