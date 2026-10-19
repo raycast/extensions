@@ -30,11 +30,3 @@ The key is stored in Raycast's password preference. The extension needs `clients
 Recent timers refresh every minute while the command is open. Use **Refresh** to load the latest changes immediately. If an action needs another attempt, choose **Retry pending timer action** to finish it.
 
 Learn more about [time tracking for client work with TrackTimer](https://www.tracktimer.app), or read the [API documentation](https://www.tracktimer.app/docs).
-
-## Development and attribution
-
-See the [development and packaging notes](https://github.com/raycast/extensions/blob/main/extensions/tracktimer/DEVELOPMENT.md) for local setup, caching, checks, and Store submission.
-
-The recent-timer list and quick-start flow are adapted from the [Toggl Track extension](https://www.raycast.com/franzwilhelm/toggl-track), by Franz Wilhelm and contributors, at [commit `fa8b3874b6f49776570e4291d8ed74b532164013`](https://github.com/raycast/extensions/tree/fa8b3874b6f49776570e4291d8ed74b532164013/extensions/toggl-track). TrackTimer replaces its Toggl-specific service integration and branding. The upstream repository's MIT license and copyright notice are preserved in `LICENSE`.
-
-The icon reuses TrackTimer's 3D sundial app artwork: an orange fin above a brushed-metal dial and stone base. It is the 512 × 512 PNG from the macOS app icon and contains no Toggl artwork.

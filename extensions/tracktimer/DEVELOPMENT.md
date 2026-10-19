@@ -51,3 +51,9 @@ npm run lint
 `npm install` creates the standalone `package-lock.json`; include that lockfile in the Store contribution. Do not generate a second dependency lockfile inside the pnpm monorepo. The manifest is public and includes the `publish` script required by Raycast's publishing CLI.
 
 The registered Raycast author handle is `pfista`. Before submitting, capture up to six 2000 × 1250 PNG screenshots using the running extension (Raycast recommends at least three), with no credentials or other applications visible. Validate the production endpoint and API permissions with an actual account. From the exported directory, run `npm run publish`; Raycast authenticates with GitHub and opens a draft pull request against `raycast/extensions`. Complete the PR description and submit it for review. After Raycast merges it, the extension is automatically published to the Store. The changelog date placeholder is replaced at merge time.
+
+## Attribution
+
+The recent-timer list and quick-start flow are adapted from the [Toggl Track extension](https://www.raycast.com/franzwilhelm/toggl-track), by Franz Wilhelm and contributors, at [commit `fa8b3874b6f49776570e4291d8ed74b532164013`](https://github.com/raycast/extensions/tree/fa8b3874b6f49776570e4291d8ed74b532164013/extensions/toggl-track). TrackTimer replaces its Toggl-specific service integration and branding. The upstream repository's MIT license and copyright notice are preserved in `LICENSE`.
+
+The icon reuses TrackTimer's 3D sundial app artwork: an orange fin above a brushed-metal dial and stone base. It is the 512 × 512 PNG from the macOS app icon and contains no Toggl artwork.
