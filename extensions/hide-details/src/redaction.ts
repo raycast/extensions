@@ -266,6 +266,7 @@ async function scanImage(
         ? windows.redactImage({
             outputPath: output,
             style,
+            blurFaces: prefs.blurFaces ?? false,
             padding: Number(padding),
             categories: new Set(selected),
             extraWords: prefs.extraWords || "",

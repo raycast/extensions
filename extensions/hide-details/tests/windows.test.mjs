@@ -170,6 +170,16 @@ test("invalid OCR geometry stops the Windows helper before rendering", async () 
   assert.equal(backend.killed, true);
 });
 
+test("face blur renders before overlapping text blackout without changing region counts", async () => {
+  const backend = helper({ ...analysis, faces: [{ x: 55, y: 15, width: 5, height: 20 }] });
+  const report = await backend.windows.redactImage({ ...options, blurFaces: true });
+  assert.deepEqual(backend.requests[1].regions, [
+    { x: 55, y: 15, width: 5, height: 20, style: "blur" },
+    { x: 55, y: 15, width: 5, height: 20, style: "blackout" },
+  ]);
+  assert.equal(report.regionCount, 1);
+});
+
 test(
   "bundled Windows helper scans and renders empty and single-item results",
   { skip: process.platform !== "win32" },
@@ -180,6 +190,10 @@ test(
     const windows = loadSource("../src/windows.ts", {
       "@raycast/api": { environment: { assetsPath: path.join(root, "assets") } },
       "./detection": { ...detection, ocrBox, regionBox },
+    });
+    await t.test("clipboard sequence can be read without changing the clipboard", async () => {
+      const count = await windows.clipboardChangeCount();
+      assert.ok(Number.isSafeInteger(count) && count >= 0 && count <= 0xffffffff);
     });
     // Only Raycast and TS module loading are replaced. spawn and the shipped script run unchanged.
     function powershell(script, report = {}) {
@@ -218,6 +232,13 @@ test(
         categories: ["face"],
         kind: "face",
       },
+      {
+        name: "face blur overrides blackout",
+        input: path.join(root, "tests", "fixtures", "face.jpg"),
+        categories: ["face"],
+        kind: "face",
+        blurFaces: true,
+      },
     ];
     for (const [index, scenario] of cases.entries()) {
       await t.test(scenario.name, async () => {
@@ -227,6 +248,7 @@ test(
           outputPath: path.join(directory, `output-${index}.png`),
           categories: new Set(scenario.categories),
           recognition: "fast",
+          blurFaces: scenario.blurFaces ?? false,
         });
         assert.equal(report.output, path.join(directory, `output-${index}.png`));
         assert.equal(report.clipboardChangeCount, null);
@@ -256,15 +278,22 @@ test(
           }
           foreach ($hit in $report.hits) {
             $box = $hit.box
+            $changed = 0
+            $nonBlack = 0
             for ($y = $box.y; $y -lt $box.y + $box.height; $y++) {
               for ($x = $box.x; $x -lt $box.x + $box.width; $x++) {
-                if ($bitmap.GetPixel($x, $y).ToArgb() -ne [System.Drawing.Color]::Black.ToArgb()) { throw 'Mask has an unredacted pixel' }
+                $pixel = $bitmap.GetPixel($x, $y).ToArgb()
+                if ($pixel -ne $source.GetPixel($x, $y).ToArgb()) { $changed++ }
+                if ($pixel -ne [System.Drawing.Color]::Black.ToArgb()) { $nonBlack++ }
               }
             }
+            if ($report.blurFaces) {
+              if ($changed -eq 0 -or $nonBlack -eq 0) { throw 'Face was not blurred' }
+            } elseif ($nonBlack -ne 0) { throw 'Mask has an unredacted pixel' }
           }
         } finally { $source.Dispose(); $bitmap.Dispose() }
       `,
-          { ...report, inputPath: path.resolve(directory, scenario.input) },
+          { ...report, inputPath: path.resolve(directory, scenario.input), blurFaces: scenario.blurFaces ?? false },
         );
       });
     }

@@ -91,7 +91,17 @@
       ]
     },
     {
+      "name": "blurFaces",
+      "title": "Face Redaction (Windows)",
+      "label": "Blur Faces",
+      "description": "On Windows, use smooth blur for detected faces while keeping the selected Redaction Style for text. Requires Faces in What to Hide. Blur can retain recognizable details.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
       "name": "categories",
+      "placeholder": "email,phone,card,secret,ip,name,face",
       "title": "Legacy Categories",
       "description": "Previous category selection, used until you save Configure What to Hide in Redact Clipboard Image. The checkbox form replaces this field and can restore it.",
       "type": "textfield",
@@ -100,6 +110,7 @@
     },
     {
       "name": "extraWords",
+      "placeholder": "Jane Doe, Project Atlas",
       "title": "Always Hide These Words",
       "description": "Comma-separated names or strings to redact. Keep the name category enabled to use this list.",
       "type": "textfield",
@@ -108,6 +119,7 @@
     },
     {
       "name": "customRegex",
+      "placeholder": "(?i)invoice-[0-9]+",
       "title": "Custom Regex",
       "description": "Optional pattern applied to each OCR line. Combine patterns with | and use (?i) for case-insensitive matching. Enter the pattern without / delimiters.",
       "type": "textfield",
@@ -116,6 +128,7 @@
     },
     {
       "name": "padding",
+      "placeholder": "4",
       "title": "Padding",
       "description": "Extra pixels around each detection. Enter a number from 0 to 1000.",
       "type": "textfield",
@@ -124,7 +137,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.6"
+    "@raycast/api": "^2.8.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
@@ -136,7 +149,7 @@
     "typescript": "^5.9.2"
   },
   "scripts": {
-    "build": "ray build",
+    "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",

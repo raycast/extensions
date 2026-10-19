@@ -78,6 +78,7 @@ On Windows, Hide Details runs a bundled Windows PowerShell script that uses Wind
 - **Accurate** text recognition scans an image upscaled 2x, which helps with small text.
 - **Custom Regex** uses [.NET regular expression syntax](https://learn.microsoft.com/dotnet/standard/base-types/regular-expression-language-quick-reference). Common patterns, including `(?i)`, work the same on both platforms.
 - **Smooth Blur** downsamples and smooths each region rather than applying a Gaussian blur.
+- Enable **Blur Faces** under **Face Redaction (Windows)** to blur faces while retaining your selected Redaction Style for text. Keep **Faces** enabled in **Configure What to Hide**. This preference defaults to off and applies only on Windows. Overlapping text masks are applied after face blur. Blur can retain recognizable details.
 
 ## Preferences
 
@@ -148,7 +149,9 @@ The output is a flattened PNG with no editable layers.
 
 Windows code lives in `assets/windows/hide-details.ps1` (image I/O, OCR, faces, rendering, clipboard) and `src/detection.ts` (text classification and OCR coordinate conversion). Windows OCR boxes are rotated by the reported text angle around the OCR image's center, then scaled to the original dimensions before masking. `npm test` checks this conversion, the helper protocol, and the TypeScript rules against the Swift rules on the same text. On Windows, run `npm run test:windows` to test the bundled PowerShell script through the TypeScript adapter, including empty and single-item OCR and face results and rendered pixels. These integration tests are skipped on other platforms. Clipboard behavior still needs manual testing on Windows.
 
-Requires macOS 14 or newer, Raycast, Node.js 22.22.2 or newer, and Xcode with Swift 6.3 or newer for the Swift build plugins.
+Distribution builds and the full native test suite require macOS 14 or newer, Raycast, Node.js 22.22.2 or newer, and Xcode with Swift 6.3 or newer for the Swift build plugins. Windows development uses Windows PowerShell 5.1 and the built-in OCR and face detection APIs.
+
+On Windows, validate with `npm run lint`, `npx ray build -e dev`, and `npm run test:windows`. Distribution builds compile the macOS Swift helper and must run on macOS. Type checking also requires the generated Swift bindings from a macOS build.
 
 Install dependencies and start development from the project directory:
 
