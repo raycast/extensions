@@ -75,7 +75,6 @@ A generated prefix never overlaps one of the following ranges.
 
 All blocks of the [IPv4](https://www.iana.org/assignments/iana-ipv4-special-registry/) and [IPv6](https://www.iana.org/assignments/iana-ipv6-special-registry/) special-purpose address registries are excluded.
 The Private-Use and Unique-Local blocks are the exception, because they are the pools themselves.
-Copies of both registries are in `iana-ipv4-special-registry-1.csv` and `iana-ipv6-special-registry-1.csv`.
 
 ### Common Defaults
 
@@ -103,31 +102,3 @@ Vendors and tools use these ranges by default.
 | `fdff:ffff:ffff::/48` | All-ones Global ID                   |
 
 The ranges are defined in `src/lib/ranges.ts`.
-
-## Development
-
-Install the dependencies:
-
-```bash
-npm install
-```
-
-Run the extension in Raycast:
-
-```bash
-npm run dev
-```
-
-Run the tests:
-
-```bash
-npm test
-```
-
-Run the linter:
-
-```bash
-npm run lint
-```
-
-The tests also check that no pool is fully excluded at the default prefix length.
