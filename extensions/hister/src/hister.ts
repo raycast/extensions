@@ -136,12 +136,77 @@ export async function search(
 
   let data: HisterSearchResponse;
   try {
-    data = (await res.json()) as HisterSearchResponse;
+    data = JSON.parse(await readWithoutHtml(res)) as HisterSearchResponse;
   } catch {
     throw new HisterError(`Unexpected response from ${serverBaseUrl()}. Is this a Hister server?`, "response");
   }
   if (data.error) throw new HisterError(data.error, "query");
   return data;
+}
+
+// Semantic-only hits carry the page's full stored HTML ("html" field), up to
+// semantic_search.result_limit of them per response. The extension never uses it, and
+// parsing it can exceed Raycast's 100 MB heap limit, so every "html" string value is
+// emptied while the body streams in, before JSON.parse sees it. Go's JSON encoder writes
+// keys as "html":"..." with no whitespace, and inside a JSON string every quote is
+// escaped, so this byte sequence only occurs where the key itself is.
+const HTML_KEY = Buffer.from('"html":"');
+const QUOTE = 0x22;
+const BACKSLASH = 0x5c;
+
+export async function readWithoutHtml(res: Response): Promise<string> {
+  if (!res.body) return "";
+  const reader = res.body.getReader();
+  const output: Buffer[] = [];
+  let matched = 0; // bytes of HTML_KEY matched so far
+  let skipping = false; // inside an "html" value
+  let escaped = false;
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const out = Buffer.allocUnsafe(value.length + HTML_KEY.length);
+    let n = 0;
+    for (const byte of value) {
+      if (skipping) {
+        if (escaped) escaped = false;
+        else if (byte === BACKSLASH) escaped = true;
+        else if (byte === QUOTE) {
+          skipping = false;
+          out[n++] = QUOTE;
+        }
+        continue;
+      }
+      if (byte === HTML_KEY[matched]) {
+        matched++;
+        if (matched === HTML_KEY.length) {
+          n += HTML_KEY.copy(out, n);
+          matched = 0;
+          skipping = true;
+        }
+        continue;
+      }
+      if (matched > 0) {
+        // Flush the partial match. Only its closing quote ('"html"') can start a new match.
+        const restart = matched === 6 ? 1 : 0;
+        n += HTML_KEY.copy(out, n, 0, matched - restart);
+        matched = restart;
+        if (byte === HTML_KEY[matched]) {
+          matched++;
+          continue;
+        }
+        if (matched > 0) {
+          out[n++] = QUOTE;
+          matched = 0;
+        }
+      }
+      if (byte === HTML_KEY[0]) matched = 1;
+      else out[n++] = byte;
+    }
+    output.push(out.subarray(0, n));
+  }
+  if (matched > 0) output.push(HTML_KEY.subarray(0, matched));
+  return Buffer.concat(output).toString("utf8");
 }
 
 // POST /api/history records which result was opened for a query (the same call the
@@ -191,6 +256,7 @@ const FAVICON_EXTENSIONS: Record<string, string> = {
   "image/webp": "webp",
 };
 const FAVICON_KEY = /^[a-f0-9]{16,128}$/i;
+const MAX_FAVICON_BYTES = 256 * 1024;
 
 function faviconDir(): string {
   return join(environment.supportPath, "favicons");
@@ -215,8 +281,10 @@ export async function downloadFavicon(key: string): Promise<string | undefined> 
   const type = (res.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase();
   const extension = FAVICON_EXTENSIONS[type];
   if (!extension) return undefined;
+  const declared = Number(res.headers.get("content-length") ?? 0);
+  if (declared > MAX_FAVICON_BYTES) return undefined;
   const bytes = Buffer.from(await res.arrayBuffer());
-  if (bytes.length === 0 || bytes.length > 1024 * 1024) return undefined;
+  if (bytes.length === 0 || bytes.length > MAX_FAVICON_BYTES) return undefined;
   await mkdir(faviconDir(), { recursive: true });
   const path = join(faviconDir(), `${key}.${extension}`);
   await writeFile(path, bytes);
