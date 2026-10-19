@@ -15,11 +15,16 @@ const localState = {
 function setup({ output = "", error, spawnError, prefs = {} } = {}) {
   const events = [];
   const commands = [];
+  const storage = new Map();
   const mocks = {
     "@raycast/api": {
       getPreferenceValues: () => prefs,
       Toast: { Style: { Failure: "failure" } },
       showToast: async () => events.push("failure"),
+      LocalStorage: {
+        getItem: async (key) => storage.get(key),
+        setItem: async (key, value) => void storage.set(key, value),
+      },
     },
     "fs/promises": { readFile: async () => JSON.stringify(localState) },
     child_process: {
@@ -49,6 +54,7 @@ function setup({ output = "", error, spawnError, prefs = {} } = {}) {
     profiles: loadModule("src/util/profiles.ts", mocks),
     events,
     commands,
+    storage,
   };
 }
 
@@ -205,4 +211,30 @@ test("Last Used preference orders extracted profiles for every command", () => {
     setup().profiles.extractProfiles(infoCache).map((p) => p.name),
     ["A", "B"],
   );
+});
+
+test("malformed hidden profile storage hides nothing", () => {
+  const { profiles } = setup();
+  assert.deepEqual(profiles.parseHiddenDirectories(undefined), []);
+  assert.deepEqual(profiles.parseHiddenDirectories("not json"), []);
+  assert.deepEqual(profiles.parseHiddenDirectories('{"Profile 1":true}'), []);
+  assert.deepEqual(profiles.parseHiddenDirectories('["Profile 1",2]'), ["Profile 1"]);
+});
+
+test("saved hidden profiles drop duplicates and profiles that no longer exist", async () => {
+  const { profiles, storage } = setup();
+  const saved = await profiles.saveHiddenDirectories(["Profile 1", "Profile 1", "Profile 9"], [profile, other]);
+  assert.deepEqual(saved, ["Profile 1"]);
+  assert.equal(storage.get("hiddenProfiles"), '["Profile 1"]');
+  assert.deepEqual(await profiles.loadHiddenDirectories(), ["Profile 1"]);
+});
+
+test("Move Current Tab destinations skip the source and hidden profiles", () => {
+  const { profiles } = setup();
+  const third = { directory: "Profile 2", name: "Side" };
+  assert.deepEqual(
+    profiles.moveDestinations([profile, other, third], "Default", ["Profile 1"]).map((p) => p.directory),
+    ["Profile 2"],
+  );
+  assert.deepEqual(profiles.moveDestinations([profile, other], "Default", ["Profile 1"]), []);
 });

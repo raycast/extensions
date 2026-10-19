@@ -13,7 +13,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -38,13 +38,16 @@ import {
   ChromeAction,
   ChromeTarget,
 } from "./util/util";
-import { extractProfiles, filterProfiles } from "./util/profiles";
+import { extractProfiles, filterProfiles, loadHiddenDirectories, saveHiddenDirectories } from "./util/profiles";
 import { getFavicon } from "@raycast/utils";
 
 const ProfileItem = (props: {
   index: number;
   profile: Profile;
   browser: BrowserConfig;
+  hidden: boolean;
+  showHiddenAction?: ReactNode;
+  onToggleHidden: (profile: Profile) => Promise<void>;
   onDelete: (profile: Profile) => Promise<void>;
 }) => {
   const { index, profile, browser } = props;
@@ -106,6 +109,13 @@ const ProfileItem = (props: {
             }}
           />
           <Action
+            title={props.hidden ? "Unhide Profile" : "Hide Profile"}
+            icon={props.hidden ? Icon.Eye : Icon.EyeDisabled}
+            shortcut={{ modifiers: ["cmd"], key: "h" }}
+            onAction={() => props.onToggleHidden(profile)}
+          />
+          {props.showHiddenAction}
+          <Action
             title="Delete Profile"
             icon={Icon.Trash}
             style={Action.Style.Destructive}
@@ -122,11 +132,15 @@ export default function Command() {
   const browser = getSelectedBrowser();
   const [searchText, setSearchText] = useState("");
   const [localState, setLocalState] = useState<GoogleChromeLocalState>();
+  const [hiddenDirectories, setHiddenDirectories] = useState<string[]>([]);
+  const [showHidden, setShowHidden] = useState(false);
   const [error, setError] = useState<Error>();
 
   useEffect(() => {
     async function listProfiles() {
       try {
+        // Loaded before the profiles so hidden profiles never flash into the list.
+        setHiddenDirectories(await loadHiddenDirectories());
         // for google-chrome-profiles-1.png:
         // 1. comment the code below:
         setLocalState((await readChromeLocalState(browser)).state);
@@ -147,6 +161,34 @@ export default function Command() {
 
   const infoCache = localState?.profile.info_cache;
   const profiles = infoCache && extractProfiles(infoCache);
+  const visibleProfiles = profiles?.filter((profile) => !hiddenDirectories.includes(profile.directory));
+  const hiddenProfiles = profiles?.filter((profile) => hiddenDirectories.includes(profile.directory)) ?? [];
+
+  const updateHiddenDirectories = async (directories: string[]) => {
+    const saved = await saveHiddenDirectories(directories, profiles ?? []);
+    setHiddenDirectories(saved);
+    if (saved.length === 0) setShowHidden(false);
+  };
+
+  const toggleHidden = async (profile: Profile) => {
+    const hide = !hiddenDirectories.includes(profile.directory);
+    await updateHiddenDirectories(
+      hide
+        ? [...hiddenDirectories, profile.directory]
+        : hiddenDirectories.filter((directory) => directory !== profile.directory),
+    );
+    await showToast(Toast.Style.Success, `${hide ? "Hid" : "Unhid"} ${profile.name}`);
+  };
+
+  const showHiddenAction =
+    hiddenProfiles.length > 0 ? (
+      <Action
+        title={showHidden ? "Hide Hidden Profiles" : "Show Hidden Profiles"}
+        icon={showHidden ? Icon.EyeDisabled : Icon.Eye}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+        onAction={() => setShowHidden(!showHidden)}
+      />
+    ) : undefined;
 
   const deleteProfile = async (profile: Profile) => {
     if (
@@ -161,6 +203,8 @@ export default function Command() {
 
     try {
       setLocalState(await deleteChromeProfile(profile, browser));
+      // Forget the deleted profile so a new profile reusing its directory isn't hidden.
+      await updateHiddenDirectories(hiddenDirectories.filter((directory) => directory !== profile.directory));
       await showToast(Toast.Style.Success, `Deleted ${profile.name}`);
     } catch (error) {
       await showToast(
@@ -171,6 +215,20 @@ export default function Command() {
     }
   };
 
+  const profileItems = (items: Profile[], hidden: boolean) =>
+    filterProfiles(items, searchText).map((profile, index) => (
+      <ProfileItem
+        key={profile.directory}
+        index={index}
+        profile={profile}
+        browser={browser}
+        hidden={hidden}
+        showHiddenAction={showHiddenAction}
+        onToggleHidden={toggleHidden}
+        onDelete={deleteProfile}
+      />
+    ));
+
   return (
     <List
       isLoading={!profiles && !error}
@@ -178,16 +236,16 @@ export default function Command() {
       filtering={false}
       onSearchTextChange={setSearchText}
     >
-      {profiles &&
-        filterProfiles(profiles, searchText).map((profile, index) => (
-          <ProfileItem
-            key={profile.directory}
-            index={index}
-            profile={profile}
-            browser={browser}
-            onDelete={deleteProfile}
-          />
-        ))}
+      {visibleProfiles && profileItems(visibleProfiles, false)}
+      {showHidden && <List.Section title="Hidden">{profileItems(hiddenProfiles, true)}</List.Section>}
+      {visibleProfiles?.length === 0 && hiddenProfiles.length > 0 && (
+        <List.EmptyView
+          icon={Icon.EyeDisabled}
+          title="All Profiles Are Hidden"
+          description="Show hidden profiles to unhide one."
+          actions={<ActionPanel>{showHiddenAction}</ActionPanel>}
+        />
+      )}
     </List>
   );
 }

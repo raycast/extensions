@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
@@ -45,4 +45,39 @@ export const readChromeLocalState = async (browser: BrowserConfig) => {
 
 export function sortByLastUsed(profiles: Profile[]): Profile[] {
   return [...profiles].sort((a, b) => (b.activeTime ?? 0) - (a.activeTime ?? 0));
+}
+
+// Hidden profiles are stored by directory, not name, so they stay hidden after a rename in Chrome.
+// Hiding only affects the lists: Chrome's menu matching still needs every profile (see `uniqueLabels`).
+const HIDDEN_PROFILES_KEY = "hiddenProfiles";
+
+export function parseHiddenDirectories(value: string | undefined): string[] {
+  try {
+    const directories: unknown = JSON.parse(value ?? "[]");
+    return Array.isArray(directories) ? directories.filter((item): item is string => typeof item === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function loadHiddenDirectories(): Promise<string[]> {
+  return parseHiddenDirectories(await LocalStorage.getItem<string>(HIDDEN_PROFILES_KEY));
+}
+
+/** Saves the hidden directories, dropping duplicates and profiles that no longer exist. */
+export async function saveHiddenDirectories(directories: string[], profiles: Profile[]): Promise<string[]> {
+  const existing = new Set(profiles.map((profile) => profile.directory));
+  const saved = [...new Set(directories)].filter((directory) => existing.has(directory));
+  await LocalStorage.setItem(HIDDEN_PROFILES_KEY, JSON.stringify(saved));
+  return saved;
+}
+
+export function moveDestinations(
+  profiles: Profile[],
+  sourceDirectory: string | undefined,
+  hiddenDirectories: string[],
+): Profile[] {
+  return profiles.filter(
+    (profile) => profile.directory !== sourceDirectory && !hiddenDirectories.includes(profile.directory),
+  );
 }

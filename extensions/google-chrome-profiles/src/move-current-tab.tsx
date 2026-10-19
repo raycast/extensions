@@ -1,7 +1,13 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { moveCurrentTab, readCurrentTab, SourceTab } from "./util/chrome";
-import { extractProfiles, filterProfiles, readChromeLocalState } from "./util/profiles";
+import {
+  extractProfiles,
+  filterProfiles,
+  loadHiddenDirectories,
+  moveDestinations,
+  readChromeLocalState,
+} from "./util/profiles";
 import { getSelectedBrowser, showDoneHUD, Profile } from "./util/types";
 import { isValidUrl } from "./util/util";
 
@@ -9,6 +15,7 @@ export default function Command() {
   const browser = getSelectedBrowser();
   const [source, setSource] = useState<SourceTab>();
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [hiddenDirectories, setHiddenDirectories] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -43,9 +50,12 @@ export default function Command() {
         if (profiles.length < 2) throw new Error("Create another Chrome profile first");
         const tab = await readCurrentTab(browser, profiles);
         if (!isValidUrl(tab.url)) throw new Error("This tab's URL cannot be moved to another profile");
+        const hidden = await loadHiddenDirectories();
+        const destinations = moveDestinations(profiles, tab.profile.directory, hidden);
+        if (destinations.length === 0) throw new Error("All other profiles are hidden. Unhide one in Switch Profiles.");
         setProfiles(profiles);
+        setHiddenDirectories(hidden);
         setSource(tab);
-        const destinations = profiles.filter((profile) => profile.directory !== tab.profile.directory);
         if (destinations.length === 1) await move(tab, destinations[0], profiles);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -58,7 +68,7 @@ export default function Command() {
     void load();
   }, []);
 
-  const destinations = profiles.filter((profile) => profile.directory !== source?.profile.directory);
+  const destinations = moveDestinations(profiles, source?.profile.directory, hiddenDirectories);
   return (
     <List
       isLoading={loading}
