@@ -1,6 +1,6 @@
 # Tethered Changelog
 
-## [Control Confirmations and Profile Sharing] - {PR_MERGE_DATE}
+## [Control Confirmations and Profile Sharing] - 2026-10-19
 
 - Add Share Profile for .tetheredprofile exports and Post Profile for Tethered’s existing gallery submission editor.
 
