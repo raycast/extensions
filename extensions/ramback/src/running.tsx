@@ -85,7 +85,7 @@ function Row({ item, onStop }: { item: Item; onStop: () => void }) {
               title="Stop"
               icon={Icon.Stop}
               style={Action.Style.Destructive}
-              onAction={() => stop(item).then(onStop)}
+              onAction={() => stop(item, onStop).then(onStop)}
             />
           )}
           {url && <Action.OpenInBrowser url={url} />}
@@ -97,7 +97,7 @@ function Row({ item, onStop }: { item: Item; onStop: () => void }) {
 }
 
 /** Stops politely; asks before a pinned row or a database, and offers Force Stop when something holds on. */
-async function stop(item: Item, ...flags: string[]): Promise<void> {
+async function stop(item: Item, onStop: () => void, ...flags: string[]): Promise<void> {
   const toast = await showToast({ style: Toast.Style.Animated, title: `Stopping ${item.title}` });
   const result = await ramback("stop", item.id, ...flags);
   if (result.code === 3) {
@@ -107,7 +107,7 @@ async function stop(item: Item, ...flags: string[]): Promise<void> {
       message: "It's pinned in Ramback or a database.",
       primaryAction: { title: "Stop", style: Alert.ActionStyle.Destructive },
     });
-    return confirmed ? stop(item, "--yes") : undefined;
+    return confirmed ? stop(item, onStop, "--yes") : undefined;
   }
   if (result.code === 0) {
     toast.style = Toast.Style.Success;
@@ -118,6 +118,6 @@ async function stop(item: Item, ...flags: string[]): Promise<void> {
   toast.title = `Couldn't stop ${item.title}`;
   toast.message = (result.stdout || result.stderr).trim();
   if (result.code === 1) {
-    toast.primaryAction = { title: "Force Stop", onAction: () => stop(item, "--yes", "--force") };
+    toast.primaryAction = { title: "Force Stop", onAction: () => stop(item, onStop, "--yes", "--force").then(onStop) };
   }
 }
