@@ -23,7 +23,7 @@ import {
 import { usePromise } from "@raycast/utils";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { around, highlight } from "./highlight";
 import {
   AppHit,
@@ -86,12 +86,24 @@ export default function Command(props: LaunchProps) {
   const ctx: Ctx = { query: query.trim(), eventId: data?.event_id ?? null, category, setCategory };
   // Lantern's own state: an unfinished setup, a download or a first indexing are explained, not shown as "no results"
   const { data: st, revalidate: recheck } = usePromise(status, [], { onError: () => undefined });
-  const busy = !!st && (!!st.model_download?.running || (st.worker.running && (st.files.indexed ?? 0) === 0));
+  const waiting = setupState(st);
+  // While any of those states shows, Lantern is asked again every 2 s (the user may be fixing it right now); when the
+  // state changes (setup finished, download or first indexing done) the current search runs again.
   useEffect(() => {
-    if (!busy) return;
+    if (!waiting) return;
     const timer = setInterval(recheck, 2000);
     return () => clearInterval(timer);
-  }, [busy, recheck]);
+  }, [waiting, recheck]);
+  const lastState = useRef(waiting);
+  useEffect(() => {
+    if (lastState.current === waiting) return;
+    lastState.current = waiting;
+    revalidate();
+  }, [waiting, revalidate]);
+  const refreshAll = () => {
+    recheck();
+    revalidate();
+  };
   // Raycast only runs the shortcuts of the selected row's actions: every empty state carries the filter actions too,
   // or ⌃1…⌃0 would beep once a filter leaves nothing to select.
   const rows = data && query.trim() ? sections(data, includeApps, ctx).filter(Boolean) : [];
@@ -171,8 +183,8 @@ export default function Command(props: LaunchProps) {
         </List.Dropdown>
       }
     >
-      {st && setupView(st) && (!query.trim() || !rows.length) ? (
-        setupView(st)
+      {st && waiting && (!query.trim() || !rows.length) ? (
+        setupView(st, ctx, refreshAll)
       ) : !query.trim() ? (
         <List.EmptyView
           icon="icon.png"
@@ -211,15 +223,35 @@ export default function Command(props: LaunchProps) {
   );
 }
 
+/** Which of the states below Lantern is in ("" for none): the key the command refreshes on. */
+function setupState(st: LanternStatus | undefined): string {
+  if (!st) return "";
+  if (st.index_problem) return "problem";
+  if (st.model_download?.running) return "download";
+  if (st.models_missing) return "setup";
+  if (st.worker.running && (st.files.indexed ?? 0) === 0) return "first-index";
+  return "";
+}
+
 /** An index needing attention, an unfinished setup, a model download, a first indexing: what to do or wait for. */
-function setupView(st: LanternStatus) {
+function setupView(st: LanternStatus, ctx: Ctx, refresh: () => void) {
   const openLantern = (
     <ActionPanel>
       <Action
         title="Open Lantern"
         icon={Icon.AppWindow}
-        onAction={openLanternApp}
+        onAction={async () => {
+          await openLanternApp();
+          setTimeout(refresh, 1500);
+        }}
       />
+      <Action
+        title="Check Again"
+        icon={Icon.ArrowClockwise}
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        onAction={refresh}
+      />
+      <FilterActions ctx={ctx} />
     </ActionPanel>
   );
   if (st.index_problem) {
