@@ -377,16 +377,18 @@ evals:
         "createdAt": "2026-01-01T00:00:00.000Z", "updatedAt": "2026-01-01T00:00:00.000Z", "version":
         1}
       update-resume: >-
-        {"id": "resume-example-1", "title": "Engineering", "name": "Example Person", "updatedAt":
-        "2026-01-01T00:00:00.000Z"}
+        {"id": "resume-example-1", "title": "Backend", "updatedAt": "2026-01-01T00:00:00.000Z"}
     expected:
       - callsTool:
           name: update-resume
           arguments:
+            id:
+              - eq: resume-example-1
             title:
-              - includes: Backend
+              - eq: Backend
             resumeJson:
-              - includes: Example Employer
+              - matches: >-
+                  ^\s*\{\s*(?:"basics"\s*:\s*\{\s*(?:"name"\s*:\s*"Example Person"\s*,\s*"label"\s*:\s*"Engineer"|"label"\s*:\s*"Engineer"\s*,\s*"name"\s*:\s*"Example Person")\s*\}\s*,\s*"work"\s*:\s*\[\s*\{\s*(?:"name"\s*:\s*"Example Employer"\s*,\s*"startDate"\s*:\s*"2020"|"startDate"\s*:\s*"2020"\s*,\s*"name"\s*:\s*"Example Employer")\s*\}\s*\]|"work"\s*:\s*\[\s*\{\s*(?:"name"\s*:\s*"Example Employer"\s*,\s*"startDate"\s*:\s*"2020"|"startDate"\s*:\s*"2020"\s*,\s*"name"\s*:\s*"Example Employer")\s*\}\s*\]\s*,\s*"basics"\s*:\s*\{\s*(?:"name"\s*:\s*"Example Person"\s*,\s*"label"\s*:\s*"Engineer"|"label"\s*:\s*"Engineer"\s*,\s*"name"\s*:\s*"Example Person")\s*\})\s*\}\s*$
   - input: "@json-resume Delete my saved local resume named Engineering."
     mocks:
       list-resumes: >-
