@@ -173,9 +173,15 @@ export async function savePlanDraft(draft: PlanDraft): Promise<SavedPlan> {
   });
 }
 
-export async function removePlannedItem(reference: PlanReference, date?: string): Promise<void> {
+export async function removePlannedItem(
+  reference: PlanReference,
+  date?: string,
+  expectedUpdatedAt?: string,
+): Promise<void> {
   await withReminderOperation(async () => {
     const goal = await requirePlan(reference.goalId);
+    if (expectedUpdatedAt !== undefined && goal.updatedAt !== expectedUpdatedAt)
+      throw new Error("The plan has changed. Reopen the editor.");
     const visible = date ? planForDate(goal, date) : goal;
     if (!visible) throw new Error("The plan has changed. Reload Today's Plan.");
     getPlannedItem(visible, reference);

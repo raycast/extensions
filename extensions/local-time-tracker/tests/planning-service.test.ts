@@ -616,6 +616,24 @@ test("daily planning integrates with existing timers, logs and recoverable stora
       },
     );
 
+    await t.test("stale deletion cannot remove newly added subtasks or alter recorded work", async () => {
+      const opened = await service.savePlanDraft({ date, content: "Delete guard\nFirst", projectId: project.id });
+      const changed = await service.savePlanDraft({
+        ...opened,
+        expectedUpdatedAt: opened.updatedAt,
+        content: "Delete guard\nFirst\nAdded after opening",
+      });
+      const before = await storage.getPlan(changed.id);
+      const logs = await storage.getWorkLogs();
+      const active = await storage.getActiveTimer();
+      await assert.rejects(service.removePlannedItem({ goalId: opened.id }, date, opened.updatedAt), /changed.*Reopen/);
+      assert.deepEqual(await storage.getPlan(opened.id), before);
+      assert.deepEqual(await storage.getWorkLogs(), logs);
+      assert.deepEqual(await storage.getActiveTimer(), active);
+      await service.removePlannedItem({ goalId: changed.id }, date, changed.updatedAt);
+      assert.equal(await storage.getPlan(changed.id), undefined);
+    });
+
     await t.test("every plan mutation invalidates stale editors with a frozen or backwards clock", async (context) => {
       const instant = Date.now();
       context.mock.timers.enable({ apis: ["Date"], now: instant });

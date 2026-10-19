@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { showFailure } from "../lib/errors";
-import { createDailyPlan, planClockKey, type PlanData } from "../lib/plan-model";
+import { createPlanClock, planClockKey } from "../lib/plan-model";
 import { loadPlanData } from "../lib/plan-state";
 
 export function useDailyPlan(date: string) {
-  const [saved, setSaved] = useState<{ date: string; data: PlanData }>();
+  const [saved, setSaved] = useState<{ date: string; clock: ReturnType<typeof createPlanClock> }>();
   const [now, setNow] = useState(new Date());
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
   const mounted = useRef(true);
   const currentDate = useRef(date);
   currentDate.current = date;
-  const latest = useRef<{ date: string; data: PlanData } | undefined>(undefined);
+  const latest = useRef<{ date: string; clock: ReturnType<typeof createPlanClock> } | undefined>(undefined);
   const dataKey = useRef("");
   const clockKey = useRef("");
   const request = useRef(0);
@@ -24,13 +24,14 @@ export function useDailyPlan(date: string) {
       const data = await loadPlanData(date);
       if (mounted.current && id === request.current && currentDate.current === date) {
         const key = `${date}:${JSON.stringify(data)}`;
-        latest.current = { date, data };
         if (key !== dataKey.current) {
           dataKey.current = key;
           const instant = new Date();
-          clockKey.current = planClockKey(data, date, instant);
+          const clock = createPlanClock(data, date, instant);
+          latest.current = { date, clock };
+          clockKey.current = planClockKey(clock(instant));
           setNow(instant);
-          setSaved({ date, data });
+          setSaved({ date, clock });
         }
         setError(undefined);
       }
@@ -49,7 +50,7 @@ export function useDailyPlan(date: string) {
       const current = latest.current;
       if (!current || current.date !== date) return;
       const instant = new Date();
-      const key = planClockKey(current.data, date, instant);
+      const key = planClockKey(current.clock(instant));
       if (key !== clockKey.current) {
         clockKey.current = key;
         setNow(instant);
@@ -82,7 +83,7 @@ export function useDailyPlan(date: string) {
     }
   }
   return {
-    plan: saved?.date === date ? createDailyPlan(saved.data, date, now) : undefined,
+    plan: saved?.date === date ? saved.clock(now) : undefined,
     busy,
     error,
     now,

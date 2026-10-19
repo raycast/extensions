@@ -453,7 +453,7 @@ function PlanEditor({
     submitting.current = true;
     setSaving(true);
     try {
-      await removePlannedItem({ goalId: editing.id }, date);
+      await removePlannedItem({ goalId: editing.id }, date, editing.updatedAt);
       pop();
     } catch (error) {
       await showFailure("Could Not Delete Plan", error);

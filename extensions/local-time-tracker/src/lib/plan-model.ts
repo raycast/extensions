@@ -62,9 +62,44 @@ export function planDateLabel(date: string): string {
   return new Date(`${date}T12:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric", weekday: "long" });
 }
 
+// Cache saved totals when source data changes; clock ticks only add live time.
+export function createPlanClock(data: PlanData, date: string, now = new Date()) {
+  const saved = createDailyPlan({ ...data, timer: null }, date, now);
+  const timer = data.timer && !data.logs.some((log) => log.id === data.timer?.id) ? data.timer : null;
+  const reference = timer?.plan;
+  return (instant: Date): DailyPlan => {
+    const seconds = timer ? planDurationSeconds(date, [], timer, instant) : 0;
+    const today = localDateKey(instant);
+    return {
+      ...saved,
+      today,
+      previousPlanDate: today === saved.today ? saved.previousPlanDate : latestPlanDateBefore(data.goals, today),
+      dates:
+        today === saved.today
+          ? saved.dates
+          : [...new Set([date, today, ...data.goals.flatMap(planDates)])].sort().reverse(),
+      active: data.timer,
+      totalSeconds: saved.totalSeconds + seconds,
+      goals:
+        seconds && reference
+          ? saved.goals.map((goal) =>
+              goal.id === reference.goalId
+                ? {
+                    ...goal,
+                    seconds: goal.seconds + seconds,
+                    tasks: goal.tasks.map((task) =>
+                      task.id === reference.taskId ? { ...task, seconds: task.seconds + seconds } : task,
+                    ),
+                  }
+                : goal,
+            )
+          : saved.goals,
+    };
+  };
+}
+
 // Only publish a clock tick when a visible duration or the local day changes.
-export function planClockKey(data: PlanData, date: string, now: Date): string {
-  const plan = createDailyPlan(data, date, now);
+export function planClockKey(plan: DailyPlan): string {
   const displayTime = (seconds: number) => (seconds > 0 ? formatDuration(seconds) : "—");
   return JSON.stringify([
     plan.today,
