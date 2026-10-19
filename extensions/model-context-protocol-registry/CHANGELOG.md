@@ -4,6 +4,10 @@
 
 - Add Wealthnow MCP Server to the registry
 
+## [Add Dynamic Document API MCP Server] - 2026-10-19
+
+- Add Dynamic Document API to the official registry: render PDFs and images from templates, HTML or Markdown, merge PDFs and create validated XRechnung and ZUGFeRD e-invoices. Hosted Streamable HTTP server at https://mcp.dynamicdocumentapi.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add ppl MCP Server] - 2026-10-18
 
 - Add ppl to the official registry: a personal CRM for AI agents to look up and update contacts, log interactions, keep notes and set reminders about the people in your life. Hosted Streamable HTTP server at https://withppl.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
