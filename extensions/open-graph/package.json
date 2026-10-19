@@ -8,7 +8,8 @@
   "contributors": [
     "ridemountainpig",
     "tm.wrnr",
-    "j3lte"
+    "j3lte",
+    "0xdhrv"
   ],
   "categories": [
     "Developer Tools",
@@ -26,7 +27,7 @@
           "name": "url",
           "placeholder": "URL",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },
@@ -51,6 +52,7 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",

@@ -1,5 +1,13 @@
 # Open Graph Changelog
 
+## [Complete Social Metadata Preview] - {PR_MERGE_DATE}
+
+- Preview all Open Graph and Twitter Card tags, including multiple images and declared dimensions.
+- Launch without a URL to use the clipboard, or enter and edit a URL in a form.
+- Copy metadata as JSON, Markdown, or HTML meta tags, and copy or open absolute image URLs.
+- Check required Open Graph properties and use page titles and descriptions when social tags are missing.
+- Show the final URL after redirects, resolve relative images, and retry failed or timed-out requests.
+
 ## [Maintenance] - 2025-12-13
 
 - Add support for Windows platform.
