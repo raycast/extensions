@@ -1,5 +1,9 @@
 # Repository Manager Changelog
 
+## [Support Link] - {PR_MERGE_DATE}
+
+- Add an optional Buy Me a Coffee support link to the README.
+
 ## [Repository Workflow, Tags, and AI Briefs] - 2026-05-12
 - **Repository Tags**: Add custom tags to repositories, show them in the list, and filter by tag from the main repository filter dropdown
 - **Unified Filters**: Combine directory, health, recent, favorite, and tag filters in the upper-right list filter with clearly labeled sections

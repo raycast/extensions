@@ -140,3 +140,8 @@ The extension provides quick access to:
 2. For code statistics, install tokei using your preferred method
 3. Configure your preferred editor and terminal in Raycast settings
 4. Enable caching for better performance with large numbers of repositories
+
+## Support
+
+If you find Repository Manager useful, you can optionally
+[support my work on Buy Me a Coffee](https://buymeacoffee.com/frameck).
