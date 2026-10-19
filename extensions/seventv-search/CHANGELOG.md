@@ -1,6 +1,6 @@
 # Changelog
 
-## [Providers and Search Fixes] - {PR_MERGE_DATE}
+## [Providers and Search Fixes] - 2026-10-19
 
 - Add BetterTTV and FrankerFaceZ to Search Emotes, informed by Kan-A-Pesh's Emotecast.
 - Replace Drop Emote and Quick Drop with Paste Emote File. Keep the alternative keyboard shortcut on the same action.
