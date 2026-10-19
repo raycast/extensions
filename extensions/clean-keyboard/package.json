@@ -12,7 +12,8 @@
     "litomore",
     "yusifaliyevpro",
     "shivraj-roy",
-    "alexi.build"
+    "alexi.build",
+    "nawal"
   ],
   "platforms": [
     "macOS",
@@ -93,6 +94,20 @@
           "default": false,
           "required": false
         }
+      ]
+    },
+    {
+      "name": "lock-keyboard-and-mouse",
+      "title": "Lock Keyboard and Mouse",
+      "description": "Block typing and clicks while scrolling still works, then unlock with Touch ID",
+      "icon": "lock-keyboard-and-mouse.png",
+      "mode": "view",
+      "keywords": [
+        "mouse",
+        "trackpad",
+        "touch id",
+        "input",
+        "guard"
       ]
     }
   ],

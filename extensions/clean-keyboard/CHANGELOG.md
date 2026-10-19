@@ -1,5 +1,11 @@
 # Clean Keyboard Changelog
 
+## [Lock Keyboard and Mouse] - {PR_MERGE_DATE}
+
+- Added a macOS **Lock Keyboard and Mouse** command that blocks typing and clicks while scrolling still works
+- Unlock with a Command-key triple tap and Touch ID, or hold both Command keys for 8 seconds to force unlock
+- Timed sessions unlock automatically, and a supervisor process releases the lock if the input helper stops responding
+
 ## [Default Duration] - 2026-10-15
 
 - Added a default duration preference to lock the keyboard immediately on open ([#30864](https://github.com/raycast/extensions/issues/30864))
