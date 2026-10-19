@@ -5,8 +5,16 @@
   "description": "⚡Get any websites brand logo in seconds (SVG, PNG)",
   "icon": "extension_icon.png",
   "author": "dilutedev",
+  "contributors": [
+    "muhammadrizo"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
-    "Developer Tools"
+    "Developer Tools",
+    "Media"
   ],
   "license": "MIT",
   "commands": [
@@ -23,6 +31,14 @@
           "description": "Key used to authenticate brand fetch api",
           "type": "password",
           "required": true
+        },
+        {
+          "title": "Download Path",
+          "name": "downloadPath",
+          "description": "Choose where downloaded brand images are saved",
+          "type": "directory",
+          "required": false,
+          "default": "~/Downloads"
         }
       ],
       "arguments": [
@@ -36,16 +52,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.69.0",
-    "axios": "^1.8.4"
+    "@chrismessina/raycast-kit": "^0.2.0",
+    "@raycast/api": "^2.8.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -53,5 +69,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild": true
   }
 }
