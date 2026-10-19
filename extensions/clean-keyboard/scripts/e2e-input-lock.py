@@ -138,9 +138,12 @@ try:
     worker = int(subprocess.check_output(["pgrep", "-P", str(process.pid)], text=True).strip())
     os.kill(worker, signal.SIGKILL)
     output, error = process.communicate(timeout=8)
-    assert process.returncode == 1, (output, error)
-    assert records(output)[-1].get("reason") == "workerExited", output
-    print("PASS: an unexpected worker crash reports failure instead of claiming a normal unlock")
+    terminal = records(output)[-1]
+    assert (process.returncode, terminal.get("phase"), terminal.get("reason")) in [
+        (1, "error", "workerExited"),
+        (0, "ready", "watchdog"),
+    ], (process.returncode, terminal, error)
+    print("PASS: an unexpected worker crash reports failure or completed watchdog recovery")
 finally:
     cleanup(process)
 

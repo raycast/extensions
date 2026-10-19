@@ -11,7 +11,7 @@ python3 scripts/e2e-input-lock.py --live
 python3 -m http.server 8765 --bind 127.0.0.1 --directory e2e
 ```
 
-`--live` blocks typing and clicks on the current Mac for up to 30 seconds. It requires enrolled Touch ID plus the helper's existing Accessibility and Input Monitoring grants. It exercises timed release, duplicate-instance refusal, an actual frozen worker, and supervisor termination. Any missing prerequisite fails the live run. Every started supervisor is cleaned up even when an assertion fails.
+`--live` blocks typing and clicks on the current Mac for up to 30 seconds. It requires enrolled Touch ID plus the helper's existing Accessibility and Input Monitoring grants. It exercises timed release, duplicate-instance refusal, an actual frozen worker, supervisor termination, worker crashes, a disconnected status consumer, and the original keyboard-only timer. Any missing prerequisite fails the live run. Every started supervisor is cleaned up even when an assertion fails.
 
 Open `http://127.0.0.1:8765/browser-witness.html` in the existing browser. Use real keyboard/pointer input. DOM-driven filling, clicking, and synthetic JavaScript events bypass the operating system tap and cannot verify input blocking.
 
