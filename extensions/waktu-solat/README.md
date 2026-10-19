@@ -1,6 +1,6 @@
 # Waktu Solat
 
-View Malaysia prayer times from [JAKIM](https://www.e-solat.gov.my/) directly in Raycast.
+View Malaysia prayer times (JAKIM zones, via [Waktu Solat API](https://api.waktusolat.app/)) directly in Raycast.
 
 ![Waktu Solat command showing daily prayer times](media/waktu-solat-1.png)
 
@@ -30,7 +30,7 @@ Open **Raycast Settings → Extensions → Waktu Solat** to configure the menu b
 
 ## Data source
 
-Prayer times and zone information are retrieved from JAKIM's [e-Solat service](https://www.e-solat.gov.my/). An internet connection is required when data is not already cached locally.
+Prayer times and zone information are retrieved from the [Waktu Solat API](https://api.waktusolat.app/), which serves JAKIM prayer times. An internet connection is required when data is not already cached locally.
 
 ## License
 

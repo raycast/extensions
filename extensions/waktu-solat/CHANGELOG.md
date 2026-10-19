@@ -1,6 +1,14 @@
 # Waktu Solat Changelog
 
-## [Raycast v2 Upgrade and Reliability Improvements] - 2026-09-13
+## [Waktu Solat API Migration and Zone Persistence Fixes] - {PR_MERGE_DATE}
+
+- Switch prayer times and zones to `api.waktusolat.app`, replacing e-solat.gov.my; cache under new `v2` keys.
+- Fix the zone resetting to JHR01 on reopen, and show zones as `CODE - Name` in the dropdown.
+- Fix a 404 from an empty zone id and a React key warning in the menu bar.
+- Refresh the menu bar every 10 seconds so zone changes appear without a manual reload.
+- Upgrade `@raycast/api` and `@raycast/utils`, fix lint errors, and remove `node-html-parser`.
+
+## [Raycast v2 Upgrade and Reliability Improvements] - {PR_MERGE_DATE}
 
 - Improve initial loading, loading indicators, and empty states for prayer times.
 - Add user-visible error handling when JAKIM prayer-time or zone data is unavailable.

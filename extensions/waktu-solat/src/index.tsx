@@ -7,21 +7,30 @@ import { extractZones, Zone } from "./lib/zones";
 
 function Zones(props: { value?: string; onChange: (z: Zone) => void }) {
   const { data: zones, isLoading } = usePromise(() =>
-    loadCached({ key: "zones", load: extractZones, isValid: (zones) => zones.length > 0 }),
+    loadCached({ key: "zones-v2", load: extractZones, isValid: (zones) => zones.length > 0 }),
   );
+
+  // On mount Raycast emits the first item before the default value; ignore events until the default is confirmed.
+  const settled = useRef(false);
+
+  if (!zones || !props.value) return <></>;
 
   return (
     <List.Dropdown
       isLoading={isLoading}
       tooltip="Select Zone"
-      value={props.value}
+      defaultValue={props.value}
       onChange={(newId) => {
+        if (!settled.current) {
+          settled.current = newId === props.value;
+          return;
+        }
         props.onChange(zones?.find((z) => z.id == newId) || { id: newId, name: "", state: "" });
       }}
     >
       <List.Dropdown.Section>
         {zones?.map((z) => (
-          <List.Dropdown.Item key={z.id} title={z.name} value={z.id} keywords={[z.state, z.id]} />
+          <List.Dropdown.Item key={z.id} title={`${z.id} - ${z.name}`} value={z.id} keywords={[z.state, z.id]} />
         ))}
       </List.Dropdown.Section>
     </List.Dropdown>
@@ -37,10 +46,7 @@ function PrayerItem(props: { item: PrayerTimeItem; onRefresh: () => Promise<void
     if (isCurrent) {
       return { tag: { value: "Current", color: Color.Green } };
     }
-    if (isNext) {
-      return { tag: { value: different } };
-    }
-    return undefined;
+    return isNext ? { tag: { value: different } } : undefined;
   }
 
   const tag = getTag();
@@ -72,6 +78,7 @@ function PrayerTimes() {
   const currentPrayerTime = prayerTime ?? initialData?.prayerTime;
 
   async function onZoneChange(z: Zone) {
+    if (!zoneId || !z.id || z.id === zoneId) return;
     const currentRequestId = ++requestId.current;
     setIsChangingZone(true);
 
@@ -110,7 +117,7 @@ function PrayerTimes() {
 
   return (
     <List
-      searchBarAccessory={<Zones value={zoneId} onChange={onZoneChange} />}
+      searchBarAccessory={zoneId ? <Zones value={zoneId} onChange={onZoneChange} /> : undefined}
       isLoading={isInitialLoading || isChangingZone}
     >
       {currentPrayerTime?.items?.length ? (
