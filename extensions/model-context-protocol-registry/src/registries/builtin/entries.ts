@@ -732,6 +732,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "local-commander",
+    title: "Local Commander",
+    description:
+      "Connects Raycast AI to Windows 11 computers you own. Your AI can read approved project files and Git state, run the checks and commands you authorize, and check local services; your workspace at localcmd.app shows which computer ran each request and how it ended. Once you approve a computer it can do what your Windows account can do; you can limit it to folders, block commands or switch it off at any time. Needs the Local Commander agent paired on each PC (`npx local-commander-agent@latest`). Free plan for up to 5 computers. Hosted remote Streamable HTTP server; OAuth 2.0 sign-in with dynamic client registration and PKCE, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/netbka/local-commander-plugins/main/assets/logo.png",
+    homepage: "https://localcmd.app",
+    remoteUrl: "https://localcmd.app/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote@0.15.1", "https://localcmd.app/mcp"],
+    },
+  },
+  {
     name: "looot",
     title: "looot",
     description:
