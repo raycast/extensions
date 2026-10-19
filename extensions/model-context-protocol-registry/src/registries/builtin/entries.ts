@@ -397,6 +397,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.dynamicdocumentapi.com/mcp",
   },
   {
+    name: "equibles",
+    title: "Equibles",
+    description:
+      "US stock market data for research: SEC filing search with exact source lines, XBRL financial statements, earnings call transcripts, insider and congressional trades, 13F holdings, short interest, end-of-day prices and FRED macro data. 130 tools: 120 read market data and 10 write to your own Equibles portfolios, watchlist or feedback. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or a Bearer API key; free plan with 100 requests a day, option chains and live quotes need a paid plan.",
+    icon: "https://equibles.com/favicon/favicon/android-chrome-192x192.png",
+    homepage: "https://equibles.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.equibles.com/mcp"],
+    },
+    remoteUrl: "https://mcp.equibles.com/mcp",
+  },
+  {
     name: "git",
     title: "Git",
     description:
