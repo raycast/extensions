@@ -4,29 +4,11 @@ import { join } from "path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   FALLBACK_SEARCH_ENGINE,
-  canRevealVerticalTabsFromJson,
   findHistoryDatabasePath,
   getCandidateProfileNames,
   getDefaultSearchProviderFromPreferences,
   getHeliumServicesPreferencesFromJson,
 } from "../../src/utils/helium-profile";
-
-describe("vertical sidebar command eligibility", () => {
-  it("requires confirmed vertical layout", () => {
-    expect(canRevealVerticalTabsFromJson(undefined)).toBe(false);
-    expect(canRevealVerticalTabsFromJson({ helium: { browser: { layout: 0 } } })).toBe(false);
-    expect(canRevealVerticalTabsFromJson({ helium: { browser: { layout: 1 } } })).toBe(false);
-    expect(canRevealVerticalTabsFromJson({ helium: { browser: { layout: 2 } } })).toBe(true);
-  });
-
-  it("does not issue the command when Helium uses it to save the page", () => {
-    expect(
-      canRevealVerticalTabsFromJson({
-        helium: { browser: { layout: 2 }, settings: { behavior: { vertical_collapse_shortcut: false } } },
-      }),
-    ).toBe(false);
-  });
-});
 
 let tempDir: string | undefined;
 

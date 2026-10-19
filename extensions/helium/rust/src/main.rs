@@ -6,14 +6,14 @@ use raycast_rust_macros::raycast;
 mod browser;
 
 #[raycast]
-fn switch_tab(executable: String, title: String, reveal_sidebar: bool) -> Result<(), String> {
+fn switch_tab(executable: String, title: String) -> Result<(), String> {
     #[cfg(windows)]
     {
-        browser::switch_tab(&executable, &title, reveal_sidebar)
+        browser::switch_tab(&executable, &title)
     }
     #[cfg(not(windows))]
     {
-        let _ = (executable, title, reveal_sidebar);
+        let _ = (executable, title);
         Err("Windows only".into())
     }
 }

@@ -33,10 +33,10 @@ full path of Helium's `chrome.exe`.
 stays empty. Selecting a tab uses a native Rust UI Automation helper that matches Helium's full executable path and
 the tab's title, then verifies selection. It preserves normal/maximized window placement and restores minimized
 windows. If the tab is missing or its title changed, refresh the list and try again; switching failures leave the list
-open and offer Copy Error. In Vertical layout, the helper can temporarily reveal a hidden sidebar and restore its
-previous state, including in Frameless mode. Keep Helium's "Use Ctrl+S to toggle vertical tabs" setting enabled for
-this automatic reveal; it uses a native window command rather than injecting Ctrl+S into a page. Helium's hover and
-window-exit grace period can briefly keep the unpinned sidebar visible afterward.
+open and offer Copy Error. In Frameless mode, the helper can temporarily reveal a hidden vertical sidebar by moving
+the pointer to the window edge, then returning it to its original position. It stops if you move the pointer, hold a
+mouse button, or change focus. This works independently of the Ctrl+S setting and does not change sidebar pinning.
+Helium's hover and window-exit grace period can briefly keep the unpinned sidebar visible afterward.
 Duplicate titles remain ambiguous; the first matching Helium tab is selected. Closing tabs and deduplicating tabs
 have no Windows equivalent and are hidden.
 

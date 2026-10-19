@@ -7,6 +7,7 @@
 - Report switching failures instead of silently opening duplicate URLs, and avoid matching unrelated tabs by partial title.
 - Add a Windows User Data Directory preference for portable/custom profiles, keeping profile reads and launches together.
 - Add Copy Error actions to command failure toasts and improve error details.
+- Update copy shortcuts: Copy URL uses `⌘⇧C` / `Ctrl+Shift+C`, Copy Title (or Copy Query) uses `⌘⌥C` / `Ctrl+Alt+C`, and Copy as Markdown uses `⌘⌃C` / `Alt+Shift+C` (macOS / Windows).
 
 ## [Windows Support] - 2026-08-10
 

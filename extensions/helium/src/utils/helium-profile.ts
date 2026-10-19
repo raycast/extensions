@@ -90,17 +90,6 @@ export function findHistoryDatabasePath(basePath = getHeliumBasePath()): string 
   return findProfileFile("History", basePath);
 }
 
-export function canRevealVerticalTabs(basePath = getHeliumBasePath()): boolean {
-  return canRevealVerticalTabsFromJson(readJsonFile(findProfileFile("Preferences", basePath)));
-}
-
-export function canRevealVerticalTabsFromJson(preferences: unknown): boolean {
-  const helium = getRecord(getRecord(preferences)?.helium);
-  const browser = getRecord(helium?.browser);
-  const behavior = getRecord(getRecord(helium?.settings)?.behavior);
-  return browser?.layout === 2 && behavior?.vertical_collapse_shortcut !== false;
-}
-
 export function getHeliumServicesPreferences(basePath = getHeliumBasePath()): HeliumServicesPreferences {
   const preferences = readJsonFile(findProfileFile("Preferences", basePath));
   return getHeliumServicesPreferencesFromJson(preferences);

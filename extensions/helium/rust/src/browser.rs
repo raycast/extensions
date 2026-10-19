@@ -7,7 +7,8 @@ use std::{
 use windows::{
     core::PWSTR,
     Win32::{
-        Foundation::{CloseHandle, BOOL, HWND, LPARAM, WPARAM},
+        Foundation::{CloseHandle, BOOL, HWND, LPARAM, POINT, RECT},
+        Graphics::Gdi::ClientToScreen,
         System::{
             Com::{
                 CoCreateInstance, CoInitializeEx, CoUninitialize, CLSCTX_INPROC_SERVER,
@@ -22,7 +23,8 @@ use windows::{
             Accessibility::*,
             Input::KeyboardAndMouse::{
                 GetAsyncKeyState, SendInput, INPUT, INPUT_0, INPUT_KEYBOARD, KEYBDINPUT,
-                KEYEVENTF_KEYUP, VK_CONTROL, VK_LWIN, VK_MENU, VK_RWIN, VK_SHIFT,
+                KEYEVENTF_KEYUP, VK_CONTROL, VK_LBUTTON, VK_LWIN, VK_MBUTTON, VK_MENU, VK_RBUTTON,
+                VK_RWIN, VK_SHIFT,
             },
             WindowsAndMessaging::*,
         },
@@ -177,48 +179,104 @@ fn title_matches(name: &str, target: &str) -> bool {
         })
 }
 
-// Helium's IDC_CTRL_S_SHORTCUT. Only use after the read-only profile check
-// confirms vertical layout with the collapse shortcut enabled; otherwise this
-// command would mean Save Page. A window command avoids injected keystrokes.
-fn toggle_sidebar(hwnd: HWND) -> Result<(), String> {
-    let sent = unsafe {
-        SendMessageTimeoutW(
-            hwnd,
-            WM_COMMAND,
-            WPARAM(34090),
-            LPARAM(0),
-            SMTO_ABORTIFHUNG | SMTO_BLOCK,
-            1000,
-            None,
-        )
-    };
-    if sent.0 == 0 {
-        return Err("Helium did not respond to the sidebar command.".into());
-    }
-    Ok(())
+// Frameless mode reveals its sidebar at either client edge. Hovering uses the
+// target window's own layout, without changing pin preferences or dispatching
+// Ctrl+S (which means Save Page in some profiles).
+struct SidebarHover {
+    hwnd: HWND,
+    original: POINT,
+    placed: POINT,
 }
 
-struct RevealedSidebar(HWND);
+fn cursor_position() -> Result<POINT, String> {
+    let mut point = POINT::default();
+    unsafe { GetCursorPos(&mut point).map_err(error)? };
+    Ok(point)
+}
+
+fn mouse_button_down() -> bool {
+    [VK_LBUTTON, VK_RBUTTON, VK_MBUTTON]
+        .iter()
+        .any(|button| unsafe { GetAsyncKeyState(button.0 as i32) < 0 })
+}
+
+impl SidebarHover {
+    fn begin(hwnd: HWND, right: bool) -> Result<Option<Self>, String> {
+        if mouse_button_down() || unsafe { GetForegroundWindow() } != hwnd {
+            return Err("Helium lost focus or a mouse button is held. Try switching again.".into());
+        }
+        let original = cursor_position()?;
+        let mut rect = RECT::default();
+        unsafe { GetClientRect(hwnd, &mut rect).map_err(error)? };
+        if rect.right - rect.left < 12 || rect.bottom - rect.top < 100 {
+            return Ok(None);
+        }
+        let mut placed = POINT {
+            x: if right { rect.right - 2 } else { rect.left + 2 },
+            y: rect.top + (rect.bottom - rect.top) / 2,
+        };
+        unsafe {
+            ClientToScreen(hwnd, &mut placed).ok().map_err(error)?;
+            if GetAncestor(WindowFromPoint(placed), GA_ROOT) != hwnd {
+                return Ok(None);
+            }
+        }
+        if cursor_position()? != original || mouse_button_down() {
+            return Err("The pointer moved while switching tabs. Try again.".into());
+        }
+        unsafe { SetCursorPos(placed.x, placed.y).map_err(error)? };
+        let hover = Self {
+            hwnd,
+            original,
+            placed,
+        };
+        hover.check()?;
+        Ok(Some(hover))
+    }
+
+    fn check(&self) -> Result<(), String> {
+        if unsafe { GetForegroundWindow() } != self.hwnd
+            || cursor_position()? != self.placed
+            || mouse_button_down()
+            || unsafe { GetAncestor(WindowFromPoint(self.placed), GA_ROOT) } != self.hwnd
+        {
+            return Err(
+                "Focus or pointer input changed while revealing Helium's tabs. Try again.".into(),
+            );
+        }
+        Ok(())
+    }
+}
+
+impl Drop for SidebarHover {
+    fn drop(&mut self) {
+        // Respect input made by the user while the helper was waiting.
+        if cursor_position().ok() == Some(self.placed) && !mouse_button_down() {
+            unsafe {
+                let _ = SetCursorPos(self.original.x, self.original.y);
+            }
+        }
+    }
+}
 
 struct WindowInspection {
     hwnd: HWND,
-    original: Option<(WINDOWPLACEMENT, HWND)>,
+    original: Option<(Option<WINDOWPLACEMENT>, HWND)>,
 }
 
 impl WindowInspection {
     fn begin(hwnd: HWND) -> Result<Self, String> {
-        let original = if unsafe { IsIconic(hwnd).as_bool() } {
+        let original = {
             let mut placement = WINDOWPLACEMENT {
                 length: size_of::<WINDOWPLACEMENT>() as u32,
                 ..Default::default()
             };
             unsafe { GetWindowPlacement(hwnd, &mut placement).map_err(error)? };
+            let placement = unsafe { IsIconic(hwnd).as_bool() }.then_some(placement);
             Some((placement, unsafe { GetForegroundWindow() }))
-        } else {
-            None
         };
         let inspection = Self { hwnd, original };
-        if inspection.original.is_some() {
+        if unsafe { IsIconic(hwnd).as_bool() } {
             focus(hwnd)?;
         }
         Ok(inspection)
@@ -234,8 +292,10 @@ impl Drop for WindowInspection {
         if let Some((placement, foreground)) = self.original {
             unsafe {
                 let was_focused = GetForegroundWindow() == self.hwnd;
-                let _ = SetWindowPlacement(self.hwnd, &placement);
                 if was_focused {
+                    if let Some(placement) = placement {
+                        let _ = SetWindowPlacement(self.hwnd, &placement);
+                    }
                     let _ = SetForegroundWindow(foreground);
                 }
             }
@@ -243,30 +303,32 @@ impl Drop for WindowInspection {
     }
 }
 
-impl RevealedSidebar {
-    fn restore(self) -> Result<(), String> {
-        let result = toggle_sidebar(self.0);
-        std::mem::forget(self);
-        result
-    }
-}
-
-impl Drop for RevealedSidebar {
-    fn drop(&mut self) {
-        let _ = toggle_sidebar(self.0);
-    }
-}
-
 fn select_tab(hwnd: HWND, tab: &IUIAutomationElement) -> Result<(), String> {
-    focus(hwnd)?;
+    if unsafe { GetForegroundWindow() } != hwnd {
+        return Err("Helium lost focus before selecting the tab.".into());
+    }
+    unsafe {
+        // Chromium can report IsOffscreen=false for tabs clipped by the strip.
+        if let Ok(scroll) =
+            tab.GetCurrentPatternAs::<IUIAutomationScrollItemPattern>(UIA_ScrollItemPatternId)
+        {
+            scroll.ScrollIntoView().map_err(error)?;
+        }
+    }
     let selection: IUIAutomationSelectionItemPattern = unsafe {
         tab.GetCurrentPatternAs(UIA_SelectionItemPatternId)
             .map_err(error)?
     };
     unsafe {
+        if GetForegroundWindow() != hwnd {
+            return Err("Helium lost focus before selecting the tab.".into());
+        }
         selection.Select().map_err(error)?;
         if !selection.CurrentIsSelected().map_err(error)?.as_bool() {
             return Err("Helium did not select the requested tab.".into());
+        }
+        if GetForegroundWindow() != hwnd {
+            return Err("Helium lost focus while selecting the tab.".into());
         }
     }
     Ok(())
@@ -287,9 +349,6 @@ unsafe fn find_tab(
         .AddProperty(UIA_ControlTypePropertyId)
         .map_err(error)?;
     cache.AddProperty(UIA_NamePropertyId).map_err(error)?;
-    cache
-        .AddProperty(UIA_IsOffscreenPropertyId)
-        .map_err(error)?;
     cache
         .AddProperty(UIA_AutomationIdPropertyId)
         .map_err(error)?;
@@ -315,9 +374,6 @@ unsafe fn find_tab(
                 continue;
             }
             if kind == UIA_TabItemControlTypeId {
-                if element.CachedIsOffscreen().map_err(error)?.as_bool() {
-                    continue;
-                }
                 let matches = match title {
                     Some(title) => {
                         title_matches(&element.CachedName().map_err(error)?.to_string(), title)
@@ -339,7 +395,7 @@ unsafe fn find_tab(
     Ok(None)
 }
 
-pub fn switch_tab(executable: &str, title: &str, reveal_sidebar: bool) -> Result<(), String> {
+pub fn switch_tab(executable: &str, title: &str) -> Result<(), String> {
     if title.trim().is_empty() {
         return Err("This tab has no title. Refresh the list and try again.".into());
     }
@@ -349,54 +405,53 @@ pub fn switch_tab(executable: &str, title: &str, reveal_sidebar: bool) -> Result
     let windows = browser_windows(executable)?;
     for &hwnd in &windows {
         if unsafe { find_tab(&automation, hwnd, Some(title))? }.is_some() {
+            let mut inspection = WindowInspection::begin(hwnd)?;
             focus(hwnd)?;
             if let Some(tab) = unsafe { find_tab(&automation, hwnd, Some(title))? } {
-                return select_tab(hwnd, &tab);
+                select_tab(hwnd, &tab)?;
+                inspection.keep_restored();
+                return Ok(());
             }
         }
     }
     for hwnd in windows {
         let mut inspection = WindowInspection::begin(hwnd)?;
         if let Some(tab) = unsafe { find_tab(&automation, hwnd, Some(title))? } {
+            focus(hwnd)?;
             select_tab(hwnd, &tab)?;
             inspection.keep_restored();
             return Ok(());
         }
-        if !reveal_sidebar {
-            continue;
-        }
         if unsafe { find_tab(&automation, hwnd, None)? }.is_some() {
             continue;
         }
-        toggle_sidebar(hwnd)?;
-        let sidebar = RevealedSidebar(hwnd);
-        let deadline = Instant::now() + Duration::from_millis(600);
-        loop {
-            if let Some(tab) = unsafe { find_tab(&automation, hwnd, Some(title))? } {
-                select_tab(hwnd, &tab)?;
-                sidebar.restore()?;
-                // Allow the normal hide animation to settle. Helium may keep an
-                // unpinned sidebar revealed while hovered or during its window
-                // exit grace period; that does not mean restoring it failed.
-                let deadline = Instant::now() + Duration::from_millis(600);
-                while unsafe { find_tab(&automation, hwnd, None)? }.is_some() {
-                    if Instant::now() >= deadline {
-                        break;
-                    }
-                    thread::sleep(Duration::from_millis(30));
+        focus(hwnd)?;
+        for right in [false, true] {
+            let Some(hover) = SidebarHover::begin(hwnd, right)? else {
+                continue;
+            };
+            let deadline = Instant::now() + Duration::from_millis(600);
+            loop {
+                hover.check()?;
+                if let Some(tab) = unsafe { find_tab(&automation, hwnd, Some(title))? } {
+                    hover.check()?;
+                    select_tab(hwnd, &tab)?;
+                    inspection.keep_restored();
+                    return Ok(());
                 }
-                inspection.keep_restored();
-                return Ok(());
+                if Instant::now() >= deadline {
+                    break;
+                }
+                thread::sleep(Duration::from_millis(30));
             }
-            if Instant::now() >= deadline {
+            drop(hover);
+            if unsafe { find_tab(&automation, hwnd, None)? }.is_some() {
                 break;
             }
-            thread::sleep(Duration::from_millis(30));
         }
-        sidebar.restore()?;
     }
     Err(
-        "The tab was not found in the selected Helium installation. Refresh the list; if the sidebar is hidden, enable Helium's vertical-tab collapse shortcut or show the sidebar."
+        "The tab was not found in the selected Helium installation. Refresh the list; if the sidebar is hidden, show it and try again."
             .into(),
     )
 }
@@ -514,7 +569,9 @@ mod tests {
                         assert_eq!(GetForegroundWindow(), probe);
                     }
                     let start = Instant::now();
-                    switch_tab(&executable, title, true).unwrap();
+                    let cursor_before = cursor_position().unwrap();
+                    switch_tab(&executable, title).unwrap();
+                    assert_eq!(cursor_position().unwrap(), cursor_before);
                     let mut after = WINDOWPLACEMENT {
                         length: size_of::<WINDOWPLACEMENT>() as u32,
                         ..Default::default()
@@ -532,7 +589,7 @@ mod tests {
                 }
                 let _ = ShowWindow(hwnd, SW_MINIMIZE);
                 assert!(IsIconic(hwnd).as_bool());
-                switch_tab(&executable, title, true).unwrap();
+                switch_tab(&executable, title).unwrap();
                 let mut after = WINDOWPLACEMENT {
                     length: size_of::<WINDOWPLACEMENT>() as u32,
                     ..Default::default()
@@ -545,27 +602,73 @@ mod tests {
             let _com = Com::initialize().unwrap();
             let automation: IUIAutomation =
                 CoCreateInstance(&CUIAutomation, None, CLSCTX_INPROC_SERVER).unwrap();
-            let _sidebar = if find_tab(&automation, hwnd, None).unwrap().is_none() {
-                toggle_sidebar(hwnd).unwrap();
-                let sidebar = RevealedSidebar(hwnd);
-                let deadline = Instant::now() + Duration::from_millis(600);
-                while find_tab(&automation, hwnd, None).unwrap().is_none() {
-                    assert!(Instant::now() < deadline, "Helium did not reveal its tabs");
-                    thread::sleep(Duration::from_millis(30));
+            let sidebar = SidebarHover::begin(hwnd, false)
+                .unwrap()
+                .expect("Expose the fixture's left edge");
+            let deadline = Instant::now() + Duration::from_millis(600);
+            let tab = loop {
+                sidebar.check().unwrap();
+                if let Some(tab) = find_tab(&automation, hwnd, None).unwrap() {
+                    break tab;
                 }
-                Some(sidebar)
-            } else {
-                None
+                assert!(Instant::now() < deadline, "Helium did not reveal its tabs");
+                thread::sleep(Duration::from_millis(30));
             };
-            let tab = find_tab(&automation, hwnd, None).unwrap().unwrap();
+            let tab = if let Ok(title) = std::env::var("RAYCAST_HELIUM_OFFSCREEN_TITLE") {
+                find_tab(&automation, hwnd, Some(&title))
+                    .unwrap()
+                    .expect("Open the fixture's offscreen tab")
+            } else {
+                tab
+            };
+            let before_bounds = tab.CurrentBoundingRectangle().unwrap();
+            let mut window_bounds = RECT::default();
+            GetWindowRect(hwnd, &mut window_bounds).unwrap();
+            if std::env::var_os("RAYCAST_HELIUM_OFFSCREEN_TITLE").is_some() {
+                assert!(
+                    before_bounds.bottom > window_bounds.bottom
+                        || before_bounds.top < window_bounds.top,
+                    "The fixture target should start outside the viewport"
+                );
+            }
             let other_title = tab.CachedName().unwrap().to_string();
             let start = Instant::now();
-            switch_tab(&executable, &other_title, true).unwrap();
+            switch_tab(&executable, &other_title).unwrap();
             let selection: IUIAutomationSelectionItemPattern =
                 tab.GetCurrentPatternAs(UIA_SelectionItemPatternId).unwrap();
             assert!(selection.CurrentIsSelected().unwrap().as_bool());
-            println!("select-first-tab={}ms", start.elapsed().as_millis());
-            switch_tab(&executable, title, true).unwrap();
+            assert!(!tab.CurrentIsOffscreen().unwrap().as_bool());
+            let after_bounds = tab.CurrentBoundingRectangle().unwrap();
+            assert!(
+                after_bounds.top >= window_bounds.top
+                    && after_bounds.bottom <= window_bounds.bottom
+            );
+            println!(
+                "select-tab={}ms before={:?} after={:?} window={:?}",
+                start.elapsed().as_millis(),
+                before_bounds,
+                after_bounds,
+                window_bounds
+            );
+            switch_tab(&executable, title).unwrap();
+            drop(sidebar);
+            let cursor_before = cursor_position().unwrap();
+            let foreground_before = GetForegroundWindow();
+            let mut before = WINDOWPLACEMENT {
+                length: size_of::<WINDOWPLACEMENT>() as u32,
+                ..Default::default()
+            };
+            GetWindowPlacement(hwnd, &mut before).unwrap();
+            assert!(switch_tab(&executable, "Raycast missing tab regression 58d663cc").is_err());
+            let mut after = WINDOWPLACEMENT {
+                length: size_of::<WINDOWPLACEMENT>() as u32,
+                ..Default::default()
+            };
+            GetWindowPlacement(hwnd, &mut after).unwrap();
+            assert_eq!(before.showCmd, after.showCmd);
+            assert_eq!(before.rcNormalPosition, after.rcNormalPosition);
+            assert_eq!(foreground_before, GetForegroundWindow());
+            assert_eq!(cursor_before, cursor_position().unwrap());
         }
     }
 

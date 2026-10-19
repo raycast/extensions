@@ -2,12 +2,10 @@ import { EventEmitter } from "events";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { spawn } from "child_process";
 import { new_tab, switch_tab } from "../mocks/rust";
-import { canRevealVerticalTabs } from "../../src/utils/helium-profile";
 import { getUserDataPathPreference, getWindowsUserDataPath } from "../../src/utils/platform";
 import { createNewTab, createNewWindow, openUrlInHelium, switchToTabByTitle } from "../../src/utils/windows-browser";
 
 vi.mock("child_process", () => ({ spawn: vi.fn() }));
-vi.mock("../../src/utils/helium-profile", () => ({ canRevealVerticalTabs: vi.fn(() => false) }));
 vi.mock("fs", () => ({ existsSync: vi.fn(() => true) }));
 vi.mock("../../src/utils/platform", () => ({
   requireHeliumExecutable: () => "C:\\Helium\\chrome.exe",
@@ -28,16 +26,10 @@ beforeEach(() => {
 describe("native Windows browser control", () => {
   it("switches through Rust and surfaces failures without launching a duplicate URL", async () => {
     await expect(switchToTabByTitle("Page")).resolves.toBe(true);
-    expect(switch_tab).toHaveBeenCalledWith("C:\\Helium\\chrome.exe", "Page", false);
+    expect(switch_tab).toHaveBeenCalledWith("C:\\Helium\\chrome.exe", "Page");
     switch_tab.mockRejectedValueOnce(new Error("Tab not found"));
     await expect(switchToTabByTitle("Old title")).rejects.toThrow("Tab not found");
     expect(spawn).not.toHaveBeenCalled();
-  });
-
-  it("only enables native sidebar commands after confirming the profile supports them", async () => {
-    vi.mocked(canRevealVerticalTabs).mockReturnValue(true);
-    await switchToTabByTitle("Page");
-    expect(switch_tab).toHaveBeenCalledWith("C:\\Helium\\chrome.exe", "Page", true);
   });
 
   it("uses guarded native new-tab input for a default instance", async () => {

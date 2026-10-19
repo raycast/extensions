@@ -2,7 +2,6 @@ import { spawn } from "child_process";
 import { existsSync } from "fs";
 import { new_tab, switch_tab } from "rust:../../rust";
 import { getUserDataPathPreference, getWindowsUserDataPath, requireHeliumExecutable } from "./platform";
-import { canRevealVerticalTabs } from "./helium-profile";
 
 const NEW_TAB_PAGE = "chrome://new-tab-page/";
 
@@ -29,7 +28,7 @@ export async function openUrlInHelium(url: string): Promise<void> {
 }
 
 export async function switchToTabByTitle(title: string): Promise<boolean> {
-  await switch_tab(requireHeliumExecutable(), title, canRevealVerticalTabs());
+  await switch_tab(requireHeliumExecutable(), title);
   return true;
 }
 
