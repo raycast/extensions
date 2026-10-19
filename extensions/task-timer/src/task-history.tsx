@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
-import { endReasonLabel, formatWorkingTime, readHistory, type HistoryEntry } from "./history";
+import { endReasonLabel, formatWorkingTime, readHistory, type HistoryEntry } from "./lib/history";
 
 function timestamp(time: number): string {
   return new Date(time).toLocaleString();

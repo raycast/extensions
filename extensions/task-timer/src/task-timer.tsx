@@ -1,7 +1,7 @@
 import { Icon, LaunchType, MenuBarExtra, Toast, launchCommand, showToast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
-import { endTask, extendTask, pauseTask, reconcileSession, resumeTask } from "./session";
-import { remainingTime, shortTaskName, type TaskSession } from "./timer";
+import { endTask, extendTask, pauseTask, reconcileSession, resumeTask } from "./lib/session";
+import { remainingTime, shortTaskName, type TaskSession } from "./lib/timer";
 
 export default function Command() {
   const [session, setSession] = useState<TaskSession>();

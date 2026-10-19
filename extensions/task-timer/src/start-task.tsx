@@ -12,7 +12,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { useState } from "react";
-import { discardTask, startTask } from "./session";
+import { discardTask, startTask } from "./lib/session";
 
 type Values = { task: string; minutes: string };
 type Context = { task?: string; minutes?: string };
