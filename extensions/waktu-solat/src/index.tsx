@@ -72,6 +72,7 @@ function PrayerTimes() {
   const [selectedZoneId, setSelectedZoneId] = useState<string>();
   const [prayerTime, setPrayerTime] = useState<PrayerTime>();
   const [isChangingZone, setIsChangingZone] = useState(false);
+  const [dropdownKey, setDropdownKey] = useState(0);
   const requestId = useRef(0);
 
   const zoneId = selectedZoneId ?? initialData?.zoneId;
@@ -84,7 +85,13 @@ function PrayerTimes() {
 
     try {
       const result = await loadTodaySolat(z.id);
-      if (!result || currentRequestId !== requestId.current) return;
+      if (currentRequestId !== requestId.current) return;
+
+      if (!result) {
+        // Remount the dropdown so it shows the zone whose times are still on screen.
+        setDropdownKey((key) => key + 1);
+        return;
+      }
 
       await LocalStorage.setItem("zone", z.id);
       if (currentRequestId !== requestId.current) return;
@@ -117,7 +124,7 @@ function PrayerTimes() {
 
   return (
     <List
-      searchBarAccessory={zoneId ? <Zones value={zoneId} onChange={onZoneChange} /> : undefined}
+      searchBarAccessory={zoneId ? <Zones key={dropdownKey} value={zoneId} onChange={onZoneChange} /> : undefined}
       isLoading={isInitialLoading || isChangingZone}
     >
       {currentPrayerTime?.items?.length ? (

@@ -28,6 +28,8 @@ export interface PrayerTimeItem {
   isNext: boolean;
 }
 
+type PrayerName = "imsak" | "fajr" | "syuruk" | "dhuhr" | "asr" | "maghrib" | "isha";
+
 export interface PrayerTime {
   hijri: string;
   date: string;
@@ -39,10 +41,28 @@ export interface PrayerTime {
   asr: string;
   maghrib: string;
   isha: string;
+  // Epoch milliseconds of each prayer, used for countdowns.
+  timestamps: Record<PrayerName, number>;
   items?: PrayerTimeItem[];
 }
 
 type PrayerKey = keyof PrayerTime;
+
+// Malaysia is UTC+8 year-round, so the zone is fixed and needs no tz database.
+const MALAYSIA_OFFSET_MS = 8 * 60 * 60 * 1000;
+
+// Local Date whose wall-clock fields equal Malaysia time at `ms`, so date-fns formatting shows Malaysia time on any computer.
+function malaysiaWallClock(ms: number): Date {
+  const shifted = new Date(ms + MALAYSIA_OFFSET_MS);
+  return new Date(
+    shifted.getUTCFullYear(),
+    shifted.getUTCMonth(),
+    shifted.getUTCDate(),
+    shifted.getUTCHours(),
+    shifted.getUTCMinutes(),
+    shifted.getUTCSeconds(),
+  );
+}
 
 const prayerNameMap: Map<PrayerKey, string> = new Map<PrayerKey, string>([
   ["imsak", "Imsak"],
@@ -76,7 +96,7 @@ interface ApiMonth {
   prayers: ApiPrayerDay[];
 }
 
-const toTime = (ts: number) => format(new Date(ts * 1000), "HH:mm:ss");
+const toTime = (ts: number) => format(malaysiaWallClock(ts * 1000), "HH:mm:ss");
 
 async function fetchSolatData(zoneId = DEFAULT_ZONE_ID, now = new Date()): Promise<SolatApiData | undefined> {
   console.log("Fetching prayer times for", zoneId);
@@ -99,6 +119,15 @@ async function fetchSolatData(zoneId = DEFAULT_ZONE_ID, now = new Date()): Promi
           asr: toTime(p.asr),
           maghrib: toTime(p.maghrib),
           isha: toTime(p.isha),
+          timestamps: {
+            imsak: p.imsak * 1000,
+            fajr: p.fajr * 1000,
+            syuruk: p.syuruk * 1000,
+            dhuhr: p.dhuhr * 1000,
+            asr: p.asr * 1000,
+            maghrib: p.maghrib * 1000,
+            isha: p.isha * 1000,
+          },
         })),
       };
     },
@@ -106,8 +135,8 @@ async function fetchSolatData(zoneId = DEFAULT_ZONE_ID, now = new Date()): Promi
 }
 
 async function loadSolatData(zoneId = DEFAULT_ZONE_ID, shouldRefresh = false) {
-  const now = new Date();
-  const cacheKey = `prayer-time-v2-${zoneId}-${format(now, "yyyy-MM")}`;
+  const now = malaysiaWallClock(Date.now());
+  const cacheKey = `prayer-time-v3-${zoneId}-${format(now, "yyyy-MM")}`;
   return loadCached({
     key: cacheKey,
     load: () => fetchSolatData(zoneId, now),
@@ -128,20 +157,22 @@ function getHumanDifferent(time: Date) {
 export async function loadTodaySolat(zoneId: string, shouldRefresh = false): Promise<PrayerTime | undefined> {
   const data = await loadSolatData(zoneId, shouldRefresh);
 
+  const today = malaysiaWallClock(Date.now());
+
   return data?.prayerTime
     ?.filter((t) => {
       const input = parse(t.date, "dd-MMM-yyyy", new Date());
-      return isSameDay(new Date(), input);
+      return isSameDay(today, input);
     })
     .map((t) => {
-      const keys: PrayerKey[] = ["imsak", "fajr", "syuruk", "dhuhr", "asr", "maghrib", "isha"];
+      const keys: PrayerName[] = ["imsak", "fajr", "syuruk", "dhuhr", "asr", "maghrib", "isha"];
 
       t.items = keys.map((key) => {
-        const value: string = t[key as PrayerKey] as string;
-        const time = parse(value, "HH:mm:ss", new Date());
+        const ms = t.timestamps[key];
+        const time = new Date(ms);
 
         return {
-          value: format(time, "hh:mm a"),
+          value: format(malaysiaWallClock(ms), "hh:mm a"),
           label: prayerNameMap.get(key)!,
           different: `${getHumanDifferent(time)}`,
           time,

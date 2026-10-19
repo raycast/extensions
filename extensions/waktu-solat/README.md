@@ -16,7 +16,7 @@ View Malaysia prayer times (JAKIM zones, via [Waktu Solat API](https://api.waktu
 2. Select your Malaysian prayer zone from the dropdown.
 3. Use **Waktu Solat Menu Bar** to show the current or upcoming prayer in the menu bar.
 
-The selected zone is shared between the command and the menu-bar item. The menu-bar command refreshes every five minutes.
+The selected zone is shared between the command and the menu-bar item. The menu-bar command refreshes every ten seconds, so a zone change made in the command appears in the menu bar within about ten seconds.
 
 ## Preferences
 
