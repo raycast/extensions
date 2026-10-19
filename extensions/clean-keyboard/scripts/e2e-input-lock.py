@@ -1,173 +1,70 @@
 #!/usr/bin/env python3
-"""Acceptance checks against the built native executable; no mocks or test builds.
+"""Acceptance checks for the existing Raycast Swift helper, without mocks.
 
-Default checks never lock input. --live temporarily blocks input on this Mac and
-requires the existing Accessibility/Input Monitoring grants and enrolled Touch ID.
+Default checks never lock input. --live runs one-second locks in each mode plus
+parent-exit cleanup. Run it only in an explicitly agreed short test window.
 """
 import argparse
 import json
 import os
 from pathlib import Path
-import selectors
 import signal
 import subprocess
+import sys
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--helper", type=Path, default=ROOT / "assets/compiled_raycast_swift/MyExecutable")
-parser.add_argument("--live", action="store_true", help="run real 30-second locks and recovery checks")
+parser.add_argument("--live", action="store_true")
 args = parser.parse_args()
 helper = args.helper.resolve()
 if not helper.is_file():
-    parser.error("Build the macOS extension before running acceptance checks")
+    parser.error("Build the macOS extension first")
 helper.chmod(helper.stat().st_mode | 0o100)
 
 
-def records(raw):
-    return [json.loads(line) for line in raw.splitlines() if line.strip()]
+def run(duration, lock_mouse, timeout=8):
+    return subprocess.run([str(helper), "handler", json.dumps(duration), json.dumps(lock_mouse)],
+                          capture_output=True, timeout=timeout)
 
 
-def run(command, value):
-    return subprocess.run([str(helper), command, json.dumps(value)], capture_output=True, timeout=10)
+for duration in [-1, 0, 2_147_483_648]:
+    result = run(duration, False)
+    assert result.returncode != 0, (duration, result)
+print("PASS: invalid durations fail before acquiring an input tap")
 
-
-for token in ["", "0", "-1", "31", "Infinity", "not-a-duration"]:
-    result = run("lockInputs", token)
-    assert result.returncode == 2 and not result.stdout, (token, result)
-print("PASS: unsupported durations fail before acquiring an input tap")
-
-result = run("lockInputsWorker", os.getpid())
-assert result.returncode == 2 and not result.stdout, result
-print("PASS: direct worker invocation from another executable is refused")
+result = run(1, "not-a-boolean")
+assert result.returncode != 0, result
+print("PASS: invalid native arguments fail before acquiring an input tap")
 
 if not args.live:
-    print("Live locking, Touch ID, and browser behavior were not exercised; rerun with --live")
+    print("Live input, browser behavior, and Touch ID were not exercised")
     raise SystemExit(0)
 
+for lock_mouse in [False, True]:
+    started = time.monotonic()
+    result = run(1, lock_mouse)
+    assert result.returncode == 0, (lock_mouse, result.stdout, result.stderr)
+    assert json.loads(result.stdout) == "timeout", result.stdout
+    assert time.monotonic() - started >= 0.8, "timer returned before the requested duration"
+    print(f"PASS: real one-second timed release, lockMouse={lock_mouse}")
 
-def start():
-    return subprocess.Popen([str(helper), "lockInputs", json.dumps("30")],
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=0)
-
-
-def await_locked(process):
-    selector = selectors.DefaultSelector()
-    selector.register(process.stdout, selectors.EVENT_READ)
-    deadline = time.monotonic() + 35
-    received = []
-    try:
-        while time.monotonic() < deadline:
-            if not selector.select(1):
-                continue
-            line = process.stdout.readline()
-            if not line:
-                raise AssertionError(("helper exited before locking", received, process.stderr.read()))
-            packet = json.loads(line)
-            received.append(packet)
-            if packet.get("phase") == "error":
-                raise AssertionError(("native prerequisite failed", packet))
-            if packet.get("phase") == "locked":
-                return received
-        raise AssertionError(("lock startup timed out", received))
-    finally:
-        selector.close()
-
-
-def finish(process, expected, timeout):
-    output, error = process.communicate(timeout=timeout)
-    packets = records(output)
-    assert process.returncode == 0, (process.returncode, packets, error)
-    assert packets and packets[-1].get("phase") == "ready", packets
-    assert packets[-1].get("reason") == expected, packets
-    return packets
-
-
-def cleanup(process):
-    if process.poll() is None:
-        process.terminate()
-        try:
-            process.communicate(timeout=8)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            process.communicate(timeout=8)
-
-
-process = start()
+# This is a real launcher process that exits while the native lock is active.
+launcher = """
+import json, subprocess, sys, time
+subprocess.Popen([sys.argv[1], 'handler', '1', 'true'], stdout=sys.stdout, stderr=sys.stderr)
+time.sleep(0.4)
+"""
+process = subprocess.Popen([sys.executable, "-c", launcher, str(helper)],
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
 try:
-    await_locked(process)
-    duplicate = run("lockInputs", "30")
-    assert duplicate.returncode == 1, duplicate
-    assert any(p.get("reason") == "alreadyActive" for p in records(duplicate.stdout)), duplicate
-    print("PASS: a second instance is rejected without disturbing the active lock")
-    finish(process, "timeout", 35)
-    print("PASS: the actual 30-second lock releases with a final timeout status")
-finally:
-    cleanup(process)
-
-process = start()
-try:
-    await_locked(process)
-    children = subprocess.check_output(["pgrep", "-P", str(process.pid)], text=True).split()
-    assert len(children) == 1, children
-    worker = int(children[0])
-    os.kill(worker, signal.SIGSTOP)
-    finish(process, "watchdog", 9)
-    try:
-        os.kill(worker, 0)
-    except ProcessLookupError:
-        pass
-    else:
-        raise AssertionError("guardian left its frozen input worker alive")
-    print("PASS: a frozen real input worker is killed and reaped by the watchdog")
-finally:
-    cleanup(process)
-
-process = start()
-try:
-    await_locked(process)
-    process.terminate()
-    finish(process, "watchdog", 8)
-    print("PASS: terminating the supervisor releases its actual input worker")
-finally:
-    cleanup(process)
-
-process = start()
-try:
-    await_locked(process)
-    worker = int(subprocess.check_output(["pgrep", "-P", str(process.pid)], text=True).strip())
-    os.kill(worker, signal.SIGKILL)
     output, error = process.communicate(timeout=8)
-    terminal = records(output)[-1]
-    assert (process.returncode, terminal.get("phase"), terminal.get("reason")) in [
-        (1, "error", "workerExited"),
-        (0, "ready", "watchdog"),
-    ], (process.returncode, terminal, error)
-    print("PASS: an unexpected worker crash reports failure or completed watchdog recovery")
-finally:
-    cleanup(process)
-
-process = start()
-try:
-    await_locked(process)
-    worker = int(subprocess.check_output(["pgrep", "-P", str(process.pid)], text=True).strip())
-    process.stdout.close()
-    process.stdout = None
-    process.communicate(timeout=8)
-    assert process.returncode == 1, process.returncode
-    try:
-        os.kill(worker, 0)
-    except ProcessLookupError:
-        pass
-    else:
-        raise AssertionError("disconnecting the output consumer left its input worker alive")
-    print("PASS: losing the status consumer releases and reaps the input worker")
-finally:
-    cleanup(process)
-
-started = time.monotonic()
-legacy = run("handler", 1)
-assert legacy.returncode == 0 and time.monotonic() - started >= 0.7, legacy
-print("PASS: the original keyboard-only helper still completes its real timed lock")
-
-print("Touch ID success/cancellation, recovery hold, and input/scroll behavior still require browser acceptance")
+except subprocess.TimeoutExpired:
+    os.killpg(process.pid, signal.SIGKILL)
+    process.communicate(timeout=3)
+    raise
+assert process.returncode == 0, (output, error)
+assert json.loads(output) == "watchdog", (output, error)
+print("PASS: existing native helper releases input when its real launcher exits")
+print("Browser typing/click/scroll, Touch ID cancellation/success, and recovery hold require physical acceptance")

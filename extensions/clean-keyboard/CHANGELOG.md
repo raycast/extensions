@@ -1,10 +1,10 @@
 # Clean Keyboard Changelog
 
-## [Lock Keyboard and Mouse] - {PR_MERGE_DATE}
+## [Optional Mouse Click Lock] - {PR_MERGE_DATE}
 
-- Added a macOS **Lock Keyboard and Mouse** command that blocks typing and clicks while scrolling still works
-- Unlock with a Command-key triple tap and Touch ID, or hold both Command keys for 8 seconds to force unlock
-- Timed sessions unlock automatically, and a supervisor process releases the lock if the input helper stops responding
+- Added an optional macOS mouse-click lock to the existing Lock Keyboard command and Ask AI tool, using the same duration and preference flow
+- Unlock mouse-click locks with Touch ID after Ctrl+U or a Command triple tap, or hold both Command keys for eight seconds to force release
+- Added native lifecycle cleanup and watchdog release while preserving keyboard-only defaults and existing branding
 
 ## [Default Duration] - 2026-10-15
 

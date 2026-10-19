@@ -1,25 +1,24 @@
-# Input lock acceptance
+# Clean Keyboard acceptance
 
-These checks use the compiled production helper and real macOS event taps. They do not substitute mocked Raycast APIs, authentication, or worker processes.
-
-From this extension folder:
+The checks exercise the existing Swift `handler` export and actual macOS event taps. There are no mocked Raycast APIs, authentication replacements, or separate test helpers.
 
 ```sh
 npm run build -- -e dev -o /tmp/clean-keyboard-build
 python3 scripts/e2e-input-lock.py
-python3 scripts/e2e-input-lock.py --live
-python3 -m http.server 8765 --bind 127.0.0.1 --directory e2e
 ```
 
-`--live` blocks typing and clicks on the current Mac for up to 30 seconds. It requires enrolled Touch ID plus the helper's existing Accessibility and Input Monitoring grants. It exercises timed release, duplicate-instance refusal, an actual frozen worker, supervisor termination, worker crashes, a disconnected status consumer, and the original keyboard-only timer. Any missing prerequisite fails the live run. Every started supervisor is cleaned up even when an assertion fails.
+The default suite refuses invalid duration and argument values before any input tap is acquired. `--live` additionally runs a one-second keyboard-only lock, a one-second mouse-click lock, and actual parent-exit recovery. It requires enrolled Touch ID and existing Accessibility/Input Monitoring grants. Run live checks only during an agreed test window; do not run them unattended while someone is using the Mac.
 
-Open `http://127.0.0.1:8765/browser-witness.html` in the existing browser. Use real keyboard/pointer input. DOM-driven filling, clicking, and synthetic JavaScript events bypass the operating system tap and cannot verify input blocking.
+## Browser and Raycast flow
 
-1. Establish a baseline by typing in the input, clicking the counter, and scrolling. Confirm the displayed counts change.
-2. Keep the input focused, start a 30-second lock from Raycast, and attempt typing/clicking. Confirm text, key count, and click count do not change. Scroll and confirm the scroll count does change. After expiry, confirm typing/clicking work again.
-3. Start a new timed lock. Triple-tap either Command key, cancel Touch ID, and confirm input stays blocked. Triple-tap again and authenticate physically. Confirm input returns and Raycast reports Touch ID release.
-4. Start another timed lock and hold both Command keys for eight seconds. Confirm release without authentication. Repeat the triple-tap gesture with both Command keys together and confirm it opens Touch ID.
-5. Run the original **Lock Keyboard** command for 15 seconds. Confirm its keyboard-only behavior and Ctrl+U release still work. Its default-duration preference, Ask AI entry point, Windows implementation, and Fn-key preference are unchanged by this contribution.
-6. With permissions unavailable, confirm the new command reports the missing permission and leaves input usable. Only the user should change privacy grants; do not automate permission toggles.
+Serve the witness with `python3 -m http.server 8765 --bind 127.0.0.1 --directory e2e`, and open `http://127.0.0.1:8765/browser-witness.html` in the existing browser. Use physical keyboard/pointer input. DOM filling, accessibility actions, and CDP-generated events can bypass macOS event taps and do not prove physical input blocking.
 
-A passing process suite does not establish the browser checks or biometric success. Record each result separately in the PR.
+1. With **Lock Mouse Clicks** off, run the existing **Lock Keyboard** command for 15 seconds. Verify typing is blocked, clicking and scrolling work, and Ctrl+U releases it. Confirm the unchanged duration list and default-duration preference still work.
+2. Enable **Lock Mouse Clicks** in existing Clean Keyboard preferences. Run the same command. Verify typing, clicks and dragging are blocked; pointer movement and scrolling remain available. After expiry, verify typing and clicks return.
+3. Start a timed mouse-click lock. Press Ctrl+U, cancel Touch ID with Escape, and verify input stays locked. Triple-tap Command and authenticate physically. Verify input returns and the existing Raycast view returns to its duration list.
+4. Start another timed lock and hold both Command keys for eight seconds. Verify release without authentication. Also verify triple-tapping both Command keys together opens Touch ID.
+5. Check that Ask AI confirmation describes keyboard-only or mouse-click locking according to the existing preference. It must give the matching unlock instructions.
+6. On a Mac missing the required grants or Touch ID enrollment, verify the optional mouse-click mode fails without locking or repeatedly opening permission dialogs. Only the user may change privacy grants.
+7. Close the agreed test window: stop any development watcher started for it, confirm no native helper remains alive, and verify normal browser typing and clicking. Do not keep launching Raycast or input locks afterward.
+
+Windows keyboard locking, Fn-key preference behavior, and all existing icons/branding are preserved. Record actual behavior separately from build and process-suite results. A passing process suite does not establish biometric or physical browser acceptance.
