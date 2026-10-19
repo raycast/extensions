@@ -154,3 +154,19 @@ describe("second review round", () => {
     );
   });
 });
+
+describe("third review round", () => {
+  it("finds a leap day more than a year away", () => {
+    expect(firstOccurrence(at("2026-10-19T09:00:00"), "FREQ=YEARLY;BYMONTH=2;BYMONTHDAY=29")).toEqual(
+      at("2028-02-29T09:00:00"),
+    );
+  });
+
+  it.each([
+    "DTSTART:20261030T090000\nRRULE:FREQ=MONTHLY;BYDAY=FR;BYSETPOS=-1",
+    "RRULE:FREQ=MONTHLY;BYDAY=1MO",
+    "RRULE:FREQ=WEEKLY;WKST=SU;BYDAY=MO",
+  ])("shows rules it can't describe faithfully as they are, %j", (rule) => {
+    expect(describeRepeat(rule)).toBe(rule.replace(/^.*RRULE:/s, ""));
+  });
+});

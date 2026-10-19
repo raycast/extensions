@@ -101,7 +101,8 @@ export function firstOccurrence(start: Date, value: string): Date {
   const monthDays = parts.BYMONTHDAY?.split(",").map(Number);
   const months = parts.BYMONTH?.split(",").map(Number);
   if (!days && !monthDays && !months) return start;
-  for (let offset = 0; offset <= 400; offset += 1) {
+  // Eight years covers the longest gap between leap days (e.g. 2096 to 2104).
+  for (let offset = 0; offset <= 366 * 8; offset += 1) {
     const candidate = new Date(start);
     candidate.setDate(start.getDate() + offset);
     if (days && !days.includes(DAY_CODES[candidate.getDay()])) continue;
@@ -119,6 +120,8 @@ function joinDays(names: string[]): string {
 /** Plain-language description of every rule part, e.g. "Every week on Monday at 08:30". */
 export function describeRepeat(value: string): string {
   const parts = ruleParts(value);
+  // Rules made in Amplenote can use parts (e.g. BYSETPOS for "last Friday") a sentence here would lose.
+  if (Object.entries(parts).some(([key, part]) => !SUPPORTED_PARTS[key]?.test(part ?? ""))) return ruleOf(value);
   const interval = Number(parts.INTERVAL ?? 1);
   const anchor = value.match(/DTSTART:(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})/);
   const anchorDate = anchor ? new Date(+anchor[1], +anchor[2] - 1, +anchor[3]) : undefined;

@@ -122,7 +122,7 @@ describe("review fixes for the tools", () => {
       startDate: "2026-10-24T08:30",
       repeat: "FREQ=WEEKLY;BYDAY=MO",
     });
-    expect(result?.info).toContainEqual({ name: "Start", value: "Mon, Oct 26, 08:30" });
+    expect(result?.info).toContainEqual({ name: "Start", value: "Mon, Oct 26, 2026, 08:30" });
   });
 
   it("refuses hideUntil on a task that already repeats", async () => {
@@ -191,6 +191,6 @@ describe("update-task with rules made in Amplenote", () => {
     });
     state.api = createApi(fakeAmplenote({ getTask: () => ({ task }) }).call);
     const result = await updateTaskConfirmation({ taskUUID: "t1", startDate: "2026-10-31T08:30" });
-    expect(result?.info).toContainEqual({ name: "Start", value: "Sat, Oct 31, 08:30" });
+    expect(result?.info).toContainEqual({ name: "Start", value: "Sat, Oct 31, 2026, 08:30" });
   });
 });
