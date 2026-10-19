@@ -1,8 +1,10 @@
-import Jimp from 'jimp';
+import { Clipboard } from '@raycast/api';
+import { Jimp } from 'jimp';
 import jsQR from 'jsqr';
 import os from 'os';
-import { scanMacOsQRCodeAcrossDisplays, selectMacOsQRCodeRegion } from './apple-scripts';
-import { scanWindowsQRCodeAcrossDisplays, selectWindowsQRCodeRegion } from './win-scripts';
+import { fileURLToPath } from 'url';
+import { readMacOsClipboardImageQRCode, scanMacOsQRCodeAcrossDisplays, selectMacOsQRCodeRegion } from './apple-scripts';
+import { readClipBoardFile, scanWindowsQRCodeAcrossDisplays, selectWindowsQRCodeRegion } from './win-scripts';
 
 // example qrcodes https://gist.github.com/kcramer/c6148fb906e116d84e4bde7b2ab56992
 const isWin = process.platform === 'win32';
@@ -72,4 +74,20 @@ export async function readDataFromQRCodeOnScreen(type: ScanType): Promise<QRCode
   output.isGoogleAuthenticatorMigration = isGoogleAuthenticatorMigration(output.data);
 
   return output;
+}
+
+const SETUP_LINK = /^otpauth(-migration)?:\/\//i;
+const IMAGE_FILE = /\.(png|jpe?g|gif|bmp|tiff?)$/i;
+
+// A copied otpauth:// link, a copied image file, or copied image data (e.g. a screenshot).
+export async function readDataFromClipboard(): Promise<string | undefined> {
+  const { text, file } = await Clipboard.read();
+  if (SETUP_LINK.test(text.trim())) return text.trim();
+  if (file) {
+    const path = file.startsWith('file://') ? fileURLToPath(file) : file;
+    return IMAGE_FILE.test(path) ? extractQRCodeFromImage(path).catch(() => undefined) : undefined;
+  }
+  const path = `${TEMP_DIR}/raycast-one-time-password-clipboard.png`;
+  if (isMacOs) return readMacOsClipboardImageQRCode(path);
+  if (isWin) return readClipBoardFile(path);
 }

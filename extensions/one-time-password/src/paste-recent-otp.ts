@@ -1,4 +1,6 @@
-import { Clipboard, showHUD } from '@raycast/api';
+import { showHUD } from '@raycast/api';
+import { pasteSecret } from './clipboard';
+import { accountLabel } from './model';
 import { getAccounts, getLastUsedAccount, setLastUsedAccountId } from './store';
 import { generateToken } from './totp';
 
@@ -17,13 +19,13 @@ export default async function Command() {
 
   let token: string;
   try {
-    token = generateToken(account.secret);
+    token = generateToken(account);
   } catch {
-    await showHUD(`Invalid secret for ${account.name}`);
+    await showHUD(`Invalid secret for ${accountLabel(account)}`);
     return;
   }
 
+  await pasteSecret(token);
   await setLastUsedAccountId(account.id);
-  await Clipboard.paste(token);
-  await showHUD(`Pasted OTP for ${account.name}`);
+  await showHUD(`Pasted code for ${accountLabel(account)}`);
 }

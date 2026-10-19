@@ -2,14 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "one-time-password",
   "title": "One Time Password",
-  "description": "Generate time-based one-time passwords",
+  "description": "Generate time-based one-time passwords with favourites, recents, and encrypted backups",
   "icon": "icon.png",
   "author": "lachero",
   "contributors": [
     "soulevans07",
     "BalliAsghar",
     "midskyey",
-    "ernest0n"
+    "ernest0n",
+    "tarun360"
   ],
   "categories": [
     "Security",
@@ -28,27 +29,71 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "import-accounts",
+      "title": "Import OTP Accounts",
+      "description": "Merge an encrypted OTP backup or portable TOTP URI list",
+      "mode": "view"
+    },
+    {
+      "name": "export-backup",
+      "title": "Export OTP Backup",
+      "description": "Create a password-encrypted backup or portable TOTP URI list",
+      "mode": "view"
+    },
+    {
       "name": "one-time-password",
       "title": "One Time Password",
-      "subtitle": "Generate time-based one-time passwords",
-      "description": "Generate time-based one-time passwords",
+      "subtitle": "Accounts, favourites and recent codes",
+      "description": "Search TOTP accounts, copy or paste codes, and manage favourites and backups",
       "mode": "view"
     },
     {
       "name": "paste-recent-otp",
       "title": "Paste Recent OTP",
-      "subtitle": "One Time Password",
+      "subtitle": "One Time Password Advanced",
       "description": "Paste the OTP code from the most recently used account into the active app",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-otp",
+      "title": "Paste OTP",
+      "subtitle": "One Time Password Advanced",
+      "description": "Paste the code for the account that best matches the service or username you type",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Service or username",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "scan-qr-code",
+      "title": "Scan OTP QR Code",
+      "subtitle": "One Time Password Advanced",
+      "description": "Add an account from a setup QR code on screen or in the clipboard and copy its first code",
       "mode": "no-view"
     }
   ],
   "preferences": [
     {
       "name": "passwordVisibility",
-      "description": "Display the generated password in the Raycast window for preview",
-      "label": "Toggle password visibility",
+      "title": "Code Visibility",
+      "description": "Show the current code next to each account. When off, codes stay hidden until you copy or paste them.",
+      "label": "Show codes in the list",
       "type": "checkbox",
-      "required": true,
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showLogos",
+      "title": "Service Logos",
+      "description": "Show each service's logo next to its account. Only the service's domain is sent to the favicon provider set in Raycast settings.",
+      "label": "Show service logos",
+      "type": "checkbox",
+      "required": false,
       "default": true
     },
     {
@@ -68,28 +113,61 @@
           "value": "paste"
         }
       ]
+    },
+    {
+      "name": "clearClipboardAfter",
+      "description": "Remove a copied or pasted code from the clipboard after this delay, unless something else has been copied since",
+      "title": "Clear Copied Codes",
+      "type": "dropdown",
+      "required": false,
+      "default": "0",
+      "data": [
+        {
+          "title": "Never",
+          "value": "0"
+        },
+        {
+          "title": "After 15 Seconds",
+          "value": "15"
+        },
+        {
+          "title": "After 30 Seconds",
+          "value": "30"
+        },
+        {
+          "title": "After 1 Minute",
+          "value": "60"
+        },
+        {
+          "title": "After 2 Minutes",
+          "value": "120"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.24",
-    "@raycast/utils": "^2.2.0",
-    "hi-base32": "^0.5.1",
-    "jimp": "^0.22.7",
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.2",
+    "jimp": "^1.6.1",
     "jsqr": "^1.4.0",
-    "otpauth": "^9.1.1",
-    "protobufjs": "^7.2.3",
-    "zod": "^3.23.8"
+    "protobufjs": "^8.8.1",
+    "qrcode": "^1.5.4",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "^24.0.13",
-    "@types/react": "^19.1.8",
-    "eslint": "^9.31.0",
-    "prettier": "^3.6.2",
-    "typescript": "^5.8.3"
+    "@types/node": "22.19.17",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "19.0.10",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

@@ -238,7 +238,7 @@ async function openUriSchemeAndWaitForExit(uri: string, processNames: string[], 
   });
 }
 
-async function readClipBoardFile(path: string) {
+export async function readClipBoardFile(path: string) {
   let scannedData: string | undefined;
 
   try {

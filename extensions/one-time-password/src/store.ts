@@ -1,114 +1,188 @@
 import { LocalStorage } from '@raycast/api';
 import crypto from 'crypto';
-import { z } from 'zod';
-import { parseUrl } from './utils';
+import { Account, CreateAccount, normalizeAccount, reorderAccounts } from './model';
 
-export const Account = z.object({
-  id: z.string(),
-  name: z.string(),
-  issuer: z.string().optional(),
-  secret: z.string(),
-  token: z.string().optional(),
-});
-export type Account = z.infer<typeof Account>;
-
-type CreateAccount = Omit<Account, 'id'>;
+export { Account } from './model';
+export type { CreateAccount } from './model';
 
 const STORAGE_KEY = 'one-time-password-accounts';
 const LAST_USED_ACCOUNT_KEY = 'one-time-password-last-used-account';
+let mutationQueue: Promise<unknown> = Promise.resolve();
 
-function generateAccountId(account: Pick<Account, 'name' | 'secret'>) {
-  const hash = crypto.createHash('sha256');
-  const { name, secret } = account;
-  const str = `${name}:${secret}`;
-  hash.update(str);
-  return hash.digest('hex');
-}
-async function save(accounts: Account[]) {
-  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
-}
-
-export async function getAccounts() {
-  const data = (await LocalStorage.getItem<string>(STORAGE_KEY)) || '[]';
-  return Account.array().parse(JSON.parse(data));
+function mutate<T>(operation: () => Promise<T>): Promise<T> {
+  const result = mutationQueue.then(operation, operation);
+  mutationQueue = result.then(
+    () => undefined,
+    () => undefined,
+  );
+  return result;
 }
 
-function isOtpUrl(str: string) {
-  return str.startsWith('otpauth://');
+async function readRecords(): Promise<unknown[]> {
+  const data: unknown = JSON.parse((await LocalStorage.getItem<string>(STORAGE_KEY)) || '[]');
+  return Array.isArray(data) ? data : [];
 }
 
-export async function addAccount(account: CreateAccount) {
-  const accounts = await getAccounts();
-
-  if (isOtpUrl(account.secret)) {
-    const { secret, issuer } = parseUrl<'secret' | 'issuer'>(account.secret);
-    account.secret = secret || '';
-    account.issuer = issuer || '';
+function parseRecord(record: unknown): Account | undefined {
+  try {
+    return normalizeAccount(record);
+  } catch {
+    return undefined;
   }
-
-  accounts.push({ ...account, id: generateAccountId(account) });
-  await save(accounts);
 }
 
-export async function removeAccount(id: string) {
-  const accounts = await getAccounts();
-  const index = accounts.findIndex((account) => account.id === id);
-  accounts.splice(index, 1);
+async function readAccounts(): Promise<Account[]> {
+  return (await readRecords()).flatMap((record) => parseRecord(record) ?? []);
+}
 
-  await save(accounts);
+// Earlier versions saved names and keys without validating them. Records that can't be read are skipped so they
+// don't hide the other accounts, and written back unchanged so they aren't lost.
+async function save(accounts: Account[]): Promise<void> {
+  const unreadable = (await readRecords()).filter((record) => !parseRecord(record));
+  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify([...accounts, ...unreadable]));
+}
 
-  const lastUsedId = await LocalStorage.getItem<string>(LAST_USED_ACCOUNT_KEY);
-  if (lastUsedId === id) {
+export async function getAccounts(): Promise<Account[]> {
+  await mutationQueue;
+  return readAccounts();
+}
+
+function accountFromInput(input: CreateAccount | Account): Account {
+  const record = input as Record<string, unknown>;
+  return normalizeAccount({ ...record, id: record.id || crypto.randomUUID() });
+}
+
+// Identity includes the normalized label and issuer, so separate accounts sharing a seed are retained.
+function identity(account: Account): string {
+  return JSON.stringify([
+    account.secret,
+    account.algorithm,
+    account.digits,
+    account.period,
+    account.issuer?.trim().toLocaleLowerCase() || '',
+    account.name.trim().toLocaleLowerCase(),
+  ]);
+}
+
+export async function addAccount(input: CreateAccount): Promise<Account> {
+  const candidate = accountFromInput(input);
+  return mutate(async () => {
+    const accounts = await readAccounts();
+    if (accounts.some((account) => identity(account) === identity(candidate)))
+      throw new Error('Account already exists');
+    if (accounts.some((account) => account.id === candidate.id)) candidate.id = crypto.randomUUID();
+    await save([...accounts, candidate]);
+    return candidate;
+  });
+}
+
+export async function findAccount(input: CreateAccount): Promise<Account | undefined> {
+  const key = identity(accountFromInput(input));
+  return (await getAccounts()).find((account) => identity(account) === key);
+}
+
+export async function importAccounts(
+  inputs: Array<CreateAccount | Account>,
+): Promise<{ added: number; skipped: number }> {
+  if (!Array.isArray(inputs) || inputs.length > 1000) throw new Error('Invalid account import');
+  // Validate every input before the first write; one malformed record aborts the whole import.
+  const candidates = inputs.map(accountFromInput);
+  return mutate(async () => {
+    const accounts = await readAccounts();
+    const identities = new Set(accounts.map(identity));
+    const ids = new Set(accounts.map((account) => account.id));
+    let added = 0;
+    let skipped = 0;
+    for (const candidate of candidates) {
+      const key = identity(candidate);
+      if (identities.has(key)) {
+        skipped++;
+        continue;
+      }
+      if (ids.has(candidate.id)) candidate.id = crypto.randomUUID();
+      accounts.push(candidate);
+      identities.add(key);
+      ids.add(candidate.id);
+      added++;
+    }
+    if (added) await save(accounts);
+    return { added, skipped };
+  });
+}
+
+export async function removeAccount(id: string): Promise<void> {
+  return mutate(async () => {
+    const accounts = await readAccounts();
+    const kept = accounts.filter((account) => account.id !== id);
+    if (kept.length === accounts.length) return;
+    await save(kept);
+    if ((await LocalStorage.getItem<string>(LAST_USED_ACCOUNT_KEY)) === id) {
+      await LocalStorage.removeItem(LAST_USED_ACCOUNT_KEY);
+    }
+  });
+}
+
+export async function updateAccount(input: Account | (CreateAccount & { id: string })): Promise<void> {
+  const candidate = accountFromInput(input);
+  return mutate(async () => {
+    const accounts = await readAccounts();
+    const index = accounts.findIndex((account) => account.id === candidate.id);
+    if (index < 0) return;
+    const updated = normalizeAccount({ ...accounts[index], ...input, id: candidate.id });
+    if (accounts.some((account, accountIndex) => accountIndex !== index && identity(account) === identity(updated))) {
+      throw new Error('Account already exists');
+    }
+    accounts[index] = updated;
+    await save(accounts);
+  });
+}
+
+// Saves a new order for the accounts of one section; see reorderAccounts.
+export async function setOrder(ids: string[]): Promise<void> {
+  return mutate(async () => save(reorderAccounts(await readAccounts(), ids)));
+}
+
+export async function toggleFavorite(id: string): Promise<void> {
+  return mutate(async () => {
+    const accounts = await readAccounts();
+    const account = accounts.find((item) => item.id === id);
+    if (!account) return;
+    account.favorite = !account.favorite;
+    await save(accounts);
+  });
+}
+
+export async function setLastUsedAccountId(id: string): Promise<void> {
+  return mutate(async () => {
+    const accounts = await readAccounts();
+    const account = accounts.find((item) => item.id === id);
+    if (!account) return;
+    account.lastUsedAt = Date.now();
+    account.useCount += 1;
+    await save(accounts);
+    await LocalStorage.setItem(LAST_USED_ACCOUNT_KEY, id);
+  });
+}
+
+export async function clearRecents(): Promise<void> {
+  return mutate(async () => {
+    const accounts = await readAccounts();
+    for (const account of accounts) {
+      delete account.lastUsedAt;
+      account.useCount = 0;
+    }
+    await save(accounts);
     await LocalStorage.removeItem(LAST_USED_ACCOUNT_KEY);
-  }
+  });
 }
 
-export async function updateAccount(account: Account) {
+export async function getLastUsedAccount(): Promise<Account | undefined> {
   const accounts = await getAccounts();
-
-  const accountFound = accounts.find((acc) => acc.id === account.id);
-  if (!accountFound) return;
-
-  accountFound.name = account.name;
-  accountFound.secret = account.secret;
-
-  await save(accounts);
-}
-
-export const MoveDir = { UP: -1, DOWN: 1 } as const;
-export type MoveDir = (typeof MoveDir)[keyof typeof MoveDir];
-export async function moveAccount(id: string, dir: MoveDir) {
-  const accounts = await getAccounts();
-
-  const accountIdx = accounts.findIndex((account) => account.id === id);
-  if (accountIdx === -1) return;
-
-  const targetIdx = accountIdx + dir;
-  if (!accounts[targetIdx]) return;
-
-  await save(swap(accounts, accountIdx, targetIdx));
-}
-
-function swap<T>(array: T[], a: number, b: number) {
-  const draft = [...array];
-  [draft[a], draft[b]] = [draft[b], draft[a]];
-  return draft;
-}
-
-export async function setLastUsedAccountId(id: string) {
-  await LocalStorage.setItem(LAST_USED_ACCOUNT_KEY, id);
-}
-
-export async function getLastUsedAccount() {
-  const accounts = await getAccounts();
-  if (accounts.length === 0) return undefined;
-
-  const lastUsedId = await LocalStorage.getItem<string>(LAST_USED_ACCOUNT_KEY);
-  if (!lastUsedId) return undefined;
-
-  const account = accounts.find((acc) => acc.id === lastUsedId);
-  if (account) return account;
-
-  await LocalStorage.removeItem(LAST_USED_ACCOUNT_KEY);
-  return undefined;
+  const id = await LocalStorage.getItem<string>(LAST_USED_ACCOUNT_KEY);
+  return (
+    accounts.find((account) => account.id === id) ??
+    accounts
+      .filter((account) => account.lastUsedAt !== undefined)
+      .sort((a, b) => (b.lastUsedAt ?? 0) - (a.lastUsedAt ?? 0))[0]
+  );
 }
