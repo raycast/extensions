@@ -438,7 +438,8 @@ function openActions(h: FileHit, ctx: Ctx, photo: boolean, thumb: string | null 
           shortcut={{ modifiers: ["opt"], key: "return" }}
           onAction={async () => {
             opened(ctx.eventId, h.chunk_id, fileKey(h));
-            await openAt(h.path, null, null, true, null);
+            // a recording seeks to 0:00 even when it is already open further on
+            await openAt(h.path, null, media ? 0 : null, true, null);
           }}
         />
         <Action

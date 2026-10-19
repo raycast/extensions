@@ -183,7 +183,11 @@ const QUICKTIME = `on run argv
     set d to open f
     if d is missing value then set d to document 1
     set current time of d to t
-    if (item 3 of argv) is "play" then play d
+    if (item 3 of argv) is "play" then
+      play d
+    else
+      pause d
+    end if
   end tell
 end run`;
 
