@@ -1,5 +1,9 @@
 # Asana Changelog
 
+## [Add Copy Short Task URL action] - {PR_MERGE_DATE}
+
+- Added a "Copy Task Short URL" action that copies the short `https://app.asana.com/0/0/<task-id>` link of a task
+
 ## [Fix due date timezone handling] - 2026-10-05
 
 - Fix date-only deadlines appearing a day early in task lists, tooltips, and details.
