@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vogels-motionmount",
+  "title": "Vogel's MotionMount",
+  "description": "Unofficial control for Vogel's MotionMount NEXT 7355 motorized TV mounts over Bluetooth",
+  "icon": "extension-icon.png",
+  "author": "vigosan",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "presets",
+      "title": "Move to Preset",
+      "subtitle": "Vogel's MotionMount",
+      "description": "Move your TV to the wall or to one of your presets, and add, edit or delete presets",
+      "mode": "view"
+    },
+    {
+      "name": "remote",
+      "title": "Remote Control",
+      "subtitle": "Vogel's MotionMount",
+      "description": "Move your TV step by step with the arrow keys, or to an exact position",
+      "mode": "view"
+    },
+    {
+      "name": "diagnostics",
+      "title": "Run Diagnostics",
+      "subtitle": "Vogel's MotionMount",
+      "description": "Run the MotionMount self-test to check that it works correctly",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsc --noEmit && vitest run && swift test --package-path swift",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
