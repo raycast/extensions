@@ -89,7 +89,7 @@ export function TimeEditor({
     <Detail
       navigationTitle={title}
       isLoading={isSaving}
-      markdown={`${timeEditingMarkdown(draft, endpoint, now)}\n\n←/→ ±1m · ⇧←/→ ±5m\n\n${draft.endedAt ? "↑/↓ Start / End · " : ""}↵ Save\n\n${note ?? "Preview · Enter to save"}`}
+      markdown={`${timeEditingMarkdown(draft, endpoint, now)}\n\n←/→ ±1m · ⇧←/→ ±1h\n\n${draft.endedAt ? "↑/↓ Start / End · " : ""}↵ Save\n\n${note ?? "Preview · Enter to save"}`}
       metadata={metadata ? <Detail.Metadata>{metadata}</Detail.Metadata> : undefined}
       actions={
         <ActionPanel>
