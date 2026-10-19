@@ -1,10 +1,12 @@
 // "Search Lantern": Lantern's results in Raycast's window, in the order the daemon decides, with the panel's keys:
-// ↩ opens at the line or moment, ⌥↩ from the start, ⌘↩ shows in Finder, ⌘Y previews at the place, ⌃1…⌃0 filter
+// ↩ opens at the line or moment, ⌥↩ from the start, ⌘↩ shows in Finder, ⌘Y previews at the place, ⌘C copies the
+// result, ⌥⌘C its matched text, ⌃1…⌃0 filter
 // (the panel's digits; Raycast keeps ⌘1…⌘9 for "open the Nth result" and extensions cannot take them).
 // Raycast never reads the user's files: text, lines and thumbnails come from the daemon (lantern.ts).
 import {
   Action,
   ActionPanel,
+  Clipboard,
   Detail,
   Icon,
   Image,
@@ -15,6 +17,7 @@ import {
   environment,
   getPreferenceValues,
   open,
+  showHUD,
   showToast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
@@ -411,6 +414,32 @@ function PreviewView({ h, ctx, photo, thumb }: { h: FileHit; ctx: Ctx; photo: bo
   );
 }
 
+/**
+ * ⌥⌘C, as the panel's: the whole passage the result was found in (code: the chunk with the definition; a recording:
+ * the transcript at the moment; a photo: the text read from it), from the daemon's index.
+ */
+async function copyMatchedText(h: FileHit) {
+  try {
+    const text = (await passage(h.chunk_id)).text.trim();
+    if (!text) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No text to copy",
+        message: "Lantern found this result by what is in it, not by its text.",
+      });
+      return;
+    }
+    await Clipboard.copy(text);
+    await showHUD("Copied Matched Text");
+  } catch (err) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could not copy the matched text",
+      message: String(err instanceof Error ? err.message : err),
+    });
+  }
+}
+
 function openActions(h: FileHit, ctx: Ctx, photo: boolean, thumb: string | null | undefined, withPreview: boolean) {
   const media = h.start_ms != null;
   return (
@@ -467,6 +496,21 @@ function openActions(h: FileHit, ctx: Ctx, photo: boolean, thumb: string | null 
           />
         ) : null}
         <Action.ToggleQuickLook title="Quick Look the File" shortcut={{ modifiers: ["cmd", "shift"], key: "y" }} />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action.CopyToClipboard
+          title="Copy File"
+          content={{ file: h.path }}
+          shortcut={{ modifiers: ["cmd"], key: "c" }}
+        />
+        {h.chunk_id >= 0 ? (
+          <Action
+            title="Copy Matched Text"
+            icon={Icon.Text}
+            shortcut={{ modifiers: ["opt", "cmd"], key: "c" }}
+            onAction={() => copyMatchedText(h)}
+          />
+        ) : null}
         <Action.CopyToClipboard
           title="Copy Path"
           content={h.path}
@@ -558,6 +602,11 @@ function AppItem({ a, ctx }: { a: AppHit; ctx: Ctx }) {
             shortcut={{ modifiers: ["cmd"], key: "return" }}
             onAction={() => reveal(a.path)}
           />
+          <Action.CopyToClipboard
+            title="Copy Application"
+            content={{ file: a.path }}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+          />
           <FilterActions ctx={ctx} />
         </ActionPanel>
       }
@@ -582,6 +631,7 @@ function SettingItem({ s, ctx }: { s: SettingHit; ctx: Ctx }) {
               open(s.url);
             }}
           />
+          <Action.CopyToClipboard title="Copy Name" content={s.title} shortcut={{ modifiers: ["cmd"], key: "c" }} />
           <FilterActions ctx={ctx} />
         </ActionPanel>
       }
@@ -607,6 +657,7 @@ function ShortcutItem({ s, ctx }: { s: ShortcutHit; ctx: Ctx }) {
               open(url);
             }}
           />
+          <Action.CopyToClipboard title="Copy Name" content={s.name} shortcut={{ modifiers: ["cmd"], key: "c" }} />
           <FilterActions ctx={ctx} />
         </ActionPanel>
       }
@@ -680,6 +731,7 @@ function MusicItem({ m, ctx }: { m: MusicHit; ctx: Ctx }) {
               }
             }}
           />
+          <Action.CopyToClipboard title="Copy Name" content={m.title} shortcut={{ modifiers: ["cmd"], key: "c" }} />
           <FilterActions ctx={ctx} />
         </ActionPanel>
       }
