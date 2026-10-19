@@ -341,10 +341,10 @@ function fileKey(h: FileHit): string {
   return `${h.kind}|${h.chunk_id}|${h.start_line ?? -1}|${h.path}|`;
 }
 
-function useThumbnail(h: FileHit, photo: boolean): string | null | undefined {
+function useThumbnail(h: FileHit, photo: boolean, size = 480): string | null | undefined {
   const { data } = usePromise(
-    async (file: string, ms: number | null, wanted: boolean) => (wanted ? thumbnail(file, ms) : null),
-    [h.path, h.start_ms, photo || isVideo(h)],
+    async (file: string, ms: number | null, wanted: boolean, px: number) => (wanted ? thumbnail(file, ms, px) : null),
+    [h.path, h.start_ms, photo || isVideo(h), size],
     { onError: () => undefined }, // no thumbnail (older daemon, unreadable file): the kind icon stays
   );
   return data;
@@ -402,9 +402,14 @@ function FileDetail({ h, ctx, photo, thumb }: { h: FileHit; ctx: Ctx; photo: boo
   );
 }
 
-/** ⌘Y: the preview at the place, larger (30 lines around, the whole passage). */
+/**
+ * ⌘Y: the preview at the place, inside Raycast like the panel's (30 lines around, the whole passage; a photo or a
+ * video's frame at the moment, large, above its transcript). Raycast cannot play a video in its window, and handing
+ * the preview to QuickTime left QuickTime open in front: playing stays on ↩.
+ */
 function PreviewView({ h, ctx, photo, thumb }: { h: FileHit; ctx: Ctx; photo: boolean; thumb?: string | null }) {
-  const markdown = usePreviewMarkdown(h, ctx, photo, thumb, true);
+  const large = useThumbnail(h, photo, 1024);
+  const markdown = usePreviewMarkdown(h, ctx, photo, large ?? thumb, true);
   return (
     <Detail
       navigationTitle={`${path.basename(h.path)}${where(h) ? " · " + where(h) : ""}`}
@@ -458,7 +463,7 @@ function openActions(h: FileHit, ctx: Ctx, photo: boolean, thumb: string | null 
           icon={media ? Icon.Play : Icon.ArrowRight}
           onAction={async () => {
             opened(ctx.eventId, h.chunk_id, fileKey(h));
-            await openAt(h.path, h.start_line, h.start_ms, true, h.page);
+            await openAt(h.path, h.start_line, h.start_ms, h.page);
           }}
         />
         <Action
@@ -468,7 +473,7 @@ function openActions(h: FileHit, ctx: Ctx, photo: boolean, thumb: string | null 
           onAction={async () => {
             opened(ctx.eventId, h.chunk_id, fileKey(h));
             // a recording seeks to 0:00 even when it is already open further on
-            await openAt(h.path, null, media ? 0 : null, true, null);
+            await openAt(h.path, null, media ? 0 : null, null);
           }}
         />
         <Action
@@ -480,14 +485,7 @@ function openActions(h: FileHit, ctx: Ctx, photo: boolean, thumb: string | null 
             reveal(h.path);
           }}
         />
-        {withPreview && media && isVideo(h) ? (
-          <Action
-            title="Preview at the Moment"
-            icon={Icon.Eye}
-            shortcut={{ modifiers: ["cmd"], key: "y" }}
-            onAction={() => openAt(h.path, null, h.start_ms, false)} // QuickTime, paused at the moment
-          />
-        ) : withPreview ? (
+        {withPreview ? (
           <Action.Push
             title="Preview Here"
             icon={Icon.Eye}

@@ -124,8 +124,8 @@ export function lines(file: string, start: number, end: number | null, context: 
  * A small JPEG of an indexed photo or of a video's frame at the moment, made by the daemon (which has access to
  * your folders) into ~/Library/Caches/Lantern/thumbnails and deleted after 10 minutes: Raycast reads only that.
  */
-export async function thumbnail(file: string, startMs: number | null): Promise<string | null> {
-  const r = await call<{ path: string | null }>("thumbnail", { path: file, start_ms: startMs, size: 480 }, 20000);
+export async function thumbnail(file: string, startMs: number | null, size = 480): Promise<string | null> {
+  const r = await call<{ path: string | null }>("thumbnail", { path: file, start_ms: startMs, size }, 20000);
   return r.path;
 }
 
@@ -183,11 +183,7 @@ const QUICKTIME = `on run argv
     set d to open f
     if d is missing value then set d to document 1
     set current time of d to t
-    if (item 3 of argv) is "play" then
-      play d
-    else
-      pause d
-    end if
+    play d
   end tell
 end run`;
 
@@ -237,13 +233,12 @@ export async function openAt(
   file: string,
   line: number | null,
   ms: number | null,
-  play = true,
   page: number | null = null,
 ): Promise<void> {
   if (ms != null) {
     const ext = path.extname(file).toLowerCase();
     if (QUICKTIME_TYPES.has(ext)) {
-      const args = ["-e", QUICKTIME, file, String(Math.floor(ms / 1000)), play ? "play" : "pause"];
+      const args = ["-e", QUICKTIME, file, String(Math.floor(ms / 1000))];
       if (await run("/usr/bin/osascript", args)) return;
       await showToast({
         style: Toast.Style.Failure,

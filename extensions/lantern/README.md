@@ -9,7 +9,7 @@ the Mac (Raycast's own features follow Raycast's privacy policy).
 | ↩ | open at the line (VS Code, VSCodium, Cursor, Xcode, JetBrains), play from the moment (QuickTime), a PDF at its page (Skim; Preview through its Go to Page shortcut, which needs the Accessibility permission for Raycast), play a song |
 | ⌥↩ | open from the start (a recording from 0:00) |
 | ⌘↩ | show in Finder (a song: in Music or Spotify) |
-| ⌘Y | preview at the place: 30 lines around the code, the whole passage with your words in bold; a video in QuickTime, paused at the moment |
+| ⌘Y | preview at the place, inside Raycast: 30 lines around the code, the whole passage with your words in bold; a photo, or a video's frame at the moment, large, above its transcript (↩ plays it in QuickTime) |
 | ⇧⌘Y | Quick Look of the whole file |
 | ⌃1 … ⌃0 | filter by kind, the panel's digits (Raycast keeps ⌘1 … ⌘9 for opening the Nth result): Applications, System Settings, Shortcuts, (4, the clipboard: only in the app), Code, Documents, PDFs, Photos, Recordings and Videos, Music; again for all kinds |
 | ⌘C | copy the file (paste it in Finder or attach it); an app likewise, a setting, shortcut or song as its name |
