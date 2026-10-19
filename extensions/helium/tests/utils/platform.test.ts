@@ -37,6 +37,18 @@ afterEach(() => {
 });
 
 describe("Windows install discovery", () => {
+  it("uses a trimmed custom User Data directory", () => {
+    const root = makeTempDir();
+    expect(getWindowsUserDataPath({ userDataPath: `  ${root}  ` })).toBe(root);
+  });
+
+  it("rejects invalid custom directories instead of reading another profile", () => {
+    const root = makeTempDir();
+    const file = join(root, "not-a-directory");
+    writeFileSync(file, "");
+    expect(() => getWindowsUserDataPath({ userDataPath: file })).toThrow("User Data Directory");
+    expect(() => getWindowsUserDataPath({ userDataPath: join(root, "missing") })).toThrow("User Data Directory");
+  });
   it("probes the per-user location before the machine-wide ones, without duplicates", () => {
     const roots = getWindowsInstallRoots(
       { LOCALAPPDATA: join("C:\\Users\\me", "AppData", "Local"), PROGRAMFILES: "C:\\program" },
