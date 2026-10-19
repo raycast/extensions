@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-10-19
 
 - Unlock "Make Badge" action for Windows
 
