@@ -1,6 +1,6 @@
 # Hide Details Changelog
 
-## [Windows Support and Clipboard History] - {PR_MERGE_DATE}
+## [Windows Support and Clipboard History] - 2026-10-19
 
 - Add Windows support with on-device Windows OCR and face detection.
 - Add **Redact Image File from History** to pick a recently copied image file, then review it or copy a redacted version.
