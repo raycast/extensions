@@ -19,6 +19,7 @@ import {
   open,
   showHUD,
   showToast,
+  useNavigation,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
@@ -507,7 +508,8 @@ function usePreviewMarkdown(h: FileHit, ctx: Ctx, photo: boolean, thumb: string 
     execute: !code && h.chunk_id >= 0,
     onError: () => undefined,
   });
-  const size = large ? "" : "?raycast-height=135";
+  // the frame or photo fits the view without scrolling (the whole picture is Quick Look's job, ⌘Y)
+  const size = large ? "?raycast-height=320" : "?raycast-height=135";
   const image = thumb ? `![](${encodeURI(`file://${thumb}`)}${size})\n\n` : "";
   if (code && rows?.length) return codeMarkdown(h.path, rows, h.start_line!, h.end_line ?? h.start_line!);
   const text = (whole?.text ?? h.preview).trim();
@@ -541,13 +543,14 @@ function FileDetail({ h, ctx, photo, thumb }: { h: FileHit; ctx: Ctx; photo: boo
  * the preview to QuickTime left QuickTime open in front: playing stays on ↩.
  */
 function PreviewView({ h, ctx, photo, thumb }: { h: FileHit; ctx: Ctx; photo: boolean; thumb?: string | null }) {
+  const { pop } = useNavigation();
   const large = useThumbnail(h, photo, 1024);
   const markdown = usePreviewMarkdown(h, ctx, photo, large ?? thumb, true);
   return (
     <Detail
       navigationTitle={`${path.basename(h.path)}${where(h) ? " · " + where(h) : ""}`}
       markdown={markdown}
-      actions={<ActionPanel>{openActions(h, ctx, photo, thumb, false)}</ActionPanel>}
+      actions={<ActionPanel>{openActions(h, ctx, photo, thumb, false, pop)}</ActionPanel>}
     />
   );
 }
@@ -578,8 +581,18 @@ async function copyMatchedText(h: FileHit) {
   }
 }
 
-function openActions(h: FileHit, ctx: Ctx, photo: boolean, thumb: string | null | undefined, withPreview: boolean) {
+function openActions(
+  h: FileHit,
+  ctx: Ctx,
+  photo: boolean,
+  thumb: string | null | undefined,
+  withPreview: boolean,
+  onClose?: () => void,
+) {
   const media = h.start_ms != null;
+  // Photos, videos and recordings: ⌘Y is Quick Look, as the panel's ⌘Y: the whole photo at once, the video or recording
+  // playing, ⌘Y again closes it (Quick Look cannot start at the moment: the frame and transcript there are on ⇧⌘Y).
+  const visual = photo || media;
   return (
     <>
       <ActionPanel.Section>
@@ -618,15 +631,37 @@ function openActions(h: FileHit, ctx: Ctx, photo: boolean, thumb: string | null 
             reveal(h.path);
           }}
         />
-        {withPreview ? (
-          <Action.Push
-            title="Preview Here"
-            icon={Icon.Eye}
+        {withPreview && visual ? (
+          <>
+            <Action.ToggleQuickLook
+              title={media ? "Play in Quick Look" : "Quick Look"}
+              shortcut={{ modifiers: ["cmd"], key: "y" }}
+            />
+            <Action.Push
+              title={media ? "Show the Moment and Transcript" : "Show Details"}
+              icon={Icon.Text}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "y" }}
+              target={<PreviewView h={h} ctx={ctx} photo={photo} thumb={thumb} />}
+            />
+          </>
+        ) : withPreview ? (
+          <>
+            <Action.Push
+              title="Preview Here"
+              icon={Icon.Eye}
+              shortcut={{ modifiers: ["cmd"], key: "y" }}
+              target={<PreviewView h={h} ctx={ctx} photo={photo} thumb={thumb} />}
+            />
+            <Action.ToggleQuickLook title="Quick Look the File" shortcut={{ modifiers: ["cmd", "shift"], key: "y" }} />
+          </>
+        ) : onClose ? (
+          <Action
+            title="Close Preview"
+            icon={Icon.XMarkCircle}
             shortcut={{ modifiers: ["cmd"], key: "y" }}
-            target={<PreviewView h={h} ctx={ctx} photo={photo} thumb={thumb} />}
+            onAction={onClose}
           />
         ) : null}
-        <Action.ToggleQuickLook title="Quick Look the File" shortcut={{ modifiers: ["cmd", "shift"], key: "y" }} />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action.CopyToClipboard
