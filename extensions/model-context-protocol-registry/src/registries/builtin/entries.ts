@@ -2437,6 +2437,19 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "wealthnow",
+    title: "Wealthnow",
+    description:
+      "Institutional financial data for AI agents: FINRA TRACE corporate bond prints and single-name CDS history, private company rounds, valuations and investors, daily options chains with greeks and IV, earnings-call transcripts, 13F and Form 4 ownership, and point-in-time fundamentals and SEC filings. Every tool is read-only; nothing places orders or moves money. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste; free Wealthnow account. Data only, not investment advice.",
+    icon: "https://raw.githubusercontent.com/Hlobo-dev/wealthnow-mcp/main/assets/wealthnow-logo-512.png",
+    homepage: "https://wealthnow.io/api",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.wealthnow.io/mcp"],
+    },
+    remoteUrl: "https://mcp.wealthnow.io/mcp",
+  },
+  {
     name: "empiriolabs",
     title: "EmpirioLabs AI",
     description:
