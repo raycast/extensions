@@ -14,6 +14,7 @@ export default function Command() {
   });
   const presets = data?.presets ?? [];
   const status = connection({ isLoading, error });
+  const canEdit = status.state === "connected";
 
   async function remove(preset: Preset) {
     const confirmed = await confirmAlert({
@@ -33,7 +34,7 @@ export default function Command() {
     }
   }
 
-  const saveCurrent = data && presets.length < PRESET_SLOTS && (
+  const saveCurrent = data && canEdit && presets.length < PRESET_SLOTS && (
     <Action.Push
       title="Save Current Position as Preset"
       icon={Icon.Plus}
@@ -94,20 +95,24 @@ export default function Command() {
                   icon={Icon.ArrowRight}
                   onAction={() => moveTo(preset.name, preset.position)}
                 />
-                <Action.Push
-                  title="Edit Preset"
-                  icon={Icon.Pencil}
-                  shortcut={Keyboard.Shortcut.Common.Edit}
-                  target={<PresetForm preset={preset} position={preset.position} onSaved={revalidate} />}
-                />
+                {canEdit && (
+                  <Action.Push
+                    title="Edit Preset"
+                    icon={Icon.Pencil}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
+                    target={<PresetForm preset={preset} position={preset.position} onSaved={revalidate} />}
+                  />
+                )}
                 {saveCurrent}
-                <Action
-                  title="Delete Preset"
-                  icon={Icon.Trash}
-                  style={Action.Style.Destructive}
-                  shortcut={Keyboard.Shortcut.Common.Remove}
-                  onAction={() => remove(preset)}
-                />
+                {canEdit && (
+                  <Action
+                    title="Delete Preset"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    onAction={() => remove(preset)}
+                  />
+                )}
               </ActionPanel>
             }
           />
