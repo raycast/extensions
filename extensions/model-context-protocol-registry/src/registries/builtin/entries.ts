@@ -2037,6 +2037,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.trycaly.com/mcp"],
     },
   },
+  {
+    name: "10ml-fragrance-index",
+    title: "10ML Fragrance Index",
+    description:
+      "Perfume knowledge from 10ML's fragrance editors: notes, accords, families, similar scents and alternatives, houses and expert guides, with links to 10ML's in-depth fragrance guides. Read-only. Hosted remote Streamable HTTP server; no sign-in and no API key.",
+    icon: "https://10ml.com/brand/icons/icon-512.png",
+    homepage: "https://github.com/10ml-com/perfume-finder-mcp",
+    remoteUrl: "https://mcp.10ml.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.10ml.com/mcp"],
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
