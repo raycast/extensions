@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Wealthnow MCP Server] - {PR_MERGE_DATE}
+## [Add Wealthnow MCP Server] - 2026-10-19
 
 - Add Wealthnow MCP Server to the registry
 
