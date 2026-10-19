@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Runx, Sourcey, Frantic and Ausca MCP servers] - 2026-10-19
+
+- Add four first-party hosted MCP servers with current marks and direct HTTP connections in Raycast. Runx and Sourcey expose public read-only discovery, Frantic exposes public bounty reads and governed actions, and Ausca exposes keyless offer discovery with x402 payment required for paid calls. Other MCP clients retain the `mcp-remote` fallback.
+
 ## [Add Local Commander MCP Server] - 2026-10-19
 
 - Add Local Commander to the official registry: connect Raycast AI to Windows 11 computers you own to read approved project files and Git state, run the checks and commands you authorize, and check local services. Hosted Streamable HTTP server at https://localcmd.app/mcp with OAuth 2.0 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
