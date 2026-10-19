@@ -1,6 +1,6 @@
 # Chiikawa Character Changelog
 
-## [Animated Characters] - {PR_MERGE_DATE}
+## [Animated Characters] - 2026-10-19
 
 - Meet 11 custom animated character illustrations with blinking eyes, waving paws, wiggling ears, and moving accessories, available offline in Raycast 2.
 - Switch to the original portraits from the action menu or turn off animation by default in extension preferences.
