@@ -57,7 +57,7 @@ export default function Command() {
     />
   );
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search task history" navigationTitle="Task History">
+    <List isLoading={loading} searchBarPlaceholder="Search task history">
       <List.EmptyView
         icon={error ? Icon.Warning : Icon.Clock}
         title={error ? "Could Not Load History" : "No Task History Yet"}

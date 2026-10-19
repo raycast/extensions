@@ -1,6 +1,4 @@
-import { environment } from "@raycast/api";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { type TaskSession } from "./timer";
 
 export type HistoryEntry = {
   id: string;
@@ -39,13 +37,25 @@ export function parseHistory(contents: string): HistoryEntry[] {
   return (value as HistoryEntry[]).sort((a, b) => b.endedAt - a.endedAt);
 }
 
-export async function readHistory(): Promise<HistoryEntry[]> {
-  try {
-    return parseHistory(await readFile(path.join(environment.supportPath, "task-history.json"), "utf8"));
-  } catch (error) {
-    if (error instanceof Error && "code" in error && error.code === "ENOENT") return [];
-    throw error;
-  }
+export function createHistoryEntry(
+  session: TaskSession,
+  endReason: HistoryEntry["endReason"],
+  now: number,
+): HistoryEntry {
+  const cutoff = session.status === "paused" ? (session.pausedAt ?? now) : Math.min(now, session.endsAt);
+  const actualWorkMs = Math.max(
+    0,
+    Math.min(session.durationMinutes * 60_000, cutoff - session.startedAt - (session.totalPausedMs ?? 0)),
+  );
+  return {
+    id: session.id ?? String(session.startedAt),
+    taskName: session.taskName,
+    durationMinutes: session.durationMinutes,
+    startedAt: session.startedAt,
+    endedAt: Math.max(now, session.startedAt),
+    actualWorkMs,
+    endReason,
+  };
 }
 
 export function formatWorkingTime(milliseconds: number): string {

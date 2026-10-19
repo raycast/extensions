@@ -1,4 +1,5 @@
 export type TaskSession = {
+  id?: string;
   taskName: string;
   durationMinutes: number;
   startedAt: number;
@@ -9,7 +10,7 @@ export type TaskSession = {
   pausedRemainingMs?: number;
 };
 
-export function createSession(task: string, minutes: string, now = Date.now()): TaskSession {
+export function createSession(task: string, minutes: string, now = Date.now(), id = crypto.randomUUID()): TaskSession {
   const taskName = task.trim();
   const input = minutes.trim();
   if (!taskName) throw new Error("Task must not be empty.");
@@ -24,7 +25,7 @@ export function createSession(task: string, minutes: string, now = Date.now()): 
   ) {
     throw new Error("Minutes must be a positive whole number within the supported range.");
   }
-  return { taskName, durationMinutes, startedAt: now, endsAt, status: "running" };
+  return { id, taskName, durationMinutes, startedAt: now, endsAt, status: "running" };
 }
 
 export function normalizeSession(value: unknown, now = Date.now()): TaskSession {
@@ -32,6 +33,7 @@ export function normalizeSession(value: unknown, now = Date.now()): TaskSession 
   const session = value as TaskSession;
   const totalPausedMs = session.totalPausedMs ?? 0;
   if (
+    (session.id !== undefined && (typeof session.id !== "string" || !session.id)) ||
     typeof session.taskName !== "string" ||
     !session.taskName.trim() ||
     !Number.isSafeInteger(session.durationMinutes) ||
