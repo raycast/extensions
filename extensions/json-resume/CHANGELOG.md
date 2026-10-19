@@ -1,6 +1,6 @@
 # Changelog
 
-## [Add Local Resumes and AI Management] - {PR_MERGE_DATE}
+## [Save, Edit, and Manage Resumes Locally] - {PR_MERGE_DATE}
 
 - Store complete JSON Resume documents inside the extension and view them offline.
 - Add a shared create/edit JSON form, local resume search, copy JSON, and confirmed deletion.
