@@ -64,7 +64,7 @@ _Last updated: ${priceTime}_
             shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
           />
           <Action.CopyToClipboard
-            title="Copy All Prices (json)"
+            title="Copy All Prices (JSON)"
             content={JSON.stringify(prices, null, 2)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
           />

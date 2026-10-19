@@ -1,4 +1,11 @@
-import { Detail, ActionPanel, Action, Icon, LaunchProps } from "@raycast/api";
+import {
+  Detail,
+  ActionPanel,
+  Action,
+  Icon,
+  LaunchProps,
+  Keyboard,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
 import { fetchPrices } from "./lib/prices";
@@ -97,7 +104,7 @@ export default function Command({
           <Action.CopyToClipboard
             title="Copy Result"
             content={String(result)}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
           <Action.CopyToClipboard
             title="Copy Btc Price"

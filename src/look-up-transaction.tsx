@@ -111,12 +111,12 @@ ${tx.status.block_time ? `| **Block Time** | ${blockInfo} |` : ""}
               shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
             />
             <Action.CopyToClipboard
-              title="Copy Fee (sats)"
+              title="Copy Fee (Sats)"
               content={String(feeSats)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
             />
             <Action.CopyToClipboard
-              title="Copy All Details (json)"
+              title="Copy All Details (JSON)"
               content={JSON.stringify(tx, null, 2)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
             />
