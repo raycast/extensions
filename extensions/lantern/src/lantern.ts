@@ -226,7 +226,7 @@ const PDF_SKIM = `on run argv
   end tell
 end run`;
 
-const QUICKTIME_TYPES = new Set([".mp4", ".mov", ".m4v", ".m4a", ".mp3", ".wav", ".aiff", ".aif", ".caf"]);
+const QUICKTIME_TYPES = new Set([".mp4", ".mov", ".m4v", ".m4a", ".mp3", ".wav", ".aiff", ".aif", ".caf", ".flac"]);
 
 /**
  * Opens a file where the result is, in the app macOS would open it with (never a different one), as the Lantern
@@ -240,9 +240,23 @@ export async function openAt(
   play = true,
   page: number | null = null,
 ): Promise<void> {
-  if (ms != null && QUICKTIME_TYPES.has(path.extname(file).toLowerCase())) {
-    const args = ["-e", QUICKTIME, file, String(Math.floor(ms / 1000)), play ? "play" : "pause"];
-    if (await run("/usr/bin/osascript", args)) return;
+  if (ms != null) {
+    const ext = path.extname(file).toLowerCase();
+    if (QUICKTIME_TYPES.has(ext)) {
+      const args = ["-e", QUICKTIME, file, String(Math.floor(ms / 1000)), play ? "play" : "pause"];
+      if (await run("/usr/bin/osascript", args)) return;
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Opened without going to ${clock(ms)}`,
+        message: "Allow Raycast to control QuickTime Player in System Settings → Privacy & Security → Automation",
+      });
+    } else if (ms > 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Opened at the start, not at ${clock(ms)}`,
+        message: `QuickTime Player cannot open ${ext} files, so the moment cannot be set`,
+      });
+    }
   }
   if (page != null && path.extname(file).toLowerCase() === ".pdf") {
     const app = await getDefaultApplication(file).catch(() => undefined);
@@ -250,6 +264,11 @@ export async function openAt(
     if (id === "net.sourceforge.skim-app.skim") {
       const args = ["-e", PDF_SKIM, file, String(page)];
       if (await run("/usr/bin/osascript", args)) return;
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Opened without going to page ${page}`,
+        message: "Allow Raycast to control Skim in System Settings → Privacy & Security → Automation",
+      });
     } else if (id === "com.apple.Preview") {
       const { ok, out } = await runOutput("/usr/bin/osascript", ["-e", PDF_PREVIEW, file, String(page)]);
       if (ok && out === "jumped") return;
