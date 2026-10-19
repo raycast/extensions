@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Dynamic Document API MCP Server] - {PR_MERGE_DATE}
+## [Add Dynamic Document API MCP Server] - 2026-10-19
 
 - Add Dynamic Document API to the official registry: render PDFs and images from templates, HTML or Markdown, merge PDFs and create validated XRechnung and ZUGFeRD e-invoices. Hosted Streamable HTTP server at https://mcp.dynamicdocumentapi.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
