@@ -61,7 +61,9 @@ private func runKickflip(playSound: Bool) async throws {
   // Exclude the target from the backdrop so there is no stationary duplicate underneath.
   let scale = screen.backingScaleFactor
   let windowConfig = captureConfiguration(size: target.frame.size, scale: scale)
-  windowConfig.ignoreShadowsSingleWindow = true
+  if #available(macOS 14.2, *) {
+    windowConfig.ignoreShadowsSingleWindow = true
+  }
   let snapshot = try await SCScreenshotManager.captureImage(
     contentFilter: SCContentFilter(desktopIndependentWindow: target), configuration: windowConfig)
   let background = try await SCScreenshotManager.captureImage(
