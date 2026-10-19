@@ -245,6 +245,21 @@ test("duplicate and uncertain responses are not retried", async () => {
   await assert.rejects(api.applyToPosition(input), /did not confirm/);
 });
 
+test("server errors warn that an application may have been accepted without retrying", async () => {
+  for (const statusCode of [500, 502, 503, 504, 599]) {
+    const { api, input, sdk } = fixture();
+    sdk.post.mock.mockImplementation(async () => ({
+      data: null,
+      error: { name: "application_error", statusCode, message: "Server error" },
+    }));
+    await assert.rejects(
+      api.applyToPosition(input),
+      /Server error.*may have been accepted.*Check before submitting again/,
+    );
+    assert.equal(sdk.post.mock.callCount(), 1);
+  }
+});
+
 test("real SDK supplies auth and multipart boundary without JSON content type", async () => {
   const sdk = new Resend("re_mock_key");
   const oauth = { getResend: () => sdk };

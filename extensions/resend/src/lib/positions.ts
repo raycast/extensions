@@ -58,7 +58,7 @@ export function positionUrl(id: string) {
 }
 
 function apiError(error: ErrorResponse, submitting = false): Error {
-  if (submitting && error.statusCode == null) {
+  if (submitting && (error.statusCode == null || (error.statusCode >= 500 && error.statusCode < 600))) {
     return new Error(
       `${error.message} Submission could not be confirmed. It may have been accepted. Check before submitting again.`,
     );
