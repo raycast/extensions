@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add UnblockingAPI MCP Server] - {PR_MERGE_DATE}
+
+- Add UnblockingAPI to the official registry: fetch public web pages that block simple requests, and get clean Markdown, HTML or template JSON back, with three read-only tools (`unblock_fetch`, `find_templates`, `get_build_guide`). Hosted Streamable HTTP server at https://mcp.unblockingapi.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a Bearer API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add NetActuate MCP Server] - 2026-10-20
 
 - Add NetActuate to the official registry: read-only answers from NetActuate's published network data (data center locations and specifications, compliance by site, internet exchanges, the sites nearest a market, products and published pricing), each linked to its netactuate.com page. Hosted Streamable HTTP server at https://netactuate.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
