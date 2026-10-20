@@ -145,6 +145,7 @@ export function createSession(options: SessionOptions) {
   let refreshing: Promise<string | undefined> | undefined;
   let forcing: Promise<string | undefined> | undefined;
   let authorizing: Promise<string> | undefined;
+  let reauthorizing: Promise<string> | undefined;
   let reconnecting: Promise<string> | undefined;
 
   async function readOrRefresh(force = false): Promise<string | undefined> {
@@ -182,9 +183,11 @@ export function createSession(options: SessionOptions) {
     return forcing;
   }
 
-  async function signIn(): Promise<string> {
-    const existing = await storedToken();
-    if (existing) return existing;
+  async function signIn(forceConsent = false): Promise<string> {
+    if (!forceConsent) {
+      const existing = await storedToken();
+      if (existing) return existing;
+    }
 
     const id = await clientId();
     try {
@@ -227,6 +230,12 @@ export function createSession(options: SessionOptions) {
     return authorizing;
   }
 
+  /** Ask for a new grant while keeping the working connection if consent is cancelled or the network fails. */
+  function reauthorize(): Promise<string> {
+    reauthorizing ??= signIn(true).finally(() => (reauthorizing = undefined));
+    return reauthorizing;
+  }
+
   /** Forget the OAuth session so the next read signs in again. */
   async function signOut() {
     await tokens.remove();
@@ -264,6 +273,7 @@ export function createSession(options: SessionOptions) {
     authorize,
     connectionEpoch,
     forceRefresh,
+    reauthorize,
     reconnect,
     signOut,
     signedInEmail,

@@ -65,7 +65,15 @@ export type Product = {
   path: string;
 };
 
-export type ProductPage = { products: Product[]; totalMatching: number; hasMore: boolean };
+export type ProductPage = {
+  products: Product[];
+  totalMatching: number;
+  /** Every product the connection can read, before the search narrows it. */
+  totalProducts?: number;
+  hasMore: boolean;
+  /** "remit" when the connection reads only the person's remits. */
+  scope?: "whole_business" | "remit";
+};
 
 export const PRODUCT_SORTS = {
   findings: { label: "Most Open Findings", dir: "desc" },

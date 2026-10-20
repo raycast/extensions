@@ -1,11 +1,18 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise, useCachedState, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
-import { authorize } from "./lib/auth";
+import { apiKey, authorize, reconnect } from "./lib/auth";
 import { appUrl, askUrl } from "./lib/config";
 import { money, validZone } from "./vendor/twelfth-shared/index";
 import { type WorkspaceContext, workspaceContext } from "./lib/context";
-import { PRODUCT_SORTS, type Figure, type Product, type ProductSort, listProducts } from "./lib/twelfth";
+import {
+  PRODUCT_SORTS,
+  type Figure,
+  type Product,
+  type ProductPage,
+  type ProductSort,
+  listProducts,
+} from "./lib/twelfth";
 
 const PAGE_SIZE = 50;
 
@@ -13,11 +20,15 @@ function SearchProducts() {
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useCachedState<ProductSort>("products.sort", "findings");
   const [showingDetail, setShowingDetail] = useCachedState("products.detail", true);
+  // From the first page: whether anything is readable at all, so an empty list
+  // can say "nothing in your remits" rather than "no match".
+  const [reach, setReach] = useState<Pick<ProductPage, "totalProducts" | "scope">>();
 
-  const { data, isLoading, pagination, revalidate } = useCachedPromise(
+  const { data, error, isLoading, pagination, revalidate } = useCachedPromise(
     (query: string, sort: ProductSort) =>
       async ({ page }: { page: number }) => {
         const result = await listProducts({ query, sort, limit: PAGE_SIZE, offset: page * PAGE_SIZE });
+        if (page === 0) setReach({ totalProducts: result.totalProducts, scope: result.scope });
         return { data: result.products, hasMore: result.hasMore };
       },
     [searchText, sort],
@@ -30,6 +41,7 @@ function SearchProducts() {
   return (
     <List
       isLoading={isLoading}
+      navigationTitle={context?.workspace ? `Search Products · ${context.workspace.name}` : "Search Products"}
       pagination={pagination}
       throttle
       filtering={false}
@@ -44,11 +56,17 @@ function SearchProducts() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView
-        icon={Icon.MagnifyingGlass}
-        title={isLoading ? "Searching…" : "No matching products"}
-        description={isLoading ? undefined : "Only products in your remits are searched."}
-      />
+      {isLoading ? (
+        <List.EmptyView icon={Icon.MagnifyingGlass} title="Searching…" />
+      ) : (
+        <EmptyProducts
+          error={error}
+          query={searchText.trim()}
+          reach={reach}
+          workspace={context?.workspace?.name}
+          onRetry={revalidate}
+        />
+      )}
       {data?.map((product) => (
         <List.Item
           key={product.sku}
@@ -98,6 +116,75 @@ function SearchProducts() {
         />
       ))}
     </List>
+  );
+}
+
+/**
+ * Why the list is empty, in the order that matters: the read failed, nothing
+ * in this workspace is readable (wrong workspace, or no remits), or the search
+ * matched nothing.
+ */
+function EmptyProducts({
+  error,
+  query,
+  reach,
+  workspace,
+  onRetry,
+}: {
+  error: Error | undefined;
+  query: string;
+  reach: Pick<ProductPage, "totalProducts" | "scope"> | undefined;
+  workspace: string | undefined;
+  onRetry: () => void;
+}) {
+  const where = workspace ? ` in ${workspace}` : "";
+  const actions = (
+    <ActionPanel>
+      {error ? <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRetry} /> : null}
+      <Action.OpenInBrowser title="Open Products in Twelfth" url={appUrl("/app/products")} />
+      {apiKey() ? null : (
+        <Action
+          title="Switch Workspace"
+          icon={Icon.Switch}
+          onAction={async () => {
+            await reconnect();
+            onRetry();
+          }}
+        />
+      )}
+    </ActionPanel>
+  );
+  if (error) {
+    return (
+      <List.EmptyView
+        icon={Icon.ExclamationMark}
+        title="Couldn't load products"
+        description={error.message}
+        actions={actions}
+      />
+    );
+  }
+  if (reach?.totalProducts === 0) {
+    return (
+      <List.EmptyView
+        icon={Icon.MagnifyingGlass}
+        title={`No products${where}`}
+        description={
+          reach.scope === "remit"
+            ? "None of your remits hold products in this workspace. Switch workspace, or ask an admin to add you to a remit."
+            : "This workspace has no products loaded yet."
+        }
+        actions={actions}
+      />
+    );
+  }
+  return (
+    <List.EmptyView
+      icon={Icon.MagnifyingGlass}
+      title={query ? `No products match "${query}"${where}` : `No products${where}`}
+      description={reach?.scope === "remit" ? "Only products in your remits are searched." : undefined}
+      actions={actions}
+    />
   );
 }
 

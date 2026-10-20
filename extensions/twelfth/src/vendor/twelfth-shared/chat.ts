@@ -26,7 +26,10 @@ export type SheetAttachment = {
   truncated: boolean;
 };
 
-export type ChartType = "bar" | "line" | "scatter";
+export type ChartType = "bar" | "line" | "scatter" | "matrix";
+
+/** A matrix's frame: where it splits and what the quadrants are called (top-left, top-right, bottom-left, bottom-right). */
+export type ChartFrame = { xSplit: number; ySplit: number; quadrants: [string, string, string, string] };
 
 /**
  * A chart as structured data: what to plot and the rows behind it. The chat's
@@ -39,11 +42,14 @@ export type ChartSpec = {
   x: string;
   y: string;
   series?: string;
+  /** Scatter and matrix: the column naming each point, and the one sizing it. */
+  label?: string;
+  size?: string;
   columns: string[];
   rows: Record<string, string | number>[];
   /** Where it was made: the sheet and the cells the chart plots. */
   source?: { app: "excel"; sheet: string | null; address: string | null };
-};
+} & Partial<ChartFrame>;
 
 /**
  * A chart made in Excel, going into the conversation: the structured chart,
@@ -69,9 +75,11 @@ export type ChatChart = {
   x: string;
   y: string;
   series?: string;
+  label?: string;
+  size?: string;
   columns?: string[];
   rows: Record<string, unknown>[];
-};
+} & Partial<ChartFrame>;
 
 /**
  * What the saved answer holds beyond its text. Tables and charts can be drawn
@@ -107,6 +115,7 @@ export type ChatRun = {
 };
 
 export type ChatEvent =
+  | { kind: "queued"; id: string; sessionId: string; position: number }
   | {
       kind: "session";
       sessionId: string;
@@ -139,6 +148,7 @@ export type ChatHistoryMessage = {
 export type ChatHistoryTurn = {
   /** The user message's id. */
   id: string;
+  queuedId?: string;
   turn: number;
   question: string;
   source: ChatTurnSource | null;
@@ -180,10 +190,19 @@ export type ChatClientOptions = {
   /** Core's origin, or a dev proxy in front of it. */
   base: string;
   session: Pick<Session, "forceRefresh" | "storedToken">;
+  /** Time to receive response headers. Once streaming starts, this no longer limits a turn. */
+  connectionTimeoutMs?: number;
+  /** Core sends an SSE heartbeat every 12 seconds during a turn. */
+  streamIdleTimeoutMs?: number;
 };
+
+const CONNECTION_TIMEOUT_MS = 20_000;
+const STREAM_IDLE_TIMEOUT_MS = 45_000;
 
 export function createChatClient(options: ChatClientOptions) {
   const { session } = options;
+  const connectionTimeoutMs = options.connectionTimeoutMs ?? CONNECTION_TIMEOUT_MS;
+  const streamIdleTimeoutMs = options.streamIdleTimeoutMs ?? STREAM_IDLE_TIMEOUT_MS;
   const askUrl = `${options.base}/api/integrations/office/chat`;
   const sessionUrl = (sessionId: string) => `${askUrl}/sessions/${encodeURIComponent(sessionId)}`;
 
@@ -191,11 +210,32 @@ export function createChatClient(options: ChatClientOptions) {
   async function send(url: string, init: RequestInit): Promise<Response> {
     const token = await session.storedToken();
     if (!token) throw new NotSignedInError();
-    const attempt = (bearer: string) =>
-      fetch(url, { ...init, headers: { ...init.headers, authorization: `Bearer ${bearer}` } }).catch(() => {
+    const attempt = async (bearer: string) => {
+      const controller = new AbortController();
+      const forwardAbort = () => controller.abort();
+      if (init.signal?.aborted) controller.abort();
+      else init.signal?.addEventListener("abort", forwardAbort, { once: true });
+      const timer = setTimeout(() => controller.abort(), connectionTimeoutMs);
+      try {
+        return await fetch(url, {
+          ...init,
+          signal: controller.signal,
+          headers: { ...init.headers, authorization: `Bearer ${bearer}` },
+        });
+      } catch {
         if (init.signal?.aborted) throw new DOMException("Stopped", "AbortError");
+        if (controller.signal.aborted)
+          throw new Error(
+            url === askUrl
+              ? "No response from Twelfth. Your answer may still be running."
+              : "No response from Twelfth. Try again.",
+          );
         throw new Error("Couldn't reach Twelfth. Check your connection.");
-      });
+      } finally {
+        clearTimeout(timer);
+        init.signal?.removeEventListener("abort", forwardAbort);
+      }
+    };
     let response = await attempt(token);
     if (response.status === 401) {
       const current = await session.storedToken();
@@ -227,14 +267,16 @@ export function createChatClient(options: ChatClientOptions) {
     const decoder = new TextDecoder();
     try {
       for (;;) {
-        const { done, value } = await reader.read();
+        const { done, value } = await readChunk(reader, streamIdleTimeoutMs);
         if (done) break;
         parser.push(decoder.decode(value, { stream: true }));
       }
-    } catch {
+    } catch (error) {
       if (signal?.aborted) return;
+      void reader.cancel().catch(() => {});
       // After `complete` only the title was still to come; losing it loses nothing.
-      if (!ended) throw new Error("The connection to Twelfth dropped before the answer finished.");
+      if (!ended)
+        throw error instanceof StreamIdleError ? error : new Error("Connection lost before the answer finished.");
     }
     if (!ended && !signal?.aborted) {
       deliver({ kind: "error", message: "The answer stopped before it finished. Ask again." });
@@ -254,6 +296,22 @@ export function createChatClient(options: ChatClientOptions) {
       body: JSON.stringify(question),
     });
     if (!response.ok) throw await refusal(response);
+    if (response.status === 202) {
+      const body = (await response.json().catch(() => ({}))) as {
+        id?: unknown;
+        sessionId?: unknown;
+        position?: unknown;
+      };
+      if (typeof body.id !== "string" || typeof body.sessionId !== "string")
+        throw new Error("Twelfth didn't confirm the queued question.");
+      onEvent({
+        kind: "queued",
+        id: body.id,
+        sessionId: body.sessionId,
+        position: typeof body.position === "number" ? body.position : 1,
+      });
+      return;
+    }
     await readTurn(response, onEvent, signal);
   }
 
@@ -315,6 +373,27 @@ export function createChatClient(options: ChatClientOptions) {
   return { ask, attach, run, history, stop, uploadFile };
 }
 
+class StreamIdleError extends Error {
+  constructor() {
+    super("Connection lost. Your answer may still be running.");
+  }
+}
+
+/** A quiet turn is fine, but a stream silent past several server heartbeats has stalled. */
+async function readChunk(reader: ReadableStreamDefaultReader<Uint8Array>, timeoutMs: number) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      reader.read(),
+      new Promise<never>((_resolve, reject) => {
+        timer = setTimeout(() => reject(new StreamIdleError()), timeoutMs);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function refusal(response: Response): Promise<Error> {
   const body = (await response.json().catch(() => ({}))) as { error?: string; code?: string };
   const message = body.error ?? `Twelfth returned ${response.status}`;
@@ -331,7 +410,27 @@ async function refusal(response: Response): Promise<Error> {
 }
 
 const RUN_STATUSES: ReadonlySet<string> = new Set(["running", "complete", "failed", "cancelled", "interrupted"]);
-const CHART_TYPES: ReadonlySet<string> = new Set(["bar", "line", "scatter"]);
+const CHART_TYPES: ReadonlySet<string> = new Set(["bar", "line", "scatter", "matrix"]);
+
+/** A matrix's frame as a message or tool stored it, or nothing. */
+function chartFrame(value: Record<string, unknown>): Partial<ChartFrame> {
+  const quadrants =
+    Array.isArray(value.quadrants) &&
+    value.quadrants.length === 4 &&
+    value.quadrants.every((q) => typeof q === "string" && q)
+      ? (value.quadrants as ChartFrame["quadrants"])
+      : null;
+  return typeof value.xSplit === "number" && typeof value.ySplit === "number" && quadrants
+    ? { xSplit: value.xSplit, ySplit: value.ySplit, quadrants }
+    : {};
+}
+const optionalColumn = (value: unknown, key: string): Record<string, string> =>
+  typeof value === "object" &&
+  value !== null &&
+  typeof (value as Record<string, unknown>)[key] === "string" &&
+  (value as Record<string, unknown>)[key]
+    ? { [key]: (value as Record<string, string>)[key]! }
+    : {};
 
 /** A server event, read as the pane needs it; anything else (reasoning, heartbeats) is dropped. */
 export function chatEvent(name: string, data: unknown): ChatEvent | undefined {
@@ -423,6 +522,9 @@ export function answerExtras(content: Record<string, unknown> | undefined): Chat
         x: item.x,
         y: item.y,
         ...(typeof item.series === "string" && item.series ? { series: item.series } : {}),
+        ...optionalColumn(item, "label"),
+        ...optionalColumn(item, "size"),
+        ...chartFrame(item),
         ...(columns.length ? { columns } : {}),
         rows: item.rows.filter(isRecord),
       },
@@ -453,9 +555,18 @@ export function chartSpec(value: unknown): ChartSpec | null {
     x: value.x,
     y: value.y,
     ...(typeof value.series === "string" && value.series ? { series: value.series } : {}),
+    ...optionalColumn(value, "label"),
+    ...optionalColumn(value, "size"),
+    ...chartFrame(value),
     columns: columns.length
       ? columns
-      : [...new Set([value.x, value.series, value.y].filter((c): c is string => typeof c === "string" && Boolean(c)))],
+      : [
+          ...new Set(
+            [value.label, value.x, value.series, value.y].filter(
+              (c): c is string => typeof c === "string" && Boolean(c),
+            ),
+          ),
+        ],
     rows,
     ...(source
       ? {
@@ -536,6 +647,7 @@ export function historyTurns(messages: ChatHistoryMessage[]): ChatHistoryTurn[] 
       const text = typeof message.content.text === "string" ? message.content.text : "";
       turns.push({
         id: message.id,
+        ...(typeof message.content.queuedId === "string" ? { queuedId: message.content.queuedId } : {}),
         turn: message.turn,
         question: text,
         source: message.source,
