@@ -152,7 +152,7 @@ export default function Command() {
 
   return (
     <MenuBarExtra
-      icon={{ source: "bitbucket-logo.png" }}
+      icon={{ source: "bitbucket-menu-bar.png", tintColor: Color.PrimaryText }}
       title={showCount && unread.length > 0 ? String(unread.length) : undefined}
       isLoading={isLoading}
       tooltip="Bitbucket Notifications"
