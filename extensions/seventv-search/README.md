@@ -37,6 +37,14 @@ These two commands currently support 7TV only. Private and unlisted emotes are e
 
 **View 7TV Usage Status** shows the API's personal-set approval status for these emotes. This status concerns adding emotes to personal sets on 7TV. It does not establish copyright or permission to reuse an image elsewhere. An emote without approval is not necessarily denied. The status does not block copying or pasting.
 
+<details>
+<summary>Screenshots</summary>
+
+![Search 7TV users](media/user-search.png)
+![Browse a channel's emotes](media/channel-emotes.png)
+
+</details>
+
 ## Development
 
 Install Node.js 22.13 or later and Raycast. This checkout was verified with Node.js 26.7 on macOS.

@@ -39,22 +39,10 @@
       "required": false,
       "default": "2",
       "data": [
-        {
-          "title": "1x",
-          "value": "1"
-        },
-        {
-          "title": "2x",
-          "value": "2"
-        },
-        {
-          "title": "3x",
-          "value": "3"
-        },
-        {
-          "title": "4x",
-          "value": "4"
-        }
+        { "title": "1x", "value": "1" },
+        { "title": "2x", "value": "2" },
+        { "title": "3x", "value": "3" },
+        { "title": "4x", "value": "4" }
       ]
     }
   ],
