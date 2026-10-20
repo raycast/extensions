@@ -109,19 +109,19 @@ const ProfileItem = (props: {
             }}
           />
           <Action
-            title={props.hidden ? "Unhide Profile" : "Hide Profile"}
-            icon={props.hidden ? Icon.Eye : Icon.EyeDisabled}
-            shortcut={{ modifiers: ["cmd"], key: "h" }}
-            onAction={() => props.onToggleHidden(profile)}
-          />
-          {props.showHiddenAction}
-          <Action
             title="Delete Profile"
             icon={Icon.Trash}
             style={Action.Style.Destructive}
             shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
             onAction={() => props.onDelete(profile)}
           />
+          <Action
+            title={props.hidden ? "Unhide Profile" : "Hide Profile"}
+            icon={props.hidden ? Icon.Eye : Icon.EyeDisabled}
+            shortcut={{ modifiers: ["cmd"], key: "h" }}
+            onAction={() => props.onToggleHidden(profile)}
+          />
+          {props.showHiddenAction}
         </ActionPanel>
       }
     />
