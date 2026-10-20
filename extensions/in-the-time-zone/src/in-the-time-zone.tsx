@@ -320,6 +320,15 @@ export default function Command() {
                     shortcut={{ modifiers: ["cmd"], key: "0" }}
                   />
                 )}
+                {!baseCityId && (selectedZoneIds ?? []).includes(localCityId) && (
+                  <Action
+                    title="Remove City"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={() => void removeCity(localCityId)}
+                    shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                  />
+                )}
                 <ActionPanel.Section title="Scrub Time">
                   <Action
                     title={formatScrubTitle(-scrubMinutes)}
