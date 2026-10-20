@@ -24,10 +24,8 @@ export default function Timers({
   edit?: boolean;
 }) {
   const api = client();
-  const { recentDateFormat, showTimerSummary = true } = getPreferenceValues<{
-    recentDateFormat?: string;
-    showTimerSummary?: boolean;
-  }>();
+  const { recentDateFormat, showTimerSummary = true } =
+    getPreferenceValues<Preferences>();
   const [, tick] = useState(0);
   const [pages, setPages] = useState(1);
   const {

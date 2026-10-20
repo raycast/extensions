@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
-import { Entry, Entity, idOf } from "./api";
+import { Entry, idOf, entryPayload } from "./api";
 import { client, perform } from "./shared";
 export default function EntryForm({
   entry,
@@ -25,16 +25,13 @@ export default function EntryForm({
       .map((t) => (typeof t === "string" ? t : t.name))
       .join(", "),
   );
-  const { data, isLoading } = usePromise(async () => {
-    const [projects, activities] = await Promise.all([
-      api.request<Entity[]>("/projects?visible=1"),
-      api.request<Entity[]>("/activities?visible=1"),
-    ]);
-    return { projects, activities };
-  }, []);
+  const { data, isLoading } = usePromise(() => api.entryOptions(entry), []);
   const projects = data?.projects ?? [];
   const activities = (data?.activities ?? []).filter(
     (a) =>
+      (entry &&
+        project === String(idOf(entry.project)) &&
+        a.id === idOf(entry.activity)) ||
       (!a.project &&
         projects.find((p) => String(p.id) === project)?.globalActivities !==
           false) ||
@@ -63,12 +60,15 @@ export default function EntryForm({
               if (!valid || submitting.current) return;
               submitting.current = true;
               await perform(entry ? "Save entry" : "Start timer", async () => {
-                const body = {
-                  project: Number(project),
-                  activity: Number(selectedActivity),
-                  description,
-                  tags,
-                };
+                const body = entryPayload(
+                  {
+                    project: Number(project),
+                    activity: Number(selectedActivity),
+                    description,
+                    tags,
+                  },
+                  entry,
+                );
                 if (entry)
                   await api.request(`/timesheets/${entry.id}`, "PATCH", body);
                 else await api.start(body);

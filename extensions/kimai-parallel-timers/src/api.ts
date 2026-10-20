@@ -35,6 +35,27 @@ export function projectColor(project: number | Entity) {
     : undefined;
 }
 
+export function entryPayload(
+  values: {
+    project: number;
+    activity: number;
+    description: string;
+    tags: string;
+  },
+  entry?: Entry,
+) {
+  return {
+    description: values.description,
+    tags: values.tags,
+    ...(!entry || values.project !== idOf(entry.project)
+      ? { project: values.project }
+      : {}),
+    ...(!entry || values.activity !== idOf(entry.activity)
+      ? { activity: values.activity }
+      : {}),
+  };
+}
+
 export function duration(entry: Entry, now = Date.now()) {
   const seconds = entry.end
     ? entry.duration
@@ -109,10 +130,43 @@ export class Kimai {
   history() {
     return this.historyPage(1);
   }
-  historyPage(page: number) {
-    return this.request<Entry[]>(
-      `/timesheets?size=100&full=true&orderBy=begin&order=DESC&page=${page}`,
-    );
+  async historyPage(page: number) {
+    try {
+      return await this.request<Entry[]>(
+        `/timesheets?size=100&full=true&orderBy=begin&order=DESC&page=${page}`,
+      );
+    } catch (error) {
+      if (
+        page > 1 &&
+        error instanceof Error &&
+        error.message.startsWith("Kimai HTTP 404:")
+      )
+        return [];
+      throw error;
+    }
+  }
+  async entryOptions(entry?: Entry) {
+    const [projects, activities] = await Promise.all([
+      this.request<Entity[]>("/projects?visible=1"),
+      this.request<Entity[]>("/activities?visible=1"),
+    ]);
+    if (entry) {
+      await Promise.all([
+        (async () => {
+          if (!projects.some((p) => p.id === idOf(entry.project)))
+            projects.push(
+              await this.request<Entity>(`/projects/${idOf(entry.project)}`),
+            );
+        })(),
+        (async () => {
+          if (!activities.some((a) => a.id === idOf(entry.activity)))
+            activities.push(
+              await this.request<Entity>(`/activities/${idOf(entry.activity)}`),
+            );
+        })(),
+      ]);
+    }
+    return { projects, activities };
   }
   async historySince(since: Date) {
     const entries: Entry[] = [];
