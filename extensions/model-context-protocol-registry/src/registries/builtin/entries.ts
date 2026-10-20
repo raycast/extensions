@@ -851,6 +851,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://moltnode.ag/mcp",
   },
   {
+    name: "multi-mail",
+    title: "Multi Mail",
+    description:
+      "Your Gmail, Outlook.com, Hotmail, Microsoft 365, iCloud and Fastmail mailboxes in Raycast - several at once, one search across all of them. Read threads, messages and attachments, draft, send and organise mail, each mailbox within the permissions its owner sets. No copy of the mail is kept. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://lumman.co/icon-512.png",
+    homepage: "https://lumman.co/mcp/multi-mail",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mail.lumman.co/mcp"],
+    },
+    remoteUrl: "https://mail.lumman.co/mcp",
+  },
+  {
     name: "netactuate",
     title: "NetActuate",
     description:
