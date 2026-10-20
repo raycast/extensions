@@ -1,6 +1,6 @@
 # RSS Reader Changelog
 
-## [Read State Fixes] - {PR_MERGE_DATE}
+## [Read State Fixes] - 2026-10-20
 
 - Keep read state for stories from Atom feeds and feeds without GUIDs
 - Match read state between the stories list and AI tools
