@@ -126,6 +126,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "ausca",
+    title: "Ausca",
+    description:
+      "Discover priced OCR, document analysis, transcription, browser and receive-only inbox services, then inspect an offer before invoking it. Public discovery needs no account or API key. Paid tools require an x402-capable client and USDC on Base; This Raycast connection covers offer discovery; paid calls require an x402-capable payment flow. Hosted remote Streamable HTTP MCP server.",
+    icon: "https://ausca.com/icon-512.png",
+    homepage: "https://ausca.com/docs/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://ausca.com/mcp"],
+    },
+    remoteUrl: "https://ausca.com/mcp",
+  },
+  {
     name: "award-travel-finder",
     title: "Award Travel Finder",
     description:
@@ -733,6 +746,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "frantic",
+    title: "Frantic",
+    description:
+      "Find funded bounties, inspect the public receipt ledger and enlist an agent to claim work and deliver results. Accepted work is paid in USDC on Base; posting and funding a bounty uses x402. Public MCP reads need no sign-in, while agent and vendor actions use Frantic's own credentials and payment flow. Hosted remote Streamable HTTP MCP server.",
+    icon: "https://gofrantic.com/favicon-512.png",
+    homepage: "https://gofrantic.com/SKILL.md",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.gofrantic.com/mcp"],
+    },
+    remoteUrl: "https://api.gofrantic.com/mcp",
+  },
+  {
     name: "latchkey",
     title: "Latchkey",
     description:
@@ -1024,6 +1050,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "runx",
+    title: "runx",
+    description:
+      "Search portable agent skills and inspect each manifest, requested authority, trust signals and install command before running it. This public MCP endpoint is read-only; execute skills with the Apache-2.0 runx CLI, which gates consequential actions and signs receipts. Hosted remote Streamable HTTP server; no sign-in needed for discovery.",
+    icon: "https://runx.ai/assets/logo/runx-symbol-512.png",
+    homepage: "https://runx.ai/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.runx.ai/mcp"],
+    },
+    remoteUrl: "https://api.runx.ai/mcp",
+  },
+  {
     name: "truthifi",
     title: "Truthifi",
     description:
@@ -1158,6 +1197,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://solidping.io/api/v1/mcp"],
     },
+  },
+  {
+    name: "sourcey",
+    title: "Sourcey",
+    description:
+      "Search and compare current startup credits, discounts and deals, inspect offer evidence and changes, and read Agent Readiness report cards showing what agents can do with software. Read-only hosted Streamable HTTP MCP server; no account or API key needed.",
+    icon: "https://sourcey.com/brand/sourcey-mark.png",
+    homepage: "https://sourcey.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.sourcey.com/mcp"],
+    },
+    remoteUrl: "https://mcp.sourcey.com/mcp",
   },
   {
     name: "springbrand",

@@ -1,5 +1,11 @@
 # Tethered Changelog
 
+## [Control Confirmations and Profile Sharing] - 2026-10-19
+
+- Add Share Profile for .tetheredprofile exports and Post Profile for Tethered’s existing gallery submission editor.
+
+- Report app-confirmed control results and rejection reasons instead of directing users to Show Status.
+
 ## [Event Scheduling and Bridge Controls] - 2026-10-19
 
 - Reserve Toggle Companion Sync for the upcoming feature, with app-confirmed unavailable errors and success/failure acknowledgments.
