@@ -100,11 +100,19 @@ const formatSoa = (serial: string | number, minimumTtl: string | number) => `Ser
 export const sortRecords = (records: string[]) =>
   [...records].sort((a, b) => a.localeCompare(b, "en", { numeric: true }));
 
+// Decodes a TXT string in presentation format: \DDD is a decimal byte, \X a literal character
+const decodeTxtString = (text: string) =>
+  Buffer.concat(
+    Array.from(text.matchAll(/\\(\d{3})|\\([^])|[^\\]+/gu), ([match, byte, char]) =>
+      byte ? Buffer.from([Number(byte)]) : Buffer.from(char ?? match),
+    ),
+  ).toString("utf8");
+
 // Converts presentation format (DoH, dig) to the format produced by the UDP resolver
 export const formatRecord = (type: RecordType, data: string): string => {
   if (type === "TXT") {
     const chunks = data.match(/"(?:[^"\\]|\\.)*"/g);
-    return chunks ? chunks.map((chunk) => chunk.slice(1, -1).replace(/\\(.)/g, "$1")).join("") : data;
+    return chunks ? chunks.map((chunk) => decodeTxtString(chunk.slice(1, -1))).join("") : data;
   }
   const parts = data.split(" ").map((part) => part.replace(/\.$/, ""));
   if (type === "SOA" && parts.length >= 7) return formatSoa(parts[2], parts[6]);
@@ -169,7 +177,10 @@ const queryUdp = async (resolver: Resolver, domain: string, type: RecordType): P
     case "MX":
       return (await resolver.resolveMx(domain)).map((record) => `${record.priority} ${record.exchange}`);
     case "TXT":
-      return (await resolver.resolveTxt(domain)).map((chunks) => chunks.join(""));
+      // Node decodes TXT bytes as latin1, while TXT data is usually UTF-8
+      return (await resolver.resolveTxt(domain)).map((chunks) =>
+        Buffer.from(chunks.join(""), "latin1").toString("utf8"),
+      );
     case "SOA": {
       const soa = await resolveZoneSoa(resolver, domain);
       return [formatSoa(soa.serial, soa.minttl)];

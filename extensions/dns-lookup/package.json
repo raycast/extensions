@@ -40,15 +40,15 @@
       "default": "auto",
       "data": [
         {
-          "title": "Auto (DoH, fallback to UDP 53)",
+          "title": "Auto (DoH, Fallback to UDP 53)",
           "value": "auto"
         },
         {
-          "title": "DNS over HTTPS only",
+          "title": "DNS over HTTPS Only",
           "value": "doh"
         },
         {
-          "title": "Classic DNS only (UDP 53)",
+          "title": "Classic DNS Only (UDP 53)",
           "value": "udp"
         }
       ]

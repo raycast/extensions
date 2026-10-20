@@ -88,6 +88,13 @@ const STATUS_ICONS: Record<Status, Image.ImageLike> = {
 const getStatusText = ({ status, records, message }: DnsResult) =>
   status === "success" && records.length > 0 ? "Resolved" : message;
 
+// Markdown code span whose delimiter is longer than any backtick run in the value (CommonMark)
+const toInlineCode = (value: string) => {
+  const fence = "`".repeat(Math.max(0, ...Array.from(value.matchAll(/`+/g), ([run]) => run.length)) + 1);
+  const padding = value.startsWith("`") || value.endsWith("`") ? " " : "";
+  return `${fence}${padding}${value}${padding}${fence}`;
+};
+
 const SWITCH_MODE_SHORTCUT: Keyboard.Shortcut = {
   macOS: { modifiers: ["cmd", "shift"], key: "enter" },
   Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
@@ -105,12 +112,18 @@ const GLOBAL_LOCATIONS: MeasurementLocationOption[] = ["US", "GB", "FR", "DE", "
 );
 
 // Tells whether every row returned the same answer, once they are all settled
-const getConcordance = (items: DnsResult[]) => {
+const getConcordance = (items: DnsResult[], recordType: RecordType) => {
   if (items.length === 0 || items.some((item) => item.status === "loading")) return undefined;
+
+  // DNS names are case-insensitive, TXT values are not
+  const toKey = ({ status, records, message }: DnsResult) => {
+    const values = recordType === "TXT" ? records : sortRecords(records.map((r) => r.toLowerCase()));
+    return `${status}|${values.join("\n") || message}`;
+  };
 
   // Failed rows are not a different answer, they only lower the ratio
   const answered = items.filter((item) => item.status !== "error");
-  const answers = new Set(answered.map((item) => `${item.status}|${item.records.join("\n") || item.message}`));
+  const answers = new Set(answered.map(toKey));
   if (answers.size === 0) return undefined;
   if (answers.size > 1) return "Answers differ";
   return answered.length === items.length ? "All identical" : `${answered.length}/${items.length} identical`;
@@ -348,7 +361,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.DnsLoo
   // --- RENDER ---
 
   // The detail panel leaves no room for a section subtitle
-  const concordance = isShowingDetail ? undefined : getConcordance(results);
+  const concordance = isShowingDetail ? undefined : getConcordance(results, recordType);
 
   return (
     <List
@@ -504,7 +517,7 @@ function ResultDetail({ item, recordType }: { item: DnsResult; recordType: Recor
       ? [
           `### ${records.length} ${recordType} record${records.length > 1 ? "s" : ""}`,
           "",
-          ...records.map((r) => `- \`${r}\``),
+          ...records.map((r) => `- ${toInlineCode(r)}`),
         ].join("\n")
       : `### ${item.message}`;
 

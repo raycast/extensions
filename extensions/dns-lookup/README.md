@@ -38,7 +38,7 @@ The extension works perfectly without any configuration. Two optional preference
 
 | Preference | Description |
 | --- | --- |
-| **Fast Check Transport** | `Auto` (DoH, fallback to UDP 53, default), `DNS over HTTPS only` or `Classic DNS only (UDP 53)`. Pick the UDP option when your network forbids encrypted DNS. |
+| **Fast Check Transport** | `Auto (DoH, Fallback to UDP 53)` (default), `DNS over HTTPS Only` or `Classic DNS Only (UDP 53)`. Pick the UDP option when your network forbids encrypted DNS. |
 | **Globalping API Key** | Bypass the anonymous rate limits and use purchased Globalping credits if needed. |
 
 To get a Globalping API Key:
