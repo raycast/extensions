@@ -121,19 +121,35 @@ export const toLocalPath = (value: string): string =>
     ? decodeURIComponent(new URL(value).pathname)
     : value;
 
-export const isUploadableFile = (path: string): boolean => {
+/** Why a path can't be uploaded, or null when it can. */
+export const uploadRejection = (path: string): string | null => {
   try {
     const stats = statSync(path);
-    return stats.isFile() && stats.size <= MAX_UPLOAD_BYTES;
+    if (!stats.isFile()) {
+      return "Folders can't be saved. Select files instead.";
+    }
+    return stats.size <= MAX_UPLOAD_BYTES
+      ? null
+      : "Files over 100 MB can't be saved.";
   } catch {
-    return false;
+    return "Teak couldn't read this file.";
   }
 };
+
+export const isUploadableFile = (path: string): boolean =>
+  uploadRejection(path) === null;
+
+const SKIPPED_FILES_NOTE =
+  "skipped: folders, files over 100 MB and unreadable files can't be saved.";
 
 export const saveFilesWithFeedback = async (
   paths: string[],
   source: string,
+  options: { skipped?: number } = {},
 ): Promise<QuickSaveResponse[]> => {
+  const skippedNote = options.skipped
+    ? `${options.skipped} ${SKIPPED_FILES_NOTE}`
+    : undefined;
   const noun = paths.length === 1 ? "file" : `${paths.length} files`;
   const toast = await showToast({
     style: Toast.Style.Animated,
@@ -163,8 +179,12 @@ export const saveFilesWithFeedback = async (
     saved.length === paths.length
       ? `Saved ${noun} to Teak`
       : `Saved ${saved.length} of ${paths.length} files`;
-  if (lastError) {
-    toast.message = failureMessage(lastError);
+  const notes = [
+    lastError ? failureMessage(lastError) : undefined,
+    skippedNote,
+  ].filter(Boolean);
+  if (notes.length > 0) {
+    toast.message = notes.join(" ");
   }
   const first = saved[0];
   toast.primaryAction = {

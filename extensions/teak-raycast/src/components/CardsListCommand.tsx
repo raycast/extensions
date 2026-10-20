@@ -12,6 +12,7 @@ import { getCardTypeIcon } from "../lib/cardIcons";
 import { removeCardById, upsertCard } from "../lib/cardListState";
 import {
   HIDDEN_CARDS_HINT,
+  isHiddenTag,
   searchNamesHiddenTag,
   shouldCheckForHiddenCards,
 } from "../lib/hiddenTags";
@@ -34,6 +35,8 @@ import { SignOutAction } from "./SignOutAction";
 const PAGE_SIZE = 50;
 
 interface CardsListCommandProps {
+  /** Offers Save Search as Smart Folder; only the unscoped Search Cards list can save its whole search. */
+  canSaveSmartFolder?: boolean;
   emptyDescription: string;
   emptyIcon: Icon;
   emptyTitle: string;
@@ -42,6 +45,8 @@ interface CardsListCommandProps {
   navigationTitle: string;
   removeTagFilterFromList?: boolean;
   removeUnfavoritedFromList?: boolean;
+  /** The tag this list is scoped to, so a hidden tag's list keeps its cards. */
+  scopeTag?: string;
   searchBarPlaceholder: string;
   /** Keeps the API's own order (closest first) until a sort is typed. */
   serverOrder?: boolean;
@@ -50,6 +55,7 @@ interface CardsListCommandProps {
 // A whole number the API takes as a shuffle seed; the same seed gives the
 // same order on every page.
 export function CardsListCommand({
+  canSaveSmartFolder = false,
   emptyDescription,
   emptyIcon,
   emptyTitle,
@@ -58,6 +64,7 @@ export function CardsListCommand({
   navigationTitle,
   removeTagFilterFromList = false,
   removeUnfavoritedFromList = false,
+  scopeTag,
   searchBarPlaceholder,
   serverOrder = false,
 }: CardsListCommandProps) {
@@ -69,6 +76,8 @@ export function CardsListCommand({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const requestGeneration = useRef(0);
+  // Where each card sat when it left the list, so Undo puts it back there.
+  const removedAt = useRef(new Map<string, number>());
 
   const {
     isAuthenticated,
@@ -174,21 +183,43 @@ export function CardsListCommand({
     void load(requestInput);
   }, [isCheckingAuth, isAuthenticated, load, requestInput]);
 
-  const showsHiddenCards = searchNamesHiddenTag(parsedFilters);
+  const showsHiddenCards =
+    searchNamesHiddenTag(parsedFilters) || isHiddenTag(scopeTag);
   const archivedView = Boolean(parsedFilters.archived);
   const inTrash = Boolean(parsedFilters.trashed);
+  let doneView: "done" | "todo" | undefined;
+  if (parsedFilters.done) {
+    doneView = "done";
+  } else if (parsedFilters.todo) {
+    doneView = "todo";
+  }
 
   const handleCardUpdated = useCallback(
     (next: RaycastCard) => {
-      setItems((previous) =>
-        upsertCard(previous, next, {
+      setItems((previous) => {
+        const index = previous.findIndex((card) => card.id === next.id);
+        const updated = upsertCard(previous, next, {
           archivedView: inTrash ? undefined : archivedView,
+          doneView,
+          insertIndex: removedAt.current.get(next.id),
           removeWhenHidden: !showsHiddenCards,
           removeWhenUnfavorited: removeUnfavoritedFromList,
-        }),
-      );
+        });
+        if (index !== -1 && !updated.some((card) => card.id === next.id)) {
+          removedAt.current.set(next.id, index);
+        } else {
+          removedAt.current.delete(next.id);
+        }
+        return updated;
+      });
     },
-    [archivedView, inTrash, removeUnfavoritedFromList, showsHiddenCards],
+    [
+      archivedView,
+      doneView,
+      inTrash,
+      removeUnfavoritedFromList,
+      showsHiddenCards,
+    ],
   );
 
   const handleCardRemoved = useCallback((cardId: string) => {
@@ -330,9 +361,11 @@ export function CardsListCommand({
             accessories={getCardAccessories(card)}
             actions={
               <CardListActions
+                canSaveSmartFolder={canSaveSmartFolder}
                 card={card}
                 filters={parsedFilters}
                 inTrash={inTrash}
+                keepNewestSort={serverOrder}
                 onCardRemoved={handleCardRemoved}
                 onCardUpdated={handleCardUpdated}
                 onFilterByTag={handleFilterByTag}

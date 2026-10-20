@@ -15,6 +15,24 @@ import {
 } from "../lib/searchFilters";
 
 describe("parseSearchFilters", () => {
+  test("ignores impossible dates instead of rolling them over", () => {
+    expect(parseSearchFilters("after:2026-02-31").createdAfter).toBeUndefined();
+    expect(parseSearchFilters("after:2026-00").createdAfter).toBeUndefined();
+    expect(parseSearchFilters("after:2026-02-28").createdAfter).toBe(
+      new Date(2026, 1, 28).getTime(),
+    );
+  });
+
+  test("keeps Newest First where the list otherwise orders by closeness", () => {
+    expect(applySortFilter("poster sort:shuffle", "newest")).toBe("poster");
+    expect(
+      applySortFilter("poster sort:shuffle", "newest", { keepNewest: true }),
+    ).toBe("poster sort:newest");
+    expect(applyTagFilter("poster sort:newest", "design")).toContain(
+      "sort:newest",
+    );
+  });
+
   test("parses a simple single-word tag", () => {
     const parsed = parseSearchFilters("tag:design");
     expect(parsed.tag).toBe("design");

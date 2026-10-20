@@ -36,6 +36,7 @@ function TagCardsView({ tag }: { tag: string }) {
       }
       navigationTitle={`Tag: ${tag}`}
       removeTagFilterFromList
+      scopeTag={tag}
       searchBarPlaceholder={`Search within "${tag}" or use type:, sort:oldest`}
     />
   );

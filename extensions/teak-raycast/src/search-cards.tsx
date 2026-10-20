@@ -5,6 +5,7 @@ import { searchCards } from "./lib/api";
 export default function SearchCardsCommand() {
   return (
     <CardsListCommand
+      canSaveSmartFolder
       emptyDescription="Try a different keyword, tag, or phrase."
       emptyIcon={Icon.MagnifyingGlass}
       emptyTitle="No cards found"

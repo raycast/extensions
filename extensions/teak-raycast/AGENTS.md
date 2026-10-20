@@ -27,5 +27,7 @@ Raycast pins the published `teak-sdk` in `package.json` and
 checks cannot catch a call the pinned version lacks. Use only what the pinned
 version publishes. To prove it, copy `apps/raycast` out of the monorepo, run
 `npm ci`, then `npx tsc --noEmit`, `bun test src/__tests__ --isolate` and
-`npx ray build` there (`workspaceParity.test.ts` checks Raycast's copies of
-Teak's tables against the workspace and fails outside the monorepo).
+`npx ray build` there; every test passes outside the monorepo.
+`scripts/raycast-parity.test.ts` checks Raycast's copies of Teak's tables
+against the workspace, and lives outside `apps/raycast` so the published
+extension never ships a test that needs the monorepo.

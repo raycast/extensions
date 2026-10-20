@@ -11,7 +11,7 @@ export const HIDDEN_CARDS_HINT =
 export const hiddenAfterTaggingMessage = (tag: string): string =>
   `Hidden. Search #${tag.trim().toLowerCase()} to see it.`;
 
-const isHiddenTag = (tag: string | undefined): boolean =>
+export const isHiddenTag = (tag: string | undefined): boolean =>
   HIDDEN_TAGS.some((hidden) => hidden === tag?.trim().toLowerCase());
 
 export const hasHiddenTag = (tags: readonly string[]): boolean =>

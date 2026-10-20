@@ -24,6 +24,28 @@ const makeCard = (id: string, isFavorited = false): RaycastCard => ({
 });
 
 describe("card list state helpers", () => {
+  test("a done or to-do list drops links that no longer match", () => {
+    const done = { ...makeCard("1"), completedAt: 5 };
+    const todo = makeCard("2");
+    expect(
+      upsertCard([todo], { ...todo, completedAt: 6 }, { doneView: "todo" }),
+    ).toEqual([]);
+    expect(
+      upsertCard([done], { ...done, completedAt: null }, { doneView: "done" }),
+    ).toEqual([]);
+    expect(upsertCard([done], done, { doneView: "done" })).toEqual([done]);
+  });
+
+  test("a card that comes back keeps its place in a shuffled list", () => {
+    const shuffled = [makeCard("3"), makeCard("9"), makeCard("1")];
+    const restored = upsertCard(
+      [shuffled[0], shuffled[2]].filter((card) => card !== undefined),
+      makeCard("9"),
+      { insertIndex: 1 },
+    );
+    expect(restored.map((card) => card.id)).toEqual(["3", "9", "1"]);
+  });
+
   test("supports optimistic favorite updates and rollback via upsert", () => {
     const cards = [makeCard("1", false)];
     const optimistic = upsertCard(cards, makeCard("1", true));

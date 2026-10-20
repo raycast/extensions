@@ -15,9 +15,11 @@ import { SetApiKeyAction } from "./SetApiKeyAction";
 import { SignOutAction } from "./SignOutAction";
 
 export interface CardListActionsProps {
+  canSaveSmartFolder: boolean;
   card: RaycastCard;
   filters: ParsedSearchFilters;
   inTrash: boolean;
+  keepNewestSort: boolean;
   onCardRemoved: (cardId: string) => void;
   onCardUpdated: (card: RaycastCard) => void;
   onFilterByTag: (tag: string) => void;
@@ -114,8 +116,10 @@ export function CardListActions(props: CardListActionsProps) {
         <CardOrganizeActions card={card} onCardUpdated={onCardUpdated} />
       )}
       <CardFilterActions
+        canSaveSmartFolder={props.canSaveSmartFolder}
         card={card}
         filters={props.filters}
+        keepNewestSort={props.keepNewestSort}
         onQueryChange={props.onQueryChange}
         onShuffle={props.onShuffle}
         removeTagFilterFromList={props.removeTagFilterFromList}

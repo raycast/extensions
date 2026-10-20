@@ -88,7 +88,7 @@ export default function RandomCardsCommand() {
   // Archiving or keeping a card moves on to the next one.
   const handleUpdated = useCallback(
     (next: RaycastCard) => {
-      if (next.isArchived || next.isDeleted) {
+      if (next.isArchived || next.isDeleted || next.isHidden) {
         handleRemoved(next.id);
         return;
       }

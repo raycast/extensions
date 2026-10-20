@@ -30,5 +30,7 @@ export default async function SaveFinderSelectionCommand() {
     return;
   }
 
-  await saveFilesWithFeedback(files, "raycast_finder");
+  await saveFilesWithFeedback(files, "raycast_finder", {
+    skipped: paths.length - files.length,
+  });
 }

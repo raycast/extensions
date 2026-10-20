@@ -85,12 +85,19 @@ export const parseDateFilter = (value: string): number | undefined => {
   if (!match) {
     return undefined;
   }
+  const year = Number(match[1]);
   const month = match[2] ? Number(match[2]) - 1 : 0;
   const day = match[3] ? Number(match[3]) : 1;
-  if (month > 11 || day < 1 || day > 31) {
+  const date = new Date(year, month, day);
+  // JavaScript rolls 2026-02-31 over to March, and month 00 back a year.
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month ||
+    date.getDate() !== day
+  ) {
     return undefined;
   }
-  return new Date(Number(match[1]), month, day).getTime();
+  return date.getTime();
 };
 
 const formatDateFilter = (timestamp: number): string => {
@@ -491,13 +498,9 @@ export const buildSearchText = (filters: SearchTextFilters): string => {
     tokens.push(`before:${formatDateFilter(filters.createdBefore)}`);
   }
 
-  // Newest is the default, except next to `like:`, which otherwise orders by
-  // how close each card is.
-  if (
-    filters.sort === "oldest" ||
-    filters.sort === "shuffle" ||
-    (filters.sort === "newest" && filters.like)
-  ) {
+  // Only written when it changes the order: applySortFilter drops Newest
+  // First where newest is already the default.
+  if (filters.sort) {
     tokens.push(`sort:${filters.sort}`);
   }
 
@@ -612,14 +615,20 @@ export const applyDoneFilter = (
   });
 };
 
+/**
+ * `keepNewest` is for lists the API otherwise orders by closeness (Find
+ * Similar), where Newest First has to be written out; so is `like:`.
+ */
 export const applySortFilter = (
   rawQuery: string,
   sort: RaycastSort,
+  options: { keepNewest?: boolean } = {},
 ): string => {
   const parsed = parseSearchFilters(rawQuery);
+  const newestIsDefault = !(options.keepNewest || parsed.like);
   return buildSearchText({
     ...parsed,
-    sort,
+    sort: sort === "newest" && newestIsDefault ? undefined : sort,
   });
 };
 

@@ -33,8 +33,10 @@ const capitalize = (value: string) =>
   value.charAt(0).toUpperCase() + value.slice(1);
 
 export interface CardFilterActionsProps {
+  canSaveSmartFolder: boolean;
   card: RaycastCard;
   filters: ParsedSearchFilters;
+  keepNewestSort: boolean;
   onQueryChange: (update: (previous: string) => string) => void;
   onShuffle: () => void;
   removeTagFilterFromList: boolean;
@@ -42,15 +44,19 @@ export interface CardFilterActionsProps {
 }
 
 export function CardFilterActions({
+  canSaveSmartFolder,
   card,
   filters,
+  keepNewestSort,
   onQueryChange,
   onShuffle,
   removeTagFilterFromList,
   showFavoritesFilter,
 }: CardFilterActionsProps) {
   const tagOptions = [...card.tags, ...card.aiTags].slice(0, 8);
-  const smartFolderQuery = toSmartFolderQuery(filters);
+  const smartFolderQuery = canSaveSmartFolder
+    ? toSmartFolderQuery(filters)
+    : undefined;
   return (
     <ActionPanel.Section title="Filters">
       {showFavoritesFilter ? (
@@ -137,7 +143,11 @@ export function CardFilterActions({
       <ActionPanel.Submenu icon={Icon.ArrowUp} title="Sort Results">
         <Action
           onAction={() =>
-            onQueryChange((previous) => applySortFilter(previous, "newest"))
+            onQueryChange((previous) =>
+              applySortFilter(previous, "newest", {
+                keepNewest: keepNewestSort,
+              }),
+            )
           }
           title="Newest First"
         />
