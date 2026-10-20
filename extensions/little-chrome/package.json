@@ -21,6 +21,20 @@
       "mode": "view"
     },
     {
+      "name": "open-url",
+      "title": "Open URL in Little Chrome",
+      "description": "Open a URL or search keyword in a small Chrome window without showing suggestions",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL or search",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
       "name": "copy-url",
       "title": "Copy Chrome URL",
       "description": "Copy the URL of the focused Chrome window (including Little Chrome windows)",

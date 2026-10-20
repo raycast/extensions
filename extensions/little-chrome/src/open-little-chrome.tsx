@@ -75,7 +75,7 @@ async function resizeNewWindow(before: Set<string>, url: string, width: number, 
     end tell`);
 }
 
-async function openLittleChrome(url: string): Promise<void> {
+export async function openLittleChrome(url: string): Promise<void> {
   const prefs = getPreferenceValues<Preferences>();
   const width = parseInt(prefs.width ?? "", 10) || 900;
   const height = parseInt(prefs.height ?? "", 10) || 700;
