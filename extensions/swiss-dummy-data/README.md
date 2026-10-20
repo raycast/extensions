@@ -56,29 +56,3 @@ The extension preferences control the history:
   The default is 20.
   An empty or invalid value falls back to 20.
   `0` hides the history.
-
-## Development
-
-Install the dependencies:
-
-```bash
-npm install
-```
-
-Run the extension in Raycast:
-
-```bash
-npm run dev
-```
-
-Run the tests:
-
-```bash
-npm test
-```
-
-Run the linter:
-
-```bash
-npm run lint
-```
