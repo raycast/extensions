@@ -203,7 +203,6 @@ export default function Command() {
 
     try {
       setLocalState(await deleteChromeProfile(profile, browser));
-      // Forget the deleted profile so a new profile reusing its directory isn't hidden.
       await updateHiddenDirectories(hiddenDirectories.filter((directory) => directory !== profile.directory));
       await showToast(Toast.Style.Success, `Deleted ${profile.name}`);
     } catch (error) {
