@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Ausca MCP listing] - {PR_MERGE_DATE}
+## [Update Ausca MCP listing] - 2026-10-20
 
 - Use Ausca's final square mark and clarify that the Raycast connection discovers offers while paid calls need an x402-capable client.
 
