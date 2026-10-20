@@ -10,6 +10,7 @@ import {
   Clipboard,
   LocalStorage,
   getPreferenceValues,
+  Cache,
 } from "@raycast/api";
 import React, { useState, useEffect, useRef } from "react";
 import { writeFile } from "fs/promises";
@@ -33,8 +34,27 @@ import {
 
 import { createSavedEmotesStore } from "./saved-emotes";
 
+const GRID_COLUMNS = { small: 8, medium: 6, large: 4 };
+type GridSize = keyof typeof GRID_COLUMNS;
+const cache = new Cache();
+
 export default function Command() {
-  const defaultSize = Number(getPreferenceValues<Preferences>().size);
+  const preferences = getPreferenceValues<Preferences>();
+  const defaultSize = Number(preferences.size);
+  // A Grid Size picked from the Action Panel is kept until the preference itself changes.
+  const [gridSize, setGridSize] = useState<GridSize>(() => {
+    const saved = JSON.parse(cache.get("gridSize") ?? "null");
+    return saved?.preference === preferences.gridSize
+      ? saved.value
+      : preferences.gridSize;
+  });
+  const changeGridSize = (value: GridSize) => {
+    setGridSize(value);
+    cache.set(
+      "gridSize",
+      JSON.stringify({ preference: preferences.gridSize, value }),
+    );
+  };
   const [searchText, setSearchText] = useState("");
   const [items, setItems] = useState<Emote[]>([]);
   const [favorites, setFavorites] = useState<Emote[]>([]);
@@ -369,6 +389,18 @@ export default function Command() {
             content={item.id}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           />
+          {isGridView && (
+            <ActionPanel.Submenu title="Grid Size" icon={Icon.AppWindowGrid3x3}>
+              {(["small", "medium", "large"] as const).map((value) => (
+                <Action
+                  key={value}
+                  title={value[0].toUpperCase() + value.slice(1)}
+                  icon={value === gridSize ? Icon.Checkmark : undefined}
+                  onAction={() => changeGridSize(value)}
+                />
+              ))}
+            </ActionPanel.Submenu>
+          )}
         </ActionPanel.Section>
       </ActionPanel>
     );
@@ -459,7 +491,8 @@ export default function Command() {
             {dropdownSections(Grid.Dropdown)}
           </Grid.Dropdown>
         }
-        columns={6}
+        columns={GRID_COLUMNS[gridSize]}
+        inset={gridSize === "small" ? Grid.Inset.Small : undefined}
         fit={Grid.Fit.Contain}
       >
         {!searchText &&

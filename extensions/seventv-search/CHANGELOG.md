@@ -1,5 +1,10 @@
 # Changelog
 
+## [Grid Size] - {PR_MERGE_DATE}
+
+- Add a Grid Size preference: Small (8 columns, the new default), Medium (6 columns, the previous layout) or Large (4 columns).
+- Add a Grid Size submenu to the Action Panel. The choice is remembered until the preference is changed.
+
 ## [Emote Size] - 2026-10-20
 
 - Add an Emote Size preference (1x to 4x, 2x by default) for pasted and copied emotes. When a size is missing, the closest smaller one is used.
