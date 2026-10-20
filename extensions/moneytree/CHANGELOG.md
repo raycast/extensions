@@ -1,6 +1,6 @@
 # Moneytree Changelog
 
-## [Category Budgets] - {PR_MERGE_DATE}
+## [Category Budgets] - 2026-10-20
 
 - Add List Budgets: see each category's spending against its limit with color-coded progress, a monthly total, sorting, and over-budget filters.
 - Add budget details with a chart of this month's spending, last month, and a 12-month average, alongside the month's transactions.
