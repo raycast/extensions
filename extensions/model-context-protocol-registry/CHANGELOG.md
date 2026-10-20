@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add New-Term Radar MCP Server] - {PR_MERGE_DATE}
+
+- Add New-Term Radar to the official registry: names of new AI models, products and repos from X, Hugging Face, GitHub and sitemaps, and the search terms behind them sized with Google Ads volume and Google Trends. Local stdio server `new-term-radar` from PyPI through `uvx --with mcp new-term-radar mcp`, with an AIsa API key set as `AISA_API_KEY` and absolute `RADAR_CONFIG` and `RADAR_STATE` paths.
+
 ## [Add NetActuate MCP Server] - 2026-10-20
 
 - Add NetActuate to the official registry: read-only answers from NetActuate's published network data (data center locations and specifications, compliance by site, internet exchanges, the sites nearest a market, products and published pricing), each linked to its netactuate.com page. Hosted Streamable HTTP server at https://netactuate.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.

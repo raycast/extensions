@@ -864,6 +864,23 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://netactuate.com/mcp",
   },
   {
+    name: "new-term-radar",
+    title: "New-Term Radar",
+    description:
+      "Names of new AI models, products and repos as they surface on X, Hugging Face, GitHub and sitemaps, and the search terms behind them sized with Google Ads volume and Google Trends, each marked prioritize, watch or skip. Three tools: recent leads (free), a keyword table for names you give it (about $0.05 a name plus $0.09 a call) and a full radar run (paid, minutes). Local stdio server `new-term-radar` (MIT) from PyPI through `uvx`; needs an AIsa API key set as `AISA_API_KEY` and a config.json copied from the repo's config.example.json, with `RADAR_CONFIG` and `RADAR_STATE` set to absolute paths.",
+    icon: "https://raw.githubusercontent.com/zhuyansen/new-term-radar/main/.claude-plugin/icon.png",
+    homepage: "https://github.com/zhuyansen/new-term-radar",
+    configuration: {
+      command: "uvx",
+      args: ["--with", "mcp", "new-term-radar", "mcp"],
+      env: {
+        AISA_API_KEY: "YOUR_API_KEY_HERE",
+        RADAR_CONFIG: "/absolute/path/to/config.json",
+        RADAR_STATE: "/absolute/path/to/state",
+      },
+    },
+  },
+  {
     name: "paddle",
     title: "Paddle",
     description:
