@@ -257,17 +257,24 @@ pub fn switch_tab(executable: &str, title: &str) -> Result<(), String> {
     )
 }
 
+fn modifiers_pressed() -> bool {
+    [VK_CONTROL, VK_SHIFT, VK_MENU, VK_LWIN, VK_RWIN]
+        .iter()
+        .any(|modifier| unsafe { GetAsyncKeyState(modifier.0 as i32) < 0 })
+}
+
 pub fn new_tab(executable: &str) -> Result<bool, String> {
     let Some(hwnd) = browser_windows(executable)?.into_iter().next() else {
         return Ok(false);
     };
+    if modifiers_pressed() {
+        return Ok(false);
+    }
     focus(hwnd)?;
+    if modifiers_pressed() {
+        return Ok(false);
+    }
     unsafe {
-        for modifier in [VK_CONTROL, VK_SHIFT, VK_MENU, VK_LWIN, VK_RWIN] {
-            if GetAsyncKeyState(modifier.0 as i32) < 0 {
-                return Err("Release modifier keys and try opening a new tab again.".into());
-            }
-        }
         if GetForegroundWindow() != hwnd {
             return Err("Brave lost focus before opening the new tab.".into());
         }
