@@ -52,7 +52,10 @@ export function buildDayHistory(
 
   for (const span of spans) {
     const cursor = startOfLocalDay(span.start);
-    const end = startOfLocalDay(span.end);
+    // The end is exclusive: a span that ends at midnight does not touch the next day.
+    const end = startOfLocalDay(
+      new Date(Math.max(span.start.getTime(), span.end.getTime() - 1)),
+    );
 
     while (cursor <= end) {
       const key = formatLocalDate(cursor);
