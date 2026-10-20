@@ -129,8 +129,8 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "ausca",
     title: "Ausca",
     description:
-      "Discover priced OCR, document analysis, transcription, browser and receive-only inbox services, then inspect an offer before invoking it. Public discovery needs no account or API key. Paid tools require an x402-capable client and USDC on Base; This Raycast connection covers offer discovery; paid calls require an x402-capable payment flow. Hosted remote Streamable HTTP MCP server.",
-    icon: "https://ausca.com/icon-512.png",
+      "Discover priced OCR, document analysis, transcription, browser and receive-only inbox services, then inspect an offer before invoking it. Public discovery needs no account or API key. This Raycast connection supports offer discovery. Paid calls require USDC on Base through an x402-capable client. Hosted remote Streamable HTTP MCP server.",
+    icon: "https://raw.githubusercontent.com/auscahq/ausca-plugin/main/assets/marketplace-icon.svg",
     homepage: "https://ausca.com/docs/mcp/",
     configuration: {
       command: "npx",
