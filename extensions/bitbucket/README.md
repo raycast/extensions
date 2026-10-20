@@ -48,11 +48,11 @@ Raycast extension to search repositories, check pipelines status, open recent Pu
 
 ## Notifications
 
-The **Notifications** menu bar command shows a count of unread notifications and lists them in the menu. Bitbucket Cloud has no notifications API, so they are derived from your open pull requests and from repository activity of the last 7 days:
+The **Notifications** menu bar command shows a count of unread notifications and lists them in the menu. Bitbucket Cloud has no notifications API, so they are derived from your pull requests and repository activity of the last 7 days:
 
-- Review requested from you on a pull request (current state of open pull requests, regardless of age)
-- Approvals and requested changes on your pull requests (current state of open pull requests, regardless of age)
-- Comments on your pull requests and `@` mentions of you
+- Review requested from you on a pull request
+- Approvals and requested changes on your pull requests
+- Comments on pull requests you authored or review, and `@` mentions of you there
 - Your pull requests that were merged or declined
 - Pipelines you started that failed
 

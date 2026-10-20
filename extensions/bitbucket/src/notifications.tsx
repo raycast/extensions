@@ -8,7 +8,13 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { getCurrentUserUuid, getMyOpenPullRequests, getNotificationEvents, NotificationEventKind } from "./queries";
+import {
+  getCurrentUserUuid,
+  getMyOpenPullRequests,
+  getNotificationEvents,
+  NOTIFICATION_LOOKBACK_DAYS,
+  NotificationEventKind,
+} from "./queries";
 import { API_TOKEN_URL, getAuthErrorHelp, REQUIRED_SCOPES } from "./helpers/authError";
 import { preferences } from "./helpers/preferences";
 
@@ -22,6 +28,8 @@ interface PullRequestNotification {
   url: string;
   createdOn?: string;
 }
+
+const MAX_MENU_ITEMS = 20;
 
 const DISMISSED_KEY = `notifications-dismissed:${preferences.workspace}:${preferences.email}`;
 
@@ -59,7 +67,10 @@ async function fetchNotifications(): Promise<NotificationsData> {
   ]);
 
   const notifications: PullRequestNotification[] = [];
+  const windowStart = Date.now() - NOTIFICATION_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
   for (const pr of pullRequests.values) {
+    // Old PRs (e.g. ones you were auto-added to as a default reviewer) would otherwise flood the menu.
+    if (pr.updated_on && Date.parse(pr.updated_on) < windowStart) continue;
     const repo = pr.destination.repository;
     const url = `https://bitbucket.org/${repo.full_name}/pull-requests/${pr.id}`;
     const base = `${repo.full_name}#${pr.id}`;
@@ -167,7 +178,7 @@ export default function Command() {
         <MenuBarExtra.Item title="No new notifications" />
       ) : (
         <MenuBarExtra.Section>
-          {unread.map((n) => (
+          {unread.slice(0, MAX_MENU_ITEMS).map((n) => (
             <MenuBarExtra.Item
               key={n.key}
               icon={KIND_ICON[n.kind]}
@@ -186,6 +197,9 @@ export default function Command() {
               }
             />
           ))}
+          {unread.length > MAX_MENU_ITEMS && (
+            <MenuBarExtra.Item title={`…and ${unread.length - MAX_MENU_ITEMS} more`} />
+          )}
         </MenuBarExtra.Section>
       )}
       {!error && data && data.failedRepoCount > 0 && (

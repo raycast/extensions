@@ -179,6 +179,7 @@ type OpenPullRequest = {
   state: "OPEN" | "MERGED" | "DECLINED" | "SUPERSEDED";
   comment_count: number;
   created_on?: string;
+  updated_on?: string;
   reviewers: Reviewer[];
   // Uuids of reviewers who were asked to review but haven't approved / requested changes yet.
   pendingReviewerUuids: string[];
@@ -374,6 +375,7 @@ async function listOpenPullRequestsForRepo(
           "values.title",
           "values.comment_count",
           "values.created_on",
+          "values.updated_on",
           "values.author.nickname",
           "values.author.uuid",
           "values.author.links.avatar.href",
@@ -411,6 +413,7 @@ async function listOpenPullRequestsForRepo(
         state: (pr.state as OpenPullRequest["state"]) ?? "OPEN",
         comment_count: (pr.comment_count as number) ?? 0,
         created_on: pr.created_on,
+        updated_on: pr.updated_on,
         reviewers: extractReviewers(pr.participants as Schema.Participant[] | undefined),
         pendingReviewerUuids: extractPendingReviewerUuids(pr.participants as Schema.Participant[] | undefined),
         author: {
@@ -615,6 +618,9 @@ async function apiGet<T>(url: string): Promise<T> {
         Authorization: `Basic ${Buffer.from(`${preferences.email}:${preferences.apiToken}`).toString("base64")}`,
         Accept: "application/json",
       },
+      // A dropped connection ("fetch failed") has no status; treat it like a transient 503 so it's retried.
+    }).catch((error: Error) => {
+      throw Object.assign(error, { status: 503 });
     });
     if (!response.ok) {
       throw Object.assign(new Error(`Bitbucket request failed: ${response.status}`), {
@@ -678,35 +684,53 @@ type PipelineRun = {
   target?: { ref_name?: string };
 };
 
-function listClosedPullRequests(repoPath: string, state: string, myUuid: string, since: string) {
+function listClosedPullRequests(repoPath: string, myUuid: string, since: string) {
+  // The `state` query param doesn't reliably restrict the list (open PRs leaked into the results),
+  // so the states are part of the query filter instead.
   return apiGetAll<ClosedPullRequest>(`${repoPath}/pullrequests`, {
-    state,
-    q: `author.uuid="${myUuid}" AND updated_on>${JSON.stringify(since)}`,
+    q: `(state="MERGED" OR state="DECLINED") AND author.uuid="${myUuid}" AND updated_on>${JSON.stringify(since)}`,
     sort: "-updated_on",
     pagelen: "50",
     fields: "values.id,values.title,values.state,values.updated_on,values.links.html.href,next",
   });
 }
 
-function listComments(repoPath: string, since: string) {
-  return apiGetAll<PullRequestComment>(`${repoPath}/pullrequests/comments`, {
-    q: `created_on>${JSON.stringify(since)}`,
-    sort: "-created_on",
-    pagelen: "50",
-    fields: [
-      "values.id",
-      "values.created_on",
-      "values.deleted",
-      "values.content.raw",
-      "values.user.uuid",
-      "values.user.nickname",
-      "values.pullrequest.id",
-      "values.pullrequest.title",
-      "values.pullrequest.author.uuid",
-      "values.links.html.href",
-      "next",
-    ].join(","),
-  });
+const MAX_COMMENT_PULL_REQUESTS = 20;
+
+// Bitbucket has no repo-wide comments endpoint, so comments are read per pull request: only
+// PRs you authored or review that changed within the window (a new comment bumps updated_on).
+async function listComments(repoPath: string, myUuid: string, since: string): Promise<PullRequestComment[]> {
+  const pullRequests = await apiGetAll<{ id: number; title: string; author?: { uuid?: string } }>(
+    `${repoPath}/pullrequests`,
+    {
+      q: `(author.uuid="${myUuid}" OR reviewers.uuid="${myUuid}") AND updated_on>${JSON.stringify(since)}`,
+      sort: "-updated_on",
+      pagelen: "50",
+      fields: "values.id,values.title,values.author.uuid,next",
+    },
+  );
+
+  const comments: PullRequestComment[] = [];
+  // Sequential on purpose: the repo scan is already concurrent and parallel bursts drop connections.
+  for (const pr of pullRequests.slice(0, MAX_COMMENT_PULL_REQUESTS)) {
+    const prComments = await apiGetAll<PullRequestComment>(`${repoPath}/pullrequests/${pr.id}/comments`, {
+      q: `created_on>${JSON.stringify(since)}`,
+      sort: "-created_on",
+      pagelen: "50",
+      fields: [
+        "values.id",
+        "values.created_on",
+        "values.deleted",
+        "values.content.raw",
+        "values.user.uuid",
+        "values.user.nickname",
+        "values.links.html.href",
+        "next",
+      ].join(","),
+    });
+    comments.push(...prComments.map((c) => ({ ...c, pullrequest: pr })));
+  }
+  return comments;
 }
 
 // The pipelines endpoint can't filter by date or creator, so page through the newest runs
@@ -732,14 +756,20 @@ async function listNotificationEventsForRepo(repo: RepoWithSlug, myUuid: string,
   const prUrl = (id: number) => `https://bitbucket.org/${preferences.workspace}/${repo.slug}/pull-requests/${id}`;
   const events: NotificationEvent[] = [];
 
-  // Sources fail independently (e.g. a token without pipeline scope shouldn't hide comments).
-  const [comments, merged, declined, pipelines] = await Promise.allSettled([
-    listComments(repoPath, since),
-    listClosedPullRequests(repoPath, "MERGED", myUuid, since),
-    listClosedPullRequests(repoPath, "DECLINED", myUuid, since),
-    listPipelines(repoPath, since),
-  ]);
-  const settled = [comments, merged, declined, pipelines];
+  // Sources fail independently (e.g. a token without pipeline scope shouldn't hide comments) and
+  // run one after another to keep the number of concurrent connections down.
+  const settle = async <T>(name: string, fn: () => Promise<T>): Promise<PromiseSettledResult<T>> => {
+    try {
+      return { status: "fulfilled", value: await fn() };
+    } catch (reason) {
+      console.error(`[bitbucket] ${name} failed for ${repo.slug}:`, (reason as Error)?.message);
+      return { status: "rejected", reason };
+    }
+  };
+  const comments = await settle("comments", () => listComments(repoPath, myUuid, since));
+  const closed = await settle("closed pull requests", () => listClosedPullRequests(repoPath, myUuid, since));
+  const pipelines = await settle("pipelines", () => listPipelines(repoPath, since));
+  const settled = [comments, closed, pipelines];
   const failedSources = settled.filter((r) => r.status === "rejected").length;
   if (failedSources === settled.length) {
     throw (comments as PromiseRejectedResult).reason;
@@ -762,9 +792,9 @@ async function listNotificationEventsForRepo(repo: RepoWithSlug, myUuid: string,
     }
   }
 
-  for (const result of [merged, declined]) {
-    if (result.status !== "fulfilled") continue;
-    for (const pr of result.value) {
+  if (closed.status === "fulfilled") {
+    for (const pr of closed.value) {
+      if (pr.state !== "MERGED" && pr.state !== "DECLINED") continue;
       events.push({
         id: `pr:${repo.slug}:${pr.id}:${pr.state}`,
         kind: pr.state === "MERGED" ? "pr_merged" : "pr_declined",
@@ -799,7 +829,11 @@ async function listNotificationEventsForRepo(repo: RepoWithSlug, myUuid: string,
 // (PR comments / mentions, your merged or declined PRs, your failed pipelines).
 // `failedRepoCount` counts repos where at least one source failed, so callers can flag
 // an incomplete refresh instead of showing it as "no notifications".
-export async function getNotificationEvents(lookbackDays = 7): Promise<ScanResult<NotificationEvent>> {
+export const NOTIFICATION_LOOKBACK_DAYS = 7;
+
+export async function getNotificationEvents(
+  lookbackDays = NOTIFICATION_LOOKBACK_DAYS,
+): Promise<ScanResult<NotificationEvent>> {
   const uuid = await getCurrentUserUuid();
   const since = new Date(Date.now() - lookbackDays * 24 * 60 * 60 * 1000).toISOString();
   let partialFailures = 0;
@@ -812,5 +846,7 @@ export async function getNotificationEvents(lookbackDays = 7): Promise<ScanResul
     return events;
   });
 
-  return { ...result, failedRepoCount: result.failedRepoCount + partialFailures };
+  // Offset-based pagination can return an item twice when activity shifts pages mid-scan.
+  const values = [...new Map(result.values.map((event) => [event.id, event])).values()];
+  return { values, failedRepoCount: result.failedRepoCount + partialFailures };
 }
