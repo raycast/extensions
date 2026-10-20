@@ -60,7 +60,7 @@ Instatus must also be checked before Statuspage: Instatus pages serve a Statuspa
 
 Statuspage uptime comes from the `/uptime_showcase` endpoint of the page. This endpoint also feeds the 90-day bars. If a page does not have it, the adapter makes the history from `/api/v2/incidents.json`.
 
-A Cloudflare bot challenge often protects Rootly pages, but the challenge skips the public `/api/v1/status.json` API. This API gives the overall status and the active incidents. It gives no components and no uptime.
+A Cloudflare bot challenge often protects Rootly pages, but the challenge skips the public `/api/v1/status.json` API. This API gives the overall status and the active incidents. It gives no components and no uptime. Only the page HTML has them, and the challenge blocks it. Thus, for Rootly pages such as [status.mistral.ai](https://status.mistral.ai), the detail view shows no components and an unknown uptime.
 
 Datadog Status Pages serve the full page state as `/config.json`: components and incidents. The adapter builds the 90-day bars and uptime from the incident timelines, as the page does. Only partial and major outages count as downtime. Detection tries Datadog before OnlineOrNot, because OnlineOrNot can still know a custom domain that moved away.
 
