@@ -9,6 +9,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getCurrentUserUuid, getMyOpenPullRequests, getNotificationEvents, NotificationEventKind } from "./queries";
+import { API_TOKEN_URL, getAuthErrorHelp, REQUIRED_SCOPES } from "./helpers/authError";
 import { preferences } from "./helpers/preferences";
 
 type Kind = "review_requested" | "changes_requested" | "approved" | NotificationEventKind;
@@ -122,6 +123,7 @@ export default function Command() {
   const { alwaysShow, showCount } = getPreferenceValues<Preferences.Notifications>();
   const { data, isLoading, error, mutate } = useCachedPromise(fetchNotifications);
 
+  const authHelp = error ? getAuthErrorHelp(error) : undefined;
   const dismissedSet = new Set(data?.dismissed ?? []);
   const unread = (data?.notifications ?? []).filter((n) => !dismissedSet.has(n.key));
 
@@ -145,7 +147,22 @@ export default function Command() {
       tooltip="Bitbucket Notifications"
     >
       {error ? (
-        <MenuBarExtra.Item title="Failed to load notifications" subtitle={error.message} icon={Icon.Warning} />
+        <MenuBarExtra.Section>
+          <MenuBarExtra.Item
+            title={authHelp?.title ?? "Failed to load notifications"}
+            subtitle={authHelp ? undefined : error.message}
+            icon={Icon.Warning}
+          />
+          {authHelp && <MenuBarExtra.Item title={authHelp.message} />}
+          {authHelp && (
+            <MenuBarExtra.Item
+              title="Create API Token"
+              icon={Icon.Key}
+              tooltip={`Required scopes: ${REQUIRED_SCOPES.join(", ")}`}
+              onAction={() => open(API_TOKEN_URL)}
+            />
+          )}
+        </MenuBarExtra.Section>
       ) : unread.length === 0 ? (
         <MenuBarExtra.Item title="No new notifications" />
       ) : (

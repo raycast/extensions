@@ -121,7 +121,7 @@
       "type": "password",
       "title": "API Token",
       "required": true,
-      "description": "Generate an API token at https://id.atlassian.com/manage-profile/security/api-tokens with read:* scopes, plus write:pullrequest:bitbucket for review actions (or see README for specific scopes)",
+      "description": "Create an API token at https://id.atlassian.com/manage-profile/security/api-tokens. Required scopes: read:user:bitbucket, read:workspace:bitbucket, read:repository:bitbucket, read:pullrequest:bitbucket, read:pipeline:bitbucket (or simply read:*), plus write:pullrequest:bitbucket for review actions.",
       "placeholder": "bXlzZWNyZXRhcGlrZXkqwd"
     }
   ],
