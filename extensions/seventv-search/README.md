@@ -31,6 +31,8 @@ Favorites and recent history remain in Raycast's local storage when this existin
 
 Open **Browse Channel Emotes** or **Browse Creator Emotes**. Search for a 7TV user, then select their avatar and press Enter. Channel browsing opens their active emote set and preserves channel aliases. Creator browsing shows their public uploads. Search within either collection, scroll for more results, and use the existing paste, size, and favorite actions.
 
+Each command remembers the last 20 users you opened. Clear the search to see **Recent Users**. Use **Remove from Recent Users** or **Clear Recent Users** to remove entries. Channel and creator history are stored separately on this device. Typing a search alone does not save it.
+
 These two commands currently support 7TV only. Private and unlisted emotes are excluded. Channel browsing shows a loaded count because the API total can include excluded entries. Creator browsing loads upload metadata once, then requests image details in small batches for each page. Use **Reload Results** to refresh the creator's upload list.
 
 **View 7TV Usage Status** shows the API's personal-set approval status for these emotes. This status concerns adding emotes to personal sets on 7TV. It does not establish copyright or permission to reuse an image elsewhere. An emote without approval is not necessarily denied. The status does not block copying or pasting.
