@@ -28,17 +28,15 @@ function commitOf(input: Input) {
 
 // The images' hashes as the user saw them in the confirmation, so the tool can refuse to post a file that
 // changed in the meantime. Raycast runs the confirmation and the tool in separate processes, so they go
-// through LocalStorage. Each distinct commit gets its own record, and a canceled confirmation's expires.
+// through LocalStorage. Each distinct commit gets its own record, which expires after ten minutes.
 const APPROVAL_TTL_MS = 10 * 60 * 1000;
 const approvalKey = (input: Input) =>
   `approval:${createHash("sha256")
     .update(JSON.stringify(commitOf(input)))
     .digest("hex")}`;
 
-async function takeApproval(input: Input): Promise<string[] | undefined> {
-  const key = approvalKey(input);
-  const stored = await LocalStorage.getItem<string>(key);
-  await LocalStorage.removeItem(key);
+// The hashes in a stored approval, or undefined if it is missing, unreadable or expired.
+function liveHashes(stored: string | undefined): string[] | undefined {
   try {
     const approval = JSON.parse(stored ?? "") as { at: number; hashes: string[] };
     return Date.now() - approval.at < APPROVAL_TTL_MS ? approval.hashes : undefined;
@@ -47,9 +45,25 @@ async function takeApproval(input: Input): Promise<string[] | undefined> {
   }
 }
 
+async function takeApproval(input: Input): Promise<string[] | undefined> {
+  const key = approvalKey(input);
+  const stored = await LocalStorage.getItem<string>(key);
+  await LocalStorage.removeItem(key);
+  return liveHashes(stored);
+}
+
+// Canceled confirmations never reach the tool, so their records are removed here once they expire.
+async function pruneApprovals() {
+  const items = await LocalStorage.allItems<Record<string, string>>();
+  for (const [key, value] of Object.entries(items)) {
+    if (key.startsWith("approval:") && !liveHashes(value)) await LocalStorage.removeItem(key);
+  }
+}
+
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   // Refuse before asking: there is no point confirming a commit /dev/null would reject.
   const { message, images } = await prepareCommit(commitOf(input));
+  await pruneApprovals();
   await LocalStorage.setItem(
     approvalKey(input),
     JSON.stringify({ at: Date.now(), hashes: images.map((image) => image.sha256) }),
