@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add xTiles MCP Server] - 2026-10-20
+## [Add xTiles MCP Server] - {PR_MERGE_DATE}
 
 - Add xTiles to the official registry: turn AI chats into xTiles projects, notes and tasks, and pull any project back into the chat with its current state. Hosted Streamable HTTP server at https://mcp.xtiles.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
