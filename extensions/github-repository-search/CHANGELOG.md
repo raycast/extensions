@@ -1,5 +1,10 @@
 # Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Add support for Raycast on Windows, including platform-appropriate keyboard shortcuts.
+- Align action labels with Raycast's title-case conventions.
+
 ## [Bug fixes and stability] - 2026-03-26
 
 - Fix typo in toast: "visted" → "visited"

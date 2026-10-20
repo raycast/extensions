@@ -6,6 +6,7 @@ import {
   Color,
   Detail,
   Icon,
+  Keyboard,
   List,
   Toast,
   environment,
@@ -123,7 +124,7 @@ function Actions(props: {
         <OpenInWebIDEAction repository={props.repository} onOpen={() => props.onVisit(props.repository)} />
         <Action.OpenInBrowser
           icon="vscode-action-icon.png"
-          title="Clone in VSCode"
+          title="Clone in VS Code"
           url={`vscode://vscode.git/clone?url=${props.repository.url}`}
         />
       </ActionPanel.Section>
@@ -132,7 +133,7 @@ function Actions(props: {
           icon={{ source: "pull-request.png", tintColor: Color.PrimaryText }}
           title="Open Pull Requests"
           url={`${props.repository.url}/pulls`}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.OpenWith}
           onOpen={() => props.onVisit(props.repository)}
         />
         {props.repository.hasIssuesEnabled && (
@@ -140,7 +141,10 @@ function Actions(props: {
             icon={{ source: "issue.png", tintColor: Color.PrimaryText }}
             title="Open Issues"
             url={`${props.repository.url}/issues`}
-            shortcut={{ modifiers: ["cmd"], key: "i" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "i" },
+              Windows: { modifiers: ["ctrl"], key: "i" },
+            }}
             onOpen={() => props.onVisit(props.repository)}
           />
         )}
@@ -149,7 +153,10 @@ function Actions(props: {
             icon={{ source: "wiki.png", tintColor: Color.PrimaryText }}
             title="Open Wiki"
             url={`${props.repository.url}/wiki`}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "w" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "w" },
+            }}
             onOpen={() => props.onVisit(props.repository)}
           />
         )}
@@ -158,7 +165,10 @@ function Actions(props: {
             icon={{ source: "project.png", tintColor: Color.PrimaryText }}
             title="Open Projects"
             url={`${props.repository.url}/projects`}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "p" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+            }}
             onOpen={() => props.onVisit(props.repository)}
           />
         )}
@@ -166,7 +176,7 @@ function Actions(props: {
           <Action
             icon={Icon.List}
             title="Browse Releases"
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={() =>
               push(<ReleaseView repository={props.repository} token={props.token} baseUrl={props.baseUrl} />)
             }
@@ -177,17 +187,23 @@ function Actions(props: {
         <Action.CopyToClipboard
           title="Copy Repository URL"
           content={props.repository.url}
-          shortcut={{ modifiers: ["cmd"], key: "." }}
+          shortcut={Keyboard.Shortcut.Common.Pin}
         />
         <Action.CopyToClipboard
           title="Copy Name with Owner"
           content={props.repository.nameWithOwner}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "." },
+            Windows: { modifiers: ["ctrl", "shift"], key: "." },
+          }}
         />
         <Action.CopyToClipboard
           title="Copy Clone Command"
           content={`git clone ${props.repository.url}`}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "," },
+            Windows: { modifiers: ["ctrl", "shift"], key: "," },
+          }}
         />
       </ActionPanel.Section>
       <DevelopmentActionSection />
@@ -250,7 +266,7 @@ function ReleaseView(props: { repository: Repository; token: string; baseUrl?: s
                 {release.description && (
                   <Action.Push
                     title="View Release Detail"
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     icon={Icon.Eye}
                     target={
                       <Detail

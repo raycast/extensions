@@ -41,7 +41,7 @@ export const WebIdes = [
 export function OpenInWebIDEAction(props: { repository: Repository; onOpen: () => void }) {
   const { repository, onOpen } = props;
   return (
-    <ActionPanel.Submenu icon={Icon.Globe} title="Open In">
+    <ActionPanel.Submenu icon={Icon.Globe} title="Open in">
       {WebIdes.map((ide) => (
         <Action.OpenInBrowser
           title={ide.title}
