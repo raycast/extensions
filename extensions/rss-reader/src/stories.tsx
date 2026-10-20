@@ -20,7 +20,7 @@ import React from "react";
 import Parser from "rss-parser";
 import { type Feed, getFeeds } from "./feeds";
 import AddFeedForm from "./subscription-form";
-import { getStoryGuid } from "./utils";
+import { getStoryGuid, getStoryLastRead } from "./utils";
 
 const parser = new Parser({});
 const preference = getPreferenceValues();
@@ -172,8 +172,6 @@ async function getStories(feeds: Feed[]) {
   const feedLastViewed: FeedLastViewed = JSON.parse(feedLastViewedString ?? "{}");
 
   const storyItems: Story[] = [];
-  const storyLastViewedString = await LocalStorage.getItem<string>("storyLastRead");
-  const storyLastRead: StoryLastRead = JSON.parse(storyLastViewedString ?? "{}");
 
   for (const feedItem of feeds) {
     const lastViewed = feedLastViewed[feedItem.url] || 0;
@@ -181,9 +179,7 @@ async function getStories(feeds: Feed[]) {
       const feed = await parser.parseURL(feedItem.url);
       const stories: Story[] = [];
       feed.items.forEach((item) => {
-        const story = ItemToStory(item, feedItem, lastViewed);
-        const lastRead = storyLastRead[story.guid] || 0;
-        stories.push({ ...story, lastRead });
+        stories.push(ItemToStory(item, feedItem, lastViewed));
       });
       feedLastViewed[feedItem.url] = stories.at(0)?.date || lastViewed;
       storyItems.push(...stories);
@@ -198,7 +194,14 @@ async function getStories(feeds: Feed[]) {
   }
   storyItems.sort((a, b) => b.date - a.date);
   await LocalStorage.setItem("feedLastViewed", JSON.stringify(feedLastViewed));
-  return storyItems;
+
+  // Read this once the feeds have loaded, so stories marked as read while they were loading keep their mark.
+  const storyLastViewedString = await LocalStorage.getItem<string>("storyLastRead");
+  const storyLastRead: StoryLastRead = JSON.parse(storyLastViewedString ?? "{}");
+  return storyItems.map((story) => ({
+    ...story,
+    lastRead: getStoryLastRead(storyLastRead, story.guid, story.link),
+  }));
 }
 
 export function StoriesList(props: { feeds?: Feed[] }) {
