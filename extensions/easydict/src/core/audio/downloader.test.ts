@@ -24,20 +24,20 @@ vi.mock("@/consts", () => ({
   EASYDICT_TMP_DIR: testDoubles.tempDir,
 }));
 
-vi.mock("@/utils/crypto", () => ({
+vi.mock("@/shared/crypto", () => ({
   md5: () => "audio-hash",
 }));
 
-vi.mock("@/utils/errors", () => ({
+vi.mock("@/shared/errors", () => ({
   normalizeError: (error: unknown) =>
     error instanceof Error ? { name: error.name, message: error.message } : { name: "Error", message: String(error) },
 }));
 
-vi.mock("@/utils/http", () => ({
+vi.mock("@/shared/http", () => ({
   timedFetch: testDoubles.timedFetch,
 }));
 
-vi.mock("@/utils/logger", () => ({
+vi.mock("@/shared/logger", () => ({
   logError: vi.fn(),
   logTrace: vi.fn(),
 }));

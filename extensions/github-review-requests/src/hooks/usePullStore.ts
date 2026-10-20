@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { PullRequestShort } from "../types";
+import { MenuPullRequest, PullRequestShort } from "../types";
 import {
   loadAllPullsFromStore,
   loadAllPullsFromRemote,
@@ -11,7 +11,7 @@ import { getTimestampISOInSeconds } from "../util";
 const usePullStore = () => {
   const [isPullStoreLoading, setIsPullStoreLoading] = useState(true);
   const [updatedPulls, setUpdatedPulls] = useState<PullRequestShort[]>([]);
-  const [recentlyVisitedPulls, setRecentlyVisitedPulls] = useState<PullRequestShort[]>([]);
+  const [recentlyVisitedPulls, setRecentlyVisitedPulls] = useState<MenuPullRequest[]>([]);
 
   useEffect(() => {
     loadAllPullsFromStore()
@@ -28,11 +28,11 @@ const usePullStore = () => {
     updatedPulls,
     recentlyVisitedPulls,
 
-    visitPull: (pull: PullRequestShort) =>
+    visitPull: (pull: MenuPullRequest) =>
       Promise.resolve()
         .then(() => getTimestampISOInSeconds())
-        .then(() => [pull, ...recentlyVisitedPulls.filter(pr => pr.id !== pull.id).slice(0, 9)] as PullRequestShort[])
-        .then((recentlyVisitedPulls: PullRequestShort[]) => {
+        .then(() => [pull, ...recentlyVisitedPulls.filter(pr => pr.id !== pull.id).slice(0, 9)] as MenuPullRequest[])
+        .then((recentlyVisitedPulls: MenuPullRequest[]) => {
           setRecentlyVisitedPulls(recentlyVisitedPulls);
 
           return saveRecentVisitedPullsToStore(recentlyVisitedPulls);
@@ -43,7 +43,7 @@ const usePullStore = () => {
 
       return saveUpdatedPullsToStore(pulls);
     },
-    fetchPulls: (options: string[]) => loadAllPullsFromRemote(options),
+    fetchPulls: (options: string[], watchedOptions?: string[]) => loadAllPullsFromRemote(options, watchedOptions),
   };
 };
 

@@ -1,5 +1,21 @@
 # Random Data Generator Changelog
 
+## [Custom Items] - 2026-10-16
+
+- Added custom items: define your own generator with a Faker template, e.g. `{{number.int({"min":5,"max":10})}}` or `{{person.firstName}} {{person.lastName}} <{{internet.email}}>`
+- Describe the data you want in plain language and let Raycast AI write the template (requires Raycast AI)
+- Custom items can be pinned, edited, deleted and used in copy/paste quicklinks like built-in items
+
+## [Added contributor] - 2026-09-07
+
+## [Fix Quicklinks and Locale Switching] - 2026-09-06
+
+- Fixed quicklinks failing with a missing arguments error, by passing the quicklink data as launch context
+- Fixed the locale dropdown reverting to English instead of keeping the selection
+- Regenerated the listed values when the locale changes, so the command no longer needs relaunching
+
+Quicklinks saved before this update need to be recreated.
+
 ## [Fix] - 2026-01-13
 
 - Added shortcuts to the Windows version

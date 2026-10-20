@@ -3,11 +3,12 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
-import { getBoundedPreferenceNumber } from "./components/Menu";
+import { getSearchPageSize } from "./components/Menu";
 import RepositoryListEmptyView from "./components/RepositoryListEmptyView";
 import RepositoryListItem from "./components/RepositoryListItem";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
 import { ExtendedRepositoryFieldsFragment } from "./generated/graphql";
+import { compactFragmentNodes, uniqueById } from "./helpers";
 import { REPO_DEFAULT_SORT_QUERY, REPO_SORT_TYPES_TO_QUERIES, useHistory } from "./helpers/repository";
 import { withGitHubClient } from "./helpers/withGithubClient";
 
@@ -23,12 +24,12 @@ function SearchRepositories() {
   });
   const sortTypesData = REPO_SORT_TYPES_TO_QUERIES;
 
-  const { data: history, visitRepository } = useHistory(searchText, searchFilter);
+  const { data: history, visitRepository, updateRepository, removeRepository } = useHistory(searchText, searchFilter);
   const query = useMemo(
     () =>
       `${searchFilter} ${searchText} ${sortQuery} fork:${preferences.includeForks} ${
         preferences.includeArchived ? "" : "archived:false"
-      }`,
+      }`.toLowerCase(),
     [searchText, searchFilter, sortQuery, preferences.includeForks, preferences.includeArchived],
   );
 
@@ -39,36 +40,45 @@ function SearchRepositories() {
     mutate: mutateList,
     pagination,
   } = useCachedPromise(
-    (query: string) => async (options: { page: number; cursor?: string }) => {
+    (query: string | null) => async (options: { page: number; cursor?: string }) => {
+      if (!query) return { data: [] as ExtendedRepositoryFieldsFragment[], hasMore: false };
+
       const result = await github.searchRepositories({
         query,
-        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 25 }),
+        numberOfItems: getSearchPageSize(),
         after: options.page > 0 ? options.cursor : undefined,
       });
       return {
-        data: result.search.nodes?.map((node) => node as ExtendedRepositoryFieldsFragment) ?? [],
+        data: compactFragmentNodes<ExtendedRepositoryFieldsFragment>(result.search.nodes),
         hasMore: result.search.pageInfo.hasNextPage,
         cursor: result.search.pageInfo.endCursor ?? undefined,
       };
     },
-    [query],
-    { keepPreviousData: true },
+    [searchText.trim() || searchFilter?.trim() ? query : null],
+    { keepPreviousData: false },
   );
 
+  const repositories = useMemo(() => uniqueById(data ?? []), [data]);
+  const repositoryIds = useMemo(() => new Set(repositories.map((repository) => repository.id)), [repositories]);
+
   useEffect(
-    () => history.forEach((repository) => data?.find((r) => r.id === repository.id && visitRepository(r))),
-    [data],
+    () => history.forEach((repository) => repositories.find((r) => r.id === repository.id && visitRepository(r))),
+    [repositories],
   );
 
   const validHistory = useMemo(
-    () => history.filter((repository) => data?.find((r) => r.id === repository.id)),
-    [data, history],
+    () => history.filter((repository) => repositoryIds.has(repository.id)),
+    [history, repositoryIds],
   );
 
+  const historyIds = useMemo(() => new Set(validHistory.map((repository) => repository.id)), [validHistory]);
+
   const foundRepositories = useMemo(
-    () => data?.filter((repository) => !validHistory.find((r) => r.id === repository.id)),
-    [data, validHistory],
+    () => repositories.filter((repository) => !historyIds.has(repository.id)),
+    [historyIds, repositories],
   );
+
+  const visitedRepositories = searchText.trim() && repositories.length > 0 ? validHistory : history;
 
   return (
     <List
@@ -76,24 +86,31 @@ function SearchRepositories() {
       searchBarPlaceholder="Search in public and private repositories"
       onSearchTextChange={setSearchText}
       searchBarAccessory={<SearchRepositoryDropdown onFilterChange={setSearchFilter} />}
-      throttle
+      throttle={!preferences.disableThrottle}
       pagination={pagination}
     >
-      <List.Section title="Visited Repositories" subtitle={validHistory ? String(validHistory.length) : undefined}>
-        {validHistory.map((repository) => (
-          <RepositoryListItem
-            key={repository.id}
-            repository={repository}
-            onVisit={visitRepository}
-            mutateList={mutateList}
-            sortQuery={sortQuery}
-            setSortQuery={setSortQuery}
-            sortTypesData={sortTypesData}
-          />
-        ))}
-      </List.Section>
+      {visitedRepositories.length > 0 ? (
+        <List.Section
+          title={searchText.trim() ? "Visited Repositories" : "Recent Visited Repositories"}
+          subtitle={String(visitedRepositories.length)}
+        >
+          {visitedRepositories.map((repository) => (
+            <RepositoryListItem
+              key={repository.id}
+              repository={repository}
+              onVisit={visitRepository}
+              onUpdate={updateRepository}
+              onRemove={removeRepository}
+              mutateList={mutateList}
+              sortQuery={sortQuery}
+              setSortQuery={setSortQuery}
+              sortTypesData={sortTypesData}
+            />
+          ))}
+        </List.Section>
+      ) : null}
 
-      {foundRepositories ? (
+      {data ? (
         <List.Section
           title={searchText ? "Search Results" : "Found Repositories"}
           subtitle={`${foundRepositories.length}`}
@@ -103,6 +120,7 @@ function SearchRepositories() {
               key={repository.id}
               repository={repository}
               onVisit={visitRepository}
+              onUpdate={updateRepository}
               mutateList={mutateList}
               sortQuery={sortQuery}
               setSortQuery={setSortQuery}

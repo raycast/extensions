@@ -35,7 +35,7 @@ export default function Command() {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    showToast({
+    const loadingToast = showToast({
       style: Toast.Style.Animated,
       title: "Getting configurations",
     });
@@ -47,7 +47,7 @@ export default function Command() {
         setError(new Error(error));
       })
       .finally(() => {
-        Toast.prototype.hide();
+        loadingToast.then((toast) => toast.hide());
         setIsLoading(false);
       });
   }, []);

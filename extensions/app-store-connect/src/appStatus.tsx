@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useAppStoreConnectApi } from "./Hooks/useAppStoreConnect";
 import { appsWithVersionsResponseSchema, AppStatusVersion, AppWithVersions } from "./Model/schemas";
 import SignIn from "./Components/SignIn";
+import { appUrl } from "./Utils/appStoreConnect";
 import AppStatusListItem from "./Components/AppStatusListItem";
 
 export interface ProcessedAppVersion {
@@ -30,14 +31,29 @@ export interface PendingRelease {
 export type StatusFilter = "all" | string;
 export type PlatformFilter = "all" | "IOS" | "MAC_OS" | "TV_OS" | "VISION_OS";
 
-export const STATUS_FILTERS: { value: StatusFilter; label: string; icon: Icon }[] = [
+/**
+ * Status carries meaning through icon and tint rather than an emoji in the label:
+ * every row already renders an icon, so an emoji doubled it — and emoji ignore the
+ * user's theme and accessibility settings.
+ */
+export const STATUS_FILTERS: { value: StatusFilter; label: string; icon: Icon; tintColor?: Color }[] = [
   { value: "all", label: "All Apps", icon: Icon.List },
-  { value: "READY_FOR_SALE", label: "✅ Ready for Sale", icon: Icon.CheckCircle },
-  { value: "IN_REVIEW", label: "👀 In Review", icon: Icon.Eye },
-  { value: "WAITING_FOR_REVIEW", label: "⏳ Waiting for Review", icon: Icon.Clock },
-  { value: "PENDING_DEVELOPER_RELEASE", label: "🚀 Pending Developer Release", icon: Icon.Clock },
-  { value: "PREPARE_FOR_SUBMISSION", label: "✏️ Prepare for Submission", icon: Icon.Pencil },
-  { value: "REJECTED", label: "❌ Rejected", icon: Icon.XMarkCircle },
+  { value: "READY_FOR_SALE", label: "Ready for Sale", icon: Icon.CheckCircle, tintColor: Color.Green },
+  { value: "IN_REVIEW", label: "In Review", icon: Icon.Eye, tintColor: Color.Blue },
+  { value: "WAITING_FOR_REVIEW", label: "Waiting for Review", icon: Icon.Hourglass, tintColor: Color.Orange },
+  {
+    value: "PENDING_DEVELOPER_RELEASE",
+    label: "Pending Developer Release",
+    icon: Icon.Rocket,
+    tintColor: Color.Purple,
+  },
+  {
+    value: "PREPARE_FOR_SUBMISSION",
+    label: "Prepare for Submission",
+    icon: Icon.Pencil,
+    tintColor: Color.SecondaryText,
+  },
+  { value: "REJECTED", label: "Rejected", icon: Icon.XMarkCircle, tintColor: Color.Red },
 ];
 
 const PLATFORM_FILTERS: { value: PlatformFilter; label: string; icon: Icon }[] = [
@@ -45,7 +61,8 @@ const PLATFORM_FILTERS: { value: PlatformFilter; label: string; icon: Icon }[] =
   { value: "IOS", label: "iOS", icon: Icon.Mobile },
   { value: "MAC_OS", label: "macOS", icon: Icon.Monitor },
   { value: "TV_OS", label: "tvOS", icon: Icon.Desktop },
-  { value: "VISION_OS", label: "visionOS", icon: Icon.Eye },
+  // Glasses, not Eye — Eye already means "In Review" in the status filter.
+  { value: "VISION_OS", label: "visionOS", icon: Icon.Glasses },
 ];
 
 export function selectVersionForPlatform(
@@ -61,7 +78,7 @@ export default function Command() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>("all");
 
-  const { data, isLoading } = useAppStoreConnectApi(
+  const { data, isLoading, isTruncated } = useAppStoreConnectApi(
     path,
     (response) => {
       const parsed = appsWithVersionsResponseSchema.safeParse(response);
@@ -112,7 +129,9 @@ export default function Command() {
     >
       <List
         isLoading={isLoading}
-        searchBarPlaceholder={searchPlaceholder}
+        // Says so when the page ceiling cut the set short: the filters and counts below
+        // are computed over what loaded, so presenting it as complete would mislead.
+        searchBarPlaceholder={isTruncated ? `${searchPlaceholder} (showing first ${apps.length})` : searchPlaceholder}
         searchBarAccessory={
           <List.Dropdown
             tooltip="Filter by Platform"
@@ -189,7 +208,7 @@ function processApps(apps: AppWithVersions[], includedVersions: AppStatusVersion
       name: app.attributes.name,
       bundleId: app.attributes.bundleId,
       versions,
-      appStoreConnectUrl: `https://appstoreconnect.apple.com/apps/${app.id}`,
+      appStoreConnectUrl: appUrl(app.id),
     };
   });
 }

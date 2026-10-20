@@ -1,5 +1,13 @@
 # Mail Changelog
 
+## [Skip Background Refresh When Mail Is Closed] - 2026-10-13
+
+- The background Refresh Mail command no longer opens Mail when it is closed, so it no longer switches to Mail's assigned desktop ([#32202](https://github.com/raycast/extensions/issues/32202)). Running Refresh Mail manually still opens Mail.
+
+## [Fix] - 2026-10-07
+
+- Refresh mailboxes sequentially to prevent spawning hundreds of concurrent osascript processes
+
 ## [Fix] - 2026-06-15
 
 - Fix sending composed messages when the subject or other message fields contain double quotes.

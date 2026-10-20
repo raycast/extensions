@@ -1,8 +1,7 @@
 import groupBy from "lodash/groupBy";
 import type { AggregatedPosition, Position } from "./types";
 import { ellipsis } from "./typography";
-import { LocalStorage, showToast, Toast } from "@raycast/api";
-import BigNumber from "bignumber.js";
+import { LocalStorage } from "@raycast/api";
 import { ADDRESSES_KEY, MENU_BAR_ADDRESS_KEY } from "./constants";
 import type { NormalizedAddress } from "./NormalizedAddress";
 
@@ -34,34 +33,23 @@ export function getFullPositionsValue(positions?: Position[] | null) {
 }
 
 export function getFullPositionsBalance(positions?: Position[] | null) {
-  const zero = new BigNumber(0);
   return positions
     ? positions.reduce(
-        (acc, position) =>
-          position.type === "loan" ? acc.minus(getPositionBalance(position)) : acc.plus(getPositionBalance(position)),
-        zero,
+        (acc, position) => (position.type === "loan" ? acc - position.quantity : acc + position.quantity),
+        0,
       )
-    : zero;
+    : 0;
 }
 
 function createAggregatedPosition(positions: Position[]): AggregatedPosition {
   return {
-    asset: positions[0].asset,
+    ...positions[0],
     id: positions[0].asset.id,
-    name: positions[0].name,
-    chain: positions[0].chain,
-    apy: null,
-    dapp: null,
-    protocol: null,
-    isDisplayable: true,
-    includedInChart: false,
-    parentId: null,
-    type: "asset",
-    chains: [...new Set(positions.map(({ chain }) => chain))],
-    value: getFullPositionsValue(positions).toString(),
-    normalizedQuantity: getFullPositionsBalance(positions).toFixed(),
-    // tokens can have different decimals across different chains
-    quantity: "0",
+    dappId: null,
+    type: "wallet",
+    chainIds: [...new Set(positions.map(({ chainId }) => chainId))],
+    value: getFullPositionsValue(positions),
+    quantity: getFullPositionsBalance(positions),
   };
 }
 
@@ -70,21 +58,14 @@ export function groupPositionsByToken(positions: Position[]): AggregatedPosition
   return Object.values(aggregatedPositions).map((assetPositions) => createAggregatedPosition(assetPositions));
 }
 
-function toCommon(value: string | number, decimals?: number): BigNumber {
-  return new BigNumber(value).shiftedBy(0 - (decimals || 0));
-}
-
 export function getPositionBalance(position: Position | AggregatedPosition) {
-  if ("normalizedQuantity" in position) {
-    return new BigNumber(position.normalizedQuantity);
-  }
-  return toCommon(position.quantity || 0, position.asset.implementations?.[position.chain.id]?.decimals);
+  return position.quantity;
 }
 
 export const DEFAULT_DAPP_ID = "wallet";
 
 export function groupPositionsByDapp(positions?: Position[]) {
-  return groupBy<Position>(positions || [], (position) => position.dapp?.id || DEFAULT_DAPP_ID);
+  return groupBy<Position>(positions || [], (position) => position.dappId || DEFAULT_DAPP_ID);
 }
 
 export function sortPositionGroupsByTotalValue(positionGroups?: Record<string, Position[] | undefined>) {
@@ -158,12 +139,4 @@ export function getSignificantValue(value: number, powShift = 0): [number, strin
 export function formatWithSignificantValue(value: number) {
   const [significantValue, symbol] = getSignificantValue(value);
   return `${Math.floor(significantValue)}${symbol}`;
-}
-
-export async function handleError({ error, title }: { error: unknown; title: string }) {
-  return showToast({
-    style: Toast.Style.Failure,
-    title: title,
-    message: error instanceof Error ? error.message : "",
-  });
 }

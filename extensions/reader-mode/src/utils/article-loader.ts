@@ -21,15 +21,18 @@
  * @see src/hooks/useArticleReader.ts for the React state management layer
  */
 
-import { urlLog, paywallLog } from "./logger";
-import { fetchHtml } from "./fetcher";
-import { parseArticle } from "./readability";
-import { formatArticle } from "./markdown";
-import { isBrowserExtensionAvailable, tryGetContentFromOpenTab } from "./browser-extension";
-import { tryBypassPaywall, createArchiveSource, ArchiveSource } from "./paywall-hopper";
-import { detectPaywall } from "./paywall-detector";
-import { BrowserTab } from "../types/browser";
+import { parseHTML } from "linkedom";
 import { ArticleState } from "../types/article";
+import { BrowserTab } from "../types/browser";
+import { isBrowserExtensionAvailable, tryGetContentFromOpenTab } from "./browser-extension";
+import { fetchHtml } from "./fetcher";
+import { paywallLog, urlLog } from "./logger";
+import { dedupeArticleImage, formatArticle } from "./markdown";
+import { findMarkdownAlternate, isMarkdownResponse, pageHead, parseMarkdownArticle } from "./markdown-source";
+import { MetadataExtractor } from "./metadata-extractor";
+import { detectPaywall } from "./paywall-detector";
+import { createArchiveSource, PaywallHopperResult, tryBypassPaywall } from "./paywall-hopper";
+import { ArticleContent, parseArticle } from "./readability";
 
 export type LoadArticleResult =
   | { status: "success"; article: ArticleState }
@@ -53,6 +56,217 @@ interface LoadArticleOptions {
 }
 
 /**
+ * Parses a bypass candidate and returns its article only if usable, for `tryBypassPaywall`.
+ *
+ * Two gates, cheapest first:
+ *
+ * 1. `minTextLength` — the soft-paywall case: the candidate must extract meaningfully more
+ *    text than the preview we already have, or it isn't worth swapping in. A cheap length
+ *    check on the raw HTML rejects hopeless candidates before paying for a parse — extracted
+ *    text is a subset of the HTML, so HTML no longer than the bar can't possibly clear it. For
+ *    the hard-block and direct paths there is no preview to beat, so `minTextLength` is 0.
+ *
+ * 2. Paywall re-detection. A bypass returning HTTP 200 is not a win: sites answer a crawler UA
+ *    with the very paywall/challenge page they gate browsers with, and Readability extracts text
+ *    from it fine. Left unchecked, that page is accepted and suppresses every later method
+ *    (archive.is, Wayback) that might have the real article. But `detectPaywall` answers "is this
+ *    page gated?", NOT "is this candidate usable?" — and those diverge, so the two conclusive
+ *    signals are treated differently:
+ *
+ *    - **Gating phrases in the extracted text** ("subscribe to read", "already a subscriber?")
+ *      are checked ALWAYS. They never appear in a genuine article body; they appear in teasers,
+ *      challenge pages, and long subscription/upsell landing pages. This is what catches a long
+ *      non-article response and keeps the waterfall going.
+ *    - **The visible-barrier DOM element** (a `.paywall`/`[data-paywall]` overlay) is checked
+ *      ONLY for short candidates (< `FULL_ARTICLE_TEXT_FLOOR`). Archives and client-gated sites
+ *      (New Yorker, Wired) return the FULL article alongside a leftover overlay, so convicting a
+ *      long extraction on the overlay alone discards a complete article and drops back to the
+ *      truncated preview (or fails outright) — the Greptile failure class. For a short candidate
+ *      the overlay may be the only tell of a phraseless teaser, so there it still counts.
+ *
+ *    Concretely: short candidates run `detectPaywall` WITH `html` (overlay + text signals); long
+ *    candidates run it WITHOUT `html` (text signals only — no overlay, and no second DOM parse).
+ *
+ *    Memory: the short path parses a second DOM (inside `findVisibleBarrier`), but sequentially —
+ *    the parse above has already returned strings and released its DOM. Measured on the largest
+ *    real fixture (vanityfair, 1.5MB): the second DOM adds ~1MB, total ~5MB over baseline, far
+ *    under the 100MB budget. (The long path skips it entirely.)
+ */
+// Below this many characters of extracted text, the visible-barrier DOM signal still counts (a
+// short teaser's only tell may be its overlay). At or above it, there is a real article's worth
+// of text: the overlay is ignored (a full article can carry a leftover one) and only gating
+// phrases in the text can still reject. Set clear of teaser range (a subscribe/challenge body is
+// a few hundred to ~1500 chars) and clear of the visible-barrier teaser at test:490 (~1580).
+const FULL_ARTICLE_TEXT_FLOOR = 2000;
+
+function validateBypassCandidate(url: string, minTextLength: number): (html: string) => ArticleContent | null {
+  return (html: string) => {
+    // Each rejection logs its reason: the caller (tryBypassPaywall) only records *that* a
+    // candidate was rejected, so without this "why did every candidate fail on site X" is
+    // unanswerable from the logs — the gap the soft-paywall refactor introduced.
+    if (html.length <= minTextLength) {
+      paywallLog.log("candidate:rejected", {
+        url,
+        reason: "html-shorter-than-bar",
+        htmlLength: html.length,
+        minTextLength,
+      });
+      return null;
+    }
+    const parsed = parseArticle(html, url, { skipPreCheck: true, forceParse: true });
+    if (!parsed.success) {
+      paywallLog.log("candidate:rejected", { url, reason: "parse-failed", error: parsed.error.message });
+      return null;
+    }
+    const { textContent, description } = parsed.article;
+    if (textContent.length <= minTextLength) {
+      paywallLog.log("candidate:rejected", {
+        url,
+        reason: "text-shorter-than-bar",
+        textLength: textContent.length,
+        minTextLength,
+      });
+      return null;
+    }
+    // Short candidates: overlay DOM + text signals. Long: text signals only (a full article can
+    // carry a leftover overlay; a gating phrase in the body cannot). See the doc comment above.
+    // An article recovered from the page's data payload is weighed on its text too: the page's
+    // overlay describes the teaser the payload got past.
+    const isShort = textContent.length < FULL_ARTICLE_TEXT_FLOOR && !parsed.article.recoveredFromPayload;
+    const evidence = isShort ? { textContent, html, description } : { textContent, description };
+    if (detectPaywall(evidence, url).isPaywalled) {
+      paywallLog.log("candidate:rejected", {
+        url,
+        reason: "still-paywalled",
+        textLength: textContent.length,
+        checked: isShort ? "overlay+text" : "text-only",
+      });
+      return null;
+    }
+    return parsed.article;
+  };
+}
+
+/**
+ * Builds the success result for a bypassed article from an already-parsed candidate.
+ *
+ * Takes the `ArticleContent` the validator already produced, so the winning candidate is
+ * never parsed a second time. Shared by all three bypass call sites, which otherwise
+ * rebuilt this identically.
+ */
+function buildBypassArticle(
+  article: ArticleContent,
+  hopperResult: PaywallHopperResult,
+  url: string,
+  source: string,
+  showArticleImage: boolean | undefined,
+): { article: ArticleState; markdownLength: number } {
+  const archiveSource = createArchiveSource(hopperResult);
+  const formatted = formatArticle(article.title, article.content, {
+    image: showArticleImage !== false ? article.image : null,
+    archiveSource: archiveSource
+      ? { service: archiveSource.service, url: archiveSource.url, timestamp: archiveSource.timestamp }
+      : undefined,
+  });
+
+  return {
+    article: {
+      bodyMarkdown: formatted.markdown,
+      title: article.title,
+      byline: article.byline,
+      siteName: article.siteName,
+      url,
+      source,
+      textContent: article.textContent,
+      bypassedReadabilityCheck: true,
+      archiveSource,
+    },
+    markdownLength: formatted.markdown.length,
+  };
+}
+
+/** Below this much text, a Markdown alternate is treated as broken and the HTML page is used. */
+const MIN_MARKDOWN_TEXT_LENGTH = 200;
+
+/**
+ * Builds the article from Markdown: a `.md` URL opened directly, or a page's Markdown alternate.
+ *
+ * For an alternate, `page` is the HTML page that advertised it. Its `<head>` supplies the title,
+ * site name, author, and image, and only the `<head>` is parsed: the alternate replaces the
+ * body, so the page's DOM (tens of MB for a long article) is never built.
+ */
+function buildMarkdownArticle(
+  markdown: string,
+  markdownUrl: string,
+  url: string,
+  source: string,
+  showArticleImage: boolean | undefined,
+  page?: { html: string; url: string },
+): ArticleState {
+  const parsed = parseMarkdownArticle(markdown, markdownUrl);
+
+  const meta = page
+    ? MetadataExtractor.extract(parseHTML(`${pageHead(page.html)}</head><body></body>`).document, page.url)
+    : null;
+
+  let bodyMarkdown = parsed.body;
+  const image = showArticleImage !== false ? meta?.image : null;
+  if (image) bodyMarkdown = `![](${image})\n\n${dedupeArticleImage(bodyMarkdown, image)}`;
+
+  return {
+    bodyMarkdown,
+    title: meta?.title || parsed.title || fileTitle(markdownUrl) || "Untitled",
+    byline: meta?.author ?? null,
+    siteName: meta?.siteName ?? null,
+    url,
+    source,
+    textContent: parsed.textContent,
+  };
+}
+
+/** "…/my-notes.md" → "my-notes". */
+function fileTitle(url: string): string {
+  let name = new URL(url).pathname.split("/").pop() ?? "";
+  try {
+    name = decodeURIComponent(name);
+  } catch {
+    // Malformed percent-encoding: keep the name as written
+  }
+  return name.replace(/\.(?:md|markdown)$/i, "");
+}
+
+/**
+ * Reads the Markdown alternate a page advertises. Null if it is missing, isn't Markdown (a
+ * catch-all route answering with the app's HTML shell), or has too little text to be the
+ * article; the caller then reads the HTML page as usual.
+ */
+async function loadMarkdownAlternate(
+  alternateUrl: string,
+  url: string,
+  source: string,
+  showArticleImage: boolean | undefined,
+  page: { html: string; url: string },
+): Promise<ArticleState | null> {
+  const fallback = (reason: string, detail: Record<string, unknown> = {}) => {
+    urlLog.log("markdown-alternate:fallback", { alternateUrl, reason, ...detail });
+    return null;
+  };
+  const result = await fetchHtml(alternateUrl);
+  if (!result.success) return fallback(result.error.message);
+  const { html: markdown, url: markdownUrl, contentType } = result.data;
+  if (!isMarkdownResponse(contentType, markdownUrl, markdown)) return fallback("not-markdown", { contentType });
+  try {
+    const article = buildMarkdownArticle(markdown, markdownUrl, url, source, showArticleImage, page);
+    if (article.textContent.length < MIN_MARKDOWN_TEXT_LENGTH) {
+      return fallback("too-short", { textLength: article.textContent.length });
+    }
+    return article;
+  } catch (err) {
+    return fallback("build-failed", { error: err instanceof Error ? err.message : String(err) });
+  }
+}
+
+/**
  * Loads and parses an article from a URL.
  * Handles fetch, parse, and format steps with proper error handling.
  */
@@ -68,8 +282,6 @@ export async function loadArticleFromUrl(
   // Step 1: Fetch HTML
   progress("Fetching article…");
   const fetchResult = await fetchHtml(url);
-  let archiveSource: ArchiveSource | undefined;
-
   if (!fetchResult.success) {
     // Check if this is a blocked error (401, 403, 429, 451) that could be resolved
     if (fetchResult.error.type === "blocked") {
@@ -86,64 +298,28 @@ export async function loadArticleFromUrl(
         paywallLog.log("hopper:blocked-page-detected", { url, statusCode: fetchResult.error.statusCode });
 
         progress("Page is blocked — trying Paywall Hopper…");
-        const hopperResult = await tryBypassPaywall(url, progress);
+        // The original fetch was a hard block (401/403/429/451): no content at all, so any
+        // page that parses is an improvement. minTextLength = 0.
+        const hopperResult = await tryBypassPaywall(url, progress, validateBypassCandidate(url, 0));
 
-        if (hopperResult.success && hopperResult.html) {
+        if (hopperResult.success && hopperResult.validated) {
           paywallLog.log("hopper:bypass-success", {
             url,
             source: hopperResult.source,
             archiveUrl: hopperResult.archiveUrl,
           });
 
-          // Parse the bypassed content
-          const bypassParseResult = parseArticle(hopperResult.html, url, {
-            skipPreCheck: true,
-            forceParse: true,
+          const built = buildBypassArticle(hopperResult.validated, hopperResult, url, source, options.showArticleImage);
+
+          urlLog.log("session:ready", {
+            url,
+            title: built.article.title,
+            markdownLength: built.markdownLength,
+            bypassedCheck: true,
+            archiveSource: hopperResult.source,
           });
 
-          if (bypassParseResult.success) {
-            archiveSource = createArchiveSource(hopperResult);
-
-            // Format and return the article with archive annotation
-            const formatted = formatArticle(bypassParseResult.article.title, bypassParseResult.article.content, {
-              image: options.showArticleImage !== false ? bypassParseResult.article.image : null,
-              archiveSource: archiveSource
-                ? {
-                    service: archiveSource.service,
-                    url: archiveSource.url,
-                    timestamp: archiveSource.timestamp,
-                  }
-                : undefined,
-            });
-
-            const article: ArticleState = {
-              bodyMarkdown: formatted.markdown,
-              title: bypassParseResult.article.title,
-              byline: bypassParseResult.article.byline,
-              siteName: bypassParseResult.article.siteName,
-              url,
-              source,
-              textContent: bypassParseResult.article.textContent,
-              bypassedReadabilityCheck: true,
-              archiveSource,
-            };
-
-            urlLog.log("session:ready", {
-              url,
-              title: formatted.title,
-              markdownLength: formatted.markdown.length,
-              bypassedCheck: true,
-              archiveSource: hopperResult.source,
-            });
-
-            return { status: "success", article };
-          } else {
-            paywallLog.log("hopper:parse-failed", {
-              url,
-              source: hopperResult.source,
-              error: bypassParseResult.error.message,
-            });
-          }
+          return { status: "success", article: built.article };
         }
       }
 
@@ -177,6 +353,34 @@ export async function loadArticleFromUrl(
     }
 
     return { status: "error", error: fetchResult.error.message };
+  }
+
+  // Step 1.5: Markdown. A .md URL is read as Markdown, never as HTML. A page that links a
+  // Markdown version of itself gets that version instead of an HTML parse.
+  const { html, url: finalUrl, contentType } = fetchResult.data;
+  const direct = isMarkdownResponse(contentType, finalUrl, html);
+  let markdownArticle: ArticleState | null = null;
+  if (direct) {
+    markdownArticle = buildMarkdownArticle(html, finalUrl, url, source, options.showArticleImage);
+  } else {
+    const alternateUrl = findMarkdownAlternate(html, finalUrl);
+    if (alternateUrl && alternateUrl !== finalUrl) {
+      progress("Fetching the Markdown version…");
+      urlLog.log("markdown-alternate:found", { url, alternateUrl });
+      markdownArticle = await loadMarkdownAlternate(alternateUrl, url, source, options.showArticleImage, {
+        html,
+        url: finalUrl,
+      });
+    }
+  }
+  if (markdownArticle) {
+    urlLog.log("session:ready", {
+      url,
+      title: markdownArticle.title,
+      markdownLength: markdownArticle.bodyMarkdown.length,
+      markdown: direct ? "direct" : "alternate",
+    });
+    return { status: "success", article: markdownArticle };
   }
 
   // Step 2: Parse with Readability
@@ -213,11 +417,13 @@ export async function loadArticleFromUrl(
   if (options.enablePaywallHopper) {
     // Weigh the HTML and the page's own description too, not just the extracted text:
     // the barrier markup and a body far shorter than its og:description are the signals
-    // that catch paywalls on sites nobody thought to enumerate.
+    // that catch paywalls on sites nobody thought to enumerate. When the article came from the
+    // page's data payload, the barrier markup describes the teaser this parse got past, so only
+    // the recovered text is weighed.
     const paywallCheck = detectPaywall(
       {
         textContent: parseResult.article.textContent,
-        html: fetchResult.data.html,
+        html: parseResult.article.recoveredFromPayload ? undefined : fetchResult.data.html,
         description: parseResult.article.description,
       },
       url,
@@ -231,77 +437,41 @@ export async function loadArticleFromUrl(
         originalContentLength: parseResult.article.textContent.length,
       });
 
-      // Try to get full content via Paywall Hopper
+      // Try to get full content via Paywall Hopper. Each candidate must extract at least
+      // 20% more text than this preview, or the waterfall rejects it and tries the next
+      // method — so a bypass that merely re-serves the preview can't end the search.
+      const originalLength = parseResult.article.textContent.length;
       progress("Paywall detected — trying Paywall Hopper…");
-      const hopperResult = await tryBypassPaywall(url, progress);
+      const hopperResult = await tryBypassPaywall(
+        url,
+        progress,
+        // floor, with the validator's `<=` reject, preserves the old strict `> originalLength * 1.2`.
+        validateBypassCandidate(url, Math.floor(originalLength * 1.2)),
+      );
 
-      if (hopperResult.success && hopperResult.html) {
-        // Parse the bypassed content
-        const bypassParseResult = parseArticle(hopperResult.html, url, {
-          skipPreCheck: true,
-          forceParse: true,
+      if (hopperResult.success && hopperResult.validated) {
+        const bypassed = hopperResult.validated;
+        paywallLog.log("hopper:soft-paywall-bypassed", {
+          url,
+          source: hopperResult.source,
+          originalLength,
+          bypassedLength: bypassed.textContent.length,
+          improvement: `${Math.round((bypassed.textContent.length / originalLength - 1) * 100)}%`,
         });
 
-        if (bypassParseResult.success) {
-          // Verify the bypassed content is actually better (longer)
-          const bypassedLength = bypassParseResult.article.textContent.length;
-          const originalLength = parseResult.article.textContent.length;
+        const built = buildBypassArticle(bypassed, hopperResult, url, source, options.showArticleImage);
 
-          if (bypassedLength > originalLength * 1.2) {
-            // At least 20% more content
-            paywallLog.log("hopper:soft-paywall-bypassed", {
-              url,
-              source: hopperResult.source,
-              originalLength,
-              bypassedLength,
-              improvement: `${Math.round((bypassedLength / originalLength - 1) * 100)}%`,
-            });
+        urlLog.log("session:ready", {
+          url,
+          title: built.article.title,
+          markdownLength: built.markdownLength,
+          bypassedCheck: true,
+          archiveSource: hopperResult.source,
+        });
 
-            const archiveSource = createArchiveSource(hopperResult);
-
-            const formatted = formatArticle(bypassParseResult.article.title, bypassParseResult.article.content, {
-              image: options.showArticleImage !== false ? bypassParseResult.article.image : null,
-              archiveSource: archiveSource
-                ? {
-                    service: archiveSource.service,
-                    url: archiveSource.url,
-                    timestamp: archiveSource.timestamp,
-                  }
-                : undefined,
-            });
-
-            const article: ArticleState = {
-              bodyMarkdown: formatted.markdown,
-              title: bypassParseResult.article.title,
-              byline: bypassParseResult.article.byline,
-              siteName: bypassParseResult.article.siteName,
-              url,
-              source,
-              textContent: bypassParseResult.article.textContent,
-              bypassedReadabilityCheck: true,
-              archiveSource,
-            };
-
-            urlLog.log("session:ready", {
-              url,
-              title: formatted.title,
-              markdownLength: formatted.markdown.length,
-              bypassedCheck: true,
-              archiveSource: hopperResult.source,
-            });
-
-            return { status: "success", article };
-          } else {
-            paywallLog.log("hopper:soft-paywall-no-improvement", {
-              url,
-              source: hopperResult.source,
-              originalLength,
-              bypassedLength,
-            });
-          }
-        }
+        return { status: "success", article: built.article };
       }
-      // If bypass failed or didn't improve, continue with original content
+      // No method beat the preview by enough: continue with the original content.
       paywallLog.log("hopper:soft-paywall-fallback", { url });
     }
   }
@@ -345,9 +515,12 @@ export async function loadArticleViaPaywallHopper(
 ): Promise<LoadArticleResult> {
   paywallLog.log("hopper:direct-attempt", { url });
 
-  const hopperResult = await tryBypassPaywall(url, options.onProgress);
+  // No original content here (the site is known paywalled), so any page that parses beats
+  // nothing. The validator parses in the waterfall; a candidate that fails to parse is
+  // rejected and the next method tried, rather than ending the search.
+  const hopperResult = await tryBypassPaywall(url, options.onProgress, validateBypassCandidate(url, 0));
 
-  if (!hopperResult.success || !hopperResult.html) {
+  if (!hopperResult.success || !hopperResult.validated) {
     paywallLog.log("hopper:direct-failed", { url, error: hopperResult.error });
     return {
       status: "error",
@@ -361,55 +534,21 @@ export async function loadArticleViaPaywallHopper(
     archiveUrl: hopperResult.archiveUrl,
   });
 
-  const parseResult = parseArticle(hopperResult.html, url, {
-    skipPreCheck: true,
-    forceParse: true,
-  });
-
-  if (!parseResult.success) {
-    paywallLog.log("hopper:direct-parse-failed", {
-      url,
-      source: hopperResult.source,
-      error: parseResult.error.message,
-    });
-    return {
-      status: "error",
-      error: `Retrieved content but failed to parse: ${parseResult.error.message}`,
-    };
-  }
-
-  const archiveSource = createArchiveSource(hopperResult);
-
-  const formatted = formatArticle(parseResult.article.title, parseResult.article.content, {
-    image: options.showArticleImage !== false ? parseResult.article.image : null,
-    archiveSource: archiveSource
-      ? {
-          service: archiveSource.service,
-          url: archiveSource.url,
-          timestamp: archiveSource.timestamp,
-        }
-      : undefined,
-  });
-
-  const article: ArticleState = {
-    bodyMarkdown: formatted.markdown,
-    title: parseResult.article.title,
-    byline: parseResult.article.byline,
-    siteName: parseResult.article.siteName,
+  const built = buildBypassArticle(
+    hopperResult.validated,
+    hopperResult,
     url,
-    source: "paywall-hopper",
-    textContent: parseResult.article.textContent,
-    bypassedReadabilityCheck: true,
-    archiveSource,
-  };
+    "paywall-hopper",
+    options.showArticleImage,
+  );
 
   urlLog.log("session:ready", {
     url,
-    title: formatted.title,
-    markdownLength: formatted.markdown.length,
+    title: built.article.title,
+    markdownLength: built.markdownLength,
     bypassedCheck: true,
     archiveSource: hopperResult.source,
   });
 
-  return { status: "success", article };
+  return { status: "success", article: built.article };
 }

@@ -53,56 +53,49 @@ export function getQueueType(queue: number): string {
 }
 
 const SUPPORTED_FILE_TYPES = {
-  image: ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp'],
+  picture: ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp'],
   audio: ['.mp3', '.wav', '.ogg', '.m4a', '.flac'],
   video: ['.mp4', '.webm', '.mov', '.avi', '.mkv'],
 };
 
-// TODO: add a cleaner re-write of this
-export function transformSubmittedData(submittedData: CreateCardFormValues, modelFields: string[]) {
+type MediaKind = keyof typeof SUPPORTED_FILE_TYPES;
+
+function getMediaKind(filePath: string): MediaKind | undefined {
+  const extension = path.extname(filePath).toLowerCase();
+  return (Object.keys(SUPPORTED_FILE_TYPES) as MediaKind[]).find(kind =>
+    SUPPORTED_FILE_TYPES[kind].includes(extension)
+  );
+}
+
+export function transformSubmittedData(
+  submittedData: CreateCardFormValues,
+  modelFields: string[]
+): AddNoteParams {
   const result: AddNoteParams = {
     deckName: submittedData.deckName,
     modelName: submittedData.modelName,
-    fields: {},
+    fields: Object.fromEntries(
+      modelFields.map(fieldName => [fieldName, submittedData[`field_${fieldName}`] || ''])
+    ),
     tags: submittedData.tags,
     audio: [],
     video: [],
     picture: [],
   };
 
-  modelFields.forEach(fieldName => {
-    result.fields[fieldName] = submittedData[`field_${fieldName}`] || '';
-  });
-
-  modelFields.forEach(fieldName => {
-    const files = submittedData[`file_${fieldName}`] || [];
-    files.forEach((file: string) => {
-      const fileExtension = file.split('.').pop()?.toLowerCase();
-      const fileName = file.split('/').pop();
-
-      if (!fileExtension || !fileName) return;
-
-      if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(fileExtension)) {
-        result.picture.push({
-          path: `/${file}`,
-          filename: fileName,
-          fields: [fieldName],
-        });
-      } else if (['mp3', 'wav', 'ogg'].includes(fileExtension)) {
-        result.audio.push({
-          path: `/${file}`,
-          filename: fileName,
-          fields: [fieldName],
-        });
-      } else if (['mp4', 'webm', 'ogv'].includes(fileExtension)) {
-        result.video.push({
-          path: `/${file}`,
-          filename: fileName,
-          fields: [fieldName],
-        });
+  for (const fieldName of modelFields) {
+    for (const file of submittedData[`file_${fieldName}`] || []) {
+      const kind = getMediaKind(file);
+      if (!kind) {
+        throw new Error(`Unsupported file type: ${file}`);
       }
-    });
-  });
+      result[kind].push({
+        path: file,
+        filename: path.basename(file),
+        fields: [fieldName],
+      });
+    }
+  }
 
   return result;
 }
@@ -144,6 +137,5 @@ export function parseMediaFiles(ankiFieldText: string): MediaFile[] {
 }
 
 export function isValidFileType(filePath: string) {
-  const extension = path.extname(filePath).toLowerCase();
-  return Object.values(SUPPORTED_FILE_TYPES).some(types => types.includes(extension));
+  return getMediaKind(filePath) !== undefined;
 }

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { DiscussionListItem } from "./components/DiscussionListItem";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
 import { DiscussionFieldsFragment } from "./generated/graphql";
+import { uniqueById } from "./helpers";
 import { DISCUSSION_DEFAULT_SORT_QUERY, formatDateForQuery } from "./helpers/discussion";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useDiscussions } from "./hooks/useDiscussions";
@@ -18,8 +19,10 @@ function DiscussionList(): JSX.Element {
   const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", DISCUSSION_DEFAULT_SORT_QUERY, {
     cacheNamespace: "github-search-discussion",
   });
-  const { data, isLoading } = useDiscussions(`${searchFilter} ${formatDateForQuery(sortQuery)} ${searchText}`);
-  const discussions = data?.nodes as DiscussionFieldsFragment[] | null | undefined;
+  const { data, isLoading, pagination } = useDiscussions(
+    `${searchFilter} ${formatDateForQuery(sortQuery)} ${searchText}`,
+  );
+  const discussions = uniqueById((data ?? []) as DiscussionFieldsFragment[]);
   return (
     <List
       isLoading={isLoading}
@@ -27,12 +30,15 @@ function DiscussionList(): JSX.Element {
       searchText={searchText}
       searchBarAccessory={<SearchRepositoryDropdown onFilterChange={setSearchFilter} />}
       throttle
+      pagination={pagination}
     >
       <List.Section
         title={searchText.length > 0 ? "Found Discussions" : "Recent Discussions"}
-        subtitle={`${discussions?.length}`}
+        subtitle={`${discussions.length}`}
       >
-        {discussions?.map((d) => <DiscussionListItem key={d.id} discussion={d} {...{ sortQuery, setSortQuery }} />)}
+        {discussions.map((d) => (
+          <DiscussionListItem key={d.id} discussion={d} {...{ sortQuery, setSortQuery }} />
+        ))}
       </List.Section>
     </List>
   );

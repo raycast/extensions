@@ -1,5 +1,14 @@
-import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   DailyStats,
   formatCost,
@@ -14,6 +23,12 @@ import {
   UsageStats,
 } from "./lib/usage-stats";
 import { renderBarChartToFile } from "./lib/svg-chart";
+import { pathToFileURL } from "url";
+import { loadClaudeSubscriptionUsage } from "./lib/claude-subscription";
+import {
+  formatSubscriptionTimestamp,
+  type SubscriptionUsageResult,
+} from "./lib/subscription-usage";
 
 type RangeKey = "today" | "week" | "month" | "all";
 
@@ -38,6 +53,65 @@ export default function UsageDashboard() {
   // ready, then swaps atomically.
   const [dailyRange, setDailyRange] = useState<RangeKey>("today");
   const [range, setRange] = useState<RangeKey>("today");
+  const [subscription, setSubscription] = useState<SubscriptionUsageResult>();
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
+  const subscriptionSequence = useRef(0);
+  const subscriptionAbort = useRef<AbortController>();
+
+  const refreshSubscription = useCallback(async (forceRefresh = false) => {
+    const sequence = ++subscriptionSequence.current;
+    subscriptionAbort.current?.abort();
+    const controller = new AbortController();
+    subscriptionAbort.current = controller;
+    setSubscriptionLoading(true);
+    try {
+      const result = await loadClaudeSubscriptionUsage({
+        forceRefresh,
+        signal: controller.signal,
+      });
+      if (
+        sequence !== subscriptionSequence.current ||
+        controller.signal.aborted
+      ) {
+        return;
+      }
+      setSubscription(result);
+      if (forceRefresh) {
+        await showToast({
+          style:
+            result.error && !result.usage
+              ? Toast.Style.Failure
+              : result.stale
+                ? Toast.Style.Failure
+                : Toast.Style.Success,
+          title: result.stale
+            ? "Subscription Usage Is Stale"
+            : result.error && !result.usage
+              ? "Subscription Usage Refresh Failed"
+              : "Subscription Usage Refreshed",
+          message: result.error,
+        });
+      }
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      if (sequence === subscriptionSequence.current && forceRefresh) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Subscription Usage Refresh Failed",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    } finally {
+      if (sequence === subscriptionSequence.current) {
+        setSubscriptionLoading(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshSubscription(false);
+    return () => subscriptionAbort.current?.abort();
+  }, [refreshSubscription]);
 
   // Fetch a daily series sized for the selected range. Cancellation token
   // protects against stale responses from rapid range switches.
@@ -91,6 +165,8 @@ export default function UsageDashboard() {
     stats,
     chart,
     statsLoading,
+    subscription,
+    subscriptionLoading,
   });
 
   return (
@@ -98,7 +174,7 @@ export default function UsageDashboard() {
       isLoading={statsLoading}
       markdown={markdown}
       navigationTitle={`Usage: ${RANGE_LABEL[range]}`}
-      metadata={<Sidebar stats={stats} />}
+      metadata={<Sidebar stats={stats} subscription={subscription} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Time Range">
@@ -123,13 +199,35 @@ export default function UsageDashboard() {
               onAction={() => setRange("all")}
             />
           </ActionPanel.Section>
+          <ActionPanel.Section title="Subscription Usage">
+            <Action
+              title="Refresh Subscription Usage"
+              icon={Icon.ArrowClockwise}
+              onAction={() => refreshSubscription(true)}
+            />
+            <Action.OpenInBrowser
+              title="Open Claude Usage Settings"
+              url="https://claude.ai/settings/usage"
+            />
+            <Action
+              title="Open Extension Preferences"
+              icon={Icon.Gear}
+              onAction={openExtensionPreferences}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
   );
 }
 
-function Sidebar({ stats }: { stats: UsageStats | undefined }) {
+function Sidebar({
+  stats,
+  subscription,
+}: {
+  stats: UsageStats | undefined;
+  subscription: SubscriptionUsageResult | undefined;
+}) {
   if (!stats) {
     return (
       <Detail.Metadata>
@@ -144,6 +242,43 @@ function Sidebar({ stats }: { stats: UsageStats | undefined }) {
 
   return (
     <Detail.Metadata>
+      {subscription?.usage?.fiveHour ? (
+        <Detail.Metadata.Label
+          title="Five-Hour Usage"
+          text={formatWindowSummary(subscription.usage.fiveHour.usedPercent)}
+          icon={Icon.Clock}
+        />
+      ) : null}
+      {subscription?.usage?.weekly ? (
+        <Detail.Metadata.Label
+          title="Weekly Usage"
+          text={formatWindowSummary(subscription.usage.weekly.usedPercent)}
+          icon={Icon.Gauge}
+        />
+      ) : null}
+      {subscription?.forecast.available ? (
+        <Detail.Metadata.Label
+          title="Weekly Forecast"
+          text={formatForecastSummary(subscription)}
+          icon={Icon.LineChart}
+        />
+      ) : null}
+      {subscription?.usage ? (
+        <Detail.Metadata.Label
+          title="Subscription Data"
+          text={`${subscription.stale ? "Stale, " : "Updated "}${formatAge(subscription.usage.fetchedAt)}`}
+          icon={subscription.stale ? Icon.Warning : Icon.CheckCircle}
+        />
+      ) : subscription?.error ? (
+        <Detail.Metadata.Label
+          title="Subscription Limits"
+          text="Unavailable"
+          icon={Icon.Warning}
+        />
+      ) : null}
+
+      <Detail.Metadata.Separator />
+
       <Detail.Metadata.Label
         title="Total Cost"
         text={formatCost(stats.totalCost)}
@@ -295,16 +430,27 @@ function buildMarkdown(args: {
   stats: UsageStats | undefined;
   chart: { path: string; header: string; total: number } | null;
   statsLoading: boolean;
+  subscription: SubscriptionUsageResult | undefined;
+  subscriptionLoading: boolean;
 }): string {
-  const { range, stats, chart, statsLoading } = args;
+  const {
+    range,
+    stats,
+    chart,
+    statsLoading,
+    subscription,
+    subscriptionLoading,
+  } = args;
 
-  let md = `# Claude Code Usage: ${RANGE_LABEL[range]}\n\n`;
+  let md = "# Claude Code Usage Dashboard\n\n";
+  md += buildSubscriptionMarkdown(subscription, subscriptionLoading);
+  md += `## Local Token Cost Estimates: ${RANGE_LABEL[range]}\n\n`;
 
   // Range-adapted chart. The aggregator picks the right granularity (daily,
   // weekly, or monthly) so the X-axis stays readable regardless of window.
   if (chart) {
     md += `## ${chart.header}\n\n`;
-    md += `![${chart.header}](file://${chart.path}?raycast-width=820)\n\n`;
+    md += `![${chart.header}](${pathToFileURL(chart.path).href}?raycast-width=820)\n\n`;
     md += `_Total: **${formatCost(chart.total)}**_\n\n`;
   }
 
@@ -336,9 +482,88 @@ function buildMarkdown(args: {
   }
 
   md += `\n---\n\n`;
-  md += `_Tip: use ⌘K to switch range. Sidebar totals update with the range._\n`;
+  md += `_Tip: open the Action Panel to switch range. Sidebar totals update with the range._\n`;
 
   return md;
+}
+
+function buildSubscriptionMarkdown(
+  result: SubscriptionUsageResult | undefined,
+  isLoading: boolean,
+): string {
+  let markdown = "## Subscription Limits\n\n";
+  if (!result?.usage) {
+    if (isLoading) return `${markdown}_Loading Subscription Usage..._\n\n`;
+    return `${markdown}_${result?.error ?? "Subscription Usage Is Unavailable"}_\n\n`;
+  }
+
+  if (result.stale) {
+    markdown += `> Stale Data from ${formatAge(result.usage.fetchedAt)}. ${result.error ?? "The Latest Refresh Failed."}\n\n`;
+  } else {
+    markdown += `_Last Successful Refresh: ${formatAge(result.usage.fetchedAt)}_\n\n`;
+  }
+  markdown += "| Window | Used | Remaining | Resets |\n";
+  markdown += "|--------|-----:|----------:|--------|\n";
+  for (const [label, window] of [
+    ["Five-Hour", result.usage.fiveHour],
+    ["Weekly", result.usage.weekly],
+    ["Weekly Opus", result.usage.weeklyOpus],
+    ["Weekly Sonnet", result.usage.weeklySonnet],
+  ] as const) {
+    if (!window) continue;
+    markdown += `| ${label} | ${formatPercent(window.usedPercent)} | ${formatPercent(100 - window.usedPercent)} | ${formatSubscriptionTimestamp(window.resetsAt)} |\n`;
+  }
+  for (const scoped of result.usage.scopedWeekly) {
+    if (/opus|sonnet/i.test(scoped.label)) continue;
+    markdown += `| Weekly ${escapeMd(scoped.label)} | ${formatPercent(scoped.window.usedPercent)} | ${formatPercent(100 - scoped.window.usedPercent)} | ${formatSubscriptionTimestamp(scoped.window.resetsAt)} |\n`;
+  }
+  markdown += "\n";
+
+  if (result.forecast.available) {
+    markdown += "### Weekly Forecast\n\n";
+    markdown += `- Projected At Reset: ${formatPercent(result.forecast.projectedUsedPercentAtReset ?? 0)}\n`;
+    markdown += `- Predicted Exhaustion: ${result.forecast.exhaustsAt ? formatSubscriptionTimestamp(result.forecast.exhaustsAt) : "Not Before This Reset"}\n`;
+    markdown += `- Confidence: ${result.forecast.confidence}\n`;
+    markdown += `- Method: ${result.forecast.method}\n`;
+    markdown += `- Data: ${result.forecast.sampleCount} Snapshots Across ${result.forecast.observedDays} Local Days\n\n`;
+  } else {
+    markdown += "### Weekly Forecast\n\n";
+    markdown += `_Unavailable: ${result.forecast.reason ?? "More Usage History Is Required"}. ${result.forecast.sampleCount} Snapshots Recorded._\n\n`;
+  }
+
+  if (result.usage.warnings.length > 0) {
+    markdown += `_${result.usage.warnings.join(". ")}._\n\n`;
+  }
+  return markdown;
+}
+
+function formatPercent(value: number): string {
+  const bounded = Math.min(100, Math.max(0, value));
+  return `${bounded.toFixed(bounded % 1 === 0 ? 0 : 1)}%`;
+}
+
+function formatWindowSummary(usedPercent: number): string {
+  return `${formatPercent(usedPercent)} Used, ${formatPercent(100 - usedPercent)} Remaining`;
+}
+
+function formatForecastSummary(result: SubscriptionUsageResult): string {
+  const forecast = result.forecast;
+  if (!forecast.available) return "Collecting History";
+  if (forecast.exhaustsAt) {
+    return `Exhausts ${formatSubscriptionTimestamp(forecast.exhaustsAt)}`;
+  }
+  return `${formatPercent(forecast.projectedUsedPercentAtReset ?? 0)} At Reset`;
+}
+
+function formatAge(timestamp: string): string {
+  const ageMs = Math.max(0, Date.now() - Date.parse(timestamp));
+  const minutes = Math.floor(ageMs / 60_000);
+  if (minutes < 1) return "Less Than a Minute Ago";
+  if (minutes < 60) return `${minutes} Minute${minutes === 1 ? "" : "s"} Ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} Hour${hours === 1 ? "" : "s"} Ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} Day${days === 1 ? "" : "s"} Ago`;
 }
 
 function sessionPreview(s: TopSessionSummary): string {

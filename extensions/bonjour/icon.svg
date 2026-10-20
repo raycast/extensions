@@ -27,5 +27,5 @@
       <use xlink:href="#link" transform="rotate(240)" />
     </g>
   </defs>
-  <use transform="translate(78 67)" xlink:href="#chain" />
+  <use xlink:href="#chain" transform="translate(78 67)" />
 </svg>

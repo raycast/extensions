@@ -1,30 +1,48 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
-import { parseCardsResponse } from "../lib/apiParsers";
+import { parseCardsPageResponse } from "../lib/apiParsers";
+import { createRaycastApiMock } from "./raycastApiMock";
 
 const getPreferenceValuesMock = mock(() => ({ apiKey: "valid-test-key" }));
 const authorizeMock = mock(() => Promise.resolve("oauth-access-token"));
-const removeTokensMock = mock(() => Promise.resolve());
-const getTokensMock = mock(() => Promise.resolve(undefined));
+const removeTokensMock = mock<(providerId: string) => Promise<void>>(() =>
+  Promise.resolve(),
+);
+const getTokensMock = mock<
+  () => Promise<{ accessToken: string; refreshToken?: string } | undefined>
+>(() => Promise.resolve(undefined));
 
 const mockRaycastApi = (isDevelopment: boolean) => {
-  mock.module("@raycast/api", () => ({
-    environment: { isDevelopment },
-    getPreferenceValues: getPreferenceValuesMock,
-    OAuth: {
-      PKCEClient: class {},
-      RedirectMethod: { App: "app", AppURI: "appURI", Web: "web" },
-    },
-  }));
+  mock.module("@raycast/api", () =>
+    createRaycastApiMock(isDevelopment, {
+      getPreferenceValues: getPreferenceValuesMock,
+      oauthClient: class {
+        private readonly providerId: string;
+        constructor(options: { providerId: string }) {
+          this.providerId = options.providerId;
+        }
+        async getTokens() {
+          const tokens = await getTokensMock();
+          return tokens && { ...tokens, isExpired: () => false };
+        }
+        removeTokens() {
+          return removeTokensMock(this.providerId);
+        }
+        setTokens() {
+          return Promise.resolve();
+        }
+        authorizationRequest() {
+          return Promise.resolve({
+            codeVerifier: "verifier",
+            redirectURI: "https://raycast.com/redirect",
+          });
+        }
+        async authorize() {
+          return { authorizationCode: await authorizeMock() };
+        }
+      },
+    }),
+  );
 };
-
-// OAuthService is instantiated at module load of ../lib/oauth; provide a stub
-// whose authorize() / client.removeTokens() we can assert against.
-mock.module("@raycast/utils", () => ({
-  OAuthService: class {
-    authorize = authorizeMock;
-    client = { getTokens: getTokensMock, removeTokens: removeTokensMock };
-  },
-}));
 
 mockRaycastApi(false);
 
@@ -38,6 +56,8 @@ const {
   softDeleteCard,
   updateCard,
 } = await import("../lib/api");
+const { signOutTeak, authorizeTeak, getStoredTeakAccessToken } =
+  await import("../lib/oauth");
 
 const sampleCard = {
   appUrl: "https://app.teakvault.com/?card=card_123",
@@ -66,7 +86,7 @@ const createCardsResponse = (
 ) => {
   const payload =
     status === 200 && Object.keys(body).length === 0
-      ? { items: [sampleCard], total: 1 }
+      ? { items: [sampleCard], pageInfo: { hasMore: false, nextCursor: null } }
       : body;
 
   return new Response(JSON.stringify(payload), {
@@ -75,13 +95,58 @@ const createCardsResponse = (
   });
 };
 
-const createEmptyResponse = (status: number): Response => {
-  return new Response(null, {
+const createEmptyResponse = (status: number): Response =>
+  new Response(null, {
     status,
     headers: { "Content-Type": "application/json" },
   });
-};
 
+const workosIssuer = "https://scholarly-hay-77.authkit.app";
+const workosClient = "client_01M47GV3CYKFW0H78W0XYKGTM5";
+const workosNamespace = `teak:https://teakvault.com/api/v1|${workosIssuer}|${workosClient}`;
+const removedNamespaces = () =>
+  removeTokensMock.mock.calls.map(([providerId]) => providerId);
+const withDiscovery = (transport: typeof fetch): typeof fetch =>
+  ((input, init) => {
+    const url = String(input);
+    const issuer = workosIssuer;
+    let metadata: unknown;
+    if (url.includes("oauth-protected-resource")) {
+      metadata = {
+        resource: "https://teakvault.com/mcp",
+        authorization_servers: [issuer],
+      };
+    } else if (url.includes("teak-oauth-clients")) {
+      metadata = {
+        primary: "workos",
+        issuer,
+        clients: Object.fromEntries(
+          ["cli", "raycast", "chrome", "firefox", "safari"].map((surface) => [
+            surface,
+            workosClient,
+          ]),
+        ),
+      };
+    } else if (url.includes("oauth-authorization-server")) {
+      metadata = {
+        issuer,
+        code_challenge_methods_supported: ["S256"],
+        authorization_endpoint: `${issuer}/authorize`,
+        token_endpoint: `${issuer}/oauth2/token`,
+      };
+    } else if (url.endsWith("/oauth2/token")) {
+      return Promise.resolve(
+        Response.json({
+          access_token: new URLSearchParams(String(init?.body)).get("code"),
+          refresh_token: "refresh",
+          expires_in: 300,
+        }),
+      );
+    }
+    return metadata
+      ? Promise.resolve(Response.json(metadata))
+      : transport(input, init);
+  }) as typeof fetch;
 const originalFetch = globalThis.fetch;
 const originalRequestTimeout = process.env.TEAK_API_REQUEST_TIMEOUT_MS;
 
@@ -108,9 +173,9 @@ describe("raycast request handling", () => {
       capturedHeaders = new Headers(init?.headers);
       return createCardsResponse();
     });
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    globalThis.fetch = withDiscovery(fetchMock as unknown as typeof fetch);
 
-    await request("/cards/search?limit=1", parseCardsResponse, {
+    await request("/cards?limit=1", parseCardsPageResponse, {
       headers: {
         Authorization: "Bearer attacker",
         "Content-Type": "text/plain",
@@ -125,9 +190,11 @@ describe("raycast request handling", () => {
   });
 
   test("maps fetch failures to NETWORK_ERROR", async () => {
-    globalThis.fetch = mock(() => {
-      throw new Error("Connection failed");
-    }) as unknown as typeof fetch;
+    globalThis.fetch = withDiscovery(
+      mock(() => {
+        throw new Error("Connection failed");
+      }) as unknown as typeof fetch,
+    );
 
     try {
       await searchCards({ limit: 1 });
@@ -140,17 +207,19 @@ describe("raycast request handling", () => {
     }
   });
 
-  test("retries development requests against a valid loopback URL", async () => {
+  test("uses the Convex site URL for development requests", async () => {
     mockRaycastApi(true);
     const { searchCards: searchCardsInDev } = await import(
       `../lib/api?dev-fallback=${crypto.randomUUID()}`
     );
     const capturedUrls: string[] = [];
 
-    globalThis.fetch = mock((input: RequestInfo | URL) => {
-      capturedUrls.push(String(input));
-      throw new Error("Connection failed");
-    }) as unknown as typeof fetch;
+    globalThis.fetch = withDiscovery(
+      mock((input: RequestInfo | URL) => {
+        capturedUrls.push(String(input));
+        throw new Error("Connection failed");
+      }) as unknown as typeof fetch,
+    );
 
     try {
       await searchCardsInDev({ limit: 1 });
@@ -163,21 +232,23 @@ describe("raycast request handling", () => {
     }
 
     expect(capturedUrls).toEqual([
-      "https://api.teak.localhost:1355/v1/cards/search?limit=1",
-      "https://127.0.0.1:1355/v1/cards/search?limit=1",
+      "https://reminiscent-kangaroo-59.convex.site/v1/cards?include=content%2Cmetadata&limit=1",
     ]);
   });
 
   test("maps timed out requests to NETWORK_ERROR", async () => {
     process.env.TEAK_API_REQUEST_TIMEOUT_MS = "5";
 
-    globalThis.fetch = mock((_input: RequestInfo | URL, init?: RequestInit) => {
-      return new Promise((_, reject) => {
-        init?.signal?.addEventListener("abort", () => {
-          reject(new Error("Request aborted"));
-        });
-      });
-    }) as unknown as typeof fetch;
+    globalThis.fetch = withDiscovery(
+      mock(
+        (_input: RequestInfo | URL, init?: RequestInit) =>
+          new Promise((_, reject) => {
+            init?.signal?.addEventListener("abort", () => {
+              reject(new Error("Request aborted"));
+            });
+          }),
+      ) as unknown as typeof fetch,
+    );
 
     try {
       await searchCards({ limit: 1 });
@@ -191,9 +262,9 @@ describe("raycast request handling", () => {
   });
 
   test("maps 401 responses to INVALID_API_KEY", async () => {
-    globalThis.fetch = mock(async () =>
-      createCardsResponse(401),
-    ) as unknown as typeof fetch;
+    globalThis.fetch = withDiscovery(
+      mock(async () => createCardsResponse(401)) as unknown as typeof fetch,
+    );
 
     try {
       await searchCards({ limit: 1 });
@@ -207,9 +278,9 @@ describe("raycast request handling", () => {
   });
 
   test("maps 429 responses to RATE_LIMITED", async () => {
-    globalThis.fetch = mock(async () =>
-      createCardsResponse(429),
-    ) as unknown as typeof fetch;
+    globalThis.fetch = withDiscovery(
+      mock(async () => createCardsResponse(429)) as unknown as typeof fetch,
+    );
 
     try {
       await searchCards({ limit: 1 });
@@ -223,9 +294,9 @@ describe("raycast request handling", () => {
   });
 
   test("maps 404 responses to NOT_FOUND", async () => {
-    globalThis.fetch = mock(async () =>
-      createCardsResponse(404),
-    ) as unknown as typeof fetch;
+    globalThis.fetch = withDiscovery(
+      mock(async () => createCardsResponse(404)) as unknown as typeof fetch,
+    );
 
     try {
       await searchCards({ limit: 1 });
@@ -239,19 +310,21 @@ describe("raycast request handling", () => {
   });
 
   test("maps API configuration failures to CONFIG_ERROR", async () => {
-    globalThis.fetch = mock(
-      async () =>
-        new Response(
-          JSON.stringify({
-            code: "CONFIG_ERROR",
-            error: "Missing or invalid CONVEX_HTTP_BASE_URL",
-          }),
-          {
-            headers: { "Content-Type": "application/json" },
-            status: 500,
-          },
-        ),
-    ) as unknown as typeof fetch;
+    globalThis.fetch = withDiscovery(
+      mock(
+        async () =>
+          new Response(
+            JSON.stringify({
+              code: "CONFIG_ERROR",
+              error: "Missing or invalid Convex API configuration",
+            }),
+            {
+              headers: { "Content-Type": "application/json" },
+              status: 500,
+            },
+          ),
+      ) as unknown as typeof fetch,
+    );
 
     try {
       await searchCards({ limit: 1 });
@@ -264,51 +337,22 @@ describe("raycast request handling", () => {
     }
   });
 
-  test("maps missing Portless dev API registration to DEV_API_UNAVAILABLE", async () => {
-    mockRaycastApi(true);
-    const { searchCards: searchCardsInDev } = await import(
-      `../lib/api?missing-dev-api=${crypto.randomUUID()}`
-    );
-
-    globalThis.fetch = mock(
-      async () =>
-        new Response(
-          "<!doctype html><html><body>No app registered for api.teak.localhost</body></html>",
-          {
-            headers: {
-              "Content-Type": "text/html",
-              "X-Portless": "1",
-            },
-            status: 404,
-          },
-        ),
-    ) as unknown as typeof fetch;
-
-    try {
-      await searchCardsInDev({ limit: 1 });
-      expect.unreachable();
-    } catch (error) {
-      expect(error).toBeInstanceOf(RaycastApiError);
-      expect((error as InstanceType<typeof RaycastApiError>).code).toBe(
-        "DEV_API_UNAVAILABLE",
-      );
-    }
-  });
-
   test("setCardFavorite patches favorite state on the favorite endpoint", async () => {
     let capturedUrl: string | null = null;
     let capturedMethod: string | null = null;
     let capturedBody: unknown = null;
 
-    globalThis.fetch = mock((input: RequestInfo | URL, init?: RequestInit) => {
-      capturedUrl = String(input);
-      capturedMethod = init?.method ?? null;
-      capturedBody = init?.body ? JSON.parse(String(init.body)) : null;
-      return createCardsResponse(200, {
-        ...sampleCard,
-        isFavorited: false,
-      });
-    }) as unknown as typeof fetch;
+    globalThis.fetch = withDiscovery(
+      mock((input: RequestInfo | URL, init?: RequestInit) => {
+        capturedUrl = String(input);
+        capturedMethod = init?.method ?? null;
+        capturedBody = init?.body ? JSON.parse(String(init.body)) : null;
+        return createCardsResponse(200, {
+          ...sampleCard,
+          isFavorited: false,
+        });
+      }) as unknown as typeof fetch,
+    );
 
     const updated = await setCardFavorite("card_123", false);
 
@@ -322,11 +366,13 @@ describe("raycast request handling", () => {
     let capturedUrl: string | null = null;
     let capturedMethod: string | null = null;
 
-    globalThis.fetch = mock((input: RequestInfo | URL, init?: RequestInit) => {
-      capturedUrl = String(input);
-      capturedMethod = init?.method ?? null;
-      return createEmptyResponse(204);
-    }) as unknown as typeof fetch;
+    globalThis.fetch = withDiscovery(
+      mock((input: RequestInfo | URL, init?: RequestInit) => {
+        capturedUrl = String(input);
+        capturedMethod = init?.method ?? null;
+        return createEmptyResponse(204);
+      }) as unknown as typeof fetch,
+    );
 
     await softDeleteCard("card_123");
 
@@ -337,15 +383,17 @@ describe("raycast request handling", () => {
   test("createCard posts structured bookmark payloads", async () => {
     let capturedBody: unknown = null;
 
-    globalThis.fetch = mock((_input: RequestInfo | URL, init?: RequestInit) => {
-      capturedBody = init?.body ? JSON.parse(String(init.body)) : null;
-      return createCardsResponse(200, {
-        appUrl: sampleCard.appUrl,
-        card: sampleCard,
-        cardId: sampleCard.id,
-        status: "created",
-      });
-    }) as unknown as typeof fetch;
+    globalThis.fetch = withDiscovery(
+      mock((_input: RequestInfo | URL, init?: RequestInit) => {
+        capturedBody = init?.body ? JSON.parse(String(init.body)) : null;
+        return createCardsResponse(200, {
+          appUrl: sampleCard.appUrl,
+          card: sampleCard,
+          cardId: sampleCard.id,
+          status: "created",
+        });
+      }) as unknown as typeof fetch,
+    );
 
     const result = await createCard({
       content: "Teak",
@@ -363,13 +411,38 @@ describe("raycast request handling", () => {
     expect(result.card?.id).toBe("card_123");
   });
 
+  test("createCard forwards explicit text Markdown exactly", async () => {
+    let capturedBody: Record<string, unknown> | null = null;
+    globalThis.fetch = withDiscovery(
+      mock((_input: RequestInfo | URL, init?: RequestInit) => {
+        capturedBody = JSON.parse(String(init?.body));
+        return createCardsResponse(200, {
+          appUrl: sampleCard.appUrl,
+          cardId: sampleCard.id,
+          status: "created",
+        });
+      }) as unknown as typeof fetch,
+    );
+    const content = "\uFEFF  # Raycast\r\n\r\nBody  \n";
+
+    await createCard({ cardType: "text", content, source: "raycast_test" });
+
+    expect(capturedBody).toEqual({
+      cardType: "text",
+      content,
+      source: "raycast_test",
+    });
+  });
+
   test("getCardById sends a GET request to the card endpoint", async () => {
     let capturedMethod: string | null = null;
 
-    globalThis.fetch = mock((_input: RequestInfo | URL, init?: RequestInit) => {
-      capturedMethod = init?.method ?? null;
-      return createCardsResponse(200, sampleCard);
-    }) as unknown as typeof fetch;
+    globalThis.fetch = withDiscovery(
+      mock((_input: RequestInfo | URL, init?: RequestInit) => {
+        capturedMethod = init?.method ?? null;
+        return createCardsResponse(200, sampleCard);
+      }) as unknown as typeof fetch,
+    );
 
     const result = await getCardById("card_123");
 
@@ -381,14 +454,16 @@ describe("raycast request handling", () => {
     let capturedBody: unknown = null;
     let capturedMethod: string | null = null;
 
-    globalThis.fetch = mock((_input: RequestInfo | URL, init?: RequestInit) => {
-      capturedMethod = init?.method ?? null;
-      capturedBody = init?.body ? JSON.parse(String(init.body)) : null;
-      return createCardsResponse(200, {
-        ...sampleCard,
-        notes: "Updated note",
-      });
-    }) as unknown as typeof fetch;
+    globalThis.fetch = withDiscovery(
+      mock((_input: RequestInfo | URL, init?: RequestInit) => {
+        capturedMethod = init?.method ?? null;
+        capturedBody = init?.body ? JSON.parse(String(init.body)) : null;
+        return createCardsResponse(200, {
+          ...sampleCard,
+          notes: "Updated note",
+        });
+      }) as unknown as typeof fetch,
+    );
 
     const result = await updateCard("card_123", {
       notes: "Updated note",
@@ -411,7 +486,7 @@ describe("raycast request handling", () => {
       capturedHeaders = new Headers(init?.headers);
       return createCardsResponse();
     });
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    globalThis.fetch = withDiscovery(fetchMock as unknown as typeof fetch);
 
     await searchCards({ limit: 1 });
 
@@ -420,6 +495,45 @@ describe("raycast request handling", () => {
     expect(capturedHeaders?.get("authorization")).toBe(
       "Bearer oauth-access-token",
     );
+  });
+
+  test("discovery outage remains a connection failure without opening sign-in", async () => {
+    getPreferenceValuesMock.mockImplementation(() => ({ apiKey: "" }));
+    getTokensMock.mockResolvedValue({ accessToken: "saved" });
+    globalThis.fetch = mock(() =>
+      Promise.resolve(new Response(null, { status: 503 })),
+    ) as unknown as typeof fetch;
+    await expect(searchCards({ limit: 1 })).rejects.toMatchObject({
+      code: "NETWORK_ERROR",
+    });
+    expect(authorizeMock).not.toHaveBeenCalled();
+    expect(removeTokensMock).not.toHaveBeenCalled();
+  });
+
+  test("reauthorization discovery outage keeps credentials and reports a network failure", async () => {
+    getPreferenceValuesMock.mockImplementation(() => ({ apiKey: "" }));
+    let discoveryReads = 0;
+    let apiCalls = 0;
+    const discovered = withDiscovery(
+      mock(() => {
+        apiCalls += 1;
+        return createCardsResponse(401);
+      }) as unknown as typeof fetch,
+    );
+    globalThis.fetch = ((input, init) => {
+      if (String(input).includes("oauth-protected-resource")) {
+        discoveryReads += 1;
+      }
+      if (discoveryReads >= 2 && String(input).includes(".well-known")) {
+        return Promise.resolve(new Response(null, { status: 503 }));
+      }
+      return discovered(input, init);
+    }) as typeof fetch;
+    await expect(searchCards({ limit: 1 })).rejects.toMatchObject({
+      code: "NETWORK_ERROR",
+    });
+    expect(apiCalls).toBe(1);
+    expect(removeTokensMock).not.toHaveBeenCalled();
   });
 
   test("refreshes the OAuth token once after a 401", async () => {
@@ -431,15 +545,89 @@ describe("raycast request handling", () => {
 
     const seenTokens: string[] = [];
     let call = 0;
-    globalThis.fetch = mock((_input: RequestInfo | URL, init?: RequestInit) => {
-      seenTokens.push(new Headers(init?.headers).get("authorization") ?? "");
-      call += 1;
-      return call === 1 ? createCardsResponse(401) : createCardsResponse();
-    }) as unknown as typeof fetch;
+    globalThis.fetch = withDiscovery(
+      mock((_input: RequestInfo | URL, init?: RequestInit) => {
+        seenTokens.push(new Headers(init?.headers).get("authorization") ?? "");
+        call += 1;
+        return call === 1 ? createCardsResponse(401) : createCardsResponse();
+      }) as unknown as typeof fetch,
+    );
 
     await searchCards({ limit: 1 });
 
-    expect(removeTokensMock).toHaveBeenCalledTimes(1);
     expect(seenTokens).toEqual(["Bearer stale-token", "Bearer fresh-token"]);
+  });
+});
+
+describe("Raycast sign out", () => {
+  test("disconnects the installation before removing its tokens", async () => {
+    getTokensMock.mockResolvedValueOnce({
+      accessToken: "access",
+      refreshToken: "refresh",
+    });
+    globalThis.fetch = withDiscovery(
+      mock((input: RequestInfo | URL, init?: RequestInit) => {
+        expect(String(input)).toBe(
+          "https://teakvault.com/api/v1/oauth/disconnect",
+        );
+        expect(init?.method).toBe("POST");
+        expect(new Headers(init?.headers).get("authorization")).toBe(
+          "Bearer access",
+        );
+        expect(removeTokensMock).not.toHaveBeenCalled();
+        return Promise.resolve(new Response(null, { status: 204 }));
+      }) as unknown as typeof fetch,
+    );
+    expect(await signOutTeak()).toBe("disconnected");
+    expect(removedNamespaces()).toContain(workosNamespace);
+  });
+
+  test("waits for a running authorization and blocks refresh while signing out", async () => {
+    let finishAuthorization: (token: string) => void = () => {};
+    authorizeMock.mockImplementationOnce(
+      () =>
+        new Promise<string>((resolve) => {
+          finishAuthorization = resolve;
+        }),
+    );
+    globalThis.fetch = withDiscovery(
+      mock(
+        () => new Response(null, { status: 200 }),
+      ) as unknown as typeof fetch,
+    );
+    const authorization = authorizeTeak();
+    while (authorizeMock.mock.calls.length === 0) {
+      await Promise.resolve();
+    }
+    const previousTokenReads = getTokensMock.mock.calls.length;
+    const signOut = signOutTeak();
+    await expect(authorizeTeak()).rejects.toThrow("sign-out is in progress");
+    expect(await getStoredTeakAccessToken()).toBeNull();
+    expect(getTokensMock.mock.calls.length).toBe(previousTokenReads);
+    getTokensMock.mockResolvedValueOnce({
+      accessToken: "fresh-access",
+      refreshToken: "fresh-refresh",
+    });
+    globalThis.fetch = withDiscovery(
+      mock((_input: RequestInfo | URL, init?: RequestInit) => {
+        expect(new Headers(init?.headers).get("authorization")).toBe(
+          "Bearer fresh-access",
+        );
+        return Promise.resolve(new Response(null, { status: 204 }));
+      }) as unknown as typeof fetch,
+    );
+    finishAuthorization("fresh-access");
+    await authorization;
+    expect(await signOut).toBe("disconnected");
+    expect(removedNamespaces()).toContain(workosNamespace);
+  });
+
+  test("handles an already-cleared session without revoking an API key", async () => {
+    getTokensMock.mockResolvedValueOnce(undefined);
+    const fetchMock = mock();
+    globalThis.fetch = withDiscovery(fetchMock as unknown as typeof fetch);
+    await signOutTeak();
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(removedNamespaces()).toContain(workosNamespace);
   });
 });

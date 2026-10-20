@@ -1,5 +1,10 @@
 # LocalSend Changelog
 
+## [Fix Device Discovery Crash] - 2026-10-03
+
+- Fixed `Discover Devices` crashing with `Error: Not running` when the multicast socket was closed twice
+- Added a "Port 53317 is in use" failure toast when another app, such as the LocalSend desktop app, already holds the discovery port
+
 ## [Major Enhancement - Pending Transfer System] - 2026-01-24
 
 ### 🎯 Pending Transfer Notifications

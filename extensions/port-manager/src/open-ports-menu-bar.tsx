@@ -43,6 +43,10 @@ export default function Command() {
                     onError() {
                       showHUD(Huds.KillProcess.Error({ name: openPort.process.name, port: openPort.port }));
                     },
+                    onSurvived() {
+                      showHUD(Huds.KillProcess.Survived({ name: openPort.process.name, port: openPort.port }));
+                      revalidateProcesses();
+                    },
                     onKilled() {
                       showHUD(Huds.KillProcess.Success({ name: openPort.process.name, port: openPort.port }));
                       revalidateProcesses();

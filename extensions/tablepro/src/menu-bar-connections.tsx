@@ -8,7 +8,7 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { Connection } from "./lib/types";
 import { databaseTypeLabel, loadConnections } from "./lib/connections";
-import { tableProInstalled } from "./lib/paths";
+import { findTablePro } from "./lib/app";
 import { openConnectionDeeplink } from "./lib/deeplink";
 import { connectionIcon } from "./lib/driver-icons";
 
@@ -23,7 +23,7 @@ interface MenuData {
 export default function MenuBarConnections() {
   const { data, isLoading } = useCachedPromise(
     async (): Promise<MenuData> => {
-      const installed = tableProInstalled();
+      const installed = (await findTablePro()) !== undefined;
       if (!installed) {
         return { installed: false, connections: [] };
       }

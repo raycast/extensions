@@ -23,7 +23,7 @@ export async function jiraRequest<T>(params: RequestParams): Promise<T | null> {
 
 function createKyInstance(baseURL: string, appType: AppType): KyInstance {
   return ky.create({
-    prefixUrl: baseURL,
+    prefix: baseURL,
     timeout: 30000,
     retry: 0,
     headers: {
@@ -32,12 +32,12 @@ function createKyInstance(baseURL: string, appType: AppType): KyInstance {
     },
     hooks: {
       beforeRequest: [
-        (request) => {
+        ({ request }) => {
           console.log("🚀 ~ Request:", request.method, request.url);
         },
       ],
       afterResponse: [
-        async (request, _options, response) => {
+        async ({ request, response }) => {
           const acceptHeader = request.headers.get("accept") || "";
           const contentType = response.headers.get("content-type") || "";
 

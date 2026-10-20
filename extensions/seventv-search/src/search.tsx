@@ -9,200 +9,203 @@ import {
   Image,
   Clipboard,
   LocalStorage,
+  getPreferenceValues,
 } from "@raycast/api";
 import React, { useState, useEffect, useRef } from "react";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 import { tmpdir } from "os";
 
-interface Emote {
-  id: string;
-  name: string;
-  owner?: {
-    display_name: string;
-  };
-  host: {
-    url: string;
-    files: {
-      name: string;
-      static_name: string;
-      width: number;
-      height: number;
-      format: string;
-    }[];
-  };
-  animated?: boolean;
-}
+import {
+  type Emote,
+  type Provider,
+  type SortMode,
+  PAGE_SIZE,
+  BTTV_PAGE_SIZE,
+  PROVIDERS,
+  getSortTitle,
+  searchEmotes,
+  getEmoteKey,
+  getEmoteFile,
+  getPreviewUrl,
+  getEmotePage,
+} from "./providers";
 
-const FAVORITES_KEY = "favorites_v1";
-const HISTORY_KEY = "history_v1";
+import { createSavedEmotesStore } from "./saved-emotes";
 
 export default function Command() {
+  const defaultSize = Number(getPreferenceValues<Preferences>().size);
   const [searchText, setSearchText] = useState("");
   const [items, setItems] = useState<Emote[]>([]);
   const [favorites, setFavorites] = useState<Emote[]>([]);
   const [history, setHistory] = useState<Emote[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isGridView, setIsGridView] = useState(true);
+  const savedStoreRef =
+    useRef<ReturnType<typeof createSavedEmotesStore>>(undefined);
+  savedStoreRef.current ??= createSavedEmotesStore(
+    {
+      getItem: (key) => LocalStorage.getItem<string>(key),
+      setItem: (key, value) => LocalStorage.setItem(key, value),
+    },
+    getEmoteKey,
+  );
   const fetchIdRef = useRef(0);
+  const nextCursorRef = useRef<string>(undefined);
 
-  const [sortValue, setSortValue] = useState<string>("popularity");
-  const [sortOrder, setSortOrder] = useState<string>("DESCENDING");
-  const [category, setCategory] = useState<string>("TOP");
+  const [retry, setRetry] = useState(0);
+  const [selection, setSelection] = useState("7tv:popular");
+  const [provider, sortMode] = selection.split(":") as [Provider, SortMode];
+  const [animatedOnly, setAnimatedOnly] = useState(false);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState<number>();
+  const [hasMore, setHasMore] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>();
+  const providerTitle = PROVIDERS.find((p) => p.id === provider)!.title;
+  const resultsTitle = `${providerTitle} · ${getSortTitle(provider, sortMode, searchText)}`;
+  const resultCount =
+    total === undefined
+      ? `${items.length} loaded`
+      : `${items.length} of ${total.toLocaleString()}`;
 
-  // Load Persistent State
   useEffect(() => {
-    async function loadStorage() {
-      const storedFavs = await LocalStorage.getItem<string>(FAVORITES_KEY);
-      const storedHist = await LocalStorage.getItem<string>(HISTORY_KEY);
-      if (storedFavs) setFavorites(JSON.parse(storedFavs));
-      if (storedHist) setHistory(JSON.parse(storedHist));
-    }
-    loadStorage();
+    let active = true;
+    savedStoreRef
+      .current!.load()
+      .then((saved) => {
+        if (!active) return;
+        setFavorites(saved.favorites);
+        setHistory(saved.history);
+      })
+      .catch((error) => {
+        if (active)
+          void showToast({
+            style: Toast.Style.Failure,
+            title: "Could Not Load Saved Emotes",
+            message: String(error),
+          });
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
-    const fetchId = fetchIdRef.current + 1;
-    fetchIdRef.current = fetchId;
-    const query = searchText.trim();
-    const shouldFetch =
-      query || category.startsWith("TRENDING") || category.startsWith("TOP");
-
-    if (!shouldFetch) {
-      setItems([]);
-      setIsLoading(false);
-      return;
-    }
-
+    const fetchId = ++fetchIdRef.current;
+    const controller = new AbortController();
     setIsLoading(true);
-
-    async function fetchEmotes() {
+    setErrorMessage(undefined);
+    const timeout = setTimeout(async () => {
       try {
-        const gqlQuery = {
-          query: `
-            query SearchEmotes($query: String!, $page: Int, $limit: Int, $sort: Sort, $filter: EmoteSearchFilter) {
-              emotes(query: $query, page: $page, limit: $limit, sort: $sort, filter: $filter) {
-                count
-                items {
-                  id
-                  name
-                  animated
-                  owner {
-                    display_name
-                  }
-                  host {
-                    url
-                    files {
-                      name
-                      static_name
-                      width
-                      height
-                      format
-                    }
-                  }
-                }
-              }
-            }
-          `,
-          variables: {
-            query: query || "",
-            page: 1,
-            limit: 60,
-            sort: {
-              value: sortValue,
-              order: sortOrder,
-            },
-            filter: {
-              category: category,
-              exact_match: false,
-              animated: null,
-              zero_width: false,
-            },
+        const result = await searchEmotes(
+          {
+            provider,
+            sort: sortMode,
+            query: searchText.trim(),
+            page,
+            animatedOnly,
+            cursor: nextCursorRef.current,
           },
-        };
-
-        const response = await fetch("https://7tv.io/v3/gql", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "User-Agent": "Raycast/1.0.0 (7TV Emotes Search)",
-          },
-          body: JSON.stringify(gqlQuery),
+          controller.signal,
+        );
+        if (fetchId !== fetchIdRef.current) return;
+        setItems((previous) => {
+          const combined =
+            page === 1 ? result.items : [...previous, ...result.items];
+          return [
+            ...new Map(combined.map((e) => [getEmoteKey(e), e])).values(),
+          ];
         });
-
-        if (!response.ok) {
-          const errBody = await response.text();
-          throw new Error(`API ${response.status}: ${errBody.slice(0, 50)}`);
-        }
-
-        const resJson = (await response.json()) as {
-          data: { emotes: { items: Emote[] } };
-          errors?: { message: string }[];
-        };
-        if (resJson.errors) {
-          throw new Error(resJson.errors[0]?.message || "GQL Error");
-        }
-
-        if (fetchId === fetchIdRef.current) {
-          setItems(resJson.data?.emotes?.items || []);
-        }
+        nextCursorRef.current = result.nextCursor;
+        setTotal(result.total);
+        setHasMore(result.hasMore);
       } catch (error) {
-        if (fetchId === fetchIdRef.current) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "7TV Error",
-            message: String(error),
-          });
-        }
+        if (controller.signal.aborted || fetchId !== fetchIdRef.current) return;
+        setHasMore(false);
+        setErrorMessage(String(error));
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `${providerTitle} Error`,
+          message: String(error),
+        });
       } finally {
-        if (fetchId === fetchIdRef.current) {
-          setIsLoading(false);
-        }
+        if (fetchId === fetchIdRef.current) setIsLoading(false);
       }
-    }
-
-    const delayDebounceFn = setTimeout(() => {
-      fetchEmotes();
-    }, 400);
-
+    }, 300);
     return () => {
-      clearTimeout(delayDebounceFn);
+      controller.abort();
+      clearTimeout(timeout);
     };
-  }, [searchText, sortValue, sortOrder, category]);
+  }, [
+    searchText,
+    provider,
+    sortMode,
+    page,
+    animatedOnly,
+    providerTitle,
+    retry,
+  ]);
 
-  const getEmoteUrl = (item: Emote, size: "1x" | "2x" | "4x" = "4x") => {
-    const hostUrl = item.host.url;
-    return `https:${hostUrl}/${size}.webp`;
-  };
+  function resetResults() {
+    // Invalidate in-flight responses before React commits the changed selection.
+    fetchIdRef.current += 1;
+    nextCursorRef.current = undefined;
+    setItems([]);
+    setTotal(undefined);
+    setHasMore(false);
+    setErrorMessage(undefined);
+    setPage(1);
+  }
+  function changeSearch(text: string) {
+    if (text === searchText) return;
+    resetResults();
+    if (provider === "bttv" && text.trim()) setSelection("bttv:popular");
+    setSearchText(text);
+  }
+  function changeSelection(value: string) {
+    if (value === selection) return;
+    resetResults();
+    setSelection(value);
+  }
 
   async function addToHistory(item: Emote) {
-    const newHistory = [item, ...history.filter((h) => h.id !== item.id)].slice(
-      0,
-      20,
-    );
-    setHistory(newHistory);
-    await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+    try {
+      const saved = await savedStoreRef.current!.recordRecent(item);
+      setHistory(saved.history);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could Not Save Recent Emote",
+        message: String(error),
+      });
+    }
   }
 
   async function toggleFavorite(item: Emote) {
-    const isFav = favorites.some((f) => f.id === item.id);
-    let newFavs;
-    if (isFav) {
-      newFavs = favorites.filter((f) => f.id !== item.id);
-      await showToast({ title: "Removed from Favorites" });
-    } else {
-      newFavs = [item, ...favorites];
-      await showToast({ title: "Added to Favorites" });
+    try {
+      const saved = await savedStoreRef.current!.toggleFavorite(item);
+      setFavorites(saved.favorites);
+      const isFavorite = saved.favorites.some(
+        (e) => getEmoteKey(e) === getEmoteKey(item),
+      );
+      await showToast({
+        title: isFavorite ? "Added to Favorites" : "Removed from Favorites",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could Not Save Favorite",
+        message: String(error),
+      });
     }
-    setFavorites(newFavs);
-    await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavs));
   }
 
-  async function handleDropEmote(
+  async function pasteEmote(
     item: Emote,
-    mode: "smart" | "url" | "bruteforce" = "smart",
+    mode: "file" | "url" = "file",
+    size = defaultSize,
   ) {
-    const url = getEmoteUrl(item, "4x");
+    const { url, ext } = getEmoteFile(item, size);
     await addToHistory(item);
 
     if (mode === "url") {
@@ -213,8 +216,7 @@ export default function Command() {
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title:
-        mode === "bruteforce" ? "Dropping Emote..." : "Processing Emote...",
+      title: "Pasting Emote...",
     });
     try {
       const res = await fetch(url);
@@ -224,7 +226,10 @@ export default function Command() {
       const data = new Uint8Array(arrayBuffer);
 
       const safeName = item.name.replace(/[^a-z0-9]/gi, "_").toLowerCase();
-      const tempPath = join(tmpdir(), `vault_${safeName}_${item.id}.webp`);
+      const tempPath = join(
+        tmpdir(),
+        `vault_${item.provider ?? "7tv"}_${safeName}_${item.id}_${size}x.${ext}`,
+      );
       await writeFile(tempPath, data);
 
       try {
@@ -233,17 +238,12 @@ export default function Command() {
           html: `<img src="${url}" alt="${item.name}" />`,
         });
 
-        if (mode === "bruteforce") {
-          await Clipboard.paste({ text: url });
-          await Clipboard.paste({ file: tempPath });
-        } else {
-          await Clipboard.paste({ file: tempPath });
-        }
+        await Clipboard.paste({ file: tempPath });
 
         toast.style = Toast.Style.Success;
-        toast.title = "Emote Dropped!";
+        toast.title = "Emote Pasted";
       } catch (clipError) {
-        console.error("Drop failed:", clipError);
+        console.error("Paste failed:", clipError);
         await Clipboard.paste(url);
         toast.style = Toast.Style.Success;
         toast.title = "URL Pasted (Fallback)";
@@ -256,23 +256,30 @@ export default function Command() {
     }
   }
 
+  const renderFilterAction = () => (
+    <Action
+      title={animatedOnly ? "Show All Emotes" : "Show Animated Only"}
+      icon={Icon.Filter}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+      onAction={() => {
+        resetResults();
+        setAnimatedOnly((value) => !value);
+      }}
+    />
+  );
+
   const renderActions = (item: Emote) => {
-    const isFav = favorites.some((f) => f.id === item.id);
-    const highResUrl = getEmoteUrl(item, "4x");
+    const isFav = favorites.some((f) => getEmoteKey(f) === getEmoteKey(item));
+    const { url: highResUrl, ext } = getEmoteFile(item, defaultSize);
     const markdown = `![${item.name}](${highResUrl})`;
 
     return (
       <ActionPanel>
         <ActionPanel.Section>
           <Action
-            title="Drop Emote"
-            icon={Icon.ChevronRight}
-            onAction={() => handleDropEmote(item, "smart")}
-          />
-          <Action
-            title="Quick Drop"
-            icon={Icon.Bolt}
-            onAction={() => handleDropEmote(item, "bruteforce")}
+            title="Paste Emote File"
+            icon={Icon.Clipboard}
+            onAction={() => pasteEmote(item)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
           />
           <Action
@@ -285,9 +292,9 @@ export default function Command() {
 
         <ActionPanel.Section>
           <Action
-            title="Force Paste URL"
+            title="Paste Emote URL"
             icon={Icon.Link}
-            onAction={() => handleDropEmote(item, "url")}
+            onAction={() => pasteEmote(item, "url")}
             shortcut={{ modifiers: ["cmd"], key: "u" }}
           />
           <Action.CopyToClipboard title="Copy Emote URL" content={highResUrl} />
@@ -311,7 +318,10 @@ export default function Command() {
                 const safeName = item.name
                   .replace(/[^a-z0-9]/gi, "_")
                   .toLowerCase();
-                const tempPath = join(tmpdir(), `copy_${safeName}.webp`);
+                const tempPath = join(
+                  tmpdir(),
+                  `copy_${item.provider ?? "7tv"}_${safeName}_${item.id}_${defaultSize}x.${ext}`,
+                );
                 await writeFile(tempPath, data);
                 await Clipboard.copy({ file: tempPath });
                 toast.style = Toast.Style.Success;
@@ -324,11 +334,29 @@ export default function Command() {
               }
             }}
           />
+          <ActionPanel.Submenu title="Paste Emote at Size" icon={Icon.Maximize}>
+            {[1, 2, 3, 4].map((size) => (
+              <Action
+                key={size}
+                title={`${size}×`}
+                onAction={() => pasteEmote(item, "file", size)}
+              />
+            ))}
+          </ActionPanel.Submenu>
         </ActionPanel.Section>
         <ActionPanel.Section>
+          {renderFilterAction()}
+          <Action
+            title="Reload Results"
+            icon={Icon.ArrowClockwise}
+            onAction={() => {
+              resetResults();
+              setRetry((value) => value + 1);
+            }}
+          />
           <Action.OpenInBrowser
-            title="View on 7TV"
-            url={`https://7tv.app/emotes/${item.id}`}
+            title="View on Provider"
+            url={getEmotePage(item)}
           />
           <Action
             title={isGridView ? "Switch to List View" : "Switch to Grid View"}
@@ -346,48 +374,47 @@ export default function Command() {
     );
   };
 
-  const accessory = (
-    <List.Dropdown
-      tooltip="Sort & Filter"
-      storeValue={true}
-      onChange={(val) => {
-        const [cat, sortVal, order] = val.split(":");
-        setCategory(cat);
-        setSortValue(sortVal);
-        setSortOrder(order);
-      }}
-    >
-      <List.Dropdown.Section title="Top Emotes">
-        <List.Dropdown.Item
-          title="Popular (All Time)"
-          value="TOP:popularity:DESCENDING"
-        />
-        <List.Dropdown.Item
-          title="Recently Created"
-          value="TOP:created_at:DESCENDING"
-        />
-      </List.Dropdown.Section>
-      <List.Dropdown.Section title="Trending">
-        <List.Dropdown.Item
-          title="Trending Right Now"
-          value="TRENDING:popularity:DESCENDING"
-        />
-      </List.Dropdown.Section>
-      <List.Dropdown.Section title="Alphabetical">
-        <List.Dropdown.Item title="Name (A-Z)" value="TOP:name:ASCENDING" />
-        <List.Dropdown.Item title="Name (Z-A)" value="TOP:name:DESCENDING" />
-      </List.Dropdown.Section>
-    </List.Dropdown>
-  );
+  const dropdownSections = (
+    Dropdown: typeof List.Dropdown | typeof Grid.Dropdown,
+  ) =>
+    PROVIDERS.map((source) => (
+      <Dropdown.Section key={source.id} title={source.title}>
+        {(source.id === "bttv" && searchText.trim()
+          ? ["popular" as SortMode]
+          : source.sorts
+        ).map((sort) => (
+          <Dropdown.Item
+            key={sort}
+            title={`${source.title} · ${getSortTitle(source.id, sort, searchText)}`}
+            value={`${source.id}:${sort}`}
+          />
+        ))}
+      </Dropdown.Section>
+    ));
+  const localItems = (data: Emote[]) =>
+    data.filter(
+      (e) =>
+        (e.provider ?? "7tv") === provider && (!animatedOnly || e.animated),
+    );
+  const pagination = {
+    pageSize: provider === "bttv" ? BTTV_PAGE_SIZE : PAGE_SIZE,
+    hasMore,
+    onLoadMore: () => {
+      if (!isLoading && hasMore) setPage((value) => value + 1);
+    },
+  };
 
   const renderGridItems = (data: Emote[], title: string) => (
-    <Grid.Section title={title}>
+    <Grid.Section
+      title={title}
+      subtitle={title === resultsTitle ? resultCount : undefined}
+    >
       {data.map((item) => (
         <Grid.Item
-          key={`${title}-${item.id}`}
+          key={`${title}-${getEmoteKey(item)}`}
           title={item.name}
           subtitle={item.owner?.display_name}
-          content={{ source: getEmoteUrl(item, "2x") }}
+          content={{ source: getPreviewUrl(item) }}
           actions={renderActions(item)}
         />
       ))}
@@ -395,14 +422,17 @@ export default function Command() {
   );
 
   const renderListItems = (data: Emote[], title: string) => (
-    <List.Section title={title}>
+    <List.Section
+      title={title}
+      subtitle={title === resultsTitle ? resultCount : undefined}
+    >
       {data.map((item) => (
         <List.Item
-          key={`${title}-${item.id}`}
+          key={`${title}-${getEmoteKey(item)}`}
           title={item.name}
           subtitle={item.owner?.display_name || "Community"}
           icon={{
-            source: getEmoteUrl(item, "1x"),
+            source: getPreviewUrl(item),
             mask: Image.Mask.RoundedRectangle,
           }}
           actions={renderActions(item)}
@@ -415,20 +445,53 @@ export default function Command() {
     return (
       <Grid
         isLoading={isLoading}
-        onSearchTextChange={setSearchText}
-        searchBarPlaceholder="Search 7TV Emotes..."
-        searchBarAccessory={accessory}
+        onSearchTextChange={changeSearch}
+        searchText={searchText}
+        filtering={false}
+        pagination={pagination}
+        searchBarPlaceholder={`Search ${providerTitle} Emotes...`}
+        searchBarAccessory={
+          <Grid.Dropdown
+            tooltip="Provider & Sort"
+            value={selection}
+            onChange={changeSelection}
+          >
+            {dropdownSections(Grid.Dropdown)}
+          </Grid.Dropdown>
+        }
         columns={6}
         fit={Grid.Fit.Contain}
       >
         {!searchText &&
           favorites.length > 0 &&
-          renderGridItems(favorites, "Starred Emotes")}
+          renderGridItems(localItems(favorites), "Starred Emotes")}
         {!searchText &&
           history.length > 0 &&
-          renderGridItems(history, "Recently Used")}
-        {(searchText || category.startsWith("TRENDING") || items.length > 0) &&
-          renderGridItems(items, `${category} Results`)}
+          renderGridItems(localItems(history), "Recently Used")}
+        {renderGridItems(items, resultsTitle)}
+        {items.length === 0 && (
+          <Grid.EmptyView
+            title={
+              errorMessage
+                ? "Search Failed"
+                : isLoading
+                  ? "Loading Emotes"
+                  : "No Emotes Found"
+            }
+            description={
+              errorMessage ?? "Try another name, provider, or filter."
+            }
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Retry Search"
+                  onAction={() => setRetry((value) => value + 1)}
+                />
+                {renderFilterAction()}
+              </ActionPanel>
+            }
+          />
+        )}
       </Grid>
     );
   }
@@ -436,19 +499,50 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search 7TV Emotes..."
-      searchBarAccessory={accessory}
+      onSearchTextChange={changeSearch}
+      searchText={searchText}
+      filtering={false}
+      pagination={pagination}
+      searchBarPlaceholder={`Search ${providerTitle} Emotes...`}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Provider & Sort"
+          value={selection}
+          onChange={changeSelection}
+        >
+          {dropdownSections(List.Dropdown)}
+        </List.Dropdown>
+      }
       throttle
     >
       {!searchText &&
         favorites.length > 0 &&
-        renderListItems(favorites, "Starred Emotes")}
+        renderListItems(localItems(favorites), "Starred Emotes")}
       {!searchText &&
         history.length > 0 &&
-        renderListItems(history, "Recently Used")}
-      {(searchText || category.startsWith("TRENDING") || items.length > 0) &&
-        renderListItems(items, `${category} Results`)}
+        renderListItems(localItems(history), "Recently Used")}
+      {renderListItems(items, resultsTitle)}
+      {items.length === 0 && (
+        <List.EmptyView
+          title={
+            errorMessage
+              ? "Search Failed"
+              : isLoading
+                ? "Loading Emotes"
+                : "No Emotes Found"
+          }
+          description={errorMessage ?? "Try another name, provider, or filter."}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry Search"
+                onAction={() => setRetry((value) => value + 1)}
+              />
+              {renderFilterAction()}
+            </ActionPanel>
+          }
+        />
+      )}
     </List>
   );
 }

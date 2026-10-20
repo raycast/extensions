@@ -10,6 +10,11 @@ Browse and set wallpapers without leaving Raycast. The collection is classic pai
 
 ## Commands
 
+**Ask Art Wallpapers**
+
+Use Raycast AI to browse today's artworks, find a random wallpaper, review your history, or set and download wallpapers.
+Search history by words, artist, artwork year, usage dates, or action type, and set a wallpaper from the results. History date ranges include both days in your local timezone.
+
 **Today's Wallpapers**
 
 Shows the three most recent wallpapers. Preview them, see the details (title, artist, year), set one as your background, or download it.
@@ -21,6 +26,7 @@ Instantly sets a random wallpaper. No UI, no prompts — just a fresh background
 **History**
 
 Shows wallpapers you selected or downloaded, including automatic wallpaper switches, with options to set or download them again.
+Each wallpaper appears once, ordered by its latest action. Its details show every recorded action and timestamp, newest first. Deleting an item removes all history entries for that wallpaper.
 
 **Auto Switch Wallpaper**
 
@@ -34,6 +40,6 @@ None. The extension talks directly to the wallpaper service — no Mac app neede
 
 ## Screenshots
 
-![Screenshot 1](metadata/basalt-screenshot-01.jpg)
-![Screenshot 2](metadata/basalt-screenshot-02.jpg)
-![Screenshot 3](metadata/basalt-screenshot-03.jpg)
+![Screenshot 1](metadata/another-boring-piece-1.png)
+![Screenshot 2](metadata/another-boring-piece-2.png)
+![Screenshot 3](metadata/another-boring-piece-3.png)

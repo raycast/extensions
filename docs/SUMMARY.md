@@ -18,8 +18,9 @@
 - [Getting Started](ai/getting-started.md)
 - [Create an AI Extension](ai/create-an-ai-extension.md)
 - [Learn Core Concepts of AI Extensions](ai/learn-core-concepts-of-ai-extensions.md)
-- [Write Evals for Your AI Extension](ai/write-evals-for-your-ai-extension.md)
+- [Evals](ai/evals.md)
 - [Follow Best Practices for AI Extensions](ai/follow-best-practices-for-ai-extensions.md)
+- [Provide AI Models](ai/provide-ai-models.md)
 
 ## Teams
 

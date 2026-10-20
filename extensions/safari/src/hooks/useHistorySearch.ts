@@ -10,7 +10,7 @@ const LIMIT = 100;
 
 const escapeSQLStringLiteral = (value: string) => value.replace(/'/g, "''");
 
-export const getHistoryQuery = (searchText?: string) => {
+export const getHistoryQuery = (searchText?: string, limit = LIMIT) => {
   const whereClause = searchText
     ? _.chain(searchText)
         .split(" ")
@@ -28,7 +28,7 @@ export const getHistoryQuery = (searchText?: string) => {
   ${whereClause ? `WHERE ${whereClause}` : ""}
   GROUP BY url
   ORDER BY visit_time DESC
-  LIMIT ${LIMIT}
+  LIMIT ${limit}
   `;
 };
 

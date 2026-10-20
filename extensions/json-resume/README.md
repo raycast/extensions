@@ -1,4 +1,12 @@
-# JSON Resume
+<div align="center">
+    <br/>
+    <br/>
+    <img src="./assets/extension-icon.png" alt="JSON Resume" width="100"/>
+    <h3>JSON Resume</h3>
+    <p>Parse JSON Resume</p>
+    <br/>
+    <br/>
+</div>
 
 A small utility and UI for parsing, validating and viewing resumes in the JSON Resume format.
 

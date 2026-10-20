@@ -410,39 +410,28 @@ function BookmarkActions({
     <ActionPanel>
       <ActionPanel.Section>
         {mainAction}
-        {mainAction.props.title !== viewDetailTitle && (
-          <Action.Push
-            icon={Icon.Sidebar}
-            target={<BookmarkDetail bookmark={bookmark} onRefresh={onRefresh} lists={lists} />}
-            title={viewDetailTitle}
-          />
-        )}
-        {mainAction.props.title !== editTitle && (
-          <Action
-            icon={Icon.Pencil}
-            title={editTitle}
-            onAction={handlers.handleEdit}
-            shortcut={Keyboard.Shortcut.Common.Edit}
-          />
-        )}
+        {/* Open is skipped when it is ALREADY the main action, or the panel
+            would list it twice. Copy is not a duplicate of anything, so it is
+            gated separately — sharing one guard meant Copy disappeared for
+            everyone on the default "Open in Browser" setting. */}
         {bookmark.content.type === "link" &&
           bookmark.content.url &&
           mainAction.props.title !== t("bookmark.actions.openLink") && (
-            <>
-              <Action.OpenInBrowser
-                url={bookmark.content.url}
-                title={t("bookmark.actions.openLink")}
-                shortcut={Keyboard.Shortcut.Common.Open}
-                onOpen={() => onVisit?.(bookmark)}
-              />
-              <Action.CopyToClipboard
-                content={bookmark.content.url}
-                title={t("bookmark.actions.copyLink")}
-                shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
-                onCopy={() => onVisit?.(bookmark)}
-              />
-            </>
+            <Action.OpenInBrowser
+              url={bookmark.content.url}
+              title={t("bookmark.actions.openLink")}
+              shortcut={Keyboard.Shortcut.Common.Open}
+              onOpen={() => onVisit?.(bookmark)}
+            />
           )}
+        {bookmark.content.type === "link" && bookmark.content.url && (
+          <Action.CopyToClipboard
+            content={bookmark.content.url}
+            title={t("bookmark.actions.copyLink")}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
+            onCopy={() => onVisit?.(bookmark)}
+          />
+        )}
         {bookmark.content.type === "text" && bookmark.content.text && mainAction.props.title !== copyNoteTitle && (
           <Action.CopyToClipboard
             content={bookmark.content.text}
@@ -457,6 +446,25 @@ function BookmarkActions({
           mainAction.props.title !== t("bookmark.actions.viewImage") && (
             <Action.OpenInBrowser url={images.asset} title={t("bookmark.actions.viewImage")} />
           )}
+        {/* Generic actions come after the type-specific ones: what you do with
+            a bookmark's own content (open it, copy it) outranks what you do to
+            the record. Whichever of these is the ↵ action is hoisted above and
+            skipped here. */}
+        {mainAction.props.title !== editTitle && (
+          <Action
+            icon={Icon.Pencil}
+            title={editTitle}
+            onAction={handlers.handleEdit}
+            shortcut={Keyboard.Shortcut.Common.Edit}
+          />
+        )}
+        {mainAction.props.title !== viewDetailTitle && (
+          <Action.Push
+            icon={Icon.Sidebar}
+            target={<BookmarkDetail bookmark={bookmark} onRefresh={onRefresh} lists={lists} />}
+            title={viewDetailTitle}
+          />
+        )}
       </ActionPanel.Section>
       <ActionPanel.Section>
         {bookmark.content.type === "link" && bookmark.content.url && (

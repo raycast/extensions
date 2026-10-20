@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "media-switcher",
+  "title": "Media Switcher",
+  "description": "Quickly switch between media sessions, control playback and adjust volume — all from the keyboard",
+  "icon": "extension-icon.png",
+  "author": "muhammadrizo",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Media",
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "switch-media",
+      "title": "Switch Media",
+      "description": "Switch between media sessions",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "prevNextTrackShortcuts",
+      "title": "Previous / Next Track Shortcuts",
+      "description": "Keyboard shortcuts for skipping to the previous or next track.",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "title": "⌘ / Ctrl + [ and ]",
+          "value": "squareBrackets"
+        },
+        {
+          "title": "⌘ / Ctrl + ← and →",
+          "value": "arrowKeys"
+        }
+      ],
+      "default": "squareBrackets"
+    },
+    {
+      "name": "refreshInterval",
+      "title": "Refresh Interval",
+      "description": "How often the session list updates, in seconds. Enter 0 to turn off auto-refresh.",
+      "type": "textfield",
+      "required": false,
+      "default": "5",
+      "placeholder": "5"
+    },
+    {
+      "name": "volumeStep",
+      "title": "Volume Step",
+      "description": "How much the Volume Up and Volume Down actions change the volume, in percentage points.",
+      "type": "textfield",
+      "required": false,
+      "default": "5",
+      "placeholder": "5"
+    },
+    {
+      "name": "groupPlayingSessions",
+      "label": "Group playing sessions at the top",
+      "description": "Moves playing sessions into their own \"Playing\" section, so they're quicker to reach.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.9",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild": true
+  }
+}

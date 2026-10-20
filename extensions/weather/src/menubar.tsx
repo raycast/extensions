@@ -403,13 +403,16 @@ function WeatherForecastDay(props: { day: WeatherData; fullTitle: string }) {
 export default function MenuCommand(): React.ReactElement {
   const { data, error, isLoading, fetchDate } = useWeather(getDefaultQuery());
   const { title, curcon, weatherDesc, area } = getMetaData(data);
+  const { menutemperature, showmenutext } = getPreferenceValues<Preferences.Menubar>();
   const temp = getCurrentTemperature(curcon);
+  const feelsLike = getCurrentFeelLikeTemperature(curcon)?.valueAndUnit;
+  const menuTemp = menutemperature === "feelslike" ? feelsLike || temp : temp;
 
   return (
     <WeatherMenuBarExtra
       data={data}
       error={error}
-      title={prefs.showmenutext ? temp : undefined}
+      title={showmenutext ? menuTemp : undefined}
       icon={{ source: getWeatherMenuIcon(curcon), tintColor: Color.PrimaryText }}
       isLoading={isLoading}
       tooltip={weatherDesc}

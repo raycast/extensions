@@ -55,6 +55,7 @@ export function getNotesFromCache(cacheKey: string): Note[] | null {
     const notesWithDates = data.notes.map((note) => ({
       ...note,
       lastModified: new Date(note.lastModified),
+      createdAt: note.createdAt ? new Date(note.createdAt) : undefined,
     }));
 
     logger.info(`Using cached notes for ${cacheKey}`);

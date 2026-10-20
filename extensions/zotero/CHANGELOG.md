@@ -1,5 +1,30 @@
 # Zotero Changelog
 
+## [Open Secondary PDF] - 2026-09-22
+
+- Added an "Open Secondary PDF" action (`⌘⇧↵`) for references with more than one pdf, e.g. supplementary material saved under the same entry. With exactly two pdfs it opens the secondary one directly (with Open in System Viewer and Show in Finder below it); with more it shows a list of the remaining pdfs, each with Open PDF, Open in System Viewer, and Show in Finder
+
+## [Order Empty Results by Last Opened] - 2026-09-21
+
+- Added an "Order by Last Opened" preference. When it is on and the search is empty, entries you opened most recently are shown first and the rest follow by date added. Tracking covers opening a PDF, the Zotero entry, or the original link, and survives a cache rebuild
+
+## [Show PDF in Finder] - 2026-09-14
+
+- Added a "Show PDF in Finder" action on references with a PDF, so you can reveal the file on disk in Finder without copying the path
+
+## [Docs] - 2026-09-10
+
+- Updated the README to document fuzzy search, the "Search by BibTeX Citation Key" preference, group libraries, the collection filter, and the 100-result limit
+
+## [Group libraries, fuzzy search, and BibTeX-key search] - 2026-08-30
+
+- Search now uses a subsequence fuzzy finder (fuzzysort) instead of near-exact matching, so typing `qsim` finds "Quantum Simulation". Results are ranked by how well they match, and the most recent items show for an empty query.
+- Added a "Search by BibTeX Citation Key" preference. With it on, typing a citation key like `smith2020quantum` returns that item.
+- Group libraries are now supported. By default only your personal library is searched, so a paper shared to a group no longer shows up twice. Use the new "Configure Group Libraries" action (`⌘L`) to pick which groups to include.
+- Items in group libraries now open in Zotero. The `zotero://` links use the `/groups/<groupID>/` path for group items, so pressing Enter opens them instead of doing nothing.
+- Selecting a collection now filters the whole library before the 100-item cap. Collections are matched by their library and key, so two collections that share a name (or a key across libraries) stay separate, and the dropdown labels them so you can tell them apart. The dropdown lists collections from your personal library and any group libraries you have included.
+- Large libraries no longer run out of memory while searching. Matching long fields such as abstracts and notes no longer grows the heap on every keystroke.
+
 ## [Fixes] - 2026-07-17
 
 - Fix "Worker terminated due to reaching memory limit: JS heap out of memory" crash on large libraries when browsing or running broad searches: the command rendered every matching item (the whole library on an empty query, or hundreds/thousands for a broad query), and Raycast's per-item detail + action list grows the command worker's memory until it is killed. Results are now capped at 100 rendered items (the section header shows "Top 100 — refine your search to see more" when capped), which keeps the render footprint bounded. Follow-up to #29478 / #29250

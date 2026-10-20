@@ -1,5 +1,9 @@
 # GitHub Enterprise Changelog
 
+## [Fix Missing Icons] - 2026-09-22
+
+- Replace missing icon assets with built-in icons and existing bundled assets
+
 ## [Add Search Repositories Feature] - 2026-03-01
 
 - Added new "Search Repositories" command to search across public and private repositories.

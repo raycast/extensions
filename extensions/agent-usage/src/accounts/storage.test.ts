@@ -163,6 +163,20 @@ test("addAccount uses separate storage per provider", async () => {
   assert.equal(zaiAccounts[0].label, "Zai Account");
 });
 
+test("Copilot accounts use separate storage", async () => {
+  const { addAccount, loadAccounts } = await loadStorageModule();
+
+  await addAccount("copilot", "Work", "copilot-token");
+  await addAccount("kimi", "Personal", "kimi-token");
+
+  const copilotAccounts = await loadAccounts("copilot");
+  const kimiAccounts = await loadAccounts("kimi");
+  assert.equal(copilotAccounts.length, 1);
+  assert.equal(copilotAccounts[0].label, "Work");
+  assert.equal(copilotAccounts[0].token, "copilot-token");
+  assert.equal(kimiAccounts[0].token, "kimi-token");
+});
+
 test("updateAccount returns true and modifies existing account", async () => {
   const { addAccount, updateAccount, loadAccounts } = await loadStorageModule();
 

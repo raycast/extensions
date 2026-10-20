@@ -3,13 +3,15 @@ import { join } from "node:path";
 import { environment } from "@raycast/api";
 
 /**
- * Optional overrides for pointing development builds at a local backend
- * (Supabase CLI Docker stack). Any field left out falls back to the
- * production value in {@link ../constants}.
+ * Optional overrides for pointing development builds at a local stack: the
+ * Supabase CLI Docker containers, and the web app served by `npm run web` in
+ * the web app repo. Any field left out falls back to the production value in
+ * {@link ../constants}.
  */
 type LocalBackendConfig = {
   supabaseUrl?: string;
   supabasePublishableKey?: string;
+  webAppUrl?: string;
 };
 
 const LOCAL_CONFIG_PATH = join(environment.assetsPath, "local-config.json");

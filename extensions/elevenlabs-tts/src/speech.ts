@@ -6,10 +6,15 @@ import { getTextPreview, getTextStats } from "./text/processing";
 import { prepareVoiceSettings } from "./voice/settings";
 
 async function showActiveSessionStatus(): Promise<void> {
-  const stopped = await stopActivePlayback();
+  const result = await stopActivePlayback();
+  if (result === "failed") {
+    await showToast({ style: Toast.Style.Failure, title: "Couldn't stop playback" });
+    return;
+  }
+
   await showToast({
     style: Toast.Style.Success,
-    title: stopped ? "⏹️ Stopped" : "🎙️ Already reading",
+    title: result === "stopped" ? "⏹️ Stopped" : "🎙️ Already reading",
   });
 }
 

@@ -1,4 +1,5 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Test
+/coverage
 
 # dependencies
 /node_modules
@@ -13,14 +14,4 @@ compiled_raycast_rust
 # misc
 .DS_Store
 
-# Test
-/coverage
-
-# dependencies
-/node_modules
-
-# Raycast specific files
-raycast-env.d.ts
-.raycast-swift-build
-.swiftpm
-compiled_raycast_swift
+/assets/catalog-development.json

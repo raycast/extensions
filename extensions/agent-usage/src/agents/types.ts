@@ -1,6 +1,7 @@
 import type { Image } from "@raycast/api";
 
 export type AgentId =
+  | "aihubmix"
   | "amp"
   | "claude"
   | "clinepass"
@@ -16,7 +17,10 @@ export type AgentId =
   | "antigravity"
   | "zai"
   | "minimax"
-  | "opencode-go";
+  | "minimaxcn"
+  | "opencode-go"
+  | "openrouter"
+  | "raycast";
 
 export interface AgentDefinition {
   id: AgentId;
@@ -28,6 +32,7 @@ export interface AgentDefinition {
 }
 
 export interface UsageState<TUsage, TError> {
+  credentialStatus?: "unverified";
   isLoading: boolean;
   usage: TUsage | null;
   error: TError | null;
@@ -42,6 +47,7 @@ export interface Accessory {
 }
 
 export interface AgentVisibilityPreferences {
+  showAihubmix: boolean;
   showAmp: boolean;
   showAntigravity: boolean;
   showClaude: boolean;
@@ -55,7 +61,10 @@ export interface AgentVisibilityPreferences {
   showGrok: boolean;
   showKimi: boolean;
   showMinimax: boolean;
+  showMinimaxCN: boolean;
   showOpencodeGo: boolean;
+  showOpenRouter: boolean;
+  showRaycast: boolean;
   showSynthetic: boolean;
   showZai: boolean;
 }

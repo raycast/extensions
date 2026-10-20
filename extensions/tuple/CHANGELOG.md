@@ -1,5 +1,22 @@
 # Tuple Changelog
 
+## [Canonical CLI Migration] - 2026-09-14
+
+- Use canonical Call and Capture commands, complete Capture exports, and Connect prompts.
+- Preserve grouped search results and compact clock timestamps in Capture views and AI summaries.
+- Show one primary personal room with grid icons and render Capture as a readable, categorized timeline.
+- Include other connected machines alongside contacts and call idle machines by their canonical IDs.
+- Require the canonical Tuple CLI without legacy command or error adapters.
+
+## [Smarter Calls and Rooms] - 2026-08-20
+
+- **Contacts** now show only the call action that person can accept: start when they're online, join when their call has room, and neither when they're offline or the call is full. Favorites, search, and Copy Email still work for everyone.
+- Full calls now say **Call Full** instead of **In a Call**, so it's clear why Join Call isn't available.
+- Raycast reports success only after a call connects. Joining a contact or room switches cleanly from your current call.
+- **Join Personal Room** now chooses Tuple's primary room instead of relying on list order, and Search Rooms shows only that primary personal room.
+- Ask Raycast AI who is pairing right now to get Tuple's grouped view of active calls.
+- Call failures now use the CLI's typed errors for more accurate guidance, with compatibility fallbacks for older Tuple builds.
+
 ## [New Tuple Integration] - 2026-06-26
 
 - **Calls**: browse contacts with live online/busy status, favorites, and recents; start a call; and run the active call from a menu-bar command — mute/unmute, add a person, copy an AI context prompt, or hang up. Toggle Mute and End Call ship as standalone commands for global hotkeys.

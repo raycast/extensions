@@ -1,5 +1,6 @@
 import { platform as getOsPlatform, release as getOsRelease } from "node:os";
 import { environment } from "@raycast/api";
+import { parse } from "yaml";
 
 export type Skill = {
   id: string;
@@ -95,48 +96,26 @@ export function parseFrontmatter(content: string): { frontmatter: SkillFrontmatt
   const match = content.match(/^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/);
   if (!match) return { frontmatter: {}, body: content };
 
-  const yamlStr = match[1];
   const body = match[2];
   const frontmatter: SkillFrontmatter = {};
 
-  const lines = yamlStr.split("\n");
-  let i = 0;
-  while (i < lines.length) {
-    const line = lines[i];
-    const keyValueMatch = line.match(/^(\S[^:]*?):\s*(.*)$/);
-    if (keyValueMatch) {
-      const key = keyValueMatch[1].trim();
-      const value = keyValueMatch[2].trim();
-
-      if (value === "") {
-        // Possibly a block array — look ahead for "  - item" lines
-        const items: string[] = [];
-        i++;
-        while (i < lines.length && /^\s+-\s+/.test(lines[i])) {
-          items.push(lines[i].replace(/^\s+-\s+/, "").trim());
-          i++;
-        }
-        if (items.length > 0) {
-          (frontmatter as Record<string, unknown>)[key] = items;
-        }
-        continue;
-      } else if (value === "|" || value === ">" || value === "|-" || value === ">-") {
-        // block scalar — multi-line body parsing is not supported, skip this key
-        i++;
-        continue;
-      } else if (value.startsWith("[") && value.endsWith("]")) {
-        // Inline array: [item1, item2, item3]
-        const items = value
-          .slice(1, -1)
-          .split(",")
-          .map((s) => s.trim().replace(/^["'](.*)["']$/, "$1"))
-          .filter(Boolean);
-        (frontmatter as Record<string, unknown>)[key] = items;
-      } else {
-        (frontmatter as Record<string, unknown>)[key] = value.replace(/^["'](.*)["']$/, "$1");
-      }
+  try {
+    // The delimiter's preceding newline belongs to YAML block scalar chomping.
+    const parsed: unknown = parse(`${match[1]}\n`);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return { frontmatter, body };
     }
-    i++;
+
+    const metadata = parsed as Record<string, unknown>;
+    for (const key of ["description", "license", "compatibility"] as const) {
+      if (typeof metadata[key] === "string") frontmatter[key] = metadata[key];
+    }
+    const tools = metadata["allowed-tools"];
+    if (typeof tools === "string" || (Array.isArray(tools) && tools.every((tool) => typeof tool === "string"))) {
+      frontmatter["allowed-tools"] = tools;
+    }
+  } catch {
+    // Invalid frontmatter should not prevent reading the Markdown body.
   }
 
   return { frontmatter, body };

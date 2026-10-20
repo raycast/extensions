@@ -4,8 +4,18 @@ import { useBoilerplates } from "./hooks/use-boilerplates";
 import { useVersion } from "./hooks/use-version";
 import { getIcon } from "./utils";
 
+/**
+ * The menu bar logo carries the yellow "new version" dot, so it cannot be tinted the way the
+ * other assets are — a tint would flatten the dot into the text colour. Ship both appearances
+ * instead: the logo is black on light, white on dark, and the dot keeps its colour in both.
+ */
+const LOGO_ICON: Image.ImageLike = { source: { light: "menu-bar.png", dark: "menu-bar@dark.png" } };
+const LOGO_ICON_UPDATES: Image.ImageLike = {
+  source: { light: "menu-bar-updates.png", dark: "menu-bar-updates@dark.png" },
+};
+
 export default function Command() {
-  const [iconMenu, setIconMenu] = useState<Image.ImageLike>("menu-bar.svg");
+  const [iconMenu, setIconMenu] = useState<Image.ImageLike>(LOGO_ICON);
   const [titleMenu, setTitleMenu] = useState("WP Bones");
 
   const { isThereNewVersion, version, flushNewVersion, isLoading, error } = useVersion();
@@ -17,13 +27,13 @@ export default function Command() {
       setIconMenu({ source: Icon.ExclamationMark, tintColor: Color.Red });
       setTitleMenu("Error fetching version");
     } else if (isLoading) {
-      setIconMenu("loading.svg");
+      setIconMenu(LOGO_ICON);
       setTitleMenu("Loading...");
     } else if (isThereNewVersion) {
-      setIconMenu("menu-bar-updates.svg");
+      setIconMenu(LOGO_ICON_UPDATES);
       setTitleMenu(`New version available: ${version}`);
     } else {
-      setIconMenu("menu-bar.svg");
+      setIconMenu(LOGO_ICON);
       setTitleMenu(`WP Bones v${version}`);
     }
   }, [error, version, isThereNewVersion, isLoading]);
@@ -54,7 +64,10 @@ export default function Command() {
           onAction={() => launchCommand({ name: "search-documentation", type: LaunchType.UserInitiated })}
         />
 
-        <MenuBarExtra.Submenu icon="brand-wordpress.svg" title="See Boilerplate in Action">
+        <MenuBarExtra.Submenu
+          icon={{ source: "brand-wordpress.png", tintColor: Color.PrimaryText }}
+          title="See Boilerplate in Action"
+        >
           {boilerplates &&
             boilerplates.map((template) =>
               template.slug === "deprecated" ? null : (
@@ -73,7 +86,10 @@ export default function Command() {
             )}
         </MenuBarExtra.Submenu>
 
-        <MenuBarExtra.Submenu icon="github-white.png" title="Create a WP Bones Repository">
+        <MenuBarExtra.Submenu
+          icon={{ source: "github-white.png", tintColor: Color.PrimaryText }}
+          title="Create a WP Bones Repository"
+        >
           {boilerplates &&
             boilerplates.map((template) =>
               template.slug === "deprecated" ? null : (
@@ -97,14 +113,14 @@ export default function Command() {
         />
         <MenuBarExtra.Item
           title="WP Bones AI"
-          icon={{ source: "brand-github-copilot.svg", tintColor: Color.Blue }}
+          icon={{ source: "brand-github-copilot.png", tintColor: Color.Blue }}
           onAction={() => open("https://wpbones.ownai.com/")}
         />
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Community">
         <MenuBarExtra.Item
-          icon="brand-discord.svg"
+          icon={{ source: "brand-discord.png", tintColor: Color.PrimaryText }}
           title="Discord"
           onAction={() => {
             open("https://discord.gg/5bdVyycU8F");
@@ -112,12 +128,12 @@ export default function Command() {
         />
         <MenuBarExtra.Item
           title="Discussion"
-          icon="messages.svg"
+          icon={{ source: "messages.png", tintColor: Color.PrimaryText }}
           onAction={() => open("https://github.com/wpbones/WPBones/discussions")}
         />
         <MenuBarExtra.Item
           title="Newsletter"
-          icon="mail-heart.svg"
+          icon={{ source: "mail-heart.png", tintColor: Color.PrimaryText }}
           onAction={() => {
             open("https://wpbones.substack.com/");
           }}

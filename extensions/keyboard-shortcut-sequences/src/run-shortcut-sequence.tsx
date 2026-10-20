@@ -60,7 +60,9 @@ export default function Command(props: { arguments: { sequenceName: string } }) 
             <Action.CreateQuicklink
               quicklink={{
                 name: sequence.name,
-                link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/HelloImSteven/keyboard-shortcut-sequences/run-shortcut-sequence?arguments=%7B%22sequenceName%22%3A%22${encodeURI(
+                link: `${
+                  process.env.RAYCAST_SCHEME ?? "raycast"
+                }://extensions/HelloImSteven/keyboard-shortcut-sequences/run-shortcut-sequence?arguments=%7B%22sequenceName%22%3A%22${encodeURI(
                   sequence.name
                 ).replaceAll("&", "%26")}%22%7D`,
               }}

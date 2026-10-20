@@ -2,27 +2,58 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openclaw",
   "title": "OpenClaw",
-  "description": "Chat with your local OpenClaw AI assistant",
+  "description": "Monitor and chat with your OpenClaw Gateway from Raycast",
   "icon": "icon.png",
   "author": "leveragedrobot",
   "contributors": [
-    "asaph_kotzin"
+    "asaph_kotzin",
+    "RaviTharuma",
+    "Olli0103"
   ],
   "categories": [
     "Productivity",
     "Developer Tools"
   ],
+  "keywords": [
+    "openclaw",
+    "gateway",
+    "assistant",
+    "automation",
+    "self-hosted",
+    "tailscale",
+    "cloudflare"
+  ],
   "license": "MIT",
   "commands": [
     {
+      "name": "control-center",
+      "title": "OpenClaw Control Center",
+      "description": "Monitor Gateway health, tasks, sessions, agents, nodes, channels, and usage",
+      "mode": "view",
+      "keywords": [
+        "dashboard",
+        "status",
+        "tasks",
+        "sessions",
+        "agents",
+        "nodes",
+        "channels",
+        "usage"
+      ]
+    },
+    {
       "name": "ask",
       "title": "Ask OpenClaw",
-      "description": "Quick question to OpenClaw",
+      "description": "Ask OpenClaw a question in a new Gateway session",
       "mode": "view",
+      "keywords": [
+        "question",
+        "prompt"
+      ],
       "arguments": [
         {
           "name": "question",
-          "placeholder": "Ask anything...",
+          "placeholder": "Ask anything…",
           "type": "text",
           "required": false
         }
@@ -31,76 +62,179 @@
     {
       "name": "chat",
       "title": "Chat with OpenClaw",
-      "description": "Open a conversation with OpenClaw",
-      "mode": "view"
+      "description": "Start or continue an OpenClaw Gateway conversation",
+      "mode": "view",
+      "keywords": [
+        "conversation",
+        "session",
+        "message"
+      ]
     },
     {
       "name": "clipboard",
       "title": "Ask About Clipboard",
-      "description": "Ask OpenClaw about your clipboard content",
-      "mode": "view"
+      "description": "Send clipboard text to OpenClaw with your question",
+      "mode": "view",
+      "keywords": [
+        "clipboard",
+        "question"
+      ]
     },
     {
       "name": "selected-text",
       "title": "Process Selected Text",
-      "description": "Summarize, explain, translate, or improve selected text",
-      "mode": "view"
+      "description": "Summarize, explain, translate, or rewrite selected text",
+      "mode": "view",
+      "keywords": [
+        "rewrite",
+        "summarize",
+        "translate",
+        "grammar",
+        "code"
+      ]
     },
     {
       "name": "status",
       "title": "Gateway Status",
-      "description": "Check OpenClaw gateway connection status",
-      "mode": "view"
+      "description": "Check the authenticated OpenClaw Gateway connection",
+      "mode": "view",
+      "keywords": [
+        "health",
+        "connection",
+        "pairing",
+        "tailscale",
+        "cloudflare"
+      ]
     },
     {
       "name": "open-webchat",
-      "title": "Open Webchat",
-      "description": "Open OpenClaw webchat in browser",
-      "mode": "no-view"
+      "title": "Open OpenClaw Control UI",
+      "description": "Open the configured Gateway Control UI in your browser",
+      "mode": "no-view",
+      "keywords": [
+        "web",
+        "dashboard",
+        "browser"
+      ]
     }
   ],
   "preferences": [
     {
+      "name": "connectionMode",
+      "title": "How Should Raycast Connect?",
+      "description": "Choose where the OpenClaw Gateway runs and how Raycast reaches it.",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Use OpenClaw Configuration",
+          "value": "config"
+        },
+        {
+          "title": "Local Gateway on This Mac",
+          "value": "local"
+        },
+        {
+          "title": "Local Network Gateway",
+          "value": "network"
+        },
+        {
+          "title": "Tailscale",
+          "value": "tailscale"
+        },
+        {
+          "title": "Cloudflare Tunnel and Access",
+          "value": "cloudflare"
+        }
+      ]
+    },
+    {
       "name": "endpoint",
-      "title": "API Endpoint",
-      "description": "OpenClaw gateway URL. Use http://127.0.0.1:18789 for local, or your Tailscale serve URL (e.g., https://machine-name.tailnet.ts.net) for remote access.",
+      "title": "Gateway URL",
+      "description": "Required for Local Network, Tailscale, and Cloudflare. Every remote connection must use wss://.",
       "type": "textfield",
-      "default": "http://127.0.0.1:18789",
-      "required": true
+      "placeholder": "wss://gateway.example.com",
+      "required": false
     },
     {
       "name": "token",
-      "title": "API Token",
-      "description": "Find in ~/.openclaw/openclaw.json under gateway.auth.token",
+      "title": "Gateway Token",
+      "description": "Optional shared Gateway token. Leave empty to use a paired device token or read a string token from ~/.openclaw/openclaw.json.",
       "type": "password",
-      "required": true
+      "required": false
+    },
+    {
+      "name": "password",
+      "title": "Gateway Password",
+      "description": "Optional Gateway password. A token is preferred when both are available.",
+      "type": "password",
+      "required": false
     },
     {
       "name": "agentId",
       "title": "Agent ID",
-      "description": "Which OpenClaw agent to use",
+      "description": "The default OpenClaw agent for new conversations.",
       "type": "textfield",
       "default": "main",
+      "required": false
+    },
+    {
+      "name": "cloudflareAuthMode",
+      "title": "Cloudflare Access Method",
+      "description": "Used only for Cloudflare. Browser sign-in opens the identity provider configured by the Access policy, such as GitHub or Google.",
+      "type": "dropdown",
+      "default": "browser",
+      "required": false,
+      "data": [
+        {
+          "title": "Browser Sign-In (GitHub, Google, or Other IdP)",
+          "value": "browser"
+        },
+        {
+          "title": "Service Token",
+          "value": "service-token"
+        }
+      ]
+    },
+    {
+      "name": "cloudflareAccessClientId",
+      "title": "Cloudflare Access Client ID",
+      "description": "Required only when Cloudflare authentication is set to Service Token.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "cloudflareAccessClientSecret",
+      "title": "Cloudflare Access Client Secret",
+      "description": "Required only when Cloudflare authentication is set to Service Token.",
+      "type": "password",
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.0",
-    "@raycast/utils": "^2.2.2"
+    "@openclaw/gateway-client": "2026.9.4",
+    "@openclaw/gateway-protocol": "2026.9.4",
+    "@raycast/api": "^2.4.1",
+    "json5": "2.2.3",
+    "ws": "8.21.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "22.13.10",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
     "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@types/ws": "8.18.1",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build --skip-types -e dist -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run lint && npm run build && npm run typecheck && npm run test:bundle",
+    "test:bundle": "node scripts/check-bundle-load.cjs",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },

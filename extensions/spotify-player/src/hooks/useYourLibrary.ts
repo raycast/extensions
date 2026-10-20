@@ -1,4 +1,4 @@
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { getUserPlaylists } from "../api/getUserPlaylists";
 import { getMySavedAlbums } from "../api/getMySavedAlbums";
 import { getFollowedArtists } from "../api/getFollowedArtists";
@@ -10,7 +10,6 @@ export type LibraryCategory = "all" | "playlists" | "albums" | "artists" | "trac
 
 type UseMyLibraryProps = {
   category?: LibraryCategory;
-  keepPreviousData?: boolean;
 };
 
 type LibraryData = {
@@ -49,9 +48,7 @@ async function fetchLibraryData(category: LibraryCategory): Promise<LibraryData>
 
 export function useYourLibrary(options: UseMyLibraryProps = {}) {
   const category = options.category ?? "all";
-  const { data, error, isLoading } = useCachedPromise(fetchLibraryData, [category], {
-    keepPreviousData: options?.keepPreviousData,
-  });
+  const { data, error, isLoading } = usePromise(fetchLibraryData, [category]);
 
   return {
     myLibraryData: {

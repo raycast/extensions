@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 
 import { getKobbePreferences } from "./preferences";
 import { SiteOverviewDetail, SitesPicker } from "./views";
@@ -20,7 +20,7 @@ export default function SiteOverview() {
           <Action
             title="Refresh Sites"
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={revalidate}
           />
         </ActionPanel>

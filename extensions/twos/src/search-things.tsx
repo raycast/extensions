@@ -12,6 +12,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, listDeepLink, listWebUrl, TwosList, TwosThing } from "./api";
 import { resolveOpenTarget, useDesktopApp } from "./useDesktopApp";
+import AddThing from "./add-thing";
 
 // Search matches the mobile app's behavior (apps/mobile/components/SearchResults.tsx):
 //   - Both lists AND things are shown; lists rank above things.
@@ -186,6 +187,14 @@ export default function SearchThings() {
   const thingRows = useMemo(() => rows.filter((r): r is ThingRow => r.kind === "thing"), [rows]);
 
   const emptyStateTitle = query.trim() ? "No results" : "Recent Lists";
+  const createAction = query.trim() ? (
+    <Action.Push
+      title="Create Thing"
+      icon={Icon.PlusCircle}
+      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      target={<AddThing defaultValue={query} />}
+    />
+  ) : null;
 
   return (
     <List
@@ -206,6 +215,7 @@ export default function SearchThings() {
                 <ActionPanel>
                   <OpenActions listId={list.id} target={target} app={app} browserTitle="Open List in Browser" />
                   <Action.CopyToClipboard content={list.title} title="Copy Title" />
+                  {createAction}
                 </ActionPanel>
               }
             />
@@ -273,6 +283,7 @@ export default function SearchThings() {
                       thing `text` is empty, so copying it silently yielded "". */}
                     <Action.CopyToClipboard content={title} title="Copy Text" />
                     {thing.url ? <Action.OpenInBrowser url={thing.url} title="Open Hyperlink" /> : null}
+                    {createAction}
                   </ActionPanel>
                 }
               />
@@ -285,6 +296,7 @@ export default function SearchThings() {
           title={emptyStateTitle}
           description={query.trim() ? `No matches for "${query.trim()}"` : "Start typing to search."}
           icon={Icon.MagnifyingGlass}
+          actions={createAction ? <ActionPanel>{createAction}</ActionPanel> : undefined}
         />
       )}
     </List>

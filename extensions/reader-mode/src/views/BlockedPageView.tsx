@@ -1,17 +1,19 @@
 import { Detail } from "@raycast/api";
-import { BrowserTab } from "../types/browser";
 import { BlockedPageActions } from "../actions/BlockedPageActions";
+import { BrowserTab } from "../types/browser";
 import { isWindows } from "../utils/host-api";
 
 interface BlockedPageViewProps {
   blockedUrl: string;
   hasBrowserExtension: boolean;
   isWaitingForBrowser: boolean;
+  /** Why the last fetch from the browser failed; shown above the instructions. */
+  browserFetchError: string | null;
   foundTab: BrowserTab | null;
   onFetchFromBrowser: () => void;
 }
 
-/** The Refresh shortcut, written the way the reader's own keyboard is labelled. */
+/** The Refresh shortcut, written the way the reader's own keyboard is labeled. */
 const REFRESH_KEYS = isWindows ? "Ctrl + R" : "⌘ + R";
 
 function buildBlockedMarkdown(hasBrowserExtension: boolean, foundTab: BrowserTab | null): string {
@@ -61,10 +63,15 @@ export function BlockedPageView({
   blockedUrl,
   hasBrowserExtension,
   isWaitingForBrowser,
+  browserFetchError,
   foundTab,
   onFetchFromBrowser,
 }: BlockedPageViewProps) {
-  const markdown = buildBlockedMarkdown(hasBrowserExtension, foundTab);
+  const instructions = buildBlockedMarkdown(hasBrowserExtension, foundTab);
+  // Without this, a failed fetch leaves the page exactly as it was, and looks like nothing happened.
+  const markdown = browserFetchError
+    ? instructions.replace(/^(# .*\n)/, `$1\n> **Couldn't read the page from your browser.** ${browserFetchError}\n`)
+    : instructions;
 
   return (
     <Detail

@@ -1,0 +1,200 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "league-stats",
+  "title": "League Stats",
+  "description": "Look up League of Legends players: ranked and recent win rates, recent matches with KDA, champions and items, and full match breakdowns.",
+  "icon": "icon.png",
+  "author": "mert_tufekci",
+  "categories": [
+    "Fun",
+    "Data"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-player",
+      "title": "Search Player",
+      "subtitle": "League Stats",
+      "description": "Look up a League of Legends player by Riot ID: win rates, recent matches, and full match breakdowns.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "riotId",
+          "type": "text",
+          "placeholder": "Riot ID (Name#TAG)",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Riot API Key",
+      "description": "Get one at developer.riotgames.com. Development keys expire every 24 hours; a Personal API Key does not.",
+      "placeholder": "RGAPI-…"
+    },
+    {
+      "name": "region",
+      "type": "dropdown",
+      "required": true,
+      "title": "Default Region",
+      "description": "Used when a player's region cannot be detected automatically.",
+      "default": "tr1",
+      "data": [
+        {
+          "title": "Türkiye (TR)",
+          "value": "tr1"
+        },
+        {
+          "title": "Europe West (EUW)",
+          "value": "euw1"
+        },
+        {
+          "title": "Europe Nordic & East (EUNE)",
+          "value": "eun1"
+        },
+        {
+          "title": "Middle East (ME)",
+          "value": "me1"
+        },
+        {
+          "title": "Russia (RU)",
+          "value": "ru"
+        },
+        {
+          "title": "North America (NA)",
+          "value": "na1"
+        },
+        {
+          "title": "Brazil (BR)",
+          "value": "br1"
+        },
+        {
+          "title": "Latin America North (LAN)",
+          "value": "la1"
+        },
+        {
+          "title": "Latin America South (LAS)",
+          "value": "la2"
+        },
+        {
+          "title": "Korea (KR)",
+          "value": "kr"
+        },
+        {
+          "title": "Japan (JP)",
+          "value": "jp1"
+        },
+        {
+          "title": "Oceania (OCE)",
+          "value": "oc1"
+        },
+        {
+          "title": "Singapore (SG)",
+          "value": "sg2"
+        },
+        {
+          "title": "Taiwan (TW)",
+          "value": "tw2"
+        },
+        {
+          "title": "Vietnam (VN)",
+          "value": "vn2"
+        },
+        {
+          "title": "Philippines (PH)",
+          "value": "ph2"
+        },
+        {
+          "title": "Thailand (TH)",
+          "value": "th2"
+        }
+      ]
+    },
+    {
+      "name": "gameType",
+      "type": "dropdown",
+      "required": false,
+      "title": "Game Type",
+      "description": "Which recent games to show and to count in the win rate.",
+      "default": "all",
+      "data": [
+        {
+          "title": "All Game Types",
+          "value": "all"
+        },
+        {
+          "title": "Ranked Solo/Duo",
+          "value": "solo"
+        },
+        {
+          "title": "Ranked Flex",
+          "value": "flex"
+        },
+        {
+          "title": "All Ranked (Solo/Duo and Flex)",
+          "value": "ranked"
+        },
+        {
+          "title": "ARAM",
+          "value": "aram"
+        },
+        {
+          "title": "Normal and Other Modes (not ranked)",
+          "value": "other"
+        }
+      ]
+    },
+    {
+      "name": "matchCount",
+      "type": "dropdown",
+      "required": false,
+      "title": "Games to Load",
+      "description": "How many recent games to load at first, and each time you choose Show More Games.",
+      "default": "20",
+      "data": [
+        {
+          "title": "10 games",
+          "value": "10"
+        },
+        {
+          "title": "20 games",
+          "value": "20"
+        },
+        {
+          "title": "30 games",
+          "value": "30"
+        },
+        {
+          "title": "50 games",
+          "value": "50"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

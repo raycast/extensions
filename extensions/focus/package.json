@@ -268,6 +268,10 @@
     "macOS"
   ],
   "overrides": {
-    "brace-expansion": "5.0.8"
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7",
+    "brace-expansion@5": "5.0.12",
+    "js-yaml@3": "3.15.2",
+    "fast-uri": "3.1.8"
   }
 }

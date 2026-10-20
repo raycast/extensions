@@ -14,19 +14,25 @@ Track your standing and sitting time throughout the day to maintain a healthy wo
 ## Commands
 
 ### Standing Desk Tracker
+
 Main command to view and manage your standing/sitting state. Shows current status, elapsed time, and today's statistics.
 
 ### Standing Desk (Menubar)
+
 Displays your current status in the menubar with quick access to:
+
 - Current state (Standing/Sitting) and elapsed time
 - Today's statistics (standing, sitting, total time)
 - Quick toggle to switch states
 
 ### Toggle Standing/Sitting
+
 Quick command to toggle between standing and sitting states without opening a view.
 
 ### Standing Desk Stats
+
 View detailed statistics including:
+
 - Total time, standing time, and sitting time
 - Visual breakdown with progress bars
 - Session statistics (count, average duration, longest/shortest sessions)
@@ -76,4 +82,3 @@ npm run fix-lint
 ## License
 
 MIT
-

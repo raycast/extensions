@@ -1,9 +1,10 @@
 import { MenuBarExtra, Icon, Image, Color } from "@raycast/api";
 import { useState } from "react";
-import { FocusText, LongBreakText, ShortBreakText, TimeStoppedPlaceholder } from "./lib/constants";
+import { FocusText, IntervalTitles, LongBreakText, ShortBreakText, TimeStoppedPlaceholder } from "./lib/constants";
 import {
   createInterval,
   getCurrentInterval,
+  getNextIntervalType,
   resetInterval,
   restartInterval,
   pauseInterval,
@@ -13,6 +14,7 @@ import {
   preferences,
   progress,
   endOfInterval,
+  skipInterval,
 } from "./lib/intervals";
 import { secondsToTime } from "./lib/secondsToTime";
 import { Interval, IntervalType } from "./lib/types";
@@ -53,6 +55,11 @@ export default function TogglePomodoroTimer() {
   function onRestart() {
     restartInterval();
     setCurrentInterval(getCurrentInterval());
+  }
+
+  async function onSkip() {
+    await checkDNDExtensionInstall();
+    setCurrentInterval(skipInterval());
   }
 
   let icon: Image.ImageLike;
@@ -100,6 +107,13 @@ export default function TogglePomodoroTimer() {
             icon={Icon.Repeat}
             onAction={onRestart}
             shortcut={{ modifiers: ["cmd"], key: "t" }}
+          />
+          <MenuBarExtra.Item
+            title="Skip to Next"
+            subtitle={IntervalTitles[getNextIntervalType(currentInterval.type)]}
+            icon={Icon.Forward}
+            onAction={onSkip}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
           />
         </>
       ) : (

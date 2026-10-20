@@ -10,6 +10,7 @@ import {
   ResetMode,
   simpleGit,
   SimpleGit,
+  SimpleGitOptions,
 } from "simple-git";
 import { showToast, Toast, getPreferenceValues, Alert, confirmAlert, environment } from "@raycast/api";
 import { readFileSync, writeFileSync, mkdtempSync, chmodSync, rmSync, existsSync, statSync } from "fs";
@@ -65,20 +66,7 @@ export class GitManager {
     this.gitDirPath = gitDirPath;
     this.gitCommonDirPath = gitCommonDirPath;
 
-    this.git = simpleGit(repoPath, {
-      binary: getPreferenceValues<Preferences>().binaryPath,
-      errors: (error, _result) => {
-        if (error) {
-          showFailureToast(error, { title: `Error running command` });
-        }
-        return error;
-      },
-    });
-
-    this.git = this.git.env(shellEnvironmentVariables);
-
-    // Global logging of all git commands for debugging
-    this.setupGlobalLogging();
+    this.git = GitManager.createSimpleGit(repoPath).env(shellEnvironmentVariables);
   }
 
   /**
@@ -142,6 +130,35 @@ export class GitManager {
     return existsSync(join(this.gitCommonDirPath, "worktrees"));
   }
 
+  private static createSimpleGit(repoPath: string, unsafe?: SimpleGitOptions["unsafe"]): SimpleGit {
+    const git = simpleGit(repoPath, {
+      binary: getPreferenceValues<Preferences>().binaryPath,
+      unsafe,
+      errors: (error, _result) => {
+        if (error) {
+          showFailureToast(error, { title: `Error running command` });
+        }
+        return error;
+      },
+    });
+
+    // Global logging of all git commands for debugging
+    GitManager.setupGlobalLogging(git);
+    return git;
+  }
+
+  /**
+   * simple-git only accepts GIT_EDITOR and `-c sequence.editor` with allowUnsafeEditor, so commands that need them run on
+   * a separate instance with its own env copy (`this.git.env(name, value)` would write into shared shellEnvironmentVariables).
+   * GIT_EDITOR=true keeps the default commit message instead of opening an editor.
+   */
+  private createGitWithoutEditor(): SimpleGit {
+    return GitManager.createSimpleGit(this.repoPath, { allowUnsafeEditor: true }).env({
+      ...shellEnvironmentVariables,
+      GIT_EDITOR: "true",
+    });
+  }
+
   /**
    * Resolves git directories for a working tree.
    * In linked worktrees `.git` is a file pointing to `<main repo>/.git/worktrees/<name>`.
@@ -180,8 +197,8 @@ export class GitManager {
   /**
    * Sets up global logging of git commands and streaming output.
    */
-  private setupGlobalLogging(): void {
-    this.git.outputHandler((command, stdout, stderr, args) => {
+  private static setupGlobalLogging(git: SimpleGit): void {
+    git.outputHandler((command, stdout, stderr, args) => {
       const ignoredCommands = ["ls-files", "ls-remote", "remote", "worktree"];
       // Skip logging for ls-files command
       if (ignoredCommands.some((command) => args.includes(command))) {
@@ -868,58 +885,67 @@ export class GitManager {
    * For reword, the new message will be applied using an exec amend step.
    */
   async interactiveRebase(startHash: string, plan: RebasePlanItem[]): Promise<void> {
-    // Build rebase todo content based on plan
-    const todoLines: string[] = [];
-
-    for (const item of plan) {
-      const action = item.action;
-      const hash = item.hash;
-
-      switch (action) {
-        case "pick":
-          todoLines.push(`pick ${hash}`);
-          break;
-        case "drop":
-          todoLines.push(`drop ${hash}`);
-          break;
-        case "edit":
-          todoLines.push(`edit ${hash}`);
-          break;
-        case "squash":
-          todoLines.push(`squash ${hash}`);
-          break;
-        case "fixup":
-          todoLines.push(`fixup ${hash}`);
-          break;
-        case "reword":
-          // Use pick + exec amend to set message non-interactively
-          todoLines.push(`pick ${hash}`);
-          if (item.newMessage) {
-            // Escape double quotes and backslashes for safe shell embedding
-            const escaped = item.newMessage.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-            todoLines.push(`exec git commit --amend -m "${escaped}"`);
-          } else {
-            throw new Error("No new message provided for reword action in interactive rebase plan");
-          }
-          break;
-      }
-    }
-
-    // Create temporary sequence editor script that writes our todo
     const tempDirectory = mkdtempSync(join(tmpdir(), "raycast-git-"));
-    const editorPath = join(tempDirectory, "sequence-editor.sh");
-    // Use template literal to generate shell script for sequence editor
-    const script = `#!/bin/sh
+    try {
+      // Reword messages are never written into the todo, where `exec` would hand them to the shell. Each one is written to a
+      // file that the sequence editor copies into rebase-merge, so it outlives a rebase that stops early (edit, conflict)
+      // and Git removes it when the rebase finishes or is aborted.
+      const rebaseMergePath = join(this.gitDirPath, "rebase-merge");
+      const quoteForShell = (value: string) => `'${value.replace(/'/g, `'\\''`)}'`;
+      const messageCopyCommands: string[] = [];
+
+      // Build rebase todo content based on plan
+      const todoLines: string[] = [];
+
+      for (const item of plan) {
+        const action = item.action;
+        const hash = item.hash;
+
+        switch (action) {
+          case "pick":
+            todoLines.push(`pick ${hash}`);
+            break;
+          case "drop":
+            todoLines.push(`drop ${hash}`);
+            break;
+          case "edit":
+            todoLines.push(`edit ${hash}`);
+            break;
+          case "squash":
+            todoLines.push(`squash ${hash}`);
+            break;
+          case "fixup":
+            todoLines.push(`fixup ${hash}`);
+            break;
+          case "reword":
+            // Use pick + exec amend to set message non-interactively
+            todoLines.push(`pick ${hash}`);
+            if (item.newMessage) {
+              const messageFileName = `raycast-reword-${messageCopyCommands.length}`;
+              const messagePath = join(tempDirectory, messageFileName);
+              writeFileSync(messagePath, item.newMessage, { encoding: "utf-8" });
+              messageCopyCommands.push(`/bin/cp ${quoteForShell(messagePath)} ${quoteForShell(rebaseMergePath)}`);
+              todoLines.push(`exec git commit --amend -F ${quoteForShell(join(rebaseMergePath, messageFileName))}`);
+            } else {
+              throw new Error("No new message provided for reword action in interactive rebase plan");
+            }
+            break;
+        }
+      }
+
+      // Create temporary sequence editor script that writes our todo
+      const editorPath = join(tempDirectory, "sequence-editor.sh");
+      // Use template literal to generate shell script for sequence editor
+      const script = `#!/bin/sh
 TODO_FILE="$1"
-/bin/cat > "$TODO_FILE" <<'__REBASE_TODO__'
+${messageCopyCommands.map((command) => `${command} || exit 1\n`).join("")}/bin/cat > "$TODO_FILE" <<'__REBASE_TODO__'
 ${todoLines.join("\n")}
 __REBASE_TODO__
 `;
-    writeFileSync(editorPath, script, { encoding: "utf-8" });
-    // Set executable permissions for the script: 0o755 means rwxr-xr-x (owner can read/write/execute, group and others can read/execute)
-    chmodSync(editorPath, 0o755);
+      writeFileSync(editorPath, script, { encoding: "utf-8" });
+      // Set executable permissions for the script: 0o755 means rwxr-xr-x (owner can read/write/execute, group and others can read/execute)
+      chmodSync(editorPath, 0o755);
 
-    try {
       const parentCommit = await this.getFirstParentOfCommit(startHash);
       const options = ["-c", `sequence.editor=${editorPath}`, "rebase", "--interactive"];
       if (parentCommit) {
@@ -927,7 +953,7 @@ __REBASE_TODO__
       } else {
         options.push("--root");
       }
-      await this.git.raw(options);
+      await this.createGitWithoutEditor().raw(options);
     } finally {
       try {
         rmSync(tempDirectory, { recursive: true, force: true });
@@ -1539,7 +1565,7 @@ __REBASE_TODO__
    * Continues an ongoing rebase.
    */
   async continueRebase(): Promise<void> {
-    await this.git.env("GIT_EDITOR", "true").rebase(["--continue"]);
+    await this.createGitWithoutEditor().rebase(["--continue"]);
   }
 
   /**

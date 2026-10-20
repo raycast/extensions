@@ -21,6 +21,14 @@ export function getIssueStatus(issue: IssueFieldsFragment | IssueDetailFieldsFra
     };
   }
 
+  if (issue.closed) {
+    return {
+      icon: { source: "issue-closed.svg", tintColor: Color.Purple },
+      text: "Closed",
+      color: Color.Purple,
+    };
+  }
+
   return {
     icon: { source: "issue-open.svg", tintColor: Color.Green },
     text: "Open",

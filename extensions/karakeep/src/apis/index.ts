@@ -1,5 +1,6 @@
 import { logger } from "@chrismessina/raycast-logger";
 import { ApiResponse, Backup, Bookmark, GetBookmarksParams, Highlight, List, Tag, UserStats } from "../types";
+import { ApiError, clearRejectedKey, describeApiError, isRejectedKey, markKeyRejected } from "../utils/apiError";
 import { getApiConfig } from "../utils/config";
 import { describeConnectionError, getConnectionErrorCode, isConnectionError } from "../utils/connection";
 import { toErrorMessage } from "../utils/toast";
@@ -22,62 +23,35 @@ export interface CreateBookmarkResult {
   wasCreated: boolean;
 }
 
-interface ZodIssue {
-  path?: (string | number)[];
-  message?: string;
-}
-
-/**
- * Turn an error body into something a toast can actually show. Karakeep
- * serializes validation failures as `{ error: { name: "ZodError", message } }`
- * where `message` is itself a JSON string holding the issue array — so the
- * useful part is two levels of encoding deep, and reading `error.issues`
- * alone leaves you with a bare "HTTP 400".
- */
-function describeApiError(body: string, status: number): string {
-  try {
-    const parsed = JSON.parse(body);
-
-    // The /api/trpc endpoints (search, summarize) answer a `batch=1` request
-    // with a top-level ARRAY, so the error hides one index deeper and under a
-    // `json` envelope. Reading `parsed.error` on an array yields undefined,
-    // which is how these two commands ended up reporting a bare status code.
-    const entry = Array.isArray(parsed) ? parsed[0] : parsed;
-    const err = entry?.error?.json ?? entry?.error;
-
-    let issues: ZodIssue[] | undefined = Array.isArray(err?.issues) ? err.issues : undefined;
-    if (!issues && typeof err?.message === "string") {
-      try {
-        const nested = JSON.parse(err.message);
-        if (Array.isArray(nested)) issues = nested;
-      } catch {
-        // error.message is prose, not encoded issues — handled below.
-      }
-    }
-
-    const described = issues
-      ?.map((issue) => (issue.path?.length ? `${issue.path.join(".")}: ${issue.message}` : issue.message))
-      .filter(Boolean);
-    if (described?.length) return described.join("; ");
-
-    if (typeof err === "string") return err;
-    if (typeof err?.message === "string") return err.message;
-    if (typeof entry?.message === "string") return entry.message;
-  } catch {
-    // body is not JSON, fall through to the status line
-  }
-  return `HTTP ${status}`;
-}
-
 export async function fetchWithAuth<T = unknown>(path: string, options: FetchOptions = {}): Promise<T> {
   const result = await fetchWithAuthResult<T>(path, options);
   return result.data;
 }
 
 async function fetchWithAuthResult<T>(path: string, options: FetchOptions = {}): Promise<FetchResult<T>> {
-  const { apiUrl, apiKey } = await getApiConfig();
-  const url = new URL(path, apiUrl);
+  // getApiConfig throws a plain Error when apiUrl or apiKey is blank, which
+  // isAuthError() cannot recognise — so every view fell back to a generic
+  // "Couldn't load bookmarks" instead of the screen that points at Settings.
+  // probeApi already classifies this case as unauthorized; the fetch layer has
+  // to agree, or the two disagree about the same broken config.
+  let apiUrl: string;
+  let apiKey: string;
+  try {
+    ({ apiUrl, apiKey } = await getApiConfig());
+  } catch (error) {
+    throw new ApiError(error instanceof Error ? error.message : "API configuration is not initialized", 401);
+  }
   const method = options.method || "GET";
+
+  // Short-circuit rather than send a request we already know the answer to. The
+  // thrown error is the same shape a real 401 produces, so every caller — guard,
+  // toast, form notice — behaves identically whether it was first or fiftieth.
+  if (isRejectedKey(apiKey)) {
+    log.log(`${method} ${path} skipped — this API key was already rejected`);
+    throw new ApiError("HTTP 401 — Unauthorized", 401);
+  }
+
+  const url = new URL(path, apiUrl);
   log.log(`${method} ${path}`);
   const done = log.time(`${method} ${path}`);
 
@@ -121,11 +95,15 @@ async function fetchWithAuthResult<T>(path: string, options: FetchOptions = {}):
     // Closed here as well as on success: the failure cases are the ones whose
     // timing you actually want when diagnosing a slow or hanging server.
     done({ status: response.status });
+    if (response.status === 401) markKeyRejected(apiKey);
     log.error(`${method} ${path} failed`, { status: response.status, body: data });
-    throw new Error(describeApiError(data, response.status));
+    throw new ApiError(describeApiError(data, response.status), response.status);
   }
 
   done({ status: response.status });
+  // A key that works cannot also be a rejected one — clears the latch if the
+  // server was briefly returning 401 for a reason other than the credential.
+  clearRejectedKey(apiKey);
 
   try {
     return { data: JSON.parse(data) as T, status: response.status };

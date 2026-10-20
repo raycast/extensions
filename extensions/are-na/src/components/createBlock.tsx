@@ -53,7 +53,7 @@ export function CreateBlockView({ channel }: { channel: MinimalChannel }) {
       }
     >
       <Form.Description text="Add Block" />
-      <Form.TextArea title="Content" placeholder="Enter the content of the Block" {...itemProps.content} />
+      <Form.TextArea title="Content" placeholder="Paste a URL or write text in Markdown" {...itemProps.content} />
       <Form.TextField title="Title (Optional)" placeholder="Custom title for this block" {...itemProps.title} />
       <Form.TextArea title="Description (Optional)" placeholder="Markdown description" {...itemProps.description} />
     </Form>

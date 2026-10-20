@@ -9,6 +9,7 @@ import { useCachedState } from "@raycast/utils";
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 
 import { getErrorMessage } from "./errors";
+import { matchesOwnerSearchFilter } from "./repository-filter";
 
 export const WEB_IDES: {
   title: string;
@@ -20,11 +21,13 @@ export const WEB_IDES: {
     title: "github.dev",
     baseUrl: "https://github.dev/",
     icon: { source: "github-dev.svg", tintColor: Color.PrimaryText },
+    shortcut: { modifiers: ["cmd"], key: "o" },
   },
   {
     title: "VS Code for the Web",
     baseUrl: "https://vscode.dev/github/",
     icon: { source: "vscode.svg", tintColor: Color.PrimaryText },
+    shortcut: { modifiers: ["cmd"], key: "v" },
   },
   {
     title: "CodeSandbox",
@@ -50,6 +53,7 @@ export const WEB_IDES: {
     title: "Sourcegraph",
     baseUrl: `https://sourcegraph.com/github.com/`,
     icon: { source: "sourcegraph.svg", tintColor: Color.PrimaryText },
+    shortcut: { modifiers: ["cmd"], key: "s" },
   },
   {
     title: "DeepWiki",
@@ -117,6 +121,24 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
     setHistory(nextRepositories);
   }
 
+  function updateRepository(repository: ExtendedRepositoryFieldsFragment) {
+    setHistory((current) =>
+      (current ?? []).map((item) =>
+        item.id === repository.id
+          ? {
+              ...item,
+              viewerHasStarred: repository.viewerHasStarred,
+              stargazerCount: repository.stargazerCount,
+            }
+          : item,
+      ),
+    );
+  }
+
+  function removeRepository(repository: ExtendedRepositoryFieldsFragment) {
+    setHistory((current) => (current ?? []).filter((item) => item.id !== repository.id));
+  }
+
   let data = history;
 
   if (searchText) {
@@ -124,12 +146,10 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
   }
 
   if (searchFilter) {
-    // Converting query filter string to regexp:
-    const repositoryFilter = `${searchFilter.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`;
-    data = data.filter((r) => r.nameWithOwner.match(repositoryFilter));
+    data = data.filter((r) => matchesOwnerSearchFilter(r.nameWithOwner, searchFilter));
   }
 
-  return { data, visitRepository };
+  return { data, visitRepository, updateRepository, removeRepository };
 }
 
 export const REPO_SORT_TYPES_TO_QUERIES = [

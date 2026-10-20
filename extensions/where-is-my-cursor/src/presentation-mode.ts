@@ -1,4 +1,5 @@
 import { showToast, Toast, closeMainWindow } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { locatecursor } from "swift:../swift/locatecursor";
 
 export default async function main() {
@@ -7,7 +8,9 @@ export default async function main() {
       style: Toast.Style.Success,
       title: "Presentation Mode Activated",
     });
-    locatecursor("-p", "presentation", "");
+    void locatecursor("-p", "presentation", "").catch((error) =>
+      showFailureToast(error, { title: "Failed to run Presentation Mode" }),
+    );
     await closeMainWindow();
   } catch (err) {
     await showToast({

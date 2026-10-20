@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apple-passwords",
-  "title": "Apple Password",
-  "description": "Search Apple Passwords and copy passwords or one-time codes from your local vault.",
-  "icon": "icon.png",
-  "author": "alec-harmon",
+  "title": "Apple Passwords",
+  "description": "Search and manage Apple Passwords from Raycast using the APW CLI.",
+  "icon": "command-icon.png",
+  "author": "bendews",
   "platforms": [
     "macOS"
   ],
@@ -15,39 +15,95 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "apw",
-      "title": "Search Passwords",
-      "subtitle": "Apple Password",
-      "description": "Search Apple Passwords and copy passwords or one-time codes",
+      "name": "list",
+      "title": "Apple Passwords",
+      "description": "Search your Apple Password items by URL.",
+      "keywords": [
+        "ap",
+        "apw",
+        "apple",
+        "password",
+        "login"
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        }
+      ],
       "mode": "view"
     },
     {
-      "name": "clear-cache",
-      "title": "Clear Password Cache",
-      "subtitle": "Apple Password",
-      "description": "Delete the local Apple Password cache file",
-      "mode": "no-view"
+      "name": "save",
+      "title": "Save Apple Password",
+      "description": "Save a new or updated password to Apple Passwords.",
+      "keywords": ["ap", "apw", "apple", "password", "save", "new"],
+      "mode": "view"
+    },
+    {
+      "name": "auth",
+      "title": "Authenticate Apple Passwords",
+      "description": "Authenticate the APW daemon by entering the PIN macOS displays.",
+      "keywords": [
+        "ap",
+        "apw",
+        "apple",
+        "password",
+        "auth",
+        "pair"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "default": "/opt/homebrew/bin/apw",
+      "description": "Enter the APW binary path",
+      "name": "cliPathAPW",
+      "placeholder": "e.g., /usr/local/bin/apw",
+      "required": false,
+      "title": "APW CLI path",
+      "type": "textfield"
+    },
+    {
+      "default": false,
+      "description": "Copy secret values instead of filling them at the cursor position",
+      "name": "copySecrets",
+      "required": false,
+      "title": "Copy secrets",
+      "label": "Copy secret values instead of filling them at the cursor position",
+      "type": "checkbox"
+    },
+    {
+      "default": "5",
+      "description": "How long to cache retrieved passwords (in minutes). Set to 0 to disable.",
+      "name": "cacheTimeout",
+      "placeholder": "e.g., 5",
+      "required": false,
+      "title": "Cache Timeout (in minutes)",
+      "type": "textfield"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.11",
-    "sql.js": "^1.14.1"
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
+    "psl": "^1.15.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
+    "@types/react": "19.0.12",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "tsx": "^4.19.3",
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build",
+    "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "node --import tsx --test $(find src/test -name '*.test.ts' -type f | sort | tr '\n' ' ')",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

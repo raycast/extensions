@@ -506,22 +506,21 @@ function DueOnSubMenu({ task, mutate }: DueOnSubmenuProps) {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Changing due date" });
 
-      // Adjust the date to UTC
-      const utcDueOn = dueOn ? new Date(Date.UTC(dueOn.getFullYear(), dueOn.getMonth(), dueOn.getDate())) : null;
+      const dueOnString = dueOn ? format(dueOn, "yyyy-MM-dd") : null;
 
-      const asyncUpdate = updateTask(task.gid, { due_on: utcDueOn });
+      const asyncUpdate = updateTask(task.gid, { due_on: dueOnString });
 
       mutate({
         asyncUpdate,
         optimisticUpdate(task) {
-          return { ...task, due_on: utcDueOn };
+          return { ...task, due_on: dueOnString };
         },
       });
 
       await showToast({
         style: Toast.Style.Success,
         title: "Changed due date",
-        message: utcDueOn ? `Due on ${format(utcDueOn, "d MMM yyyy")}` : "No due date",
+        message: dueOn ? `Due on ${format(dueOn, "d MMM yyyy")}` : "No due date",
       });
     } catch (error) {
       await showToast({

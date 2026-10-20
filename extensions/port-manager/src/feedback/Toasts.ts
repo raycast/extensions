@@ -57,6 +57,24 @@ const Toasts = {
         message: process.name ? `${process.name} (${process.pid})` : `${process.pid}`,
       };
     },
+    Survived(process: { name?: string; pid: number }, forceKill?: () => void): Toast.Options {
+      const label = process.name ? `${process.name} (${process.pid})` : `${process.pid}`;
+      return {
+        style: Toast.Style.Failure,
+        title: "Process Still Running",
+        message: `${label} did not exit after the signal`,
+        primaryAction:
+          forceKill === undefined
+            ? undefined
+            : {
+                title: "Force Kill (SIGKILL)",
+                onAction: (toast) => {
+                  toast.hide();
+                  forceKill();
+                },
+              },
+      };
+    },
   },
 } as const;
 

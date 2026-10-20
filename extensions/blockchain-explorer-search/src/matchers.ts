@@ -107,7 +107,7 @@ export class TokenMatch extends AddressMatch {
   }
 }
 
-// .eth at the end
+// ENS supports both .eth names and DNS names imported into ENS.
 export class ENSMatch extends Match {
   constructor(search: string, explorer: Explorer) {
     super(search, explorer);
@@ -123,8 +123,9 @@ export class ENSMatch extends Match {
   }
   match() {
     if (this.explorer.chainId !== 1) return false;
-    if (this.search.endsWith(".eth")) return true;
-    return false;
+    if (this.search.length <= 2 || /[\s/:@?#]/u.test(this.search)) return false;
+    const labels = this.search.split(".");
+    return labels.length > 1 && labels.every((label) => label.length > 0);
   }
 }
 

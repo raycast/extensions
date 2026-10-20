@@ -41,18 +41,31 @@ export default function Command() {
 
           child.unref();
 
-          setTimeout(async () => {
+          // Bounded readiness probe: retry until the server responds or the
+          // deadline passes, so slower CookCLI startups aren't falsely reported
+          // as failed (see Greptile review on PR #30223).
+          const PROBE_INTERVAL_MS = 500;
+          const PROBE_TIMEOUT_MS = 15000;
+          const startedAt = Date.now();
+
+          const probe = async () => {
             if (spawnFailed) return;
             try {
               await fetch(url);
               setState("started");
             } catch {
-              setState("error");
-              setErrorMsg(
-                "Server process started but not responding. Check your preferences.",
-              );
+              if (Date.now() - startedAt >= PROBE_TIMEOUT_MS) {
+                setState("error");
+                setErrorMsg(
+                  "Server process started but not responding. Check your preferences.",
+                );
+              } else {
+                setTimeout(probe, PROBE_INTERVAL_MS);
+              }
             }
-          }, 2000);
+          };
+
+          setTimeout(probe, PROBE_INTERVAL_MS);
         } catch (err) {
           setState("error");
           setErrorMsg(err instanceof Error ? err.message : String(err));

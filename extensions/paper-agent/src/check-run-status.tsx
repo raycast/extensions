@@ -42,7 +42,13 @@ function readLastRunStatus(statusPath: string): LastRunStatus | undefined {
     return undefined;
   }
   try {
-    return JSON.parse(fs.readFileSync(statusPath, "utf-8")) as LastRunStatus;
+    const value: unknown = JSON.parse(fs.readFileSync(statusPath, "utf-8"));
+    if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+    return Object.fromEntries(
+      Object.entries(value).filter(
+        ([key, item]) => typeof item === "string" || (key === "exit_code" && typeof item === "number"),
+      ),
+    ) as LastRunStatus;
   } catch {
     return undefined;
   }
@@ -113,6 +119,8 @@ function computeTodaySummary(lastSuccessDate: string | undefined, lastRun: LastR
 export default function Command() {
   const prefs = getPreferenceValues<Preferences.CheckRunStatus>();
   const [status, setStatus] = useState<StatusData | null>(null);
+  const [error, setError] = useState<string>();
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -141,12 +149,29 @@ export default function Command() {
       });
     };
 
-    void loadStatus();
+    setError(undefined);
+    void loadStatus().catch((cause: unknown) => {
+      if (!cancelled) setError(cause instanceof Error ? cause.message : "Could not read run status.");
+    });
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [retry]);
+
+  if (error) {
+    return (
+      <Detail
+        navigationTitle="Run Status"
+        markdown={`# Could not load run status\n\n${error}`}
+        actions={
+          <ActionPanel>
+            <Action title="Retry" onAction={() => setRetry((value) => value + 1)} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
   if (!status) {
     return <Detail isLoading={true} markdown="Loading run status..." navigationTitle="Run Status" />;
@@ -200,6 +225,7 @@ export default function Command() {
       navigationTitle="Run Status"
       actions={
         <ActionPanel>
+          <Action title="Refresh Status" onAction={() => setRetry((value) => value + 1)} />
           {configDir ? <Action title="Open Config Directory" onAction={() => open(configDir)} /> : null}
           <Action title="Open Log Directory" onAction={() => open(schedulePaths.logDir)} />
           {lastRun?.log_path ? (

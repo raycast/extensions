@@ -96,10 +96,7 @@ export async function getSessions(): Promise<Session[]> {
   }
 }
 
-export function getSessionsForPeriod(
-  sessions: Session[],
-  period: "day" | "week" | "month",
-): Session[] {
+export function getPeriodCutoffTime(period: "day" | "week" | "month"): number {
   const now = new Date();
   const cutoff = new Date();
 
@@ -118,9 +115,20 @@ export function getSessionsForPeriod(
       cutoff.setDate(1);
       cutoff.setHours(0, 0, 0, 0);
       break;
+    default: {
+      const exhaustiveCheck: never = period;
+      return exhaustiveCheck;
+    }
   }
 
-  const cutoffTime = cutoff.getTime();
+  return cutoff.getTime();
+}
+
+export function getSessionsForPeriod(
+  sessions: Session[],
+  period: "day" | "week" | "month",
+): Session[] {
+  const cutoffTime = getPeriodCutoffTime(period);
 
   return sessions.filter((session) => {
     const sessionDate = new Date(session.startTime);
@@ -208,4 +216,23 @@ export async function getCurrentSessionElapsedTime(): Promise<number> {
 
   const now = Date.now();
   return Math.floor((now - startTime) / 1000);
+}
+
+export async function getCurrentSessionElapsedTimeForPeriod(
+  period: "day" | "week" | "month",
+): Promise<number> {
+  const { startTime } = await getCurrentState();
+  if (!startTime) {
+    return 0;
+  }
+
+  const cutoffTime = getPeriodCutoffTime(period);
+  const effectiveStart = Math.max(startTime, cutoffTime);
+  const now = Date.now();
+
+  if (now <= effectiveStart) {
+    return 0;
+  }
+
+  return Math.floor((now - effectiveStart) / 1000);
 }

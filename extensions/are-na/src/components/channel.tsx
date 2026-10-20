@@ -92,7 +92,7 @@ export function ChannelView({ channel }: { channel: MinimalChannel }) {
           {data?.contents?.map((block) => (
             <Grid.Item
               key={block.id}
-              content={getIconSource(block)}
+              content={getIconSource(block, true)}
               title={block.title != null ? String(block.title) : ""}
               subtitle={`${block.user.full_name}—${block.class}`}
               actions={

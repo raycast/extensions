@@ -1,7 +1,7 @@
 import { TIDY_DIR, buildExtIndex, buildFolderNamer, organizedDirNames, quarantineDirNames } from "./config.js";
 import { findDuplicates } from "./dedup.js";
 import { checkHealth } from "./health.js";
-import { clusterByHash, hashImages, isHashableImage, loadHashCache, saveHashCache } from "./phash.js";
+import { clusterByHash, hashImages, isHashableImage, loadHashCache } from "./phash.js";
 import { buildPlan } from "./plan.js";
 import { buildSubIndex, scanDest, scanSource } from "./scan.js";
 import { findSimilar } from "./similar.js";
@@ -14,7 +14,12 @@ import { findSimilar } from "./similar.js";
  * `onPhase(phase, info)` reports progress: "scanning" | "dedup" | "health" |
  * "similar" | "perceptual" | "planning". Adapters own the wording.
  *
- * Returns { entries, sourceFiles, counts }.
+ * Returns { entries, sourceFiles, counts, hashCache }. `hashCache` is the
+ * perceptual-hash cache state for executePlan to persist (null when the pass
+ * didn't run) — analyze() itself never writes anything to disk. It runs before
+ * any user confirmation (dry runs included), so a save here would be a lasting
+ * side effect of a mere preview, and creating destDir/.tidy would silently
+ * defeat the adapters' "destination doesn't exist, create it?" consent check.
  */
 export async function analyze({ sourceDir, destDir, config, recursive = false, inPlace = false, onPhase = () => {} }) {
   // config.detect === false turns every pass off, current and future — the
@@ -29,7 +34,7 @@ export async function analyze({ sourceDir, destDir, config, recursive = false, i
     includeJunk: detect("health"),
   });
   if (!sourceFiles.length) {
-    return { entries: [], sourceFiles, counts: emptyCounts() };
+    return { entries: [], sourceFiles, counts: emptyCounts(), hashCache: null };
   }
 
   // Health first: junk and broken files are headed for review anyway, and they
@@ -68,6 +73,7 @@ export async function analyze({ sourceDir, destDir, config, recursive = false, i
   }
 
   let perceptual = new Map();
+  let hashCache = null;
   // Without a hashable source image the pass could only flag archive-vs-archive
   // pairs, all of which get filtered out below — skip the decoding entirely.
   const sourceImages = detect("perceptual") ? healthy.filter(isHashableImage) : [];
@@ -76,12 +82,13 @@ export async function analyze({ sourceDir, destDir, config, recursive = false, i
     onPhase("perceptual", { files: images.length });
     // The cache spares re-decoding the whole archive on every run — decode cost
     // would otherwise grow with the archive, not with the batch being tidied.
+    // Read-only here: persisting is executePlan's job (see the doc block above).
     const cache = loadHashCache(destDir);
     const hashes = await hashImages(images, {
       cache,
       onProgress: (done) => onPhase("perceptual", { files: images.length, done }),
     });
-    saveHashCache(destDir, cache, images);
+    hashCache = { cache, images };
     if (hashes.size > 1) {
       const byPath = new Map(images.map((f) => [f.path, f]));
       perceptual = keepSourceOnly(clusterByHash(hashes, byPath, config.perceptualThreshold ?? 5), sourcePaths);
@@ -103,7 +110,7 @@ export async function analyze({ sourceDir, destDir, config, recursive = false, i
     perceptual,
   });
 
-  return { entries, sourceFiles, counts: countBy(entries) };
+  return { entries, sourceFiles, counts: countBy(entries), hashCache };
 }
 
 /** Detection passes compare against archived files for context, but only source files are being moved. */

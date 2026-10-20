@@ -7,6 +7,7 @@ import {
   showToast,
   Toast,
   Icon,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { sendMessage } from "./api";
@@ -94,7 +95,7 @@ function ResultView({
 
 ### Original
 \`\`\`
-${selectedText.slice(0, 500)}${selectedText.length > 500 ? "..." : ""}
+${selectedText.slice(0, 500)}${selectedText.length > 500 ? "…" : ""}
 \`\`\`
 
 ---
@@ -111,12 +112,11 @@ ${answer}`;
           <Action.CopyToClipboard
             title="Copy Result"
             content={answer}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
           <Action.CopyToClipboard
             title="Copy All"
             content={`Original:\n${selectedText}\n\nResult:\n${answer}`}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
         </ActionPanel>
       }
@@ -150,7 +150,10 @@ export default function Command() {
 
   async function handleAction(action: ActionItem) {
     if (!selectedText.trim()) {
-      showToast({ style: Toast.Style.Failure, title: "No text selected" });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No Text Selected",
+      });
       return;
     }
 
@@ -163,11 +166,11 @@ export default function Command() {
       ]);
       setResult({ action, answer: response });
     } catch (error) {
-      showToast({
+      await showToast({
         style: Toast.Style.Failure,
-        title: "Error",
+        title: "Could Not Process Text",
         message:
-          error instanceof Error ? error.message : "Failed to get response",
+          error instanceof Error ? error.message : "OpenClaw did not respond.",
       });
     } finally {
       setProcessingAction(null);
@@ -193,9 +196,9 @@ export default function Command() {
       <Detail
         markdown={`## No Text Selected
 
-Select some text in any application, then run this command again.
+Select text in any application, then run this command again.
 
-**Tip:** You can assign a keyboard shortcut to this command in Raycast preferences for quick access.`}
+Assign a keyboard shortcut in Raycast preferences if you use this command often.`}
       />
     );
   }
@@ -203,7 +206,7 @@ Select some text in any application, then run this command again.
   return (
     <List>
       <List.Section
-        title={`Selected: "${selectedText.slice(0, 50)}${selectedText.length > 50 ? "..." : ""}"`}
+        title={`Selected: "${selectedText.slice(0, 50)}${selectedText.length > 50 ? "…" : ""}"`}
       >
         {ACTIONS.map((action) => (
           <List.Item
@@ -211,7 +214,7 @@ Select some text in any application, then run this command again.
             icon={action.icon}
             title={action.title}
             accessories={
-              processingAction === action.id ? [{ text: "Processing..." }] : []
+              processingAction === action.id ? [{ text: "Processing…" }] : []
             }
             actions={
               <ActionPanel>

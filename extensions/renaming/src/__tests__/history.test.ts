@@ -533,15 +533,15 @@ describe("describeUndoPreview", () => {
       { restorable: 3, missing: 0, occupied: 0, replaced: 0, total: 3 },
       '"Renamed 3 files"',
     );
-    expect(message).toBe('This will restore the original names of 3 files from "Renamed 3 files"');
+    expect(message).toBe('This will restore the original names of 3 items from "Renamed 3 files"');
   });
 
-  it("uses the singular for a single file", () => {
+  it("uses the singular for a single item", () => {
     const message = describeUndoPreview(
       { restorable: 1, missing: 0, occupied: 0, replaced: 0, total: 1 },
       '"Renamed 1 file"',
     );
-    expect(message).toContain("of 1 file from");
+    expect(message).toContain("of 1 item from");
   });
 
   it("summarizes all three conflict kinds and the skip behavior", () => {
@@ -549,11 +549,11 @@ describe("describeUndoPreview", () => {
       { restorable: 15, missing: 2, occupied: 1, replaced: 1, total: 19 },
       '"Renamed 19 files"',
     );
-    expect(message).toContain('15 of 19 files from "Renamed 19 files" can be restored');
+    expect(message).toContain('15 of 19 items from "Renamed 19 files" can be restored');
     expect(message).toContain("2 were moved or deleted");
     expect(message).toContain("1 has the original name taken");
-    expect(message).toContain("1 is not verifiably the renamed file");
-    expect(message).toContain("Conflicted files will be skipped and can be retried later");
+    expect(message).toContain("1 is not verifiably the renamed item");
+    expect(message).toContain("Conflicted items will be skipped and can be retried later");
   });
 });
 
@@ -894,6 +894,73 @@ describe("directory-and-children batch undo", () => {
 
     expect(ops[0].newPath).toBe("/dir/a");
     expect(ops[1].newPath).toBe("/dir/a/g.txt");
+  });
+});
+
+describe("timestamp collisions", () => {
+  it("keeps both entries when another instance stamped the same millisecond", async () => {
+    const nowSpy = vi.spyOn(Date, "now").mockReturnValue(1000);
+    try {
+      const theirs = { timestamp: 1000, description: "theirs", operations: [] };
+      mockStorage.getItem.mockResolvedValue(JSON.stringify([theirs]));
+
+      await saveToHistory("mine", [{ oldPath: "/dir/a.txt", newPath: "/dir/b.txt" }]);
+
+      const stored = JSON.parse(mockStorage.setItem.mock.calls[0][1]);
+      expect(stored).toHaveLength(2);
+      // Ours steps forward instead of evicting the colliding entry, and each
+      // timestamp still names exactly one entry (the UI's key).
+      expect(stored.map((e: { description: string }) => e.description)).toEqual(["mine", "theirs"]);
+      expect(stored[0].timestamp).toBe(1001);
+      expect(stored[1].timestamp).toBe(1000);
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it("steps past every colliding timestamp already stored", async () => {
+    const nowSpy = vi.spyOn(Date, "now").mockReturnValue(1000);
+    try {
+      mockStorage.getItem.mockResolvedValue(
+        JSON.stringify([
+          { timestamp: 1000, description: "theirs a", operations: [] },
+          { timestamp: 1001, description: "theirs b", operations: [] },
+        ]),
+      );
+
+      await saveToHistory("mine", [{ oldPath: "/dir/a.txt", newPath: "/dir/b.txt" }]);
+
+      const stored = JSON.parse(mockStorage.setItem.mock.calls[0][1]);
+      expect(stored).toHaveLength(3);
+      expect(stored[0].timestamp).toBe(1002);
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it("stays idempotent when a retry re-reads a state that already holds our entry", async () => {
+    const nowSpy = vi.spyOn(Date, "now").mockReturnValue(1000);
+    try {
+      mockStorage.getItem.mockResolvedValue(JSON.stringify([]));
+      // The first write is clobbered by a winner that merged our entry into
+      // its own state — the retry must neither duplicate ours nor bump it
+      // again on account of the copy of itself it finds.
+      mockStorage.setItem.mockImplementationOnce(async (_key: string, value: string) => {
+        const ours = JSON.parse(value)[0];
+        mockStorage.getItem.mockResolvedValue(
+          JSON.stringify([{ timestamp: 500, description: "theirs", operations: [] }, ours]),
+        );
+      });
+
+      await saveToHistory("mine", [{ oldPath: "/dir/a.txt", newPath: "/dir/b.txt" }]);
+
+      expect(mockStorage.setItem).toHaveBeenCalledTimes(2);
+      const stored = JSON.parse(mockStorage.setItem.mock.calls[1][1]);
+      expect(stored.map((e: { description: string }) => e.description)).toEqual(["mine", "theirs"]);
+      expect(stored[0].timestamp).toBe(1000);
+    } finally {
+      nowSpy.mockRestore();
+    }
   });
 });
 

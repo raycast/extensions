@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
 import { useNotesContext } from "@/context/notes";
 import { VaultNote } from "@/types/dcli";
@@ -51,6 +51,9 @@ export const ListItemNote = ({ note }: Props) => {
             <FavoriteActions item={note} />
           </ActionPanel.Section>
           <SyncAction />
+          {isInitialLoaded && note.content && (
+            <Action.CopyToClipboard title="Copy Note Content" content={note.content} concealed />
+          )}
         </ActionPanel>
       }
     />

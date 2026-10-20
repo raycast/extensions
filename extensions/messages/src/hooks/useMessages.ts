@@ -11,10 +11,11 @@ import { createContactMap, mergeContactMaps, mergeContactPhotos, persistedToCont
 import { createDebouncedContactMapPersist, createMessagesCache, loadPersistedContactMap } from "../messages-cache";
 import {
   buildMessagesQuery,
-  decodeHexString,
+  decodeMessageBody,
   fuzzySearch,
   getContactLookupIdentifiers,
   getContactOrGroupInfo,
+  parseMessageAttachments,
 } from "../helpers";
 import type { ChatOrMessageInfo, Contact, Filter, Message, SQLMessage } from "../types";
 
@@ -81,8 +82,8 @@ export function useMessages(searchText?: string, filter?: Filter) {
         return {
           message,
           info,
-          body: decodeHexString(message.body),
-          replyingTo: message.reply_body ? decodeHexString(message.reply_body) : null,
+          body: decodeMessageBody(message.body, message.plain_text),
+          replyingTo: decodeMessageBody(message.reply_body, message.reply_plain_text) || null,
         };
       }),
     [rawData],
@@ -134,6 +135,7 @@ export function useMessages(searchText?: string, filter?: Filter) {
         is_audio_message: Boolean(message.is_audio_message),
         is_sent: Boolean(message.is_sent),
         is_read: message.is_sent ? true : Boolean(message.is_read),
+        attachments: parseMessageAttachments(message.attachments_json),
       };
     })
     .filter((message) => {

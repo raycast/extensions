@@ -1,7 +1,7 @@
 import { LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { aiAvailable, generateCallMetadata } from "./lib/ai";
-import { listRecordedCalls, setCallSummary, setCallTitle } from "./lib/tuple";
+import { listRecordedCalls, setCallMetadata } from "./lib/tuple";
 
 /** Optional `{ "callId": "..." }` passed via deeplink `context=` for automation; absent for a hotkey run. */
 interface LaunchContext {
@@ -9,7 +9,7 @@ interface LaunchContext {
 }
 
 /**
- * Headless counterpart to the "Generate Title & Summary…" action: drafts both from the transcript and
+ * Headless counterpart to the "Generate Title & Summary…" action: drafts both from captured context and
  * writes them straight to the call, skipping the editable form. Targets the call id from the launch
  * context (deeplink automation) or, by default, the most recently recorded call. Hotkey- and
  * deeplink-friendly; requires Raycast Pro for the AI call.
@@ -47,12 +47,10 @@ export default async function AutoTitleSummary(props: LaunchProps<{ launchContex
       toast.message = "The model didn’t return a usable title or summary. Try the editable version.";
       return;
     }
-    if (newTitle) {
-      await setCallTitle(callId, newTitle);
-    }
-    if (newSummary) {
-      await setCallSummary(callId, newSummary);
-    }
+    await setCallMetadata(
+      callId,
+      newTitle ? { title: newTitle, ...(newSummary ? { summary: newSummary } : {}) } : { summary: newSummary },
+    );
     await toast.hide();
     await showHUD(`Updated “${newTitle || "call"}”`);
   } catch (error) {
@@ -64,12 +62,5 @@ export default async function AutoTitleSummary(props: LaunchProps<{ launchContex
 
 /** The most recently started recorded call, or undefined when nothing has been recorded. */
 async function mostRecentCallId(): Promise<string | undefined> {
-  const calls = await listRecordedCalls();
-  if (calls.length === 0) {
-    return undefined;
-  }
-  // The CLI returns calls most-recent-first; prefer the latest started_at, falling back to that order
-  // so a missing or all-equal started_at still yields a real call instead of nothing.
-  const latest = calls.reduce((best, call) => (call.started_at > best.started_at ? call : best), calls[0]);
-  return latest.call_id;
+  return (await listRecordedCalls({ limit: 1 }))[0]?.call_id;
 }

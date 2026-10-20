@@ -1,12 +1,11 @@
 import { showToast, Toast, showHUD } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchCreateBookmark } from "./apis";
 import { getBrowserLink } from "./hooks/useBrowserLink";
 import { Bookmark } from "./types";
 import { getTranslator } from "./i18n/standalone";
 import { ensureReachable } from "./utils/submitGuard";
-import { attachCopyDetail, toErrorMessage } from "./utils/toast";
+import { attachCopyDetail, markToastFailed } from "./utils/toast";
 
 const log = logger.child("[QuickBookmark]");
 
@@ -42,7 +41,7 @@ export default async function QuickBookmark() {
     // No UI to fall back on here, so recover inline: start a stopped local
     // container and wait, rather than failing with a URL the user then has to
     // go and find again. ensureReachable drives its own toast.
-    if ((await ensureReachable(url, toast)) === "unreachable") return;
+    if ((await ensureReachable(url, toast)) !== "ok") return;
 
     toast.title = t("quickBookmark.creatingBookmark");
 
@@ -67,11 +66,12 @@ export default async function QuickBookmark() {
     await showHUD(t("quickBookmark.successHud"));
   } catch (error) {
     log.error("Quick bookmark failed", { error });
-    await showFailureToast({
-      title: t("quickBookmark.failureToastTitle"),
-      // toErrorMessage unwraps a transport failure's cause; String(error) here
-      // would render the useless "TypeError: fetch failed".
-      message: toErrorMessage(error),
-    });
+    // markToastFailed rather than showFailureToast: it unwraps a transport
+    // failure's cause (String(error) renders the useless "TypeError: fetch
+    // failed"), attaches the house-style Copy Error action, and — the reason
+    // this command needed it — recognises a rejected API key and offers
+    // Extension Settings instead of a retry that can only fail again.
+    const toast = await showToast({ style: Toast.Style.Animated, title: t("quickBookmark.failureToastTitle") });
+    markToastFailed(toast, t("quickBookmark.failureToastTitle"), error);
   }
 }

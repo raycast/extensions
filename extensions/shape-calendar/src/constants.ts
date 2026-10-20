@@ -7,8 +7,11 @@ export const sportIcons: Record<SportType, Icon> = {
   swim: Icon.Droplets,
   hike: Icon.Mountain,
   yoga: Icon.Leaf,
+  tennis: Icon.TennisBall,
+  skiing: Icon.CloudSnow,
   nordicski: Icon.Snowflake,
   strength: Icon.Weights,
+  surf: Icon.Wind,
   other: Icon.Heartbeat,
 };
 
@@ -18,7 +21,10 @@ export const sportNames: Record<SportType, string> = {
   swim: "Swim",
   hike: "Hike",
   yoga: "Yoga",
+  tennis: "Tennis",
+  skiing: "Skiing",
   nordicski: "Nordic Ski",
   strength: "Strength",
+  surf: "Surf",
   other: "Other",
 };

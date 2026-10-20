@@ -1,47 +1,29 @@
 /**
- * Replace File(s) Characters command — find and replace characters in file names.
+ * Replace in File Names command — find and replace characters in file names.
  */
 
 import { useEffect, useState } from "react";
-import { Form, ActionPanel, Action, popToRoot, showToast, Toast, getSelectedFinderItems, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import { dirname, join } from "path";
-import { getFileInfo } from "./lib/files";
 import { batchRename, checkConflicts } from "./lib/batch";
 import { openRenameHistory, recordRenameHistory } from "./lib/history-nav";
+import { itemNoun, loadSelection, type SelectionMode } from "./lib/selection";
 import { log } from "./lib/logger";
 import type { FileInfo, RenameOperation } from "./types";
 
-export default function Command() {
+export default function Command({ foldersOnly = false }: { foldersOnly?: boolean } = {}) {
+  const mode: SelectionMode = foldersOnly ? "folders" : "files";
   const [files, setFiles] = useState<FileInfo[]>([]);
   const [replaceCharacter, setReplaceCharacter] = useState<string>("");
   const [newCharacter, setNewCharacter] = useState<string>("");
 
   const getSelectedFiles = async () => {
-    try {
-      const selectedItems = await getSelectedFinderItems();
-      const filePaths = selectedItems.map((file) => file.path);
-      log.rename.debug("Fetched files", filePaths);
-
-      if (filePaths.length === 0) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Please select at least one file or open a Finder window",
-        });
-        popToRoot();
-        return;
-      }
-
-      const fileInfos = await Promise.all(filePaths.map((p) => getFileInfo(p)));
-      setFiles(fileInfos);
-    } catch (error) {
-      log.rename.error("Failed to fetch files", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to fetch files",
-        message: "Please make sure a Finder window is open and files are selected",
-      });
-      popToRoot();
+    const fileInfos = await loadSelection(mode);
+    if (!fileInfos) {
+      return;
     }
+
+    setFiles(fileInfos);
   };
 
   useEffect(() => {
@@ -81,7 +63,7 @@ export default function Command() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Replace would remove base name",
-          message: `${emptyBases.length} file${emptyBases.length > 1 ? "s" : ""} would lose ${emptyBases.length > 1 ? "their" : "its"} base name`,
+          message: `${emptyBases.length} ${itemNoun(mode, emptyBases.length)} would lose ${emptyBases.length > 1 ? "their" : "its"} base name`,
         });
         return;
       }
@@ -101,9 +83,8 @@ export default function Command() {
       const results = await batchRename(operations);
 
       const successfulOps = results.filter((r) => r.success).map(({ oldPath, newPath }) => ({ oldPath, newPath }));
-      const noun = successfulOps.length === 1 ? "file" : "files";
       const historySaved = await recordRenameHistory(
-        `Replaced characters in ${successfulOps.length} ${noun}`,
+        `Replaced characters in ${successfulOps.length} ${itemNoun(mode, successfulOps.length)}`,
         successfulOps,
       );
 
@@ -113,7 +94,7 @@ export default function Command() {
       if (failureCount === 0) {
         await showToast({
           style: Toast.Style.Success,
-          title: `Replaced characters in ${successCount} file${successCount !== 1 ? "s" : ""}`,
+          title: `Replaced characters in ${successCount} ${itemNoun(mode, successCount)}`,
           // An empty batch records no history by design — only warn when
           // there was something to save and saving failed.
           message: successCount > 0 && !historySaved ? "History could not be saved" : undefined,
@@ -122,13 +103,13 @@ export default function Command() {
       } else if (successCount > 0) {
         await showToast({
           style: Toast.Style.Failure,
-          title: `Replaced in ${successCount} of ${results.length} files`,
+          title: `Replaced in ${successCount} of ${results.length} ${itemNoun(mode, results.length)}`,
           message: results.find((r) => !r.success)?.error,
         });
       } else {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Failed to replace file characters",
+          title: `Failed to replace characters in ${itemNoun(mode, 1)} names`,
           message: results.find((r) => !r.success)?.error,
         });
       }
@@ -137,7 +118,7 @@ export default function Command() {
 
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to replace file characters",
+        title: `Failed to replace characters in ${itemNoun(mode, 1)} names`,
         message: (error as Error).message,
       });
     }

@@ -74,6 +74,16 @@ test("isMonochromeSvg accepts synthetic-style black/white stroke+fill", () => {
   assert.equal(isMonochromeSvg(svg), true);
 });
 
+test("isMonochromeSvg treats gradient fills as colored even when the glyph is white", () => {
+  const svg = `
+    <svg viewBox="0 0 32 32" fill="none">
+      <circle cx="16" cy="16" r="16" fill="url(#g)"/>
+      <path fill="white" d="M0 0"/>
+    </svg>
+  `;
+  assert.equal(isMonochromeSvg(svg), false);
+});
+
 test("isMonochromeSvg rejects brand-colored icons", () => {
   const svg = `<svg viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="#D97757"/></svg>`;
   assert.equal(isMonochromeSvg(svg), false);

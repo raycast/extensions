@@ -7,7 +7,61 @@ import { BYTES_PER_KILOBYTE, BYTES_PER_MEGABYTE } from "../../utils/constants";
 
 const logger = new Logger("ContentSearch");
 
-const MIN_RESULTS = 50; // Stop content search after finding this many matches
+export const MAX_CONTENT_SEARCH_RESULTS = 50;
+export const MAX_SEARCH_FILE_SIZE_BYTES = 1024 * 1024;
+
+export type SearchableNoteContentResult =
+  | { status: "available"; content: string }
+  | { status: "oversized" }
+  | { status: "unavailable" };
+
+export async function readNoteContentForSearch(note: Note): Promise<SearchableNoteContentResult> {
+  const file = await fs.promises.open(note.path, "r");
+
+  try {
+    const stats = await file.stat();
+    if (!stats.isFile()) return { status: "unavailable" };
+    if (stats.size > MAX_SEARCH_FILE_SIZE_BYTES) {
+      logger.debug(`Skipping content search for oversized note ${note.path} (${stats.size} bytes)`);
+      return { status: "oversized" };
+    }
+
+    const bytesToRead = stats.size;
+    const buffer = Buffer.allocUnsafe(bytesToRead);
+    let totalBytesRead = 0;
+
+    while (totalBytesRead < bytesToRead) {
+      const { bytesRead } = await file.read(buffer, totalBytesRead, bytesToRead - totalBytesRead, totalBytesRead);
+      if (bytesRead === 0) break;
+      totalBytesRead += bytesRead;
+    }
+
+    return { status: "available", content: buffer.subarray(0, totalBytesRead).toString("utf-8") };
+  } finally {
+    await file.close();
+  }
+}
+
+export async function readSearchableNoteContent(note: Note): Promise<string | undefined> {
+  const result = await readNoteContentForSearch(note);
+  return result.status === "available" ? result.content : undefined;
+}
+
+export function findTitleOrPathMatches(notes: Note[], query: string, limit = MAX_CONTENT_SEARCH_RESULTS): Note[] {
+  if (limit <= 0) return [];
+
+  const titleFuse = new Fuse(notes, {
+    keys: ["title", "path"],
+    threshold: 0.3,
+    ignoreLocation: true,
+    includeScore: true,
+  });
+
+  return titleFuse
+    .search(query, { limit })
+    .sort((a, b) => (a.score || 0) - (b.score || 0))
+    .map((result) => result.item);
+}
 
 // Full-content search must stay well under the ~100 MB extension JS heap.
 // readFile() + toLowerCase() keeps two string copies live; a single oversized
@@ -55,17 +109,7 @@ export async function searchNotesWithContent(notes: Note[], query: string): Prom
   const queryLower = remainingQuery.toLowerCase();
 
   // Step 1: Quick filter by title/path first (no file I/O)
-  const titleFuse = new Fuse(filteredNotes, {
-    keys: ["title"],
-    threshold: 0.3,
-    ignoreLocation: true,
-    includeScore: true,
-  });
-
-  const titleMatches = titleFuse
-    .search(remainingQuery)
-    .sort((a, b) => (a.score || 0) - (b.score || 0))
-    .map((r) => r.item);
+  const titleMatches = findTitleOrPathMatches(filteredNotes, remainingQuery);
   logger.info(`Found ${titleMatches.length} title/path matches`);
 
   // Step 2: Search remaining notes by content (read files one at a time)
@@ -74,7 +118,7 @@ export async function searchNotesWithContent(notes: Note[], query: string): Prom
   let skippedLargeFiles = 0;
 
   // Early exit if we already have enough matches from title/path
-  if (titleMatches.length >= MIN_RESULTS) {
+  if (titleMatches.length >= MAX_CONTENT_SEARCH_RESULTS) {
     logger.info(`Already have ${titleMatches.length} title/path matches, skipping content search`);
     return titleMatches;
   }
@@ -86,8 +130,8 @@ export async function searchNotesWithContent(notes: Note[], query: string): Prom
     }
 
     // Stop if we have enough total results
-    if (titleMatches.length + contentMatches.length >= MIN_RESULTS) {
-      logger.info(`Reached ${MIN_RESULTS} results after checking ${filesChecked} files, stopping early`);
+    if (titleMatches.length + contentMatches.length >= MAX_CONTENT_SEARCH_RESULTS) {
+      logger.info(`Reached ${MAX_CONTENT_SEARCH_RESULTS} results after checking ${filesChecked} files, stopping early`);
       break;
     }
 
@@ -144,8 +188,8 @@ async function searchNotesByTag(notes: Note[], tagQuery: string): Promise<Note[]
 
   for (const note of notes) {
     // Stop if we have enough results
-    if (matches.length >= MIN_RESULTS) {
-      logger.info(`Reached ${MIN_RESULTS} results after checking ${filesChecked} files, stopping early`);
+    if (matches.length >= MAX_CONTENT_SEARCH_RESULTS) {
+      logger.info(`Reached ${MAX_CONTENT_SEARCH_RESULTS} results after checking ${filesChecked} files, stopping early`);
       break;
     }
 

@@ -10,7 +10,7 @@ export async function apfelExplain(text: string): Promise<string> {
   const truncated = escapeForShell(text);
 
   return await runAppleScript(
-    `do shell script "echo '${truncated}' | ${getApfelPath()} -s '${EXPLAIN_SYSTEM_PROMPT}'"`,
+    `do shell script "printf '%s' '${truncated}' | ${getApfelPath()} -s '${EXPLAIN_SYSTEM_PROMPT}'"`,
     { timeout: 60000 },
   );
 }

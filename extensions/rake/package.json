@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rake",
+  "title": "Rake",
+  "description": "Search and run Rake tasks from a configurable directory, with support for task arguments.",
+  "icon": "icon.png",
+  "author": "kdmsnr",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "rakePath",
+      "type": "textfield",
+      "required": false,
+      "title": "Rake Executable",
+      "description": "Path to the rake executable, e.g. ~/.rbenv/shims/rake. Leave empty to use rake from PATH.",
+      "placeholder": "rake"
+    },
+    {
+      "name": "directory",
+      "type": "directory",
+      "required": false,
+      "title": "Rake Directory",
+      "description": "Directory used to discover and run Rake tasks. Defaults to your home directory.",
+      "default": "~"
+    }
+  ],
+  "commands": [
+    {
+      "name": "rake",
+      "title": "Run Rake Task",
+      "description": "Search Rake tasks in your configured directory and run them with optional arguments.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.3.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist -o dist",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "prepublishOnly": "node -e \"console.error('Use npm run publish to submit this extension to the Raycast Store.'); process.exit(1)\"",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "keywords": [
+    "ruby",
+    "rakefile",
+    "tasks",
+    "automation"
+  ]
+}

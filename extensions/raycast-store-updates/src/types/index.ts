@@ -27,6 +27,7 @@ interface GitHubPR {
   title: string;
   html_url: string;
   merged_at: string | null;
+  updated_at?: string;
   user: {
     login: string;
     html_url: string;
@@ -57,6 +58,8 @@ interface StoreItem {
   extensionSlug?: string;
   /** GitHub PR URL for updated extensions */
   prUrl?: string;
+  /** PR title for an update, distinct from the extension description. */
+  changeSummary?: string;
   /** Supported platforms */
   platforms?: string[];
   /** Extension version from package.json */

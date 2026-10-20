@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "osaurus",
+  "title": "Osaurus",
+  "description": "Use local Osaurus models in Raycast AI, ask them directly, manage them, and search chat history",
+  "icon": "extension-icon.png",
+  "author": "chrismessina",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "Server URL",
+      "description": "Where the Osaurus server listens",
+      "type": "textfield",
+      "required": false,
+      "default": "http://localhost:1337"
+    },
+    {
+      "name": "osaurusApp",
+      "title": "Osaurus App",
+      "description": "Which Osaurus to open when none is running. Empty reopens the last one.",
+      "type": "appPicker",
+      "required": false
+    },
+    {
+      "name": "verboseLogging",
+      "title": "Debug Logging",
+      "label": "Enable extra diagnostics in the console",
+      "description": "Show detailed logs in the console for debugging.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "strictRedaction",
+      "type": "checkbox",
+      "required": false,
+      "title": "Strict Redaction",
+      "label": "Also hide URL query strings and fragments in logs",
+      "description": "Turn on before reproducing an issue, then share only the new log lines.",
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "ask-osaurus",
+      "title": "Ask Osaurus",
+      "description": "Send a prompt to a local model and stream the answer",
+      "mode": "view"
+    },
+    {
+      "name": "manage-models",
+      "title": "Manage Models",
+      "description": "Browse your Osaurus models, set the one Ask Osaurus uses, and open or quit Osaurus",
+      "mode": "view"
+    },
+    {
+      "name": "search-models",
+      "title": "Search Models",
+      "description": "Search Hugging Face for MLX models, or paste a link, and add one to Osaurus",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search past Osaurus chats by title and message text",
+      "mode": "view"
+    }
+  ],
+  "ai": {
+    "modelProvider": "models"
+  },
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "^3.0.55",
+    "@chrismessina/raycast-logger": "^1.5.0",
+    "@raycast/api": "^2.5.1",
+    "@raycast/utils": "^2.3.0",
+    "ai": "^7.0.113"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

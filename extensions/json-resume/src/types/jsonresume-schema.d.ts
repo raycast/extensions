@@ -1,4 +1,3 @@
 declare module "@jsonresume/schema" {
-  const value: unknown;
-  export default value;
+  export function validate(resume: object, callback: (errors: unknown, valid: boolean) => void): void;
 }

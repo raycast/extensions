@@ -171,7 +171,7 @@ function UnreadNotifications() {
           <MenuBarExtra.Item
             title="Mark All as Read"
             icon={Icon.Checkmark}
-            shortcut={{ /* gmail uses shift-i to mark as read */ modifiers: ["cmd"], key: "i" }}
+            shortcut={{ modifiers: ["cmd"], key: "i" }}
             onAction={markAllNotificationsAsRead}
           />
         ) : null}

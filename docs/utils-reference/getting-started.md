@@ -16,6 +16,18 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v2.3.3
+
+- Fixed `useFrecencySorting` ignoring the age of past visits when sorting. Existing rankings are migrated automatically without resetting usage history.
+
+### v2.3.2
+
+- Allow overriding providerName and description in built-in OAuthService providers (Thanks @smorin!)
+
+### v2.3.1
+
+- Allow overriding providerId and extraParameters in built-in OAuthService providers (Thanks @smorin!)
+
 ### v2.3.0
 
 - Added `cacheWriteDebounce` to `useCachedState`, `useCachedPromise`, `useFetch`, `useExec`, and `useStreamJSON`

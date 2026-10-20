@@ -1,11 +1,17 @@
 import { getPreferenceValues } from "@raycast/api";
 
 import { loadAccounts } from "../accounts/storage.ts";
+import { resolveAihubmixAccessKey } from "../aihubmix/auth.ts";
+import { fetchAihubmixUsage } from "../aihubmix/fetcher.ts";
+import type { AihubmixError, AihubmixUsage } from "../aihubmix/types.ts";
+import { checkAmpCredentials } from "../amp/auth.ts";
+import { checkAntigravityCredentials } from "../antigravity/credential-check.ts";
+import { checkGrokCredentials } from "../grok/auth.ts";
 import { fetchAmpUsage } from "../amp/fetcher.ts";
 import type { AmpError, AmpUsage } from "../amp/types.ts";
 import { fetchAntigravityUsage } from "../antigravity/fetcher.ts";
 import type { AntigravityError, AntigravityUsage } from "../antigravity/types.ts";
-import { fetchClaudeUsage, readClaudeCredentials } from "../claude/fetcher.ts";
+import { fetchClaudeUsage, listClaudeOAuthAccounts, dedupeClaudeAccounts } from "../claude/fetcher.ts";
 import type { ClaudeError, ClaudeUsage } from "../claude/types.ts";
 import { buildClinePassAccountCandidates } from "../clinepass/accounts.ts";
 import { readClineCredentials } from "../clinepass/auth.ts";
@@ -13,10 +19,12 @@ import { fetchClinePassUsage } from "../clinepass/fetcher.ts";
 import { clearClineLocalCredential, loadClineLocalCredential, saveClineLocalCredential } from "../clinepass/storage.ts";
 import type { ClinePassError, ClinePassUsage } from "../clinepass/types.ts";
 import { buildCodexAccountCandidates } from "../codex/accounts.ts";
-import { listCodexOAuthAccounts, parseAdditionalCodexHomes } from "../codex/auth.ts";
+import { listCodexOAuthAccounts } from "../codex/auth.ts";
+import { parseAdditionalHomes } from "./home-dirs.ts";
 import { fetchCodexUsage } from "../codex/fetcher.ts";
 import type { CodexError, CodexUsage } from "../codex/types.ts";
-import { resolveCopilotAuthTokens, shouldFallbackToPreferenceToken } from "../copilot/auth.ts";
+import { buildCopilotAccountCandidates } from "../copilot/accounts.ts";
+import { resolveCopilotAuthTokens } from "../copilot/auth.ts";
 import { fetchCopilotUsage } from "../copilot/fetcher.ts";
 import type { CopilotError, CopilotUsage } from "../copilot/types.ts";
 import { fetchCursorUsage, resolveCursorCredential } from "../cursor/fetcher.ts";
@@ -36,8 +44,16 @@ import type { KimiError, KimiUsage } from "../kimi/types.ts";
 import { resolveMiniMaxAuthTokens } from "../minimax/auth.ts";
 import { fetchMiniMaxUsage } from "../minimax/fetcher.ts";
 import type { MiniMaxError, MiniMaxUsage } from "../minimax/types.ts";
-import { fetchOpencodegoUsage } from "../opencode-go/fetcher.ts";
+import { resolveMinimaxCNAuthTokens } from "../minimaxcn/auth.ts";
+import { fetchMinimaxCNUsage } from "../minimaxcn/fetcher.ts";
+import type { MinimaxCNError, MinimaxCNUsage } from "../minimaxcn/types.ts";
+import { fetchOpencodegoUsage, OPENCODEGO_OPENCODE_KEY } from "../opencode-go/fetcher.ts";
 import type { OpencodegoError, OpencodegoUsage } from "../opencode-go/types.ts";
+import { resolveOpenRouterApiKey } from "../openrouter/auth.ts";
+import { fetchOpenRouterUsage } from "../openrouter/fetcher.ts";
+import type { OpenRouterError, OpenRouterUsage } from "../openrouter/types.ts";
+import { fetchRaycastUsage, normalizeRaycastCookieHeader } from "../raycast/fetcher.ts";
+import type { RaycastError, RaycastUsage } from "../raycast/types.ts";
 import { fetchSyntheticUsage, SYNTHETIC_OPENCODE_KEY } from "../synthetic/fetcher.ts";
 import type { SyntheticError, SyntheticUsage } from "../synthetic/types.ts";
 import { resolveZaiAuthTokens } from "../zai/auth.ts";
@@ -56,7 +72,9 @@ import { readOpencodeAuthToken } from "./opencode-auth.ts";
 
 // Root-level preferences shared by both commands.
 type SharedPrefs = {
+  additionalClaudeHomes?: string;
   additionalCodexHomes?: string;
+  aihubmixApiKey?: string;
   copilotAuthToken?: string;
   cursorCookieHeader?: string;
   deepseekApiKey?: string;
@@ -64,63 +82,101 @@ type SharedPrefs = {
   syntheticApiToken?: string;
   zaiApiToken?: string;
   minimaxApiToken?: string;
-  opencodegoWorkspaceId?: string;
-  opencodegoAuthCookie?: string;
+  minimaxcnApiToken?: string;
+  opencodegoApiKey?: string;
+  openrouterApiKey?: string;
+  raycastCookieHeader?: string;
 };
 
 function prefValue(key: keyof SharedPrefs): string {
   return getPreferenceValues<SharedPrefs>()[key]?.trim() || "";
 }
 
+export const useAihubmixUsage = createUsageHook<AihubmixUsage, AihubmixError>({
+  agentId: "aihubmix",
+  resolveAuthKey: async () => (await resolveAihubmixAccessKey(prefValue("aihubmixApiKey"))) ?? "",
+  fetcher: async () => {
+    const accessKey = await resolveAihubmixAccessKey(prefValue("aihubmixApiKey"));
+    if (!accessKey) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "AIHubMix Access Key not configured. Copy it from https://console.aihubmix.com/setting, then paste it in extension settings (Cmd+,) or set AIHUBMIX_ACCESS_KEY in your shell.",
+        },
+      };
+    }
+    return fetchAihubmixUsage(accessKey);
+  },
+});
+
 export const useAmpUsage = createUsageHook<AmpUsage, AmpError>({
   agentId: "amp",
+  credentials: {
+    check: checkAmpCredentials,
+    error: (message) => ({ type: "unknown", message }),
+  },
   fetcher: fetchAmpUsage,
 });
 
 export const useAntigravityUsage = createUsageHook<AntigravityUsage, AntigravityError>({
   agentId: "antigravity",
+  credentials: {
+    check: checkAntigravityCredentials,
+    error: (message) => ({ type: "unknown", message }),
+  },
   fetcher: () => fetchAntigravityUsage(),
 });
 
-export const useClaudeUsage = createUsageHook<ClaudeUsage, ClaudeError>({
+export const useClaudeAccounts = createAccountsHook<
+  ClaudeUsage,
+  ClaudeError,
+  ReturnType<typeof listClaudeOAuthAccounts>[number]
+>({
   agentId: "claude",
-  resolveAuthKey: async () => readClaudeCredentials().credentials?.accessToken ?? "",
-  fetcher: async () => {
-    const { credentials, error } = readClaudeCredentials();
-    if (!credentials) return { usage: null, error };
-    return fetchClaudeUsage(credentials);
+  getAccounts: async () => {
+    const defaultAccounts = listClaudeOAuthAccounts();
+    const additionalAccounts = parseAdditionalHomes(prefValue("additionalClaudeHomes")).flatMap(
+      (configDir, homeIndex) =>
+        listClaudeOAuthAccounts({ configDir }).map((account) => ({
+          ...account,
+          id: `claude-home-${homeIndex}-${account.id}`,
+        })),
+    );
+
+    return dedupeClaudeAccounts([...defaultAccounts, ...additionalAccounts]);
+  },
+  fetcher: async (account) => {
+    if (account.scopeError) return { usage: null, error: account.scopeError };
+    return fetchClaudeUsage(account.credentials, account.identity);
+  },
+  noAccountsError: {
+    type: "not_configured",
+    message: "Claude CLI not configured. Run 'claude' to authenticate.",
   },
 });
 
-async function resolveCopilotTokens() {
-  return resolveCopilotAuthTokens({ preferenceToken: prefValue("copilotAuthToken") });
-}
-
-export const useCopilotUsage = createUsageHook<CopilotUsage, CopilotError>({
+export const useCopilotAccounts = createAccountsHook<
+  CopilotUsage,
+  CopilotError,
+  ReturnType<typeof buildCopilotAccountCandidates>[number]
+>({
   agentId: "copilot",
-  resolveAuthKey: async () => {
-    const { primaryToken, preferenceToken } = await resolveCopilotTokens();
-    return `${primaryToken ?? ""}\n${preferenceToken ?? ""}`;
+  getAccounts: async () => {
+    const { cliToken, githubToken, ghToken } = await resolveCopilotAuthTokens();
+    return buildCopilotAccountCandidates({
+      manualAccounts: await loadAccounts("copilot"),
+      preferenceToken: prefValue("copilotAuthToken"),
+      cliToken,
+      githubToken,
+      ghToken,
+    });
   },
-  fetcher: async () => {
-    const { primaryToken, localToken, preferenceToken } = await resolveCopilotTokens();
-    if (!primaryToken) {
-      return {
-        usage: null,
-        error: {
-          type: "not_configured",
-          message: "Copilot is not configured. Set GH_TOKEN/GITHUB_TOKEN or add a token in extension settings (Cmd+,).",
-        },
-      };
-    }
-    let result = await fetchCopilotUsage(primaryToken);
-    if (
-      preferenceToken &&
-      shouldFallbackToPreferenceToken({ localToken, preferenceToken, errorType: result.error?.type })
-    ) {
-      result = await fetchCopilotUsage(preferenceToken);
-    }
-    return result;
+  fetcher: (account) => fetchCopilotUsage(account.token),
+  noAccountsError: {
+    type: "not_configured",
+    message: "Copilot is not configured. Set GH_TOKEN/GITHUB_TOKEN or add an account via Manage Accounts.",
   },
 });
 
@@ -176,6 +232,10 @@ export const useGeminiUsage = createUsageHook<GeminiUsage, GeminiError>({
 
 export const useGrokUsage = createUsageHook<GrokUsage, GrokError>({
   agentId: "grok",
+  credentials: {
+    check: checkGrokCredentials,
+    error: (message) => ({ type: "unknown", message }),
+  },
   fetcher: fetchGrokUsage,
 });
 
@@ -201,41 +261,82 @@ export const useMiniMaxUsage = createUsageHook<MiniMaxUsage, MiniMaxError>({
   },
 });
 
-export const useOpencodegoUsage = createUsageHook<OpencodegoUsage, OpencodegoError>({
-  agentId: "opencode-go",
-  resolveAuthKey: async () => `${prefValue("opencodegoWorkspaceId")}\n${prefValue("opencodegoAuthCookie")}`,
+// MinimaxCN — the Chinese-region MiniMax provider (api.minimaxi.com, vs api.minimax.io for the international edition).
+// Token resolves from MINIMAX_CN_API_KEY env var or the minimaxcnApiToken preference.
+export const useMinimaxCNUsage = createUsageHook<MinimaxCNUsage, MinimaxCNError>({
+  agentId: "minimaxcn",
+  resolveAuthKey: async () => {
+    const { primaryToken } = await resolveMinimaxCNAuthTokens({ preferenceToken: prefValue("minimaxcnApiToken") });
+    return primaryToken ?? "";
+  },
   fetcher: async () => {
-    const workspaceId = prefValue("opencodegoWorkspaceId");
-    const authCookie = prefValue("opencodegoAuthCookie");
-    if (!workspaceId && !authCookie) {
+    const { primaryToken } = await resolveMinimaxCNAuthTokens({ preferenceToken: prefValue("minimaxcnApiToken") });
+    if (!primaryToken) {
       return {
         usage: null,
         error: {
           type: "not_configured",
           message:
-            "OpenCode Go workspace ID and auth cookie not configured. Please add them in extension settings (Cmd+,).",
+            "MinimaxCN token not configured. Add it in extension settings (Cmd+,) or set MINIMAX_CN_API_KEY in your shell.",
         },
       };
     }
-    if (!workspaceId) {
+    return fetchMinimaxCNUsage(primaryToken);
+  },
+});
+
+export const useOpencodegoUsage = createUsageHook<OpencodegoUsage, OpencodegoError>({
+  agentId: "opencode-go",
+  resolveAuthKey: async () => prefValue("opencodegoApiKey") || readOpencodeAuthToken(OPENCODEGO_OPENCODE_KEY) || "",
+  fetcher: async () => {
+    const apiKey = prefValue("opencodegoApiKey") || readOpencodeAuthToken(OPENCODEGO_OPENCODE_KEY);
+    if (!apiKey) {
       return {
         usage: null,
         error: {
           type: "not_configured",
-          message: "OpenCode Go workspace ID not configured. Please add it in extension settings (Cmd+,).",
+          message:
+            "OpenCode Zen API key not found. Login via OpenCode (`opencode auth login`) or paste your API key in extension settings (Cmd+,).",
         },
       };
     }
-    if (!authCookie) {
+    return fetchOpencodegoUsage(apiKey);
+  },
+});
+
+export const useOpenRouterUsage = createUsageHook<OpenRouterUsage, OpenRouterError>({
+  agentId: "openrouter",
+  resolveAuthKey: async () => (await resolveOpenRouterApiKey(prefValue("openrouterApiKey"))) ?? "",
+  fetcher: async (apiKey) => {
+    if (!apiKey) {
       return {
         usage: null,
         error: {
           type: "not_configured",
-          message: "OpenCode Go auth cookie not configured. Please add it in extension settings (Cmd+,).",
+          message:
+            "OpenRouter API key not configured. Add it in extension settings (Cmd+,), log in through OpenCode, or set OPENROUTER_API_KEY in your shell.",
         },
       };
     }
-    return fetchOpencodegoUsage(workspaceId, authCookie);
+    return fetchOpenRouterUsage(apiKey);
+  },
+});
+
+export const useRaycastUsage = createUsageHook<RaycastUsage, RaycastError>({
+  agentId: "raycast",
+  resolveAuthKey: async () => normalizeRaycastCookieHeader(prefValue("raycastCookieHeader")) ?? "",
+  fetcher: async (cookieHeader) => {
+    if (!cookieHeader) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "Raycast session not configured. Sign in at raycast.com/settings, then paste the __raycast_session cookie in extension settings (Cmd+,).",
+        },
+      };
+    }
+    return fetchRaycastUsage(cookieHeader);
   },
 });
 
@@ -247,12 +348,11 @@ export const useCodexAccounts = createAccountsHook<
   agentId: "codex",
   getAccounts: async () => {
     const defaultAccounts = listCodexOAuthAccounts();
-    const additionalAccounts = parseAdditionalCodexHomes(prefValue("additionalCodexHomes")).flatMap(
-      (codexHome, homeIndex) =>
-        listCodexOAuthAccounts({ codexHome }).map((account) => ({
-          ...account,
-          id: `codex-home-${homeIndex}-${account.id}`,
-        })),
+    const additionalAccounts = parseAdditionalHomes(prefValue("additionalCodexHomes")).flatMap((codexHome, homeIndex) =>
+      listCodexOAuthAccounts({ codexHome }).map((account) => ({
+        ...account,
+        id: `codex-home-${homeIndex}-${account.id}`,
+      })),
     );
 
     return buildCodexAccountCandidates([...defaultAccounts, ...additionalAccounts], await loadAccounts("codex"));

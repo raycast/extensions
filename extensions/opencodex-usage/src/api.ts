@@ -1,6 +1,6 @@
 import { readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
-import { join, resolve } from "node:path";
+import { join, resolve, sep } from "node:path";
 import { getPreferenceValues } from "@raycast/api";
 import { isConfigResponse, isProviderInfoList, isProviderQuotasResponse, isUsageResponse, type Guard } from "./guards";
 
@@ -153,7 +153,7 @@ const ADMIN_TOKEN_FILE = "admin-api-token";
 
 function expandUserPath(value: string): string {
   if (value === "~") return homedir();
-  if (value.startsWith("~/")) return join(homedir(), value.slice(2));
+  if (value.startsWith("~/") || value.startsWith("~" + sep)) return join(homedir(), value.slice(2));
   return value;
 }
 

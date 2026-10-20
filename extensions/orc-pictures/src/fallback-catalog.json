@@ -1,0 +1,182 @@
+[
+  {
+    "file": "/gifs/cooked.gif",
+    "height": 608,
+    "poster": "/gifs/cooked.jpg",
+    "slug": "cooked",
+    "tags": ["cooked", "done", "finished", "toast"],
+    "title": "Cooked",
+    "width": 480
+  },
+  {
+    "file": "/gifs/doubt.gif",
+    "height": 544,
+    "poster": "/gifs/doubt.jpg",
+    "slug": "doubt",
+    "tags": ["doubt", "skeptical", "hmm", "side-eye"],
+    "title": "Doubt",
+    "width": 544
+  },
+  {
+    "file": "/gifs/ew.gif",
+    "height": 544,
+    "poster": "/gifs/ew.jpg",
+    "slug": "ew",
+    "tags": ["ew", "gross", "nope", "dislike"],
+    "title": "Ew",
+    "width": 544
+  },
+  {
+    "file": "/gifs/gold.gif",
+    "height": 480,
+    "poster": "/gifs/gold.jpg",
+    "slug": "gold",
+    "tags": ["gold", "rich", "money", "treasure"],
+    "title": "Gold",
+    "width": 608
+  },
+  {
+    "file": "/gifs/nod.gif",
+    "height": 544,
+    "poster": "/gifs/nod.jpg",
+    "slug": "nod",
+    "tags": ["nod", "yes", "approve", "thumbs-up", "ok"],
+    "title": "Nod",
+    "width": 544
+  },
+  {
+    "file": "/gifs/online.gif",
+    "height": 528,
+    "poster": "/gifs/online.jpg",
+    "slug": "online",
+    "tags": ["online", "here", "available", "wave"],
+    "title": "Online",
+    "width": 560
+  },
+  {
+    "file": "/gifs/orc-smile.gif",
+    "height": 164,
+    "slug": "orc-smile",
+    "tags": ["orc-smile", "smile", "grin", "happy", "orc"],
+    "title": "Orc smile",
+    "width": 220,
+    "poster": "/gifs/orc-smile.jpg"
+  },
+  {
+    "file": "/gifs/popcorn.gif",
+    "height": 544,
+    "poster": "/gifs/popcorn.jpg",
+    "slug": "popcorn",
+    "tags": ["popcorn", "watching", "drama", "snack"],
+    "title": "Popcorn",
+    "width": 544
+  },
+  {
+    "file": "/gifs/proud.gif",
+    "height": 608,
+    "poster": "/gifs/proud.jpg",
+    "slug": "proud",
+    "tags": ["proud", "smile", "happy", "good"],
+    "title": "Proud",
+    "width": 480
+  },
+  {
+    "file": "/gifs/ready.gif",
+    "height": 544,
+    "poster": "/gifs/ready.jpg",
+    "slug": "ready",
+    "tags": ["ready", "lets-go", "go", "prepared"],
+    "title": "Ready",
+    "width": 544
+  },
+  {
+    "file": "/gifs/salute.gif",
+    "height": 544,
+    "poster": "/gifs/salute.jpg",
+    "slug": "salute",
+    "tags": ["salute", "respect", "sir", "agree", "hello"],
+    "title": "Salute",
+    "width": 544
+  },
+  {
+    "file": "/gifs/seriously.gif",
+    "height": 544,
+    "poster": "/gifs/seriously.jpg",
+    "slug": "seriously",
+    "tags": ["seriously", "unamused", "stare", "really"],
+    "title": "Seriously",
+    "width": 544
+  },
+  {
+    "file": "/gifs/sir.gif",
+    "height": 608,
+    "poster": "/gifs/sir.jpg",
+    "slug": "sir",
+    "tags": ["sir", "yes-sir", "respect", "officer"],
+    "title": "Sir",
+    "width": 480
+  },
+  {
+    "file": "/gifs/sleep.gif",
+    "height": 480,
+    "poster": "/gifs/sleep.jpg",
+    "slug": "sleep",
+    "tags": ["sleep", "tired", "zzz", "night"],
+    "title": "Sleep",
+    "width": 608
+  },
+  {
+    "file": "/gifs/spotted.gif",
+    "height": 480,
+    "poster": "/gifs/spotted.jpg",
+    "slug": "spotted",
+    "tags": ["spotted", "seen", "caught", "look"],
+    "title": "Spotted",
+    "width": 608
+  },
+  {
+    "file": "/gifs/stars.gif",
+    "height": 544,
+    "poster": "/gifs/stars.jpg",
+    "slug": "stars",
+    "tags": ["stars", "wow", "amazed", "sparkle"],
+    "title": "Stars",
+    "width": 544
+  },
+  {
+    "file": "/gifs/tear.gif",
+    "height": 480,
+    "poster": "/gifs/tear.jpg",
+    "slug": "tear",
+    "tags": ["tear", "sad", "cry", "emotional"],
+    "title": "Tear",
+    "width": 608
+  },
+  {
+    "file": "/gifs/thankyou.gif",
+    "height": 544,
+    "poster": "/gifs/thankyou.jpg",
+    "slug": "thankyou",
+    "tags": ["thankyou", "thanks", "grateful"],
+    "title": "Thank you",
+    "width": 544
+  },
+  {
+    "file": "/gifs/toldyou.gif",
+    "height": 544,
+    "poster": "/gifs/toldyou.jpg",
+    "slug": "toldyou",
+    "tags": ["toldyou", "told-you", "smug", "knew-it"],
+    "title": "Told you",
+    "width": 544
+  },
+  {
+    "file": "/gifs/victory.gif",
+    "height": 426,
+    "poster": "/gifs/victory.jpg",
+    "slug": "victory",
+    "tags": ["victory", "win", "celebrate", "yes"],
+    "title": "Victory",
+    "width": 640
+  }
+]

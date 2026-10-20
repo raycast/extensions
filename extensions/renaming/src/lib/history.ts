@@ -102,15 +102,31 @@ export async function saveToHistory(description: string, operations: RenameHisto
     }),
   );
 
-  const entry: RenameHistoryEntry = {
+  // Reassigned only by the timestamp-collision step below, so a retry of the
+  // mutator recognises the copy an earlier attempt stored.
+  let entry: RenameHistoryEntry = {
     timestamp: Date.now(),
     description,
     operations: stamped,
   };
 
   const saved = await updateHistory((fresh) => {
-    // Idempotent under retry: our entry may already be in the re-read state.
-    const next = [entry, ...fresh.filter((e) => e.timestamp !== entry.timestamp)];
+    // Idempotent under retry: our own entry may already be in the re-read
+    // state, so drop it by value — never by timestamp alone, which would
+    // discard a different entry that happened to share the millisecond.
+    const ours = JSON.stringify(entry);
+    const others = fresh.filter((e) => JSON.stringify(e) !== ours);
+
+    // Date.now() is not unique: a concurrent command instance can stamp its
+    // own entry in the same millisecond, and the timestamp is the entry's
+    // identity throughout the UI (undoEntry, the detail view). Step ours
+    // forward until it names only itself, keeping both entries. Idempotent:
+    // once `others` no longer holds the collision, re-applying does nothing.
+    while (others.some((e) => e.timestamp === entry.timestamp)) {
+      entry = { ...entry, timestamp: entry.timestamp + 1 };
+    }
+
+    const next = [entry, ...others];
     if (next.length > MAX_HISTORY_ENTRIES) {
       next.length = MAX_HISTORY_ENTRIES;
     }
@@ -158,21 +174,27 @@ async function revertOperation(op: HistoryOperation, newPath: string = op.newPat
     return `${basename(newPath)} not found`;
   }
 
+  // A case-only rename resolves its own old spelling on a case-insensitive
+  // volume — that is the file being restored, not an occupying conflict.
+  if ((await fileExists(op.oldPath)) && !(await isSameEntry(newPath, op.oldPath))) {
+    return `${basename(op.oldPath)} already exists`;
+  }
+
   // Never move a file the rename didn't produce: if something else now sits
   // at the recorded destination — or identity cannot be proven — refuse.
+  // Checked last, immediately before the rename, so the window in which the
+  // source could be swapped is as narrow as this process can make it.
+  //
+  // Check-then-rename is not atomic (Node exposes no RENAME_NOREPLACE, and
+  // the hardlink trick cannot cover directories), so two residual races are
+  // accepted here: a file created at oldPath after the existence check is
+  // overwritten, and a file substituted at newPath after this verification is
+  // moved as though it were the renamed one. Both windows are microseconds of
+  // syscall latency with no filesystem primitive available to close them; the
+  // forward rename path accepts the same residual race.
   const identityFailure = await verifyIdentity(op, newPath);
   if (identityFailure !== undefined) {
     return identityFailure;
-  }
-
-  // A case-only rename resolves its own old spelling on a case-insensitive
-  // volume — that is the file being restored, not an occupying conflict.
-  // Check-then-rename is not atomic (Node exposes no RENAME_NOREPLACE, and
-  // the hardlink trick cannot cover directories): a file created at oldPath
-  // inside this window is overwritten. The forward rename path accepts the
-  // same residual race.
-  if ((await fileExists(op.oldPath)) && !(await isSameEntry(newPath, op.oldPath))) {
-    return `${basename(op.oldPath)} already exists`;
   }
 
   try {
@@ -256,12 +278,14 @@ export async function previewUndo(operations: ReadonlyArray<HistoryOperation>): 
 
   for (const op of operations) {
     if (!isUndoable(op)) continue;
+    // Same order of checks as revertOperation, so an operation blocked by
+    // more than one conflict is previewed under the reason the undo reports.
     if (!(await fileExists(op.newPath))) {
       missing++;
-    } else if ((await verifyIdentity(op, op.newPath)) !== undefined) {
-      replaced++;
     } else if ((await fileExists(op.oldPath)) && !(await isSameEntry(op.newPath, op.oldPath))) {
       occupied++;
+    } else if ((await verifyIdentity(op, op.newPath)) !== undefined) {
+      replaced++;
     } else {
       restorable++;
     }
@@ -272,10 +296,13 @@ export async function previewUndo(operations: ReadonlyArray<HistoryOperation>): 
 
 /**
  * Human-readable confirmation message for an undo about to cover `preview`.
+ * Says "items", not "files": an entry records whatever its command renamed —
+ * files, folders, or (from Advanced Batch Rename) a mix — and the entry does
+ * not store which.
  */
 export function describeUndoPreview(preview: UndoPreview, source: string): string {
   if (preview.missing === 0 && preview.occupied === 0 && preview.replaced === 0) {
-    return `This will restore the original names of ${preview.total} file${preview.total !== 1 ? "s" : ""} from ${source}`;
+    return `This will restore the original names of ${preview.total} item${preview.total !== 1 ? "s" : ""} from ${source}`;
   }
 
   const conflicts: string[] = [];
@@ -287,12 +314,12 @@ export function describeUndoPreview(preview: UndoPreview, source: string): strin
   }
   if (preview.replaced > 0) {
     conflicts.push(
-      `${preview.replaced} ${preview.replaced === 1 ? "is" : "are"} not verifiably the renamed file${preview.replaced === 1 ? "" : "s"}`,
+      `${preview.replaced} ${preview.replaced === 1 ? "is" : "are"} not verifiably the renamed item${preview.replaced === 1 ? "" : "s"}`,
     );
   }
   return (
-    `${preview.restorable} of ${preview.total} file${preview.total !== 1 ? "s" : ""} from ${source} can be restored. ` +
-    `${conflicts.join("; ")}. Conflicted files will be skipped and can be retried later.`
+    `${preview.restorable} of ${preview.total} item${preview.total !== 1 ? "s" : ""} from ${source} can be restored. ` +
+    `${conflicts.join("; ")}. Conflicted items will be skipped and can be retried later.`
   );
 }
 

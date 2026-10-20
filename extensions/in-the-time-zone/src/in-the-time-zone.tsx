@@ -12,9 +12,15 @@ import {
 import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
 import { searchCities } from "./citySearch";
-import { formatDelta, formatGmtOffset, getCurrentTimeISO } from "./time-utils";
+import {
+  ClockFormatPreference,
+  formatDelta,
+  formatGmtOffset,
+  getCurrentTimeISO,
+  resolveTimeFormat,
+} from "./time-utils";
 import { TimelineView } from "./timeline-view";
-import { DEFAULT_TIME_ZONES, getCityName, getTimezone } from "./timezones";
+import { CityOrderPreference, DEFAULT_TIME_ZONES, getCityName, getTimezone, sortZoneIds } from "./timezones";
 
 const STORAGE_KEY = "selectedTimeZones";
 const BASE_CITY_KEY = "baseCityId";
@@ -30,6 +36,8 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const scrubMinutes = parseInt(preferences.defaultScrubMinutes, 10) || 60;
   const optionScrubMinutes = parseInt(preferences.optionScrubMinutes, 10) || 30;
+  const timeFormat = resolveTimeFormat(preferences.timeFormat as ClockFormatPreference);
+  const cityOrder = (preferences.cityOrder as CityOrderPreference) ?? "offset-asc";
 
   useEffect(() => {
     const load = async () => {
@@ -102,15 +110,33 @@ export default function Command() {
     await saveSelectedZones(currentIds.filter((id) => id !== cityId));
   }
 
+  async function moveCity(cityId: string, delta: -1 | 1) {
+    const currentIds = [...(selectedZoneIds ?? [])];
+    const from = currentIds.indexOf(cityId);
+    if (from === -1) return;
+    let to = from + delta;
+    // Skip over the base city, which is displayed in its own section
+    while (to >= 0 && to < currentIds.length && currentIds[to] === baseCityId) to += delta;
+    if (to < 0 || to >= currentIds.length) return;
+    currentIds.splice(from, 1);
+    currentIds.splice(to, 0, cityId);
+    await saveSelectedZones(currentIds);
+  }
+
   // Use selected base city or fall back to system timezone
   const baseZoneId = baseCityId ? getTimezone(baseCityId) : Intl.DateTimeFormat().resolvedOptions().timeZone;
   const base = useMemo(() => DateTime.fromISO(baseISO).setZone(baseZoneId), [baseISO, baseZoneId]);
 
+  // Apply the configured ordering (GMT offset or custom arrangement)
+  const sortedZoneIds = useMemo(
+    () => sortZoneIds(selectedZoneIds ?? [], baseISO, cityOrder),
+    [selectedZoneIds, baseISO, cityOrder],
+  );
+
   // Filter out the base city from the list (it's shown separately)
   const otherCities = useMemo(() => {
-    const zoneIds = selectedZoneIds ?? [];
-    return zoneIds.filter((id) => id !== baseCityId);
-  }, [selectedZoneIds, baseCityId]);
+    return sortedZoneIds.filter((id) => id !== baseCityId);
+  }, [sortedZoneIds, baseCityId]);
 
   // Search results
   const searchResults = useMemo(() => {
@@ -124,7 +150,7 @@ export default function Command() {
       const dt = DateTime.fromISO(baseISO).setZone(getTimezone(zoneId));
       const diffMinutes = dt.offset - base.offset;
       const cityName = getCityName(zoneId);
-      const paddedTime = padTime(dt.toFormat("h:mm a"));
+      const paddedTime = padTime(dt.toFormat(timeFormat));
       return {
         key: zoneId,
         title: `${paddedTime}  ${cityName}`,
@@ -134,11 +160,11 @@ export default function Command() {
         dateText: dt.toFormat("ccc, LLL d"),
       };
     });
-  }, [baseISO, base.offset, otherCities]);
+  }, [baseISO, base.offset, otherCities, timeFormat]);
 
   const baseRow = useMemo(() => {
     const cityName = baseCityId ? getCityName(baseCityId) : getCityName(baseZoneId);
-    const paddedTime = padTime(base.toFormat("h:mm a"));
+    const paddedTime = padTime(base.toFormat(timeFormat));
     const isSystemTz = !baseCityId;
     return {
       title: `${paddedTime}  ${cityName}`,
@@ -147,7 +173,7 @@ export default function Command() {
       timeColor: getTimeColor(base.hour),
       isSystemTz,
     };
-  }, [base, baseZoneId, baseCityId]);
+  }, [base, baseZoneId, baseCityId, timeFormat]);
 
   function shiftMinutes(delta: number) {
     setBaseISO((prev) => DateTime.fromISO(prev).plus({ minutes: delta }).toISO() || prev);
@@ -166,13 +192,14 @@ export default function Command() {
       <TimelineView
         baseISO={baseISO}
         baseCityId={baseCityId}
-        selectedZoneIds={selectedZoneIds ?? []}
+        selectedZoneIds={sortedZoneIds}
         onShiftMinutes={shiftMinutes}
         onSetBaseISO={setBaseISO}
         onToggleView={() => setViewMode("list")}
         onClearBase={clearBase}
         scrubMinutes={scrubMinutes}
         optionScrubMinutes={optionScrubMinutes}
+        timeFormat={timeFormat}
       />
     );
   }
@@ -308,6 +335,22 @@ export default function Command() {
                       onAction={() => setViewMode("timeline")}
                       shortcut={{ modifiers: ["cmd"], key: "l" }}
                     />
+                    {cityOrder === "custom" && (
+                      <ActionPanel.Section title="Arrange">
+                        <Action
+                          title="Move up"
+                          icon={Icon.ArrowUp}
+                          onAction={() => void moveCity(row.key, -1)}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                        />
+                        <Action
+                          title="Move Down"
+                          icon={Icon.ArrowDown}
+                          onAction={() => void moveCity(row.key, 1)}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                        />
+                      </ActionPanel.Section>
+                    )}
                     <ActionPanel.Section title="Scrub Time">
                       <Action
                         title={formatScrubTitle(-scrubMinutes)}
