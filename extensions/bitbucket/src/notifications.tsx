@@ -106,9 +106,11 @@ async function fetchNotifications(): Promise<NotificationsData> {
   // failed repos their keys are merely missing, and dropping them would resurface them.
   let dismissed = savedDismissed;
   if (failedRepoCount === 0) {
+    // Re-read storage: the user may have marked something as read while the scan was running.
     const live = new Set(notifications.map((n) => n.key));
-    dismissed = savedDismissed.filter((key) => live.has(key));
-    if (dismissed.length !== savedDismissed.length) {
+    const current = await loadDismissed();
+    dismissed = current.filter((key) => live.has(key));
+    if (dismissed.length !== current.length) {
       await LocalStorage.setItem(DISMISSED_KEY, JSON.stringify(dismissed));
     }
   }
