@@ -851,6 +851,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://moltnode.ag/mcp",
   },
   {
+    name: "netactuate",
+    title: "NetActuate",
+    description:
+      "Answers from NetActuate's own published data about its global edge network: data center locations and what each publishes about power, cooling, security and connectivity; which sites hold HIPAA, PCI-DSS, SOC 2 or ISO 27001; where it peers across internet exchanges; the sites nearest a target market; and its products and published pricing, each linked to its netactuate.com page. Read-only tools. Hosted remote Streamable HTTP server; no sign-in and no API key.",
+    icon: "https://netactuate.com/mcp/icon.png",
+    homepage: "https://netactuate.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://netactuate.com/mcp"],
+    },
+    remoteUrl: "https://netactuate.com/mcp",
+  },
+  {
     name: "paddle",
     title: "Paddle",
     description:
