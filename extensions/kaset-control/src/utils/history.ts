@@ -16,6 +16,20 @@ export interface RecentTrack extends TrackLike {
 
 export const MAX_RECENT = 5;
 
+// History is stored newest-first, but the section sits above Now Playing, so it
+// is displayed oldest-first. The track that is currently playing is excluded:
+// replaying a song that is already in the history would otherwise list it in
+// both Now Playing and Recently Played at the same time.
+export function visibleRecent(
+  recent: RecentTrack[],
+  currentId?: string,
+): RecentTrack[] {
+  return recent
+    .filter((entry) => entry.id !== currentId)
+    .slice()
+    .reverse();
+}
+
 // Kaset exposes an ID-only placeholder song titled "Loading..." while it fills
 // in real metadata (`Song.placeholder` in the app's source, which its own views
 // guard against by that same title). Recording one left a junk "Loading..." row

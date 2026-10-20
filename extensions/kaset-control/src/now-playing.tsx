@@ -31,6 +31,7 @@ import {
   removeFromQueue,
   toggleMute,
   toggleShuffle,
+  visibleRecent,
   type KasetState,
   type PlayQueue,
   type RecentTrack,
@@ -161,7 +162,10 @@ export default function NowPlaying() {
   // History is stored newest-first, but the section sits above Now Playing, so
   // show it oldest-first: the most recent track then lands directly above the
   // current one and the list reads as a single timeline.
-  const recent = (library.recent ?? []).slice().reverse();
+  // History is stored newest-first; show it oldest-first so the most recent
+  // track sits directly above Now Playing, and never show the track that is
+  // playing right now.
+  const recent = visibleRecent(library.recent ?? [], currentTrack?.id);
 
   if (!currentTrack && upNext.length === 0) {
     return (

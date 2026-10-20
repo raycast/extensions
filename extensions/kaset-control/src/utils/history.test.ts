@@ -3,6 +3,7 @@ import {
   isPlaceholderTrack,
   MAX_RECENT,
   mergeRecent,
+  visibleRecent,
   type RecentTrack,
 } from "./history";
 
@@ -50,6 +51,33 @@ describe("mergeRecent", () => {
     expect(out).toHaveLength(MAX_RECENT);
     expect(out[0].id).toBe("new");
     expect(out.some((entry) => entry.id === `t${MAX_RECENT - 1}`)).toBe(false);
+  });
+});
+
+describe("visibleRecent", () => {
+  const history: RecentTrack[] = [
+    { ...track("newest"), playedAt: 3000 },
+    { ...track("middle"), playedAt: 2000 },
+    { ...track("oldest"), playedAt: 1000 },
+  ];
+
+  test("shows history oldest first", () => {
+    expect(visibleRecent(history).map((entry) => entry.id)).toEqual([
+      "oldest",
+      "middle",
+      "newest",
+    ]);
+  });
+
+  test("excludes the track that is currently playing", () => {
+    expect(visibleRecent(history, "middle").map((entry) => entry.id)).toEqual([
+      "oldest",
+      "newest",
+    ]);
+  });
+
+  test("leaves the list intact when nothing is playing", () => {
+    expect(visibleRecent(history, undefined)).toHaveLength(3);
   });
 });
 
