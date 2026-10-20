@@ -1,9 +1,8 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { Timer } from "../backend/types";
 import { formatDateTime, formatTime } from "../backend/formatUtils";
 import useTimers from "../hooks/useTimers";
 import RenameAction from "./RenameAction";
-import { showError } from "@chrismessina/raycast-kit";
 
 interface RunningTimerListItemProps {
   timer: Timer;
@@ -15,7 +14,6 @@ const runningIcon = { source: Icon.Clock, tintColor: Color.Yellow };
 const runningLabel = { tag: { value: "Running", color: Color.Yellow } };
 const finishedIcon = { source: Icon.Clock, tintColor: Color.Green };
 const finishedLabel = { tag: { value: "Finished!", color: Color.Green } };
-const failedLabel = { tag: { value: "Alert Error", color: Color.Red } };
 
 export default function RunningTimerListItem({ timer }: RunningTimerListItemProps) {
   const { handlePauseTimer, handleUnpauseTimer, handleStopTimer, handleCreateCT } = useTimers();
@@ -27,34 +25,16 @@ export default function RunningTimerListItem({ timer }: RunningTimerListItemProp
       accessories={[
         { text: formatTime(timer.secondsSet) + " originally" },
         { text: `${timer.timeLeft === 0 ? "Ended" : "Ends"} at ${formatDateTime(timer.timeEnds)}` },
-        timer.workerError
-          ? { ...failedLabel, tooltip: timer.workerError }
-          : timer.timeLeft === 0
-            ? finishedLabel
-            : timer.lastPaused !== "---"
-              ? pausedLabel
-              : runningLabel,
+        timer.timeLeft === 0 ? finishedLabel : timer.lastPaused !== "---" ? pausedLabel : runningLabel,
       ]}
       actions={
         <ActionPanel>
-          {timer.workerError ? (
-            <Action
-              title="Show Alert Error"
-              icon={Icon.ExclamationMark}
-              onAction={() =>
-                showError(new Error(timer.workerError), {
-                  title: "Timer Alert Failed",
-                  copyContext: `Timer: ${timer.name}`,
-                })
-              }
-            />
-          ) : null}
           {timer.timeLeft === 0 ? (
             <Action title="Stop Timer" icon={Icon.Stop} onAction={() => handleStopTimer(timer)} />
           ) : (
             <Action
               title={(timer.lastPaused !== "---" ? "Unpause" : "Pause") + " Timer"}
-              icon={timer.lastPaused !== "---" ? Icon.Play : Icon.Pause}
+              icon={Icon.Pause}
               onAction={timer.lastPaused !== "---" ? () => handleUnpauseTimer(timer) : () => handlePauseTimer(timer)}
             />
           )}
@@ -62,14 +42,19 @@ export default function RunningTimerListItem({ timer }: RunningTimerListItemProp
           <Action
             title="Stop Timer"
             icon={Icon.Stop}
-            style={Action.Style.Destructive}
-            shortcut={Keyboard.Shortcut.Common.Remove}
+            shortcut={{
+              modifiers: ["ctrl"],
+              key: "x",
+            }}
             onAction={() => handleStopTimer(timer)}
           />
           <Action
             title="Save Timer as Preset"
             icon={Icon.SaveDocument}
-            shortcut={Keyboard.Shortcut.Common.Save}
+            shortcut={{
+              modifiers: ["cmd", "shift"],
+              key: "enter",
+            }}
             onAction={() => handleCreateCT(timer)}
           />
         </ActionPanel>

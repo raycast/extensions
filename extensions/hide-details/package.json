@@ -6,7 +6,8 @@
   "icon": "extension-icon.png",
   "author": "0xdhrv",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Productivity",
@@ -22,6 +23,13 @@
       "title": "Redact Clipboard Image",
       "subtitle": "Hide Details",
       "description": "Find sensitive details in the clipboard image and copy a redacted version",
+      "mode": "view"
+    },
+    {
+      "name": "redact-history",
+      "title": "Redact Image File from History",
+      "subtitle": "Hide Details",
+      "description": "Pick a recently copied image file from clipboard history, then review or copy a redacted version",
       "mode": "view"
     },
     {
@@ -134,6 +142,10 @@
     "fix-lint": "ray lint --fix",
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node --test tests/*.test.mjs",
+    "test:windows": "node --test tests/windows.test.mjs",
     "publish": "ray publish"
-  }
+  },
+  "contributors": [
+    "ray.dhruv"
+  ]
 }

@@ -11,6 +11,22 @@ function sanitize(s: string): string {
   return s.replace(/[\t\n\r]/g, " ");
 }
 
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function renderAnkiBack(t: Translation): string {
+  const translation = escapeHtml(t.translation);
+  const posPart = t.partOfSpeech ? ` <i style="opacity:.6">(${escapeHtml(t.partOfSpeech)})</i>` : "";
+  const header = `<div style="font-size:1.3em"><b>${translation}</b>${posPart}</div>`;
+  if (!t.example && !t.exampleTranslation) return header;
+  const exampleLine = t.example ? `<div>${escapeHtml(t.example)}</div>` : "";
+  const exampleTranslationLine = t.exampleTranslation
+    ? `<div style="opacity:.7">${escapeHtml(t.exampleTranslation)}</div>`
+    : "";
+  return `${header}<hr>${exampleLine}${exampleTranslationLine}`;
+}
+
 export function formatJson(translations: Translation[]): string {
   return JSON.stringify(translations, null, 2);
 }
@@ -18,11 +34,8 @@ export function formatJson(translations: Translation[]): string {
 export function formatAnki(translations: Translation[]): string {
   const words = wordsOnly(translations);
   if (words.length === 0) return "";
-  const header = "#separator:Tab\n#columns:Word\tTranslation\tPart of Speech\tExample\tExample Translation";
-  const rows = words.map(
-    (t) =>
-      `${sanitize(t.word)}\t${sanitize(t.translation)}\t${sanitize(t.partOfSpeech)}\t${sanitize(t.example)}\t${sanitize(t.exampleTranslation)}`,
-  );
+  const header = "#separator:Tab\n#html:true\n#notetype:Basic\n#columns:Front\tBack";
+  const rows = words.map((t) => `${sanitize(escapeHtml(t.word))}\t${sanitize(renderAnkiBack(t))}`);
   return header + "\n" + rows.join("\n") + "\n";
 }
 

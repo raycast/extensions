@@ -1,5 +1,18 @@
 # Changelog
 
+## [Providers and Search Fixes] - 2026-10-19
+
+- Add BetterTTV and FrankerFaceZ to Search Emotes, informed by Kan-A-Pesh's Emotecast.
+- Replace Drop Emote and Quick Drop with Paste Emote File. Keep the alternative keyboard shortcut on the same action.
+- Rename Force Paste URL to Paste Emote URL.
+- Credit Kan-A-Pesh for the multi-provider references.
+- Use native GIF files for animated emotes and PNG for static emotes when available.
+- Fix 7TV Popular, Recently Created, and Trending with its current API.
+- Add pagination, matching-result counts where available, and an animated-only filter.
+- Preserve existing 7TV favorites and recent history across updates, including actions taken while saved data is still loading.
+- Keep the animated-only filter action available in empty grid and list results.
+- Hide 7TV alphabetical sorting while its API returns an error.
+
 ## [1.0.0] - 2026-04-25
 
 ### Added

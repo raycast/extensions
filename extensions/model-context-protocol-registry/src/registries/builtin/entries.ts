@@ -126,6 +126,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "ausca",
+    title: "Ausca",
+    description:
+      "Discover priced OCR, document analysis, transcription, browser and receive-only inbox services, then inspect an offer before invoking it. Public discovery needs no account or API key. Paid tools require an x402-capable client and USDC on Base; This Raycast connection covers offer discovery; paid calls require an x402-capable payment flow. Hosted remote Streamable HTTP MCP server.",
+    icon: "https://ausca.com/icon-512.png",
+    homepage: "https://ausca.com/docs/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://ausca.com/mcp"],
+    },
+    remoteUrl: "https://ausca.com/mcp",
+  },
+  {
     name: "award-travel-finder",
     title: "Award Travel Finder",
     description:
@@ -382,6 +395,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://dropthehassle.com/mcp"],
     },
     remoteUrl: "https://dropthehassle.com/mcp",
+  },
+  {
+    name: "dynamic-document-api",
+    title: "Dynamic Document API",
+    description:
+      "Render PDFs and images from saved templates plus JSON, from HTML or from Markdown, merge PDFs, and create validated e-invoices (XRechnung, EN 16931, Factur-X / ZUGFeRD). 9 tools; renders are free, watermarked test renders until a call passes `test: false`. Hosted remote Streamable HTTP server in the EU; OAuth 2.1 sign-in with dynamic client registration and PKCE, free plan, no API key to paste.",
+    icon: "https://dynamicdocumentapi.com/assets/img/icon-512.png",
+    homepage: "https://dynamicdocumentapi.com/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.dynamicdocumentapi.com/mcp"],
+    },
+    remoteUrl: "https://mcp.dynamicdocumentapi.com/mcp",
   },
   {
     name: "git",
@@ -707,6 +733,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "frantic",
+    title: "Frantic",
+    description:
+      "Find funded bounties, inspect the public receipt ledger and enlist an agent to claim work and deliver results. Accepted work is paid in USDC on Base; posting and funding a bounty uses x402. Public MCP reads need no sign-in, while agent and vendor actions use Frantic's own credentials and payment flow. Hosted remote Streamable HTTP MCP server.",
+    icon: "https://gofrantic.com/favicon-512.png",
+    homepage: "https://gofrantic.com/SKILL.md",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.gofrantic.com/mcp"],
+    },
+    remoteUrl: "https://api.gofrantic.com/mcp",
+  },
+  {
     name: "latchkey",
     title: "Latchkey",
     description:
@@ -716,6 +755,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://latchkey.dev/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
+    },
+  },
+  {
+    name: "local-commander",
+    title: "Local Commander",
+    description:
+      "Connects Raycast AI to Windows 11 computers you own. Your AI can read approved project files and Git state, run the checks and commands you authorize, and check local services; your workspace at localcmd.app shows which computer ran each request and how it ended. Once you approve a computer it can do what your Windows account can do; you can limit it to folders, block commands or switch it off at any time. Needs the Local Commander agent paired on each PC (`npx local-commander-agent@latest`). Free plan for up to 5 computers. Hosted remote Streamable HTTP server; OAuth 2.0 sign-in with dynamic client registration and PKCE, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/netbka/local-commander-plugins/main/assets/logo.png",
+    homepage: "https://localcmd.app",
+    remoteUrl: "https://localcmd.app/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote@0.15.1", "https://localcmd.app/mcp"],
     },
   },
   {
@@ -985,6 +1037,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "runx",
+    title: "runx",
+    description:
+      "Search portable agent skills and inspect each manifest, requested authority, trust signals and install command before running it. This public MCP endpoint is read-only; execute skills with the Apache-2.0 runx CLI, which gates consequential actions and signs receipts. Hosted remote Streamable HTTP server; no sign-in needed for discovery.",
+    icon: "https://runx.ai/assets/logo/runx-symbol-512.png",
+    homepage: "https://runx.ai/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.runx.ai/mcp"],
+    },
+    remoteUrl: "https://api.runx.ai/mcp",
+  },
+  {
     name: "truthifi",
     title: "Truthifi",
     description:
@@ -1119,6 +1184,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://solidping.io/api/v1/mcp"],
     },
+  },
+  {
+    name: "sourcey",
+    title: "Sourcey",
+    description:
+      "Search and compare current startup credits, discounts and deals, inspect offer evidence and changes, and read Agent Readiness report cards showing what agents can do with software. Read-only hosted Streamable HTTP MCP server; no account or API key needed.",
+    icon: "https://sourcey.com/brand/sourcey-mark.png",
+    homepage: "https://sourcey.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.sourcey.com/mcp"],
+    },
+    remoteUrl: "https://mcp.sourcey.com/mcp",
   },
   {
     name: "springbrand",
@@ -2422,6 +2500,19 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://vibeprospecting.explorium.ai/mcp"],
     },
+  },
+  {
+    name: "wealthnow",
+    title: "Wealthnow",
+    description:
+      "Institutional financial data for AI agents: FINRA TRACE corporate bond prints and single-name CDS history, private company rounds, valuations and investors, daily options chains with greeks and IV, earnings-call transcripts, 13F and Form 4 ownership, and point-in-time fundamentals and SEC filings. Every tool is read-only; nothing places orders or moves money. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste; free Wealthnow account. Data only, not investment advice.",
+    icon: "https://raw.githubusercontent.com/Hlobo-dev/wealthnow-mcp/main/assets/wealthnow-logo-512.png",
+    homepage: "https://wealthnow.io/api",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.wealthnow.io/mcp"],
+    },
+    remoteUrl: "https://mcp.wealthnow.io/mcp",
   },
   {
     name: "empiriolabs",

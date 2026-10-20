@@ -1,12 +1,20 @@
-import { Icon, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { buildTextTranslationDetailMarkdown, buildTranslationDetailMarkdown } from "../lib/markdown";
+import { LanguagePair } from "../lib/languages";
 import { Translation } from "../lib/types";
-
-export const TTS_HINT_TEXT = "⌘O to pronounce · ⌘⇧O for translation";
+import { DetailMetadata } from "./DetailMetadata";
 
 type TranslationDetailInput = Pick<
   Translation,
-  "type" | "word" | "translation" | "partOfSpeech" | "example" | "exampleTranslation"
+  | "type"
+  | "word"
+  | "translation"
+  | "partOfSpeech"
+  | "example"
+  | "exampleTranslation"
+  | "transcription"
+  | "forms"
+  | "register"
 >;
 
 export function buildDetailMarkdown(item: TranslationDetailInput, originalInput?: string): string {
@@ -17,19 +25,19 @@ export function buildDetailMarkdown(item: TranslationDetailInput, originalInput?
 
 interface TranslationDetailProps {
   item: Translation;
+  languagePair: LanguagePair;
   originalInput?: string;
 }
 
-export function TranslationDetail({ item, originalInput }: TranslationDetailProps) {
-  const markdown = buildDetailMarkdown(item, originalInput);
-
+export function TranslationDetail({ item, languagePair, originalInput }: TranslationDetailProps) {
   return (
     <List.Item.Detail
-      markdown={markdown}
+      markdown={buildDetailMarkdown(item, originalInput)}
       metadata={
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="" text={TTS_HINT_TEXT} icon={Icon.SpeakerHigh} />
-        </List.Item.Detail.Metadata>
+        <DetailMetadata
+          languagePair={languagePair}
+          sourceTitle={item.type === "text" ? "Pronounce Original" : "Pronounce Word"}
+        />
       }
     />
   );

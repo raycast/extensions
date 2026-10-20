@@ -396,7 +396,7 @@
 /extensions/cheetah                                                 @RongleCat
 /extensions/chess-com                                               @joshfarrant @tomassliz @muhammadrizo-y
 /extensions/chhoto                                                  @paranoidPhantom
-/extensions/chiikawa-character                                      @0xdhrv
+/extensions/chiikawa-character                                      @0xdhrv @0xdhrv
 /extensions/china-ip-address                                        @ErlichLiu
 /extensions/chinese-character                                       @koinzhang
 /extensions/chinese-character-converter                             @f88083
@@ -1235,7 +1235,7 @@
 /extensions/heyclaude                                               @JSONbored
 /extensions/hidden-icons                                            @koinzhang
 /extensions/hide-all-apps                                           @peduarte @pernielsentikaer @andrewsardone @haydencbarnes
-/extensions/hide-details                                            @0xdhrv
+/extensions/hide-details                                            @0xdhrv @0xdhrv
 /extensions/hide-files                                              @koinzhang
 /extensions/hide-mail                                               @Flatroy @xmok
 /extensions/hidemyemail                                             @svenhofman @pernielsentikaer @dcastil
@@ -1975,7 +1975,7 @@
 /extensions/office-quotes                                           @braydoncoyer @sandypockets @xmok
 /extensions/office2pdf                                              @ARui-tw
 /extensions/oh-shoot                                                @Nico-Pergande
-/extensions/ohdear                                                  @andreaselia @pernielsentikaer @Hodglim
+/extensions/ohdear                                                  @andreaselia @pernielsentikaer @Hodglim @0xdhrv
 /extensions/ohmyzsh-git-alias                                       @yufeikang
 /extensions/ohmyzsh-plugins                                         @k8scat
 /extensions/ok-json                                                 @francisfeng
@@ -2131,6 +2131,7 @@
 /extensions/pdf-tools                                               @xilopaint
 /extensions/pdfsearch                                               @kevin-pek @xilopaint
 /extensions/pdsls                                                   @notjuliet
+/extensions/pele                                                    @0xdhrv
 /extensions/penflow-ai                                              @Feng6611
 /extensions/penpot                                                  @bobbymannino @tonka3000
 /extensions/pera-explorer                                           @akgunberk
@@ -2640,7 +2641,7 @@
 /extensions/setapp                                                  @lardissone
 /extensions/setlist-fm                                              @csigritz
 /extensions/sevalla                                                 @xmok
-/extensions/seventv-search                                          @Paranjayy
+/extensions/seventv-search                                          @Paranjayy @Paranjayy
 /extensions/sf-symbols-search                                       @peteschaffner @xilopaint
 /extensions/shadcn-svelte                                           @selemondev
 /extensions/shadcn-ui                                               @luisFilipePT @WilliamWelsh @Olivier-OG @ridemountainpig @Siddharth-2382 @1weiho @carlesandres
@@ -3012,7 +3013,7 @@
 /extensions/timecamp                                                @iAmKevinCruz
 /extensions/timecrowd-tracker                                       @machamp0714
 /extensions/timely                                                  @jakedohm
-/extensions/timers                                                  @ThatNerdSquared @GastroGeek @pernielsentikaer @lokot0k @ThatNerdSquared @a-laughlin @muhammadrizo-y
+/extensions/timers                                                  @ThatNerdSquared @GastroGeek @pernielsentikaer @lokot0k @ThatNerdSquared @a-laughlin
 /extensions/timeular                                                @kudrykv
 /extensions/timezone-buddy                                          @andrebreia @jelias @michaelreinhard1 @pernielsentikaer @TakenMC @EduardoGomezPueyo
 /extensions/timezone-converter                                      @joaom182 @pernielsentikaer @ridemountainpig
@@ -3299,6 +3300,7 @@
 /extensions/wikipedia                                               @vimtor @shubzkothekar @NikosEfthias @menahishayan @pernielsentikaer @Ek2100 @sergiivelykodnyi @j3lte @peterbrinck @koinzhang @0xdhrv
 /extensions/windhawk                                                @muhammadrizo-y
 /extensions/windmill                                                @emiliobool @xmok
+/extensions/window-kickflip                                         @0xdhrv
 /extensions/window-layouts                                          @teemusuvinen @gfazioli
 /extensions/window-sizer                                            @the3ash
 /extensions/window-walker                                           @luinbytes @LostViking09

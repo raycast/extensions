@@ -1,5 +1,4 @@
-import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
-import { showError } from "@chrismessina/raycast-kit";
+import { Action, ActionPanel, Form, Toast, useNavigation } from "@raycast/api";
 import { renameStopwatch } from "../backend/stopwatchBackend";
 import { renameCustomTimer, renameTimer } from "../backend/timerBackend";
 import { showHudOrToast } from "../backend/utils";
@@ -12,28 +11,25 @@ interface RenameViewProps {
 
 function RenameView(props: RenameViewProps) {
   const { pop } = useNavigation();
-  const handleSubmit = async (newName: string) => {
+  const handleSubmit = (newName: string) => {
     if (newName === "" || newName === props.currentName) {
-      await showError(new Error("Enter a different name"), { title: "Could Not Rename" });
+      const toast = new Toast({ style: Toast.Style.Failure, title: "No new name given!" });
+      toast.show();
     } else {
-      try {
-        switch (props.originalFile) {
-          case "customTimer":
-            renameCustomTimer(props.ctID ? props.ctID : "-99", newName);
-            break;
-          case "stopwatch":
-            renameStopwatch(props.ctID ? props.ctID : "-99", newName);
-            break;
-          default:
-            renameTimer(props.originalFile, newName);
-            break;
-        }
-
-        await showHudOrToast({ msg: `Renamed to ${newName}!`, launchedFromMenuBar: false, isErr: false });
-        pop();
-      } catch (error) {
-        await showError(error, { title: "Could Not Rename" });
+      pop();
+      switch (props.originalFile) {
+        case "customTimer":
+          renameCustomTimer(props.ctID ? props.ctID : "-99", newName);
+          break;
+        case "stopwatch":
+          renameStopwatch(props.ctID ? props.ctID : "-99", newName);
+          break;
+        default:
+          renameTimer(props.originalFile, newName);
+          break;
       }
+
+      showHudOrToast({ msg: `Renamed to ${newName}!`, launchedFromMenuBar: false, isErr: false });
     }
   };
 

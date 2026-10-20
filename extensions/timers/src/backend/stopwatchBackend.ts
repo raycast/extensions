@@ -1,7 +1,8 @@
 import { environment } from "@raycast/api";
-import { randomUUID } from "node:crypto";
-import { existsSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
-import { extname } from "node:path";
+import { execSync } from "child_process";
+import { randomUUID } from "crypto";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "fs";
+import { extname } from "path";
 import { secondsBetweenDates } from "./formatUtils";
 import { Stopwatch, StopwatchLaunchConfig } from "./types";
 import { showHudOrToast } from "./utils";
@@ -95,10 +96,8 @@ const cleanUpOldStopwatches = (newStore: Stopwatch[]) => {
       const timeStarted = swFile.replace(/__/g, ":").replace(".stopwatch", "");
       stopwatch.timeStarted = new Date(timeStarted);
       stopwatch.timeElapsed = Math.max(0, secondsBetweenDates({}));
+      execSync(`rm "${environment.supportPath}/${swFile}"`);
       newStore.push(stopwatch);
-      // Persist the migration before deleting the legacy file.
-      writeFileSync(SWPATH, JSON.stringify(newStore));
-      unlinkSync(environment.supportPath + "/" + swFile);
     }
   });
   writeFileSync(SWPATH, JSON.stringify(newStore));

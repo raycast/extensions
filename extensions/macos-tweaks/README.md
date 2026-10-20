@@ -14,6 +14,7 @@ Discover and toggle hidden macOS settings without the Terminal. Browse a curated
 
 - **Browse Tweaks** — Browse all hidden settings by category, toggle them on/off, and see current values at a glance
 - **My Tweaks** — View only your modified settings, reset individually or all at once, export as shell commands
+- **Add Dock Spacer** — Add an empty tile to the Dock to split your apps into groups, small or regular, on either side of the divider
 - **Tweaks Menu Bar** — Quick access from the menu bar with badge showing how many tweaks are active
 
 ## Features
@@ -27,6 +28,7 @@ Discover and toggle hidden macOS settings without the Terminal. Browse a curated
 - Export all modified tweaks as a shell script
 - Safety warnings for moderate-risk settings
 - Automatic process restart (Finder, Dock, SystemUIServer) after applying changes
+- Dock spacers: add them from the **Add Dock Spacer** command or the Dock section of Browse Tweaks, which also counts them and removes them all at once
 - Quick toggle directly from the menu bar
 
 ## Categories
