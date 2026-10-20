@@ -1,5 +1,9 @@
 # Karakeep Changelog
 
+## [Unreleased]
+
+- Fixed screenshot previews being blank on self-hosted Karakeep v0.33.x. The extension was fetching images through the Next.js image optimizer route (`/_next/image`), which returns HTTP 400 in v0.33.x. It now fetches directly from `/api/assets/{id}`, which returns the image with HTTP 200 on all supported server versions.
+
 ## [2.4.5] - 2026-08-29
 
 - A rejected API key now says so. Every command used to fail with a bare "HTTP 401" and no way to act on it — the lists showed "Couldn't load bookmarks", the forms showed "Couldn't create bookmark", and nothing pointed at the setting that was actually wrong. Bookmarks, Lists, Tags, Highlights, Backups and Stats now show an "Invalid API key" screen with Open Extension Settings as the default action, and every error toast in the extension offers the same
