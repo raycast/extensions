@@ -1,8 +1,8 @@
 # Model Context Protocol Registry Changelog
 
-## [Clarify Ausca MCP payment flow] - {PR_MERGE_DATE}
+## [Update Ausca MCP listing] - {PR_MERGE_DATE}
 
-- Clarify that the Raycast connection discovers Ausca offers and paid calls need an x402-capable client.
+- Use Ausca's final square mark and clarify that the Raycast connection discovers offers while paid calls need an x402-capable client.
 
 ## [Add Runx, Sourcey, Frantic and Ausca MCP servers] - 2026-10-19
 
