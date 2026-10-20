@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add xTiles MCP Server] - 2026-10-20
+
+- Add xTiles to the official registry: turn AI chats into xTiles projects, notes and tasks, and pull any project back into the chat with its current state. Hosted Streamable HTTP server at https://mcp.xtiles.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add Runx, Sourcey, Frantic and Ausca MCP servers] - 2026-10-19
 
 - Add four first-party hosted MCP servers with current marks and direct HTTP connections in Raycast. Runx and Sourcey expose public read-only discovery, Frantic exposes public bounty reads and governed actions, and Ausca exposes keyless offer discovery with x402 payment required for paid calls. Other MCP clients retain the `mcp-remote` fallback.
