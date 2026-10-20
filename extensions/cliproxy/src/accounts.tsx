@@ -18,6 +18,8 @@ import {
   AuthFile,
   baseUrl,
   clearCooldown,
+  ConnectionId,
+  connectionId,
   describeRefresh,
   listAuthFiles,
   refreshAllAuthFiles,
@@ -39,20 +41,30 @@ const VIEWS: { value: View; title: string; icon: Icon }[] = [
   { value: "overview", title: "Overview", icon: Icon.BarChart },
 ];
 
-async function fetchAllQuotas(accounts: QuotaAccount[]): Promise<Record<string, QuotaResult>> {
-  const results = await Promise.all(accounts.map(async (a) => [a.auth_index, await loadQuota(a)] as const));
+async function fetchAllQuotas(
+  connection: ConnectionId,
+  accounts: QuotaAccount[],
+): Promise<Record<string, QuotaResult>> {
+  const results = await Promise.all(accounts.map(async (a) => [a.auth_index, await loadQuota(connection, a)] as const));
   return Object.fromEntries(results);
 }
 
 export default function Command() {
+  // Remount when the server or key changes, so no kept data or in-flight result from the old connection carries over.
+  // Callbacks still held from the old render pass its connection, which the API then refuses.
+  const connection = connectionId();
+  return <Accounts key={connection} connection={connection} />;
+}
+
+function Accounts({ connection }: { connection: ConnectionId }) {
   const [view, setView] = useCachedState<View>("view", "details");
-  const files = useCachedPromise(listAuthFiles, [], { keepPreviousData: true });
+  const files = useCachedPromise(listAuthFiles, [connection]);
 
   // Key quota fetching on stable fields only, so status changes don't re-hit upstream.
   const quotaAccounts: QuotaAccount[] = (files.data ?? [])
     .filter(supportsQuota)
     .map(({ auth_index, provider, id_token }) => ({ auth_index, provider, id_token }));
-  const quotas = useCachedPromise(fetchAllQuotas, [quotaAccounts], {
+  const quotas = useCachedPromise(fetchAllQuotas, [connection, quotaAccounts], {
     execute: quotaAccounts.length > 0,
     keepPreviousData: true,
   });
@@ -64,7 +76,7 @@ export default function Command() {
 
   const refreshAll = () =>
     withToast("Refreshing all accounts…", async () => {
-      const results = await refreshAllAuthFiles();
+      const results = await refreshAllAuthFiles(connection);
       reloadAll();
       const failed = results.filter((r) => !r.success);
       if (failed.length > 0) {
@@ -98,6 +110,7 @@ export default function Command() {
   const byProvider = groupBy(files.data ?? [], (f) => f.provider || "other");
   const nextView = VIEWS[(VIEWS.findIndex((v) => v.value === view) + 1) % VIEWS.length];
   const actions: ListActions = {
+    connection,
     view,
     nextView,
     switchView: () => setView(nextView.value),
@@ -159,6 +172,7 @@ export default function Command() {
 }
 
 type ListActions = {
+  connection: ConnectionId;
   view: View;
   nextView: (typeof VIEWS)[number];
   switchView: () => void;
@@ -177,14 +191,14 @@ function AccountItem(props: AccountProps & { actions: ListActions }) {
 
   const refresh = () =>
     withToast(`Refreshing ${accountTitle(file)}…`, async () => {
-      await refreshAuthFile(file);
+      await refreshAuthFile(actions.connection, file);
       actions.reloadAll();
       return "Account refreshed";
     });
 
   const toggleDisabled = () =>
     withToast(file.disabled ? "Enabling account…" : "Disabling account…", async () => {
-      await setAuthFileDisabled(file, !file.disabled);
+      await setAuthFileDisabled(actions.connection, file, !file.disabled);
       actions.reloadAll();
       return file.disabled ? "Account enabled" : "Account disabled";
     });
@@ -198,7 +212,7 @@ function AccountItem(props: AccountProps & { actions: ListActions }) {
     });
     if (!confirmed) return;
     await withToast("Clearing cooldown…", async () => {
-      await clearCooldown(file.auth_index);
+      await clearCooldown(actions.connection, file.auth_index);
       actions.reloadFiles();
       return "Cooldown cleared";
     });
@@ -216,7 +230,7 @@ function AccountItem(props: AccountProps & { actions: ListActions }) {
     });
     if (!confirmed) return;
     await withToast("Resetting rate limits…", async () => {
-      const message = await spendReset(file);
+      const message = await spendReset(actions.connection, file);
       actions.reloadAll();
       return message;
     });

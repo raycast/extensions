@@ -1,6 +1,14 @@
 import { Cache } from "@raycast/api";
 import { randomUUID } from "node:crypto";
-import { AuthFile, clearCooldown, isRecord, upstream, UpstreamResponse } from "./api";
+import {
+  AuthFile,
+  clearCooldown,
+  ConnectionChangedError,
+  ConnectionId,
+  isRecord,
+  upstream,
+  UpstreamResponse,
+} from "./api";
 
 // Upstream quota for Codex and Claude accounts, fetched through CLIProxyAPI's /api-call proxy.
 // Endpoints and headers mirror the official Management Center (router-for-me/Cli-Proxy-API-Management-Center).
@@ -32,8 +40,8 @@ export function canUseReset(offer: ResetOffer | null | undefined): boolean {
   return offer.kind === "codex" ? offer.available > 0 : offer.grantId !== null;
 }
 
-export function fetchQuota(file: QuotaAccount): Promise<Quota> {
-  return file.provider === "codex" ? fetchCodexQuota(file) : fetchClaudeQuota(file);
+export function fetchQuota(connection: ConnectionId, file: QuotaAccount): Promise<Quota> {
+  return file.provider === "codex" ? fetchCodexQuota(connection, file) : fetchClaudeQuota(connection, file);
 }
 
 /** Latest quota for an account. On failure `quota` is the last good fetch (if any) and `error` says why it's stale. */
@@ -41,13 +49,15 @@ export type QuotaResult = { quota: Quota | null; fetchedAt: number | null; error
 
 const lastGood = new Cache({ namespace: "quota" });
 
-export async function loadQuota(account: QuotaAccount): Promise<QuotaResult> {
+/** The last good fetch is kept per connection, as auth indexes repeat across servers. */
+export async function loadQuota(connection: ConnectionId, account: QuotaAccount): Promise<QuotaResult> {
+  const key = `${connection}/${account.auth_index}`;
   try {
-    const result = { quota: await fetchQuota(account), fetchedAt: Date.now(), error: null };
-    lastGood.set(account.auth_index, JSON.stringify(result));
+    const result = { quota: await fetchQuota(connection, account), fetchedAt: Date.now(), error: null };
+    lastGood.set(key, JSON.stringify(result));
     return result;
   } catch (error) {
-    const cached = lastGood.get(account.auth_index);
+    const cached = lastGood.get(key);
     const previous: QuotaResult | null = cached ? JSON.parse(cached) : null;
     const message = error instanceof Error ? error.message : String(error);
     return { quota: previous?.quota ?? null, fetchedAt: previous?.fetchedAt ?? null, error: message };
@@ -55,11 +65,11 @@ export async function loadQuota(account: QuotaAccount): Promise<QuotaResult> {
 }
 
 /** Spend one reset credit/grant, then clear CLIProxyAPI's local cooldown. Returns a status message. */
-export async function spendReset(file: QuotaAccount): Promise<string> {
-  if (file.provider === "codex") await consumeCodexCredit(file);
-  else await claimClaudeGrant(file);
+export async function spendReset(connection: ConnectionId, file: QuotaAccount): Promise<string> {
+  if (file.provider === "codex") await consumeCodexCredit(connection, file);
+  else await claimClaudeGrant(connection, file);
   try {
-    await clearCooldown(file.auth_index);
+    await clearCooldown(connection, file.auth_index);
   } catch {
     return "Reset used, but clearing the local cooldown failed";
   }
@@ -83,7 +93,7 @@ function codexHeaders(file: QuotaAccount): Record<string, string> {
   return headers;
 }
 
-async function fetchCodexQuota(file: QuotaAccount): Promise<Quota> {
+async function fetchCodexQuota(connection: ConnectionId, file: QuotaAccount): Promise<Quota> {
   const headers = codexHeaders(file);
   const creditHeaders = {
     ...headers,
@@ -92,8 +102,8 @@ async function fetchCodexQuota(file: QuotaAccount): Promise<Quota> {
     Originator: "Codex Desktop",
   };
   const [usage, credits] = await Promise.all([
-    upstream(file.auth_index, "GET", CODEX_USAGE_URL, headers),
-    upstream(file.auth_index, "GET", CODEX_CREDITS_URL, creditHeaders).catch(() => null),
+    upstream(connection, file.auth_index, "GET", CODEX_USAGE_URL, headers),
+    upstream(connection, file.auth_index, "GET", CODEX_CREDITS_URL, creditHeaders).catch(() => null),
   ]);
   const payload = expectOk(usage);
 
@@ -130,10 +140,15 @@ function codexWindowLabel(seconds: number | null, index: number): string {
   return index === 0 ? "Primary" : "Secondary";
 }
 
-async function consumeCodexCredit(file: QuotaAccount): Promise<void> {
-  const res = await upstream(file.auth_index, "POST", CODEX_CONSUME_URL, codexHeaders(file), {
-    redeem_request_id: randomUUID(),
-  });
+async function consumeCodexCredit(connection: ConnectionId, file: QuotaAccount): Promise<void> {
+  let res: UpstreamResponse;
+  try {
+    res = await upstream(connection, file.auth_index, "POST", CODEX_CONSUME_URL, codexHeaders(file), {
+      redeem_request_id: randomUUID(),
+    });
+  } catch (error) {
+    throw unknownOutcome(error);
+  }
   const code = expectOk(res).code;
   if (code !== "reset" && code !== "already_redeemed") {
     throw new Error("Codex did not confirm the reset");
@@ -161,9 +176,9 @@ const CLAUDE_WINDOWS: [key: string, label: string][] = [
 const GRANT_ID_RE = /^[a-z0-9_-]{1,40}$/;
 const ORG_UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-async function fetchClaudeQuota(file: QuotaAccount): Promise<Quota> {
+async function fetchClaudeQuota(connection: ConnectionId, file: QuotaAccount): Promise<Quota> {
   // One request for windows and reset grants: Anthropic rate-limits this endpoint hard.
-  const res = await upstream(file.auth_index, "GET", `${ANTHROPIC}/api/oauth/usage?cedar_ember=1`, {
+  const res = await upstream(connection, file.auth_index, "GET", `${ANTHROPIC}/api/oauth/usage?cedar_ember=1`, {
     ...CLAUDE_HEADERS,
     Accept: "application/json",
   });
@@ -204,8 +219,9 @@ function claudeFableLimit(payload: Record<string, unknown>): QuotaWindow | null 
 type ClaudeGrantStatus = Extract<ResetOffer, { kind: "claude" }>;
 
 /** Fresh read of the reset-grant program, used right before spending one. */
-async function readClaudeGrants(file: QuotaAccount): Promise<ClaudeGrantStatus> {
+async function readClaudeGrants(connection: ConnectionId, file: QuotaAccount): Promise<ClaudeGrantStatus> {
   const res = await upstream(
+    connection,
     file.auth_index,
     "GET",
     `${ANTHROPIC}/api/oauth/usage?cedar_ember=1&skip_spend=1`,
@@ -258,26 +274,29 @@ const CLAIM_ERRORS: Record<string, string> = {
   unavailable: "Reset grant unavailable",
 };
 
-async function claimClaudeGrant(file: QuotaAccount): Promise<void> {
+async function claimClaudeGrant(connection: ConnectionId, file: QuotaAccount): Promise<void> {
   // Re-read right before spending so we never claim against stale state.
-  const status = await readClaudeGrants(file);
+  const status = await readClaudeGrants(connection, file);
   if (!status.grantId) throw new Error(status.blocker ?? "No reset grant usable right now");
 
-  const profile = expectOk(await upstream(file.auth_index, "GET", `${ANTHROPIC}/api/oauth/profile`, CLAUDE_HEADERS));
+  const profile = expectOk(
+    await upstream(connection, file.auth_index, "GET", `${ANTHROPIC}/api/oauth/profile`, CLAUDE_HEADERS),
+  );
   const org = str(record(profile.organization).uuid);
   if (!org || !ORG_UUID_RE.test(org)) throw new Error("Could not resolve the Claude organization");
 
   let res: UpstreamResponse;
   try {
     res = await upstream(
+      connection,
       file.auth_index,
       "POST",
       `${ANTHROPIC}/api/organizations/${org}/reset_rate_limits`,
       CLAUDE_HEADERS,
       { program: "cedar_ember", grant_id: status.grantId, request_id: randomUUID() },
     );
-  } catch {
-    throw new Error("Reset outcome unknown, reload the quota before trying again");
+  } catch (error) {
+    throw unknownOutcome(error);
   }
   if (res.status === 429) throw new Error("Rate limited by Anthropic, nothing was spent");
   if (res.status === 401 || res.status === 403) throw new Error("Anthropic rejected the account token");
@@ -288,6 +307,15 @@ async function claimClaudeGrant(file: QuotaAccount): Promise<void> {
 }
 
 // MARK: Helpers
+
+/**
+ * A failed spend request may still have gone through upstream; a retry would use a new request id, so say so.
+ * A changed connection fails before anything is sent, so that error passes through as is.
+ */
+function unknownOutcome(error: unknown): Error {
+  if (error instanceof ConnectionChangedError) return error;
+  return new Error("Reset outcome unknown, reload the quota before trying again");
+}
 
 function expectOk(res: UpstreamResponse): Record<string, unknown> {
   if (res.status < 200 || res.status >= 300) {

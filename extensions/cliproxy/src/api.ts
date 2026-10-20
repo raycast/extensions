@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { createHash } from "node:crypto";
 
 // Thin client for the CLIProxyAPI management API (/v0/management).
 
@@ -48,24 +49,64 @@ export class ApiError extends Error {
 }
 
 export function baseUrl(): string {
-  const { baseUrl } = getPreferenceValues<Preferences>();
-  return (baseUrl?.trim() || "http://localhost:8317").replace(/\/+$/, "");
+  return readSettings().url;
 }
 
-async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const { managementKey } = getPreferenceValues<Preferences>();
-  const url = `${baseUrl()}/v0/management${path}`;
+/**
+ * Opaque id of the configured server URL and management key. Views capture it when they load and pass it to every
+ * call, so a call made after the settings changed fails instead of reaching the new server or using the new key.
+ * Cache keys include it too; it's a truncated hash, so the key itself is never stored.
+ */
+export type ConnectionId = string & { readonly __brand: "ConnectionId" };
+
+export function connectionId(): ConnectionId {
+  return readSettings().id;
+}
+
+/** Thrown before sending anything when the settings no longer match the connection the caller loaded from. */
+export class ConnectionChangedError extends ApiError {
+  constructor() {
+    super("Server settings changed, reopen the command to continue", 0);
+  }
+}
+
+/** URL, key and their id from one read of the preferences, so they always belong together. */
+function readSettings() {
+  const prefs = getPreferenceValues<Preferences>();
+  const url = (prefs.baseUrl?.trim() || "http://localhost:8317").replace(/\/+$/, "");
+  const id = createHash("sha256")
+    .update(JSON.stringify([url, prefs.managementKey]))
+    .digest("hex")
+    .slice(0, 16) as ConnectionId;
+  return { url, managementKey: prefs.managementKey, id };
+}
+
+/** Deadline for one management API call, including reading the response body. */
+const REQUEST_TIMEOUT_MS = 15_000;
+
+async function request<T>(connection: ConnectionId, method: string, path: string, body?: unknown): Promise<T> {
+  const { url, managementKey, id } = readSettings();
+  if (id !== connection) throw new ConnectionChangedError();
+  // Aborting also fails a pending res.text(), so a body that stops mid-way can't hang the call either.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   let res: Response;
+  let text: string;
   try {
-    res = await fetch(url, {
+    res = await fetch(`${url}/v0/management${path}`, {
       method,
       headers: { Authorization: `Bearer ${managementKey}`, "Content-Type": "application/json" },
       body: body === undefined ? undefined : JSON.stringify(body),
+      signal: controller.signal,
     });
+    text = await res.text();
   } catch {
-    throw new ApiError(`CLIProxyAPI is not reachable at ${baseUrl()}`, 0);
+    throw controller.signal.aborted
+      ? new ApiError(`CLIProxyAPI at ${url} didn't respond within ${REQUEST_TIMEOUT_MS / 1000}s`, 0)
+      : new ApiError(`CLIProxyAPI is not reachable at ${url}`, 0);
+  } finally {
+    clearTimeout(timer);
   }
-  const text = await res.text();
   const json = text ? safeJson(text) : null;
   if (!res.ok) {
     const message = isRecord(json) && typeof json.error === "string" ? json.error : `HTTP ${res.status}`;
@@ -74,8 +115,8 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   return json as T;
 }
 
-export async function listAuthFiles(): Promise<AuthFile[]> {
-  const res = await request<{ files: AuthFile[] }>("GET", "/auth-files");
+export async function listAuthFiles(connection: ConnectionId): Promise<AuthFile[]> {
+  const res = await request<{ files: AuthFile[] }>(connection, "GET", "/auth-files");
   const receivedAt = Date.now();
   return res.files.map((file) => ({
     ...file,
@@ -85,34 +126,37 @@ export async function listAuthFiles(): Promise<AuthFile[]> {
 }
 
 /** Force a token refresh for one auth file. */
-export async function refreshAuthFile(file: AuthFile): Promise<void> {
-  await request("POST", "/auth-files/refresh", { name: file.name, auth_index: file.auth_index });
+export async function refreshAuthFile(connection: ConnectionId, file: AuthFile): Promise<void> {
+  await request(connection, "POST", "/auth-files/refresh", { name: file.name, auth_index: file.auth_index });
 }
 
 /** Force a token refresh for every enabled auth file. */
-export async function refreshAllAuthFiles(): Promise<RefreshResult[]> {
-  const res = await request<{ results: RefreshResult[] | null }>("POST", "/auth-files/refresh", { all: true });
+export async function refreshAllAuthFiles(connection: ConnectionId): Promise<RefreshResult[]> {
+  const res = await request<{ results: RefreshResult[] | null }>(connection, "POST", "/auth-files/refresh", {
+    all: true,
+  });
   return res.results ?? [];
 }
 
-export async function setAuthFileDisabled(file: AuthFile, disabled: boolean): Promise<void> {
-  await request("PATCH", "/auth-files/status", { name: file.name, auth_index: file.auth_index, disabled });
+export async function setAuthFileDisabled(connection: ConnectionId, file: AuthFile, disabled: boolean): Promise<void> {
+  await request(connection, "PATCH", "/auth-files/status", { name: file.name, auth_index: file.auth_index, disabled });
 }
 
 /** Clear CLIProxyAPI's local cooldown/quota routing state for an account. Upstream quota is untouched. */
-export async function clearCooldown(authIndex: string): Promise<void> {
-  await request("POST", "/reset-quota", { auth_index: authIndex });
+export async function clearCooldown(connection: ConnectionId, authIndex: string): Promise<void> {
+  await request(connection, "POST", "/reset-quota", { auth_index: authIndex });
 }
 
 /** Send a request upstream through the proxy; `$TOKEN$` in headers is replaced with the account's access token. */
 export async function upstream(
+  connection: ConnectionId,
   authIndex: string,
   method: string,
   url: string,
   header: Record<string, string>,
   data?: unknown,
 ): Promise<UpstreamResponse> {
-  const res = await request<{ status_code: number; body: string }>("POST", "/api-call", {
+  const res = await request<{ status_code: number; body: string }>(connection, "POST", "/api-call", {
     auth_index: authIndex,
     method,
     url,
