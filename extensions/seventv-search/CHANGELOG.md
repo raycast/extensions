@@ -1,7 +1,9 @@
 # Changelog
 
-## [Saved Search and View Preferences] - {PR_MERGE_DATE}
+## [User Browsing and Saved Search] - {PR_MERGE_DATE}
 
+- Add 7TV user search with separate channel-emote and creator-upload commands.
+- Show personal-set usage status and exclude private or unlisted entries from user browsing.
 - Show matching favorites and recently used emotes while searching in grid and list views.
 - Remember the provider, sort order, view, and animated-only filter between command sessions.
 - Restore README credit for n4kama’s GIF/PNG clipboard contribution.

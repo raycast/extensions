@@ -13,6 +13,13 @@ export interface EmoteFile {
   url?: string;
   static_name?: string;
 }
+export interface EmoteUsage {
+  approvedPersonal?: boolean;
+  deniedPersonal?: boolean;
+  private?: boolean;
+  publicListed?: boolean;
+  nsfw?: boolean;
+}
 export interface Emote {
   id: string;
   name: string;
@@ -20,6 +27,7 @@ export interface Emote {
   owner?: { display_name: string };
   host: { url: string; files: EmoteFile[] };
   animated?: boolean;
+  usage?: EmoteUsage;
 }
 export const PAGE_SIZE = 60;
 export const BTTV_PAGE_SIZE = 50;

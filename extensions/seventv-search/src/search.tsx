@@ -10,6 +10,7 @@ import {
   Clipboard,
   LocalStorage,
   getPreferenceValues,
+  Detail,
 } from "@raycast/api";
 import React, { useState, useEffect, useRef } from "react";
 import { writeFile } from "fs/promises";
@@ -31,6 +32,8 @@ import {
   getEmotePage,
 } from "./providers";
 
+import { type UserEmoteSource, getUsageDescription } from "./user-emotes";
+
 import { createSavedEmotesStore } from "./saved-emotes";
 import {
   type SearchPreferences,
@@ -43,7 +46,7 @@ const validSelections = PROVIDERS.flatMap((provider) =>
   provider.sorts.map((sort) => `${provider.id}:${sort}`),
 );
 
-export default function Command() {
+export function EmoteBrowser({ source }: { source?: UserEmoteSource }) {
   const defaultSize = Number(getPreferenceValues<Preferences>().size);
   const [searchText, setSearchText] = useState("");
   const [items, setItems] = useState<Emote[]>([]);
@@ -76,13 +79,20 @@ export default function Command() {
   const nextCursorRef = useRef<string>(undefined);
 
   const [retry, setRetry] = useState(0);
-  const [provider, sortMode] = selection.split(":") as [Provider, SortMode];
+  const [selectedProvider, selectedSort] = selection.split(":") as [
+    Provider,
+    SortMode,
+  ];
+  const provider = source ? "7tv" : selectedProvider;
+  const sortMode = source ? "popular" : selectedSort;
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState<number>();
   const [hasMore, setHasMore] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
   const providerTitle = PROVIDERS.find((p) => p.id === provider)!.title;
-  const resultsTitle = `${providerTitle} · ${getSortTitle(provider, sortMode, searchText)}`;
+  const resultsTitle =
+    source?.title ??
+    `${providerTitle} · ${getSortTitle(provider, sortMode, searchText)}`;
   const resultCount =
     total === undefined
       ? `${items.length} loaded`
@@ -153,7 +163,7 @@ export default function Command() {
     setErrorMessage(undefined);
     const timeout = setTimeout(async () => {
       try {
-        const result = await searchEmotes(
+        const result = await (source?.load ?? searchEmotes)(
           {
             provider,
             sort: sortMode,
@@ -194,6 +204,7 @@ export default function Command() {
     };
   }, [
     preferencesLoaded,
+    source,
     searchText,
     provider,
     sortMode,
@@ -408,6 +419,7 @@ export default function Command() {
             title="Reload Results"
             icon={Icon.ArrowClockwise}
             onAction={() => {
+              source?.invalidate?.();
               resetResults();
               setRetry((value) => value + 1);
             }}
@@ -427,6 +439,26 @@ export default function Command() {
             content={item.id}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           />
+          {item.usage && (
+            <Action.Push
+              title="View 7TV Usage Status"
+              icon={Icon.Info}
+              target={
+                <Detail
+                  markdown={`# 7TV Usage Status
+
+${getUsageDescription(item.usage)}
+
+This status applies to 7TV personal emote sets. It does not describe general permission to reuse the image elsewhere.
+
+- Public listing: ${item.usage.publicListed ? "Listed" : "Unlisted"}
+- Private: ${item.usage.private ? "Yes" : "No"}
+
+[View emote on 7TV](${getEmotePage(item)})`}
+                />
+              }
+            />
+          )}
         </ActionPanel.Section>
       </ActionPanel>
     );
@@ -449,12 +481,14 @@ export default function Command() {
         ))}
       </Dropdown.Section>
     ));
-  const savedMatches = getSavedEmoteMatches(
-    favorites,
-    history,
-    { provider, query: searchText, animatedOnly },
-    getEmoteKey,
-  );
+  const savedMatches = source
+    ? { favorites: [], history: [] }
+    : getSavedEmoteMatches(
+        favorites,
+        history,
+        { provider, query: searchText, animatedOnly },
+        getEmoteKey,
+      );
   const hasSavedMatches =
     savedMatches.favorites.length > 0 || savedMatches.history.length > 0;
   const pagination = {
@@ -515,15 +549,22 @@ export default function Command() {
         searchText={searchText}
         filtering={false}
         pagination={pagination}
-        searchBarPlaceholder={`Search ${providerTitle} Emotes...`}
+        navigationTitle={source?.title}
+        searchBarPlaceholder={
+          source
+            ? "Search These Emotes..."
+            : `Search ${providerTitle} Emotes...`
+        }
         searchBarAccessory={
-          <Grid.Dropdown
-            tooltip="Provider & Sort"
-            value={selection}
-            onChange={changeSelection}
-          >
-            {dropdownSections(Grid.Dropdown)}
-          </Grid.Dropdown>
+          source ? undefined : (
+            <Grid.Dropdown
+              tooltip="Provider & Sort"
+              value={selection}
+              onChange={changeSelection}
+            >
+              {dropdownSections(Grid.Dropdown)}
+            </Grid.Dropdown>
+          )
         }
         columns={6}
         fit={Grid.Fit.Contain}
@@ -543,7 +584,9 @@ export default function Command() {
                   : "No Emotes Found"
             }
             description={
-              errorMessage ?? "Try another name, provider, or filter."
+              errorMessage ??
+              source?.emptyDescription ??
+              "Try another name, provider, or filter."
             }
             actions={
               <ActionPanel>
@@ -567,15 +610,20 @@ export default function Command() {
       searchText={searchText}
       filtering={false}
       pagination={pagination}
-      searchBarPlaceholder={`Search ${providerTitle} Emotes...`}
+      navigationTitle={source?.title}
+      searchBarPlaceholder={
+        source ? "Search These Emotes..." : `Search ${providerTitle} Emotes...`
+      }
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Provider & Sort"
-          value={selection}
-          onChange={changeSelection}
-        >
-          {dropdownSections(List.Dropdown)}
-        </List.Dropdown>
+        source ? undefined : (
+          <List.Dropdown
+            tooltip="Provider & Sort"
+            value={selection}
+            onChange={changeSelection}
+          >
+            {dropdownSections(List.Dropdown)}
+          </List.Dropdown>
+        )
       }
       throttle
     >
@@ -593,7 +641,11 @@ export default function Command() {
                 ? "Loading Emotes"
                 : "No Emotes Found"
           }
-          description={errorMessage ?? "Try another name, provider, or filter."}
+          description={
+            errorMessage ??
+            source?.emptyDescription ??
+            "Try another name, provider, or filter."
+          }
           actions={
             <ActionPanel>
               <Action
@@ -607,4 +659,8 @@ export default function Command() {
       )}
     </List>
   );
+}
+
+export default function Command() {
+  return <EmoteBrowser />;
 }
