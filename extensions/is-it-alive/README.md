@@ -15,7 +15,7 @@
 ## Screenshots
 
 <p align="center">
-  <img src="metadata/is-it-alive-1.png" alt="Monitored sites list with live status" width="720" />
+  <img src="media/is-it-alive-1.png" alt="Monitored sites list with live status" width="720" />
 </p>
 
 <p align="center">
@@ -23,7 +23,7 @@
 </p>
 
 <p align="center">
-  <img src="metadata/is-it-alive-2.png" alt="Status detail view with 90-day uptime charts" width="720" />
+  <img src="media/is-it-alive-2.png" alt="Status detail view with 90-day uptime charts" width="720" />
 </p>
 
 <p align="center">
