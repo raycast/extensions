@@ -23,6 +23,18 @@ export interface DatadogComponentGroup {
   components: DatadogComponent[];
 }
 
+interface DatadogAffectedComponent {
+  id: string;
+  status: DatadogComponentStatus;
+}
+
+/** One status update. The page builds its uptime bars from these. */
+export interface DatadogTimelineEntry {
+  createdAt: string;
+  startedAt?: string;
+  componentsAffected?: DatadogAffectedComponent[];
+}
+
 export interface DatadogIncident {
   id: string;
   title: string;
@@ -30,12 +42,14 @@ export interface DatadogIncident {
   description?: string;
   lastModifiedAt: string;
   resolved: boolean;
-  componentsAffected?: Array<{ id: string; status: DatadogComponentStatus }>;
+  componentsAffected?: DatadogAffectedComponent[];
+  timeline?: DatadogTimelineEntry[];
 }
 
 export interface DatadogConfig {
   name: string;
   pageUrl: string;
+  created?: string;
   customDomain?: string;
   components: Array<DatadogComponent | DatadogComponentGroup>;
   incidents: DatadogIncident[] | null;

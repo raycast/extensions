@@ -62,7 +62,7 @@ Statuspage uptime comes from the `/uptime_showcase` endpoint of the page. This e
 
 A Cloudflare bot challenge often protects Rootly pages, but the challenge skips the public `/api/v1/status.json` API. This API gives the overall status and the active incidents. It gives no components and no uptime.
 
-Datadog Status Pages serve the full page state as `/config.json`: components and incidents, but no uptime. Detection tries Datadog before OnlineOrNot, because OnlineOrNot can still know a custom domain that moved away.
+Datadog Status Pages serve the full page state as `/config.json`: components and incidents. The adapter builds the 90-day bars and uptime from the incident timelines, as the page does. Only partial and major outages count as downtime. Detection tries Datadog before OnlineOrNot, because OnlineOrNot can still know a custom domain that moved away.
 
 Detection tries OnlineOrNot after Statuspage. Hosted pages use `{subdomain}.onlineornot.com`. For custom domains, the adapter passes the hostname to the public summary API at `/v1/status_pages/{hostname}/summary`.
 

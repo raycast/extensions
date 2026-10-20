@@ -3,7 +3,7 @@
 ## [Rootly, Datadog, and Faster Refresh] - {PR_MERGE_DATE}
 
 - Add Rootly status pages (e.g. status.mistral.ai) through `/api/v1/status.json`
-- Add Datadog status pages (e.g. status.openrouter.ai) through `/config.json`
+- Add Datadog status pages (e.g. status.openrouter.ai) through `/config.json`, with 90-day bars and uptime from the incident timelines
 - Detect the platform again when a saved site fails to load, and save the new platform
 - Load only the overall status and active incidents in the list. Statuspage list refresh goes from up to 29 s to less than 0.5 s
 - Read Statuspage 90-day uptime from the `/uptime_showcase` API in batches of 60 components
