@@ -129,8 +129,8 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "ausca",
     title: "Ausca",
     description:
-      "Discover priced OCR, document analysis, transcription, browser and receive-only inbox services, then inspect an offer before invoking it. Public discovery needs no account or API key. Paid tools require an x402-capable client and USDC on Base; This Raycast connection covers offer discovery; paid calls require an x402-capable payment flow. Hosted remote Streamable HTTP MCP server.",
-    icon: "https://ausca.com/icon-512.png",
+      "Discover priced OCR, document analysis, transcription, browser and receive-only inbox services, then inspect an offer before invoking it. Public discovery needs no account or API key. This Raycast connection supports offer discovery. Paid calls require USDC on Base through an x402-capable client. Hosted remote Streamable HTTP MCP server.",
+    icon: "https://raw.githubusercontent.com/auscahq/ausca-plugin/main/assets/marketplace-icon.svg",
     homepage: "https://ausca.com/docs/mcp/",
     configuration: {
       command: "npx",
@@ -408,6 +408,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.dynamicdocumentapi.com/mcp"],
     },
     remoteUrl: "https://mcp.dynamicdocumentapi.com/mcp",
+  },
+  {
+    name: "equibles",
+    title: "Equibles",
+    description:
+      "US stock market data for research: SEC filing search with exact source lines, XBRL financial statements, earnings call transcripts, insider and congressional trades, 13F holdings, short interest, end-of-day prices and FRED macro data. 130 tools: 120 read market data and 10 write to your own Equibles portfolios, watchlist or feedback. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or a Bearer API key; free plan with 100 requests a day, option chains and live quotes need a paid plan.",
+    icon: "https://equibles.com/favicon/favicon/android-chrome-192x192.png",
+    homepage: "https://equibles.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.equibles.com/mcp"],
+    },
+    remoteUrl: "https://mcp.equibles.com/mcp",
   },
   {
     name: "git",
@@ -836,6 +849,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://moltnode.ag/mcp"],
     },
     remoteUrl: "https://moltnode.ag/mcp",
+  },
+  {
+    name: "netactuate",
+    title: "NetActuate",
+    description:
+      "Answers from NetActuate's own published data about its global edge network: data center locations and what each publishes about power, cooling, security and connectivity; which sites hold HIPAA, PCI-DSS, SOC 2 or ISO 27001; where it peers across internet exchanges; the sites nearest a target market; and its products and published pricing, each linked to its netactuate.com page. Read-only tools. Hosted remote Streamable HTTP server; no sign-in and no API key.",
+    icon: "https://netactuate.com/mcp/icon.png",
+    homepage: "https://netactuate.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://netactuate.com/mcp"],
+    },
+    remoteUrl: "https://netactuate.com/mcp",
   },
   {
     name: "neverapply",
