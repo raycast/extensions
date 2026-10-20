@@ -4,6 +4,14 @@
 
 - Add xTiles to the official registry: turn AI chats into xTiles projects, notes and tasks, and pull any project back into the chat with its current state. Hosted Streamable HTTP server at https://mcp.xtiles.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
+## [Add NetActuate MCP Server] - 2026-10-20
+
+- Add NetActuate to the official registry: read-only answers from NetActuate's published network data (data center locations and specifications, compliance by site, internet exchanges, the sites nearest a market, products and published pricing), each linked to its netactuate.com page. Hosted Streamable HTTP server at https://netactuate.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add Equibles MCP Server] - 2026-10-20
+
+- Add Equibles to the official registry: US stock market data for research, from SEC filing search and XBRL financial statements to earnings call transcripts, insider and congressional trades and 13F holdings. Hosted Streamable HTTP server at https://mcp.equibles.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a Bearer API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Update Ausca MCP listing] - 2026-10-20
 
 - Use Ausca's final square mark and clarify that the Raycast connection discovers offers while paid calls need an x402-capable client.
