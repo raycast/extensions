@@ -52,7 +52,7 @@ The **Notifications** menu bar command shows a count of unread notifications and
 
 - Review requested from you on a pull request
 - Approvals and requested changes on your pull requests
-- Comments on pull requests you authored or review, and `@` mentions of you there
+- Comments on pull requests you authored, and `@` mentions of you on pull requests you authored or review
 - Your pull requests that were merged or declined
 - Pipelines you started that failed
 

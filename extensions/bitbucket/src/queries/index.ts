@@ -695,8 +695,6 @@ function listClosedPullRequests(repoPath: string, myUuid: string, since: string)
   });
 }
 
-const MAX_COMMENT_PULL_REQUESTS = 20;
-
 // Bitbucket has no repo-wide comments endpoint, so comments are read per pull request: only
 // PRs you authored or review that changed within the window (a new comment bumps updated_on).
 async function listComments(repoPath: string, myUuid: string, since: string): Promise<PullRequestComment[]> {
@@ -712,7 +710,7 @@ async function listComments(repoPath: string, myUuid: string, since: string): Pr
 
   const comments: PullRequestComment[] = [];
   // Sequential on purpose: the repo scan is already concurrent and parallel bursts drop connections.
-  for (const pr of pullRequests.slice(0, MAX_COMMENT_PULL_REQUESTS)) {
+  for (const pr of pullRequests) {
     const prComments = await apiGetAll<PullRequestComment>(`${repoPath}/pullrequests/${pr.id}/comments`, {
       q: `created_on>${JSON.stringify(since)}`,
       sort: "-created_on",
