@@ -282,15 +282,6 @@ export default function Command() {
             onAction={() => pasteEmote(item)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
           />
-          <ActionPanel.Submenu title="Paste Emote at Size" icon={Icon.Maximize}>
-            {[1, 2, 3, 4].map((size) => (
-              <Action
-                key={size}
-                title={`${size}×`}
-                onAction={() => pasteEmote(item, "file", size)}
-              />
-            ))}
-          </ActionPanel.Submenu>
           <Action
             title={isFav ? "Unstar Emote" : "Star Emote"}
             icon={isFav ? Icon.StarDisabled : Icon.Star}
@@ -343,6 +334,15 @@ export default function Command() {
               }
             }}
           />
+          <ActionPanel.Submenu title="Paste Emote at Size" icon={Icon.Maximize}>
+            {[1, 2, 3, 4].map((size) => (
+              <Action
+                key={size}
+                title={`${size}×`}
+                onAction={() => pasteEmote(item, "file", size)}
+              />
+            ))}
+          </ActionPanel.Submenu>
         </ActionPanel.Section>
         <ActionPanel.Section>
           {renderFilterAction()}
