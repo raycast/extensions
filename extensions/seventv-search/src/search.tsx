@@ -592,7 +592,12 @@ This status applies to 7TV personal emote sets. It does not describe general per
               <ActionPanel>
                 <Action
                   title="Retry Search"
-                  onAction={() => setRetry((value) => value + 1)}
+                  icon={Icon.ArrowClockwise}
+                  onAction={() => {
+                    source?.invalidate?.();
+                    resetResults();
+                    setRetry((value) => value + 1);
+                  }}
                 />
                 {renderFilterAction()}
               </ActionPanel>
@@ -650,7 +655,12 @@ This status applies to 7TV personal emote sets. It does not describe general per
             <ActionPanel>
               <Action
                 title="Retry Search"
-                onAction={() => setRetry((value) => value + 1)}
+                icon={Icon.ArrowClockwise}
+                onAction={() => {
+                  source?.invalidate?.();
+                  resetResults();
+                  setRetry((value) => value + 1);
+                }}
               />
               {renderFilterAction()}
             </ActionPanel>
