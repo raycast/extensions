@@ -1,5 +1,10 @@
 # Search Router Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+- Browse Search Engines: Add primary action to search with selected search engine
+- Browse Search Engines: Merge aliases display into primary trigger
+
 ## [Feature] - 2026-10-07
 
 - Add a configurable first-token search engine prefix, including support for bare triggers while reserving `@` for site searches

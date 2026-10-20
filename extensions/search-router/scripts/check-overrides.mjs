@@ -15,7 +15,7 @@ let customCacheReads = 0;
 let effects = [];
 const mocks = {
   "@raycast/api": {
-    Action: { SubmitForm: "SubmitForm", CopyToClipboard: "CopyToClipboard", Style: {} },
+    Action: { SubmitForm: "SubmitForm", CopyToClipboard: "CopyToClipboard", Push: "Push", Style: {} },
     ActionPanel: { Section: "Section", Submenu: "Submenu" },
     Form: { TextField: "TextField", Description: "Description", Separator: "Separator" },
     List: { Item: "Item", Section: "ListSection", EmptyView: "EmptyView", Dropdown: { Item: "DropdownItem" } },
@@ -92,6 +92,7 @@ const src = path.resolve(import.meta.dirname, "../src");
 const Add = load(path.join(src, "add-custom-search-engine.tsx")).default;
 const Browse = load(path.join(src, "browse-search-engines.tsx")).default;
 const Search = load(path.join(src, "search.tsx")).default;
+const SearchWithEngine = load(path.join(src, "search-with-engine.tsx")).default;
 const { builtinSearchEngines } = load(path.join(src, "data/builtin-search-engines.ts"));
 const { getSearchEngine, getBuiltinSearchEngine, getEffectiveAliases, getCustomSearchEnginesByTrigger } = load(
   path.join(src, "data/search-engines.ts"),
@@ -616,6 +617,52 @@ async function search(query) {
     mocks["@raycast/api"].Cache.prototype.set = originalSet;
     mocks["@raycast/utils"].showFailureToast = originalFailureToast;
   }
+  // Verify browse action changes: primary Search with Engine, cmd+return Set as Default, no Test Search
+  const googleRow = row("g", "all");
+  const googleElements = elements(googleRow);
+  const pushAction = googleElements.find((el) => el.type === "Push");
+  assert.ok(pushAction, "primary action is Action.Push");
+  assert.equal(pushAction.props.title, "Search with Google");
+
+  const defaultAction = googleElements.find((el) => el.props.title === "Set as Default");
+  assert.ok(defaultAction, "Set as Default action exists");
+  assert.deepEqual(
+    defaultAction.props.shortcut,
+    {
+      macOS: { modifiers: ["cmd"], key: "return" },
+      Windows: { modifiers: ["ctrl"], key: "return" },
+    },
+    "Set as Default uses cmd+return",
+  );
+
+  const testSearch = googleElements.find((el) => el.props.title?.startsWith("Test Search"));
+  assert.equal(testSearch, undefined, "Test Search action is removed");
+
+  // Verify SearchWithEngine view and submit
+  stateValues = ["cat photos"];
+  const engineView = SearchWithEngine({ searchEngine: getBuiltinSearchEngine("g") });
+  const engineElements = elements(engineView);
+  const searchAction = engineElements.find((el) => el.props.title === "Search with Google");
+  assert.ok(searchAction, "Search with Google action exists");
+  assert.equal(engineView.props.searchBarPlaceholder, "Search Google…");
+  assert.equal(engineView.props.filtering, false);
+
+  openedUrls = [];
+  closedWindows = 0;
+  await searchAction.props.onAction();
+  assert.equal(closedWindows, 1);
+  assert.equal(openedUrls.length, 1);
+  assert.equal(openedUrls[0], "https://www.google.com/search?q=cat%20photos");
+
+  stateValues = ["   "];
+  const emptyView = SearchWithEngine({ searchEngine: getBuiltinSearchEngine("g") });
+  const emptyAction = elements(emptyView).find((el) => el.props.title === "Search with Google");
+  openedUrls = [];
+  closedWindows = 0;
+  await emptyAction.props.onAction();
+  assert.equal(closedWindows, 1);
+  assert.equal(openedUrls.length, 1);
+  assert.equal(openedUrls[0], "https://www.google.com");
   console.log(
     "Review regression checks passed for defaults, cache reads, alias discovery, labels, and Unicode overrides.",
   );
