@@ -84,8 +84,8 @@ export function CreateCategoryForm({
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={isEditing ? "Update Category" : "Create Category"}
-            icon={isEditing ? Icon.Pencil : Icon.PlusCircle}
+            title={isEditing ? "Save Category" : "Create Category"}
+            icon={Icon.Checkmark}
             onSubmit={handleSubmit}
           />
         </ActionPanel>
