@@ -1,5 +1,4 @@
 import { DateTime } from "luxon";
-import { release } from "os";
 import { DARK_PALETTE, getHourType, HourType, LIGHT_PALETTE, TimelinePalette } from "./palette";
 import { SunTimes } from "./sun-times";
 import { formatDelta, formatGmtOffset } from "./time-utils";
@@ -67,26 +66,11 @@ function svg(strings: TemplateStringsArray, ...values: (string | number)[]): str
   }, "");
 }
 
-// Raycast's SVG renderer on macOS 27 ignores font-weight in the stylesheet and dominant-baseline, and draws
-// text about 0.2em above its baseline. So text is drawn through text(), which sets the weight as an attribute
-// and moves the baseline down to compensate.
-const TEXT_SHIFT_EM = Number(release().split(".")[0]) >= 27 ? 0.2 : 0;
+// The SVG renderer on macOS 27 ignores font-weight in the stylesheet, and only understands the "bold" keyword,
+// not numeric weights. So text is drawn through text(), which sets the weight as an attribute.
+const BOLD_TEXT = new Set(["title", "time", "city", "day-diff", "badge", "cursor-label", "now-label", "weekday"]);
 
-const TEXT_STYLES: Record<string, { size: number; weight?: number }> = {
-  title: { size: 17, weight: 700 },
-  time: { size: 15, weight: 700 },
-  city: { size: 15, weight: 600 },
-  "day-diff": { size: 12, weight: 600 },
-  badge: { size: 11, weight: 600 },
-  sun: { size: 12 },
-  "cursor-label": { size: 12, weight: 800 },
-  "now-label": { size: 11, weight: 600 },
-  hour: { size: 13 },
-  weekday: { size: 11, weight: 700 },
-  legend: { size: 12 },
-};
-
-// Draws a text element. The first class picks the size and weight from TEXT_STYLES; `bold` overrides the weight.
+// Draws a text element. The first class decides whether it is bold; `bold` makes any text bold.
 function text(
   classes: string,
   x: number,
@@ -94,13 +78,10 @@ function text(
   content: string,
   options: { bold?: boolean; attrs?: string } = {},
 ): string {
-  const style = TEXT_STYLES[classes.split(" ")[0]];
-  const weight = options.bold ? 700 : style.weight;
-  const shiftedY = y + style.size * TEXT_SHIFT_EM;
+  const bold = options.bold || BOLD_TEXT.has(classes.split(" ")[0]);
   return (
-    svg`<text class="${classes}" x="${x}" y="${shiftedY}"` +
-    // Raycast's renderer only understands the "bold" keyword, not numeric weights.
-    (weight ? ` font-weight="${weight >= 700 ? "bold" : weight}"` : "") +
+    svg`<text class="${classes}" x="${x}" y="${y}"` +
+    (bold ? ` font-weight="bold"` : "") +
     (options.attrs ? ` ${options.attrs}` : "") +
     `>${escapeXml(content)}</text>`
   );

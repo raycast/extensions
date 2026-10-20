@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
-import { searchCities } from "./citySearch";
+import { canonicalZone, searchCities } from "./citySearch";
 import { getHourType } from "./palette";
 import {
   ClockFormatPreference,
@@ -166,7 +166,7 @@ export default function Command() {
     const showExtraLocal =
       showLocalTimezone &&
       baseCityId !== null &&
-      getTimezone(localCityId) !== getTimezone(baseCityId) &&
+      canonicalZone(getTimezone(localCityId)) !== canonicalZone(getTimezone(baseCityId)) &&
       !(selectedZoneIds ?? []).includes(localCityId);
     if (!showExtraLocal) return sortedZoneIds;
     if (cityOrder === "custom") return [localCityId, ...sortedZoneIds];
@@ -242,7 +242,7 @@ export default function Command() {
       <TimelineView
         baseISO={baseISO}
         nowISO={nowISO}
-        baseCityId={effectiveBaseId}
+        baseCityId={baseCityId}
         localCityId={localCityId}
         selectedZoneIds={timelineZoneIds}
         isLoading={isLoading}

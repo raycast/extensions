@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { lookupCity } from "./citySearch";
 import { generateTimelineSvg, TimelineConfig } from "./timeline-renderer";
 import { getSunTimes, SunTimes } from "./sun-times";
-import { getSystemTimezone, getTimezone } from "./timezones";
+import { getTimezone } from "./timezones";
 
 export interface TimelineViewProps {
   baseISO: string;
@@ -91,13 +91,15 @@ export function TimelineView(props: TimelineViewProps) {
     return `${sign}${abs} Minutes`;
   }
 
-  const baseZoneId = baseCityId ? getTimezone(baseCityId) : getSystemTimezone();
+  // Without a pinned base city, the timeline is based on where the user is now
+  const baseId = baseCityId ?? localCityId;
+  const baseZoneId = getTimezone(baseId);
   const baseTime = useMemo(() => DateTime.fromISO(baseISO).setZone(baseZoneId), [baseISO, baseZoneId]);
   const appearance = environment.appearance;
 
   // Sunrise/sunset are shown for each city's local date at the cursor. They only change when one of those
   // dates changes, so they are keyed on the (city, local date) pairs rather than recomputed on every cursor move.
-  const sunZoneIds = baseCityId ? [baseCityId, ...selectedZoneIds] : selectedZoneIds;
+  const sunZoneIds = [baseId, ...selectedZoneIds];
   const sunDaysKey = JSON.stringify(
     sunZoneIds.map((zoneId) => [zoneId, baseTime.setZone(getTimezone(zoneId)).toISODate() ?? ""]),
   );
@@ -117,8 +119,8 @@ export function TimelineView(props: TimelineViewProps) {
   }, [sunDaysKey, timeFormat]);
 
   const config: TimelineConfig = useMemo(
-    () => ({ baseISO, baseCityId, localCityId, selectedZoneIds, timeFormat, appearance, nowISO, sunTimes }),
-    [baseISO, baseCityId, localCityId, selectedZoneIds, timeFormat, appearance, nowISO, sunTimes],
+    () => ({ baseISO, baseCityId: baseId, localCityId, selectedZoneIds, timeFormat, appearance, nowISO, sunTimes }),
+    [baseISO, baseId, localCityId, selectedZoneIds, timeFormat, appearance, nowISO, sunTimes],
   );
   const markdown = useMemo(
     () => `![Timeline](data:image/svg+xml;base64,${Buffer.from(generateTimelineSvg(config)).toString("base64")})`,

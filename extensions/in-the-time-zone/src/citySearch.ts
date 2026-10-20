@@ -66,8 +66,30 @@ export function lookupCity(id: string): CityData | undefined {
   // Try exact match first
   const exact = cityMapping.find((c) => c.timezone === timezone && c.city === cityName);
   if (exact) return exact;
-  // Fallback to timezone-only match
-  return cityMapping.find((c) => c.timezone === timezone);
+  // Fallback to timezone-only match: a city named like the zone, or else the zone's largest city
+  const zone = canonicalZone(timezone);
+  const candidates = cityMapping.filter((c) => c.timezone && canonicalZone(c.timezone) === zone);
+  return (
+    candidates.find((c) => c.city === cityName || c.city_ascii === cityName) ??
+    candidates.reduce<CityData | undefined>((largest, c) => (!largest || c.pop > largest.pop ? c : largest), undefined)
+  );
+}
+
+const canonicalZones = new Map<string, string>();
+
+// Time zones can have several names (e.g. Asia/Calcutta and Asia/Kolkata), and the system may report another
+// one than the city data uses. Intl resolves every alias to the same name, so zones are compared by that.
+export function canonicalZone(timezone: string): string {
+  let canonical = canonicalZones.get(timezone);
+  if (canonical === undefined) {
+    try {
+      canonical = new Intl.DateTimeFormat("en-US", { timeZone: timezone }).resolvedOptions().timeZone;
+    } catch {
+      canonical = timezone;
+    }
+    canonicalZones.set(timezone, canonical);
+  }
+  return canonical;
 }
 
 function formatCityLabel(city: CityData): string {

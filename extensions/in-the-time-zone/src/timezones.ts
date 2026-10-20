@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { lookupCity, parseCityId } from "./citySearch";
+import { canonicalZone, lookupCity, parseCityId } from "./citySearch";
 
 export type TimeZoneEntry = { id: string; label: string };
 
@@ -48,7 +48,6 @@ export function getSystemTimezone(): string {
 // (keeping its name and sunrise data), otherwise the bare system zone ID, whose city name comes from the zone.
 export function resolveLocalCityId(zoneIds: string[]): string {
   const systemTz = getSystemTimezone();
-  const canonical = (tz: string) => DateTime.local().setZone(tz).zoneName ?? tz;
-  const systemZone = canonical(systemTz);
-  return zoneIds.find((id) => canonical(getTimezone(id)) === systemZone) ?? systemTz;
+  const systemZone = canonicalZone(systemTz);
+  return zoneIds.find((id) => canonicalZone(getTimezone(id)) === systemZone) ?? systemTz;
 }
