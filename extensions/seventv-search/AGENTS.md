@@ -9,3 +9,7 @@ Keep the extension name `seventv-search`, the `search` command, and `favorites_v
 7TV and FrankerFaceZ use page numbers. BetterTTV browse uses a `before` cursor, while BetterTTV text search uses numeric offsets. Do not infer a BetterTTV total from loaded results. 7TV alphabetical sorting currently returns LOAD_ERROR and must remain hidden until verified live.
 
 Preserve unrelated changes. Do not commit credentials, dependencies, downloaded emotes, or user media. Keep clipboard runtime checks distinct from HTTP and unit tests.
+
+`src/search-state.ts` matches saved emote names and persists view preferences under `search_preferences_v1`. Restore preferences before requesting provider results. Validate provider/sort combinations against exposed options. Keep search text out of storage, queue preference writes, and leave unreadable preferences untouched. Saved search must work in grid and list views, including when the provider returns no results.
+
+Local follow-up work is based on n4kama's #32566. Keep their commits and `nakama` contributor entry. Do not submit this follow-up before #32566 merges or open a PR without the maintainer's approval. The README now acknowledges their original GIF/PNG work; this correction is local until an approved update publishes it.

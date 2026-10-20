@@ -1,5 +1,11 @@
 # Changelog
 
+## [Saved Search and View Preferences] - {PR_MERGE_DATE}
+
+- Show matching favorites and recently used emotes while searching in grid and list views.
+- Remember the provider, sort order, view, and animated-only filter between command sessions.
+- Restore README credit for n4kama’s GIF/PNG clipboard contribution.
+
 ## [Emote Size] - 2026-10-20
 
 - Add an Emote Size preference (1x to 4x, 2x by default) for pasted and copied emotes. When a size is missing, the closest smaller one is used.
