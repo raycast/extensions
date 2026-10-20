@@ -4,7 +4,7 @@
 
 - Add 7TV user search with separate channel-emote and creator-upload commands.
 - Remember recently opened users separately in both browsing commands, with remove and clear actions.
-- Show complete user avatars in a padded canvas, with an interface-size option for Raycast’s enlarged layouts.
+- Show complete user avatars without a circular crop.
 - Show personal-set usage status and exclude private or unlisted entries from user browsing.
 - Show matching favorites and recently used emotes while searching in grid and list views.
 - Remember the provider, sort order, view, and animated-only filter between command sessions.

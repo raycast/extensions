@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   Grid,
-  getPreferenceValues,
   Icon,
   LocalStorage,
   showToast,
@@ -18,12 +17,6 @@ import {
   type UserEmoteMode,
 } from "./user-emotes";
 
-import type { ReactNode } from "react";
-import {
-  fallbackAvatar,
-  getUserAvatar,
-  type AvatarInterfaceSize,
-} from "./user-avatar";
 import { createUserHistoryStore } from "./user-history";
 
 export default function UserBrowser({ mode }: { mode: UserEmoteMode }) {
@@ -132,15 +125,23 @@ export default function UserBrowser({ mode }: { mode: UserEmoteMode }) {
       }}
     >
       <Grid.Section
-        columns={5}
         title={query.trim() ? "Users" : "Recent Users"}
         fit={Grid.Fit.Contain}
         inset={Grid.Inset.Zero}
       >
         {displayedUsers.map((user) => (
-          <ContainedUserTile
+          <Grid.Item
             key={user.id}
-            user={user}
+            id={user.id}
+            title={user.name}
+            subtitle={`${user.platform} · ${user.handle}`}
+            content={{
+              value: {
+                source: user.avatar ?? Icon.Person,
+                fallback: Icon.Person,
+              },
+              tooltip: user.name,
+            }}
             actions={
               <ActionPanel>
                 <Action
@@ -236,45 +237,5 @@ export default function UserBrowser({ mode }: { mode: UserEmoteMode }) {
         />
       )}
     </Grid>
-  );
-}
-
-function ContainedUserTile({
-  user,
-  actions,
-}: {
-  user: SevenTVUser;
-  actions: ReactNode;
-}) {
-  const { avatarInterfaceSize = "default" } = getPreferenceValues<{
-    avatarInterfaceSize?: AvatarInterfaceSize;
-  }>();
-  const [avatar, setAvatar] = useState<string>();
-  useEffect(() => {
-    let active = true;
-    setAvatar(undefined);
-    if (user.avatar)
-      void getUserAvatar(user.avatar, avatarInterfaceSize)
-        .then((source) => {
-          if (active) setAvatar(source);
-        })
-        .catch(() => {
-          /* Keep the fallback icon when an avatar is unavailable. */
-        });
-    return () => {
-      active = false;
-    };
-  }, [user.avatar, avatarInterfaceSize]);
-  return (
-    <Grid.Item
-      id={user.id}
-      title={user.name}
-      subtitle={`${user.platform} · ${user.handle}`}
-      content={{
-        value: { source: avatar ?? fallbackAvatar(avatarInterfaceSize) },
-        tooltip: user.name,
-      }}
-      actions={actions}
-    />
   );
 }

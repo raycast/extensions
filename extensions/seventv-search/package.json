@@ -56,28 +56,6 @@
           "value": "4"
         }
       ]
-    },
-    {
-      "name": "avatarInterfaceSize",
-      "title": "Raycast Interface Size",
-      "description": "Match Raycast Settings \u2192 General \u2192 Interface Size to keep user avatars centered. Used only by the user browsing commands.",
-      "type": "dropdown",
-      "required": false,
-      "default": "default",
-      "data": [
-        {
-          "title": "Default",
-          "value": "default"
-        },
-        {
-          "title": "Large",
-          "value": "large"
-        },
-        {
-          "title": "Larger",
-          "value": "larger"
-        }
-      ]
     }
   ],
   "dependencies": {
