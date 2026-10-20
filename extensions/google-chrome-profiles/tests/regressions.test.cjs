@@ -223,10 +223,23 @@ test("malformed hidden profile storage hides nothing", () => {
 
 test("saved hidden profiles drop duplicates and profiles that no longer exist", async () => {
   const { profiles, storage } = setup();
-  const saved = await profiles.saveHiddenDirectories(["Profile 1", "Profile 1", "Profile 9"], [profile, other]);
+  const saved = await profiles.saveHiddenDirectories(
+    browser,
+    ["Profile 1", "Profile 1", "Profile 9"],
+    [profile, other],
+  );
   assert.deepEqual(saved, ["Profile 1"]);
-  assert.equal(storage.get("hiddenProfiles"), '["Profile 1"]');
-  assert.deepEqual(await profiles.loadHiddenDirectories(), ["Profile 1"]);
+  assert.equal(storage.get("hiddenProfiles:unused"), '["Profile 1"]');
+  assert.deepEqual(await profiles.loadHiddenDirectories(browser), ["Profile 1"]);
+});
+
+test("Chrome and Chrome Canary keep separate hidden profiles", async () => {
+  const { profiles } = setup();
+  const canary = { ...browser, dataPath: "canary" };
+  await profiles.saveHiddenDirectories(browser, ["Default"], [other]);
+  await profiles.saveHiddenDirectories(canary, [], [other]);
+  assert.deepEqual(await profiles.loadHiddenDirectories(browser), ["Default"]);
+  assert.deepEqual(await profiles.loadHiddenDirectories(canary), []);
 });
 
 test("Move Current Tab destinations skip the source and hidden profiles", () => {

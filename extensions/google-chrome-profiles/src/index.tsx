@@ -140,7 +140,7 @@ export default function Command() {
     async function listProfiles() {
       try {
         // Loaded before the profiles so hidden profiles never flash into the list.
-        setHiddenDirectories(await loadHiddenDirectories());
+        setHiddenDirectories(await loadHiddenDirectories(browser));
         // for google-chrome-profiles-1.png:
         // 1. comment the code below:
         setLocalState((await readChromeLocalState(browser)).state);
@@ -165,7 +165,7 @@ export default function Command() {
   const hiddenProfiles = profiles?.filter((profile) => hiddenDirectories.includes(profile.directory)) ?? [];
 
   const updateHiddenDirectories = async (directories: string[]) => {
-    const saved = await saveHiddenDirectories(directories, profiles ?? []);
+    const saved = await saveHiddenDirectories(browser, directories, profiles ?? []);
     setHiddenDirectories(saved);
     if (saved.length === 0) setShowHidden(false);
   };

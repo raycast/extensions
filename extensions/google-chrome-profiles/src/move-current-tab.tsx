@@ -50,7 +50,7 @@ export default function Command() {
         if (profiles.length < 2) throw new Error("Create another Chrome profile first");
         const tab = await readCurrentTab(browser, profiles);
         if (!isValidUrl(tab.url)) throw new Error("This tab's URL cannot be moved to another profile");
-        const hidden = await loadHiddenDirectories();
+        const hidden = await loadHiddenDirectories(browser);
         const destinations = moveDestinations(profiles, tab.profile.directory, hidden);
         if (destinations.length === 0) throw new Error("All other profiles are hidden. Unhide one in Switch Profiles.");
         setProfiles(profiles);
