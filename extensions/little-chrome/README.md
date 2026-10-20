@@ -6,7 +6,7 @@ The window has no address bar, tab bar or bookmarks bar, uses your normal Chrome
 
 ## Commands
 
-- **Open Little Chrome** — type a URL or search terms and press Enter. Your Chrome history (with favicons) is listed below the search bar, ranked by how often and how recently you visited each page. The top history match is selected; press ↑ to open exactly what you typed instead.
+- **Open Little Chrome** — type a URL or search terms and press Enter. Your Chrome history (with favicons) is listed below the search bar, ranked by how often and how recently you visited each page. The top history match is selected; press ↑ to open exactly what you typed instead. Press ⌘↵ to open it in a tab of a normal Chrome window instead.
   - Input with a scheme (`https://…`, `chrome://…`) is opened as is.
   - Domains and IP addresses get `https://`; `localhost`, `127.0.0.1`, `*.localhost` and `*.test` get `http://`.
   - Anything else becomes a Google search.
