@@ -1,6 +1,7 @@
+import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { logger } from "@chrismessina/raycast-logger";
-import { Tool } from "@raycast/api";
+import { LocalStorage, Tool } from "@raycast/api";
 import { normalizeBody } from "../lib/body";
 import { postCommit, prepareCommit } from "../lib/devnull";
 import { writePreview } from "../lib/images";
@@ -25,18 +26,33 @@ function commitOf(input: Input) {
   return { message: input.text, imagePaths: (input.imagePaths ?? []).filter((path) => path.trim() !== "") };
 }
 
-// The images' hashes as the user saw them in the confirmation, keyed by the input, so the tool can refuse to
-// post a file that changed in the meantime. Empty if Raycast runs the tool in a fresh process; then the commit
-// is still checked, and hashed from the bytes it uploads, but not compared with what was shown.
-const approvedHashes = new Map<string, string[]>();
-const keyOf = (input: Input) => JSON.stringify(commitOf(input));
+// The images' hashes as the user saw them in the confirmation, so the tool can refuse to post a file that
+// changed in the meantime. Raycast runs the confirmation and the tool in separate processes, so they go
+// through LocalStorage. Each distinct commit gets its own record, and a canceled confirmation's expires.
+const APPROVAL_TTL_MS = 10 * 60 * 1000;
+const approvalKey = (input: Input) =>
+  `approval:${createHash("sha256")
+    .update(JSON.stringify(commitOf(input)))
+    .digest("hex")}`;
+
+async function takeApproval(input: Input): Promise<string[] | undefined> {
+  const key = approvalKey(input);
+  const stored = await LocalStorage.getItem<string>(key);
+  await LocalStorage.removeItem(key);
+  try {
+    const approval = JSON.parse(stored ?? "") as { at: number; hashes: string[] };
+    return Date.now() - approval.at < APPROVAL_TTL_MS ? approval.hashes : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   // Refuse before asking: there is no point confirming a commit /dev/null would reject.
   const { message, images } = await prepareCommit(commitOf(input));
-  approvedHashes.set(
-    keyOf(input),
-    images.map((image) => image.sha256),
+  await LocalStorage.setItem(
+    approvalKey(input),
+    JSON.stringify({ at: Date.now(), hashes: images.map((image) => image.sha256) }),
   );
   return {
     message: "Post this commit to /dev/null? It will be public.",
@@ -58,12 +74,11 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
  * Post a commit (a public post) to /dev/null, the social network for developers, signed with the user's
  * SSH key. Optionally attach up to 3 images by absolute file path. Returns the link to the new commit and
  * whether it is waiting for review. Only say images were posted when imagesAttached is more than 0.
+ * Show the url to the user in full.
  */
 export default async function tool(input: Input) {
   const commit = commitOf(input);
-  const key = keyOf(input);
-  const approvedImageHashes = approvedHashes.get(key);
-  approvedHashes.delete(key);
+  const approvedImageHashes = await takeApproval(input);
   const result = await postCommit(commit, { log: (message, data) => logger.log(message, data), approvedImageHashes });
   return {
     url: result.url,

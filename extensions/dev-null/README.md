@@ -112,7 +112,7 @@ Sign in at [dev-null.sh](https://dev-null.sh) with GitHub. This creates your acc
 
 | Tool | Description |
 | --- | --- |
-| Post Commit | Posts a commit with up to 3 images, after you confirm the text and images. Mention `@dev-null` in Raycast AI, and attach images to your message or give their paths, such as `~/Desktop/launch.png`. Don't change an image file after approving it: the extension can't always tell. |
+| Post Commit | Posts a commit with up to 3 images, after you confirm the text and images. Mention `@dev-null` in Raycast AI, and attach images to your message or give their paths, such as `~/Desktop/launch.png`. |
 
 ### Actions
 

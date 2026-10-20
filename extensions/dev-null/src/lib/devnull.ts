@@ -262,7 +262,7 @@ export async function postCommit(commit: Commit, options: CommitOptions = {}): P
   log("Checked commit", {
     images: images.length,
     imageBytes: images.reduce((sum, image) => sum + image.data.length, 0),
-    // "not recorded" means the AI tool's confirmation ran in another process, so nothing was compared.
+    // "not recorded" means the AI tool found no approval for this exact commit, so nothing was compared.
     approval: approved ? "matched" : "not recorded",
   });
 

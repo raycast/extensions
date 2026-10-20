@@ -32,7 +32,7 @@
   "dependencies": {
     "@chrismessina/raycast-kit": "^0.2.0",
     "@chrismessina/raycast-logger": "^1.5.0",
-    "@raycast/api": "^1.104.25",
+    "@raycast/api": "^2.8.2",
     "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
