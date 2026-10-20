@@ -2335,6 +2335,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "llmslim",
+    title: "LLMSlim",
+    description:
+      "Long-term memory for agents with no LLM call. Tools: remember, recall, list_memories, forget, fit_context. Messages are stored word for word in a local SQLite file (or Postgres), and recall returns the ones that answer a question within a token budget. The user and agent scope is fixed when the server starts, not chosen by the model. Local stdio server, no API key. MIT.",
+    icon: "https://raw.githubusercontent.com/Thanatos9404/llmslim/main/web/public/icon-512.png",
+    homepage: "https://github.com/Thanatos9404/llmslim",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "llmslim[mcp]", "llmslim", "mcp"],
+    },
+  },
+  {
     name: "memo",
     title: "memo",
     description:
