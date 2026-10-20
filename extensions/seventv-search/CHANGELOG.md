@@ -1,6 +1,6 @@
 # Changelog
 
-## [Emote Size] - {PR_MERGE_DATE}
+## [Emote Size] - 2026-10-20
 
 - Add an Emote Size preference (1x to 4x, 2x by default) for pasted and copied emotes. When a size is missing, the closest smaller one is used.
 - Add Paste Emote at Size to the Action Panel to paste a single emote at another size.
