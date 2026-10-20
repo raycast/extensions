@@ -1,5 +1,10 @@
 # Changelog
 
+## [Emote Size] - {PR_MERGE_DATE}
+
+- Add an Emote Size preference (1x to 4x, 2x by default) for pasted and copied emotes. When a size is missing, the closest smaller one is used.
+- Add Paste Emote at Size to the Action Panel to paste a single emote at another size.
+
 ## [Providers and Search Fixes] - 2026-10-19
 
 - Add BetterTTV and FrankerFaceZ to Search Emotes, informed by Kan-A-Pesh's Emotecast.
