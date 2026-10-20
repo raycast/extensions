@@ -93,6 +93,24 @@ export type Todo = {
   dueDateIsRecurring?: boolean;
 };
 
+// Collection mappers return nested to-dos without project/area back-references.
+// Keep this graph finite for AI-tool output schema extraction.
+// Use a plain object: the extractor does not preserve Omit's mapped properties.
+export type CollectionTodo = {
+  id: string;
+  name: string;
+  status: 'open' | 'completed' | 'canceled';
+  tags: string;
+  areaTags: string | null;
+  dueDate: string;
+  activationDate: string;
+  creationDate: string;
+  notes: string;
+  isProject?: boolean;
+  isRecurring?: boolean;
+  dueDateIsRecurring?: boolean;
+};
+
 export type Project = {
   id: string;
   name: string;
@@ -102,14 +120,14 @@ export type Project = {
   activationDate: string;
   notes: string;
   area?: Area;
-  todos?: Todo[];
+  todos?: CollectionTodo[];
 };
 
 export type Area = {
   id: string;
   name: string;
   tags?: string;
-  todos?: Todo[];
+  todos?: CollectionTodo[];
 };
 
 export type List = { id: string; name: string; type: 'area' | 'project' };
