@@ -116,7 +116,12 @@ async function submit(trigger, engine) {
 function row(trigger, filter, prefix = "!") {
   stateValues = [trigger, filter];
   const item = elements(Browse()).find(
-    (element) => element.type === "Item" && element.props.subtitle === `${prefix}${trigger}`,
+    (element) =>
+      element.type === "Item" &&
+      (typeof element.props.subtitle === "string"
+        ? element.props.subtitle
+        : element.props.subtitle?.value
+      )?.split(" ")[0] === `${prefix}${trigger}`,
   );
   assert.ok(item, `${filter} row for ${trigger}`);
   return item;
@@ -141,7 +146,14 @@ function findByAlias(alias, primary, filter = "all") {
   stateValues = [alias, filter];
   const list = Browse();
   assert.equal(list.props.filtering, false, "Fuse handles alias filtering without native filtering hiding matches");
-  const item = elements(list).find((element) => element.type === "Item" && element.props.subtitle === `!${primary}`);
+  const item = elements(list).find(
+    (element) =>
+      element.type === "Item" &&
+      (typeof element.props.subtitle === "string"
+        ? element.props.subtitle
+        : element.props.subtitle?.value
+      )?.split(" ")[0] === `!${primary}`,
+  );
   assert.ok(item, `${filter} search for alias ${alias} finds ${primary}`);
   return item;
 }
@@ -357,7 +369,7 @@ async function search(query) {
   ]) {
     const item = findByAlias(alias, primary);
     assert.ok(canCopyAlias(item, alias), `copy ${alias}`);
-    assert.ok(item.props.accessories.some((accessory) => accessory.tooltip?.includes(`!${alias}`)));
+    assert.ok(item.props.subtitle?.tooltip?.split(" ").includes(`!${alias}`));
   }
   await submit("w");
   assert.equal(tag(row("w", "custom")), "Overrides !w (Wikipedia alias)");
@@ -509,9 +521,8 @@ async function search(query) {
       }
     }
     const item = row("wikipedia", "all", prefix);
-    const accessory = item.props.accessories.find((accessory) => accessory.tooltip);
-    assert.ok(accessory.text.startsWith(`Aliases: ${prefix}wiki, ${prefix}w, `));
-    assert.ok(accessory.tooltip.split(", ").includes(`${prefix}w`));
+    assert.ok(item.props.subtitle.value.startsWith(`${prefix}wikipedia ${prefix}wiki`));
+    assert.ok(item.props.subtitle.tooltip.split(" ").includes(`${prefix}w`));
     const copyAlias = elements(item).find((element) => element.props.title === `Copy ${prefix}w`);
     assert.equal(copyAlias?.props.content, `${prefix}w`);
     for (const query of [`${prefix}w cats`, "!w cats"]) {
