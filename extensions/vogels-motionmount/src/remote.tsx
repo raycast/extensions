@@ -1,33 +1,17 @@
-import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Detail, environment, Icon, Keyboard } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { forgetMount, getStatus, goTo } from "./api";
 import { Connection, connection } from "./connection";
 import { connectionColor } from "./connection-color";
 import { describe, Direction, nudge, Position } from "./format";
+import { illustration, svgMarkdown } from "./illustration";
 import Move from "./move";
 
-const WIDTH = 20;
-
-function distanceMeter(distance: number) {
-  const filled = Math.round((distance / 100) * WIDTH);
-  return "▓".repeat(filled) + "░".repeat(WIDTH - filled);
-}
-
-function rotationMeter(rotation: number) {
-  const marker = Math.round(((rotation + 100) / 200) * WIDTH);
-  return Array.from({ length: WIDTH + 1 }, (_, i) => (i === marker ? "●" : i === WIDTH / 2 ? "┃" : "─")).join("");
-}
-
-function markdown(position: Position | undefined, isReady: boolean, status: Connection) {
-  if (status.state === "failed") return `# Could not reach your MotionMount\n\n${status.message}`;
-  if (!position) return "# Connecting to your MotionMount…";
-  return [
-    `# ${describe(position)}`,
-    `**Distance** \`wall ${distanceMeter(position.distance)} out\` ${position.distance}`,
-    `**Rotation** \`left ${rotationMeter(position.rotation)} right\` ${position.rotation}`,
-    isReady ? "Use **⌘ + arrow keys** to move the TV." : "Reading the current position…",
-  ].join("\n\n");
+function markdown(position: Position | undefined, status: Connection) {
+  if (status.state === "failed") return `## Can't reach your MotionMount\n\n${status.message}`;
+  if (!position) return "Connecting to your MotionMount…";
+  return svgMarkdown(illustration(position, environment.appearance));
 }
 
 export default function Command() {
@@ -79,14 +63,20 @@ export default function Command() {
   return (
     <Detail
       isLoading={isLoading || isMoving}
-      markdown={markdown(position, isReady, status)}
+      markdown={markdown(position, status)}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.TagList title="MotionMount">
-            <Detail.Metadata.TagList.Item text={status.title} color={connectionColor[status.state]} />
-          </Detail.Metadata.TagList>
-          {position && <Detail.Metadata.Label title="Distance" text={String(position.distance)} />}
-          {position && <Detail.Metadata.Label title="Rotation" text={String(position.rotation)} />}
+          <Detail.Metadata.Label
+            title="Status"
+            text={status.title}
+            icon={{ source: Icon.CircleFilled, tintColor: connectionColor[status.state] }}
+          />
+          {position && <Detail.Metadata.Label title="Position" text={describe(position)} />}
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label title="Extend · Retract" text="⌘↑  ⌘↓" />
+          <Detail.Metadata.Label title="Turn Left · Right" text="⌘←  ⌘→" />
+          <Detail.Metadata.Label title="Move to Wall" text="⌘⇧W" />
+          <Detail.Metadata.Label title="Exact Position" text="↵" />
         </Detail.Metadata>
       }
       actions={
@@ -106,6 +96,12 @@ export default function Command() {
           position &&
           isReady && (
             <ActionPanel>
+              <Action.Push
+                title="Enter Exact Position"
+                icon={Icon.Pencil}
+                shortcut={Keyboard.Shortcut.Common.Edit}
+                target={<Move position={position} />}
+              />
               <ActionPanel.Section>
                 <Action
                   title="Extend"
@@ -138,12 +134,6 @@ export default function Command() {
                   icon={Icon.ArrowCounterClockwise}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
                   onAction={moveToWall}
-                />
-                <Action.Push
-                  title="Enter Exact Position"
-                  icon={Icon.Pencil}
-                  shortcut={Keyboard.Shortcut.Common.Edit}
-                  target={<Move position={position} />}
                 />
               </ActionPanel.Section>
             </ActionPanel>

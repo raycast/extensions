@@ -1,5 +1,5 @@
 import { describe as suite, expect, it } from "vitest";
-import { clamp, describe, nudge } from "./format";
+import { clamp, describe, isAt, nudge } from "./format";
 
 suite("describe", () => {
   it("says the TV is against the wall when retracted, since rotation is meaningless there", () => {
@@ -40,5 +40,16 @@ suite("nudge", () => {
 
   it("does not turn while against the wall", () => {
     expect(nudge({ distance: 0, rotation: 0 }, "right")).toEqual({ distance: 0, rotation: 0 });
+  });
+});
+
+suite("isAt", () => {
+  it("recognizes a preset even when the motors stop a couple of steps away from it", () => {
+    expect(isAt({ distance: 95, rotation: -88 }, { distance: 95, rotation: -86 })).toBe(true);
+  });
+
+  it("does not mark a preset the TV is clearly away from", () => {
+    expect(isAt({ distance: 31, rotation: -28 }, { distance: 95, rotation: -86 })).toBe(false);
+    expect(isAt({ distance: 95, rotation: -70 }, { distance: 95, rotation: -86 })).toBe(false);
   });
 });

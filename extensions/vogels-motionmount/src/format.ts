@@ -27,3 +27,9 @@ export function nudge({ distance, rotation }: Position, direction: Direction): P
       return clamp({ distance, rotation: rotation + STEP });
   }
 }
+
+const TOLERANCE = 3;
+
+export const isAt = (position: Position, target: Position) =>
+  Math.abs(position.distance - target.distance) <= TOLERANCE &&
+  Math.abs(position.rotation - target.rotation) <= TOLERANCE;

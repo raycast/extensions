@@ -3,7 +3,7 @@ import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { deletePreset, forgetMount, getStatus, moveTo, Position, Preset, PRESET_SLOTS } from "./api";
 import { connection } from "./connection";
 import { connectionColor } from "./connection-color";
-import { describe } from "./format";
+import { describe, isAt } from "./format";
 import PresetForm from "./preset-form";
 
 const wall: Position = { distance: 0, rotation: 0 };
@@ -15,6 +15,8 @@ export default function Command() {
   const presets = data?.presets ?? [];
   const status = connection({ isLoading, error });
   const canEdit = status.state === "connected";
+  const current = (position: Position) =>
+    data && isAt(data.position, position) ? [{ icon: Icon.Checkmark, tooltip: "Current position" }] : [];
 
   async function remove(preset: Preset) {
     const confirmed = await confirmAlert({
@@ -49,7 +51,9 @@ export default function Command() {
         title="Current Position"
         subtitle={status.state === "failed" ? status.message : data && describe(data.position)}
         icon={Icon.Bluetooth}
-        accessories={[{ tag: { value: status.title, color: connectionColor[status.state] } }]}
+        accessories={[
+          { icon: { source: Icon.CircleFilled, tintColor: connectionColor[status.state] }, text: status.title },
+        ]}
         actions={
           <ActionPanel>
             {status.state === "failed" && (
@@ -75,6 +79,7 @@ export default function Command() {
           title="Wall"
           subtitle={describe(wall)}
           icon={Icon.ArrowCounterClockwise}
+          accessories={current(wall)}
           actions={
             <ActionPanel>
               <Action title="Move to Wall" icon={Icon.ArrowRight} onAction={() => moveTo("Wall", wall)} />
@@ -88,6 +93,7 @@ export default function Command() {
             title={preset.name}
             subtitle={describe(preset.position)}
             icon={Icon.Monitor}
+            accessories={current(preset.position)}
             actions={
               <ActionPanel>
                 <Action

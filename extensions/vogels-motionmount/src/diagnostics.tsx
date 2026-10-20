@@ -1,33 +1,29 @@
-import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Detail, environment, Icon } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { Diagnostics, getDiagnostics, startDiagnostics } from "./api";
+import { progress, svgMarkdown } from "./illustration";
 
 const POLL_INTERVAL_MS = 2000;
 const MAX_FAILED_POLLS = 3;
 
-const intro = `# Diagnostics
+const intro = `## Diagnostics
 
-Run the diagnostics if your MotionMount is not working as expected.
+Checks that the motors and sensors of your MotionMount work correctly.
 
-During the diagnostics the MotionMount moves from side to side and makes more noise than during normal use. Do not interrupt it and keep your Mac within Bluetooth range.`;
-
-function progressBar(step: number, total: number) {
-  const filled = Math.round((Math.min(step, total) / total) * 20);
-  return "▓".repeat(filled) + "░".repeat(20 - filled);
-}
+The TV moves from side to side and makes more noise than usual. Keep your Mac nearby until it finishes.`;
 
 function markdown(diagnostics?: Diagnostics, lostContact?: string) {
   if (lostContact)
-    return `# Lost contact with your MotionMount\n\n${lostContact}\n\nThe diagnostics may still be running on the mount. Check again once it is within Bluetooth range.`;
+    return `## Lost Contact\n\n${lostContact}\n\nThe diagnostics may still be running. Check again once your Mac is within Bluetooth range.`;
   if (!diagnostics) return intro;
   switch (diagnostics.status) {
     case "running":
-      return `# Running diagnostics…\n\n\`${progressBar(diagnostics.step ?? 0, diagnostics.totalSteps)}\` step ${diagnostics.step ?? 0} of ${diagnostics.totalSteps}\n\nThe MotionMount is moving. Do not interrupt it.`;
+      return `## Running Diagnostics…\n\nStep ${diagnostics.step ?? 0} of ${diagnostics.totalSteps}\n\n${svgMarkdown(progress(diagnostics.step ?? 0, diagnostics.totalSteps, environment.appearance))}`;
     case "passed":
-      return "# ✅ Diagnostics passed\n\nYour MotionMount is working correctly.";
+      return "## Diagnostics Passed\n\nYour MotionMount is working correctly.";
     case "failed":
-      return `# ❌ Diagnostics failed\n\nThe MotionMount reported error code ${diagnostics.code}. Contact Vogel's support if the problem persists.`;
+      return `## Diagnostics Failed\n\nYour MotionMount reported error ${diagnostics.code}. If this keeps happening, contact Vogel's support.`;
   }
 }
 
