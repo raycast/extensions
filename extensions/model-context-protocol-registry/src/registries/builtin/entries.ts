@@ -864,6 +864,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://netactuate.com/mcp",
   },
   {
+    name: "neverapply",
+    title: "NeverApply",
+    description:
+      "AI job-search agent: search and match jobs, tailor resumes, answer screening questions, prepare for interviews, and apply with your approval. 15 tools. Official hosted remote Streamable HTTP server from Kasovy LLC; OAuth 2.1 sign-in with PKCE and dynamic client registration, no API key to paste.",
+    icon: "https://github.com/kasovy.png",
+    homepage: "https://neverapply.co/features/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://neverapply.co/mcp"],
+    },
+    remoteUrl: "https://neverapply.co/mcp",
+  },
+  {
     name: "paddle",
     title: "Paddle",
     description:

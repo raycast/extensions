@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add NeverApply MCP Server] - {PR_MERGE_DATE}
+
+- Add NeverApply to the official registry: an AI job-search agent to search and match jobs, tailor resumes, answer screening questions, prepare for interviews, and apply with your approval. Official hosted Streamable HTTP server at https://neverapply.co/mcp with OAuth 2.1 sign-in (PKCE and dynamic client registration), plus an `mcp-remote` fallback.
+
 ## [Add NetActuate MCP Server] - 2026-10-20
 
 - Add NetActuate to the official registry: read-only answers from NetActuate's published network data (data center locations and specifications, compliance by site, internet exchanges, the sites nearest a market, products and published pricing), each linked to its netactuate.com page. Hosted Streamable HTTP server at https://netactuate.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
