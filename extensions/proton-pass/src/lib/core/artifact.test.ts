@@ -18,6 +18,20 @@ test("resolves pinned pass-cli 2.3.3 artifacts", () => {
     binaryName: "pass-cli",
     requiredFiles: ["pass-cli"],
   });
+  assert.deepEqual(resolveArtifact("linux", "arm64"), {
+    url: "https://proton.me/download/pass-cli/2.3.3/pass-cli-linux-aarch64",
+    sha256: "9c3e85e10d3bb631ffe377f063d996b9cc9a545d30971bcedf5910e16d03542b",
+    kind: "raw",
+    binaryName: "pass-cli",
+    requiredFiles: ["pass-cli"],
+  });
+  assert.deepEqual(resolveArtifact("linux", "x64"), {
+    url: "https://proton.me/download/pass-cli/2.3.3/pass-cli-linux-x86_64",
+    sha256: "b5b49a8b3fd0af8830c0c1979f28ea0c90ccece73f59023a8bca8245d4b68da9",
+    kind: "raw",
+    binaryName: "pass-cli",
+    requiredFiles: ["pass-cli"],
+  });
   assert.deepEqual(resolveArtifact("win32", "x64"), {
     url: "https://proton.me/download/pass-cli/2.3.3/pass-cli-windows-x86_64.zip",
     sha256: "4169c7644e3475f294d265e2f1262476573e41d372b905187222c52f1c6dbca5",
@@ -37,5 +51,5 @@ test("rejects unsupported platform and architecture pairs", () => {
       return true;
     },
   );
-  assert.throws(() => resolveArtifact("linux", "x64"), /Unsupported platform: linux-x64/);
+  assert.throws(() => resolveArtifact("linux", "ia32"), /Unsupported platform: linux-ia32/);
 });

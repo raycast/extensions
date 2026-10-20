@@ -35,6 +35,24 @@ function zipArtifact(archive: Buffer): Artifact {
   };
 }
 
+test("installs a verified Linux binary and makes it executable", async () => {
+  await withPaths(async (destDir, tempDir) => {
+    const binary = Buffer.from("fake macOS binary!!!");
+    const installed = await installArtifact({
+      artifact: rawArtifact,
+      download: async () => binary,
+      destDir,
+      tmpDir: tempDir,
+      platform: "linux",
+    });
+
+    assert.equal(installed, path.join(destDir, "pass-cli"));
+    assert.deepEqual(await readFile(installed), binary);
+    if (process.platform !== "win32") assert.notEqual((await stat(installed)).mode & 0o111, 0);
+    await assert.rejects(access(tempDir));
+  });
+});
+
 test("installs a verified macOS binary and makes it executable", async () => {
   await withPaths(async (destDir, tempDir) => {
     const binary = Buffer.from("fake macOS binary!!!");

@@ -1,5 +1,10 @@
 # proton-pass Changelog
 
+## [Linux pass-cli] - {PR_MERGE_DATE}
+
+- On Linux, a `pass-cli` already on `PATH` is used before any download, including `~/.local/bin`, so an existing `pass-cli login` session keeps working
+- When none is installed, download Proton Pass CLI 2.3.3 for Linux x64 and arm64 and mark that binary executable
+
 ## [CLI Not Found Screen] - 2026-10-13
 
 - The screen shown when pass-cli can't be found points to the CLI Path preference, with an Open Extension Preferences action. It used to ask to install pass-cli, which the extension already does by itself
