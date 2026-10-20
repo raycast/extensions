@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Runcrate MCP Server] - 2026-10-20
+
+- Add Runcrate to the official registry: GPUs for your AI agent. See live GPU prices, launch and delete GPU instances, run commands and jobs over SSH, move files, manage volumes, SSH keys and secrets, call 200+ open inference models and track spend (37 tools). Hosted Streamable HTTP server at https://mcp.runcrate.ai/mcp with OAuth sign-in in the browser, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add NetActuate MCP Server] - 2026-10-20
 
 - Add NetActuate to the official registry: read-only answers from NetActuate's published network data (data center locations and specifications, compliance by site, internet exchanges, the sites nearest a market, products and published pricing), each linked to its netactuate.com page. Hosted Streamable HTTP server at https://netactuate.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
