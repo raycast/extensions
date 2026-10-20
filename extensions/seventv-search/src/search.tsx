@@ -44,9 +44,9 @@ export default function Command() {
   // A Grid Size picked from the Action Panel is kept until the preference itself changes.
   const [gridSize, setGridSize] = useState<GridSize>(() => {
     const saved = JSON.parse(cache.get("gridSize") ?? "null");
-    return saved?.preference === preferences.gridSize
-      ? saved.value
-      : preferences.gridSize;
+    if (saved?.preference === preferences.gridSize) return saved.value;
+    cache.remove("gridSize");
+    return preferences.gridSize;
   });
   const changeGridSize = (value: GridSize) => {
     setGridSize(value);
