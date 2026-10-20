@@ -1225,6 +1225,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.sourcey.com/mcp",
   },
   {
+    name: "spacefast",
+    title: "Spacefast",
+    description:
+      "Publish and host what your AI builds: turn pages, apps and artifacts into live Spaces with a built-in database, share them by link or password, connect a custom domain, and update or roll back versions. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://github.com/spacefast.png",
+    homepage: "https://spacefast.com/docs/setup/raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.spacefast.com"],
+    },
+    remoteUrl: "https://mcp.spacefast.com",
+  },
+  {
     name: "springbrand",
     title: "SpringBrand",
     description:
