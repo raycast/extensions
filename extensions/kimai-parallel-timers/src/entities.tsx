@@ -51,23 +51,27 @@ function EntityForm({
             title={entity ? "Save" : "Create"}
             onSubmit={async () => {
               if (!name.trim() || (kind === "projects" && !parent)) return;
-              await perform("Save " + kind, async () => {
-                await api.request(
-                  `/${kind}${entity ? `/${entity.id}` : ""}`,
-                  entity ? "PATCH" : "POST",
-                  {
-                    name: name.trim(),
-                    ...(kind === "projects"
-                      ? { customer: Number(parent) }
-                      : {}),
-                    ...(kind === "activities"
-                      ? { project: parent ? Number(parent) : null }
-                      : {}),
-                  },
-                );
-                await refresh();
-                pop();
-              });
+              await perform(
+                `${kind}:save:${entity?.id ?? "new"}`,
+                "Save " + kind,
+                async () => {
+                  await api.request(
+                    `/${kind}${entity ? `/${entity.id}` : ""}`,
+                    entity ? "PATCH" : "POST",
+                    {
+                      name: name.trim(),
+                      ...(kind === "projects"
+                        ? { customer: Number(parent) }
+                        : {}),
+                      ...(kind === "activities"
+                        ? { project: parent ? Number(parent) : null }
+                        : {}),
+                    },
+                  );
+                  await refresh();
+                  pop();
+                },
+              );
             }}
           />
         </ActionPanel>
@@ -136,6 +140,7 @@ export default function Entities({ kind }: { kind: Kind }) {
           title={e.visible === false ? "Restore" : "Archive"}
           onAction={() =>
             perform(
+              `${kind}:visibility:${e.id}`,
               "Update visibility",
               () =>
                 api.request(`/${kind}/${e.id}`, "PATCH", {
@@ -164,6 +169,7 @@ export default function Entities({ kind }: { kind: Kind }) {
               })
             )
               await perform(
+                `${kind}:delete:${e.id}`,
                 "Delete",
                 () => api.request(`/${kind}/${e.id}`, "DELETE"),
                 revalidate,

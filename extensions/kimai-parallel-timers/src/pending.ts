@@ -1,6 +1,6 @@
 const pending = new Set<string>();
 
-// One running action of each kind per command runtime, shared by list/menu handlers.
+// One running action per explicit operation/record key in this command runtime.
 export async function runOnce(key: string, action: () => Promise<void>) {
   if (pending.has(key)) return;
   pending.add(key);

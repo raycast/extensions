@@ -12,11 +12,12 @@ export function client() {
   return new Kimai(p.baseUrl, p.apiToken);
 }
 export async function perform(
+  key: string,
   title: string,
   work: () => Promise<unknown>,
   refresh?: () => unknown,
 ) {
-  return runOnce(title, async () => {
+  return runOnce(key, async () => {
     const toast = await showToast({ style: Toast.Style.Animated, title });
     try {
       await work();

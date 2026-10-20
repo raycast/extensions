@@ -126,3 +126,48 @@ test("failed pending action releases the guard for retry", async () => {
   });
   assert.equal(retried, true);
 });
+
+test("stopping different timers runs concurrently while duplicate stop is ignored", async () => {
+  const calls: number[] = [];
+  let release!: () => void;
+  const wait = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const stop = (id: number) =>
+    runOnce(`timer:stop:${id}`, async () => {
+      calls.push(id);
+      await wait;
+    });
+  const first = stop(101);
+  const second = stop(102);
+  await stop(101);
+  assert.deepEqual(calls, [101, 102]);
+  release();
+  await Promise.all([first, second]);
+  await stop(101);
+  assert.deepEqual(calls, [101, 102, 101]);
+});
+test("operation and entity type keys do not block unrelated mutations", async () => {
+  const keys = [
+    "timer:stop:200",
+    "timer:resume:200",
+    "projects:visibility:200",
+    "projects:visibility:201",
+    "customers:delete:200",
+    "projects:delete:200",
+  ];
+  const calls: string[] = [];
+  let release!: () => void;
+  const wait = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const work = keys.map((key) =>
+    runOnce(key, async () => {
+      calls.push(key);
+      await wait;
+    }),
+  );
+  assert.deepEqual(calls, keys);
+  release();
+  await Promise.all(work);
+});

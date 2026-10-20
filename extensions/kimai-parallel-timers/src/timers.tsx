@@ -105,7 +105,12 @@ export default function Timers({
             title="Stop This Timer"
             icon={Icon.Stop}
             onAction={() =>
-              perform("Stop timer", () => api.stop(e.id), revalidate)
+              perform(
+                `timer:stop:${e.id}`,
+                "Stop timer",
+                () => api.stop(e.id),
+                revalidate,
+              )
             }
           />
         ) : (
@@ -113,7 +118,12 @@ export default function Timers({
             title="Resume as Parallel Timer"
             icon={Icon.Play}
             onAction={() =>
-              perform("Resume timer", () => api.resume(e), revalidate)
+              perform(
+                `timer:resume:${e.id}`,
+                "Resume timer",
+                () => api.resume(e),
+                revalidate,
+              )
             }
           />
         ))}
@@ -151,7 +161,12 @@ export default function Timers({
                 },
               })
             )
-              await perform("Stop all timers", () => api.stopAll(), revalidate);
+              await perform(
+                "timer:stop-all",
+                "Stop all timers",
+                () => api.stopAll(),
+                revalidate,
+              );
           }}
         />
       )}

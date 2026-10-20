@@ -82,7 +82,12 @@ export default function Command() {
             subtitle={nameOf(e.project)}
             icon={Icon.Stop}
             onAction={() =>
-              perform("Stop timer", () => api.stop(e.id), refresh)
+              perform(
+                `timer:stop:${e.id}`,
+                "Stop timer",
+                () => api.stop(e.id),
+                refresh,
+              )
             }
           />
         ))}
@@ -108,7 +113,12 @@ export default function Command() {
           title={`Stop All ${active.length} Timers`}
           icon={Icon.Stop}
           onAction={() =>
-            perform("Stop all timers", () => api.stopAll(), refresh)
+            perform(
+              "timer:stop-all",
+              "Stop all timers",
+              () => api.stopAll(),
+              refresh,
+            )
           }
         />
       )}
@@ -122,7 +132,12 @@ export default function Command() {
               subtitle={nameOf(e.project)}
               icon={Icon.Play}
               onAction={() =>
-                perform("Resume timer", () => api.resume(e), refresh)
+                perform(
+                  `timer:resume:${e.id}`,
+                  "Resume timer",
+                  () => api.resume(e),
+                  refresh,
+                )
               }
             />
           ))}

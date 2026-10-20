@@ -59,22 +59,26 @@ export default function EntryForm({
             onSubmit={async () => {
               if (!valid || submitting.current) return;
               submitting.current = true;
-              await perform(entry ? "Save entry" : "Start timer", async () => {
-                const body = entryPayload(
-                  {
-                    project: Number(project),
-                    activity: Number(selectedActivity),
-                    description,
-                    tags,
-                  },
-                  entry,
-                );
-                if (entry)
-                  await api.request(`/timesheets/${entry.id}`, "PATCH", body);
-                else await api.start(body);
-                await refresh?.();
-                pop();
-              });
+              await perform(
+                entry ? `timer:edit:${entry.id}` : "timer:create",
+                entry ? "Save entry" : "Start timer",
+                async () => {
+                  const body = entryPayload(
+                    {
+                      project: Number(project),
+                      activity: Number(selectedActivity),
+                      description,
+                      tags,
+                    },
+                    entry,
+                  );
+                  if (entry)
+                    await api.request(`/timesheets/${entry.id}`, "PATCH", body);
+                  else await api.start(body);
+                  await refresh?.();
+                  pop();
+                },
+              );
               submitting.current = false;
             }}
           />
