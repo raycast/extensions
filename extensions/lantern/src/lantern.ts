@@ -198,10 +198,11 @@ export async function thumbnail(file: string, startMs: number | null, size = 480
 export async function previewAtMoment(file: string, startMs: number, text: string): Promise<void> {
   // encodeURIComponent, not URLSearchParams: its "+" for a space reaches Swift's URLComponents as a literal "+"
   const part = (k: string, v: string) => `${k}=${encodeURIComponent(v)}`;
-  const query = [part("path", file), part("ms", String(startMs)), part("text", text.slice(0, 400))].join("&");
-  const url = `lantern://preview?${query}`;
   try {
-    await open(url);
+    // whole characters (code points), so an emoji is never cut in half: encodeURIComponent throws on half of one
+    const passage = Array.from(text).slice(0, 400).join("");
+    const query = [part("path", file), part("ms", String(startMs)), part("text", passage)].join("&");
+    await open(`lantern://preview?${query}`);
   } catch (err) {
     await showToast({
       style: Toast.Style.Failure,
