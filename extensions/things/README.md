@@ -34,3 +34,19 @@ Searches across all areas, projects, and to-dos by reading the Things database d
 
 **Examples (without AI):**
 * Complete project -> Creates to-do with title "Complete project" in "Inbox".
+
+## macOS Calendar events
+
+Today and Upcoming display a separate **Calendar Events** section above to-dos. Event rows show the title, time (or All day), and calendar name on the right. Calendar search is supported; the Things tag dropdown filters to-dos only.
+
+Extension preferences:
+
+- **Show macOS calendar events in Today and Upcoming** enables the section (on by default).
+- **Calendar Names** accepts comma-separated exact names, for example `Home, Lunar, Work`. Empty means all macOS calendars, including subscribed calendars. This selection is independent of the calendars selected inside Things.
+- **Upcoming Calendar Days** sets the range starting tomorrow (default 30, maximum 365). Today includes events overlapping the current local day. Recurring and multi-day events are included.
+
+On first use, allow the macOS calendar permission request. If access is denied, use the row's **Open Calendar Privacy Settings** action to allow full calendar access for Raycast, then **Refresh Calendar Events**. A permission timeout or calendar error leaves your to-dos usable. Reopen the command or use the refresh action to reload events. Event contents are read-only and are not persisted by this feature. **Open Date in Calendar** navigates Calendar to the event date.
+
+The bridge uses Apple's [EventKit event retrieval API](https://developer.apple.com/documentation/eventkit/retrieving-events-and-reminders) and requests full access before querying. Authorization must be verified from the actual launcher: authorization obtained or denied in a development terminal does not establish the launcher's state.
+
+Development checks: `npm test`, `npx tsc --noEmit`, and `npm run build`. Calendar permission prompts and rendering must also be tested in Raycast.

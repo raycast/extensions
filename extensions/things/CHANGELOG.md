@@ -1,5 +1,11 @@
 # Things Changelog
 
+## [Calendar Events in Today and Upcoming] - {PR_MERGE_DATE}
+
+- Add macOS Calendar events to Today and Upcoming, including recurring, subscribed-calendar, all-day, and multi-day events.
+- Add preferences for calendar names and the Upcoming date range, plus permission recovery and refresh actions.
+- Keep to-do creation and Things search available from calendar rows.
+
 ## [Things 3.23 Compatibility] - 2026-08-29
 
 - Fixed Today and Anytime missing to-dos whose scheduled date had arrived when the Unofficial API preference is enabled. Things 3.23 leaves such a to-do marked as scheduled, so the extension has to decide list membership by date.
