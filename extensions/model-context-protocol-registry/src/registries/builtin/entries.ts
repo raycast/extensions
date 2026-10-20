@@ -851,6 +851,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://moltnode.ag/mcp",
   },
   {
+    name: "multi-calendar",
+    title: "Multi Calendar",
+    description:
+      "Your Outlook.com, Hotmail, Microsoft 365 and Google calendars in Raycast - many accounts at once, one search for free time across all of them. Read events, find free time, create, move and cancel events and answer invitations, make booking links, booking pages and group polls, each account within the permissions its owner sets. No copy of the calendars is kept. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://lumman.co/icon-512.png",
+    homepage: "https://lumman.co/mcp/multi-calendar",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://calendar.lumman.co/mcp"],
+    },
+    remoteUrl: "https://calendar.lumman.co/mcp",
+  },
+  {
     name: "netactuate",
     title: "NetActuate",
     description:
