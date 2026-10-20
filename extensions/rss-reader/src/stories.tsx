@@ -15,12 +15,12 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
-import { randomUUID } from "crypto";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import React from "react";
 import Parser from "rss-parser";
 import { type Feed, getFeeds } from "./feeds";
 import AddFeedForm from "./subscription-form";
+import { getStoryGuid } from "./utils";
 
 const parser = new Parser({});
 const preference = getPreferenceValues();
@@ -88,7 +88,7 @@ function setCachedFilter(value: string) {
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
-function StoryListItem(props: { item: Story; refresh: () => void }) {
+function StoryListItem(props: { item: Story; refresh: () => void; onRead: (item: Story) => void }) {
   return (
     <List.Item
       icon={props.item.icon}
@@ -97,8 +97,8 @@ function StoryListItem(props: { item: Story; refresh: () => void }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenStory item={props.item} />
-            <ReadStory item={props.item} />
+            <OpenStory item={props.item} onRead={props.onRead} />
+            <ReadStory item={props.item} onRead={props.onRead} />
             <CopyStory item={props.item} />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -122,27 +122,28 @@ function StoryListItem(props: { item: Story; refresh: () => void }) {
   );
 }
 
-async function updateLastRead(props: { item: Story }) {
-  const lastRead = new Date().valueOf();
+async function updateLastRead(guid: string, lastRead: number) {
   const storyLastViewedString = await LocalStorage.getItem<string>("storyLastRead");
   const storyLastRead: StoryLastRead = await JSON.parse(storyLastViewedString ?? "{}");
-  storyLastRead[props.item.guid] = lastRead;
+  storyLastRead[guid] = lastRead;
   await LocalStorage.setItem("storyLastRead", JSON.stringify(storyLastRead));
 }
 
-function ReadStory(props: { item: Story }) {
+function ReadStory(props: { item: Story; onRead: (item: Story) => void }) {
   return props.item.content ? (
     <Action.Push
       icon={Icon.Book}
       title="Read Story"
-      target={<StoryDetail item={props.item} />}
-      onPush={() => updateLastRead(props)}
+      target={<StoryDetail item={props.item} onRead={props.onRead} />}
+      onPush={() => props.onRead(props.item)}
     />
   ) : null;
 }
 
-function OpenStory(props: { item: Story }) {
-  return props.item.link ? <Action.OpenInBrowser url={props.item.link} onOpen={() => updateLastRead(props)} /> : null;
+function OpenStory(props: { item: Story; onRead: (item: Story) => void }) {
+  return props.item.link ? (
+    <Action.OpenInBrowser url={props.item.link} onOpen={() => props.onRead(props.item)} />
+  ) : null;
 }
 
 function CopyStory(props: { item: Story }) {
@@ -154,7 +155,7 @@ function CopyStory(props: { item: Story }) {
 function ItemToStory(item: Parser.Item, feed: Feed, lastViewed: number) {
   const date = item.pubDate ? Date.parse(item.pubDate) : 0;
   return {
-    guid: item.guid || randomUUID(),
+    guid: getStoryGuid(item, feed.url),
     title: item.title || "No title",
     subtitle: feed.title,
     link: item.link,
@@ -208,8 +209,24 @@ export function StoriesList(props: { feeds?: Feed[] }) {
 
     return { feeds, stories: await getStories(feeds) };
   }
-  const { data, isLoading, revalidate } = useCachedPromise(fetchStories, [props.feeds]);
+  const { data, isLoading, revalidate, mutate } = useCachedPromise(fetchStories, [props.feeds]);
   const [filter, setFilter] = React.useState(() => getCachedFilter() ?? "all");
+
+  // Update the loaded stories in place: refetching every feed would also clear the "new" dots.
+  const markAsRead = React.useCallback(
+    (item: Story) => {
+      const lastRead = Date.now();
+      mutate(updateLastRead(item.guid, lastRead), {
+        optimisticUpdate: (data) =>
+          data && {
+            ...data,
+            stories: data.stories.map((story) => (story.guid === item.guid ? { ...story, lastRead } : story)),
+          },
+        shouldRevalidateAfter: false,
+      });
+    },
+    [mutate],
+  );
 
   React.useEffect(() => {
     if (!data?.feeds) {
@@ -269,20 +286,25 @@ export function StoriesList(props: { feeds?: Feed[] }) {
           return filter === "all" || story.fromFeed === filter;
         })
         .map((story) => (
-          <StoryListItem key={story.guid} item={story} refresh={revalidate} />
+          <StoryListItem
+            key={`${story.fromFeed}:${story.guid}`}
+            item={story}
+            refresh={revalidate}
+            onRead={markAsRead}
+          />
         ))}
     </List>
   );
 }
 
-function StoryDetail(props: { item: Story }) {
+function StoryDetail(props: { item: Story; onRead: (item: Story) => void }) {
   return (
     <Detail
       navigationTitle={props.item.title}
       markdown={NodeHtmlMarkdown.translate(props.item.content || "")}
       actions={
         <ActionPanel>
-          <OpenStory item={props.item} />
+          <OpenStory item={props.item} onRead={props.onRead} />
           <CopyStory item={props.item} />
         </ActionPanel>
       }

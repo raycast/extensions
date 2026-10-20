@@ -1,5 +1,11 @@
 # RSS Reader Changelog
 
+## [Read State Fixes] - {PR_MERGE_DATE}
+
+- Keep read state for stories from Atom feeds and feeds without GUIDs
+- Match read state between the stories list and AI tools
+- Update the read indicator as soon as a story is opened
+
 ## [Preference] - 2026-09-18
 
 - Added "Show Subtitle" Preference for hiding subtitle on stories
