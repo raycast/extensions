@@ -139,7 +139,11 @@ export default function PlaySong(
         />
       ) : (
         results.map((result) => (
-          <ResultItem key={result.id} result={result} addMode={addMode} />
+          <ResultItem
+            key={`${result.source}-${result.id}`}
+            result={result}
+            addMode={addMode}
+          />
         ))
       )}
     </List>

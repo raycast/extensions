@@ -16,7 +16,7 @@ import { useEffect, useState } from "react";
 import {
   getKasetState,
   isKasetRunning,
-  recordPlayed,
+  recordFinishedTrack,
   KasetState,
 } from "./utils/kaset";
 
@@ -26,9 +26,10 @@ async function fetchState() {
   const running = await isKasetRunning();
   if (!running) return null;
   const state = await getKasetState();
-  if (state?.currentTrack) {
-    await recordPlayed(state.currentTrack);
-  }
+  // Same rule as Now Playing: a track joins the history only once it has
+  // stopped. This used to log the playing song on every refresh, which put the
+  // same track in both Now Playing and Recently Played.
+  await recordFinishedTrack(state?.currentTrack ?? null);
   return state;
 }
 

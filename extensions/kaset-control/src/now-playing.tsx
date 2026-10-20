@@ -7,6 +7,7 @@ import {
   LaunchType,
   List,
   launchCommand,
+  showHUD,
 } from "@raycast/api";
 import { getProgressIcon, usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
@@ -19,6 +20,7 @@ import {
   getPlayQueue,
   getRecent,
   isKasetRunning,
+  isPlaceholderTrack,
   likeTrack,
   nextTrack,
   playPause,
@@ -70,8 +72,12 @@ export default function NowPlaying() {
   const { data: liveState, revalidate: refreshState } =
     usePromise(getKasetState);
 
-  const library = liveLibrary ?? cachedLibrary;
-  const state = liveState ?? cachedState;
+  // Only fall back while the live value is still undefined. A completed `null`
+  // means there genuinely is no player (Kaset closed, or not initialised yet),
+  // and a stale snapshot must not paper over that — nor turn it into a
+  // permanent loading state on a fresh install with no snapshot.
+  const library = liveLibrary === undefined ? cachedLibrary : liveLibrary;
+  const state = liveState === undefined ? cachedState : liveState;
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -98,9 +104,13 @@ export default function NowPlaying() {
   // though Recently Played sits above it; released once the user moves.
   const [pinSelection, setPinSelection] = useState(true);
 
+  // Keyed on the metadata as well as the id: Kaset first reports an ID-only
+  // "Loading..." placeholder and fills in the title and artist afterwards under
+  // the same video id, so an id-only dependency would never fire again and the
+  // real track would never reach the history.
   useEffect(() => {
     void recordFinishedTrack(currentTrack).then(() => refreshLibrary());
-  }, [currentTrack?.id]);
+  }, [currentTrack?.id, currentTrack?.name, currentTrack?.artist]);
 
   // Only the first load shows the loading shell; polling must not re-trigger it.
   if (library === undefined || state === undefined) {
@@ -224,7 +234,6 @@ export default function NowPlaying() {
           <PlayerQueueItem
             itemId={NOW_PLAYING_ID}
             track={currentTrack}
-            index={currentIndex}
             isCurrent
             album={currentAlbum}
             state={state}
@@ -239,7 +248,6 @@ export default function NowPlaying() {
             <PlayerQueueItem
               key={`${track.id}-${offset}`}
               track={track}
-              index={currentIndex + offset + 1}
               onRevalidate={refreshLibrary}
             />
           ))}
@@ -251,7 +259,6 @@ export default function NowPlaying() {
 
 function PlayerQueueItem({
   track,
-  index,
   itemId,
   isCurrent = false,
   album,
@@ -259,7 +266,6 @@ function PlayerQueueItem({
   onRevalidate,
 }: {
   track: Track;
-  index: number;
   itemId?: string;
   isCurrent?: boolean;
   album?: string;
@@ -289,11 +295,7 @@ function PlayerQueueItem({
             onRevalidate={onRevalidate}
           />
         ) : (
-          <QueueRowActions
-            track={track}
-            index={index}
-            onRevalidate={onRevalidate}
-          />
+          <QueueRowActions track={track} onRevalidate={onRevalidate} />
         )
       }
     />
@@ -304,20 +306,26 @@ function PlayerQueueItem({
 // `resolveAlbum` caches by video id, so returning to a track is instant.
 function useResolvedAlbum(track: Track | null): string | undefined {
   const id = track?.id;
+  const name = track?.name;
+  const artist = track?.artist;
+  const hasAlbum = Boolean(track?.album);
+  // Kaset's ID-only placeholder carries no usable title, so looking it up would
+  // search for "Loading..." and cache the miss under the real video id.
+  const placeholder = track ? isPlaceholderTrack(track) : true;
   const [resolved, setResolved] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     setResolved(undefined);
-    if (!id || !track || track.album || !track.name) return;
+    if (!id || !name || hasAlbum || placeholder) return;
 
     let cancelled = false;
-    void resolveAlbum(id, track.name, track.artist).then((album) => {
+    void resolveAlbum(id, name, artist ?? "").then((album) => {
       if (!cancelled) setResolved(album);
     });
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, name, artist, hasAlbum, placeholder]);
 
   return track ? track.album || resolved : undefined;
 }
@@ -622,11 +630,9 @@ function CurrentTrackActions({
 
 function QueueRowActions({
   track,
-  index,
   onRevalidate,
 }: {
   track: Track & { audioVideoId?: string };
-  index: number;
   onRevalidate: () => void;
 }) {
   return (
@@ -638,10 +644,20 @@ function QueueRowActions({
           onAction={async () => {
             // Re-resolve against the freshest queue so indices cannot drift.
             const fresh = await getPlayQueue();
+            if (!fresh) {
+              onRevalidate();
+              return;
+            }
             const resolved =
-              (fresh?.tracks.findIndex((entry) => entry.id === track.id) ??
-                -1) + 1;
-            await playTrackAtIndex(resolved > 0 ? resolved : index);
+              fresh.tracks.findIndex((entry) => entry.id === track.id) + 1;
+            if (resolved <= 0) {
+              // The row is gone. Falling back to its old position would start
+              // whatever occupies that slot now, which is a different song.
+              await showHUD("Track is no longer in the queue");
+              onRevalidate();
+              return;
+            }
+            await playTrackAtIndex(resolved);
             onRevalidate();
           }}
         />
