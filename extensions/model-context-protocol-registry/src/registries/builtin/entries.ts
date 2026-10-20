@@ -1411,6 +1411,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "visualping",
+    title: "Visualping",
+    description:
+      "Remote MCP server from Visualping, the website change monitoring service. Agents can create, edit, run, pause and delete monitors, list monitors, read recently detected changes, and read full monitor settings such as AI alerting, notifications, schedule, page actions and crawl config. OAuth sign-in with your Visualping account, and actions follow your Visualping role in each workspace. Public beta. Hosted remote SSE server; OAuth 2.0 sign-in with dynamic client registration and PKCE, no API key to paste; available on all Visualping plans, including Free.",
+    icon: "https://github.com/webmonitoring.png",
+    homepage: "https://help.visualping.io/en/articles/11982593",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://visualping.io/mcp/sse"],
+    },
+    remoteUrl: "https://visualping.io/mcp/sse",
+  },
+  {
     name: "voicemoat",
     title: "VoiceMoat",
     description:
