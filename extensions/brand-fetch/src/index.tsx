@@ -23,13 +23,8 @@ import { failToast, showError } from "@chrismessina/raycast-kit";
 
 const DOWNLOAD_DIR = `${homedir()}/Downloads`;
 
-interface Preferences {
-  bfApiKey: string;
-  downloadPath?: string;
-}
-
 export default function Command(props: LaunchProps<{ arguments: { query: string } }>) {
-  const { bfApiKey } = getPreferenceValues<Preferences>();
+  const { bfApiKey } = getPreferenceValues<Preferences.Index>();
   const [isLoading, setIsLoading] = useState(false);
   const [resp, setResp] = useState<RetrieveBrandResponse | SearchBrandKeyword[]>();
   const [queryType, setQueryType] = useState("query");
@@ -103,7 +98,7 @@ function BrandView({ domain, bfApiKey }: { domain: string; bfApiKey: string }) {
   }, [domain]);
 
   async function download(imageUrl: string, extName: string) {
-    const { downloadPath } = getPreferenceValues<Preferences>();
+    const { downloadPath } = getPreferenceValues<Preferences.Index>();
     const configuredPath = downloadPath?.trim() || DOWNLOAD_DIR;
     const directory = configuredPath.replace(/^~(?=$|[\\/])/, homedir());
     const filePath = join(directory, randomUUID() + "." + extName);
