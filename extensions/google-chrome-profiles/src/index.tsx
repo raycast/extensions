@@ -214,8 +214,12 @@ export default function Command() {
     }
   };
 
+  const visibleResults = visibleProfiles && filterProfiles(visibleProfiles, searchText);
+  const hiddenResults = filterProfiles(hiddenProfiles, searchText);
+  const allHidden = visibleProfiles?.length === 0;
+
   const profileItems = (items: Profile[], hidden: boolean) =>
-    filterProfiles(items, searchText).map((profile, index) => (
+    items.map((profile, index) => (
       <ProfileItem
         key={profile.directory}
         index={index}
@@ -235,13 +239,14 @@ export default function Command() {
       filtering={false}
       onSearchTextChange={setSearchText}
     >
-      {visibleProfiles && profileItems(visibleProfiles, false)}
-      {showHidden && <List.Section title="Hidden">{profileItems(hiddenProfiles, true)}</List.Section>}
-      {visibleProfiles?.length === 0 && hiddenProfiles.length > 0 && (
+      {visibleResults && profileItems(visibleResults, false)}
+      {showHidden && <List.Section title="Hidden">{profileItems(hiddenResults, true)}</List.Section>}
+      {/* Without a visible result there is no item to run Show Hidden Profiles from, so offer it here. */}
+      {!showHidden && visibleResults?.length === 0 && hiddenResults.length > 0 && (
         <List.EmptyView
           icon={Icon.EyeDisabled}
-          title="All Profiles Are Hidden"
-          description="Show hidden profiles to unhide one."
+          title={allHidden ? "All Profiles Are Hidden" : "Only Hidden Profiles Match"}
+          description={allHidden ? "Show hidden profiles to unhide one." : "Show hidden profiles to see them."}
           actions={<ActionPanel>{showHiddenAction}</ActionPanel>}
         />
       )}
