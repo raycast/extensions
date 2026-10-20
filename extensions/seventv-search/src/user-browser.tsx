@@ -19,7 +19,11 @@ import {
 } from "./user-emotes";
 
 import type { ReactNode } from "react";
-import { getUserAvatar, type AvatarInterfaceSize } from "./user-avatar";
+import {
+  fallbackAvatar,
+  getUserAvatar,
+  type AvatarInterfaceSize,
+} from "./user-avatar";
 import { createUserHistoryStore } from "./user-history";
 
 export default function UserBrowser({ mode }: { mode: UserEmoteMode }) {
@@ -266,7 +270,10 @@ function ContainedUserTile({
       id={user.id}
       title={user.name}
       subtitle={`${user.platform} · ${user.handle}`}
-      content={{ value: { source: avatar ?? Icon.Person }, tooltip: user.name }}
+      content={{
+        value: { source: avatar ?? fallbackAvatar(avatarInterfaceSize) },
+        tooltip: user.name,
+      }}
       actions={actions}
     />
   );
