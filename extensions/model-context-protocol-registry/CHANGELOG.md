@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add NeverApply MCP Server] - {PR_MERGE_DATE}
+
+- Add NeverApply to the official registry: an AI job-search agent to search and match jobs, tailor resumes, answer screening questions, prepare for interviews, and apply with your approval. Official hosted Streamable HTTP server at https://neverapply.co/mcp with OAuth 2.1 sign-in (PKCE and dynamic client registration), plus an `mcp-remote` fallback.
+
 ## [Add Runx, Sourcey, Frantic and Ausca MCP servers] - 2026-10-19
 
 - Add four first-party hosted MCP servers with current marks and direct HTTP connections in Raycast. Runx and Sourcey expose public read-only discovery, Frantic exposes public bounty reads and governed actions, and Ausca exposes keyless offer discovery with x402 payment required for paid calls. Other MCP clients retain the `mcp-remote` fallback.
