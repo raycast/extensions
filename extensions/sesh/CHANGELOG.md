@@ -1,5 +1,11 @@
 # Sesh Changelog
 
+## [Search sessions and windows] - {PR_MERGE_DATE}
+
+- Add a Search Sessions and Windows command that lists your sessions and every tmux window in one place, so typing a window name finds it alongside sessions
+- Load windows in Connect to Window from the session list on sesh 2.32 and later, instead of one extra `sesh window list` call per session
+- Ignore a second press of Enter while a session or window is still connecting
+
 ## [Connect to worktree from browser] - 2026-10-04
 
 - Add a Connect to Worktree from Browser command that reads the GitHub issue or pull request from your active browser tab and connects to its worktree, creating it if it doesn't exist
