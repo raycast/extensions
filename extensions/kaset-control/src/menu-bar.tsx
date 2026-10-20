@@ -1,5 +1,7 @@
 import {
+  Color,
   Icon,
+  Image,
   LocalStorage,
   MenuBarExtra,
   open,
@@ -9,15 +11,25 @@ import {
   environment,
   showHUD,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { useState } from "react";
-import { getKasetState, isKasetRunning, KasetState } from "./utils/kaset";
+import { getProgressIcon, usePromise } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import {
+  getKasetState,
+  isKasetRunning,
+  recordPlayed,
+  KasetState,
+} from "./utils/kaset";
 
 const MENU_BAR_ENABLED_KEY = "menuBarEnabled";
 
 async function fetchState() {
   const running = await isKasetRunning();
-  return running ? await getKasetState() : null;
+  if (!running) return null;
+  const state = await getKasetState();
+  if (state?.currentTrack) {
+    await recordPlayed(state.currentTrack);
+  }
+  return state;
 }
 
 export default function Command() {
@@ -45,16 +57,27 @@ export default function Command() {
     return { enabled: true, state: await fetchState() };
   });
 
+  // Hooks must run before any early return.
+  const title = useMenuBarTitle(data?.state);
+
   // If disabled (either by local state or persisted), hide the menu bar
   if (isHidden || data?.enabled === false) {
     return null;
   }
 
   const state = data?.state;
-  const title = getMenuBarTitle(state);
+  const prefs = getPreferenceValues<Preferences>();
+
+  if (prefs.hideWhenIdle && !state?.currentTrack) {
+    return null;
+  }
 
   return (
-    <MenuBarExtra icon={Icon.Music} title={title} isLoading={isLoading}>
+    <MenuBarExtra
+      icon={getMenuBarIcon(state)}
+      title={title}
+      isLoading={isLoading}
+    >
       {state?.currentTrack ? (
         <>
           <MenuBarExtra.Section title="Now Playing">
@@ -214,32 +237,65 @@ export default function Command() {
   );
 }
 
-function getMenuBarTitle(
+function getMenuBarIcon(
+  state: KasetState | null | undefined,
+): Image.ImageLike | string {
+  const { menuBarIconStyle } = getPreferenceValues<Preferences>();
+
+  if (menuBarIconStyle === "progress" && state && state.duration > 0) {
+    return getProgressIcon(state.position / state.duration, Color.PrimaryText);
+  }
+
+  if (state?.currentTrack?.artworkURL) {
+    return {
+      source: state.currentTrack.artworkURL,
+      mask: Image.Mask.RoundedRectangle,
+    };
+  }
+
+  return Icon.Music;
+}
+
+function useMenuBarTitle(
   state: KasetState | null | undefined,
 ): string | undefined {
   const { menuBarStyle } = getPreferenceValues<Preferences>();
+  const [offset, setOffset] = useState(0);
 
-  if (menuBarStyle === "icon") {
-    return undefined;
-  }
-
-  if (!state?.currentTrack) {
-    return undefined;
-  }
-
-  const maxLengthMap = {
+  const maxLengthMap: Record<string, number> = {
     short: 20,
     medium: 35,
     long: 50,
+    marquee: 40,
   };
-  const maxLength = maxLengthMap[menuBarStyle] || 20;
+  const maxLength = maxLengthMap[menuBarStyle] ?? 20;
 
-  const { name, artist } = state.currentTrack;
-  const title = `${name} - ${artist}`;
+  const track = state?.currentTrack;
+  const full = track ? `${track.name} — ${track.artist}` : undefined;
+  const marquee = menuBarStyle === "marquee";
+  const needsScroll = marquee && !!full && full.length > maxLength;
 
-  if (title.length > maxLength) {
-    return title.substring(0, maxLength - 1) + "…";
+  useEffect(() => {
+    if (!needsScroll || !full) return;
+    const padded = `${full}   `;
+    const id = setInterval(
+      () => setOffset((value) => (value + 1) % padded.length),
+      300,
+    );
+    return () => clearInterval(id);
+  }, [needsScroll, full]);
+
+  if (menuBarStyle === "icon" || !full) {
+    return undefined;
   }
 
-  return title;
+  if (!needsScroll) {
+    return full.length > maxLength
+      ? `${full.substring(0, maxLength - 1)}…`
+      : full;
+  }
+
+  const padded = `${full}   `;
+  const doubled = padded + padded;
+  return doubled.substring(offset, offset + maxLength);
 }

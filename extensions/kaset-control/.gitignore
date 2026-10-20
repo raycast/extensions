@@ -39,3 +39,8 @@ compiled_raycast_rust
 # Logs
 *.log
 npm-debug.log*
+
+# BEGIN oh-my-opencode-slim clonedeps
+.slim/
+.ignore
+# END oh-my-opencode-slim clonedeps

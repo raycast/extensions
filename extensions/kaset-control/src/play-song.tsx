@@ -1,54 +1,132 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  LaunchProps,
+  List,
+  Toast,
+  getPreferenceValues,
+  showToast,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { SearchSong, playVideo, searchSongs } from "./utils/kaset";
+import {
+  addToQueue,
+  mergeSearchResults,
+  playVideo,
+  playYouTubeVideo,
+  searchYouTube,
+  searchYouTubeMusic,
+  type SearchResult,
+  type SongResult,
+  type VideoResult,
+} from "./utils/kaset";
 
-export default function PlaySong() {
+type Source = "both" | "ytmusic" | "youtube";
+
+interface PlaySongLaunchContext {
+  mode?: "play" | "add";
+}
+
+export default function PlaySong(
+  props: LaunchProps<{ launchContext: PlaySongLaunchContext }>,
+) {
+  const addMode = props.launchContext?.mode === "add";
   const [searchText, setSearchText] = useState("");
+  const [source, setSource] = useState<Source>(
+    () => getPreferenceValues<Preferences>().searchSource ?? "both",
+  );
   const query = searchText.trim();
 
   const { data, isLoading, revalidate } = usePromise(
-    async (q: string) => {
-      if (!q) return { query: q, songs: [] as SearchSong[] };
-      const songs = await searchSongs(q);
-      return { query: q, songs };
+    async (q: string, src: Source) => {
+      if (!q) return { query: q, source: src, results: [] as SearchResult[] };
+
+      let results: SearchResult[];
+      if (src === "youtube") {
+        results = await searchYouTube(q);
+      } else if (src === "ytmusic") {
+        results = await searchYouTubeMusic(q);
+      } else {
+        const [songs, videos] = await Promise.allSettled([
+          searchYouTubeMusic(q),
+          searchYouTube(q),
+        ]);
+        if (songs.status === "rejected" && videos.status === "rejected") {
+          throw songs.reason;
+        }
+        results = mergeSearchResults(
+          songs.status === "fulfilled" ? songs.value : [],
+          videos.status === "fulfilled" ? videos.value : [],
+        );
+      }
+
+      return { query: q, source: src, results };
     },
-    [query],
+    [query, source],
+    {
+      onError: async () => {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Search temporarily unavailable",
+          message: "The search request failed. Please try again.",
+        });
+      },
+    },
   );
 
-  const hasCurrentResponse = data?.query === query;
-  const songs = useMemo(
-    () => (hasCurrentResponse ? (data?.songs ?? []) : []),
-    [data, hasCurrentResponse],
+  const settled =
+    data?.query === query && data?.source === source && !isLoading;
+  const results = useMemo(
+    () => (settled ? (data?.results ?? []) : []),
+    [data, settled],
   );
   const hasQuery = query.length > 0;
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search songs on YouTube Music"
+      searchBarPlaceholder="Search songs and videos"
       onSearchTextChange={setSearchText}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Source"
+          value={source}
+          onChange={(value) => setSource(value as Source)}
+        >
+          <List.Dropdown.Item
+            title="YouTube Music + YouTube"
+            value="both"
+            icon={Icon.Music}
+          />
+          <List.Dropdown.Item
+            title="YouTube Music"
+            value="ytmusic"
+            icon={Icon.Music}
+          />
+          <List.Dropdown.Item
+            title="YouTube"
+            value="youtube"
+            icon={Icon.Video}
+          />
+        </List.Dropdown>
+      }
       throttle
     >
       {!hasQuery ? (
         <List.EmptyView
           title="Search for a song"
-          description="Type a song title, artist, or keywords to start searching."
+          description="Type a title, artist, or keywords to search."
         />
-      ) : !hasCurrentResponse ? (
+      ) : !settled ? (
         <List.EmptyView
           title="Searching..."
-          description={`Looking for "${query}" on YouTube Music.`}
+          description={`Looking for "${query}".`}
         />
-      ) : isLoading && songs.length === 0 ? (
+      ) : results.length === 0 ? (
         <List.EmptyView
-          title="Searching..."
-          description="Fetching results..."
-        />
-      ) : songs.length === 0 && !isLoading ? (
-        <List.EmptyView
-          title="No songs found"
-          description="Try a different query."
+          title="No results found"
+          description="Try a different query or source."
           actions={
             <ActionPanel>
               <Action
@@ -60,33 +138,82 @@ export default function PlaySong() {
           }
         />
       ) : (
-        songs.map((song) => <SongItem key={song.id} song={song} />)
+        results.map((result) => (
+          <ResultItem key={result.id} result={result} addMode={addMode} />
+        ))
       )}
     </List>
   );
 }
 
-function SongItem({ song }: { song: SearchSong }) {
-  const subtitle = [song.artist, song.album].filter(Boolean).join(" • ");
+function ResultItem({
+  result,
+  addMode,
+}: {
+  result: SearchResult;
+  addMode: boolean;
+}) {
+  const isVideo = result.source === "youtube";
+  const song = result as SongResult;
+  const video = result as VideoResult;
+
+  const subtitle = isVideo
+    ? video.channel
+    : [song.artist, song.album].filter(Boolean).join(" • ");
+
+  const play = (
+    <Action
+      title={isVideo ? "Play Video" : "Play Song"}
+      icon={Icon.Play}
+      onAction={() =>
+        isVideo ? playYouTubeVideo(result.id) : playVideo(result.id)
+      }
+    />
+  );
+
+  const addToQueueAction = (
+    <Action
+      title="Add to Queue"
+      icon={Icon.Plus}
+      shortcut={{ modifiers: ["cmd"], key: "q" }}
+      onAction={() => addToQueue([result.id])}
+    />
+  );
+
+  const playNextAction = (
+    <Action
+      title="Play Next"
+      icon={Icon.Forward}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+      onAction={() => addToQueue([result.id], true)}
+    />
+  );
+
+  const copyLinkAction = (
+    <Action.CopyToClipboard
+      title="Copy Link"
+      icon={Icon.Link}
+      content={`https://youtu.be/${result.id}`}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+    />
+  );
 
   return (
     <List.Item
-      title={song.title}
+      title={result.title}
       subtitle={subtitle}
-      icon={song.artworkURL || Icon.Music}
-      accessories={song.duration ? [{ text: song.duration }] : undefined}
+      icon={result.artworkURL || (isVideo ? Icon.Video : Icon.Music)}
+      accessories={result.duration ? [{ text: result.duration }] : undefined}
       actions={
         <ActionPanel>
-          <Action
-            title="Play Song"
-            icon={Icon.Play}
-            onAction={async () => await playVideo(song.id)}
-          />
-          <Action.CopyToClipboard
-            title="Copy Video Id"
-            content={song.id}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
+          {addMode ? addToQueueAction : play}
+          {addMode ? play : addToQueueAction}
+          <ActionPanel.Section title="Queue">
+            {playNextAction}
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Copy">
+            {copyLinkAction}
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
