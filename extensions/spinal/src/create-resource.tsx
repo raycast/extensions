@@ -14,6 +14,7 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { Fragment, useEffect, useRef, useState } from "react";
 import {
   Collection,
@@ -366,11 +367,10 @@ export default function Command(props: LaunchProps) {
     const issues = validationIssues(target, values);
 
     if (issues.length > 0) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Validation failed",
-        message: issues.map((issue) => issue.message).join("\n"),
-      });
+      await showFailureToast(
+        new Error(issues.map((issue) => issue.message).join("\n")),
+        { title: "Validation Failed" },
+      );
 
       return;
     }
@@ -413,8 +413,7 @@ export default function Command(props: LaunchProps) {
       );
     } catch (error) {
       await progressToast.hide();
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: errorTitle(error),
         message: errorMessage(error),
       });

@@ -12,6 +12,8 @@ Spinal is a Git-powered CMS for static site generators. This extension talks to 
 2. Install the extension and set the **API Key** preference.
 3. Optional: open Create Resource, pick a collection, and press ⌘D to make it the default. The form preselects it next time.
 
+Raycast stores the key on your Mac. It sends the key only to the Spinal API, and only when it reads or creates resources for you.
+
 ## Commands
 
 ### Create Resource

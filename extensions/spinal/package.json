@@ -5,6 +5,7 @@
   "description": "Create and browse resources in your Spinal workspace from Raycast",
   "icon": "extension-icon.png",
   "author": "spinalcms",
+  "platforms": ["macOS"],
   "categories": [
     "Productivity",
     "Web"
@@ -14,6 +15,7 @@
     {
       "name": "create-resource",
       "title": "Create Resource",
+      "subtitle": "Spinal",
       "description": "Create a draft or scheduled resource in a Spinal collection",
       "mode": "view",
       "icon": "extension-icon.png"
@@ -21,6 +23,7 @@
     {
       "name": "browse-resources",
       "title": "Browse Resources",
+      "subtitle": "Spinal",
       "description": "Browse resources in a Spinal collection and filter by status",
       "mode": "view",
       "icon": "extension-icon.png"
@@ -36,7 +39,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.25"
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

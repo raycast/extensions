@@ -9,11 +9,10 @@ import {
   LaunchType,
   List,
   LocalStorage,
-  Toast,
   launchCommand,
   openExtensionPreferences,
-  showToast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Collection,
@@ -424,8 +423,7 @@ export default function Command(props: LaunchProps) {
     } catch (error) {
       if (latestRequestId.current !== requestId) return;
 
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: errorTitle(error),
         message: errorMessage(error),
       });
@@ -457,11 +455,17 @@ export default function Command(props: LaunchProps) {
   async function launchCreateResource() {
     if (!selectedCollectionId) return;
 
-    await launchCommand({
-      name: "create-resource",
-      type: LaunchType.UserInitiated,
-      context: { collectionId: selectedCollectionId },
-    });
+    try {
+      await launchCommand({
+        name: "create-resource",
+        type: LaunchType.UserInitiated,
+        context: { collectionId: selectedCollectionId },
+      });
+    } catch (error) {
+      await showFailureToast(error, {
+        title: "Could Not Open Create Resource",
+      });
+    }
   }
 
   const groups = useMemo(
@@ -592,7 +596,6 @@ export default function Command(props: LaunchProps) {
     <List
       isLoading={isLoading || isLoadingMore}
       isShowingDetail
-      navigationTitle="Browse Resources"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Collection"
