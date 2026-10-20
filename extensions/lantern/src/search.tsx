@@ -41,6 +41,7 @@ import {
   installedApp,
   lines,
   openLanternApp,
+  previewAtMoment,
   openAt,
   opened,
   passage,
@@ -590,8 +591,8 @@ function openActions(
   onClose?: () => void,
 ) {
   const media = h.start_ms != null;
-  // Photos, videos and recordings: ⌘Y is Quick Look, as the panel's ⌘Y: the whole photo at once, the video or recording
-  // playing, ⌘Y again closes it (Quick Look cannot start at the moment: the frame and transcript there are on ⇧⌘Y).
+  // As the panel's ⌘Y: a photo in Quick Look (whole, ⌘Y closes it); a video or recording in Lantern's own player from
+  // the moment, scrubbable back to the start (Quick Look cannot start at a moment); frame and transcript on ⇧⌘Y.
   const visual = photo || media;
   return (
     <>
@@ -633,10 +634,16 @@ function openActions(
         />
         {withPreview && visual ? (
           <>
-            <Action.ToggleQuickLook
-              title={media ? "Play in Quick Look" : "Quick Look"}
-              shortcut={{ modifiers: ["cmd"], key: "y" }}
-            />
+            {media ? (
+              <Action
+                title="Preview from the Moment"
+                icon={Icon.Play}
+                shortcut={{ modifiers: ["cmd"], key: "y" }}
+                onAction={() => previewAtMoment(h.path, h.start_ms ?? 0, h.preview)}
+              />
+            ) : (
+              <Action.ToggleQuickLook title="Quick Look" shortcut={{ modifiers: ["cmd"], key: "y" }} />
+            )}
             <Action.Push
               title={media ? "Show the Moment and Transcript" : "Show Details"}
               icon={Icon.Text}

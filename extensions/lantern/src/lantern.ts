@@ -190,6 +190,27 @@ export async function thumbnail(file: string, startMs: number | null, size = 480
   return r.path;
 }
 
+/**
+ * ⌘Y on a video or recording: the Lantern panel's own player in a small window (the whole file, started at the
+ * moment, scrubbable back to the start; ⌘Y closes it), through the app's `lantern://preview` URL. Quick Look cannot
+ * start at a moment. The app opens only indexed files.
+ */
+export async function previewAtMoment(file: string, startMs: number, text: string): Promise<void> {
+  // encodeURIComponent, not URLSearchParams: its "+" for a space reaches Swift's URLComponents as a literal "+"
+  const part = (k: string, v: string) => `${k}=${encodeURIComponent(v)}`;
+  const query = [part("path", file), part("ms", String(startMs)), part("text", text.slice(0, 400))].join("&");
+  const url = `lantern://preview?${query}`;
+  try {
+    await open(url);
+  } catch (err) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could not open the preview in Lantern",
+      message: `Lantern 0.2.1 or newer previews recordings from the moment. ${err instanceof Error ? err.message : err}`,
+    });
+  }
+}
+
 /** Records the opened result, so Lantern learns your choices as it does from its own panel. */
 export function opened(eventId: number | null, chunkId: number | null, key?: string): void {
   if (eventId == null || chunkId == null || chunkId < 0) return;
