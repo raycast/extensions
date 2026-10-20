@@ -8,11 +8,10 @@ export default function SearchCardsCommand() {
       emptyDescription="Try a different keyword, tag, or phrase."
       emptyIcon={Icon.MagnifyingGlass}
       emptyTitle="No cards found"
-      getItemIcon={(card) => (card.isFavorited ? Icon.Star : Icon.Document)}
       latestSectionTitle="Latest Teak Cards"
-      loadCards={(input) => searchCards({ ...input, limit: 50 })}
+      loadCards={(input) => searchCards({ ...input, limit: 50 }, "interactive")}
       navigationTitle="Search Teak Cards"
-      searchBarPlaceholder="Search cards or use type:, tag:, fav, sort:oldest"
+      searchBarPlaceholder="Search, or filter with type:, tag:, fav, trash, hue:, #hex, after:"
     />
   );
 }

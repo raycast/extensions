@@ -2,7 +2,10 @@ import { Clipboard, showToast, Toast } from "@raycast/api";
 import {
   ensureCredentialsForNoViewCommand,
   extractFirstHttpUrl,
+  isUploadableFile,
   saveCardWithFeedback,
+  saveFilesWithFeedback,
+  toLocalPath,
 } from "./lib/capture";
 
 export default async function SaveClipboardCommand() {
@@ -10,7 +13,14 @@ export default async function SaveClipboardCommand() {
     return;
   }
 
-  const clipboardText = (await Clipboard.readText())?.trim() ?? "";
+  const clipboard = await Clipboard.read();
+  const copiedFile = clipboard.file ? toLocalPath(clipboard.file) : null;
+  if (copiedFile && isUploadableFile(copiedFile)) {
+    await saveFilesWithFeedback([copiedFile], "raycast_clipboard");
+    return;
+  }
+
+  const clipboardText = clipboard.text.trim();
 
   if (!clipboardText) {
     await showToast({

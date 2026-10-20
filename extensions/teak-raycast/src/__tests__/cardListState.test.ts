@@ -56,4 +56,42 @@ describe("card list state helpers", () => {
 
     expect(next.map((card) => card.id)).toEqual(["4"]);
   });
+
+  test("drops a card that was archived from a list of the library", () => {
+    const cards = [makeCard("5"), makeCard("4")];
+    const next = upsertCard(
+      cards,
+      { ...makeCard("5"), isArchived: true },
+      { archivedView: false },
+    );
+    expect(next.map((card) => card.id)).toEqual(["4"]);
+  });
+
+  test("drops a card that was unarchived from the Archive list", () => {
+    const cards = [{ ...makeCard("5"), isArchived: true }, makeCard("4")];
+    const next = upsertCard(cards, makeCard("5"), { archivedView: true });
+    expect(next.map((card) => card.id)).toEqual(["4"]);
+  });
+
+  test("keeps an archived card in the Archive list when it changes", () => {
+    const archived = { ...makeCard("5"), isArchived: true };
+    const next = upsertCard(
+      [archived],
+      { ...archived, isFavorited: true },
+      {
+        archivedView: true,
+      },
+    );
+    expect(next[0]?.isFavorited).toBe(true);
+  });
+
+  test("drops a card that became hidden unless the search names a hidden tag", () => {
+    const hidden = { ...makeCard("5"), isHidden: true };
+    expect(
+      upsertCard([makeCard("5")], hidden, { removeWhenHidden: true }),
+    ).toEqual([]);
+    expect(
+      upsertCard([makeCard("5")], hidden, { removeWhenHidden: false }),
+    ).toHaveLength(1);
+  });
 });

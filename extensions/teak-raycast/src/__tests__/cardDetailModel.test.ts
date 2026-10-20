@@ -5,9 +5,16 @@ import { createRaycastApiMock } from "./raycastApiMock";
 mock.module("@raycast/api", () => createRaycastApiMock(false));
 
 const {
+  formatFileSize,
+  formatLinkCategory,
+  formatLinkPrice,
+  getCardSource,
   getCardTitle,
+  getDetailMarkdown,
   getDetailStatusChips,
   getHeroMediaUrl,
+  getLinkByline,
+  getLinkPublishedDate,
   getOpenableUrl,
   isHttpUrl,
 } = await import("../lib/cardDetailModel");
@@ -105,5 +112,153 @@ describe("card detail model", () => {
       { kind: "aiSummary", text: "No Teak Summary" },
       { kind: "aiTags", text: "No Teak Tags" },
     ]);
+  });
+});
+
+describe("card detail markdown", () => {
+  test("shows palette swatches and copyable hex colors for palette cards", () => {
+    const markdown = getDetailMarkdown({
+      ...baseCard,
+      type: "palette",
+      url: null,
+      colors: [{ hex: "#112233" }, { hex: "javascript:alert(1)" }],
+    });
+    expect(markdown).toContain("![#112233](data:image/svg+xml;base64,");
+    expect(markdown.match(/data:image\/svg\+xml/g)).toHaveLength(1);
+    expect(markdown).not.toContain("javascript:");
+  });
+
+  test("includes the transcript and quotes quote cards", () => {
+    const markdown = getDetailMarkdown({
+      ...baseCard,
+      type: "quote",
+      content: "Less, but better.",
+      aiTranscript: "Spoken words",
+    });
+    expect(markdown).toContain("> Less, but better.");
+    expect(markdown).toContain("## Transcript\n\nSpoken words");
+  });
+
+  test("skips content that only repeats a file's name", () => {
+    const markdown = getDetailMarkdown({
+      ...baseCard,
+      type: "document",
+      content: "notes.pdf",
+      fileName: "notes.pdf",
+    });
+    expect(markdown).not.toContain("## Content");
+  });
+
+  test.each([
+    [512, "512 B"],
+    [4_812_000, "4.6 MB"],
+    [52_428_800, "50 MB"],
+  ])("formats %i bytes as %s", (bytes, text) => {
+    expect(formatFileSize(bytes)).toBe(text);
+  });
+});
+
+describe("card detail facts", () => {
+  test("formats a price in the page's currency, or the bare amount", () => {
+    expect(formatLinkPrice({ amount: 29.99, currency: "USD" })).toBe("$29.99");
+    expect(formatLinkPrice({ amount: 12, currency: null })).toBe("12");
+    expect(formatLinkPrice({ amount: 5, currency: "NOPE!" })).toBe("NOPE! 5");
+  });
+
+  test("words a link category", () => {
+    expect(formatLinkCategory("design_portfolio")).toBe("Design portfolio");
+    expect(formatLinkCategory("article")).toBe("Article");
+  });
+
+  test("joins author and publisher, once each", () => {
+    expect(
+      getLinkByline({
+        ...baseCard,
+        linkAuthor: "Ada",
+        linkPublisher: "The Atlas",
+      }),
+    ).toBe("Ada · The Atlas");
+    expect(
+      getLinkByline({ ...baseCard, linkAuthor: "Ada", linkSiteName: "Ada" }),
+    ).toBe("Ada");
+    expect(getLinkByline(baseCard)).toBeNull();
+  });
+
+  test("reads a published date and ignores one it can't read", () => {
+    expect(
+      getLinkPublishedDate({
+        ...baseCard,
+        linkPublishedAt: "2026-10-01",
+      })?.getUTCFullYear(),
+    ).toBe(2026);
+    expect(
+      getLinkPublishedDate({ ...baseCard, linkPublishedAt: "later" }),
+    ).toBeNull();
+    expect(getLinkPublishedDate(baseCard)).toBeNull();
+  });
+
+  test("says where a saved text came from", () => {
+    expect(
+      getCardSource({
+        ...baseCard,
+        sourceTitle: " A page ",
+        sourceUrl: "https://www.example.com/post",
+      }),
+    ).toEqual({
+      label: "From example.com",
+      title: "A page",
+      url: "https://www.example.com/post",
+    });
+    expect(
+      getCardSource({ ...baseCard, sourceUrl: "javascript:alert(1)" }),
+    ).toBeNull();
+    expect(getCardSource(baseCard)).toBeNull();
+  });
+
+  test("chips show a done mark, archive and hidden state", () => {
+    const chips = getDetailStatusChips({
+      ...baseCard,
+      completedAt: 1,
+      isArchived: true,
+      isHidden: true,
+      linkCategory: "movie",
+    });
+    expect(chips.map((chip) => chip.text)).toEqual(
+      expect.arrayContaining(["Watched", "Archived", "Hidden"]),
+    );
+  });
+
+  test("shows [[ links by their card's title and lists the cards linking here", () => {
+    const target = "k17abcdefghij1234567890abcdefghij";
+    const markdown = getDetailMarkdown({
+      ...baseCard,
+      backlinks: [
+        {
+          id: "k17zzzzzzzzzz1234567890zzzzzzzzzz",
+          missing: false,
+          title: "Plan",
+          type: "text",
+        },
+      ],
+      content: `Compare [[Old|teak:${target}]]`,
+      links: [{ id: target, missing: false, title: "New", type: "text" }],
+      type: "text",
+    });
+    expect(markdown).toContain(
+      `[New](https://app.teakvault.com/?card=${target})`,
+    );
+    expect(markdown).not.toContain("teak:");
+    expect(markdown).toContain("## Linked from");
+    expect(markdown).toContain("[Plan]");
+  });
+
+  test("titles a card by the text of a [[ link at the start of its content", () => {
+    expect(
+      getCardTitle({
+        ...baseCard,
+        content: "[[Roadmap|teak:k17abcdefghij1234567890abcdefghij]] notes",
+        metadataTitle: null,
+      }),
+    ).toBe("Roadmap notes");
   });
 });
