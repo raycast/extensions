@@ -3,6 +3,7 @@
 ## [Tag Pills] - {PR_MERGE_DATE}
 
 - Show each to-do tag as its own tag pill in list rows instead of a single comma-separated label.
+- Fixed the build failing to extract AI tool schemas for `get-projects` and `get-areas`, whose return types referenced each other recursively.
 
 ## [Things 3.23 Compatibility] - 2026-08-29
 
