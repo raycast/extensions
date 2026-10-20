@@ -742,7 +742,7 @@ function render_settings_page(): void {
 		.brx-list.is-pro .brx-icon { color: <?php echo $active ? 'var(--brx-good)' : '#8c8f94'; ?>; }
 		.brx-side h3 { margin: 22px 0 0; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 		.brx-side h3:first-of-type { margin-top: 14px; }
-		.brx-tag { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: var(--brx-yellow); color: #1d2327; }
+		.brx-tag { text-decoration: none; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: var(--brx-yellow); color: #1d2327; }
 		.brx-about { margin: 12px 0 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 16px; }
 		.brx-about dt { color: var(--brx-muted); margin: 0; }
 		.brx-about dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
@@ -835,7 +835,7 @@ function render_settings_page(): void {
 								<input type="text" id="brx-key" name="license_key" class="regular-text" placeholder="Paste your license key" autocomplete="off" spellcheck="false" required>
 								<button type="submit" name="license_action" value="activate" class="button button-primary">Activate license</button>
 							</div>
-							<p class="brx-buy">No key yet? <a href="<?php echo esc_url( $summary['buy_url'] ); ?>" target="_blank" rel="noopener">Get Bricks Raycast Pro</a> from €29 a year, or add your key from Raycast with Bricks Raycast Pro.</p>
+							<p class="brx-buy">No key yet? <a href="<?php echo esc_url( $summary['buy_url'] ); ?>" target="_blank" rel="noopener">See the Bricks Raycast Pro plans</a>, or add your key from Raycast with the Bricks Raycast Pro command.</p>
 						<?php else : ?>
 							<div class="brx-keyrow">
 								<span class="brx-key" title="Your license key, shortened"><?php echo esc_html( (string) $summary['key_hint'] ); ?></span>
@@ -892,7 +892,13 @@ function render_settings_page(): void {
 							<li><?php echo settings_icon( 'check' ); // phpcs:ignore WordPress.Security.EscapeOutput ?><span><?php echo esc_html( $item ); ?></span></li>
 						<?php endforeach; ?>
 					</ul>
-					<h3>Pro <span class="brx-tag"><?php echo $active ? 'Active' : 'From €29/yr'; ?></span></h3>
+					<h3>Pro
+						<?php if ( $active ) : ?>
+							<span class="brx-tag">Active</span>
+						<?php else : ?>
+							<a class="brx-tag" href="<?php echo esc_url( $summary['buy_url'] ); ?>" target="_blank" rel="noopener">See plans</a>
+						<?php endif; ?>
+					</h3>
 					<ul class="brx-list is-pro">
 						<?php foreach ( $pro as $item ) : ?>
 							<li><?php echo settings_icon( $active ? 'check' : 'lock' ); // phpcs:ignore WordPress.Security.EscapeOutput ?><span><?php echo esc_html( $item ); ?></span></li>
