@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Equibles MCP Server] - 2026-10-20
+
+- Add Equibles to the official registry: US stock market data for research, from SEC filing search and XBRL financial statements to earnings call transcripts, insider and congressional trades and 13F holdings. Hosted Streamable HTTP server at https://mcp.equibles.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a Bearer API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Update Ausca MCP listing] - 2026-10-20
 
 - Use Ausca's final square mark and clarify that the Raycast connection discovers offers while paid calls need an x402-capable client.
