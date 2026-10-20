@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Clarify Ausca MCP payment flow] - {PR_MERGE_DATE}
+
+- Clarify that the Raycast connection discovers Ausca offers and paid calls need an x402-capable client.
+
 ## [Add Runx, Sourcey, Frantic and Ausca MCP servers] - 2026-10-19
 
 - Add four first-party hosted MCP servers with current marks and direct HTTP connections in Raycast. Runx and Sourcey expose public read-only discovery, Frantic exposes public bounty reads and governed actions, and Ausca exposes keyless offer discovery with x402 payment required for paid calls. Other MCP clients retain the `mcp-remote` fallback.
