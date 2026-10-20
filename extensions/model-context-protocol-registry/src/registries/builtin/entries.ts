@@ -1621,6 +1621,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "zip-codes",
+    title: "Zip-Codes.com",
+    description:
+      "Location intelligence for US addresses and ZIP Codes: standardize a US street address to its ZIP+4, look up US ZIP Codes, ZIP+4s and Canadian postal codes, turn coordinates into a postal code, find postal areas within a radius, measure distance, and request census tract demographics, mapped districts and school districts. 11 read-only tools, including free reference tools for counties, metro areas, USPS city-name rules and data sources. Hosted remote Streamable HTTP server; no sign-in and no API key for demo mode (real values, deeper fields withheld except on demo codes and addresses); an optional X-Api-Key header with a free key (2,500 credits a day) removes the masking.",
+    icon: "https://www.zip-codes.com/api/favicon.svg",
+    homepage: "https://www.zip-codes.com/api/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.zip-codes.com/mcp"],
+    },
+    remoteUrl: "https://mcp.zip-codes.com/mcp",
+  },
+  {
     name: "zonefoundry",
     title: "ZoneFoundry for Sonos",
     description:

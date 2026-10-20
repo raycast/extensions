@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Zip-Codes.com MCP Server] - 2026-10-20
+
+- Add Zip-Codes.com to the official registry: US address standardization to ZIP+4, US ZIP Code and Canadian postal code lookup, radius search, distance and census tract demographics. Hosted Streamable HTTP server at https://mcp.zip-codes.com/mcp with no sign-in (demo mode without a key), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add NetActuate MCP Server] - 2026-10-20
 
 - Add NetActuate to the official registry: read-only answers from NetActuate's published network data (data center locations and specifications, compliance by site, internet exchanges, the sites nearest a market, products and published pricing), each linked to its netactuate.com page. Hosted Streamable HTTP server at https://netactuate.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
