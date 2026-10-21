@@ -47,11 +47,13 @@ function mergeLockEntries(skills: InstalledSkill[], lockEntries: Record<string, 
   return skills.map((skill) => {
     const lock = lockEntries[skill.name];
     if (!lock) return skill;
+    // Local installs record the absolute directory path as both source and sourceUrl.
+    const isLocal = lock.sourceType === "local";
     return {
       ...skill,
-      source: lock.source,
+      source: isLocal ? lock.source.replace(homedir(), "~") : lock.source,
       sourceType: lock.sourceType,
-      sourceUrl: lock.sourceUrl ? stripGitSuffix(lock.sourceUrl) : undefined,
+      sourceUrl: lock.sourceUrl && !isLocal ? stripGitSuffix(lock.sourceUrl) : undefined,
       ref: lock.ref,
       installedAt: lock.installedAt,
       updatedAt: lock.updatedAt,
