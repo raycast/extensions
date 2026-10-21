@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zadig",
+  "title": "Zadig",
+  "description": "Search your Zadig workflow runs and environments, and manage sub-environments.",
+  "icon": "icon.png",
+  "author": "philly_cai",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "searchWorkflows",
+      "title": "Search Workflows",
+      "subtitle": "Zadig",
+      "description": "Search workflow runs, see their commits and stages, and retry or cancel a run.",
+      "mode": "view"
+    },
+    {
+      "name": "searchEnvironments",
+      "title": "Search Environments",
+      "subtitle": "Zadig",
+      "description": "Search environments and their services, create sub-environments, add or restart services, and delete test environments.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "domain",
+      "type": "textfield",
+      "required": true,
+      "title": "Domain",
+      "placeholder": "zadig.example.com",
+      "description": "The domain your company serves Zadig from."
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Copy it from Account Settings in Zadig.",
+      "placeholder": "Paste your API token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.0",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
