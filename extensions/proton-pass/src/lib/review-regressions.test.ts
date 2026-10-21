@@ -57,19 +57,19 @@ function actions(element: unknown): Element["props"][] {
   return [props, ...[props.children].flat(Infinity).flatMap(actions)];
 }
 
-test("autofill keeps the original external target when closing changes focus and rejects Raycast", async () => {
+test("autofill targets the app Raycast was opened from, rejects Raycast, and keeps Raycast open meanwhile", async () => {
   const externalApp = { name: "Example", bundleId: "com.example.app" };
-  const otherApp = { name: "Other", bundleId: "com.example.other" };
   const raycast = { name: "Raycast", bundleId: "com.raycast.macos" };
   for (const initialApp of [externalApp, raycast, undefined]) {
-    let frontmostApp: typeof externalApp | undefined = initialApp;
+    let closed = false;
     const { getTargetApp } = loadView("autofill.ts", {
       "@raycast/api": {
         PopToRootType: { Suspended: "suspended" },
+        // Raycast closes only to fill, once the item is loaded: its toast shows the loading meanwhile.
         closeMainWindow: async () => {
-          frontmostApp = otherApp;
+          closed = true;
         },
-        getFrontmostApplication: async () => frontmostApp,
+        getFrontmostApplication: async () => initialApp,
       },
       "@raycast/utils": {},
       "./fill-sequence": fillSequence,
@@ -82,6 +82,7 @@ test("autofill keeps the original external target when closing changes focus and
     } else {
       await assert.rejects(getTargetApp(), /Couldn't find the app to fill/);
     }
+    assert.equal(closed, false);
   }
 });
 
@@ -577,6 +578,48 @@ test("Shared with Me failing to load doesn't hold the vaults back, unlike an end
 
   shareError = new PassCliError("Session ended", "not_authenticated");
   await assert.rejects(api.listVaultsAndItems(), /Session ended/);
+});
+
+test("pass-cli commands wait for the session check, during which pass-cli can catch up with the account", async () => {
+  const started: string[] = [];
+  let finishCheck: () => void = () => undefined;
+  const api = loadView("pass-cli.ts", {
+    "@raycast/api": { environment: { isDevelopment: false, supportPath: "/fixture" }, getPreferenceValues: () => ({}) },
+    "node:os": { homedir: () => "/fixture" },
+    "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+    "./cache": {},
+    "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/adapter": {
+      createPassCliAdapter: () => ({
+        checkAuth: () => {
+          started.push("info");
+          return new Promise((resolve) => {
+            finishCheck = () => resolve(true);
+          });
+        },
+        getItem: async () => {
+          started.push("item view");
+          return item;
+        },
+      }),
+    },
+    "./core/login": { isDetachedLoginRunning: async () => false },
+    "./mock-data": {},
+    "./types": { PassCliError },
+  }) as unknown as {
+    endedSessionError: () => Promise<PassCliError | undefined>;
+    getItem: (shareId: string, itemId: string) => Promise<unknown>;
+  };
+  const check = api.endedSessionError();
+  // Started meanwhile, it would catch up with the account again, as long as the check.
+  const detail = api.getItem("vault", "login");
+  await new Promise(setImmediate);
+  assert.equal(started.join(), "info");
+
+  finishCheck();
+  assert.equal(await check, undefined);
+  await detail;
+  assert.equal(started.join(), "info,item view");
 });
 
 test("only the user's own vaults have their members counted, to know whether they're shared", async () => {

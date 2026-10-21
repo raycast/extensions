@@ -80,7 +80,8 @@ export const ItemActions = memo(function ItemActions({
   /** Pastes into the app that was in front of Raycast; the TOTP code is then left in the clipboard. */
   async function fill(fields: "login" | "email" | "username" | "password") {
     try {
-      // Taken first: loading the item can take a moment, during which another app could come in front.
+      // Taken first: loading the item can take a moment, during which another app could come in front. Raycast stays
+      // open while it loads, with its toast, and closes to fill.
       const target = await getTargetApp();
       const loaded = await loadDetail();
       // Most logins use the email, so it comes first; the username is used when there's no email.
@@ -122,6 +123,8 @@ export const ItemActions = memo(function ItemActions({
   async function pasteTotpCode() {
     try {
       const target = await getTargetApp();
+      // Without the item's details, the code comes from pass-cli.
+      if (!store.peek(item)) await showToast({ style: Toast.Style.Animated, title: "Loading TOTP Code…" });
       const code = await getTotpCode();
       onUse(item);
       await fillApp(target, { values: [code] });

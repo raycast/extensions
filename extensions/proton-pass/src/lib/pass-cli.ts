@@ -69,7 +69,11 @@ export async function getCliPath(): Promise<string> {
 /** Where the browser login keeps its state while it runs, so that it's found again after Raycast closed. */
 const loginDir = () => join(environment.supportPath, "login");
 
+/** The session check in flight, which every other command waits for: see endedSessionError. */
+let sessionCheck: Promise<unknown> | undefined;
+
 async function getAdapter(): Promise<PassCliAdapter> {
+  await sessionCheck?.catch(() => undefined);
   // A pass-cli command running while a login saves its session can make pass-cli delete that session.
   if (await isDetachedLoginRunning(loginDir())) {
     throw new PassCliError("Finish logging in in your browser first.", "not_authenticated");
@@ -152,12 +156,20 @@ export const SESSION_CHECK_WAIT_MS = 1_000;
 /**
  * The error to show when pass-cli says the session has ended, so that saved items don't show meanwhile. Nothing when
  * the session is open, or when pass-cli can't tell, e.g. offline: saved items can still show then.
+ *
+ * Other commands wait for it. After half an hour unused, pass-cli first catches up with the account's changes, which
+ * can take several seconds, and each command started meanwhile does it again: an item opened then would take as long
+ * again. Once this check is done, pass-cli is up to date for them.
  */
 export async function endedSessionError(): Promise<PassCliError | undefined> {
+  const check = checkAuth();
+  sessionCheck = check;
   try {
-    if (await checkAuth()) return undefined;
+    if (await check) return undefined;
   } catch {
     return undefined;
+  } finally {
+    if (sessionCheck === check) sessionCheck = undefined;
   }
   // Cached items belong to the session that wrote them.
   await clearCache();
