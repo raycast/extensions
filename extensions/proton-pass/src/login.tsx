@@ -72,7 +72,7 @@ export default function Command() {
     verifyAuth();
   }, []);
 
-  // A login in progress comes first, also one started from the logged-in screen to log in again.
+  // A login in progress comes first.
   if (login.status.state === "waiting") {
     return <LoginScreen login={login} onCheckAgain={checkAgain} />;
   }
@@ -94,21 +94,17 @@ export default function Command() {
       <List.EmptyView
         icon={Icon.CheckCircle}
         title="You're Logged In"
-        description={
-          login.status.state === "failed"
-            ? `Your session is still active, but the new login didn't complete: ${login.status.error.message}`
-            : "You are successfully authenticated with Proton Pass. You can now use other commands to search and manage your vaults."
-        }
+        description="You are successfully authenticated with Proton Pass. You can now use other commands to search and manage your vaults."
         actions={
           <ActionPanel>
-            <Action title="Re-Run Browser Login" icon={Icon.Globe} onAction={login.start} />
+            {/* Logging in again is only needed after logging out, to change accounts for instance. */}
+            <Action title="Logout" icon={Icon.Logout} style={Action.Style.Destructive} onAction={confirmLogOut} />
             <Action.OpenInBrowser
               title="View CLI Documentation"
               url={PROTON_PASS_CLI_DOCS}
               icon={Icon.Globe}
               shortcut={platformShortcut(["cmd"], "d")}
             />
-            <Action title="Logout" icon={Icon.Logout} style={Action.Style.Destructive} onAction={confirmLogOut} />
           </ActionPanel>
         }
       />

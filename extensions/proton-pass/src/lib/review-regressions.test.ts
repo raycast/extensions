@@ -2173,7 +2173,7 @@ test("a login started while a check is in flight lets it finish, and keeps its o
   const [checkLogin] = harness.effects;
   checkLogin();
   await new Promise(setImmediate);
-  // As Re-Run Browser Login does, in the Login command, while the check of an earlier login is still running.
+  // Login with Browser pressed right away, while the check of an earlier login is still running.
   const starting = login().start();
   await new Promise(setImmediate);
   // That check would remove the new login's files, and report its own result over the new login's.
