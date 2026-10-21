@@ -1,6 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { parse, parseDuration, scan, type ParseResult } from "@timelang/parse";
 
+const TIMER_KEY_PREFIX = "timer:";
 const TIMERS_KEY = "active-timers";
 const LEGACY_TIMER_KEY = "active-timer";
 
@@ -171,35 +172,71 @@ function isTimer(value: unknown): value is ActiveTimer {
   return typeof timer.id === "string" && Number.isFinite(timer.endAt);
 }
 
-async function readTimerList(): Promise<ActiveTimer[]> {
-  const raw = await LocalStorage.getItem<string>(TIMERS_KEY);
-  if (raw) {
-    try {
-      const parsed: unknown = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        return parsed.filter(isTimer);
-      }
-    } catch {
-      return [];
-    }
-  }
+function timerKey(id: string): string {
+  return `${TIMER_KEY_PREFIX}${id}`;
+}
 
-  const legacy = await LocalStorage.getItem<string>(LEGACY_TIMER_KEY);
-  if (!legacy) {
+function parseStoredTimer(value: unknown): ActiveTimer | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return isTimer(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function parseTimerList(raw: string | undefined): ActiveTimer[] {
+  if (!raw) {
     return [];
   }
-
   try {
-    const parsed: unknown = JSON.parse(legacy);
+    const parsed: unknown = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      return parsed.filter(isTimer);
+    }
     return isTimer(parsed) ? [parsed] : [];
   } catch {
     return [];
   }
 }
 
-async function writeTimers(timers: ActiveTimer[]): Promise<void> {
-  await LocalStorage.setItem(TIMERS_KEY, JSON.stringify(timers));
-  await LocalStorage.removeItem(LEGACY_TIMER_KEY);
+let migrateLegacyTimersPromise: Promise<void> | undefined;
+
+async function migrateLegacyTimers(): Promise<void> {
+  migrateLegacyTimersPromise ??= (async () => {
+    const [listRaw, legacyRaw] = await Promise.all([
+      LocalStorage.getItem<string>(TIMERS_KEY),
+      LocalStorage.getItem<string>(LEGACY_TIMER_KEY),
+    ]);
+    if (listRaw === undefined && legacyRaw === undefined) {
+      return;
+    }
+
+    const timers = [...parseTimerList(listRaw), ...parseTimerList(legacyRaw)];
+    await Promise.all(timers.map((timer) => LocalStorage.setItem(timerKey(timer.id), JSON.stringify(timer))));
+    await Promise.all([LocalStorage.removeItem(TIMERS_KEY), LocalStorage.removeItem(LEGACY_TIMER_KEY)]);
+  })();
+
+  await migrateLegacyTimersPromise;
+}
+
+async function readTimerList(): Promise<ActiveTimer[]> {
+  await migrateLegacyTimers();
+  const items = await LocalStorage.allItems();
+  const timers: ActiveTimer[] = [];
+  for (const [key, value] of Object.entries(items)) {
+    if (!key.startsWith(TIMER_KEY_PREFIX)) {
+      continue;
+    }
+    const timer = parseStoredTimer(value);
+    if (timer) {
+      timers.push(timer);
+    }
+  }
+  return timers;
 }
 
 export async function getActiveTimers(): Promise<ActiveTimer[]> {
@@ -209,25 +246,25 @@ export async function getActiveTimers(): Promise<ActiveTimer[]> {
 export async function upsertTimer(timer: ActiveTimer): Promise<ActiveTimer | undefined> {
   const timers = await getActiveTimers();
   const replaced = timer.name ? timers.find((candidate) => namesMatch(candidate.name, timer.name)) : undefined;
-  const next = timers.filter((candidate) => candidate.id !== replaced?.id);
-  next.push(timer);
-  await writeTimers(next);
+  if (replaced) {
+    await LocalStorage.removeItem(timerKey(replaced.id));
+  }
+  await LocalStorage.setItem(timerKey(timer.id), JSON.stringify(timer));
   return replaced;
 }
 
 export async function removeTimer(id: string): Promise<ActiveTimer | undefined> {
-  const timers = await getActiveTimers();
-  const timer = timers.find((candidate) => candidate.id === id);
+  const timer = (await getActiveTimers()).find((candidate) => candidate.id === id);
   if (!timer) {
     return undefined;
   }
-  await writeTimers(timers.filter((candidate) => candidate.id !== id));
+  await LocalStorage.removeItem(timerKey(id));
   return timer;
 }
 
 export async function stopAllTimers(): Promise<number> {
   const timers = await getActiveTimers();
-  await writeTimers([]);
+  await Promise.all(timers.map((timer) => LocalStorage.removeItem(timerKey(timer.id))));
   return timers.length;
 }
 

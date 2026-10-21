@@ -10,7 +10,7 @@ import {
   waitForTimer,
 } from "./timer";
 
-export default async function Command(props: LaunchProps<{ arguments: { when: string; name?: string } }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.StartTimer }>) {
   const input = (props.arguments.when || props.fallbackText || "").trim();
   if (!input) {
     await showToast({
