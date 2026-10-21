@@ -12,8 +12,8 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { getPassboltClient, PassboltClient } from "./lib/passbolt";
-import { getActiveWebsiteUrl } from "./lib/active-website";
-import { partitionResourcesByWebsite, websiteHostname } from "./utils/website";
+import { getActiveWebsites } from "./lib/active-website";
+import { partitionResourcesByWebsite, websiteHostname, chooseActiveWebsite, type ActiveWebsite } from "./utils/website";
 import ResourceDetail from "./details";
 import { Resource } from "./types";
 import { filterResources } from "./utils/resources";
@@ -24,24 +24,37 @@ export default function Command(props: LaunchProps<{ launchContext?: { url?: str
   const [isLoading, setIsLoading] = useState(true);
   const [client] = useState(() => getPassboltClient());
 
-  const [websiteUrl, setWebsiteUrl] = useState<string>();
+  const [activeWebsites, setActiveWebsites] = useState<ActiveWebsite[]>([]);
+  const [activeWebsite, setActiveWebsite] = useState<ActiveWebsite>();
+  const currentWebsites = useRef<ActiveWebsite[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string>();
   const autoSelect = useRef(true);
   const { matchCurrentWebsite = true } = getPreferenceValues<Preferences.Search>();
 
   useEffect(() => {
     let cancelled = false;
+    currentWebsites.current = [];
+    setActiveWebsites([]);
+    setActiveWebsite(undefined);
     if (matchCurrentWebsite) {
-      getActiveWebsiteUrl(props.launchContext?.url).then((url) => {
-        if (!cancelled) setWebsiteUrl(url);
+      getActiveWebsites(props.launchContext?.url).then((websites) => {
+        if (!cancelled) {
+          currentWebsites.current = websites;
+          setActiveWebsites(websites);
+        }
       });
-    } else {
-      setWebsiteUrl(undefined);
     }
     return () => {
       cancelled = true;
     };
   }, [matchCurrentWebsite, props.launchContext?.url]);
+
+  useEffect(() => {
+    // Freeze the first choice while entries stream; reset only with the browser context.
+    if (activeWebsite || activeWebsites !== currentWebsites.current) return;
+    const chosen = chooseActiveWebsite(allItems, activeWebsites);
+    if (chosen) setActiveWebsite(chosen);
+  }, [allItems, activeWebsites, activeWebsite]);
 
   // Load all resources once on mount; closing the command cancels the load and its
   // remaining decryption work instead of continuing in the background.
@@ -92,8 +105,8 @@ export default function Command(props: LaunchProps<{ launchContext?: { url?: str
   const filteredItems = useMemo(() => filterResources(allItems, searchText), [allItems, searchText]);
 
   const { matching, others: remainingItems } = useMemo(
-    () => partitionResourcesByWebsite(filteredItems, websiteUrl),
-    [filteredItems, websiteUrl],
+    () => partitionResourcesByWebsite(filteredItems, activeWebsite?.url, activeWebsite?.title),
+    [filteredItems, activeWebsite],
   );
 
   // Separate favorites from the remaining items
@@ -186,7 +199,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { url?: str
           {matching.length > 0 && (
             <List.Section
               key="current-website"
-              title={`Current Website · ${websiteHostname(websiteUrl)}`}
+              title={`Current Website · ${websiteHostname(activeWebsite?.url)}`}
               subtitle={`${matching.length} items`}
             >
               {matching.map((item) => (

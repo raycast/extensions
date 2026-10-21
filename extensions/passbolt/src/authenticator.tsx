@@ -13,9 +13,10 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { getPassboltClient } from "./lib/passbolt";
-import { getActiveWebsiteUrl } from "./lib/active-website";
+import { getActiveWebsites } from "./lib/active-website";
 import { TotpLoadProgress, TotpResource } from "./types";
 import { createTotpGenerator, filterTotpResources, rankAndPartitionTotpResources, websiteHostname } from "./utils/totp";
+import { chooseActiveWebsite, type ActiveWebsite } from "./utils/website";
 import type { TOTP } from "otpauth";
 
 export default function Authenticator(props: LaunchProps<{ launchContext?: { url?: string } }>) {
@@ -24,7 +25,9 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
   const [loadError, setLoadError] = useState<string>();
   const [progress, setProgress] = useState<TotpLoadProgress>();
   const [searchText, setSearchText] = useState("");
-  const [websiteUrl, setWebsiteUrl] = useState<string>();
+  const [activeWebsites, setActiveWebsites] = useState<ActiveWebsite[]>([]);
+  const [activeWebsite, setActiveWebsite] = useState<ActiveWebsite>();
+  const currentWebsites = useRef<ActiveWebsite[]>([]);
   const [revision, setRevision] = useState(0);
   const [selectedItemId, setSelectedItemId] = useState<string>();
   const selection = useRef<{ revision: number; autoSelect: boolean }>({ revision: 0, autoSelect: true });
@@ -39,17 +42,31 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
 
   useEffect(() => {
     let cancelled = false;
+    currentWebsites.current = [];
+    setActiveWebsites([]);
+    setActiveWebsite(undefined);
     if (matchCurrentWebsite) {
-      getActiveWebsiteUrl(props.launchContext?.url).then((url) => {
-        if (!cancelled) setWebsiteUrl(url);
+      getActiveWebsites(props.launchContext?.url).then((websites) => {
+        if (!cancelled) {
+          currentWebsites.current = websites;
+          setActiveWebsites(websites);
+        }
       });
-    } else {
-      setWebsiteUrl(undefined);
     }
     return () => {
       cancelled = true;
     };
   }, [matchCurrentWebsite, props.launchContext?.url]);
+
+  useEffect(() => {
+    // Freeze the first choice while entries stream; reset only with the browser context.
+    if (activeWebsite || activeWebsites !== currentWebsites.current) return;
+    const chosen = chooseActiveWebsite(items, activeWebsites, (resource) => [
+      resource.totp?.issuer,
+      resource.totp?.label,
+    ]);
+    if (chosen) setActiveWebsite(chosen);
+  }, [items, activeWebsites, activeWebsite]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -95,8 +112,9 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
   );
   // Rank and split in one pass: each entry is scored against the current website exactly once.
   const { matching, others } = useMemo(
-    () => rankAndPartitionTotpResources(filterTotpResources(items, searchText), websiteUrl),
-    [items, searchText, websiteUrl],
+    () =>
+      rankAndPartitionTotpResources(filterTotpResources(items, searchText), activeWebsite?.url, activeWebsite?.title),
+    [items, searchText, activeWebsite],
   );
   useEffect(() => {
     if (selection.current.revision !== revision || !selection.current.autoSelect || searchText || !matching.length)
@@ -184,7 +202,7 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
       {matching.length > 0 && (
         <List.Section
           key="current-website"
-          title={`Current Website · ${websiteHostname(websiteUrl)}`}
+          title={`Current Website · ${websiteHostname(activeWebsite?.url)}`}
           subtitle={`${matching.length} accounts`}
         >
           {matching.map(renderItem)}

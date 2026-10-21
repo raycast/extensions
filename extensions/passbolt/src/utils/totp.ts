@@ -1,5 +1,5 @@
 import { TOTP, URI } from "otpauth";
-import { websiteMatchContext, websiteScore } from "./website";
+import { websiteMatchContext, websiteRelevanceScore } from "./website";
 export { websiteHostname, websiteMatchScore } from "./website";
 import type { ResourceType, TotpConfiguration, TotpResource } from "../types";
 
@@ -132,10 +132,13 @@ export function filterTotpResources(resources: TotpResource[], query: string): T
   });
 }
 
-function scoreTotpResources(resources: TotpResource[], currentUrl?: string) {
-  const context = websiteMatchContext(currentUrl);
+function scoreTotpResources(resources: TotpResource[], currentUrl?: string, title?: string) {
+  const context = websiteMatchContext(currentUrl, title);
   return resources
-    .map((resource) => ({ resource, score: websiteScore(resource, context) }))
+    .map((resource) => ({
+      resource,
+      score: websiteRelevanceScore(resource, context, [resource.totp?.issuer, resource.totp?.label]),
+    }))
     .sort(
       (a, b) =>
         b.score - a.score ||
@@ -144,18 +147,19 @@ function scoreTotpResources(resources: TotpResource[], currentUrl?: string) {
     );
 }
 
-export function rankTotpResources(resources: TotpResource[], currentUrl?: string): TotpResource[] {
-  return scoreTotpResources(resources, currentUrl).map(({ resource }) => resource);
+export function rankTotpResources(resources: TotpResource[], currentUrl?: string, title?: string): TotpResource[] {
+  return scoreTotpResources(resources, currentUrl, title).map(({ resource }) => resource);
 }
 
 // Scores each entry once and splits the ranked list in a single pass.
 export function rankAndPartitionTotpResources(
   resources: TotpResource[],
   currentUrl?: string,
+  title?: string,
 ): { matching: TotpResource[]; others: TotpResource[] } {
   const matching: TotpResource[] = [];
   const others: TotpResource[] = [];
-  for (const { resource, score } of scoreTotpResources(resources, currentUrl)) {
+  for (const { resource, score } of scoreTotpResources(resources, currentUrl, title)) {
     (score > 0 ? matching : others).push(resource);
   }
   return { matching, others };
