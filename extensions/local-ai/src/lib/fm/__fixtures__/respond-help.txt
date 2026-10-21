@@ -1,0 +1,35 @@
+
+  [38;2;55;195;160m[1mfm respond[0m
+  [38;2;153;153;153mGenerate a response to a prompt.[0m
+
+  [38;2;55;195;160m[1mUSAGE[0m
+    [38;2;153;153;153m%[0m fm respond 'What is Swift?'
+    [38;2;153;153;153m%[0m fm respond --use-case content-tagging 'Analyze this text'
+    [38;2;153;153;153m%[0m fm respond --image photo.jpg --text 'What is in this image?'
+    [38;2;153;153;153m%[0m echo 'What is Swift?' | fm respond
+
+  [38;2;55;195;160m[1mARGUMENTS[0m
+    [1m<prompt>                [0mPrompt for the model to respond to
+
+  [38;2;55;195;160m[1mOPTIONS[0m
+    [1m-m, --model <model>     [0mModel to use (system)
+    [1m-i, --instructions <t>  [0mInstructions for the model to follow
+    [1m--schema <file>         [0mPath to a structured output schema file
+    [1m--text <text>           [0mText segment to include in the prompt
+    [1m--image <path>          [0mImage file path to include in the prompt
+    [1m--label <name>          [0mLabel for the corresponding --image (paired by order)
+    [1m--tool <name>           [0mBuilt-in tool to enable (barcode, ocr; repeatable)
+    [1m--resume <f>            [0mContinue a saved conversation from its transcript
+    [1m--save-transcript <f>   [0mSave transcript to a file after responding
+    [1m--[no-]stream           [0mStream the output as it's generated (default: on)
+    [1m-g, --greedy            [0mUse greedy sampling
+    [1m-v, --verbose           [0mPrint verbose output
+    [1m-h, --help              [0mShow help information
+
+  [38;2;55;195;160m[1mSYSTEM MODEL OPTIONS[0m
+    [1m--use-case <case>       [0mModel use case (general, content-tagging)
+    [1m--guardrails <level>    [0mGuardrail level (default, permissive-content-transformations)
+
+  [38;2;55;195;160m[1mMODELS[0m
+    [1msystem                  [0mOn-device Apple Foundation Model [38;2;153;153;153m(default)[0m
+
