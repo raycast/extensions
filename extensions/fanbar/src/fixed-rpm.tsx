@@ -33,6 +33,8 @@ export default function FixedRPM() {
 function FixedRPMForm(props: { status: FanBarStatus }) {
   const { status } = props;
   const range = sharedRange(status.fans);
+  // Fans whose ranges don't overlap have no speed FanBar will accept for all of them.
+  const noSharedRange = status.fans.length > 0 && !range;
 
   const { handleSubmit, itemProps } = useForm<FixedRPMValues>({
     initialValues: {
@@ -43,6 +45,7 @@ function FixedRPMForm(props: { status: FanBarStatus }) {
       rpm: (value) => {
         if (!value?.trim()) return FormValidation.Required;
         if (!/^\d+$/.test(value.trim())) return "Enter a whole number";
+        if (noSharedRange) return "These fans share no speed range";
         const rpm = Number(value);
         if (range && (rpm < range.min || rpm > range.max)) {
           return `Between ${range.min.toLocaleString("en-US")} and ${range.max.toLocaleString("en-US")}`;
@@ -90,7 +93,15 @@ function FixedRPMForm(props: { status: FanBarStatus }) {
           text={`${formatRPM(fan.currentRPM)} now · ${fan.minimumRPM.toLocaleString("en-US")}–${formatRPM(fan.maximumRPM)}`}
         />
       ))}
-      {!range && <Form.Description title="Fans" text="FanBar reported no fans, so the RPM is not checked here." />}
+      {noSharedRange && (
+        <Form.Description
+          title="Fans"
+          text="These fans' speed ranges don't overlap, so no single RPM suits them all."
+        />
+      )}
+      {status.fans.length === 0 && (
+        <Form.Description title="Fans" text="FanBar reported no fans, so the RPM is not checked here." />
+      )}
     </Form>
   );
 }
