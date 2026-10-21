@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Datacircle MCP Server] - {PR_MERGE_DATE}
+## [Update Datacircle MCP Server] - 2026-10-21
 
 - Update Datacircle's description and homepage.
 
