@@ -1,6 +1,5 @@
 import { execFile } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync } from "node:fs";
 import { setTimeout as sleep } from "node:timers/promises";
 import { promisify } from "node:util";
 
@@ -18,6 +17,7 @@ const TMUX_CANDIDATES = EXTRA_PATH.map((dir) => `${dir}/tmux`);
 // e.g. for Docker containers started with "up -d".
 export const STOP_TARGET = "dev-stop";
 const STOP_TIMEOUT_MS = 5000;
+const KILL_TIMEOUT_MS = 2000;
 
 export type Service = {
   project: string;
@@ -88,10 +88,12 @@ export function logMarkdown(log: string): string {
   return "```\n" + log.replaceAll("```", "`​``") + "\n```";
 }
 
-export function hasTarget(makefile: string, target: string): boolean {
+// Make reports this when the target is defined nowhere, neither in the Makefile nor in an
+// included file. A missing prerequisite names the prerequisite instead. make 3.81 (macOS)
+// quotes with `target', newer versions with 'target'.
+export function isMissingTarget(stderr: string, target: string): boolean {
   const escaped = target.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  // ":=" is a variable assignment, not a target.
-  return new RegExp(`^${escaped}[ \\t]*:(?!=)`, "m").test(makefile);
+  return new RegExp(`No rule to make target [\`']${escaped}'`).test(stderr);
 }
 
 export class TmuxMissingError extends Error {}
@@ -143,14 +145,28 @@ async function panes(target: string[]): Promise<{ pid: number | null; dead: bool
   return parsePanes(await tmux("list-panes", ...target, "-F", "#{pane_pid}\t#{pane_dead}"));
 }
 
-function signalGroup(pid: number, signal: NodeJS.Signals): void {
+// Returns false if the group no longer exists. Signal 0 only checks that it exists.
+function signalGroup(pid: number, signal: NodeJS.Signals | 0): boolean {
   // kill(-0) would hit our own process group (Raycast), kill(-1) every process of the user.
   if (!Number.isInteger(pid) || pid <= 1) throw new Error(`invalid pane PID: ${pid}`);
   try {
     process.kill(-pid, signal);
+    return true;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ESRCH") throw error;
+    return false;
   }
+}
+
+// The pane process can exit while a child that ignores SIGTERM keeps running in its
+// group, so wait for the groups themselves, not only for the panes to be dead.
+async function waitForExit(target: string[], pids: number[], timeoutMs: number): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs;
+  while (pids.some((pid) => signalGroup(pid, 0)) || (await panes(target)).some((pane) => !pane.dead)) {
+    if (Date.now() > deadline) return false;
+    await sleep(100);
+  }
+  return true;
 }
 
 // Closing or respawning a window in tmux does not reliably end its processes; they keep
@@ -158,15 +174,12 @@ function signalGroup(pid: number, signal: NodeJS.Signals): void {
 // group also reaches children, "&" and nohup processes. Exited panes have no PID and are
 // skipped. Anything still running after STOP_TIMEOUT_MS gets SIGKILL.
 async function terminate(target: string[]): Promise<void> {
-  const groups = (await panes(target)).flatMap(({ pid }) => (pid === null ? [] : [{ pid }]));
-  for (const { pid } of groups) signalGroup(pid, "SIGTERM");
-  const deadline = Date.now() + STOP_TIMEOUT_MS;
-  while ((await panes(target)).some((pane) => !pane.dead)) {
-    if (Date.now() > deadline) {
-      for (const { pid } of groups) signalGroup(pid, "SIGKILL");
-      return;
-    }
-    await sleep(100);
+  const pids = (await panes(target)).flatMap(({ pid }) => (pid === null ? [] : [pid]));
+  for (const pid of pids) signalGroup(pid, "SIGTERM");
+  if (await waitForExit(target, pids, STOP_TIMEOUT_MS)) return;
+  for (const pid of pids) signalGroup(pid, "SIGKILL");
+  if (!(await waitForExit(target, pids, KILL_TIMEOUT_MS))) {
+    throw new Error("Processes are still running after SIGKILL");
   }
 }
 
@@ -179,19 +192,24 @@ export async function stopService(windowId: string): Promise<void> {
   await terminate(["-t", windowId]);
 }
 
-// Returns whether STOP_TARGET was run.
+// Returns whether STOP_TARGET was run. Make decides whether it exists, so it may also be
+// defined in an included file.
 export async function stopProject(project: string, projectPath: string): Promise<boolean> {
   await terminate(["-s", "-t", `=${project}`]);
   await tmux("kill-session", "-t", `=${project}`);
 
-  const makefile = join(projectPath, "Makefile");
-  if (!existsSync(makefile) || !hasTarget(readFileSync(makefile, "utf8"), STOP_TARGET)) return false;
-  await execFileAsync("make", [STOP_TARGET], {
-    cwd: projectPath,
-    env: { ...process.env, PATH: [...EXTRA_PATH, process.env.PATH].join(":") },
-    timeout: 120_000,
-  });
-  return true;
+  try {
+    await execFileAsync("make", [STOP_TARGET], {
+      cwd: projectPath,
+      // LC_ALL=C keeps make's "No rule" message unlocalized for isMissingTarget.
+      env: { ...process.env, PATH: [...EXTRA_PATH, process.env.PATH].join(":"), LC_ALL: "C" },
+      timeout: 120_000,
+    });
+    return true;
+  } catch (error) {
+    if (isMissingTarget((error as { stderr?: string }).stderr ?? "", STOP_TARGET)) return false;
+    throw error;
+  }
 }
 
 const shellQuote = (value: string) => `'${value.replaceAll("'", `'\\''`)}'`;

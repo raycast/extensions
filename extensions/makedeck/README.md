@@ -11,7 +11,7 @@ This extension shows sessions created by the `makedeck` launcher, so you need bo
 
    ```sh
    git clone https://github.com/Lorenzo-Se/makedeck.git
-   ln -s "$PWD/makedeck/bin/makedeck" /opt/homebrew/bin/makedeck
+   ln -s "$PWD/makedeck/bin/makedeck" "$(brew --prefix)/bin/makedeck"
    ```
 
 Then run `makedeck` in a project root. It starts every prerequisite of the Makefile's `dev` target in its own background tmux window. Open **Dev Services** in Raycast to see them.

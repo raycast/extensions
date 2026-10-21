@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { hasTarget, logMarkdown, parsePanes, parseWindows, tailLog, truncateStart, fitLog } from "./tmux.ts";
+import { isMissingTarget, logMarkdown, parsePanes, parseWindows, tailLog, truncateStart, fitLog } from "./tmux.ts";
 
 // One line as printed by `tmux list-windows -a -F LIST_FORMAT`.
 const row = (...fields: string[]) => fields.join("\t") + "\n";
@@ -53,21 +53,21 @@ test("parseWindows: a line without tab separators throws instead of yielding und
   assert.throws(() => parseWindows("proj_/p_0_@0_server_0_\n"), /unexpected tmux output/);
 });
 
-test("hasTarget: finds a target at line start, with prerequisites and comment", () => {
-  assert.equal(hasTarget("dev: a b\ndev-stop: ## stop Docker\n\tdocker compose stop\n", "dev-stop"), true);
+test("isMissingTarget: recognizes make 3.81 and make 4 quoting", () => {
+  assert.equal(isMissingTarget("make: *** No rule to make target `dev-stop'.  Stop.\n", "dev-stop"), true);
+  assert.equal(isMissingTarget("make: *** No rule to make target 'dev-stop'.  Stop.\n", "dev-stop"), true);
 });
 
-test("hasTarget: ignores prefix matches and indented lines", () => {
-  assert.equal(hasTarget("dev-stop-all:\n\t dev-stop:\n", "dev-stop"), false);
+test("isMissingTarget: a missing prerequisite of the target is a real failure", () => {
+  assert.equal(
+    isMissingTarget("make: *** No rule to make target `infra', needed by `dev-stop'.  Stop.\n", "dev-stop"),
+    false,
+  );
 });
 
-test("hasTarget: special characters in the target name are literal", () => {
-  assert.equal(hasTarget("devXstop:\n", "dev.stop"), false);
-  assert.equal(hasTarget("dev.stop:\n", "dev.stop"), true);
-});
-
-test("hasTarget: a variable assignment is not a target", () => {
-  assert.equal(hasTarget("dev-stop := 1\n", "dev-stop"), false);
+test("isMissingTarget: ignores prefix matches and treats special characters literally", () => {
+  assert.equal(isMissingTarget("make: *** No rule to make target `dev-stop-all'.  Stop.\n", "dev-stop"), false);
+  assert.equal(isMissingTarget("make: *** No rule to make target `devXstop'.  Stop.\n", "dev.stop"), false);
 });
 
 test("parsePanes: exited pane has no PID (tmux reports empty, not 0)", () => {
