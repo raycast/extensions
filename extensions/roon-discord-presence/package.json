@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "roon-discord-presence",
+  "title": "Roon Discord Presence",
+  "description": "See what Roon is showing on your Discord status, and start, stop or restart roon-discord-presence.",
+  "icon": "icon.png",
+  "author": "alvinism",
+  "categories": [
+    "Media",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "Roon Discord Presence",
+      "subtitle": "Menu Bar",
+      "description": "Shows the track on your Discord status in the menu bar, with service controls.",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "status",
+      "title": "Show Roon Discord Presence",
+      "description": "Current track, Roon and Discord connection, zones, and service controls.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-menu-bar",
+      "title": "Toggle Menu Bar Icon",
+      "subtitle": "Roon Discord Presence",
+      "description": "Hide or show the Roon Discord Presence menu bar icon.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "Path to CLI",
+      "description": "Leave empty to look in ~/.local/bin and Homebrew.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/.local/bin/roon-discord-presence"
+    },
+    {
+      "name": "showTrackInMenuBar",
+      "title": "Menu Bar",
+      "label": "Show track title in the menu bar",
+      "description": "Show the title of the track being shown on Discord next to the menu bar icon.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
