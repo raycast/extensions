@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { isAbsolute, join, relative, sep } from "node:path";
 import { getGithubToken } from "../preferences";
 import { stripGitSuffix, type InstalledSkill, type SkillLockEntry } from "../shared";
 import { listInstalledSkills } from "./skills-cli";
@@ -43,6 +43,13 @@ async function getInstalledSkillsSnapshot(): Promise<{
   });
 }
 
+function tildifyPath(path: string): string {
+  const fromHome = relative(homedir(), path);
+  if (fromHome === "") return "~";
+  if (fromHome === ".." || fromHome.startsWith(`..${sep}`) || isAbsolute(fromHome)) return path;
+  return join("~", fromHome);
+}
+
 function mergeLockEntries(skills: InstalledSkill[], lockEntries: Record<string, SkillLockEntry>): InstalledSkill[] {
   return skills.map((skill) => {
     const lock = lockEntries[skill.name];
@@ -51,7 +58,7 @@ function mergeLockEntries(skills: InstalledSkill[], lockEntries: Record<string, 
     const isLocal = lock.sourceType === "local";
     return {
       ...skill,
-      source: isLocal ? lock.source.replace(homedir(), "~") : lock.source,
+      source: isLocal ? tildifyPath(lock.source) : lock.source,
       sourceType: lock.sourceType,
       sourceUrl: lock.sourceUrl && !isLocal ? stripGitSuffix(lock.sourceUrl) : undefined,
       ref: lock.ref,
