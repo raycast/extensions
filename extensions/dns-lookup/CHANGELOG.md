@@ -1,6 +1,6 @@
 # DNS Lookup Changelog
 
-## [Classic DNS Fallback] - {PR_MERGE_DATE}
+## [Classic DNS Fallback] - 2026-10-21
 
 - Added a **Fast Check Transport** preference: Auto (DoH with fallback to classic DNS on UDP port 53), DoH only, or classic DNS only.
 - Added a **System DNS** row that queries the resolver configured on your machine.
