@@ -1,0 +1,228 @@
+{
+  "prayer": {
+    "imsak": "Imsak",
+    "subuh": "Subuh",
+    "syuruk": "Syuruk",
+    "doha": "Dhuha",
+    "zuhur": "Zuhur",
+    "asar": "Asar",
+    "maghrib": "Maghrib",
+    "isyak": "Isyak"
+  },
+  "district": {
+    "label": "District",
+    "bruneiMuara": "Brunei & Muara",
+    "tutong": "Tutong",
+    "belait": "Belait"
+  },
+  "state": {
+    "loading": "Loading…",
+    "unavailable": "Prayer times are unavailable.",
+    "offline": "You are offline. Showing the last known data.",
+    "refreshing": "Updating…",
+    "current": "Now"
+  },
+  "action": {
+    "retry": "Try again",
+    "menu": "Menu",
+    "reloadData": "Reload data",
+    "reloadApp": "Reload app",
+    "share": "Share prayer times",
+    "downloads": "Other platforms",
+    "tasbih": "Tasbih"
+  },
+  "source": {
+    "label": "Data source",
+    "name": "Department of Islamic Affairs (KHEU), Brunei"
+  },
+  "update": {
+    "message": "A new version is available. Reload to update.",
+    "reload": "Reload",
+    "later": "Later"
+  },
+  "duration": {
+    "hoursMinutes": "{hours}h {minutes}m",
+    "minutes": "{minutes}m",
+    "seconds": "{seconds}s"
+  },
+  "next": {
+    "in": "{duration} until {prayer}"
+  },
+  "share": {
+    "title": "Brunei Prayer Times",
+    "district": "District: Brunei & Muara",
+    "line": "{prayer}: {time}",
+    "offsets": "Add 1 minute for Tutong and 3 minutes for Belait.",
+    "copied": "Copied to clipboard",
+    "formatted": "Formatted text",
+    "raw": "Raw text"
+  },
+  "pull": {
+    "reload": "Pull down to reload",
+    "refreshing": "Reloading…"
+  },
+  "meta": {
+    "title": "Brunei Prayer Times",
+    "siteName": "Brunei Prayer Times",
+    "description": "Brunei prayer times for Brunei & Muara, Temburong, Tutong and Belait — anywhere.",
+    "imageAlt": "Brunei Prayer Times — Subuh, Syuruk, Zuhur, Asar, Maghrib, Isyak"
+  },
+  "theme": {
+    "mode": "Colour mode",
+    "dark": "Dark",
+    "light": "Light",
+    "palette": {
+      "label": "Primary colour",
+      "yellow": "Yellow",
+      "green": "Green",
+      "blue": "Blue",
+      "rose": "Rose",
+      "violet": "Violet",
+      "custom": "Custom"
+    }
+  },
+  "notification": {
+    "enable": "Enable notifications",
+    "enabled": "Notifications enabled",
+    "unsupported": "Notifications not supported",
+    "blocked": "Notifications blocked in browser",
+    "lead": "{prayer} in 15 minutes",
+    "due": "It is time for {prayer}",
+    "body": "{prayer} at {time}"
+  },
+  "settings": {
+    "title": "Settings",
+    "back": "Back",
+    "language": "Language",
+    "timeFormat": {
+      "label": "Time format",
+      "h24": "24-hour",
+      "h12": "12-hour"
+    }
+  },
+  "extension": {
+    "title": "Browser extension",
+    "pageHeader": "Show times on web pages",
+    "pageHeaderLabel": "Next",
+    "openApp": "Open app",
+    "closeLabel": "Hide",
+    "updateAvailable": "Version {version} is available",
+    "updateDownload": "Download",
+    "enablePrompt": "Enable prayer-time notifications?",
+    "enableYes": "Enable",
+    "enableNo": "Not now"
+  },
+  "downloads": {
+    "title": "Download",
+    "intro": "Brunei Prayer Times for other platforms. One core, many shells.",
+    "back": "Back to the app",
+    "available": "Available",
+    "soon": "Coming soon",
+    "download": "Download",
+    "marketplace": "Get it on the Marketplace",
+    "installNote": {
+      "extension": "Download the zip, then open chrome://extensions, enable Developer mode and choose \"Load unpacked\" on the extracted folder.",
+      "vscode": "Download the .vsix, then run \"Extensions: Install from VSIX…\" from the command palette."
+    },
+    "platforms": {
+      "extension": {
+        "name": "Browser extension",
+        "description": "Prayer times in the toolbar and on every page, with notifications."
+      },
+      "cli": {
+        "name": "CLI",
+        "description": "Prayer times in your terminal."
+      },
+      "tui": {
+        "name": "TUI",
+        "description": "A full terminal interface for prayer times."
+      },
+      "vscode": {
+        "name": "VS Code extension",
+        "description": "Prayer times in the editor status bar."
+      },
+      "raycast": {
+        "name": "Raycast extension",
+        "description": "Prayer times from your launcher."
+      }
+    }
+  },
+  "admin": {
+    "title": "Data admin",
+    "signIn": "Sign in with Google",
+    "signInHint": "Sign in with an authorized Google account to manage prayer times.",
+    "forbidden": "This account is not allowed to manage data.",
+    "signOut": "Sign out",
+    "email": "Account",
+    "month": "Month",
+    "import": "Import month",
+    "importing": "Importing…",
+    "records": "Records this month",
+    "empty": "No records for this month.",
+    "date": "Date",
+    "district": "District",
+    "prayer": "Entry",
+    "time": "Time",
+    "save": "Save",
+    "back": "Back to the app",
+    "prayers": {
+      "imsak": "Imsak",
+      "subuh": "Subuh",
+      "syuruk": "Syuruk",
+      "doha": "Dhuha",
+      "zuhur": "Zuhur",
+      "asar": "Asar",
+      "maghrib": "Maghrib",
+      "isyak": "Isyak"
+    },
+    "imported": "Imported {count} records.",
+    "saved": "Saved.",
+    "failed": "Failed. Try again.",
+    "unauthorized": "Session expired. Sign in again."
+  },
+  "month": {
+    "prev": "Previous month",
+    "next": "Next month",
+    "today": "This month",
+    "date": "Date",
+    "label": "Month",
+    "hijri": "Hijri",
+    "view": "Monthly view",
+    "dayView": "Daily view",
+    "tableLabel": "Monthly prayer times table"
+  },
+  "page": {
+    "label": "Pages",
+    "day": "Daily view",
+    "month": "Monthly view",
+    "trend": "Trend chart"
+  },
+  "chart": {
+    "label": "Prayer times chart",
+    "filter": "Filter entries",
+    "prev": "Previous period",
+    "next": "Next period",
+    "today": "This period",
+    "hideOutliers": "Hide off-scale",
+    "range": {
+      "label": "Range",
+      "week": "Week",
+      "month": "Month",
+      "year": "Year"
+    }
+  },
+  "tasbih": {
+    "title": "Tasbih",
+    "intro": "Digital tasbih for zikir. Tap anywhere to count.",
+    "back": "Back to the app",
+    "label": "Tasbih counter, {count}",
+    "count": "Count: {count}",
+    "hint": "Tap anywhere to add one. Use the side keys to subtract one or reset.",
+    "increment": "Add one",
+    "decrement": "Subtract one",
+    "reset": "Reset to zero"
+  },
+  "a11y": {
+    "skipToContent": "Skip to content"
+  }
+}

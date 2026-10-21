@@ -1,0 +1,114 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "brunei-prayer-times",
+  "title": "Brunei Prayer Times",
+  "description": "Prayer times for Brunei and Muara, Tutong and Belait, right from your launcher.",
+  "icon": "icon.png",
+  "author": "lordsayur",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "prayer",
+    "sembahyang",
+    "brunei",
+    "waktu",
+    "islam"
+  ],
+  "commands": [
+    {
+      "name": "prayer-times",
+      "title": "View Prayer Times",
+      "description": "Show today's prayer times for a district in Brunei.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "locale",
+      "title": "Language",
+      "description": "Language for labels and dates.",
+      "type": "dropdown",
+      "required": false,
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Bahasa Melayu",
+          "value": "ms"
+        },
+        {
+          "title": "بهاس ملايو (Jawi)",
+          "value": "ms-Arab"
+        },
+        {
+          "title": "العربية",
+          "value": "ar"
+        }
+      ]
+    },
+    {
+      "name": "timeFormat",
+      "title": "Time Format",
+      "description": "Use a 24-hour or 12-hour clock.",
+      "type": "dropdown",
+      "required": false,
+      "default": "24h",
+      "data": [
+        {
+          "title": "24-hour",
+          "value": "24h"
+        },
+        {
+          "title": "12-hour",
+          "value": "12h"
+        }
+      ]
+    },
+    {
+      "name": "district",
+      "title": "Default District",
+      "description": "District selected when the command first opens.",
+      "type": "dropdown",
+      "required": false,
+      "default": "bruneiMuara",
+      "data": [
+        {
+          "title": "Brunei and Muara",
+          "value": "bruneiMuara"
+        },
+        {
+          "title": "Tutong",
+          "value": "tutong"
+        },
+        {
+          "title": "Belait",
+          "value": "belait"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.10",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray dev",
+    "lint": "ray lint",
+    "fix": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
