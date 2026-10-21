@@ -63,7 +63,7 @@ export async function showBoltFailure(error: unknown) {
 }
 
 export function boltPath(): string {
-  const { boltPath } = getPreferenceValues<{ boltPath?: string }>();
+  const { boltPath } = getPreferenceValues<Preferences>();
   const custom = boltPath?.trim().replace(/^~(?=$|\/)/, homedir());
   if (custom) {
     if (isExecutable(custom)) return custom;
@@ -77,7 +77,7 @@ export function boltPath(): string {
   if (!found) {
     throw new BoltError(
       "bolt not found",
-      "Needs BoltAI 3.0 or later, which includes the bolt tool: get it at boltai.com. If BoltAI is somewhere else, set bolt Path in the extension's preferences.",
+      "Needs BoltAI 3.0 or later, which includes the bolt tool: get it at boltai.com. If BoltAI is somewhere else, set Bolt Path in the extension's preferences.",
       boltMissing,
     );
   }

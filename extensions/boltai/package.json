@@ -63,7 +63,7 @@
   "preferences": [
     {
       "name": "boltPath",
-      "title": "bolt Path",
+      "title": "Bolt Path",
       "description": "Path to the bolt command-line tool. Leave empty to find it in ~/.local/bin, /Applications/BoltAI.app or the Setapp app.",
       "type": "textfield",
       "required": false,
