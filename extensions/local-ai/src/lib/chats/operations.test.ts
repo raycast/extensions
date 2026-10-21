@@ -55,4 +55,12 @@ describe("chat operations", () => {
       ["assistant", "Because."],
     ]);
   });
+
+  it("prefers an explicit seed title over the first line of the message", () => {
+    const chat = createChat(
+      { id: "c3", now: NOW },
+      { seed: { userMessage: "Context:\nsome text", assistantMessage: "Because.", title: "Why is the sky blue?" } },
+    );
+    expect(chat.title).toBe("Why is the sky blue?");
+  });
 });

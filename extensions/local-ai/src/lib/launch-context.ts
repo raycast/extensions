@@ -17,6 +17,7 @@ export interface RunViewLaunchContext {
 export interface ChatSeed {
   userMessage: string;
   assistantMessage: string;
+  title?: string;
 }
 
 export interface ChatLaunchContext {
@@ -38,7 +39,12 @@ function isRunInput(value: unknown): value is RunInput {
 }
 
 function isChatSeed(value: unknown): value is ChatSeed {
-  return isRecord(value) && typeof value.userMessage === "string" && typeof value.assistantMessage === "string";
+  return (
+    isRecord(value) &&
+    typeof value.userMessage === "string" &&
+    typeof value.assistantMessage === "string" &&
+    (value.title === undefined || typeof value.title === "string")
+  );
 }
 
 export function isRunCommandLaunchContext(value: unknown): value is RunCommandLaunchContext {

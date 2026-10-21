@@ -67,7 +67,13 @@ export function AnswerView(props: { question: string; selection?: string; onAskW
               <>
                 <Action.CopyToClipboard content={answer} />
                 <Action.Paste content={answer} />
-                {!error && <ContinueInChatAction userMessage={question} assistantMessage={answer} />}
+                {!error && (
+                  <ContinueInChatAction
+                    userMessage={buildQuickAiStdin(question, selection)}
+                    assistantMessage={answer}
+                    title={question}
+                  />
+                )}
               </>
             )}
             <Action title="Retry" icon={Icon.ArrowClockwise} onAction={retry} />

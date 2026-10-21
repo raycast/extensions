@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { useState } from "react";
 import { useFmStream } from "../hooks/useFmStream";
 import type { AiCommand } from "../lib/commands/types";
 import type { RunInput } from "../lib/launch-context";
@@ -13,7 +14,8 @@ import { FmErrorView } from "./FmErrorView";
 const SOURCE_LABELS = { selection: "Selected text", clipboard: "Clipboard" } as const;
 
 export function ResultView(props: { command: AiCommand; input: RunInput; argumentValues: Record<string, string> }) {
-  const { command, input, argumentValues } = props;
+  const { input, argumentValues } = props;
+  const [command, setCommand] = useState(props.command);
   const { text, isLoading, error, retry } = useFmStream(
     (signal, onText) => executeRun({ command, input, argumentValues, stream: true, signal, onText }),
     [command, input, JSON.stringify(argumentValues)],
@@ -43,7 +45,11 @@ export function ResultView(props: { command: AiCommand; input: RunInput; argumen
             {result && <Action.Paste title="Paste to Active App" content={result} />}
             {result && !error && <ContinueInChatAction userMessage={input.text} assistantMessage={result} />}
             <Action title="Retry" icon={Icon.ArrowClockwise} onAction={retry} />
-            <Action.Push title="Edit Command" icon={Icon.Pencil} target={<CommandForm command={command} />} />
+            <Action.Push
+              title="Edit Command"
+              icon={Icon.Pencil}
+              target={<CommandForm command={command} onSaved={setCommand} />}
+            />
           </ActionPanel>
         ) : undefined
       }

@@ -42,11 +42,17 @@ describe("selectHistory", () => {
     { userTokens: 50, assistantTokens: 60 },
   ];
 
-  it("keeps the newest turns that fit", () => {
-    expect(selectHistory(turns, 120)).toEqual({ startIndex: 2, usedTokens: 110 });
-    expect(selectHistory(turns, 200)).toEqual({ startIndex: 1, usedTokens: 180 });
+  it("keeps the newest turns that fit, counting turn and header overhead", () => {
+    expect(selectHistory(turns, 120)).toEqual({ startIndex: 3, usedTokens: 0 });
+    expect(selectHistory(turns, 140)).toEqual({ startIndex: 2, usedTokens: 134 });
+    expect(selectHistory(turns, 220)).toEqual({ startIndex: 1, usedTokens: 212 });
     expect(selectHistory(turns, 0)).toEqual({ startIndex: 3, usedTokens: 0 });
-    expect(selectHistory(turns, 1000)).toEqual({ startIndex: 0, usedTokens: 210 });
+    expect(selectHistory(turns, 1000)).toEqual({ startIndex: 0, usedTokens: 250 });
+  });
+
+  it("drops tiny turns that fit by content alone once labels are counted", () => {
+    const tiny = Array.from({ length: 100 }, () => ({ userTokens: 5, assistantTokens: 5 }));
+    expect(selectHistory(tiny, 1000)).toEqual({ startIndex: 46, usedTokens: 988 });
   });
 });
 

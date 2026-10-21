@@ -44,7 +44,7 @@ Local AI starts with these commands, which you can edit or delete:
 
 Use these in a command's prompt:
 
-- `{selection}`: the selected text. If nothing is selected, the clipboard is used. Some apps, like code editors, don't share the selected text with Raycast. Turn on **Copy selection in apps that don't share it** in the extension's preferences to have Local AI copy it and restore your clipboard right after.
+- `{selection}`: the selected text. If nothing is selected, the clipboard is used. Some apps, like code editors, don't share the selected text with Raycast. Turn on **Copy selection in apps that don't share it** in the extension's preferences to have Local AI copy it and restore your clipboard right after when you run a command from its hotkey.
 - `{clipboard}`: the current clipboard text.
 - `{date}` and `{time}`: the current date and time.
 - `{argument name="language" default="English"}`: asks you for a value when the command runs. Add `options="A, B, C"` to offer a fixed list. Up to three arguments per command.

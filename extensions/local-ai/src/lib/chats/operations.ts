@@ -37,7 +37,7 @@ export function createChat(
     { id: userId, role: "user", content: seed.userMessage, createdAt: deps.now },
     { id: assistantId, role: "assistant", content: seed.assistantMessage, createdAt: deps.now },
   ];
-  return { ...chat, title: titleFromMessage(seed.userMessage), messages };
+  return { ...chat, title: titleFromMessage(seed.title ?? seed.userMessage), messages };
 }
 
 export function appendMessage(chat: Chat, message: ChatMessage, now: string): Chat {

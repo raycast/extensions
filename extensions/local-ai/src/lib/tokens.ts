@@ -3,6 +3,8 @@ import { tooLongMessage } from "./fm/errors";
 export const CONTEXT_WINDOW_TOKENS = 4096;
 export const SAFETY_MARGIN_TOKENS = 100;
 export const ANSWER_RESERVE_TOKENS = 1000;
+export const TURN_OVERHEAD_TOKENS = 8;
+export const HISTORY_HEADER_TOKENS = 16;
 
 export type BudgetCheck =
   { ok: true; tokens: number; limit: number } | { ok: false; tokens: number; limit: number; message: string };
@@ -36,13 +38,14 @@ export function selectHistory(
   availableTokens: number,
 ): { startIndex: number; usedTokens: number } {
   let startIndex = turns.length;
-  let usedTokens = 0;
+  let turnTokens = 0;
   for (let i = turns.length - 1; i >= 0; i--) {
-    const cost = turns[i].userTokens + turns[i].assistantTokens;
-    if (usedTokens + cost > availableTokens) break;
-    usedTokens += cost;
+    const cost = turns[i].userTokens + turns[i].assistantTokens + TURN_OVERHEAD_TOKENS;
+    if (HISTORY_HEADER_TOKENS + turnTokens + cost > availableTokens) break;
+    turnTokens += cost;
     startIndex = i;
   }
+  const usedTokens = startIndex < turns.length ? HISTORY_HEADER_TOKENS + turnTokens : 0;
   return { startIndex, usedTokens };
 }
 

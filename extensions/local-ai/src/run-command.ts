@@ -21,7 +21,7 @@ export default async function Command(props: LaunchProps) {
 
   let input: RunInput | undefined;
   try {
-    input = await captureInput();
+    input = await captureInput({ allowCopyFallback: true });
   } catch {
     return showHUD(NO_INPUT_MESSAGE);
   }

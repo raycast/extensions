@@ -16,6 +16,8 @@ describe("launch context guards", () => {
 
   it("validates the optional seed of a chat context", () => {
     expect(isChatLaunchContext({ seed: { userMessage: "q", assistantMessage: "a" } })).toBe(true);
+    expect(isChatLaunchContext({ seed: { userMessage: "q", assistantMessage: "a", title: "t" } })).toBe(true);
+    expect(isChatLaunchContext({ seed: { userMessage: "q", assistantMessage: "a", title: 1 } })).toBe(false);
     expect(isChatLaunchContext({ seed: { userMessage: 1 } })).toBe(false);
   });
 });
