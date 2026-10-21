@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add 10ML Fragrance Index MCP Server] - {PR_MERGE_DATE}
+
+- Add the 10ML Fragrance Index to the official registry: perfume notes, accords, families, similar scents and alternatives, houses and expert guides, curated by 10ML's fragrance editors. Hosted Streamable HTTP server at https://mcp.10ml.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add NetActuate MCP Server] - 2026-10-20
 
 - Add NetActuate to the official registry: read-only answers from NetActuate's published network data (data center locations and specifications, compliance by site, internet exchanges, the sites nearest a market, products and published pricing), each linked to its netactuate.com page. Hosted Streamable HTTP server at https://netactuate.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
