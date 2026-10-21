@@ -9,6 +9,7 @@ import {
   Image,
   Clipboard,
   LocalStorage,
+  getPreferenceValues,
 } from "@raycast/api";
 import React, { useState, useEffect, useRef } from "react";
 import { writeFile } from "fs/promises";
@@ -33,6 +34,7 @@ import {
 import { createSavedEmotesStore } from "./saved-emotes";
 
 export default function Command() {
+  const defaultSize = Number(getPreferenceValues<Preferences>().size);
   const [searchText, setSearchText] = useState("");
   const [items, setItems] = useState<Emote[]>([]);
   const [favorites, setFavorites] = useState<Emote[]>([]);
@@ -198,8 +200,12 @@ export default function Command() {
     }
   }
 
-  async function pasteEmote(item: Emote, mode: "file" | "url" = "file") {
-    const { url, ext } = getEmoteFile(item);
+  async function pasteEmote(
+    item: Emote,
+    mode: "file" | "url" = "file",
+    size = defaultSize,
+  ) {
+    const { url, ext } = getEmoteFile(item, size);
     await addToHistory(item);
 
     if (mode === "url") {
@@ -222,7 +228,7 @@ export default function Command() {
       const safeName = item.name.replace(/[^a-z0-9]/gi, "_").toLowerCase();
       const tempPath = join(
         tmpdir(),
-        `vault_${item.provider ?? "7tv"}_${safeName}_${item.id}.${ext}`,
+        `vault_${item.provider ?? "7tv"}_${safeName}_${item.id}_${size}x.${ext}`,
       );
       await writeFile(tempPath, data);
 
@@ -264,7 +270,7 @@ export default function Command() {
 
   const renderActions = (item: Emote) => {
     const isFav = favorites.some((f) => getEmoteKey(f) === getEmoteKey(item));
-    const { url: highResUrl, ext } = getEmoteFile(item);
+    const { url: highResUrl, ext } = getEmoteFile(item, defaultSize);
     const markdown = `![${item.name}](${highResUrl})`;
 
     return (
@@ -314,7 +320,7 @@ export default function Command() {
                   .toLowerCase();
                 const tempPath = join(
                   tmpdir(),
-                  `copy_${item.provider ?? "7tv"}_${safeName}_${item.id}.${ext}`,
+                  `copy_${item.provider ?? "7tv"}_${safeName}_${item.id}_${defaultSize}x.${ext}`,
                 );
                 await writeFile(tempPath, data);
                 await Clipboard.copy({ file: tempPath });
@@ -328,6 +334,15 @@ export default function Command() {
               }
             }}
           />
+          <ActionPanel.Submenu title="Paste Emote at Size" icon={Icon.Maximize}>
+            {[1, 2, 3, 4].map((size) => (
+              <Action
+                key={size}
+                title={`${size}×`}
+                onAction={() => pasteEmote(item, "file", size)}
+              />
+            ))}
+          </ActionPanel.Submenu>
         </ActionPanel.Section>
         <ActionPanel.Section>
           {renderFilterAction()}

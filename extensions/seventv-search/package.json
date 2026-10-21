@@ -18,6 +18,22 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "size",
+      "title": "Emote Size",
+      "description": "Size of pasted and copied emotes. Larger sizes are sharper but heavier. When a size is missing, the closest smaller one is used.",
+      "type": "dropdown",
+      "required": false,
+      "default": "2",
+      "data": [
+        { "title": "1x", "value": "1" },
+        { "title": "2x", "value": "2" },
+        { "title": "3x", "value": "3" },
+        { "title": "4x", "value": "4" }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.17"
   },
@@ -47,6 +63,7 @@
     "Windows"
   ],
   "contributors": [
-    "Kan-A-Pesh"
+    "Kan-A-Pesh",
+    "nakama"
   ]
 }

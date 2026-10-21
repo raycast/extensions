@@ -346,9 +346,9 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "datacircle",
     title: "Datacircle",
     description:
-      "Datacircle is a data co-op. Query your favorite B2B data APIs through us. Same request, same price, no markup. Every morning, you get the flat file of your data plus everyone else's.",
+      "Datacircle lists all the GTM APIs. Our MCP server is open to anyone, with no key: add api.datacircle.dev/mcp to Claude, ChatGPT or Cursor.",
     icon: "https://datacircle.dev/favicon.png",
-    homepage: "https://docs.datacircle.dev/mcp-server",
+    homepage: "https://datacircle.dev/docs/mcp",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://api.datacircle.dev/mcp"],
