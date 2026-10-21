@@ -9,21 +9,25 @@
     "Media",
     "Applications"
   ],
+  "platforms": [
+    "macOS"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "menu-bar",
-      "title": "Roon Discord Presence",
-      "subtitle": "Menu Bar",
+      "title": "Menu Bar Status",
+      "subtitle": "Roon Discord Presence",
       "description": "Shows the track on your Discord status in the menu bar, with service controls.",
       "mode": "menu-bar",
       "interval": "10s"
     },
     {
       "name": "status",
-      "title": "Show Roon Discord Presence",
+      "title": "Show Status",
       "description": "Current track, Roon and Discord connection, zones, and service controls.",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Roon Discord Presence"
     },
     {
       "name": "toggle-menu-bar",

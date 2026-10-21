@@ -5,10 +5,10 @@ which shows what Roon is playing as your Discord Rich Presence.
 
 ## Commands
 
-- **Roon Discord Presence** (menu bar) — the track currently on your Discord status, with
+- **Menu Bar Status** — the track currently on your Discord status, with
   Start / Stop / Restart and Open Log. Refreshes every 10 seconds. Optionally shows the track
   title next to the icon (preference _Show track title in the menu bar_).
-- **Show Roon Discord Presence** — the current track with its cover, Roon and Discord connection
+- **Show Status** — the current track with its cover, Roon and Discord connection
   state, all Roon zones, and the same controls.
 - **Toggle Menu Bar Icon** — hide or show the menu bar icon. The same switch is in the menu
   itself (_Hide Menu Bar Icon_) and in the status view (⌘⇧M). Running the menu bar command

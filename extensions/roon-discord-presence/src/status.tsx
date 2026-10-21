@@ -99,7 +99,7 @@ export default function Command() {
   const connections = status?.service === "running" && status.state !== "starting";
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Filter status and zones">
       {error && <List.EmptyView icon={Icon.Warning} title="Status unavailable" description={error.message} />}
       {summary && (
         <List.Section title="Discord">
