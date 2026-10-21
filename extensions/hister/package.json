@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hister",
+  "title": "Hister",
+  "description": "Full-text search of the web pages and files indexed by your Hister instance.",
+  "icon": "extension-icon.png",
+  "author": "tommasoturchi",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-hister",
+      "title": "Search History",
+      "subtitle": "Hister",
+      "description": "Search indexed pages by content and open results in your browser.",
+      "mode": "view",
+      "keywords": [
+        "history",
+        "browsing history",
+        "full-text",
+        "bookmarks"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Server URL",
+      "description": "Base URL of your Hister instance, including any base path",
+      "type": "textfield",
+      "required": true,
+      "default": "http://127.0.0.1:4433",
+      "placeholder": "http://127.0.0.1:4433"
+    },
+    {
+      "name": "accessToken",
+      "title": "Access Token",
+      "description": "Needed only if your server requires authentication: the app.access_token value, or the output of hister user show USERNAME --show-token",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "fallbackSearchUrl",
+      "title": "Web Search URL",
+      "description": "Used by Search the Web; %s is replaced by the query",
+      "type": "textfield",
+      "required": false,
+      "default": "https://duckduckgo.com/?q=%s"
+    },
+    {
+      "name": "semantic",
+      "title": "Semantic Search",
+      "label": "Include semantic matches",
+      "description": "Adds a Similar Pages section. Requires an embeddings endpoint configured in Hister.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

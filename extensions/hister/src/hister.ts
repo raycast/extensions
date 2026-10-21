@@ -1,0 +1,382 @@
+import { Icon, Image, environment, getPreferenceValues } from "@raycast/api";
+import { readdirSync } from "fs";
+import { mkdir, writeFile } from "fs/promises";
+import { join } from "path";
+
+// Shapes returned by Hister's GET /search?format=json (see client/search_types.go
+// and client/document_types.go in asciimoo/hister). Only the fields used here are typed.
+
+export enum DocType {
+  Web = 0,
+  Local = 1,
+  Remote = 2,
+}
+
+export interface HisterDocument {
+  id?: string;
+  url: string;
+  domain?: string;
+  title?: string;
+  text?: string;
+  favicon?: string;
+  favicon_key?: string;
+  score?: number;
+  added?: number;
+  updated?: number;
+  type?: DocType;
+  language?: string;
+  label?: string;
+}
+
+export interface HisterHistoryItem {
+  id?: string;
+  url: string;
+  title?: string;
+  text?: string;
+  domain?: string;
+  count?: number;
+  pinned?: boolean;
+  added?: number;
+  updated?: number;
+}
+
+export interface HisterSemanticHit {
+  doc_id: string;
+  similarity: number;
+  matched_chunk?: string;
+  document?: HisterDocument;
+}
+
+export interface HisterSearchResponse {
+  error?: string;
+  total: number;
+  documents: HisterDocument[] | null;
+  history: HisterHistoryItem[] | null;
+  semantic_hits?: HisterSemanticHit[] | null;
+  page_key?: string;
+  query_suggestion?: string;
+  search_duration?: string;
+}
+
+export type ErrorKind = "unreachable" | "auth" | "query" | "server" | "response";
+
+export class HisterError extends Error {
+  constructor(
+    message: string,
+    readonly kind: ErrorKind,
+    readonly status?: number,
+  ) {
+    super(message);
+    this.name = "HisterError";
+  }
+}
+
+export const PAGE_SIZE = 30;
+
+export function serverBaseUrl(): string {
+  const raw = (getPreferenceValues<Preferences>().serverUrl || "").trim();
+  const withScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : `http://${raw}`;
+  return withScheme.replace(/\/+$/, "");
+}
+
+function authHeaders(): Record<string, string> {
+  const token = getPreferenceValues<Preferences>().accessToken?.trim();
+  return token ? { "X-Access-Token": token } : {};
+}
+
+async function request(path: string, init: RequestInit): Promise<Response> {
+  const base = serverBaseUrl();
+  let res: Response;
+  try {
+    res = await fetch(`${base}${path}`, init);
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") throw error;
+    throw new HisterError(`Can't reach Hister at ${base}`, "unreachable");
+  }
+  if (res.status === 401 || res.status === 403) {
+    throw new HisterError("Hister rejected the request. Check the access token.", "auth", res.status);
+  }
+  if (res.status === 400) {
+    throw new HisterError((await readError(res)) || "Hister couldn't parse this query", "query", 400);
+  }
+  if (!res.ok) {
+    throw new HisterError(`Hister returned HTTP ${res.status}`, "server", res.status);
+  }
+  return res;
+}
+
+async function readError(res: Response): Promise<string> {
+  const body = (await res.text()).trim();
+  try {
+    const parsed = JSON.parse(body) as { error?: string };
+    if (parsed.error) return parsed.error;
+  } catch {
+    // plain-text error body
+  }
+  return body;
+}
+
+export async function search(
+  text: string,
+  options: { pageKey?: string; semantic?: boolean; signal?: AbortSignal } = {},
+): Promise<HisterSearchResponse> {
+  const params = new URLSearchParams({
+    format: "json",
+    q: text,
+    // "HTML" highlighting returns a text snippet with <mark> around matched terms.
+    query: JSON.stringify({ highlight: "HTML", limit: PAGE_SIZE }),
+  });
+  if (options.pageKey) params.set("page_key", options.pageKey);
+  if (options.semantic) params.set("semantic", "1");
+
+  const res = await request(`/search?${params.toString()}`, {
+    headers: { Accept: "application/json", ...authHeaders() },
+    signal: options.signal,
+  });
+
+  let data: HisterSearchResponse;
+  try {
+    data = JSON.parse(await readWithoutHtml(res)) as HisterSearchResponse;
+  } catch {
+    throw new HisterError(`Unexpected response from ${serverBaseUrl()}. Is this a Hister server?`, "response");
+  }
+  if (data.error) throw new HisterError(data.error, "query");
+  return data;
+}
+
+// Semantic-only hits carry the page's full stored HTML ("html" field), up to
+// semantic_search.result_limit of them per response. The extension never uses it, and
+// parsing it can exceed Raycast's 100 MB heap limit, so every "html" string value is
+// emptied while the body streams in, before JSON.parse sees it. Go's JSON encoder writes
+// keys as "html":"..." with no whitespace, and inside a JSON string every quote is
+// escaped, so this byte sequence only occurs where the key itself is.
+const HTML_KEY = Buffer.from('"html":"');
+const QUOTE = 0x22;
+const BACKSLASH = 0x5c;
+
+export async function readWithoutHtml(res: Response): Promise<string> {
+  if (!res.body) return "";
+  const reader = res.body.getReader();
+  const output: Buffer[] = [];
+  let matched = 0; // bytes of HTML_KEY matched so far
+  let skipping = false; // inside an "html" value
+  let escaped = false;
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const out = Buffer.allocUnsafe(value.length + HTML_KEY.length);
+    let n = 0;
+    for (const byte of value) {
+      if (skipping) {
+        if (escaped) escaped = false;
+        else if (byte === BACKSLASH) escaped = true;
+        else if (byte === QUOTE) {
+          skipping = false;
+          out[n++] = QUOTE;
+        }
+        continue;
+      }
+      if (byte === HTML_KEY[matched]) {
+        matched++;
+        if (matched === HTML_KEY.length) {
+          n += HTML_KEY.copy(out, n);
+          matched = 0;
+          skipping = true;
+        }
+        continue;
+      }
+      if (matched > 0) {
+        // Flush the partial match. Only its closing quote ('"html"') can start a new match.
+        const restart = matched === 6 ? 1 : 0;
+        n += HTML_KEY.copy(out, n, 0, matched - restart);
+        matched = restart;
+        if (byte === HTML_KEY[matched]) {
+          matched++;
+          continue;
+        }
+        if (matched > 0) {
+          out[n++] = QUOTE;
+          matched = 0;
+        }
+      }
+      if (byte === HTML_KEY[0]) matched = 1;
+      else out[n++] = byte;
+    }
+    // Copy, so the full-size scratch buffer (mostly discarded HTML) can be freed.
+    if (n > 0) output.push(Buffer.from(out.subarray(0, n)));
+  }
+  if (matched > 0) output.push(HTML_KEY.subarray(0, matched));
+  return Buffer.concat(output).toString("utf8");
+}
+
+// POST /api/history records which result was opened for a query (the same call the
+// web UI makes), so Hister can promote it next time. Origin "hister://" is the
+// CSRF exemption Hister grants to non-browser clients.
+export async function updateHistory(body: {
+  url: string;
+  title?: string;
+  query: string;
+  pin?: boolean;
+  delete?: boolean;
+}): Promise<void> {
+  await request("/api/history", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Origin: "hister://", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+}
+
+export function webUiUrl(query?: string): string {
+  const base = serverBaseUrl();
+  return query ? `${base}/?q=${encodeURIComponent(query)}` : `${base}/`;
+}
+
+export function fallbackSearchUrl(query: string): string {
+  const template =
+    (getPreferenceValues<Preferences>().fallbackSearchUrl || "").trim() || "https://duckduckgo.com/?q=%s";
+  const encoded = encodeURIComponent(query);
+  return template.includes("%s") ? template.split("%s").join(encoded) : `${template}${encoded}`;
+}
+
+export function docIcon(doc: Pick<HisterDocument, "type">, faviconPath?: string): Image.ImageLike {
+  const fallback = doc.type === DocType.Local ? Icon.Document : Icon.Globe;
+  return faviconPath ? { source: faviconPath, fallback } : fallback;
+}
+
+// Favicons are downloaded from Hister (with the access token, if any) and kept in the
+// extension's support folder, keyed by Hister's content-addressed favicon_key. Raycast
+// then shows them from disk, which also works for http:// and token-protected servers.
+const FAVICON_EXTENSIONS: Record<string, string> = {
+  "image/png": "png",
+  "image/x-icon": "ico",
+  "image/vnd.microsoft.icon": "ico",
+  "image/svg+xml": "svg",
+  "image/jpeg": "jpg",
+  "image/gif": "gif",
+  "image/webp": "webp",
+};
+const FAVICON_KEY = /^[a-f0-9]{16,128}$/i;
+const MAX_FAVICON_BYTES = 256 * 1024;
+
+function faviconDir(): string {
+  return join(environment.supportPath, "favicons");
+}
+
+export function cachedFavicons(): Map<string, string> {
+  const paths = new Map<string, string>();
+  try {
+    for (const file of readdirSync(faviconDir())) {
+      const key = file.split(".")[0];
+      if (FAVICON_KEY.test(key)) paths.set(key, join(faviconDir(), file));
+    }
+  } catch {
+    // No favicons cached yet.
+  }
+  return paths;
+}
+
+export async function downloadFavicon(key: string, signal?: AbortSignal): Promise<string | undefined> {
+  if (!FAVICON_KEY.test(key)) return undefined;
+  const res = await request(`/api/favicon?key=${encodeURIComponent(key)}`, { headers: authHeaders(), signal });
+  const type = (res.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase();
+  const extension = FAVICON_EXTENSIONS[type];
+  const declared = Number(res.headers.get("content-length") ?? 0);
+  if (!extension || declared > MAX_FAVICON_BYTES) {
+    await res.body?.cancel();
+    return undefined;
+  }
+  const bytes = await readAtMost(res, MAX_FAVICON_BYTES);
+  if (!bytes || bytes.length === 0) return undefined;
+  await mkdir(faviconDir(), { recursive: true });
+  const path = join(faviconDir(), `${key}.${extension}`);
+  await writeFile(path, bytes);
+  return path;
+}
+
+// Reads the body in chunks and gives up as soon as it grows past the limit, so a
+// missing or wrong Content-Length can't make the extension buffer a huge file.
+async function readAtMost(res: Response, limit: number): Promise<Buffer | undefined> {
+  if (!res.body) return undefined;
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.length;
+    if (size > limit) {
+      await reader.cancel();
+      return undefined;
+    }
+    chunks.push(value);
+  }
+  return Buffer.concat(chunks);
+}
+
+export function docTypeLabel(type?: DocType): string {
+  switch (type) {
+    case DocType.Local:
+      return "Local file";
+    case DocType.Remote:
+      return "Remote file";
+    default:
+      return "Web page";
+  }
+}
+
+export function fromUnix(seconds?: number): Date | undefined {
+  return seconds && seconds > 0 ? new Date(seconds * 1000) : undefined;
+}
+
+const ENTITIES: Record<string, string> = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+};
+
+function decodeEntities(s: string): string {
+  return s.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (match, entity: string) => {
+    if (entity[0] === "#") {
+      const code =
+        entity[1] === "x" || entity[1] === "X" ? parseInt(entity.slice(2), 16) : parseInt(entity.slice(1), 10);
+      return Number.isFinite(code) ? String.fromCodePoint(code) : match;
+    }
+    return ENTITIES[entity.toLowerCase()] ?? match;
+  });
+}
+
+export function escapeMarkdown(s: string): string {
+  // Parentheses and brackets are left alone: Raycast renders \( \) and \[ \] as LaTeX.
+  // A zero-width space after "]" stops "[text](url)" in page text from becoming a link.
+  return s.replace(/[\\`*_{}#+\-.!|<>~$]/g, "\\$&").replace(/\]\(/g, "]\u200b(");
+}
+
+/** Turns a Hister snippet (plain text with <mark> highlights) into one line of Markdown. */
+export function snippetToMarkdown(snippet?: string): string {
+  if (!snippet) return "";
+  const merged = snippet.replace(/<\/mark><mark>/g, "");
+  const parts = merged.split(/(<mark>[\s\S]*?<\/mark>)/g);
+  return parts
+    .map((part) => {
+      const marked = part.startsWith("<mark>") && part.endsWith("</mark>");
+      const inner = marked ? part.slice(6, -7) : part;
+      const text = escapeMarkdown(decodeEntities(inner.replace(/<[^>]+>/g, "")).replace(/\s+/g, " "));
+      if (!marked || !text.trim()) return text;
+      // Bold markers must touch the word, so keep surrounding spaces outside them.
+      const [, lead, core, trail] = text.match(/^(\s*)([\s\S]*?)(\s*)$/) ?? ["", "", text, ""];
+      return `${lead}**${core}**${trail}`;
+    })
+    .join("")
+    .trim();
+}
+
+export function plainSnippet(snippet?: string): string {
+  if (!snippet) return "";
+  return decodeEntities(snippet.replace(/<[^>]+>/g, ""))
+    .replace(/\s+/g, " ")
+    .trim();
+}
