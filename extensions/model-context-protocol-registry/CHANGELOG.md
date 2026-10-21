@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add OverlayQA MCP Server] - 2026-10-21
+## [Add OverlayQA MCP Server] - {PR_MERGE_DATE}
 
 - Add OverlayQA to the official registry: design QA for coding agents, with WCAG accessibility (axe-core), color-contrast and design-token audits and AI visual reviews on any public URL, plus QA issues, comments, labels and client review links in OverlayQA. Hosted Streamable HTTP server at https://api.overlayqa.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
