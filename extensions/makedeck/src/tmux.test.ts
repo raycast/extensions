@@ -65,6 +65,11 @@ test("isMissingTarget: a missing prerequisite of the target is a real failure", 
   );
 });
 
+test("isMissingTarget: a sub-make without the target is a real failure", () => {
+  const stderr = "make[1]: *** No rule to make target `dev-stop'.  Stop.\nmake: *** [dev-stop] Error 2\n";
+  assert.equal(isMissingTarget(stderr, "dev-stop"), false);
+});
+
 test("isMissingTarget: ignores prefix matches and treats special characters literally", () => {
   assert.equal(isMissingTarget("make: *** No rule to make target `dev-stop-all'.  Stop.\n", "dev-stop"), false);
   assert.equal(isMissingTarget("make: *** No rule to make target `devXstop'.  Stop.\n", "dev.stop"), false);

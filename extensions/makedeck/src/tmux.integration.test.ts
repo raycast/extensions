@@ -2,7 +2,7 @@
 import { test, after } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 
@@ -118,6 +118,18 @@ test("stopProject: a project without dev-stop reports that it did not run", { sk
   const project = basename(dir).replaceAll(".", "_");
 
   assert.equal(await stopProject(project, dir), false);
+});
+
+test("stopProject: a failing sub-make in dev-stop is reported, not treated as a missing target", { skip }, async () => {
+  const dir = startProject(
+    `dev: web\nweb:\n\t@exec -a ${marker("web5")} sleep 300\ndev-stop:\n\t@$(MAKE) -C sub dev-stop\n`,
+  );
+  mkdirSync(join(dir, "sub"));
+  writeFileSync(join(dir, "sub", "Makefile"), "other:\n");
+  await sleep(1000);
+  const project = basename(dir).replaceAll(".", "_");
+
+  await assert.rejects(stopProject(project, dir), /No rule to make target/);
 });
 
 // Exited panes have no PID; this used to become kill(-0) on our own process group,

@@ -89,11 +89,12 @@ export function logMarkdown(log: string): string {
 }
 
 // Make reports this when the target is defined nowhere, neither in the Makefile nor in an
-// included file. A missing prerequisite names the prerequisite instead. make 3.81 (macOS)
+// included file. A missing prerequisite names the prerequisite instead, and a sub-make in a
+// recipe reports as "make[1]:", so only the top-level "make:" line counts. make 3.81 (macOS)
 // quotes with `target', newer versions with 'target'.
 export function isMissingTarget(stderr: string, target: string): boolean {
   const escaped = target.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return new RegExp(`No rule to make target [\`']${escaped}'`).test(stderr);
+  return new RegExp(`^make: \\*\\*\\* No rule to make target [\`']${escaped}'`, "m").test(stderr);
 }
 
 export class TmuxMissingError extends Error {}
@@ -198,11 +199,14 @@ export async function stopProject(project: string, projectPath: string): Promise
   await terminate(["-s", "-t", `=${project}`]);
   await tmux("kill-session", "-t", `=${project}`);
 
+  // For isMissingTarget: LC_ALL=C keeps the message unlocalized, and without an inherited
+  // MAKELEVEL the top-level make reports as "make:".
+  const env: NodeJS.ProcessEnv = { ...process.env, PATH: [...EXTRA_PATH, process.env.PATH].join(":"), LC_ALL: "C" };
+  delete env.MAKELEVEL;
   try {
     await execFileAsync("make", [STOP_TARGET], {
       cwd: projectPath,
-      // LC_ALL=C keeps make's "No rule" message unlocalized for isMissingTarget.
-      env: { ...process.env, PATH: [...EXTRA_PATH, process.env.PATH].join(":"), LC_ALL: "C" },
+      env,
       timeout: 120_000,
     });
     return true;
