@@ -254,17 +254,20 @@ final class CanvasView: NSView {
 
 enum ScreenDrawError: LocalizedError {
     case lockFailed(String)
+    case workerDidNotStart
 
     var errorDescription: String? {
         switch self {
         case .lockFailed(let path): "Could not open the lock file at \(path)"
+        case .workerDidNotStart: "The drawing overlay did not start"
         }
     }
 }
 
-// The running overlay holds an exclusive lock on this file and writes its pid into it.
-private func lockPath(in supportPath: String) -> String {
-    (supportPath as NSString).appendingPathComponent("overlay.lock")
+// The running overlay holds an exclusive lock on overlay.lock and writes its pid into it.
+// toggle.lock serializes toggles, so a quick second press waits for the first to finish.
+private func lockPath(_ name: String, in supportPath: String) -> String {
+    (supportPath as NSString).appendingPathComponent(name)
 }
 
 private func openLock(_ path: String) throws -> Int32 {
@@ -273,22 +276,35 @@ private func openLock(_ path: String) throws -> Int32 {
     return descriptor
 }
 
+private func readPid(_ path: String) -> pid_t? {
+    guard let contents = try? String(contentsOfFile: path, encoding: .utf8) else { return nil }
+    return pid_t(contents.trimmingCharacters(in: .whitespacesAndNewlines))
+}
+
+private func isLocked(_ descriptor: Int32) -> Bool {
+    guard flock(descriptor, LOCK_EX | LOCK_NB) == 0 else { return true }
+    flock(descriptor, LOCK_UN)
+    return false
+}
+
 /// Opens the overlay, or closes it if it is already open. Returns whether it is open afterwards.
 @raycast
 func toggleOverlay(supportPath: String) throws -> Bool {
     try FileManager.default.createDirectory(atPath: supportPath, withIntermediateDirectories: true)
-    let path = lockPath(in: supportPath)
+    let toggleDescriptor = try openLock(lockPath("toggle.lock", in: supportPath))
+    defer { close(toggleDescriptor) }
+    flock(toggleDescriptor, LOCK_EX)
+
+    let path = lockPath("overlay.lock", in: supportPath)
     let descriptor = try openLock(path)
     defer { close(descriptor) }
 
-    guard flock(descriptor, LOCK_EX | LOCK_NB) == 0 else {
-        if let contents = try? String(contentsOfFile: path, encoding: .utf8),
-           let pid = pid_t(contents.trimmingCharacters(in: .whitespacesAndNewlines)) {
+    if isLocked(descriptor) {
+        if let pid = readPid(path) {
             kill(pid, SIGTERM)
         }
         return false
     }
-    flock(descriptor, LOCK_UN)
 
     let worker = Process()
     worker.executableURL = URL(fileURLWithPath: CommandLine.arguments[0])
@@ -297,13 +313,23 @@ func toggleOverlay(supportPath: String) throws -> Bool {
     worker.standardOutput = FileHandle.nullDevice
     worker.standardError = FileHandle.nullDevice
     try worker.run()
-    return true
+
+    // Hold the toggle lock until the worker owns overlay.lock and has written its pid,
+    // so the next toggle sees it running and closes it.
+    let deadline = Date().addingTimeInterval(5)
+    while Date() < deadline && worker.isRunning {
+        if isLocked(descriptor) && readPid(path) == worker.processIdentifier {
+            return true
+        }
+        usleep(10_000)
+    }
+    worker.terminate()
+    throw ScreenDrawError.workerDidNotStart
 }
 
 @raycast
 func runOverlay(supportPath: String) async throws {
-    let descriptor = try openLock(lockPath(in: supportPath))
-    // Another overlay won the race; it is already on screen.
+    let descriptor = try openLock(lockPath("overlay.lock", in: supportPath))
     guard flock(descriptor, LOCK_EX | LOCK_NB) == 0 else { exit(0) }
     ftruncate(descriptor, 0)
     let pid = "\(getpid())\n"
