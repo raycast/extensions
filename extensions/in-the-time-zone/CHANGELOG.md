@@ -1,6 +1,6 @@
 # In The Timezone Changelog
 
-## [Timeline Redesign] - {PR_MERGE_DATE}
+## [Timeline Redesign] - 2026-10-21
 
 - The timeline is now drawn as a graphic instead of monospace text, so it no longer wraps, and fills the full width
 - Each hour is a cell colored by time of day: blue for sleep (22-6), strong yellow for work (9-17), pale yellow for the hours in between; the list view uses the same colors
