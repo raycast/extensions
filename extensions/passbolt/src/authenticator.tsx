@@ -11,11 +11,12 @@ import {
   LaunchProps,
   Keyboard,
 } from "@raycast/api";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { getPassboltClient } from "./lib/passbolt";
-import { getActiveWebsiteUrl } from "./lib/active-website";
+import { getActiveWebsites } from "./lib/active-website";
 import { TotpLoadProgress, TotpResource } from "./types";
 import { createTotpGenerator, filterTotpResources, rankAndPartitionTotpResources, websiteHostname } from "./utils/totp";
+import { chooseActiveWebsite, type ActiveWebsite } from "./utils/website";
 import type { TOTP } from "otpauth";
 
 export default function Authenticator(props: LaunchProps<{ launchContext?: { url?: string } }>) {
@@ -24,8 +25,10 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
   const [loadError, setLoadError] = useState<string>();
   const [progress, setProgress] = useState<TotpLoadProgress>();
   const [searchText, setSearchText] = useState("");
-  const [websiteUrl, setWebsiteUrl] = useState<string>();
+  const [activeWebsites, setActiveWebsites] = useState<ActiveWebsite[]>([]);
   const [revision, setRevision] = useState(0);
+  const [selectedItemId, setSelectedItemId] = useState<string>();
+  const selection = useRef<{ revision: number; autoSelect: boolean }>({ revision: 0, autoSelect: true });
   const [client] = useState(() => getPassboltClient());
   const [currentTime, setCurrentTime] = useState(Date.now());
   const { matchCurrentWebsite = true } = getPreferenceValues<Preferences.Authenticator>();
@@ -37,17 +40,25 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
 
   useEffect(() => {
     let cancelled = false;
+    setActiveWebsites([]);
     if (matchCurrentWebsite) {
-      getActiveWebsiteUrl(props.launchContext?.url).then((url) => {
-        if (!cancelled) setWebsiteUrl(url);
+      getActiveWebsites(props.launchContext?.url).then((websites) => {
+        if (!cancelled) setActiveWebsites(websites);
       });
-    } else {
-      setWebsiteUrl(undefined);
     }
     return () => {
       cancelled = true;
     };
   }, [matchCurrentWebsite, props.launchContext?.url]);
+
+  // The best website can change while entries stream in: a partial vault can favor a
+  // title-only match for one window over an exact match for another. Re-evaluate on
+  // every update so the choice settles on the complete vault instead of freezing the
+  // first guess; the row selection pin below keeps the selection stable meanwhile.
+  const activeWebsite = useMemo(
+    () => chooseActiveWebsite(items, activeWebsites, (resource) => [resource.totp?.issuer, resource.totp?.label]),
+    [items, activeWebsites],
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -93,10 +104,40 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
   );
   // Rank and split in one pass: each entry is scored against the current website exactly once.
   const { matching, others } = useMemo(
-    () => rankAndPartitionTotpResources(filterTotpResources(items, searchText), websiteUrl),
-    [items, searchText, websiteUrl],
+    () =>
+      rankAndPartitionTotpResources(filterTotpResources(items, searchText), activeWebsite?.url, activeWebsite?.title),
+    [items, searchText, activeWebsite],
   );
-  const refresh = () => setRevision((value) => value + 1);
+  useEffect(() => {
+    if (selection.current.revision !== revision || !selection.current.autoSelect || searchText || !matching.length)
+      return;
+    selection.current.autoSelect = false;
+    setSelectedItemId(matching[0].id);
+  }, [matching, searchText, revision]);
+
+  const onSelectionChange = (id: string | null) => {
+    // Ignore empty-list notifications and callbacks from the list being refreshed.
+    if (selection.current.revision !== revision || id === null) return;
+    const firstId = matching[0]?.id ?? others[0]?.id;
+    // Raycast reports its own default selection when the list grows or reorders. Only a
+    // deliberate move away from the first result should cancel the pending website jump.
+    if (id !== firstId) selection.current.autoSelect = false;
+    setSelectedItemId(id);
+  };
+  const onSearchTextChange = (text: string) => {
+    if (text) selection.current.autoSelect = false;
+    setSearchText(text);
+    // Let Raycast choose a visible result when filtering hides the selected entry.
+    setSelectedItemId(undefined);
+  };
+  const refresh = () => {
+    const nextRevision = selection.current.revision + 1;
+    selection.current = { revision: nextRevision, autoSelect: !searchText };
+    setSelectedItemId(undefined);
+    // Clear in the same update as revision so the selection effect cannot pin old items.
+    setItems([]);
+    setRevision(nextRevision);
+  };
   const refreshAction = (
     <Action
       title="Refresh Accounts"
@@ -120,7 +161,9 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
       isLoading={isLoading}
       filtering={false}
       searchText={searchText}
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={onSearchTextChange}
+      selectedItemId={selectedItemId}
+      onSelectionChange={onSelectionChange}
       searchBarPlaceholder="Search accounts, usernames, websites, or tags…"
       actions={<ActionPanel>{refreshAction}</ActionPanel>}
     >
@@ -150,7 +193,8 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
       )}
       {matching.length > 0 && (
         <List.Section
-          title={`Current Website · ${websiteHostname(websiteUrl)}`}
+          key="current-website"
+          title={`Current Website · ${websiteHostname(activeWebsite?.url)}`}
           subtitle={`${matching.length} accounts`}
         >
           {matching.map(renderItem)}
@@ -158,6 +202,7 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
       )}
       {others.length > 0 && (
         <List.Section
+          key="other-accounts"
           title={matching.length ? "Other Accounts" : "TOTP Accounts"}
           subtitle={
             isLoading && progress
@@ -209,6 +254,7 @@ function TotpListItem({
 
   return (
     <List.Item
+      id={item.id}
       title={item.name || "Unnamed resource"}
       subtitle={item.username}
       icon={item.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : Icon.Key}
