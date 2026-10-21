@@ -25,23 +25,16 @@ export default function Command(props: LaunchProps<{ launchContext?: { url?: str
   const [client] = useState(() => getPassboltClient());
 
   const [activeWebsites, setActiveWebsites] = useState<ActiveWebsite[]>([]);
-  const [activeWebsite, setActiveWebsite] = useState<ActiveWebsite>();
-  const currentWebsites = useRef<ActiveWebsite[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string>();
   const autoSelect = useRef(true);
   const { matchCurrentWebsite = true } = getPreferenceValues<Preferences.Search>();
 
   useEffect(() => {
     let cancelled = false;
-    currentWebsites.current = [];
     setActiveWebsites([]);
-    setActiveWebsite(undefined);
     if (matchCurrentWebsite) {
       getActiveWebsites(props.launchContext?.url).then((websites) => {
-        if (!cancelled) {
-          currentWebsites.current = websites;
-          setActiveWebsites(websites);
-        }
+        if (!cancelled) setActiveWebsites(websites);
       });
     }
     return () => {
@@ -49,12 +42,11 @@ export default function Command(props: LaunchProps<{ launchContext?: { url?: str
     };
   }, [matchCurrentWebsite, props.launchContext?.url]);
 
-  useEffect(() => {
-    // Freeze the first choice while entries stream; reset only with the browser context.
-    if (activeWebsite || activeWebsites !== currentWebsites.current) return;
-    const chosen = chooseActiveWebsite(allItems, activeWebsites);
-    if (chosen) setActiveWebsite(chosen);
-  }, [allItems, activeWebsites, activeWebsite]);
+  // The best website can change while entries stream in: a partial vault can favor a
+  // title-only match for one window over an exact match for another. Re-evaluate on
+  // every update so the choice settles on the complete vault instead of freezing the
+  // first guess; the row selection pin below keeps the selection stable meanwhile.
+  const activeWebsite = useMemo(() => chooseActiveWebsite(allItems, activeWebsites), [allItems, activeWebsites]);
 
   // Load all resources once on mount; closing the command cancels the load and its
   // remaining decryption work instead of continuing in the background.

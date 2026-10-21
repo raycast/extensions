@@ -98,6 +98,9 @@ export function websiteRelevanceScore(
       if (domain && oracleDomains.has(domain)) return 3;
     }
   }
+  // Title matching is only a fallback for entries without a saved URL: an entry
+  // saved for another website must never surface as the current site's match.
+  if (resource.uri || (resource.uris ?? []).length) return 0;
   return websiteTitleScore([resource.name, ...extraLabels], context.title);
 }
 

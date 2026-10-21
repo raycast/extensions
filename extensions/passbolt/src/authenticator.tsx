@@ -26,8 +26,6 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
   const [progress, setProgress] = useState<TotpLoadProgress>();
   const [searchText, setSearchText] = useState("");
   const [activeWebsites, setActiveWebsites] = useState<ActiveWebsite[]>([]);
-  const [activeWebsite, setActiveWebsite] = useState<ActiveWebsite>();
-  const currentWebsites = useRef<ActiveWebsite[]>([]);
   const [revision, setRevision] = useState(0);
   const [selectedItemId, setSelectedItemId] = useState<string>();
   const selection = useRef<{ revision: number; autoSelect: boolean }>({ revision: 0, autoSelect: true });
@@ -42,15 +40,10 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
 
   useEffect(() => {
     let cancelled = false;
-    currentWebsites.current = [];
     setActiveWebsites([]);
-    setActiveWebsite(undefined);
     if (matchCurrentWebsite) {
       getActiveWebsites(props.launchContext?.url).then((websites) => {
-        if (!cancelled) {
-          currentWebsites.current = websites;
-          setActiveWebsites(websites);
-        }
+        if (!cancelled) setActiveWebsites(websites);
       });
     }
     return () => {
@@ -58,15 +51,14 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
     };
   }, [matchCurrentWebsite, props.launchContext?.url]);
 
-  useEffect(() => {
-    // Freeze the first choice while entries stream; reset only with the browser context.
-    if (activeWebsite || activeWebsites !== currentWebsites.current) return;
-    const chosen = chooseActiveWebsite(items, activeWebsites, (resource) => [
-      resource.totp?.issuer,
-      resource.totp?.label,
-    ]);
-    if (chosen) setActiveWebsite(chosen);
-  }, [items, activeWebsites, activeWebsite]);
+  // The best website can change while entries stream in: a partial vault can favor a
+  // title-only match for one window over an exact match for another. Re-evaluate on
+  // every update so the choice settles on the complete vault instead of freezing the
+  // first guess; the row selection pin below keeps the selection stable meanwhile.
+  const activeWebsite = useMemo(
+    () => chooseActiveWebsite(items, activeWebsites, (resource) => [resource.totp?.issuer, resource.totp?.label]),
+    [items, activeWebsites],
+  );
 
   useEffect(() => {
     const controller = new AbortController();
