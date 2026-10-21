@@ -51,7 +51,7 @@ export default function SearchEntries() {
     );
     let toast: Toast | undefined;
     try {
-      const port = parsePort(getPreferenceValues<{ port: string }>().port);
+      const port = parsePort(getPreferenceValues<Preferences>().port);
       const client = new MacPassClient(localTransport(port));
       const hash = await client.databaseHash();
       const key = storageKey(port, hash);
