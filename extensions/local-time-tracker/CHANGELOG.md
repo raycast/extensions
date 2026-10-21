@@ -1,6 +1,6 @@
 # Changelog
 
-## [Daily Plans and Subtasks] - {PR_MERGE_DATE}
+## [Daily Plans and Subtasks] - 2026-10-21
 
 - Add Today's Plan for daily goals, optional subtasks, completion, and tracked time, with goals and subtasks entered in one form field.
 - Start or stop a task with Return and toggle completion with Command+Return; switching tasks saves the previous timer.
