@@ -1,7 +1,8 @@
 import Cocoa
+import RaycastSwiftMacros
 
 // Transparent full-screen overlay you can draw on. One window per display.
-// Launched (and toggled off) by the Raycast "Draw on Screen" command.
+// Toggled by the Raycast "Draw on Screen" command.
 
 enum Tool: String {
     case pen = "Pen"
@@ -251,37 +252,100 @@ final class CanvasView: NSView {
 
 // MARK: Launch
 
-let app = NSApplication.shared
-app.setActivationPolicy(.accessory)
+enum ScreenDrawError: LocalizedError {
+    case lockFailed(String)
 
-let mouseLocation = NSEvent.mouseLocation
-var focusedCanvas: CanvasView?
-
-for screen in NSScreen.screens {
-    let window = OverlayWindow(contentRect: screen.frame, styleMask: .borderless, backing: .buffered, defer: false)
-    window.level = .screenSaver
-    window.isOpaque = false
-    // Nearly (not fully) transparent so the window catches clicks instead of passing them through.
-    window.backgroundColor = NSColor.black.withAlphaComponent(0.01)
-    window.hasShadow = false
-    window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
-    window.isReleasedWhenClosed = false
-
-    let canvas = CanvasView(frame: NSRect(origin: .zero, size: screen.frame.size))
-    window.contentView = canvas
-    window.orderFrontRegardless()
-    session.canvases.append(canvas)
-
-    if screen.frame.contains(mouseLocation) || focusedCanvas == nil {
-        focusedCanvas = canvas
+    var errorDescription: String? {
+        switch self {
+        case .lockFailed(let path): "Could not open the lock file at \(path)"
+        }
     }
 }
 
-if let focusedCanvas, let window = focusedCanvas.window {
-    window.makeKeyAndOrderFront(nil)
-    window.makeFirstResponder(focusedCanvas)
-    focusedCanvas.flash(helpText, for: 3)
+// The running overlay holds an exclusive lock on this file and writes its pid into it.
+private func lockPath(in supportPath: String) -> String {
+    (supportPath as NSString).appendingPathComponent("overlay.lock")
 }
 
-app.activate(ignoringOtherApps: true)
-app.run()
+private func openLock(_ path: String) throws -> Int32 {
+    let descriptor = open(path, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR)
+    guard descriptor >= 0 else { throw ScreenDrawError.lockFailed(path) }
+    return descriptor
+}
+
+/// Opens the overlay, or closes it if it is already open. Returns whether it is open afterwards.
+@raycast
+func toggleOverlay(supportPath: String) throws -> Bool {
+    try FileManager.default.createDirectory(atPath: supportPath, withIntermediateDirectories: true)
+    let path = lockPath(in: supportPath)
+    let descriptor = try openLock(path)
+    defer { close(descriptor) }
+
+    guard flock(descriptor, LOCK_EX | LOCK_NB) == 0 else {
+        if let contents = try? String(contentsOfFile: path, encoding: .utf8),
+           let pid = pid_t(contents.trimmingCharacters(in: .whitespacesAndNewlines)) {
+            kill(pid, SIGTERM)
+        }
+        return false
+    }
+    flock(descriptor, LOCK_UN)
+
+    let worker = Process()
+    worker.executableURL = URL(fileURLWithPath: CommandLine.arguments[0])
+    worker.arguments = ["runOverlay", String(data: try JSONEncoder().encode(supportPath), encoding: .utf8) ?? "\"\""]
+    worker.standardInput = FileHandle.nullDevice
+    worker.standardOutput = FileHandle.nullDevice
+    worker.standardError = FileHandle.nullDevice
+    try worker.run()
+    return true
+}
+
+@raycast
+func runOverlay(supportPath: String) async throws {
+    let descriptor = try openLock(lockPath(in: supportPath))
+    // Another overlay won the race; it is already on screen.
+    guard flock(descriptor, LOCK_EX | LOCK_NB) == 0 else { exit(0) }
+    ftruncate(descriptor, 0)
+    let pid = "\(getpid())\n"
+    _ = pid.withCString { write(descriptor, $0, strlen($0)) }
+
+    await MainActor.run(body: showOverlay)
+}
+
+@MainActor
+private func showOverlay() {
+    let app = NSApplication.shared
+    app.setActivationPolicy(.accessory)
+
+    let mouseLocation = NSEvent.mouseLocation
+    var focusedCanvas: CanvasView?
+
+    for screen in NSScreen.screens {
+        let window = OverlayWindow(contentRect: screen.frame, styleMask: .borderless, backing: .buffered, defer: false)
+        window.level = .screenSaver
+        window.isOpaque = false
+        // Nearly (not fully) transparent so the window catches clicks instead of passing them through.
+        window.backgroundColor = NSColor.black.withAlphaComponent(0.01)
+        window.hasShadow = false
+        window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
+        window.isReleasedWhenClosed = false
+
+        let canvas = CanvasView(frame: NSRect(origin: .zero, size: screen.frame.size))
+        window.contentView = canvas
+        window.orderFrontRegardless()
+        session.canvases.append(canvas)
+
+        if screen.frame.contains(mouseLocation) || focusedCanvas == nil {
+            focusedCanvas = canvas
+        }
+    }
+
+    if let focusedCanvas, let window = focusedCanvas.window {
+        window.makeKeyAndOrderFront(nil)
+        window.makeFirstResponder(focusedCanvas)
+        focusedCanvas.flash(helpText, for: 3)
+    }
+
+    app.activate(ignoringOtherApps: true)
+    app.run()
+}

@@ -15,7 +15,3 @@ Run **Draw on Screen** to open a transparent overlay on every display. Run it ag
 | `C` or `Delete` | Clear everything |
 | `?` | Show controls |
 | `Esc` | Close the overlay |
-
-## Requirements
-
-The overlay is a small native helper written in Swift. It is compiled from the bundled source on first run, which needs the Xcode Command Line Tools (`xcode-select --install`).
