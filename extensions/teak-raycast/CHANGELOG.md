@@ -1,6 +1,6 @@
 # Changelog
 
-## [Folders, Find Similar, done states and more] - {PR_MERGE_DATE}
+## [Folders, Find Similar, done states and more] - 2026-10-21
 
 - New Browse Folders command lists your folders and smart folders and opens any of them as a card list
 - Add to Folder… puts a card in a folder, and Save Search as Smart Folder… saves the current search
@@ -17,7 +17,7 @@
 - Raycast tells you how to find a card you just hid with the `secret` or `hidden` tag, and when hidden cards explain an empty list
 - Raycast AI can search by similar card, done state, mood, archive and folder, list your folders, and mark done, archive or file cards
 
-## [Files, Trash, and richer cards] - {PR_MERGE_DATE}
+## [Files, Trash, and richer cards] - 2026-10-21
 
 - New Save Finder Selection command uploads the files selected in Finder
 - Save Clipboard uploads copied files and images
@@ -29,7 +29,7 @@
 - Edit Card rewrites text and quote cards and removes tags Teak added
 - New Update Teak Card AI tool adds or removes tags and changes notes
 
-## [Shared Teak sign-in] - {PR_MERGE_DATE}
+## [Shared Teak sign-in] - 2026-10-21
 
 - Sign-in, token renewal, and Sign Out now use the same Teak sign-in library as the CLI and browser extension
 
