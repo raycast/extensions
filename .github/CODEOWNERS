@@ -1397,7 +1397,7 @@
 /extensions/jovida-daily                                            @signalband
 /extensions/json-editor                                             @lryong @jvrbnjak89
 /extensions/json-format                                             @Destiner @Aayush9029 @devloos @lacherogwu @AlexIsMaking @jfkisafk @duranbe @m4l0n @cl1107 @andyfase @kricsleo
-/extensions/json-resume                                             @0xdhrv
+/extensions/json-resume                                             @0xdhrv @alexibuild
 /extensions/json-to-gcf-converter                                   @blackwell-systems
 /extensions/json-to-go                                              @chyroc
 /extensions/json-to-toon-converter                                  @mshll
@@ -2641,7 +2641,7 @@
 /extensions/setapp                                                  @lardissone
 /extensions/setlist-fm                                              @csigritz
 /extensions/sevalla                                                 @xmok
-/extensions/seventv-search                                          @Paranjayy @Paranjayy
+/extensions/seventv-search                                          @Paranjayy @Paranjayy @n4kama
 /extensions/sf-symbols-search                                       @peteschaffner @xilopaint
 /extensions/shadcn-svelte                                           @selemondev
 /extensions/shadcn-ui                                               @luisFilipePT @WilliamWelsh @Olivier-OG @ridemountainpig @Siddharth-2382 @1weiho @carlesandres
@@ -2842,7 +2842,7 @@
 /extensions/sublime                                                 @phgn0
 /extensions/subnoto                                                 @Mikescops
 /extensions/subscription-manager                                    @shivraj-roy
-/extensions/substack                                                @j3lte
+/extensions/substack                                                @j3lte @alexibuild
 /extensions/subwatch                                                @nirgn975
 /extensions/summarize-youtube-video-with-ai                         @iKasch @bl1nk @mateusbadalotti
 /extensions/summation                                               @supermamon
