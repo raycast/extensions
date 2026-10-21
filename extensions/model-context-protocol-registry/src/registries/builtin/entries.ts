@@ -356,6 +356,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://api.datacircle.dev/mcp",
   },
   {
+    name: "databricks-field-guide",
+    title: "Databricks Field Guide",
+    description:
+      "Databricks answers with working code, from TechFabric's engineers. Search and read the Databricks Field Guide: chapters on building, running and paying for Databricks, runnable SQL, Python and CLI examples with the explanation around them, and recent Databricks changes, each linked to the docs.databricks.com pages it cites. Read-only tools. Hosted remote Streamable HTTP server; no sign-in and no API key.",
+    icon: "https://www.techfabric.com/brand/mcp/techfabric-icon-on-dark-512.png",
+    homepage: "https://databricks.techfabric.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://databricks.techfabric.com/mcp"],
+    },
+    remoteUrl: "https://databricks.techfabric.com/mcp",
+  },
+  {
     name: "desearch",
     title: "Desearch",
     description:
