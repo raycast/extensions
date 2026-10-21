@@ -31,6 +31,7 @@ export default function Command({
     isLoading,
     data: tx,
     error,
+    revalidate,
   } = usePromise(fetchTransaction, [raw], { execute: true });
 
   if (isLoading) {
@@ -46,6 +47,11 @@ export default function Command({
             <Action.OpenInBrowser
               title="Search on Mempool"
               url="https://mempool.space"
+            />
+            <Action
+              icon={Icon.RotateClockwise}
+              title="Retry"
+              onAction={revalidate}
             />
           </ActionPanel>
         }
@@ -103,6 +109,11 @@ ${tx.status.block_time ? `| **Block Time** | ${blockInfo} |` : ""}
             title="Open on Mempool"
             url={mempoolUrl}
             icon={Icon.Globe}
+          />
+          <Action
+            icon={Icon.RotateClockwise}
+            title="Refresh"
+            onAction={revalidate}
           />
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
