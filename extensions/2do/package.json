@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "2do",
+  "title": "2Do",
+  "description": "Add, view, and edit 2Do tasks.",
+  "icon": "icon.png",
+  "author": "danielhaven",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "2do",
+    "todo",
+    "tasks",
+    "task manager",
+    "reminders",
+    "gtd"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Add a task to 2Do.",
+      "mode": "view"
+    },
+    {
+      "name": "view-tasks",
+      "title": "View Tasks",
+      "description": "Browse 2Do tasks by scope, list, or smart list, and edit, complete, or open them.",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "2.7.3",
+    "@raycast/utils": "2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "10.12.0",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3",
+    "vitest": "5.0.4"
+  }
+}
