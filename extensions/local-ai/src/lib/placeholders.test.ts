@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CLIPBOARD_MARKER, parsePrompt, renderInstructions, SELECTION_MARKER } from "./placeholders";
+import { CLIPBOARD_MARKER, missingArguments, parsePrompt, renderInstructions, SELECTION_MARKER } from "./placeholders";
 
 describe("parsePrompt", () => {
   it("collects arguments and selection use", () => {
@@ -96,5 +96,23 @@ describe("renderInstructions", () => {
 
   it("inserts replacements literally", () => {
     expect(renderInstructions("{selection}", { ...ctx, selectionReplacement: "$& $1" })).toBe("$& $1");
+  });
+});
+
+describe("missingArguments", () => {
+  const specs = parsePrompt(
+    '{argument name="tone"} {argument name="language" default="English"} {argument name="topic"}',
+  ).arguments;
+
+  it("returns arguments without a value or default", () => {
+    expect(missingArguments(specs, { tone: "formal" }).map((spec) => spec.name)).toEqual(["topic"]);
+  });
+
+  it("treats empty values as missing", () => {
+    expect(missingArguments(specs, { tone: "", topic: "x" }).map((spec) => spec.name)).toEqual(["tone"]);
+  });
+
+  it("returns nothing when every argument is covered", () => {
+    expect(missingArguments(specs, { tone: "a", topic: "b" })).toEqual([]);
   });
 });

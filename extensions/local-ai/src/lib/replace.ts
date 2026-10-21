@@ -14,6 +14,8 @@ export interface AppIdentity {
 
 export type ClipboardRestoreContent = { file: string } | { html: string; text: string } | { text: string };
 
+export type RestoreAction = "restore" | "clear" | "keep";
+
 const REFUSAL_EXCERPT_LENGTH = 80;
 
 export function isRunInFlight(startedAt: string | undefined, now: number, timeoutMs: number): boolean {
@@ -44,6 +46,11 @@ export function clipboardRestoreContent(previous: ClipboardSnapshot): ClipboardR
 
 export function isRestorable(snapshot: ClipboardSnapshot): boolean {
   return clipboardRestoreContent(snapshot) !== undefined;
+}
+
+export function restoreAction(snapshot: ClipboardSnapshot, wasEmpty: boolean): RestoreAction {
+  if (isRestorable(snapshot)) return "restore";
+  return wasEmpty ? "clear" : "keep";
 }
 
 export function isClipboardInfoEmpty(output: string): boolean {

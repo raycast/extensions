@@ -4,7 +4,7 @@ import type { AiCommand } from "../lib/commands/types";
 import type { RunInput } from "../lib/launch-context";
 import { finalizeReplacement } from "../lib/output";
 import { isSameTarget, replaceFailureMessage, type AppIdentity } from "../lib/replace";
-import { restoreClipboard } from "./clipboard";
+import { restoreClipboard, saveClipboard } from "./clipboard";
 import { isSetupError, toFmError } from "./errors";
 import { invalidatePreflight } from "./preflight";
 import { executeRun } from "./run";
@@ -12,7 +12,7 @@ import { executeRun } from "./run";
 export const CLIPBOARD_RESTORE_DELAY_MS = 300;
 
 export async function pasteAndRestoreClipboard(text: string): Promise<void> {
-  const previous = await Clipboard.read();
+  const previous = await saveClipboard();
   try {
     await Clipboard.paste(text);
     await delay(CLIPBOARD_RESTORE_DELAY_MS);

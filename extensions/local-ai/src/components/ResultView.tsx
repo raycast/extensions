@@ -5,8 +5,10 @@ import type { AiCommand } from "../lib/commands/types";
 import type { RunInput } from "../lib/launch-context";
 import { errorBlockMarkdown, explainFmError } from "../lib/fm/explain";
 import { finalizeWindowText } from "../lib/output";
+import { missingArguments, parsePrompt } from "../lib/placeholders";
 import { isSetupError } from "../services/errors";
 import { executeRun } from "../services/run";
+import { ArgumentForm } from "./ArgumentForm";
 import { CommandForm } from "./CommandForm";
 import { ContinueInChatAction } from "./ContinueInChatAction";
 import { FmErrorView } from "./FmErrorView";
@@ -14,12 +16,36 @@ import { FmErrorView } from "./FmErrorView";
 const SOURCE_LABELS = { selection: "Selected text", clipboard: "Clipboard" } as const;
 
 export function ResultView(props: { command: AiCommand; input: RunInput; argumentValues: Record<string, string> }) {
-  const { input, argumentValues } = props;
-  const [command, setCommand] = useState(props.command);
+  const { input } = props;
+  const [run, setRun] = useState({ command: props.command, argumentValues: props.argumentValues });
+  const [editedCommand, setEditedCommand] = useState<AiCommand>();
+  const { command, argumentValues } = run;
   const { text, isLoading, error, retry } = useFmStream(
     (signal, onText) => executeRun({ command, input, argumentValues, stream: true, signal, onText }),
     [command, input, JSON.stringify(argumentValues)],
   );
+
+  function handleSaved(saved: AiCommand) {
+    const specs = parsePrompt(saved.prompt).arguments;
+    if (missingArguments(specs, argumentValues).length === 0) setRun({ command: saved, argumentValues });
+    else setEditedCommand(saved);
+  }
+
+  if (editedCommand) {
+    const specs = parsePrompt(editedCommand.prompt).arguments.map((spec) =>
+      Object.hasOwn(argumentValues, spec.name) ? { ...spec, defaultValue: argumentValues[spec.name] } : spec,
+    );
+    return (
+      <ArgumentForm
+        command={editedCommand}
+        specs={specs}
+        onSubmit={(values) => {
+          setRun({ command: editedCommand, argumentValues: { ...argumentValues, ...values } });
+          setEditedCommand(undefined);
+        }}
+      />
+    );
+  }
 
   if (error && isSetupError(error)) return <FmErrorView error={error} onRetry={retry} />;
 
@@ -48,7 +74,7 @@ export function ResultView(props: { command: AiCommand; input: RunInput; argumen
             <Action.Push
               title="Edit Command"
               icon={Icon.Pencil}
-              target={<CommandForm command={command} onSaved={setCommand} />}
+              target={<CommandForm command={command} onSaved={handleSaved} />}
             />
           </ActionPanel>
         ) : undefined

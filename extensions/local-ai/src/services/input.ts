@@ -4,16 +4,15 @@ import { setTimeout as delay } from "node:timers/promises";
 import { promisify } from "node:util";
 import type { RunInput } from "../lib/launch-context";
 import { pollForText } from "../lib/poll";
-import { isClipboardInfoEmpty, isRestorable } from "../lib/replace";
+import { isRestorable } from "../lib/replace";
 import { resolveInput } from "../lib/run-request";
-import { restoreClipboard } from "./clipboard";
+import { restoreClipboard, saveClipboard } from "./clipboard";
 import { getSettings } from "./settings";
 
 const execFileAsync = promisify(execFile);
 
 const COPY_POLL_INTERVAL_MS = 25;
 const COPY_POLL_TIMEOUT_MS = 500;
-const CLIPBOARD_INFO_SCRIPT = "clipboard info";
 const COPY_KEYSTROKE_SCRIPT = 'tell application "System Events" to keystroke "c" using command down';
 
 interface CaptureOptions {
@@ -35,8 +34,8 @@ export async function captureInput(options: CaptureOptions = {}): Promise<RunInp
 }
 
 async function copySelection(): Promise<string | undefined> {
-  const previous = await Clipboard.read();
-  if (!isRestorable(previous) && !(await isClipboardEmpty())) return undefined;
+  const previous = await saveClipboard();
+  if (!isRestorable(previous.snapshot) && !previous.wasEmpty) return undefined;
   try {
     await Clipboard.clear();
     await execFileAsync("/usr/bin/osascript", ["-e", COPY_KEYSTROKE_SCRIPT]);
@@ -49,14 +48,5 @@ async function copySelection(): Promise<string | undefined> {
     return undefined;
   } finally {
     await restoreClipboard(previous);
-  }
-}
-
-async function isClipboardEmpty(): Promise<boolean> {
-  try {
-    const { stdout } = await execFileAsync("/usr/bin/osascript", ["-e", CLIPBOARD_INFO_SCRIPT]);
-    return isClipboardInfoEmpty(stdout);
-  } catch {
-    return false;
   }
 }

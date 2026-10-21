@@ -63,6 +63,13 @@ export function parsePrompt(prompt: string): ParsedPrompt {
   return parsed;
 }
 
+export function missingArguments(specs: ArgumentSpec[], argumentValues: Record<string, string>): ArgumentSpec[] {
+  return specs.filter(
+    (spec) =>
+      spec.defaultValue === undefined && !(Object.hasOwn(argumentValues, spec.name) && argumentValues[spec.name]),
+  );
+}
+
 export function renderInstructions(prompt: string, ctx: RenderContext): string {
   return prompt.replace(PLACEHOLDER, (whole, identifier: string, rest: string | undefined) => {
     switch (identifier) {

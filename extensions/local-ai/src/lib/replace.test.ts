@@ -3,6 +3,7 @@ import {
   clipboardRestoreContent,
   isClipboardInfoEmpty,
   isRestorable,
+  restoreAction,
   isRunInFlight,
   isSameTarget,
   replaceFailureMessage,
@@ -126,5 +127,20 @@ describe("isClipboardInfoEmpty", () => {
 
   it("is false when the pasteboard lists any type", () => {
     expect(isClipboardInfoEmpty("\u00abclass PNGf\u00bb, 1234\n")).toBe(false);
+  });
+});
+
+describe("restoreAction", () => {
+  it("restores any restorable snapshot", () => {
+    expect(restoreAction({ text: "hello" }, false)).toBe("restore");
+    expect(restoreAction({ text: "", file: "/Users/me/image.png" }, false)).toBe("restore");
+  });
+
+  it("clears when the clipboard was truly empty", () => {
+    expect(restoreAction({ text: "" }, true)).toBe("clear");
+  });
+
+  it("keeps the clipboard when it held content that cannot be restored", () => {
+    expect(restoreAction({ text: "" }, false)).toBe("keep");
   });
 });
