@@ -3,6 +3,7 @@ import { useDebounce } from "use-debounce";
 import {
   Action,
   ActionPanel,
+  Alert,
   Color,
   Detail,
   Icon,
@@ -10,6 +11,7 @@ import {
   List,
   Toast,
   closeMainWindow,
+  confirmAlert,
   getPreferenceValues,
   open,
   showToast,
@@ -139,6 +141,25 @@ function Actions(props: {
     await closeMainWindow();
   }
 
+  async function clearVisitedRepositories() {
+    if (!props.onClear) {
+      return;
+    }
+
+    const confirmed = await confirmAlert({
+      title: "Clear All Visited Repositories?",
+      message: "This will permanently remove all repositories from your visit history.",
+      primaryAction: {
+        title: "Clear All",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (confirmed) {
+      await props.onClear();
+    }
+  }
+
   return (
     <ActionPanel title={props.repository.nameWithOwner}>
       <ActionPanel.Section>
@@ -237,7 +258,7 @@ function Actions(props: {
               icon={Icon.Trash}
               title="Clear All Visited Repositories"
               style={Action.Style.Destructive}
-              onAction={props.onClear}
+              onAction={clearVisitedRepositories}
             />
           )}
         </ActionPanel.Section>
