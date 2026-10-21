@@ -9,6 +9,7 @@ import {
   Keyboard,
   List,
   Toast,
+  closeMainWindow,
   environment,
   getPreferenceValues,
   open,
@@ -121,6 +122,7 @@ function Actions(props: {
   async function openRepository(url: string) {
     await props.onVisit(props.repository);
     await open(url);
+    await closeMainWindow();
   }
 
   return (
