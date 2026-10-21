@@ -1,6 +1,6 @@
 # Swiss Dummy Data Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-21
 
 - Generate random Swiss Social Security Numbers (AHV-Nummer) with a valid check digit.
 - Copy the number with or without dots.
