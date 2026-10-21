@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Wave AI MCP Server] - 2026-10-21
+## [Add Wave AI MCP Server] - {PR_MERGE_DATE}
 
 - Add Wave AI to the official registry: an AI note taker for phone calls, meetings and in-person conversations. Search and quote recordings, ask what a person said with Voice ID, and update action items, folders and sharing. Hosted Streamable HTTP server at https://mcp.wave.co with OAuth 2.0 sign-in (PKCE and dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
