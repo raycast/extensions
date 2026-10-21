@@ -53,3 +53,18 @@ export function useRepositoryBranches(repository?: string) {
     { execute: Boolean(owner && name) },
   );
 }
+
+export function useRepositoryBranchSearch(repository: string | undefined, query: string) {
+  const { github } = getGitHubClient();
+  const [owner, name] = (repository ?? "").split("/");
+  const trimmed = query.trim();
+
+  return useCachedPromise(
+    async (owner: string, name: string, query: string) => {
+      const result = await github.searchRepositoryBranches({ owner, name, query });
+      return (result.repository?.refs?.nodes ?? []).flatMap((node) => (node?.name ? [node.name] : []));
+    },
+    [owner, name, trimmed],
+    { execute: Boolean(owner && name && trimmed) },
+  );
+}

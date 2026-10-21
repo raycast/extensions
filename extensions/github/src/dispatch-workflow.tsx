@@ -1,13 +1,14 @@
 import { Action, ActionPanel, Form, Icon, Image, Toast, open, showToast } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm, useLocalStorage } from "@raycast/utils";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
+import { branchesForQuery } from "./helpers/branch-search";
 import { getErrorMessage } from "./helpers/errors";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { WorkflowDispatchInput, getWorkflowDispatchInputs, parseWorkflowDocument } from "./helpers/workflow-dispatch";
 import { useMyRepositories } from "./hooks/useRepositories";
-import { useRepositoryBranches } from "./hooks/useRepositoryBranches";
+import { useRepositoryBranches, useRepositoryBranchSearch } from "./hooks/useRepositoryBranches";
 
 type DispatchFormValues = {
   repository: string;
@@ -104,8 +105,17 @@ function DispatchWorkflowForm() {
   const owner = selectedRepository?.owner.login ?? "";
   const name = selectedRepository?.name ?? "";
 
+  const [refQuery, setRefQuery] = useState("");
   const { data: branchesData, isLoading: branchesIsLoading } = useRepositoryBranches(selectedRepository?.nameWithOwner);
+  const { data: matchingBranches, isLoading: branchSearchIsLoading } = useRepositoryBranchSearch(
+    selectedRepository?.nameWithOwner,
+    refQuery,
+  );
   const defaultBranch = branchesData?.defaultBranch ?? "";
+  const refBranches = useMemo(
+    () => branchesForQuery(branchesData?.branches ?? [], matchingBranches, refQuery, values.ref),
+    [branchesData?.branches, matchingBranches, refQuery, values.ref],
+  );
 
   const {
     data: workflowLoad,
@@ -343,8 +353,14 @@ function DispatchWorkflowForm() {
         />
       ) : null}
 
-      <Form.Dropdown {...itemProps.ref} title="Ref" isLoading={branchesIsLoading}>
-        {(branchesData?.branches ?? []).map((branch) => (
+      <Form.Dropdown
+        {...itemProps.ref}
+        title="Ref"
+        isLoading={branchesIsLoading || branchSearchIsLoading}
+        throttle
+        onSearchTextChange={setRefQuery}
+      >
+        {refBranches.map((branch) => (
           <Form.Dropdown.Item key={branch} value={branch} title={branch} />
         ))}
       </Form.Dropdown>

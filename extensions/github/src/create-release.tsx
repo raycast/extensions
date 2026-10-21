@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
 import RepositoriesDropdown from "./components/RepositoryDropdown";
+import { branchesForQuery } from "./helpers/branch-search";
 import { getErrorMessage } from "./helpers/errors";
 import { withGitHubClient } from "./helpers/withGithubClient";
-import { useRepositoryBranches } from "./hooks/useRepositoryBranches";
+import { useRepositoryBranches, useRepositoryBranchSearch } from "./hooks/useRepositoryBranches";
 
 type ReleaseFormValues = {
   tag: string;
@@ -152,8 +153,13 @@ function ReleaseForm({ repository, onCreated }: ReleaseFormProps) {
   const { octokit } = getGitHubClient();
   const [owner, repo] = repository.split("/");
   const [notesAreGenerated, setNotesAreGenerated] = useState(false);
+  const [targetQuery, setTargetQuery] = useState("");
 
   const { data: branchesData, isLoading: branchesIsLoading } = useRepositoryBranches(repository);
+  const { data: matchingBranches, isLoading: branchSearchIsLoading } = useRepositoryBranchSearch(
+    repository,
+    targetQuery,
+  );
 
   const { data: latestRelease, isLoading: latestReleaseIsLoading } = useCachedPromise(
     async (owner: string, repo: string) => {
@@ -217,6 +223,8 @@ function ReleaseForm({ repository, onCreated }: ReleaseFormProps) {
       target: FormValidation.Required,
     },
   });
+
+  const targetBranches = branchesForQuery(branchesData?.branches ?? [], matchingBranches, targetQuery, values.target);
 
   const notesRequestId = useRef(0);
   const appliedSuggestions = useRef(false);
@@ -355,8 +363,15 @@ function ReleaseForm({ repository, onCreated }: ReleaseFormProps) {
 
       <Form.TextField {...itemProps.title} title="Title" placeholder="Defaults to the tag name" />
 
-      <Form.Dropdown {...itemProps.target} title="Target" onChange={handleTargetChange}>
-        {(branchesData?.branches ?? []).map((branch) => (
+      <Form.Dropdown
+        {...itemProps.target}
+        title="Target"
+        isLoading={branchesIsLoading || branchSearchIsLoading}
+        throttle
+        onSearchTextChange={setTargetQuery}
+        onChange={handleTargetChange}
+      >
+        {targetBranches.map((branch) => (
           <Form.Dropdown.Item key={branch} title={branch} value={branch} />
         ))}
       </Form.Dropdown>
