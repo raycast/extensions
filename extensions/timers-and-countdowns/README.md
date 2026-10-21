@@ -2,6 +2,10 @@
 
 Start and stop countdown timers in Raycast using natural language.
 
+![Start Timer](media/start-timer.gif)
+![Stop Timer](media/stop-timer.gif)
+![Change Ring Sound](media/change-ring-sound.gif)
+
 ## Commands
 
 ### Start Timer
