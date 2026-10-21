@@ -1423,6 +1423,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "wave-ai",
+    title: "Wave AI",
+    description:
+      "Wave AI is an AI note taker for phone calls, meetings and in-person conversations. Ask what was decided, what a person said (Voice ID finds people you have named in Wave), or what you still owe, then update action items, organize folders and share recordings without opening Wave. Wave never deletes recordings or edits transcripts, and it asks before sharing. Hosted remote Streamable HTTP server; OAuth 2.0 sign-in with PKCE and dynamic client registration, free Wave account, no API key to paste.",
+    icon: "https://wave.co/brand/icon-rounded-512.png",
+    homepage: "https://help.wave.co/integrations/connect-wave-to-other-ai-tools",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.wave.co"],
+    },
+    remoteUrl: "https://mcp.wave.co",
+  },
+  {
     name: "weio-site-check",
     title: "Weio site check",
     description:
