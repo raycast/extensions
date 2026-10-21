@@ -49,17 +49,18 @@ const pad = (n: number) => String(n).padStart(2, "0");
 export function dateFields(prefix: "start" | "due", d: Date | null, clear: boolean) {
   const empty = clear ? { [`${prefix}_date`]: null, [`${prefix}_time`]: null } : {};
   if (!d) return empty;
-  // ponytail: midnight counts as "no time" so untimed 2Do dates round-trip; a task timed at exactly 00:00 loses its time
-  const fullDay = Form.DatePicker.isFullDay(d) || (d.getHours() === 0 && d.getMinutes() === 0);
   return {
     ...empty,
     [`${prefix}_date`]: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
-    ...(!fullDay && { [`${prefix}_time`]: `${pad(d.getHours())}:${pad(d.getMinutes())}` }),
+    ...(!Form.DatePicker.isFullDay(d) && { [`${prefix}_time`]: `${pad(d.getHours())}:${pad(d.getMinutes())}` }),
   };
 }
 
 export function toDate(date?: string, time?: string) {
-  return date ? new Date(`${date}T${time ?? "00:00"}`) : null;
+  if (!date) return null;
+  if (time) return new Date(`${date}T${time}`);
+  // Raycast marks a full-day date (no time) with 1 millisecond; see Form.DatePicker.isFullDay in Raycast's runtime.
+  return new Date(`${date}T00:00:00.001`);
 }
 
 // Tag picker choices: all tags plus the task's own. 2Do can leave a task's tag out of list_tags,

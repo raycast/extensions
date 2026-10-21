@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { dateFields, saveTask, scopeArgs, tagOptions, Task, taskToValues, toDate, twoDo } from "./2do";
 
-const { runAppleScript, isFullDay } = vi.hoisted(() => ({
-  runAppleScript: vi.fn(),
-  isFullDay: vi.fn(),
-}));
+const { runAppleScript } = vi.hoisted(() => ({ runAppleScript: vi.fn() }));
 vi.mock("@raycast/utils", () => ({ runAppleScript }));
-vi.mock("@raycast/api", () => ({ Form: { DatePicker: { isFullDay } } }));
+// Same check as Raycast's runtime: full-day dates carry exactly 1 millisecond.
+vi.mock("@raycast/api", () => ({
+  Form: { DatePicker: { isFullDay: (d?: Date | null) => !!d && d.getMilliseconds() === 1 } },
+}));
+
+const fullDay = (y: number, m: number, d: number) => new Date(y, m, d, 0, 0, 0, 1);
 
 // The 2Do commands sent so far, as [command, args] with args decoded from JSON.
 const sent = () => runAppleScript.mock.calls.map(([, [command, args]]) => [command, JSON.parse(args)]);
@@ -29,7 +31,6 @@ const task: Task = {
 
 beforeEach(() => {
   runAppleScript.mockReset().mockResolvedValue("{}");
-  isFullDay.mockReset().mockReturnValue(false);
 });
 
 describe("twoDo", () => {
@@ -57,12 +58,11 @@ describe("dateFields", () => {
   });
 
   it("sends only the date for a full-day pick", () => {
-    isFullDay.mockReturnValue(true);
-    expect(dateFields("start", new Date(2026, 9, 5, 9, 30), false)).toEqual({ start_date: "2026-10-05" });
+    expect(dateFields("start", fullDay(2026, 9, 5), false)).toEqual({ start_date: "2026-10-05" });
   });
 
-  it("treats midnight as no time", () => {
-    expect(dateFields("due", new Date(2026, 9, 5), false)).toEqual({ due_date: "2026-10-05" });
+  it("keeps a time of exactly midnight", () => {
+    expect(dateFields("due", new Date(2026, 9, 5), false)).toEqual({ due_date: "2026-10-05", due_time: "00:00" });
   });
 
   it("omits empty dates when creating and clears them when editing", () => {
@@ -71,7 +71,7 @@ describe("dateFields", () => {
   });
 
   it("clears an old time when an edited date becomes full-day", () => {
-    expect(dateFields("due", new Date(2026, 9, 5), true)).toEqual({ due_date: "2026-10-05", due_time: null });
+    expect(dateFields("due", fullDay(2026, 9, 5), true)).toEqual({ due_date: "2026-10-05", due_time: null });
   });
 });
 

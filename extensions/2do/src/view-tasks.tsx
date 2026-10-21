@@ -12,7 +12,11 @@ const FOCUSES = [
   ["done", "Done", Icon.CheckCircle],
 ] as const;
 
-const PRIORITY_COLORS = { high: Color.Red, medium: Color.Orange, low: Color.Blue };
+const PRIORITY_TAGS = {
+  high: { value: "High", color: Color.Red },
+  medium: { value: "Medium", color: Color.Orange },
+  low: { value: "Low", color: Color.Blue },
+};
 
 export default function Command() {
   const [scope, setScope] = useState<string>();
@@ -72,7 +76,7 @@ export default function Command() {
           icon={t.completed ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
           accessories={[
             ...t.tags.map((tag) => ({ tag: tag.title })),
-            ...(t.priority !== "none" ? [{ tag: { value: t.priority, color: PRIORITY_COLORS[t.priority] } }] : []),
+            ...(t.priority !== "none" ? [{ tag: PRIORITY_TAGS[t.priority] }] : []),
             ...(t.presentation.due_date_formatted
               ? [
                   {
