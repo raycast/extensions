@@ -1,0 +1,6 @@
+node_modules/
+dist/
+raycast-env.d.ts
+.swift-module-cache/
+*.log
+.DS_Store
