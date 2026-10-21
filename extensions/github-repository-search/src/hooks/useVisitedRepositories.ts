@@ -20,10 +20,6 @@ async function saveVisitedRepositories(repositories: Repository[]) {
   await LocalStorage.setItem(VISITED_REPOSITORIES_KEY, data);
 }
 
-export async function clearVisitedRepositories() {
-  return await LocalStorage.removeItem(VISITED_REPOSITORIES_KEY);
-}
-
 export function useVisitedRepositories() {
   const [repositories, setRepositories] = useState<Repository[]>();
   const repositoriesRef = useRef<Repository[]>([]);
@@ -46,5 +42,19 @@ export function useVisitedRepositories() {
     await saveVisitedRepositories(nextRepositories);
   }
 
-  return { repositories, visitRepository, isLoading: !repositories };
+  async function removeVisitedRepository(repository: Repository) {
+    const nextRepositories = repositoriesRef.current.filter((item) => item.id !== repository.id);
+
+    repositoriesRef.current = nextRepositories;
+    setRepositories(nextRepositories);
+    await saveVisitedRepositories(nextRepositories);
+  }
+
+  async function clearVisitedRepositories() {
+    repositoriesRef.current = [];
+    setRepositories([]);
+    await LocalStorage.removeItem(VISITED_REPOSITORIES_KEY);
+  }
+
+  return { repositories, visitRepository, removeVisitedRepository, clearVisitedRepositories, isLoading: !repositories };
 }

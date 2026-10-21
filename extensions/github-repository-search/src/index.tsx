@@ -10,7 +10,6 @@ import {
   List,
   Toast,
   closeMainWindow,
-  environment,
   getPreferenceValues,
   open,
   showToast,
@@ -20,7 +19,7 @@ import { OAuthService, getAccessToken, withAccessToken } from "@raycast/utils";
 import type { Repository } from "@/types";
 import { useRepositories } from "@/hooks/useRepositories";
 import { useRepositoryReleases } from "@/hooks/useRepositoryReleases";
-import { clearVisitedRepositories, useVisitedRepositories } from "@/hooks/useVisitedRepositories";
+import { useVisitedRepositories } from "@/hooks/useVisitedRepositories";
 import { OpenInWebIDEAction } from "@/components/website";
 import { getAccessoryTitle, getIcon, getSubtitle } from "@/utils";
 
@@ -38,6 +37,8 @@ function CommandInner() {
   const {
     repositories: visitedRepositories,
     visitRepository,
+    removeVisitedRepository,
+    clearVisitedRepositories,
     isLoading: isLoadingVisitedRepositories,
   } = useVisitedRepositories();
 
@@ -66,6 +67,8 @@ function CommandInner() {
               key={repository.id}
               repository={repository}
               onVisit={visitRepository}
+              onRemove={() => removeVisitedRepository(repository)}
+              onClear={clearVisitedRepositories}
               token={token}
               baseUrl={baseUrl}
             />
@@ -91,6 +94,8 @@ export default withAccessToken(github)(CommandInner);
 function RepositoryListItem(props: {
   repository: Repository;
   onVisit: (repository: Repository) => Promise<void>;
+  onRemove?: () => Promise<void>;
+  onClear?: () => Promise<void>;
   token: string;
   baseUrl?: string;
 }) {
@@ -100,7 +105,14 @@ function RepositoryListItem(props: {
       title={props.repository.nameWithOwner}
       subtitle={getSubtitle(props.repository)}
       actions={
-        <Actions repository={props.repository} onVisit={props.onVisit} token={props.token} baseUrl={props.baseUrl} />
+        <Actions
+          repository={props.repository}
+          onVisit={props.onVisit}
+          onRemove={props.onRemove}
+          onClear={props.onClear}
+          token={props.token}
+          baseUrl={props.baseUrl}
+        />
       }
       accessories={[
         {
@@ -114,6 +126,8 @@ function RepositoryListItem(props: {
 function Actions(props: {
   repository: Repository;
   onVisit: (repository: Repository) => Promise<void>;
+  onRemove?: () => Promise<void>;
+  onClear?: () => Promise<void>;
   token: string;
   baseUrl?: string;
 }) {
@@ -210,35 +224,26 @@ function Actions(props: {
           }}
         />
       </ActionPanel.Section>
-      <DevelopmentActionSection />
+      {props.onRemove && (
+        <ActionPanel.Section title="Visited Repositories">
+          <Action
+            icon={Icon.Trash}
+            title="Remove from Visited Repositories"
+            style={Action.Style.Destructive}
+            onAction={props.onRemove}
+          />
+          {props.onClear && (
+            <Action
+              icon={Icon.Trash}
+              title="Clear All Visited Repositories"
+              style={Action.Style.Destructive}
+              onAction={props.onClear}
+            />
+          )}
+        </ActionPanel.Section>
+      )}
     </ActionPanel>
   );
-}
-
-function DevelopmentActionSection() {
-  async function handleClearVisitedRepositories() {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Clearing visited repositories",
-    });
-
-    try {
-      await clearVisitedRepositories();
-      toast.style = Toast.Style.Success;
-      toast.title = "Cleared visited repositories";
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed clearing visited repositories";
-      toast.message = error instanceof Error ? error.message : undefined;
-      console.error("Failed clearing visited repositories", error);
-    }
-  }
-
-  return environment.isDevelopment ? (
-    <ActionPanel.Section title="Development">
-      <Action icon={Icon.Trash} title="Clear Visited Repositories" onAction={handleClearVisitedRepositories} />
-    </ActionPanel.Section>
-  ) : null;
 }
 
 function ReleaseView(props: { repository: Repository; token: string; baseUrl?: string }) {
