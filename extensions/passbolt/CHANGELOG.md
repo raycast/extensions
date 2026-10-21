@@ -1,8 +1,11 @@
 # Passbolt Changelog
 
-## [Keep the Current-Website Account Selected] - {PR_MERGE_DATE}
+## [Current Website Matching] - {PR_MERGE_DATE}
 
-- Pin the current-website account as the selection while the rest of the vault loads, instead of letting progressive loading move it.
+- Show passwords matching the current website above Favorites in Search Passwords, ordered by exact hostname, favorite status, and name.
+- Enable optional Website Matching in the Search Passwords preferences, using the browser extension or launch context.
+- Keep the current-website match selected while the rest of the vault loads in both commands, instead of letting progressive loading move it.
+- Share the website matching helpers between Search Passwords and Authenticator while preserving their ranking behavior.
 
 ## [Faster TOTP Codes and Leaner Loading] - 2026-10-17
 

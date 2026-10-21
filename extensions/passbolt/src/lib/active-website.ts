@@ -1,5 +1,5 @@
 import { BrowserExtension, environment } from "@raycast/api";
-import { websiteHostname } from "../utils/totp";
+import { websiteHostname } from "../utils/website";
 
 export async function getActiveWebsiteUrl(launchUrl?: string): Promise<string | undefined> {
   if (launchUrl && websiteHostname(launchUrl)) return launchUrl;

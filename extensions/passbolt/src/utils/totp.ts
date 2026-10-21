@@ -1,6 +1,7 @@
 import { TOTP, URI } from "otpauth";
-import { getDomain } from "tldts";
-import type { Resource, ResourceType, TotpConfiguration, TotpResource } from "../types";
+import { websiteMatchContext, websiteScore } from "./website";
+export { websiteHostname, websiteMatchScore } from "./website";
+import type { ResourceType, TotpConfiguration, TotpResource } from "../types";
 
 function object(value: unknown): Record<string, unknown> | undefined {
   return value !== null && typeof value === "object" && !Array.isArray(value)
@@ -129,45 +130,6 @@ export function filterTotpResources(resources: TotpResource[], query: string): T
     const { text, initials, aliases } = blobs[index];
     return terms.every((term) => text.includes(term) || initials.includes(term) || aliases.includes(term));
   });
-}
-
-export function websiteHostname(value?: string): string | undefined {
-  if (!value) return undefined;
-  try {
-    const hasScheme = /^[a-z][a-z0-9+.-]*:/i.test(value) && !/^[^/:]+:\d+(?:\/|$)/.test(value);
-    const url = new URL(hasScheme ? value : `https://${value}`);
-    return ["https:", "http:"].includes(url.protocol) ? url.hostname.toLowerCase().replace(/\.$/, "") : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-// The current website only needs parsing once per ranking pass instead of once per entry.
-interface WebsiteMatchContext {
-  host: string;
-  domain: string | null;
-}
-
-function websiteMatchContext(currentUrl?: string): WebsiteMatchContext | undefined {
-  const host = websiteHostname(currentUrl);
-  if (!host) return undefined;
-  return { host, domain: getDomain(host, { allowPrivateDomains: true }) };
-}
-
-function websiteScore(resource: Resource, context?: WebsiteMatchContext): number {
-  if (!context) return 0;
-  let score = 0;
-  for (const uri of [resource.uri, ...(resource.uris ?? [])]) {
-    const host = websiteHostname(uri);
-    if (!host) continue;
-    if (host === context.host) return 2;
-    if (context.domain && getDomain(host, { allowPrivateDomains: true }) === context.domain) score = 1;
-  }
-  return score;
-}
-
-export function websiteMatchScore(resource: Resource, currentUrl?: string): number {
-  return websiteScore(resource, websiteMatchContext(currentUrl));
 }
 
 function scoreTotpResources(resources: TotpResource[], currentUrl?: string) {
