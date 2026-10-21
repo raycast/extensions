@@ -1,5 +1,9 @@
 # Passbolt Changelog
 
+## [Keep the Current-Website Account Selected] - {PR_MERGE_DATE}
+
+- Pin the current-website account as the selection while the rest of the vault loads, instead of letting progressive loading move it.
+
 ## [Faster TOTP Codes and Leaner Loading] - 2026-10-17
 
 - Load the vault list without secret payloads and download secrets only for TOTP-capable entries, in ID-filtered batches.

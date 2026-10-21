@@ -11,7 +11,7 @@ import {
   LaunchProps,
   Keyboard,
 } from "@raycast/api";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { getPassboltClient } from "./lib/passbolt";
 import { getActiveWebsiteUrl } from "./lib/active-website";
 import { TotpLoadProgress, TotpResource } from "./types";
@@ -26,6 +26,8 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
   const [searchText, setSearchText] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState<string>();
   const [revision, setRevision] = useState(0);
+  const [selectedItemId, setSelectedItemId] = useState<string>();
+  const selection = useRef<{ revision: number; autoSelect: boolean }>({ revision: 0, autoSelect: true });
   const [client] = useState(() => getPassboltClient());
   const [currentTime, setCurrentTime] = useState(Date.now());
   const { matchCurrentWebsite = true } = getPreferenceValues<Preferences.Authenticator>();
@@ -96,7 +98,36 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
     () => rankAndPartitionTotpResources(filterTotpResources(items, searchText), websiteUrl),
     [items, searchText, websiteUrl],
   );
-  const refresh = () => setRevision((value) => value + 1);
+  useEffect(() => {
+    if (selection.current.revision !== revision || !selection.current.autoSelect || searchText || !matching.length)
+      return;
+    selection.current.autoSelect = false;
+    setSelectedItemId(matching[0].id);
+  }, [matching, searchText, revision]);
+
+  const onSelectionChange = (id: string | null) => {
+    // Ignore empty-list notifications and callbacks from the list being refreshed.
+    if (selection.current.revision !== revision || id === null) return;
+    const firstId = matching[0]?.id ?? others[0]?.id;
+    // Raycast reports its own default selection when the list grows or reorders. Only a
+    // deliberate move away from the first result should cancel the pending website jump.
+    if (id !== firstId) selection.current.autoSelect = false;
+    setSelectedItemId(id);
+  };
+  const onSearchTextChange = (text: string) => {
+    if (text) selection.current.autoSelect = false;
+    setSearchText(text);
+    // Let Raycast choose a visible result when filtering hides the selected entry.
+    setSelectedItemId(undefined);
+  };
+  const refresh = () => {
+    const nextRevision = selection.current.revision + 1;
+    selection.current = { revision: nextRevision, autoSelect: !searchText };
+    setSelectedItemId(undefined);
+    // Clear in the same update as revision so the selection effect cannot pin old items.
+    setItems([]);
+    setRevision(nextRevision);
+  };
   const refreshAction = (
     <Action
       title="Refresh Accounts"
@@ -120,7 +151,9 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
       isLoading={isLoading}
       filtering={false}
       searchText={searchText}
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={onSearchTextChange}
+      selectedItemId={selectedItemId}
+      onSelectionChange={onSelectionChange}
       searchBarPlaceholder="Search accounts, usernames, websites, or tags…"
       actions={<ActionPanel>{refreshAction}</ActionPanel>}
     >
@@ -150,6 +183,7 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
       )}
       {matching.length > 0 && (
         <List.Section
+          key="current-website"
           title={`Current Website · ${websiteHostname(websiteUrl)}`}
           subtitle={`${matching.length} accounts`}
         >
@@ -158,6 +192,7 @@ export default function Authenticator(props: LaunchProps<{ launchContext?: { url
       )}
       {others.length > 0 && (
         <List.Section
+          key="other-accounts"
           title={matching.length ? "Other Accounts" : "TOTP Accounts"}
           subtitle={
             isLoading && progress
@@ -209,6 +244,7 @@ function TotpListItem({
 
   return (
     <List.Item
+      id={item.id}
       title={item.name || "Unnamed resource"}
       subtitle={item.username}
       icon={item.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : Icon.Key}
