@@ -1,6 +1,6 @@
 # Passbolt Changelog
 
-## [Current Website Matching] - {PR_MERGE_DATE}
+## [Current Website Matching] - 2026-10-21
 
 - Show passwords matching the current website above Favorites in Search Passwords, ordered by exact hostname, favorite status, and name.
 - Enable optional Website Matching in the Search Passwords preferences, using the browser extension or launch context.
