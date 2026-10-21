@@ -1,6 +1,6 @@
 # Asana Changelog
 
-## [Add Copy Short Task URL action] - {PR_MERGE_DATE}
+## [Add Copy Short Task URL action] - 2026-10-21
 
 - Added a "Copy Task Short URL" action that copies the short `https://app.asana.com/0/0/<task-id>` link of a task
 
