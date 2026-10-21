@@ -1,6 +1,6 @@
 # Substack Changelog
 
-## [Add Ask AI and multiple account draft support] - {PR_MERGE_DATE}
+## [Add Ask AI and multiple account draft support] - 2026-10-21
 
 - Add Ask Substack with account and draft tools.
 - Add List My Drafts for remote unpublished drafts and pagination.
