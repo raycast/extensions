@@ -5,7 +5,6 @@
   "description": "Ask your AI models, run AI Workflows on selected text, start chats and paste prompts with BoltAI.",
   "icon": "icon.png",
   "author": "daniel_nguyenx",
-  "owner": "boltai",
   "access": "public",
   "categories": [
     "Productivity",
