@@ -100,7 +100,24 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter status and zones">
-      {error && <List.EmptyView icon={Icon.Warning} title="Status unavailable" description={error.message} />}
+      {error && (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Status unavailable"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={revalidate}
+              />
+              <Action title="Open Log" icon={Icon.Document} onAction={() => open(LOG_FILE, "Console")} />
+            </ActionPanel>
+          }
+        />
+      )}
       {summary && (
         <List.Section title="Discord">
           <List.Item

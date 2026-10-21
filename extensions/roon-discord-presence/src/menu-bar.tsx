@@ -28,7 +28,7 @@ const ICONS = {
 };
 
 export default function Command() {
-  const { showTrackInMenuBar } = getPreferenceValues<{ showTrackInMenuBar?: boolean }>();
+  const { showTrackInMenuBar } = getPreferenceValues<Preferences.MenuBar>();
   // running the command by hand from Raycast brings a hidden icon back
   if (environment.launchType === LaunchType.UserInitiated && isMenuBarHidden()) {
     setMenuBarHidden(false, false); // we are about to render, no refresh needed

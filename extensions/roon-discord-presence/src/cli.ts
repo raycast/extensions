@@ -32,7 +32,7 @@ export const LOG_FILE = join(homedir(), "Library/Logs/roon-discord-presence/roon
 export const INSTALL_HINT = "uv tool install 'roon-discord-presence[s3]' && roon-discord-presence setup";
 
 function findCli(): string {
-  const { cliPath } = getPreferenceValues<{ cliPath?: string }>();
+  const { cliPath } = getPreferenceValues<Preferences>();
   const candidates = [
     cliPath?.trim(),
     join(homedir(), ".local/bin/roon-discord-presence"),
