@@ -1,6 +1,6 @@
 # Search Router Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-10-21
 
 - Browse Search Engines: Add primary action to search with selected search engine
 - Browse Search Engines: Merge aliases display into primary trigger
