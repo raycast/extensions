@@ -358,6 +358,10 @@ it.each([
   ["gym at 11-1 in the evening", "gym", "2026-09-21", "23:00", "01:00", 120],
   ["gym at 8-10 in the night", "gym", "2026-09-21", "20:00", "22:00", 120],
   ["gym at 11-1 in the night", "gym", "2026-09-21", "23:00", "01:00", 120],
+  ["gym at 11-12 in the evening", "gym", "2026-09-21", "23:00", "00:00", 60],
+  ["gym at 11-12 evening", "gym", "2026-09-21", "23:00", "00:00", 60],
+  ["gym at 9-12 in the evening", "gym", "2026-09-21", "21:00", "00:00", 180],
+  ["gym at 10-12 in the night", "gym", "2026-09-21", "22:00", "00:00", 120],
 ])("reconciles a range with a window word for %s", (input, name, date, start, end, durationMinutes) => {
   expect(parseCapture(input, ref)).toMatchObject({ kind: "exact", name, date, start, end, durationMinutes });
 });

@@ -88,7 +88,9 @@ export function parseCapture(input: string, ref = new Date()): ParsedCapture {
           // midnight ("11-1" → 11:00 today, 01:00 tomorrow); shifting that
           // end by 12 hours would break the overnight span, so leave it.
           const endOvernight = todayISO(endDate) !== todayISO(startDate);
-          const endShift = endOvernight ? 0 : windowHourShift(endDate, window);
+          // A noon end after a start moved to PM is midnight ("11-12 in the evening" → 23:00–00:00).
+          const noonAfterPM = shift > 0 && endDate.getHours() === 12;
+          const endShift = endOvernight ? 0 : noonAfterPM ? -12 : windowHourShift(endDate, window);
           reconciledEnd = endShift ? shiftClockHM(clockHM(endDate), endShift) : clockHM(endDate);
           // Wall-clock minutes from the reconciled clocks: a shifted start ("12 to 2
           // in the night" → 00:00) moves off chrono's date, so the dates do not apply.
@@ -129,6 +131,12 @@ export function parseCapture(input: string, ref = new Date()): ParsedCapture {
       // Calendar minutes match the API's wall-clock ranges, including DST days.
       rangeMinutes = wallMinutes(result.start.date(), result.end.date());
       if (rangeMinutes <= 0) rangeMinutes += 24 * 60;
+      // Chrono reads "11-12 evening" as 23:00 to noon the next day. With no typed am/pm, the user means midnight.
+      const typedMeridiem = /\d\s*[ap]\.?m\b/i.test(result.text);
+      if (end === "12:00" && result.start.date().getHours() > 12 && !typedMeridiem) {
+        end = "00:00";
+        rangeMinutes -= 12 * 60;
+      }
     }
   }
 
