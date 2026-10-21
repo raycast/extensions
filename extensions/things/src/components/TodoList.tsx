@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { getListTodos, getCollections } from '../api';
 import { plural } from '../utils';
 
+import CalendarEvents from './CalendarEvents';
 import TodoListEmptyView from './TodoListEmptyView';
 import TodoListItem from './TodoListItem';
 import ErrorView from './ErrorView';
@@ -188,6 +189,14 @@ export default function TodoList({ commandListName, displayActivationDates }: To
         </List.Dropdown>
       }
     >
+      {preferences.showCalendarEvents !== false && (commandListName === 'today' || commandListName === 'upcoming') && (
+        <CalendarEvents
+          list={commandListName}
+          names={preferences.calendarNames ?? ''}
+          days={preferences.calendarUpcomingDays ?? '30'}
+          searchText={searchText}
+        />
+      )}
       {Object.entries(sections).map(([key, section]) => {
         if (key === 'no-project-or-area') {
           return section.todos.map((todo) => (

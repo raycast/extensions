@@ -16,7 +16,8 @@
     "dinocosta",
     "janosorcsik",
     "faridrashidi",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "raffeyang"
   ],
   "pastContributors": [
     "thomaslombart"
@@ -474,6 +475,30 @@
       "description": "Requires Full Disk Access for Raycast and uses an unofficial internal format that may break on Things updates.",
       "default": false,
       "required": false
+    },
+    {
+      "name": "showCalendarEvents",
+      "type": "checkbox",
+      "title": "Calendar Events",
+      "label": "Show macOS calendar events in Today and Upcoming",
+      "description": "Read events from macOS Calendar, including subscribed calendars. Requires calendar access.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "calendarNames",
+      "type": "textfield",
+      "title": "Calendar Names",
+      "description": "Comma-separated exact calendar names, e.g. Home, Lunar, Work. Leave empty to show all calendars. Independent of Things calendar settings.",
+      "required": false
+    },
+    {
+      "name": "calendarUpcomingDays",
+      "type": "textfield",
+      "title": "Upcoming Calendar Days",
+      "description": "Number of days to show starting tomorrow (1–365).",
+      "default": "30",
+      "required": false
     }
   ],
   "dependencies": {
@@ -494,6 +519,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test tests/*.cjs"
   }
 }
