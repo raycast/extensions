@@ -1,8 +1,8 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import {
+  branchExistsLocal,
   directoryExists,
-  removeWorktree,
   sanitizeBranchName,
   worktreeDir,
 } from "./worktrees";
@@ -12,44 +12,16 @@ const gitExecutable = process.platform === "win32" ? "git" : "/usr/bin/git";
 
 async function runGit(cwd: string, args: string[]): Promise<string> {
   const { stdout } = await execFileAsync(gitExecutable, ["-C", cwd, ...args], {
-    timeout: 30_000,
-  });
-  return stdout;
-}
-
-async function runGh(cwd: string, args: string[]): Promise<string> {
-  const { stdout } = await execFileAsync("gh", args, {
-    cwd,
     timeout: 60_000,
   });
   return stdout;
 }
 
-async function currentHeadRef(repoRoot: string): Promise<string | undefined> {
-  try {
-    return (await runGit(repoRoot, ["symbolic-ref", "HEAD"])).trim();
-  } catch {
-    return undefined;
-  }
-}
-
-async function branchExists(
-  repoRoot: string,
-  branch: string,
-): Promise<boolean> {
-  try {
-    await runGit(repoRoot, [
-      "show-ref",
-      "--verify",
-      "--quiet",
-      `refs/heads/${branch}`,
-    ]);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
+/**
+ * Creates a worktree for the PR without touching the primary checkout:
+ * the PR head is fetched from origin (the repo the dashboard lists PRs from)
+ * and a new `pr-N` branch is created directly inside the worktree.
+ */
 export async function checkoutPullRequestAsWorktree(
   repoRoot: string,
   pr: { number: number; headRefName: string },
@@ -61,50 +33,29 @@ export async function checkoutPullRequestAsWorktree(
   if (await directoryExists(worktreePath)) {
     throw new Error(`Worktree already exists at ${worktreePath}`);
   }
-
-  const headBefore = await currentHeadRef(repoRoot);
-  const branchExistedBefore = await branchExists(repoRoot, localBranch);
+  if (await branchExistsLocal(repoRoot, localBranch)) {
+    throw new Error(
+      `Branch ${localBranch} already exists in ${repoRoot}; delete it before checking out PR #${pr.number} as a worktree`,
+    );
+  }
 
   try {
-    await runGh(repoRoot, [
-      "pr",
-      "checkout",
-      String(pr.number),
-      "--branch",
-      localBranch,
-      "--force",
-    ]);
+    await runGit(repoRoot, ["fetch", "origin", `refs/pull/${pr.number}/head`]);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`gh pr checkout failed: ${message}`);
-  }
-
-  const headAfter = await currentHeadRef(repoRoot);
-  if (headBefore && headAfter && headBefore !== headAfter) {
-    try {
-      await runGit(repoRoot, ["switch", "-"]);
-    } catch {
-      // best effort; the toast layer surfaces the caveat if needed
-    }
+    throw new Error(`git fetch of PR #${pr.number} head failed: ${message}`);
   }
 
   try {
-    await runGit(repoRoot, ["worktree", "add", worktreePath, localBranch]);
+    await runGit(repoRoot, [
+      "worktree",
+      "add",
+      "-b",
+      localBranch,
+      worktreePath,
+      "FETCH_HEAD",
+    ]);
   } catch (error) {
-    if (!branchExistedBefore) {
-      try {
-        await runGit(repoRoot, ["branch", "-D", localBranch]);
-      } catch {
-        // ignore cleanup failure
-      }
-    }
-    if (await directoryExists(worktreePath)) {
-      try {
-        await removeWorktree(repoRoot, worktreePath);
-      } catch {
-        // ignore cleanup failure
-      }
-    }
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`git worktree add failed: ${message}`);
   }

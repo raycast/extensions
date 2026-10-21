@@ -17,7 +17,7 @@ import { runAICommit } from "./aiCommit";
 import { runAIPRDescription } from "./aiPRDescription";
 import { TemplateList } from "./views/TemplateList";
 import { existsSync } from "node:fs";
-import { basename } from "node:path";
+import { basename, dirname } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { WorktreeList } from "./views/WorktreeList";
@@ -260,6 +260,9 @@ async function enrichFolders(folders: Folder[]): Promise<Folder[]> {
   return Promise.all(folders.map(inspectGit));
 }
 
+// Bounds the Windows profile walk so large profiles return within the timeout.
+const WINDOWS_SEARCH_DEPTH = 5;
+
 async function searchFolders(query: string): Promise<Folder[]> {
   const trimmed = query.trim();
   if (!trimmed) return [];
@@ -274,7 +277,7 @@ async function searchFolders(query: string): Promise<Folder[]> {
               "-NoProfile",
               "-NonInteractive",
               "-Command",
-              `$q = '${trimmed.replaceAll("'", "''")}'; Get-ChildItem -Path $env:USERPROFILE -Directory -Recurse -Force -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "*$q*" -or $_.FullName -like "*$q*" } | Select-Object -ExpandProperty FullName`,
+              `$q = '${trimmed.replaceAll("'", "''")}'; Get-ChildItem -Path $env:USERPROFILE -Directory -Recurse -Depth ${WINDOWS_SEARCH_DEPTH} -Force -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "*$q*" -or $_.FullName -like "*$q*" } | Select-Object -ExpandProperty FullName`,
             ],
             { maxBuffer: 4 * 1024 * 1024, timeout: 15_000 },
           ),
@@ -284,7 +287,7 @@ async function searchFolders(query: string): Promise<Folder[]> {
               "-NoProfile",
               "-NonInteractive",
               "-Command",
-              `Get-ChildItem -Path $env:USERPROFILE -Directory -Recurse -Force -Filter .git -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Parent`,
+              `Get-ChildItem -Path $env:USERPROFILE -Directory -Recurse -Depth ${WINDOWS_SEARCH_DEPTH} -Force -Filter .git -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName`,
             ],
             { maxBuffer: 4 * 1024 * 1024, timeout: 15_000 },
           ).catch(() => ({ stdout: "" })),
@@ -310,8 +313,8 @@ async function searchFolders(query: string): Promise<Folder[]> {
   gitDirs.stdout
     .split("\n")
     .map((path) => path.trim())
-    .filter((path) => path.endsWith("/.git"))
-    .forEach((path) => paths.add(path.slice(0, -5)));
+    .filter((path) => basename(path) === ".git")
+    .forEach((path) => paths.add(dirname(path)));
   const candidates = await enrichFolders(
     Array.from(paths)
       .slice(0, 500)
