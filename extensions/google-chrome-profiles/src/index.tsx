@@ -241,7 +241,7 @@ export default function Command() {
     >
       {visibleResults && profileItems(visibleResults, false)}
       {showHidden && <List.Section title="Hidden">{profileItems(hiddenResults, true)}</List.Section>}
-      {/* Without a visible result there is no item to run Show Hidden Profiles from, so offer it here. */}
+      {/* Keep "Show Hidden Profiles" available when no visible profiles match. */}
       {!showHidden && visibleResults?.length === 0 && hiddenResults.length > 0 && (
         <List.EmptyView
           icon={Icon.EyeDisabled}

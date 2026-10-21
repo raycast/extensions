@@ -47,8 +47,7 @@ export function sortByLastUsed(profiles: Profile[]): Profile[] {
   return [...profiles].sort((a, b) => (b.activeTime ?? 0) - (a.activeTime ?? 0));
 }
 
-// Stored per browser and by directory, not name: Chrome and Canary share directory names, and names can change.
-// Hiding only affects the lists: Chrome's menu matching still needs every profile (see `uniqueLabels`).
+// Profile names can change; directory names can overlap between browsers.
 const hiddenProfilesKey = (browser: BrowserConfig) => `hiddenProfiles:${browser.dataPath}`;
 
 export function parseHiddenDirectories(value: string | undefined): string[] {
@@ -64,7 +63,6 @@ export async function loadHiddenDirectories(browser: BrowserConfig): Promise<str
   return parseHiddenDirectories(await LocalStorage.getItem<string>(hiddenProfilesKey(browser)));
 }
 
-/** Saves the hidden directories, dropping duplicates and profiles that no longer exist. */
 export async function saveHiddenDirectories(
   browser: BrowserConfig,
   directories: string[],
