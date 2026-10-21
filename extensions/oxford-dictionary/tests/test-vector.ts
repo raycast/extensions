@@ -119,6 +119,24 @@ async function testVector() {
   console.log(`  Found petrichor with ${petrMatch.matchPercent}% match!`);
   console.log('  ✓ Test 8 Passed\n');
 
+  // Test 9: Multi-dimensional intersection & morphological derivation ("large imposing complex" -> edificial / edifice)
+  console.log('Test 9: Multi-dimensional intersection for "large imposing complex"');
+  const t9 = await searchVectorSynonyms('large imposing complex', undefined, 10);
+  console.log(
+    '  Top 5 for "large imposing complex":',
+    t9.slice(0, 5).map((x) => `${x.word} (${x.matchPercent}%, ${x.partOfSpeech})`).join(', ')
+  );
+  const edificialHit = t9.find((x) => x.word.toLowerCase() === 'edificial');
+  const edificeHit = t9.find((x) => x.word.toLowerCase() === 'edifice');
+  if (!edificialHit || !edificeHit) {
+    throw new Error('Expected both "edificial" and "edifice" to appear in top results for "large imposing complex"');
+  }
+  if (t9[0].word.toLowerCase() !== 'edificial' && t9[1].word.toLowerCase() !== 'edificial') {
+    throw new Error('Expected "edificial" to rank #1 or #2 for "large imposing complex"');
+  }
+  console.log(`  Found edificial (${edificialHit.matchPercent}%) and edifice (${edificeHit.matchPercent}%) at the top!`);
+  console.log('  ✓ Test 9 Passed\n');
+
   console.log('=== ALL VECTOR SEMANTIC SYNONYM TESTS PASSED SUCCESSFULLY! ===');
 }
 
