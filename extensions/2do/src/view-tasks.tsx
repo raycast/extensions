@@ -62,6 +62,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
+      {!tasks.isLoading && <List.EmptyView icon={Icon.CheckCircle} title="No Tasks" />}
       {tasks.data?.map((t) => (
         <List.Item
           key={t.task_id}

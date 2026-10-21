@@ -29,6 +29,7 @@ export function TaskForm({ task, onSaved }: { task?: Task; onSaved?: () => void 
 
   return (
     <Form
+      navigationTitle={task ? "Edit Task" : undefined}
       isLoading={lists.isLoading || tags.isLoading}
       actions={
         <ActionPanel>
@@ -37,7 +38,7 @@ export function TaskForm({ task, onSaved }: { task?: Task; onSaved?: () => void 
       }
     >
       <Form.TextField title="Title" placeholder="Task" {...itemProps.title} />
-      <Form.TextArea title="Notes" {...itemProps.notes} />
+      <Form.TextArea title="Notes" placeholder="Notes" {...itemProps.notes} />
       <Form.Dropdown title="List" storeValue={!task} {...itemProps.list_id}>
         {lists.data?.map((l) => (
           <Form.Dropdown.Item key={l.list_id} value={l.list_id} title={l.title} />
