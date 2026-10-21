@@ -85,8 +85,8 @@ for the reviewed workflows. Compatibility fixes in this extension handle:
 - The `permission` gate opens `/settings/plan`. The old `/settings/billing`
   link gave a 404.
 
-Sync anchor: reassign `f4a983a8d` (#1665, the head of origin/main). The
-reassign PRs on origin/main from #1468 to #1665 change no field, error code,
+Sync anchor: reassign `c86570e3c` (#1689, the head of origin/main). The
+reassign PRs on origin/main from #1468 to #1689 change no field, error code,
 or status that the extension uses. The exceptions are #1499 (`mirrorStyles` on
 `/schedule/plan`, handled in #88), #1541 and #1665 (see below). The billing checkout
 routes alone return `checkout_unlinked` (409, #1512), and the extension does
@@ -108,6 +108,18 @@ reassign#1541 adds Inbox projects and priority (`projectId`, `priority`). Fill
 with AI, Add Block and Inbox use these fields. reassign#1665 adds them to
 `/schedule/plan`, so Find a Time sends them too. reassign#1663 changes only the
 MCP tool text, and #1664 changes only dependencies.
+
+reassign#1677 treats a null `areaId` or `activityTypeId` as absent in the
+`/schedule/plan` replay fingerprint. The extension omits these keys when they
+are empty, so it never sends null. reassign#1679 makes each route load only its
+own contract group. The schemas, limits and `auth` gate do not change.
+
+#1683 and #1689 change the AI `update` intent of a cross-midnight event.
+`blockDraft` refuses every op other than `create` and `park`, so the extension
+does not use this intent. Their other changes touch only the web UI, the tests
+and the docs. #1666, #1678, #1680 and #1681 change only the web UI, as do the
+other fixes in #1677. reassign#1691 is on origin/develop only, so it is not in
+this anchor.
 
 The SDK is `@raycast/api` 2.4.1; the installed app is Raycast 2.4.1.
 The [OAuth docs](https://developers.raycast.com/api-reference/oauth) still recommend

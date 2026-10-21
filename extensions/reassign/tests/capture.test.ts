@@ -160,6 +160,38 @@ it.each([
   expect(parseCapture(input, ref).name).not.toMatch(/\b30\b/);
 });
 
+// Chrono-node does not absorb "the" in front of a time token. Before the fix,
+// only the literal "in the" was tolerated, so "before the 6pm", "at the noon",
+// "until the 6pm", ... left a trailing "the " in `lead`, the bare integer was
+// treated as title text, and the duration collapsed to the hours-only value.
+it.each([
+  ["gym 1h 30 before the 6pm meeting", "gym before meeting", "18:00", "19:30", 90],
+  ["gym 1h 30 until the 6pm", "gym until", "18:00", "19:30", 90],
+  ["gym 1h 30 around the 6pm", "gym around", "18:00", "19:30", 90],
+  ["gym 1h 30 till the 6pm", "gym till", "18:00", "19:30", 90],
+  ["gym 1h 30 at the 6pm", "gym", "18:00", "19:30", 90],
+  ["gym 1h 30 at the noon", "gym", "12:00", "13:30", 90],
+  ["gym 1h 30 on the 6pm", "gym", "18:00", "19:30", 90],
+  ["gym 1h 30 by the 6pm", "gym", "18:00", "19:30", 90],
+  ["gym 1h 30 to the 6pm", "gym", "18:00", "19:30", 90],
+  ["gym 1h 30 in the 6pm", "gym in", "18:00", "19:30", 90],
+  ["gym 1h 30 in the evening", "gym", undefined, undefined, 90],
+  ["gym 1h 30 from the 6pm", "gym", "18:00", "19:30", 90],
+  ["gym 1h 30 at around the 6pm", "gym around", "18:00", "19:30", 90],
+])(
+  "keeps the minutes when a connector plus 'the' precedes the time for %s",
+  (input, name, start, end, durationMinutes) => {
+    const expected: Record<string, unknown> = { kind: start ? "exact" : "flexible", name, durationMinutes };
+    if (start) {
+      expected.start = start;
+      expected.end = end;
+    }
+    expect(parseCapture(input, ref)).toMatchObject(expected);
+    // The bare integer must never leak into the committed name.
+    expect(parseCapture(input, ref).name).not.toMatch(/\b30\b/);
+  },
+);
+
 // A content word ("issues", a name) between the integer and the time keeps the integer
 // in the title, so the duration is the hours-only value and the count stays in the name.
 it.each([
@@ -255,5 +287,162 @@ it("moves a window that already ended today to tomorrow", () => {
   expect(parseCapture("run 30m morning", new Date(2026, 8, 29, 15, 30))).toMatchObject({
     date: "2026-09-30",
     earliest: "06:00",
+  });
+});
+
+// Chrono splits "at 6 in the evening" into "at 6" + "evening" (it merges
+// "in the morning"/"in the afternoon" but not "in the evening"/"in the
+// night"). A bare hour followed by "in the evening"/"in the night" must be
+// reconciled into the window (06:00 → 18:00) so the seeded form does not flip
+// the user's evening to early morning of the next day, and the window word
+// must be stripped from the title instead of leaking in as "gym in evening".
+it.each([
+  ["gym at 6 in the evening", "gym", "2026-09-21", "18:00", "18:30", 30, false],
+  ["gym at 7 in the evening", "gym", "2026-09-21", "19:00", "19:30", 30, false],
+  ["gym at 9 in the evening", "gym", "2026-09-21", "21:00", "21:30", 30, false],
+  ["gym at 11 in the evening", "gym", "2026-09-21", "23:00", "23:30", 30, false],
+  ["gym at 6 in the night", "gym", "2026-09-21", "18:00", "18:30", 30, false],
+  ["gym at 11 in the night", "gym", "2026-09-21", "23:00", "23:30", 30, false],
+  ["yoga at 7 in the evening", "yoga", "2026-09-21", "19:00", "19:30", 30, false],
+])("reconciles a bare hour with a window word for %s", (input, name, date, start, end, durationMinutes, explicit) => {
+  const parsed = parseCapture(input, ref);
+  expect(parsed).toMatchObject({ kind: "exact", name, date, start, end, durationMinutes, dateExplicit: explicit });
+  expect(parsed.name).not.toMatch(/\bevening\b|\bnight\b/i);
+  expect(parsed.preview).toBe(`${name} · Today · ${start}–${end}`);
+});
+
+// The reconciled "in the evening" phrasing must match the working sibling
+// "evening" (no "the") byte-for-byte, so adding "the" no longer flips the result.
+it.each([
+  ["gym at 6 in the evening", "gym at 6 evening"],
+  ["gym at 5 in the evening", "gym at 5 evening"],
+  ["gym at 9 in the evening", "gym at 9 evening"],
+  ["gym at 11 in the evening", "gym at 11 evening"],
+  ["gym at 6 in the night", "gym at 6 night"],
+  ["gym at 11-12 in the evening", "gym at 11-12 evening"],
+  ["gym at 6-7 in the evening", "gym at 6-7 evening"],
+  ["gym at 6 in the evening tomorrow", "gym at 6 evening tomorrow"],
+  ["gym at 6 in the evening today", "gym at 6 evening today"],
+])('parses %s like its sibling without "the" (%s)', (a, b) => {
+  const pa = parseCapture(a, ref);
+  const pb = parseCapture(b, ref);
+  expect(pa).toEqual(pb);
+});
+
+// A window phrase that names a day ("evening tomorrow") keeps that day on the
+// reconciled capture. Chrono does not advance "tomorrow" after "evening", so
+// the fix re-parses the rest of the phrase to recover the explicit day.
+it.each([
+  ["gym at 6 in the evening tomorrow", "gym", "2026-09-22", "18:00", "18:30", true],
+  ["gym at 11 in the evening tomorrow", "gym", "2026-09-22", "23:00", "23:30", true],
+  ["gym at 6 in the evening today", "gym", "2026-09-21", "18:00", "18:30", true],
+  ["gym at 6 in the evening on friday", "gym", "2026-09-25", "18:00", "18:30", true],
+])("keeps the day named in the window phrase for %s", (input, name, date, start, end, explicit) => {
+  expect(parseCapture(input, ref)).toMatchObject({
+    kind: "exact",
+    name,
+    date,
+    start,
+    end,
+    durationMinutes: 30,
+    dateExplicit: explicit,
+  });
+});
+
+// A range whose start and end are both bare ("6-7 in the evening") reconciles
+// both bounds into the window. An overnight range ("11-1 in the evening")
+// keeps chrono's already-advanced end, so the span stays at two hours.
+it.each([
+  ["gym at 6-7 in the evening", "gym", "2026-09-21", "18:00", "19:00", 60],
+  ["gym at 9-11 in the evening", "gym", "2026-09-21", "21:00", "23:00", 120],
+  ["gym at 11-1 in the evening", "gym", "2026-09-21", "23:00", "01:00", 120],
+  ["gym at 8-10 in the night", "gym", "2026-09-21", "20:00", "22:00", 120],
+  ["gym at 11-1 in the night", "gym", "2026-09-21", "23:00", "01:00", 120],
+])("reconciles a range with a window word for %s", (input, name, date, start, end, durationMinutes) => {
+  expect(parseCapture(input, ref)).toMatchObject({ kind: "exact", name, date, start, end, durationMinutes });
+});
+
+// A small night hour stays AM ("1 in the night" is 01:00), and "12 in the night" is
+// midnight. Each lands on the next day when that time has passed today.
+it.each([
+  ["call at 1 in the night", "2026-09-22", "01:00", "01:30", 30],
+  ["call at 1:30 in the night", "2026-09-22", "01:30", "02:00", 30],
+  ["call at 5 in the night", "2026-09-22", "05:00", "05:30", 30],
+  ["call at 12 in the night", "2026-09-22", "00:00", "00:30", 30],
+  ["call at 12:30 in the night", "2026-09-22", "00:30", "01:00", 30],
+  ["call tomorrow at 1 in the night", "2026-09-22", "01:00", "01:30", 30],
+  ["call from 1 to 3 in the night", "2026-09-22", "01:00", "03:00", 120],
+  ["call from 12 to 2 in the night", "2026-09-22", "00:00", "02:00", 120],
+  ["call from 10 to 2 in the night", "2026-09-21", "22:00", "02:00", 240],
+])("keeps a small night hour in the small hours for %s", (input, date, start, end, durationMinutes) => {
+  expect(parseCapture(input, ref)).toMatchObject({ kind: "exact", name: "call", date, start, end, durationMinutes });
+});
+
+it("keeps a small night hour today when it is still ahead", () => {
+  const justAfterMidnight = new Date(2026, 8, 21, 0, 30);
+  expect(parseCapture("call at 1 in the night", justAfterMidnight)).toMatchObject({
+    date: "2026-09-21",
+    start: "01:00",
+  });
+});
+
+// Conditions chrono already parses correctly (PM hour inside the window, or a
+// window phrase it merges itself) are not touched by the reconciliation.
+it.each([
+  ["gym at 6pm in the evening", "gym", "2026-09-21", "18:00"],
+  ["gym at 18 in the evening", "gym", "2026-09-21", "18:00"],
+  ["gym at 6 in the afternoon", "gym", "2026-09-21", "18:00"],
+  ["gym at 6 in the morning", "gym", "2026-09-22", "06:00"],
+  ["call 9 in the morning", "call", "2026-09-22", "09:00"],
+])("does not over-shift when chrono already placed the hour for %s", (input, name, date, start) => {
+  expect(parseCapture(input, ref)).toMatchObject({ kind: "exact", name, date, start });
+});
+
+// A duration before the time, or after it, must still apply on top of the
+// reconciled hour. The window word is stripped from the title in every shape.
+it.each([
+  ["gym 30m at 6 in the evening", "gym", "2026-09-21", "18:00", "18:30", 30],
+  ["deep work 2h at 6 in the evening", "deep work", "2026-09-21", "18:00", "20:00", 120],
+  ["gym at 6 in the evening for 1h", "gym", "2026-09-21", "18:00", "19:00", 60],
+  ["gym at 6 in the evening 30m", "gym", "2026-09-21", "18:00", "18:30", 30],
+])("keeps the duration with a reconciled window hour for %s", (input, name, date, start, end, durationMinutes) => {
+  expect(parseCapture(input, ref)).toMatchObject({ kind: "exact", name, date, start, end, durationMinutes });
+  expect(parseCapture(input, ref).name).not.toMatch(/\bevening\b/i);
+});
+
+// A content word after the window phrase ("and practice") still reaches the
+// name; only the adjacent window result is consumed for the reconciliation.
+it("keeps a trailing name word after a reconciled window hour", () => {
+  expect(parseCapture("gym at 6 in the evening and practice", ref)).toMatchObject({
+    kind: "exact",
+    name: "gym and practice",
+    date: "2026-09-21",
+    start: "18:00",
+    end: "18:30",
+  });
+});
+
+// When the reconciled time has already passed today, the date rolls to
+// tomorrow — matching the "6 evening" sibling chrono parses itself.
+it.each([
+  ["gym at 6 in the evening", "2026-09-22", "18:00"],
+  ["gym at 9 in the evening", "2026-09-22", "21:00"],
+])("rolls a past reconciled time to tomorrow for %s", (input, date, start) => {
+  expect(parseCapture(input, new Date(2026, 8, 21, 21, 30))).toMatchObject({
+    kind: "exact",
+    name: "gym",
+    date,
+    start,
+  });
+});
+
+// A reconciled time still ahead today stays today, even when chrono's original
+// 6am had rolled to tomorrow via forwardDate.
+it("keeps today for a reconciled evening time still ahead", () => {
+  expect(parseCapture("gym at 11 in the night", new Date(2026, 8, 21, 20, 0))).toMatchObject({
+    kind: "exact",
+    name: "gym",
+    date: "2026-09-21",
+    start: "23:00",
   });
 });

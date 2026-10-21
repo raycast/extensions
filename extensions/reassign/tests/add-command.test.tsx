@@ -343,6 +343,101 @@ it("a chosen end time sends the range length", async () => {
     durationMinutes: 120,
   });
 });
+it("a range kept after clearing End still sends its length to the Inbox", async () => {
+  const start = new Date(2026, 8, 22, 9);
+  const end = new Date(2026, 8, 22, 11);
+  render()
+    .find((n) => n.props.id === "start")!
+    .props.onChange(start);
+  render()
+    .find((n) => n.props.id === "end")!
+    .props.onChange(end);
+  // Clearing End keeps the 2h range as the Duration field's value.
+  render()
+    .find((n) => n.props.id === "end")!
+    .props.onChange(null);
+  expect(render().find((n) => n.props.id === "duration")!.props.value).toBe("2h");
+  await render()
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({ ...values, start, duration: "2h" });
+  expect(mock.capture).toHaveBeenCalledWith({
+    op: "capture_text",
+    text: "idea",
+    plannedDate: "2026-09-22",
+    durationMinutes: 120,
+  });
+});
+it("a range kept after clearing Start still sends its length to the Inbox", async () => {
+  const start = new Date(2026, 8, 22, 9);
+  const end = new Date(2026, 8, 22, 11);
+  render()
+    .find((n) => n.props.id === "start")!
+    .props.onChange(start);
+  render()
+    .find((n) => n.props.id === "end")!
+    .props.onChange(end);
+  render()
+    .find((n) => n.props.id === "start")!
+    .props.onChange(null);
+  expect(render().find((n) => n.props.id === "duration")!.props.value).toBe("2h");
+  await render()
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({ ...values, end, duration: "2h" });
+  // The kept length reaches the AI whether End or Start was cleared.
+  expect(mock.capture).toHaveBeenCalledWith(expect.objectContaining({ op: "capture_text", durationMinutes: 120 }));
+});
+it("clearing the kept Duration after clearing End does not send the default length", async () => {
+  const start = new Date(2026, 8, 22, 9);
+  const end = new Date(2026, 8, 22, 11);
+  render()
+    .find((n) => n.props.id === "start")!
+    .props.onChange(start);
+  render()
+    .find((n) => n.props.id === "end")!
+    .props.onChange(end);
+  render()
+    .find((n) => n.props.id === "end")!
+    .props.onChange(null);
+  // The user then clears the kept Duration field itself: not a choice.
+  render()
+    .find((n) => n.props.id === "duration")!
+    .props.onChange("");
+  await render()
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({ ...values, start, duration: "" });
+  const op = mock.capture.mock.calls[0][0];
+  expect(op).not.toHaveProperty("durationMinutes");
+});
+it.each(["end", "start"])("clearing %s over the parsed 30-minute default does not send that length", async (field) => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date(2026, 8, 22, 8));
+  const text = "idea at 9am";
+  expect(render(text).find((n) => n.props.id === "end")!.props.value).toEqual(new Date(2026, 8, 22, 9, 30));
+  render(text)
+    .find((n) => n.props.id === field)!
+    .props.onChange(null);
+  // The form still shows the kept length, but the AI estimates the length itself.
+  expect(render(text).find((n) => n.props.id === "duration")!.props.value).toBe("30m");
+  await render(text)
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({ ...values, duration: "30m" });
+  expect(mock.capture.mock.calls[0][0]).not.toHaveProperty("durationMinutes");
+});
+it("an End the user picks over the parsed default sends its length after Start is cleared", async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date(2026, 8, 22, 8));
+  const text = "idea at 9am";
+  render(text)
+    .find((n) => n.props.id === "end")!
+    .props.onChange(new Date(2026, 8, 22, 10));
+  render(text)
+    .find((n) => n.props.id === "start")!
+    .props.onChange(null);
+  await render(text)
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({ ...values, end: new Date(2026, 8, 22, 10), duration: "1h" });
+  expect(mock.capture).toHaveBeenCalledWith(expect.objectContaining({ op: "capture_text", durationMinutes: 60 }));
+});
 it("an edited name replaces the launch text", async () => {
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(new Date(2026, 8, 22, 12));

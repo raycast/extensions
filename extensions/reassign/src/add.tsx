@@ -208,6 +208,8 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
   const saved = useRef(false);
   const timingEdited = useRef(false);
   const durationEdited = useRef(false);
+  // End came from the user or the AI, not from the parser's 30-minute default.
+  const endEdited = useRef(false);
 
   // The first parse uses the device clock. The account timezone can put the capture
   // on another day, so parse again on the account clock, unless the user edited first.
@@ -263,7 +265,11 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
   function keepRangeAsDuration() {
     if (hasStartTime && hasEndTime && start && end) {
       const minutes = wallMinutes(start, end);
-      if (minutes > 0 && minutes <= MAX_DURATION_MINUTES) setDuration(humanDuration(minutes));
+      if (minutes > 0 && minutes <= MAX_DURATION_MINUTES) {
+        setDuration(humanDuration(minutes));
+        // A kept seed default is not a choice: the AI estimates the length instead.
+        if (endEdited.current) durationEdited.current = true;
+      }
     }
   }
   function changeStart(value: Date | null) {
@@ -276,6 +282,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
   function changeEnd(value: Date | null) {
     timingEdited.current = true;
     keepRangeAsDuration();
+    endEdited.current = Boolean(value);
     setEnd(value);
   }
   function changeDuration(value: string) {
@@ -292,6 +299,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     setStart(draft.start);
     const minutes = parseDuration(draft.duration)?.minutes;
     setEnd(draft.start && minutes ? shiftWallMinutes(draft.start, minutes) : null);
+    endEdited.current = Boolean(draft.start && minutes);
     setDuration(draft.duration);
     durationEdited.current = Boolean(draft.duration);
     setAiDestination(draft.destination);

@@ -514,8 +514,9 @@ function useLastGood<T extends { ok: true }>(
   isLoading: boolean,
 ): T | ApiError | undefined {
   const last = useRef<{ key: string; value: T } | undefined>(undefined);
-  // Only a fresh payload counts. keepPreviousData can hold another key's payload while it loads.
-  if (data?.ok && !isLoading) last.current = { key, value: data };
+  // Only a fresh payload counts. keepPreviousData can hold another key's payload while it loads,
+  // but a mount-time cache hit arrives with isLoading: true — record it for its own key anyway.
+  if (data?.ok && (!isLoading || last.current?.key !== key)) last.current = { key, value: data };
   const kept = last.current?.key === key ? last.current.value : undefined;
   const transient = data && !data.ok && TRANSIENT_CODES.has(data.code) ? data : undefined;
   useEffect(() => {
