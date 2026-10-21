@@ -514,6 +514,49 @@ test("items shared one by one are listed under Shared with Me, through their own
   assert.equal(failedVaults.length, 0);
 });
 
+test("the vaults' items don't wait for the shares of the items shared with the user, which can take seconds", async () => {
+  let releaseShares: (shareIds: string[]) => void = () => undefined;
+  const listed: string[] = [];
+  const api = passCliWithAdapter({
+    listVaults: async () => [{ shareId: "vault", name: "Personal" }],
+    listItemShares: () =>
+      new Promise((resolve) => {
+        releaseShares = resolve;
+      }),
+    listItems: async (shareId: string, vaultName: string) => {
+      listed.push(shareId);
+      return [{ ...item, shareId, itemId: shareId, vaultName }];
+    },
+  });
+  const listing = api.listVaultsAndItems();
+  await new Promise(setImmediate);
+  assert.equal(listed.join(), "vault");
+
+  releaseShares(["item-share"]);
+  const { items } = await listing;
+  assert.equal(listed.join(), "vault,item-share");
+  assert.equal(items.length, 2);
+});
+
+test("vault and shared item listings run at most 8 pass-cli commands at once, together", async () => {
+  let running = 0;
+  let most = 0;
+  const api = passCliWithAdapter({
+    listVaults: async () => Array.from({ length: 12 }, (_, index) => ({ shareId: `vault-${index}`, name: "Vault" })),
+    listItemShares: async () => Array.from({ length: 6 }, (_, index) => `item-share-${index}`),
+    listItems: async (shareId: string, vaultName: string) => {
+      running++;
+      most = Math.max(most, running);
+      await new Promise(setImmediate);
+      running--;
+      return [{ ...item, shareId, itemId: shareId, vaultName }];
+    },
+  });
+  const { items } = await api.listVaultsAndItems();
+  assert.equal(items.length, 18);
+  assert.equal(most, 8);
+});
+
 test("Shared with Me failing to load doesn't hold the vaults back, unlike an ended session", async () => {
   let shareError = new PassCliError("Network unavailable", "network_error");
   const api = passCliWithAdapter({

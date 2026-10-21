@@ -214,6 +214,26 @@ async function mapWithConcurrency<T, R>(values: T[], limit: number, fn: (value: 
   return results;
 }
 
+/** Runs at most `limit` tasks at once, in the order they come: for listings that start at different times. */
+function createLimiter(limit: number) {
+  let running = 0;
+  const waiting: (() => void)[] = [];
+  return async function run<R>(task: () => Promise<R>): Promise<R> {
+    if (running < limit) running++;
+    // A finishing task hands its place over.
+    else await new Promise<void>((resolve) => waiting.push(resolve));
+    try {
+      return await task();
+    } finally {
+      const next = waiting.shift();
+      if (next) next();
+      else running--;
+    }
+  };
+}
+
+type Limiter = ReturnType<typeof createLimiter>;
+
 /** A vault whose items couldn't be listed. */
 export interface VaultFailure {
   vault: Vault;
@@ -236,9 +256,12 @@ const vaultSources = (vaults: Vault[]): ItemSource[] =>
 const sharedSources = (shareIds: string[]): ItemSource[] =>
   shareIds.map((shareId) => ({ shareId, vault: SHARED_WITH_ME }));
 
-async function listItemsOfSources(sources: ItemSource[]): Promise<{ items: Item[]; failedVaults: VaultFailure[] }> {
+async function listItemsOfSources(
+  sources: ItemSource[],
+  run: Limiter = createLimiter(VAULT_LIST_CONCURRENCY),
+): Promise<{ items: Item[]; failedVaults: VaultFailure[] }> {
   const failures = new Map<string, VaultFailure>();
-  const itemsPerSource = await mapWithConcurrency(sources, VAULT_LIST_CONCURRENCY, async ({ shareId, vault }) => {
+  const listSource = async ({ shareId, vault }: ItemSource): Promise<Item[]> => {
     try {
       const items = await listItemsFromVault(shareId, vault.name);
       // A shared item is only reachable through its own share, whichever share pass-cli prints.
@@ -252,8 +275,9 @@ async function listItemsOfSources(sources: ItemSource[]): Promise<{ items: Item[
       if (!failures.has(vault.shareId)) failures.set(vault.shareId, { vault, message });
       return [];
     }
-  });
-  return { items: withoutDuplicates(itemsPerSource.flat()), failedVaults: [...failures.values()] };
+  };
+  const itemsPerSource = await Promise.all(sources.map((source) => run(() => listSource(source))));
+  return { items: itemsPerSource.flat(), failedVaults: [...failures.values()] };
 }
 
 export async function listItems(shareId?: string, vaults?: Vault[]): Promise<Item[]> {
@@ -287,23 +311,27 @@ export async function listVaultsAndItems(): Promise<{ vaults: Vault[]; items: It
     return { vaults, items, failedVaults: [] };
   }
 
-  // Listed next to the vaults: a failure only concerns Shared with Me.
+  // The vaults' items and the shared ones each start as soon as their shares are known, which can take seconds for the
+  // shared ones, and share the parallel pass-cli calls.
+  const run = createLimiter(VAULT_LIST_CONCURRENCY);
+  const ownListing = listVaults().then(async (vaults) => ({
+    vaults,
+    ...(await listItemsOfSources(vaultSources(vaults), run)),
+  }));
   const sharedListing = listItemShares().then(
-    (shareIds) => ({ shareIds, failure: undefined }),
+    (shareIds) => listItemsOfSources(sharedSources(shareIds), run),
     (error: unknown) => {
+      // A failure only concerns Shared with Me.
       if (error instanceof PassCliError && error.type === "not_authenticated") throw error;
-      return { shareIds: [], failure: { vault: SHARED_WITH_ME, message: errorMessage(error) } };
+      return { items: [], failedVaults: [{ vault: SHARED_WITH_ME, message: errorMessage(error) }] };
     },
   );
-  const [vaults, shared] = await Promise.all([listVaults(), sharedListing]);
-  const { items, failedVaults } = await listItemsOfSources([
-    ...vaultSources(vaults),
-    ...sharedSources(shared.shareIds),
-  ]);
-  const failures = shared.failure ? [...failedVaults, shared.failure] : failedVaults;
+  const [own, shared] = await Promise.all([ownListing, sharedListing]);
+  const items = withoutDuplicates([...own.items, ...shared.items]);
+  const failures = [...own.failedVaults, ...shared.failedVaults];
   // Shared with Me also shows when its items failed to load, so that the ones known already stay.
   const hasShared = items.some((item) => item.sharedWithMe) || failures.some(({ vault }) => isSharedWithMe(vault));
-  return { vaults: hasShared ? [...vaults, SHARED_WITH_ME] : vaults, items, failedVaults: failures };
+  return { vaults: hasShared ? [...own.vaults, SHARED_WITH_ME] : own.vaults, items, failedVaults: failures };
 }
 
 /**
