@@ -864,6 +864,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://netactuate.com/mcp",
   },
   {
+    name: "overlayqa",
+    title: "OverlayQA",
+    description:
+      "Design QA for coding agents. Run WCAG accessibility (axe-core), color-contrast and design-token audits and AI visual reviews on any public URL, then create and manage QA issues, comments, labels and client review links in OverlayQA. 31 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. A free OverlayQA account includes 3 scans a day; creating issues needs a paid plan after a 14-day trial.",
+    icon: "https://raw.githubusercontent.com/OverlayQA/mcp/main/icon.png",
+    homepage: "https://overlayqa.com/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.overlayqa.com/mcp"],
+    },
+    remoteUrl: "https://api.overlayqa.com/mcp",
+  },
+  {
     name: "paddle",
     title: "Paddle",
     description:
