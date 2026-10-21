@@ -59,7 +59,7 @@ export default function Command() {
     }
     const confirmed = await confirmAlert({
       title: "Stop all timers?",
-      message: `${timers.length} running ${timers.length === 1 ? "timer" : "timers"} will be cancelled.`,
+      message: `${timers.length} running ${timers.length === 1 ? "timer" : "timers"} will be canceled.`,
       primaryAction: { title: "Stop All", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) {
