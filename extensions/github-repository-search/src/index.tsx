@@ -11,6 +11,7 @@ import {
   Toast,
   environment,
   getPreferenceValues,
+  open,
   showToast,
   useNavigation,
 } from "@raycast/api";
@@ -88,7 +89,7 @@ export default withAccessToken(github)(CommandInner);
 
 function RepositoryListItem(props: {
   repository: Repository;
-  onVisit: (repository: Repository) => void;
+  onVisit: (repository: Repository) => Promise<void>;
   token: string;
   baseUrl?: string;
 }) {
@@ -111,17 +112,22 @@ function RepositoryListItem(props: {
 
 function Actions(props: {
   repository: Repository;
-  onVisit: (repository: Repository) => void;
+  onVisit: (repository: Repository) => Promise<void>;
   token: string;
   baseUrl?: string;
 }) {
   const { push } = useNavigation();
 
+  async function openRepository(url: string) {
+    await props.onVisit(props.repository);
+    await open(url);
+  }
+
   return (
     <ActionPanel title={props.repository.nameWithOwner}>
       <ActionPanel.Section>
-        <Action.OpenInBrowser url={props.repository.url} onOpen={() => props.onVisit(props.repository)} />
-        <OpenInWebIDEAction repository={props.repository} onOpen={() => props.onVisit(props.repository)} />
+        <Action title="Open in Browser" icon={Icon.Globe} onAction={() => openRepository(props.repository.url)} />
+        <OpenInWebIDEAction repository={props.repository} onOpen={openRepository} />
         <Action.OpenInBrowser
           icon="vscode-action-icon.png"
           title="Clone in VS Code"
@@ -129,47 +135,43 @@ function Actions(props: {
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <Action.OpenInBrowser
+        <Action
           icon={{ source: "pull-request.png", tintColor: Color.PrimaryText }}
           title="Open Pull Requests"
-          url={`${props.repository.url}/pulls`}
           shortcut={Keyboard.Shortcut.Common.OpenWith}
-          onOpen={() => props.onVisit(props.repository)}
+          onAction={() => openRepository(`${props.repository.url}/pulls`)}
         />
         {props.repository.hasIssuesEnabled && (
-          <Action.OpenInBrowser
+          <Action
             icon={{ source: "issue.png", tintColor: Color.PrimaryText }}
             title="Open Issues"
-            url={`${props.repository.url}/issues`}
             shortcut={{
               macOS: { modifiers: ["cmd"], key: "i" },
               Windows: { modifiers: ["ctrl"], key: "i" },
             }}
-            onOpen={() => props.onVisit(props.repository)}
+            onAction={() => openRepository(`${props.repository.url}/issues`)}
           />
         )}
         {props.repository.hasWikiEnabled && (
-          <Action.OpenInBrowser
+          <Action
             icon={{ source: "wiki.png", tintColor: Color.PrimaryText }}
             title="Open Wiki"
-            url={`${props.repository.url}/wiki`}
             shortcut={{
               macOS: { modifiers: ["cmd", "shift"], key: "w" },
               Windows: { modifiers: ["ctrl", "shift"], key: "w" },
             }}
-            onOpen={() => props.onVisit(props.repository)}
+            onAction={() => openRepository(`${props.repository.url}/wiki`)}
           />
         )}
         {props.repository.hasProjectsEnabled && (
-          <Action.OpenInBrowser
+          <Action
             icon={{ source: "project.png", tintColor: Color.PrimaryText }}
             title="Open Projects"
-            url={`${props.repository.url}/projects`}
             shortcut={{
               macOS: { modifiers: ["cmd", "shift"], key: "p" },
               Windows: { modifiers: ["ctrl", "shift"], key: "p" },
             }}
-            onOpen={() => props.onVisit(props.repository)}
+            onAction={() => openRepository(`${props.repository.url}/projects`)}
           />
         )}
         {props.repository.releases?.totalCount > 0 && (

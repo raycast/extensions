@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LocalStorage } from "@raycast/api";
 import type { Repository } from "@/types";
 
@@ -26,20 +26,24 @@ export async function clearVisitedRepositories() {
 
 export function useVisitedRepositories() {
   const [repositories, setRepositories] = useState<Repository[]>();
+  const repositoriesRef = useRef<Repository[]>([]);
 
   useEffect(() => {
-    loadVisitedRepositories().then(setRepositories);
+    loadVisitedRepositories().then((storedRepositories) => {
+      repositoriesRef.current = storedRepositories;
+      setRepositories(storedRepositories);
+    });
   }, []);
 
-  function visitRepository(repository: Repository) {
-    setRepositories((prev) => {
-      const nextRepositories = [repository, ...(prev?.filter((item) => item.id !== repository.id) ?? [])].slice(
-        0,
-        VISITED_REPOSITORIES_LENGTH,
-      );
-      saveVisitedRepositories(nextRepositories);
-      return nextRepositories;
-    });
+  async function visitRepository(repository: Repository) {
+    const nextRepositories = [repository, ...repositoriesRef.current.filter((item) => item.id !== repository.id)].slice(
+      0,
+      VISITED_REPOSITORIES_LENGTH,
+    );
+
+    repositoriesRef.current = nextRepositories;
+    setRepositories(nextRepositories);
+    await saveVisitedRepositories(nextRepositories);
   }
 
   return { repositories, visitRepository, isLoading: !repositories };
