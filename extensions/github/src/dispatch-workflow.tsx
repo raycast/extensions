@@ -35,6 +35,11 @@ function requiresValue(input: WorkflowDispatchInput): boolean {
 function DispatchWorkflowForm() {
   const { octokit } = getGitHubClient();
   const { data: repositories, isLoading: repositoriesIsLoading } = useMyRepositories();
+  const {
+    value: storedRepositoryId,
+    setValue: setStoredRepositoryId,
+    isLoading: storedRepositoryIsLoading,
+  } = useLocalStorage<string>("dispatch-workflow-repository", "");
 
   const { handleSubmit, itemProps, values, setValue } = useForm<DispatchFormValues>({
     async onSubmit(formValues) {
@@ -100,6 +105,16 @@ function DispatchWorkflowForm() {
       ref: FormValidation.Required,
     },
   });
+
+  useEffect(() => {
+    if (storedRepositoryIsLoading || !repositories || values.repository || !storedRepositoryId) {
+      return;
+    }
+
+    if (repositories.some((repository) => repository.id === storedRepositoryId)) {
+      setValue("repository", storedRepositoryId);
+    }
+  }, [storedRepositoryIsLoading, repositories, storedRepositoryId, values.repository]);
 
   const selectedRepository = repositories?.find((repository) => repository.id === values.repository);
   const owner = selectedRepository?.owner.login ?? "";
@@ -302,9 +317,25 @@ function DispatchWorkflowForm() {
           ) : null}
         </ActionPanel>
       }
-      isLoading={repositoriesIsLoading || workflowsIsLoading || branchesIsLoading || latestRunIsLoading}
+      isLoading={
+        repositoriesIsLoading ||
+        storedRepositoryIsLoading ||
+        workflowsIsLoading ||
+        branchesIsLoading ||
+        latestRunIsLoading
+      }
     >
-      <Form.Dropdown {...itemProps.repository} title="Repository" storeValue autoFocus>
+      <Form.Dropdown
+        {...itemProps.repository}
+        title="Repository"
+        autoFocus
+        onChange={(repositoryId) => {
+          setValue("repository", repositoryId);
+          if (repositoryId) {
+            void setStoredRepositoryId(repositoryId);
+          }
+        }}
+      >
         {repositories?.map((repository) => (
           <Form.Dropdown.Item
             key={repository.id}
