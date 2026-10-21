@@ -1,6 +1,6 @@
 # TrackTimer Changelog
 
-## [Search and Branding Update] - {PR_MERGE_DATE}
+## [Search and Branding Update] - 2026-10-21
 
 - Filter recent timers by partial project names, client names, and descriptions.
 - Use TrackTimer's 3D sundial app icon.
