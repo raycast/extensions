@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add UnblockingAPI MCP Server] - 2026-10-21
+
+- Add UnblockingAPI to the official registry: fetch public web pages that block simple requests, and get clean Markdown, HTML or template JSON back, with three read-only tools (`unblock_fetch`, `find_templates`, `get_build_guide`). Hosted Streamable HTTP server at https://mcp.unblockingapi.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a Bearer API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add New-Term Radar MCP Server] - 2026-10-21
 
 - Add New-Term Radar to the official registry: names of new AI models, products and repos from X, Hugging Face, GitHub and sitemaps, and the search terms behind them sized with Google Ads volume and Google Trends. Local stdio server `new-term-radar` from PyPI through `uvx --with mcp new-term-radar mcp`, with an AIsa API key set as `AISA_API_KEY` and absolute `RADAR_CONFIG` and `RADAR_STATE` paths.

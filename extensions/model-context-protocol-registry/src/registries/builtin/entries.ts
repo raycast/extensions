@@ -1441,6 +1441,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "unblockingapi",
+    title: "UnblockingAPI",
+    description:
+      "Fetch public web pages that block simple requests, and get clean Markdown, HTML or template JSON back. Three read-only tools: unblock_fetch returns Markdown by default or HTML, optionally narrowed with a CSS selector, or structured JSON when a published template covers the site; find_templates finds templates by URL, keyword or category; get_build_guide explains building apps on the REST API. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or a Bearer API key; 500 free credits on sign-up, no card.",
+    icon: "https://unblockingapi.com/app-icon.png",
+    homepage: "https://unblockingapi.com/tools",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.unblockingapi.com/mcp"],
+    },
+    remoteUrl: "https://mcp.unblockingapi.com/mcp",
+  },
+  {
     name: "voicemoat",
     title: "VoiceMoat",
     description:
