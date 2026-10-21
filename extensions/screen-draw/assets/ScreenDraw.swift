@@ -123,6 +123,8 @@ final class CanvasView: NSView {
             NSApp.terminate(nil)
         } else if command && key == "z" {
             session.undo()
+        } else if command {
+            return
         } else if key == "c" || event.keyCode == 51 {
             session.clearAll()
             flash("Cleared")
