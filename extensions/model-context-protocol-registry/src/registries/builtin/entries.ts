@@ -346,9 +346,9 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "datacircle",
     title: "Datacircle",
     description:
-      "Datacircle is a data co-op. Query your favorite B2B data APIs through us. Same request, same price, no markup. Every morning, you get the flat file of your data plus everyone else's.",
+      "Datacircle lists all the GTM APIs. Our MCP server is open to anyone, with no key: add api.datacircle.dev/mcp to Claude, ChatGPT or Cursor.",
     icon: "https://datacircle.dev/favicon.png",
-    homepage: "https://docs.datacircle.dev/mcp-server",
+    homepage: "https://datacircle.dev/docs/mcp",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://api.datacircle.dev/mcp"],
@@ -849,6 +849,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://moltnode.ag/mcp"],
     },
     remoteUrl: "https://moltnode.ag/mcp",
+  },
+  {
+    name: "multi-mail",
+    title: "Multi Mail",
+    description:
+      "Your Gmail, Outlook.com, Hotmail, Microsoft 365, iCloud and Fastmail mailboxes in Raycast - several at once, one search across all of them. Read threads, messages and attachments, draft, send and organise mail, each mailbox within the permissions its owner sets. No copy of the mail is kept. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://lumman.co/icon-512.png",
+    homepage: "https://lumman.co/mcp/multi-mail",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mail.lumman.co/mcp"],
+    },
+    remoteUrl: "https://mail.lumman.co/mcp",
   },
   {
     name: "netactuate",

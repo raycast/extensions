@@ -4,6 +4,14 @@
 
 - Add New-Term Radar to the official registry: names of new AI models, products and repos from X, Hugging Face, GitHub and sitemaps, and the search terms behind them sized with Google Ads volume and Google Trends. Local stdio server `new-term-radar` from PyPI through `uvx --with mcp new-term-radar mcp`, with an AIsa API key set as `AISA_API_KEY` and absolute `RADAR_CONFIG` and `RADAR_STATE` paths.
 
+## [Add Multi Mail MCP Server] - 2026-10-21
+
+- Add Multi Mail to the official registry: a person's own Gmail, Outlook.com, Microsoft 365, iCloud and Fastmail mailboxes, several at once with one search across all of them - read, draft, send and organise mail within the permissions each mailbox's owner sets. Hosted Streamable HTTP server at https://mail.lumman.co/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Update Datacircle MCP Server] - 2026-10-21
+
+- Update Datacircle's description and homepage.
+
 ## [Add NetActuate MCP Server] - 2026-10-20
 
 - Add NetActuate to the official registry: read-only answers from NetActuate's published network data (data center locations and specifications, compliance by site, internet exchanges, the sites nearest a market, products and published pricing), each linked to its netactuate.com page. Hosted Streamable HTTP server at https://netactuate.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
