@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Multi Mail MCP Server] - 2026-10-21
+
+- Add Multi Mail to the official registry: a person's own Gmail, Outlook.com, Microsoft 365, iCloud and Fastmail mailboxes, several at once with one search across all of them - read, draft, send and organise mail within the permissions each mailbox's owner sets. Hosted Streamable HTTP server at https://mail.lumman.co/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Update Datacircle MCP Server] - 2026-10-21
 
 - Update Datacircle's description and homepage.
