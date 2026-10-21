@@ -23,7 +23,15 @@ export default function Command({
   const isSatsToUsd = direction !== "usd-to-sats";
   const raw = amount.replace(/,/g, "").trim();
   const btcMatch = raw.match(/^(\d*\.?\d+)\s*btc$/i);
-  const numericValue = btcMatch ? parseFloat(btcMatch[1]) : parseFloat(raw);
+
+  let numericValue: number;
+  if (btcMatch) {
+    numericValue = parseFloat(btcMatch[1]);
+  } else {
+    // Reject strings with trailing junk (e.g. "0.005 BTCC"), "Infinity", "NaN"
+    const numMatch = raw.match(/^(-?\d*\.?\d+)$/);
+    numericValue = numMatch ? parseFloat(raw) : NaN;
+  }
 
   if (btcMatch && !isSatsToUsd) {
     return (
@@ -31,9 +39,9 @@ export default function Command({
     );
   }
 
-  if (isNaN(numericValue) || numericValue < 0) {
+  if (!isFinite(numericValue) || numericValue < 0) {
     return (
-      <Detail markdown="## Invalid amount\n\nPlease enter a non-negative number." />
+      <Detail markdown="## Invalid amount\n\nPlease enter a valid non-negative number (e.g. 100000 or 0.005 BTC)." />
     );
   }
 
@@ -45,6 +53,7 @@ export default function Command({
     isLoading,
     data: prices,
     error,
+    revalidate,
   } = usePromise(fetchPrices, [], { execute: true });
 
   if (isLoading) {
@@ -60,6 +69,11 @@ export default function Command({
             <Action.OpenInBrowser
               title="Open Mempool.space"
               url="https://mempool.space"
+            />
+            <Action
+              icon={Icon.RotateClockwise}
+              title="Refresh Price"
+              onAction={revalidate}
             />
           </ActionPanel>
         }
@@ -120,6 +134,11 @@ export default function Command({
             title="Open on Mempool.space"
             url="https://mempool.space"
             icon={Icon.Globe}
+          />
+          <Action
+            icon={Icon.RotateClockwise}
+            title="Refresh Price"
+            onAction={revalidate}
           />
         </ActionPanel>
       }
