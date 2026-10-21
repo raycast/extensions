@@ -4,6 +4,22 @@
 
 - Update the Hermoso entry's description: an AI marketing agent and AI ad generator for your AI agent, with no markup on models. The connection is unchanged.
 
+## [Add UnblockingAPI MCP Server] - 2026-10-21
+
+- Add UnblockingAPI to the official registry: fetch public web pages that block simple requests, and get clean Markdown, HTML or template JSON back, with three read-only tools (`unblock_fetch`, `find_templates`, `get_build_guide`). Hosted Streamable HTTP server at https://mcp.unblockingapi.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a Bearer API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add New-Term Radar MCP Server] - 2026-10-21
+
+- Add New-Term Radar to the official registry: names of new AI models, products and repos from X, Hugging Face, GitHub and sitemaps, and the search terms behind them sized with Google Ads volume and Google Trends. Local stdio server `new-term-radar` from PyPI through `uvx --with mcp new-term-radar mcp`, with an AIsa API key set as `AISA_API_KEY` and absolute `RADAR_CONFIG` and `RADAR_STATE` paths.
+
+## [Add Multi Mail MCP Server] - 2026-10-21
+
+- Add Multi Mail to the official registry: a person's own Gmail, Outlook.com, Microsoft 365, iCloud and Fastmail mailboxes, several at once with one search across all of them - read, draft, send and organise mail within the permissions each mailbox's owner sets. Hosted Streamable HTTP server at https://mail.lumman.co/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Update Datacircle MCP Server] - 2026-10-21
+
+- Update Datacircle's description and homepage.
+
 ## [Add NetActuate MCP Server] - 2026-10-20
 
 - Add NetActuate to the official registry: read-only answers from NetActuate's published network data (data center locations and specifications, compliance by site, internet exchanges, the sites nearest a market, products and published pricing), each linked to its netactuate.com page. Hosted Streamable HTTP server at https://netactuate.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
