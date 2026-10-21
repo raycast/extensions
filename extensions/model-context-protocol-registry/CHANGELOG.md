@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Hermoso MCP Server] - {PR_MERGE_DATE}
+## [Update Hermoso MCP Server] - 2026-10-21
 
 - Update the Hermoso entry's description: an AI marketing agent and AI ad generator for your AI agent, with no markup on models. The connection is unchanged.
 
