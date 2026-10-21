@@ -1,6 +1,6 @@
 # Sesh Changelog
 
-## [Search sessions and windows] - {PR_MERGE_DATE}
+## [Search sessions and windows] - 2026-10-21
 
 - Add a Search Sessions and Windows command that lists your sessions and every tmux window in one place, so typing a window name finds it alongside sessions
 - Load windows in Connect to Window from the session list on sesh 2.32 and later, instead of one extra `sesh window list` call per session
