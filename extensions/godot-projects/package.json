@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "godot",
+  "name": "godot-projects",
   "title": "Godot Projects",
   "description": "Search your Godot projects and open them in the editor, run them, or show them in Finder.",
   "icon": "extension-icon.png",

@@ -34,3 +34,5 @@ Godot 3 keeps its project list in a different file, and a self-contained Godot (
 ## Credits
 
 The Godot Engine logo is by Andrea Calabró and is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+Godot Projects is not affiliated with or endorsed by the Godot Foundation.
