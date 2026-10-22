@@ -1,6 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { copyMissingLegacyWorkLogs } from "./storage-migration";
-import type { ActiveTimer, Project, ProjectCategory, WorkLog } from "./types";
+import { planForDate, isSavedPlan, isPlanDate, isPlanReference } from "./planning";
+import type { ActiveTimer, SavedPlan, Project, ProjectCategory, WorkLog } from "./types";
 
 export const STORAGE_KEYS = {
   schemaVersion: "schemaVersion",
@@ -12,6 +13,9 @@ export const STORAGE_KEYS = {
 } as const;
 
 const WORK_LOG_KEY_PREFIX = "workLog:";
+// Keep the original on-disk keys when renaming goals to plans.
+const PLAN_KEY_PREFIX = "dailyGoal:";
+const PLAN_ORDER_KEY_PREFIX = "dailyGoalOrder:";
 
 export const SCHEMA_VERSION = 1;
 
@@ -117,6 +121,78 @@ export async function clearActiveTimerIfMatches(id: string): Promise<boolean> {
   return true;
 }
 
+export async function getPlans(date?: string): Promise<SavedPlan[]> {
+  await initializeStorage();
+  const items = await LocalStorage.allItems<Record<string, string>>();
+  const goals = Object.entries(items)
+    .filter(([key]) => key.startsWith(PLAN_KEY_PREFIX))
+    .map(([key, raw]) => {
+      const goal = parseJson(raw, "daily goal");
+      if (!isSavedPlan(goal) || `${PLAN_KEY_PREFIX}${goal.id}` !== key) {
+        throw new StorageDataError("Saved daily goal is invalid. Existing data was not overwritten.");
+      }
+      return goal;
+    })
+    .flatMap((goal) => {
+      const visible = date ? planForDate(goal, date) : goal;
+      return visible ? [visible] : [];
+    });
+  const positions = new Map<string, number>();
+  for (const date of new Set(goals.map((goal) => goal.date))) {
+    const raw = items[`${PLAN_ORDER_KEY_PREFIX}${date}`];
+    if (raw !== undefined) {
+      const ids = parseJson(raw, "daily goal order");
+      if (!isPlanOrder(ids))
+        throw new StorageDataError("Saved goal order is invalid. Existing data was not overwritten.");
+      ids.forEach((id, index) => positions.set(id, index));
+    }
+  }
+  return goals.sort(
+    (a, b) =>
+      a.date.localeCompare(b.date) ||
+      (positions.get(a.id) ?? Infinity) - (positions.get(b.id) ?? Infinity) ||
+      a.createdAt.localeCompare(b.createdAt) ||
+      a.id.localeCompare(b.id),
+  );
+}
+
+// A single write preserves the complete parent order without partial multi-goal updates.
+export async function savePlanOrder(date: string, ids: string[]): Promise<void> {
+  await initializeStorage();
+  if (!isPlanDate(date) || !isPlanOrder(ids)) throw new StorageDataError("Daily goal order is invalid");
+  await LocalStorage.setItem(`${PLAN_ORDER_KEY_PREFIX}${date}`, JSON.stringify(ids));
+}
+
+function isPlanOrder(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) &&
+    value.every((id) => typeof id === "string" && id.length > 0) &&
+    new Set(value).size === value.length
+  );
+}
+
+export async function getPlan(id: string): Promise<SavedPlan | undefined> {
+  await initializeStorage();
+  const raw = await LocalStorage.getItem<string>(`${PLAN_KEY_PREFIX}${id}`);
+  if (raw === undefined) return undefined;
+  const goal = parseJson(raw, "daily goal");
+  if (!isSavedPlan(goal) || goal.id !== id)
+    throw new StorageDataError("Saved daily goal is invalid. Existing data was not overwritten.");
+  return goal;
+}
+
+// Callers serialize plan mutations with the same lock as timer changes.
+export async function savePlan(goal: SavedPlan): Promise<void> {
+  await initializeStorage();
+  if (!isSavedPlan(goal)) throw new StorageDataError("Daily goal is invalid");
+  await LocalStorage.setItem(`${PLAN_KEY_PREFIX}${goal.id}`, JSON.stringify(goal));
+}
+
+export async function deletePlan(id: string): Promise<void> {
+  await initializeStorage();
+  await LocalStorage.removeItem(`${PLAN_KEY_PREFIX}${id}`);
+}
+
 async function readArray<T>(key: string, validator: (value: unknown) => value is T, label: string): Promise<T[]> {
   const rawValue = await LocalStorage.getItem<string>(key);
   if (rawValue === undefined) {
@@ -175,6 +251,7 @@ function isWorkLog(value: unknown): value is WorkLog {
     isNonEmptyString(value.id) &&
     isNonEmptyString(value.projectId) &&
     typeof value.description === "string" &&
+    (value.plan === undefined || isPlanReference(value.plan)) &&
     isIsoDate(value.startedAt) &&
     isIsoDate(value.endedAt) &&
     new Date(value.endedAt).getTime() >= new Date(value.startedAt).getTime() &&
@@ -189,6 +266,7 @@ function isActiveTimer(value: unknown): value is ActiveTimer {
     isNonEmptyString(value.id) &&
     isNonEmptyString(value.projectId) &&
     typeof value.description === "string" &&
+    (value.plan === undefined || isPlanReference(value.plan)) &&
     isIsoDate(value.startedAt)
   );
 }
