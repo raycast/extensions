@@ -21,6 +21,25 @@
   ],
   "commands": [
     {
+      "name": "player-count",
+      "title": "Player Count",
+      "subtitle": "Roblox",
+      "description": "Display your universe's player count in the menu bar",
+      "mode": "menu-bar",
+      "interval": "30s",
+      "preferences": [
+        {
+          "name": "hideZeroPlayers",
+          "type": "checkbox",
+          "title": "",
+          "label": "Hide when there are zero players",
+          "description": "Keep refreshing while hidden and show the item when players join",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
       "name": "launch",
       "title": "Launch Game",
       "subtitle": "Roblox",
@@ -71,17 +90,17 @@
   ],
   "preferences": [
     {
+      "name": "universeId",
+      "type": "textfield",
+      "title": "Universe ID",
+      "description": "Required for Player Count, Studio, and Restart",
+      "required": false
+    },
+    {
       "name": "placeId",
       "type": "textfield",
       "title": "Place ID",
       "description": "Required for Launch and Studio",
-      "required": false
-    },
-    {
-      "name": "universeId",
-      "type": "textfield",
-      "title": "Universe ID",
-      "description": "Required for Studio and Restart",
       "required": false
     },
     {
