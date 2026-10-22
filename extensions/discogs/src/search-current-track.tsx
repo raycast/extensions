@@ -14,15 +14,20 @@ tell application "Music"
 end tell
 `;
 
-/**
- * Removes characters that tend to cause noisy/irrelevant Discogs search results,
- * e.g. "Simon & Garfunkel" -> "Simon Garfunkel".
- */
 function sanitize(text: string): string {
   return text.replace(/ & /g, " ").replace(/;/g, "");
 }
 
 export default async function Command() {
+  if (process.platform !== "darwin") {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "This command requires macOS",
+      message: "Apple Music integration is only available on macOS.",
+    });
+    return;
+  }
+
   try {
     const result = await runAppleScript(getCurrentTrackScript);
 
@@ -39,7 +44,6 @@ export default async function Command() {
 
     const artist = sanitize(rawArtist);
     const name = sanitize(rawName);
-
     const query = encodeURIComponent(`${artist} ${name}`);
     const url = `https://www.discogs.com/search?q=${query}`;
 
