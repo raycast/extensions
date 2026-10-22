@@ -1,6 +1,6 @@
 # Anycap Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-22
 
 - Save Current Tab: the page in front of Safari, Chrome, Arc, Brave, Edge, Vivaldi or Anity.
 - Search Anycap: every capture, newest first, with meaning matches under the literal ones.
