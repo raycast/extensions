@@ -16,6 +16,18 @@
       "title": "Search Emotes",
       "description": "Find emotes across 7TV, BetterTTV, and FrankerFaceZ",
       "mode": "view"
+    },
+    {
+      "name": "browse-channel-emotes",
+      "title": "Browse Channel Emotes",
+      "description": "Find a 7TV user and browse their active channel emotes",
+      "mode": "view"
+    },
+    {
+      "name": "browse-creator-emotes",
+      "title": "Browse Creator Emotes",
+      "description": "Find a 7TV creator and browse their uploaded emotes",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -27,10 +39,22 @@
       "required": false,
       "default": "2",
       "data": [
-        { "title": "1x", "value": "1" },
-        { "title": "2x", "value": "2" },
-        { "title": "3x", "value": "3" },
-        { "title": "4x", "value": "4" }
+        {
+          "title": "1x",
+          "value": "1"
+        },
+        {
+          "title": "2x",
+          "value": "2"
+        },
+        {
+          "title": "3x",
+          "value": "3"
+        },
+        {
+          "title": "4x",
+          "value": "4"
+        }
       ]
     }
   ],
