@@ -142,11 +142,18 @@ async function testVector() {
   console.log('Test 10: Derived adjective definition correctness (oceanic)');
   const t10 = await searchVectorSynonyms('vast deep marine', undefined, 20);
   const oceanicHit = t10.find((x) => x.word.toLowerCase() === 'oceanic');
-  if (oceanicHit && oceanicHit.definition) {
-    console.log('  Oceanic definition:', oceanicHit.definition);
-    if (oceanicHit.definition.toLowerCase().includes('austronesian')) {
-      throw new Error('Oceanic definition should not describe the Austronesian language family (noun sense)');
-    }
+  if (!oceanicHit) {
+    throw new Error('Expected "oceanic" to be present in vector search results for "vast deep marine"');
+  }
+  if (!oceanicHit.definition) {
+    throw new Error('Expected "oceanic" to have an adjective definition');
+  }
+  console.log('  Oceanic definition:', oceanicHit.definition);
+  if (oceanicHit.definition.toLowerCase().includes('austronesian')) {
+    throw new Error('Oceanic definition should not describe the Austronesian language family (noun sense)');
+  }
+  if (oceanicHit.partOfSpeech !== 'adjective') {
+    throw new Error(`Expected oceanic to have partOfSpeech "adjective", got "${oceanicHit.partOfSpeech}"`);
   }
   console.log('  ✓ Test 10 Passed\n');
 
