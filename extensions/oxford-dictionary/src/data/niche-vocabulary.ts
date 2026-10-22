@@ -520,7 +520,7 @@ export const NICHE_VOCABULARY: NicheWordEntry[] = [
       'grand architectural edifice',
       'imposing architectural complex',
     ],
-    categories: [189, 554, 842], // Abode, Structure, Importance
+    categories: [189, 329, 642], // Abode, Structure (Texture), Importance
   },
   {
     word: 'edifice',
@@ -534,7 +534,7 @@ export const NICHE_VOCABULARY: NicheWordEntry[] = [
       'monumental edifice',
       'large imposing complex',
     ],
-    categories: [189, 554, 842], // Abode, Structure, Importance
+    categories: [189, 329, 642], // Abode, Structure (Texture), Importance
   },
   {
     word: 'palatial',
@@ -547,7 +547,7 @@ export const NICHE_VOCABULARY: NicheWordEntry[] = [
       'regal palace architecture',
       'palatial mansion',
     ],
-    categories: [189, 206, 842], // Abode, Size, Importance
+    categories: [189, 192, 642], // Abode, Size, Importance
   },
   {
     word: 'monolithic',
@@ -560,7 +560,7 @@ export const NICHE_VOCABULARY: NicheWordEntry[] = [
       'uniform massive scale',
       'single stone monolith',
     ],
-    categories: [192, 240, 842], // Dimensions, Form, Importance
+    categories: [192, 240, 642], // Dimensions, Form, Importance
   },
   {
     word: 'labyrinthine',
@@ -586,7 +586,7 @@ export const NICHE_VOCABULARY: NicheWordEntry[] = [
       'immense breathtaking size',
       'colossal stature',
     ],
-    categories: [31, 192, 842], // Greatness, Dimensions, Importance
+    categories: [31, 192, 642], // Greatness, Dimensions, Importance
   },
   {
     word: 'elysian',
@@ -638,7 +638,7 @@ export const NICHE_VOCABULARY: NicheWordEntry[] = [
       'antediluvian origin',
       'relic of antiquity',
     ],
-    categories: [122, 124, 842], // Oldness, Antiquity, Importance
+    categories: [122, 124, 642], // Oldness, Antiquity, Importance
   },
 ];
 

@@ -8,7 +8,6 @@ import {
 } from '../types/dictionary';
 import { NICHE_VOCABULARY, searchNicheVocabulary } from '../data/niche-vocabulary';
 import { lookupOffline } from './offline-dictionary';
-import { searchWord } from './dictionary-manager';
 
 const vectorMemoryCache = new Map<string, VectorSearchResult[]>();
 
@@ -533,27 +532,32 @@ async function fetchDatamuseVector(seeds: string[], limit = 50): Promise<VectorS
 
   // Morphological Derivation Expansion:
   // If query is predominantly adjectival and top nouns exist, derive valid adjectives!
-  const topNouns = Array.from(aggregated.values())
-    .filter((c) => parseDatamusePos(c.tags) === 'noun')
-    .sort((a, b) => b.rrf - a.rrf)
-    .slice(0, 10);
+  if (isPredominantlyAdjective) {
+    const topNouns = Array.from(aggregated.values())
+      .filter((c) => parseDatamusePos(c.tags) === 'noun')
+      .sort((a, b) => b.rrf - a.rrf)
+      .slice(0, 10);
 
-  for (const nounCand of topNouns) {
-    const adjDerivs = getAdjectiveDerivations(nounCand.word);
-    for (const adjWord of adjDerivs) {
-      if (aggregated.has(adjWord) || seedSet.has(adjWord)) continue;
-      const dictInfo = await searchWord(adjWord);
-      if (dictInfo && dictInfo.meanings.some((m) => m.partOfSpeech === 'adjective')) {
-        const adjDef = dictInfo.meanings[0].definitions[0] || `Pertaining to ${nounCand.word}; structural.`;
-        const adjRrf = nounCand.rrf * (isPredominantlyAdjective ? 1.15 : 1.05);
-        aggregated.set(adjWord, {
-          word: adjWord,
-          rrf: adjRrf,
-          tags: ['adj', 'f:0.04'],
-          defs: [`adj\t${adjDef}`],
-          jointRank: nounCand.jointRank,
-          seedDimensions: new Set(nounCand.seedDimensions),
-        });
+    for (const nounCand of topNouns) {
+      const adjDerivs = getAdjectiveDerivations(nounCand.word);
+      for (const adjWord of adjDerivs) {
+        if (aggregated.has(adjWord) || seedSet.has(adjWord)) continue;
+        const dictInfo = await lookupOffline(adjWord);
+        if (dictInfo) {
+          const adjMeaning = dictInfo.meanings.find((m) => m.partOfSpeech === 'adjective');
+          if (adjMeaning && adjMeaning.definitions.length > 0) {
+            const adjDef = adjMeaning.definitions[0] || `Pertaining to ${nounCand.word}; structural.`;
+            const adjRrf = nounCand.rrf * 1.15;
+            aggregated.set(adjWord, {
+              word: adjWord,
+              rrf: adjRrf,
+              tags: ['adj', 'f:0.04'],
+              defs: [`adj\t${adjDef}`],
+              jointRank: nounCand.jointRank,
+              seedDimensions: new Set(nounCand.seedDimensions),
+            });
+          }
+        }
       }
     }
   }

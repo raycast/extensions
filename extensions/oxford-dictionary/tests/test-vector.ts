@@ -3,6 +3,7 @@ import {
   searchOfflineVector,
   extractSeedWords,
 } from '../src/services/vector-search-service';
+import { NICHE_VOCABULARY } from '../src/data/niche-vocabulary';
 
 async function testVector() {
   console.log('--- STARTING VECTOR SEMANTIC SYNONYM SEARCH TESTS ---\n');
@@ -136,6 +137,36 @@ async function testVector() {
   }
   console.log(`  Found edificial (${edificialHit.matchPercent}%) and edifice (${edificeHit.matchPercent}%) at the top!`);
   console.log('  ✓ Test 9 Passed\n');
+
+  // Test 10: Adjective derivation extracts adjective definitions, not noun definitions
+  console.log('Test 10: Derived adjective definition correctness (oceanic)');
+  const t10 = await searchVectorSynonyms('vast deep marine', undefined, 20);
+  const oceanicHit = t10.find((x) => x.word.toLowerCase() === 'oceanic');
+  if (oceanicHit && oceanicHit.definition) {
+    console.log('  Oceanic definition:', oceanicHit.definition);
+    if (oceanicHit.definition.toLowerCase().includes('austronesian')) {
+      throw new Error('Oceanic definition should not describe the Austronesian language family (noun sense)');
+    }
+  }
+  console.log('  ✓ Test 10 Passed\n');
+
+  // Test 11: Niche vocabulary category integrity (no unrelated 554 Representation or 842 Wit on structure/importance words)
+  console.log('Test 11: Roget category integrity in niche vocabulary');
+  const targetWords = ['edificial', 'edifice', 'palatial', 'monolithic', 'colossal', 'antediluvian'];
+  for (const w of targetWords) {
+    const entry = NICHE_VOCABULARY.find((e) => e.word.toLowerCase() === w);
+    if (!entry) throw new Error(`Missing niche vocabulary entry for ${w}`);
+    if (entry.categories.includes(554)) {
+      throw new Error(`Word "${w}" should not use category 554 (Representation) for structure`);
+    }
+    if (entry.categories.includes(842)) {
+      throw new Error(`Word "${w}" should not use category 842 (Wit) for importance`);
+    }
+    if (!entry.categories.includes(642)) {
+      throw new Error(`Word "${w}" should use category 642 for importance`);
+    }
+  }
+  console.log('  ✓ Test 11 Passed\n');
 
   console.log('=== ALL VECTOR SEMANTIC SYNONYM TESTS PASSED SUCCESSFULLY! ===');
 }
