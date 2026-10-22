@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Zip-Codes.com MCP Server] - 2026-10-22
+
+- Add Zip-Codes.com to the official registry: US address standardization to ZIP+4, US ZIP Code and Canadian postal code lookup, radius search, distance and census tract demographics. Hosted Streamable HTTP server at https://mcp.zip-codes.com/mcp with no sign-in (demo mode without a key), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add LLMSlim MCP Server] - 2026-10-22
 
 - Add LLMSlim to the community registry: long-term memory for agents with no LLM call (remember, recall, list_memories, forget, fit_context). Messages are stored word for word in a local SQLite file and recalled within a token budget. Local stdio server via `uvx --from llmslim[mcp] llmslim mcp`; no API key.
