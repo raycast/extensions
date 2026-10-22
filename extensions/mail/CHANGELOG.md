@@ -1,6 +1,6 @@
 # Mail Changelog
 
-## [Add AI Tools] - {PR_MERGE_DATE}
+## [Add AI Tools] - 2026-10-22
 
 - Add paginated Inbox reading and Inbox-filtered email search.
 - Add AI tools to list mailboxes, reply or forward messages, manage message status and folders, and list or save attachments.
