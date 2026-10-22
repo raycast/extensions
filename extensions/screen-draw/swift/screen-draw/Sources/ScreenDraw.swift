@@ -315,10 +315,12 @@ func toggleOverlay(supportPath: String) throws -> Bool {
     try worker.run()
 
     // Hold the toggle lock until the worker owns overlay.lock and has written its pid,
-    // so the next toggle sees it running and closes it.
+    // so the next toggle sees it running and closes it. The worker writes its pid only
+    // after taking the lock, so poll the pid alone: probing the lock here could make the
+    // worker's non-blocking flock fail.
     let deadline = Date().addingTimeInterval(5)
     while Date() < deadline && worker.isRunning {
-        if isLocked(descriptor) && readPid(path) == worker.processIdentifier {
+        if readPid(path) == worker.processIdentifier {
             return true
         }
         usleep(10_000)
