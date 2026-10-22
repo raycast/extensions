@@ -1420,6 +1420,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "techfabric",
+    title: "TechFabric",
+    description:
+      "Lets TechFabric's engineers write blog posts and case studies for techfabric.com from the coding agent they already use, with its repository and context: today's brief, the site's checks, and a draft under their byline that only they publish. Anyone can also search and read the site. Hosted remote Streamable HTTP server; reading needs no sign-in and no API key, writing uses OAuth 2.1 sign-in with a TechFabric Microsoft account (dynamic client registration and PKCE).",
+    icon: "https://www.techfabric.com/brand/mcp/techfabric-icon-on-dark-512.png",
+    homepage: "https://www.techfabric.com/mcp-servers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.techfabric.com/mcp"],
+    },
+    remoteUrl: "https://www.techfabric.com/mcp",
+  },
+  {
     name: "terminal-tax",
     title: "Terminal Tax",
     description:
