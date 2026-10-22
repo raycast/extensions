@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import RaycastSwiftMacros
 
@@ -29,6 +30,10 @@ private struct BridgeError: Error, CustomStringConvertible {
   } catch {
     throw BridgeError(description: error.localizedDescription)
   }
+}
+
+@raycast func clipboardChangeCount() -> Int {
+  NSPasteboard.general.changeCount
 }
 
 @raycast func updateReviewImage(sourcePath: String, key: String, boxesJSON: String, style: String, outputPath: String) throws -> Int {

@@ -1,13 +1,17 @@
 import { OAuth, getPreferenceValues } from "@raycast/api";
 
 /**
- * Explicit redirect URI shared by authorize + token exchange.
- * Raycast's default Web redirect includes `?packageName=Extension`, which many
- * providers (including Unsplash) reject or treat as a mismatch on token exchange.
- * Pinning a fixed URI keeps macOS and Windows consistent with the setup docs.
+ * Redirect URI users register in their Unsplash app (shown in the setup guide).
+ */
+export const REGISTERED_REDIRECT_URI = "https://raycast.com/redirect";
+
+/**
+ * Redirect URI sent in both authorize and token exchange. raycast.com/redirect needs
+ * `packageName` to build the "Open Raycast" deep link; Unsplash accepts the extra query
+ * against the registered URI above. Pinned so macOS and Windows send the same value.
  * @see https://developers.raycast.com/api-reference/oauth#oauth.redirectmethod
  */
-export const REDIRECT_URI = "https://raycast.com/redirect";
+export const REDIRECT_URI = `${REGISTERED_REDIRECT_URI}?packageName=Extension`;
 
 export const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -57,8 +61,8 @@ export async function doAuth() {
 
   const { authorizationCode } = await client.authorize(authRequest);
 
-  // Unsplash uses confidential-client code exchange (client_secret), not PKCE.
-  // Send the same redirect_uri used in the authorize step.
+  // Unsplash validates the PKCE challenge sent by PKCEClient, so the verifier is
+  // required alongside client_secret. Send the same redirect_uri as the authorize step.
   const tokenResponse = await fetch("https://unsplash.com/oauth/token", {
     method: "POST",
     headers: {
@@ -70,6 +74,7 @@ export async function doAuth() {
       client_secret: clientSecret,
       redirect_uri: REDIRECT_URI,
       code: authorizationCode,
+      code_verifier: authRequest.codeVerifier,
       grant_type: "authorization_code",
     }),
   });

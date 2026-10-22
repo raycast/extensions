@@ -9,9 +9,9 @@ import {
   open,
 } from "@raycast/api"
 import {FormValidation, useForm} from "@raycast/utils"
-import {createTask} from "api/helpers"
-import {TaskStatus} from "api/types"
-import {labelForTaskColumn} from "helpers/focustask"
+import {createTask} from "../../api/helpers"
+import {TaskStatus} from "../../api/types"
+import {labelForTaskColumn} from "../../helpers/focustask"
 import {FC} from "react"
 import {ListPicker} from "./list-picker"
 
@@ -54,16 +54,18 @@ export const CreateForm: FC<{initialTitle?: string}> = ({initialTitle}) => {
             toast.hide()
           },
         }
+        popToRoot()
       } else {
-        toast.style = Toast.Style.Success
+        toast.style = Toast.Style.Failure
         toast.title = "Failure"
         toast.message = "Failed to create a task"
       }
-
-      popToRoot()
     },
     validation: {
       title: FormValidation.Required,
+    },
+    initialValues: {
+      title: initialTitle,
     },
   })
 

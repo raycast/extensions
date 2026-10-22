@@ -1,5 +1,9 @@
 # Pomodoro Changelog
 
+## [Improvement] - 2026-10-17
+
+- Added a new work and break interval of 52 minutes and 17 minutes respectively.
+
 ## [Skip to Next] - 2026-09-13
 
 - Add Skip to Next (⌘N) to jump from the current interval to the next one in the control command, menu bar, Slack variant, and Raycast AI

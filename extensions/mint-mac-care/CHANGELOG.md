@@ -1,5 +1,14 @@
 # Mint Changelog
 
+## [The current free allowance] - 2026-10-18
+
+- The first page before Mint is installed states today's free use: cleaning, organizing, Optimize and app uninstall share one free 1 GB each week. It no longer promises a free first clean of any size, which Mint stopped offering in 1.0.97.
+
+## [Easier to find] - 2026-10-16
+
+- The listing says what Mint is for: Mac storage cleanup and optimization for you and your AI agents.
+- Commands come up for more of what people search, like cleanup, deep clean, optimizer, Xcode, node_modules, Claude Code and Cursor.
+
 ## [Clearer access, recovery and AI answers] - 2026-10-12
 
 - Installation guidance now explains Direct's weekly free allowances and the differences between editions.

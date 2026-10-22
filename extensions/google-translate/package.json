@@ -48,6 +48,13 @@
       "title": "Quick Translate",
       "subtitle": "Google Translate",
       "description": "Quickly translate to multiple languages",
+      "mode": "no-view"
+    },
+    {
+      "name": "quick-translate-view",
+      "title": "Quick Translate Results",
+      "subtitle": "Google Translate",
+      "description": "Display the translation results opened by Quick Translate",
       "mode": "view"
     },
     {

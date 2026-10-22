@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.9.0 - 2026-10-21
+
+### ✨ New
+
+- **OAuth**: Added an optional `revocationEndpoint` to `OAuth.PKCEClient` to request token revocation when users log out in Raycast Settings or extensions call `removeTokens()`. See [Token Revocation](./api-reference/oauth.md#token-revocation).
+
 ## 2.5.0 - 2026-09-24
 
 ### ✨ New

@@ -33,16 +33,18 @@ export function ModelBreakdown() {
 
   const modelsByTier = useMemo(() => (models ? groupModelsByTier(models) : {}), [models]);
 
-  const accessories: List.Item.Accessory[] = error
-    ? STANDARD_ACCESSORIES.ERROR
-    : models.length === 0 && isLoading
-      ? STANDARD_ACCESSORIES.LOADING
-      : !models || models.length === 0
-        ? [{ text: "No models", icon: Icon.Circle }]
-        : [{ text: `${models.length} models`, icon: Icon.BarChart }];
+  const accessories: List.Item.Accessory[] =
+    error && models.length === 0
+      ? STANDARD_ACCESSORIES.ERROR
+      : models.length === 0 && isLoading
+        ? STANDARD_ACCESSORIES.LOADING
+        : !models || models.length === 0
+          ? [{ text: "No models", icon: Icon.Circle }]
+          : [{ text: `${models.length} models`, icon: Icon.BarChart }];
   const renderDetailMetadata = (): ReactNode => {
     const errorMetadata = ErrorMetadata({
-      error,
+      error: models.length === 0 ? error : undefined,
+      isLoading,
       noDataMessage: !models || models.length === 0 ? "No model usage data available" : undefined,
       noDataSubMessage:
         !models || models.length === 0 ? `Model breakdown will appear ${MESSAGES.DIFFERENT_MODELS}` : undefined,
@@ -58,6 +60,7 @@ export function ModelBreakdown() {
 
     return (
       <List.Item.Detail.Metadata>
+        {error && <List.Item.Detail.Metadata.Label title="Refresh Error" text={error.message} />}
         <List.Item.Detail.Metadata.Label
           title="Model Overview"
           text={`${models.length} models used`}

@@ -1,6 +1,6 @@
-import { aiLog } from "./logger";
 import { buildPromptForStyle, getStyleLabel as getStyleLabelFromConfig } from "../config/prompts";
 import { SummaryStyle, TranslationOptions } from "../types/summary";
+import { aiLog } from "./logger";
 
 /**
  * Get a human-readable label for a summary style

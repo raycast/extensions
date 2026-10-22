@@ -1,4 +1,4 @@
-import { createQueryString, escapeAppleScriptString, runScript, tell } from "../apple-script";
+import { createQueryString, escapeAppleScriptString, NOT_IN_LIBRARY_ERROR, runScript, tell } from "../apple-script";
 
 export const search = (search: string) => {
   const outputQuery = createQueryString({
@@ -51,3 +51,23 @@ export const playById = (id: string) =>
 		play (every track whose id is "${escapeAppleScriptString(id)}")
 	end tell
 `);
+
+/** Play the library copy of a catalog song. The AppleScript bridge exposes no
+ * catalog ids, so the linkage the API reports is re-derived by metadata:
+ * title + artist + album first, then title + artist in case the library
+ * holds a different edition of the album. */
+export const playMatching = ({ title, artist, album }: { title: string; artist: string; album: string }) => {
+  const name = escapeAppleScriptString(title);
+  const artistName = escapeAppleScriptString(artist);
+  const albumName = escapeAppleScriptString(album);
+  return runScript(`
+	tell application "Music"
+		set matches to (every track of library playlist 1 whose name is "${name}" and artist is "${artistName}" and album is "${albumName}")
+		if (count of matches) = 0 then
+			set matches to (every track of library playlist 1 whose name is "${name}" and artist is "${artistName}")
+		end if
+		if (count of matches) = 0 then error "Not found in library" number ${NOT_IN_LIBRARY_ERROR}
+		play (item 1 of matches)
+	end tell
+`);
+};

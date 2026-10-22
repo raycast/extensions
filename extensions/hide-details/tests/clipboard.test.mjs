@@ -4,7 +4,7 @@ import { createRequire } from "node:module";
 import { readFile, readdir, writeFile, mkdtemp, rm, mkdir, utimes, access } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { after, test } from "node:test";
 import vm from "node:vm";
 import ts from "typescript";
@@ -49,7 +49,7 @@ async function loadSource(relative, replacements) {
   return module.exports;
 }
 
-async function harness({ preferences = {}, native } = {}) {
+async function harness({ preferences = {}, native, history = [] } = {}) {
   const directory = path.join(temporary, String(sequence++));
   await mkdir(directory);
   const calls = [];
@@ -79,13 +79,24 @@ async function harness({ preferences = {}, native } = {}) {
   const categoryModule = await loadSource("src/categories.ts", { "@raycast/api": api });
   const source = await loadSource("src/redaction.ts", {
     "./categories": categoryModule,
-    "@raycast/api": api,
+    "@raycast/api": {
+      ...api,
+      getPreferenceValues: () => preferences,
+      Clipboard: {
+        read: async ({ offset }) => {
+          if (history[offset] instanceof Error) throw history[offset];
+          return history[offset] ?? { text: "" };
+        },
+      },
+    },
     os: { tmpdir: () => directory },
     "swift:../swift/hide-details": {
       updateReviewImage: (...args) => invoke("updateReviewImage", args),
       redactImage: (...args) => invoke("redactImage", args),
       copyRedactedImage: (...args) => invoke("copyRedactedImage", args),
+      clipboardChangeCount: async () => 17,
     },
+    "./windows": {},
   });
   return {
     ...source,
@@ -296,7 +307,7 @@ test("unmount disposes a scan that finishes after the review closes", async () =
   });
   let mount;
   const stateValues = [];
-  const command = await loadSource("src/redact-clipboard.tsx", {
+  const review = await loadSource("src/review.tsx", {
     "./category-settings": { CategorySettings: () => null },
     "./redaction": wrapper,
     react: {
@@ -310,7 +321,10 @@ test("unmount disposes a scan that finishes after the review closes", async () =
     "react/jsx-runtime": { jsx: (type, props) => ({ type, props }), jsxs: (type, props) => ({ type, props }) },
     "@raycast/api": { getPreferenceValues: () => ({}), Icon: {}, List: { Section: {}, Item: { Detail: {} } } },
   });
-  command.default();
+  review.Review({
+    load: (recognition) => wrapper.redactClipboard({ recognition, forReview: true }),
+    target: "clipboard",
+  });
   const unmount = mount();
   await nativeStarted;
   unmount();
@@ -578,7 +592,7 @@ test("review masks all detection labels, uses real line breaks, and disposes rep
   let hookIndex = 0;
   const hooks = [];
   const jsx = (type, props) => ({ type, props });
-  const command = await loadSource("src/redact-clipboard.tsx", {
+  const review = await loadSource("src/review.tsx", {
     "./category-settings": { CategorySettings: () => null },
     "./redaction": wrapper,
     react: {
@@ -617,7 +631,10 @@ test("review masks all detection labels, uses real line breaks, and disposes rep
   });
   const render = () => {
     hookIndex = 0;
-    return command.default();
+    return review.Review({
+      load: (recognition) => wrapper.redactClipboard({ recognition, forReview: true }),
+      target: "clipboard",
+    });
   };
   render();
   const unmount = mount();
@@ -687,6 +704,132 @@ test("review masks all detection labels, uses real line breaks, and disposes rep
   for (let attempts = 0; attempts < 50 && (await wrapper.outputs()).length; attempts++) {
     await new Promise((resolve) => setTimeout(resolve, 10));
   }
+  assert.deepEqual(await wrapper.outputs(), []);
+});
+
+const noImage = () =>
+  Object.assign(new Error("process failed"), { stderr: "Clipboard has no image. Copy a screenshot first." });
+
+async function historyFiles() {
+  const directory = path.join(temporary, `history-${sequence++}`);
+  await mkdir(directory);
+  const files = {};
+  for (const name of ["notes.txt", "shot.png", "photo.JPG", "pruned.png"]) files[name] = path.join(directory, name);
+  for (const name of ["notes.txt", "shot.png", "photo.JPG"]) await writeFile(files[name], png);
+  return files;
+}
+
+test("clipboard history lists only existing image files, newest first, without duplicates", async () => {
+  const files = await historyFiles();
+  const wrapper = await harness({
+    history: [
+      { text: "plain text" },
+      { text: "notes.txt", file: files["notes.txt"] },
+      { text: "shot.png", file: files["shot.png"] },
+      new Error("history unavailable"),
+      { text: "photo", file: pathToFileURL(files["photo.JPG"]).href },
+      { text: "pruned", file: files["pruned.png"] },
+    ],
+  });
+  const images = await wrapper.clipboardHistoryImageFiles();
+  assert.deepEqual(
+    Array.from(images, ({ offset, path }) => [offset, path]),
+    [
+      [2, files["shot.png"]],
+      [4, files["photo.JPG"]],
+    ],
+  );
+  assert.ok(images[0].modified instanceof Date);
+  assert.equal((await wrapper.clipboardHistoryImageFiles(1)).length, 1);
+});
+
+test("a history scan reads the file and never claims a clipboard generation", async () => {
+  const files = await historyFiles();
+  const wrapper = await harness({
+    native: async (args) => {
+      await writeFile(args[0], png);
+      return { hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: null };
+    },
+  });
+  const image = { offset: 3, path: files["shot.png"], modified: new Date() };
+  const scan = await wrapper.redactHistoryImage(image, { recognition: "accurate" });
+  assert.equal(wrapper.calls[0].args[7], files["shot.png"]);
+  assert.equal(wrapper.calls[0].args[5], "accurate");
+  assert.equal(scan.source.kind, "history");
+  assert.equal(scan.source.offset, 3);
+  assert.equal(scan.clipboardChangeCount, null);
+  await wrapper.copyRedacted(scan, { requireOriginalClipboard: true });
+  assert.deepEqual(Array.from(wrapper.calls.at(-1).args), [scan.output, null]);
+  await wrapper.disposeScan(scan);
+  assert.deepEqual(await wrapper.outputs(), []);
+
+  const lying = await harness({
+    native: async (args) => {
+      await writeFile(args[0], png);
+      return { hits: [], regionCount: 0, output: args[0], clipboardChangeCount: 4 };
+    },
+  });
+  await assert.rejects(lying.redactHistoryImage(image), /invalid result/);
+  assert.deepEqual(await lying.outputs(), []);
+});
+
+test("history fallback skips screenshot API responses, scans a copied image file, and guards automatic copy", async () => {
+  const files = await historyFiles();
+  const wrapper = await harness({
+    // Clipboard.read returns no file for screenshot image representations, even though Raycast retains the image.
+    history: [{ text: "copied text" }, { text: "" }, { text: "shot.png", file: files["shot.png"] }],
+    native: async (args, operation) => {
+      if (operation === "copyRedactedImage") return;
+      if (args[7] === null) throw noImage();
+      await writeFile(args[0], png);
+      return { hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: null };
+    },
+  });
+  const scan = await wrapper.redactClipboard({ fallbackToHistory: true, guardClipboard: true });
+  assert.equal(scan.source.kind, "history");
+  assert.equal(scan.source.offset, 2);
+  assert.equal(wrapper.calls[1].args[7], files["shot.png"]);
+  assert.equal(scan.clipboardChangeCount, 17);
+  await wrapper.copyRedacted(scan, { requireOriginalClipboard: true });
+  assert.deepEqual(Array.from(wrapper.calls.at(-1).args), [scan.output, 17]);
+  await wrapper.disposeScan(scan);
+  assert.deepEqual(await wrapper.outputs(), []);
+});
+
+test("history fallback only handles a missing clipboard image", async () => {
+  const files = await historyFiles();
+  const history = [{ text: "shot.png", file: files["shot.png"] }];
+  const empty = await harness({
+    native: async () => {
+      throw noImage();
+    },
+  });
+  await assert.rejects(empty.redactClipboard({ fallbackToHistory: true }), /recent history has no copied image files/);
+  await assert.rejects(empty.redactClipboard(), /^Error: Clipboard has no image\. Copy a screenshot first\.$/);
+  const failing = await harness({
+    history,
+    native: async () => {
+      throw Object.assign(new Error("process failed"), { stderr: "Invalid Custom Regex." });
+    },
+  });
+  await assert.rejects(failing.redactClipboard({ fallbackToHistory: true }), /Invalid Custom Regex/);
+  assert.equal(failing.calls.length, 1);
+  assert.deepEqual(await failing.outputs(), []);
+});
+
+test("screenshot-only history explains the API limitation and how to scan the screenshot", async () => {
+  const wrapper = await harness({
+    history: [{ text: "" }, { text: "" }],
+    native: async () => {
+      throw noImage();
+    },
+  });
+  assert.deepEqual(Array.from(await wrapper.clipboardHistoryImageFiles()), []);
+  await assert.rejects(wrapper.redactClipboard({ fallbackToHistory: true }), (error) => {
+    assert.match(error.message, /Screenshot history is unavailable/);
+    assert.match(error.message, /Copy a screenshot again or copy an image file/);
+    return true;
+  });
   assert.deepEqual(await wrapper.outputs(), []);
 });
 
