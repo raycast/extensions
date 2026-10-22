@@ -1474,7 +1474,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://vomo.ai/cli",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://mcp.vomo.ai/mcp"],
+      args: ["-y", "mcp-remote", "https://mcp.vomo.ai/mcp", "--host", "127.0.0.1"],
     },
   },
   {
