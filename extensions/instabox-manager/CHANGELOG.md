@@ -1,6 +1,6 @@
 # InstaBox Manager Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-22
 
 - Manage Machines: list machines grouped by state, view details, start, stop, pause, resume and delete them, with operation progress
 - Connect over SSH in Terminal or iTerm with a short-lived SSH token, or copy the SSH, Mosh or CLI command
