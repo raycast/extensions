@@ -308,7 +308,11 @@ export default function Command(
                 subtitle={
                   showDetail
                     ? undefined
-                    : [project, branch].filter(Boolean).join(" · ")
+                    : // Raycast has no branch icon, and a subtitle takes no
+                      // images anyway; the glyph marks it as a branch.
+                      [project, branch && `⎇ ${branch}`]
+                        .filter(Boolean)
+                        .join(" · ")
                 }
                 keywords={[
                   row.worktreePath,
