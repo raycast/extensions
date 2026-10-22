@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { planMoves, type Screen, type WindowInfo } from "../src/lib/geometry.ts";
+import { pickWindow, planMoves, type Screen, type WindowInfo } from "../src/lib/geometry.ts";
 
 // MacBook-ish: 1512x982, 37px menu bar, 70px Dock at the bottom.
 const laptop: Screen = { frame: { x: 0, y: 0, w: 1512, h: 982 }, visible: { x: 0, y: 37, w: 1512, h: 875 } };
@@ -110,4 +110,52 @@ test("Dock on the external display, window on the laptop is untouched by the lap
   assert.equal(moves.length, 1);
   assert.equal(moves[0].pid, 2);
   assert.deepEqual(moves[0].to, { x: 2500, y: 1352 - 420, w: 600, h: 420 });
+});
+
+test("a gap that leaves no room moves nothing instead of squashing windows", () => {
+  const huge = { ...opts, margin: 900 };
+  assert.equal(planMoves([laptop], [win({ x: 400, y: 600, w: 500, h: 400 })], dock, huge).length, 0);
+  const left: Screen = { frame: laptop.frame, visible: { x: 80, y: 37, w: 1432, h: 945 } };
+  assert.equal(planMoves([left], [win({ x: 20, y: 300, w: 600, h: 400 })], null, { ...opts, margin: 1500 }).length, 0);
+});
+
+test("two same-app windows with the same frame each get moved", () => {
+  const f = { x: 400, y: 600, w: 500, h: 400 };
+  const moves = planMoves([laptop], [win(f, { index: -1 }), win(f, { index: -1 })], dock, opts);
+  assert.equal(moves.length, 2);
+
+  // What the apply script sees for that app: both windows still at the old frame.
+  const pos = [
+    [f.x, f.y],
+    [f.x, f.y],
+  ];
+  const size = [
+    [f.w, f.h],
+    [f.w, f.h],
+  ];
+  const used: number[] = [];
+  for (const m of moves) {
+    const idx = pickWindow(pos, size, m.from, m.index, used);
+    assert.notEqual(idx, -1);
+    used.push(idx);
+  }
+  assert.deepEqual(used, [0, 1]);
+  assert.equal(pickWindow(pos, size, f, -1, used), -1);
+});
+
+test("pickWindow prefers the hinted index and skips moved windows", () => {
+  const pos = [
+    [0, 0],
+    [400, 600],
+    [400, 600],
+  ];
+  const size = [
+    [100, 100],
+    [500, 400],
+    [500, 400],
+  ];
+  const from = { x: 400, y: 600, w: 500, h: 400 };
+  assert.equal(pickWindow(pos, size, from, 2, []), 2);
+  assert.equal(pickWindow(pos, size, from, 0, []), 1);
+  assert.equal(pickWindow(pos, size, { x: 1, y: 1, w: 1, h: 1 }, -1, []), -1);
 });

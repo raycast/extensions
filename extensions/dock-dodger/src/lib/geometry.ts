@@ -125,6 +125,9 @@ export function planMoves(screens: Screen[], windows: WindowInfo[], dock: Rect |
       right: right(screen.visible) - (edges.right ? margin : 0),
     };
 
+    // A huge gap preference can leave no room at all; don't squash windows into it.
+    if (b.bottom - b.top < MIN_SIZE || b.right - b.left < MIN_SIZE) continue;
+
     let { x, y, w, h } = f;
 
     if (edges.bottom && bottom(f) > b.bottom + EPS) {
@@ -164,6 +167,35 @@ export function planMoves(screens: Screen[], windows: WindowInfo[], dock: Rect |
   }
 
   return moves;
+}
+
+/**
+ * Find the window to move among one app's windows, by frame. Window order can
+ * shift between scan and apply, so `hint` is only tried first. Indexes in
+ * `used` were already claimed by an earlier move, so two windows with the same
+ * frame each get their own match.
+ *
+ * Runs inside the JXA apply script via toString(), so it must stay
+ * self-contained: no outside references and no nested named functions.
+ */
+export function pickWindow(pos: number[][], size: number[][], from: Rect, hint: number, used: number[]): number {
+  for (let k = -1; k < pos.length; k++) {
+    const j = k < 0 ? hint : k;
+    if (j < 0 || j >= pos.length || used.indexOf(j) >= 0) continue;
+    const p = pos[j];
+    const s = size[j];
+    if (
+      p &&
+      s &&
+      Math.abs(p[0] - from.x) <= 1 &&
+      Math.abs(p[1] - from.y) <= 1 &&
+      Math.abs(s[0] - from.w) <= 1 &&
+      Math.abs(s[1] - from.h) <= 1
+    ) {
+      return j;
+    }
+  }
+  return -1;
 }
 
 export function parseIgnoredApps(raw: string | undefined): string[] {

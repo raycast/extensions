@@ -3,19 +3,13 @@ import { runAppleScript } from "@raycast/utils";
 import { type Move, type Rect, type Screen, type WindowInfo, parseIgnoredApps, planMoves } from "./geometry";
 import { SCAN_SCRIPT, applyScript } from "./scripts";
 
-type Prefs = {
-  margin?: string;
-  shrink?: boolean;
-  ignoredApps?: string;
-};
-
 type Scan = { screens: Screen[]; windows: WindowInfo[]; dock: Rect | null };
 
 export type LiftResult = { planned: Move[]; ok: number; failed: string[] };
 
 function readPrefs() {
-  const p = getPreferenceValues<Prefs>();
-  const margin = Number.parseFloat(p.margin ?? "");
+  const p = getPreferenceValues<Preferences>();
+  const margin = Number.parseFloat(p.margin);
   return {
     margin: Number.isFinite(margin) ? margin : 8,
     shrink: p.shrink ?? true,

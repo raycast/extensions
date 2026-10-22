@@ -6,9 +6,11 @@ import { friendlyError, liftWindows } from "./lib/lift";
 export default async function Command() {
   const manual = environment.launchType === LaunchType.UserInitiated;
   try {
-    const { ok } = await liftWindows();
+    const { ok, failed } = await liftWindows();
     if (manual) {
-      await showHUD(ok ? `Lifted ${ok}, now watching every 10s` : "Watching the Dock every 10s");
+      if (ok) await showHUD(`Lifted ${ok}, now watching every 10s`);
+      else if (failed.length) await showHUD(`Watching every 10s, couldn't move ${[...new Set(failed)].join(", ")}`);
+      else await showHUD("Watching the Dock every 10s");
     }
   } catch (error) {
     if (manual) await showHUD(friendlyError(error));

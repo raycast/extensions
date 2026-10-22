@@ -1,7 +1,11 @@
 // JXA run through osascript. Scanning and moving are split so the geometry
 // lives in plain TypeScript (see geometry.ts) and can be tested off macOS.
 
-import type { Move } from "./geometry";
+import { type Move, pickWindow } from "./geometry";
+
+// Automation denied (-1743) or no Accessibility access (-25211). These must
+// reach friendlyError instead of being swallowed per window.
+const PERMISSION_ERROR = String.raw`/-1743|-25211|assistive access|not authori[sz]ed/i`;
 
 /**
  * Returns JSON: { screens, windows, dock }
@@ -31,7 +35,9 @@ function run() {
     const p = list.position();
     const s = list.size();
     dock = { x: p[0], y: p[1], w: s[0], h: s[1] };
-  } catch (e) {}
+  } catch (e) {
+    if (${PERMISSION_ERROR}.test(String(e))) throw e;
+  }
 
   const opts = $.kCGWindowListOptionOnScreenOnly | $.kCGWindowListExcludeDesktopElements;
   const info = ObjC.deepUnwrap(ObjC.castRefToObject($.CGWindowListCopyWindowInfo(opts, $.kCGNullWindowID))) || [];
@@ -63,7 +69,7 @@ export function applyScript(moves: Move[]): string {
 function run() {
   const moves = ${JSON.stringify(moves)};
   const se = Application("System Events");
-  const near = (a, b) => Math.abs(a - b) <= 1;
+  const pickWindow = ${pickWindow.toString()};
   let ok = 0;
   const failed = [];
   const byPid = {};
@@ -73,26 +79,21 @@ function run() {
       // One lookup per app: every Apple Event against System Events is slow.
       if (!byPid[m.pid]) {
         const wins = se.applicationProcesses.whose({ unixId: m.pid })[0].windows;
-        byPid[m.pid] = { wins: wins, pos: wins.position(), size: wins.size() };
+        byPid[m.pid] = { wins: wins, pos: wins.position(), size: wins.size(), used: [] };
       }
-      const { wins, pos, size } = byPid[m.pid];
-      const matches = (j) =>
-        pos[j] && size[j] &&
-        near(pos[j][0], m.from.x) && near(pos[j][1], m.from.y) &&
-        near(size[j][0], m.from.w) && near(size[j][1], m.from.h);
-
-      // Window order can shift between scan and apply; match on frame.
-      let idx = matches(m.index) ? m.index : -1;
-      for (let j = 0; idx < 0 && j < pos.length; j++) if (matches(j)) idx = j;
+      const app = byPid[m.pid];
+      const idx = pickWindow(app.pos, app.size, m.from, m.index, app.used);
       if (idx < 0) continue; // user moved it in the meantime, leave it
+      app.used.push(idx);
 
-      const w = wins[idx];
+      const w = app.wins[idx];
       const resize = m.to.w !== m.from.w || m.to.h !== m.from.h;
       if (resize) w.size = [m.to.w, m.to.h];
       w.position = [m.to.x, m.to.y];
       if (resize) w.size = [m.to.w, m.to.h]; // some apps clamp size against the old position
       ok++;
     } catch (e) {
+      if (${PERMISSION_ERROR}.test(String(e))) throw e;
       failed.push(m.app);
     }
   }
