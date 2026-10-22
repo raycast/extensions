@@ -1,0 +1,108 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "geekflare",
+  "title": "Geekflare",
+  "description": "Search the web (including the full Google results page), scrape pages to Markdown, and check websites: uptime, DNS, TLS, redirects, and Lighthouse.",
+  "icon": "icon.png",
+  "author": "chandankumar",
+  "owner": "geekflare",
+  "access": "public",
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-web",
+      "title": "Search Web",
+      "description": "Search the live web with Geekflare and open or copy results.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "check-website",
+      "title": "Check Website",
+      "description": "Run a website check: status, DNS, DNSSEC, TLS, redirects, broken links, load time, mixed content, or Lighthouse.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "example.com",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "scrape-to-clipboard",
+      "title": "Scrape Page to Clipboard",
+      "description": "Copy a public page's content as Markdown to the clipboard.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://example.com",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-web",
+      "title": "Search Web",
+      "description": "Search the live web, news, or images, or get the full Google results page for a country or city.",
+      "icon": "icon.png"
+    },
+    {
+      "name": "scrape-page",
+      "title": "Scrape Page",
+      "description": "Fetch a public web page and return its content as Markdown.",
+      "icon": "icon.png"
+    },
+    {
+      "name": "check-website",
+      "title": "Check Website",
+      "description": "Run one website check: status, DNS records, DNSSEC, TLS, redirects, broken links, load time, mixed content, or Lighthouse.",
+      "icon": "icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "type": "password",
+      "required": true,
+      "description": "Your Geekflare API key from dash.geekflare.com."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.15.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

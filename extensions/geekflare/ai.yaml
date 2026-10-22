@@ -1,0 +1,57 @@
+instructions: |
+  Use `geekflare` when the user needs live web results, the content of a specific page, or a health check of a website or domain.
+
+  Pick the tool that matches the request:
+  1. Use `search-web` for current information and finding sources. Set `serp: true` when the user asks what Google shows, about rankings, People Also Ask, or AI Overview, and pass `location` or `city` when they name a place.
+  2. Use `scrape-page` when the user gives a URL or wants the content of a specific page.
+  3. Use `check-website` for uptime, DNS records, DNSSEC, TLS/SSL certificates, redirects, broken links, load time, mixed content, or Lighthouse scores. Choose the single most relevant `check`; run more than one only when the user asks for a general health check.
+  You may combine tools, for example `search-web` first and then `scrape-page` for the most relevant result.
+
+  When answering:
+  - Cite sources with their URLs.
+  - Report website check findings as observed; never claim to have changed the website.
+  - Only use the tools for publicly accessible pages.
+evals:
+  - input: "@geekflare what are the latest developments in AI agents?"
+    expected:
+      - callsTool:
+          name: search-web
+          arguments:
+            query:
+              includes: "AI agents"
+    mocks:
+      search-web: []
+  - input: "@geekflare what does Google show for best project management software in London?"
+    expected:
+      - callsTool:
+          name: search-web
+          arguments:
+            serp: true
+            query:
+              includes: "project management"
+    mocks:
+      search-web: []
+  - input: "@geekflare summarize https://example.com"
+    expected:
+      - callsTool:
+          name: scrape-page
+          arguments:
+            url:
+              includes: "example.com"
+    mocks:
+      scrape-page:
+        url: "https://example.com"
+        markdown: "# Example Domain"
+        truncated: false
+  - input: "@geekflare when does the TLS certificate for example.com expire?"
+    expected:
+      - callsTool:
+          name: check-website
+          arguments:
+            check: "tls_scan"
+            url:
+              includes: "example.com"
+    mocks:
+      check-website:
+        check: "tls_scan"
+        result: {}
