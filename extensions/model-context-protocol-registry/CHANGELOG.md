@@ -1,5 +1,50 @@
 # Model Context Protocol Registry Changelog
 
+## [Refresh MCP Registry Entries] - 2026-10-16
+
+- Connect ElevenLabs through its maintained hosted MCP endpoint with OAuth sign-in.
+- Remove the archived E2B and Google Drive listings and the unavailable Shopify Dev listing.
+
+## [Add Kolect Creator Search MCP Server] - 2026-10-15
+
+- Add Kolect Creator Search to the official registry: search 300M+ TikTok, Instagram and YouTube creators from a plain-language brief, look up creators by link or @handle, check fake followers, get public contact emails and save shortlists. Hosted Streamable HTTP server at https://app.kolect.ai/mcp, connected through `mcp-remote` with a Kolect API key as a bearer header.
+
+## [Update Recordist entry] - 2026-10-15
+
+- Correct the Recordist description: it can also control recording, and what it returns goes to the assistant you connect.
+
+## [Add MoltNode by Chord MCP Server] - 2026-10-15
+
+- Add MoltNode by Chord to the official registry: read 31 blockchains over JSON-RPC and get best-route DEX swap quotes with unsigned transactions via Chord, then broadcast a transaction you signed yourself. Non-custodial: it never holds keys or signs. Remote Streamable HTTP server with no sign-in and no API key. Direct HTTP connection in Raycast at https://moltnode.ag/mcp.
+
+## [Add Chord MCP Server] - 2026-10-15
+
+- Add Chord to the official registry: DEX swap quotes and unsigned transactions on 7 EVM chains, plus token boards, candles, wallet PnL and smart money from Chord's index of on-chain trades. Non-custodial: tools return unsigned transactions for your own wallet to sign. Remote Streamable HTTP server with no sign-in and no API key for the data and swap tools. Direct HTTP connection in Raycast at https://api.getchord.xyz/v1/mcp.
+
+## [Add JANCTION Render MCP Server] - 2026-10-15
+
+- Add JANCTION Render to the official registry: render Blender scenes and 3D models (GLB, FBX, USD, OBJ, STL) on cloud GPUs, with a tiled preview first, then product shots, turntables, animations or stills as PNG or MP4. Hosted Streamable HTTP server at https://render.janction.jp/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add Web3Juice MCP Server] - 2026-10-15
+
+- Add Web3Juice to the official registry: evidence-backed DeFi yield data. Market summaries, pool detail with base vs reward APY, 90-day history and side-by-side comparisons for ~17,000 pools. Read-only. Remote Streamable HTTP server with no sign-in for the research tools. Direct HTTP connection in Raycast at https://web3juice.com/api/mcp.
+
+## [Add Latchkey MCP Server] - 2026-10-14
+
+- Add Latchkey to the official registry: read the CI failures its self-healing GitHub Actions runners could not repair, check run status and logs, dispatch workflows and run one-off commands on fresh ephemeral runners. Hosted Streamable HTTP server at https://latchkey.dev/mcp, connected through `mcp-remote` with a Latchkey API key as a bearer header.
+
+## [Add Taplio MCP Server] - 2026-10-14
+
+- Add Taplio to the official registry: write, schedule and analyze LinkedIn posts, find inspiration, comment, like and connect. Hosted Streamable HTTP server at https://mcp.taplio.com/ with OAuth sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Update AI Applyd MCP Server] - 2026-10-14
+
+- Update AI Applyd's description: it now submits applications on 34 hiring systems, up from 15.
+
+## [Add Nitrosend MCP Server] - 2026-10-14
+
+- Add Nitrosend to the official registry: compose email campaigns and automation flows, manage contacts and segments, send transactional email or SMS, and review delivery. Hosted remote Streamable HTTP server at https://api.nitrosend.com/mcp with direct HTTP connection in Raycast and OAuth sign-in.
+
 ## [Add Bool MCP Server] - 2026-10-13
 
 - Add Bool to the official registry: make your own apps and tools from a conversation. Create projects, prompt the builder or edit files, define data, and publish working web apps to a live URL. Hosted remote Streamable HTTP server with OAuth 2.1 sign-in. Direct HTTP connection in Raycast at https://bool.com/api/mcp.

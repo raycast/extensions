@@ -7,6 +7,8 @@ import * as fs from "fs";
 import * as path from "path";
 import QRCode from "qrcode";
 
+import { isTelegramAuthenticationError, TelegramAuthenticationError } from "../utils/errors";
+
 const QR_CODE_TIMEOUT = 30000;
 
 const SESSION_KEY = "telegram_session";
@@ -157,6 +159,44 @@ export async function clearPendingAuthSession(): Promise<void> {
 export async function isAuthenticated(): Promise<boolean> {
   const sessionString = await LocalStorage.getItem<string>(SESSION_KEY);
   return !!sessionString;
+}
+
+async function clearAuthentication(client: TelegramClient): Promise<void> {
+  if (clientInstance !== client) {
+    // A late failure from an older client must not discard a newer login -- but a
+    // replacement client built from the same rejected key is not a newer login.
+    // Drop the stored key so the authenticate page starts fresh; when the current
+    // client's own request is rejected it performs the full cleanup and disconnect.
+    const saved = await LocalStorage.getItem<string>(SESSION_KEY);
+    if (saved && saved !== (client.session.save() as unknown as string)) return;
+    await LocalStorage.removeItem(SESSION_KEY);
+    await LocalStorage.removeItem(USER_ID_KEY);
+    return;
+  }
+  clientInstance = null;
+  await LocalStorage.removeItem(SESSION_KEY);
+  await LocalStorage.removeItem(USER_ID_KEY);
+  // A slow disconnect must not delay a fresh login.
+  void client.destroy().catch((error) => {
+    console.error("Failed to disconnect invalid Telegram session:", error);
+  });
+}
+
+async function withTelegramClient<T>(
+  config: TelegramConfig,
+  operation: (client: TelegramClient) => Promise<T>,
+): Promise<T> {
+  const client = await getClient(config);
+  try {
+    if (!client.connected) await client.connect();
+    return await operation(client);
+  } catch (error) {
+    if (isTelegramAuthenticationError(error)) {
+      await clearAuthentication(client);
+      throw new TelegramAuthenticationError();
+    }
+    throw error;
+  }
 }
 
 export interface LogOutResult {
@@ -479,6 +519,7 @@ async function downloadMedia(
       return filePath;
     }
   } catch (error) {
+    if (isTelegramAuthenticationError(error)) throw error;
     console.error("Failed to download media:", error);
   }
 
@@ -506,6 +547,7 @@ async function downloadProfilePhoto(
       return photoPath;
     }
   } catch (error) {
+    if (isTelegramAuthenticationError(error)) throw error;
     console.error(`Failed to download ${entityType} photo:`, error);
   }
 
@@ -751,6 +793,7 @@ async function processChatMessage(
       const user = await client.getEntity(msg.fromId.userId);
       if (user instanceof Api.User) author = user;
     } catch (error) {
+      if (isTelegramAuthenticationError(error)) throw error;
       console.error(`Failed to resolve sender ${senderId}:`, error);
     }
   }
@@ -783,76 +826,124 @@ async function processChatMessage(
 export async function getSavedMessages(options: GetSavedMessagesOptions): Promise<SavedMessage[]> {
   const { config, limit = 50, searchQuery, skipMediaDownload = false } = options;
 
-  const client = await getClient(config);
+  return withTelegramClient(config, async (client) => {
+    const userId = await LocalStorage.getItem<string>(USER_ID_KEY);
+    if (!userId) {
+      throw new Error("User ID not found. Please authenticate first.");
+    }
 
-  if (!client.connected) {
-    await client.connect();
-  }
+    const messages = await client.getMessages("me", {
+      limit,
+      search: searchQuery || undefined,
+    });
 
-  const userId = await LocalStorage.getItem<string>(USER_ID_KEY);
-  if (!userId) {
-    throw new Error("User ID not found. Please authenticate first.");
-  }
+    const filteredMessages = messages.filter(hasRenderableContent);
 
-  const messages = await client.getMessages("me", {
-    limit,
-    search: searchQuery || undefined,
+    const processedMessages = await Promise.all(
+      filteredMessages.map((msg) => processSavedMessage(client, msg, skipMediaDownload)),
+    );
+
+    return processedMessages;
   });
-
-  const filteredMessages = messages.filter(hasRenderableContent);
-
-  const processedMessages = await Promise.all(
-    filteredMessages.map((msg) => processSavedMessage(client, msg, skipMediaDownload)),
-  );
-
-  return processedMessages;
 }
 
 export async function getChatMessages(options: GetMessagesOptions): Promise<ChatMessage[]> {
   const { config, chatId, limit = 50, searchQuery, skipMediaDownload = false } = options;
 
-  const client = await getClient(config);
+  return withTelegramClient(config, async (client) => {
+    const messages = await client.getMessages(chatId, {
+      limit,
+      search: searchQuery || undefined,
+    });
 
-  if (!client.connected) {
-    await client.connect();
-  }
+    const filteredMessages = messages.filter(hasRenderableContent);
 
-  const messages = await client.getMessages(chatId, {
-    limit,
-    search: searchQuery || undefined,
+    // Get the chat entity to know who the chat partner is
+    const entity = await client.getEntity(chatId);
+    const chatEntity =
+      entity instanceof Api.User || entity instanceof Api.Chat || entity instanceof Api.Channel ? entity : undefined;
+
+    const processedMessages = await Promise.all(
+      filteredMessages.map((msg) => processChatMessage(client, msg, skipMediaDownload, chatEntity)),
+    );
+
+    return processedMessages;
   });
-
-  const filteredMessages = messages.filter(hasRenderableContent);
-
-  // Get the chat entity to know who the chat partner is
-  const entity = await client.getEntity(chatId);
-  const chatEntity =
-    entity instanceof Api.User || entity instanceof Api.Chat || entity instanceof Api.Channel ? entity : undefined;
-
-  const processedMessages = await Promise.all(
-    filteredMessages.map((msg) => processChatMessage(client, msg, skipMediaDownload, chatEntity)),
-  );
-
-  return processedMessages;
 }
 
 export async function getChats(options: GetChatsOptions): Promise<Chat[]> {
   const { config, limit = 50, skipPhotoDownload = false } = options;
 
-  const client = await getClient(config);
+  return withTelegramClient(config, async (client) => {
+    const dialogs = await client.getDialogs({ limit });
 
-  if (!client.connected) {
-    await client.connect();
-  }
+    const chats: Chat[] = await Promise.all(
+      dialogs.map(async (dialog) => {
+        const entity = dialog.entity;
+        let title = "";
+        let type: ChatType = "group";
+        let photo: string | undefined;
 
-  const dialogs = await client.getDialogs({ limit });
+        if (entity instanceof Api.User) {
+          title = entity.firstName || "";
+          if (entity.lastName) title += ` ${entity.lastName}`;
 
-  const chats: Chat[] = await Promise.all(
-    dialogs.map(async (dialog) => {
-      const entity = dialog.entity;
+          if (entity.deleted) {
+            title = "Deleted Account";
+          } else if (!title.trim()) {
+            title = "Unknown User";
+          }
+
+          type = "private";
+          if (!skipPhotoDownload && entity.photo && "photoId" in entity.photo) {
+            photo = await downloadProfilePhoto(client, entity, entity.id.toString(), "profile");
+          }
+        } else if (entity instanceof Api.Chat) {
+          title = entity.title;
+          type = "group";
+          if (!skipPhotoDownload && entity.photo && "photoId" in entity.photo) {
+            photo = await downloadProfilePhoto(client, entity, entity.id.toString(), "chat");
+          }
+        } else if (entity instanceof Api.Channel) {
+          title = entity.title;
+          type = "group";
+          if (!skipPhotoDownload && entity.photo && "photoId" in entity.photo) {
+            photo = await downloadProfilePhoto(client, entity, entity.id.toString(), "channel");
+          }
+        }
+
+        let lastMessage: ChatMessage | undefined;
+
+        if (dialog.message) {
+          const chatEntityForMessage =
+            entity instanceof Api.User || entity instanceof Api.Chat || entity instanceof Api.Channel
+              ? entity
+              : undefined;
+          lastMessage = await processChatMessage(client, dialog.message, skipPhotoDownload, chatEntityForMessage);
+        }
+
+        return {
+          id: dialog.id?.toString() || "",
+          title,
+          type,
+          lastMessage,
+          unreadCount: dialog.unreadCount,
+          photo,
+          isPinned: dialog.pinned || false,
+        };
+      }),
+    );
+
+    return chats;
+  });
+}
+
+export async function getChatById(config: TelegramConfig, chatId: string): Promise<Chat | null> {
+  return withTelegramClient(config, async (client) => {
+    try {
+      const entity = await client.getEntity(chatId);
       let title = "";
       let type: ChatType = "group";
-      let photo: string | undefined;
 
       if (entity instanceof Api.User) {
         title = entity.firstName || "";
@@ -865,121 +956,54 @@ export async function getChats(options: GetChatsOptions): Promise<Chat[]> {
         }
 
         type = "private";
-        if (!skipPhotoDownload && entity.photo && "photoId" in entity.photo) {
-          photo = await downloadProfilePhoto(client, entity, entity.id.toString(), "profile");
-        }
       } else if (entity instanceof Api.Chat) {
         title = entity.title;
         type = "group";
-        if (!skipPhotoDownload && entity.photo && "photoId" in entity.photo) {
-          photo = await downloadProfilePhoto(client, entity, entity.id.toString(), "chat");
-        }
       } else if (entity instanceof Api.Channel) {
         title = entity.title;
         type = "group";
-        if (!skipPhotoDownload && entity.photo && "photoId" in entity.photo) {
-          photo = await downloadProfilePhoto(client, entity, entity.id.toString(), "channel");
-        }
-      }
-
-      let lastMessage: ChatMessage | undefined;
-
-      if (dialog.message) {
-        const chatEntityForMessage =
-          entity instanceof Api.User || entity instanceof Api.Chat || entity instanceof Api.Channel
-            ? entity
-            : undefined;
-        lastMessage = await processChatMessage(client, dialog.message, skipPhotoDownload, chatEntityForMessage);
       }
 
       return {
-        id: dialog.id?.toString() || "",
+        id: chatId,
         title,
         type,
-        lastMessage,
-        unreadCount: dialog.unreadCount,
-        photo,
-        isPinned: dialog.pinned || false,
+        unreadCount: 0,
+        isPinned: false,
       };
-    }),
-  );
-
-  return chats;
-}
-
-export async function getChatById(config: TelegramConfig, chatId: string): Promise<Chat | null> {
-  const client = await getClient(config);
-
-  if (!client.connected) {
-    await client.connect();
-  }
-
-  try {
-    const entity = await client.getEntity(chatId);
-    let title = "";
-    let type: ChatType = "group";
-
-    if (entity instanceof Api.User) {
-      title = entity.firstName || "";
-      if (entity.lastName) title += ` ${entity.lastName}`;
-
-      if (entity.deleted) {
-        title = "Deleted Account";
-      } else if (!title.trim()) {
-        title = "Unknown User";
-      }
-
-      type = "private";
-    } else if (entity instanceof Api.Chat) {
-      title = entity.title;
-      type = "group";
-    } else if (entity instanceof Api.Channel) {
-      title = entity.title;
-      type = "group";
+    } catch (error) {
+      if (isTelegramAuthenticationError(error)) throw error;
+      console.error("Failed to get chat by ID:", error);
+      return null;
     }
-
-    return {
-      id: chatId,
-      title,
-      type,
-      unreadCount: 0,
-      isPinned: false,
-    };
-  } catch (error) {
-    console.error("Failed to get chat by ID:", error);
-    return null;
-  }
+  });
 }
 
 export async function sendMessage(options: SendMessageOptions): Promise<void> {
   const { config, chatId, message, filePaths } = options;
 
-  const client = await getClient(config);
+  return withTelegramClient(config, async (client) => {
+    const files = filePaths ? (Array.isArray(filePaths) ? filePaths : [filePaths]) : [];
 
-  if (!client.connected) {
-    await client.connect();
-  }
-
-  const files = filePaths ? (Array.isArray(filePaths) ? filePaths : [filePaths]) : [];
-
-  if (files.length === 0) {
-    await client.sendMessage(chatId, { message });
-    return;
-  }
-
-  // Send message with first file (Telegram API limitation - one file per message)
-  await client.sendMessage(chatId, {
-    message,
-    file: files[0],
-  });
-
-  // If there are more files, send them in separate messages
-  if (files.length > 1) {
-    for (let i = 1; i < files.length; i++) {
-      await client.sendMessage(chatId, {
-        message: "",
-        file: files[i],
-      });
+    if (files.length === 0) {
+      await client.sendMessage(chatId, { message });
+      return;
     }
-  }
+
+    // Send message with first file (Telegram API limitation - one file per message)
+    await client.sendMessage(chatId, {
+      message,
+      file: files[0],
+    });
+
+    // If there are more files, send them in separate messages
+    if (files.length > 1) {
+      for (let i = 1; i < files.length; i++) {
+        await client.sendMessage(chatId, {
+          message: "",
+          file: files[i],
+        });
+      }
+    }
+  });
 }

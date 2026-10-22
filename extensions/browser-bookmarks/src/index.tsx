@@ -12,7 +12,6 @@ import {
   showToast,
 } from "@raycast/api";
 import { runAppleScript, useCachedPromise, useCachedState } from "@raycast/utils";
-import Fuse from "fuse.js";
 import { useEffect, useMemo, useState } from "react";
 
 import PermissionErrorScreen from "./components/PermissionErrorScreen";
@@ -55,6 +54,7 @@ import {
 } from "./utils/browserOpening";
 import { getInitialBrowserSelection } from "./utils/browsers";
 // Note: frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
+import { createBookmarkSearch } from "./utils/bookmarkSearch";
 import { getBookmarkIcon } from "./utils/icons";
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
 
@@ -64,6 +64,7 @@ type Bookmark = {
   title: string;
   url: string;
   folder: string;
+  searchFolder?: string;
   domain: string;
   favicon?: string;
   bookmarkFrecency?: BookmarkFrecency;
@@ -165,7 +166,8 @@ export default function Command() {
   const { data: availableBrowsers, isLoading: isLoadingAvailableBrowsers } = useAvailableBrowsers();
   const availableBrowserIdsKey = availableBrowsers?.map((browser) => browser.browserId).join("|") ?? "__pending__";
 
-  const { showDomain, openBookmarkBrowser, replaceCurrentTab, copyLinkShortcut } = getPreferenceValues<Preferences>();
+  const { showDomain, openBookmarkBrowser, replaceCurrentTab, copyLinkShortcut, searchStrictness } =
+    getPreferenceValues<Preferences>();
 
   const {
     data: storedBrowsers,
@@ -451,18 +453,10 @@ export default function Command() {
     });
   }, [bookmarks, selectedFolderId, folders]);
 
-  const fuse = useMemo(() => {
-    return new Fuse(folderBookmarks, {
-      keys: [
-        { name: "title", weight: 3 },
-        { name: "domain", weight: 1 },
-        { name: "folder", weight: 0.5 },
-      ],
-      threshold: 0.4,
-      includeScore: true,
-      ignoreLocation: true,
-    });
-  }, [folderBookmarks]);
+  const fuse = useMemo(
+    () => createBookmarkSearch(folderBookmarks, Number(searchStrictness)),
+    [folderBookmarks, searchStrictness],
+  );
 
   // Limit display to 100 bookmarks to avoid heap memory errors
   // Use custom filtering instead of native filtering

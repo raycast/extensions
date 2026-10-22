@@ -1,10 +1,27 @@
-function getErrorText(error: unknown): string {
+export function getErrorText(error: unknown): string {
   if (!error) return "";
   if (typeof error === "string") return error;
-  if (error instanceof Error) return error.message;
+  const details = error as { message?: string; errorMessage?: string; name?: string };
+  return `${details.errorMessage || ""} ${details.name || ""} ${details.message || ""}`.trim();
+}
 
-  const details = error as { message?: string; errorMessage?: string };
-  return `${details.errorMessage || ""} ${details.message || ""}`.trim();
+export class TelegramAuthenticationError extends Error {
+  constructor(
+    message = "Your Telegram session is no longer valid. Run 'Authenticate with Telegram' to sign in again.",
+  ) {
+    super(message);
+    this.name = "TelegramAuthenticationError";
+  }
+}
+
+export function isTelegramAuthenticationError(error: unknown): boolean {
+  if (error instanceof TelegramAuthenticationError) return true;
+
+  // RPC errors have a human-readable message; the protocol code is in errorMessage.
+  const errorText = getErrorText(error).toUpperCase();
+  return /AUTH_KEY_UNREGISTERED|AUTH_KEY_INVALID|AUTH_KEY_DUPLICATED|SESSION_EXPIRED|SESSION_REVOKED|AUTHKEYUNREGISTEREDERROR|AUTHKEYINVALIDERROR|AUTHKEYDUPLICATEDERROR|SESSIONEXPIREDERROR|SESSIONREVOKEDERROR/.test(
+    errorText,
+  );
 }
 
 function formatFloodWaitMessage(errorText: string): string | null {
@@ -30,6 +47,10 @@ function formatFloodWaitMessage(errorText: string): string | null {
 }
 
 export function getTelegramErrorMessage(error: unknown): string {
+  if (isTelegramAuthenticationError(error)) {
+    return error instanceof TelegramAuthenticationError ? error.message : new TelegramAuthenticationError().message;
+  }
+
   const errorText = getErrorText(error).toUpperCase();
 
   if (errorText.includes("SESSION_PASSWORD_NEEDED")) {

@@ -1,4 +1,4 @@
-import { confirmAlert, showToast, Toast } from "@raycast/api";
+import { Clipboard, confirmAlert, showToast, Toast } from "@raycast/api";
 import { stat } from "fs/promises";
 import { basename } from "path";
 import { promisify } from "util";
@@ -93,6 +93,8 @@ export async function searchFilesWithCLI(searchText: string, preferences: Prefer
     const errorMessage = error instanceof Error ? error.message : String(error);
     const hasStderr = error && typeof error === "object" && "stderr" in error;
     const stderr = hasStderr ? String(error.stderr) : "";
+    // es.exe exits with code 8 ("Everything IPC not found") when the Everything app is not running
+    const isEverythingNotRunning = errorCode === 8 || stderr.includes("Everything IPC");
 
     const isNotFound =
       errorCode === 1 ||
@@ -100,7 +102,19 @@ export async function searchFilesWithCLI(searchText: string, preferences: Prefer
       stderr.includes("command not found") ||
       errorMessage.includes("not recognized");
 
-    if (isNotFound) {
+    if (isEverythingNotRunning) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Everything is not running",
+        message: "Please make sure the Everything app is running.",
+        primaryAction: {
+          title: "Copy Error",
+          onAction: () => {
+            Clipboard.copy(errorMessage);
+          },
+        },
+      });
+    } else if (isNotFound) {
       if (esExePath) {
         // User configured a custom path that doesn't work
         await showToast({
@@ -140,6 +154,12 @@ export async function searchFilesWithCLI(searchText: string, preferences: Prefer
         style: Toast.Style.Failure,
         title: "Error Searching Files",
         message: errorMessage,
+        primaryAction: {
+          title: "Copy Error",
+          onAction: () => {
+            Clipboard.copy(errorMessage);
+          },
+        },
       });
     }
     return [];

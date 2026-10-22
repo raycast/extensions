@@ -185,7 +185,18 @@
       "name": "create-issue",
       "title": "Create Issue",
       "description": "Create an issue in one of your GitHub repositories.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "openInBrowserAfterCreate",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "After Creating",
+          "label": "Open issue in browser",
+          "description": "If checked, newly created issues will be opened in your default browser."
+        }
+      ]
     },
     {
       "name": "create-branch",
