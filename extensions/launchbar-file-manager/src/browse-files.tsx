@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -134,6 +134,15 @@ function FileBrowser(props: {
   // navigation. Copy/move happens only via Tab → transfer tree.
   const { selected } = useGlobalSelection();
 
+  // Shift+↑/↓ run. The first press marks the row you are on and moves on;
+  // continuing in the same direction marks each row you leave. Reversing
+  // unmarks the row you leave, so arrowing back shrinks the run. A plain
+  // arrow move ends the run, which is what makes non-contiguous runs work.
+  const shiftRun = useRef<{ direction: 1 | -1 } | null>(null);
+  // The row id we moved to programmatically. onSelectionChange uses it to
+  // tell our own move apart from a plain arrow move (which ends the run).
+  const programmaticMove = useRef<string | null>(null);
+
   // Remember the last opened folder (only the folder — the basket is
   // always cleared on open, so exiting deselects).
   useEffect(() => {
@@ -193,37 +202,58 @@ function FileBrowser(props: {
     [entries, searchText],
   );
 
+  function endShiftRun() {
+    shiftRun.current = null;
+  }
+
   function toggleSelect(fullPath: string) {
+    endShiftRun();
     togglePath(fullPath);
   }
 
   function selectAll() {
+    endShiftRun();
     addPaths(entries.map((e) => e.fullPath));
   }
 
   function selectFiltered() {
+    endShiftRun();
     addPaths(filteredEntries.map((e) => e.fullPath));
   }
 
   function clearSelection() {
+    endShiftRun();
     clearAll();
   }
 
   // LaunchBar-style selection: Shift+↑/↓ marks the row you are on, then
-  // moves the highlight one step. The row ahead is NOT selected — pressing
-  // again marks it and moves on, so consecutive presses build a run.
+  // moves the highlight one step. The row ahead is NOT selected. Reversing
+  // over an active run unmarks the row you leave, so Shift+↓ then Shift+↑
+  // shrinks the selection back.
   function extendSelection(fromPath: string, direction: 1 | -1) {
     const list = visibleEntries;
     const from = list.findIndex((e) => e.fullPath === fromPath);
     if (from === -1) return;
 
-    if (!selectedSet.has(fromPath)) addPaths([fromPath]);
+    const run = shiftRun.current;
+    if (run && run.direction === -direction) {
+      // Reversing over the run: deselect the row we are leaving.
+      removePaths([fromPath]);
+    } else {
+      // First press, or continuing the run: select the row we are leaving.
+      if (!selectedSet.has(fromPath)) addPaths([fromPath]);
+      shiftRun.current = { direction };
+    }
 
     const target = Math.max(0, Math.min(list.length - 1, from + direction));
-    if (target !== from) setHighlightId(list[target].fullPath);
+    if (target !== from) {
+      programmaticMove.current = list[target].fullPath;
+      setHighlightId(list[target].fullPath);
+    }
   }
 
   function enterFolder(folderPath: string) {
+    endShiftRun();
     setSearchText("");
     setHighlightId(undefined);
     setCurrentPath(folderPath);
@@ -231,6 +261,7 @@ function FileBrowser(props: {
 
   function goUp() {
     if (currentPath === parentDir(currentPath)) return;
+    endShiftRun();
     // Land the highlight on the folder just left (released by the effect
     // below once it has actually landed).
     setHighlightId(currentPath);
@@ -241,6 +272,7 @@ function FileBrowser(props: {
   function jumpTo(target: string) {
     const resolved = expandHome(target);
     if (resolved === currentPath) return;
+    endShiftRun();
     setSearchText("");
     setHighlightId(undefined);
     setCurrentPath(resolved);
@@ -261,6 +293,7 @@ function FileBrowser(props: {
         showHidden={props.showHidden}
         onDone={(destDir) => {
           // Reveal the results: open the destination, not the origin.
+          endShiftRun();
           setSearchText("");
           setCurrentPath(destDir);
           refresh();
@@ -293,18 +326,31 @@ function FileBrowser(props: {
 
   const crumbs = currentPath.replace(/^\/Users\/[^/]+/, "~");
 
+  function changeSearch(text: string) {
+    endShiftRun();
+    setSearchText(text);
+  }
+
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder={`${crumbs} · ${entries.length} items · ${selected.length} selected — Shift+↑/↓ select, Tab transfer, ← up`}
       searchText={searchText}
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={changeSearch}
       filtering={false}
       selectedItemId={highlightId}
       onSelectionChange={(id) => {
         // Real landing or user move — release. Null (loading gap or
         // filtered-out target) must NOT clear, or the landing is lost.
         if (!id) return;
+        if (programmaticMove.current === id) {
+          // Our own Shift+↑/↓ move — keep the run alive.
+          programmaticMove.current = null;
+        } else {
+          // Plain arrow move (or click) ends the run so the next
+          // Shift+arrow starts a fresh selection.
+          endShiftRun();
+        }
         setHighlightId(undefined);
       }}
       isShowingDetail={props.showDetail && entries.length > 0}
@@ -404,7 +450,7 @@ function FileBrowser(props: {
               <Action
                 title="Clear Search"
                 icon={Icon.XMarkCircle}
-                onAction={() => setSearchText("")}
+                onAction={() => changeSearch("")}
               />
               <Action
                 title="Go Up"
