@@ -35,7 +35,8 @@
       "description": "Pixels to keep between a window and the Dock.",
       "type": "textfield",
       "required": false,
-      "default": "8"
+      "default": "8",
+      "placeholder": "8"
     },
     {
       "name": "shrink",
@@ -52,7 +53,8 @@
       "description": "Comma-separated app names to never move, e.g. Finder, Preview",
       "type": "textfield",
       "required": false,
-      "default": ""
+      "default": "",
+      "placeholder": "Finder, Preview"
     }
   ],
   "dependencies": {
