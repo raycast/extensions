@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add LLMSlim MCP Server] - 2026-10-22
+
+- Add LLMSlim to the community registry: long-term memory for agents with no LLM call (remember, recall, list_memories, forget, fit_context). Messages are stored word for word in a local SQLite file and recalled within a token budget. Local stdio server via `uvx --from llmslim[mcp] llmslim mcp`; no API key.
+
 ## [Update Hermoso MCP Server] - 2026-10-21
 
 - Update the Hermoso entry's description: an AI marketing agent and AI ad generator for your AI agent, with no markup on models. The connection is unchanged.
