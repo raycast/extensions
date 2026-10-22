@@ -1,0 +1,1 @@
+[{"role":"meta","content":"--session=fabric-raycast-check --dry-run -p summarize"},{"role":"system","content":"# IDENTITY and PURPOSE\n\nYou summarize the text you are given.\n\n# OUTPUT\n\n- One sentence."},{"role":"user","content":"hello"},{"role":"assistant","content":"Dry run: Fake response sent by DryRun plugin\n"}]

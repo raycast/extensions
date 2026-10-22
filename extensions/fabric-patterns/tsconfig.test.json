@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["test/**/*", "raycast-env.d.ts"],
+  "compilerOptions": { "types": ["node", "bun"] }
+}
