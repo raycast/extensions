@@ -51,7 +51,7 @@
         {
           "name": "closeAllVersions",
           "type": "checkbox",
-          "title": "Restart",
+          "title": "",
           "label": "Restart all versions",
           "description": "Turn off to restart outdated servers only",
           "required": false,
@@ -60,7 +60,7 @@
         {
           "name": "confirmRestart",
           "type": "checkbox",
-          "title": "Confirmation",
+          "title": "",
           "label": "Ask before restarting",
           "description": "Confirm each restart",
           "required": false,
