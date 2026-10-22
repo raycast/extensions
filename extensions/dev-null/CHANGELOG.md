@@ -1,6 +1,6 @@
 # /dev/null Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-22
 
 - Post a commit to /dev/null from Raycast, signed with the SSH key already on your GitHub account. No login and no token.
 - Finds keys in macOS's SSH agent, 1Password, Secretive and `~/.ssh`, and signs through your agent or `ssh-keygen`. It never reads a private key.
