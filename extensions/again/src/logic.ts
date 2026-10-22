@@ -2,7 +2,8 @@
 // No Raycast imports: tested with node.
 
 export type Outcome = "done" | "some" | "not";
-export type Day = { promise: string; outcome?: Outcome; auto?: boolean; prev?: Outcome };
+// `counted` remembers that the day was ever answered Done or Some, whatever the current answer says.
+export type Day = { promise: string; outcome?: Outcome; auto?: boolean; prev?: Outcome; counted?: boolean };
 export type State = { days: Record<string, Day> };
 export type Screen = "first" | "welcome-back" | "choose" | "promise" | "closed";
 export type Offer = { text: string; label?: string };
@@ -61,12 +62,19 @@ export function lastPromiseDay(state: State, before: string): string | null {
   );
 }
 
-// A reopened day keeps counting through its earlier answer, so the number never goes down.
+const isShowUp = (o?: Outcome) => o === "done" || o === "some";
+const counts = (d: Day) => d.counted === true || isShowUp(d.outcome) || isShowUp(d.prev);
+
+// A day that counted once keeps counting, whatever it is changed to later, so the number never goes down.
 export function showedUp(state: State): number {
-  return Object.values(state.days).filter((v) => {
-    const o = v.outcome ?? v.prev;
-    return o === "done" || o === "some";
-  }).length;
+  return Object.values(state.days).filter(counts).length;
+}
+
+// "Yesterday" only when it is; an older day that can still be corrected is named by its weekday.
+export function dayLabel(key: string, today: string): string {
+  if (daysBetween(key, today) === 1) return "Yesterday";
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(y, m - 1, d, 12).toLocaleDateString("en-US", { weekday: "long" });
 }
 
 // "Smaller" is a ladder: minutes are halved down to 2, then two fixed rungs. The last rung stays put.
@@ -155,6 +163,7 @@ export function setPromise(state: State, today: string, text: string): State {
   const d = state.days[today];
   const prev = d?.outcome ?? d?.prev;
   const next: Day = prev ? { promise: t, prev } : { promise: t };
+  if (d?.counted) next.counted = true;
   return { ...state, days: { ...state.days, [today]: next } };
 }
 
@@ -164,6 +173,7 @@ export function answer(state: State, today: string, outcome: Outcome): State {
   const next: Day = { ...d, outcome };
   delete next.prev;
   delete next.auto;
+  if (counts(d) || isShowUp(outcome)) next.counted = true;
   return { ...state, days: { ...state.days, [today]: next } };
 }
 
@@ -172,21 +182,28 @@ export function answerDay(state: State, key: string, outcome: Outcome): State {
   const d = state.days[key];
   if (!d?.promise) return state;
   const next: Day = { promise: d.promise, outcome };
+  if (counts(d) || isShowUp(outcome)) next.counted = true;
   return { ...state, days: { ...state.days, [key]: next } };
 }
 
 export function reopen(state: State, today: string): State {
   const d = state.days[today];
   if (!d?.outcome) return state;
-  return { ...state, days: { ...state.days, [today]: { promise: d.promise, prev: d.outcome } } };
+  const next: Day = { promise: d.promise, prev: d.outcome };
+  if (counts(d)) next.counted = true;
+  return { ...state, days: { ...state.days, [today]: next } };
 }
 
 // "Pick another thing". A reopened day keeps its earlier answer, so the count does not drop.
 export function clearToday(state: State, today: string): State {
   const days = { ...state.days };
   const d = days[today];
-  if (d?.prev) days[today] = { promise: "", prev: d.prev };
-  else delete days[today];
+  if (d && (d.prev || d.counted)) {
+    const kept: Day = { promise: "" };
+    if (d.prev) kept.prev = d.prev;
+    if (counts(d)) kept.counted = true;
+    days[today] = kept;
+  } else delete days[today];
   return { ...state, days };
 }
 
