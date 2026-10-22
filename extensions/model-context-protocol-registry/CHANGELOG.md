@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Multi Calendar MCP Server] - 2026-10-22
+
+- Add Multi Calendar to the official registry: a person's own Outlook.com, Hotmail, Microsoft 365 and Google calendars, many accounts at once with one search for free time across all of them - read, create, move and cancel events, answer invitations and make booking links, booking pages and group polls within the permissions each account's owner sets. Hosted Streamable HTTP server at https://calendar.lumman.co/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add Terminal Tax MCP Server] - 2026-10-22
 
 - Add Terminal Tax to the official registry: e-file a 2025 US federal Form 1040 that your AI assistant prepared. The tools check the return and return either the problems to fix or one link to a hosted filing page where you review, sign and pay; Terminal Tax then e-files it. Hosted Streamable HTTP server at https://mcp.terminal.tax/v1/hosted-mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
