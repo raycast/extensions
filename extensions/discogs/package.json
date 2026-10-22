@@ -44,7 +44,8 @@
       "name": "search-current-track",
       "title": "Search Current Music Track",
       "description": "Search Discogs for the track currently playing in Apple Music",
-      "mode": "no-view"
+      "mode": "no-view",
+      "platforms": ["macOS"]
     }
   ],
   "preferences": [
