@@ -1,6 +1,6 @@
 # Circleback Changelog
 
-## [Error reporting] - {PR_MERGE_DATE}
+## [Error reporting] - 2026-10-22
 
 - Errors shown in a toast are now reported to Raycast so we can fix them.
 
