@@ -1,6 +1,6 @@
 # App Time Zone Launcher Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-22
 
 - Search installed apps and relaunch one with its own time zone (`TZ` / `__XPC_TZ`)
 - Ask for confirmation before restarting an app that is already running
