@@ -18,6 +18,7 @@ function parseState(raw: string): State | null {
       if (OUTCOMES.includes(v.outcome as Outcome)) day.outcome = v.outcome as Outcome;
       if (OUTCOMES.includes(v.prev as Outcome)) day.prev = v.prev as Outcome;
       if (v.auto === true) day.auto = true;
+      if (v.counted === true) day.counted = true;
       days[k] = day;
     }
     return { days };
@@ -26,8 +27,10 @@ function parseState(raw: string): State | null {
   }
 }
 
-// Reads the saved days and closes any day left open. A read error is not treated as "no days":
-// it throws, so nothing is written over what is there. A value that cannot be parsed is kept as a backup.
+// Reads the saved days and closes any day left open, in memory only. Reading never overwrites the saved value,
+// so the background menu bar refresh cannot erase a change made in the list. The closed days are saved with
+// the next change. A read error is not treated as "no days": it throws, so nothing is written over what is there.
+// A value that cannot be parsed is kept as a backup.
 export async function loadState(): Promise<State> {
   const raw = await LocalStorage.getItem<string>(KEY);
   let state: State = { days: {} };
@@ -36,9 +39,7 @@ export async function loadState(): Promise<State> {
     if (parsed) state = parsed;
     else await LocalStorage.setItem(`${KEY}.bak`, raw);
   }
-  const closed = autoClose(state, todayKey());
-  if (JSON.stringify(closed) !== JSON.stringify(state)) await LocalStorage.setItem(KEY, JSON.stringify(closed));
-  return closed;
+  return autoClose(state, todayKey());
 }
 
 // Every change re-reads what is saved and works out today again, so a click in the menu bar and a click in the
