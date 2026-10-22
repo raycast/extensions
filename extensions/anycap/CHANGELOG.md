@@ -1,6 +1,6 @@
 # Anycap Changelog
 
-## [Undo failure is reported] - {PR_MERGE_DATE}
+## [Undo failure is reported] - 2026-10-22
 
 - Undo after Archive says so when the capture could not be restored, instead of refreshing as if it had.
 
