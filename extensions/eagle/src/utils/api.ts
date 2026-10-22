@@ -2,6 +2,7 @@ import axios from "axios";
 import { readdir, readFile } from "fs/promises";
 import { join, basename } from "path";
 import { Application, EagleAPIResponse, Folder, Item } from "../@types/eagle";
+import { EagleClient, EagleItem, EagleLibrary, EaglePage } from "../@types/eagle-v2";
 
 export const instance = axios.create({
   baseURL: "http://localhost:41595/api/",
@@ -212,3 +213,35 @@ export function getRecentFolders() {
 }
 
 export default instance;
+
+// Keep the existing commands on V1. AI tools require Eagle 4.0 Build 21's V2 API.
+async function v2Request<T>(endpoint: string, body?: unknown): Promise<T> {
+  try {
+    const response = await instance.request<{ status: string; data: T; message?: string }>({
+      url: `v2/${endpoint}`,
+      method: body === undefined ? "GET" : "POST",
+      data: body,
+      timeout: 30_000,
+    });
+    if (response.data.status !== "success") {
+      throw new Error(response.data.message || "Eagle rejected the request.");
+    }
+    return response.data.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 404) {
+        throw new Error("AI tools require Eagle 4.0 Build 21 or later. Update Eagle and keep it running.");
+      }
+      throw new Error("Cannot reach Eagle's V2 API. Keep Eagle 4.0 Build 21 or later running and try a read again.");
+    }
+    throw error;
+  }
+}
+
+export const eagleV2: EagleClient = {
+  library: () => v2Request<EagleLibrary>("library/info"),
+  items: (filters) => v2Request<EaglePage<EagleItem>>("item/get", filters),
+  query: (query, offset, limit) => v2Request<EaglePage<EagleItem>>("item/query", { query, offset, limit }),
+  add: (item) => v2Request<{ id: string }>("item/add", item),
+  update: (id, changes) => v2Request<EagleItem>("item/update", { id, ...changes }),
+};
