@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Spacefast MCP Server] - {PR_MERGE_DATE}
+## [Add Spacefast MCP Server] - 2026-10-22
 
 - Add Spacefast to the official registry: publish and host what your AI builds as live Spaces with a built-in database, share links, custom domains and versioned rollbacks. Hosted Streamable HTTP server at https://mcp.spacefast.com with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
