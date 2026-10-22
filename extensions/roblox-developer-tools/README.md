@@ -18,21 +18,9 @@ Create the API key in [Creator Dashboard → API Keys](https://create.roblox.com
 
 ## Player Count
 
-Run **Player Count** to display the total players across the configured universe. Use Raycast's **Show in Menu Bar** setting to control its visibility. No API key is needed.
+Shows your game's player count in the menu bar. Enable **Show in Menu Bar** and **Background Refresh** in the command's settings.
 
-The count refreshes approximately every 30 seconds using [Raycast background refresh](https://developers.raycast.com/information/lifecycle/background-refresh). Keep background refresh enabled for the **Player Count** command in Raycast settings; macOS may adjust the actual timing.
-
-Enable **Hide when there are zero players** in the **Player Count** command's settings, alongside **Show in Menu Bar** and **Background Refresh**, to hide an empty universe. Refreshes continue while hidden, so the item reappears when players join. Connection errors display a warning instead of being treated as zero players.
-
-## Open in Creator Dashboard
-
-Opens the configured universe's **Overview** page in your default browser. Uses your **Universe ID**; no API key is needed.
-
-## Open Game Page
-
-Opens the configured universe's public Roblox game page in your default browser. Resolves the starting place from your **Universe ID**; no API key is needed.
-
-Both browser commands show an opening notification only if the operation takes longer than 750 milliseconds.
+Enable **Hide when there are zero players** to hide the count until players join.
 
 ## Publish Place
 
