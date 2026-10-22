@@ -6,6 +6,7 @@ Manage OrbStack machines and containers directly from Raycast
 
 - **Machine Management** - Start, stop, and monitor OrbStack Linux machines instantly
 - **Machine Creation** - Create new Linux machines with supported distributions
+- **Container Management** - List, start, stop, restart, and remove Docker containers running in OrbStack
 - **AI Chat Integration** - Ask AI to run commands in your Linux machines
 
 ## Prerequisites

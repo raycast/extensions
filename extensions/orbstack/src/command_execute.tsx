@@ -7,6 +7,8 @@ interface CommandConfirmProps {
   name: string;
   title: string;
   command: string[];
+  /** Defaults to `orbctl`. Pass `docker` (with context args in `command`) for containers. */
+  bin?: string;
   markdown?: string;
   requireConfirmation?: boolean;
   refresh?: () => void;
@@ -15,13 +17,14 @@ interface CommandConfirmProps {
 export default function CommandExecute(props: CommandConfirmProps) {
   const { pop } = useNavigation();
   const { name, command, title, markdown, requireConfirmation, refresh } = props;
+  const bin = props.bin ?? ORB_CTL;
   const [shouldExecute, setShouldExecute] = useState(!requireConfirmation);
   const {
     data: commandOutput,
     isLoading,
     error,
     revalidate,
-  } = useExec(ORB_CTL, command, {
+  } = useExec(bin, command, {
     execute: shouldExecute,
     onData: () => {
       showToast({
@@ -37,7 +40,7 @@ export default function CommandExecute(props: CommandConfirmProps) {
   if (error) {
     return (
       <Detail
-        markdown={`# Error\n\nFailed to run command \`${ORB_CTL} ${command.join(" ")}\`\n${error.message}`}
+        markdown={`# Error\n\nFailed to run command \`${bin} ${command.join(" ")}\`\n${error.message}`}
         actions={
           <ActionPanel>
             <Action
