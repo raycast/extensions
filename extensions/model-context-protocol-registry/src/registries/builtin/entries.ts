@@ -1420,6 +1420,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "terminal-tax",
+    title: "Terminal Tax",
+    description:
+      "E-file a 2025 US federal Form 1040 from your AI assistant. Four tools check the prepared return and return either the problems to fix or one link to a hosted filing page, where you review the complete return, type your Social Security number and PINs, sign and pay; Terminal Tax then e-files it. $19.99, charged only if the IRS accepts it. Federal only. Hosted remote Streamable HTTP server; no account, API key or OAuth.",
+    icon: "https://raw.githubusercontent.com/maxdhs/terminal-tax-mcp-server/main/logo.png",
+    homepage: "https://terminal.tax",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.terminal.tax/v1/hosted-mcp"],
+    },
+    remoteUrl: "https://mcp.terminal.tax/v1/hosted-mcp",
+  },
+  {
     name: "the-bridge",
     title: "The Bridge",
     description:
