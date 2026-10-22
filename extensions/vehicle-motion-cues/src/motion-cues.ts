@@ -1,4 +1,4 @@
-import { closeMainWindow, environment, open, showHUD, showToast, Toast } from "@raycast/api";
+import { environment, open, showHUD, showToast, Toast } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -43,7 +43,6 @@ async function control(operation: Operation): Promise<State> {
 }
 
 export async function runMotionCues(operation: Exclude<Operation, "status">) {
-  await closeMainWindow();
   try {
     const requested = await control(operation);
     const expected = requested.requested;
