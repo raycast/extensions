@@ -97,8 +97,7 @@ test("renderMarkdown escapes markdown image/link syntax in notes", () => {
 test("computeTotals and renderHtml tolerate malformed items instead of throwing", () => {
   const data = {
     items: [null, { description: "ok" }, { qty: "2", rate: "50" }],
-    // @ts-expect-error - simulating untrusted JSON input
-  } as InvoiceData;
+  } as unknown as InvoiceData;
   assert.doesNotThrow(() => computeTotals(data));
   assert.doesNotThrow(() => renderHtml(data));
   const { subtotal } = computeTotals(data);
