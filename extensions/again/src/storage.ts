@@ -31,7 +31,7 @@ function parseState(raw: string): State | null {
 // so the background menu bar refresh cannot erase a change made in the list. The closed days are saved with
 // the next change. A read error is not treated as "no days": it throws, so nothing is written over what is there.
 // A value that cannot be parsed is kept as a backup.
-export async function loadState(): Promise<State> {
+async function read(today: string): Promise<{ state: State; raw: string | undefined }> {
   const raw = await LocalStorage.getItem<string>(KEY);
   let state: State = { days: {} };
   if (raw) {
@@ -39,20 +39,35 @@ export async function loadState(): Promise<State> {
     if (parsed) state = parsed;
     else await LocalStorage.setItem(`${KEY}.bak`, raw);
   }
-  return autoClose(state, todayKey());
+  return { state: autoClose(state, today), raw };
 }
 
-// Every change re-reads what is saved and works out today again, so a click in the menu bar and a click in the
-// list cannot overwrite each other, and a pick made just after 4 a.m. lands on the right day.
+export const loadState = async (): Promise<State> => (await read(todayKey())).state;
+
+// Thrown when a screen drawn for one day is used after the day turned at 4 a.m.
+export class StaleDayError extends Error {}
+
+// Every change re-reads what is saved and works out today once, so a click in the menu bar and a click in the
+// list cannot overwrite each other, and a pick made just after 4 a.m. lands on the right day. LocalStorage has no
+// atomic update, so the value is read again just before the write: if another command saved in between, the change
+// is worked out again from the newer value. `expectedDay` is the day the screen was drawn for.
 export async function mutate(
   change: (state: State, today: string) => State,
-  options: { refreshMenuBar: boolean } = { refreshMenuBar: true },
+  options: { refreshMenuBar?: boolean; expectedDay?: string } = {},
 ): Promise<State> {
-  const state = await loadState();
-  const next = change(state, todayKey());
-  if (next !== state) await LocalStorage.setItem(KEY, JSON.stringify(next));
-  if (options.refreshMenuBar) await refreshMenuBar();
-  return next;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const today = todayKey();
+    if (options.expectedDay && options.expectedDay !== today) throw new StaleDayError();
+    const { state, raw } = await read(today);
+    const next = change(state, today);
+    if (next !== state) {
+      if ((await LocalStorage.getItem<string>(KEY)) !== raw) continue;
+      await LocalStorage.setItem(KEY, JSON.stringify(next));
+    }
+    if (options.refreshMenuBar !== false) await refreshMenuBar();
+    return next;
+  }
+  throw new Error("Another change was being saved at the same time. Try again.");
 }
 
 // The menu bar item only redraws when its command runs, so the list asks it to run after each change.
