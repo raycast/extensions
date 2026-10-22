@@ -10,7 +10,7 @@ type Input = {
    */
   numResults?: number;
   /**
-   * Search mode: auto (default) balances quality and speed; lite is low-latency, cached-content-only search; deep performs multi-step research; deep-reasoning is a legacy option.
+   * Search mode: auto (default) balances quality and speed; lite prioritizes speed and cost and returns cached content; deep performs multi-step research; deep-reasoning is a legacy option.
    */
   type?: "lite" | "auto" | "deep" | "deep-reasoning";
   /**

@@ -47,7 +47,7 @@
     {
       "name": "search",
       "title": "Search",
-      "description": "Search with Exa using auto, cached-content-only lite, or deep modes and return compact result highlights.",
+      "description": "Search the web with Exa using Lite, Auto, or Deep and return relevant highlights.",
       "icon": "icon.png",
       "keywords": [
         "web",
