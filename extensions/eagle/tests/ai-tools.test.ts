@@ -7,7 +7,15 @@ import test from "node:test";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { EagleClient, EagleItem, EagleLibrary, ItemChanges, ItemFilters, ItemImport } from "../src/@types/eagle-v2";
 import { activeLibrary, mergeChanges, updateItemMetadata, validateUpdate } from "../src/utils/ai-library";
-import { importItem, inspectRemoteAsset, isPublicAddress, prepareSource, validateImport } from "../src/utils/ai-import";
+import {
+  fileHash,
+  importItem,
+  inspectRemoteAsset,
+  isPublicAddress,
+  prepareImport,
+  prepareSource,
+  validateImport,
+} from "../src/utils/ai-import";
 import { findItems } from "../src/utils/ai-search";
 import { eagleV2, instance } from "../src/utils/api";
 
@@ -94,7 +102,16 @@ async function fixture(t: Parameters<Parameters<typeof test>[1]>[0]) {
     await mkdir(directory, { recursive: true });
     await writeFile(join(directory, `${imported.name}.png`), bytes);
   };
-  return { root, client, library, sourcePath, item, saveOriginal, support: join(root, "support") };
+  const downloadRemote = async (url: string, supportPath: string) => {
+    const staging = join(supportPath, "ai-import-staging");
+    await mkdir(staging, { recursive: true, mode: 0o700 });
+    const directory = await mkdtemp(join(staging, "asset-"));
+    const path = join(directory, "asset.png");
+    const bytes = await readFile(sourcePath);
+    await writeFile(path, bytes, { mode: 0o600 });
+    return { url, path, size: bytes.length, sha256: await fileHash(path) };
+  };
+  return { root, client, library, sourcePath, item, saveOriginal, downloadRemote, support: join(root, "support") };
 }
 
 test("library returns recursive full folder paths and stable identity", async (t) => {
@@ -303,35 +320,33 @@ test("library switch just before import prevents the POST", async (t) => {
   assert.equal(f.client.additions.length, 0);
 });
 
-test("remote assets use v2 url plus separate source webpage metadata", async (t) => {
+test("remote assets import a private staged path, preserve source metadata and clean up after verified success", async (t) => {
   const f = await fixture(t);
   f.client.onAdd = (input) => f.saveOriginal(input);
   const result = await importItem(
     { libraryId: f.library.id, assetUrl: "https://example.com/photo.png", sourceUrl: "https://example.com/gallery" },
     f.support,
-    { client: f.client, polls: 1, inspectRemote: async (url) => url },
+    { client: f.client, polls: 1, inspectRemote: async (url) => url, downloadRemote: f.downloadRemote },
   );
   assert.equal(result.status, "imported");
-  assert.equal(f.client.additions[0].url, "https://example.com/photo.png");
+  assert.equal(f.client.additions[0].url, undefined);
   assert.equal(f.client.additions[0].website, "https://example.com/gallery");
-  assert.equal(f.client.additions[0].path, undefined);
+  assert.match(f.client.additions[0].path!, /ai-import-staging/);
+  assert.equal(result.original?.sourceMatches, true);
+  assert.deepEqual(await readdir(join(f.support, "ai-import-staging")), []);
 });
 
 test("remote validation rejects HTML, private hosts and private redirects, accepts direct asset bytes", async (t) => {
-  const original = axios.defaults.adapter;
-  t.after(() => {
-    axios.defaults.adapter = original;
-  });
   let type = "image/png";
   let bytes = "PNG fixture bytes";
   let redirect = false;
-  axios.defaults.adapter = async (config) => ({
+  t.mock.method(axios, "get", async (_url, config) => ({
     config,
     status: redirect ? 302 : 200,
     statusText: "OK",
     headers: redirect ? { location: "http://127.0.0.1/private" } : { "content-type": type },
     data: Readable.from([bytes]),
-  });
+  }));
   assert.equal(await inspectRemoteAsset("https://93.184.216.34/a.png"), "https://93.184.216.34/a.png");
   type = "text/html";
   await assert.rejects(inspectRemoteAsset("https://93.184.216.34/photo.png"), /HTML/);
@@ -411,7 +426,12 @@ test("pending local imports reconcile after the source disappears", async (t) =>
 test("pending remote imports reconcile without fetching an expired source URL", async (t) => {
   const f = await fixture(t);
   const input = { libraryId: f.library.id, assetUrl: "https://example.com/temporary.png" };
-  await importItem(input, f.support, { client: f.client, polls: 1, inspectRemote: async (url) => url });
+  await importItem(input, f.support, {
+    client: f.client,
+    polls: 1,
+    inspectRemote: async (url) => url,
+    downloadRemote: f.downloadRemote,
+  });
   await f.saveOriginal(f.client.additions[0]);
   const result = await importItem(input, f.support, {
     client: f.client,
@@ -491,4 +511,105 @@ test("a duplicate enters the saved collection only after Keep Both accepts it", 
   });
   assert.equal(result.status, "imported");
   assert.equal(f.client.additions.length, 1);
+});
+
+test("remote confirmation inspection creates no staged files", async (t) => {
+  const f = await fixture(t);
+  let downloads = 0;
+  await prepareImport(
+    { libraryId: f.library.id, assetUrl: "https://example.com/photo.png" },
+    {
+      client: f.client,
+      inspectRemote: async (url) => url,
+      downloadRemote: async (...args) => {
+        downloads++;
+        return f.downloadRemote(...args);
+      },
+    },
+    f.support,
+  );
+  assert.equal(downloads, 0);
+  await assert.rejects(readdir(join(f.support, "ai-import-staging")), { code: "ENOENT" });
+});
+
+test("pending remote staging survives lost responses and is removed only after original hash verification", async (t) => {
+  const f = await fixture(t);
+  f.client.onAdd = async () => {
+    throw new Error("lost response");
+  };
+  const input = { libraryId: f.library.id, assetUrl: "https://example.com/download", name: "Named Reference" };
+  const options = {
+    client: f.client,
+    polls: 1,
+    inspectRemote: async (url: string) => url,
+    downloadRemote: f.downloadRemote,
+  };
+  const pending = await importItem(input, f.support, options);
+  assert.equal(pending.status, "uncertain");
+  const request = f.client.additions[0];
+  assert.equal(request.url, undefined);
+  assert.equal(request.website, input.assetUrl);
+  assert.equal(await readFile(request.path!, "utf8"), "fictitious image bytes");
+  await f.saveOriginal(request, "different bytes");
+  const mismatch = await importItem(input, f.support, options);
+  assert.equal(mismatch.status, "uncertain");
+  assert.match(mismatch.verificationError!, /SHA-256/);
+  assert.equal(await readFile(request.path!, "utf8"), "fictitious image bytes");
+  await f.saveOriginal(request);
+  assert.equal((await importItem(input, f.support, options)).status, "already-imported");
+  assert.equal(f.client.additions.length, 1);
+  assert.deepEqual(await readdir(join(f.support, "ai-import-staging")), []);
+});
+
+test("remote pre-write library changes remove only fresh owned staging and reservation", async (t) => {
+  const f = await fixture(t);
+  const other = join(f.root, "Other.library");
+  await mkdir(other);
+  f.client.onLibrary = (reads) => {
+    if (reads === 3) f.client.current = { ...f.client.current, path: other };
+  };
+  await assert.rejects(
+    importItem({ libraryId: f.library.id, assetUrl: "https://example.com/photo.png" }, f.support, {
+      client: f.client,
+      polls: 1,
+      inspectRemote: async (url) => url,
+      downloadRemote: f.downloadRemote,
+    }),
+    /library changed/,
+  );
+  assert.equal(f.client.additions.length, 0);
+  assert.deepEqual(await readdir(join(f.support, "ai-import-staging")), []);
+  assert.deepEqual(await readdir(join(f.support, "ai-imports")), []);
+  assert.equal(await readFile(f.sourcePath, "utf8"), "fictitious image bytes");
+});
+
+test("concurrent remote imports discard the loser's staging and retain the winner's pending file", async (t) => {
+  const f = await fixture(t);
+  const downloads: string[] = [];
+  let release!: () => void;
+  const bothDownloaded = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const downloadRemote = async (url: string, supportPath: string) => {
+    const result = await f.downloadRemote(url, supportPath);
+    downloads.push(result.path);
+    if (downloads.length === 2) release();
+    await bothDownloaded;
+    return result;
+  };
+  const input = { libraryId: f.library.id, assetUrl: "https://example.com/photo.png" };
+  const options = { client: f.client, polls: 1, inspectRemote: async (url: string) => url, downloadRemote };
+  const outcomes = await Promise.all([importItem(input, f.support, options), importItem(input, f.support, options)]);
+  assert.equal(f.client.additions.length, 1);
+  assert.equal(outcomes[0].itemId, outcomes[1].itemId);
+  const winner = f.client.additions[0].path!;
+  assert.equal(await readFile(winner, "utf8"), "fictitious image bytes");
+  const loser = downloads.find((path) => path !== winner)!;
+  await assert.rejects(readFile(loser), { code: "ENOENT" });
+  const records = await readdir(join(f.support, "ai-imports"));
+  assert.equal(records.length, 1);
+  const record = JSON.parse(await readFile(join(f.support, "ai-imports", records[0]), "utf8"));
+  assert.equal(record.local.path, winner);
+  assert.equal(record.local.sha256, await fileHash(winner));
+  assert.equal(record.state, "pending");
 });

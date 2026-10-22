@@ -1,15 +1,13 @@
-import axios from "axios";
 import { createHash, randomBytes } from "node:crypto";
-import { lookup } from "node:dns/promises";
 import { createReadStream } from "node:fs";
-import { access, mkdir, open, readFile, realpath, rename, stat, unlink } from "node:fs/promises";
+import { access, link, mkdir, open, readFile, realpath, rename, rmdir, stat, unlink } from "node:fs/promises";
 import { constants } from "node:fs";
-import { isIP } from "node:net";
 import { homedir } from "node:os";
-import { basename, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
-import { Readable } from "node:stream";
+import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { EagleClient, EagleItem, ItemChanges } from "../@types/eagle-v2";
 import { eagleV2 } from "./api";
+import { downloadRemoteAsset, inspectRemoteAsset, isHtml } from "./remote-asset";
+export { inspectRemoteAsset, isPublicAddress } from "./remote-asset";
 import {
   exactItem,
   identifier,
@@ -33,13 +31,14 @@ export type ImportInput = {
   folderIds?: string[];
 };
 type LocalSource = { path: string; size: number; sha256: string };
-type PreparedSource = { key: string; path?: string; url?: string; local?: LocalSource };
+type PreparedSource = { key: string; path?: string; url?: string; local?: LocalSource; staged?: boolean };
 type ImportAttempt = {
   version: 1;
   libraryId: string;
   itemId: string;
   createdAt: string;
   local?: LocalSource;
+  staged?: boolean;
   expected: ItemChanges;
   state: "pending" | "complete";
 };
@@ -48,88 +47,13 @@ type ImportOptions = {
   polls?: number;
   pollIntervalMs?: number;
   inspectRemote?: typeof inspectRemoteAsset;
+  downloadRemote?: typeof downloadRemoteAsset;
 };
 
 export async function fileHash(path: string) {
   const hash = createHash("sha256");
   for await (const chunk of createReadStream(path)) hash.update(chunk);
   return hash.digest("hex");
-}
-
-function html(content: Buffer) {
-  return /<!doctype\s+html|<html(?:\s|>)/i.test(content.toString("utf8"));
-}
-
-export function isPublicAddress(address: string) {
-  if (isIP(address) === 4) {
-    const [a, b, c] = address.split(".").map(Number);
-    return !(
-      a === 0 ||
-      a === 10 ||
-      a === 127 ||
-      a >= 224 ||
-      (a === 100 && b >= 64 && b <= 127) ||
-      (a === 169 && b === 254) ||
-      (a === 172 && b >= 16 && b <= 31) ||
-      (a === 192 && (b === 168 || (b === 0 && (c === 0 || c === 2)))) ||
-      (a === 198 && (b === 18 || b === 19 || (b === 51 && c === 100))) ||
-      (a === 203 && b === 0 && c === 113)
-    );
-  }
-  // Only global unicast IPv6; this also rejects mapped IPv4 and local addresses.
-  return isIP(address) === 6 && /^[23]/i.test(address) && !/^2001:db8:/i.test(address);
-}
-
-async function publicUrl(value: string) {
-  sourceUrl(value);
-  const url = new URL(value);
-  if (url.port && url.port !== "80" && url.port !== "443") throw new Error("assetUrl must use a public HTTP(S) port.");
-  const host = url.hostname.replace(/^\[|\]$/g, "");
-  const addresses = isIP(host) ? [{ address: host }] : await lookup(host, { all: true });
-  if (!addresses.length || addresses.some(({ address }) => !isPublicAddress(address))) {
-    throw new Error("assetUrl must point to a public direct asset, not a local or private server.");
-  }
-  return url;
-}
-
-/** Check each redirect and inspect actual bytes rather than trusting a file suffix. */
-export async function inspectRemoteAsset(value: string): Promise<string> {
-  let url = await publicUrl(value);
-  for (let redirects = 0; redirects <= 5; redirects++) {
-    const response = await axios.get<Readable>(url.href, {
-      responseType: "stream",
-      maxRedirects: 0,
-      timeout: 15_000,
-      proxy: false,
-      headers: { Range: "bytes=0-1023" },
-      validateStatus: () => true,
-    });
-    const stream = response.data;
-    try {
-      if ([301, 302, 303, 307, 308].includes(response.status)) {
-        if (!response.headers.location || redirects === 5) throw new Error("Too many asset redirects.");
-        url = await publicUrl(new URL(response.headers.location, url).href);
-        continue;
-      }
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error("The asset URL is not publicly downloadable. Supply a direct asset URL.");
-      }
-      const contentType = String(response.headers["content-type"] || "").toLowerCase();
-      if (!contentType || /text\/html|application\/xhtml/.test(contentType)) {
-        throw new Error("The URL is an HTML webpage or has no asset content type. Supply a public direct asset URL.");
-      }
-      let preview = Buffer.alloc(0);
-      for await (const chunk of stream) {
-        preview = Buffer.concat([preview, Buffer.from(chunk).subarray(0, 1024 - preview.length)]);
-        if (preview.length >= 1024) break;
-      }
-      if (!preview.length || html(preview)) throw new Error("The URL returned empty content or an HTML webpage.");
-      return url.href;
-    } finally {
-      stream.destroy();
-    }
-  }
-  throw new Error("Too many asset redirects.");
 }
 
 export function validateImport(input: ImportInput) {
@@ -199,10 +123,10 @@ async function existingAttempt(path: string, libraryId: string) {
 
 function effectiveName(input: ImportInput, source: PreparedSource) {
   if (input.name !== undefined) return input.name;
-  const name = source.path
-    ? basename(source.path, extname(source.path))
-    : basename(decodeURIComponent(new URL(source.url!).pathname));
-  const result = basename(name, source.path ? "" : extname(name)).replace(/\\/g, "_");
+  const name = input.assetUrl
+    ? basename(decodeURIComponent(new URL(input.assetUrl).pathname))
+    : basename(source.path!, extname(source.path!));
+  const result = basename(name, input.assetUrl ? extname(name) : "").replace(/\\/g, "_");
   return result && result !== "." && result !== ".." ? result : "Imported Asset";
 }
 
@@ -240,7 +164,13 @@ export async function prepareImport(input: ImportInput, options: ImportOptions =
     }
   }
   const source = attempt
-    ? { key: sourceIdentity(input), path: attempt.local?.path, url: input.assetUrl, local: attempt.local }
+    ? {
+        key: sourceIdentity(input),
+        path: attempt.local?.path,
+        url: input.assetUrl,
+        local: attempt.local,
+        staged: attempt.staged,
+      }
     : await prepareSource(input, options.inspectRemote);
   return { library, folders, source, attempt, name: attempt?.expected.name || effectiveName(input, source) };
 }
@@ -272,18 +202,13 @@ async function reserveAttempt(
     itemId: randomBytes(9).toString("hex").toUpperCase(),
     createdAt: new Date().toISOString(),
     local: source.local,
+    staged: source.staged,
     expected,
     state: "pending",
   };
-  let handle;
-  try {
-    handle = await open(path, "wx", 0o600);
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-    const existing = await existingAttempt(path, libraryId);
-    if (!existing) throw new Error("Import recovery record changed. Retry the same input to reconcile it.");
-    return { attempt: existing, path, fresh: false };
-  }
+  const temporary = `${path}.${randomBytes(6).toString("hex")}.tmp`;
+  const handle = await open(temporary, "wx", 0o600);
+  let published = false;
   try {
     try {
       await handle.writeFile(JSON.stringify(attempt));
@@ -291,7 +216,16 @@ async function reserveAttempt(
     } finally {
       await handle.close();
     }
-    // Sync the containing directory as well as the file before the mutation.
+    try {
+      // Publish complete JSON exclusively; concurrent imports can never read a partial reservation.
+      await link(temporary, path);
+      published = true;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+      const existing = await existingAttempt(path, libraryId);
+      if (!existing) throw new Error("Import recovery record changed. Retry the same input to reconcile it.");
+      return { attempt: existing, path, fresh: false };
+    }
     const folder = await open(directory, "r");
     try {
       await folder.sync();
@@ -299,8 +233,10 @@ async function reserveAttempt(
       await folder.close();
     }
   } catch (error) {
-    await unlink(path);
+    if (published) await unlink(path);
     throw error;
+  } finally {
+    await unlink(temporary);
   }
   return { attempt, path, fresh: true };
 }
@@ -333,7 +269,7 @@ export async function verifyOriginal(item: EagleItem, library: LibraryInfo, loca
     try {
       const preview = Buffer.alloc(1024);
       const { bytesRead } = await handle.read(preview, 0, preview.length, 0);
-      if (html(preview.subarray(0, bytesRead))) throw new Error("The imported original is an HTML webpage.");
+      if (isHtml(preview.subarray(0, bytesRead))) throw new Error("The imported original is an HTML webpage.");
     } finally {
       await handle.close();
     }
@@ -341,20 +277,60 @@ export async function verifyOriginal(item: EagleItem, library: LibraryInfo, loca
   return { size: original.size, localSourceMatches: local ? true : undefined };
 }
 
+async function cleanupStaged(source: { staged?: boolean; local?: LocalSource }, supportPath: string) {
+  if (!source.staged || !source.local) return;
+  const path = source.local.path;
+  const directory = dirname(path);
+  const root = await realpath(join(supportPath, "ai-import-staging")).catch((error: NodeJS.ErrnoException) => {
+    if (error.code === "ENOENT") return undefined;
+    throw error;
+  });
+  if (!root) return;
+  const ownedDirectory = await realpath(directory).catch((error: NodeJS.ErrnoException) => {
+    if (error.code === "ENOENT") return undefined;
+    throw error;
+  });
+  if (!ownedDirectory) return;
+  if (
+    dirname(ownedDirectory) !== root ||
+    !/^asset-[a-zA-Z0-9]+$/.test(basename(directory)) ||
+    !/^asset\.[a-zA-Z0-9]+$/.test(basename(path))
+  ) {
+    throw new Error("Refusing to remove a staged file outside extension-owned storage.");
+  }
+  await unlink(path).catch((error: NodeJS.ErrnoException) => {
+    if (error.code !== "ENOENT") throw error;
+  });
+  await rmdir(directory);
+}
+
 /** Reserve before POST; an existing reservation is always reconciled, never posted again. */
 export async function importItem(input: ImportInput, supportPath: string, options: ImportOptions = {}) {
   const client = options.client || eagleV2;
-  const { library, source, attempt: prior } = await prepareImport(input, options, supportPath);
+  const prepared = await prepareImport(input, options, supportPath);
+  const { library, attempt: prior } = prepared;
+  let source: PreparedSource = prepared.source;
   const expected: ItemChanges = prior?.expected || {
     name: effectiveName(input, source),
-    url: input.sourceUrl,
+    url: input.sourceUrl ?? input.assetUrl,
     annotation: input.notes,
     tags: input.tags === undefined ? undefined : strings(input.tags, "tags"),
     folders: input.folderIds === undefined ? undefined : strings(input.folderIds, "folderIds"),
   };
-  const reserved = prior
-    ? { attempt: prior, path: attemptPath(supportPath, library.id, source.key), fresh: false }
-    : await reserveAttempt(join(supportPath, "ai-imports"), source.key, library.id, source, expected);
+  let reserved;
+  try {
+    if (!prior && input.assetUrl) {
+      const downloaded = await (options.downloadRemote || downloadRemoteAsset)(input.assetUrl, supportPath);
+      source = { ...source, path: downloaded.path, url: downloaded.url, local: downloaded, staged: true };
+    }
+    reserved = prior
+      ? { attempt: prior, path: attemptPath(supportPath, library.id, source.key), fresh: false }
+      : await reserveAttempt(join(supportPath, "ai-imports"), source.key, library.id, source, expected);
+  } catch (error) {
+    await cleanupStaged(source, supportPath);
+    throw error;
+  }
+  if (!reserved.fresh && !prior) await cleanupStaged(source, supportPath);
   const { attempt } = reserved;
   let accepted = false;
   let message = "An earlier import attempt is being reconciled; no new import was sent.";
@@ -373,13 +349,13 @@ export async function importItem(input: ImportInput, supportPath: string, option
     } catch (error) {
       // No request has been sent, so this fresh reservation can safely be discarded.
       await unlink(reserved.path);
+      await cleanupStaged(source, supportPath);
       throw error;
     }
     try {
       const response = await client.add({
         id: attempt.itemId,
         path: source.path,
-        url: source.url,
         name: attempt.expected.name,
         website: attempt.expected.url,
         annotation: attempt.expected.annotation,
@@ -416,11 +392,22 @@ export async function importItem(input: ImportInput, supportPath: string, option
         const original = await verifyOriginal(item, current, attempt.local);
         await requireLibrary(input.libraryId, client);
         await writeAttempt(reserved.path, { ...attempt, state: "complete" });
+        let stagedCleanupPending = false;
+        try {
+          await cleanupStaged(attempt, supportPath);
+        } catch {
+          stagedCleanupPending = true;
+        }
         return {
           status: reserved.fresh ? "imported" : "already-imported",
           libraryId: library.id,
           item: itemDetails(item, current),
-          original,
+          original: {
+            ...original,
+            localSourceMatches: input.path ? original.localSourceMatches : undefined,
+            sourceMatches: !!attempt.local,
+          },
+          stagedCleanupPending: stagedCleanupPending || undefined,
           message: reserved.fresh
             ? "The item and non-empty original file were verified."
             : "The earlier attempt was verified. No duplicate was imported; use update-item for metadata changes.",

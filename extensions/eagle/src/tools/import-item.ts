@@ -22,14 +22,16 @@ type Input = {
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const { library, folders, source, attempt, name } = await prepareImport(input, {}, environment.supportPath);
-  const metadata = attempt ? attempt.expected : { url: input.sourceUrl, annotation: input.notes, tags: input.tags };
+  const metadata = attempt
+    ? attempt.expected
+    : { url: input.sourceUrl ?? input.assetUrl, annotation: input.notes, tags: input.tags };
   return {
     message: attempt
       ? "Reconcile this earlier Eagle import? No new import or metadata update will be sent."
       : "Import this asset into Eagle?",
     info: [
       { name: "Library", value: `${library.name}\n${library.path}` },
-      { name: "Asset", value: source.path || source.url },
+      { name: "Asset", value: input.assetUrl || source.path },
       { name: "Folders", value: folders.map((folder) => folder.path).join("\n") || "Unfiled" },
       { name: "Name", value: name },
       { name: "Earlier Attempt", value: attempt?.itemId },
