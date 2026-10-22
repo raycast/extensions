@@ -86,10 +86,33 @@ export default function StartTimer() {
       }
 
       setIsSubmitting(true);
+      let state: TimerState;
       try {
-        const state = await startTimer(totalMinutes, breakMinutes);
+        state = await startTimer(totalMinutes, breakMinutes);
+      } catch {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to start timer",
+        });
+        setIsSubmitting(false);
+        return;
+      }
 
-        if (await hasMenuBarBeenSeen()) {
+      try {
+        let menuBarHasBeenSeen: boolean;
+        try {
+          menuBarHasBeenSeen = await hasMenuBarBeenSeen();
+        } catch {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Timer Started",
+            message: "Could not check menu bar setup.",
+          });
+          await popToRoot();
+          return;
+        }
+
+        if (menuBarHasBeenSeen) {
           await showToast({
             style: Toast.Style.Success,
             title: "Timer Started",
@@ -109,11 +132,6 @@ export default function StartTimer() {
           }
         }
         await popToRoot();
-      } catch {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to start timer",
-        });
       } finally {
         setIsSubmitting(false);
       }
