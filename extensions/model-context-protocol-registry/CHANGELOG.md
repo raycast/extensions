@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Sync Ausca listing copy in Store page] - {PR_MERGE_DATE}
+
+- Show the corrected Ausca payment boundary in the Store page's server table.
+
 ## [Update Hermoso MCP Server] - 2026-10-21
 
 - Update the Hermoso entry's description: an AI marketing agent and AI ad generator for your AI agent, with no markup on models. The connection is unchanged.
