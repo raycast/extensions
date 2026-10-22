@@ -4,6 +4,7 @@ import {
   Color,
   getPreferenceValues,
   Icon,
+  Keyboard,
   List,
   LocalStorage,
   showToast,
@@ -11,22 +12,33 @@ import {
 } from "@raycast/api";
 import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
-import { searchCities } from "./citySearch";
+import { canonicalZone, searchCities } from "./citySearch";
+import { getHourType } from "./palette";
 import {
   ClockFormatPreference,
   formatDelta,
   formatGmtOffset,
-  getCurrentTimeISO,
+  getCurrentMinuteISO,
   resolveTimeFormat,
+  snapToGrid,
 } from "./time-utils";
-import { TimelineView } from "./timeline-view";
-import { CityOrderPreference, DEFAULT_TIME_ZONES, getCityName, getTimezone, sortZoneIds } from "./timezones";
+import { SnapTimeSection, TimelineView } from "./timeline-view";
+import {
+  CityOrderPreference,
+  DEFAULT_TIME_ZONES,
+  getCityName,
+  getTimezone,
+  resolveLocalCityId,
+  sortZoneIds,
+} from "./timezones";
 
 const STORAGE_KEY = "selectedTimeZones";
 const BASE_CITY_KEY = "baseCityId";
 
 export default function Command() {
-  const [baseISO, setBaseISO] = useState<string>(() => getCurrentTimeISO());
+  const [nowISO, setNowISO] = useState<string>(getCurrentMinuteISO);
+  // null while the cursor follows the current time; set once the user scrubs away from it
+  const [cursorISO, setCursorISO] = useState<string | null>(null);
   const [selectedZoneIds, setSelectedZoneIds] = useState<string[] | null>(null);
   const [baseCityId, setBaseCityId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,6 +50,7 @@ export default function Command() {
   const optionScrubMinutes = parseInt(preferences.optionScrubMinutes, 10) || 30;
   const timeFormat = resolveTimeFormat(preferences.timeFormat as ClockFormatPreference);
   const cityOrder = (preferences.cityOrder as CityOrderPreference) ?? "offset-asc";
+  const showLocalTimezone = preferences.showLocalTimezone ?? true;
 
   useEffect(() => {
     const load = async () => {
@@ -69,6 +82,11 @@ export default function Command() {
     };
 
     void load();
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => setNowISO(getCurrentMinuteISO()), 5000);
+    return () => clearInterval(timer);
   }, []);
 
   async function saveSelectedZones(nextIds: string[]) {
@@ -116,15 +134,19 @@ export default function Command() {
     if (from === -1) return;
     let to = from + delta;
     // Skip over the base city, which is displayed in its own section
-    while (to >= 0 && to < currentIds.length && currentIds[to] === baseCityId) to += delta;
+    while (to >= 0 && to < currentIds.length && currentIds[to] === effectiveBaseId) to += delta;
     if (to < 0 || to >= currentIds.length) return;
     currentIds.splice(from, 1);
     currentIds.splice(to, 0, cityId);
     await saveSelectedZones(currentIds);
   }
 
-  // Use selected base city or fall back to system timezone
-  const baseZoneId = baseCityId ? getTimezone(baseCityId) : Intl.DateTimeFormat().resolvedOptions().timeZone;
+  // Where the user is now: a listed city in the system time zone, or the system zone itself
+  const localCityId = useMemo(() => resolveLocalCityId(selectedZoneIds ?? []), [selectedZoneIds]);
+  // Use the pinned base city or fall back to the local one
+  const effectiveBaseId = baseCityId ?? localCityId;
+  const baseZoneId = getTimezone(effectiveBaseId);
+  const baseISO = cursorISO ?? nowISO;
   const base = useMemo(() => DateTime.fromISO(baseISO).setZone(baseZoneId), [baseISO, baseZoneId]);
 
   // Apply the configured ordering (GMT offset or custom arrangement)
@@ -135,8 +157,21 @@ export default function Command() {
 
   // Filter out the base city from the list (it's shown separately)
   const otherCities = useMemo(() => {
-    return sortedZoneIds.filter((id) => id !== baseCityId);
-  }, [sortedZoneIds, baseCityId]);
+    return sortedZoneIds.filter((id) => id !== effectiveBaseId);
+  }, [sortedZoneIds, effectiveBaseId]);
+
+  // When a pinned base is somewhere else, the timeline also shows a row for where the user is now,
+  // unless that place is already in the list. It is never saved with the selected cities.
+  const timelineZoneIds = useMemo(() => {
+    const showExtraLocal =
+      showLocalTimezone &&
+      baseCityId !== null &&
+      canonicalZone(getTimezone(localCityId)) !== canonicalZone(getTimezone(baseCityId)) &&
+      !(selectedZoneIds ?? []).includes(localCityId);
+    if (!showExtraLocal) return sortedZoneIds;
+    if (cityOrder === "custom") return [localCityId, ...sortedZoneIds];
+    return sortZoneIds([...(selectedZoneIds ?? []), localCityId], baseISO, cityOrder);
+  }, [showLocalTimezone, baseCityId, localCityId, selectedZoneIds, sortedZoneIds, baseISO, cityOrder]);
 
   // Search results
   const searchResults = useMemo(() => {
@@ -163,7 +198,7 @@ export default function Command() {
   }, [baseISO, base.offset, otherCities, timeFormat]);
 
   const baseRow = useMemo(() => {
-    const cityName = baseCityId ? getCityName(baseCityId) : getCityName(baseZoneId);
+    const cityName = getCityName(effectiveBaseId);
     const paddedTime = padTime(base.toFormat(timeFormat));
     const isSystemTz = !baseCityId;
     return {
@@ -173,10 +208,25 @@ export default function Command() {
       timeColor: getTimeColor(base.hour),
       isSystemTz,
     };
-  }, [base, baseZoneId, baseCityId, timeFormat]);
+  }, [base, effectiveBaseId, baseCityId, timeFormat]);
 
   function shiftMinutes(delta: number) {
-    setBaseISO((prev) => DateTime.fromISO(prev).plus({ minutes: delta }).toISO() || prev);
+    setCursorISO((prev) => {
+      const cursor = DateTime.fromISO(prev ?? nowISO);
+      return cursor.plus({ minutes: delta }).toISO() || prev;
+    });
+  }
+
+  function snapMinutes(stepMinutes: number, direction: 1 | -1) {
+    setCursorISO((prev) => {
+      const cursor = DateTime.fromISO(prev ?? nowISO).setZone(baseZoneId);
+      return snapToGrid(cursor, stepMinutes, direction).toISO() || prev;
+    });
+  }
+
+  function resetToNow() {
+    setCursorISO(null);
+    setNowISO(getCurrentMinuteISO());
   }
 
   function formatScrubTitle(minutes: number): string {
@@ -191,10 +241,14 @@ export default function Command() {
     return (
       <TimelineView
         baseISO={baseISO}
+        nowISO={nowISO}
         baseCityId={baseCityId}
-        selectedZoneIds={sortedZoneIds}
+        localCityId={localCityId}
+        selectedZoneIds={timelineZoneIds}
+        isLoading={isLoading}
         onShiftMinutes={shiftMinutes}
-        onSetBaseISO={setBaseISO}
+        onSnapMinutes={snapMinutes}
+        onResetToNow={resetToNow}
         onToggleView={() => setViewMode("list")}
         onClearBase={clearBase}
         scrubMinutes={scrubMinutes}
@@ -206,7 +260,6 @@ export default function Command() {
 
   return (
     <List
-      navigationTitle="In The Timezone"
       searchBarPlaceholder="Search cities to add..."
       isLoading={isLoading}
       searchText={searchText}
@@ -256,8 +309,8 @@ export default function Command() {
                 <Action
                   title="Reset to Now"
                   icon={Icon.Clock}
-                  onAction={() => setBaseISO(getCurrentTimeISO())}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  onAction={resetToNow}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                 />
                 {!baseRow.isSystemTz && (
                   <Action
@@ -265,6 +318,15 @@ export default function Command() {
                     icon={Icon.ComputerChip}
                     onAction={() => void clearBase()}
                     shortcut={{ modifiers: ["cmd"], key: "0" }}
+                  />
+                )}
+                {!baseCityId && (selectedZoneIds ?? []).includes(localCityId) && (
+                  <Action
+                    title="Remove City"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={() => void removeCity(localCityId)}
+                    shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                   />
                 )}
                 <ActionPanel.Section title="Scrub Time">
@@ -289,11 +351,16 @@ export default function Command() {
                     shortcut={{ modifiers: ["opt"], key: "arrowRight" }}
                   />
                 </ActionPanel.Section>
+                <SnapTimeSection
+                  scrubMinutes={scrubMinutes}
+                  optionScrubMinutes={optionScrubMinutes}
+                  onSnapMinutes={snapMinutes}
+                />
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
                     title="Copy Base ISO"
                     content={base.toISO() ?? ""}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
@@ -326,8 +393,8 @@ export default function Command() {
                     <Action
                       title="Reset to Now"
                       icon={Icon.Clock}
-                      onAction={() => setBaseISO(getCurrentTimeISO())}
-                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                      onAction={resetToNow}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
                     />
                     <Action
                       title="Timeline View"
@@ -341,13 +408,13 @@ export default function Command() {
                           title="Move up"
                           icon={Icon.ArrowUp}
                           onAction={() => void moveCity(row.key, -1)}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                          shortcut={Keyboard.Shortcut.Common.MoveUp}
                         />
                         <Action
                           title="Move Down"
                           icon={Icon.ArrowDown}
                           onAction={() => void moveCity(row.key, 1)}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                          shortcut={Keyboard.Shortcut.Common.MoveDown}
                         />
                       </ActionPanel.Section>
                     )}
@@ -373,6 +440,11 @@ export default function Command() {
                         shortcut={{ modifiers: ["opt"], key: "arrowRight" }}
                       />
                     </ActionPanel.Section>
+                    <SnapTimeSection
+                      scrubMinutes={scrubMinutes}
+                      optionScrubMinutes={optionScrubMinutes}
+                      onSnapMinutes={snapMinutes}
+                    />
                   </ActionPanel>
                 }
               />
@@ -400,10 +472,8 @@ function padTime(time: string): string {
 }
 
 function getTimeColor(hour: number): Color {
-  // Red: 12AM-7AM (sleeping hours)
-  if (hour >= 0 && hour < 7) return Color.Red;
-  // Green: 9AM-5PM (working hours)
-  if (hour >= 9 && hour < 17) return Color.Green;
-  // Yellow: 7AM-9AM and 5PM-12AM (marginal hours)
-  return Color.Yellow;
+  const type = getHourType(hour);
+  if (type === "sleep") return Color.Blue;
+  if (type === "work") return Color.Yellow;
+  return Color.Orange;
 }

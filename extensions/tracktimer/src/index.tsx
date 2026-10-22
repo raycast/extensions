@@ -160,6 +160,7 @@ export default function Command() {
   );
   return (
     <List
+      filtering={true}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       selectedItemId={selectedItemId}
