@@ -1093,6 +1093,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "runcrate",
+    title: "Runcrate",
+    description:
+      "Give your AI agent GPUs. See live GPU prices, launch and delete GPU instances (H100, A100, RTX 4090 and more), run commands and jobs over SSH, move files, manage volumes, SSH keys and secrets, call 200+ open inference models and track spend. 37 tools. Hosted remote Streamable HTTP server; OAuth sign-in in the browser, no API key to paste.",
+    icon: "https://www.runcrate.ai/android-chrome-512x512.png",
+    homepage: "https://www.runcrate.ai/mcp?utm_source=raycast-mcp-registry&utm_medium=directory&utm_campaign=mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.runcrate.ai/mcp"],
+    },
+    remoteUrl: "https://mcp.runcrate.ai/mcp",
+  },
+  {
     name: "runx",
     title: "runx",
     description:

@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Runcrate MCP Server] - 2026-10-22
+
+- Add Runcrate to the official registry: GPUs for your AI agent. See live GPU prices, launch and delete GPU instances, run commands and jobs over SSH, move files, manage volumes, SSH keys and secrets, call 200+ open inference models and track spend (37 tools). Hosted Streamable HTTP server at https://mcp.runcrate.ai/mcp with OAuth sign-in in the browser, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add Zip-Codes.com MCP Server] - 2026-10-22
 
 - Add Zip-Codes.com to the official registry: US address standardization to ZIP+4, US ZIP Code and Canadian postal code lookup, radius search, distance and census tract demographics. Hosted Streamable HTTP server at https://mcp.zip-codes.com/mcp with no sign-in (demo mode without a key), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
