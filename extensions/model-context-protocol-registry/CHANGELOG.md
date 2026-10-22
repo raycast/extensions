@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add VOMO MCP Server] - {PR_MERGE_DATE}
+
+- Add VOMO with a direct HTTP connection in Raycast and an mcp-remote fallback for other clients. Search and read saved meeting notes and transcripts with OAuth and read-only access.
+
 ## [Update Hermoso MCP Server] - 2026-10-21
 
 - Update the Hermoso entry's description: an AI marketing agent and AI ad generator for your AI agent, with no markup on models. The connection is unchanged.
