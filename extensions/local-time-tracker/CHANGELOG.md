@@ -1,5 +1,14 @@
 # Changelog
 
+## [Daily Plans and Subtasks] - 2026-10-21
+
+- Add Today's Plan for daily goals, optional subtasks, completion, and tracked time, with goals and subtasks entered in one form field.
+- Start or stop a task with Return and toggle completion with Command+Return; switching tasks saves the previous timer.
+- Sort plans and subtasks with Command+Option+Up/Down, finishing with Return or Escape.
+- Import incomplete plans from the last day with tasks using Command+Shift+I, preserving completed steps and order. Show a notification when nothing remains to import.
+- Revisit earlier dates and move individual plans to today while preserving historical logs, reports, and running timers. Time totals are scoped to each day.
+- Preserve existing tracking commands and Pomodoro, protect running tasks during editing, and reject stale plan saves even after clock changes.
+
 ## [Precise Work Time Editing] - 2026-10-17
 
 - Return to an empty Root Search after successfully starting work, and label the running-timer view "Tracking Work".
