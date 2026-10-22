@@ -4,10 +4,10 @@ import {
   confirmAlert,
   getPreferenceValues,
 } from "@raycast/api";
-import { run, settings } from "./utils";
+import { run, settings, showError } from "./utils";
 
 export default async function Command() {
-  await run("Restarting servers…", async () => {
+  try {
     const { universeId, apiKey } = settings("universeId", "apiKey");
     const { closeAllVersions, confirmRestart } =
       getPreferenceValues<Preferences.Restart>();
@@ -44,32 +44,39 @@ export default async function Command() {
 
     await closeMainWindow();
 
-    let response: Response;
-    try {
-      response = await fetch(
-        `https://apis.roblox.com/cloud/v2/universes/${universeId}:restartServers`,
-        {
-          method: "POST",
-          headers: { "x-api-key": apiKey, "Content-Type": "application/json" },
-          body: JSON.stringify({ closeAllVersions }),
-          signal: AbortSignal.timeout(20_000),
-          redirect: "error",
-        },
-      );
-    } catch {
-      throw new Error("No response. Check servers before retrying.");
-    }
-    if (!response.ok) {
-      const errors: Record<number, string> = {
-        401: "Check your API key.",
-        403: "Check your API key permissions.",
-        404: "Universe not found.",
-        429: "Too many requests. Try again later.",
-      };
-      throw new Error(
-        errors[response.status] ?? `Roblox error (${response.status}).`,
-      );
-    }
-    return "Restarting servers...";
-  });
+    await run("Restarting servers…", async () => {
+      let response: Response;
+      try {
+        response = await fetch(
+          `https://apis.roblox.com/cloud/v2/universes/${universeId}:restartServers`,
+          {
+            method: "POST",
+            headers: {
+              "x-api-key": apiKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ closeAllVersions }),
+            signal: AbortSignal.timeout(20_000),
+            redirect: "error",
+          },
+        );
+      } catch {
+        throw new Error("No response. Check servers before retrying.");
+      }
+      if (!response.ok) {
+        const errors: Record<number, string> = {
+          401: "Check your API key.",
+          403: "Check your API key permissions.",
+          404: "Universe not found.",
+          429: "Too many requests. Try again later.",
+        };
+        throw new Error(
+          errors[response.status] ?? `Roblox error (${response.status}).`,
+        );
+      }
+      return "Restarting servers...";
+    });
+  } catch (error) {
+    await showError(error);
+  }
 }
