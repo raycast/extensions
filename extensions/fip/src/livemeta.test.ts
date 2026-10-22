@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { mergeTracks, refreshDelay, timelineAt, Track, tracksFromLive, tracksFromPull } from "./livemeta";
+import {
+  mergeTracks,
+  nextPollDelay,
+  refreshDelay,
+  timelineAt,
+  Track,
+  tracksFromLive,
+  tracksFromPull,
+} from "./livemeta";
 import pullFip from "./__fixtures__/pull-fip.json";
 import pullJazz from "./__fixtures__/pull-jazz.json";
 import pullGrooveLagging from "./__fixtures__/pull-groove-lagging.json";
@@ -74,6 +82,22 @@ describe("refreshDelay", () => {
   it("never polls more often than every 10 seconds", () => {
     expect(refreshDelay({ ...liveJazz, delayToRefresh: 0 })).toBe(10000);
     expect(refreshDelay({ ...liveJazz, delayToRefresh: undefined })).toBe(10000);
+  });
+});
+
+describe("nextPollDelay", () => {
+  const hipHop = tracksFromLive(liveHipHop);
+
+  it("polls when the airing song ends if that comes before the server's delay", () => {
+    expect(nextPollDelay(hipHop, at(1792675200), 220000)).toBe(79000);
+  });
+
+  it("keeps the server's delay when no song starts or ends sooner", () => {
+    expect(nextPollDelay(hipHop, at(1792675200), 30000)).toBe(30000);
+  });
+
+  it("keeps the server's delay once every known song is over", () => {
+    expect(nextPollDelay(hipHop, at(1792675600), 10000)).toBe(10000);
   });
 });
 

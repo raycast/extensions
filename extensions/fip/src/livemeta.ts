@@ -103,6 +103,14 @@ export function refreshDelay({ delayToRefresh }: LiveResponse): number {
   return Math.max(delayToRefresh ?? 0, MIN_REFRESH_DELAY);
 }
 
+// Songs start and end at known times: poll again then rather than show a finished song as airing.
+export function nextPollDelay(tracks: Track[], now: Date, serverDelay: number): number {
+  const untilChanges = tracks
+    .flatMap((track) => [track.start.getTime() - now.getTime(), track.end.getTime() - now.getTime()])
+    .filter((delay) => delay > 0);
+  return Math.min(serverDelay, ...untilChanges);
+}
+
 // Both feeds report a song with the same start time, so the start time identifies it.
 export function mergeTracks(timeline: Track[], live: Track[]): Track[] {
   const known = new Set(timeline.map((track) => track.start.getTime()));

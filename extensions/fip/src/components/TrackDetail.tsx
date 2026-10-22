@@ -1,14 +1,17 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useEffect } from "react";
-import { fetchSnapshot, timelineAt, TimelinePosition, Track } from "../livemeta";
+import { fetchSnapshot, nextPollDelay, timelineAt, TimelinePosition, Track } from "../livemeta";
 import { lastStartedRadio } from "../playback";
 import { Radio } from "../radios";
+
+const RETRY_DELAY = 30_000;
 
 async function loadTimeline() {
   const radio = await lastStartedRadio();
   const { tracks, refreshIn } = await fetchSnapshot(radio.id);
-  return { radio, timeline: timelineAt(tracks, new Date()), refreshIn };
+  const now = new Date();
+  return { radio, timeline: timelineAt(tracks, now), refreshIn: nextPollDelay(tracks, now, refreshIn) };
 }
 
 const MISSING_TRACK: Record<TimelinePosition, (radio: Radio) => string> = {
@@ -39,13 +42,15 @@ export function TrackDetail({ position }: { position: TimelinePosition }) {
   });
   const track = data?.timeline[position];
 
+  // A failed load clears `data`, so the retry has to hang off `error`.
   useEffect(() => {
-    if (!data) {
+    const delay = error ? RETRY_DELAY : data?.refreshIn;
+    if (delay === undefined) {
       return;
     }
-    const timer = setTimeout(revalidate, data.refreshIn);
+    const timer = setTimeout(revalidate, delay);
     return () => clearTimeout(timer);
-  }, [data]);
+  }, [data, error]);
 
   const markdown = !data
     ? error && `Could not reach Radio France: ${error.message}`
