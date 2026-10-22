@@ -6,7 +6,7 @@
   "icon": "icon.png",
   "author": "kleogeos",
   "platforms": ["macOS", "Windows"],
-  "categories": ["Developer Tools", "Productivity"],
+  "categories": ["Finance", "Developer Tools", "Productivity"],
   "license": "MIT",
   "commands": [
     {
