@@ -23,6 +23,7 @@ import {
   baseOf,
   clearToday,
   correctionDay,
+  dayLabel,
   offers,
   reopen,
   screenFor,
@@ -65,8 +66,18 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Today 
     })();
   }, []);
 
+  // The day this screen was drawn for. If the day turned at 4 a.m. while the list stayed open, the buttons on
+  // screen belong to the old day: nothing is changed and no success is reported; the screen is redrawn instead.
+  const shownDay = todayKey();
+
   // Each change goes through mutate: it re-reads what is saved and works out today again.
   async function run(change: (s: State, t: string) => State, hud?: string) {
+    if (todayKey() !== shownDay) {
+      setState(await loadState());
+      setSearch("");
+      await showToast({ style: Toast.Style.Success, title: "A new day started", message: "Nothing was changed." });
+      return;
+    }
     const next = await mutate(change);
     if (hud) {
       await showHUD(hud, { popToRootType: PopToRootType.Immediate });
@@ -195,6 +206,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Today 
     <Action title="Set as Today's Thing" icon={Icon.Checkmark} onAction={() => set(text)} />
   );
   const fixDay = correctionDay(state, today);
+  const fixLabel = fixDay ? dayLabel(fixDay, today) : "";
 
   return (
     <List
@@ -206,7 +218,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Today 
       searchBarPlaceholder="Pick one, or type your own"
     >
       {fixDay && !typed ? (
-        <List.Section title={`Yesterday: ${baseOf(state.days[fixDay].promise)}`} subtitle="Did it happen after all?">
+        <List.Section title={`${fixLabel}: ${baseOf(state.days[fixDay].promise)}`} subtitle="Did it happen after all?">
           <List.Item
             title="Done"
             icon={Icon.CheckCircle}
@@ -214,7 +226,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Today 
               <Actions
                 main={
                   <Action
-                    title="Mark Yesterday as Done"
+                    title={`Mark ${fixLabel} as Done`}
                     icon={Icon.CheckCircle}
                     onAction={() => run((s) => answerDay(s, fixDay, "done"))}
                   />
@@ -230,7 +242,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Today 
               <Actions
                 main={
                   <Action
-                    title="Mark Yesterday as Some"
+                    title={`Mark ${fixLabel} as Some`}
                     icon={Icon.CircleProgress50}
                     onAction={() => run((s) => answerDay(s, fixDay, "some"))}
                   />
