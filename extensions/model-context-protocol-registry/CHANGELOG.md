@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Candor Finance MCP Server] - 2026-10-22
+## [Add Candor Finance MCP Server] - {PR_MERGE_DATE}
 
 - Add Candor Finance to the official registry: tell your agent what you want with your money, and it sets up goals and a budget from your real US accounts and keeps you on them, with a weekly review that tells the agent what's worth talking through and why. Figures are calculated from the records; read-only toward the accounts, and it never moves money. Hosted Streamable HTTP server at https://api.candor.money/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
