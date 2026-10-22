@@ -7,9 +7,9 @@ import type { OrcaTerminal, OrcaWorktree } from "../src/orca.ts";
 import {
   buildSections,
   cleanTitle,
-  sessionLabel,
   sessionTitle,
   filterRows,
+  isUnseen,
   mergeAgents,
   projectNamer,
   summarize,
@@ -155,18 +155,6 @@ test("a session named from a long prompt keeps its text in the summary", () => {
   assert.ok(summarize(one, "sessions", 25)!.length <= 25);
 });
 
-test("a waiting row is labelled project-first, like the root search subtitle", () => {
-  const row = {
-    title: "✳ Claude Code",
-    agentIdentity: "claude",
-    prompt: "/review work_items/450",
-    worktreePath: "/Users/you/code/api",
-  };
-
-  assert.equal(sessionLabel(row, "api"), "api: /review work_items/450");
-  assert.equal(sessionLabel(row), "/review work_items/450");
-});
-
 test("projects with the same folder name stay separate sections", () => {
   const rows = [
     { handle: "a", worktreePath: "/code/team-a/app", worktreeId: "r1::/code/team-a/app",
@@ -220,4 +208,87 @@ test("a pane Orca has not titled yet does not break the list", () => {
   // Nothing to show at all: the agent name beats an empty row.
   assert.equal(sessionTitle({ title: null, agentIdentity: "claude" }), "claude");
   assert.equal(sessionTitle({ title: null }), "Terminal");
+});
+
+/** The fixture with the docs worktree left unread, as Orca marks one whose agent finished unseen. */
+function withUnreadDocs(): OrcaWorktree[] {
+  return worktrees.map((worktree) =>
+    worktree.path.endsWith("/docs") ? { ...worktree, unread: true } : worktree,
+  );
+}
+
+test("a row carries whether Orca still marks its worktree unread", () => {
+  const rows = mergeAgents(terminals, withUnreadDocs());
+
+  assert.deepEqual(
+    rows.filter((row) => row.unread).map((row) => row.handle),
+    ["term_docs-1", "term_docs-2"],
+  );
+  assert.equal(isUnseen(rows.find((row) => row.handle === "term_docs-1")!), true);
+  // A worktree Orca never flagged is not unread, null or not.
+  assert.equal(rows.find((row) => row.handle === "term_web-1")?.unread, false);
+});
+
+test("by project, unseen finished agents get their own section under the waiting ones", () => {
+  const rows = filterRows(mergeAgents(terminals, withUnreadDocs()), "all", "all-agents");
+
+  const sections = buildSections(rows, "project");
+
+  assert.deepEqual(
+    sections.map((section) => section.kind),
+    ["waiting", "unseen", "project", "project"],
+  );
+  // Most recently finished first.
+  assert.deepEqual(
+    sections[1].items.map((row) => row.handle),
+    ["term_docs-1", "term_docs-2"],
+  );
+  // An unseen agent is not repeated under its project.
+  assert.ok(sections.slice(2).every((section) => section.key !== "docs"));
+});
+
+test("by status, sections run waiting, unseen, working, finished, then the rest", () => {
+  const merged = mergeAgents(terminals, withUnreadDocs());
+  // Orca flags whole worktrees; clear the flag on one docs pane to get a finished
+  // agent that has been looked at.
+  const rows = filterRows(
+    merged.map((row) =>
+      row.handle === "term_docs-2" ? { ...row, unread: false } : row,
+    ),
+    "all",
+    "everything",
+  );
+
+  const sections = buildSections(rows, "status");
+
+  assert.deepEqual(
+    sections.map((section) => section.kind),
+    ["waiting", "unseen", "working", "finished", "other"],
+  );
+  assert.deepEqual(sections[1].items.map((row) => row.handle), ["term_docs-1"]);
+  assert.deepEqual(sections[3].items.map((row) => row.handle), ["term_docs-2"]);
+  // A pane with no agent state — a shell, or an agent Orca has no state for.
+  assert.deepEqual(
+    sections[4].items.map((row) => row.handle).sort(),
+    ["term_api-3", "term_cli-1"],
+  );
+});
+
+test("the counts summary includes agents that finished unseen", () => {
+  const rows = mergeAgents(terminals, withUnreadDocs());
+
+  assert.equal(summarize(rows, "counts"), "2 waiting · 1 working · 2 done");
+  // Seen finished agents are no news.
+  assert.equal(
+    summarize(mergeAgents(terminals, worktrees).filter((row) => row.state === "done"), "counts"),
+    null,
+  );
+});
+
+test("with nobody blocked, the sessions summary falls back to the counts", () => {
+  const rows = mergeAgents(terminals, withUnreadDocs()).filter(
+    (row) => row.state !== "waiting",
+  );
+
+  assert.equal(summarize(rows, "sessions"), "1 working · 2 done");
 });
