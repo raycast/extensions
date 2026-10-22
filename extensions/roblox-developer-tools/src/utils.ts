@@ -8,6 +8,7 @@ import {
 } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { setTimeout as wait } from "node:timers/promises";
 
 const labels = {
   placeId: "Place ID",
@@ -176,9 +177,12 @@ export async function publish(studio: Studio) {
     });
     return;
   }
-  await showHUD(`Publishing ${studio.title}...`, {
-    popToRootType: PopToRootType.Immediate,
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: `Publishing ${studio.title}...`,
   });
+  await wait(2_000);
+  await toast.hide();
 }
 
 export async function getStudios(): Promise<Studio[]> {
