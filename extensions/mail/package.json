@@ -96,7 +96,7 @@
     },
     {
       "name": "paste-latest-otp-code",
-      "title": "Paste Latest OTP Code",
+      "title": "Paste Latest Otp Code",
       "description": "Paste the latest OTP code from your emails.",
       "mode": "no-view",
       "keywords": [
