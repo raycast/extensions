@@ -7,6 +7,15 @@ export interface DockerContainer {
   status: string;
 }
 
+export interface DockerDiskUsageItem {
+  type: string;
+  totalCount: number;
+  active: number;
+  size: string;
+  reclaimable: string;
+  sizeBytes: number;
+}
+
 export type ProjectId = string;
 
 export interface Service {
@@ -39,6 +48,10 @@ export interface Redis extends Service {
   redisId: string;
   applicationStatus: "idle";
 }
+export interface Libsql extends Service {
+  libsqlId: string;
+  applicationStatus: "idle";
+}
 export interface Compose extends Service {
   composeId: string;
   composeStatus: "idle" | "done";
@@ -52,6 +65,8 @@ export interface ServiceCollections {
   postgres: Postgres[];
   redis: Redis[];
   compose: Compose[];
+  /** Dokploy v0.29.0+ only - older instances don't send this key at all. */
+  libsql?: Libsql[];
 }
 
 export interface Environment extends ServiceCollections {
@@ -61,6 +76,15 @@ export interface Environment extends ServiceCollections {
   createdAt: string;
   env: string;
   projectId: ProjectId;
+  /** The environment Dokploy opens a project on. Not sent by older instances. */
+  isDefault?: boolean;
+}
+
+export interface Tag {
+  tagId: string;
+  name: string;
+  /** A hex color like `#3b82f6`, or unset. */
+  color?: string | null;
 }
 
 export interface ProjectBase {
@@ -70,6 +94,8 @@ export interface ProjectBase {
   createdAt: string;
   organizationId: string;
   env: string;
+  /** Dokploy v0.29.0+ only - older instances don't send this key at all. */
+  projectTags?: { tag: Tag }[];
 }
 
 export interface ModernProject extends ProjectBase {
@@ -152,6 +178,28 @@ export interface Domain {
   serviceName?: string | null;
   /** False once the router backing this domain has been removed - Dokploy still lists it, but it 404s. */
   enabled?: boolean;
+}
+
+/** A scheduled database backup - the `backups` relation embedded in `<kind>.one`'s response. */
+export interface Backup {
+  backupId: string;
+  /** Cron expression. */
+  schedule: string;
+  enabled?: boolean | null;
+  prefix: string;
+  destinationId: string;
+  destination?: { name: string } | null;
+  keepLatestCount?: number | null;
+  /** The database name inside the engine to dump - not this extension's `Service.name`. */
+  database: string;
+  databaseType?: "postgres" | "mariadb" | "mysql" | "mongo" | "web-server" | "libsql";
+  postgresId?: string | null;
+  mariadbId?: string | null;
+  mysqlId?: string | null;
+  mongoId?: string | null;
+  /** Compose only - the stack backed up, and which container in it. */
+  composeId?: string | null;
+  serviceName?: string | null;
 }
 
 interface Issue {

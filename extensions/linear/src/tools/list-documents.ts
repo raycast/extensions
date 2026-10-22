@@ -1,19 +1,27 @@
 import { LinearClient, PaginationOrderBy } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
 
 import {
   afterDate,
   client,
   collect,
   PageInput,
-  pick,
   resolveInitiative,
   resolveProject,
   resolveTeam,
   resolveUser,
 } from "./linearUtils";
+import {
+  Plain,
+  initiativeRef,
+  issueRef,
+  pickFields,
+  projectRef,
+  related,
+  serializeDocument,
+  teamRef,
+  userRef,
+} from "./serializers";
+import { withLinear } from "./withLinear";
 
 type DocumentFilter = NonNullable<Parameters<LinearClient["documents"]>[0]>["filter"];
 type Field =
@@ -46,7 +54,7 @@ interface Input extends PageInput {
 }
 const defaultFields = ["id", "title", "url", "createdAt", "updatedAt", "archivedAt"] as const;
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   const project = input.projectId ? await resolveProject(input.projectId) : undefined;
   const initiative = input.initiativeId ? await resolveInitiative(input.initiativeId) : undefined;
   const team = input.teamId ? await resolveTeam(input.teamId) : undefined;
@@ -73,19 +81,22 @@ export default withAccessToken(linear)(async (input: Input) => {
       }),
     input,
   );
+  const fields: readonly Field[] = input.fields?.length
+    ? ["id", ...input.fields.filter((field) => field !== "id")]
+    : defaultFields;
+  const wants = (field: Field) => fields.includes(field);
   const nodes = await Promise.all(
     result.nodes.map(async (document) => {
-      const record: Record<string, unknown> = { ...document };
-      if (input.fields?.includes("creator")) record.creator = await document.creator;
-      if (input.fields?.includes("updatedBy")) record.updatedBy = await document.updatedBy;
-      if (input.fields?.includes("project")) record.project = await document.project;
-      if (input.fields?.includes("initiative")) record.initiative = await document.initiative;
-      if (input.fields?.includes("issue")) record.issue = await document.issue;
-      if (input.fields?.includes("team")) record.team = team;
-      const fields = input.fields?.length
-        ? (["id", ...input.fields.filter((field) => field !== "id")] as Field[])
-        : defaultFields;
-      return pick(record, fields);
+      const record: Record<string, Plain> = {
+        ...serializeDocument(document, { content: wants("content") }),
+        creator: wants("creator") ? await related(document.creator, userRef) : undefined,
+        updatedBy: wants("updatedBy") ? await related(document.updatedBy, userRef) : undefined,
+        project: wants("project") ? await related(document.project, projectRef) : undefined,
+        initiative: wants("initiative") ? await related(document.initiative, initiativeRef) : undefined,
+        issue: wants("issue") ? await related(document.issue, issueRef) : undefined,
+        team: wants("team") && team ? teamRef(team) : undefined,
+      };
+      return pickFields(record, fields);
     }),
   );
   return { ...result, nodes };

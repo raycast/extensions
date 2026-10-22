@@ -14,17 +14,6 @@ export type ResolveOutcome =
   | { ok: true; direction: "from-qobuz"; qobuzTrackId: number }
   | { ok: false; reason: ResolveFailure };
 
-export const spotifySearchUrl = (query: string) => `https://open.spotify.com/search/${encodeURIComponent(query)}`;
-
-export const ytMusicSearchUrl = (query: string) => `https://music.youtube.com/search?q=${encodeURIComponent(query)}`;
-
-export const deezerByIsrc = async (isrc: string): Promise<string | undefined> => {
-  const res = await fetch(`https://api.deezer.com/track/isrc:${isrc}`).catch(() => null);
-  if (!res || !res.ok) return undefined;
-  const track = (await res.json()) as { link?: string };
-  return track.link;
-};
-
 const isQobuz = (host: string) => host.endsWith("qobuz.com");
 
 const isSpotify = (host: string) => host.endsWith("open.spotify.com");

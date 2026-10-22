@@ -18,15 +18,6 @@ export interface ConnectionGroup {
   color?: string;
 }
 
-export interface MCPHandshake {
-  port: number;
-  token: string;
-  pid: number;
-  protocolVersion: string;
-  tls: boolean;
-  tlsCertFingerprint?: string;
-}
-
 export interface DatabaseInfo {
   name: string;
 }
@@ -143,11 +134,69 @@ export class ExternalAccessDeniedError extends Error {
   }
 }
 
-export class RemoteAccessUnsupportedError extends Error {
+export class TokenExpiredError extends Error {
   constructor() {
+    super("API token expired. Pair with TablePro again.");
+    this.name = "TokenExpiredError";
+  }
+}
+
+export class RateLimitedError extends Error {
+  constructor() {
+    super("TablePro is limiting requests. Wait a few minutes and try again.");
+    this.name = "RateLimitedError";
+  }
+}
+
+export class ServerDisabledError extends Error {
+  constructor() {
+    super("The TablePro MCP server is turned off.");
+    this.name = "ServerDisabledError";
+  }
+}
+
+export class ServerUnreachableError extends Error {
+  readonly port: number;
+
+  constructor(port: number) {
+    super(`No answer from TablePro on port ${port}`);
+    this.name = "ServerUnreachableError";
+    this.port = port;
+  }
+}
+
+export class InvalidPortError extends Error {
+  readonly value: string;
+
+  constructor(value: string) {
+    super(`MCP Port "${value}" is not a number from 1 to 65535`);
+    this.name = "InvalidPortError";
+    this.value = value;
+  }
+}
+
+export class UpdateRequiredError extends Error {
+  readonly minimumVersion: string;
+  readonly installedVersion?: string;
+
+  constructor(minimumVersion: string, installedVersion?: string) {
     super(
-      "Remote MCP not yet supported in Raycast. Disable remote access in TablePro Settings.",
+      installedVersion
+        ? `This extension needs TablePro ${minimumVersion} or later. You have ${installedVersion}.`
+        : `This extension needs TablePro ${minimumVersion} or later.`,
     );
-    this.name = "RemoteAccessUnsupportedError";
+    this.name = "UpdateRequiredError";
+    this.minimumVersion = minimumVersion;
+    this.installedVersion = installedVersion;
+  }
+}
+
+export class ToolError extends Error {
+  readonly code?: string;
+
+  constructor(code: string | undefined, message: string) {
+    super(message);
+    this.name = "ToolError";
+    this.code = code;
   }
 }

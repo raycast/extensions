@@ -13,6 +13,7 @@ import {
   millisecondsToDurationString,
   notifyFailure,
   stopCurrentTimer,
+  timeEntriesCacheAge,
   toMonospaceFont,
 } from "./utils";
 import { TimeEntry } from "./types";
@@ -30,6 +31,20 @@ class DataWrapper {
   // unreachable request cannot also suppress the unrelated ones that depend on this.
   public settled = false;
 }
+
+/**
+ * How stale the restart list may get before the menu bar pays to refresh it.
+ *
+ * Refreshing means a 500-entry hydrated request — about 1.2MB and three seconds — and this command is
+ * re-invoked every 10 seconds, so refreshing every time cost in the order of 450MB an hour while no
+ * timer was even running, all to populate a five-item list.
+ *
+ * These are templates to restart from rather than live data, and the only thing that adds one is
+ * completing an entry with a project/task/description combination that is not already in the list.
+ * Stopping a timer from this extension writes that into the cache directly, so the staleness here
+ * only affects entries created entirely outside it, and the list is seeded from cache meanwhile.
+ */
+const RESTART_LIST_MAX_AGE_MS = 10 * 60 * 1000;
 
 /**
  * Up to five distinct entries to restart from, newest first.
@@ -92,6 +107,12 @@ export default function ClockifyMenuCommand() {
         // Settled-empty rather than null: we know the timer is gone, so the recent-entries effect
         // below should run instead of waiting for the next invocation to work it out.
         setCurrentData({ currentEntry: null, currentlyElapsedTime: null, settled: true });
+
+        // Re-seed from the cache, which stopCurrentTimer has just amended to mark this entry ended.
+        // The list was built at mount, when this timer was still running and so excluded from it, and
+        // the effect below will not refetch while the cache is still fresh — without this the entry
+        // just stopped would be missing from the restart list until the next invocation.
+        setRecentEntries(toRestartTemplates(getAllTimeEntriesFromLocalStorage()));
       });
     } catch (error) {
       notifyFailure(error, "Could not stop timer");
@@ -213,7 +234,13 @@ export default function ClockifyMenuCommand() {
         // seconds after a timer was stopped, until the refresh below caught up.
         getTodayTotalTimeForProject(currentEntry.projectId).then(setTodayTotal);
       } else if (!currentEntry) {
-        // No active timer: refresh the recent entries seeded above
+        // No active timer: refresh the recent entries seeded above, but only once they are stale
+        // enough to be worth the request. See RESTART_LIST_MAX_AGE_MS.
+        if (timeEntriesCacheAge() < RESTART_LIST_MAX_AGE_MS) {
+          setTodayTotal(0);
+          return;
+        }
+
         getTimeEntries({})
           .then((allEntries) => {
             setRecentEntries(toRestartTemplates(allEntries));

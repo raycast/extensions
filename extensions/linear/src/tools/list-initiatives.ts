@@ -1,9 +1,6 @@
 import { LinearClient, PaginationOrderBy } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
 
-import { linear } from "../api/linearClient";
-
-import { InitiativeField, initiativeStatus, serializeInitiative } from "./initiativeUtils";
+import { initiativeStatus } from "./initiativeUtils";
 import {
   afterDate,
   client,
@@ -14,6 +11,8 @@ import {
   resolveTeam,
   resolveUser,
 } from "./linearUtils";
+import { InitiativeField, serializeInitiative } from "./serializers";
+import { withLinear } from "./withLinear";
 
 type InitiativeFilter = NonNullable<Parameters<LinearClient["initiatives"]>[0]>["filter"];
 
@@ -35,7 +34,7 @@ interface Input extends PageInput {
   fields?: InitiativeField[];
 }
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   const owner = input.owner ? await resolveUser(input.owner) : undefined;
   const team = input.leadTeam ? await resolveTeam(input.leadTeam) : undefined;
   const parent = input.parentInitiative ? await resolveInitiative(input.parentInitiative) : undefined;

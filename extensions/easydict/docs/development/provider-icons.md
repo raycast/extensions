@@ -98,10 +98,10 @@ Inspect the resulting strip at actual Raycast list-item size as well as at full 
 
 Add the new preset name and asset in:
 
-1. `src/ai-providers/types.ts` — `PROVIDER_ICON_NAMES`.
-2. `src/components/ui/Icons.tsx` — `providerIconAssets`.
-3. `src/ai-providers/presets.ts` — the provider preset.
-4. `src/components/pages/AIProviderForm.tsx` — the explicit icon dropdown item.
+1. `src/core/results/types.ts` — `PROVIDER_ICON_NAMES`.
+2. `src/core/results/icons.tsx` — `providerIconAssets`.
+3. `src/providers/profiles/presets.ts` — the provider preset.
+4. `src/features/provider-management/AIProviderForm.tsx` — the explicit icon dropdown item.
 
 Then run the project CI verification sequence:
 

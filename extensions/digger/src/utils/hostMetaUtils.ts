@@ -49,7 +49,7 @@ export async function fetchHostMetadata(baseUrl: string): Promise<HostMetadataDa
     }
   } catch (error) {
     // Rethrow. The caller wraps this in withAbort(..., undefined), which restores
-    // that exact fallback — so behaviour is unchanged for callers, but the reason
+    // that exact fallback — so behavior is unchanged for callers, but the reason
     // survives instead of masquerading as "no host-meta published".
     log.error("fetch:error", { error: error instanceof Error ? error.message : String(error) });
     throw error;

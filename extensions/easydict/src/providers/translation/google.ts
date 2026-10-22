@@ -3,11 +3,12 @@
 import { batchTranslate } from "google-translate-api-x";
 
 import { networkTimeout } from "@/consts";
+import type { TranslationContent } from "@/core/content/types";
 import { getLangCode } from "@/core/language/utils";
-import { TranslationType } from "@/types/api";
-import type { QueryInput, RequestOptions } from "@/types/query";
-import { RequestError } from "@/utils/errors";
-import { timedFetch } from "@/utils/http";
+import { TranslationType } from "@/core/results/kinds";
+import type { QueryInput, RequestOptions } from "@/core/results/types";
+import { RequestError } from "@/shared/errors";
+import { timedFetch } from "@/shared/http";
 
 import { BaseNonStreamingTranslateProvider } from "./base";
 
@@ -18,7 +19,7 @@ const sentenceSegmenter = new Intl.Segmenter(undefined, { granularity: "sentence
 export class GoogleTranslateProvider extends BaseNonStreamingTranslateProvider {
   type = TranslationType.Google;
 
-  protected async doTranslate(queryWordInfo: QueryInput, { signal }: RequestOptions = {}) {
+  protected async doTranslate(queryWordInfo: QueryInput, { signal }: RequestOptions = {}): Promise<TranslationContent> {
     const fromLanguageId = getLangCode(queryWordInfo.fromLanguage, "googleLangCode");
     const toLanguageId = getLangCode(queryWordInfo.toLanguage, "googleLangCode");
     const chunks = splitGoogleText(queryWordInfo.word.trim());
@@ -62,9 +63,9 @@ export class GoogleTranslateProvider extends BaseNonStreamingTranslateProvider {
       .join("");
 
     return {
-      type: TranslationType.Google,
-      translations: translation.split("\n"),
-      queryWordInfo,
+      kind: "translation",
+      paragraphs: translation.split("\n"),
+      query: queryWordInfo,
     };
   }
 }

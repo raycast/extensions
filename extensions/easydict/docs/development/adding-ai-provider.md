@@ -16,7 +16,7 @@ The shared model-discovery code expects an OpenAI-compatible response shaped as 
 
 ## 2. Add the preset
 
-Add an entry to `src/ai-providers/presets.ts` with the fields defined by `OpenAICompatiblePreset`:
+Add an entry to `src/providers/profiles/presets.ts` with the fields defined by `OpenAICompatiblePreset`:
 
 ```ts
 newProvider: {
@@ -41,9 +41,9 @@ The runtime normalizes the endpoint with `normalizeOpenAICompatibleEndpoint`, in
 For a bundled brand icon, follow the [provider icon guide](provider-icons.md). In summary, register the icon in every relevant layer:
 
 1. Add the SVG asset under `assets/provider-icons/`.
-2. Add the icon name to `PROVIDER_ICON_NAMES` in `src/ai-providers/types.ts`.
-3. Map the name to the bundled asset in `providerIconAssets` in `src/components/ui/Icons.tsx`.
-4. Add the same choice to the icon dropdown in `src/components/pages/AIProviderForm.tsx`.
+2. Add the icon name to `PROVIDER_ICON_NAMES` in `src/core/results/types.ts`.
+3. Map the name to the bundled asset in `providerIconAssets` in `src/core/results/icons.tsx`.
+4. Add the same choice to the icon dropdown in `src/features/provider-management/AIProviderForm.tsx`.
 5. Point the preset's `icon` field at the registered preset icon.
 
 `ProviderIconConfig` also supports `{ kind: "favicon", website?: string }` and `{ kind: "initials" }` when a bundled brand asset is not appropriate. The form also supports a remote icon URL for providers, but a bundled icon or favicon is preferable for a built-in preset.
@@ -52,13 +52,13 @@ For a bundled brand icon, follow the [provider icon guide](provider-icons.md). I
 
 For an OpenAI-compatible provider, model discovery derives a normalized `<base>/models` URL. It removes a trailing `/chat/completions` when necessary, then requests the models endpoint with `Authorization: Bearer <key>` for the usual provider case.
 
-Only add an endpoint to `PUBLIC_OPENAI_COMPATIBLE_MODELS_ENDPOINTS` in `src/ai-providers/modelDiscovery.ts` after confirming that its models catalog is intentionally public and supports anonymous requests. Keep the allow-list specific to the normalized models URL. Add regression coverage in `modelDiscovery.test.ts` and `modelCatalog.test.ts` for the public-auth exception, URL normalization, and the resulting model options as applicable.
+Only add an endpoint to `PUBLIC_OPENAI_COMPATIBLE_MODELS_ENDPOINTS` in `src/features/provider-management/modelDiscovery.ts` after confirming that its models catalog is intentionally public and supports anonymous requests. Keep the allow-list specific to the normalized models URL. Add regression coverage in `modelDiscovery.test.ts` and `modelCatalog.test.ts` for the public-auth exception, URL normalization, and the resulting model options as applicable.
 
 An anonymous model catalog does not mean that inference is anonymous. The provider may still require an API key for chat completions, as OpenCode Zen and OpenCode Go do. If the models response is not `{ data: [{ id }] }`, evaluate a provider-specific adapter or normalizer boundary instead of placing an ad hoc provider hack in shared discovery code.
 
 ## 5. Add focused tests and verify
 
-Follow the repository test principle: add tests for an external contract, a real regression, or an important boundary, not for coverage alone. At minimum, protect the preset contract (required fields and provider defaults). When the provider has special endpoint behavior, also cover endpoint normalization and the public-auth exception. Reuse the existing `src/ai-providers/*` test files where the scenario belongs.
+Follow the repository test principle: add tests for an external contract, a real regression, or an important boundary, not for coverage alone. At minimum, protect the preset contract (required fields and provider defaults). When the provider has special endpoint behavior, also cover endpoint normalization and the public-auth exception. Reuse the existing tests in `src/providers/profiles/` or `src/features/provider-management/` where the scenario belongs.
 
 Run the same validation used by CI:
 

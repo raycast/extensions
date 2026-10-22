@@ -1,5 +1,45 @@
 # `Easydict` Changelog
 
+## [v3.5.0] - 2026-10-02
+
+### ✨ New Features
+
+#### Windows OCR Screenshot Translation
+
+- **OCR Translate** now works on Windows: drag-select a screen area, recognize the text locally with the built-in Windows OCR engine, and query it in Easydict. Install an OCR language pack in Windows Settings to recognize languages other than your Windows display language.
+- Added the **Select OCR Language** command to pin an installed Windows OCR language; the default **Automatic (Windows profile)** uses the OCR languages from your Windows language settings.
+
+Thanks to [@duckieeeduck](https://github.com/duckieeeduck) for the original Windows implementation ([raycast/extensions#30884](https://github.com/raycast/extensions/pull/30884))!
+
+### 🐞 Bug Fixes
+
+- Query Cache, AI Query Cache, AnkiConnect URL, and Anki Deck no longer appear in the first-run preferences form. These are optional settings, and leaving them empty falls back to their defaults.
+
+## [v3.4.0] - 2026-10-01
+
+### ✨ New Features
+
+#### Add Favorite Words to Anki
+
+- Added **Add to Anki** and **Add All to Anki** actions to Favorite Words, sending cards to Anki through the AnkiConnect add-on. Cards include the word, phonetic, pronunciation audio, translations, and dictionary explanations.
+- Added the **Add Favorites to Anki Automatically** preference (off by default). Removing a favorite does not delete its Anki card.
+
+Thanks to [@cassieliang6709](https://github.com/cassieliang6709) for contributing this feature!
+
+### 💎 Improvements
+
+- Improved content page rendering: headwords and pronunciations use a text layout that wraps naturally instead of a fixed-size image; saved favorites no longer repeat the language direction.
+- **Clear Query Cache** is hidden while both Query Cache and AI Query Cache are Off, since there is nothing to clear.
+- Favorites with unreadable saved data can be recovered or exported instead of being discarded.
+
+### 🐞 Bug Fixes
+
+- Fixed the Requery All Services shortcut conflict: read actions keep `Cmd+R` / `Cmd+Shift+R`, and Requery All Services uses `Cmd+Option+R` (`Ctrl+Alt+R` on Windows).
+  - Thanks to [@qizidog](https://github.com/qizidog)
+- Resolve the Serbian preference alias (`sr` → `sr-Latn`) when reading language preferences.
+- Keep the active query running when an AI provider falls back from unsupported JSON output.
+- Preserve AI model loading when a provider's catalog refreshes.
+
 ## [v3.3.0] - 2026-09-19
 
 ### ✨ New Features

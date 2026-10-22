@@ -131,5 +131,34 @@ All properties for the AI capabilities of the extension. This object should be w
 
 | Property | Description |
 | --- | --- |
+| skills | An array of Agent Skills bundled by the extension, see [Skill properties](#skill-properties). |
+| mcp | A single MCP server configuration. Its tools are merged with declared tools. See [MCP server](#mcp-server). |
+| modelProvider | The entry point that provides AI models to Raycast. A value of `models` maps to `src/models.ts`. Using models provided by extensions requires a Raycast Pro plan. [More details](../ai/provide-ai-models.md) |
 | instructions | A string containing additional instructions for the AI. It will be added as a system message whenever the extension is mentioned. It can for example be used to help the AI respond with a format that makes more sense for the extension: `Always format pull requests and issues as markdown links: [pull-request-title](https://github.com/:org/:repo/pull/:number) and [issue-title](https://github.com/:org/:repo/issues/:number)` |
-| evals | Evals for AI Extension. [More details](https://raycastapp.notion.site/AI-Extensions-Evals-15fd6e4a8215800598cad77d8afb5dc8?pvs=73) |
+| evals | Evals for AI Extension. [More details](../ai/evals.md) |
+
+### Skill properties
+
+All properties for an [Agent Skill](https://agentskills.io/specification) declared in `ai.skills` in `package.json` or the top-level `skills` array of an AI configuration file, and bundled in `skills/<name>` at the extension root. The skill’s description is read from `SKILL.md` frontmatter.
+
+| Property | Description |
+| --- | --- |
+| name<mark style="color:red;">\*</mark> | The stable lowercase, hyphenated skill identifier. It must match both the skill directory and the `name` in `SKILL.md` frontmatter. |
+| title<mark style="color:red;">\*</mark> | The human-readable skill title shown in Raycast's mention menus, composer pills, and chat messages. |
+| icon | <p>An optional reference to an icon file in the assets folder. Use png format with a size of at least 512 x 512 pixels. Light and dark variants use the same naming convention as command icons.</p><p>If no icon is specified, the extension icon will be used.</p> |
+
+### MCP Server
+
+Set `ai.mcp` in `package.json` (or `mcp` in `ai.yaml`) to an [MCP server](https://modelcontextprotocol.io) configuration:
+
+```json
+{
+  "ai": {
+    "mcp": { "url": "https://example.com/mcp" }
+  }
+}
+```
+
+HTTP servers support `url`, optional `type` (`http` or `sse`), and `headers`. Stdio servers support `command`, optional `type` (`stdio`), `args`, and `env`. Raycast also supports `oauth: { "type": "dynamic" }` or `oauth: { "type": "static", "clientId": "…", "clientSecret": "…", "scopes": ["read"] }` for HTTP servers; `clientSecret` and `scopes` are optional. HTTP servers can request OAuth sign-in without an explicit `oauth` setting.
+
+An MCP configuration adds **Ask Extension**, even when the extension has no declared tools or commands. MCP tools and declared tools share the extension's AI identity. If names match, the declared tool takes precedence, including its schema, execution, and confirmation behavior.

@@ -8,6 +8,9 @@ export const isStatus = (error: unknown, ...codes: number[]) => {
   return codes.some((code) => new RegExp(`^${code}\\b`).test(message));
 };
 
+// A bad token, rate limit or Forge outage has nothing in this code to fix
+const isOurBug = (status: number) => status >= 400 && status < 500 && ![401, 403, 429].includes(status);
+
 const doTheFetch = async (url: string, options?: RequestInit) => {
   // A tool's thrown message already reaches the model; a toast on top is noise
   const silent = environment.launchType === LaunchType.Background || environment.entryPointType === "tool";
@@ -17,7 +20,6 @@ const doTheFetch = async (url: string, options?: RequestInit) => {
   } catch (e) {
     if (e instanceof Error) {
       console.error({ error: e, url });
-      captureException(e);
       if (!silent) showResetToast({ title: `Error ${res?.status}: ${e.message}` });
       throw new Error(e.message);
     }
@@ -29,7 +31,7 @@ const doTheFetch = async (url: string, options?: RequestInit) => {
       ? "Forge rejected the API token. Create a v2 token with the scopes you need."
       : `Error ${res?.status}: ${res?.statusText}`;
     if (!silent) showResetToast({ title });
-    captureException(new Error(`${res?.status} ${res?.statusText}: ${url}`));
+    if (res && isOurBug(res.status)) captureException(new Error(`${res.status} ${res.statusText}: ${url}`));
     // Forge explains itself in the body: a 400 names the filters it does allow
     const detail = await res
       ?.text()

@@ -1,7 +1,7 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { client } from "./linearUtils";
+import { withLinear } from "./withLinear";
 type Input = { /** Comment ID */ id: string };
-export default withAccessToken(linear)(async ({ id }: Input) => client().deleteComment(id));
+export default withLinear(async ({ id }: Input) => {
+  const result = await client().deleteComment(id);
+  return { success: result.success, entityId: result.entityId };
+});

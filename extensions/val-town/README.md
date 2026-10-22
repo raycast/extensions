@@ -4,7 +4,7 @@ Browse your [Val Town](https://www.val.town) account from Raycast, and allow Ray
 
 ## Setup
 
-Create a token at [val.town/settings/api](https://www.val.town/settings/api) and paste it into the extension's preferences.
+Create a token at [val.town/settings/api](https://www.val.town/settings/api) with read and write on Vals, Blob storage and SQLite, and paste it into the extension's preferences. With less, a val's runs, blobs and database won't load.
 
 ## Running vals
 

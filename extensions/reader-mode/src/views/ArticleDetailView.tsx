@@ -1,8 +1,10 @@
+import { memo } from "react";
 import { Detail } from "@raycast/api";
+import { ArticleActions } from "../actions/ArticleActions";
+import { DEFAULT_SUMMARY_MODEL, getSummaryModelTitle, SummaryModelKey } from "../config/ai";
 import { ArticleState } from "../types/article";
 import { SummaryStyle } from "../types/summary";
 import { formatSummaryBlock } from "../utils/summarizer";
-import { ArticleActions } from "../actions/ArticleActions";
 
 interface ArticleDetailViewProps {
   article: ArticleState;
@@ -11,6 +13,8 @@ interface ArticleDetailViewProps {
   isSummarizing: boolean;
   canAccessAI: boolean;
   onSummarize: (style: SummaryStyle) => void;
+  summaryModel: SummaryModelKey;
+  onRegenerate: (model: SummaryModelKey) => void;
   onStopSummarizing?: () => void;
   onReimportFromBrowser?: () => void;
 }
@@ -71,17 +75,20 @@ function buildMarkdown(
   summaryStyle: SummaryStyle | null,
   currentSummary: string | null,
   isSummarizing: boolean,
+  summaryModel: SummaryModelKey,
 ): string {
   const header = buildArticleHeader(article);
+  // Name the model only when it isn't the default.
+  const modelTitle = summaryModel === DEFAULT_SUMMARY_MODEL ? null : getSummaryModelTitle(summaryModel);
   const parts: string[] = [header, "", "---"];
 
   if (summaryStyle) {
     if (isSummarizing && currentSummary) {
-      parts.push("", formatSummaryBlock(currentSummary, summaryStyle), "", "*Generating summary...*");
+      parts.push("", formatSummaryBlock(currentSummary, summaryStyle, modelTitle), "", "*Generating summary...*");
     } else if (isSummarizing) {
       parts.push("", "> Generating summary...");
     } else if (currentSummary) {
-      parts.push("", formatSummaryBlock(currentSummary, summaryStyle));
+      parts.push("", formatSummaryBlock(currentSummary, summaryStyle, modelTitle));
     }
     parts.push("", "---");
   }
@@ -90,17 +97,21 @@ function buildMarkdown(
   return parts.join("\n");
 }
 
-export function ArticleDetailView({
+// Memoized: the reader re-renders on every streamed summary token, and every update of this view
+// re-sends the whole article to Raycast. Its props only change when the throttled summary does.
+export const ArticleDetailView = memo(function ArticleDetailView({
   article,
   summaryStyle,
   currentSummary,
   isSummarizing,
   canAccessAI,
   onSummarize,
+  summaryModel,
+  onRegenerate,
   onStopSummarizing,
   onReimportFromBrowser,
 }: ArticleDetailViewProps) {
-  const markdown = buildMarkdown(article, summaryStyle, currentSummary, isSummarizing);
+  const markdown = buildMarkdown(article, summaryStyle, currentSummary, isSummarizing, summaryModel);
 
   return (
     <Detail
@@ -115,6 +126,8 @@ export function ArticleDetailView({
           canAccessAI={canAccessAI}
           isSummarizing={isSummarizing}
           onSummarize={onSummarize}
+          summaryModel={summaryModel}
+          onRegenerate={onRegenerate}
           onStopSummarizing={onStopSummarizing}
           onReimportFromBrowser={onReimportFromBrowser}
           archiveSource={article.archiveSource}
@@ -122,4 +135,4 @@ export function ArticleDetailView({
       }
     />
   );
-}
+});

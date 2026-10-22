@@ -13,7 +13,7 @@ const log = getLogger("wellknown-registry");
  * exactly as before. What a refresh buys is the handful of paths registered
  * since the release.
  *
- * IANA serves `Last-Modified` and honours `If-Modified-Since` with a 304
+ * IANA serves `Last-Modified` and honors `If-Modified-Since` with a 304
  * (verified 2026-09-08), so the steady state is a conditional request that
  * transfers no body at all. The registry changes a few times a year; the check
  * interval is set accordingly.
@@ -128,7 +128,7 @@ async function readStored(): Promise<StoredRegistry | undefined> {
  * The catalog to sweep: the shipped snapshot, replaced by a fetched registry
  * when one has been stored.
  *
- * Local rulings survive the swap. `probe: false` is a judgement about whether a
+ * Local rulings survive the swap. `probe: false` is a judgment about whether a
  * bare GET can answer for a path at all — it is not in the registry and IANA
  * will never supply it, so a refresh that dropped it would silently start
  * probing 30 paths that cannot answer and inflating the denominator with them.

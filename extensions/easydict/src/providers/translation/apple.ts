@@ -4,10 +4,11 @@ import querystring from "node:querystring";
 
 import { runAppleScript } from "@raycast/utils";
 
+import type { TranslationContent } from "@/core/content/types";
 import { getLangCode } from "@/core/language/utils";
-import { TranslationType } from "@/types/api";
-import type { QueryInput, RequestOptions } from "@/types/query";
-import { logTrace, logWarn } from "@/utils/logger";
+import { TranslationType } from "@/core/results/kinds";
+import type { QueryInput, RequestOptions } from "@/core/results/types";
+import { logTrace, logWarn } from "@/shared/logger";
 
 import { BaseNonStreamingTranslateProvider } from "./base";
 
@@ -29,13 +30,12 @@ function getShortcutsScript(shortcutName: string, input: string): string {
 export class AppleTranslateProvider extends BaseNonStreamingTranslateProvider {
   type = TranslationType.Apple;
 
-  protected async doTranslate(queryWordInfo: QueryInput, { signal }: RequestOptions = {}) {
+  protected async doTranslate(queryWordInfo: QueryInput, { signal }: RequestOptions = {}): Promise<TranslationContent> {
     const { word, fromLanguage, toLanguage } = queryWordInfo;
-    const type = TranslationType.Apple;
 
     if (process.platform !== "darwin") {
       logWarn(this.type, "Apple Translate is only supported on macOS.");
-      return { type, queryWordInfo, translations: [], result: undefined };
+      return { kind: "translation", query: queryWordInfo, paragraphs: [] };
     }
 
     const appleFromLanguageId = getLangCode(fromLanguage, "appleLangCode");
@@ -43,12 +43,12 @@ export class AppleTranslateProvider extends BaseNonStreamingTranslateProvider {
 
     if (!appleFromLanguageId || !appleToLanguageId) {
       logWarn(this.type, `language not support: ${fromLanguage} -> ${toLanguage}`);
-      return { type, queryWordInfo, translations: [], result: undefined };
+      return { kind: "translation", query: queryWordInfo, paragraphs: [] };
     }
 
     if (appleFromLanguageId === "auto") {
       logWarn(this.type, `auto detect not supported for this language: ${word}`);
-      return { type, queryWordInfo, translations: [], result: undefined };
+      return { kind: "translation", query: queryWordInfo, paragraphs: [] };
     }
 
     const map = new Map([
@@ -68,10 +68,9 @@ export class AppleTranslateProvider extends BaseNonStreamingTranslateProvider {
     const translations = trimmed.split("\n").filter((line) => line.length > 0);
 
     return {
-      type,
-      queryWordInfo,
-      translations,
-      result: { translatedText: trimmed },
+      kind: "translation",
+      query: queryWordInfo,
+      paragraphs: translations,
     };
   }
 }

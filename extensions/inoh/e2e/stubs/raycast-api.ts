@@ -6,7 +6,7 @@
  * test, so the end-to-end coverage here goes through the extension's real
  * modules — its Supabase client, auth, dictionary search, and card writes —
  * against the local Supabase stack. Only the rendering is unverified, and that
- * is what the manual checklist in E2E.md covers.
+ * is what the manual checklist covers.
  *
  * Aliased in place of the real package by `e2e/vitest.config.ts`.
  */

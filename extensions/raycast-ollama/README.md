@@ -54,6 +54,8 @@ The extension includes focused commands for common tasks:
 
 Most text commands use the input source selected in the extension preferences: **Selected Text** or **Clipboard**. You can also enable fallback to the other source when the preferred source is empty. After a one-shot command finishes, use **Continue as Chat** to keep the conversation going.
 
+Commands that rewrite their input also offer **Auto-Replace Selected Text**, enabled per command in its Raycast settings. When enabled, the generated text replaces your selection as soon as it is ready, instead of waiting for you to copy or paste it. It only replaces text when the selection actually supplied the input: if the input source was the clipboard, or fell back to it because nothing was selected, the answer is shown instead of overwriting whatever happens to be highlighted. Commands that explain, describe, or summarise their input do not offer it, because their output is not a replacement for what you selected.
+
 ## Manage Models and Servers
 
 Use **Manage Models** to:
@@ -73,6 +75,8 @@ Use **Create Custom Command** to create a Raycast Quicklink backed by your own p
 - `{selection}` inserts selected or clipboard text.
 - `{browser-tab}` inserts the current browser tab as Markdown. Use `{browser-tab format="html"}` or `{browser-tab format="text"}` to request another format.
 - `{image}` attaches a JPEG or PNG image from Finder or the clipboard. This requires a vision-capable model.
+
+Tick **Auto-Replace** to have the result replace the selected text automatically, as the built-in commands can. This only makes sense for a prompt that uses `{selection}`. The choice is stored in the Quicklink when it is created, so changing it later means creating the command again.
 
 ## Web Search and Web Fetch
 
@@ -104,3 +108,5 @@ Select the configured servers in the chat model settings. Only MCP tools are cur
 - **Chat Memory Messages** sets how many recent messages are included as context.
 - **Certificate Validation Enabled** controls TLS certificate validation for Ollama server requests.
 - **Ollama API Key** enables the hosted web search and web fetch tools.
+
+**Auto-Replace Selected Text** is not listed here: it is set per command, in the settings of each command that rewrites its input.

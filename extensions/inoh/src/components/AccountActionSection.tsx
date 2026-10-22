@@ -1,12 +1,14 @@
 import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
-import { BILLING_URL, PLANS_URL } from "../constants";
+import { BILLING_URL, PLANS_URL, SETTINGS_URL } from "../constants";
 import { canManageBilling } from "../lib/subscription";
 import type { SubscriptionState } from "../lib/subscription";
 import type { User } from "@supabase/supabase-js";
 
 type AccountActionSectionProps = {
-  user: User;
+  /** The signed-in account, or null for a visitor. */
+  user: User | null;
   subscriptionState: SubscriptionState | undefined;
+  onSignIn: () => void;
   onSignOut: () => Promise<void>;
 };
 
@@ -24,19 +26,27 @@ function _describePlanAction(state: SubscriptionState): PlanAction {
   return { title: "Upgrade Plan", url: PLANS_URL, icon: Icon.Stars };
 }
 
-/**
- * Account email, one plan action, and sign-out, shown in the ActionPanel only
- * when signed in. Plans are upgraded and managed in the Inoh web app: free
- * users get "Upgrade Plan" (the plans page); subscribers, accounts with a
- * pending change, and `past_due` accounts that must fix their card go to
- * Plan & Billing. Neither shows until the plan has been read at least once.
- */
+/** The one plan action for the account, shown once the plan has been read. */
 function PlanActionItem({ state }: { state: SubscriptionState }) {
   const planAction = _describePlanAction(state);
   return <Action.OpenInBrowser title={planAction.title} icon={planAction.icon} url={planAction.url} />;
 }
 
-export function AccountActionSection({ user, subscriptionState, onSignOut }: AccountActionSectionProps) {
+/**
+ * Account email, one plan action, and sign-out, shown in the ActionPanel only
+ * when signed in. Both links lead into the Inoh web app, because that is where
+ * an account is changed: the email opens Settings, and the plan action opens
+ * the page that matches the account's state — free users get "Upgrade Plan"
+ * (the plans page); subscribers, accounts with a pending change, and
+ * `past_due` accounts that must fix their card go to Plan & Billing. The plan
+ * action does not show until the plan has been read at least once.
+ *
+ * A visitor gets the section too, holding the one account action they can
+ * take. Reason: searching is free and needs no account, so someone can arrive
+ * anywhere in the extension signed out, and every panel carrying this section
+ * is then a way in rather than a dead end.
+ */
+export function AccountActionSection({ user, subscriptionState, onSignIn, onSignOut }: AccountActionSectionProps) {
   async function handleSignOut() {
     try {
       await onSignOut();
@@ -50,9 +60,17 @@ export function AccountActionSection({ user, subscriptionState, onSignOut }: Acc
     }
   }
 
+  if (user === null) {
+    return (
+      <ActionPanel.Section title="Account">
+        <Action title="Sign In" icon={Icon.Key} onAction={onSignIn} />
+      </ActionPanel.Section>
+    );
+  }
+
   return (
     <ActionPanel.Section title="Account">
-      <Action.CopyToClipboard title={user.email ?? "Account"} content={user.email ?? ""} icon={Icon.Person} />
+      <Action.OpenInBrowser title={user.email ?? "Account"} icon={Icon.Person} url={SETTINGS_URL} />
       {subscriptionState && <PlanActionItem state={subscriptionState} />}
       <Action title="Sign Out" icon={Icon.Logout} style={Action.Style.Destructive} onAction={handleSignOut} />
     </ActionPanel.Section>

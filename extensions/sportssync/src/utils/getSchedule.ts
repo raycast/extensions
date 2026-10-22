@@ -1,5 +1,4 @@
 import { useFetch } from "@raycast/utils";
-import getPastAndFutureDays from "./getDateRange";
 import sportInfo from "./getSportInfo";
 
 interface Athlete {
@@ -82,25 +81,13 @@ interface Response {
 }
 
 export default function getScoresAndSchedule() {
-  let dateRange = getPastAndFutureDays(new Date());
   const currentLeague = sportInfo.getLeague();
   const currentSport = sportInfo.getSport();
 
   // F1 Specific Date Range
 
   const currentYear = new Date().getFullYear();
-
-  if (currentLeague === "f1") {
-    dateRange = `${currentYear}`;
-  }
-
-  if (currentLeague === "mens-college-basketball" || currentLeague === "womens-college-basketball") {
-    dateRange = ``;
-  }
-
-  if (currentSport === "soccer") {
-    dateRange = ``;
-  }
+  const dateRange = currentLeague === "f1" ? `${currentYear}` : "";
 
   const {
     isLoading: scheduleLoading,

@@ -1,16 +1,25 @@
 import { environment, getPreferenceValues, open } from "@raycast/api";
 import { homedir } from "node:os";
-import { delimiter } from "node:path";
+import { delimiter, join } from "node:path";
 import { clearCache } from "./cache";
 import { ensureCli } from "./cli";
 import { createPassCliAdapter, PassCliAdapter } from "./core/adapter";
-import { runBrowserLogin } from "./core/login";
+import {
+  BrowserLoginStatus,
+  cancelDetachedLogin,
+  checkDetachedLogin,
+  forgetDetachedLogin,
+  isDetachedLoginRunning,
+  savedDetachedLogin,
+  startDetachedLogin,
+} from "./core/login";
 import { MOCK_ITEM_DETAILS, MOCK_ITEMS, MOCK_TOTP_CODES, MOCK_VAULTS } from "./mock-data";
-import { Item, ItemDetail, PassCliError, PasswordOptions, PasswordScore, Vault } from "./types";
+import { Item, ItemDetail, PassCliError, PasswordOptions, PasswordScore, Vault, VaultSharing } from "./types";
 
 const USE_MOCK_DATA = environment.isDevelopment;
 const DEFAULT_CLI_COMMAND = "pass-cli";
-const LOGIN_TIMEOUT_MS = 10 * 60_000;
+/** How long pass-cli may take to print the login URL. */
+const LOGIN_URL_TIMEOUT_MS = 30_000;
 type CliPathPreferenceValues = { cliPath?: string };
 
 let mockCacheCleared = false;
@@ -51,11 +60,19 @@ function getConfiguredCliPath(): string | undefined {
   return stripSurroundingQuotes(configured);
 }
 
-async function getCliPath(): Promise<string> {
+/** The pass-cli the extension runs: the CLI Path preference when set, otherwise the one it installed. */
+export async function getCliPath(): Promise<string> {
   return getConfiguredCliPath() ?? ensureCli();
 }
 
+/** Where the browser login keeps its state while it runs, so that it's found again after Raycast closed. */
+const loginDir = () => join(environment.supportPath, "login");
+
 async function getAdapter(): Promise<PassCliAdapter> {
+  // A pass-cli command running while a login saves its session can make pass-cli delete that session.
+  if (await isDetachedLoginRunning(loginDir())) {
+    throw new PassCliError("Finish logging in in your browser first.", "not_authenticated");
+  }
   const cliPath = await getCliPath();
   return createPassCliAdapter(
     { file: cliPath, args: [] },
@@ -65,20 +82,56 @@ async function getAdapter(): Promise<PassCliAdapter> {
   );
 }
 
-export async function loginWithBrowser(): Promise<void> {
+/**
+ * Starts a browser login and opens its page. The login keeps going if Raycast closes meanwhile: checkBrowserLogin()
+ * follows it. Returns the page's URL, or nothing when there's nothing to wait for.
+ */
+export async function startBrowserLogin(): Promise<string | undefined> {
   if (USE_MOCK_DATA) {
     await ensureMockCacheCleared();
-    return;
+    return undefined;
   }
 
+  // The new session may belong to another account: no view may show the previous one's cached items, whichever
+  // view opens first once the login completes.
+  await clearCache();
   const cliPath = await getCliPath();
-  await runBrowserLogin(
-    { file: cliPath, args: [] },
-    {
-      openUrl: (url) => open(url),
-      timeoutMs: LOGIN_TIMEOUT_MS,
-    },
-  );
+  const url = await startDetachedLogin({ file: cliPath, args: [] }, loginDir(), LOGIN_URL_TIMEOUT_MS);
+  try {
+    await open(url);
+  } catch (error) {
+    // Nobody can finish this login, and while it runs, no other pass-cli command does.
+    await cancelDetachedLogin(loginDir());
+    throw error;
+  }
+  return url;
+}
+
+/** Where the browser login is: still waiting for the browser, logged in, or failed. */
+export async function checkBrowserLogin(): Promise<BrowserLoginStatus> {
+  if (USE_MOCK_DATA) return { state: "none" };
+
+  const status = await checkDetachedLogin(loginDir(), checkAuth);
+  if (status.state === "failed") console.error(`Browser login failed: ${status.error.message}`);
+  return status;
+}
+
+export async function cancelBrowserLogin(): Promise<void> {
+  if (!USE_MOCK_DATA) await cancelDetachedLogin(loginDir());
+}
+
+/**
+ * Ends the session, which pass-cli shares with the terminal, and clears the extension's cache. `force` only removes it
+ * from this computer, for when ending it on Proton's servers fails.
+ */
+export async function logout(force = false): Promise<void> {
+  if (USE_MOCK_DATA) return clearCache();
+  // A login running now stops Logout (see getAdapter), so this one is over. One started meanwhile must keep going.
+  const endedLogin = await savedDetachedLogin(loginDir());
+  await (await getAdapter()).logout(force);
+  await clearCache();
+  // Its result would otherwise show on the next login screen.
+  if (endedLogin) await forgetDetachedLogin(loginDir(), endedLogin);
 }
 
 export async function checkAuth(): Promise<boolean> {
@@ -94,39 +147,120 @@ export async function listVaults(): Promise<Vault[]> {
     await ensureMockCacheCleared();
     return MOCK_VAULTS;
   }
-  return (await getAdapter()).listVaults();
+  try {
+    return await (await getAdapter()).listVaults();
+  } catch (error) {
+    // Cached items belong to the session that wrote them: once it has ended, they must not show up again.
+    if (error instanceof PassCliError && error.type === "not_authenticated") await clearCache();
+    throw error;
+  }
 }
 
 async function listItemsFromVault(shareId: string, vaultName: string): Promise<Item[]> {
-  return (await getAdapter()).listItems(shareId, vaultName);
+  try {
+    return await (await getAdapter()).listItems(shareId, vaultName);
+  } catch (error) {
+    if (error instanceof PassCliError && error.type === "not_authenticated") await clearCache();
+    throw error;
+  }
 }
 
-export async function listItems(shareId?: string): Promise<Item[]> {
+// Each pass-cli call takes ~0.5-1.5s, so listing vaults one after another adds up quickly
+// for accounts with many vaults. Run a bounded number of calls in parallel instead.
+const VAULT_LIST_CONCURRENCY = 8;
+
+async function mapWithConcurrency<T, R>(values: T[], limit: number, fn: (value: T) => Promise<R>): Promise<R[]> {
+  const results = new Array<R>(values.length);
+  let next = 0;
+  async function worker() {
+    while (next < values.length) {
+      const index = next++;
+      results[index] = await fn(values[index]);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, values.length) }, worker));
+  return results;
+}
+
+/** A vault whose items couldn't be listed. */
+export interface VaultFailure {
+  vault: Vault;
+  message: string;
+}
+
+async function listItemsOfVaults(vaults: Vault[]): Promise<{ items: Item[]; failedVaults: VaultFailure[] }> {
+  const failedVaults: VaultFailure[] = [];
+  const itemsPerVault = await mapWithConcurrency(vaults, VAULT_LIST_CONCURRENCY, async (vault) => {
+    try {
+      return await listItemsFromVault(vault.shareId, vault.name);
+    } catch (error) {
+      // An ended session concerns every vault, so it fails the whole listing.
+      if (error instanceof PassCliError && error.type === "not_authenticated") throw error;
+      const message = error instanceof Error ? error.message : "Unknown error";
+      console.error(`Failed to list items from vault ${vault.name}: ${message}`);
+      failedVaults.push({ vault, message });
+      return [];
+    }
+  });
+  return { items: itemsPerVault.flat(), failedVaults };
+}
+
+export async function listItems(shareId?: string, vaults?: Vault[]): Promise<Item[]> {
   if (USE_MOCK_DATA) {
     await ensureMockCacheCleared();
     return shareId ? MOCK_ITEMS.filter((item) => item.shareId === shareId) : MOCK_ITEMS;
   }
 
-  const vaults = await listVaults();
+  const knownVaults = vaults ?? (await listVaults());
   if (shareId) {
-    const vault = vaults.find((candidate) => candidate.shareId === shareId);
+    const vault = knownVaults.find((candidate) => candidate.shareId === shareId);
     return listItemsFromVault(shareId, vault?.name ?? "Unknown Vault");
   }
 
-  const allItems: Item[] = [];
-  for (const vault of vaults) {
-    try {
-      allItems.push(...(await listItemsFromVault(vault.shareId, vault.name)));
-    } catch (error) {
-      const type = error instanceof PassCliError ? error.type : "unknown";
-      const message = error instanceof Error ? error.message : "Unknown error";
-      console.error(`Failed to list items from vault ${vault.name} (${type}): ${message}`);
-    }
-  }
-  return allItems;
+  return (await listItemsOfVaults(knownVaults)).items;
 }
 
-export async function getItem(shareId: string, itemId: string): Promise<ItemDetail> {
+/**
+ * Lists vaults once and reuses them for the item listing, instead of listing vaults twice. Vaults whose items
+ * couldn't be listed are reported rather than thrown, so the other vaults still load.
+ */
+export async function listVaultsAndItems(): Promise<{ vaults: Vault[]; items: Item[]; failedVaults: VaultFailure[] }> {
+  const vaults = await listVaults();
+  if (USE_MOCK_DATA) return { vaults, items: await listItems(undefined, vaults), failedVaults: [] };
+  return { vaults, ...(await listItemsOfVaults(vaults)) };
+}
+
+/**
+ * How each vault is shared, by share ID. Vaults the user doesn't own were shared with them; for the user's own
+ * vaults, the members are counted, one call per vault, in parallel like the item listing. A count that fails
+ * leaves `isShared` unknown.
+ */
+export async function listVaultSharing(): Promise<Map<string, VaultSharing>> {
+  if (USE_MOCK_DATA) {
+    await ensureMockCacheCleared();
+    return new Map(
+      MOCK_VAULTS.flatMap((vault) =>
+        vault.role ? [[vault.shareId, { role: vault.role, isShared: vault.role !== "owner" || vault.isShared }]] : [],
+      ),
+    );
+  }
+
+  const adapter = await getAdapter();
+  const roles = Array.from(await adapter.listVaultRoles());
+  return new Map(
+    await mapWithConcurrency(
+      roles,
+      VAULT_LIST_CONCURRENCY,
+      async ([shareId, role]): Promise<[string, VaultSharing]> => {
+        if (role !== "owner") return [shareId, { role, isShared: true }];
+        const members = await (await getAdapter()).countVaultMembers(shareId).catch(() => undefined);
+        return [shareId, { role, isShared: members === undefined ? undefined : members > 1 }];
+      },
+    ),
+  );
+}
+
+export async function getItem(shareId: string, itemId: string, vaultName?: string): Promise<ItemDetail> {
   if (USE_MOCK_DATA) {
     const detail = MOCK_ITEM_DETAILS[itemId];
     if (detail) return detail;
@@ -134,7 +268,7 @@ export async function getItem(shareId: string, itemId: string): Promise<ItemDeta
     if (item) return { ...item, password: "mock-password-123" };
     throw new PassCliError("Item not found", "invalid_output");
   }
-  return (await getAdapter()).getItem(shareId, itemId);
+  return (await getAdapter()).getItem(shareId, itemId, vaultName);
 }
 
 export async function getTotpCodes(shareId: string, itemId: string): Promise<Record<string, string>> {

@@ -1,4 +1,5 @@
 instructions: |
+  Post text includes the full long-form body when X provides it. Use the returned text when explaining technical details; do not assume posts are limited to 280 characters. If only a preview is available, explain that limitation without inventing the missing content.
   Use search-posts for public posts published within the last seven days. Pass X search operators exactly when they help narrow the request. Never use it to search the authenticated user's older post history.
   When a personal-context request names a person without an exact @username, always use search-my-connections with only the identifying name or profile terms before search-my-posts. This is required even if the remembered name might match post text. The tool searches following first and automatically falls back to followers only when following has no matches. Use the matching name or username as a search-my-posts term, and do not treat a connection match as proof that the person is the intended one when multiple profiles are plausible.
   Use search-my-posts when the user wants to find one of their own posts or replies by its content, mentioned account, or remembered details. Pass one to eight precise terms that must all match; names and usernames are searchable even when only the @mention appears in the post. This tool automatically paginates through the retrievable personal timeline, excluding reposts, up to X's limit of 3,200 recent authored posts. If it returns reachedEnd false, explain that X's timeline retrieval limit was reached rather than claiming no older post exists.
@@ -13,9 +14,30 @@ instructions: |
   Use send-dm only when the user explicitly asks to privately message specific recipients who have clearly indicated that they want to hear from the user, and numeric recipient user IDs are known. Never use it for unsolicited outreach, bulk messaging, recurring follow-ups, or infer a DM from a request to draft, summarize, or suggest text. It supports one media attachment and creates a group when given multiple recipients.
   Every write tool presents its exact side effect in Raycast's confirmation UI. Do not ask for an additional chat confirmation; call the tool and let its confirmation obtain approval. Never claim a write succeeded until the tool returns successfully.
   If post-thread returns posted false with postIds, those posts are already live. Report the partial result. Only retry when asked, using remainingPosts and replyToPostId; never resend the published prefix.
-  X posts are limited to 280 weighted characters, using twitter-text URL and Unicode weighting. Ask the user to shorten or split text that exceeds the limit instead of silently truncating it.
+  Publishing through this extension is limited to 280 weighted characters per post, using twitter-text URL and Unicode weighting. Ask the user to shorten or split text that exceeds this publishing limit instead of silently truncating it. This limit does not apply to reading existing long posts.
   Prefer the term "post" in responses, while recognizing "tweet" as a synonym in user requests.
 evals:
+  - input: "@twitter Search recent posts from @exampledev about multiple accounts and explain the MCP technical detail in the result."
+    mocks:
+      get-user:
+        user:
+          id: "100"
+          name: "Example Developer"
+          username: "exampledev"
+      search-posts:
+        items:
+          - id: "1234567890123456789"
+            text: "Multiple accounts are available for plugins. You can bring work and personal context into the same conversation, connect the accounts you need, and choose which account to use for each task. This announcement has a longer explanation for developers after the introductory section. Devs: this works automatically because each account gets a separate MCP connection."
+            user:
+              id: "100"
+              name: "Example Developer"
+              username: "exampledev"
+    expected:
+      - callsTool: "search-posts"
+      - includes: "MCP"
+      - matches: "[Ss]eparate.*(connection|MCP)"
+      - not:
+          matches: "[Tt]runcat|couldn.t retrieve|[Pp]aste.*section"
   - input: "@twitter List @participant's followers."
     mocks:
       get-user-connections:

@@ -3,15 +3,15 @@
 import { Cache } from "@raycast/api";
 
 import { myPreferences, userAgent } from "@/consts";
-import { timedFetch } from "@/utils/http";
-import { logTrace, logWarn } from "@/utils/logger";
+import { timedFetch } from "@/shared/http";
+import { logTrace, logWarn } from "@/shared/logger";
 
 interface BingConfig {
   IG: string;
   IID: string;
   key: string;
   token: string;
-  expirationInterval: string;
+  expirationInterval: number;
   count: number;
 }
 
@@ -42,20 +42,41 @@ function parseBingConfig(html: string): BingConfig | undefined {
   const params_AbusePreventionHelper = html.match(/var params_AbusePreventionHelper = (.*?);/)?.[1];
 
   if (IG && params_AbusePreventionHelper) {
-    const paramsArray = JSON.parse(params_AbusePreventionHelper);
-    const [key, token, expirationInterval] = paramsArray;
-    const config: BingConfig = {
-      IG,
-      IID: IID || "translator.5023",
-      key,
-      token,
-      expirationInterval,
-      count: 1,
-    };
-    bingConfig = config;
-    cache.set(bingConfigKey, JSON.stringify(config));
-    return config;
+    try {
+      const params: unknown = JSON.parse(params_AbusePreventionHelper);
+      if (!Array.isArray(params)) return undefined;
+      const [key, token, expirationInterval] = params;
+      return decodeBingConfig({ IG, IID: IID || "translator.5023", key, token, expirationInterval, count: 1 });
+    } catch {
+      return undefined;
+    }
   }
+}
+
+function decodeBingConfig(value: unknown): BingConfig | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return undefined;
+  const { IG, IID, key, token, expirationInterval, count } = value as Record<string, unknown>;
+  const numericKey = typeof key === "number" || (typeof key === "string" && key.trim()) ? Number(key) : NaN;
+  const expiry =
+    typeof expirationInterval === "number" || (typeof expirationInterval === "string" && expirationInterval.trim())
+      ? Number(expirationInterval)
+      : NaN;
+  if (
+    typeof IG !== "string" ||
+    !IG.trim() ||
+    typeof IID !== "string" ||
+    !IID.trim() ||
+    typeof token !== "string" ||
+    !token.trim() ||
+    !Number.isFinite(numericKey) ||
+    !Number.isFinite(expiry) ||
+    expiry <= 0 ||
+    typeof count !== "number" ||
+    !Number.isSafeInteger(count) ||
+    count < 0
+  )
+    return undefined;
+  return { IG, IID, key: String(numericKey), token, expirationInterval: expiry, count };
 }
 
 async function fetchBingConfig(depth = 0): Promise<BingConfig | undefined> {
@@ -72,8 +93,8 @@ async function fetchBingConfig(depth = 0): Promise<BingConfig | undefined> {
     responseType: "text",
   });
 
-  const html = response._data as string;
-  const config = parseBingConfig(html);
+  const html: unknown = response._data;
+  const config = typeof html === "string" ? parseBingConfig(html) : undefined;
 
   if (config) {
     bingConfig = config;
@@ -122,10 +143,16 @@ function checkIfBingTokenExpired(): boolean {
     return true;
   }
 
-  const config = JSON.parse(value) as BingConfig;
+  let config: BingConfig | undefined;
+  try {
+    config = decodeBingConfig(JSON.parse(value));
+  } catch {
+    return true;
+  }
+  if (!config) return true;
   const { key, expirationInterval } = config;
-  const tokenStartTime = parseInt(key);
-  const expiration = parseInt(expirationInterval);
+  const tokenStartTime = Number(key);
+  const expiration = expirationInterval;
   const tokenUsedTime = Date.now() - tokenStartTime;
 
   const isExpired = tokenUsedTime > expiration;

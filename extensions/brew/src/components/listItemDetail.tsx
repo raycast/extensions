@@ -8,7 +8,7 @@
 import { List } from "@raycast/api";
 import { Cask, Formula, brewName, brewPrefix } from "../utils";
 import { usePackageDetail } from "../hooks/usePackageDetail";
-import { ListMetadata, caskMetadataRows, formulaMetadataRows } from "./packageMetadata";
+import { ListMetadata, caskMetadataRows, formulaMetadataRows, type MetadataOptions } from "./packageMetadata";
 
 interface FormulaListItemDetailProps {
   formula: Formula;
@@ -17,6 +17,7 @@ interface FormulaListItemDetailProps {
   isSelected?: boolean;
   /** When false, the panel drops the markdown and is metadata only. */
   showDescription?: boolean;
+  trust?: MetadataOptions["trust"];
 }
 
 interface CaskListItemDetailProps {
@@ -24,6 +25,7 @@ interface CaskListItemDetailProps {
   isInstalled: (name: string) => boolean;
   isSelected?: boolean;
   showDescription?: boolean;
+  trust?: MetadataOptions["trust"];
 }
 
 /**
@@ -34,13 +36,14 @@ export function FormulaListItemDetail({
   isInstalled,
   isSelected,
   showDescription = true,
+  trust,
 }: FormulaListItemDetailProps) {
-  const detail = usePackageDetail(formula.name, false, isSelected ?? false);
+  const detail = usePackageDetail(formula, isSelected ?? false);
 
   return (
     <List.Item.Detail
       markdown={showDescription ? formatFormulaMarkdown(formula) : undefined}
-      metadata={<ListMetadata rows={formulaMetadataRows(formula, { isInstalled, detail, showDescription })} />}
+      metadata={<ListMetadata rows={formulaMetadataRows(formula, { isInstalled, detail, showDescription, trust })} />}
     />
   );
 }
@@ -48,13 +51,19 @@ export function FormulaListItemDetail({
 /**
  * Detail panel for a cask in the split-view.
  */
-export function CaskListItemDetail({ cask, isInstalled, isSelected, showDescription = true }: CaskListItemDetailProps) {
-  const detail = usePackageDetail(cask.token, true, isSelected ?? false);
+export function CaskListItemDetail({
+  cask,
+  isInstalled,
+  isSelected,
+  showDescription = true,
+  trust,
+}: CaskListItemDetailProps) {
+  const detail = usePackageDetail(cask, isSelected ?? false);
 
   return (
     <List.Item.Detail
       markdown={showDescription ? formatCaskMarkdown(cask) : undefined}
-      metadata={<ListMetadata rows={caskMetadataRows(cask, { isInstalled, detail, showDescription })} />}
+      metadata={<ListMetadata rows={caskMetadataRows(cask, { isInstalled, detail, showDescription, trust })} />}
     />
   );
 }

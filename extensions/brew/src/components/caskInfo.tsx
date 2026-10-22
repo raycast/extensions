@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Detail, showToast, Toast, useNavigation } from "@raycast/api";
 import { CaskActionPanel } from "./actionPanels";
-import { Cask, brewName, brewFetchCaskInfo, uiLogger, ensureError } from "../utils";
+import { Cask, brewName, brewFetchCaskInfo, uiLogger, ensureError, copyLogsAction } from "../utils";
 import { DetailMetadata, caskMetadataRows } from "./packageMetadata";
 import { usePackageDetail } from "../hooks/usePackageDetail";
 
@@ -23,7 +23,7 @@ export function CaskInfo({
   const { pop } = useNavigation();
   // Fetched once here and shared by both metadata blocks below. Always executed:
   // unlike a list row, this view exists only because the user opened it.
-  const packageDetail = usePackageDetail(initialCask.token, true, true);
+  const packageDetail = usePackageDetail(initialCask, true);
   const [cask, setCask] = useState<Cask>(initialCask);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -73,6 +73,10 @@ export function CaskInfo({
         } else {
           toast.style = Toast.Style.Failure;
           toast.title = "Failed to load cask info";
+          toast.primaryAction = copyLogsAction(
+            `Failed to load cask info\n\nCask: ${initialCask.token}\nbrew info --json=v2 returned no record.`,
+            { hideToast: true },
+          );
         }
       } catch (err) {
         clearTimeout(timeoutId);
@@ -84,6 +88,14 @@ export function CaskInfo({
         });
         toast.style = Toast.Style.Failure;
         toast.title = isTimeout ? "Cask info load timed out" : "Failed to load cask info";
+        toast.primaryAction = copyLogsAction(
+          [
+            isTimeout ? "Cask info load timed out" : "Failed to load cask info",
+            `Cask: ${initialCask.token}`,
+            `Error: ${ensureError(err).name}: ${ensureError(err).message}`,
+          ].join("\n"),
+          { hideToast: true },
+        );
       } finally {
         setIsLoading(false);
       }

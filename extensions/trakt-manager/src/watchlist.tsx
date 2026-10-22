@@ -14,11 +14,12 @@ import { fetchCombinedMediaPage, fetchMediaPage, mediaListCacheOptions } from ".
 import {
   addMovieToHistory,
   addShowToHistory,
-  checkInFirstEpisodeToHistory,
+  markFirstEpisodeWatched,
   removeMovieFromWatchlist,
   removeShowFromWatchlist,
 } from "./lib/media-mutations";
 import { TraktMovieListItem, TraktShowListItem } from "./lib/schema";
+import { useWatchlistState } from "./lib/use-watchlist-ids";
 
 type WatchlistFilterType = "all" | "movie" | "show";
 
@@ -43,6 +44,7 @@ export default function Command() {
   const [mediaType, setMediaType] = useState<WatchlistFilterType>("all");
   const [actionLoading, setActionLoading] = useState(false);
   const traktClient = initTraktClient();
+  const { setListed } = useWatchlistState();
   const {
     isLoading,
     data: watchlist,
@@ -88,15 +90,17 @@ export default function Command() {
   const removeShowFromWatchlistAction = useCallback(
     async (show: TraktShowListItem) => {
       await removeShowFromWatchlist(traktClient, show, { signal: abortable.current?.signal });
+      setListed("show", show.show.ids.trakt, false);
     },
-    [traktClient],
+    [setListed, traktClient],
   );
 
   const removeMovieFromWatchlistAction = useCallback(
     async (movie: TraktMovieListItem) => {
       await removeMovieFromWatchlist(traktClient, movie, { signal: abortable.current?.signal });
+      setListed("movie", movie.movie.ids.trakt, false);
     },
-    [traktClient],
+    [setListed, traktClient],
   );
 
   const addMovieToHistoryAction = useCallback(
@@ -113,9 +117,9 @@ export default function Command() {
     [traktClient],
   );
 
-  const checkInFirstEpisodeToHistoryAction = useCallback(
+  const markFirstEpisodeWatchedAction = useCallback(
     async (show: TraktShowListItem) => {
-      await checkInFirstEpisodeToHistory(traktClient, show, { signal: abortable.current?.signal });
+      await markFirstEpisodeWatched(traktClient, show.show.ids.trakt, { signal: abortable.current?.signal });
     },
     [traktClient],
   );
@@ -156,8 +160,8 @@ export default function Command() {
     (item: TraktShowListItem) => (
       <ShowActionPanel
         item={item}
-        onCheckInFirstEpisode={(show) =>
-          runShowAction(show, checkInFirstEpisodeToHistoryAction, "First episode checked-in")
+        onMarkFirstEpisodeWatched={(show) =>
+          runShowAction(show, markFirstEpisodeWatchedAction, "First episode marked as watched")
         }
         actions={[
           {
@@ -175,7 +179,7 @@ export default function Command() {
         ]}
       />
     ),
-    [addShowToHistoryAction, checkInFirstEpisodeToHistoryAction, removeShowFromWatchlistAction, runShowAction],
+    [addShowToHistoryAction, markFirstEpisodeWatchedAction, removeShowFromWatchlistAction, runShowAction],
   );
 
   const searchBarAccessory = (

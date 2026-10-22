@@ -2,7 +2,7 @@
 
 import type { Message } from "@xsai/shared-chat";
 
-import type { QueryInput } from "@/types/query";
+import type { QueryInput } from "@/core/results/types";
 
 interface TranslationPromptSpec {
   instructions: string;

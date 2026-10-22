@@ -14,28 +14,39 @@ Search Z-Library and download books directly from Raycast.
 
 ## Requirements
 
-- **zlib CLI** installed via Homebrew:
-  ```bash
-  brew install heartleo/tap/zlib
-  ```
-- An active Z-Library login (run `zlib login` in Terminal)
+- **zlib CLI** installed:
+  - macOS:
+    ```bash
+    brew install heartleo/tap/zlib
+    ```
+  - Windows:
+    ```powershell
+    winget install heartleo.zlib
+    ```
+- An active Z-Library login (run `zlib login` in your terminal)
 
 ## Setup
 
-1. Install the extension from Raycast Store
+1. Install the extension from Raycast Store (macOS and Windows)
 2. Configure preferences (optional):
-   - **zlib Binary Path** - Path to zlib executable (default: `/opt/homebrew/bin/zlib`)
+   - **zlib Binary Path** - Path to zlib executable (default: auto-detected — `/opt/homebrew/bin/zlib` on macOS, `zlib.exe` on PATH on Windows)
    - **Download Directory** - Where to save books (default: `~/Downloads`)
    - **Z-Library Domain Override** - Set this only if your session uses a blocked domain (see `zlib doctor --eapi`)
 
 ## Usage
 
-1. Open Raycast (⌘+Space)
+1. Open Raycast (Alt+Space on Windows; ⌘+Space on macOS)
 2. Type "Search Books"
 3. Enter a search query (title, author, ISBN, etc.)
 4. Press ⏎ to download, or use other actions:
    - **Open in Browser** - Visit the book's Z-Library page
    - **Copy Book ID** - Copy the book's identifier
+
+### Can't find a book?
+
+The search runs through the `zlib` CLI, and its results can differ from the Z-Library website (the website sometimes has books the CLI does not return). The last row of the results, **Search "..." on the Z-Library website**, opens the website's own search for your query in your browser. It uses your **Z-Library Domain Override** if set, otherwise the domain of the results.
+
+> **Note:** These shortcuts use `⌘` on macOS and `Ctrl` on Windows.
 
 ### Bulk Download (select and download now)
 
@@ -58,7 +69,7 @@ If you see "failed to fetch book" errors, your saved Z-Library session may be us
 zlib doctor --eapi
 ```
 
-Look for domains marked "healthy", then set one in the extension's **Z-Library Domain Override** preference (⌘+K).
+Look for domains marked "healthy", then set one in the extension's **Z-Library Domain Override** preference (⌘+K, Ctrl+K on Windows).
 
 ## License
 

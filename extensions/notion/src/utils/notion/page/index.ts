@@ -81,6 +81,17 @@ export async function search(query?: string, nextCursor?: string, pageSize: numb
   };
 }
 
+export async function searchAllPages(query: string) {
+  const pages: Page[] = [];
+  let cursor: string | undefined;
+  do {
+    const result = await search(query, cursor, 100);
+    pages.push(...result.pages);
+    cursor = result.hasMore ? (result.nextCursor ?? undefined) : undefined;
+  } while (cursor);
+  return { pages };
+}
+
 export async function fetchPageContent(pageId: string) {
   try {
     const notion = getNotionClient();

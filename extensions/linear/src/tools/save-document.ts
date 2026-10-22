@@ -1,7 +1,3 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import {
   applyPatch,
   client,
@@ -13,6 +9,8 @@ import {
   resolveProject,
   resolveTeam,
 } from "./linearUtils";
+import { serializeDocument } from "./serializers";
+import { withLinear } from "./withLinear";
 
 type Input = {
   id?: string;
@@ -37,7 +35,7 @@ type Input = {
   color?: string;
 };
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   if (input.content !== undefined && input.patch) throw new Error("Pass content or patch, not both.");
   const parentCount = [input.project, input.issue, input.initiative, input.cycle, input.team && !input.cycle].filter(
     Boolean,
@@ -60,8 +58,9 @@ export default withAccessToken(linear)(async (input: Input) => {
       color: input.color,
       ...parent,
     });
-    if (!result.success) throw new Error("Failed to update document.");
-    return result.document;
+    const updated = result.success ? await result.document : undefined;
+    if (!updated) throw new Error("Failed to update document.");
+    return serializeDocument(updated);
   }
   if (!input.title) throw new Error("title is required when creating a document.");
   const result = await client().createDocument({
@@ -71,6 +70,7 @@ export default withAccessToken(linear)(async (input: Input) => {
     color: input.color,
     ...parent,
   });
-  if (!result.success) throw new Error("Failed to create document.");
-  return result.document;
+  const created = result.success ? await result.document : undefined;
+  if (!created) throw new Error("Failed to create document.");
+  return serializeDocument(created);
 });

@@ -20,6 +20,7 @@ export const DEFAULT_AGENT_ORDER = [
   "minimaxcn",
   "opencode-go",
   "openrouter",
+  "raycast",
   "synthetic",
   "zai",
 ] as const satisfies readonly AgentId[];

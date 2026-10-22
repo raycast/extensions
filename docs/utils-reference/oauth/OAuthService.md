@@ -102,7 +102,6 @@ Google has verification processes based on the required scopes for your extensio
 Creating your own Google client ID is more tedious than other processes, so we’ve created a page to assist you: [Getting a Google client ID](./getting-google-client-id.md)
 {% endhint %}
 
-
 ##### Signature
 
 ```ts
@@ -142,7 +141,7 @@ const jira = OAuthService.jira({
 ##### Signature
 
 ```ts
-OAuthService.linear: (options: ProviderOptions) => OAuthService
+OAuthService.linear: (options: ProviderWithDefaultClientOptions) => OAuthService
 ```
 
 ##### Example
@@ -154,9 +153,13 @@ const linear = OAuthService.linear({ scope: "read write" });
 const secondWorkspace = OAuthService.linear({
   scope: "read write",
   providerId: "linear-workspace-2",
+  providerName: "Linear — Acme",
+  description: "Connect to Acme as you@acme.com",
   extraParameters: { prompt: "consent" },
 });
 ```
+
+`providerId` is the stable token-storage namespace. `providerName` and `description` are display metadata for the OAuth client, so they can identify the specific account, workspace, or site without changing where its tokens are stored.
 
 #### Slack
 
@@ -204,7 +207,7 @@ const zoom = OAuthService.zoom({
 | tokenUrl<mark style="color:red;">\*</mark>     | The URL to exchange the authorization code for an access token                                                                     | `string`                                     |
 | refreshTokenUrl                                | The URL to refresh the access token if applicable                                                                                  | `string`                                     |
 | personalAccessToken                            | A personal token if the provider supports it                                                                                       | `string`                                     |
-| onAuthorize                                    | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken`        | `string`                                     |
+| onAuthorize                                    | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken`        | `(params: OnAuthorizeParams) => void`        |
 | extraParameters                                | The extra parameters you may need for the authorization request                                                                    | `Record<string, string>`                     |
 | bodyEncoding                                   | Specifies the format for sending the body of the request.                                                                          | `json` \| `url-encoded`                      |
 | tokenResponseParser                            | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token         | `(response: unknown) => OAuth.TokenResponse` |
@@ -212,34 +215,38 @@ const zoom = OAuthService.zoom({
 
 ### ProviderOptions
 
-| Property Name                                  | Description                                                                                                                        | Type                                         |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| clientId<mark style="color:red;">\*</mark>     | The app's client ID                                                                                                                | `string`                                     |
-| scope<mark style="color:red;">\*</mark>        | The scope of the access requested from the provider                                                                                | `string` \| `Array<string>`                  |
-| providerId                              | The provider ID used to namespace the token storage of the internally-constructed `OAuth.PKCEClient`. Defaults to the service's name (e.g. `linear`). Override it to keep several independent logins for the same provider (e.g. one per workspace). | `string`                                     |
-| extraParameters                         | Extra parameters for the authorization request, merged over the provider's defaults (caller wins)                                  | `Record<string, string>`                     |
-| authorizeUrl<mark style="color:red;">\*</mark> | The URL to start the OAuth flow                                                                                                    | `string`                                     |
-| tokenUrl<mark style="color:red;">\*</mark>     | The URL to exchange the authorization code for an access token                                                                     | `string`                                     |
-| refreshTokenUrl                                | The URL to refresh the access token if applicable                                                                                  | `string`                                     |
-| personalAccessToken                            | A personal token if the provider supports it                                                                                       | `string`                                     |
-| onAuthorize                                    | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken`        | `string`                                     |
-| bodyEncoding                                   | Specifies the format for sending the body of the request.                                                                          | `json` \| `url-encoded`                      |
-| tokenResponseParser                            | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token         | `(response: unknown) => OAuth.TokenResponse` |
-| tokenRefreshResponseParser                     | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
+| Property Name                                  | Description                                                                                                                                                                                                                                          | Type                                         |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| clientId<mark style="color:red;">\*</mark>     | The app's client ID                                                                                                                                                                                                                                  | `string`                                     |
+| scope<mark style="color:red;">\*</mark>        | The scope of the access requested from the provider                                                                                                                                                                                                  | `string`                                     |
+| providerId                                     | The provider ID used to namespace the token storage of the internally-constructed `OAuth.PKCEClient`. Defaults to the service's name (e.g. `linear`). Override it to keep several independent logins for the same provider (e.g. one per workspace). | `string`                                     |
+| providerName                                   | The provider name displayed by the internally-constructed `OAuth.PKCEClient`. Defaults to the built-in provider's name. Override it to distinguish multiple accounts, workspaces, or sites.                                                          | `string`                                     |
+| description                                    | The description displayed by the internally-constructed `OAuth.PKCEClient`. Defaults to the built-in provider's connection message.                                                                                                                  | `string`                                     |
+| extraParameters                                | Extra parameters for the authorization request, merged over the provider's defaults (caller wins)                                                                                                                                                    | `Record<string, string>`                     |
+| authorizeUrl<mark style="color:red;">\*</mark> | The URL to start the OAuth flow                                                                                                                                                                                                                      | `string`                                     |
+| tokenUrl<mark style="color:red;">\*</mark>     | The URL to exchange the authorization code for an access token                                                                                                                                                                                       | `string`                                     |
+| refreshTokenUrl                                | The URL to refresh the access token if applicable                                                                                                                                                                                                    | `string`                                     |
+| personalAccessToken                            | A personal token if the provider supports it                                                                                                                                                                                                         | `string`                                     |
+| onAuthorize                                    | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken`                                                                                                                          | `(params: OnAuthorizeParams) => void`        |
+| bodyEncoding                                   | Specifies the format for sending the body of the request.                                                                                                                                                                                            | `json` \| `url-encoded`                      |
+| tokenResponseParser                            | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token                                                                                                                           | `(response: unknown) => OAuth.TokenResponse` |
+| tokenRefreshResponseParser                     | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token                                                                                                                   | `(response: unknown) => OAuth.TokenResponse` |
 
 ### ProviderWithDefaultClientOptions
 
-| Property Name                           | Description                                                                                                                        | Type                                         |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| scope<mark style="color:red;">\*</mark> | The scope of the access requested from the provider                                                                                | `string` \| `Array<string>`                  |
+| Property Name                           | Description                                                                                                                                                                                                                                          | Type                                         |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| scope<mark style="color:red;">\*</mark> | The scope of the access requested from the provider                                                                                                                                                                                                  | `string`                                     |
 | providerId                              | The provider ID used to namespace the token storage of the internally-constructed `OAuth.PKCEClient`. Defaults to the service's name (e.g. `linear`). Override it to keep several independent logins for the same provider (e.g. one per workspace). | `string`                                     |
-| extraParameters                         | Extra parameters for the authorization request, merged over the provider's defaults (caller wins)                                  | `Record<string, string>`                     |
-| clientId                                | The app's client ID                                                                                                                | `string`                                     |
-| authorizeUrl                            | The URL to start the OAuth flow                                                                                                    | `string`                                     |
-| tokenUrl                                | The URL to exchange the authorization code for an access token                                                                     | `string`                                     |
-| refreshTokenUrl                         | The URL to refresh the access token if applicable                                                                                  | `string`                                     |
-| personalAccessToken                     | A personal token if the provider supports it                                                                                       | `string`                                     |
-| onAuthorize                             | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken`        | `string`                                     |
-| bodyEncoding                            | Specifies the format for sending the body of the request.                                                                          | `json` \| `url-encoded`                      |
-| tokenResponseParser                     | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token         | `(response: unknown) => OAuth.TokenResponse` |
-| tokenRefreshResponseParser              | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
+| providerName                            | The provider name displayed by the internally-constructed `OAuth.PKCEClient`. Defaults to the built-in provider's name. Override it to distinguish multiple accounts, workspaces, or sites.                                                          | `string`                                     |
+| description                             | The description displayed by the internally-constructed `OAuth.PKCEClient`. Defaults to the built-in provider's connection message.                                                                                                                  | `string`                                     |
+| extraParameters                         | Extra parameters for the authorization request, merged over the provider's defaults (caller wins)                                                                                                                                                    | `Record<string, string>`                     |
+| clientId                                | The app's client ID                                                                                                                                                                                                                                  | `string`                                     |
+| authorizeUrl                            | The URL to start the OAuth flow                                                                                                                                                                                                                      | `string`                                     |
+| tokenUrl                                | The URL to exchange the authorization code for an access token                                                                                                                                                                                       | `string`                                     |
+| refreshTokenUrl                         | The URL to refresh the access token if applicable                                                                                                                                                                                                    | `string`                                     |
+| personalAccessToken                     | A personal token if the provider supports it                                                                                                                                                                                                         | `string`                                     |
+| onAuthorize                             | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken`                                                                                                                          | `(params: OnAuthorizeParams) => void`        |
+| bodyEncoding                            | Specifies the format for sending the body of the request.                                                                                                                                                                                            | `json` \| `url-encoded`                      |
+| tokenResponseParser                     | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token                                                                                                                           | `(response: unknown) => OAuth.TokenResponse` |
+| tokenRefreshResponseParser              | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token                                                                                                                   | `(response: unknown) => OAuth.TokenResponse` |

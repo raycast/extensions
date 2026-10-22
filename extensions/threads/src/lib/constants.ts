@@ -13,3 +13,7 @@ export const THREADS_HOSTS = ["threads.com", "www.threads.com", "threads.net", "
 // with a browser UA it answers 200 and never redirects. Both behaviours are load-bearing;
 // see `resolveThreadsPost`.
 export const CRAWLER_USER_AGENT = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
+
+// Threads Graph API. Reads for the Analytics, Analytics Menu Bar, and Giveaway
+// commands go here; everything else in this extension opens a threads.com URL.
+export const THREADS_GRAPH_URL = "https://graph.threads.net/v1.0";

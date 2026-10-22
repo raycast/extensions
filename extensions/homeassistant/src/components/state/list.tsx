@@ -37,8 +37,9 @@ export function StatesList(props: {
   domain: string;
   deviceClass?: string | undefined;
   entitiesState?: State[] | undefined;
+  initialSearchText?: string | undefined;
 }): React.ReactElement {
-  const [searchText, setSearchText] = useState<string>();
+  const [searchText, setSearchText] = useState<string | undefined>(props.initialSearchText);
   const { states: allStates, error, isLoading } = useVisibleHAStates();
   const { entityAliases, hiddenEntityIds, favoriteEntityIds } = useEntityOverrides();
   const sourceStates = useMemo(() => {
@@ -72,7 +73,12 @@ export function StatesList(props: {
   const otherStates = sortByDisplayName(others);
 
   return (
-    <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
+    <List
+      searchBarPlaceholder="Filter by name or ID..."
+      isLoading={isLoading}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+    >
       {favoriteStates.length > 0 && (
         <List.Section title="Favorites" subtitle={`${favoriteStates.length}`}>
           {favoriteStates.map((state) => (

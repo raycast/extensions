@@ -1,5 +1,15 @@
 # Google Meet Changelog
 
+## [Safari Web App Support & Per-Profile Open In] - 2026-10-13
+
+- Create meetings directly inside a Google Meet Safari web app (File → Add to Dock) when "Open Meetings In" is set to the PWA. The meeting link is read from the web app's window title ("Meet - <code>") through System Events, so no browser tab is opened and neither the preferred nor the default browser is consulted. A default browser that isn't a supported browser, such as a link router like Finicky, no longer causes "isn't a supported browser" in this mode.
+- Detect Safari web apps by their `com.apple.Safari.WebApp.` bundle identifier prefix, alongside the Chromium PWA prefixes.
+- Ignore meeting codes already showing in the web app before the command ran, so a meeting window left open from an earlier call is never copied instead of the new one.
+- Wait up to 30 seconds for the web app to show its meeting code, regardless of the timeout preference, since Meet takes 6–15+ seconds to get from `/new` to a meeting there. Requires Accessibility permission for Raycast.
+- Let each saved profile choose where its meetings open — Preferred Browser, Google Meet PWA, or the extension's Open Meetings In setting — with a new Open In field when adding a profile and a Set Where Meetings Open action on existing ones. Profiles saved before this release keep following the extension setting.
+
+## [Added Aside support] - 2026-09-29
+
 ## [Fix Arc Detection] - 2026-08-07
 
 - Fix meeting links never being copied in Arc, which failed by asserting the meeting had opened in Little Arc even when Little Arc was disabled. Arc's `URL of active tab` raises a `-1728` error for perfectly normal, visible windows — right after a tab opens, and whenever the active tab isn't a web page — and returns a URL again milliseconds later. The previous release treated any such error as a Little Arc signature and threw a fatal error, which aborted the entire detection window on the very first poll instead of letting the next one (300ms later) succeed. Arc also enumerates one `window` per space and those entries mirror the same active tab, so a single blip marks every window at once.

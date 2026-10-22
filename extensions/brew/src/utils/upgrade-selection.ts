@@ -18,7 +18,7 @@
  *   enforce that invariant; toggleSelection is pin-blind by design and relies
  *   on callers never offering a toggle on a pinned row — the run skips pinned
  *   formulae regardless, so a violation cannot reach brew.
- * - The run upgrades each package individually by name, so honouring a
+ * - The run upgrades each package individually by name, so honoring a
  *   selection means nothing more than filtering the run's package list
  *   (selectedPackages). Deselected packages are simply not upgraded — no
  *   state anywhere is touched on their behalf.
@@ -84,7 +84,7 @@ export function defaultSelectionState(packages: readonly SelectablePackage[]): M
  * Known asymmetry: a pin-forced `false` is indistinguishable from a manual
  * deselection, so a package pinned and later unpinned outside the review
  * stays deselected after both refreshes. That errs toward holding back — the
- * row is visibly deselected and one ↩ re-selects it.
+ * row is visibly deselected and one ⌘⇧X re-selects it.
  */
 export function mergeSelectionState(
   previous: SelectionState,

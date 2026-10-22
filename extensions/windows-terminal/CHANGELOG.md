@@ -1,5 +1,18 @@
 # Windows Terminal Changelog
 
+## [Bug Fix] - 2026-10-15
+
+- Uses static path for `wt.exe` in case the alias is not in the path
+- Removed macOS logic since it's not needed
+- Added support for portable Windows Terminal setups
+
+## [Open with Terminal command] - 2026-09-27
+
+- Add `Open with Terminal` command that opens the selected file manager item in Terminal
+- Use `wt.exe` (for Terminal) so the default profile is used instead of CMD every time
+- Fix `Open in New Tab` action opening a new window
+- Bump all dependencies to the latest
+
 ## [New Tab Menu Preference] - 2026-09-14
 
 - Added the `Use New Tab Menu order` preference. When enabled, profiles are filtered and ordered to match Windows Terminal's `newTabMenu` setting (`profile`, `matchProfiles`, `folder`, and `remainingProfiles` entries), instead of the raw `settings.json` list order.

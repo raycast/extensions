@@ -61,4 +61,11 @@ describe.skipIf(!isRaycastUiEnabled())("the Search Word command", () => {
     // The database is the assertion: Raycast's own UI cannot be read.
     expect(readAccountState(TEST_ACCOUNT_EMAIL).words).toContain(probeWord);
   });
+
+  it("opens the Generate command", async () => {
+    // The deeplink is derived from the manifest, so this proves the command is
+    // declared and Raycast accepts it; the form itself is the manual checklist's.
+    await openExtensionCommand("generate");
+    dismissRaycast();
+  });
 });

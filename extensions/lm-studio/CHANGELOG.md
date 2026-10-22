@@ -1,5 +1,9 @@
 # LM Studio Changelog
 
+## [Raycast Model Provider] - 2026-09-24
+
+- Use downloaded LM Studio language models directly in Raycast AI, with streamed responses, vision, and tool calling when supported.
+
 ## [Initial Release] - 2026-08-31
 
 - Use a transcript-first persistent chat with on-demand message details, streaming, reasoning, screenshot/image input, MCP integrations, and branching.

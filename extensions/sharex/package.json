@@ -74,6 +74,18 @@
       "title": "Image Splitter",
       "description": "Open ShareX Image Splitter tool",
       "mode": "no-view"
+    },
+    {
+      "name": "qr-code",
+      "title": "QR Code",
+      "description": "Open ShareX QR Code tool",
+      "mode": "no-view"
+    },
+    {
+      "name": "clipboard-upload",
+      "title": "Clipboard Upload",
+      "description": "Open ShareX Clipboard Upload tool",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -191,6 +203,9 @@
   },
   "overrides": {
     "brace-expansion": "5.0.9",
-    "js-yaml@4": "4.3.1"
-  }
+    "js-yaml@4": "4.3.2"
+  },
+  "contributors": [
+    "TheTimmaeh"
+  ]
 }

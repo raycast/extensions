@@ -7,6 +7,8 @@ import { formatProcessForDisplay, type ProcessSpec } from "./process";
 import { getMediaType, type AllOutputExtension } from "../types/media";
 import { recordEditHistory } from "./historyRecording";
 
+export const EDIT_FRAME_RATES = [24, 30, 60] as const;
+
 export type EditRequest =
   | {
       operation: "resize-crop";
@@ -17,7 +19,9 @@ export type EditRequest =
       cropX?: number;
       cropY?: number;
     }
-  | { operation: "speed"; speed: number }
+  | { operation: "speed"; speed: number; frameRate?: number; removeAudio?: boolean }
+  | { operation: "frame-rate"; frameRate: number; removeAudio?: boolean }
+  | { operation: "remove-audio" }
   | { operation: "extract-audio"; audioFormat: ".mp3" | ".m4a" | ".wav" | ".flac" }
   | { operation: "normalize"; integratedLufs: number }
   | { operation: "subtitles"; mode: "burn" | "remove"; subtitlePath?: string };
@@ -41,7 +45,7 @@ export async function editMedia(inputPath: string, request: EditRequest, options
   const duration = inspection.durationSec ?? (await probeDurationSec(ffmpeg.path, inputPath)) ?? undefined;
   console.log(`Executing FFmpeg edit command: ${formatProcessForDisplay(spec)}`);
   await runFFmpegWithProgress(spec, {
-    totalDurationSec: duration,
+    totalDurationSec: request.operation === "speed" && duration !== undefined ? duration / request.speed : duration,
     onProgress: options.onProgress,
     signal: options.signal,
   });
@@ -99,18 +103,36 @@ export function buildEditProcessSpec(
       break;
     }
     case "speed": {
-      if (!Number.isFinite(request.speed) || request.speed < 0.25 || request.speed > 4) {
-        throw new Error("Speed must be between 0.25× and 4×.");
+      if (!Number.isFinite(request.speed) || request.speed < 0.25 || request.speed > 40) {
+        throw new Error("Speed must be between 0.25× and 40×.");
       }
-      if (streams.hasVideo) args.push("-filter:v", `setpts=PTS/${request.speed}`);
-      if (streams.hasAudio) args.push("-filter:a", buildAtempoFilter(request.speed));
+      if (request.frameRate !== undefined || request.removeAudio) {
+        requireVideoInput(inputType, streams.hasVideo);
+      }
+      if (streams.hasVideo) {
+        const filters = [`setpts=PTS/${request.speed}`];
+        if (request.frameRate !== undefined) filters.push(frameRateFilter(request.frameRate));
+        args.push("-filter:v", filters.join(","));
+      }
+      if (request.removeAudio) args.push("-an");
+      else if (streams.hasAudio) args.push("-filter:a", buildAtempoFilter(request.speed));
       if (!streams.hasVideo && !streams.hasAudio) throw new Error("No editable audio or video stream was found.");
       if (streams.hasVideo) args.push("-c:v", "libx264", "-preset", "medium", "-crf", "23");
-      if (streams.hasAudio) {
+      if (streams.hasAudio && !request.removeAudio) {
         args.push("-c:a", streams.hasVideo ? "aac" : "libmp3lame", "-b:a", "192k");
       }
       break;
     }
+    case "frame-rate":
+      requireVideoInput(inputType, streams.hasVideo);
+      args.push("-vf", frameRateFilter(request.frameRate), "-c:v", "libx264", "-preset", "medium", "-crf", "23");
+      if (request.removeAudio) args.push("-an");
+      else if (streams.hasAudio) args.push("-c:a", "aac", "-b:a", "192k");
+      break;
+    case "remove-audio":
+      requireVideoInput(inputType, streams.hasVideo);
+      args.push("-map", "0:v:0", "-an", "-c:v", "libx264", "-preset", "medium", "-crf", "23");
+      break;
     case "extract-audio":
       if (!streams.hasAudio) throw new Error("This file has no audio stream to extract.");
       args.push("-vn", ...audioCodecArgs(request.audioFormat));
@@ -165,6 +187,17 @@ export function buildAtempoFilter(speed: number): string {
   }
   factors.push(remaining);
   return factors.map((factor) => `atempo=${Number(factor.toFixed(5))}`).join(",");
+}
+
+function requireVideoInput(inputType: string | null, hasVideo: boolean): void {
+  if (inputType !== "video" || !hasVideo) throw new Error("Frame rate and audio removal require a video file.");
+}
+
+function frameRateFilter(frameRate: number): string {
+  if (!EDIT_FRAME_RATES.some((rate) => rate === frameRate)) {
+    throw new Error("Output frame rate must be 24, 30, or 60 fps.");
+  }
+  return `fps=${frameRate}`;
 }
 
 function editOutputExtension(inputPath: string, request: EditRequest): AllOutputExtension {

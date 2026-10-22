@@ -27,3 +27,20 @@ export function workspaceSlug(input: string | undefined): string | null {
 export function taskWebUrl(slug: string, taskId: string): string {
   return `https://app.sunsama.com/group/${slug}?taid=${encodeURIComponent(taskId)}`;
 }
+
+/**
+ * The link "Open in Sunsama" uses for a task. Deep links
+ * (`sunsama://action/details/<id>`) open the desktop app and need no
+ * workspace; otherwise it's the web link, which needs the workspace slug.
+ * Returns undefined when neither can be built.
+ */
+export function taskUrl(
+  taskId: string,
+  slug: string | null,
+  useDeepLinks: boolean,
+): string | undefined {
+  if (useDeepLinks) {
+    return `sunsama://action/details/${encodeURIComponent(taskId)}`;
+  }
+  return slug ? taskWebUrl(slug, taskId) : undefined;
+}

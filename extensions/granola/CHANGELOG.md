@@ -1,5 +1,19 @@
 # Granola Changelog
 
+## [2.2.2 - Resume Sign-in After Browser Approval] - 2026-10-17
+
+- Fix sign-in not completing when Raycast closes while you approve access in the browser. The pending sign-in is now saved and finishes automatically the next time you open any Granola command.
+
+## [2.2.1 - Sign-in Fix for Raycast 2.8] - 2026-10-16
+
+- Fix sign-in timing out on Raycast 2.8 (`extensionHost.render timed out`), which left every view command unusable. The sign-in illustration now uses static image assets instead of a runtime-generated SVG.
+
+## [Meeting Actions Skill] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Add a skill for extracting decisions, action items, and open questions from meeting notes or a weekly review.
+- Include source references, stated owners and deadlines, and clear gaps when notes or attribution are unavailable.
+
 ## [2.2.0 - OAuth Authentication] - 2026-09-07
 
 - Add OAuth sign-in with secure token storage and automatic refresh on macOS and Windows.

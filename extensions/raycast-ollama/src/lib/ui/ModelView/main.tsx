@@ -1,6 +1,6 @@
 import * as Types from "./types";
 import * as React from "react";
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { getProgressIcon, usePromise, useLocalStorage } from "@raycast/utils";
 import { DeleteModel, DeleteServer, GetModels, LoadModel, UnloadModel, UpdateModel } from "./function";
 import { Shortcut } from "../shortcut";
@@ -8,6 +8,7 @@ import { FormPullModel } from "./form/PullModel";
 import { FormEditServer } from "./form/EditServer";
 import { FormatOllamaPsModelExpireAtFormat, GetServerArray } from "../function";
 import { GetOllamaServers } from "../../settings/settings";
+import { GetGlobalDefaultModel, SetGlobalDefaultModel } from "../../settings/settings";
 
 const locale = Intl.DateTimeFormat().resolvedOptions().locale;
 
@@ -51,7 +52,7 @@ export function ModelView(): React.JSX.Element {
         onChange={setSelectedServer}
         defaultValue={SelectedServer ? SelectedServer : "Local"}
       >
-        {Servers && Servers.map((s) => <List.Dropdown.Item title={s} value={s} />)}
+        {Servers && Servers.map((s) => <List.Dropdown.Item key={s} title={s} value={s} />)}
       </List.Dropdown>
     );
   }
@@ -71,14 +72,19 @@ export function ModelView(): React.JSX.Element {
             {prop.model.show.capabilities && prop.model.show.capabilities.length > 0 && (
               <List.Item.Detail.Metadata.TagList title="Capabilities">
                 {prop.model.show.capabilities.map((c) => (
-                  <List.Item.Detail.Metadata.TagList.Item icon={IconsCapabilities[c]} text={c} color={Color.Purple} />
+                  <List.Item.Detail.Metadata.TagList.Item
+                    key={c}
+                    icon={IconsCapabilities[c]}
+                    text={c}
+                    color={Color.Purple}
+                  />
                 ))}
               </List.Item.Detail.Metadata.TagList>
             )}
             {prop.model.detail.details.families && prop.model.detail.details.families.length > 0 && (
               <List.Item.Detail.Metadata.TagList title="Families">
                 {prop.model.detail.details.families.map((f) => (
-                  <List.Item.Detail.Metadata.TagList.Item text={f} />
+                  <List.Item.Detail.Metadata.TagList.Item key={f} text={f} />
                 ))}
               </List.Item.Detail.Metadata.TagList>
             )}
@@ -119,6 +125,7 @@ export function ModelView(): React.JSX.Element {
               <List.Item.Detail.Metadata.TagList title="Parameters">
                 {Object.keys(prop.model.modelfile.parameter).map((p, i) => (
                   <List.Item.Detail.Metadata.TagList.Item
+                    key={p}
                     text={`${p} ${prop.model.modelfile && Object.values(prop.model.modelfile?.parameter)[i]}`}
                   />
                 ))}
@@ -194,6 +201,22 @@ export function ModelView(): React.JSX.Element {
             url="https://ollama.com/library"
             shortcut={Shortcut.OpenLibrary}
           />
+          <ActionPanel.Submenu title="Set as Default Model" icon={Icon.Star}>
+            <Action
+              title={`Yes, Use "${prop.model.detail.name}" as Default`}
+              icon={Icon.CheckCircle}
+              onAction={async () => {
+                const defaults = await GetGlobalDefaultModel();
+                await SetGlobalDefaultModel({
+                  ...defaults,
+                  model: prop.model.detail.name,
+                  server: prop.model.server.name,
+                });
+                await showToast({ style: Toast.Style.Success, title: "Default model updated" });
+              }}
+            />
+            <Action title="No" icon={Icon.XMarkCircle} />
+          </ActionPanel.Submenu>
         </ActionPanel.Section>
         <ActionPanel.Section title="Ollama Server">
           <Action title="Add Server" icon={Icon.NewDocument} onAction={() => setShowNewServerForm(true)} />

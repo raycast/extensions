@@ -210,11 +210,6 @@ const AI_SITES: readonly Omit<SuggestedSite, "category">[] = [
     favicon: "https://www.cerebras.ai",
   },
   {
-    name: "Replicate",
-    url: "https://www.replicatestatus.com",
-    favicon: "https://replicate.com",
-  },
-  {
     name: "Hugging Face",
     url: "https://status.huggingface.co",
     favicon: "https://huggingface.co",

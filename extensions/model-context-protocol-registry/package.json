@@ -7,7 +7,8 @@
   "author": "thomas",
   "contributors": [
     "nagauta",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "porenes"
   ],
   "owner": "raycast",
   "access": "public",
@@ -47,6 +48,7 @@
   },
   "scripts": {
     "build": "ray build",
+    "test": "node --test tests/*.test.cjs",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

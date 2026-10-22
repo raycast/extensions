@@ -1,6 +1,7 @@
 import { ThemeColor, ThemeData } from "../types";
 import { toHex } from "./colorUtils";
 import { LIMITS, TIMEOUTS } from "./config";
+import { readCappedText } from "./fetcher";
 import { getLogger } from "./logger";
 import { fetchPageSuppliedUrl } from "./networkGuard";
 import { redactUrlForLog } from "./urlUtils";
@@ -16,7 +17,7 @@ const log = getLogger("theme");
  * `style="--chat-user-text: #111112; …"` is written onto <html> after hydration,
  * so it exists in a browser's inspector and not in the bytes the server sent.
  * What a server does send is meta theme-color, color-scheme, the vendor tile
- * colours, and whatever <html> attributes and head <style> rules carry.
+ * colors, and whatever <html> attributes and head <style> rules carry.
  */
 
 /**
@@ -34,14 +35,14 @@ const CUSTOM_PROPERTY = /(--[\w-]{1,128})\s*:\s*([^;}]{1,512})/g;
 /** Attributes that conventionally carry a theme choice rather than app state. */
 const THEME_ATTRIBUTES = /^data-(theme|color-scheme|colour-scheme|mode|accent-color|accent|style|appearance)$/i;
 
-/** Class tokens that name a colour scheme outright. */
+/** Class tokens that name a color scheme outright. */
 const SCHEME_CLASSES = new Set(["light", "dark", "light-theme", "dark-theme", "theme-light", "theme-dark"]);
 
 /**
- * A value worth keeping as a colour token.
+ * A value worth keeping as a color token.
  *
  * `toHex` answers for every concrete syntax. A `var()` reference is kept too —
- * it IS a colour, just an indirect one, and dropping it here would silently lose
+ * it IS a color, just an indirect one, and dropping it here would silently lose
  * every Tailwind v3 token, which are all written `hsl(var(--x))`.
  */
 function isColor(value: string): boolean {
@@ -51,21 +52,21 @@ function isColor(value: string): boolean {
 /**
  * A bare channel list — `254 242 242`, `0 86% 97%`, `0, 86%, 97%`.
  *
- * Not a colour by itself, which is why it must NOT be emitted as a token, but it
+ * Not a color by itself, which is why it must NOT be emitted as a token, but it
  * is what `hsl(var(--x))` and `rgb(var(--x))` expand to, so it has to survive
  * collection or every Tailwind v3 palette token resolves to nothing.
  */
 const CHANNELS = /^\s*-?[\d.]+%?[\s,]+-?[\d.]+%?[\s,]+-?[\d.]+%?\s*$/;
 
 /**
- * A declaration that is ONLY a colour reference: `var(--x)`, or a colour
+ * A declaration that is ONLY a color reference: `var(--x)`, or a color
  * function wrapping one. Deliberately strict — the loose test "contains a
  * `var()`" also matches every shadow, gradient and filter a framework defines.
  */
 const COLOR_REFERENCE =
   /^(?:var\(\s*--[\w-]+\s*(?:,[^()]*)?\)|(?:hsla?|rgba?|oklch|oklab|lab|lch|color)\(\s*var\(\s*--[\w-]+\s*(?:,[^()]*)?\)\s*\))$/i;
 
-/** Normalises for display without altering meaning: collapse space, trim quotes. */
+/** Normalizes for display without altering meaning: collapse space, trim quotes. */
 function tidy(value: string): string {
   return value
     .replace(/\s+/g, " ")
@@ -97,7 +98,7 @@ function metaContent(html: string, name: string): string | undefined {
 
 /**
  * `theme-color` may appear several times, each scoped to a media query, which is
- * how a site declares a different browser-chrome colour for light and dark. A
+ * how a site declares a different browser-chrome color for light and dark. A
  * single value would report one of them as though it were the only one.
  */
 function themeColors(html: string): ThemeColor[] {
@@ -131,10 +132,10 @@ function htmlAttributes(html: string): { attributes: Record<string, string>; sch
 }
 
 /**
- * Custom properties whose value is a colour, taken from <style> blocks present
+ * Custom properties whose value is a color, taken from <style> blocks present
  * in the markup. First definition wins — later ones are usually the same token
  * redefined under a media query or a `[data-theme]` selector, and reporting each
- * override as a separate token turns a five-colour palette into fifty rows.
+ * override as a separate token turns a five-color palette into fifty rows.
  */
 function colorTokens(html: string, tag: string | undefined): ThemeColor[] {
   const tokens = new Map<string, string>();
@@ -200,7 +201,7 @@ export function extractThemeData(html: string): ThemeData | undefined {
 }
 
 /**
- * A placeholder, not a colour choice.
+ * A placeholder, not a color choice.
  *
  * Tailwind seeds `--tw-gradient-from: #0000` and friends as "unset" sentinels;
  * they are plumbing, and 306 of tailwindcss.com's tokens are this shape. Filtering
@@ -217,7 +218,7 @@ function isPlaceholder(value: string): boolean {
   );
 }
 
-/** Colour-valued custom properties from a stylesheet body. First definition wins. */
+/** Color-valued custom properties from a stylesheet body. First definition wins. */
 export function extractTokensFromCss(css: string, into: Map<string, string[]>, maxTokens?: number): void {
   const cap = maxTokens ?? LIMITS.MAX_THEME_TOKENS;
   for (const [, name, rawValue] of css.matchAll(CUSTOM_PROPERTY)) {
@@ -227,7 +228,7 @@ export function extractTokensFromCss(css: string, into: Map<string, string[]>, m
     const existing = into.get(name);
     if (existing) {
       // Keep a few alternatives — the light/dark or layered overrides — so the
-      // resolver can pick one that actually yields a colour. Bounded, or a
+      // resolver can pick one that actually yields a color. Bounded, or a
       // heavily themed sheet stores dozens of near-identical strings.
       if (existing.length < 4 && !existing.includes(value)) existing.push(value);
     } else {
@@ -240,36 +241,17 @@ export function extractTokensFromCss(css: string, into: Map<string, string[]>, m
  * Reads at most MAX_CSS_BYTES, then cancels the stream.
  *
  * `await response.text()` buffers the WHOLE body before any cap can be applied, so
- * slicing afterwards limits what is parsed and not what is downloaded — a 200MB or
+ * slicing afterward limits what is parsed and not what is downloaded — a 200MB or
  * endlessly streaming stylesheet is fully resident first, and the on-demand view
- * repeats that for up to 40 sheets. Reading chunk by chunk and cancelling bounds
+ * repeats that for up to 40 sheets. Reading chunk by chunk and canceling bounds
  * the memory, not just the parse.
  */
 async function readCapped(response: Response): Promise<string> {
-  const reader = response.body?.getReader();
-  if (!reader) return "";
-  const decoder = new TextDecoder("utf-8", { fatal: false });
-  let text = "";
-  let bytes = 0;
-  try {
-    while (bytes < LIMITS.MAX_CSS_BYTES) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (!value) continue;
-      const remaining = LIMITS.MAX_CSS_BYTES - bytes;
-      const slice = value.byteLength > remaining ? value.subarray(0, remaining) : value;
-      bytes += slice.byteLength;
-      text += decoder.decode(slice, { stream: true });
-    }
-    text += decoder.decode();
-  } finally {
-    await reader.cancel().catch(() => undefined);
-  }
-  return text;
+  return (await readCappedText(response, LIMITS.MAX_CSS_BYTES)).text;
 }
 
 /**
- * Reads linked stylesheets for colour tokens.
+ * Reads linked stylesheets for color tokens.
  *
  * Bounded on three axes because none of them is bounded by the site: how many
  * sheets (linear.app links 54), how many bytes of each, and how many tokens are
@@ -365,8 +347,8 @@ export function withStylesheetTokens(
  * Resolves `var(--other)` references and computes a hex for each token.
  *
  * Two separate reasons a swatch came up empty, and this fixes both. A value like
- * `hsl(var(--color-red-50))` is an INDIRECTION — the colour is real, it is just
- * one hop away — and `oklch(82.8% .189 84.429)` is a concrete colour in a space
+ * `hsl(var(--color-red-50))` is an INDIRECTION — the color is real, it is just
+ * one hop away — and `oklch(82.8% .189 84.429)` is a concrete color in a space
  * Raycast cannot tint. Neither is "a variable that requires calculation" in the
  * sense of needing a browser: both are computable here.
  *
@@ -400,7 +382,7 @@ export function resolveTokenColors(declarations: Map<string, string[]>): ThemeCo
           replacement = nested;
           break;
         }
-        // Bare channels (`0 86% 97%`) are not a colour alone but are one once
+        // Bare channels (`0 86% 97%`) are not a color alone but are one once
         // substituted into the `hsl()` / `rgb()` that references them.
         if (CHANNELS.test(candidate)) {
           replacement = candidate.trim();
@@ -431,10 +413,10 @@ export function resolveTokenColors(declarations: Map<string, string[]>): ThemeCo
       }
     }
     // Nothing resolved. Keep it only if the declaration is unambiguously a
-    // colour — a lone `var(--x)` or a colour function wrapping one. Anything
+    // color — a lone `var(--x)` or a color function wrapping one. Anything
     // else that merely CONTAINS a var() is a shadow, gradient, blur or easing
     // curve, and x.com listed 22 of those as "color tokens" before this check:
-    // `--tw-shadow: 0 1px 3px 0 var(--tw-shadow-color,#0000001a)` is not a colour.
+    // `--tw-shadow: 0 1px 3px 0 var(--tw-shadow-color,#0000001a)` is not a color.
     if (chosen === undefined) {
       const colorShaped = values.find((v) => COLOR_REFERENCE.test(v));
       if (colorShaped === undefined) continue;

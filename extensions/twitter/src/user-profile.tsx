@@ -1,5 +1,6 @@
 import { withXAuth } from "./v2/lib/with_x_auth";
 import { Action, ActionPanel, Icon, Image, Keyboard, LaunchProps, List, showToast, Toast } from "@raycast/api";
+import "./v2/components/register-post-views";
 import { usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { shouldShowListWithDetails } from "./common";

@@ -1,5 +1,9 @@
 # Hule Changelog
 
+## [Fix Installation on Raycast 2.4] - 2026-09-20
+
+- Build against Raycast API 2.4.0, the version the current Raycast release ships, so the extension can be installed
+
 ## [Initial Release] - 2026-09-14
 
 - Quick Add Task: create a task from a single line, into a configurable default list

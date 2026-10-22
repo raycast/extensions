@@ -3,7 +3,7 @@ import { randomUUID } from "crypto";
 import { promises as fs } from "node:fs";
 import { tmpdir } from "os";
 import { basename, join } from "path";
-import { lock, LockOptions } from "proper-lockfile";
+import { check, lock, LockOptions } from "proper-lockfile";
 import { promisify } from "util";
 
 interface HeldSession {
@@ -16,6 +16,14 @@ interface PlaybackRecord {
   pid: number;
   audioFile: string;
 }
+
+/**
+ * Outcome of a stop request
+ * - stopped: the player was signalled and has exited
+ * - not-playing: there was no live player to stop
+ * - failed: a player may still be running but could not be verified, signalled or confirmed exited
+ */
+export type StopResult = "stopped" | "not-playing" | "failed";
 
 const SESSION_LOCK_PATH = join(tmpdir(), "elevenlabs-tts-session-v2");
 const SESSION_LOCK_OPTIONS: LockOptions = { stale: 10_000, update: 2_000 };
@@ -81,6 +89,11 @@ export class SpeechSessionLock {
     const heldSession = this.sessions.get(sessionId);
     return Boolean(heldSession && !heldSession.isCompromised());
   }
+
+  /** Whether any command currently holds a live (non-stale) speech session */
+  async isActive(): Promise<boolean> {
+    return check(this.lockPath, { stale: this.options.stale, realpath: false });
+  }
 }
 
 const speechSessionLock = new SpeechSessionLock(SESSION_LOCK_PATH, SESSION_LOCK_OPTIONS, stopActivePlayback);
@@ -93,6 +106,10 @@ export function isOwnedPlaybackCommand(command: string, audioFile: string): bool
 
 export async function beginSpeechSession(): Promise<string | undefined> {
   return speechSessionLock.begin();
+}
+
+export async function isSpeechSessionActive(): Promise<boolean> {
+  return speechSessionLock.isActive();
 }
 
 export async function endSpeechSession(sessionId: string): Promise<void> {
@@ -114,16 +131,18 @@ export async function clearPlayback(sessionId: string, expectedPid: number): Pro
   await removePlaybackFile();
 }
 
-export async function stopActivePlayback(): Promise<boolean> {
+export async function stopActivePlayback(): Promise<StopResult> {
   const playback = await readPlayback();
-  if (!playback) return false;
+  if (!playback) return "not-playing";
 
   return stopPlaybackForSession(playback.sessionId);
 }
 
-async function stopPlaybackForSession(sessionId: string): Promise<boolean> {
+async function stopPlaybackForSession(sessionId: string): Promise<StopResult> {
   const record = await readPlayback();
-  if (record?.sessionId !== sessionId) return false;
+  if (!record) return "not-playing";
+  // Another session registered a new player in between, which this request did not stop
+  if (record.sessionId !== sessionId) return "failed";
 
   let command: string;
   try {
@@ -133,24 +152,28 @@ async function stopPlaybackForSession(sessionId: string): Promise<boolean> {
   } catch {
     // ps exits non-zero when the PID is gone; on any other failure the owner is unverified,
     // so keep the record and let begin() deny takeover rather than signal a possibly reused PID.
-    if (isProcessGone(record.pid)) await clearPlayback(sessionId, record.pid);
-    return false;
+    if (isProcessGone(record.pid)) {
+      await clearPlayback(sessionId, record.pid);
+      return "not-playing";
+    }
+    return "failed";
   }
 
+  // The pid now belongs to another process (or a defunct player), so ours already exited
   if (!isOwnedPlaybackCommand(command, record.audioFile)) {
     await removePlaybackFile();
-    return false;
+    return "not-playing";
   }
 
   try {
     process.kill(record.pid, "SIGTERM");
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "ESRCH") return false;
+    if ((error as NodeJS.ErrnoException).code !== "ESRCH") return "failed";
   }
-  if (!(await waitForPlaybackExit(record, 1_000))) return false;
+  if (!(await waitForPlaybackExit(record, 1_000))) return "failed";
 
   await clearPlayback(sessionId, record.pid);
-  return true;
+  return "stopped";
 }
 
 function isProcessGone(pid: number): boolean {

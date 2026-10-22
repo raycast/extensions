@@ -218,7 +218,7 @@ function getCategoryDescription(category: FetchCategory): string {
     wayback: "Wayback Machine history",
     hostMeta: "Host metadata",
     wellKnown: "Well-known files",
-    stylesheets: "Stylesheet colour tokens",
+    stylesheets: "Stylesheet color tokens",
     robots: "robots.txt",
     sitemap: "Sitemap",
     llmsTxt: "llms.txt",
@@ -348,7 +348,7 @@ export function useFetchSite(url?: string) {
 
       // Cancel any previous fetch in progress
       if (abortControllerRef.current) {
-        log.log("fetch:cancelling-previous", { targetUrl });
+        log.log("fetch:canceling-previous", { targetUrl });
         abortControllerRef.current.abort();
       }
 
@@ -1241,7 +1241,7 @@ export function useFetchSite(url?: string) {
         // Handle each one individually so they update as they complete
         // Each handler bails if a newer fetch has taken over. updateProgress and
         // updateData are already guarded, but returning here also suppresses the
-        // "*-complete" logs — which would otherwise claim a cancelled fetch
+        // "*-complete" logs — which would otherwise claim a canceled fetch
         // finished — and covers setCertificateInfo/setData, which write directly.
         dnsPromise.then((dnsData) => {
           if (isSuperseded()) return;
@@ -1436,7 +1436,7 @@ export function useFetchSite(url?: string) {
         }
         log.log("fetch:complete", { url: normalizedUrl });
       } catch (err) {
-        // Say nothing if a newer dig owns the view — whether it cancelled us or we
+        // Say nothing if a newer dig owns the view — whether it canceled us or we
         // failed on our own. Ownership, not the abort signal: our own
         // failure-abort flips that signal too, and reading it here is what used to
         // swallow genuine errors.
@@ -1447,7 +1447,7 @@ export function useFetchSite(url?: string) {
 
         const classified = classifyError(err);
         log.error("fetch:error", { error: classified.message, type: classified.type });
-        // Ensure async operations are cancelled on any error.
+        // Ensure async operations are canceled on any error.
         abortController.abort();
         setError(classified.message);
         setErrorType(classified.type);

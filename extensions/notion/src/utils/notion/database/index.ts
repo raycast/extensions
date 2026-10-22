@@ -1,4 +1,4 @@
-import { Client } from "@notionhq/client";
+import { Client, collectPaginatedAPI } from "@notionhq/client";
 import type { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
 import { type Form, showToast, Toast } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
@@ -57,14 +57,14 @@ export async function fetchDatabase(pageId: string, silent: boolean = true) {
 export async function fetchDatabases() {
   try {
     const notion = getNotionClient();
-    const databases = await notion.search({
+    const databases = await collectPaginatedAPI(notion.search, {
       sort: {
         direction: "descending",
         timestamp: "last_edited_time",
       },
       filter: { property: "object", value: "data_source" },
     });
-    return databases.results
+    return databases
       .map((x) => (x.object === "data_source" && "last_edited_time" in x ? x : undefined))
       .filter(isNotNullOrUndefined)
       .map(
@@ -72,7 +72,7 @@ export async function fetchDatabases() {
           ({
             id: x.id,
             last_edited_time: new Date(x.last_edited_time).getTime(),
-            title: x.title[0]?.plain_text,
+            title: x.title.map((text) => text.plain_text).join("") || "Untitled",
             icon_emoji: x.icon?.type === "emoji" ? x.icon.emoji : null,
             icon_file: x.icon?.type === "file" ? x.icon.file.url : null,
             icon_external: x.icon?.type === "external" ? x.icon.external.url : null,
@@ -126,9 +126,9 @@ export async function queryDatabase(
   try {
     const notion = getNotionClient();
     const dataSourceId = await resolveDataSourceId(notion, databaseId);
-    const database = await notion.dataSources.query({
+    const pages = await collectPaginatedAPI(notion.dataSources.query, {
       data_source_id: dataSourceId,
-      page_size: 20,
+      page_size: 100,
       sorts: [
         {
           direction: "descending",
@@ -149,7 +149,7 @@ export async function queryDatabase(
         : undefined,
     });
 
-    return database.results.map(pageMapper);
+    return pages.map(pageMapper);
   } catch (err) {
     return handleError(err, "Failed to query database", []);
   }

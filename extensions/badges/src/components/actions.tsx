@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, getPreferenceValues } from "@raycast/api";
 import { Badge, OnBadgeChange } from "../types.js";
-import { pickLogo } from "../utils.js";
+import { buildBadge3DUrl, pickLogo } from "../utils.js";
 
 export const Documentation = ({ title, url }: { title: string; url: string }) => (
   <ActionPanel.Section>
@@ -41,15 +41,16 @@ export const GeneralActions = ({
           }}
           onAction={pickLogo}
         />
-        <Action
-          icon={Icon.Undo}
-          title="Reset"
+        <Action.OpenInBrowser
+          icon={Icon.Box}
+          title="Get Badge3D Model"
+          url={buildBadge3DUrl(badgeUrl).toString()}
           shortcut={{
-            macOS: { modifiers: ["cmd"], key: "r" },
-            Windows: { modifiers: ["ctrl"], key: "r" },
+            macOS: { modifiers: ["cmd"], key: "m" },
+            Windows: { modifiers: ["ctrl"], key: "m" },
           }}
-          onAction={reset}
         />
+        <Action icon={Icon.Undo} title="Reset" shortcut={Keyboard.Shortcut.Common.Refresh} onAction={reset} />
       </ActionPanel.Section>
       <Documentation title="API Documentation" url={documentationUrl} />
     </ActionPanel>

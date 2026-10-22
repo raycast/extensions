@@ -32,6 +32,8 @@ const CLI_PATH = path.join(BACKEND_DIR, "supabase/e2e/cli.ts");
 export const TEST_ACCOUNT_EMAIL = "e2e-raycast@test.com";
 
 export type Plan = "free" | "plus" | "pro";
+/** Where a paid plan sits in its lifecycle; the CLI documents each. */
+export type SubscriptionLifecycle = "active" | "cancel_pending" | "downgrade_pending" | "past_due" | "canceled";
 export type SeedProfile = "learner" | "empty" | "pronunciation-cap" | "card-cap";
 
 export type SeededAccount = {
@@ -60,6 +62,7 @@ export type AccountState = {
     scheduledPlan: string | null;
     scheduledBillingInterval: string | null;
     hasStripeCustomer: boolean;
+    stripeSubscriptionId: string | null;
   } | null;
   decks: { id: string; name: string; isDefault: boolean; cardCount: number }[];
   cardCount: number;
@@ -69,6 +72,13 @@ export type AccountState = {
   pronunciationPracticesThisMonth: number;
   cardRequests: { word: string; status: string }[];
 };
+
+/**
+ * One optional CLI flag: present only when a value was given, so the CLI's own
+ * defaults still apply.
+ */
+const _buildOptionalFlag = (flagName: string, value: string | number | undefined): Record<string, string> =>
+  value === undefined ? {} : { [flagName]: String(value) };
 
 /**
  * Runs one fixture command.
@@ -109,14 +119,43 @@ export const assertLocalStackReady = (): void => {
 /**
  * Deletes, recreates, and seeds one account.
  *
- * @param options - The account's address, plan, and seed profile
+ * @param options - The account's address, plan, seed profile, and how much of
+ *   the month's private card allowance to spend before the test starts
  * @returns The seeded account, including the words it was given
  */
-export const resetAccount = (options: { email: string; plan?: Plan; profile?: SeedProfile }): SeededAccount =>
+export const resetAccount = (options: {
+  email: string;
+  plan?: Plan;
+  profile?: SeedProfile;
+  /**
+   * Private cards already asked for this month, which is what the monthly
+   * allowance counts. The seed writes them as requests rather than cards,
+   * because that is the state the trigger reads. Left out entirely when not
+   * given, so the CLI's own default applies.
+   */
+  spentPrivateCards?: number;
+}): SeededAccount =>
   _runFixtureCommand<SeededAccount>("reset-user", {
     email: options.email,
     plan: options.plan ?? "free",
     profile: options.profile ?? "learner",
+    ..._buildOptionalFlag("spent-private-cards", options.spentPrivateCards),
+  });
+
+/**
+ * Rewrites an existing account's subscription row in place, so a client that is
+ * already signed in can be shown another plan state without signing in again.
+ *
+ * @param email - The account
+ * @param plan - free, plus or pro
+ * @param subscriptionState - Lifecycle state; only meaningful on a paid plan
+ * @returns The account's state after the change
+ */
+export const setSubscription = (email: string, plan: Plan, subscriptionState?: SubscriptionLifecycle): AccountState =>
+  _runFixtureCommand<AccountState>("set-subscription", {
+    email,
+    plan,
+    ..._buildOptionalFlag("state", subscriptionState),
   });
 
 /**

@@ -14,7 +14,7 @@ export interface SatoriFont {
   style: "normal";
 }
 
-const VIEWPORT_WIDTH = 1160;
+export const VIEWPORT_WIDTH = 1160;
 
 const svgPostProcessors: Array<(svg: string) => string> = [pulseAnimation, weekendStripePattern];
 

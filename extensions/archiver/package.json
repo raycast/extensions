@@ -7,7 +7,8 @@
   "author": "JinShi",
   "contributors": [
     "3llomi",
-    "ridemountainpig"
+    "ridemountainpig",
+    "sam32j"
   ],
   "categories": [
     "Data",
@@ -35,6 +36,23 @@
       "description": "Delete file(s) after compression",
       "label": "Delete File(s) after Compression",
       "default": false
+    },
+    {
+      "name": "revealInFinder",
+      "type": "checkbox",
+      "required": false,
+      "title": "Finder",
+      "description": "Reveal the compressed file in Finder after compression completes",
+      "label": "Reveal Compressed File in Finder",
+      "default": true
+    },
+    {
+      "name": "revealExtracted",
+      "type": "checkbox",
+      "required": false,
+      "description": "Reveal extracted files in Finder after extraction completes",
+      "label": "Reveal Extracted Files in Finder",
+      "default": true
     },
     {
       "name": "locationSaveCompressed",

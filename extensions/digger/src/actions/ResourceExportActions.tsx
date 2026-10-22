@@ -1,10 +1,16 @@
-import { Action, ActionPanel, Clipboard, Icon, Keyboard, showInFinder, showToast, Toast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { Action, ActionPanel, Clipboard, Icon, Keyboard, showHUD, showInFinder, showToast, Toast } from "@raycast/api";
 import { downloadToFile, Exportable, ExportFormat, toFormat } from "../utils/exportUtils";
+import { failToast } from "../utils/toastUtils";
 
 interface ResourceExportActionsProps {
   /** The resource to export, or undefined while its body is still loading. */
   resource: Exportable | undefined;
+  /**
+   * Whether Copy as Text takes `Common.Copy`. True where the resource IS the
+   * view; false in a list whose rows have their own Copy URL, which needs the
+   * shortcut more than the whole file does.
+   */
+  textCopyShortcut?: boolean;
 }
 
 const COPY_SHORTCUTS: Record<ExportFormat, Keyboard.Shortcut | undefined> = {
@@ -30,7 +36,7 @@ const LABEL: Record<ExportFormat, string> = { text: "Text", markdown: "Markdown"
  * text, and a disabled-looking action the user has to learn to ignore is worse
  * than an absent one.
  */
-export function ResourceExportActions({ resource }: ResourceExportActionsProps) {
+export function ResourceExportActions({ resource, textCopyShortcut = true }: ResourceExportActionsProps) {
   if (!resource) return null;
 
   const formats: ExportFormat[] = resource.rows ? ["text", "markdown", "csv"] : ["text", "markdown"];
@@ -50,22 +56,32 @@ export function ResourceExportActions({ resource }: ResourceExportActionsProps) 
         // extension declares Windows, where "Show in Finder" is wrong. Wording
         // verified against the installed types (@raycast/api v2.1.3).
         title: process.platform === "darwin" ? "Show in Finder" : "File Explorer",
-        shortcut: { modifiers: ["cmd"], key: "o" },
+        shortcut: { macOS: { modifiers: ["cmd"], key: "o" }, Windows: { modifiers: ["ctrl"], key: "o" } },
         onAction: () => showInFinder(path),
       };
       toast.secondaryAction = {
         title: "Copy Path",
-        shortcut: { modifiers: ["cmd"], key: "c" },
+        shortcut: { macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } },
         onAction: async (t) => {
           await Clipboard.copy(path);
           t.message = "Path copied to clipboard";
         },
       };
     } catch (error) {
-      // Not `toast.style = Failure`: showFailureToast attaches the Copy Error
-      // action, and a failure the user cannot copy is one they cannot report.
-      await toast.hide();
-      await showFailureToast(error, { title: `Could not save ${LABEL[format]}` });
+      // A failure the user cannot copy is one they cannot report.
+      failToast(toast, `Could not save ${LABEL[format]}`, error);
+    }
+  };
+
+  // Built when chosen, not at render. A list renders this panel once per row,
+  // so `content={toFormat(…)}` would build the Markdown table and the CSV of a
+  // 50,000-row sitemap two thousand times before anything was selected.
+  const copy = async (format: ExportFormat) => {
+    try {
+      await Clipboard.copy(toFormat(resource, format));
+      await showHUD("Copied to Clipboard");
+    } catch (error) {
+      failToast(await showToast({ style: Toast.Style.Failure, title: "" }), `Could not copy ${LABEL[format]}`, error);
     }
   };
 
@@ -73,12 +89,12 @@ export function ResourceExportActions({ resource }: ResourceExportActionsProps) 
     <>
       <ActionPanel.Section title="Copy Resource">
         {formats.map((format) => (
-          <Action.CopyToClipboard
+          <Action
             key={`copy-${format}`}
             title={`Copy as ${LABEL[format]}`}
             icon={Icon.Clipboard}
-            content={toFormat(resource, format)}
-            shortcut={COPY_SHORTCUTS[format]}
+            shortcut={format === "text" && !textCopyShortcut ? undefined : COPY_SHORTCUTS[format]}
+            onAction={() => copy(format)}
           />
         ))}
       </ActionPanel.Section>

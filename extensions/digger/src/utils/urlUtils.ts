@@ -28,37 +28,7 @@ export function normalizeUrl(url: string): string {
   return normalized;
 }
 
-/**
- * Validate whether a given URL is valid or not.
- * @param {string} url The URL to validate.
- * @returns {boolean} true if the URL is valid, false otherwise.
- */
-export function validateUrl(url: string): boolean {
-  const trimmed = url.trim();
-  if (trimmed.includes(" ")) {
-    return false;
-  }
-  try {
-    const urlObj = new URL(trimmed.match(/^https?:\/\//i) ? trimmed : `https://${trimmed}`);
-    return urlObj.protocol === "http:" || urlObj.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Extracts the first URL (starting with http:// or https://) found in a string.
- * Useful for handling mixed input like "filename.png https://example.com".
- * @param {string} input The input string to search.
- * @returns {string | null} The first URL found, or null if none.
- */
-export function extractUrl(input: string): string | null {
-  const match = input.match(/https?:\/\/[^\s<>"')\]]+/);
-  if (!match) return null;
-  // Strip common trailing punctuation that isn't part of the URL
-  const cleaned = match[0].replace(/[.,;:!?]+$/, "");
-  return validateUrl(cleaned) ? cleaned : null;
-}
+export { extractUrl, validateUrl } from "./urlText";
 
 /**
  * Check if a string value is a URL (starts with http:// or https://).
@@ -136,13 +106,22 @@ export function getRootResourceUrl(resourcePath: string, baseUrl: string): strin
  * the Debug Logging preference and therefore emit for every user. The logger's
  * redactor only scrubs credential-shaped keys (`token=`, `apiKey=`, userinfo);
  * it leaves arbitrary query values alone, so `?email=someone@example.com`
- * reaches the console verbatim. Digger analyses whatever URL the user hands it,
+ * reaches the console verbatim. Digger analyzes whatever URL the user hands it,
  * and a query string is the most likely place for something personal to hide.
  *
  * Origin and path are kept: they are what makes a warning actionable, and they
  * are already visible in the UI. Falls back to the origin alone, then to a
  * constant, so logging can never throw on a malformed URL.
  */
+/**
+ * Every URL inside free text — an error message — redacted as redactUrlForLog
+ * does. A warn line that redacts its `url` field but prints the raw error would
+ * still leak the query, because transport errors quote the URL they failed on.
+ */
+export function redactUrlsInText(text: string): string {
+  return text.replace(/\bhttps?:\/\/[^\s"'<>)\]]+/gi, (url) => redactUrlForLog(url));
+}
+
 export function redactUrlForLog(url: string): string {
   try {
     const urlObj = new URL(url);

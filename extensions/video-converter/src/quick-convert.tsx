@@ -1,17 +1,18 @@
 import React from "react";
+import GifSettings from "./components/gifSettings";
 import { Action, ActionPanel, Form } from "@raycast/api";
 import errorInfo from "./components/ffmpegNotFound";
 import Conversion from "./components/conversion";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { useVideoConverter } from "./hooks/useVideoConverter";
-import { AVAILABLE_VIDEO_FORMATS, filterByExtensions, type VideoFormat, CODEC_OPTIONS } from "./types";
+import { AVAILABLE_VIDEO_FORMATS, OUTPUT_FORMATS, filterByExtensions, type VideoFormat, CODEC_OPTIONS } from "./types";
 
 export default function QuickConvert() {
-  const { formData, isSubmitted, isFfmpegInstalled, handleChange, handleSubmit } = useVideoConverter(true);
+  const { sourceFps, formData, isSubmitted, isFfmpegInstalled, handleChange, handleSubmit } = useVideoConverter(true);
 
   const handleFormatChange = (format: VideoFormat) => {
     handleChange("videoFormat", format);
-    handleChange("videoCodec", CODEC_OPTIONS[format][0]);
+    if (format !== "gif") handleChange("videoCodec", CODEC_OPTIONS[format][0]);
   };
 
   // ------------------------------------
@@ -53,10 +54,14 @@ export default function QuickConvert() {
           value={formData.videoFormat}
           onChange={(v) => handleFormatChange(v as VideoFormat)}
         >
-          {AVAILABLE_VIDEO_FORMATS.map((fmt) => (
+          {OUTPUT_FORMATS.map((fmt) => (
             <Form.Dropdown.Item key={fmt} value={fmt} title={fmt.toUpperCase()} />
           ))}
         </Form.Dropdown>
+
+        {formData.videoFormat === "gif" && (
+          <GifSettings values={formData} sourceFps={sourceFps} onChange={handleChange} />
+        )}
 
         <Form.FilePicker
           id="outputFolder"
@@ -68,13 +73,15 @@ export default function QuickConvert() {
           canChooseFiles={false}
         />
 
-        <Form.Checkbox
-          id="useHardwareAcceleration"
-          label="Use Hardware Acceleration"
-          info="Enable hardware acceleration for encoding. This may speed up conversion but may not be supported on all formats."
-          value={formData.useHardwareAcceleration}
-          onChange={(v) => handleChange("useHardwareAcceleration", v)}
-        />
+        {formData.videoFormat !== "gif" && (
+          <Form.Checkbox
+            id="useHardwareAcceleration"
+            label="Use Hardware Acceleration"
+            info="Enable hardware acceleration for encoding. This may speed up conversion but may not be supported on all formats."
+            value={formData.useHardwareAcceleration}
+            onChange={(v) => handleChange("useHardwareAcceleration", v)}
+          />
+        )}
       </Form>
     </ErrorBoundary>
   );

@@ -66,10 +66,42 @@
       "title": "Show Upgrades",
       "subtitle": "Brew",
       "description": "Review available upgrades, choose which to apply, and run it",
+      "mode": "view"
+    },
+    {
+      "name": "show-vulnerabilities",
+      "title": "Show Vulnerabilities",
+      "subtitle": "Brew",
+      "description": "Check installed formulae for known vulnerabilities (Homebrew 7)",
       "mode": "view",
       "keywords": [
-        "outdated"
+        "security",
+        "vulns",
+        "vulnerabilities",
+        "cve",
+        "osv"
       ]
+    },
+    {
+      "name": "run-doctor",
+      "title": "Run Doctor",
+      "subtitle": "Brew",
+      "description": "Check your Homebrew installation for problems and fix them",
+      "mode": "view",
+      "keywords": [
+        "doctor",
+        "diagnose",
+        "health",
+        "check",
+        "problems"
+      ]
+    },
+    {
+      "name": "adopt-apps",
+      "title": "Adopt Apps",
+      "subtitle": "Homebrew",
+      "description": "Find applications already on your Mac that Homebrew can manage, and adopt them into a cask.",
+      "mode": "view"
     },
     {
       "name": "upgrade",
@@ -84,6 +116,21 @@
       "subtitle": "Brew",
       "description": "Start, stop & restart Homebrew services",
       "mode": "view"
+    },
+    {
+      "name": "manage-taps",
+      "title": "Manage Taps",
+      "subtitle": "Brew",
+      "description": "Add, trust & remove third-party Homebrew taps, and explore what they provide",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "tap",
+          "placeholder": "user/repo",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "services-menu",
@@ -228,9 +275,8 @@
     "@chrismessina/raycast-logger": "^1.4.0",
     "@raycast/api": "^2.2.0",
     "@raycast/utils": "^2.3.0",
-    "@types/stream-json": "^1.7.8",
-    "stream-chain": "^3.4.0",
-    "stream-json": "^1.9.1"
+    "stream-chain": "^4.2.5",
+    "stream-json": "^3.6.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
@@ -240,7 +286,7 @@
     "prettier": "^3.8.1",
     "react": "^19.2.4",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -256,6 +302,6 @@
     "macOS"
   ],
   "overrides": {
-    "brace-expansion": "5.0.9"
+    "brace-expansion": "5.0.12"
   }
 }

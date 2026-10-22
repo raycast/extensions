@@ -1,6 +1,6 @@
 import { CACHE_SCHEMA } from "./cacheSchema";
 
-/** See CACHE.SALT. Bump this string when behaviour changes but types do not. */
+/** See CACHE.SALT. Bump this string when behavior changes but types do not. */
 const CACHE_SALT = "1";
 
 /**
@@ -31,8 +31,20 @@ export const TIMEOUTS = {
   WELL_KNOWN_TOTAL: 20000,
   /** One conditional GET of the IANA registry CSV. Off the dig's critical path. */
   REGISTRY_FETCH: 8000,
-  /** One stylesheet fetched for its colour tokens. */
+  /** One stylesheet fetched for its color tokens. */
   STYLESHEET: 6000,
+  /** The whole document, re-fetched for "View All SVGs". The dig stops at
+   *  `</head>`; this reads the body too, so it gets a larger budget. */
+  FULL_PAGE: 20000,
+  /** One sitemap file in the sitemap view. Larger than RESOURCE_FETCH: the dig
+   *  only sniffs a sitemap's first bytes, while the view reads the whole file. */
+  SITEMAP_FETCH: 20000,
+  /** One external SVG file: a sprite sheet, or an `<img>` source being copied. */
+  SVG_FILE: 8000,
+  /** One page-referenced image downloaded for display (a thumbnail, a favicon). */
+  IMAGE_FETCH: 8000,
+  /** Rasterizing one SVG to PNG through AppKit. Measured at ~0.1s. */
+  SVG_RASTER: 10000,
 } as const;
 
 /**
@@ -59,12 +71,12 @@ export const CACHE = {
    * with no swatch) for the full 48h TTL. Every one passed tsc, ray build and
    * ray lint, because a missing optional field is perfectly valid.
    *
-   * The lesson generalises past caching: when the correctness of a change
+   * The lesson generalizes past caching: when the correctness of a change
    * depends on a human remembering a second, unrelated edit, the remembering IS
    * the defect. Derive it instead. See scripts/cache-schema.mjs.
    */
   /**
-   * Bumped BY HAND when behaviour changes but the shape does not.
+   * Bumped BY HAND when behavior changes but the shape does not.
    *
    * The hash cannot see this case, and pretending otherwise is worse than
    * admitting it: correcting a classifier to report "unavailable" where it used
@@ -88,6 +100,17 @@ export const CACHE = {
    * enough to be invisible.
    */
   REGISTRY_CHECK_INTERVAL_MS: 7 * 24 * 60 * 60 * 1000,
+  /**
+   * Sitemap bodies, kept apart from the dig cache. The dig cache is LocalStorage,
+   * and `getCacheIndex` calls `allItems()` on every read — megabytes of sitemap
+   * text there would be loaded into memory on every dig. Raycast's `Cache` is
+   * file-backed and evicts least-recently-used entries past `capacity` by itself.
+   *
+   * It stores the raw body, never a parse, so a parser fix applies to cached
+   * entries immediately and there is no shape to version.
+   */
+  SITEMAP_NAMESPACE: "sitemaps",
+  SITEMAP_CAPACITY_BYTES: 120 * 1024 * 1024,
 } as const;
 
 /**
@@ -102,13 +125,29 @@ export const LIMITS = {
   TLS_PORT: 443,
   /** Maximum resources (stylesheets, scripts, images) to parse per page */
   MAX_RESOURCES: 50,
-  /** Maximum entries to display in sitemap views */
-  MAX_DISPLAY_ENTRIES: 100,
+  /** Sitemap rows rendered at once. Search runs over every parsed entry; this
+   *  bounds only how many matches become List items. */
+  SITEMAP_RENDER_CAP: 2000,
+  /** Bytes read from one sitemap file, after decompression. The protocol caps a
+   *  file at 50 MB; real ones over 20 MB are rare and would dominate memory. */
+  SITEMAP_MAX_BYTES: 20 * 1024 * 1024,
+  /** Child sitemaps one index view will fetch while spidering, at any depth. */
+  SITEMAP_SPIDER_MAX_FILES: 100,
+  /** Index-of-index nesting followed below the opened sitemap. */
+  SITEMAP_SPIDER_MAX_DEPTH: 3,
+  /** Decompressed bytes one spider reads before it stops taking new files. A soft
+   *  cap: files already in flight finish, so the worst case is this plus
+   *  (SITEMAP_SPIDER_CONCURRENCY - 1) x SITEMAP_MAX_BYTES. */
+  SITEMAP_SPIDER_MAX_BYTES: 60 * 1024 * 1024,
+  /** Distinct pages one spider collects before it stops fetching. */
+  SITEMAP_SPIDER_MAX_PAGES: 100_000,
+  /** Child sitemaps fetched at once. */
+  SITEMAP_SPIDER_CONCURRENCY: 4,
   /** Bytes read before judging what a resource IS. Enough for a doctype, an
    *  XML declaration or an opening brace; far short of downloading the file. */
   SNIFF_BYTES: 1024,
   /** Simultaneous `/.well-known/` probes. The catalog is ~110 paths and firing
-   *  them all at once is scanner behaviour; a cap keeps one dig comparable to
+   *  them all at once is scanner behavior; a cap keeps one dig comparable to
    *  loading an ordinary web page. */
   WELL_KNOWN_CONCURRENCY: 10,
   /** Rows an export will build from one resource. A sitemap's size is the
@@ -129,6 +168,29 @@ export const LIMITS = {
    *  pathological site cannot run forever. */
   MAX_STYLESHEETS_DEEP: 40,
   MAX_THEME_TOKENS_DEEP: 2000,
+  /** Bytes of the full document read for "View All SVGs". linear.app is 1.3MB;
+   *  the cap exists so an endless stream cannot hold the view open. */
+  MAX_PAGE_BYTES: 8 * 1024 * 1024,
+  /** SVGs listed in one grid. linear.app yields ~440 after dedupe. Nothing here
+   *  is cached — it only bounds the grid for a pathological page. */
+  MAX_SVG_ASSETS: 1000,
+  /** External sprite files read per view. Pages reference one or two. */
+  MAX_SPRITE_FILES: 10,
+  /** Bytes read from one external SVG. A file cut off mid-way is broken markup,
+   *  so exceeding this fails the read rather than returning half a file. */
+  MAX_SVG_FILE_BYTES: 4 * 1024 * 1024,
+  /** File-backed SVGs downloaded for grid thumbnails. Pages link a handful; past
+   *  this, tiles show a placeholder rather than the grid fetching without end. */
+  MAX_REMOTE_SVGS: 60,
+  /** Simultaneous thumbnail downloads. */
+  REMOTE_SVG_CONCURRENCY: 6,
+  /** Page-referenced images downloaded for display, and how many at once. */
+  MAX_GUARDED_IMAGES: 100,
+  IMAGE_CONCURRENCY: 6,
+  /** Bytes read from one displayed image. Open Graph images run to a few MB. */
+  MAX_IMAGE_BYTES: 10 * 1024 * 1024,
+  /** Longest side, in pixels, of a PNG made by Copy as PNG. */
+  SVG_PNG_SIZE: 1024,
 } as const;
 
 /**

@@ -3,27 +3,12 @@
 import { parse } from "node-html-parser";
 import type { default as HtmlNode } from "node-html-parser/dist/nodes/html";
 
-import { getLanguageEnglishName, getLanguageItemFromDeepLSourceCode } from "@/core/language/utils";
-import { checkIsWord } from "@/providers/shared/utils";
-import type { QueryInput, QueryWordInfo } from "@/types/query";
-import { logWarn } from "@/utils/logger";
+import type { ContentEquivalent, ContentExample } from "@/core/content/types";
+import { getLanguageItemFromDeepLSourceCode } from "@/core/language/utils";
+import type { QueryWordInfo } from "@/core/results/types";
+import { logWarn } from "@/shared/logger";
 
-import { getValidLingueeLanguagePair } from "./languages";
-import type {
-  LingueeExample,
-  LingueeParseResult,
-  LingueeWikipedia,
-  LingueeWordExplanation,
-  LingueeWordItem,
-} from "./types";
-import { LingueeListItemType } from "./types";
-
-const AUDIO_URL_BASE = "https://www.linguee.com/mp3";
-
-function getAudioUrl(element: HtmlNode | null, selector: string): string {
-  const id = element?.querySelector(selector)?.getAttribute("id");
-  return id ? `${AUDIO_URL_BASE}/${id}.mp3` : "";
-}
+import type { LingueeDictionaryResult, LingueeParseResult, LingueeWordItem } from "./types";
 
 function getTagFormsText(tagForms: HtmlNode | null): string {
   const text = tagForms?.textContent ?? "";
@@ -31,57 +16,46 @@ function getTagFormsText(tagForms: HtmlNode | null): string {
   return stripped ? text : "";
 }
 
-function getExplanationDisplayType(wordFrequency: string): LingueeListItemType {
-  if (wordFrequency.includes("(often used)")) return LingueeListItemType.OftenUsed;
-  if (wordFrequency.includes("(almost always used)")) return LingueeListItemType.AlmostAlwaysUsed;
-  if (wordFrequency.length > 0) return LingueeListItemType.SpecialForms;
-  return LingueeListItemType.Common;
+function getExplanationFrequency(wordFrequency: string): ContentEquivalent["frequency"] {
+  if (wordFrequency.includes("(often used)")) return "often";
+  if (wordFrequency.includes("(almost always used)")) return "almost-always";
+  if (wordFrequency.length > 0) return "special-forms";
+  return "common";
 }
 
 function getYoudaoLanguageId(language: string, rootElement: HtmlNode): string | undefined {
   const textJavascript = rootElement.querySelector("script[type=text/javascript]");
   const sourceLang = textJavascript?.textContent?.split(`${language}:`)[1]?.split(",")[0];
   if (!sourceLang) return undefined;
-  return getLanguageItemFromDeepLSourceCode(sourceLang.replace(/'/g, "")).youdaoLangCode;
-}
-
-function parseExamples(examples: HtmlNode[]): LingueeExample[] {
-  if (!examples?.length) return [];
-  return examples.map((example) => ({
-    example: { text: example?.querySelector(".tag_s")?.textContent ?? "", pos: "" },
-    translations: [{ text: example?.querySelector(".tag_t")?.textContent ?? "", pos: "" }],
-  }));
+  return getLanguageItemFromDeepLSourceCode(sourceLang.replace(/'/g, ""))?.youdaoLangCode;
 }
 
 function parseExplanation(
   translation: HtmlNode,
-  isFeatured: boolean,
-  designatedFrequency?: LingueeListItemType,
-): LingueeWordExplanation {
+  prominent: boolean,
+  frequency?: ContentEquivalent["frequency"],
+): ContentEquivalent {
+  const entry: ContentEquivalent = {
+    text: translation.querySelector(".dictLink")?.textContent ?? "",
+    partOfSpeech: translation.querySelector(".tag_type")?.textContent ?? "",
+    prominent,
+    frequency: frequency ?? "common",
+  };
+  if (!prominent) return entry;
+
   const tagC = translation.querySelector(".tag_c");
   const tagForms = translation.querySelector(".tag_forms");
   const tagText = `${tagC?.textContent ?? ""} ${getTagFormsText(tagForms)}`.trim();
 
   return {
-    translation: translation.querySelector(".dictLink")?.textContent ?? "",
-    pos: translation.querySelector(".tag_type")?.textContent ?? "",
-    featured: isFeatured,
-    audioUrl: getAudioUrl(translation, ".audio"),
-    examples: parseExamples(translation.querySelectorAll(".example")),
-    frequencyTag: { tagForms: tagText, displayType: designatedFrequency ?? getExplanationDisplayType(tagText) },
+    ...entry,
+    firstExampleTranslation: translation.querySelector(".example")?.querySelector(".tag_t")?.textContent ?? "",
+    inflectionNote: tagText,
+    frequency: getExplanationFrequency(tagText),
   };
 }
 
-function parseExplanations(
-  translations: HtmlNode[] | undefined,
-  isFeatured: boolean,
-  designatedFrequency?: LingueeListItemType,
-): LingueeWordExplanation[] {
-  if (!translations?.length) return [];
-  return translations.map((t) => parseExplanation(t, isFeatured, designatedFrequency));
-}
-
-function parseWordItem(lemma: HtmlNode): LingueeWordItem {
+function parseHeadword(lemma: HtmlNode) {
   const placeholder = lemma.querySelector(".dictLink .placeholder");
   let placeholderText = placeholder?.textContent ?? "";
   placeholder?.remove();
@@ -89,7 +63,6 @@ function parseWordItem(lemma: HtmlNode): LingueeWordItem {
   const dictLinks = lemma.querySelectorAll(".lemma_desc .dictLink");
   const words = dictLinks.map((link) => link?.textContent ?? "").join(" ");
 
-  const tagLemma = lemma.querySelector(".tag_lemma");
   const tagLemmaContext = lemma.querySelector(".tag_lemma_context");
   if (tagLemmaContext) {
     placeholderText = tagLemmaContext.textContent ?? "";
@@ -100,58 +73,67 @@ function parseWordItem(lemma: HtmlNode): LingueeWordItem {
   const tagArea = lemma.querySelector(".lemma_desc .tag_area");
   const posText = `${tagWordtype?.textContent ?? ""} ${tagFormsText} ${tagArea?.textContent ?? ""}`.trim();
   const pos = tagWordtype ? posText : (lemma.querySelector(".tag_type")?.textContent ?? "");
-  const featured = lemma.getAttribute("class")?.includes("featured") ?? false;
+  return { word: words, pos, placeholder: placeholderText };
+}
 
-  const featuredTranslations = lemma.querySelectorAll(".translation.sortablemg.featured");
-  const explanations = parseExplanations(featuredTranslations, true);
-  featuredTranslations.forEach((el) => el.remove());
+function extractTranslations(lemma: HtmlNode): [HtmlNode[], HtmlNode[]] {
+  const featured = lemma.querySelectorAll(".translation.sortablemg.featured");
+  featured.forEach((element) => element.remove());
+  return [featured, lemma.querySelector(".lemma_content")?.querySelectorAll(".translation") ?? []];
+}
 
-  const lemmaContent = lemma.querySelector(".lemma_content");
-  const isLessCommon = !!lemmaContent?.querySelector(".line .notascommon");
-  const frequency = isLessCommon ? LingueeListItemType.LessCommon : LingueeListItemType.Common;
-  const lessCommonTranslations = lemmaContent?.querySelectorAll(".translation");
-  const lessCommonExplanations = parseExplanations(lessCommonTranslations, false, frequency);
+function parseWordItem(lemma: HtmlNode): LingueeWordItem {
+  const headword = parseHeadword(lemma);
+  const [featured, unfeatured] = extractTranslations(lemma);
+  const frequency = lemma.querySelector(".lemma_content")?.querySelector(".line .notascommon")
+    ? "less-common"
+    : "common";
 
   return {
-    word: words,
-    title: tagLemma?.textContent ?? "",
-    featured,
-    pos,
-    placeholder: placeholderText,
-    translationItems: [...explanations, ...lessCommonExplanations],
-    audioUrl: getAudioUrl(tagLemma, ".audio"),
+    ...headword,
+    entries: [
+      ...featured.map((element) => parseExplanation(element, true)),
+      ...unfeatured.map((element) => parseExplanation(element, false, frequency)),
+    ],
   };
 }
 
-function parseWordItems(lemmas: HtmlNode[] | undefined): LingueeWordItem[] {
-  if (!lemmas?.length) return [];
-  return lemmas.map(parseWordItem);
-}
-
-function parseExampleItems(lemmas: HtmlNode[] | undefined): LingueeExample[] {
-  if (!lemmas?.length) return [];
+function parseExampleItems(lemmas: HtmlNode[]): ContentExample[] {
   return lemmas.map((lemma) => {
     const tagType = lemma.querySelector(".line .tag_type");
     const pos = tagType?.textContent ?? "";
     return {
-      example: { text: lemma.querySelector(".line .dictLink")?.textContent ?? "", pos },
-      translations: lemma
+      sentence: lemma.querySelector(".line .dictLink")?.textContent ?? "",
+      partOfSpeech: pos,
+      translation: lemma
         .querySelectorAll(".lemma_content .dictLink")
         .filter((el) => el.textContent)
-        .map((el) => ({ text: el.textContent, pos })),
+        .map((el) => el.textContent)
+        .join(";  "),
     };
   });
 }
 
-function parseWikipediaItems(elements: HtmlNode[] | undefined): LingueeWikipedia[] {
-  if (!elements?.length) return [];
+function parseRelatedWords(lemmas: HtmlNode[]): LingueeDictionaryResult["relatedWords"] {
+  return lemmas.map((lemma) => {
+    const { word, pos } = parseHeadword(lemma);
+    const [featured, unfeatured] = extractTranslations(lemma);
+    return {
+      expression: word,
+      partOfSpeech: pos,
+      meaning: [...featured, ...unfeatured]
+        .map((item) => item.querySelector(".dictLink")?.textContent ?? "")
+        .join(";  "),
+    };
+  });
+}
+
+function parseWikipediaItems(elements: HtmlNode[]): LingueeDictionaryResult["wikipedias"] {
   return elements.map((element) => {
     const h2Title = element.querySelector("h2");
     return {
-      title: h2Title?.textContent ?? "",
-      explanation: h2Title?.nextSibling?.textContent?.trim() ?? "",
-      source: element.querySelector(".source_url_spacer")?.textContent ?? "",
-      sourceUrl: element.querySelector("a")?.getAttribute("href") ?? "",
+      subject: h2Title?.textContent ?? "",
+      text: h2Title?.nextSibling?.textContent?.trim() ?? "",
     };
   });
 }
@@ -159,17 +141,18 @@ function parseWikipediaItems(elements: HtmlNode[] | undefined): LingueeWikipedia
 export function parseLingueeHTML(html: string): LingueeParseResult {
   const root = parse(html);
   const dictionary = root.querySelector("#dictionary");
-  const exactLemmas = dictionary?.querySelectorAll(".exact .lemma");
+  const exactLemmas = dictionary?.querySelectorAll(".exact .lemma") ?? [];
+  const audioId = exactLemmas[0]?.querySelector(".tag_lemma")?.querySelector(".audio")?.getAttribute("id");
 
   const queryWord = root.querySelector(".l_deepl_ad__querytext");
   const sourceLanguage = getYoudaoLanguageId("sourceLang", root);
   const targetLanguage = getYoudaoLanguageId("targetLang", root);
 
-  const wordItems = parseWordItems(exactLemmas);
+  const wordItems = exactLemmas.map(parseWordItem);
 
   // Split inexact elements into examples vs related words by h3 label
-  let examplesElement: HtmlNode[] | undefined;
-  let relatedWordsElement: HtmlNode[] | undefined;
+  let examplesElement: HtmlNode[] = [];
+  let relatedWordsElement: HtmlNode[] = [];
   for (const element of dictionary?.querySelectorAll(".inexact") ?? []) {
     const h3Text = element.querySelector("h3")?.textContent;
     const lemmas = element.querySelectorAll(".lemma");
@@ -184,8 +167,8 @@ export function parseLingueeHTML(html: string): LingueeParseResult {
   }
 
   const examples = parseExampleItems(examplesElement);
-  const relatedWords = parseWordItems(relatedWordsElement);
-  const wikipedias = parseWikipediaItems(dictionary?.querySelectorAll(".wikipedia .abstract"));
+  const relatedWords = parseRelatedWords(relatedWordsElement);
+  const wikipedias = parseWikipediaItems(dictionary?.querySelectorAll(".wikipedia .abstract") ?? []);
 
   const hasEntries = wordItems.length > 0 || examples.length > 0 || relatedWords.length > 0 || wikipedias.length > 0;
   if (!hasEntries) {
@@ -196,7 +179,7 @@ export function parseLingueeHTML(html: string): LingueeParseResult {
     word: queryWord?.textContent ?? "",
     fromLanguage: sourceLanguage ?? "",
     toLanguage: targetLanguage ?? "",
-    speechUrl: wordItems[0]?.audioUrl ?? "",
+    speechUrl: audioId ? `https://www.linguee.com/mp3/${audioId}.mp3` : "",
     isWord: hasEntries,
   };
 
@@ -204,15 +187,4 @@ export function parseLingueeHTML(html: string): LingueeParseResult {
     queryWordInfo,
     result: hasEntries ? { wordItems, examples, relatedWords, wikipedias } : undefined,
   };
-}
-
-export function getLingueeWebDictionaryURL(queryWordInfo: QueryInput): string | undefined {
-  const { fromLanguage, toLanguage } = queryWordInfo;
-  const validLanguagePair = getValidLingueeLanguagePair(fromLanguage, toLanguage);
-  const isWord = checkIsWord(queryWordInfo);
-
-  if (!validLanguagePair || !isWord) return undefined;
-
-  const sourceLanguage = getLanguageEnglishName(fromLanguage).toLowerCase();
-  return `https://www.linguee.com/${validLanguagePair}/search?source=${sourceLanguage}&query=${encodeURIComponent(queryWordInfo.word)}`;
 }

@@ -3,9 +3,11 @@ import test from "node:test";
 import {
   canRevalidateMintCLI,
   escapeMarkdown,
+  formatBytes,
   formatSignedBytes,
+  isAtLeastVersion,
   isCompatibleMintCLIVersion,
-  parseMintAgentsJSON,
+  MINIMUM_APP_VERSION,
   parseJSON,
   parseMintCommandJSON,
   shortPath,
@@ -14,10 +16,10 @@ import {
 
 const compatibleVersion: MintCLIVersion = {
   product: "Mint",
-  appVersion: "1.0.10",
-  appBuild: "16",
+  appVersion: "1.0.80",
+  appBuild: "95",
   schemaVersion: 2,
-  capabilities: ["scan-lite.v1", "scan.v1", "status.v1", "why.v1", "surface.v1", "agents.v1"],
+  capabilities: ["scan-lite.v1", "scan.native.v1", "cli.native.v1", "status.v1", "why.v1", "surface.v1", "agents.v1"],
 };
 
 test("accepts the current Mint CLI compatibility contract", () => {
@@ -28,6 +30,14 @@ test("accepts the current Mint CLI compatibility contract", () => {
     isCompatibleMintCLIVersion({
       ...compatibleVersion,
       capabilities: compatibleVersion.capabilities?.filter((capability) => capability !== "agents.v1"),
+    }),
+    false,
+  );
+  // Before 1.0.72 the surface had no Organize or Optimize actions.
+  assert.equal(
+    isCompatibleMintCLIVersion({
+      ...compatibleVersion,
+      capabilities: compatibleVersion.capabilities?.filter((capability) => capability !== "cli.native.v1"),
     }),
     false,
   );
@@ -51,17 +61,6 @@ test("accepts only schema-2 output for the expected command capability", () => {
   assert.equal(parseMintCommandJSON('{"schemaVersion":2}', "why.v1"), undefined);
 });
 
-test("accepts only structurally valid AI-agent storage output", () => {
-  const available = JSON.stringify({ available: true, totalBytes: 1024, tools: [] });
-  const unavailable = JSON.stringify({ available: false, reason: "Run a scan in Mint." });
-
-  assert.equal(parseMintAgentsJSON<{ totalBytes?: number }>(available)?.totalBytes, 1024);
-  assert.equal(parseMintAgentsJSON<{ reason?: string }>(unavailable)?.reason, "Run a scan in Mint.");
-  assert.equal(parseMintAgentsJSON('{"available":true,"tools":[]}'), undefined);
-  assert.equal(parseMintAgentsJSON('{"available":true,"totalBytes":1024}'), undefined);
-  assert.equal(parseMintAgentsJSON('{"available":"yes"}'), undefined);
-});
-
 test("shortens only the home directory and its descendants", () => {
   assert.equal(shortPath("/Users/tester", "/Users/tester"), "~");
   assert.equal(shortPath("/Users/tester/Documents/a.txt", "/Users/tester"), "~/Documents/a.txt");
@@ -69,8 +68,8 @@ test("shortens only the home directory and its descendants", () => {
 });
 
 test("formats signed byte deltas and escapes local labels for markdown", () => {
-  assert.equal(formatSignedBytes(1_048_576), "+1.0 MB");
-  assert.equal(formatSignedBytes(-1_048_576), "−1.0 MB");
+  assert.equal(formatSignedBytes(1_500_000), "+1.5 MB");
+  assert.equal(formatSignedBytes(-1_500_000), "−1.5 MB");
   assert.equal(formatSignedBytes(0), "0 B");
   assert.equal(escapeMarkdown("Build | cache\nnext"), "Build \\| cache next");
 });
@@ -85,4 +84,29 @@ test("revalidates only the same freshly trusted CLI path", () => {
   assert.equal(canRevalidateMintCLI(trusted.path, { ...trusted, path: "/opt/homebrew/bin/mint-cli" }), false);
   assert.equal(canRevalidateMintCLI(trusted.path, { status: "untrusted" }), false);
   assert.equal(canRevalidateMintCLI(undefined, trusted), false);
+});
+
+test("writes sizes the way Mint does: decimal units", () => {
+  assert.equal(formatBytes(0), "0 B");
+  assert.equal(formatBytes(999), "999 B");
+  assert.equal(formatBytes(64_020_480), "64 MB");
+  assert.equal(formatBytes(489_160_704), "489.2 MB");
+  assert.equal(formatBytes(1_000_000_000), "1 GB");
+  assert.equal(formatBytes(1_368_322_048), "1.37 GB");
+  assert.equal(formatBytes(61_248_467_865), "61.25 GB");
+  assert.equal(formatBytes(999_960_000), "1 GB");
+  assert.equal(formatBytes(494_384_795_648), "494.38 GB");
+});
+
+test("Mint older than 1.0.80 is not ready, whatever capabilities it lists", () => {
+  assert.equal(isAtLeastVersion("1.0.80", MINIMUM_APP_VERSION), true);
+  assert.equal(isAtLeastVersion("1.0.100", MINIMUM_APP_VERSION), true);
+  assert.equal(isAtLeastVersion("1.1", MINIMUM_APP_VERSION), true);
+  assert.equal(isAtLeastVersion("1.0.79", MINIMUM_APP_VERSION), false);
+  assert.equal(isAtLeastVersion("1.0.72", MINIMUM_APP_VERSION), false);
+  assert.equal(isAtLeastVersion("beta", MINIMUM_APP_VERSION), false);
+  assert.equal(isCompatibleMintCLIVersion({ ...compatibleVersion, appVersion: "1.0.72" }), false);
+  assert.equal(isCompatibleMintCLIVersion({ ...compatibleVersion, appVersion: "1.0.81" }), true);
+  // The copy in Homebrew's bin cannot say its version; resolveMintCLI judges it by Mint.app.
+  assert.equal(isCompatibleMintCLIVersion({ ...compatibleVersion, appVersion: undefined }), true);
 });

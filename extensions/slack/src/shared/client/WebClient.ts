@@ -1,48 +1,16 @@
-import { getPreferenceValues, open, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 import { WebClient } from "@slack/web-api";
 import { HttpsProxyAgent } from "https-proxy-agent";
-import { formatRetryAfter, observeSlackRateLimits, slackRateLimitDocumentationUrl } from "./rateLimit";
+import { createCanvasClient } from "./canvas";
+import { slackRetryConfig } from "./retryPolicy";
 
 export type { SlackConversation, SlackMember } from "./slackTypes";
 
 const { accessToken, proxyUrl: proxyUrlPref } = getPreferenceValues<Preferences>();
 let slackWebClient: WebClient | null = null;
+let canvasWebClient: WebClient | null = null;
 let currentToken: string | undefined = accessToken;
-let rateLimitToast: Toast | undefined;
-let rateLimitToastTimeout: ReturnType<typeof setTimeout> | undefined;
-
-async function showRateLimitToast(retryAfter: number) {
-  const message = `Slack requested a ${formatRetryAfter(retryAfter)} wait. Retrying automatically.`;
-
-  if (rateLimitToast) {
-    rateLimitToast.style = Toast.Style.Animated;
-    rateLimitToast.title = "Slack rate limit exceeded";
-    rateLimitToast.message = message;
-  } else {
-    rateLimitToast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Slack rate limit exceeded",
-      message,
-      primaryAction: {
-        title: "View Slack Rate Limits",
-        onAction: () => open(slackRateLimitDocumentationUrl),
-      },
-    });
-  }
-
-  if (rateLimitToastTimeout) clearTimeout(rateLimitToastTimeout);
-  const toast = rateLimitToast;
-  rateLimitToastTimeout = setTimeout(
-    () => {
-      if (rateLimitToast === toast) {
-        void toast.hide();
-        rateLimitToast = undefined;
-      }
-    },
-    Math.max(1, retryAfter) * 1000,
-  );
-}
 
 function getHttpProxy() {
   if (process.env.HTTPS_PROXY) return "HTTPS_PROXY";
@@ -62,14 +30,15 @@ export function getProxyAgent(): HttpsProxyAgent<string> | undefined {
 
 export const slack = OAuthService.slack({
   scope:
-    "users:read users:read.email channels:read groups:read im:read mpim:read chat:write channels:history groups:history im:history mpim:history channels:write groups:write im:write mpim:write users:write dnd:read dnd:write search:read users.profile:write emoji:read users.profile:read files:read files:write reactions:write",
+    "users:read users:read.email channels:read groups:read im:read mpim:read chat:write channels:history groups:history im:history mpim:history channels:write groups:write im:write mpim:write users:write dnd:read dnd:write search:read users.profile:write emoji:read users.profile:read files:read files:write reactions:write canvases:read canvases:write",
   personalAccessToken: accessToken,
   onAuthorize({ token }) {
     currentToken = token;
     const agent = getProxyAgent();
-    slackWebClient = observeSlackRateLimits(new WebClient(token, { ...(agent && { agent }) }), (retryAfter) => {
-      void showRateLimitToast(retryAfter);
-    });
+    // Rate limits keep Slack's default retry budget and wait for Retry-After, including during AI tool calls.
+    // Timeouts and HTTP 5xx stop after two retries so they surface instead of loading for ~30 minutes.
+    slackWebClient = new WebClient(token, { retryConfig: slackRetryConfig(), ...(agent && { agent }) });
+    canvasWebClient = createCanvasClient(token, agent);
   },
 });
 
@@ -79,6 +48,11 @@ export function getSlackWebClient(): WebClient {
   }
 
   return slackWebClient;
+}
+
+export function getCanvasWebClient(): WebClient {
+  if (!canvasWebClient) throw new Error("No slack client initialized");
+  return canvasWebClient;
 }
 
 /**

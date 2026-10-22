@@ -2,7 +2,7 @@ import { Toast, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { existsSync } from "fs-extra";
 import { applyTo } from "../types/preferences";
-import type { ResendWallpaper, ResendWallpaperWithInfo } from "../types/types";
+import type { ResendWallpaper } from "../types/types";
 import { buildCachePath, cachePicture } from "./common-utils";
 
 const scriptSetWallpaper = (path: string, applyTo: string) => {
@@ -24,7 +24,7 @@ const scriptSetWallpaper = (path: string, applyTo: string) => {
     `;
 };
 
-export const setWallpaper = async (wallpaper: ResendWallpaperWithInfo) => {
+export const setWallpaper = async (wallpaper: ResendWallpaper, targetDesktop = applyTo) => {
   const toast = await showToast(Toast.Style.Animated, "Setting wallpaper...");
 
   const fixedPathName = buildCachePath(wallpaper);
@@ -36,7 +36,7 @@ export const setWallpaper = async (wallpaper: ResendWallpaperWithInfo) => {
       await cachePicture(wallpaper);
     }
 
-    const result = await runAppleScript(scriptSetWallpaper(actualPath, applyTo));
+    const result = await runAppleScript(scriptSetWallpaper(actualPath, targetDesktop));
 
     if (result !== "ok") {
       throw new Error("Error setting wallpaper.");
@@ -46,6 +46,7 @@ export const setWallpaper = async (wallpaper: ResendWallpaperWithInfo) => {
       toast.style = Toast.Style.Success;
       toast.title = "Set wallpaper successfully!";
     }
+    return true;
   } catch (err) {
     console.error(err);
 
@@ -54,6 +55,7 @@ export const setWallpaper = async (wallpaper: ResendWallpaperWithInfo) => {
       toast.title = "Something went wrong.";
       toast.message = "Try with another image or check your internet connection.";
     }
+    return false;
   }
 };
 

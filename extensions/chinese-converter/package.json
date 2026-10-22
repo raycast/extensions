@@ -2,34 +2,40 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chinese-converter",
   "title": "Chinese Converter",
-  "version": "1.0.0",
-  "description": "Convert number input into Chinese formatted text, including uppercase RMB amount text.",
+  "type": "module",
+  "version": "1.0.1",
+  "description": "Convert number input into Chinese formatted text, including uppercase RMB amount text",
   "icon": "icon.png",
   "author": "tofrankie",
-  "homepage": "https://github.com/tofrankie/raycast-chinese-converter",
+  "license": "MIT",
+  "homepage": "https://github.com/tofrankie/raycast-collection/tree/main/extensions/chinese-converter",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tofrankie/raycast-collection.git",
+    "directory": "extensions/chinese-converter"
+  },
   "bugs": {
-    "url": "https://github.com/tofrankie/raycast-chinese-converter/issues",
+    "url": "https://github.com/tofrankie/raycast-collection/issues",
     "email": "1426203851@qq.com"
   },
-  "platforms": [
-    "macOS",
-    "Windows"
-  ],
   "categories": [
     "Finance"
   ],
   "keywords": [
-    "RMB",
-    "Currency",
-    "Money",
-    "Chinese Currency",
-    "Uppercase Chinese",
-    "Amount Conversion",
-    "Financial",
     "Accounting",
-    "Number to Chinese"
+    "Amount Conversion",
+    "Chinese Currency",
+    "Currency",
+    "Financial",
+    "Money",
+    "Number to Chinese",
+    "RMB",
+    "Uppercase Chinese"
   ],
-  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "scripts": {
     "dev": "ray develop",
     "build": "ray build",
@@ -40,50 +46,50 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^2.2.5",
+    "@raycast/api": "^2.6.3",
+    "@raycast/utils": "^2.3.2",
     "bignumber.js": "^11.1.1",
     "nzh": "^1.0.14"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "22.19.17",
     "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.9",
     "typescript": "^5.9.3",
-    "vitest": "^4.1.7"
+    "vitest": "^5.0.3"
   },
   "commands": [
     {
       "name": "convert-number-to-rmb",
+      "mode": "view",
       "title": "Convert Number to RMB",
       "description": "Convert number to uppercase Chinese RMB text.",
-      "mode": "view",
       "arguments": [
         {
           "name": "number",
-          "placeholder": "Enter a number",
           "type": "text",
-          "required": false
+          "required": false,
+          "placeholder": "Enter a number"
         }
       ],
       "preferences": [
         {
           "name": "autoReadClipboard",
+          "type": "checkbox",
+          "required": false,
           "title": "Auto Read Clipboard",
           "label": "Read clipboard content and fill the search box on launch",
           "description": "When enabled, if no number is provided through the command argument, the command reads clipboard text on launch and converts it automatically.",
-          "type": "checkbox",
-          "required": false,
           "default": false
         },
         {
           "name": "roundingMode",
-          "title": "Rounding Mode",
-          "description": "How to handle   extra decimal digits beyond the specified places.",
           "type": "dropdown",
           "required": false,
+          "title": "Rounding Mode",
+          "description": "How to handle   extra decimal digits beyond the specified places.",
           "default": "4",
           "data": [
             {
@@ -126,46 +132,46 @@
         },
         {
           "name": "unOmitYuan",
+          "type": "checkbox",
+          "required": false,
           "title": "Always Show Yuan",
           "label": "不足一元时也显示「元」，如零元叁角贰分",
           "description": "不足一元时也显示「元」，如 0.32 → 零元叁角贰分。",
-          "type": "checkbox",
-          "required": false,
           "default": false
         },
         {
           "name": "preferTraditionalYuan",
+          "type": "checkbox",
+          "required": false,
           "title": "Use Traditional Yuan",
           "label": "使用「圆」替代「元」",
           "description": "开启后使用「圆」，默认使用「元」。",
-          "type": "checkbox",
-          "required": false,
           "default": false
         },
         {
           "name": "forceZheng",
+          "type": "checkbox",
+          "required": false,
           "title": "Append Zheng",
           "label": "到角位（无分）时在末尾加「整」，如壹元贰角整",
           "description": "到角位（无分）时在末尾加「整」，如 1.2 → 壹元贰角整。",
-          "type": "checkbox",
-          "required": false,
           "default": false
         },
         {
           "name": "preferSimpleZheng",
+          "type": "checkbox",
+          "required": false,
           "title": "Use Simple Zheng",
           "label": "使用「正」替代「整」",
           "description": "开启后使用「正」，默认使用「整」。",
-          "type": "checkbox",
-          "required": false,
           "default": false
         },
         {
           "name": "moneyPrefix",
-          "title": "Custom Prefix",
-          "description": "在结果前添加自定义文字，如「人民币壹元贰角叁分」。",
           "type": "textfield",
           "required": false,
+          "title": "Custom Prefix",
+          "description": "在结果前添加自定义文字，如「人民币壹元贰角叁分」。",
           "default": ""
         }
       ]

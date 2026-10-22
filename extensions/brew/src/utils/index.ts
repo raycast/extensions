@@ -12,6 +12,7 @@ export type {
   Cask,
   CaskDependency,
   Formula,
+  FormulaRequirement,
   InstalledVersion,
   Versions,
   OutdatedFormula,
@@ -48,6 +49,7 @@ export {
   UnsupportedMacOSError,
   isBrewError,
   isNetworkError,
+  isAbortError,
   isBrewLockError,
   isPinnedRefusal,
   upgradeSkipReason,
@@ -72,7 +74,7 @@ export { supportPath, bundleIdentifier, cachePath, clearCache } from "./cache";
 export { markOutdatedSnapshotDirty, clearOutdatedSnapshotDirty, isOutdatedSnapshotDirty } from "./outdated-dirty";
 
 // Toast
-export { showActionToast, showBrewFailureToast } from "./toast";
+export { copyLogsAction, showActionToast, showBrewFailureToast } from "./toast";
 export type { ActionToastHandle } from "./toast";
 
 // Array extensions (side-effect import to add prototype methods)

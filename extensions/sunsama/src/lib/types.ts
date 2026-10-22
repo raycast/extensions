@@ -70,4 +70,16 @@ export interface Task {
   ownTimerRunning: boolean;
   /** Display start time of the task's earliest calendar slot, e.g. "9:30 AM". */
   startTime?: string;
+  /** Every calendar slot the task is projected onto, e.g. "9:30 AM – 10:00 AM". */
+  timeSlots: string[];
+  /** Category the channel sits under (e.g. "Work"). */
+  category?: string;
+  /** External id of the linked item in its service. */
+  integrationId?: string;
+  /** Account the linked item lives under (e.g. a Google Tasks email). */
+  integrationAccount?: string;
+  /** Calendar service the task was imported from (e.g. "googleCalendar"). */
+  importedFrom?: string;
+  createdAt?: string; // ISO
+  lastModified?: string; // ISO
 }

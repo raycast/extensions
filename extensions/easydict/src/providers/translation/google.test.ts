@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { TranslationType } from "@/types/api";
-import { CancelledError } from "@/utils/errors";
+import { TranslationType } from "@/core/results/kinds";
+import { CancelledError } from "@/shared/errors";
 
 import { GoogleTranslateProvider } from "./google";
 
@@ -30,8 +30,7 @@ describe("Google translation", () => {
       done: true,
       value: {
         type: TranslationType.Google,
-        translations: ["第一行 &amp; <文本>。", "", "第二段。"],
-        queryWordInfo: query,
+        content: { kind: "translation", query, paragraphs: ["第一行 &amp; <文本>。", "", "第二段。"] },
       },
     });
     expect(fetch).toHaveBeenCalledOnce();
@@ -66,8 +65,7 @@ describe("Google translation", () => {
     expect(fetch).toHaveBeenCalledOnce();
     expect(requestedTexts(fetch.mock.calls[0][1])).toEqual(paragraphs);
     expect(result.value).toMatchObject({
-      translations: ["第一段。", "", "第二段。"],
-      queryWordInfo: query,
+      content: { paragraphs: ["第一段。", "", "第二段。"], query },
     });
   });
 
@@ -107,7 +105,9 @@ describe("Google translation", () => {
 
     expect(fetch).toHaveBeenCalledOnce();
     expect(requestedTexts(fetch.mock.calls[0][1])).toEqual(chunks);
-    expect(result.value).toMatchObject({ translations: [chunks.map((_, index) => `译文${index}`).join(" ")] });
+    expect(result.value).toMatchObject({
+      content: { paragraphs: [chunks.map((_, index) => `译文${index}`).join(" ")] },
+    });
   });
 
   it.each([

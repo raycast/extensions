@@ -1,11 +1,8 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { client } from "./linearUtils";
+import { withLinear } from "./withLinear";
 
 type Input = { id: string };
-export default withAccessToken(linear)(async ({ id }: Input) => {
+export default withLinear(async ({ id }: Input) => {
   const result = await client().deleteAttachment(id);
   return { success: result.success };
 });

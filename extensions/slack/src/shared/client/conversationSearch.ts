@@ -3,7 +3,7 @@ import type { Channel, Group } from "./conversation";
 import { toChannel, toGroup } from "./conversation";
 import type { CursorPage } from "./pagination";
 import { collectPaginatedResults, matchesAllWords } from "./pagination";
-import { searchMemberDirectory } from "./memberSearch";
+import { isMemberDirectoryScanError, searchMemberDirectory } from "./memberSearch";
 
 type ConversationSearchOptions = {
   types?: "channels" | "groups" | "all";
@@ -34,8 +34,13 @@ export async function searchUserNames({
   loadPage,
   signal,
 }: UserNameSearchOptions): Promise<ReadonlyMap<string, string>> {
-  const { userNames } = await searchMemberDirectory({ query, maxResults, loadPage, signal });
-  return userNames;
+  try {
+    const { userNames } = await searchMemberDirectory({ query, maxResults, loadPage, signal });
+    return userNames;
+  } catch (error) {
+    if (!isMemberDirectoryScanError<unknown>(error)) throw error;
+    return error.partial.userNames;
+  }
 }
 
 /**

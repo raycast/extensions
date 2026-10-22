@@ -1,4 +1,4 @@
-import { Action, Color, Icon, List } from "@raycast/api";
+import { Action, Color, Icon, Image, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 import { Actions } from "../actions";
 import { ResourcesViewActions } from "../actions/ResourceViewActions";
@@ -6,9 +6,11 @@ import { DiggerResult, FontAsset } from "../types";
 import { getDeniedAccessMessage } from "../utils/botDetection";
 import { getFontDisplayName } from "../utils/fontUtils";
 import { truncateText } from "../utils/formatters";
+import { isSvgUrl } from "../utils/svgUtils";
 import { resolveUrl } from "../utils/urlUtils";
 import { getUniqueImageCount, ImagesGridView } from "./ImagesGridView";
 import { ResourcesListView } from "./ResourcesListView";
+import { SvgGridView } from "./SvgGridView";
 
 interface ResourcesAssetsProps {
   data: DiggerResult | null;
@@ -104,6 +106,18 @@ export function ResourcesAssets({ data, onRefresh, progress }: ResourcesAssetsPr
                   target={<ImagesGridView images={resources!.images!} siteUrl={data.url} />}
                 />
               )}
+              {!isChallengePage && (
+                <Action.Push
+                  title="View All SVGs"
+                  icon={Icon.EditShape}
+                  target={
+                    <SvgGridView
+                      pageUrl={data.networking?.finalUrl ?? data.url}
+                      known={knownSvgs(data).map((img) => ({ url: resolveUrl(img.src, pageBase(data)) }))}
+                    />
+                  }
+                />
+              )}
               <ResourcesViewActions
                 data={data}
                 hasFonts={hasFonts}
@@ -119,6 +133,17 @@ export function ResourcesAssets({ data, onRefresh, progress }: ResourcesAssetsPr
       }
     />
   );
+}
+
+/**
+ * A block's header icon: what the block is, colored by what the dig found.
+ * Green when it found some, red when it found none, orange when a bot challenge
+ * stood in for the page. The shape never changes, so the four blocks read as
+ * kinds of asset rather than as four identical checkmarks.
+ */
+function headerIcon(kind: Icon, found: boolean, isChallengePage: boolean): Image.ImageLike {
+  if (isChallengePage) return { source: Icon.ExclamationMark, tintColor: Color.Orange };
+  return { source: kind, tintColor: found ? Color.Green : Color.Red };
 }
 
 interface ResourcesAssetsDetailProps {
@@ -149,13 +174,7 @@ function ResourcesAssetsDetail({
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label
             title={`Images${hasImages ? ` (${uniqueImageCount} unique)` : ""}`}
-            icon={
-              isChallengePage
-                ? { source: Icon.ExclamationMark, tintColor: Color.Orange }
-                : hasImages
-                  ? { source: Icon.Check, tintColor: Color.Green }
-                  : { source: Icon.Xmark, tintColor: Color.Red }
-            }
+            icon={headerIcon(Icon.Image, hasImages, isChallengePage)}
           />
           {hasImages &&
             (() => {
@@ -194,15 +213,12 @@ function ResourcesAssetsDetail({
           )}
 
           <List.Item.Detail.Metadata.Separator />
+          <SvgSummary data={data} isChallengePage={isChallengePage} deniedMessage={deniedMessage} />
+
+          <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title={`Fonts${hasFonts ? ` (${resources!.fonts!.length})` : ""}`}
-            icon={
-              isChallengePage
-                ? { source: Icon.ExclamationMark, tintColor: Color.Orange }
-                : hasFonts
-                  ? { source: Icon.Check, tintColor: Color.Green }
-                  : { source: Icon.Xmark, tintColor: Color.Red }
-            }
+            icon={headerIcon(Icon.Text, hasFonts, isChallengePage)}
           />
           {hasFonts &&
             resources!.fonts!.slice(0, 5).map((font: FontAsset, index: number) => {
@@ -228,13 +244,7 @@ function ResourcesAssetsDetail({
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title={`Stylesheets${hasStylesheets ? ` (${resources!.stylesheets!.length})` : ""}`}
-            icon={
-              isChallengePage
-                ? { source: Icon.ExclamationMark, tintColor: Color.Orange }
-                : hasStylesheets
-                  ? { source: Icon.Check, tintColor: Color.Green }
-                  : { source: Icon.Xmark, tintColor: Color.Red }
-            }
+            icon={headerIcon(Icon.Swatch, hasStylesheets, isChallengePage)}
           />
           {hasStylesheets &&
             resources!.stylesheets!.slice(0, 5).map((sheet, index) => {
@@ -262,13 +272,7 @@ function ResourcesAssetsDetail({
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title={`Scripts${hasScripts ? ` (${resources!.scripts!.length})` : ""}`}
-            icon={
-              isChallengePage
-                ? { source: Icon.ExclamationMark, tintColor: Color.Orange }
-                : hasScripts
-                  ? { source: Icon.Check, tintColor: Color.Green }
-                  : { source: Icon.Xmark, tintColor: Color.Red }
-            }
+            icon={headerIcon(Icon.CodeBlock, hasScripts, isChallengePage)}
           />
           {hasScripts &&
             (() => {
@@ -309,5 +313,81 @@ function ResourcesAssetsDetail({
         </List.Item.Detail.Metadata>
       }
     />
+  );
+}
+
+/**
+ * SVGs the dig already found: icon links, Open Graph and Twitter images, JSON-LD,
+ * and the web manifest — which is not in `<head>` at all, so the copy never says
+ * "in <head>". The grid receives these too, because its own scan reads HTML and
+ * would otherwise miss the metadata and manifest ones.
+ */
+/** The page's own URL after redirects: what a relative reference on it resolves against. */
+function pageBase(data: DiggerResult): string {
+  return data.networking?.finalUrl ?? data.url;
+}
+
+function knownSvgs(data: DiggerResult) {
+  const seen = new Set<string>();
+  return (data.resources?.images ?? []).filter((img) => {
+    const isSvg = isSvgUrl(img.src) || /svg/i.test(img.mimeType ?? "");
+    if (!isSvg || seen.has(img.src)) return false;
+    seen.add(img.src);
+    return true;
+  });
+}
+
+/**
+ * What the dig knows about SVGs: head declarations and the manifest, never the body.
+ *
+ * Inline SVGs live in the body and the dig stops at `</head>`, so this block
+ * claims neither a count nor an absence for them: its header carries a neutral
+ * icon rather than a check or a cross. View All SVGs downloads the page and counts.
+ */
+function SvgSummary({
+  data,
+  isChallengePage,
+  deniedMessage,
+}: {
+  data: DiggerResult;
+  isChallengePage: boolean;
+  deniedMessage: string;
+}) {
+  const headSvgs = knownSvgs(data);
+
+  return (
+    <>
+      {isChallengePage ? (
+        <>
+          <List.Item.Detail.Metadata.Label
+            title="SVGs"
+            icon={{ source: Icon.ExclamationMark, tintColor: Color.Orange }}
+          />
+          <List.Item.Detail.Metadata.Label title="" text={deniedMessage} />
+        </>
+      ) : (
+        <>
+          {/* No count and no check or cross: the dig stops at </head>, and the
+              body's SVGs are only counted once View All SVGs downloads the page.
+              A count of the head's alone would read as the page's total. */}
+          <List.Item.Detail.Metadata.Label
+            title="SVGs"
+            icon={{ source: Icon.EditShape, tintColor: Color.SecondaryText }}
+          />
+          {headSvgs.slice(0, 3).map((img) => {
+            const absoluteUrl = resolveUrl(img.src, pageBase(data));
+            const filename = absoluteUrl.startsWith("data:")
+              ? "(inline data)"
+              : absoluteUrl.split("?")[0].split("/").pop() || absoluteUrl;
+            return (
+              <List.Item.Detail.Metadata.Link key={img.src} title={img.type} target={absoluteUrl} text={filename} />
+            );
+          })}
+          {headSvgs.length > 3 && (
+            <List.Item.Detail.Metadata.Label title={`…and ${headSvgs.length - 3} more found by the dig`} />
+          )}
+        </>
+      )}
+    </>
   );
 }

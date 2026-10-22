@@ -1,11 +1,17 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { requestEmailCode, verifyEmailCode } from "../lib/auth";
+import type { User } from "@supabase/supabase-js";
 
 type Step = "email" | "code";
 
 interface SignInViewProps {
-  onAuthenticated: () => void;
+  /**
+   * Called with the account that just signed in. The user is passed rather
+   * than read back from state, so a caller resuming an interrupted action has
+   * an id to use immediately.
+   */
+  onAuthenticated: (signedInUser: User) => void;
 }
 
 /**
@@ -53,8 +59,8 @@ export function SignInView({ onAuthenticated }: SignInViewProps) {
 
     setIsSubmitting(true);
     try {
-      await verifyEmailCode(email.trim(), trimmedCode);
-      onAuthenticated();
+      const signedInUser = await verifyEmailCode(email.trim(), trimmedCode);
+      onAuthenticated(signedInUser);
     } catch (verifyError) {
       await showToast({
         style: Toast.Style.Failure,

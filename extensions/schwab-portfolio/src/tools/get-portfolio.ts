@@ -1,6 +1,7 @@
 import { withAccessToken } from "@raycast/utils";
 import { schwabOAuth } from "../lib/oauth";
 import { getAccounts, getAccountNicknames } from "../lib/schwab-client";
+import { getPositionReturn } from "../lib/position-return";
 import { getAccountAliases } from "../lib/account-aliases";
 import { getAccountDisplayName, getAccountTotalValue, getCashBalance } from "../types/accounts";
 
@@ -24,11 +25,7 @@ export default withAccessToken(schwabOAuth)(async () => {
     const accountValue = getAccountTotalValue(account);
     const positions = (sa.positions ?? []).map((position) => {
       const quantity = position.longQuantity || position.shortQuantity || 0;
-      const averageCost = position.averagePrice ?? position.averageLongPrice ?? position.taxLotAverageLongPrice;
-      const costBasis = averageCost != null ? averageCost * quantity : undefined;
-      const unrealizedProfitLoss =
-        position.longOpenProfitLoss ??
-        (position.marketValue != null && costBasis != null ? position.marketValue - costBasis : undefined);
+      const { unrealizedPL: unrealizedProfitLoss } = getPositionReturn(position);
       return {
         symbol: position.instrument.symbol,
         description: position.instrument.description,

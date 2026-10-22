@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "music-recognizer",
+  "title": "Music Recognizer",
+  "description": "Identify the song playing on your PC by recording a few seconds of system audio.",
+  "icon": "icon.png",
+  "author": "erenalparslan",
+  "categories": [
+    "Media"
+  ],
+  "keywords": [
+    "song",
+    "music",
+    "identify",
+    "recognition",
+    "now playing",
+    "what song is this",
+    "audio"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "recognize",
+      "title": "Recognize",
+      "subtitle": "Music Recognizer",
+      "description": "Listen to what's playing and identify the song.",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Music Recognizer",
+      "description": "Browse previously recognized songs.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "AudD API Token",
+      "description": "Your personal AudD API token from dashboard.audd.io. AudD offers a limited free trial; continued use needs a paid AudD plan.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "duration",
+      "title": "Recording Duration",
+      "description": "How long to record system audio before recognition. 5 seconds is usually plenty; longer clips only help when the recording is noisy.",
+      "type": "dropdown",
+      "required": false,
+      "default": "5",
+      "data": [
+        {
+          "title": "3 seconds",
+          "value": "3"
+        },
+        {
+          "title": "5 seconds",
+          "value": "5"
+        },
+        {
+          "title": "8 seconds",
+          "value": "8"
+        },
+        {
+          "title": "10 seconds",
+          "value": "10"
+        },
+        {
+          "title": "12 seconds",
+          "value": "12"
+        }
+      ]
+    },
+    {
+      "name": "primaryService",
+      "title": "Primary Music Service",
+      "description": "Shown as the first action after a match, so pressing Enter opens the song there.",
+      "type": "dropdown",
+      "required": false,
+      "default": "spotify",
+      "data": [
+        {
+          "title": "Spotify",
+          "value": "spotify"
+        },
+        {
+          "title": "YouTube Music",
+          "value": "youtubemusic"
+        },
+        {
+          "title": "Apple Music",
+          "value": "applemusic"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.0",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

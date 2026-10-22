@@ -80,28 +80,6 @@ export const getHistoryDbPath = (): string => {
   return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "places.sqlite");
 };
 
-export const getSessionManagerExtensionPath = (extensionId: string) => {
-  const userDirectoryPath = userDataDirectoryPath();
-  return path.join(
-    userDirectoryPath,
-    getProfileName(userDirectoryPath),
-    "storage",
-    "default",
-    `moz-extension+++${extensionId}`,
-    "idb",
-  );
-};
-
-export const getSessionInactivePath = (): string => {
-  const userDirectoryPath = userDataDirectoryPath();
-  return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "sessionstore.jsonlz4");
-};
-
-export const getSessionActivePath = (): string => {
-  const userDirectoryPath = userDataDirectoryPath();
-  return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "sessionstore-backups", "recovery.jsonlz4");
-};
-
 // Escape ' for SQL and the LIKE wildcards % and _ (plus the escape char itself) so they match literally.
 const escapeLike = (term: string) => term.replace(/'/g, "''").replace(/[\\%_]/g, "\\$&");
 

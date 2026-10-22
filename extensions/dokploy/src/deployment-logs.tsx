@@ -5,8 +5,16 @@ import { parseTrpcTextResponse, trpcQueryUrl } from "./trpc";
 
 const LOG_TAIL = 200;
 
-export default function DeploymentLogs({ deployment }: { deployment: { deploymentId: string; title: string } }) {
-  const { url, headers } = useToken();
+export default function DeploymentLogs({
+  deployment,
+  token,
+}: {
+  deployment: { deploymentId: string; title: string };
+  /** Overrides the cached active-instance token - see the identical prop on `DeploymentHistory`. */
+  token?: { url: string; headers: Record<string, string> };
+}) {
+  const activeToken = useToken();
+  const { url, headers } = token ?? activeToken;
 
   const requestUrl = trpcQueryUrl(url, "deployment.readLogs", {
     deploymentId: deployment.deploymentId,

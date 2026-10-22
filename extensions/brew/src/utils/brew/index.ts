@@ -11,6 +11,7 @@ export type {
   Nameable,
   Cask,
   CaskDependency,
+  CaskArtifact,
   Formula,
   InstalledVersion,
   Versions,
@@ -38,7 +39,9 @@ export {
   brewMapInstalled,
   asInstallableResults,
   brewFetchOutdated,
+  brewFetchVulns,
   brewUpdate,
+  brewCheckForUpdate,
   brewFetchFormulaInfo,
   brewFetchCaskInfo,
   hasSearchCache,
@@ -73,6 +76,7 @@ export type { SearchProgressCallback, SearchDownloadProgress } from "./search";
 // Actions
 export {
   brewInstall,
+  brewInstallDryRun,
   brewInstallWithProgress,
   brewUninstall,
   brewUpgrade,
@@ -83,6 +87,48 @@ export {
   brewUnpin,
   brewDoctor,
 } from "./actions";
+
+// Link / unlink casks (`brew {link,unlink} --cask`, Homebrew 7)
+export { brewCaskLinkPreview, caskHasSymlinkArtifacts } from "./link";
+export {
+  ADOPT_INDEX_FILE,
+  adoptClassification,
+  adoptIndexEntry,
+  adoptOperation,
+  adoptProgressText,
+  isAdoptPhase,
+  isOwnedByCurrentUser,
+  bundleRelativeLinkSources,
+  conflictingInstalledCasks,
+  identitySignal,
+  isMacAppStoreApp,
+  missingLinkedComponents,
+  readBundleVersion,
+  scanForAdoptableApps,
+  versionRelationship,
+} from "./adopt";
+export type {
+  AdoptableApp,
+  AdoptCandidate,
+  AdoptClassification,
+  AdoptIndex,
+  AdoptIndexEntry,
+  AdoptOperation,
+  AdoptTier,
+  IdentitySignal,
+  InstalledApplication,
+  VersionRelationship,
+} from "./adopt";
+export { loadAdoptIndex, loadCasksByToken, rebuildCaskIndex } from "./fetch";
+export type { CaskLinkVerb } from "./link";
+
+// Install preview (`brew install --dry-run`)
+export { parseDryRun } from "./dry-run";
+export type { DryRunSection } from "./dry-run";
+
+// Doctor (`brew doctor --json`)
+export { tierLabel, worstTier, doctorReportMarkdown } from "./doctor";
+export type { DoctorReport, DoctorTier } from "./doctor";
 
 // Upgrade with progress
 export { brewUpgradeOutdated, upgradeKey } from "./upgrade";
@@ -108,20 +154,49 @@ export {
 } from "./services";
 export type { Service, ServiceStatus, ServiceAction } from "./services";
 
+// Third-party taps
+export {
+  brewFetchQualifiedPackage,
+  brewFetchTapPackages,
+  brewFetchTaps,
+  brewIsTapped,
+  brewPackageTrust,
+  brewTapCommand,
+  parseTapName,
+  tapCommandName,
+  untapCommands,
+} from "./taps";
+export type { PackageTrust, Tap, TapInstalls, TapStatus, TapTarget } from "./taps";
+
+// Installability (Homebrew 7's ⊘ marker, derived from the API JSON)
+export { installabilityOf } from "./installability";
+export { brewHost } from "./host";
+
 // Version comparison
-export { isOutdatedVersion } from "./version";
+export { isOutdatedVersion, HOMEBREW_7 } from "./version";
+export { getBrewMajorVersion, invalidateBrewMajorVersion } from "./brew-version";
+export { confirmAndRun } from "./confirmAndRun";
+
+// Vulnerabilities (`brew vulns`)
+export { osvUrl, osvLink, escapeMarkdown } from "./vulns";
+export type { VulnSeverity, Vulnerability, VulnFinding, VulnResults } from "./vulns";
 
 // Helpers
 export {
   brewName,
+  isThirdPartyTap,
+  thirdPartyTapOf,
   brewIsInstalled,
   brewInstallPath,
   brewFormatVersion,
   brewInstalledVersion,
+  brewAvailableVersion,
+  formatPackageVersion,
   brewIsOutdated,
   brewInstalledDate,
   brewIdentifier,
   brewCaskOption,
+  caskLanguagesText,
   normalizeOutdatedResults,
   brewPinnedIdentifiers,
   pinLookupKey,
@@ -130,6 +205,8 @@ export {
   brewCompare,
   brewInstallCommand,
   brewAdoptCommand,
+  brewAdoptCaskCommand,
+  brewAdoptCaskArgs,
   brewUninstallCommand,
   brewUpgradeCommand,
 } from "./helpers";

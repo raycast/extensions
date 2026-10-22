@@ -9,10 +9,13 @@ import {
   isNpxResolutionError,
   isSkillsCliBusyError,
   runSkillsCli,
+  stripAnsiEscapes,
   type SkillsCliRunner,
 } from "./skills-cli-runner";
 
 const home = homedir();
+
+const MAX_UNEXPECTED_OUTPUT_CHARS = 500;
 
 export {
   InvalidCustomNpxPathError,
@@ -49,8 +52,14 @@ export async function listInstalledSkills(runCli: SkillsCliRunner = runSkillsCli
   const stdout = await runCli(["list", "-g", "--json"], { readOnly: true });
   try {
     return parseSkillsListJson(stdout);
-  } catch {
-    throw new Error("Failed to parse skills list: unexpected output from `skills list --json`");
+  } catch (error) {
+    const output = stripAnsiEscapes(stdout).trim();
+    const excerpt =
+      output.length > MAX_UNEXPECTED_OUTPUT_CHARS ? `${output.slice(0, MAX_UNEXPECTED_OUTPUT_CHARS)}…` : output;
+    throw new Error(
+      `Failed to parse skills list: unexpected output from \`skills list --json\`\n${excerpt || "(no output)"}`,
+      { cause: error },
+    );
   }
 }
 

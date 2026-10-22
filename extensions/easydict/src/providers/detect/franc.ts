@@ -2,61 +2,27 @@
 
 import { francAll } from "franc";
 
-import type { DetectedLangModel } from "@/core/detect/types";
-import { isPreferredLanguage } from "@/core/detect/utils";
+import type { DetectionObservation } from "@/core/detect/types";
 import { languageItemList } from "@/core/language/consts";
-import { getLanguageItem, getLanguageItemFromFrancCode } from "@/core/language/utils";
-import { LanguageDetectType } from "@/types/api";
+import { getLangCode, getLanguageFromProviderCode, isLanguageCode } from "@/core/language/utils";
+import { LanguageDetectType } from "@/core/results/kinds";
 
-import type { DetectOptions } from "./base";
 import { BaseDetectProvider } from "./base";
 
 export class FrancDetectProvider extends BaseDetectProvider {
   type = LanguageDetectType.Franc;
   isLocal = true;
 
-  isEnabled(): boolean {
+  isEnabled() {
     return true;
   }
 
-  protected async doDetect(text: string, options?: DetectOptions) {
-    return francLanguageDetect(text, options?.confirmedConfidence);
+  protected async doDetect(text: string): Promise<DetectionObservation> {
+    const only = languageItemList.flatMap((item) => getLangCode(item.youdaoLangCode, "francLangCode") ?? []);
+    const candidates = francAll(text, { minLength: 2, only }).map(([code, confidence]) => {
+      const language = getLanguageFromProviderCode(code, "francLangCode");
+      return { language: isLanguageCode(language) ? language : undefined, confidence };
+    });
+    return { kind: "ranked", type: this.type, candidates };
   }
-}
-
-/**
- * Use franc to detect text language (offline, n-gram based).
- */
-export function francLanguageDetect(text: string, confirmedConfidence = 0.8): DetectedLangModel {
-  let detectedLanguageId = "auto";
-  let confirmed = false;
-
-  const onlyFrancLanguageIdList = languageItemList.map((item) => item.francLangCode);
-  const francDetectLanguageList = francAll(text, { minLength: 2, only: onlyFrancLanguageIdList });
-
-  const detectedYoudaoLanguageArray: [string, number][] = francDetectLanguageList.map((languageTuple) => {
-    const [francLanguageId, confidence] = languageTuple;
-    const youdaoLanguageId = getLanguageItemFromFrancCode(francLanguageId).youdaoLangCode;
-    return [youdaoLanguageId, confidence];
-  });
-
-  for (const [languageId, confidence] of detectedYoudaoLanguageArray) {
-    if (confidence > confirmedConfidence && isPreferredLanguage(languageId)) {
-      detectedLanguageId = languageId;
-      confirmed = true;
-      break;
-    }
-  }
-
-  if (!confirmed) {
-    [detectedLanguageId] = detectedYoudaoLanguageArray[0];
-  }
-
-  return {
-    type: LanguageDetectType.Franc,
-    sourceLangCode: getLanguageItem(detectedLanguageId).francLangCode,
-    youdaoLangCode: detectedLanguageId,
-    confirmed,
-    detectedLanguageArray: detectedYoudaoLanguageArray,
-  };
 }

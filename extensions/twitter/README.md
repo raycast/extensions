@@ -35,6 +35,8 @@ Use the **Logout** action in a post's action panel to disconnect your account. T
 
 Lists load up to 20 posts per page. Additional pages are fetched only when you scroll for more results, and successful reads are cached for two minutes to avoid repeating billed X API requests. The details pane follows the extension preference by default and can be toggled at any time with **Option-D** from the action panel.
 
+Post lists and AI tools read the full body of long posts when X returns it. Personal-history and bookmark searches also match that full text. Reposts use the expanded original body when available; if X omits it, only the returned preview is available.
+
 ## Posting and media
 
 The composer supports:

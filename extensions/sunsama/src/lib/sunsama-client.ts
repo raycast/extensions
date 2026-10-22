@@ -20,6 +20,13 @@ interface McpSubtask {
   timeEstimate?: string; // human string, e.g. "1 hours and 30 minutes"
 }
 
+/** A calendar slot the task is projected onto, as Sunsama formats it. */
+interface McpTimeEntry {
+  startTime?: string; // e.g. "9:30 AM"
+  endTime?: string;
+  startDate?: string; // e.g. "2026-09-21 9:30 AM"
+}
+
 interface McpTask {
   _id: string;
   title: string;
@@ -30,10 +37,21 @@ interface McpTask {
   /** The day the task is scheduled to, YYYY-MM-DD. */
   scheduledDate?: string;
   channel?: string;
+  category?: string;
   subtasks?: McpSubtask[];
-  integrationDetails?: { service?: string; url?: string };
+  integrationDetails?: {
+    service?: string;
+    url?: string;
+    externalId?: string;
+    /** Account the item lives under (e.g. a Google Tasks email). */
+    displayIdentifier?: string;
+  };
+  /** Calendar-imported tasks name their source here instead. */
+  importedFrom?: { service?: string };
   actualTimeSpent?: { total?: string };
-  projectedTimeEntries?: Array<{ startTime?: string; startDate?: string }>;
+  projectedTimeEntries?: McpTimeEntry[];
+  createdAt?: string;
+  lastModified?: string;
   /** Present on calendar-imported tasks; false = anchored to another day. */
   isScheduledOnPanelDate?: boolean;
 }
@@ -324,12 +342,24 @@ function projectTask(t: McpTask): Task {
   const totalSeconds =
     (parseDuration(t.actualTimeSpent?.total ?? "") ?? 0) * 60;
 
-  // Earliest calendar slot start, shown as Sunsama formats it (e.g. "9:30 AM").
-  const startTime = (t.projectedTimeEntries ?? [])
-    .filter((e) => e.startTime)
+  // Calendar slots in day order, shown as Sunsama formats them (e.g. "9:30 AM").
+  const entries = (t.projectedTimeEntries ?? [])
+    .filter((e): e is McpTimeEntry & { startTime: string } =>
+      Boolean(e.startTime),
+    )
+    // An entry without a parsable date sorts first rather than poisoning the
+    // comparison with NaN.
     .sort(
-      (a, b) => Date.parse(a.startDate ?? "") - Date.parse(b.startDate ?? ""),
-    )[0]?.startTime;
+      (a, b) =>
+        (Date.parse(a.startDate ?? "") || 0) -
+        (Date.parse(b.startDate ?? "") || 0),
+    );
+  const startTime = entries[0]?.startTime;
+  const timeSlots = entries.map((e) =>
+    e.endTime ? `${e.startTime} – ${e.endTime}` : e.startTime,
+  );
+
+  const integration = t.integrationDetails;
 
   // Timer state is folded in later by `withActiveTimer`, once that separate
   // request lands.
@@ -348,13 +378,20 @@ function projectTask(t: McpTask): Task {
     completed: t.completed,
     timeEstimate: minutes(t.timeEstimate),
     channelName: t.channel || undefined,
-    integrationUrl: t.integrationDetails?.url,
-    integrationService: t.integrationDetails?.service,
+    category: t.category || undefined,
+    integrationUrl: integration?.url,
+    integrationService: integration?.service,
+    integrationId: integration?.externalId || undefined,
+    integrationAccount: integration?.displayIdentifier || undefined,
+    importedFrom: t.importedFrom?.service,
     subtasks,
     isRunning: false,
     trackedSeconds: totalSeconds,
     ownTimerRunning: false,
     startTime,
+    timeSlots,
+    createdAt: t.createdAt,
+    lastModified: t.lastModified,
   };
 }
 
@@ -386,12 +423,23 @@ export async function getTasksForDay(day: string): Promise<DayTasks> {
     // hidden rather than dropped — they stay in `allIds` so reordering doesn't
     // relocate them:
     //   - Calendar imports anchored elsewhere (the server rolls incomplete past
-    //     events forward, but Sunsama keeps an event on its own day).
+    //     events forward, but Sunsama keeps an event on its own day). An
+    //     event's `scheduledDate` is its own day, so anything else is a
+    //     rollover — `isScheduledOnPanelDate` alone missed events that arrived
+    //     without the flag.
     //   - Tasks already moved to a later day. The day resource keeps returning
     //     those, so without this a task snoozed to tomorrow stays on today.
     //     Earlier days are kept on purpose: that's a rolled-over task.
     tasks: ordered
       .filter((t) => t.isScheduledOnPanelDate !== false)
+      .filter(
+        (t) =>
+          !(
+            t.importedFrom?.service &&
+            t.scheduledDate &&
+            t.scheduledDate !== day
+          ),
+      )
       .filter((t) => !(t.scheduledDate && isAfterDay(t.scheduledDate, day)))
       .map(projectTask),
     allIds: ordered.map((t) => t._id),

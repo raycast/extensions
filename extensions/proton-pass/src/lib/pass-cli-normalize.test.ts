@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { normalizeItem, normalizeVault } from "./pass-cli-normalize";
+import { normalizeItem, normalizeItemDetail, normalizeVault } from "./pass-cli-normalize";
 import { PassCliError } from "./types";
 
 test("normalizes a scoped item list entry that omits the vault share id", () => {
@@ -79,8 +79,11 @@ test("normalizes full login data to exactly the cache-safe Item keys", () => {
 
   assert.deepEqual(Object.keys(item).sort(), [
     "email",
+    "hasNote",
+    "hasPassword",
     "hasTotp",
     "itemId",
+    "modifiedAt",
     "shareId",
     "title",
     "type",
@@ -90,7 +93,72 @@ test("normalizes full login data to exactly the cache-safe Item keys", () => {
   ]);
   assert.equal(Object.hasOwn(item, "password"), false);
   assert.equal(Object.hasOwn(item, "totp_uri"), false);
+  assert.equal(Object.hasOwn(item, "totpUri"), false);
   assert.equal(item.hasTotp, true);
+  assert.equal(item.hasPassword, true);
+});
+
+test("records whether a login has a password and when it was last modified", () => {
+  const login = normalizeItem(
+    {
+      id: "item-1",
+      modify_time: "2025-06-01T12:34:56",
+      content: { title: "Passkey Only", content: { Login: { username: "alice", password: "" } } },
+    },
+    "Personal",
+    "vault-1",
+  );
+  assert.equal(login.hasPassword, false);
+  assert.equal(login.modifiedAt, "2025-06-01T12:34:56.000Z");
+
+  const note = normalizeItem(
+    { id: "item-2", modify_time: 1748781296, content: { title: "Note", content: { Note: {} } } },
+    "Personal",
+    "vault-1",
+  );
+  assert.equal(note.hasPassword, undefined);
+  assert.equal(note.modifiedAt, "2025-06-01T12:34:56.000Z");
+
+  const undated = normalizeItem(
+    { id: "item-3", modify_time: "not a date", content: { title: "Note", content: { Note: {} } } },
+    "Personal",
+    "vault-1",
+  );
+  assert.equal(undated.modifiedAt, undefined);
+});
+
+test("records whether an item has a note without keeping the note", () => {
+  const withNote = normalizeItem(
+    {
+      id: "item-1",
+      content: { title: "Login", note: "  recovery codes  ", content: { Login: { username: "alice" } } },
+    },
+    "Personal",
+    "vault-1",
+  );
+  assert.equal(withNote.hasNote, true);
+  assert.equal(JSON.stringify(withNote).includes("recovery codes"), false);
+
+  const withoutNote = normalizeItem(
+    { id: "item-2", content: { title: "Login", note: "   ", content: { Login: { username: "alice" } } } },
+    "Personal",
+    "vault-1",
+  );
+  assert.equal(withoutNote.hasNote, false);
+});
+
+test("exposes the TOTP URI in item details only", () => {
+  const raw = {
+    id: "item-1",
+    content: {
+      title: "Login",
+      content: { Login: { username: "alice", password: "secret", totp_uri: "otpauth://totp/Example?secret=ABC" } },
+    },
+  };
+  const detail = normalizeItemDetail(raw, "Personal", "vault-1");
+  assert.equal(detail.totpUri, "otpauth://totp/Example?secret=ABC");
+  assert.equal(detail.password, "secret");
+  assert.equal(detail.vaultName, "Personal");
 });
 
 test("recognizes note, credit card, and alias items", () => {

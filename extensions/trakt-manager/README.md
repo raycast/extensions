@@ -24,9 +24,9 @@ Search for episodes by title.
 
 Lists movies and shows that are in your watchlist.
 
-### Up Next
+### Continue Watching
 
-Get the list of shows that are up next.
+Lists the shows and movies you are in the middle of, like Trakt's Continue Watching. Filter by All, Shows or Movies.
 
 ### History
 
@@ -45,8 +45,9 @@ Raycast AI can act on your Trakt account using the same sign-in as the commands 
 - _"What episode am I on in Breaking Bad?"_
 - _"Rate The Bear 9 out of 10"_
 - _"What should I watch next?"_
+- _"Create a list called Emmy 2025 winners and add these shows to it"_
 
-Anything that changes your account — marking as watched, rating, or editing the watchlist — asks for confirmation first, and shows exactly which title it resolved so it cannot act on the wrong one.
+Anything that changes your account — marking as watched, rating, editing the watchlist or your lists — asks for confirmation first, and shows exactly which title it resolved so it cannot act on the wrong one.
 
 When several titles share a name, mention the year (_"Butterfly 2025"_) to remove the ambiguity.
 

@@ -45,7 +45,7 @@ function SearchArc(props: LaunchProps) {
       ) : (
         <>
           <HistoryListSection searchText={searchText} history={history} />
-          {!isLoadingHistory && <TabListSections searchText={searchText} tabs={tabs} mutateTabs={mutateTabs} />}
+          <TabListSections searchText={searchText} tabs={tabs} mutateTabs={mutateTabs} />
           <SuggestionsListSection searchText={searchText} suggestions={suggestions} />
         </>
       )}

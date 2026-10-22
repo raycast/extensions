@@ -10,7 +10,14 @@
 
 import { Cask, Formula, InstallableResults, DownloadProgress, IndexEntry } from "../types";
 import { searchLogger } from "../logger";
-import { fetchFormulaIndex, fetchCaskIndex, fetchFormulaItems, fetchCaskItems } from "./fetch";
+import {
+  fetchFormulaIndex,
+  fetchCaskIndex,
+  fetchFormulaItems,
+  fetchCaskItems,
+  cachedFormulaIndex,
+  cachedCaskIndex,
+} from "./fetch";
 import { brewCompare } from "./helpers";
 import { PopularityRanks, byPopularity } from "./analytics";
 
@@ -37,6 +44,9 @@ export type SearchProgressCallback = (progress: SearchDownloadProgress) => void;
  * @param ranks - When given, results are ordered by install count instead of
  *   name relevance. Ranking happens on the full match set, *before* the limit
  *   is applied, so the top results are the most installed matches overall.
+ * @param offset - Where the window starts. Results are a WINDOW, not a growing
+ *   list: page 40 loads the same number of records as page 1, which is what
+ *   keeps the command under Raycast's memory ceiling. See `utils/paging.ts`.
  * @returns Matching formulae and casks
  */
 export async function brewSearch(
@@ -45,8 +55,9 @@ export async function brewSearch(
   signal?: AbortSignal,
   onProgress?: SearchProgressCallback,
   ranks?: PopularityRanks,
+  offset = 0,
 ): Promise<InstallableResults> {
-  searchLogger.log("Searching", { query: searchText, limit, sortByPopularity: ranks != undefined });
+  searchLogger.log("Searching", { query: searchText, limit, offset, sortByPopularity: ranks != undefined });
 
   // Track progress for both downloads
   let casksProgress: DownloadProgress | undefined;
@@ -128,8 +139,14 @@ export async function brewSearch(
   const casksLen = matchingCaskEntries.length;
 
   // Phase 3: Slice BEFORE loading chunks (key optimization)
-  const limitedFormulaEntries = limit ? matchingFormulaEntries.slice(0, limit) : matchingFormulaEntries;
-  const limitedCaskEntries = limit ? matchingCaskEntries.slice(0, limit) : matchingCaskEntries;
+  // The window starts at `offset`, so paging forward DROPS the previous page
+  // rather than appending to it — see the `offset` note above.
+  const limitedFormulaEntries = limit
+    ? matchingFormulaEntries.slice(offset, offset + limit)
+    : matchingFormulaEntries.slice(offset);
+  const limitedCaskEntries = limit
+    ? matchingCaskEntries.slice(offset, offset + limit)
+    : matchingCaskEntries.slice(offset);
 
   // Phase 4: Load only needed chunks
   const [formulae, casks] = await Promise.all([
@@ -154,12 +171,14 @@ export async function brewSearch(
     }
   }
 
-  // Set totalLength for UI (shows "X of Y results")
+  // `totalLength` drives "X of Y results" in-process; `totals` below is the
+  // same numbers in a form that survives being cached (see InstallableResults).
   (formulae as Formula[] & { totalLength?: number }).totalLength = formulaeLen;
   (casks as Cask[] & { totalLength?: number }).totalLength = casksLen;
 
   searchLogger.log("Search completed", {
     query: searchText,
+    offset,
     formulaeResults: formulae.length,
     casksResults: casks.length,
     totalFormulae: formulaeLen,
@@ -174,5 +193,78 @@ export async function brewSearch(
     casksProgress: casksProgress ? { ...casksProgress, totalItems: casksLen } : undefined,
   });
 
-  return { formulae, casks };
+  return { formulae, casks, totals: { formulae: formulaeLen, casks: casksLen } };
+}
+
+/**
+ * The outcome of {@link brewFindPackage}.
+ *
+ * `missing` and `unavailable` are kept apart because they mean opposite things
+ * to the user: one says brew has no such package, the other says we cannot
+ * answer yet.
+ */
+export type FindPackageResult =
+  | { status: "found"; package: Formula | Cask }
+  /** The indexes were readable and neither had the name — including a tap-only package. */
+  | { status: "missing" }
+  /** No valid index on disk yet, so nothing was looked up. */
+  | { status: "unavailable" };
+
+/**
+ * Find one package by its exact name or token.
+ *
+ * For callers that hold a bare name — a `brew install --dry-run` plan lists
+ * dependencies by name only — and need the record behind it. Formulae are
+ * checked first, since a name that is both is the formula in brew's own
+ * resolution order.
+ *
+ * Strictly a READ of what is already cached: `cachedFormulaIndex` /
+ * `cachedCaskIndex` return the in-memory or on-disk index and nothing else, so
+ * a cold or schema-stale cache yields `unavailable` rather than kicking off the
+ * full chunked-cache build (and, on the warm path, the background rebuild) that
+ * `fetchFormulaIndex` would. That build is what the sliding-window memory
+ * budget exists to avoid, and this lookup is worth one index read plus one
+ * chunk read or nothing at all.
+ *
+ * Cost when it does run: the two indexes (already on disk after any search)
+ * plus ONE chunk read for the match. Nothing is fetched on a miss, and a
+ * package that lives only in a tap is a miss: the indexes cover the core taps
+ * alone.
+ */
+export async function brewFindPackage(name: string): Promise<FindPackageResult> {
+  const target = name.toLowerCase();
+  const [formulaIndex, caskIndex] = await Promise.all([cachedFormulaIndex(), cachedCaskIndex()]);
+
+  if (!formulaIndex || !caskIndex) {
+    searchLogger.log("No cached index for lookup", { name });
+    return { status: "unavailable" };
+  }
+
+  // An index entry promises a chunk read will produce the record, but a chunk
+  // written by an older build — or half-written, or since pruned — can hand
+  // back nothing. Reporting that as "found" with no package let `isCask()`
+  // throw a TypeError, which surfaced as a misleading "Lookup failed".
+  // The indexes and chunks disagree, which is "cannot answer", not "not there".
+  const formulaEntry = formulaIndex.entries.find((entry) => entry.n === target || entry.a?.includes(target));
+  if (formulaEntry) {
+    const formula = (await fetchFormulaItems([formulaEntry]))[0];
+    if (!formula) {
+      searchLogger.log("Index entry with no chunk record", { name, kind: "formula" });
+      return { status: "unavailable" };
+    }
+    return { status: "found", package: formula };
+  }
+
+  const caskEntry = caskIndex.entries.find((entry) => entry.n === target);
+  if (caskEntry) {
+    const cask = (await fetchCaskItems([caskEntry]))[0];
+    if (!cask) {
+      searchLogger.log("Index entry with no chunk record", { name, kind: "cask" });
+      return { status: "unavailable" };
+    }
+    return { status: "found", package: cask };
+  }
+
+  searchLogger.log("Package not found in index", { name });
+  return { status: "missing" };
 }

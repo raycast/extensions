@@ -79,7 +79,7 @@
     "fix-lint": "ray lint --fix"
   },
   "overrides": {
-    "brace-expansion": "5.0.9",
-    "js-yaml@4": "4.3.1"
+    "brace-expansion@1": "1.1.21",
+    "js-yaml@4": "4.3.2"
   }
 }

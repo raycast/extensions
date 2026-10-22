@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "amp-runner-manager",
+  "title": "Local Amp Runners",
+  "description": "Manage folders served by local Amp runners",
+  "icon": "icon.png",
+  "author": "nhkhang",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "manage-runners",
+      "title": "Manage Local Amp Runners",
+      "description": "Manage folders served by local Amp runners",
+      "mode": "view",
+      "keywords": [
+        "amp",
+        "runner",
+        "folders",
+        "directories"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ampPath",
+      "title": "Amp Executable",
+      "description": "Path to the Amp CLI",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/.local/bin/amp",
+      "default": "~/.local/bin/amp"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.20.6",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

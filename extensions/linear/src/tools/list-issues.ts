@@ -1,13 +1,11 @@
 import { LinearClient, PaginationOrderBy } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
 
-import { linear } from "../api/linearClient";
-
-import { IssueField, resolveWorkflowState, serializeIssue } from "./issueUtils";
+import { resolveWorkflowState } from "./issueUtils";
 import {
   afterDate,
   client,
   collect,
+  isUuid,
   PageInput,
   resolveCycle,
   resolveIssue,
@@ -17,6 +15,8 @@ import {
   resolveTeam,
   resolveUser,
 } from "./linearUtils";
+import { IssueField, serializeIssue } from "./serializers";
+import { withLinear } from "./withLinear";
 
 type IssueFilter = NonNullable<Parameters<LinearClient["issues"]>[0]>["filter"];
 
@@ -26,6 +26,7 @@ interface Input extends PageInput {
   /** Sort: createdAt | updatedAt */ orderBy?: "createdAt" | "updatedAt";
   query?: string;
   team?: string;
+  /** Status ID, name, or type. Without `team`, matches that status in every team. */
   state?: string;
   cycle?: string;
   label?: string;
@@ -42,9 +43,9 @@ interface Input extends PageInput {
   includeArchived?: boolean;
 }
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   const team = input.team ? await resolveTeam(input.team) : undefined;
-  const state = input.state ? await resolveState(input.state, team?.id) : undefined;
+  const state = input.state && team ? await resolveWorkflowState(input.state, team.id) : undefined;
   const cycle = input.cycle ? await resolveCycle(input.cycle, team?.id) : undefined;
   const label = input.label ? await resolveIssueLabel(input.label) : undefined;
   const assignee =
@@ -57,7 +58,7 @@ export default withAccessToken(linear)(async (input: Input) => {
   const updatedAfter = afterDate(input.updatedAt);
   const filter: IssueFilter = {
     team: team ? { id: { eq: team.id } } : undefined,
-    state: state ? { id: { eq: state.id } } : undefined,
+    state: state ? { id: { eq: state.id } } : input.state ? stateAcrossTeams(input.state) : undefined,
     cycle: cycle ? { id: { eq: cycle.id } } : undefined,
     labels: label ? { some: { id: { eq: label.id } } } : undefined,
     assignee:
@@ -87,17 +88,12 @@ export default withAccessToken(linear)(async (input: Input) => {
   return { ...result, nodes: await Promise.all(result.nodes.map((issue) => serializeIssue(issue, input.fields))) };
 });
 
-async function resolveState(query: string, teamId?: string) {
-  if (teamId) return resolveWorkflowState(query, teamId);
-  try {
-    return await client().workflowState(query);
-  } catch {
-    // Resolve human-readable state names and types below.
-  }
-  const normalized = query.toLowerCase();
-  const states = (await client().workflowStates({ first: 250 })).nodes;
-  const matches = states.filter((state) => state.name.toLowerCase() === normalized || state.type === normalized);
-  if (matches.length === 1) return matches[0];
-  if (matches.length > 1) throw new Error(`Multiple issue statuses match "${query}". Pass a team or status ID.`);
-  throw new Error(`No issue status found for "${query}".`);
+/**
+ * Matches a status by ID, name, or type across all teams.
+ *
+ * Every team has its own workflow states, so a name like "In Progress" exists once per team. Resolving it to a single state would fail for questions like "my in-progress issues", so without a team the filter matches every team's state of that name instead.
+ */
+function stateAcrossTeams(query: string): NonNullable<IssueFilter>["state"] {
+  if (isUuid(query)) return { id: { eq: query } };
+  return { or: [{ name: { eqIgnoreCase: query } }, { type: { eq: query.toLowerCase() } }] };
 }

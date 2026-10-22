@@ -5,7 +5,7 @@ import fs from "fs";
 import path from "path";
 import { x } from "tinyexec";
 
-import { logError, logTrace, logWarn } from "@/utils/logger";
+import { logError, logTrace, logWarn } from "@/shared/logger";
 
 import { playTTS } from "./tts";
 

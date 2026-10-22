@@ -214,3 +214,26 @@ export const getTokens = async (options: TokenOptions = {}) => {
     return tokens;
   }
 };
+
+export const getWorkspaceUrl = async (): Promise<string> => {
+  const storedTokens = await client.getTokens();
+  const cachedUrl = await LocalStorage.getItem<string>("URL");
+
+  // If tokens exist locally (even if expired/unrefreshable) and we have a cached URL,
+  // return it immediately — the browser session may still be active.
+  if (storedTokens && cachedUrl) return cachedUrl;
+
+  // No tokens stored means the user is signed out; require a full sign-in.
+  if (!(await getTokens())) {
+    throw new Error("Please sign in to your awork workspace and try again.");
+  }
+
+  await getUserData();
+  const url = await LocalStorage.getItem<string>("URL");
+
+  if (!url) {
+    throw new Error("Couldn't determine your awork workspace URL. Please try again.");
+  }
+
+  return url;
+};

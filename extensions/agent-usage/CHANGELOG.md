@@ -1,5 +1,16 @@
 # Agent Usage Changelog
 
+## [Cursor sign-in on Windows] - 2026-10-16
+
+- Auto-detect active Cursor authentication from the Windows state database, with `%APPDATA%\Cursor\auth.json` as a fallback
+
+## [Add Raycast AI credits] - 2026-10-05
+
+### New Features
+
+- Show remaining Raycast AI credits, plan, and renewal date in the list and menu bar
+- Add a **Raycast Session Cookie** preference for signing in with your raycast.com website session
+
 ## [Multiple Claude accounts] - 2026-09-19
 
 ### New Features

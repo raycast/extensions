@@ -4,6 +4,7 @@ import { getGitLabGQL, gitlab } from "../common";
 import { dataToProject, Group, Milestone, Project } from "../gitlabapi";
 import { getTextIcon, GitLabIcons } from "../icons";
 import { getFirstChar, getPreferences } from "../utils";
+import { useAvatars } from "../hooks";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { EpicList } from "./epics";
 import { IssueList, IssueScope, IssueState } from "./issues";
@@ -16,13 +17,15 @@ function webUrl(group: Group, partial: string) {
 }
 
 export function GroupListItem(props: { group: Group; nameOnly?: boolean }) {
+  const avatarUrl = props.group.avatar_url || props.group.owner?.avatar_url;
+  const avatarSources = useAvatars([avatarUrl]);
   return (
     <List.Item
       id={`${props.group.id}`}
       title={props.nameOnly === true ? props.group.name : props.group.full_name}
       icon={
-        props.group.avatar_url || props.group.owner?.avatar_url
-          ? { source: props.group.avatar_url ?? props.group.owner?.avatar_url ?? "" }
+        avatarSources[avatarUrl ?? ""]
+          ? { source: avatarSources[avatarUrl ?? ""] }
           : getTextIcon((props.group.name ? getFirstChar(props.group.name) : "?").toUpperCase())
       }
       actions={

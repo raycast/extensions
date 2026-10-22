@@ -1,37 +1,83 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import { normalizeOpenAICompatibleEndpoint } from "@/ai-providers/endpoint";
-import { getTokenLimitParams } from "@/ai-providers/tokenLimit";
-import type { OpenAICompatibleProfile } from "@/ai-providers/types";
-import { TranslationType } from "@/types/api";
+import { streamText } from "@xsai/stream-text";
 
-import { BaseOpenAICompatibleTranslateProvider } from "../openai-compatible/base";
+import type { TranslationContent } from "@/core/content/types";
+import { getLanguageEnglishName } from "@/core/language/utils";
+import { TranslationType } from "@/core/results/kinds";
+import type { QueryInput, RequestOptions, StreamChunk } from "@/core/results/types";
+import type { OpenAICompatibleRuntimeConfig } from "@/providers/profiles/runtime";
+import { getTokenLimitParams } from "@/providers/profiles/tokenLimit";
+import { getOpenAICompatibleRequestHeaders } from "@/providers/shared/openai-compatible-headers";
+import { BaseStreamingTranslateProvider } from "@/providers/translation/base";
+import { timedFetch } from "@/shared/http";
+import { logTrace } from "@/shared/logger";
+
+import { createTranslationPromptSpec, renderTranslationChatMessages } from "./prompt";
 
 const DEFAULT_MAX_TOKENS = 2000;
-export class ConfiguredOpenAICompatibleTranslateProvider extends BaseOpenAICompatibleTranslateProvider {
+
+export class ConfiguredOpenAICompatibleTranslateProvider extends BaseStreamingTranslateProvider {
   type = TranslationType.OpenAI;
 
-  constructor(private readonly profile: Readonly<OpenAICompatibleProfile>) {
+  constructor(private readonly config: OpenAICompatibleRuntimeConfig) {
     super();
   }
 
   protected override get logLabel() {
-    return this.profile.name;
+    return this.config.name;
   }
 
-  protected getEndpoint() {
-    return normalizeOpenAICompatibleEndpoint(this.profile.endpoint);
-  }
+  protected async *doTranslate(
+    queryWordInfo: QueryInput,
+    { signal }: RequestOptions = {},
+  ): AsyncGenerator<StreamChunk, TranslationContent, unknown> {
+    const headers = getOpenAICompatibleRequestHeaders(this.config.endpoint);
 
-  protected getModel() {
-    return this.profile.model.trim();
-  }
+    const fromLanguage = getLanguageEnglishName(queryWordInfo.fromLanguage);
+    const toLanguage = getLanguageEnglishName(queryWordInfo.toLanguage);
 
-  protected getAPIKey() {
-    return this.profile.apiKey.trim();
-  }
+    logTrace(
+      this.logLabel,
+      `translate (${this.config.request.model}): ${fromLanguage} -> ${toLanguage}: ${queryWordInfo.word}`,
+    );
 
-  protected getTokenLimitParams() {
-    return getTokenLimitParams(this.profile.tokenLimitMode, DEFAULT_MAX_TOKENS);
+    const tokenParams = getTokenLimitParams(this.config.tokenLimitMode, DEFAULT_MAX_TOKENS);
+    const messages = renderTranslationChatMessages(
+      createTranslationPromptSpec(queryWordInfo, fromLanguage, toLanguage),
+    );
+
+    const chunks: string[] = [];
+
+    const streamResult = streamText({
+      ...this.config.request,
+      ...(headers ? { headers } : {}),
+      messages,
+      abortSignal: signal,
+      fetch: timedFetch.native,
+      ...tokenParams,
+    });
+
+    // Suppress unhandled rejection warnings for unused promises (e.g. usage, messages)
+    Object.values(streamResult).forEach((value) => {
+      if (value instanceof Promise) value.catch(() => {});
+    });
+
+    const { textStream } = streamResult;
+
+    for await (const chunk of textStream) {
+      if (chunk) {
+        chunks.push(chunk);
+        yield { content: chunk };
+      }
+    }
+
+    const resultText = chunks.join("");
+
+    return {
+      kind: "translation",
+      query: queryWordInfo,
+      paragraphs: [resultText],
+    };
   }
 }

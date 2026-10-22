@@ -24,11 +24,11 @@ vi.mock("@raycast/api", () => ({
   },
 }));
 
-vi.mock("@/utils/http", () => ({
+vi.mock("@/shared/http", () => ({
   timedFetch: { raw: testDoubles.fetchRaw },
 }));
 
-vi.mock("@/utils/logger", () => ({
+vi.mock("@/shared/logger", () => ({
   logError: testDoubles.logError,
 }));
 

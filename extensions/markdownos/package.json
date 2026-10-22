@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "markdownos",
+  "title": "MarkdownOS",
+  "description": "Quick actions for MarkdownOS, right from Raycast.",
+  "icon": "icon.png",
+  "author": "azlandotgg",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "Search, edit, archive, and delete your MarkdownOS bookmarks.",
+      "mode": "view"
+    },
+    {
+      "name": "save-bookmark",
+      "title": "Save Bookmark",
+      "description": "Save a URL as a MarkdownOS bookmark, with an optional title.",
+      "mode": "view"
+    },
+    {
+      "name": "save-tab",
+      "title": "Save Current Tab",
+      "description": "Save the active browser tab as a MarkdownOS bookmark.",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "description": "Search your MarkdownOS notes, open one in the app, copy it, or delete it.",
+      "mode": "view"
+    },
+    {
+      "name": "new-note",
+      "title": "Create Note",
+      "description": "Create an empty MarkdownOS note and open it in a new window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-bookmarks",
+      "title": "Open Bookmarks",
+      "description": "Open the Bookmarks section in MarkdownOS.",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "MarkdownOS Menu Bar",
+      "description": "Create a note, search notes or bookmarks, or open the app \u2014 from a menu bar icon.",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "title": "Vault",
+      "description": "Your MarkdownOS vault folder.",
+      "type": "directory",
+      "required": true,
+      "placeholder": "Select MarkdownOS Vault"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.3.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.2",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

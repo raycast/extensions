@@ -19,6 +19,12 @@ export type MenuBarSnapshot =
   | { kind: "no-track"; playerState: PlayerState }
   | { kind: "ok"; track: Readonly<Track>; playerState: PlayerState };
 
+export enum PlaylistKind {
+  ALL = "all",
+  USER = "user",
+  SUBSCRIPTION = "subscription",
+}
+
 export interface Playlist {
   id: string;
   name: string;
@@ -62,6 +68,17 @@ export interface CatalogAlbum {
   artwork: string | null;
   url: string | null;
   contentRating: "clean" | "explicit" | null;
+}
+
+export interface CatalogPlaylist {
+  id: string;
+  title: string;
+  curator: string;
+  artwork: string | null;
+  url: string | null;
+  /** A `library-playlists` resource (the user's own playlist surfaced in a
+   * recommendation room) rather than a catalog playlist — nothing to add. */
+  fromLibrary: boolean;
 }
 
 export interface ScriptError extends Error {

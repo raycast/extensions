@@ -5,6 +5,9 @@
   "description": "Search Z-Library and download books, powered by the zlib CLI.",
   "icon": "icon.png",
   "author": "materialcritic",
+  "contributors": [
+    "joshith99"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -29,7 +32,7 @@
     {
       "name": "zlibPath",
       "title": "zlib Binary Path",
-      "description": "Path to the zlib executable. Leave blank to auto-detect (Apple Silicon or Intel Homebrew).",
+      "description": "Path to the zlib executable. Leave blank to auto-detect (Homebrew on macOS, zlib.exe on PATH on Windows).",
       "type": "textfield",
       "default": "",
       "required": false
@@ -71,6 +74,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

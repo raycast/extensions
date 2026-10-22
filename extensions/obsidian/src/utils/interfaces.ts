@@ -14,6 +14,6 @@ export interface MediaState {
 }
 
 export interface MediaSearchArguments {
-  searchArgument: string;
-  typeArgument: string;
+  searchArgument?: string;
+  typeArgument?: string;
 }

@@ -5,116 +5,13 @@ import {
   resolveCycle,
   resolveIssue,
   resolveIssueLabel,
+  resolveIssueLabelForTeam,
   resolveMilestone,
   resolveProject,
   resolveRelease,
   resolveTeam,
   resolveUser,
 } from "./linearUtils";
-
-export type IssueField =
-  | "id"
-  | "title"
-  | "description"
-  | "projectMilestone"
-  | "priority"
-  | "estimate"
-  | "url"
-  | "gitBranchName"
-  | "createdAt"
-  | "updatedAt"
-  | "archivedAt"
-  | "completedAt"
-  | "startedAt"
-  | "canceledAt"
-  | "dueDate"
-  | "slaStartedAt"
-  | "slaMediumRiskAt"
-  | "slaHighRiskAt"
-  | "slaBreachesAt"
-  | "slaType"
-  | "status"
-  | "statusType"
-  | "labels"
-  | "triageIntel"
-  | "createdBy"
-  | "createdById"
-  | "assignee"
-  | "assigneeId"
-  | "delegate"
-  | "delegateId"
-  | "project"
-  | "projectId"
-  | "parentId"
-  | "team"
-  | "teamId"
-  | "cycleId";
-
-const defaultFields: IssueField[] = [
-  "id",
-  "title",
-  "description",
-  "priority",
-  "url",
-  "createdAt",
-  "updatedAt",
-  "status",
-  "labels",
-  "assignee",
-  "project",
-  "team",
-];
-
-export async function serializeIssue(issue: Issue, fields?: IssueField[]) {
-  const requested = new Set(fields?.length ? ["id", ...fields] : defaultFields);
-  const result: Record<string, unknown> = { id: issue.id };
-  const direct: Partial<Record<IssueField, unknown>> = {
-    title: issue.title,
-    description: issue.description,
-    priority: issue.priority,
-    estimate: issue.estimate,
-    url: issue.url,
-    gitBranchName: issue.branchName,
-    createdAt: issue.createdAt,
-    updatedAt: issue.updatedAt,
-    archivedAt: issue.archivedAt,
-    completedAt: issue.completedAt,
-    startedAt: issue.startedAt,
-    canceledAt: issue.canceledAt,
-    dueDate: issue.dueDate,
-    slaStartedAt: issue.slaStartedAt,
-    slaMediumRiskAt: issue.slaMediumRiskAt,
-    slaHighRiskAt: issue.slaHighRiskAt,
-    slaBreachesAt: issue.slaBreachesAt,
-    slaType: issue.slaType,
-    createdById: issue.creatorId,
-    assigneeId: issue.assigneeId,
-    delegateId: issue.delegateId,
-    projectId: issue.projectId,
-    parentId: issue.parentId,
-    teamId: issue.teamId,
-    cycleId: issue.cycleId,
-  };
-  for (const field of requested) {
-    if (field in direct) result[field] = direct[field as IssueField];
-  }
-
-  if (requested.has("status") || requested.has("statusType")) {
-    const state = issue.state ? await issue.state : undefined;
-    if (requested.has("status")) result.status = state;
-    if (requested.has("statusType")) result.statusType = state?.type;
-  }
-  if (requested.has("labels")) result.labels = (await issue.labels({ first: 250 })).nodes;
-  if (requested.has("createdBy")) result.createdBy = issue.creator ? await issue.creator : undefined;
-  if (requested.has("assignee")) result.assignee = issue.assignee ? await issue.assignee : undefined;
-  if (requested.has("delegate")) result.delegate = issue.delegate ? await issue.delegate : undefined;
-  if (requested.has("project")) result.project = issue.project ? await issue.project : undefined;
-  if (requested.has("projectMilestone"))
-    result.projectMilestone = issue.projectMilestone ? await issue.projectMilestone : undefined;
-  if (requested.has("team")) result.team = issue.team ? await issue.team : undefined;
-  if (requested.has("triageIntel")) result.triageIntel = undefined;
-  return result;
-}
 
 export async function resolveWorkflowState(query: string, teamQuery: string) {
   const team = await resolveTeam(teamQuery);
@@ -131,6 +28,8 @@ export async function resolveWorkflowState(query: string, teamQuery: string) {
 
 export async function issueInput(input: {
   team?: string;
+  /** Team of the issue being updated, used to resolve label names when `team` is not changing. */
+  currentTeamId?: string;
   cycle?: string | null;
   milestone?: string;
   project?: string | null;
@@ -174,9 +73,7 @@ export async function issueInput(input: {
         : typeof input.delegate === "string"
           ? (await resolveUser(input.delegate)).id
           : undefined,
-    labelIds: input.labels
-      ? await Promise.all(input.labels.map(async (label) => (await resolveIssueLabel(label)).id))
-      : undefined,
+    labelIds: input.labels ? await resolveLabelIds(input.labels, team?.id ?? input.currentTeamId) : undefined,
     dueDate: input.dueDate,
     slaBreachesAt:
       input.slaBreachesAt === null ? null : input.slaBreachesAt ? new Date(input.slaBreachesAt) : undefined,
@@ -280,3 +177,12 @@ export async function setIssueReleases(
 }
 
 export type IssueUpdateInput = Parameters<LinearClient["updateIssue"]>[1];
+
+/** Resolves label names within the issue's team when known, since names like "Bug" repeat across teams and are only unambiguous per team. */
+async function resolveLabelIds(labels: string[], teamId?: string) {
+  return Promise.all(
+    labels.map(async (label) =>
+      teamId ? (await resolveIssueLabelForTeam(label, teamId)).id : (await resolveIssueLabel(label)).id,
+    ),
+  );
+}

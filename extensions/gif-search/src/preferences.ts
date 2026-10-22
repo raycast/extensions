@@ -43,7 +43,8 @@ export function getDefaultAction(): string {
 }
 
 export function getMaxResults(): number {
-  return parseInt(preferences.maxResults, 10) ?? 20;
+  const maxResults = Number(preferences.maxResults);
+  return Number.isSafeInteger(maxResults) && maxResults > 0 ? maxResults : 20;
 }
 
 export const GRID_COLUMNS: { [key: string]: number } = {

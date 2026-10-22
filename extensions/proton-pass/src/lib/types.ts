@@ -11,7 +11,18 @@ export interface Vault {
   name: string;
   itemCount?: number;
   role?: VaultRole;
+  /** Whether other people have access to the vault. */
+  isShared?: boolean;
 }
+
+/** How a vault is shared: the user's role on it, and whether other people have access, when known. */
+export interface VaultSharing {
+  role: VaultRole;
+  isShared?: boolean;
+}
+
+/** How each vault is shared, by share ID, as saved by List Vaults. */
+export type SavedSharing = Record<string, VaultSharing>;
 
 export interface Item {
   shareId: string;
@@ -23,6 +34,12 @@ export interface Item {
   username?: string;
   email?: string;
   hasTotp: boolean;
+  /** Whether a login has a password saved. The password itself is never part of `Item`, which gets cached. */
+  hasPassword?: boolean;
+  /** ISO 8601 date of the last modification. */
+  modifiedAt?: string;
+  /** Whether the item has a note. The note itself is never part of `Item`. */
+  hasNote?: boolean;
 }
 
 export interface CustomField {
@@ -36,6 +53,8 @@ export interface ItemDetail extends Item {
   urls?: string[];
   note?: string;
   customFields?: CustomField[];
+  /** otpauth:// URI, kept in memory only so codes can be generated locally. */
+  totpUri?: string;
 }
 
 export interface PasswordOptions {

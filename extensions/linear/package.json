@@ -21,7 +21,6 @@
     "erikjs",
     "alexi.build",
     "samuelkraft",
-    "ray.dhruv",
     "ChrisPanTaken"
   ],
   "pastContributors": [
@@ -285,114 +284,29 @@
   ],
   "tools": [
     {
-      "name": "get-current-user",
-      "title": "Get Current User",
-      "description": "Get the Linear information of the current user."
-    },
-    {
-      "name": "create-comment",
-      "title": "Create Comment",
-      "description": "Creates a comment in Linear"
-    },
-    {
-      "name": "update-comment",
-      "title": "Update Comment",
-      "description": "Updates an existing comment in Linear"
-    },
-    {
-      "name": "get-documents",
-      "title": "Get Documents",
-      "description": "Fetches all documents/PRDs from Linear"
-    },
-    {
-      "name": "get-document-content",
-      "title": "Get Document Content",
-      "description": "Get the content of a document/PRD from Linear"
-    },
-    {
-      "name": "create-document",
-      "title": "Create Document",
-      "description": "Creates a new document/PRD in Linear"
-    },
-    {
-      "name": "update-document",
-      "title": "Update Document",
-      "description": "Updates an existing PRD in Linear"
-    },
-    {
       "name": "full-text-search-issues",
       "title": "Full Text Search Issues",
-      "description": "Full-text search across Linear issues using plain text. Use this for relevance-ranked keyword search; use filter-issues or list-issues for structured criteria. Supports cursor pagination and returns nextCursor when more results are available."
+      "description": "Relevance-ranked keyword search across Linear issue content. Use it when the user searches by topic or phrase; it cannot filter by team or project, so check each result's scope. Use list-issues for structured criteria. Supports cursor pagination and returns nextCursor when more results are available."
     },
     {
       "name": "filter-issues",
       "title": "Filter Issues",
-      "description": "Filter Linear issues using structured GraphQL criteria such as assignee, team, status, labels, priority, cycle, project, or milestone. Use full-text-search-issues for relevance-ranked keyword search. Supports cursor pagination and returns nextCursor when more results are available."
-    },
-    {
-      "name": "update-issue",
-      "title": "Update Issue",
-      "description": "Updates an existing issue in Linear"
-    },
-    {
-      "name": "create-issue",
-      "title": "Create Issue",
-      "description": "Creates a new issue in Linear with a title, description, dueDate and priority"
-    },
-    {
-      "name": "get-teams",
-      "title": "Get Teams",
-      "description": "Returns all Linear teams that the current user is part of"
-    },
-    {
-      "name": "get-issue-states",
-      "title": "Get Issue States",
-      "description": "Fetches all available issue states. Issue status could be a synonym of issue state"
-    },
-    {
-      "name": "get-members",
-      "title": "Get Members",
-      "description": "Retrieves all members of the Linear organization"
+      "description": "Filter Linear issues with a raw GraphQL IssueFilter for criteria list-issues cannot express, such as priority ranges, due-date ranges, estimates, completion dates, or OR conditions. Prefer list-issues for team, status, assignee, label, cycle, project, or priority filters. Supports cursor pagination and returns nextCursor when more results are available."
     },
     {
       "name": "get-notifications",
       "title": "Get Notifications",
-      "description": "Retrieves all notifications for current user"
-    },
-    {
-      "name": "get-labels",
-      "title": "Get Issue Labels",
-      "description": "Retrieves all labels that can be assigned to a Linear issue"
+      "description": "Retrieve the current user's Linear notifications (their Linear inbox). Pass unreadOnly for unread notifications. Supports cursor pagination and returns nextCursor when more results are available."
     },
     {
       "name": "add-label",
       "title": "Add Label to Issue",
-      "description": "Add a Label to an existing Linear issue"
+      "description": "Add one label to an existing Linear issue while keeping its other labels."
     },
     {
       "name": "remove-label",
       "title": "Remove Label from Issue",
-      "description": "Remove a Label from an existing Linear issue"
-    },
-    {
-      "name": "get-projects",
-      "title": "Get Projects",
-      "description": "Fetches all projects from Linear"
-    },
-    {
-      "name": "get-project-updates",
-      "title": "Get Project Updates",
-      "description": "Retrieves all project updates for a given project ID from Linear"
-    },
-    {
-      "name": "get-project-statuses",
-      "title": "Get Project Statuses",
-      "description": "Fetches all project statuses from Linear"
-    },
-    {
-      "name": "update-project-milestone",
-      "title": "Update an Existing Project Milestone",
-      "description": "Updates an existing project milestone in Linear"
+      "description": "Remove one label from an existing Linear issue while keeping its other labels."
     },
     {
       "name": "search-documentation",
@@ -422,12 +336,12 @@
     {
       "name": "list-cycles",
       "title": "List Cycles",
-      "description": "Retrieve cycles for a specific Linear team. Cycles always belong to a team. Supports cursor pagination and returns nextCursor when more results are available."
+      "description": "List Linear cycles, optionally scoped to a team and filtered to the current, previous, or next cycle. Without a team, returns cycles across all teams with each cycle's teamId. Supports cursor pagination and returns nextCursor when more results are available."
     },
     {
       "name": "list-teams",
       "title": "List Teams",
-      "description": "List teams in the user's Linear workspace"
+      "description": "List teams in the Linear workspace. Every input is optional; call it without arguments to get all teams, or pass query to match a team name or key."
     },
     {
       "name": "get-team",
@@ -532,7 +446,7 @@
     {
       "name": "list-milestones",
       "title": "List Project Milestones",
-      "description": "List milestones in a Linear project. Milestones always belong to a project. Supports cursor pagination and returns nextCursor when more results are available."
+      "description": "List Linear project milestones, optionally scoped to a project. Without a project, returns milestones across all projects with each milestone's projectId. Supports cursor pagination and returns nextCursor when more results are available."
     },
     {
       "name": "get-milestone",
@@ -587,7 +501,7 @@
     {
       "name": "list-issues",
       "title": "List Issues",
-      "description": "List issues in the user's Linear workspace, including active Triage Intelligence suggestions for issues in triage. For my issues, use \"me\" as the assignee. Use \"null\" for no assignee."
+      "description": "List issues in the user's Linear workspace, including active Triage Intelligence suggestions for issues in triage. For my issues, use \"me\" as the assignee. Use \"null\" for no assignee. Filter by status name or type with state; without a team it matches that status in every team."
     },
     {
       "name": "save-issue",
@@ -602,7 +516,7 @@
     {
       "name": "list-issue-statuses",
       "title": "List Issue Statuses",
-      "description": "List available issue statuses in a Linear team. Statuses are team-specific. Supports cursor pagination and returns nextCursor when more results are available."
+      "description": "List Linear issue statuses (workflow states), optionally scoped to a team. Statuses are team-specific, so pass team before using a status ID in a write. Without a team, returns statuses across all teams with each status's teamId. Supports cursor pagination and returns nextCursor when more results are available."
     },
     {
       "name": "get-issue-status",
@@ -627,7 +541,7 @@
     {
       "name": "get-status-updates",
       "title": "Get Status Updates",
-      "description": "List or get project/initiative status updates. Pass `id` to get a specific update, or filter to list."
+      "description": "List or get project and initiative status updates. Pass id to get one update. type defaults to initiative when only initiative is given, otherwise project."
     },
     {
       "name": "save-status-update",
@@ -642,7 +556,7 @@
   ],
   "dependencies": {
     "@linear/sdk": "^91.0.0",
-    "@raycast/api": "^1.104.1",
+    "@raycast/api": "^2.5.0",
     "@raycast/utils": "^2.2.3",
     "date-fns": "^4.1.0",
     "lodash": "^4.17.23",
@@ -666,7 +580,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/commentUtils.test.mts tests/favorites.test.mts",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/favorites.test.mts",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
@@ -676,6 +590,14 @@
   ],
   "overrides": {
     "brace-expansion": "5.0.9",
-    "js-yaml@4": "4.3.1"
+    "js-yaml@4": "4.3.2"
+  },
+  "ai": {
+    "skills": [
+      {
+        "name": "linear-work-planning",
+        "title": "Plan and Review Work"
+      }
+    ]
   }
 }

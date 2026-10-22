@@ -1,0 +1,3 @@
+# Written by scripts/vendor-cli.mjs.
+assets/
+package-lock.json

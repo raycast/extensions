@@ -20,7 +20,8 @@
     "bsradcliffe",
     "aditi_bhagat",
     "muhammadrizo",
-    "aaronjensen"
+    "aaronjensen",
+    "dmitri_moscoglo"
   ],
   "pastContributors": [
     "Visual-Studio-Coder"
@@ -213,6 +214,14 @@
       "required": false,
       "default": true,
       "label": "Prevent disk sleep"
+    },
+    {
+      "name": "preventSleepOnAC",
+      "description": "Keep the system awake while on AC power, for example with the lid closed (caffeinate -s). This option is not supported on Windows and will have no effect",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Prevent system sleep on AC power"
     },
     {
       "name": "icon",

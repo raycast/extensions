@@ -17,3 +17,13 @@ node_modules/
 dist/
 .DS_Store
 .agent/
+.ui-fixtures/
+.ui-fixtures-native/
+
+# Local validation evidence; portable reports and synthetic tests are tracked.
+/docs/*.json
+/docs/*.log
+/docs/*.png
+/docs/native-connection-20260912/
+/docs/native-schema2-20260911/
+/docs/schema2-validation/

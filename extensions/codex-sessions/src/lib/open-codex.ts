@@ -1,5 +1,6 @@
 import { getApplications, getPreferenceValues, showToast, Toast, open } from "@raycast/api";
 import { execFile as execFileCallback } from "node:child_process";
+import { stat } from "node:fs/promises";
 import { promisify } from "node:util";
 import { resolveCodexBinary } from "./codex-paths";
 
@@ -73,6 +74,16 @@ export async function openWorkspace(path: string): Promise<boolean> {
     return openDeepLink(newTaskDeepLink({ path }));
   }
   return openWorkspaceViaCli(path);
+}
+
+export async function openNewThreadInProject(path: string): Promise<boolean> {
+  try {
+    if (!(await stat(path)).isDirectory()) throw new Error("Not a directory");
+  } catch {
+    await showFailureToast("Project folder is unavailable", "Restore the folder before starting a new thread here.");
+    return false;
+  }
+  return openWorkspace(path);
 }
 
 export async function showFailureToast(title: string, message: string): Promise<void> {

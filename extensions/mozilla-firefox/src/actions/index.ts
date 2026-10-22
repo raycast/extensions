@@ -1,44 +1,43 @@
 import { closeMainWindow, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
-import { exec, spawn } from "child_process";
+import { execFile, spawn } from "child_process";
 import { existsSync } from "fs";
+import os from "os";
+import path from "path";
 import { promisify } from "util";
-import { Preferences, Tab } from "../interfaces";
 import { SEARCH_ENGINE } from "../constants";
 
-const execAsync = promisify(exec);
-
-const WINDOWS_FIREFOX_PATHS: Record<string, string[]> = {
-  Firefox: ["C:\\Program Files\\Mozilla Firefox\\firefox.exe", "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe"],
-  "Firefox Nightly": [
-    "C:\\Program Files\\Firefox Nightly\\firefox.exe",
-    "C:\\Program Files (x86)\\Firefox Nightly\\firefox.exe",
-  ],
-  "Firefox ESR": [
-    "C:\\Program Files\\Mozilla Firefox ESR\\firefox.exe",
-    "C:\\Program Files (x86)\\Mozilla Firefox ESR\\firefox.exe",
-  ],
-  "Firefox Developer Edition": [
-    "C:\\Program Files\\Firefox Developer Edition\\firefox.exe",
-    "C:\\Program Files (x86)\\Firefox Developer Edition\\firefox.exe",
-  ],
-};
+const execFileAsync = promisify(execFile);
 
 const RELEASE_VARIANT = "Firefox";
 
+const WINDOWS_FIREFOX_FOLDERS: Record<string, string> = {
+  Firefox: "Mozilla Firefox",
+  "Firefox Nightly": "Firefox Nightly",
+  "Firefox ESR": "Mozilla Firefox ESR",
+  "Firefox Developer Edition": "Firefox Developer Edition",
+};
+
+function windowsFirefoxCandidates(browserApp: string): string[] {
+  const folder = WINDOWS_FIREFOX_FOLDERS[browserApp] ?? WINDOWS_FIREFOX_FOLDERS[RELEASE_VARIANT];
+  const exe = "firefox.exe";
+  const localAppData = process.env.LOCALAPPDATA ?? path.win32.join(os.homedir(), "AppData", "Local");
+  return [
+    path.win32.join("C:\\Program Files", folder, exe),
+    path.win32.join("C:\\Program Files (x86)", folder, exe),
+    path.win32.join(localAppData, folder, exe),
+    path.win32.join(localAppData, "Programs", folder, exe),
+  ];
+}
+
 /**
  * Resolves the Firefox executable path for the given variant on Windows.
- * Release Firefox falls back to the bare "firefox.exe" (resolved via PATH) when
- * not found at its known install locations. Non-release variants (Nightly, ESR,
- * Developer Edition) must resolve to a verified install path — falling back to
- * "firefox.exe" would silently launch Release instead, so an actionable error
- * is thrown instead.
+ * Only paths confirmed with existsSync are returned. An unverified "firefox.exe"
+ * PATH fallback is never used — it caused ENOENT when Firefox was off PATH,
+ * and for non-release variants it could silently launch Release instead.
  */
 function getWindowsFirefoxExe(browserApp: string): string {
-  const candidates = WINDOWS_FIREFOX_PATHS[browserApp] ?? WINDOWS_FIREFOX_PATHS[RELEASE_VARIANT];
-  const resolved = candidates.find(existsSync);
+  const resolved = windowsFirefoxCandidates(browserApp).find(existsSync);
   if (resolved) return resolved;
-
-  if (browserApp === RELEASE_VARIANT || !WINDOWS_FIREFOX_PATHS[browserApp]) return "firefox.exe";
 
   throw new Error(
     `${browserApp} was not found. Please verify it is installed, or change the Firefox Application preference.`,
@@ -50,9 +49,9 @@ function getWindowsFirefoxExe(browserApp: string): string {
  * Resolves once the child process has started successfully, or rejects
  * with a descriptive error if the executable cannot be launched.
  */
-function spawnFirefoxWindows(exe: string, url: string): Promise<void> {
+function spawnFirefoxWindows(exe: string, url: string, extraArgs: string[] = []): Promise<void> {
   return new Promise((resolve, reject) => {
-    const child = spawn(exe, [url], { detached: true, stdio: "ignore" });
+    const child = spawn(exe, [...extraArgs, url], { detached: true, stdio: "ignore" });
     child.once("spawn", () => {
       child.unref(); // let Firefox live independently of the Raycast process
       resolve();
@@ -68,7 +67,7 @@ async function launchFirefox(url: string, browserApp: string): Promise<void> {
   if (process.platform === "win32") {
     await spawnFirefoxWindows(getWindowsFirefoxExe(browserApp), url);
   } else {
-    await execAsync(`open -a "${browserApp}" "${url}"`);
+    await execFileAsync("open", ["-a", browserApp, url]);
   }
 }
 
@@ -76,11 +75,48 @@ function getBrowserApp(): string {
   return getPreferenceValues<Preferences>().browserApp || "Firefox";
 }
 
+async function showLaunchError(err: unknown) {
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "Failed to open Firefox",
+    message: err instanceof Error ? err.message : String(err),
+  });
+}
+
+const FILE_SUFFIX =
+  /\.(html|js|json|txt|ts|tsx|css|jsx|mjs|cjs|csv|go|rb|php|yml|yaml|toml|xml|vue|kt|java|pdf|png|jpe?g|svg|zip|sql|log|env|ini)$/i;
+
+export function looksLikeUrl(text: string): boolean {
+  const trimmed = text.trim();
+  if (!trimmed) return false;
+  if (/^(https?:\/\/|about:)/i.test(trimmed)) return true;
+  if (/^localhost(:\d+)?([/:?#]|$)/i.test(trimmed)) return true;
+  if (/^\d{1,3}(\.\d{1,3}){3}(:\d+)?([/:?#]|$)/.test(trimmed)) return true;
+  const host = trimmed.split(/[/:?#]/)[0];
+  if (FILE_SUFFIX.test(host)) return false;
+  return /^[\w.-]+\.[a-z]{2,}([/:?#]|$)/i.test(trimmed);
+}
+
+export function newTabTitle(query?: string): string {
+  const trimmed = query?.trim();
+  if (!trimmed) return "Open Empty Tab";
+  return looksLikeUrl(trimmed) ? "Open URL" : `Search "${trimmed}"`;
+}
+
+export function buildNewTabUrl(queryText: string | null | undefined): string {
+  const trimmed = queryText?.trim();
+  if (!trimmed) return "about:newtab";
+  if (/^(https?:\/\/|about:)/i.test(trimmed)) return trimmed;
+  if (looksLikeUrl(trimmed)) {
+    const scheme = /^(localhost|(\d{1,3}\.){3}\d{1,3})(:\d+)?([/:?#]|$)/i.test(trimmed) ? "http" : "https";
+    return `${scheme}://${trimmed}`;
+  }
+  const searchEngine = getPreferenceValues<Preferences.NewTab>().searchEngine?.toLowerCase() || "google";
+  return `${SEARCH_ENGINE[searchEngine] ?? SEARCH_ENGINE["google"]}${encodeURIComponent(trimmed)}`;
+}
+
 export async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
-  const searchEngine = getPreferenceValues<Preferences>().searchEngine?.toLowerCase() || "google";
-  const url = queryText
-    ? `${SEARCH_ENGINE[searchEngine] ?? SEARCH_ENGINE["google"]}${encodeURIComponent(queryText)}`
-    : "about:newtab";
+  const url = buildNewTabUrl(queryText);
 
   try {
     await launchFirefox(url, getBrowserApp());
@@ -88,7 +124,24 @@ export async function openNewTab(queryText: string | null | undefined): Promise<
     closeMainWindow({ clearRootSearch: true });
     return "success";
   } catch (err) {
-    await showToast({ style: Toast.Style.Failure, title: "Failed to open Firefox", message: String(err) });
+    await showLaunchError(err);
+    return "error";
+  }
+}
+
+const NEW_WINDOW_FLAG = "-new-window";
+const EMPTY_TAB_DESTINATION = "about:newtab";
+
+export async function openInNewWindow(url: string | null | undefined): Promise<boolean | string> {
+  const destination = url?.trim() || EMPTY_TAB_DESTINATION;
+
+  try {
+    await spawnFirefoxWindows(getWindowsFirefoxExe(getBrowserApp()), destination, [NEW_WINDOW_FLAG]);
+    popToRoot();
+    closeMainWindow({ clearRootSearch: true });
+    return "success";
+  } catch (err) {
+    await showLaunchError(err);
     return "error";
   }
 }
@@ -100,17 +153,7 @@ export async function openHistoryTab(url: string): Promise<boolean | string> {
     closeMainWindow({ clearRootSearch: true });
     return "success";
   } catch (err) {
-    await showToast({ style: Toast.Style.Failure, title: "Failed to open Firefox", message: String(err) });
+    await showLaunchError(err);
     return "error";
-  }
-}
-
-export async function setActiveTab(tab: Tab): Promise<void> {
-  try {
-    // Instead of trying to find and activate the existing tab,
-    // just open the URL which is more reliable and simpler
-    await launchFirefox(tab.url, getBrowserApp());
-  } catch (err) {
-    await showToast({ style: Toast.Style.Failure, title: "Failed to open Firefox", message: String(err) });
   }
 }

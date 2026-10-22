@@ -16,15 +16,17 @@ import { Color, Detail, Icon, Image, List } from "@raycast/api";
 import {
   Cask,
   Formula,
-  brewInstalledVersion,
-  brewIsInstalled,
-  brewIsOutdated,
-  isCask,
+  formatPackageVersion,
   brewPrefix,
+  brewHost,
+  brewIsInstalled,
   analyticsRows,
   packageStatus,
+  caskLanguagesText,
 } from "../utils";
+import { uninstallableReason } from "../utils/brew/installability";
 import { PackageDetailState } from "../hooks/usePackageDetail";
+import { STATUS_COLOR, UNINSTALLABLE_ICON, WARNING_ICON } from "./palette";
 
 export type MetadataRow =
   | { kind: "label"; key: string; title: string; text: string; color?: Color; icon?: Image.ImageLike }
@@ -47,42 +49,18 @@ export interface MetadataOptions {
    * minimal record from the list and fills in.
    */
   isLoading?: boolean;
+  /**
+   * Whether Homebrew will load this package without asking, for a view that
+   * knows (Manage Taps). Absent everywhere else, where no row is shown.
+   */
+  trust?: { text: string; icon: Image.ImageLike };
 }
 
 /// Row builders
 
 /**
- * The version line: what is INSTALLED, plus what is available when they differ.
- *
- * Never leads with `versions.stable` on an installed package — that is the
- * version on offer, not the one present, and labelling it "installed" claimed a
- * version the user did not have.
- */
-export function formatPackageVersion(item: Cask | Formula): string {
-  const cask = isCask(item);
-  const available = cask ? item.version : item.versions.stable;
-  const installedVersion = brewInstalledVersion(item);
-
-  const status: string[] = [];
-  if (!cask && item.versions.bottle) {
-    status.push("bottled");
-  }
-  if (brewIsInstalled(item)) {
-    status.push("installed");
-  }
-  if (!cask && item.installed?.first()?.installed_on_request === false) {
-    status.push("dependency");
-  }
-
-  const version =
-    installedVersion && brewIsOutdated(item) ? `${installedVersion} → ${available}` : (installedVersion ?? available);
-
-  return status.length > 0 ? `${version} (${status.join(", ")})` : version;
-}
-
-/**
  * A checkmark prefix, so an installed dependency reads as such without relying
- * on colour alone. U+2713 rather than an SF Symbols codepoint: this has to
+ * on color alone. U+2713 rather than an SF Symbols codepoint: this has to
  * render on Windows too.
  */
 const INSTALLED_TAG_PREFIX = "✓ ";
@@ -90,8 +68,8 @@ const INSTALLED_TAG_PREFIX = "✓ ";
 function dependencyTags(names: string[] | undefined, isInstalled: (name: string) => boolean) {
   return (names ?? []).map((name) =>
     isInstalled(name)
-      ? { text: `${INSTALLED_TAG_PREFIX}${name}`, color: Color.Green }
-      : { text: name, color: Color.SecondaryText },
+      ? { text: `${INSTALLED_TAG_PREFIX}${name}`, color: STATUS_COLOR.ok }
+      : { text: name, color: STATUS_COLOR.muted },
   );
 }
 
@@ -120,10 +98,31 @@ function leadingRows(item: Cask | Formula, options: MetadataOptions, caveats: st
       key: "status",
       title: status.title,
       text: status.text,
-      color: Color.Orange,
-      icon: { source: Icon.Warning, tintColor: Color.Orange },
+      color: STATUS_COLOR.attention,
+      icon: WARNING_ICON,
     });
     rows.push({ kind: "separator", key: "status-sep" });
+  }
+
+  // Why brew would refuse this package here — the verdict, next to the
+  // requirement rows that state the constraint. A disabled package already
+  // says so in the status row above, so it is not repeated: gated on the
+  // record's own `disabled`, NOT on `status`, which arrives with the async
+  // detail fetch (and never at all if that fetch fails) and would otherwise
+  // let the red row render first and then be replaced.
+  if (!brewIsInstalled(item) && item.disabled !== true) {
+    const reason = uninstallableReason(item, brewHost);
+    if (reason) {
+      rows.push({
+        kind: "label",
+        key: "installability",
+        title: "Can't Install",
+        text: reason,
+        color: STATUS_COLOR.error,
+        icon: UNINSTALLABLE_ICON,
+      });
+      rows.push({ kind: "separator", key: "installability-sep" });
+    }
   }
 
   if (!options.showDescription) {
@@ -135,7 +134,7 @@ function leadingRows(item: Cask | Formula, options: MetadataOptions, caveats: st
       key: "caveats",
       title: "Caveats",
       text: caveats ? "Yes" : "None",
-      icon: caveats ? { source: Icon.Info, tintColor: Color.Blue } : undefined,
+      icon: caveats ? { source: Icon.Info, tintColor: STATUS_COLOR.info } : undefined,
     });
     rows.push({ kind: "separator", key: "prose-sep" });
   }
@@ -143,23 +142,40 @@ function leadingRows(item: Cask | Formula, options: MetadataOptions, caveats: st
   return rows;
 }
 
-/** Trailing statistics rows, identical in both views. */
-function statisticsRows(options: MetadataOptions): MetadataRow[] {
+/**
+ * Trailing statistics rows, identical in both views.
+ *
+ * Empty for a package from a third-party tap, separator included — Homebrew
+ * publishes analytics for its own two taps only, so there is nothing there to
+ * head with a rule.
+ */
+function statisticsRows(options: MetadataOptions, tap: string | null | undefined): MetadataRow[] {
+  const rows = analyticsRows(options.detail.data, options.detail.failed, tap);
+  if (rows.length === 0) return [];
   return [
     { kind: "separator", key: "stats-sep" },
-    ...analyticsRows(options.detail.data, options.detail.failed).map(
+    ...rows.map(
       (row): MetadataRow => ({
         kind: "label",
         key: `stat-${row.key}`,
         title: row.title,
         text: row.text,
-        icon: row.unavailable ? { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText } : undefined,
+        icon: row.unavailable ? { source: Icon.QuestionMarkCircle, tintColor: STATUS_COLOR.muted } : undefined,
       }),
     ),
   ];
 }
 
 /** What an empty field shows: still arriving, or genuinely not set. */
+function trustRows(options: MetadataOptions): MetadataRow[] {
+  const trust = options.trust;
+  if (!trust) return [];
+  return [
+    { kind: "label", key: "trust", title: "Trust", text: trust.text, icon: trust.icon },
+    { kind: "separator", key: "trust-sep" },
+  ];
+}
+
 function missing(options: MetadataOptions): string {
   return options.isLoading ? "Loading…" : "—";
 }
@@ -189,6 +205,7 @@ export function formulaMetadataRows(formula: Formula, options: MetadataOptions):
     { kind: "separator", key: "homepage-sep" },
     { kind: "label", key: "tap", title: "Tap", text: formula.tap || missing(options) },
     { kind: "separator", key: "tap-sep" },
+    ...trustRows(options),
   ];
 
   if (formula.license) {
@@ -220,7 +237,7 @@ export function formulaMetadataRows(formula: Formula, options: MetadataOptions):
     rows.push({ kind: "label", key: "keg-only", title: "Keg Only", text: "Yes" });
   }
 
-  return [...rows, ...statisticsRows(options)];
+  return [...rows, ...statisticsRows(options, formula.tap)];
 }
 
 export function caskMetadataRows(cask: Cask, options: MetadataOptions): MetadataRow[] {
@@ -232,6 +249,7 @@ export function caskMetadataRows(cask: Cask, options: MetadataOptions): Metadata
     { kind: "separator", key: "homepage-sep" },
     { kind: "label", key: "tap", title: "Tap", text: cask.tap || missing(options) },
     { kind: "separator", key: "tap-sep" },
+    ...trustRows(options),
     { kind: "label", key: "version", title: "Version", text: formatPackageVersion(cask) },
   ];
 
@@ -261,6 +279,12 @@ export function caskMetadataRows(cask: Cask, options: MetadataOptions): Metadata
   const conflicts = cask.conflicts_with?.cask;
   pushTagRow(rows, "conflicts", "Conflicts With", conflicts && dependencyTags(conflicts, options.isInstalled));
 
+  const languages = caskLanguagesText(cask.languages);
+  if (languages) {
+    rows.push({ kind: "separator", key: "languages-sep" });
+    rows.push({ kind: "label", key: "languages", title: "Languages", text: languages });
+  }
+
   // The list's tack accessory is hidden while the metadata panel is open
   // (list.tsx), so this is the only pin indicator a cask has in that view.
   if (cask.pinned) {
@@ -271,7 +295,7 @@ export function caskMetadataRows(cask: Cask, options: MetadataOptions): Metadata
   rows.push({ kind: "separator", key: "auto-sep" });
   rows.push({ kind: "label", key: "auto-updates", title: "Auto Updates", text: cask.auto_updates ? "Yes" : "No" });
 
-  return [...rows, ...statisticsRows(options)];
+  return [...rows, ...statisticsRows(options, cask.tap)];
 }
 
 /// Renderers — one per metadata namespace, both driven by the rows above

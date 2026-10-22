@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Icon, List } from "@raycast/api";
+import { ActionPanel, Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 import {
   brewFormatVersion,
@@ -7,17 +7,24 @@ import {
   brewIsInstalled,
   brewIsOutdated,
   brewName,
+  brewHost,
   Cask,
   Formula,
   preferences,
 } from "../utils";
-import { CaskActionPanel, FormulaActionPanel } from "./actionPanels";
-import { installStateIcon, UPDATE_AVAILABLE_COLOR } from "./packageIcons";
+import { CaskActionPanel, FormulaActionPanel, PagingSection } from "./actionPanels";
+import { installStateIcon, STATUS_COLOR, UNINSTALLABLE_COLOR, UPDATE_AVAILABLE_COLOR } from "./palette";
 import { FormulaListItemDetail, CaskListItemDetail } from "./listItemDetail";
+import type { MetadataOptions } from "./packageMetadata";
+import { hasNextPage, pageRangeCompact, pageRangeSummary } from "../utils/paging";
+import { isUnusedDependency } from "../utils/installed";
+import { uninstallableReason } from "../utils/brew/installability";
 
 export interface FormulaListProps {
   isLoading: boolean;
   formulae: Formula[];
+  /** Formulae pulled in by something else. Installed-list only. */
+  dependencies?: Formula[];
   casks: Cask[];
   pinnedFormulae?: Formula[];
   pinnedCasks?: Cask[];
@@ -44,6 +51,41 @@ export interface FormulaListProps {
   showInstalledDate?: boolean;
   /** Offer Hide Dependencies. Installed-list only — see FormulaActionPanel. */
   showDependenciesFilter?: boolean;
+  /**
+   * How many matched in total, before the caller's window narrowed the arrays
+   * above. Only Search passes it: Show Installed renders every installed
+   * package and the outdated surfaces render the whole outdated set, so neither
+   * is ever windowed.
+   */
+  totals?: { formulae: number; casks: number };
+  /** Page navigation, when the matches span more than one page. */
+  paging?: PagingProps;
+  /** Actions on what contains each row, appended to its panel: Manage Taps' tap section. */
+  extraActions?: ActionPanel.Children;
+  /** A section above the results: Search's install-from-a-tap row for a pasted qualified name. */
+  leadingSection?: React.ComponentProps<typeof List>["children"];
+  /**
+   * Every name something installed depends on (`brew leaves`). Only the
+   * Dependencies section passes it on, so no other row evaluates "Unused".
+   */
+  dependedOn?: ReadonlySet<string>;
+}
+
+/**
+ * Moving a fixed-size WINDOW over the results, rather than growing the list.
+ *
+ * Passed as one object through each hop instead of five loose callbacks: the
+ * actions have to reach every row's panel, and threading them individually
+ * through FormulaList → list item → action panel → ViewSection is five
+ * prop edits per hop for no gain.
+ */
+export interface PagingProps {
+  /** Zero-based. */
+  page: number;
+  totalPages: number;
+  pageSize: number;
+  /** Clamped by the owner; callers hand it a raw target index. */
+  goToPage: (page: number) => void;
 }
 
 export function FormulaList(props: FormulaListProps) {
@@ -51,7 +93,14 @@ export function FormulaList(props: FormulaListProps) {
   const casks = props.casks;
   const pinnedFormulae = props.pinnedFormulae ?? [];
   const pinnedCasks = props.pinnedCasks ?? [];
-  const hasResults = formulae.length > 0 || casks.length > 0 || pinnedFormulae.length > 0 || pinnedCasks.length > 0;
+  const dependencies = props.dependencies ?? [];
+  const hasResults =
+    props.leadingSection != undefined ||
+    formulae.length > 0 ||
+    dependencies.length > 0 ||
+    casks.length > 0 ||
+    pinnedFormulae.length > 0 ||
+    pinnedCasks.length > 0;
   const showMetadataPanel = props.showMetadataPanel ?? false;
 
   // Raycast constructs the detail element for every row, so the panel needs to
@@ -61,49 +110,71 @@ export function FormulaList(props: FormulaListProps) {
   // A pin is an explicit user decision, so surfacing it first is the default.
   const pinnedFirst = preferences.pinnedFirst;
 
+  // Every row in every section takes the same display props; only `key`, `id`,
+  // the item itself and `dependedOn` differ per call site.
+  const rowProps = {
+    selectedId,
+    isInstalled: props.isInstalled,
+    onAction: props.onAction,
+    showMetadataPanel,
+    onToggleSidebar: props.onToggleSidebar,
+    sortByPopularity: props.sortByPopularity,
+    onToggleSort: props.onToggleSort,
+    showDescription: props.showDescription,
+    onToggleDescription: props.onToggleDescription,
+    showInstalledDate: props.showInstalledDate,
+    paging: props.paging,
+    extraActions: props.extraActions,
+  };
+  // `CaskListItem` takes no dependency filter, so formula rows get their own object.
+  const formulaRowProps = { ...rowProps, showDependenciesFilter: props.showDependenciesFilter };
+  // Pinned Formulae is the one section that has never offered the popularity
+  // sort. Kept that way rather than changed silently by the shared spread.
+  const pinnedFormulaRowProps = { ...formulaRowProps, sortByPopularity: undefined, onToggleSort: undefined };
+
+  const pageFooter = (kind: "formula" | "cask", shown: number, total: number) =>
+    props.paging && hasNextPage(props.paging.page, props.paging.totalPages) && total > shown ? (
+      <PageFooterItem
+        shown={shown}
+        total={total}
+        kind={kind}
+        showMetadataPanel={showMetadataPanel}
+        paging={props.paging}
+      />
+    ) : null;
+
   const formulaeSection = formulae.length > 0 && (
-    <List.Section title="Formulae">
+    <List.Section title="Formulae" subtitle={sectionCount(props.totals?.formulae ?? formulae.length)}>
       {formulae.map((formula) => (
         <FormulaListItem
           key={`formula-${formula.name}`}
           id={`formula-${formula.name}`}
-          selectedId={selectedId}
           formula={formula}
-          isInstalled={props.isInstalled}
-          onAction={props.onAction}
-          showMetadataPanel={showMetadataPanel}
-          onToggleSidebar={props.onToggleSidebar}
-          sortByPopularity={props.sortByPopularity}
-          onToggleSort={props.onToggleSort}
-          showDescription={props.showDescription}
-          onToggleDescription={props.onToggleDescription}
-          showInstalledDate={props.showInstalledDate}
-          showDependenciesFilter={props.showDependenciesFilter}
+          {...formulaRowProps}
         />
       ))}
-      {formulae.isTruncated() && <MoreListItem />}
+      {pageFooter("formula", formulae.length, props.totals?.formulae ?? 0)}
+    </List.Section>
+  );
+  const dependenciesSection = dependencies.length > 0 && (
+    <List.Section title="Dependencies" subtitle={`${dependencies.length}`}>
+      {dependencies.map((formula) => (
+        <FormulaListItem
+          key={`dependency-${formula.name}`}
+          id={`dependency-${formula.name}`}
+          formula={formula}
+          dependedOn={props.dependedOn}
+          {...formulaRowProps}
+        />
+      ))}
     </List.Section>
   );
   const casksSection = casks.length > 0 && (
-    <List.Section title="Casks">
+    <List.Section title="Casks" subtitle={sectionCount(props.totals?.casks ?? casks.length)}>
       {casks.map((cask) => (
-        <CaskListItem
-          key={`cask-${cask.token}`}
-          id={`cask-${cask.token}`}
-          selectedId={selectedId}
-          cask={cask}
-          isInstalled={props.isInstalled}
-          onAction={props.onAction}
-          showMetadataPanel={showMetadataPanel}
-          onToggleSidebar={props.onToggleSidebar}
-          sortByPopularity={props.sortByPopularity}
-          onToggleSort={props.onToggleSort}
-          showDescription={props.showDescription}
-          onToggleDescription={props.onToggleDescription}
-          showInstalledDate={props.showInstalledDate}
-        />
+        <CaskListItem key={`cask-${cask.token}`} id={`cask-${cask.token}`} cask={cask} {...rowProps} />
       ))}
-      {casks.isTruncated() && <MoreListItem />}
+      {pageFooter("cask", casks.length, props.totals?.casks ?? 0)}
     </List.Section>
   );
   const pinnedFormulaeSection = pinnedFormulae.length > 0 && (
@@ -112,16 +183,8 @@ export function FormulaList(props: FormulaListProps) {
         <FormulaListItem
           key={`pinned-formula-${formula.name}`}
           id={`pinned-formula-${formula.name}`}
-          selectedId={selectedId}
           formula={formula}
-          isInstalled={props.isInstalled}
-          onAction={props.onAction}
-          showMetadataPanel={showMetadataPanel}
-          onToggleSidebar={props.onToggleSidebar}
-          showDescription={props.showDescription}
-          onToggleDescription={props.onToggleDescription}
-          showInstalledDate={props.showInstalledDate}
-          showDependenciesFilter={props.showDependenciesFilter}
+          {...pinnedFormulaRowProps}
         />
       ))}
     </List.Section>
@@ -129,21 +192,7 @@ export function FormulaList(props: FormulaListProps) {
   const pinnedCasksSection = pinnedCasks.length > 0 && (
     <List.Section title="Pinned Casks" subtitle={`${pinnedCasks.length}`}>
       {pinnedCasks.map((cask) => (
-        <CaskListItem
-          key={`pinned-cask-${cask.token}`}
-          id={`pinned-cask-${cask.token}`}
-          selectedId={selectedId}
-          cask={cask}
-          isInstalled={props.isInstalled}
-          onAction={props.onAction}
-          showMetadataPanel={showMetadataPanel}
-          onToggleSidebar={props.onToggleSidebar}
-          sortByPopularity={props.sortByPopularity}
-          onToggleSort={props.onToggleSort}
-          showDescription={props.showDescription}
-          onToggleDescription={props.onToggleDescription}
-          showInstalledDate={props.showInstalledDate}
-        />
+        <CaskListItem key={`pinned-cask-${cask.token}`} id={`pinned-cask-${cask.token}`} cask={cask} {...rowProps} />
       ))}
     </List.Section>
   );
@@ -170,16 +219,19 @@ export function FormulaList(props: FormulaListProps) {
       {!hasResults && !props.isLoading && props.dataFetched && (
         <List.EmptyView icon={Icon.MagnifyingGlass} title="No Results" description="No packages found" />
       )}
+      {props.leadingSection}
       {pinnedFirst ? (
         <>
           {pinnedFormulaeSection}
           {pinnedCasksSection}
           {formulaeSection}
+          {dependenciesSection}
           {casksSection}
         </>
       ) : (
         <>
           {formulaeSection}
+          {dependenciesSection}
           {casksSection}
           {pinnedFormulaeSection}
           {pinnedCasksSection}
@@ -189,7 +241,22 @@ export function FormulaList(props: FormulaListProps) {
   );
 }
 
+/**
+ * How many a section holds — the full match count when Search windowed it, not
+ * the page — like the counted Dependencies and Pinned sections beside it.
+ */
+function sectionCount(n: number): string {
+  return n.toLocaleString();
+}
+
 export function FormulaListItem(props: {
+  /** Page navigation, forwarded into the row's action panel. */
+  paging?: PagingProps;
+  extraActions?: ActionPanel.Children;
+  /** A trailing accessory a view adds of its own: Manage Taps' trust exception. */
+  extraAccessory?: List.Item.Accessory;
+  /** The sidebar's Trust row, for a view that knows it. */
+  trust?: MetadataOptions["trust"];
   id?: string;
   selectedId?: string | null;
   formula: Formula;
@@ -203,6 +270,8 @@ export function FormulaListItem(props: {
   onToggleDescription?: () => void;
   showInstalledDate?: boolean;
   showDependenciesFilter?: boolean;
+  /** Passed only by the Dependencies section; drives the "Unused" tag. */
+  dependedOn?: ReadonlySet<string>;
 }) {
   const formula = props.formula;
   const showMetadataPanel = props.showMetadataPanel ?? false;
@@ -214,10 +283,24 @@ export function FormulaListItem(props: {
     version = brewFormatVersion(formula);
   }
 
-  const icon = installStateIcon(installed, formulaOutdated);
+  const uninstallable = installed ? undefined : uninstallableReason(formula, brewHost);
+
+  const icon = installStateIcon(installed, formulaOutdated, uninstallable);
   const accessories: List.Item.Accessory[] = [];
   if (installed && formulaOutdated) {
     accessories.push({ tag: { value: "Outdated", color: UPDATE_AVAILABLE_COLOR } });
+  }
+  // Guarded on presence, not size: only the Dependencies section passes this,
+  // and an empty set is a real answer (a lone dependency nothing depends on),
+  // not missing data. Undefined is the "installed data not loaded yet" case.
+  if (props.dependedOn !== undefined && isUnusedDependency(formula, props.dependedOn)) {
+    accessories.push({
+      tag: { value: "Unused", color: STATUS_COLOR.muted },
+      tooltip: "Nothing installed depends on this",
+    });
+  }
+  if (uninstallable) {
+    accessories.push({ tag: { value: "Can't Install", color: UNINSTALLABLE_COLOR }, tooltip: uninstallable });
   }
   accessories.push({ text: version });
   pushAccessories(
@@ -226,6 +309,7 @@ export function FormulaListItem(props: {
     formula.installs,
     formula.pinned,
   );
+  if (props.extraAccessory) accessories.push(props.extraAccessory);
 
   return (
     <List.Item
@@ -241,6 +325,7 @@ export function FormulaListItem(props: {
             isInstalled={props.isInstalled}
             isSelected={props.id != undefined && props.id === props.selectedId}
             showDescription={props.showDescription}
+            trust={props.trust}
           />
         ) : undefined
       }
@@ -256,6 +341,8 @@ export function FormulaListItem(props: {
           onToggleDescription={props.onToggleDescription}
           metadataPanelVisible={showMetadataPanel}
           showDependenciesFilter={props.showDependenciesFilter}
+          paging={props.paging}
+          extraActions={props.extraActions}
         />
       }
     />
@@ -263,6 +350,11 @@ export function FormulaListItem(props: {
 }
 
 export function CaskListItem(props: {
+  /** Page navigation, forwarded into the row's action panel. */
+  paging?: PagingProps;
+  extraActions?: ActionPanel.Children;
+  extraAccessory?: List.Item.Accessory;
+  trust?: MetadataOptions["trust"];
   id?: string;
   selectedId?: string | null;
   cask: Cask;
@@ -286,10 +378,15 @@ export function CaskListItem(props: {
     version = brewFormatVersion(cask);
   }
 
-  const icon = installStateIcon(installed, caskOutdated);
+  const uninstallable = installed ? undefined : uninstallableReason(cask, brewHost);
+
+  const icon = installStateIcon(installed, caskOutdated, uninstallable);
   const accessories: List.Item.Accessory[] = [];
   if (installed && caskOutdated) {
     accessories.push({ tag: { value: "Outdated", color: UPDATE_AVAILABLE_COLOR } });
+  }
+  if (uninstallable) {
+    accessories.push({ tag: { value: "Can't Install", color: UNINSTALLABLE_COLOR }, tooltip: uninstallable });
   }
   accessories.push({ text: version });
   pushAccessories(
@@ -298,6 +395,7 @@ export function CaskListItem(props: {
     cask.installs,
     cask.pinned,
   );
+  if (props.extraAccessory) accessories.push(props.extraAccessory);
 
   return (
     <List.Item
@@ -313,6 +411,7 @@ export function CaskListItem(props: {
             isInstalled={props.isInstalled}
             isSelected={props.id != undefined && props.id === props.selectedId}
             showDescription={props.showDescription}
+            trust={props.trust}
           />
         ) : undefined
       }
@@ -327,6 +426,8 @@ export function CaskListItem(props: {
           showDescription={props.showDescription}
           onToggleDescription={props.onToggleDescription}
           metadataPanelVisible={showMetadataPanel}
+          paging={props.paging}
+          extraActions={props.extraActions}
         />
       }
     />
@@ -373,6 +474,47 @@ function pushAccessories(
   }
 }
 
-export function MoreListItem() {
-  return <List.Item title="" icon={Icon.Dot} />;
+/**
+ * Closes a windowed section: which slice is on screen, and how to move it.
+ *
+ * The earlier version of this row had an EMPTY title and a dot icon, which read
+ * as a broken Load More control. It also wrote its full sentence regardless of
+ * width, and with the metadata sidebar open the list column is under half the
+ * window — so it clipped to "Showing 100 o… Keep typing to…", which says
+ * nothing at all. With the sidebar open it now drops the noun and the hint and
+ * keeps the numbers, which are the part that carries the meaning.
+ */
+function PageFooterItem(props: {
+  shown: number;
+  total: number;
+  kind: "formula" | "cask";
+  showMetadataPanel: boolean;
+  paging: PagingProps;
+}) {
+  const { paging } = props;
+  const offset = paging.page * paging.pageSize;
+  const full = pageRangeSummary(offset, props.shown, props.total, props.kind);
+  const compact = pageRangeCompact(offset, props.shown, props.total);
+  const position = `Page ${paging.page + 1} of ${paging.totalPages}`;
+
+  return (
+    <List.Item
+      icon={Icon.Ellipsis}
+      title={props.showMetadataPanel ? compact : full}
+      subtitle={props.showMetadataPanel ? undefined : position}
+      accessories={props.showMetadataPanel ? undefined : [{ text: "↵ Next Page" }]}
+      detail={
+        props.showMetadataPanel ? (
+          <List.Item.Detail
+            markdown={`### ${full}\n\n${position}\n\nPress ⏎ for the next page, or keep typing to narrow the results.`}
+          />
+        ) : undefined
+      }
+      actions={
+        <ActionPanel>
+          <PagingSection paging={paging} />
+        </ActionPanel>
+      }
+    />
+  );
 }

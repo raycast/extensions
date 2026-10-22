@@ -62,7 +62,7 @@ export const textIcon = (text: string): Image.ImageLike => {
     const labels = lines
       .map(
         (line, index) =>
-          `<text x="24" y="${44 + index * 28}" font-size="18" font-family="Menlo" fill="${foreground}">${escapeXml(line)}</text>`,
+          `<text x="24" y="${44 + index * 28}" font-size="18" font-family="Menlo, Consolas, monospace" fill="${foreground}">${escapeXml(line)}</text>`,
       )
       .join("");
     return svgDataUri(

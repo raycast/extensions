@@ -221,7 +221,7 @@ export interface DNSData {
    * a type listed here means "we could not check", NOT "the host publishes none"
    * — the two render differently and only one of them is a fact about the host.
    * Absent on entries cached before this field existed, which reads as "nothing
-   * known to have failed" and matches the old behaviour.
+   * known to have failed" and matches the old behavior.
    */
   unchecked?: DNSRecordKind[];
 }
@@ -264,7 +264,7 @@ export interface HostMetadataData {
 /**
  * One file actually published under `/.well-known/`.
  *
- * Only files that passed the content-type judgement in `wellKnownUtils` become
+ * Only files that passed the content-type judgment in `wellKnownUtils` become
  * hits, so the absence of a path here means the host answered for it — not that
  * the probe was skipped. Paths whose probe never got an answer are listed
  * separately in `WellKnownData.unchecked`.
@@ -307,7 +307,7 @@ export interface WellKnownData {
   controlUnchecked?: boolean;
 }
 
-/** One colour a page declares: a token with a name, or a theme-color with a media query. */
+/** One color a page declares: a token with a name, or a theme-color with a media query. */
 export interface ThemeColor {
   /** Custom-property or meta name. Absent for a bare `theme-color`. */
   name?: string;
@@ -343,9 +343,9 @@ export interface ThemeData {
   statusBarStyle?: string;
   /** Theme-bearing `data-*` attributes on <html>, e.g. `data-accent-color`. */
   attributes: Record<string, string>;
-  /** Vendor chrome colours: msapplication tile and nav-button. */
+  /** Vendor chrome colors: msapplication tile and nav-button. */
   vendorColors: ThemeColor[];
-  /** CSS custom properties whose value is a colour. */
+  /** CSS custom properties whose value is a color. */
   tokens: ThemeColor[];
   /**
    * Outcome of reading the linked stylesheets. Absent when none were scanned —

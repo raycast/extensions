@@ -149,13 +149,35 @@ const analyticsPeriodTitles: [AnalyticsPeriod, string][] = [
  * count isn't known yet — so the metadata panel reserves their height and does
  * not reflow when the lazily-fetched analytics arrive underneath the user.
  *
- * This stabilises the COMMON case only, deliberately. Two rows are still added
+ * This stabilizes the COMMON case only, deliberately. Two rows are still added
  * after the fetch: build errors (absent for almost every package, and a
  * permanent "0" row would be noise) and the deprecation warning, which is rarer
  * still and cannot be usefully reserved — a blank warning slot on every healthy
  * package is a worse trade than a rare shift.
  */
-export function analyticsRows(detail?: PackageDetailResponse, failed = false): AnalyticsRow[] {
+/**
+ * The taps Homebrew publishes install analytics for.
+ *
+ * `formulae.brew.sh` reports on the two official taps and nothing else, so a
+ * package from anywhere else has no counts to report — not zero, and not a
+ * failure. Everything in `Library/Taps` beyond these two is somebody's own
+ * repository, which Homebrew never surveys.
+ */
+const ANALYTICS_TAPS = ["homebrew/core", "homebrew/cask"];
+
+/** Whether Homebrew publishes analytics for a package from this tap. */
+export function tapHasAnalytics(tap: string | null | undefined): boolean {
+  // An unknown tap keeps its rows: a cached record that predates the field
+  // would otherwise lose real counts, which is the worse of the two mistakes.
+  return tap == undefined || ANALYTICS_TAPS.includes(tap);
+}
+
+export function analyticsRows(detail?: PackageDetailResponse, failed = false, tap?: string | null): AnalyticsRow[] {
+  // A third-party tap has no analytics to be missing. Reserving three rows that
+  // can only ever read "Unavailable" states a fetch problem that did not happen
+  // and implies the package might have counts, which it never will.
+  if (!tapHasAnalytics(tap)) return [];
+
   const installs = detail?.analytics?.install;
 
   const rows: AnalyticsRow[] = analyticsPeriodTitles.map(([period, title]) => {

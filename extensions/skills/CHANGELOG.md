@@ -1,5 +1,24 @@
 # Skills Changelog
 
+## [Sync with Skills CLI 1.7] - 2026-10-22
+
+- Show skills installed from a local path with a `~`-relative source in Manage Skills, instead of the absolute path offered as a repository link and URL
+- Add the fx, Grok Build, Kimchi, MiniMax Code, Posit Assistant, Sarvam Code, and ZCode agents, so installing to Grok Build passes its real `grok` ID instead of failing
+- Read `SKILL.md` frontmatter that starts with a byte order mark or has no content after it
+
+## [Fix Multiline Skill Descriptions] - 2026-10-18
+
+- Show complete descriptions from multiline YAML frontmatter in Search Skills and Manage Skills details
+- Ignore invalid frontmatter metadata so skill details remain readable
+
+## [Fix Skills List Troubleshooting] - 2026-10-17
+
+- Include `--json` in the troubleshooting commands so they match the installed-skills list command used by the extension
+
+## [Show Unexpected CLI Output When Listing Fails] - 2026-09-26
+
+- Include what the `skills` CLI actually printed when "Manage Skills" cannot parse its installed-skills list, instead of only reporting that the output was unexpected
+
 ## [Fix Commands Waiting Forever Behind Each Other] - 2026-09-12
 
 - Stop a second command from waiting indefinitely behind a running one: opening Manage Skills during "Update All Skills" now either gets its turn or reports that another skills command is still running, instead of showing an empty list and spinning for minutes

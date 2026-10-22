@@ -25,6 +25,7 @@ import {
   User,
 } from "../utils/notion";
 import { handleOnOpenPage, isNotionApp } from "../utils/openPage";
+import { formatPageLink } from "../utils/formatPageLink";
 import { DatabaseView } from "../utils/types";
 
 import { DatabaseList } from "./DatabaseList";
@@ -306,10 +307,7 @@ export function PageListItem({
               />
               <Action.CopyToClipboard
                 title="Copy Formatted URL"
-                content={{
-                  html: `<a href="${page.url}" title="${title}">${title}</a>`,
-                  text: title,
-                }}
+                content={formatPageLink(title, page.url)}
                 shortcut={Keyboard.Shortcut.Common.CopyName}
               />
               <Action.Paste

@@ -1,5 +1,47 @@
 # Slack Changelog
 
+## [Profile photos in Find Users] - 2026-10-22
+
+- Return each person's profile photo URL from the **Find Users** AI tool, so AI can use it, for example to add a photo to a contact. It uses the 1024px photo when someone uploaded their own and the 512px image otherwise.
+- Add a `hasCustomPhoto` flag so AI can tell an uploaded photo apart from Slack's default avatar.
+
+## [Added new screenshots] - 2026-10-13
+
+## [Rename Channel AI Tool] - 2026-10-12
+
+- Add a **Rename Channel** AI tool that renames a channel by ID after confirmation. Names are converted to Slack's format (lowercase, hyphens instead of spaces), and common errors such as a taken name or missing permission are explained.
+
+## [Fix user search stalling] - 2026-10-10
+
+- Fix searching for users in **Send Message** and **Open Channel** loading indefinitely in large workspaces.
+- Load the workspace member list once and cache it, instead of rescanning Slack on every keystroke.
+- Show the first page of people right away when opening the picker while the full list loads in the background.
+- Request smaller pages from Slack. Timeouts and server errors stop retrying after a few attempts so they show up instead of loading forever; rate limits still wait for Slack's retry delay.
+
+## [Add Canvas AI tools] - 2026-10-09
+
+- Add **Read Canvas** and **Edit Canvas** AI tools for existing Slack canvases.
+- Request Slack's `canvases:read` and `canvases:write` OAuth scopes.
+
+## [Archive Channels AI Tool] - 2026-10-05
+
+- Add an **Archive Channels** AI tool that archives one or more channels by ID after confirmation.
+
+## [Fix Unread Messages configuration] - 2026-09-25
+
+- Fix selected conversations in the Unread Messages configuration sometimes being lost
+- Add a "Done" action to the configuration list to go back once you've picked your conversations
+
+## [Catch-up, Decisions, and Standup Skills] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Add skills for catching up on selected Slack conversations, finding past discussions and decisions, and drafting standup updates from your own activity.
+- Include source references and coverage limits, with Slack delivery only when requested.
+
+## [Quiet automatic rate-limit retries] - 2026-09-23
+
+- Retry Slack rate-limited requests automatically without repeatedly showing a toast during commands and AI tasks.
+
 ## [Fix recipient search, AI file uploads, and attachment downloads] - 2026-09-10
 
 - Keep **Send Message** and **Open Channel** responsive in large workspaces by loading bounded, filtered directory pages instead of retaining and caching the entire workspace directory.

@@ -29,6 +29,10 @@ export function parseQuery(q: string): ParsedQuery {
 export interface RankOptions {
   // Include the Better BibTeX citekey as a (highest-weight) search field.
   bibtexSearch?: boolean;
+  // Last-opened timestamps by item identity. When provided with an empty
+  // query, recently opened entries rank first and the rest follow by date
+  // added; non-empty queries ignore it.
+  interactions?: Record<string, number>;
   // If provided, keep only items belonging to at least one of these collections,
   // identified by library-qualified collection id (`collectionId`).
   collections?: string[];
@@ -161,6 +165,17 @@ export function rankResults(items: RefData[], query: string, opts: RankOptions =
   }
 
   if (terms.length === 0) {
+    // Open history only reorders a truly blank query, matching the preference
+    // text ("when the search is empty"); a tag-only query keeps date-added
+    // order.
+    if (tags.length === 0) {
+      const openedAt = opts.interactions ?? {};
+      const lastOpened = (it: RefData): number => openedAt[itemIdentity(it)] ?? 0;
+      // Recently opened first (by when they were opened, not added), then the
+      // never-opened rest by date added; with no interactions this reduces to
+      // date-added order.
+      return pool.sort((a, b) => lastOpened(b) - lastOpened(a) || recency(b) - recency(a)).slice(0, limit);
+    }
     return pool.sort((a, b) => recency(b) - recency(a)).slice(0, limit);
   }
 

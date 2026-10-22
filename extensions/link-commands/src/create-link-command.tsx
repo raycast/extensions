@@ -13,14 +13,25 @@ import {
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { access, chmod, mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { discoverScriptCommands, parseDirectoryPreference } from "./lib/discover-script-commands";
-import { facetCounts, splitTypedPackage } from "./lib/convention";
+import { categoryName, environmentName, facetCounts, splitPackage } from "./lib/convention";
 import { learnedPackages, packageForTarget } from "./lib/link-command";
 import { reusableIcon } from "./lib/reuse-icon";
 import { collapseHome } from "./lib/home-path";
 import { fetchFavicon } from "./lib/fetch-icon";
+import { fetchSiteName } from "./lib/fetch-site-name";
 import { brandFor, buildScript, domainOf, findPlaceholder, scriptFilename, slugify } from "./lib/generate-script";
+import {
+  directoryEnvironmentAction,
+  hoistShouldOverride,
+  initialEnvironmentSource,
+  isWorkPath,
+  resolveAutoEnvironment,
+  type EnvironmentSource,
+} from "./lib/work-directory";
+import { formatTitle } from "./lib/format-title";
+import { suggestTitle, titleEdited, titleSuggested, type TitleState } from "./lib/suggest-title";
 
 /** Sentinel for the "New…" dropdown entry — a value no real environment or category can hold. */
 const NEW_VALUE = "\u0000new";
@@ -116,10 +127,14 @@ const Command = () => {
   const preferences = getPreferenceValues<Preferences>();
   const directories = parseDirectoryPreference(preferences.scriptDirectories);
 
-  const [title, setTitle] = useState("");
+  const [titleState, setTitleState] = useState<TitleState>({ title: "", suggestion: "", touched: false });
+  const { title } = titleState;
   const [target, setTarget] = useState("");
-  const [environment, setEnvironment] = useState("");
-  const [newEnvironment, setNewEnvironment] = useState("");
+  const [environment, setEnvironment] = useState(() => (isWorkPath(directories[0] ?? "") ? NEW_VALUE : ""));
+  const [newEnvironment, setNewEnvironment] = useState(() => (isWorkPath(directories[0] ?? "") ? "work" : ""));
+  const [environmentSource, setEnvironmentSource] = useState<EnvironmentSource>(() =>
+    initialEnvironmentSource(directories[0] ?? ""),
+  );
   const [packageName, setPackageName] = useState("");
   const [category, setCategory] = useState("");
   const [newCategory, setNewCategory] = useState("");
@@ -139,13 +154,91 @@ const Command = () => {
 
   // Deriving a package from the domain gets the product and the casing wrong often enough to be
   // a nuisance — atlassian.net is Jira, npmjs.com is npm, my.pcloud.com is pCloud. The collection
-  // already holds the right answer for every service it has seen, so it is asked first.
+  // already holds the right answer for every service it has seen, so it is asked first. Next comes
+  // the site's own name, read off the page; the domain-derived brand is the last resort.
   const learned = learnedPackages(discovered?.commands ?? []);
-  const suggestedPackage = packageForTarget(target, learned) ?? brandFor(target);
+
+  // The site's own name, fetched once typing pauses. Skipped for anything that is not a web URL —
+  // a folder has no page to read. Debounced so a keystroke is not a request. Never written into
+  // the field: an empty Package falls back to the suggestion, so what is typed stays the person's.
+  const [siteName, setSiteName] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const trimmed = target.trim();
+    if (!/^https?:\/\//i.test(trimmed)) {
+      setSiteName(undefined);
+      return;
+    }
+
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      fetchSiteName(trimmed).then(
+        (name) => {
+          if (!cancelled) setSiteName(name);
+        },
+        () => {
+          if (!cancelled) setSiteName(undefined);
+        },
+      );
+    }, 400);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [target]);
+
+  const suggestedPackage = packageForTarget(target, learned) ?? siteName ?? brandFor(target);
 
   // Mirrors the generator's own guard rather than restating it loosely: `open -a` takes no query, so a
   // search target has nothing an app could stand in for, and a folder has no web surface to fall back to.
   const canRoute = /^https?:\/\//i.test(target.trim()) && !findPlaceholder(target);
+
+  const titleBrand = packageForTarget(target.trim(), learned) ?? siteName ?? brandFor(target.trim());
+
+  /**
+   * The title is a field the person owns, so the suggestion is offered to it rather than bound to it: a bound
+   * value would snap back the moment they typed over it. It is re-offered whenever it changes, which covers
+   * Target and Desktop App, the two inputs that change what the command *does*, and also the collection
+   * finishing discovery after the person has started typing, so a host it files under `Jira` stops being
+   * titled `Atlassian`. The brand is resolved the same way the Package placeholder is, so the title and the
+   * subtitle agree.
+   */
+  const titleSuggestion = suggestTitle({
+    target,
+    brand: titleBrand,
+    desktopApplication: desktopApplication || undefined,
+  });
+
+  useEffect(() => setTitleState((state) => titleSuggested(state, titleSuggestion)), [titleSuggestion]);
+
+  // The form starts before discovery finishes, so an auto Work has no match yet and goes through
+  // "New…"; once the facets arrive holding it, the dropdown selects the existing entry instead of
+  // keeping the extra field.
+  useEffect(() => {
+    const resolved = resolveAutoEnvironment(
+      environmentSource,
+      environment,
+      newEnvironment,
+      facets.environments,
+      NEW_VALUE,
+    );
+    if (resolved) setEnvironment(resolved);
+  }, [environmentSource, environment, newEnvironment, facets.environments]);
+
+  // A field left empty falls back to the suggestion, so Enter while the field is still focused and empty
+  // creates the same command tabbing away would.
+  const effectiveTitle = title.trim() || titleSuggestion || "";
+
+  // The site prefix is applied at write time, never to the field itself: the filename and the slug keep
+  // deriving from the bare name, so turning the preference on changes no file.
+  const formattedTitle = formatTitle({
+    name: effectiveTitle,
+    target,
+    enabled: preferences.titleWithSite ?? false,
+    brand: titleBrand,
+    desktopApplication: desktopApplication || undefined,
+  });
 
   // The dropdown holds a sentinel while a new value is being typed; everything downstream sees
   // only the resolved string.
@@ -178,31 +271,52 @@ const Command = () => {
     setTyped(value);
   };
 
+  // The directory drives Environment only while its value is still the directory's own guess; a
+  // scope the person set, typed or hoisted, stops the syncing.
+  const handleDirectoryChange = (next: string) => {
+    setDirectory(next);
+
+    const action = directoryEnvironmentAction(environmentSource, isWorkPath(next), chosenEnvironment);
+    if (action === "keep") return;
+
+    if (action === "set-work") {
+      selectOrCreate("work", facets.environments, setEnvironment, setNewEnvironment);
+      setEnvironmentSource("auto");
+    } else {
+      setEnvironment("");
+      setNewEnvironment("");
+      setEnvironmentSource(null);
+    }
+  };
+
   /**
    * Package is the one field that drives the filename, and a sigil typed into it is someone reaching for a
    * control that already exists a few rows away. Left alone, `Linear · @work` becomes a brand by that
-   * literal name: it slugs to `linear-work.` rather than the `work.linear.` the convention specifies, and
+   * literal name: it slugs to `linear-work.` instead of keeping the scope on the subtitle, and
    * the list reads it back as part of the brand rather than as a scope.
    *
    * The sigil therefore always leaves the brand. Where it lands defers to the user: a control they have
-   * already set is never overridden, and a conflicting sigil is reported as dropped instead. On blur rather
+   * already set by hand is never overridden — an automatically chosen scope gives way to what they
+   * typed — and a conflicting sigil is reported as dropped instead. On blur rather
    * than on change, because `@w` already matches and a per-keystroke hoist would swallow the token as it
    * was being typed.
    */
   const hoistPackageFields = (typed: string) => {
-    const fields = splitTypedPackage(typed);
+    const fields = splitPackage(typed);
     if (!fields.environment && !fields.category) return;
 
     const notes: string[] = [];
 
     // Tested against the resolved value, not the raw control: "New…" holds a sentinel that is truthy while
     // its text field is still empty, so reading the control directly would call an unset field set and
-    // report the sigil dropped rather than moving it.
-    if (fields.environment && chosenEnvironment)
-      notes.push(`dropped @${fields.environment}, Environment is already set`);
-    if (fields.environment && !chosenEnvironment) {
+    // report the sigil dropped rather than moving it. An auto scope never blocks: it was the
+    // directory's guess, so the typed scope takes the control and counts as a user choice.
+    if (fields.environment && hoistShouldOverride(chosenEnvironment, environmentSource)) {
       selectOrCreate(fields.environment, facets.environments, setEnvironment, setNewEnvironment);
+      setEnvironmentSource("user");
       notes.push(`moved @${fields.environment} to Environment`);
+    } else if (fields.environment) {
+      notes.push(`dropped @${fields.environment}, Environment is already set`);
     }
 
     if (fields.category && chosenCategory) notes.push(`dropped #${fields.category}, Category is already set`);
@@ -219,9 +333,9 @@ const Command = () => {
 
   const placeholder = findPlaceholder(target);
   const filename =
-    title.trim() && target.trim()
+    effectiveTitle && target.trim()
       ? scriptFilename({
-          title,
+          title: effectiveTitle,
           target,
           environment: chosenEnvironment || undefined,
           packageName: resolvedPackage || undefined,
@@ -230,7 +344,7 @@ const Command = () => {
   const preview = filename && placeholder ? `${filename} — prompts for “${placeholder}”` : filename;
 
   const submit = async () => {
-    if (!title.trim() || !target.trim()) {
+    if (!formattedTitle || !target.trim()) {
       await showFailureToast(new Error("A title and a target are both required"), { title: "Nothing to create" });
       return;
     }
@@ -245,7 +359,7 @@ const Command = () => {
     try {
       const path = await createScript({
         directory,
-        title,
+        title: formattedTitle,
         target,
         reuseIcon: await reusableIcon(discovered?.commands ?? [], directory, resolvedPackage),
         environment: chosenEnvironment,
@@ -279,7 +393,22 @@ const Command = () => {
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" placeholder="Netflix" value={title} onChange={setTitle} />
+      <Form.TextField
+        id="title"
+        title="Title"
+        placeholder="Netflix"
+        info={
+          preferences.titleWithSite
+            ? "Suggested from the target. Leave it empty to use the suggestion. Written with its site — “claude.ai · Usage”."
+            : "Suggested from the target. Leave it empty to use the suggestion."
+        }
+        value={title}
+        onChange={(next) => setTitleState((state) => titleEdited(state, next))}
+        onBlur={() => setTitleState((state) => (state.title.trim() ? state : titleSuggested(state, titleSuggestion)))}
+      />
+      {preferences.titleWithSite && formattedTitle && formattedTitle !== effectiveTitle ? (
+        <Form.Description title="Title" text={`Written as “${formattedTitle}”`} />
+      ) : null}
       <Form.TextField
         id="target"
         title="Target"
@@ -293,7 +422,7 @@ Put {query} anywhere in a URL to make it a search command: Raycast prompts for t
 
       <Form.Separator />
 
-      <Form.Dropdown id="directory" title="Directory" value={directory} onChange={setDirectory}>
+      <Form.Dropdown id="directory" title="Directory" value={directory} onChange={handleDirectoryChange}>
         {directories.map((entry) => (
           <Form.Dropdown.Item key={entry} title={collapseHome(entry)} value={entry} />
         ))}
@@ -302,13 +431,16 @@ Put {query} anywhere in a URL to make it a search command: Raycast prompts for t
       <Form.Dropdown
         id="environment"
         title="Environment"
-        info='Prefixes the title with "@work · " and the filename with "work.", so the command gets its own section in the list and can be filtered on.'
+        info='Adds " · @work" to the subtitle, so the command gets its own section in the list and can be filtered on. The title stays the name alone, and the filename stays brand.detail.sh however the environment is set. Picking a directory under a work folder ticks this to Work, and picking any other directory unticks it back to None — until it is changed by hand, which stops the syncing.'
         value={environment}
-        onChange={setEnvironment}
+        onChange={(next) => {
+          setEnvironment(next);
+          setEnvironmentSource("user");
+        }}
       >
         <Form.Dropdown.Item title="None" value="" />
         {facets.environments.map((entry) => (
-          <Form.Dropdown.Item key={entry.value} title={`@${entry.value}`} value={entry.value} />
+          <Form.Dropdown.Item key={entry.value} title={environmentName(entry.value)} value={entry.value} />
         ))}
         <Form.Dropdown.Item title="New…" value={NEW_VALUE} />
       </Form.Dropdown>
@@ -319,7 +451,10 @@ Put {query} anywhere in a URL to make it a search command: Raycast prompts for t
           title="New Environment"
           placeholder="work"
           value={newEnvironment}
-          onChange={setNewEnvironment}
+          onChange={(next) => {
+            setNewEnvironment(next);
+            setEnvironmentSource("user");
+          }}
         />
       ) : null}
 
@@ -347,7 +482,7 @@ Put {query} anywhere in a URL to make it a search command: Raycast prompts for t
       >
         <Form.Dropdown.Item title="None" value="" />
         {facets.categories.map((entry) => (
-          <Form.Dropdown.Item key={entry.value} title={`#${entry.value}`} value={entry.value} />
+          <Form.Dropdown.Item key={entry.value} title={categoryName(entry.value)} value={entry.value} />
         ))}
         <Form.Dropdown.Item title="New…" value={NEW_VALUE} />
       </Form.Dropdown>

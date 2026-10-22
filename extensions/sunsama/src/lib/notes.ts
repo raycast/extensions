@@ -21,6 +21,15 @@ function stripTags(s: string): string {
   return s.replace(/<[^>]+>/g, "");
 }
 
+/**
+ * Escape plain text for interpolation into Markdown, so a title like
+ * "Fix *flaky* test" or "#1 priority" reads literally instead of styling or
+ * restructuring the document.
+ */
+export function escapeMarkdown(text: string): string {
+  return text.replace(/[\\`*_{}[\]()#+\-!<>|~]/g, "\\$&");
+}
+
 export function htmlToMarkdown(html: string | undefined | null): string {
   if (!html) return "";
   let s = html;

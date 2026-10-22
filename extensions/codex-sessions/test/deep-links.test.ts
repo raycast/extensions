@@ -1,4 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const mocks = vi.hoisted(() => ({
   execFile: vi.fn((...args: unknown[]) => {
@@ -7,13 +10,14 @@ const mocks = vi.hoisted(() => ({
   }),
   getApplications: vi.fn(),
   open: vi.fn(),
+  showToast: vi.fn(),
 }));
 
 vi.mock("@raycast/api", () => ({
   getApplications: mocks.getApplications,
   getPreferenceValues: vi.fn(() => ({})),
   open: mocks.open,
-  showToast: vi.fn(),
+  showToast: mocks.showToast,
   Toast: { Style: { Failure: "failure" } },
 }));
 vi.mock("@raycast/utils", () => ({
@@ -23,7 +27,13 @@ vi.mock("node:child_process", () => ({
   execFile: mocks.execFile,
 }));
 
-import { newTaskDeepLink, openWorkspace, threadDeepLink, type NewTaskTarget } from "../src/lib/open-codex";
+import {
+  newTaskDeepLink,
+  openNewThreadInProject,
+  openWorkspace,
+  threadDeepLink,
+  type NewTaskTarget,
+} from "../src/lib/open-codex";
 
 describe("Codex deep links", () => {
   it("encodes spaces and Japanese thread IDs", () => {
@@ -68,5 +78,44 @@ describe("Codex deep links", () => {
     const params = new URL(openedUrl).searchParams;
     expect(params.get("path")).toBe("/tmp/chosen-project");
     expect(params.has("originUrl")).toBe(false);
+  });
+});
+
+describe("new thread in the selected project", () => {
+  let projectPath: string;
+
+  beforeEach(() => {
+    projectPath = mkdtempSync(join(tmpdir(), "codex 日本語 O'Brien-"));
+    mocks.open.mockClear();
+    mocks.showToast.mockClear();
+    mocks.getApplications.mockResolvedValue([{ bundleId: "com.openai.codex" }]);
+  });
+
+  afterEach(() => {
+    rmSync(projectPath, { recursive: true, force: true });
+  });
+
+  it("opens the new-thread composer with the exact selected project path", async () => {
+    expect(await openNewThreadInProject(projectPath)).toBe(true);
+
+    expect(mocks.open).toHaveBeenCalledTimes(1);
+    const url = new URL(mocks.open.mock.calls[0][0] as string);
+    expect(url.host).toBe("new");
+    expect(url.searchParams.get("path")).toBe(projectPath);
+    expect(url.searchParams.has("originUrl")).toBe(false);
+  });
+
+  it("does not open another project when the selected folder is missing", async () => {
+    expect(await openNewThreadInProject(join(projectPath, "missing"))).toBe(false);
+    expect(mocks.open).not.toHaveBeenCalled();
+    expect(mocks.showToast).toHaveBeenCalledWith(expect.objectContaining({ title: "Project folder is unavailable" }));
+  });
+
+  it("rejects a path that is a file instead of a project folder", async () => {
+    const file = join(projectPath, "file.txt");
+    writeFileSync(file, "test");
+
+    expect(await openNewThreadInProject(file)).toBe(false);
+    expect(mocks.open).not.toHaveBeenCalled();
   });
 });

@@ -22,7 +22,7 @@ function onAuthorize({ token, type }: { token: string; type: string }) {
 
 export const githubOAuthService = OAuthService.github({
   personalAccessToken: preferences.personalAccessToken,
-  scope: "notifications repo project read:org read:user",
+  scope: "notifications repo project read:org read:user read:packages",
   onAuthorize,
 });
 

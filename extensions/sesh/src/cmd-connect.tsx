@@ -1,72 +1,66 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { Icon, List, Action, ActionPanel, closeMainWindow, clearSearchBar, Color } from "@raycast/api";
+import { Icon, List, Action, ActionPanel, closeMainWindow, clearSearchBar } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { getSessions, connectToSession, isTmuxRunning, Session } from "./sesh";
+import { getSessions, connectToSession } from "./sesh";
+import { checkSetup, isSetupError, renderSetupEmptyView } from "./setup";
 import { openApp } from "./app";
+import { getIcon } from "./sessions";
+import { WindowList } from "./windows";
 
-export class TmuxNotRunningError extends Error {
-  constructor() {
-    super("Please start tmux before using this command.");
-    this.name = "TmuxNotRunningError";
-  }
-}
-
-function getIcon(session: Session) {
-  switch (session.Src) {
-    case "tmux":
-      return {
-        source: Icon.Bolt,
-        tintColor: session.Attached >= 1 ? Color.Green : Color.Blue,
-        tooltip: session.Attached >= 1 ? "Attached" : "Detached",
-      };
-    case "tmuxinator":
-      return {
-        source: Icon.Box,
-        tintColor: Color.Magenta,
-      };
-    case "config":
-      return {
-        source: Icon.Cog,
-        tintColor: Color.SecondaryText,
-      };
-    case "zoxide":
-    default:
-      return {
-        source: Icon.Folder,
-        tintColor: Color.SecondaryText,
-      };
-  }
-}
-
-function formatScore(score: number) {
-  if (score === 0) return undefined;
-  return String(Number.isInteger(score) ? score : score.toFixed(2));
-}
+const ALIAS_AUTO_CONNECT_DELAY_MS = 150;
+const ALIAS_PREFIX = "/";
 
 export default function ConnectCommand() {
   const [isConnecting, setIsConnecting] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const connectingRef = useRef(false);
+  const autoConnectTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
     async () => {
-      if (!(await isTmuxRunning())) {
-        throw new TmuxNotRunningError();
-      }
+      await checkSetup();
       return (await getSessions()) ?? [];
     },
     [],
     {
       keepPreviousData: true,
       onError: (error) => {
-        showFailureToast(error, {
-          title: error instanceof TmuxNotRunningError ? "tmux isn't running" : "Couldn't get sessions",
-        });
+        if (isSetupError(error)) {
+          return;
+        }
+        showFailureToast(error, { title: "Couldn't get sessions" });
       },
     },
   );
-  const sessions = data ?? [];
+  const sessions = isSetupError(error) ? [] : (data ?? []);
+  const aliasQuery = searchText.startsWith(ALIAS_PREFIX)
+    ? searchText.slice(ALIAS_PREFIX.length).toLowerCase()
+    : undefined;
+  const query = aliasQuery ?? searchText.toLowerCase();
+  const nameMatch = aliasQuery === undefined && sessions.some((session) => session.Name.toLowerCase() === query);
+  const aliasMatch = nameMatch
+    ? undefined
+    : sessions.find((session) => session.Alias && session.Alias.toLowerCase() === query);
+  const aliasPrefixMatches = sessions.filter(
+    (session) => session.Alias && session.Alias.toLowerCase().startsWith(query),
+  );
+  const visibleSessions = aliasQuery !== undefined ? aliasPrefixMatches : aliasMatch ? [aliasMatch] : sessions;
+  const autoConnectTarget =
+    aliasMatch && aliasPrefixMatches.length === 1 && (aliasQuery !== undefined || aliasMatch.AliasAutoConnect)
+      ? aliasMatch.Name
+      : undefined;
+
+  useEffect(() => {
+    if (!autoConnectTarget) return;
+    autoConnectTimerRef.current = setTimeout(() => connect(autoConnectTarget), ALIAS_AUTO_CONNECT_DELAY_MS);
+    return () => clearTimeout(autoConnectTimerRef.current);
+  }, [autoConnectTarget]);
 
   async function connect(session: string) {
+    clearTimeout(autoConnectTimerRef.current);
+    if (connectingRef.current) return;
+    connectingRef.current = true;
     try {
       setIsConnecting(true);
       await connectToSession(session);
@@ -76,6 +70,7 @@ export default function ConnectCommand() {
     } catch (error) {
       await showFailureToast(error, { title: "Couldn't connect to session" });
     } finally {
+      connectingRef.current = false;
       setIsConnecting(false);
     }
   }
@@ -89,34 +84,52 @@ export default function ConnectCommand() {
     />
   );
 
-  return (
-    <List isLoading={isLoading || isConnecting}>
+  function renderEmptyView() {
+    const setupEmptyView = renderSetupEmptyView(error, refreshAction);
+    if (setupEmptyView) {
+      return setupEmptyView;
+    }
+    if (error) {
+      return (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't load sessions"
+          description="Press ⌘R to retry."
+          actions={<ActionPanel>{refreshAction}</ActionPanel>}
+        />
+      );
+    }
+    return (
       <List.EmptyView
-        icon={error ? Icon.Warning : Icon.MagnifyingGlass}
-        title={error ? "Couldn't load sessions" : "No sessions found"}
-        description={
-          error
-            ? error instanceof TmuxNotRunningError
-              ? "Start tmux, then press ⌘R to retry."
-              : "Press ⌘R to retry."
-            : "Press ⌘R to refresh."
-        }
+        icon={Icon.MagnifyingGlass}
+        title="No sessions found"
+        description="Press ⌘R to refresh."
         actions={<ActionPanel>{refreshAction}</ActionPanel>}
       />
-      {sessions.map((session, index) => {
+    );
+  }
+
+  return (
+    <List
+      key={aliasQuery === undefined ? "search" : "alias"}
+      isLoading={isLoading || isConnecting}
+      filtering={aliasQuery === undefined}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+    >
+      {renderEmptyView()}
+      {visibleSessions.map((session, index) => {
         const accessories = [];
 
-        if (session.Src === "tmux") {
+        if (session.Alias) {
+          accessories.push({ tag: session.Alias, tooltip: "Alias" });
+        }
+
+        if (session.Src === "tmux" && !session.TmuxWindows) {
           accessories.push({
             icon: Icon.AppWindow,
             text: String(session.Windows),
             tooltip: session.Windows === 1 ? "Window" : "Windows",
-          });
-        } else {
-          accessories.push({
-            text: formatScore(session.Score),
-            icon: session.Src === "tmuxinator" ? Icon.Box : Icon.Racket,
-            tooltip: "Score",
           });
         }
 
@@ -124,11 +137,20 @@ export default function ConnectCommand() {
           <List.Item
             key={index}
             title={session.Name}
+            keywords={session.Alias ? [session.Alias] : undefined}
+            subtitle={session.TmuxWindows?.map((window) => window.Name).join("  ")}
             icon={getIcon(session)}
             accessories={accessories}
             actions={
               <ActionPanel>
                 <Action title="Connect to Session" onAction={() => connect(session.Name)} />
+                {session.Src === "tmux" && (
+                  <Action.Push
+                    title="Search Windows"
+                    icon={Icon.AppWindowList}
+                    target={<WindowList session={session.Name} />}
+                  />
+                )}
                 {refreshAction}
               </ActionPanel>
             }

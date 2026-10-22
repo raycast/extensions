@@ -8,7 +8,14 @@
  */
 
 import { useFetch } from "@raycast/utils";
-import { PackageDetailResponse, fetchLogger, packageAnalyticsURL } from "../utils";
+import {
+  type Cask,
+  type Formula,
+  PackageDetailResponse,
+  fetchLogger,
+  packageAnalyticsURL,
+  thirdPartyTapOf,
+} from "../utils";
 
 /** What the detail panels need: the record, and whether fetching it failed. */
 export interface PackageDetailState {
@@ -21,10 +28,19 @@ export interface PackageDetailState {
  *
  * Gated on `isSelected`: Raycast constructs the detail element for every row in
  * the list, so an ungated fetch would fire once per visible result.
+ *
+ * Never for a third-party tap's package. formulae.brew.sh publishes core and
+ * cask only, and is keyed by SHORT name — so it would answer with a same-named
+ * official package and show that package's Disabled or Deprecated warning on
+ * the tapped one. Its data is also dropped, not just unfetched: useFetch caches
+ * by URL, so a same-named core package fetched earlier would come back anyway.
  */
-export function usePackageDetail(name: string, isCask: boolean, isSelected: boolean): PackageDetailState {
+export function usePackageDetail(item: Cask | Formula, isSelected: boolean): PackageDetailState {
+  const isCask = "token" in item;
+  const name = isCask ? item.token : item.name;
+  const thirdParty = thirdPartyTapOf(item) !== undefined;
   const { data, error } = useFetch<PackageDetailResponse>(packageAnalyticsURL(name, isCask), {
-    execute: isSelected,
+    execute: isSelected && !thirdParty,
     // Deliberately NOT keepPreviousData. These numbers render under a package
     // name, so stale data here is data attributed to the wrong package — the
     // one failure mode worth a flicker to avoid. Without it the statistics
@@ -40,5 +56,6 @@ export function usePackageDetail(name: string, isCask: boolean, isSelected: bool
   // failed from a package that genuinely reports no installs — both would
   // otherwise render as an em dash forever. It only counts as failed when
   // there is no data to show instead.
+  if (thirdParty) return { failed: false };
   return { data, failed: error != undefined && data == undefined };
 }

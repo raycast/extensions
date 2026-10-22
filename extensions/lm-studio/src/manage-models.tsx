@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  AI,
   Alert,
   Color,
   Detail,
@@ -349,6 +350,19 @@ export default function ManageModelsCommand() {
 
   const visibleModels = filter === "all" ? models : models.filter((model) => model.type === filter);
 
+  async function refreshRaycastModels() {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Refreshing Raycast Models…" });
+    try {
+      await AI.refreshModels();
+      toast.style = Toast.Style.Success;
+      toast.title = "Raycast Models Refreshed";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could Not Refresh Raycast Models";
+      toast.message = friendlyError(error);
+    }
+  }
+
   async function unload(model: LMStudioModel, instanceId: string) {
     const confirmed = await confirmAlert({
       title: `Unload ${model.displayName}?`,
@@ -422,6 +436,7 @@ export default function ManageModelsCommand() {
             <ActionPanel>
               <Action title="Refresh Models" icon={Icon.ArrowClockwise} onAction={refresh} />
               <Action.Push title="Download Model" icon={Icon.Download} target={downloadForm} />
+              <Action title="Refresh Raycast Models" icon={Icon.ArrowClockwise} onAction={refreshRaycastModels} />
               <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
@@ -473,6 +488,7 @@ export default function ManageModelsCommand() {
                   shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={refresh}
                 />
+                <Action title="Refresh Raycast Models" icon={Icon.ArrowClockwise} onAction={refreshRaycastModels} />
                 <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               </ActionPanel>
             }

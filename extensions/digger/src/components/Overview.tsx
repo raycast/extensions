@@ -1,6 +1,7 @@
 import { Color, Icon, Image, List } from "@raycast/api";
 import { getFavicon, getProgressIcon } from "@raycast/utils";
 import { Actions } from "../actions";
+import { useGuardedImages } from "../hooks/useGuardedImages";
 import { DiggerResult } from "../types";
 import { getDeniedAccessMessage } from "../utils/botDetection";
 import { formatBytes, getStatusText } from "../utils/formatters";
@@ -22,7 +23,9 @@ export function Overview({ data, onRefresh, overallProgress }: OverviewProps) {
   //
   //  1. Prefer the icon the PAGE declared. We already parsed it into
   //     resources.images and resolved it to an absolute URL, so there is no
-  //     discovery step at all — Raycast just loads the image and swaps it in.
+  //     discovery step. It is downloaded through the network guard and shown
+  //     from a local file — the page chose that URL, so Raycast must not fetch
+  //     it directly (see fetchImageToFile).
   //  2. Fall back to Icon.Globe rather than Icon.Link. A globe reads as "a
   //     website whose icon we don't have"; a chain reads as "a link", which is
   //     what every other row in this list already is.
@@ -33,15 +36,23 @@ export function Overview({ data, onRefresh, overallProgress }: OverviewProps) {
   //     going to load either, so pointing at it trades a globe for a blank.
   //
   // The fallback renders immediately and is replaced when the real icon
-  // decodes, which is the lazy behaviour asked for.
+  // decodes, which is the lazy behavior asked for.
   const servedAPage = !!data?.networking?.statusCode && data.networking.statusCode < 400;
   const declaredFavicon = data?.overview?.favicon;
+  const { images: favicons } = useGuardedImages(
+    servedAPage && declaredFavicon ? [declaredFavicon] : [],
+    data?.networking?.finalUrl ?? data?.url ?? "",
+  );
+  const guardedFavicon = declaredFavicon ? favicons.get(declaredFavicon) : undefined;
   const siteIcon: Image.ImageLike | undefined = !data
     ? undefined
     : !servedAPage
       ? Icon.Globe
       : declaredFavicon
-        ? { source: declaredFavicon, fallback: Icon.Globe }
+        ? // The globe until the download lands, and for good if it fails.
+          guardedFavicon && "path" in guardedFavicon
+          ? { source: guardedFavicon.path, fallback: Icon.Globe }
+          : Icon.Globe
         : getFavicon(data.url, { fallback: Icon.Globe });
   const progressIcon = isStillLoading ? getProgressIcon(overallProgress, Color.Blue) : (siteIcon ?? Icon.Globe);
 

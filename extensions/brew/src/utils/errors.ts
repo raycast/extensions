@@ -256,6 +256,23 @@ export function isNetworkError(error: unknown): error is NetworkError {
 }
 
 /**
+ * A canceled operation, not a failure.
+ *
+ * Worth a named predicate because an abort is the one ending that raises NO
+ * toast of its own: `showBrewFailureToast` returns early on it, and
+ * `usePromise` suppresses `onError` for it. Anything holding an in-progress
+ * toast therefore has to clear that toast itself on an abort, or leave a
+ * spinner running after the user has walked away.
+ *
+ * Both shapes reaching us are `Error` instances: `child_process.exec` rejects
+ * with Node's `AbortError`, and `AbortController.abort()` produces a
+ * `DOMException` that also extends `Error`.
+ */
+export function isAbortError(error: unknown): boolean {
+  return error instanceof Error && error.name === "AbortError";
+}
+
+/**
  * Check if an error is a BrewLockError.
  */
 export function isBrewLockError(error: unknown): error is BrewLockError {
@@ -380,7 +397,7 @@ export function upgradeSkipReason(output: string, name: string): string | undefi
     if (/no version is available for the current platform/i.test(reason)) return "No version for this platform";
     if (/the installed version is not below the minimum version/i.test(reason)) return "Installed version is not older";
     if (/artifact has not changed|latest version is already installed/i.test(reason)) return "Already up to date";
-    // An unrecognised reason is still a skip; carry brew's own words rather than
+    // An unrecognized reason is still a skip; carry brew's own words rather than
     // inventing a category or, worse, reporting an upgrade that did not happen.
     return reason.replace(/\.$/, "");
   }
@@ -562,7 +579,7 @@ export function getErrorMessage(error: unknown): string {
   if (error instanceof StaleProcessError) {
     const pkg = error.packageName ? ` for "${error.packageName}"` : "";
     const phase = error.lastPhase ? ` (stuck at ${error.lastPhase})` : "";
-    return `Process appears stuck${pkg}${phase}. The operation was cancelled.`;
+    return `Process appears stuck${pkg}${phase}. The operation was canceled.`;
   }
 
   if (error instanceof PackageDisabledError) {
@@ -608,9 +625,9 @@ export function getErrorMessage(error: unknown): string {
   }
 
   if (error instanceof BrewCommandError) {
-    // Check for null exit code (process was killed/cancelled)
+    // Check for null exit code (process was killed/canceled)
     if (error.exitCode === undefined || error.exitCode === null) {
-      return "Cancelled";
+      return "Canceled";
     }
     // Check if the stderr contains a known error pattern for better messages
     if (error.stderr) {
@@ -638,11 +655,16 @@ export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     // Handle abort errors with user-friendly message
     if (error.name === "AbortError") {
-      return "Cancelled";
+      return "Canceled";
     }
 
     // Check for ExecError-like objects
     const execError = error as { stderr?: string; stdout?: string };
+    // git's own complaint, buried under brew's echo of the clone command line.
+    const missingRepo = execError.stderr && /fatal: repository '([^']+?)\/?' not found/.exec(execError.stderr);
+    if (missingRepo) {
+      return `No repo found at ${missingRepo[1].replace(/^https:\/\//, "")}`;
+    }
     if (execError.stderr) {
       // Check for disabled package in raw stderr
       const disabledInfo = parseDisabledPackageMessage(execError.stderr);
@@ -675,4 +697,19 @@ export function outdatedFetchFailureCopy(error: unknown): { title: string; messa
     title: isLock ? "Brew Is Busy" : "Failed to Check for Upgrades",
     message: isLock ? "Another brew process is running. Please wait and try again." : getErrorMessage(error),
   };
+}
+
+/**
+ * The Adopt scan's derived cask index is missing, damaged or empty.
+ *
+ * Distinct from a generic failure because the recovery is specific and the
+ * alternative is worse than an error: rendering an empty list would tell the
+ * user nothing on their Mac is adoptable, which is a different claim from
+ * "we could not look".
+ */
+export class AdoptIndexUnavailableError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "AdoptIndexUnavailableError";
+  }
 }

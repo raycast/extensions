@@ -1,9 +1,7 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
-import { addParentInitiatives, initiativeInput, InitiativeUpdateInput, serializeInitiative } from "./initiativeUtils";
+import { addParentInitiatives, initiativeInput, InitiativeUpdateInput } from "./initiativeUtils";
 import { applyPatch, client, ContentPatch, resolveInitiative } from "./linearUtils";
+import { serializeInitiative } from "./serializers";
+import { withLinear } from "./withLinear";
 
 type Input = {
   id?: string;
@@ -33,7 +31,7 @@ type Input = {
   labels?: string[];
 };
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   const existing = input.id ? await resolveInitiative(input.id) : undefined;
   if (!existing && !input.name) throw new Error("name is required when creating an initiative.");
   if (input.description !== undefined && input.patch) throw new Error("Pass description or patch, not both.");

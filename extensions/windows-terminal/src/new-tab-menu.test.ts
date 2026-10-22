@@ -262,7 +262,8 @@ describe("buildProfileMatcher", () => {
     const matcher = buildProfileMatcher({ type: "matchProfiles", name: "a.b" });
     assert.equal(matcher!({ ...powershell, name: "a b" }), true);
     assert.equal(matcher!({ ...powershell, name: "a\nb" }), false);
-    assert.equal(matcher!({ ...powershell, name: "a b" }), false);
+    assert.equal(matcher!({ ...powershell, name: "a" + String.fromCodePoint(0x2028) + "b" }), false);
+    assert.equal(matcher!({ ...powershell, name: "ab" }), false);
     // \s still covers it, so a pattern that means to cross a line can.
     assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "a\\sb" })!({ ...powershell, name: "a\nb" }), true);
   });

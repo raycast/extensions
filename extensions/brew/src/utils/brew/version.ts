@@ -6,11 +6,42 @@
  * transitively and cannot be run outside Raycast.
  */
 
+/** The Homebrew major version the extension's confirmation-gated features require. */
+export const HOMEBREW_7 = 7;
+
+const BREW_MAJOR = /^Homebrew (\d+)\./m;
+
+/** Major from `brew --version` stdout; undefined for the ">=4.3.0 (shallow…)" fallback or garbage. */
+export function parseBrewMajor(stdout: string): number | undefined {
+  const m = BREW_MAJOR.exec(stdout);
+  return m ? Number(m[1]) : undefined;
+}
+
 /** Homebrew appends `_N` to an installed FORMULA rebuilt at the same version. */
 const REVISION_SUFFIX = /_\d+$/;
 
 /** Plain dotted numbers — the only shape this module claims to understand. */
 const NUMERIC_VERSION = /^\d+(?:\.\d+)*$/;
+
+/**
+ * A cask's version with Homebrew's build component removed.
+ *
+ * Cask versions are a documented CSV — `version,build[,…]` — and the published
+ * JSON carries the whole string (`1.2026.184,1`, `7.0.1,10509`). Only the first
+ * field is the upstream version; the rest is Homebrew's own packaging detail
+ * and nothing an `Info.plist` would ever report, so comparing against it makes
+ * every such cask incomparable.
+ *
+ * Truncating at the first comma is reading the format, not guessing at it —
+ * which is the line `compareVersions` draws. Nothing else is stripped: a
+ * prerelease like `6.0.0b2` stays exactly as it is and stays incomparable,
+ * because inferring an order for it is the mistake that function exists to
+ * refuse.
+ */
+export function caskVersionForCompare(version: string): string {
+  const comma = version.indexOf(",");
+  return comma === -1 ? version : version.slice(0, comma);
+}
 
 /** Strip a formula's rebuild revision. `stable` never carries one. */
 export function stripRevision(version: string): string {

@@ -4,6 +4,7 @@ import { format, formatDistanceToNow } from "date-fns";
 
 import {
   displayDueDate,
+  extractTagsFromNotes,
   formatReminderTime,
   getLocationDescription,
   getPriorityIcon,
@@ -19,6 +20,7 @@ type ReminderListItemProps = {
   reminder: Reminder;
   mutate: MutatePromise<{ reminders: Reminder[]; lists: TList[] } | undefined>;
   listId?: string;
+  lists?: TList[];
   displayCompletionDate: boolean;
   viewProps: ViewProps;
 };
@@ -26,6 +28,7 @@ type ReminderListItemProps = {
 export default function ReminderListItem({
   reminder,
   listId,
+  lists,
   displayCompletionDate,
   viewProps,
   mutate,
@@ -100,6 +103,18 @@ export default function ReminderListItem({
     keywords.push(reminder.priority);
   }
 
+  const { tags } = extractTagsFromNotes(reminder.notes);
+
+  if (tags.length > 0) {
+    accessories.push({
+      icon: Icon.Tag,
+      text: tags.map((t) => `#${t}`).join(" "),
+      tooltip: `Tags: ${tags.map((t) => `#${t}`).join(", ")}`,
+    });
+
+    keywords.push(...tags.map((t) => `#${t}`), ...tags);
+  }
+
   if (listId === "all" && reminder.list) {
     accessories.push({
       icon: { source: Icon.Dot, tintColor: reminder.list.color },
@@ -121,7 +136,9 @@ export default function ReminderListItem({
       subtitle={reminder.notes}
       accessories={accessories}
       keywords={keywords}
-      actions={<ReminderActions reminder={reminder} viewProps={viewProps} listId={listId} mutate={mutate} />}
+      actions={
+        <ReminderActions reminder={reminder} viewProps={viewProps} listId={listId} lists={lists} mutate={mutate} />
+      }
     />
   );
 }

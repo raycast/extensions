@@ -29,3 +29,13 @@ compiled_raycast_rust
 
 .env
 raycast-env.d.ts
+.nova
+.vscode
+dist
+
+# claude
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.worktreeinclude
+.mcp.json

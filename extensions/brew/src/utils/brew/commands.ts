@@ -16,7 +16,7 @@ import * as fs from "fs/promises";
 import { join as path_join } from "path";
 import { environment } from "@raycast/api";
 import { ExecError, ExecResult } from "../types";
-import { brewExecutable } from "./paths";
+import { brewExecutable, brewPath } from "./paths";
 import { preferences } from "../preferences";
 import { brewLogger } from "../logger";
 import { BrewLockError, isBrewLockMessage } from "../errors";
@@ -29,13 +29,28 @@ let homebrewEnvLogged = false;
 
 /**
  * Execute a brew command.
+ *
+ * With `raw`, `cmd` is already a complete shell command line (Doctor's
+ * `sudo chown …` remediations) and runs verbatim instead of being prefixed with
+ * the resolved brew executable.
  */
-export async function execBrew(cmd: string, options?: { signal?: AbortSignal }): Promise<ExecResult> {
+export async function execBrew(
+  cmd: string,
+  options?: { signal?: AbortSignal; env?: NodeJS.ProcessEnv; raw?: boolean },
+): Promise<ExecResult> {
   try {
-    const env = await execBrewEnv();
-    return await execp(`${brewExecutable()} ${cmd}`, {
+    // Caller overrides win: a read-only command can set HOMEBREW_NO_AUTO_UPDATE
+    // without changing what every other command in the extension runs with.
+    const env = { ...(await execBrewEnv()), ...options?.env };
+    if (options?.raw) {
+      // execBrewEnv doesn't set PATH; without this, a bare "brew …" inside a
+      // remediation resolves off whatever's inherited instead of the configured
+      // install (customBrewPath), the way brewExecutable() does below.
+      env.PATH = `${brewPath("bin")}:${env.PATH ?? ""}`;
+    }
+    return await execp(options?.raw ? cmd : `${brewExecutable()} ${cmd}`, {
       signal: options?.signal,
-      env: env,
+      env,
       maxBuffer: 10 * 1024 * 1024,
     });
   } catch (err) {
@@ -54,12 +69,35 @@ export async function execBrew(cmd: string, options?: { signal?: AbortSignal }):
       });
     }
 
-    // Check for brew not found
-    if (preferences.customBrewPath && execErr && execErr.code === 127) {
+    // Check for brew not found. Only for commands the extension actually ran
+    // the brew executable for: a raw remediation's 127 is its OWN missing
+    // binary (a missing `sudo`), and claiming brew is missing would be a lie.
+    if (!options?.raw && preferences.customBrewPath && execErr?.code === 127) {
       execErr.stderr = `Brew executable not found at: ${preferences.customBrewPath}`;
       throw execErr;
     }
 
+    throw err;
+  }
+}
+
+/**
+ * Run a `--json` brew command that signals "I found something" by exiting 1
+ * with the report already on stdout. Returns that run's output, carrying
+ * brew's own `ExecError` so a caller can prefer brew's message to a parse
+ * error. Any other failure rethrows.
+ */
+export async function execBrewJson(
+  cmd: string,
+  options?: { signal?: AbortSignal },
+): Promise<ExecResult & { exitError?: ExecError }> {
+  try {
+    return await execBrew(cmd, options);
+  } catch (err) {
+    const execErr = err as ExecError;
+    if (execErr?.code === 1 && execErr.stdout?.trim()) {
+      return { stdout: execErr.stdout, stderr: execErr.stderr, exitError: execErr };
+    }
     throw err;
   }
 }

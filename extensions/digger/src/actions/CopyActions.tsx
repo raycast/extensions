@@ -291,7 +291,7 @@ function generateMarkdownReport(data: DiggerResult): string {
       }
     } else if (wellKnown.unchecked?.length) {
       // Zero hits AND unanswered paths is not "none published" — a qualifying
-      // sentence afterwards does not make the preceding claim true.
+      // sentence afterward does not make the preceding claim true.
       const answered = wellKnown.probed - wellKnown.unchecked.length;
       markdown += `- No files found in the ${answered} of ${wellKnown.probed} paths that answered\n`;
     } else {

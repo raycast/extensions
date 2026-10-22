@@ -6,8 +6,9 @@ import { getVoices, killRunningSay, say } from "native-say";
 
 import { languageItemList } from "@/core/language/consts";
 import type { LanguageItem } from "@/core/language/types";
-import { showErrorToast } from "@/utils/errors";
-import { logError, logTrace, logWarn } from "@/utils/logger";
+import { getLangCode } from "@/core/language/utils";
+import { showErrorToast } from "@/shared/errors";
+import { logError, logTrace, logWarn } from "@/shared/logger";
 
 let cachedVoices: Voice[] | null = null;
 
@@ -39,7 +40,9 @@ async function getBestMatchVoice(languageItem: LanguageItem): Promise<string | u
   }
 
   // 2. If no preferred voice is found (or none installed), dynamically find by language code
-  const langCode = languageItem.appleLangCode?.replace("_", "-") || languageItem.googleLangCode;
+  const langCode =
+    getLangCode(languageItem.youdaoLangCode, "appleLangCode")?.replace("_", "-") ||
+    getLangCode(languageItem.youdaoLangCode, "googleLangCode");
   if (!langCode) return undefined;
 
   const targetCulture = langCode.toLowerCase();

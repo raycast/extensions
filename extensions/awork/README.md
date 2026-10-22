@@ -68,6 +68,14 @@ Press `⌘⏎` to save the task or `⌘⇧⏎` to save it and open it in the bro
 
 Log time for a task or project right in Raycast. Press `⌘⏎` to submit.
 
+### New AI Thread
+
+Open your workspace's awork AI page in the browser directly from Raycast. Select **New AI Thread** and press `⏎`
+to open it, or fill in the optional **Prompt** argument first — for example, `Plan my week`.
+
+The prompt is prefilled in awork's AI chat so you can review and send it there. Leave the argument empty to open
+the AI page without a prompt.
+
 ### Raycast AI
 
 Use `@awork` to search projects and tasks, log time, or create and edit project and private tasks in natural language.

@@ -53,6 +53,7 @@ export const BROWSERS_BUNDLE_ID = {
   chromeDev: "com.google.chrome.dev",
   comet: "ai.perplexity.comet",
   dia: "company.thebrowser.dia",
+  duckDuckGo: "com.duckduckgo.macos.browser",
   chatGPTAtlas: "com.openai.atlas",
   firefox: "org.mozilla.firefox",
   firefoxDev: "org.mozilla.firefoxdeveloperedition",
@@ -137,6 +138,7 @@ const BROWSER_DEFINITIONS: BrowserDefinition[] = [
         )
       : undefined,
   },
+  { id: BROWSERS_BUNDLE_ID.duckDuckGo, name: "DuckDuckGo", macBundleId: "com.duckduckgo.macos.browser" },
   { id: BROWSERS_BUNDLE_ID.chatGPTAtlas, name: "ChatGPT Atlas", macBundleId: "com.openai.atlas" },
   {
     id: BROWSERS_BUNDLE_ID.firefox,
