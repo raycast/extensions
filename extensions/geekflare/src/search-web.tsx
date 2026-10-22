@@ -1,19 +1,22 @@
 import { Action, ActionPanel, Icon, Keyboard, LaunchProps, List } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { callGeekflare, type SearchResult, toSearchResults } from "./geekflare";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.SearchWeb }>) {
   const [query, setQuery] = useState(props.arguments.query ?? "");
 
+  const abortable = useRef<AbortController>(null);
+
   const { data: results = [], isLoading } = usePromise(
     async (q: string): Promise<SearchResult[]> => {
       if (!q.trim()) return [];
-      return toSearchResults(await callGeekflare("search", { query: q.trim(), limit: 10 }));
+      return toSearchResults(await callGeekflare("search", { query: q.trim(), limit: 10 }, abortable.current?.signal));
     },
     [query],
     {
+      abortable,
       onError: (error) => {
         void showFailureToast(error, { title: "Search failed" });
       },
