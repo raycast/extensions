@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Spacefast MCP Server] - 2026-10-22
+
+- Add Spacefast to the official registry: publish and host what your AI builds as live Spaces with a built-in database, share links, custom domains and versioned rollbacks. Hosted Streamable HTTP server at https://mcp.spacefast.com with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add Runcrate MCP Server] - 2026-10-22
 
 - Add Runcrate to the official registry: GPUs for your AI agent. See live GPU prices, launch and delete GPU instances, run commands and jobs over SSH, move files, manage volumes, SSH keys and secrets, call 200+ open inference models and track spend (37 tools). Hosted Streamable HTTP server at https://mcp.runcrate.ai/mcp with OAuth sign-in in the browser, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
