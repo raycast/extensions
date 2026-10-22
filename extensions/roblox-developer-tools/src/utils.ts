@@ -30,10 +30,13 @@ export function settings<K extends keyof typeof labels>(
   return result;
 }
 
-export async function run(title: string, action: () => Promise<string | void>) {
+export async function run(
+  title: string,
+  action: (toast: Toast) => Promise<string | void>,
+) {
   const toast = await showToast({ style: Toast.Style.Animated, title });
   try {
-    const message = await action();
+    const message = await action(toast);
     if (message) {
       toast.style = Toast.Style.Success;
       toast.title = message;
