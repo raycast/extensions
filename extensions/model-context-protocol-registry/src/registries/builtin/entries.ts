@@ -1547,6 +1547,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "xtiles",
+    title: "xTiles",
+    description:
+      "Turn AI chats into xTiles projects, notes and tasks, and pull any project back into the chat. Save plans and research to pages, create and update tasks with due dates and assignees, add notes to your daily planner and read your calendar, then get a project's current state, decisions and open tasks. 39 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, free xTiles account, no API key to paste.",
+    icon: "https://xtiles.app/android-chrome-512x512.png",
+    homepage: "https://xtiles.app/en/imagine/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.xtiles.app/mcp"],
+    },
+    remoteUrl: "https://mcp.xtiles.app/mcp",
+  },
+  {
     name: "firecrawl",
     title: "Firecrawl",
     description:
