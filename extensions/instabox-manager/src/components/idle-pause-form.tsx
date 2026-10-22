@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { useCachedPromise, useForm } from "@raycast/utils";
+import { useForm } from "@raycast/utils";
+import { useAccountData } from "../hooks/use-account-data";
 import { getMe } from "../services/account";
 import { updateMachine } from "../services/machines";
 import { Machine } from "../types";
@@ -13,9 +14,7 @@ interface IdlePauseFormProps {
 
 export function IdlePauseForm({ machine, onSaved }: IdlePauseFormProps) {
   const { pop } = useNavigation();
-  const { data: me, isLoading } = useCachedPromise(getMe, [], {
-    onError: errorToast("Could not load your account"),
-  });
+  const { data: me, isLoading } = useAccountData("me", getMe, { onError: errorToast("Could not load your account") });
   const current = String(machine.autoSuspendAfterSeconds ?? 0);
   const choices = me ? idleOptions(me) : [];
   const options =

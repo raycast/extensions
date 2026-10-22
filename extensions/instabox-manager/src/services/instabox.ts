@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { ApiErrorBody } from "../types";
 
 export const DEFAULT_API_URL = "https://api.instabox.sh";
@@ -36,6 +36,15 @@ interface RequestOptions {
 function apiBaseUrl() {
   const { apiUrl } = getPreferenceValues<Preferences>();
   return (apiUrl?.trim() || DEFAULT_API_URL).replace(/\/+$/, "");
+}
+
+/**
+ * Names the account behind the API key and URL, for cache keys, so cached data of one key or server is never
+ * shown for another. A hash, so the key itself is not stored with the cache.
+ */
+export function accountScope() {
+  const { apiKey } = getPreferenceValues<Preferences>();
+  return createHash("sha256").update(`${apiBaseUrl()}\n${apiKey.trim()}`).digest("hex").slice(0, 16);
 }
 
 export function machinePath(id: string, suffix = "") {

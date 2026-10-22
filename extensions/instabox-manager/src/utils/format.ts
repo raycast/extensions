@@ -56,15 +56,17 @@ export function codeBlock(text: string, language = "") {
   return `${fence}${language}\n${text}\n${fence}`;
 }
 
-/** Parses `KEY=value` lines (blank lines and `#` comments are skipped). */
+/** Parses `KEY=value` lines (blank lines and `#` comments are skipped). Values are kept as typed, spaces included. */
 export function parseKeyValueLines(text: string | undefined) {
-  const result: Record<string, string> = {};
+  // No prototype, so a key such as `__proto__` is kept like any other.
+  const result: Record<string, string> = Object.create(null);
   for (const rawLine of (text ?? "").split("\n")) {
-    const line = rawLine.trim();
-    if (!line || line.startsWith("#")) continue;
+    const line = rawLine.replace(/\r$/, "");
+    if (!line.trim() || line.trimStart().startsWith("#")) continue;
     const index = line.indexOf("=");
-    if (index <= 0) throw new Error(`"${line}" is not in KEY=value form`);
-    result[line.slice(0, index).trim()] = line.slice(index + 1).trim();
+    const key = index > 0 ? line.slice(0, index).trim() : "";
+    if (!key) throw new Error(`"${line.trim()}" is not in KEY=value form`);
+    result[key] = line.slice(index + 1);
   }
   return result;
 }

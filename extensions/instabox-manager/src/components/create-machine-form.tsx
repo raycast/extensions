@@ -9,8 +9,9 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
+import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect } from "react";
+import { useAccountData } from "../hooks/use-account-data";
 import { getMe, getUsage, listTemplates } from "../services/account";
 import { createMachine } from "../services/machines";
 import { listSnapshots } from "../services/snapshots";
@@ -72,14 +73,14 @@ export function validateLabels(value: string | undefined) {
 
 export function CreateMachineForm({ defaultSource, onSubmitted }: CreateMachineFormProps) {
   const { pop } = useNavigation();
-  const { data: templates, isLoading: loadingTemplates } = useCachedPromise(listTemplates, [], {
+  const { data: templates, isLoading: loadingTemplates } = useAccountData("templates", listTemplates, {
     onError: errorToast("Could not load templates"),
   });
-  const { data: snapshots, isLoading: loadingSnapshots } = useCachedPromise(listSnapshots, [], {
+  const { data: snapshots, isLoading: loadingSnapshots } = useAccountData("snapshots", listSnapshots, {
     onError: () => undefined,
   });
-  const { data: usage } = useCachedPromise(getUsage, [], { onError: () => undefined });
-  const { data: me } = useCachedPromise(getMe, [], { onError: () => undefined });
+  const { data: usage } = useAccountData("usage", getUsage, { onError: () => undefined });
+  const { data: me } = useAccountData("me", getMe, { onError: () => undefined });
   const idleChoices = me ? idleOptions(me) : [];
 
   const readySnapshots = (snapshots ?? []).filter((snapshot) => snapshot.status === "ready");

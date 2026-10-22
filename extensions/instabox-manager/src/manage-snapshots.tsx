@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
 import { CreateMachineForm } from "./components/create-machine-form";
+import { useAccountData } from "./hooks/use-account-data";
 import { listMachines } from "./services/machines";
 import { deleteSnapshot, listSnapshots } from "./services/snapshots";
 import { Snapshot, SnapshotStatus } from "./types";
@@ -20,11 +20,9 @@ export default function ManageSnapshots() {
     data: snapshots,
     isLoading,
     revalidate,
-  } = useCachedPromise(listSnapshots, [], {
-    keepPreviousData: true,
-    onError: errorToast("Could not load snapshots"),
-  });
-  const { data: machines } = useCachedPromise(listMachines, [], { onError: () => undefined });
+    error,
+  } = useAccountData("snapshots", listSnapshots, { onError: errorToast("Could not load snapshots") });
+  const { data: machines } = useAccountData("machines", listMachines, { onError: () => undefined });
   const machineNames = new Map((machines ?? []).map((machine) => [machine.id, machine.name]));
 
   const uploading = !!snapshots?.some((snapshot) => snapshot.status === "pending");
@@ -57,12 +55,35 @@ export default function ManageSnapshots() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search snapshots...">
-      {!isLoading && (
+      {error && !snapshots ? (
         <List.EmptyView
-          icon={Icon.SaveDocument}
-          title="No Snapshots Yet"
-          description="Save a machine from Manage Machines with Create Snapshot, then start new machines from it."
+          icon={Icon.ExclamationMark}
+          title="Could not load snapshots"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
         />
+      ) : (
+        !isLoading && (
+          <List.EmptyView
+            icon={Icon.SaveDocument}
+            title="No Snapshots Yet"
+            description="Save a machine from Manage Machines with Create Snapshot, then start new machines from it."
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  onAction={revalidate}
+                />
+              </ActionPanel>
+            }
+          />
+        )
       )}
       {sorted.map((snapshot) => {
         const status = STATUS[snapshot.status];

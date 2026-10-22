@@ -1,10 +1,11 @@
-import { useCachedPromise, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { InstaBoxError } from "../services/instabox";
 import { getMachine, listMachines } from "../services/machines";
 import { Machine } from "../types";
 import { errorToast, showError } from "../utils/errors";
 import { isBusy } from "../utils/machine-state";
+import { useAccountData } from "./use-account-data";
 
 const POLL_INTERVAL_MS = 3000;
 
@@ -18,10 +19,7 @@ export function usePolling(active: boolean, revalidate: () => void) {
 }
 
 export function useMachines() {
-  const result = useCachedPromise(listMachines, [], {
-    keepPreviousData: true,
-    onError: errorToast("Could not load machines"),
-  });
+  const result = useAccountData("machines", listMachines, { onError: errorToast("Could not load machines") });
   usePolling(!!result.data?.some(isBusy), result.revalidate);
   return result;
 }

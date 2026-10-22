@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useAccountData } from "../hooks/use-account-data";
 import { getUsage } from "../services/account";
 import { DASHBOARD_URL } from "../services/instabox";
 import { formatBytes, formatDateTime, formatSpec, progressBar } from "../utils/format";
@@ -12,9 +12,7 @@ export function UsageDetail() {
     data: usage,
     isLoading,
     revalidate,
-  } = useCachedPromise(getUsage, [], {
-    onError: errorToast("Could not load usage"),
-  });
+  } = useAccountData("usage", getUsage, { onError: errorToast("Could not load usage") });
 
   let markdown = "# Usage and Limits\n\nLoading…";
   if (usage) {

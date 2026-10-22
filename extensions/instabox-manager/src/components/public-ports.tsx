@@ -21,7 +21,7 @@ import { formatRelative } from "../utils/format";
 const RESERVED_PORTS = new Set([5901, 6768]);
 
 export function PublicPortsList({ machine }: { machine: Machine }) {
-  const { data, isLoading, revalidate } = useCachedPromise(listPorts, [machine.id], {
+  const { data, isLoading, revalidate, error } = useCachedPromise(listPorts, [machine.id], {
     onError: errorToast("Could not load public ports"),
   });
   const ports = data?.ports ?? [];
@@ -32,6 +32,15 @@ export function PublicPortsList({ machine }: { machine: Machine }) {
       icon={Icon.Plus}
       shortcut={Keyboard.Shortcut.Common.New}
       target={<PublishPortForm machine={machine} onPublished={revalidate} />}
+    />
+  );
+
+  const refreshAction = (
+    <Action
+      title="Refresh"
+      icon={Icon.ArrowClockwise}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
+      onAction={revalidate}
     />
   );
 
@@ -59,19 +68,38 @@ export function PublicPortsList({ machine }: { machine: Machine }) {
       navigationTitle={`Public Ports of ${machine.name}`}
       searchBarPlaceholder="Search ports..."
     >
-      {data && !data.enabled ? (
+      {error && !data ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could not load public ports"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : data && !data.enabled ? (
         <List.EmptyView
           icon={Icon.Globe}
           title="Public ports are not available"
           description="This InstaBox server has no public ports configured."
+          actions={<ActionPanel>{refreshAction}</ActionPanel>}
         />
       ) : (
-        <List.EmptyView
-          icon={Icon.Globe}
-          title="No public ports"
-          description="Give a web server in this machine an HTTPS URL."
-          actions={<ActionPanel>{publishAction}</ActionPanel>}
-        />
+        !isLoading && (
+          <List.EmptyView
+            icon={Icon.Globe}
+            title="No public ports"
+            description="Give a web server in this machine an HTTPS URL."
+            actions={
+              <ActionPanel>
+                {publishAction}
+                {refreshAction}
+              </ActionPanel>
+            }
+          />
+        )
       )}
       {ports.map((port) => (
         <List.Item
@@ -89,12 +117,7 @@ export function PublicPortsList({ machine }: { machine: Machine }) {
               <Action.OpenInBrowser url={port.url} />
               <Action.CopyToClipboard title="Copy URL" content={port.url} />
               {publishAction}
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                shortcut={Keyboard.Shortcut.Common.Refresh}
-                onAction={revalidate}
-              />
+              {refreshAction}
               <Action
                 title="Remove Public URL"
                 icon={Icon.Trash}
