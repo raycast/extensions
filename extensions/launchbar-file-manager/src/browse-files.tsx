@@ -134,11 +134,15 @@ function FileBrowser(props: {
   // navigation. Copy/move happens only via Tab → transfer tree.
   const { selected } = useGlobalSelection();
 
-  // Shift+↑/↓ run. The first press marks the row you are on and moves on;
-  // continuing in the same direction marks each row you leave. Reversing
-  // unmarks the row you leave, so arrowing back shrinks the run. A plain
-  // arrow move ends the run, which is what makes non-contiguous runs work.
-  const shiftRun = useRef<{ direction: 1 | -1 } | null>(null);
+  // Shift+↑/↓ run. The first press toggles the row you are on and moves
+  // on: unselected rows are added, already-selected rows are removed, so a
+  // new run can start by deselecting. Continuing in the same direction
+  // repeats that mode; reversing undoes it. A plain arrow move ends the
+  // run, which is what makes non-contiguous runs work.
+  const shiftRun = useRef<{
+    direction: 1 | -1;
+    mode: "add" | "remove";
+  } | null>(null);
   // The row id we moved to programmatically. onSelectionChange uses it to
   // tell our own move apart from a plain arrow move (which ends the run).
   const programmaticMove = useRef<string | null>(null);
@@ -226,29 +230,45 @@ function FileBrowser(props: {
     clearAll();
   }
 
-  // LaunchBar-style selection: Shift+↑/↓ marks the row you are on, then
-  // moves the highlight one step. The row ahead is NOT selected. Reversing
-  // over an active run unmarks the row you leave, so Shift+↓ then Shift+↑
-  // shrinks the selection back.
+  // LaunchBar-style selection: Shift+↑/↓ toggles the row you are on, then
+  // moves the highlight one step. The row ahead is NOT selected. A fresh
+  // run on a selected row removes it (and keeps removing while you move in
+  // that direction), so selections can be carved back without Shift held
+  // from before. Reversing undoes the run on the row you move back into.
   function extendSelection(fromPath: string, direction: 1 | -1) {
     const list = visibleEntries;
     const from = list.findIndex((e) => e.fullPath === fromPath);
     if (from === -1) return;
 
+    const target = Math.max(0, Math.min(list.length - 1, from + direction));
+    const targetPath = list[target].fullPath;
     const run = shiftRun.current;
-    if (run && run.direction === -direction) {
-      // Reversing over the run: deselect the row we are leaving.
-      removePaths([fromPath]);
-    } else {
-      // First press, or continuing the run: select the row we are leaving.
-      if (!selectedSet.has(fromPath)) addPaths([fromPath]);
-      shiftRun.current = { direction };
+
+    if (!run) {
+      // First press of a run: toggle the current row.
+      const mode = selectedSet.has(fromPath) ? "remove" : "add";
+      if (mode === "add") addPaths([fromPath]);
+      else removePaths([fromPath]);
+      shiftRun.current = { direction, mode };
+    } else if (run.direction === direction) {
+      // Keep the run's mode, but a deselect run turns into a select run
+      // once it leaves the selected block, so continuing past it starts
+      // selecting again instead of silently moving.
+      const mode =
+        run.mode === "remove" && !selectedSet.has(fromPath) ? "add" : run.mode;
+      if (mode === "add") addPaths([fromPath]);
+      else removePaths([fromPath]);
+      shiftRun.current = { direction, mode };
+    } else if (target !== from) {
+      // Reversing over the run: undo it on the row we are returning to.
+      const mode = run.mode === "add" ? "remove" : "add";
+      if (mode === "add") addPaths([targetPath]);
+      else removePaths([targetPath]);
     }
 
-    const target = Math.max(0, Math.min(list.length - 1, from + direction));
     if (target !== from) {
-      programmaticMove.current = list[target].fullPath;
-      setHighlightId(list[target].fullPath);
+      programmaticMove.current = targetPath;
+      setHighlightId(targetPath);
     }
   }
 
@@ -497,13 +517,19 @@ function FileRow(props: {
     compressSelected([...selectedPaths], props.currentPath, onChanged);
   }
   const baseIcon = entry.isDirectory ? Icon.Folder : fileIcon(entry.extension);
+  // Raycast doesn't expose a row background colour. Match LaunchBar's
+  // three states as closely as the API allows: normal row, native
+  // highlighted row, and a blue-tinted icon + dot for selected rows.
   const icon = props.isSelected
-    ? { source: Icon.CheckCircle, tintColor: Color.Green }
+    ? { source: baseIcon, tintColor: Color.Blue }
     : baseIcon;
 
   const accessories: List.Item.Accessory[] = [];
   if (props.isSelected) {
-    accessories.push({ tag: { value: "Selected", color: Color.Green } });
+    accessories.push({
+      icon: { source: Icon.CircleFilled, tintColor: Color.Blue },
+      tooltip: "Selected",
+    });
   }
   accessories.push({
     text: entry.isDirectory ? "Folder" : fileKind(entry),
@@ -512,7 +538,7 @@ function FileRow(props: {
 
   const detail = props.showDetail ? (
     <List.Item.Detail
-      markdown={detailMarkdown(entry, props.isSelected)}
+      markdown={detailMarkdown(entry)}
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label
@@ -528,10 +554,6 @@ function FileRow(props: {
             text={formatDate(entry.mtime)}
           />
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label
-            title="Selected"
-            text={props.isSelected ? "Yes" : "No"}
-          />
           <List.Item.Detail.Metadata.Label title="Path" text={entry.fullPath} />
           <List.Item.Detail.Metadata.Label title="Name" text={entry.name} />
         </List.Item.Detail.Metadata>
@@ -542,7 +564,7 @@ function FileRow(props: {
   return (
     <List.Item
       id={entry.fullPath}
-      title={props.isSelected ? `✓ ${entry.name}` : entry.name}
+      title={entry.name}
       subtitle={entry.isDirectory ? undefined : formatSize(entry.size, false)}
       accessories={accessories}
       icon={icon}
@@ -817,14 +839,13 @@ function fileIcon(ext: string) {
   }
 }
 
-function detailMarkdown(entry: FileEntry, isSelected: boolean): string {
+function detailMarkdown(entry: FileEntry): string {
   const lines = [
     `# ${entry.name}`,
     ``,
     `${fileKind(entry)} · ${formatSize(entry.size, entry.isDirectory)}`,
     ``,
     `Modified: ${formatDate(entry.mtime)}`,
-    isSelected ? `Selected ✓` : ``,
   ];
   if (entry.isDirectory) {
     lines.push(

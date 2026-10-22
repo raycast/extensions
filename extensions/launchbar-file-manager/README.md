@@ -19,7 +19,8 @@ The list never jumps around while you arrow through it: it stays put until the h
 
 ## Selecting multiple files
 
-- Hold `Shift` and press `↑`/`↓` to select files in succession — each press marks the item you're on, then moves the highlight one step. Arrowing back over a run deselects it again. Let go of `Shift`, move up or down, then hold it again to start another run, so non-adjacent files can be selected too.
+- Hold `Shift` and press `↑`/`↓` to select files in succession — each press toggles the item you're on, then moves the highlight one step. Starting on an already-selected row removes it, and reversing over a run undoes it, so you can carve selections back without holding `Shift` from before. Let go of `Shift`, move up or down, then hold it again to start another run, so non-adjacent files can be selected too.
+- Selected rows keep their normal icon shape but turn blue and get a small blue dot; Raycast draws the current highlighted row natively. There are no checkboxes or `Selected` labels.
 - `⌘⇧A` selects everything in the folder, `⌘⇧F` selects just the filtered results, `⌘⇧X` clears the whole selection. A single row can still be toggled from its action menu (`⌘K` → Select/Deselect).
 - With files selected, any row's action menu (`⌘K`) offers batch operations: trash them all, compress them into one ZIP here, or copy all their paths.
 - Selections are temporary: exiting the browser, completing a transfer, or cancelling one always deselects everything.
