@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Sync with Skills CLI 1.7] - {PR_MERGE_DATE}
+## [Sync with Skills CLI 1.7] - 2026-10-22
 
 - Show skills installed from a local path with a `~`-relative source in Manage Skills, instead of the absolute path offered as a repository link and URL
 - Add the fx, Grok Build, Kimchi, MiniMax Code, Posit Assistant, Sarvam Code, and ZCode agents, so installing to Grok Build passes its real `grok` ID instead of failing
