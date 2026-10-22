@@ -3,13 +3,6 @@ import fs from "node:fs";
 import path from "node:path";
 
 export type DocKind = "notes" | "lyrics";
-type DocPreferences = {
-  notesFolder?: string;
-  lyricsFolder?: string;
-  notesTemplateFile?: string;
-  lyricsTemplateFile?: string;
-  strictLineBreaks?: boolean;
-};
 
 const DOC_KINDS: DocKind[] = ["notes", "lyrics"];
 
@@ -28,8 +21,8 @@ const COLLISION_SUFFIX: Record<DocKind, string> = {
 /** 已删除项目的遗留文档收进自定义文件夹下的这个子文件夹（名称固定，不随语言变）。 */
 export const DELETED_DOCS_FOLDER = "Deleted Projects";
 
-function prefs(): DocPreferences {
-  return getPreferenceValues<DocPreferences>();
+function prefs(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 // 记住"上次用过的自定义文件夹"。实测文件夹被改名后，扩展读到的设置值可能变成空（设置页仍显示旧路径），
@@ -99,9 +92,16 @@ function getTemplateFile(kind: DocKind): string {
   return (value ?? "").trim();
 }
 
-// 规范化路径，用于判断两个自定义文件夹是否指向同一处。
+// 规范化路径，用于判断两个自定义文件夹是否指向同一处：先解析符号链接；文件夹不存在时按字面路径比较。
 function normalizeFolder(folder: string): string {
-  return folder ? path.resolve(folder).replace(/\/+$/, "").toLowerCase() : "";
+  if (!folder) return "";
+  let resolved = path.resolve(folder);
+  try {
+    resolved = fs.realpathSync(resolved);
+  } catch {
+    // 文件夹不存在：交给失效保护处理。
+  }
+  return resolved.replace(/\/+$/, "").toLowerCase();
 }
 
 // Notes 与 Lyrics 的自定义文件夹指向同一处时需要加后缀。
@@ -500,8 +500,9 @@ export function writeDocBody(project: { title: string; folderPath: string }, kin
   let existing = "";
   try {
     existing = fs.readFileSync(file, "utf8");
-  } catch {
-    // 文件不存在 = 没有 frontmatter 可保留。
+  } catch (error) {
+    // 只有「文件不存在」才当作没有 frontmatter；其他读取错误就停下，免得写入时把原有的 frontmatter 丢掉。
+    if ((error as NodeJS.ErrnoException)?.code !== "ENOENT") throw new DocUnreadableError(file);
   }
   // 新建或空文件：frontmatter 取自模板；否则保留文件原有的。
   const source = isBlankDoc(existing) ? initialContent(project, kind) : existing;

@@ -20,7 +20,7 @@ export function isAudioFile(fileName: string): boolean {
 
 /** 根据偏好里的 Bounces 子文件夹名，解析某个项目的 bounces 所在目录。 */
 export function resolveBouncesFolder(projectPath: string): string {
-  const folderName = (getPreferenceValues<{ bouncesFolderName?: string }>().bouncesFolderName ?? "").trim();
+  const folderName = (getPreferenceValues<Preferences>().bouncesFolderName ?? "").trim();
   return folderName ? path.join(projectPath, folderName) : projectPath;
 }
 
@@ -146,7 +146,8 @@ export function collectBounces(input: BounceSourceInput): BounceWithSource[] {
   for (const file of input.externalFiles ?? []) {
     try {
       const stats = fs.statSync(file);
-      if (!stats.isFile()) {
+      // 不是文件、或不是音频：标成不可用，留在列表里方便移除，也不会被当成最新 bounce。
+      if (!stats.isFile() || !isAudioFile(file)) {
         push(unavailablePlaceholder(file), "external", false, file);
         continue;
       }

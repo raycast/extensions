@@ -535,39 +535,30 @@ export default function Command() {
           <ActionPanel>
             <ActionPanel.Section>
               <Action.Push title={t.viewSets} icon={Icon.Document} target={<Sets project={item} />} />
-              {item.bouncesCount > 0 && (
-                <Action
-                  title={toggleTitle}
-                  icon={toggleIcon}
-                  shortcut={{ modifiers: ["cmd"], key: "return" }}
-                  onAction={() => {
-                    if (isThisPlaying) {
-                      if (playbackStatus === "Stopping") {
-                        return;
-                      }
-                      if (playbackStatus === "Paused") {
-                        resume();
-                      } else {
-                        pause();
-                      }
+              <Action
+                title={toggleTitle}
+                icon={toggleIcon}
+                shortcut={{ modifiers: ["cmd"], key: "return" }}
+                onAction={() => {
+                  if (isThisPlaying) {
+                    if (playbackStatus === "Stopping") {
                       return;
                     }
-                    playProjectBounce(item);
-                  }}
-                />
-              )}
+                    if (playbackStatus === "Paused") {
+                      resume();
+                    } else {
+                      pause();
+                    }
+                    return;
+                  }
+                  playProjectBounce(item);
+                }}
+              />
               <Action
                 title={t.browseBounces}
                 icon={Icon.Waveform}
                 shortcut={{ modifiers: ["opt"], key: "return" }}
-                onAction={async () => {
-                  if (item.bouncesCount === 0) {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: t.noBounces,
-                    });
-                    return;
-                  }
+                onAction={() => {
                   push(
                     <Bounces
                       projectId={item.id}

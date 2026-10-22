@@ -15,7 +15,7 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import fs from "node:fs";
 import path from "node:path";
 import { getTranslations } from "@/i18n";
@@ -68,6 +68,7 @@ import {
   saveProjectMetadata,
 } from "@/core/metadata/project-metadata";
 import { showFailure } from "@/core/ui/toast";
+import { onFinderRenames } from "@/core/fs/finder-sync";
 import { EditInfo, type ProjectRename } from "@/core/ui/components/project/edit-info";
 import { EditNote } from "@/core/ui/components/project/edit-note";
 
@@ -564,6 +565,19 @@ function CollectionPanel({
       }),
     );
   }
+
+  // Finder 里改了名：后台重载已把轨号 / 角色迁到新 id，这里把快照里的旧 id 换掉，免得下次排序把旧表写回去。
+  const reloadMetadataRef = useRef(reloadMetadata);
+  reloadMetadataRef.current = reloadMetadata;
+  useEffect(
+    () =>
+      onFinderRenames((renames) => {
+        void (async () => {
+          for (const rename of renames) await reloadMetadataRef.current(rename);
+        })();
+      }),
+    [],
+  );
 
   // Edit Note 存盘后：重读该曲目的 Note 正文，让详情面板即时回显。
   function reloadNote(project: Project) {

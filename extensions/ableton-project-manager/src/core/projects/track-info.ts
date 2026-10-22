@@ -211,18 +211,12 @@ function normalize(value: number, range: EnergyRange): number {
 
 // 能量特征权重：从扩展偏好读取（Off/Low/Normal/High = 0/0.5/1/2），模块加载时读一次。
 // 权重是相对的：energyScore 会按总权重归一，所以只有三者之间的差值有意义；某项为 0 即关闭该特征。
-type EnergyWeightPrefs = {
-  weightCrest?: string;
-  weightBrightness?: string;
-  weightActivity?: string;
-};
-
 function readWeight(value: string | undefined): number {
   const n = Number(value);
   return Number.isFinite(n) && n >= 0 ? n : 1; // 缺失/非法回退到 Normal = 1
 }
 
-const energyPrefs = getPreferenceValues<EnergyWeightPrefs>();
+const energyPrefs = getPreferenceValues<Preferences>();
 const ENERGY_WEIGHTS = {
   crest: readWeight(energyPrefs.weightCrest),
   brightness: readWeight(energyPrefs.weightBrightness),

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { findLatestBounce, isAudioFile, listBounces } from "../src/core/projects/bounces";
+import { collectBounces, findLatestBounce, isAudioFile, listBounces } from "../src/core/projects/bounces";
 
 let tmpDir: string;
 
@@ -67,5 +67,18 @@ describe("findLatestBounce", () => {
     const empty = fs.mkdtempSync(path.join(os.tmpdir(), "asm-empty-"));
     expect(findLatestBounce(empty)).toBeNull();
     fs.rmSync(empty, { recursive: true, force: true });
+  });
+});
+
+describe("collectBounces", () => {
+  it("外部单个文件不是音频时记为不可用，不会被当成最新 bounce", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "asm-ext-"));
+    const text = path.join(dir, "notes.txt");
+    fs.writeFileSync(text, "x");
+
+    const result = collectBounces({ defaultFolder: path.join(dir, "none"), externalFiles: [text] });
+    expect(result).toEqual([expect.objectContaining({ path: text, source: "external", available: false })]);
+
+    fs.rmSync(dir, { recursive: true, force: true });
   });
 });

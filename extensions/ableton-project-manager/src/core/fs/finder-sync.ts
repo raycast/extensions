@@ -5,7 +5,6 @@ import {
   diffSnapshots,
   isConfirmedInTrash,
   readTrashFolders,
-  sameFolder,
   trashDirsFor,
   type SnapshotEntry,
 } from "./project-snapshot";
@@ -13,7 +12,7 @@ import { deleteProjectMetadata, renameProjectMetadata } from "@/core/metadata/pr
 import { removeProjectFromAllOrders, renameProjectInAllOrders } from "@/core/metadata/collection-order";
 import { removeProjectFromAllRoles, renameProjectInAllRoles } from "@/core/metadata/collection-roles";
 import { renameDocFiles } from "@/core/docs/docs";
-import { archiveDeletedProject, hasDeletedRecord, pruneDeletedRecords } from "./deleted-projects";
+import { archiveDeletedProject, hasDeletedRecord } from "./deleted-projects";
 
 // 每个 Projects Folder 各存一份清单：换到新文件夹时当作首次使用，换回来仍和它自己的清单比对。
 const SNAPSHOT_PREFIX = "project-snapshot:";
@@ -33,6 +32,19 @@ async function readSnapshot(key: string): Promise<SnapshotEntry[] | null> {
   } catch {
     return null;
   }
+}
+
+/** Finder 改名：旧名 → 新名，以及新文件夹路径。 */
+export type FinderRename = { oldId: string; newId: string; folderPath: string };
+
+const renameListeners = new Set<(renames: FinderRename[]) => void>();
+
+/** 订阅 Finder 改名。已打开的视图（如合集面板）拿的是快照，靠它把旧 id 换成新 id。返回取消订阅的函数。 */
+export function onFinderRenames(listener: (renames: FinderRename[]) => void): () => void {
+  renameListeners.add(listener);
+  return () => {
+    renameListeners.delete(listener);
+  };
 }
 
 export type FinderSyncResult = {
@@ -73,6 +85,8 @@ export async function syncFinderChanges(
     docRenameIssues: [],
   };
 
+  const renames: FinderRename[] = [];
+
   if (diff) {
     result.guardTripped = diff.guardTripped;
     result.ambiguous = diff.ambiguous.length;
@@ -84,6 +98,8 @@ export async function syncFinderChanges(
       const docs = renameDocFiles(from.id, to.id);
       if (docs.conflicts.length > 0 || docs.failures.length > 0) result.docRenameIssues.push(to.id);
       result.renamed++;
+      const folderPath = projects.find((p) => p.id === to.id)?.folderPath ?? path.join(projectsRoot, to.id);
+      renames.push({ oldId: from.id, newId: to.id, folderPath });
     }
 
     const trash = readTrashFolders(trashDirsFor(projectsRoot));
@@ -104,15 +120,6 @@ export async function syncFinderChanges(
       await removeProjectFromAllRoles(entry.id);
       result.archived++;
     }
-
-    if (trash) {
-      // 废纸篓被清空（或项目被彻底删除）后已无从放回，提前作废记录；归档的文档文件保留。
-      await pruneDeletedRecords(
-        (record) =>
-          trash.some((folder) => sameFolder(folder, record)) ||
-          current.some((c) => c.id === record.id && sameFolder(c, record)),
-      );
-    }
   }
 
   // 保护触发时不覆盖旧清单，等磁盘接回来后照常对比。
@@ -121,5 +128,7 @@ export async function syncFinderChanges(
     // 旧清单已被这个文件夹认领，迁到新 key 后删掉。
     if (legacy && !legacyMismatch) await LocalStorage.removeItem(LEGACY_SNAPSHOT_KEY);
   }
+  // 迁移完成后再通知：订阅方这时从存储读到的已经是新 id。
+  if (renames.length > 0) for (const listener of renameListeners) listener(renames);
   return result;
 }

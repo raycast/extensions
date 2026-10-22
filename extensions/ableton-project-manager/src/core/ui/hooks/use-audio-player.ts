@@ -34,6 +34,8 @@ let activeSessionId = 0;
 let statusPoller: ReturnType<typeof setInterval> | null = null;
 // 刚发过暂停/续播命令的时刻：命令有轮询延迟，这段时间内不让状态轮询回弹覆盖乐观态。
 let lastCommandAt = 0;
+// 播放器还没就绪时就按了暂停：就绪后补发一次（启动时会清空命令文件，先前那条可能被丢掉）。
+let pendingPause = false;
 
 // useSyncExternalStore 要求 getSnapshot 在未变化时返回稳定引用，这里缓存快照。
 let snapshot: {
@@ -109,6 +111,7 @@ function play(id: string, audioPath: string, playerPath: string, callbacks?: Pla
     stopActivePlayer();
   }
 
+  pendingPause = false;
   setPlaybackStatus("Starting");
   setPlayingId(id);
   setProgress(0, 0);
@@ -130,6 +133,14 @@ function play(id: string, audioPath: string, playerPath: string, callbacks?: Pla
     onStatusChange: (status) => {
       // 只允许当前会话更新播放状态。
       if (activeSessionId !== sessionId) {
+        return;
+      }
+
+      if (status === "Playing" && pendingPause) {
+        pendingPause = false;
+        lastCommandAt = Date.now();
+        commandPause();
+        setPlaybackStatus("Paused");
         return;
       }
 
@@ -163,6 +174,7 @@ function play(id: string, audioPath: string, playerPath: string, callbacks?: Pla
 }
 
 function stop() {
+  pendingPause = false;
   if (!activeController) {
     stopStatusPoller();
     stopActivePlayer();
@@ -241,7 +253,10 @@ function pause() {
   // 命令写入文件，后台播放进程轮询执行：切回命令后也能暂停。
   lastCommandAt = Date.now();
   commandPause();
-  if (playbackStatus === "Playing") {
+  if (playbackStatus === "Starting") {
+    pendingPause = true;
+    setPlaybackStatus("Paused");
+  } else if (playbackStatus === "Playing") {
     setPlaybackStatus("Paused");
   }
 }
@@ -249,6 +264,7 @@ function pause() {
 function resume() {
   lastCommandAt = Date.now();
   commandResume();
+  pendingPause = false;
   if (playbackStatus === "Paused") {
     setPlaybackStatus("Playing");
   }

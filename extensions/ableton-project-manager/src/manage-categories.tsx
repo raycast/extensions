@@ -241,6 +241,12 @@ export default function Command() {
   }
 
   async function editOption(id: string, name: string, color?: Color) {
+    // 不许改成另一个选项的名字：Role 按名字存，重名会把两边的曲目合在一起。
+    const key = name.trim().toLowerCase();
+    if (options.some((o) => o.id !== id && o.name.trim().toLowerCase() === key)) {
+      await showToast({ style: Toast.Style.Failure, title: t.tagNameExists });
+      return;
+    }
     const existing = options.find((o) => o.id === id);
     const next = options.map((o) => {
       if (o.id !== id) return o;

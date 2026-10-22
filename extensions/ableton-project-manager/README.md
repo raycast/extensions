@@ -136,6 +136,8 @@ While Search Projects is open, it watches your Projects Folder and reloads when 
 - **Queue Collection in Player:** use a player that supports `.m3u` playlists, such as IINA, VLC, or Swinsian. QuickTime Player doesn't.
 - **Renaming files externally:** if you rename a note or lyrics `.md` file yourself, the extension can no longer find it.
 - **Moving custom folders:** if a custom notes or lyrics folder is renamed or moved, the extension shows a warning and won't write anything until you choose the folder again in Extension Preferences.
+- **Same-named projects across libraries:** projects are identified by folder name, so if you switch to a different Projects Folder that contains a project with the same name, it shows the same tags and collections.
+- **Changing note and lyrics folders:** if notes and lyrics start or stop sharing the same custom folder, their file names switch between `<Project Name>.md` and `<Project Name> @Notes.md` / `@Lyrics.md`. Existing files aren't renamed, so rename them yourself to keep them linked.
 
 ## 🛠️ For developers
 
