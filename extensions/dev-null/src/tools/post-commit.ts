@@ -53,10 +53,13 @@ async function takeApproval(input: Input): Promise<string[] | undefined> {
 }
 
 // Canceled confirmations never reach the tool, so their records are removed here once they expire.
+// Each record is read again before it is removed, so one that another confirmation refreshed since
+// allItems() is kept.
 async function pruneApprovals() {
   const items = await LocalStorage.allItems<Record<string, string>>();
   for (const [key, value] of Object.entries(items)) {
-    if (key.startsWith("approval:") && !liveHashes(value)) await LocalStorage.removeItem(key);
+    if (!key.startsWith("approval:") || liveHashes(value)) continue;
+    if (!liveHashes(await LocalStorage.getItem<string>(key))) await LocalStorage.removeItem(key);
   }
 }
 
