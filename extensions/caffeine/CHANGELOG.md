@@ -1,6 +1,6 @@
 # Caffeine Changelog
 
-## [Initial Version] - 2026-10-22
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release of Caffeine for Windows
 - Support for indefinite keep-awake mode

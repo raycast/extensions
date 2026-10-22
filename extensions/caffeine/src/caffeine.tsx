@@ -9,11 +9,11 @@ import {
   showToast,
   Toast,
   useNavigation,
-} from '@raycast/api';
-import { useCallback, useEffect, useState } from 'react';
-import { DEFAULT_INACTIVE_STATE, getCurrentState, startCaffeine, stopCaffeine } from './utils/caffeine';
-import { formatDuration, formatRemainingTime } from './utils/time';
-import { CaffeineState, TIMER_PRESETS, TimerPreset } from './utils/types';
+} from "@raycast/api";
+import { useCallback, useEffect, useState } from "react";
+import { DEFAULT_INACTIVE_STATE, getCurrentState, startCaffeine, stopCaffeine } from "./utils/caffeine";
+import { formatDuration, formatRemainingTime } from "./utils/time";
+import { CaffeineState, TIMER_PRESETS, TimerPreset } from "./utils/types";
 
 export default function Command() {
   const [state, setState] = useState<CaffeineState>(DEFAULT_INACTIVE_STATE);
@@ -49,14 +49,14 @@ export default function Command() {
       setState(newState);
       await showToast({
         style: Toast.Style.Success,
-        title: 'Caffeine Activated',
-        message: 'Keeping Windows awake indefinitely',
+        title: "Caffeine Activated",
+        message: "Keeping Windows awake indefinitely",
       });
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: 'Failed to Activate Caffeine',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        title: "Failed to Activate Caffeine",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
@@ -71,14 +71,14 @@ export default function Command() {
       setState(newState);
       await showToast({
         style: Toast.Style.Success,
-        title: wasActive ? 'Caffeine Timer Updated' : 'Caffeine Activated',
+        title: wasActive ? "Caffeine Timer Updated" : "Caffeine Activated",
         message: `Keeping Windows awake for ${formatDuration(seconds)}`,
       });
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: wasActive ? 'Failed to Update Timer' : 'Failed to Activate Caffeine',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        title: wasActive ? "Failed to Update Timer" : "Failed to Activate Caffeine",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
@@ -92,21 +92,21 @@ export default function Command() {
       setState(newState);
       await showToast({
         style: Toast.Style.Success,
-        title: 'Caffeine Stopped',
-        message: 'Windows normal power management restored',
+        title: "Caffeine Stopped",
+        message: "Windows normal power management restored",
       });
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: 'Failed to Stop Caffeine',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        title: "Failed to Stop Caffeine",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const isTimerActive = state.active && typeof state.expiresAt === 'number' && state.expiresAt > 0;
+  const isTimerActive = state.active && typeof state.expiresAt === "number" && state.expiresAt > 0;
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Caffeine actions...">
@@ -115,18 +115,18 @@ export default function Command() {
         <List.Item
           title="Turn Off"
           subtitle={
-            isTimerActive ? `Active • ${formatRemainingTime(state.expiresAt)} remaining` : 'Active (Indefinitely)'
+            isTimerActive ? `Active • ${formatRemainingTime(state.expiresAt)} remaining` : "Active (Indefinitely)"
           }
           icon={{ source: Icon.Sun, tintColor: Color.Orange }}
           accessories={[
             {
               tag: {
-                value: isTimerActive ? formatRemainingTime(state.expiresAt) : 'Active',
+                value: isTimerActive ? formatRemainingTime(state.expiresAt) : "Active",
                 color: Color.Orange,
               },
             },
             {
-              text: state.preventDisplaySleep ? 'Display: Awake' : 'Display: Normal',
+              text: state.preventDisplaySleep ? "Display: Awake" : "Display: Normal",
               icon: state.preventDisplaySleep ? Icon.Eye : Icon.EyeDisabled,
             },
           ]}
@@ -134,14 +134,14 @@ export default function Command() {
             <ActionPanel>
               <Action title="Turn Off" icon={{ source: Icon.Stop, tintColor: Color.Red }} onAction={handleTurnOff} />
               <Action
-                title={isTimerActive ? 'Change Timer…' : 'Set Timer…'}
+                title={isTimerActive ? "Change Timer…" : "Set Timer…"}
                 icon={Icon.Clock}
                 onAction={() => push(<TimerView onStart={handleStartTimer} />)}
               />
               <Action
                 title="Open Extension Preferences"
                 icon={Icon.Gear}
-                shortcut={{ modifiers: ['cmd', 'shift'], key: ',' }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                 onAction={openExtensionPreferences}
               />
             </ActionPanel>
@@ -155,7 +155,7 @@ export default function Command() {
           accessories={[
             {
               tag: {
-                value: 'Inactive',
+                value: "Inactive",
                 color: Color.SecondaryText,
               },
             },
@@ -171,7 +171,7 @@ export default function Command() {
               <Action
                 title="Open Extension Preferences"
                 icon={Icon.Gear}
-                shortcut={{ modifiers: ['cmd', 'shift'], key: ',' }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                 onAction={openExtensionPreferences}
               />
             </ActionPanel>
@@ -185,7 +185,7 @@ export default function Command() {
         subtitle={
           isTimerActive
             ? `Change timer (currently ${formatRemainingTime(state.expiresAt)} remaining)`
-            : 'Keep awake for a specific duration or custom minutes'
+            : "Keep awake for a specific duration or custom minutes"
         }
         icon={Icon.Clock}
         accessories={
@@ -203,7 +203,7 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action
-              title={isTimerActive ? 'Change Timer…' : 'Set Timer…'}
+              title={isTimerActive ? "Change Timer…" : "Set Timer…"}
               icon={Icon.Clock}
               onAction={() => push(<TimerView onStart={handleStartTimer} />)}
             />
@@ -211,14 +211,14 @@ export default function Command() {
               <Action
                 title="Turn Off"
                 icon={{ source: Icon.Stop, tintColor: Color.Red }}
-                shortcut={{ modifiers: ['cmd'], key: 'x' }}
+                shortcut={{ modifiers: ["cmd"], key: "x" }}
                 onAction={handleTurnOff}
               />
             )}
             <Action
               title="Open Extension Preferences"
               icon={Icon.Gear}
-              shortcut={{ modifiers: ['cmd', 'shift'], key: ',' }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               onAction={openExtensionPreferences}
             />
           </ActionPanel>
@@ -292,17 +292,17 @@ function CustomDurationForm({ onStart }: { onStart: (seconds: number) => Promise
   const [minutesError, setMinutesError] = useState<string | undefined>();
 
   const handleSubmit = async (values: { minutes: string }) => {
-    const raw = (values.minutes || '').trim();
+    const raw = (values.minutes || "").trim();
 
     // Validate positive integer only: 1 to 10,080 only
     if (!raw || !/^\d+$/.test(raw)) {
-      setMinutesError('Enter a duration between 1 and 10,080 minutes.');
+      setMinutesError("Enter a duration between 1 and 10,080 minutes.");
       return;
     }
 
     const minutes = parseInt(raw, 10);
     if (isNaN(minutes) || minutes < 1 || minutes > 10080) {
-      setMinutesError('Enter a duration between 1 and 10,080 minutes.');
+      setMinutesError("Enter a duration between 1 and 10,080 minutes.");
       return;
     }
 
@@ -314,7 +314,7 @@ function CustomDurationForm({ onStart }: { onStart: (seconds: number) => Promise
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Start Timer" shortcut={{ modifiers: [], key: 'return' }} onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Start Timer" shortcut={{ modifiers: [], key: "return" }} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

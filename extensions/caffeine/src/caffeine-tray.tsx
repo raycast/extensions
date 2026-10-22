@@ -1,8 +1,8 @@
-import { Color, Icon, MenuBarExtra, openExtensionPreferences, showToast, Toast } from '@raycast/api';
-import { useCallback, useEffect, useState } from 'react';
-import { DEFAULT_INACTIVE_STATE, getCurrentState, startCaffeine, stopCaffeine } from './utils/caffeine';
-import { formatDuration, formatRemainingTime } from './utils/time';
-import { CaffeineState, TIMER_PRESETS, TimerPreset } from './utils/types';
+import { Color, Icon, MenuBarExtra, openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import { useCallback, useEffect, useState } from "react";
+import { DEFAULT_INACTIVE_STATE, getCurrentState, startCaffeine, stopCaffeine } from "./utils/caffeine";
+import { formatDuration, formatRemainingTime } from "./utils/time";
+import { CaffeineState, TIMER_PRESETS, TimerPreset } from "./utils/types";
 
 export default function Command() {
   const [state, setState] = useState<CaffeineState>(DEFAULT_INACTIVE_STATE);
@@ -34,14 +34,14 @@ export default function Command() {
       setState(newState);
       await showToast({
         style: Toast.Style.Success,
-        title: 'Caffeine Activated',
-        message: 'Keeping Windows awake indefinitely',
+        title: "Caffeine Activated",
+        message: "Keeping Windows awake indefinitely",
       });
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: 'Failed to Activate Caffeine',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        title: "Failed to Activate Caffeine",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
@@ -56,14 +56,14 @@ export default function Command() {
       setState(newState);
       await showToast({
         style: Toast.Style.Success,
-        title: wasActive ? 'Caffeine Timer Updated' : 'Caffeine Activated',
+        title: wasActive ? "Caffeine Timer Updated" : "Caffeine Activated",
         message: `Keeping Windows awake for ${formatDuration(seconds)}`,
       });
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: wasActive ? 'Failed to Update Timer' : 'Failed to Activate Caffeine',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        title: wasActive ? "Failed to Update Timer" : "Failed to Activate Caffeine",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
@@ -77,14 +77,14 @@ export default function Command() {
       setState(newState);
       await showToast({
         style: Toast.Style.Success,
-        title: 'Caffeine Stopped',
-        message: 'Windows normal power management restored',
+        title: "Caffeine Stopped",
+        message: "Windows normal power management restored",
       });
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: 'Failed to Stop Caffeine',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        title: "Failed to Stop Caffeine",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
@@ -96,18 +96,18 @@ export default function Command() {
     return null;
   }
 
-  const isTimerActive = typeof state.expiresAt === 'number' && state.expiresAt > 0;
-  const remainingText = isTimerActive ? formatRemainingTime(state.expiresAt) : 'Indefinite';
+  const isTimerActive = typeof state.expiresAt === "number" && state.expiresAt > 0;
+  const remainingText = isTimerActive ? formatRemainingTime(state.expiresAt) : "Indefinite";
 
   return (
     <MenuBarExtra
       icon={{ source: Icon.Sun, tintColor: Color.Orange }}
       title={isTimerActive ? remainingText : undefined}
-      tooltip={`Caffeine Active (${isTimerActive ? remainingText : 'Indefinitely'})`}
+      tooltip={`Caffeine Active (${isTimerActive ? remainingText : "Indefinitely"})`}
       isLoading={isLoading}
     >
       <MenuBarExtra.Item
-        title={isTimerActive ? `Active • ${remainingText}` : 'Active (Indefinitely)'}
+        title={isTimerActive ? `Active • ${remainingText}` : "Active (Indefinitely)"}
         icon={{ source: Icon.Sun, tintColor: Color.Orange }}
       />
       <MenuBarExtra.Section>

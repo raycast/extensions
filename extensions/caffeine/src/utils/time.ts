@@ -1,6 +1,6 @@
 export function formatDuration(seconds: number): string {
   if (seconds <= 0) {
-    return 'Indefinitely';
+    return "Indefinitely";
   }
 
   const hours = Math.floor(seconds / 3600);
@@ -9,28 +9,28 @@ export function formatDuration(seconds: number): string {
 
   const parts: string[] = [];
   if (hours > 0) {
-    parts.push(hours === 1 ? '1 hour' : `${hours} hours`);
+    parts.push(hours === 1 ? "1 hour" : `${hours} hours`);
   }
   if (minutes > 0) {
-    parts.push(minutes === 1 ? '1 minute' : `${minutes} minutes`);
+    parts.push(minutes === 1 ? "1 minute" : `${minutes} minutes`);
   }
   if (remainingSeconds > 0 && hours === 0) {
-    parts.push(remainingSeconds === 1 ? '1 second' : `${remainingSeconds} seconds`);
+    parts.push(remainingSeconds === 1 ? "1 second" : `${remainingSeconds} seconds`);
   }
 
-  return parts.length > 0 ? parts.join(' ') : `${seconds} seconds`;
+  return parts.length > 0 ? parts.join(" ") : `${seconds} seconds`;
 }
 
 export function formatRemainingTime(expiresAt: number | null | undefined): string {
   if (expiresAt === null || expiresAt === undefined) {
-    return 'Indefinite';
+    return "Indefinite";
   }
 
   const now = Date.now();
   const diffMs = expiresAt - now;
 
   if (diffMs <= 0) {
-    return 'Expiring now';
+    return "Expiring now";
   }
 
   const totalSeconds = Math.ceil(diffMs / 1000);
@@ -49,5 +49,5 @@ export function formatRemainingTime(expiresAt: number | null | undefined): strin
 
 export function formatTime(timestamp: number): string {
   const date = new Date(timestamp);
-  return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
 }

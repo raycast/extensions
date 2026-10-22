@@ -20,11 +20,12 @@
 ## 📖 Overview
 
 Windows users frequently encounter situations where their computer goes to sleep or turns off the display during active operations:
-* Downloading or uploading large files
-* Long-running builds, 3D rendering, or data processing
-* Presenting slides or sharing screens during meetings
-* Monitoring real-time telemetry or dashboards
-* Reading long technical documents
+
+- Downloading or uploading large files
+- Long-running builds, 3D rendering, or data processing
+- Presenting slides or sharing screens during meetings
+- Monitoring real-time telemetry or dashboards
+- Reading long technical documents
 
 **Caffeine for Windows** solves this with a keyboard-first, native Raycast experience. It allows users to temporarily keep Windows awake either **indefinitely** or for a **precise timed duration**, complete with a dynamic **Windows System Tray** indicator.
 
@@ -75,24 +76,27 @@ flowchart TD
 
 ## 🛠️ Technology Stack
 
-* **Frontend / UI**: React, Raycast Extension API (`@raycast/api`, `@raycast/utils`)
-* **Core Language**: TypeScript 5.5+
-* **System Integration**: Win32 API (`kernel32.dll`, `user32.dll`), Windows PowerShell Runtime
-* **Power Management**: Win32 `SetThreadExecutionState`
-* **Shell Integration**: Windows `NotifyIcon` (Taskbar Notification Area / Tray)
-* **Code Quality & Testing**: ESLint, Prettier, Node.js Test Suite
+- **Frontend / UI**: React, Raycast Extension API (`@raycast/api`, `@raycast/utils`)
+- **Core Language**: TypeScript 5.5+
+- **System Integration**: Win32 API (`kernel32.dll`, `user32.dll`), Windows PowerShell Runtime
+- **Power Management**: Win32 `SetThreadExecutionState`
+- **Shell Integration**: Windows `NotifyIcon` (Taskbar Notification Area / Tray)
+- **Code Quality & Testing**: ESLint, Prettier, Node.js Test Suite
 
 ---
 
 ## 📱 User Experience
 
 ### 1. Indefinite Mode
+
 Press `Turn On` to keep Windows awake indefinitely until explicitly toggled off.
 
 ### 2. Timed Keep-Awake
-Open `Timer…` to enter a custom duration or choose from quick duration presets (**15m**, **30m**, **1h**).
+
+Open `Timer…` to enter a custom duration or choose from quick duration presets (**5m**, **10m**, **15m**, **30m**, **45m**, **1h**, **2h**).
 
 ### 3. System Tray Indicator
+
 While active, an icon appears in the Windows system tray showing remaining duration and providing quick-stop options. Turning off Caffeine instantly removes the indicator.
 
 ---
@@ -110,7 +114,7 @@ While active, an icon appears in the Windows system tray showing remaining durat
 
 ## 👤 Author
 
-* **Afaan Bhat** — [GitHub Profile](https://github.com/afaanbhat-9)
+- **Afaan Bhat** — [GitHub Profile](https://github.com/afaanbhat-9)
 
 ---
 

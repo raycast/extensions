@@ -1,10 +1,34 @@
-import { environment } from '@raycast/api';
-import { execFileSync } from 'child_process';
-import fs from 'fs';
-import path from 'path';
+import { environment } from "@raycast/api";
+import { execFile, execFileSync } from "child_process";
+import fs from "fs";
+import os from "os";
+import path from "path";
 
 let cachedScriptPath: string | null = null;
 let cachedIconPath: string | null = null;
+
+export function getStateDirectory(): string {
+  const base = environment.supportPath || path.join(os.tmpdir(), "raycast-caffeine");
+  if (!fs.existsSync(base)) {
+    fs.mkdirSync(base, { recursive: true });
+  }
+  return base;
+}
+
+export function cleanFile(filePath: string | undefined): void {
+  if (!filePath) return;
+  try {
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  } catch {
+    // Ignore cleanup error
+  }
+}
+
+export function escapePsArg(arg: string): string {
+  return arg.replace(/'/g, "''").replace(/"/g, '`"');
+}
 
 export function getHelperScriptPath(): string {
   if (cachedScriptPath && fs.existsSync(cachedScriptPath)) {
@@ -14,13 +38,13 @@ export function getHelperScriptPath(): string {
   const candidates: string[] = [];
 
   if (environment.assetsPath) {
-    candidates.push(path.join(environment.assetsPath, 'scripts', 'caffeine-helper.ps1'));
-    candidates.push(path.join(environment.assetsPath, 'caffeine-helper.ps1'));
+    candidates.push(path.join(environment.assetsPath, "scripts", "caffeine-helper.ps1"));
+    candidates.push(path.join(environment.assetsPath, "caffeine-helper.ps1"));
   }
 
-  candidates.push(path.join(__dirname, '..', '..', 'assets', 'scripts', 'caffeine-helper.ps1'));
-  candidates.push(path.join(__dirname, '..', 'assets', 'scripts', 'caffeine-helper.ps1'));
-  candidates.push(path.join(process.cwd(), 'assets', 'scripts', 'caffeine-helper.ps1'));
+  candidates.push(path.join(__dirname, "..", "..", "assets", "scripts", "caffeine-helper.ps1"));
+  candidates.push(path.join(__dirname, "..", "assets", "scripts", "caffeine-helper.ps1"));
+  candidates.push(path.join(process.cwd(), "assets", "scripts", "caffeine-helper.ps1"));
 
   for (const candidate of candidates) {
     if (fs.existsSync(candidate)) {
@@ -29,7 +53,7 @@ export function getHelperScriptPath(): string {
     }
   }
 
-  throw new Error('Caffeine PowerShell helper script not found in extension assets.');
+  throw new Error("Caffeine PowerShell helper script not found in extension assets.");
 }
 
 export function getIconPath(): string | null {
@@ -40,12 +64,12 @@ export function getIconPath(): string | null {
   const candidates: string[] = [];
 
   if (environment.assetsPath) {
-    candidates.push(path.join(environment.assetsPath, 'icon.png'));
+    candidates.push(path.join(environment.assetsPath, "icon.png"));
   }
 
-  candidates.push(path.join(__dirname, '..', '..', 'assets', 'icon.png'));
-  candidates.push(path.join(__dirname, '..', 'assets', 'icon.png'));
-  candidates.push(path.join(process.cwd(), 'assets', 'icon.png'));
+  candidates.push(path.join(__dirname, "..", "..", "assets", "icon.png"));
+  candidates.push(path.join(__dirname, "..", "assets", "icon.png"));
+  candidates.push(path.join(process.cwd(), "assets", "icon.png"));
 
   for (const candidate of candidates) {
     if (fs.existsSync(candidate)) {
@@ -58,40 +82,117 @@ export function getIconPath(): string | null {
 }
 
 /**
- * Verifies if a PID is alive and belongs to the expected Caffeine PowerShell helper.
+ * Verifies if a PID is alive and belongs to the Caffeine helper.
+ * Uses helper-owned status file and non-blocking process.kill(pid, 0).
  */
-export function isPidAlive(pid: number | undefined): boolean {
-  if (!pid || typeof pid !== 'number' || isNaN(pid) || pid <= 0 || pid === process.pid) {
+export function isPidAlive(pid: number | undefined, processStartTime?: number, statusFilePath?: string): boolean {
+  if (!pid || typeof pid !== "number" || isNaN(pid) || pid <= 0 || pid === process.pid) {
+    return false;
+  }
+
+  if (statusFilePath && !fs.existsSync(statusFilePath)) {
     return false;
   }
 
   try {
     process.kill(pid, 0);
-
-    const output = execFileSync('tasklist', ['/FI', `PID eq ${pid}`, '/FO', 'CSV', '/NH'], {
-      windowsHide: true,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    });
-
-    return output.toLowerCase().includes('powershell');
   } catch {
     return false;
   }
+
+  return true;
+}
+
+/**
+ * Thoroughly verifies the process identity and creation time before terminating or replacing it.
+ * Ensures unrelated PowerShell jobs that reused the PID are never killed.
+ */
+export function verifyHelperIdentity(pid: number, expectedStartTime?: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (!pid || typeof pid !== "number" || isNaN(pid) || pid <= 0) {
+      resolve(false);
+      return;
+    }
+
+    try {
+      process.kill(pid, 0);
+    } catch {
+      resolve(false);
+      return;
+    }
+
+    const safePid = Math.floor(pid);
+    const safeExpectedStart = expectedStartTime && expectedStartTime > 0 ? Math.floor(expectedStartTime) : 0;
+
+    const checkCmd = `
+$TargetPid = ${safePid}
+$ExpectedStart = ${safeExpectedStart}
+try {
+    $proc = [System.Diagnostics.Process]::GetProcessById($TargetPid)
+    if ($proc.ProcessName -notlike '*powershell*' -and $proc.ProcessName -notlike '*pwsh*') {
+        exit 2
+    }
+    if ($ExpectedStart -gt 0) {
+        $procStartMs = [DateTimeOffset]::new($proc.StartTime.ToUniversalTime()).ToUnixTimeMilliseconds()
+        if ([Math]::Abs($procStartMs - $ExpectedStart) -gt 3000) {
+            exit 3
+        }
+    }
+    $cim = Get-CimInstance Win32_Process -Filter "ProcessId = $TargetPid" -ErrorAction SilentlyContinue
+    if (-not $cim -or $cim.CommandLine -notlike '*caffeine-helper*') {
+        exit 4
+    }
+    exit 0
+} catch {
+    exit 1
+}
+`;
+
+    execFile(
+      "powershell.exe",
+      ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", checkCmd],
+      {
+        windowsHide: true,
+        timeout: 2500,
+      },
+      (error: Error | null) => {
+        resolve(!error);
+      },
+    );
+  });
+}
+
+export interface LaunchHelperResult {
+  pid: number;
+  processStartTime: number;
+  statusFilePath: string;
 }
 
 /**
  * Launches the background Caffeine PowerShell helper using Windows native Start-Process.
- * durationSeconds = 0 runs indefinitely until stopped.
- * durationSeconds > 0 runs for the specified duration.
+ * Waits for a confirmed ready signal from the helper before returning.
+ * If SetThreadExecutionState fails or the helper terminates during startup, throws an error.
  */
-export function launchHelperProcess(durationSeconds: number, preventDisplaySleep: boolean): number {
+export async function launchHelperProcess(
+  durationSeconds: number,
+  preventDisplaySleep: boolean,
+): Promise<LaunchHelperResult> {
   const scriptPath = getHelperScriptPath();
   const iconPath = getIconPath();
   const safeDuration = Math.max(0, Math.floor(durationSeconds));
-  const safeDisplayFlag = preventDisplaySleep ? '1' : '0';
+  const safeDisplayFlag = preventDisplaySleep ? "1" : "0";
 
-  const escapedScriptPath = scriptPath.replace(/"/g, '`"');
+  const sessionId = `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  const readyFilePath = path.join(getStateDirectory(), `caffeine_ready_${sessionId}.json`);
+  const statusFilePath = path.join(getStateDirectory(), `caffeine_status_${sessionId}.json`);
+
+  cleanFile(readyFilePath);
+  cleanFile(statusFilePath);
+
+  const safeScriptPath = escapePsArg(scriptPath);
+  const safeReadyFilePath = escapePsArg(readyFilePath);
+  const safeStatusFilePath = escapePsArg(statusFilePath);
+
   const psArgs = [
     "'-NoProfile'",
     "'-NonInteractive'",
@@ -100,45 +201,121 @@ export function launchHelperProcess(durationSeconds: number, preventDisplaySleep
     "'-ExecutionPolicy'",
     "'Bypass'",
     "'-File'",
-    `'"${escapedScriptPath}"'`,
+    `'"${safeScriptPath}"'`,
     "'-DurationSeconds'",
     `'${safeDuration}'`,
     "'-PreventDisplaySleep'",
     `'${safeDisplayFlag}'`,
+    "'-ReadyFile'",
+    `'"${safeReadyFilePath}"'`,
+    "'-StatusFile'",
+    `'"${safeStatusFilePath}"'`,
   ];
 
   if (iconPath) {
-    const escapedIconPath = iconPath.replace(/"/g, '`"');
-    psArgs.push("'-IconPath'", `'"${escapedIconPath}"'`);
+    const safeIconPath = escapePsArg(iconPath);
+    psArgs.push("'-IconPath'", `'"${safeIconPath}"'`);
   }
 
-  const psCommand = `Start-Process powershell.exe -ArgumentList @(${psArgs.join(',')}) -WindowStyle Hidden -PassThru | Select-Object -ExpandProperty Id`;
+  const psCommand = `Start-Process powershell.exe -ArgumentList @(${psArgs.join(",")}) -WindowStyle Hidden -PassThru | Select-Object -ExpandProperty Id`;
 
   const output = execFileSync(
-    'powershell.exe',
-    ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', psCommand],
+    "powershell.exe",
+    ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", psCommand],
     {
       windowsHide: true,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
     },
   );
 
-  const pid = parseInt(output.trim(), 10);
-  if (isNaN(pid) || pid <= 0) {
-    throw new Error('Failed to obtain a valid process ID for the Caffeine background helper.');
+  const initialPid = parseInt(output.trim(), 10);
+  if (isNaN(initialPid) || initialPid <= 0) {
+    cleanFile(readyFilePath);
+    cleanFile(statusFilePath);
+    throw new Error("Failed to obtain a valid process ID for the Caffeine background helper.");
   }
 
-  return pid;
+  // Asynchronously wait for ready signal from helper
+  const startTime = Date.now();
+  const timeoutMs = 5000;
+  let readyData: { pid: number; startTime: number } | null = null;
+
+  while (Date.now() - startTime < timeoutMs) {
+    if (fs.existsSync(readyFilePath)) {
+      try {
+        const raw = fs.readFileSync(readyFilePath, "utf8");
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed.pid === "number") {
+          readyData = {
+            pid: parsed.pid,
+            startTime: typeof parsed.startTime === "number" ? parsed.startTime : Date.now(),
+          };
+          break;
+        }
+      } catch {
+        // Retry reading
+      }
+    }
+
+    // Verify child process hasn't exited during initialization (e.g. SetThreadExecutionState returned 0)
+    try {
+      process.kill(initialPid, 0);
+    } catch {
+      cleanFile(readyFilePath);
+      cleanFile(statusFilePath);
+      throw new Error(
+        "Caffeine helper failed during startup: SetThreadExecutionState failed or helper process terminated.",
+      );
+    }
+
+    await new Promise((r) => setTimeout(r, 50));
+  }
+
+  cleanFile(readyFilePath);
+
+  if (!readyData) {
+    try {
+      process.kill(initialPid);
+    } catch {
+      // Process may already have exited
+    }
+    cleanFile(statusFilePath);
+    throw new Error("Timed out waiting for Caffeine helper to initialize.");
+  }
+
+  return {
+    pid: readyData.pid,
+    processStartTime: readyData.startTime,
+    statusFilePath,
+  };
 }
 
 /**
  * Safely and gracefully terminates the background helper process by PID.
- * Signals the Named Event so the helper runs its finally block (disposing the system tray icon),
- * then refreshes the taskbar notification area to prevent ghost icons.
+ * Verifies helper identity and creation time before sending signals or killing,
+ * ensuring unrelated processes are never affected.
  */
-export function terminateHelperProcess(pid: number | undefined): void {
-  if (!pid || typeof pid !== 'number' || isNaN(pid) || pid <= 0 || pid === process.pid) {
+export async function terminateHelperProcess(
+  pid: number | undefined,
+  processStartTime?: number,
+  statusFilePath?: string,
+): Promise<void> {
+  if (!pid || typeof pid !== "number" || isNaN(pid) || pid <= 0 || pid === process.pid) {
+    return;
+  }
+
+  try {
+    process.kill(pid, 0);
+  } catch {
+    if (statusFilePath) cleanFile(statusFilePath);
+    return;
+  }
+
+  // Verify identity and creation time before terminating to protect unrelated processes
+  const isHelper = await verifyHelperIdentity(pid, processStartTime);
+  if (!isHelper) {
+    if (statusFilePath) cleanFile(statusFilePath);
     return;
   }
 
@@ -192,32 +369,40 @@ try {
     $e.Set() | Out-Null
     $e.Close()
 } catch {}
-Start-Sleep -Milliseconds 120
+Start-Sleep -Milliseconds 150
 [TrayRefresher]::Refresh()
 `;
 
-    execFileSync(
-      'powershell.exe',
-      ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', stopCmd],
-      {
-        windowsHide: true,
-        stdio: 'ignore',
-        timeout: 2000,
-      },
-    );
+    await new Promise<void>((resolve) => {
+      execFile(
+        "powershell.exe",
+        ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", stopCmd],
+        {
+          windowsHide: true,
+          timeout: 2500,
+        },
+        () => resolve(),
+      );
+    });
   } catch {
     // Ignore error
   }
 
-  // Fallback: If still running after grace period, terminate process
-  if (isPidAlive(pid)) {
-    try {
-      execFileSync('taskkill', ['/PID', String(pid), '/F', '/T'], {
+  // Fallback: If still running after grace period, re-verify and terminate
+  try {
+    process.kill(pid, 0);
+    const stillOurHelper = await verifyHelperIdentity(pid, processStartTime);
+    if (stillOurHelper) {
+      execFileSync("taskkill", ["/PID", String(pid), "/F", "/T"], {
         windowsHide: true,
-        stdio: 'ignore',
+        stdio: "ignore",
       });
-    } catch {
-      // Process may have already exited
     }
+  } catch {
+    // Process already exited
+  }
+
+  if (statusFilePath) {
+    cleanFile(statusFilePath);
   }
 }

@@ -5,7 +5,9 @@
 param(
     [int]$DurationSeconds = 0,
     [int]$PreventDisplaySleep = 1,
-    [string]$IconPath = ""
+    [string]$IconPath = "",
+    [string]$ReadyFile = "",
+    [string]$StatusFile = ""
 )
 
 $ErrorActionPreference = 'Stop'
@@ -47,6 +49,42 @@ $keepDisplay = ($PreventDisplaySleep -ne 0)
 $prev = [WinPower]::Enable($keepDisplay)
 if ($prev -eq 0) {
     exit 1
+}
+
+# Capture process identity and start time
+$proc = [System.Diagnostics.Process]::GetCurrentProcess()
+$startTimeMs = [DateTimeOffset]::new($proc.StartTime.ToUniversalTime()).ToUnixTimeMilliseconds()
+
+if (![string]::IsNullOrWhiteSpace($StatusFile)) {
+    try {
+        $statusDir = [System.IO.Path]::GetDirectoryName($StatusFile)
+        if (![string]::IsNullOrWhiteSpace($statusDir) -and !(Test-Path $statusDir)) {
+            New-Item -ItemType Directory -Path $statusDir -Force | Out-Null
+        }
+        $statusObj = @{
+            pid = $PID
+            startTime = $startTimeMs
+            active = $true
+        }
+        $statusJson = $statusObj | ConvertTo-Json -Compress
+        [System.IO.File]::WriteAllText($StatusFile, $statusJson)
+    } catch {}
+}
+
+if (![string]::IsNullOrWhiteSpace($ReadyFile)) {
+    try {
+        $readyDir = [System.IO.Path]::GetDirectoryName($ReadyFile)
+        if (![string]::IsNullOrWhiteSpace($readyDir) -and !(Test-Path $readyDir)) {
+            New-Item -ItemType Directory -Path $readyDir -Force | Out-Null
+        }
+        $readyObj = @{
+            pid = $PID
+            startTime = $startTimeMs
+            status = "ready"
+        }
+        $readyJson = $readyObj | ConvertTo-Json -Compress
+        [System.IO.File]::WriteAllText($ReadyFile, $readyJson)
+    } catch {}
 }
 
 # Resolve icon path
@@ -167,6 +205,10 @@ try {
         }
     }
 } finally {
+    if (![string]::IsNullOrWhiteSpace($StatusFile) -and (Test-Path $StatusFile)) {
+        Remove-Item -Path $StatusFile -Force -ErrorAction SilentlyContinue
+    }
+
     # Cleanly remove tray icon immediately
     if ($notifyIcon) {
         $notifyIcon.Visible = $false
