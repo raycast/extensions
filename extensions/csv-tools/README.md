@@ -6,6 +6,10 @@ Inspect, filter, sort, and edit explicitly supplied CSV text using [CSV File Too
 
 This extension connects Raycast AI directly to `https://csvfile.tools/api/csv/mcp` using Raycast’s native HTTP MCP configuration. There is no copied CSV engine or extra server. Supplied CSV text is sent to that endpoint for processing. Review the service’s published privacy policy before supplying data. Endpoint availability and host acceptance must be verified before release.
 
+## Open CSV Editor
+
+Run **Open CSV Editor** to open [the CSV editor](https://csvfile.tools/editor) in your default browser. The command sends no CSV text, file path or account data. Choose a local file inside the browser editor when needed.
+
 ## Tools
 
 - `inspect_csv`: record, column and cell counts; up to 20 preview records.
@@ -33,8 +37,8 @@ Expected filtered CSV: `name,status\nAda,paid` (the server may serialize a trail
 
 ## Requirements
 
-Use Raycast with AI tools enabled. This extension connects to the public CSV MCP endpoint and requires no CSV API key. The extension exposes no filesystem commands; supply CSV text explicitly in the conversation.
+Use Raycast with AI tools enabled. This extension connects to the public CSV MCP endpoint and requires no CSV API key. The editor command only opens the public editor URL and exposes no filesystem commands. For AI tools, supply CSV text explicitly in the conversation.
 
 ## Development
 
-Install dependencies with `npm ci`, then run `npm run build`. This extension contains native MCP configuration rather than a copied CSV engine or separate server.
+Install dependencies with `npm ci`, then run `npm run build`. This extension contains native MCP configuration and a small browser-launch command rather than a copied CSV engine or separate server.
