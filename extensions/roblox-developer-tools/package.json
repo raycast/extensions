@@ -58,7 +58,7 @@
       "title": "Publish Place",
       "subtitle": "Roblox",
       "description": "Publish the current place in Studio",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "restart",
