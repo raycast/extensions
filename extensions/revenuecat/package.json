@@ -119,7 +119,7 @@
     {
       "name": "chartsV3",
       "label": "Use Charts v3",
-      "description": "Use Charts v3 for dashboard and menu bar revenue and customer metrics. Turn off to match the legacy overview.",
+      "description": "Use Charts v3 for all dashboard and menu bar metrics. Turn off to match the legacy overview.",
       "type": "checkbox",
       "required": false,
       "default": true
