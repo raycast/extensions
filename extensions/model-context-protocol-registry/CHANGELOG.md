@@ -2,7 +2,7 @@
 
 ## [Add VOMO MCP Server] - {PR_MERGE_DATE}
 
-- Add VOMO with a direct HTTP connection in Raycast and an mcp-remote fallback for other clients. Search and read saved meeting notes and transcripts with OAuth and read-only access.
+- Add VOMO through mcp-remote. Search and read saved meeting notes and transcripts with OAuth and read-only access. Requires Node.js with npm.
 
 ## [Update Hermoso MCP Server] - 2026-10-21
 
