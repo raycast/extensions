@@ -3,7 +3,7 @@
 <!-- Raycast's Store reads version headings in this form. -->
 <!-- vale Google.Headings = NO -->
 
-## [Initial version] - {PR_MERGE_DATE}
+## [Initial version] - 2026-10-22
 
 - Add **Scan Folder**, which scans a disk, a common folder, or a folder by its path in Sizewise, or
   lists its largest files.
