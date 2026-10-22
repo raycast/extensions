@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Databricks Field Guide MCP Server] - {PR_MERGE_DATE}
+## [Add Databricks Field Guide MCP Server] - 2026-10-22
 
 - Add the Databricks Field Guide to the official registry: search and read TechFabric's Databricks Field Guide (https://databricks.techfabric.com), with runnable SQL, Python and CLI examples and recent Databricks changes, each linked to the docs.databricks.com pages it cites. Hosted Streamable HTTP server at https://databricks.techfabric.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
