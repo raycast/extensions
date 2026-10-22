@@ -24,15 +24,38 @@ function escapeHtml(s: string): string {
     .replace(/'/g, "&#x27;");
 }
 
+export function escapeMarkdown(s: string): string {
+  return String(s).replace(/([\\`*_{}[\]()#+.!|<>-])/g, "\\$1");
+}
+
 export function money(n: number): string {
   const sign = n < 0 ? "-" : "";
   const abs = Math.abs(n);
   return `${sign}$${abs.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+function toFiniteNumber(n: unknown): number {
+  const v = typeof n === "number" ? n : Number(n);
+  return Number.isFinite(v) ? v : 0;
+}
+
+export function sanitizeItems(items: unknown): InvoiceItem[] {
+  if (!Array.isArray(items)) return [];
+  return items
+    .filter(
+      (i): i is Record<string, unknown> => i !== null && typeof i === "object",
+    )
+    .map((i) => ({
+      description: typeof i.description === "string" ? i.description : "",
+      qty: toFiniteNumber(i.qty),
+      rate: toFiniteNumber(i.rate),
+    }));
+}
+
 export function computeTotals(data: InvoiceData) {
-  const subtotal = data.items.reduce((acc, i) => acc + i.qty * i.rate, 0);
-  const taxRate = data.tax_rate || 0;
+  const items = sanitizeItems(data.items);
+  const subtotal = items.reduce((acc, i) => acc + i.qty * i.rate, 0);
+  const taxRate = toFiniteNumber(data.tax_rate);
   const tax = (subtotal * taxRate) / 100;
   const total = subtotal + tax;
   return { subtotal, taxRate, tax, total };
@@ -40,8 +63,9 @@ export function computeTotals(data: InvoiceData) {
 
 export function renderHtml(data: InvoiceData): string {
   const { subtotal, taxRate, tax, total } = computeTotals(data);
+  const items = sanitizeItems(data.items);
 
-  const rows = data.items
+  const rows = items
     .map(
       (i) =>
         `<tr><td>${escapeHtml(i.description)}</td>` +
@@ -82,20 +106,21 @@ ${notes ? `<p class='meta'>${notes}</p>` : ""}
 
 export function renderMarkdown(data: InvoiceData): string {
   const { subtotal, taxRate, tax, total } = computeTotals(data);
+  const items = sanitizeItems(data.items);
 
-  const rows = data.items
+  const rows = items
     .map(
       (i) =>
-        `| ${i.description} | ${i.qty} | ${money(i.rate)} | ${money(i.qty * i.rate)} |`,
+        `| ${escapeMarkdown(i.description)} | ${i.qty} | ${money(i.rate)} | ${money(i.qty * i.rate)} |`,
     )
     .join("\n");
 
   const lines = [
-    `# Invoice ${data.invoice_number || ""}`,
+    `# Invoice ${escapeMarkdown(data.invoice_number || "")}`,
     "",
-    `**From:** ${data.from || ""}  `,
-    `**To:** ${data.to || ""}  `,
-    `**Date:** ${data.date || ""} · **Due:** ${data.due_date || ""}`,
+    `**From:** ${escapeMarkdown(data.from || "")}  `,
+    `**To:** ${escapeMarkdown(data.to || "")}  `,
+    `**Date:** ${escapeMarkdown(data.date || "")} · **Due:** ${escapeMarkdown(data.due_date || "")}`,
     "",
     "| Description | Qty | Rate | Amount |",
     "|---|---:|---:|---:|",
@@ -110,7 +135,7 @@ export function renderMarkdown(data: InvoiceData): string {
   lines.push(`### Total: ${money(total)}`);
 
   if (data.notes) {
-    lines.push("", `_${data.notes}_`);
+    lines.push("", `_${escapeMarkdown(data.notes)}_`);
   }
 
   return lines.join("\n");
