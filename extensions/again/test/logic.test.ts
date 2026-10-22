@@ -11,6 +11,7 @@ import {
   clearToday,
   correctionDay,
   dayKey,
+  dayLabel,
   daysBetween,
   offers,
   reopen,
@@ -135,4 +136,27 @@ test("the number never goes down", () => {
   // typing a new thing over a closed day (the command argument) keeps the count too
   const t = setPromise(answer(setPromise({ days: {} }, day, "A"), day, "some"), day, "B");
   assert.equal(showedUp(t), 1);
+});
+
+test("changing a counted day to not today does not lower the number", () => {
+  const day = "2026-10-22";
+  for (const first of ["done", "some"] as const) {
+    let s = answer(setPromise({ days: {} }, day, "Close five tabs"), day, first);
+    s = answer(reopen(s, day), day, "not");
+    assert.equal(showedUp(s), 1, `${first} then not today`);
+    s = answer(reopen(s, day), day, "not");
+    assert.equal(showedUp(s), 1, "and again");
+    s = clearToday(reopen(s, day), day);
+    assert.equal(showedUp(s), 1, "pick another thing after that");
+    s = autoClose(setPromise(s, day, "Reply to one message"), "2026-10-23");
+    assert.equal(showedUp(s), 1, "left open afterwards");
+  }
+  // a day that never counted can still be changed freely
+  const s = answer(answer(setPromise({ days: {} }, day, "A"), day, "not"), day, "done");
+  assert.equal(showedUp(s), 1);
+});
+
+test("an older correctable day is named by its weekday", () => {
+  assert.equal(dayLabel("2026-10-21", "2026-10-22"), "Yesterday");
+  assert.equal(dayLabel("2026-10-19", "2026-10-21"), "Monday");
 });
