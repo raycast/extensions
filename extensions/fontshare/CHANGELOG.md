@@ -1,6 +1,6 @@
 # Fontshare Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-22
 
 - Search the Fontshare catalogue by name, designer, category or tag
 - Browse fonts as a grid of "Aa" previews or as a list
