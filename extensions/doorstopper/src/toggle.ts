@@ -1,14 +1,20 @@
-import { showFailureToast } from "@raycast/utils";
-import { isDoorstopperEnabled, startDoorstopper, stopDoorstopper } from "./util";
+import { showHUD } from "@raycast/api";
+import { disable, enable, getDefaultMinutes } from "./lib/session";
+import { turnOnMessage } from "./lib/labels";
+import { showCommandFailure } from "./lib/feedback";
+import { isSleepDisabled } from "./lib/system";
 
 export default async function main() {
   try {
-    if (isDoorstopperEnabled()) {
-      await stopDoorstopper({ menubar: true, status: true }, "Doorstopper is now disabled");
+    if (await isSleepDisabled()) {
+      await disable();
+      await showHUD("Doorstopper is now disabled");
     } else {
-      await startDoorstopper({ menubar: true, status: true }, "Doorstopper is now enabled");
+      const minutes = getDefaultMinutes();
+      await enable(minutes);
+      await showHUD(turnOnMessage(minutes));
     }
   } catch (error) {
-    showFailureToast("Failed to toggle Doorstopper", { message: String(error) });
+    await showCommandFailure(error, "Failed to toggle Doorstopper");
   }
 }
