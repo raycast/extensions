@@ -1180,7 +1180,7 @@ describe("review fixes", () => {
     await expect(getStatus()).resolves.toEqual({
       on: true,
       session: null,
-      battery: { hasBattery: false, percent: null, onAC: false },
+      battery: undefined,
     });
   });
 });

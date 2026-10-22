@@ -36,7 +36,7 @@ Changes to `/etc/pam.d/sudo` can be overwritten by macOS updates. If Touch ID is
 
 ## Passwordless Mode and Auto-Off
 
-Run **Set up Passwordless Doorstopper** to install a sudoers rule at `/etc/sudoers.d/raycast-doorstopper`. macOS asks for your admin password once. The rule lets your user run only these two commands as root without a password:
+Run **Set up Passwordless Doorstopper** to install a sudoers rule for your macOS account at `/etc/sudoers.d/raycast-doorstopper-<username>`. Each account on the Mac gets its own rule file. macOS asks for your admin password once. The rule lets your user run only these two commands as root without a password:
 
 ```text
 /usr/bin/pmset -a disablesleep 0
@@ -63,7 +63,7 @@ To install the Doorstopper extension, follow these steps:
 Once installed, simply trigger the Raycast command palette and search for the Doorstopper commands.
 
 <p align="center">
-  <img src="metadata/capture-1.png" alt="Raycast Command Palette for Doorstopper">
+  <img src="metadata/doorstopper-3.png" alt="Raycast Command Palette for Doorstopper">
 </p>
 
 ## Features ✨

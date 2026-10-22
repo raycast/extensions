@@ -14,11 +14,13 @@ const RECHECK_KEY = "recheck";
 // The highest sequence number used so far. It is kept when sessions are cleared, so a number is never handed out again
 // while an older check may still hold it.
 const SEQUENCE_KEY = "sequence";
-const UNKNOWN_BATTERY: Battery = { hasBattery: false, percent: null, onAC: false };
+// Used for auto-off when the battery cannot be read. It never reports a cutoff, and it is not shown as a desktop Mac.
+const UNREADABLE_BATTERY: Battery = { hasBattery: false, percent: null, onAC: false };
 
 export const PRESETS: (number | null)[] = [30, 60, 120, 240, null];
 
-export type Status = { on: boolean; session: Session | null; battery: Battery };
+// battery is undefined when the battery could not be read, so the menu bar can say the status is unknown.
+export type Status = { on: boolean; session: Session | null; battery: Battery | undefined };
 
 function getPrefs(): { thresholdPercent: number; defaultMinutes: number | null } {
   const prefs = getPreferenceValues<Preferences>();
@@ -311,7 +313,7 @@ async function readStatus(): Promise<StatusRead> {
     }
   }
   // Battery information is optional here. A failed read must not hide the sleep state or stop an expired timer.
-  const battery = await getBattery().catch(() => UNKNOWN_BATTERY);
+  const battery = await getBattery().catch(() => undefined);
   return { status: { on, session: entry?.session ?? null, battery }, entry };
 }
 
@@ -332,7 +334,7 @@ async function autoDisable(): Promise<AutoDisableReason | null> {
     session: entry.session,
     currentBootTime: await getBootTime(),
     now: Date.now(),
-    battery: status.battery,
+    battery: status.battery ?? UNREADABLE_BATTERY,
     thresholdPercent,
   });
   if (!reason) {
