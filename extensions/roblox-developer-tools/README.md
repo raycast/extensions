@@ -6,11 +6,11 @@ Launch games, open and publish places in Studio, open Creator Dashboard, restart
 
 Add these in Raycast Settings → Extensions → Roblox Developer Tools:
 
-| Setting     | Used by                                                                  |
-| ----------- | ------------------------------------------------------------------------ |
-| Universe ID | Player Count, Open in Studio, Open in Creator Dashboard, Restart Servers |
-| Place ID    | Launch Game, Open in Studio                                              |
-| API Key     | Restart Servers                                                          |
+| Setting     | Used by                                                                                  |
+| ----------- | ---------------------------------------------------------------------------------------- |
+| Universe ID | Player Count, Open in Studio, Open Game Page, Open in Creator Dashboard, Restart Servers |
+| Place ID    | Launch Game, Open in Studio                                                              |
+| API Key     | Restart Servers                                                                          |
 
 Find your IDs in the [Creator Dashboard](https://create.roblox.com/dashboard/creations)
 
@@ -27,6 +27,10 @@ Enable **Hide when there are zero players** in the **Player Count** command's se
 ## Open in Creator Dashboard
 
 Opens the configured universe's **Overview** page in your default browser. Uses your **Universe ID**; no API key is needed.
+
+## Open Game Page
+
+Opens the configured universe's public Roblox game page in your default browser. Resolves the starting place from your **Universe ID**; no API key is needed.
 
 ## Publish Place
 

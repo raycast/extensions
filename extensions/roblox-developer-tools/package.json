@@ -88,6 +88,13 @@
       ]
     },
     {
+      "name": "game-page",
+      "title": "Open Game Page",
+      "subtitle": "Roblox",
+      "description": "Open your universe's public Roblox game page",
+      "mode": "no-view"
+    },
+    {
       "name": "dashboard",
       "title": "Open in Creator Dashboard",
       "subtitle": "Roblox",
@@ -100,7 +107,7 @@
       "name": "universeId",
       "type": "textfield",
       "title": "Universe ID",
-      "description": "Required for Player Count, Studio, Creator Dashboard, and Restart",
+      "description": "Required for Player Count, Studio, Game Page, Creator Dashboard, and Restart",
       "required": false
     },
     {
