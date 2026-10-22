@@ -26,7 +26,7 @@ import {
   smaller,
 } from "./logic";
 import { NUDGE_CIRCLE, OPEN_CIRCLE, PICK_CIRCLE, isEvening, outcomeIcon } from "./look";
-import { loadState, mutate, todayKey } from "./storage";
+import { StaleDayError, loadState, mutate, todayKey } from "./storage";
 
 // A long title is the first thing macOS hides when the menu bar is full, notch or not.
 function short(text: string, max: number): string {
@@ -47,6 +47,7 @@ const openList = () => launchCommand({ name: "today", type: LaunchType.UserIniti
 export default function Command() {
   const { showTitle, eveningNudge } = getPreferenceValues<Preferences.MenuBar>();
   const [state, setState] = useState<State | null>(null);
+  const shownDay = todayKey();
 
   useEffect(() => {
     loadState().then(setState, () => setState({ days: {} }));
@@ -54,7 +55,12 @@ export default function Command() {
 
   // Each click re-reads what is saved, so a pick just after 4 a.m. or a click made while the list is open is safe.
   async function run(change: (s: State, t: string) => State) {
-    setState(await mutate(change, { refreshMenuBar: false }));
+    try {
+      setState(await mutate(change, { refreshMenuBar: false, expectedDay: shownDay }));
+    } catch (error) {
+      if (!(error instanceof StaleDayError)) throw error;
+      setState(await loadState());
+    }
   }
 
   if (!state) return <MenuBarExtra isLoading icon={Icon.Circle} />;
