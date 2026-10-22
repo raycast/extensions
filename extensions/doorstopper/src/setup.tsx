@@ -2,9 +2,9 @@ import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@rayca
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { disable } from "./lib/session";
 import { isUserCancelled } from "./lib/labels";
-import { SUDOERS_PATH, installRule, isRuleInstalled, isSleepDisabled, removeRule } from "./lib/system";
+import { installRule, isRuleInstalled, isSleepDisabled, removeRule } from "./lib/system";
 
-const EXPLANATION = `Adds \`${SUDOERS_PATH}\`, which lets your user run only \`pmset -a disablesleep 0\` and \`pmset -a disablesleep 1\` as root without a password. macOS asks for your admin password once, when you install or remove it.\n\nWith the rule installed, Doorstopper no longer asks for Touch ID or your password, and it can disable itself when a timer ends, the battery is low, or the Mac restarts.`;
+const EXPLANATION = `Adds a sudoers rule for your user, which lets you run only \`pmset -a disablesleep 0\` and \`pmset -a disablesleep 1\` as root without a password. macOS asks for your admin password once, when you install or remove it.\n\nWith the rule installed, Doorstopper no longer asks for Touch ID or your password, and it can disable itself when a timer ends, the battery is low, or the Mac restarts.`;
 
 export default function Command() {
   const { data: installed, isLoading, revalidate } = usePromise(isRuleInstalled);

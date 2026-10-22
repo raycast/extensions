@@ -20,7 +20,12 @@ const MV = "/bin/mv";
 const RM = "/bin/rm";
 const MKTEMP = "/usr/bin/mktemp";
 
-export const SUDOERS_PATH = "/etc/sudoers.d/raycast-doorstopper";
+// Each macOS account gets its own rule file, so one account's setup never replaces another account's rule.
+// sudo skips file names that contain a dot, so dots in the username are written as underscores.
+export function sudoersPathFor(username: string): string {
+  sudoersRule(username);
+  return `/etc/sudoers.d/raycast-doorstopper-${username.replace(/\./g, "_")}`;
+}
 
 function appleScriptString(value: string): string {
   return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
@@ -83,12 +88,13 @@ export function sudoersRule(username: string): string {
 // The root shell command that installs the rule for `username`. It is run through runAsAdmin, or as root by sudo in tests.
 export function installRuleScript(username: string): string {
   const rule = sudoersRule(username);
+  const path = sudoersPathFor(username);
   const install = [
     `${PRINTF} '%s\\n' '${rule}' > "$T"`,
     `${VISUDO} -cf "$T"`,
     `${CHOWN} root:wheel "$T"`,
     `${CHMOD} 0440 "$T"`,
-    `${MV} -f "$T" ${SUDOERS_PATH}`,
+    `${MV} -f "$T" ${path}`,
   ].join(" && ");
   // Everything runs as root inside the root-owned sudoers.d directory, so the user cannot swap the file.
   // mktemp gives each attempt its own 0600 file, so overlapping installs never share one. The dotted name
@@ -96,12 +102,14 @@ export function installRuleScript(username: string): string {
   return `T=$(${MKTEMP} /etc/sudoers.d/.raycast-doorstopper.XXXXXX) || exit 1; ${install}; S=$?; ${RM} -f "$T"; exit $S`;
 }
 
-export const REMOVE_RULE_SCRIPT = `${RM} -f ${SUDOERS_PATH}`;
+export function removeRuleScript(username: string): string {
+  return `${RM} -f ${sudoersPathFor(username)}`;
+}
 
 export async function installRule(): Promise<void> {
   await runAsAdmin(installRuleScript(os.userInfo().username));
 }
 
 export async function removeRule(): Promise<void> {
-  await runAsAdmin(REMOVE_RULE_SCRIPT);
+  await runAsAdmin(removeRuleScript(os.userInfo().username));
 }

@@ -9,7 +9,8 @@ import {
   installRuleScript,
   isRuleInstalled,
   isSleepDisabled,
-  REMOVE_RULE_SCRIPT,
+  removeRuleScript,
+  sudoersPathFor,
   removeRule,
   runAsAdmin,
   setSleepDisabled,
@@ -45,7 +46,7 @@ const PMSET = "/usr/bin/pmset";
 const SUDO = "/usr/bin/sudo";
 const OSASCRIPT = "/usr/bin/osascript";
 const SYSCTL = "/usr/sbin/sysctl";
-const SUDOERS = "/etc/sudoers.d/raycast-doorstopper";
+const SUDOERS = "/etc/sudoers.d/raycast-doorstopper-alice";
 const MKTEMP = "/usr/bin/mktemp";
 const STAGING_TEMPLATE = "/etc/sudoers.d/.raycast-doorstopper.XXXXXX";
 const RULE = `alice ALL=(root) NOPASSWD: ${PMSET} -a disablesleep 0, ${PMSET} -a disablesleep 1`;
@@ -286,7 +287,7 @@ describe("removeRule", () => {
     expect(calls).toEqual([
       {
         file: OSASCRIPT,
-        args: ["-e", `do shell script "/bin/rm -f /etc/sudoers.d/raycast-doorstopper" with administrator privileges`],
+        args: ["-e", `do shell script "/bin/rm -f /etc/sudoers.d/raycast-doorstopper-alice" with administrator privileges`],
       },
     ]);
   });
@@ -347,12 +348,17 @@ describe("sudoersRule and installRuleScript", () => {
     expect(sudoersRule("alice")).toBe(RULE);
   });
 
+  it("gives each account its own rule file, with dots turned into underscores since sudo skips dotted names", () => {
+    expect(sudoersPathFor("alice")).toBe(SUDOERS);
+    expect(sudoersPathFor("first.last")).toBe("/etc/sudoers.d/raycast-doorstopper-first_last");
+  });
+
   it("rejects an unsupported username", () => {
     expect(() => sudoersRule('al"ice')).toThrow("Unsupported macOS username");
   });
 
-  it("builds the install script from the same rule and removes the rule with REMOVE_RULE_SCRIPT", () => {
+  it("builds the install script from the same rule and removes the rule with removeRuleScript", () => {
     expect(installRuleScript("alice")).toContain(`'${RULE}' > "$T"`);
-    expect(REMOVE_RULE_SCRIPT).toBe(`/bin/rm -f ${SUDOERS}`);
+    expect(removeRuleScript("alice")).toBe(`/bin/rm -f ${SUDOERS}`);
   });
 });

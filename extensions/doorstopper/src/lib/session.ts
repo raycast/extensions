@@ -11,6 +11,10 @@ const LEGACY_SESSION_KEY = "session";
 // Set when Doorstopper disabled sleep but could not read storage to confirm a session is still stored. The menu bar's
 // next check finishes that check once storage can be read again.
 const RECHECK_KEY = "recheck";
+// The highest sequence number used so far. It is kept when sessions are cleared, so a number is never handed out again
+// while an older check may still hold it.
+const SEQUENCE_KEY = "sequence";
+const UNKNOWN_BATTERY: Battery = { hasBattery: false, percent: null, onAC: false };
 
 export const PRESETS: (number | null)[] = [30, 60, 120, 240, null];
 
@@ -104,8 +108,11 @@ async function writeSession(session: Session): Promise<string> {
   // The new sequence number is one past every stored one, so this Start outranks any session already saved.
   // Overlapping Starts can compute the same number and write the same key. The last write wins, which is acceptable.
   const existing = await readSessionEntries();
-  const seq = Math.max(0, ...existing.map((entry) => entry.seq)) + 1;
+  const used = Number(await LocalStorage.getItem<string>(SEQUENCE_KEY)) || 0;
+  const seq = Math.max(used, 0, ...existing.map((entry) => entry.seq)) + 1;
   const key = sessionKey(seq);
+  // Recorded before the session, so a session number is never reused even after its session is cleared.
+  await LocalStorage.setItem(SEQUENCE_KEY, String(seq));
   await LocalStorage.setItem(key, JSON.stringify(session));
   // Drop only older sessions (lower sequence numbers). A higher one came from an overlapping Start and must stay.
   try {
@@ -200,9 +207,15 @@ async function startSession(minutes: number | null): Promise<string> {
     throw error;
   }
   // Auto-off from the menu bar or Turn Off from another command may have changed sleep while this session was being
-  // saved. If sleep is now off, turn it back on, unless the sessions were cleared in the meantime.
-  if (!(await isSleepDisabled())) {
-    await keepAwakeWhileSessionStored();
+  // saved. If sleep is now off, turn it back on, unless the sessions were cleared in the meantime. A failure here
+  // undoes the Start, so sleep is not left disabled without a session that will end it.
+  try {
+    if (!(await isSleepDisabled())) {
+      await keepAwakeWhileSessionStored();
+    }
+  } catch (error) {
+    await undoStart(key).catch(() => undefined);
+    throw error;
   }
   return key;
 }
@@ -297,7 +310,8 @@ async function readStatus(): Promise<StatusRead> {
       on = await isSleepDisabled();
     }
   }
-  const battery = await getBattery();
+  // Battery information is optional here. A failed read must not hide the sleep state or stop an expired timer.
+  const battery = await getBattery().catch(() => UNKNOWN_BATTERY);
   return { status: { on, session: entry?.session ?? null, battery }, entry };
 }
 

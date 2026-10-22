@@ -47,6 +47,11 @@ const MINUTE = 60_000;
 const BOOT = 1728633600;
 const ON_BATTERY_80: Battery = { hasBattery: true, percent: 80, onAC: false };
 
+// The session keys only, without the sequence counter that is stored next to them.
+function sessionKeys(): string[] {
+  return [...raycast.store.keys()].filter((key) => key.startsWith("session:"));
+}
+
 // The next sequence number after the stored session keys, as a new Start would compute it.
 function nextSeq(): number {
   const seqs = [...raycast.store.keys()]
@@ -284,7 +289,7 @@ describe("enable", () => {
 
     await enable(60);
 
-    expect([...raycast.store.keys()]).toEqual(["session:3"]);
+    expect(sessionKeys()).toEqual(["session:3"]);
     expect(storedSession()).toEqual({ startedAt: NOW, endsAt: NOW + 60 * MINUTE, bootTime: BOOT });
   });
 
@@ -301,7 +306,7 @@ describe("enable", () => {
     const session = { startedAt, endsAt: startedAt + 30 * MINUTE, bootTime: BOOT };
     expect(raycast.store.has(`session:${indefinite}`)).toBe(false);
     expect(storedSession()).toEqual(session);
-    expect(raycast.store.size).toBe(1);
+    expect(sessionKeys().length).toBe(1);
     await expect(getStatus()).resolves.toEqual({ on: true, session, battery: ON_BATTERY_80 });
   });
 
@@ -312,7 +317,7 @@ describe("enable", () => {
     await enable(60);
 
     expect(raycast.store.has(`session:${NOW}`)).toBe(false);
-    expect(raycast.store.size).toBe(1);
+    expect(sessionKeys().length).toBe(1);
     expect(storedSession()).toEqual({ startedAt: NOW, endsAt: NOW + 60 * MINUTE, bootTime: BOOT });
   });
 
@@ -385,7 +390,7 @@ describe("enable", () => {
 
     const fresh = { startedAt: NOW, endsAt: NOW + 60 * MINUTE, bootTime: BOOT };
     expect(raycast.store.has(`session:${old}`)).toBe(false);
-    expect(raycast.store.size).toBe(1);
+    expect(sessionKeys().length).toBe(1);
     await expect(getStatus()).resolves.toEqual({ on: true, session: fresh, battery: ON_BATTERY_80 });
   });
 
@@ -452,7 +457,7 @@ describe("enable", () => {
     const session = storedSession();
     expect(session?.endsAt).toBe((session?.startedAt ?? 0) + 60 * MINUTE);
     expect(session?.bootTime).toBe(BOOT);
-    expect([...raycast.store.keys()]).toEqual(["session:2"]);
+    expect(sessionKeys()).toEqual(["session:2"]);
     const sleepAllowed = vi.mocked(system.setSleepDisabled).mock.calls.filter(([on]) => on === false);
     expect(sleepAllowed).toEqual([]);
   });
@@ -1144,5 +1149,38 @@ describe("stored session entries", () => {
 
     await expect(getStatus()).resolves.toEqual({ on: true, session: null, battery: ON_BATTERY_80 });
     allItems.mockRestore();
+  });
+});
+
+describe("review fixes", () => {
+  it("never reuses a session number after its session was cleared, so an older check cannot delete a new timer", async () => {
+    vi.mocked(system.isSleepDisabled).mockResolvedValue(true);
+    await enable(30);
+    expect(sessionKeys()).toEqual(["session:1"]);
+    await disable();
+
+    await enable(60);
+
+    expect(sessionKeys()).toEqual(["session:2"]);
+  });
+
+  it("undoes a Start when checking sleep after the save fails, so sleep is not left disabled", async () => {
+    vi.mocked(system.isSleepDisabled).mockRejectedValueOnce(new Error("pmset failed"));
+
+    await expect(enable(30)).rejects.toThrow("pmset failed");
+
+    expect(sessionKeys()).toEqual([]);
+    expect(system.setSleepDisabled).toHaveBeenLastCalledWith(false, { allowPrompt: false });
+  });
+
+  it("still reports the sleep state when the battery cannot be read", async () => {
+    vi.mocked(system.isSleepDisabled).mockResolvedValue(true);
+    vi.mocked(system.getBattery).mockRejectedValue(new Error("pmset failed"));
+
+    await expect(getStatus()).resolves.toEqual({
+      on: true,
+      session: null,
+      battery: { hasBattery: false, percent: null, onAC: false },
+    });
   });
 });
