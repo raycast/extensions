@@ -16,13 +16,7 @@ Find your IDs in the [Creator Dashboard](https://create.roblox.com/dashboard/cre
 
 Create the API key in [Creator Dashboard → API Keys](https://create.roblox.com/dashboard/credentials), grant `universe:write` for the universe, and configure its allowed IP addresses
 
-## Player Count
-
-Shows your game's player count in the menu bar. Enable **Show in Menu Bar** and **Background Refresh** in the command's settings.
-
-Enable **Hide when there are zero players** to hide the count until players join.
-
-## Publish Place
+## Using Publish Place
 
 Studio must be running with a place open and use English menus
 
