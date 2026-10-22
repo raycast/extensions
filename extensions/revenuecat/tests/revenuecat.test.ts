@@ -46,6 +46,13 @@ test("rejects malformed metrics and preserves zero values and periods", async ()
   assert.equal(periodLabel("P0D"), "Current");
   assert.equal(periodLabel("P28D"), "Last 28 days");
 });
+test("rounds currency metrics to whole amounts", () => {
+  const metric = (value: number) => formatMetric({ ...demoOverview.metrics[0], value }, "USD");
+  const whole = (value: number) =>
+    new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
+  assert.equal(metric(669.92), whole(670));
+  assert.equal(metric(0.49), whole(0));
+});
 test("stops repeated pagination", async () => {
   const client = new RevenueCatClient("test", (async () =>
     json({ items: [], next_page: "/projects?limit=100" })) as typeof fetch);
