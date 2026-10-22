@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add LLMSlim MCP Server] - {PR_MERGE_DATE}
+## [Add LLMSlim MCP Server] - 2026-10-22
 
 - Add LLMSlim to the community registry: long-term memory for agents with no LLM call (remember, recall, list_memories, forget, fit_context). Messages are stored word for word in a local SQLite file and recalled within a token budget. Local stdio server via `uvx --from llmslim[mcp] llmslim mcp`; no API key.
 
