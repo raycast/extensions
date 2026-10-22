@@ -173,8 +173,13 @@ export function CaptureActions(props: {
               toast.primaryAction = {
                 title: "Undo",
                 onAction: async () => {
-                  await callTool("archive", { id: row.id, restore: true });
-                  props.onChange?.();
+                  try {
+                    const restored = await callTool("archive", { id: row.id, restore: true });
+                    if (restored.startsWith("No item")) throw new Error(restored);
+                    props.onChange?.();
+                  } catch (error) {
+                    await showFailureToast(error, { title: "Could not undo archive" });
+                  }
                 },
               };
               props.onChange?.();

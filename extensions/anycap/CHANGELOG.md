@@ -1,5 +1,9 @@
 # Anycap Changelog
 
+## [Undo failure is reported] - {PR_MERGE_DATE}
+
+- Undo after Archive says so when the capture could not be restored, instead of refreshing as if it had.
+
 ## [Initial Version] - 2026-10-22
 
 - Save Current Tab: the page in front of Safari, Chrome, Arc, Brave, Edge, Vivaldi or Anity.
