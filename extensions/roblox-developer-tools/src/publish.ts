@@ -16,8 +16,9 @@ export default async function Command() {
           "-e",
           `
         tell application "System Events"
-          if not (exists process "Roblox Studio") then return "not-running"
-          tell process "Roblox Studio"
+          set studioProcesses to every application process whose bundle identifier is "com.Roblox.RobloxStudio"
+          if (count of studioProcesses) is 0 then return "not-running"
+          tell item 1 of studioProcesses
             click menu item "Publish to Roblox" of menu "File" of menu bar 1
           end tell
         end tell
