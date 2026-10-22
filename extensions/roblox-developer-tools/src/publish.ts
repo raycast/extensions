@@ -29,7 +29,26 @@ export default async function Command() {
             if (count of studioProcesses) is 1 then
               set targetProcess to item 1 of studioProcesses
             else
-              return "ambiguous"
+              set studioChoices to {}
+              repeat with studioProcess in studioProcesses
+                set studioTitle to "Roblox Studio"
+                try
+                  set studioTitle to name of front window of studioProcess
+                end try
+                set end of studioChoices to studioTitle & " (" & (unix id of studioProcess as text) & ")"
+              end repeat
+              with timeout of 120 seconds
+                tell current application
+                  set selectedChoice to choose from list studioChoices with title "Publish Place" with prompt "Which Studio instance would you like to publish?" OK button name "Publish" multiple selections allowed false empty selection allowed false
+                end tell
+              end timeout
+              if selectedChoice is false then return "cancelled"
+              repeat with choiceIndex from 1 to count of studioChoices
+                if item choiceIndex of studioChoices is item 1 of selectedChoice then
+                  set targetProcess to item choiceIndex of studioProcesses
+                  exit repeat
+                end if
+              end repeat
             end if
           end if
           tell targetProcess
@@ -39,12 +58,11 @@ export default async function Command() {
         return "sent"
       `,
         ],
-        { timeout: 30_000 },
+        { timeout: 150_000 },
       );
       if (stdout.trim() === "not-running")
         throw new Error("Roblox Studio isn't running");
-      if (stdout.trim() === "ambiguous")
-        throw new Error("Focus the Studio window to publish, then run again");
+      if (stdout.trim() === "cancelled") return;
       if (stdout.trim() !== "sent") throw new Error("Couldn't publish");
     } catch (error) {
       const failure = error as Error & { stderr?: string };
