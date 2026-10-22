@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import { errorMessage, getStudios, publish, Studio } from "./publish-utils";
+import { errorMessage, getStudios, publish, Studio } from "./utils";
 
 export default function Command() {
   const [studios, setStudios] = useState<Studio[]>([]);

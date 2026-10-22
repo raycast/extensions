@@ -5,8 +5,7 @@ import {
   openCommandPreferences,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { fetchPlayerCount } from "./player-count-utils";
-import { settings } from "./utils";
+import { fetchPlayerCount, settings } from "./utils";
 
 type State = {
   loading: boolean;
