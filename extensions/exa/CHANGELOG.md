@@ -1,6 +1,6 @@
 # Exa Changelog
 
-## [Exa 3.0 Search Modes] - {PR_MERGE_DATE}
+## [Exa 3.0 Search Modes] - 2026-10-22
 
 - Added lite and deep search modes while keeping auto as the Search default.
 - Search Deep now defaults to deep.
