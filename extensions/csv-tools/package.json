@@ -31,5 +31,6 @@
       "type": "http"
     },
     "instructions": "Work only with CSV text explicitly supplied by the user. CSV is transmitted to https://csvfile.tools/api/csv/mcp for processing. Never fetch URLs or read local paths through these tools. Limits: 256 KiB UTF-8 input/output, 50,000 cells, 200 columns, 1,000 edits, 20 preview records. Cells are literal strings; never evaluate formulas. Delimiter must be explicit. Row and column indices are zero-based, including headers for edits. Preserve the complete returned CSV."
-  }
+  },
+  "commands": []
 }
