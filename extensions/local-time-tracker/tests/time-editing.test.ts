@@ -87,13 +87,13 @@ test("the current end minute is selectable regardless of the original hidden sec
   }
 });
 
-test("current-minute end adjustment is capped at now at minute boundaries, midnight and five-minute steps", () => {
+test("current-minute end adjustment is capped at now at minute boundaries, midnight and one-hour steps", () => {
   for (const current of [
     new Date(2026, 9, 16, 22, 9, 0),
     new Date(2026, 9, 16, 22, 9, 59, 999),
     new Date(2026, 9, 17, 0, 0, 0),
   ]) {
-    for (const minutes of [1, 5]) {
+    for (const minutes of [1, 60]) {
       const times = {
         startedAt: new Date(current.getTime() - 3600000).toISOString(),
         endedAt: new Date(Math.floor(current.getTime() / 60000) * 60000 - minutes * 60000 + 59999).toISOString(),

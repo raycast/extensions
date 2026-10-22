@@ -251,7 +251,13 @@ function ProjectForm({
     try {
       const now = new Date().toISOString();
       const nextProject: Project = project
-        ? { ...project, name, type: values.type, isPreferred: values.isPreferred, updatedAt: now }
+        ? {
+            ...project,
+            name,
+            type: values.type,
+            isPreferred: values.isPreferred,
+            updatedAt: now,
+          }
         : {
             id: crypto.randomUUID(),
             name,

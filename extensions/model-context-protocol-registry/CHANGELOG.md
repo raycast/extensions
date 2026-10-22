@@ -4,6 +4,54 @@
 
 - Add Multi Calendar to the official registry: a person's own Outlook.com, Hotmail, Microsoft 365 and Google calendars, many accounts at once with one search for free time across all of them - read, create, move and cancel events, answer invitations and make booking links, booking pages and group polls within the permissions each account's owner sets. Hosted Streamable HTTP server at https://calendar.lumman.co/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
+## [Add xTiles MCP Server] - 2026-10-22
+
+- Add xTiles to the official registry: turn AI chats into xTiles projects, notes and tasks, and pull any project back into the chat with its current state. Hosted Streamable HTTP server at https://mcp.xtiles.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add Databricks Field Guide MCP Server] - 2026-10-22
+
+- Add the Databricks Field Guide to the official registry: search and read TechFabric's Databricks Field Guide (https://databricks.techfabric.com), with runnable SQL, Python and CLI examples and recent Databricks changes, each linked to the docs.databricks.com pages it cites. Hosted Streamable HTTP server at https://databricks.techfabric.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Sync Ausca listing copy in Store page] - 2026-10-22
+
+- Show the corrected Ausca payment boundary in the Store page's server table.
+
+## [Add Spacefast MCP Server] - 2026-10-22
+
+- Add Spacefast to the official registry: publish and host what your AI builds as live Spaces with a built-in database, share links, custom domains and versioned rollbacks. Hosted Streamable HTTP server at https://mcp.spacefast.com with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add Runcrate MCP Server] - 2026-10-22
+
+- Add Runcrate to the official registry: GPUs for your AI agent. See live GPU prices, launch and delete GPU instances, run commands and jobs over SSH, move files, manage volumes, SSH keys and secrets, call 200+ open inference models and track spend (37 tools). Hosted Streamable HTTP server at https://mcp.runcrate.ai/mcp with OAuth sign-in in the browser, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add Zip-Codes.com MCP Server] - 2026-10-22
+
+- Add Zip-Codes.com to the official registry: US address standardization to ZIP+4, US ZIP Code and Canadian postal code lookup, radius search, distance and census tract demographics. Hosted Streamable HTTP server at https://mcp.zip-codes.com/mcp with no sign-in (demo mode without a key), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add LLMSlim MCP Server] - 2026-10-22
+
+- Add LLMSlim to the community registry: long-term memory for agents with no LLM call (remember, recall, list_memories, forget, fit_context). Messages are stored word for word in a local SQLite file and recalled within a token budget. Local stdio server via `uvx --from llmslim[mcp] llmslim mcp`; no API key.
+
+## [Update Hermoso MCP Server] - 2026-10-21
+
+- Update the Hermoso entry's description: an AI marketing agent and AI ad generator for your AI agent, with no markup on models. The connection is unchanged.
+
+## [Add UnblockingAPI MCP Server] - 2026-10-21
+
+- Add UnblockingAPI to the official registry: fetch public web pages that block simple requests, and get clean Markdown, HTML or template JSON back, with three read-only tools (`unblock_fetch`, `find_templates`, `get_build_guide`). Hosted Streamable HTTP server at https://mcp.unblockingapi.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a Bearer API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add New-Term Radar MCP Server] - 2026-10-21
+
+- Add New-Term Radar to the official registry: names of new AI models, products and repos from X, Hugging Face, GitHub and sitemaps, and the search terms behind them sized with Google Ads volume and Google Trends. Local stdio server `new-term-radar` from PyPI through `uvx --with mcp new-term-radar mcp`, with an AIsa API key set as `AISA_API_KEY` and absolute `RADAR_CONFIG` and `RADAR_STATE` paths.
+
+## [Add Multi Mail MCP Server] - 2026-10-21
+
+- Add Multi Mail to the official registry: a person's own Gmail, Outlook.com, Microsoft 365, iCloud and Fastmail mailboxes, several at once with one search across all of them - read, draft, send and organise mail within the permissions each mailbox's owner sets. Hosted Streamable HTTP server at https://mail.lumman.co/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Update Datacircle MCP Server] - 2026-10-21
+
+- Update Datacircle's description and homepage.
+
 ## [Add NetActuate MCP Server] - 2026-10-20
 
 - Add NetActuate to the official registry: read-only answers from NetActuate's published network data (data center locations and specifications, compliance by site, internet exchanges, the sites nearest a market, products and published pricing), each linked to its netactuate.com page. Hosted Streamable HTTP server at https://netactuate.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
