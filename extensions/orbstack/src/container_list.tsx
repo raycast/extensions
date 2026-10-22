@@ -1,19 +1,23 @@
 import { List, ActionPanel, Action, Icon, Keyboard, Color, getPreferenceValues } from "@raycast/api";
 import CommandExecute from "./command_execute";
-import { composeProjectFromLabels, DockerContainer, DOCKER, dockerArgs, isContainerRunning } from "./docker";
+import {
+  composeProjectFromLabels,
+  DockerContainer,
+  DOCKER,
+  dockerArgs,
+  isContainerPaused,
+  isContainerRunning,
+} from "./docker";
 import { useContainerAction, useContainerList } from "./hooks";
 import { withToast } from "./ui/toast";
 import { getContainerStatusIcon } from "./utils";
 import { groupByToArray } from "./utils/group_by";
 
-interface Preferences {
-  groupContainersByState: boolean;
-}
-
 export default function ContainerList() {
-  const { groupContainersByState } = getPreferenceValues<Preferences>();
-  const { containers, isLoadingContainerList, revalidateContainerList, applyOptimisticState } = useContainerList();
-  const dockerActions = useContainerAction(revalidateContainerList, applyOptimisticState);
+  const { groupContainersByState } = getPreferenceValues<Preferences.ContainerList>();
+  const { containers, isLoadingContainerList, revalidateContainerList, applyOptimisticState, clearOptimisticState } =
+    useContainerList();
+  const dockerActions = useContainerAction(revalidateContainerList, applyOptimisticState, clearOptimisticState);
   const { isRunningContainerAction } = dockerActions;
 
   const hasContainers = containers.length > 0;
@@ -69,7 +73,9 @@ function ContainerItem({ container, dockerActions, revalidate }: ContainerItemPr
   const name = container.Names;
   const project = composeProjectFromLabels(container.Labels);
   const running = isContainerRunning(container.State);
-  const { startContainer, stopContainer, restartContainer, removeContainer, stopAndRemoveContainer } = dockerActions;
+  const paused = isContainerPaused(container.State);
+  const { startContainer, stopContainer, restartContainer, unpauseContainer, removeContainer, stopAndRemoveContainer } =
+    dockerActions;
 
   const accessories = [...(project ? [{ tag: project }] : []), { text: { value: container.Image } }];
 
@@ -82,7 +88,19 @@ function ContainerItem({ container, dockerActions, revalidate }: ContainerItemPr
       accessories={accessories}
       actions={
         <ActionPanel>
-          {running ? (
+          {paused ? (
+            <Action
+              title="Unpause Container"
+              icon={Icon.Play}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+              onAction={withToast({
+                action: () => unpauseContainer(container),
+                onStart: () => `Unpausing container ${name}`,
+                onSuccess: () => `Container ${name} unpaused`,
+                onFailure: (error) => [`Failed to unpause ${name}`, error.message],
+              })}
+            />
+          ) : running ? (
             <Action
               title="Stop Container"
               icon={Icon.Stop}
@@ -137,6 +155,7 @@ function ContainerItem({ container, dockerActions, revalidate }: ContainerItemPr
                 bin={DOCKER}
                 name={name}
                 title="Logs"
+                mergeStderr
                 command={dockerArgs("logs", "--tail", "200", container.ID)}
               />
             }
@@ -155,20 +174,7 @@ function ContainerItem({ container, dockerActions, revalidate }: ContainerItemPr
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
           <Action.CopyToClipboard title="Copy Name" content={name} />
-          {!running ? (
-            <Action
-              title="Remove Container"
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              shortcut={Keyboard.Shortcut.Common.Remove}
-              onAction={withToast({
-                action: () => removeContainer(container),
-                onStart: () => `Removing container ${name}`,
-                onSuccess: () => `Container ${name} removed`,
-                onFailure: (error) => [`Failed to remove ${name}`, error.message],
-              })}
-            />
-          ) : (
+          {running || paused ? (
             <Action
               title="Stop and Remove Container"
               icon={Icon.Trash}
@@ -178,6 +184,19 @@ function ContainerItem({ container, dockerActions, revalidate }: ContainerItemPr
                 action: () => stopAndRemoveContainer(container),
                 onStart: () => `Stopping and removing container ${name}`,
                 onSuccess: () => `Container ${name} stopped and removed`,
+                onFailure: (error) => [`Failed to remove ${name}`, error.message],
+              })}
+            />
+          ) : (
+            <Action
+              title="Remove Container"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+              onAction={withToast({
+                action: () => removeContainer(container),
+                onStart: () => `Removing container ${name}`,
+                onSuccess: () => `Container ${name} removed`,
                 onFailure: (error) => [`Failed to remove ${name}`, error.message],
               })}
             />

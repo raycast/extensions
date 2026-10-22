@@ -9,6 +9,8 @@ interface CommandConfirmProps {
   command: string[];
   /** Defaults to `orbctl`. Pass `docker` (with context args in `command`) for containers. */
   bin?: string;
+  /** Merge stderr into displayed output (needed for `docker logs`). */
+  mergeStderr?: boolean;
   markdown?: string;
   requireConfirmation?: boolean;
   refresh?: () => void;
@@ -16,7 +18,7 @@ interface CommandConfirmProps {
 
 export default function CommandExecute(props: CommandConfirmProps) {
   const { pop } = useNavigation();
-  const { name, command, title, markdown, requireConfirmation, refresh } = props;
+  const { name, command, title, markdown, requireConfirmation, refresh, mergeStderr } = props;
   const bin = props.bin ?? ORB_CTL;
   const [shouldExecute, setShouldExecute] = useState(!requireConfirmation);
   const {
@@ -26,6 +28,9 @@ export default function CommandExecute(props: CommandConfirmProps) {
     revalidate,
   } = useExec(bin, command, {
     execute: shouldExecute,
+    parseOutput: mergeStderr
+      ? ({ stdout, stderr }) => [stdout, stderr].filter((part) => part && part.length > 0).join("\n")
+      : undefined,
     onData: () => {
       showToast({
         title: "Command executed successfully",

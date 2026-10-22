@@ -4,7 +4,14 @@ import { execFile, spawn } from "child_process";
 import { createInterface } from "readline";
 import { promisify } from "util";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { DockerContainer, DOCKER, DOCKER_CONTAINER_REFRESH_EVENTS, dockerArgs, parseDockerPsOutput } from "./docker";
+import {
+  DockerContainer,
+  DOCKER,
+  DOCKER_CONTAINER_REFRESH_EVENTS,
+  dockerArgs,
+  isContainerPaused,
+  parseDockerPsOutput,
+} from "./docker";
 import { OrbMachine, OrbMachineInfo, ORB_CTL } from "./orbstack";
 
 const execFileAsync = promisify(execFile);
@@ -285,17 +292,30 @@ export function useContainerList() {
     setOverlays((prev) => ({ ...prev, [id]: overlay }));
   };
 
+  const clearOptimisticState = (id: string) => {
+    setOverlays((prev) => {
+      if (!(id in prev)) {
+        return prev;
+      }
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
   return {
     containers,
     isLoadingContainerList,
     revalidateContainerList,
     applyOptimisticState,
+    clearOptimisticState,
   };
 }
 
 export function useContainerAction(
   revalidate?: () => void,
   applyOptimisticState?: (id: string, overlay: ContainerOverlay) => void,
+  clearOptimisticState?: (id: string) => void,
 ) {
   const [isRunningContainerAction, setIsRunningContainerAction] = useState(false);
 
@@ -307,6 +327,9 @@ export function useContainerAction(
     try {
       await dockerExec(args);
       revalidate?.();
+    } catch (error) {
+      clearOptimisticState?.(container.ID);
+      throw error;
     } finally {
       setIsRunningContainerAction(false);
     }
@@ -330,15 +353,29 @@ export function useContainerAction(
       Status: "Restarting…",
     });
 
+  const unpauseContainer = (container: DockerContainer) =>
+    runDockerAction(container, dockerArgs("unpause", container.ID), {
+      State: "running",
+      Status: "Unpausing…",
+    });
+
   const removeContainer = (container: DockerContainer) => runDockerAction(container, dockerArgs("rm", container.ID));
 
   const stopAndRemoveContainer = async (container: DockerContainer) => {
     applyOptimisticState?.(container.ID, { State: "exited", Status: "Stopping…" });
     setIsRunningContainerAction(true);
     try {
-      await dockerExec(dockerArgs("stop", container.ID));
-      await dockerExec(dockerArgs("rm", container.ID));
+      // Paused containers reject plain stop/rm; force-remove instead.
+      if (isContainerPaused(container.State)) {
+        await dockerExec(dockerArgs("rm", "-f", container.ID));
+      } else {
+        await dockerExec(dockerArgs("stop", container.ID));
+        await dockerExec(dockerArgs("rm", container.ID));
+      }
       revalidate?.();
+    } catch (error) {
+      clearOptimisticState?.(container.ID);
+      throw error;
     } finally {
       setIsRunningContainerAction(false);
     }
@@ -349,6 +386,7 @@ export function useContainerAction(
     startContainer,
     stopContainer,
     restartContainer,
+    unpauseContainer,
     removeContainer,
     stopAndRemoveContainer,
   };

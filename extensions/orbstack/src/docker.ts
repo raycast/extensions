@@ -50,6 +50,10 @@ export function isContainerRunning(state: string): boolean {
   return state.toLowerCase() === "running";
 }
 
+export function isContainerPaused(state: string): boolean {
+  return state.toLowerCase() === "paused";
+}
+
 export function composeProjectFromLabels(labels: string): string | undefined {
   const match = labels.match(/(?:^|,)com\.docker\.compose\.project=([^,]+)/);
   return match?.[1];

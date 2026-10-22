@@ -23,8 +23,12 @@ export function getStatusIcon(status: string) {
 
 /** Same visual language as the Docker extension Manage Containers list. */
 export function getContainerStatusIcon(status: string) {
-  if (status.toLowerCase() === "running") {
+  const normalized = status.toLowerCase();
+  if (normalized === "running") {
     return { source: "icon-container-running.png", tintColor: Color.Green };
+  }
+  if (normalized === "paused") {
+    return { source: "icon-container.png", tintColor: Color.Yellow };
   }
   return { source: "icon-container.png", tintColor: Color.SecondaryText };
 }
