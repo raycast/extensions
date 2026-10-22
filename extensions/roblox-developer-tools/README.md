@@ -6,11 +6,11 @@ Launch games, open and publish places in Studio, open Creator Dashboard, restart
 
 Add these in Raycast Settings → Extensions → Roblox Developer Tools:
 
-| Setting     | Used by                                                                                  |
-| ----------- | ---------------------------------------------------------------------------------------- |
+| Setting     | Used by                                                                               |
+| ----------- | ------------------------------------------------------------------------------------- |
 | Universe ID | Player Count, Open in Studio, Open Game Page, Open in Creator Dashboard, Restart Servers |
-| Place ID    | Launch Game, Open in Studio                                                              |
-| API Key     | Restart Servers                                                                          |
+| Place ID    | Launch Game, Open in Studio                                                           |
+| API Key     | Restart Servers                                                                       |
 
 Find your IDs in the [Creator Dashboard](https://create.roblox.com/dashboard/creations)
 
@@ -31,6 +31,8 @@ Opens the configured universe's **Overview** page in your default browser. Uses 
 ## Open Game Page
 
 Opens the configured universe's public Roblox game page in your default browser. Resolves the starting place from your **Universe ID**; no API key is needed.
+
+Both browser commands show an opening notification only if the operation takes longer than 750 milliseconds.
 
 ## Publish Place
 

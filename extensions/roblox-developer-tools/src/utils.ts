@@ -63,3 +63,26 @@ export async function showError(error: unknown, toast?: Toast) {
     onAction: () => openExtensionPreferences(),
   };
 }
+
+export async function runWithDelayedToast(
+  title: string,
+  action: () => Promise<void>,
+) {
+  let pendingToast: Promise<Toast | undefined> | undefined;
+  const timer = setTimeout(() => {
+    pendingToast = showToast({ style: Toast.Style.Animated, title }).catch(
+      () => undefined,
+    );
+  }, 750);
+
+  try {
+    await action();
+    clearTimeout(timer);
+    await (await pendingToast)?.hide();
+  } catch (error) {
+    clearTimeout(timer);
+    await showError(error, await pendingToast);
+  } finally {
+    clearTimeout(timer);
+  }
+}

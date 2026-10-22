@@ -1,10 +1,10 @@
 import { closeMainWindow, open } from "@raycast/api";
-import { run, settings } from "./utils";
+import { runWithDelayedToast, settings } from "./utils";
 
 export default async function Command() {
   await closeMainWindow();
 
-  await run("Opening Game Page...", async () => {
+  await runWithDelayedToast("Opening Game Page...", async () => {
     const { universeId } = settings("universeId");
     const response = await fetch(
       `https://games.roblox.com/v1/games?universeIds=${universeId}`,
