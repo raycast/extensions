@@ -86,6 +86,13 @@
           "default": true
         }
       ]
+    },
+    {
+      "name": "dashboard",
+      "title": "Open in Creator Dashboard",
+      "subtitle": "Roblox",
+      "description": "Open your universe's Overview page in Creator Dashboard",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -93,7 +100,7 @@
       "name": "universeId",
       "type": "textfield",
       "title": "Universe ID",
-      "description": "Required for Player Count, Studio, and Restart",
+      "description": "Required for Player Count, Studio, Creator Dashboard, and Restart",
       "required": false
     },
     {
