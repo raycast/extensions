@@ -1,6 +1,6 @@
 # Changelog
 
-## [User Browsing and Saved Search] - {PR_MERGE_DATE}
+## [User Browsing and Saved Search] - 2026-10-22
 
 - Add 7TV user search with separate channel-emote and creator-upload commands.
 - Remember recently opened users separately in both browsing commands, with remove and clear actions.
