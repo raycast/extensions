@@ -1,6 +1,6 @@
 # Threads Changelog
 
-## [Fix Stuck Download Progress] - {PR_MERGE_DATE}
+## [Fix Stuck Download Progress] - 2026-10-22
 
 - Fix `Download Threads Media` leaving its progress toast stuck partway (e.g. "Downloading
   Media 1 of 2 — 66%") after every file had already saved. The toast now always ends on the
