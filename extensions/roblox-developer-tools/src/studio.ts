@@ -7,8 +7,7 @@ import { run, settings, showError } from "./utils";
 
 const exec = promisify(execFile);
 const lockPath = join(environment.supportPath, "open-studio.lock");
-// Allow Launch Services time to create the process. Once it exists, its state
-// (not a timeout) determines whether another launch is allowed.
+// Bound the startup grace period when process or log state is unknown.
 const lockTimeout = 30_000;
 
 async function acquireLock(placeId: string) {
@@ -21,9 +20,13 @@ async function acquireLock(placeId: string) {
 
       try {
         const studio = await findStudio(placeId);
-        if (studio?.opening) return;
+        if (studio?.state === "loading") return;
         const lock = await stat(lockPath);
-        if (!studio && Date.now() - lock.mtimeMs < lockTimeout) return;
+        if (
+          studio?.state !== "ready" &&
+          Date.now() - lock.mtimeMs < lockTimeout
+        )
+          return;
         await unlink(lockPath);
       } catch (error) {
         if ((error as { code?: string }).code !== "ENOENT") throw error;
@@ -32,13 +35,16 @@ async function acquireLock(placeId: string) {
   }
 }
 
-async function findStudio(placeId: string) {
+type StudioState = { pid: string; state: "ready" | "loading" | "unknown" };
+
+async function findStudio(placeId: string): Promise<StudioState | undefined> {
   const { stdout } = await exec("/bin/ps", ["-axo", "pid=,command="], {
     timeout: 3_000,
     maxBuffer: 4 * 1024 * 1024,
   });
   const processes = stdout.split("\n");
-  let opening: { pid: string; opening: boolean } | undefined;
+  let opening: StudioState | undefined;
+  let unknown: StudioState | undefined;
 
   for (const process of processes) {
     const pid = process.match(/^\s*(\d+)\s+.*\/RobloxStudio(?:\s|$)/)?.[1];
@@ -56,7 +62,7 @@ async function findStudio(placeId: string) {
       try {
         log = await readFile(logPath, "utf8");
       } catch {
-        // The process arguments still identify a launch before logs are ready.
+        // Missing logs cannot establish whether the process is still loading.
       }
     }
 
@@ -77,16 +83,19 @@ async function findStudio(placeId: string) {
         "[telemetryLog] State: OpenPlaceSuccess",
       );
       if (successIndex > Math.max(closedIndex, startedPlace?.index ?? -1)) {
-        return { pid, opening: false };
+        return { pid, state: "ready" };
       }
-      opening = { pid, opening: true };
+      if (startedPlace?.[1] === placeId && startedPlace.index! > closedIndex) {
+        opening = { pid, state: "loading" };
+      } else {
+        unknown = { pid, state: "unknown" };
+      }
     } else if (!currentPlace && closedIndex === -1 && launchPlace === placeId) {
-      // Startup arguments are only a fallback before the first document. They
-      // must not match an old place after the user switches or closes it.
-      opening = { pid, opening: true };
+      // Original launch arguments identify a candidate, not its current state.
+      unknown = { pid, state: "unknown" };
     }
   }
-  return opening;
+  return opening ?? unknown;
 }
 
 export default async function Command() {
@@ -103,7 +112,7 @@ export default async function Command() {
     // If discovery fails, report it rather than risk launching a duplicate.
     const studio = await findStudio(placeId);
 
-    if (studio?.opening) {
+    if (studio?.state === "loading") {
       await showHUD("Studio is opening...");
       return;
     }
@@ -122,6 +131,11 @@ export default async function Command() {
         );
         return;
       } catch {
+        if (studio.state === "unknown") {
+          throw new Error(
+            "Couldn't focus Studio. Open it manually, or quit Studio and retry.",
+          );
+        }
         // The process may have exited since detection. Open the place normally.
       }
     }

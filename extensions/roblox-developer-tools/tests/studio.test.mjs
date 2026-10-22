@@ -37,6 +37,7 @@ function harness() {
     errors: [],
     failDiscovery: false,
     failLaunch: false,
+    failFocus: false,
     unreadableLog: false,
   };
   const execFile = () => {};
@@ -50,6 +51,7 @@ function harness() {
       assert.equal(args.includes("-n"), true);
       state.launches++;
     } else if (file === "/usr/bin/osascript") {
+      if (state.failFocus) throw new Error("Focus failed");
       state.focuses++;
     }
     return { stdout: "" };
@@ -110,7 +112,7 @@ test("repeated invocations wait through process startup and slow loading, then f
   assert.equal(state.launches, 1);
   assert.notEqual(state.lock, undefined);
 
-  state.now = 60_000;
+  state.now = 10_000;
   state.processes = processLine(); // No crash handler or log yet.
   await command();
   state.now = 600_000; // Loading must not expire after a fixed timeout.
@@ -128,14 +130,15 @@ test("repeated invocations wait through process startup and slow loading, then f
   assert.equal(state.lock, undefined);
 });
 
-test("an already opening instance is protected even without a saved lock or readable log", async () => {
+test("an unreadable log focuses the existing process instead of assuming loading", async () => {
   const { state, command } = harness();
   state.processes = `${processLine()}\n${crashLine}`;
   state.unreadableLog = true;
   await command();
   await command();
   assert.equal(state.launches, 0);
-  assert.equal(state.hud.length, 2);
+  assert.equal(state.hud.length, 0);
+  assert.equal(state.focuses, 2);
 });
 
 test("an exited or never-started launch can be retried after the startup grace period", async () => {
@@ -197,4 +200,35 @@ test("a different place's startup does not block the requested place", async () 
   state.processes = processLine("1234");
   await command();
   assert.equal(state.launches, 1);
+});
+
+for (const logState of ["missing", "unreadable", "empty"]) {
+  test(`unknown ${logState} log recovers after the startup grace period`, async () => {
+    const { state, command } = harness();
+    await command();
+    state.processes = processLine();
+    if (logState !== "missing") state.processes += `\n${crashLine}`;
+    state.unreadableLog = logState === "unreadable";
+    state.now = 10_000;
+    await command();
+    assert.equal(state.focuses, 0);
+    state.now = 31_000;
+    await command();
+    assert.equal(state.focuses, 1);
+    assert.equal(state.launches, 1);
+    assert.equal(state.lock, undefined);
+    await command();
+    assert.equal(state.focuses, 2);
+    assert.equal(state.launches, 1);
+  });
+}
+
+test("unknown state with failed focus provides recovery without launching a duplicate", async () => {
+  const { state, command } = harness();
+  state.processes = processLine();
+  state.failFocus = true;
+  await command();
+  assert.equal(state.launches, 0);
+  assert.equal(state.lock, undefined);
+  assert.match(state.errors[0].message, /quit Studio and retry/);
 });
