@@ -76,4 +76,33 @@ test("renderMarkdown omits tax line when tax_rate is 0/undefined", () => {
   assert.ok(!md.includes("Tax ("));
 });
 
+test("renderHtml does not inject markup via a non-numeric tax_rate", () => {
+  const html = renderHtml({
+    items: [{ description: "x", qty: 1, rate: 100 }],
+    // @ts-expect-error - simulating untrusted JSON input
+    tax_rate: '0"><script>alert(1)</script>',
+  });
+  assert.ok(!html.includes("<script>alert(1)</script>"));
+});
+
+test("renderMarkdown escapes markdown image/link syntax in notes", () => {
+  const md = renderMarkdown({
+    items: [{ description: "x", qty: 1, rate: 100 }],
+    notes: "![x](https://attacker.example/pixel)",
+  });
+  assert.ok(!md.includes("![x](https://attacker.example/pixel)"));
+  assert.ok(md.includes("\\!\\[x\\]\\(https://attacker\\.example/pixel\\)"));
+});
+
+test("computeTotals and renderHtml tolerate malformed items instead of throwing", () => {
+  const data = {
+    items: [null, { description: "ok" }, { qty: "2", rate: "50" }],
+    // @ts-expect-error - simulating untrusted JSON input
+  } as InvoiceData;
+  assert.doesNotThrow(() => computeTotals(data));
+  assert.doesNotThrow(() => renderHtml(data));
+  const { subtotal } = computeTotals(data);
+  assert.strictEqual(subtotal, 100);
+});
+
 console.log("all tests passed");
