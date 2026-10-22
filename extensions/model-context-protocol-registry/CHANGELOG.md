@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add TechFabric MCP Server] - 2026-10-22
+## [Add TechFabric MCP Server] - {PR_MERGE_DATE}
 
 - Add TechFabric to the official registry: search and read techfabric.com (https://www.techfabric.com), and let TechFabric's engineers write blog posts and case studies for it from their own coding agent, under their byline. Hosted Streamable HTTP server at https://www.techfabric.com/mcp; reading needs no sign-in, writing uses OAuth 2.1 sign-in with a TechFabric Microsoft account. A direct HTTP connection in Raycast and an mcp-remote fallback for other clients. Docs: https://www.techfabric.com/mcp-servers
 
