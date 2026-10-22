@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Kimiko MCP Server] - {PR_MERGE_DATE}
+
+- Add Kimiko to the official registry: meetings, notes and tasks from Kimiko, the private AI note taker, with tools to search meetings, notes and transcripts, read a meeting's summary, and list, add or update tasks, plus three prompts. Local stdio server that ships inside the Kimiko desktop app at /Applications/Kimiko.app/Contents/MacOS/kimiko-mcp (Mac only), with no arguments, environment variables or API key; it stays off until Allow AI apps is turned on in Kimiko.
+
 ## [Add Wave AI MCP Server] - 2026-10-22
 
 - Add Wave AI to the official registry: an AI note taker for phone calls, meetings and in-person conversations. Search and quote recordings, ask what a person said with Voice ID, and update action items, folders and sharing. Hosted Streamable HTTP server at https://mcp.wave.co with OAuth 2.0 sign-in (PKCE and dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
