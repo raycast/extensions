@@ -209,6 +209,20 @@ function FileBrowser(props: {
     clearAll();
   }
 
+  // LaunchBar-style selection: Shift+↑/↓ marks the row you are on, then
+  // moves the highlight one step. The row ahead is NOT selected — pressing
+  // again marks it and moves on, so consecutive presses build a run.
+  function extendSelection(fromPath: string, direction: 1 | -1) {
+    const list = visibleEntries;
+    const from = list.findIndex((e) => e.fullPath === fromPath);
+    if (from === -1) return;
+
+    if (!selectedSet.has(fromPath)) addPaths([fromPath]);
+
+    const target = Math.max(0, Math.min(list.length - 1, from + direction));
+    if (target !== from) setHighlightId(list[target].fullPath);
+  }
+
   function enterFolder(folderPath: string) {
     setSearchText("");
     setHighlightId(undefined);
@@ -282,8 +296,7 @@ function FileBrowser(props: {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={crumbs}
-      searchBarPlaceholder={`${entries.length} items · ${selected.length} selected — ↑↓ filter, X select, Tab transfer, ← up`}
+      searchBarPlaceholder={`${crumbs} · ${entries.length} items · ${selected.length} selected — Shift+↑/↓ select, Tab transfer, ← up`}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       filtering={false}
@@ -291,7 +304,8 @@ function FileBrowser(props: {
       onSelectionChange={(id) => {
         // Real landing or user move — release. Null (loading gap or
         // filtered-out target) must NOT clear, or the landing is lost.
-        if (id) setHighlightId(undefined);
+        if (!id) return;
+        setHighlightId(undefined);
       }}
       isShowingDetail={props.showDetail && entries.length > 0}
     >
@@ -310,6 +324,8 @@ function FileBrowser(props: {
             selectedPaths={selected}
             searchActive={searchText.trim().length > 0}
             onToggleSelect={() => toggleSelect(entry.fullPath)}
+            onExtendSelectionUp={() => extendSelection(entry.fullPath, -1)}
+            onExtendSelectionDown={() => extendSelection(entry.fullPath, 1)}
             onSelectAll={selectAll}
             onSelectFiltered={selectFiltered}
             onClearSelection={clearSelection}
@@ -369,7 +385,7 @@ function FileBrowser(props: {
                 ))}
               </ActionPanel.Section>
               <Action
-                title="Go up"
+                title="Go Up"
                 icon={Icon.ArrowLeft}
                 shortcut={{ modifiers: [], key: "arrowLeft" }}
                 onAction={goUp}
@@ -391,7 +407,7 @@ function FileBrowser(props: {
                 onAction={() => setSearchText("")}
               />
               <Action
-                title="Go up"
+                title="Go Up"
                 icon={Icon.ArrowLeft}
                 shortcut={{ modifiers: [], key: "arrowLeft" }}
                 onAction={goUp}
@@ -413,6 +429,8 @@ function FileRow(props: {
   selectedPaths: string[];
   searchActive: boolean;
   onToggleSelect: () => void;
+  onExtendSelectionUp: () => void;
+  onExtendSelectionDown: () => void;
   onSelectAll: () => void;
   onSelectFiltered: () => void;
   onClearSelection: () => void;
@@ -514,7 +532,7 @@ function FileRow(props: {
               />
             </>
           )}
-          {/* THE transfer flow: Tab sends this item (or the X-basket) to the transfer tree */}
+          {/* THE transfer flow: Tab sends this item (or the selection basket) to the transfer tree */}
           <Action
             title={
               props.selectedCount > 0
@@ -526,18 +544,18 @@ function FileRow(props: {
             onAction={props.onTransfer}
           />
           <Action.Push
-            title="Open with…"
+            title="Open With…"
             icon={Icon.AppWindow}
             target={<AppPicker filePath={entry.fullPath} />}
           />
           <Action
-            title="Go up"
+            title="Go Up"
             icon={Icon.ArrowLeft}
             shortcut={{ modifiers: [], key: "arrowLeft" }}
             onAction={props.onGoUp}
           />
           <Action
-            title="Go up Alternative"
+            title="Go Up Alternative"
             icon={Icon.ArrowLeft}
             shortcut={{ modifiers: ["cmd"], key: "[" }}
             onAction={props.onGoUp}
@@ -549,12 +567,24 @@ function FileRow(props: {
             onAction={() => showInFinder(entry.fullPath)}
           />
 
-          {/* multi-select: filter, ↑↓ to highlight, X to toggle */}
+          {/* multi-select: Shift+↑/↓ marks the row and moves the highlight.
+              Ranges can be non-contiguous: let go of Shift, move, repeat. */}
           <ActionPanel.Section title="Select">
+            <Action
+              title="Select and Move Up"
+              icon={Icon.ArrowUp}
+              shortcut={{ modifiers: ["shift"], key: "arrowUp" }}
+              onAction={props.onExtendSelectionUp}
+            />
+            <Action
+              title="Select and Move Down"
+              icon={Icon.ArrowDown}
+              shortcut={{ modifiers: ["shift"], key: "arrowDown" }}
+              onAction={props.onExtendSelectionDown}
+            />
             <Action
               title={props.isSelected ? "Deselect" : "Select"}
               icon={props.isSelected ? Icon.XMarkCircle : Icon.CheckCircle}
-              shortcut={{ modifiers: [], key: "x" }}
               onAction={props.onToggleSelect}
             />
             <Action
@@ -751,7 +781,10 @@ function detailMarkdown(entry: FileEntry, isSelected: boolean): string {
     isSelected ? `Selected ✓` : ``,
   ];
   if (entry.isDirectory) {
-    lines.push("", "Space or → enters, ← goes up. X selects, Tab transfers.");
+    lines.push(
+      "",
+      "Space or → enters, ← goes up. Shift+↑/↓ selects, Tab transfers.",
+    );
   } else if (entry.extension === ".md" || entry.extension === ".txt") {
     lines.push(
       "",

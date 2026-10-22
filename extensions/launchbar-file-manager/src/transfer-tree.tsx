@@ -44,11 +44,18 @@ export function TransferTree(props: {
   /** Called with the destination folder so the browser can reveal results. */
   onDone: (destDir: string) => void;
   /**
-   * Whether this transfer owns the global X-basket (clear on cancel/done).
+   * Whether this transfer owns the global selection basket (clear on
+   * cancel/done).
    * The Finder-selection command passes false so its sources never disturb
    * a basket built in the main browser. Defaults to true.
    */
   manageBasket?: boolean;
+  /**
+   * True when this tree is the command's root view (Transfer Finder
+   * Selection). Raycast already shows the command title there, so the
+   * breadcrumb navigation title is only used on pushed views (Tab flow).
+   */
+  isRootView?: boolean;
 }) {
   const { pop } = useNavigation();
   const { sources } = props;
@@ -249,8 +256,8 @@ export function TransferTree(props: {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={`Transfer → ${crumbs}`}
-      searchBarPlaceholder="←/→ navigate, Enter confirms, Esc cancels"
+      navigationTitle={props.isRootView ? undefined : `Transfer → ${crumbs}`}
+      searchBarPlaceholder={`${crumbs} — ←/→ navigate, Enter confirms, Esc cancels`}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       filtering={false}
@@ -288,7 +295,7 @@ export function TransferTree(props: {
                     onAction={() => enter(entry.fullPath)}
                   />
                   <Action
-                    title="Go up"
+                    title="Go Up"
                     icon={Icon.ArrowLeft}
                     shortcut={{ modifiers: [], key: "arrowLeft" }}
                     onAction={goUp}
@@ -335,7 +342,7 @@ export function TransferTree(props: {
                 <ActionPanel>
                   {transferMenu(currentPath, null)}
                   <Action
-                    title="Go up"
+                    title="Go Up"
                     icon={Icon.ArrowLeft}
                     shortcut={{ modifiers: [], key: "arrowLeft" }}
                     onAction={goUp}
@@ -374,7 +381,7 @@ export function TransferTree(props: {
             <ActionPanel>
               {transferMenu(currentPath, null)}
               <Action
-                title="Go up"
+                title="Go Up"
                 icon={Icon.ArrowLeft}
                 shortcut={{ modifiers: [], key: "arrowLeft" }}
                 onAction={goUp}

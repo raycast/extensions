@@ -80,6 +80,14 @@ export async function uniqueDest(
   }
 }
 
+/**
+ * True when `child` lives inside `parent` (not equal to it).
+ */
+function isInSubtree(child: string, parent: string): boolean {
+  const rel = path.relative(parent, child);
+  return rel !== "" && !rel.startsWith("..") && !path.isAbsolute(rel);
+}
+
 type PlanEntry =
   | { kind: "dir"; src: string; dest: string; mode: number }
   | { kind: "file"; src: string; dest: string; size: number; mode: number }
@@ -249,7 +257,11 @@ export async function copyManyWithProgress(
   let copiedBytes = 0;
   let doneFiles = 0;
   const throttle = { last: 0 };
-  const failedPlan = new Set<number>();
+  const failedPlans = new Set<number>();
+  // Source directories whose destination could not be created. Their
+  // subtree must not be poured into whatever occupies the path now, but
+  // sibling files/folders in the same top-level selection still copy.
+  const poisonedDirs: string[] = [];
   // Directory permission fixes wait until every child is written (deepest
   // first, best-effort each).
   const pendingDirModes: { dest: string; mode: number }[] = [];
@@ -271,10 +283,17 @@ export async function copyManyWithProgress(
 
   for (const { pair, plan } of pairs) {
     const current = path.basename(pair.src);
-    if (failedPlan.has(plan)) {
-      // A failed directory poisons its whole subtree: pouring children
+    const poison = poisonedDirs.find((dir) => isInSubtree(pair.src, dir));
+    if (poison) {
+      // A failed directory poisons only its own subtree: pouring children
       // into it (or into whatever occupies its path now) would scatter
-      // files into an unrelated folder. Count as done, record nothing more.
+      // files into an unrelated folder. Record every skipped path so the
+      // result count matches what actually happened, then keep going with
+      // siblings.
+      failedPlans.add(plan);
+      errors.push(
+        `${pair.src}: skipped because ${poison} could not be created`,
+      );
       doneFiles++;
       showProgress(current, true);
       continue;
@@ -308,20 +327,22 @@ export async function copyManyWithProgress(
         await fs.cp(pair.src, pair.dest, { recursive: true });
       }
     } catch (e) {
-      failedPlan.add(plan);
+      failedPlans.add(plan);
       errors.push(`${pair.src}: ${String(e)}`);
+      // Only a directory that failed to be created makes its descendants
+      // unsafe. A bad file must not skip the rest of the folder.
+      if (pair.kind === "dir") poisonedDirs.push(pair.src);
     }
     doneFiles++;
     showProgress(current, true);
   }
 
   for (const [i, plan] of plans.entries()) {
-    if (failedPlan.has(i)) {
-      const r = results.find((x) => x.src === plan.src);
-      if (r) {
-        r.ok = false;
-        r.error = errors.find((e) => e.startsWith(plan.src));
-      }
+    if (!failedPlans.has(i)) continue;
+    const r = results.find((x) => x.src === plan.src);
+    if (r) {
+      r.ok = false;
+      r.error = errors.find((e) => e.startsWith(`${plan.src}:`));
     }
   }
 

@@ -3,9 +3,7 @@ import {
   ActionPanel,
   Icon,
   List,
-  Toast,
   getPreferenceValues,
-  showToast,
 } from "@raycast/api";
 import { getSelectedFinderItems } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
@@ -29,7 +27,7 @@ function getPrefs(): Preferences.FinderSelection {
  * Transfer Finder Selection: takes whatever is selected in Finder right now
  * and runs it through the same transfer tree as Tab (browse destination,
  * Enter on a folder transfers into it, then Copy vs Move). Never touches
- * the X-basket from the main browser.
+ * the selection basket from the main browser.
  */
 export default function Command() {
   const p = getPrefs();
@@ -40,11 +38,8 @@ export default function Command() {
       const items = await getSelectedFinderItems();
       return items.map((item) => item.path);
     } catch {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No Finder selection",
-        message: "Select files in Finder first, then run this command",
-      });
+      // Nothing selected (or Finder can't be queried): the empty view with
+      // its Retry action is the whole story — no extra failure toast.
       return [] as string[];
     }
   }, []);
@@ -83,6 +78,7 @@ export default function Command() {
       showHidden={!!p.showHiddenDefault}
       onDone={() => undefined}
       manageBasket={false}
+      isRootView
     />
   );
 }
