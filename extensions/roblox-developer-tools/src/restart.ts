@@ -28,7 +28,7 @@ export default async function Command() {
       } catch {
         name = "";
       }
-      const game = name ? `"${name}"` : "this game";
+      const game = name ? `"${name}"` : `universe ${universeId}`;
       if (
         !(await confirmAlert({
           title: "Restart servers?",
