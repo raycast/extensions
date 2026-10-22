@@ -17,6 +17,7 @@ import {
   baseOf,
   clearToday,
   correctionDay,
+  dayLabel,
   offers,
   reopen,
   screenFor,
@@ -135,7 +136,7 @@ export default function Command() {
       tooltip={nudge ? "Nothing picked yet. Pick when you can." : "Pick today's one thing"}
     >
       {fixDay ? (
-        <MenuBarExtra.Section title={`Yesterday: ${short(baseOf(state.days[fixDay].promise), 30)}`}>
+        <MenuBarExtra.Section title={`${dayLabel(fixDay, today)}: ${short(baseOf(state.days[fixDay].promise), 30)}`}>
           <MenuBarExtra.Item
             title="Done"
             icon={Icon.CheckCircle}
