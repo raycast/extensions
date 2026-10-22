@@ -5,8 +5,6 @@
   "description": "Search the web (including the full Google results page), scrape pages to Markdown, and check websites: uptime, DNS, TLS, redirects, and Lighthouse.",
   "icon": "icon.png",
   "author": "chandankumar",
-  "owner": "geekflare",
-  "access": "public",
   "categories": [
     "Developer Tools",
     "Web"
