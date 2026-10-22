@@ -71,17 +71,6 @@ Sources: Sahih Muslim 612 (Asr lasts until the sun turns pale); the hadith of Ji
 Tirmidhi 149) for one and two shadow lengths; Hanafi fatwas on the red and white twilight; Ja'fari rulings
 on the eastern redness and the shared times of Dhuhr and Asr, and of Maghrib and Isha.
 
-## Development
-
-```bash
-npm install
-npm run dev      # ray develop; also builds swift/PrayerTimes through Raycast's Swift bridge
-npm test         # unit tests (TZ=Asia/Karachi)
-```
-
-`swift/PrayerTimes` holds the EventKit (Reminders) and CoreLocation code, called from
-`src/lib/helper.ts` through `swift:` imports. Raycast compiles it with Xcode.
-
 ## Credits
 
 - Prayer time calculation: [adhan-js](https://github.com/batoulapps/adhan-js) (MIT)

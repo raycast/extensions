@@ -15,7 +15,11 @@ export default async function Command() {
   } catch {
     await updateCommandMetadata({ subtitle: "Set your location to start" });
     if (environment.launchType === LaunchType.UserInitiated) {
-      await launchCommand({ name: "set-location", type: LaunchType.UserInitiated });
+      try {
+        await launchCommand({ name: "set-location", type: LaunchType.UserInitiated });
+      } catch {
+        // Set Prayer Location disabled; the subtitle above says what to do.
+      }
     }
     return;
   }
@@ -35,6 +39,10 @@ export default async function Command() {
   }
 
   if (environment.launchType === LaunchType.UserInitiated) {
-    await launchCommand({ name: "today", type: LaunchType.UserInitiated });
+    try {
+      await launchCommand({ name: "today", type: LaunchType.UserInitiated });
+    } catch {
+      // Today's Prayers disabled; the subtitle is already updated.
+    }
   }
 }

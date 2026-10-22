@@ -3,7 +3,7 @@
 import PackageDescription
 
 // Built by Raycast's Swift bridge (`swift:` imports in src/lib/helper.ts) into
-// assets/compiled_raycast_swift/PrayerTimes. Locally without Xcode, see README → Development.
+// assets/compiled_raycast_swift/PrayerTimes.
 let package = Package(
   name: "PrayerTimes",
   platforms: [

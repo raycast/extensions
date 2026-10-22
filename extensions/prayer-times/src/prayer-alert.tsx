@@ -56,7 +56,6 @@ function PrayerAlert({ settings, context }: { settings: Settings; context?: Aler
 
   return (
     <Detail
-      navigationTitle={slot.name}
       markdown={`# ${title}\n\n${message}`}
       metadata={
         <Detail.Metadata>
