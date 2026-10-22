@@ -1,6 +1,7 @@
 export interface SpotlightSearchPreferences {
   maxResults: number;
   maxRecentFolders: string;
+  collapseSelectedFiles?: boolean;
 }
 
 export type SpotlightSearchDefinition = string[];

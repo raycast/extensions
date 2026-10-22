@@ -638,14 +638,43 @@ export default function Command(props: LaunchProps) {
         <>
           {selectedFiles.length > 0 && (
             <List.Section title="Selected Files">
-              {selectedFiles.map((filePath, index) => (
+              {preferences.collapseSelectedFiles && selectedFiles.length > 1 ? (
                 <List.Item
-                  key={`file-${index}`}
-                  title={path.basename(filePath)}
-                  subtitle={path.dirname(filePath)}
+                  key="selected-files-summary"
+                  title={`${selectedFiles.length} files selected`}
+                  subtitle={path.basename(selectedFiles[0])}
                   icon={Icon.Document}
+                  detail={
+                    <List.Item.Detail
+                      metadata={
+                        <List.Item.Detail.Metadata>
+                          <List.Item.Detail.Metadata.Label
+                            title="Selected Files"
+                            text={`${selectedFiles.length} files`}
+                          />
+                          <List.Item.Detail.Metadata.Separator />
+                          {selectedFiles.map((filePath, index) => (
+                            <List.Item.Detail.Metadata.Label
+                              key={`selected-file-${index}`}
+                              title={path.basename(filePath)}
+                              text={path.dirname(filePath)}
+                            />
+                          ))}
+                        </List.Item.Detail.Metadata>
+                      }
+                    />
+                  }
                 />
-              ))}
+              ) : (
+                selectedFiles.map((filePath, index) => (
+                  <List.Item
+                    key={`file-${index}`}
+                    title={path.basename(filePath)}
+                    subtitle={path.dirname(filePath)}
+                    icon={Icon.Document}
+                  />
+                ))
+              )}
             </List.Section>
           )}
 
