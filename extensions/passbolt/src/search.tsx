@@ -1,15 +1,52 @@
-import { ActionPanel, Action, List, showToast, Toast, Clipboard, Icon, Color } from "@raycast/api";
-import { useState, useEffect, useMemo } from "react";
+import {
+  ActionPanel,
+  Action,
+  List,
+  showToast,
+  Toast,
+  Clipboard,
+  Icon,
+  Color,
+  getPreferenceValues,
+  LaunchProps,
+} from "@raycast/api";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { getPassboltClient, PassboltClient } from "./lib/passbolt";
+import { getActiveWebsites } from "./lib/active-website";
+import { partitionResourcesByWebsite, websiteHostname, chooseActiveWebsite, type ActiveWebsite } from "./utils/website";
 import ResourceDetail from "./details";
 import { Resource } from "./types";
 import { filterResources } from "./utils/resources";
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ launchContext?: { url?: string } }>) {
   const [searchText, setSearchText] = useState("");
   const [allItems, setAllItems] = useState<Resource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [client] = useState(() => getPassboltClient());
+
+  const [activeWebsites, setActiveWebsites] = useState<ActiveWebsite[]>([]);
+  const [selectedItemId, setSelectedItemId] = useState<string>();
+  const autoSelect = useRef(true);
+  const { matchCurrentWebsite = true } = getPreferenceValues<Preferences.Search>();
+
+  useEffect(() => {
+    let cancelled = false;
+    setActiveWebsites([]);
+    if (matchCurrentWebsite) {
+      getActiveWebsites(props.launchContext?.url).then((websites) => {
+        if (!cancelled) setActiveWebsites(websites);
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [matchCurrentWebsite, props.launchContext?.url]);
+
+  // The best website can change while entries stream in: a partial vault can favor a
+  // title-only match for one window over an exact match for another. Re-evaluate on
+  // every update so the choice settles on the complete vault instead of freezing the
+  // first guess; the row selection pin below keeps the selection stable meanwhile.
+  const activeWebsite = useMemo(() => chooseActiveWebsite(allItems, activeWebsites), [allItems, activeWebsites]);
 
   // Load all resources once on mount; closing the command cancels the load and its
   // remaining decryption work instead of continuing in the background.
@@ -59,12 +96,17 @@ export default function Command() {
   // Filter items client-side for instant feedback
   const filteredItems = useMemo(() => filterResources(allItems, searchText), [allItems, searchText]);
 
-  // Separate favorites from other items
+  const { matching, others: remainingItems } = useMemo(
+    () => partitionResourcesByWebsite(filteredItems, activeWebsite?.url, activeWebsite?.title),
+    [filteredItems, activeWebsite],
+  );
+
+  // Separate favorites from the remaining items
   const { favoriteItems, otherItems } = useMemo(() => {
     const favorites: Resource[] = [];
     const others: Resource[] = [];
 
-    filteredItems.forEach((item) => {
+    remainingItems.forEach((item) => {
       if (item.favorite) {
         favorites.push(item);
       } else {
@@ -73,7 +115,26 @@ export default function Command() {
     });
 
     return { favoriteItems: favorites, otherItems: others };
-  }, [filteredItems]);
+  }, [remainingItems]);
+
+  useEffect(() => {
+    if (!autoSelect.current || searchText || !matching.length) return;
+    autoSelect.current = false;
+    setSelectedItemId(matching[0].id);
+  }, [matching, searchText]);
+
+  const onSelectionChange = (id: string | null) => {
+    if (id === null) return;
+    // Raycast also reports its default first selection as streamed items arrive.
+    const firstId = matching[0]?.id ?? favoriteItems[0]?.id ?? otherItems[0]?.id;
+    if (id !== firstId) autoSelect.current = false;
+    setSelectedItemId(id);
+  };
+  const onSearchTextChange = (text: string) => {
+    if (text) autoSelect.current = false;
+    setSearchText(text);
+    setSelectedItemId(undefined);
+  };
 
   async function copyPassword(resourceId: string) {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Decrypting password..." });
@@ -106,7 +167,10 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      onSearchTextChange={setSearchText}
+      searchText={searchText}
+      onSearchTextChange={onSearchTextChange}
+      selectedItemId={selectedItemId}
+      onSelectionChange={onSelectionChange}
       searchBarPlaceholder="Search vault..."
       filtering={false}
     >
@@ -124,21 +188,35 @@ export default function Command() {
         />
       ) : (
         <>
+          {matching.length > 0 && (
+            <List.Section
+              key="current-website"
+              title={`Current Website · ${websiteHostname(activeWebsite?.url)}`}
+              subtitle={`${matching.length} items`}
+            >
+              {matching.map((item) => (
+                <ResourceListItem key={item.id} item={item} client={client} onCopyPassword={copyPassword} />
+              ))}
+            </List.Section>
+          )}
           {favoriteItems.length > 0 && (
-            <List.Section title="⭐ Favorites" subtitle={`${favoriteItems.length} items`}>
+            <List.Section key="favorites" title="⭐ Favorites" subtitle={`${favoriteItems.length} items`}>
               {favoriteItems.map((item) => (
                 <ResourceListItem key={item.id} item={item} client={client} onCopyPassword={copyPassword} />
               ))}
             </List.Section>
           )}
-          <List.Section
-            title={favoriteItems.length > 0 ? "Other Items" : "All Items"}
-            subtitle={`${otherItems.length} items`}
-          >
-            {otherItems.map((item) => (
-              <ResourceListItem key={item.id} item={item} client={client} onCopyPassword={copyPassword} />
-            ))}
-          </List.Section>
+          {otherItems.length > 0 && (
+            <List.Section
+              key="other-items"
+              title={matching.length > 0 || favoriteItems.length > 0 ? "Other Items" : "All Items"}
+              subtitle={`${otherItems.length} items`}
+            >
+              {otherItems.map((item) => (
+                <ResourceListItem key={item.id} item={item} client={client} onCopyPassword={copyPassword} />
+              ))}
+            </List.Section>
+          )}
         </>
       )}
     </List>
@@ -177,6 +255,7 @@ function ResourceListItem({ item, client, onCopyPassword }: ResourceListItemProp
 
   return (
     <List.Item
+      id={item.id}
       title={item.name || "Unnamed resource"}
       subtitle={item.username}
       icon={item.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : Icon.Key}
