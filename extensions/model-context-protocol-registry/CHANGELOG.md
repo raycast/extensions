@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Sync Ausca listing copy in Store page] - 2026-10-22
+
+- Show the corrected Ausca payment boundary in the Store page's server table.
+
 ## [Add Spacefast MCP Server] - 2026-10-22
 
 - Add Spacefast to the official registry: publish and host what your AI builds as live Spaces with a built-in database, share links, custom domains and versioned rollbacks. Hosted Streamable HTTP server at https://mcp.spacefast.com with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
