@@ -1093,6 +1093,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "runcrate",
+    title: "Runcrate",
+    description:
+      "Give your AI agent GPUs. See live GPU prices, launch and delete GPU instances (H100, A100, RTX 4090 and more), run commands and jobs over SSH, move files, manage volumes, SSH keys and secrets, call 200+ open inference models and track spend. 37 tools. Hosted remote Streamable HTTP server; OAuth sign-in in the browser, no API key to paste.",
+    icon: "https://www.runcrate.ai/android-chrome-512x512.png",
+    homepage: "https://www.runcrate.ai/mcp?utm_source=raycast-mcp-registry&utm_medium=directory&utm_campaign=mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.runcrate.ai/mcp"],
+    },
+    remoteUrl: "https://mcp.runcrate.ai/mcp",
+  },
+  {
     name: "runx",
     title: "runx",
     description:
@@ -1253,6 +1266,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.sourcey.com/mcp"],
     },
     remoteUrl: "https://mcp.sourcey.com/mcp",
+  },
+  {
+    name: "spacefast",
+    title: "Spacefast",
+    description:
+      "Publish and host what your AI builds: turn pages, apps and artifacts into live Spaces with a built-in database, share them by link or password, connect a custom domain, and update or roll back versions. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://github.com/spacefast.png",
+    homepage: "https://spacefast.com/docs/setup/raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.spacefast.com"],
+    },
+    remoteUrl: "https://mcp.spacefast.com",
   },
   {
     name: "springbrand",
@@ -1662,6 +1688,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         ZEABUR_TOKEN: "YOUR_ZEABUR_TOKEN_HERE",
       },
     },
+  },
+  {
+    name: "zip-codes",
+    title: "Zip-Codes.com",
+    description:
+      "Location intelligence for US addresses and ZIP Codes: standardize a US street address to its ZIP+4, look up US ZIP Codes, ZIP+4s and Canadian postal codes, turn coordinates into a postal code, find postal areas within a radius, measure distance, and request census tract demographics, mapped districts and school districts. 11 read-only tools, including free reference tools for counties, metro areas, USPS city-name rules and data sources. Hosted remote Streamable HTTP server; no sign-in and no API key for demo mode (real values, deeper fields withheld except on demo codes and addresses); an optional X-Api-Key header with a free key (2,500 credits a day) removes the masking.",
+    icon: "https://www.zip-codes.com/api/images/icon/icon-512.png",
+    homepage: "https://www.zip-codes.com/api/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.zip-codes.com/mcp"],
+    },
+    remoteUrl: "https://mcp.zip-codes.com/mcp",
   },
   {
     name: "zonefoundry",
@@ -2375,6 +2414,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         LIGHTDASH_API_KEY: "YOUR_API_KEY_HERE",
         LIGHTDASH_API_URL: "https://<your base url>",
       },
+    },
+  },
+  {
+    name: "llmslim",
+    title: "LLMSlim",
+    description:
+      "Long-term memory for agents with no LLM call. Tools: remember, recall, list_memories, forget, fit_context. Messages are stored word for word in a local SQLite file (or Postgres), and recall returns the ones that answer a question within a token budget. The user and agent scope is fixed when the server starts, not chosen by the model. Local stdio server, no API key. MIT.",
+    icon: "https://raw.githubusercontent.com/Thanatos9404/llmslim/main/web/public/icon-512.png",
+    homepage: "https://github.com/Thanatos9404/llmslim",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "llmslim[mcp]", "llmslim", "mcp"],
     },
   },
   {
