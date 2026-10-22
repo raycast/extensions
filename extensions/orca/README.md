@@ -19,7 +19,8 @@ that are done but still carry Orca's unread dot, most recently finished first.
 Everything else is grouped by project below — or, with **Group List By** set to
 *Status*, into *Working*, *Finished* and *Other terminals*. Outside a project
 section each row names its project next to the branch, in grey after the title:
-Raycast puts nothing but the icon before it. The list re-reads Orca every 5 seconds while open, so a wait
+Raycast puts nothing but the icon before it. With the details pane open, which
+hides that grey text, the project goes back in front of the title. The list re-reads Orca every 5 seconds while open, so a wait
 time never goes stale.
 
 The icon on the left is the row's state — red question mark waiting, green

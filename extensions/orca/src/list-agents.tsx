@@ -27,7 +27,7 @@ import {
   isUnseen,
   loadAgents,
   projectNamer,
-  sessionTitle,
+  sessionLabel,
 } from "./orca";
 
 const execFileAsync = promisify(execFile);
@@ -289,6 +289,12 @@ export default function Command(
             const agent = row.agentIdentity;
             const branch = shortBranch(row.branch);
             const tag = stateTag(row);
+            // Outside a project section rows come from everywhere, so they name
+            // their project. Raycast puts nothing but the icon before the
+            // title, so it goes with the branch — or, with the details pane
+            // hiding the subtitle, back in front of the title.
+            const project =
+              section.kind === "project" ? undefined : projectOf(row);
             const waited =
               row.state === "waiting"
                 ? waitedFor(row.stateStartedAt)
@@ -298,19 +304,11 @@ export default function Command(
               <List.Item
                 key={row.handle}
                 icon={stateIcon(row)}
-                title={sessionTitle(row)}
-                // Outside a project section rows come from everywhere, so they
-                // name their project. Raycast puts nothing but the icon before
-                // the title, so it goes with the branch.
+                title={sessionLabel(row, showDetail ? project : undefined)}
                 subtitle={
                   showDetail
                     ? undefined
-                    : [
-                        section.kind === "project" ? undefined : projectOf(row),
-                        branch,
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")
+                    : [project, branch].filter(Boolean).join(" · ")
                 }
                 keywords={[
                   row.worktreePath,

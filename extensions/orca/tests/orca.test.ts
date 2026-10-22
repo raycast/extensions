@@ -7,6 +7,7 @@ import type { OrcaTerminal, OrcaWorktree } from "../src/orca.ts";
 import {
   buildSections,
   cleanTitle,
+  sessionLabel,
   sessionTitle,
   filterRows,
   isUnseen,
@@ -153,6 +154,17 @@ test("a session named from a long prompt keeps its text in the summary", () => {
   // Narrower: the session is still named, just trimmed to what fits.
   assert.ok(summarize(one, "sessions", 25)!.startsWith("❓ infra: So"));
   assert.ok(summarize(one, "sessions", 25)!.length <= 25);
+});
+
+test("with details open, a row outside its project section leads with the project", () => {
+  const row = {
+    title: "✳ Claude Code",
+    agentIdentity: "claude",
+    prompt: "/review work_items/450",
+  };
+
+  assert.equal(sessionLabel(row, "api"), "api: /review work_items/450");
+  assert.equal(sessionLabel(row), "/review work_items/450");
 });
 
 test("projects with the same folder name stay separate sections", () => {

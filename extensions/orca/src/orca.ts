@@ -312,6 +312,18 @@ function pickLabel(row: {
   return shortenUrls(prompt).replace(/\s+/g, " ").trim();
 }
 
+/**
+ * A row's title with its project in front — for rows outside a project section
+ * when the details pane hides the subtitle that otherwise carries the project.
+ */
+export function sessionLabel(
+  row: Parameters<typeof sessionTitle>[0],
+  project?: string,
+): string {
+  const title = sessionTitle(row);
+  return project ? `${project}: ${title}` : title;
+}
+
 /** Blocked longest first — the same order the list uses. */
 function waitingFirst(rows: AgentRow[]): AgentRow[] {
   return rows
