@@ -1,6 +1,6 @@
 # Roblox Developer Tools Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-22
 
 - Launch Roblox games
 - Open places in Roblox Studio
