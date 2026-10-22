@@ -1466,6 +1466,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "vomo",
+    title: "VOMO",
+    description:
+      "Find and read your VOMO meeting notes and original transcripts. List saved notes, search by keyword, and retrieve summaries or transcripts from your own account. Read-only notes:read access; no recording, uploads, edits, deletion, or purchases. Hosted Streamable HTTP server with OAuth sign-in, dynamic client registration, and PKCE. Requires an existing VOMO account with saved notes.",
+    icon: "https://vomo.ai/icons/vomo-app-icon.svg",
+    homepage: "https://vomo.ai/cli",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.vomo.ai/mcp"],
+    },
+    remoteUrl: "https://mcp.vomo.ai/mcp",
+  },
+  {
     name: "weio-site-check",
     title: "Weio site check",
     description:
