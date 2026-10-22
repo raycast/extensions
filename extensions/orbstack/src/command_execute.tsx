@@ -1,6 +1,6 @@
 import { Detail, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
 import { useExec } from "@raycast/utils";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ORB_CTL } from "./orbstack";
 
 interface CommandConfirmProps {
@@ -9,11 +9,18 @@ interface CommandConfirmProps {
   command: string[];
   /** Defaults to `orbctl`. Pass `docker` (with context args in `command`) for containers. */
   bin?: string;
-  /** Merge stderr into displayed output (needed for `docker logs`). */
+  /**
+   * Merge stderr into displayed output in write order (needed for `docker logs`).
+   * Uses a shell redirect so stdout/stderr stay interleaved instead of concatenated buffers.
+   */
   mergeStderr?: boolean;
   markdown?: string;
   requireConfirmation?: boolean;
   refresh?: () => void;
+}
+
+function shellQuote(arg: string): string {
+  return `'${arg.replace(/'/g, `'\\''`)}'`;
 }
 
 export default function CommandExecute(props: CommandConfirmProps) {
@@ -21,16 +28,24 @@ export default function CommandExecute(props: CommandConfirmProps) {
   const { name, command, title, markdown, requireConfirmation, refresh, mergeStderr } = props;
   const bin = props.bin ?? ORB_CTL;
   const [shouldExecute, setShouldExecute] = useState(!requireConfirmation);
+
+  const { execBin, execArgs } = useMemo(() => {
+    if (!mergeStderr) {
+      return { execBin: bin, execArgs: command };
+    }
+
+    // Merge at the shell so docker log lines keep arrival order across streams.
+    const quoted = [bin, ...command].map(shellQuote).join(" ");
+    return { execBin: "/bin/sh", execArgs: ["-c", `${quoted} 2>&1`] };
+  }, [bin, command, mergeStderr]);
+
   const {
     data: commandOutput,
     isLoading,
     error,
     revalidate,
-  } = useExec(bin, command, {
+  } = useExec(execBin, execArgs, {
     execute: shouldExecute,
-    parseOutput: mergeStderr
-      ? ({ stdout, stderr }) => [stdout, stderr].filter((part) => part && part.length > 0).join("\n")
-      : undefined,
     onData: () => {
       showToast({
         title: "Command executed successfully",
