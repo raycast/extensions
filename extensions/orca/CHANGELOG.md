@@ -1,6 +1,6 @@
 # Orca Changelog
 
-## [Finished Agents and Grouping by Status] - {PR_MERGE_DATE}
+## [Finished Agents and Grouping by Status] - 2026-10-22
 
 - Agents that finished but you have not looked at yet get their own section under the waiting ones
 - Mark an agent's worktree as read right from the list
