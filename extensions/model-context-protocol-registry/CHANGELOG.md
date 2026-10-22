@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Sync Ausca listing copy in Store page] - {PR_MERGE_DATE}
+## [Sync Ausca listing copy in Store page] - 2026-10-22
 
 - Show the corrected Ausca payment boundary in the Store page's server table.
 
