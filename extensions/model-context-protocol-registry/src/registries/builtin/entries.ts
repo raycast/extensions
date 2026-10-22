@@ -346,14 +346,27 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "datacircle",
     title: "Datacircle",
     description:
-      "Datacircle is a data co-op. Query your favorite B2B data APIs through us. Same request, same price, no markup. Every morning, you get the flat file of your data plus everyone else's.",
+      "Datacircle lists all the GTM APIs. Our MCP server is open to anyone, with no key: add api.datacircle.dev/mcp to Claude, ChatGPT or Cursor.",
     icon: "https://datacircle.dev/favicon.png",
-    homepage: "https://docs.datacircle.dev/mcp-server",
+    homepage: "https://datacircle.dev/docs/mcp",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://api.datacircle.dev/mcp"],
     },
     remoteUrl: "https://api.datacircle.dev/mcp",
+  },
+  {
+    name: "databricks-field-guide",
+    title: "Databricks Field Guide",
+    description:
+      "Databricks answers with working code, from TechFabric's engineers. Search and read the Databricks Field Guide: chapters on building, running and paying for Databricks, runnable SQL, Python and CLI examples with the explanation around them, and recent Databricks changes, each linked to the docs.databricks.com pages it cites. Read-only tools. Hosted remote Streamable HTTP server; no sign-in and no API key.",
+    icon: "https://www.techfabric.com/brand/mcp/techfabric-icon-on-dark-512.png",
+    homepage: "https://databricks.techfabric.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://databricks.techfabric.com/mcp"],
+    },
+    remoteUrl: "https://databricks.techfabric.com/mcp",
   },
   {
     name: "desearch",
@@ -621,7 +634,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "hermoso",
     title: "Hermoso",
     description:
-      "Hermoso is marketing on autopilot, run from your AI agent. Research the ads already winning in any market (the Meta, Google and LinkedIn ad libraries plus organic TikTok, Instagram, YouTube, Reddit and Threads), make finished image and video ads and organic posts in your brand, publish and schedule to 10 social channels or let Autopilot posting fill your calendar, automate DMs on Instagram, Facebook, Messenger and X, and build and manage paid campaigns on 12 ad platforms. Hosted remote server with OAuth sign-in, no API key to paste.",
+      "Hermoso is an AI marketing agent and AI ad generator for your AI agent. No markup on models. Research the ads already winning in any market (the Meta, Google and LinkedIn ad libraries plus organic TikTok, Instagram, YouTube, Reddit and Threads), make image and video ads and organic posts in your brand, publish and schedule to 11 social channels or let Autopilot posting fill your calendar, automate DMs on Instagram, Facebook, Messenger and X, and build and manage paid campaigns on 12 ad platforms. Hosted remote server with OAuth sign-in, no API key to paste.",
     icon: "https://raw.githubusercontent.com/hermoso-ai/hermoso/main/assets/logo.png",
     homepage: "https://hermoso.ai/mcp/",
     configuration: {
@@ -851,6 +864,32 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://moltnode.ag/mcp",
   },
   {
+    name: "multi-calendar",
+    title: "Multi Calendar",
+    description:
+      "Your Outlook.com, Hotmail, Microsoft 365 and Google calendars in Raycast - many accounts at once, one search for free time across all of them. Read events, find free time, create, move and cancel events and answer invitations, make booking links, booking pages and group polls, each account within the permissions its owner sets. No copy of the calendars is kept. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://lumman.co/icon-512.png",
+    homepage: "https://lumman.co/mcp/multi-calendar",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://calendar.lumman.co/mcp"],
+    },
+    remoteUrl: "https://calendar.lumman.co/mcp",
+  },
+  {
+    name: "multi-mail",
+    title: "Multi Mail",
+    description:
+      "Your Gmail, Outlook.com, Hotmail, Microsoft 365, iCloud and Fastmail mailboxes in Raycast - several at once, one search across all of them. Read threads, messages and attachments, draft, send and organise mail, each mailbox within the permissions its owner sets. No copy of the mail is kept. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://lumman.co/icon-512.png",
+    homepage: "https://lumman.co/mcp/multi-mail",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mail.lumman.co/mcp"],
+    },
+    remoteUrl: "https://mail.lumman.co/mcp",
+  },
+  {
     name: "netactuate",
     title: "NetActuate",
     description:
@@ -862,6 +901,23 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://netactuate.com/mcp"],
     },
     remoteUrl: "https://netactuate.com/mcp",
+  },
+  {
+    name: "new-term-radar",
+    title: "New-Term Radar",
+    description:
+      "Names of new AI models, products and repos as they surface on X, Hugging Face, GitHub and sitemaps, and the search terms behind them sized with Google Ads volume and Google Trends, each marked prioritize, watch or skip. Three tools: recent leads (free), a keyword table for names you give it (about $0.05 a name plus $0.09 a call) and a full radar run (paid, minutes). Local stdio server `new-term-radar` (MIT) from PyPI through `uvx`; needs an AIsa API key set as `AISA_API_KEY` and a config.json copied from the repo's config.example.json, with `RADAR_CONFIG` and `RADAR_STATE` set to absolute paths.",
+    icon: "https://raw.githubusercontent.com/zhuyansen/new-term-radar/main/.claude-plugin/icon.png",
+    homepage: "https://github.com/zhuyansen/new-term-radar",
+    configuration: {
+      command: "uvx",
+      args: ["--with", "mcp", "new-term-radar", "mcp"],
+      env: {
+        AISA_API_KEY: "YOUR_API_KEY_HERE",
+        RADAR_CONFIG: "/absolute/path/to/config.json",
+        RADAR_STATE: "/absolute/path/to/state",
+      },
+    },
   },
   {
     name: "overlayqa",
@@ -1076,6 +1132,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "runcrate",
+    title: "Runcrate",
+    description:
+      "Give your AI agent GPUs. See live GPU prices, launch and delete GPU instances (H100, A100, RTX 4090 and more), run commands and jobs over SSH, move files, manage volumes, SSH keys and secrets, call 200+ open inference models and track spend. 37 tools. Hosted remote Streamable HTTP server; OAuth sign-in in the browser, no API key to paste.",
+    icon: "https://www.runcrate.ai/android-chrome-512x512.png",
+    homepage: "https://www.runcrate.ai/mcp?utm_source=raycast-mcp-registry&utm_medium=directory&utm_campaign=mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.runcrate.ai/mcp"],
+    },
+    remoteUrl: "https://mcp.runcrate.ai/mcp",
+  },
+  {
     name: "runx",
     title: "runx",
     description:
@@ -1238,6 +1307,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.sourcey.com/mcp",
   },
   {
+    name: "spacefast",
+    title: "Spacefast",
+    description:
+      "Publish and host what your AI builds: turn pages, apps and artifacts into live Spaces with a built-in database, share them by link or password, connect a custom domain, and update or roll back versions. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://github.com/spacefast.png",
+    homepage: "https://spacefast.com/docs/setup/raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.spacefast.com"],
+    },
+    remoteUrl: "https://mcp.spacefast.com",
+  },
+  {
     name: "springbrand",
     title: "SpringBrand",
     description:
@@ -1351,6 +1433,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "terminal-tax",
+    title: "Terminal Tax",
+    description:
+      "E-file a 2025 US federal Form 1040 from your AI assistant. Four tools check the prepared return and return either the problems to fix or one link to a hosted filing page, where you review the complete return, type your Social Security number and PINs, sign and pay; Terminal Tax then e-files it. $19.99, charged only if the IRS accepts it. Federal only. Hosted remote Streamable HTTP server; no account, API key or OAuth.",
+    icon: "https://raw.githubusercontent.com/maxdhs/terminal-tax-mcp-server/main/logo.png",
+    homepage: "https://terminal.tax",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.terminal.tax/v1/hosted-mcp"],
+    },
+    remoteUrl: "https://mcp.terminal.tax/v1/hosted-mcp",
+  },
+  {
     name: "the-bridge",
     title: "The Bridge",
     description:
@@ -1424,6 +1519,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "unblockingapi",
+    title: "UnblockingAPI",
+    description:
+      "Fetch public web pages that block simple requests, and get clean Markdown, HTML or template JSON back. Three read-only tools: unblock_fetch returns Markdown by default or HTML, optionally narrowed with a CSS selector, or structured JSON when a published template covers the site; find_templates finds templates by URL, keyword or category; get_build_guide explains building apps on the REST API. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or a Bearer API key; 500 free credits on sign-up, no card.",
+    icon: "https://unblockingapi.com/app-icon.png",
+    homepage: "https://unblockingapi.com/tools",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.unblockingapi.com/mcp"],
+    },
+    remoteUrl: "https://mcp.unblockingapi.com/mcp",
+  },
+  {
     name: "voicemoat",
     title: "VoiceMoat",
     description:
@@ -1434,6 +1542,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://app.voicemoat.com/api/mcp"],
     },
+  },
+  {
+    name: "wave-ai",
+    title: "Wave AI",
+    description:
+      "Wave AI is an AI note taker for phone calls, meetings and in-person conversations. Ask what was decided, what a person said (Voice ID finds people you have named in Wave), or what you still owe, then update action items, organize folders and share recordings without opening Wave. Wave never deletes recordings or edits transcripts, and it asks before sharing. Hosted remote Streamable HTTP server; OAuth 2.0 sign-in with PKCE and dynamic client registration, free Wave account, no API key to paste.",
+    icon: "https://wave.co/brand/icon-rounded-512.png",
+    homepage: "https://help.wave.co/integrations/connect-wave-to-other-ai-tools",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.wave.co"],
+    },
+    remoteUrl: "https://mcp.wave.co",
   },
   {
     name: "weio-site-check",
@@ -1476,6 +1597,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         XERO_CLIENT_SECRET: "YOUR_CLIENT_SECRET_HERE",
       },
     },
+  },
+  {
+    name: "xtiles",
+    title: "xTiles",
+    description:
+      "Turn AI chats into xTiles projects, notes and tasks, and pull any project back into the chat. Save plans and research to pages, create and update tasks with due dates and assignees, add notes to your daily planner and read your calendar, then get a project's current state, decisions and open tasks. 39 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, free xTiles account, no API key to paste.",
+    icon: "https://xtiles.app/android-chrome-512x512.png",
+    homepage: "https://xtiles.app/en/imagine/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.xtiles.app/mcp"],
+    },
+    remoteUrl: "https://mcp.xtiles.app/mcp",
   },
   {
     name: "firecrawl",
@@ -1632,6 +1766,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         ZEABUR_TOKEN: "YOUR_ZEABUR_TOKEN_HERE",
       },
     },
+  },
+  {
+    name: "zip-codes",
+    title: "Zip-Codes.com",
+    description:
+      "Location intelligence for US addresses and ZIP Codes: standardize a US street address to its ZIP+4, look up US ZIP Codes, ZIP+4s and Canadian postal codes, turn coordinates into a postal code, find postal areas within a radius, measure distance, and request census tract demographics, mapped districts and school districts. 11 read-only tools, including free reference tools for counties, metro areas, USPS city-name rules and data sources. Hosted remote Streamable HTTP server; no sign-in and no API key for demo mode (real values, deeper fields withheld except on demo codes and addresses); an optional X-Api-Key header with a free key (2,500 credits a day) removes the masking.",
+    icon: "https://www.zip-codes.com/api/images/icon/icon-512.png",
+    homepage: "https://www.zip-codes.com/api/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.zip-codes.com/mcp"],
+    },
+    remoteUrl: "https://mcp.zip-codes.com/mcp",
   },
   {
     name: "zonefoundry",
@@ -2345,6 +2492,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         LIGHTDASH_API_KEY: "YOUR_API_KEY_HERE",
         LIGHTDASH_API_URL: "https://<your base url>",
       },
+    },
+  },
+  {
+    name: "llmslim",
+    title: "LLMSlim",
+    description:
+      "Long-term memory for agents with no LLM call. Tools: remember, recall, list_memories, forget, fit_context. Messages are stored word for word in a local SQLite file (or Postgres), and recall returns the ones that answer a question within a token budget. The user and agent scope is fixed when the server starts, not chosen by the model. Local stdio server, no API key. MIT.",
+    icon: "https://raw.githubusercontent.com/Thanatos9404/llmslim/main/web/public/icon-512.png",
+    homepage: "https://github.com/Thanatos9404/llmslim",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "llmslim[mcp]", "llmslim", "mcp"],
     },
   },
   {

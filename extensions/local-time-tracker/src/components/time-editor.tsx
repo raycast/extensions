@@ -89,7 +89,7 @@ export function TimeEditor({
     <Detail
       navigationTitle={title}
       isLoading={isSaving}
-      markdown={`${timeEditingMarkdown(draft, endpoint, now)}\n\n←/→ ±1m · ⇧←/→ ±5m\n\n${draft.endedAt ? "↑/↓ Start / End · " : ""}↵ Save\n\n${note ?? "Preview · Enter to save"}`}
+      markdown={`${timeEditingMarkdown(draft, endpoint, now)}\n\n←/→ ±1m · ⇧←/→ ±1h\n\n${draft.endedAt ? "↑/↓ Start / End · " : ""}↵ Save\n\n${note ?? "Preview · Enter to save"}`}
       metadata={metadata ? <Detail.Metadata>{metadata}</Detail.Metadata> : undefined}
       actions={
         <ActionPanel>
@@ -137,16 +137,16 @@ export function TimeEditor({
                   onAction={() => adjust(1)}
                 />
                 <Action
-                  title="Move 5 Minutes Earlier"
+                  title="Move 1 Hour Earlier"
                   icon={Icon.ArrowLeft}
                   shortcut={{ modifiers: ["shift"], key: "arrowLeft" }}
-                  onAction={() => adjust(-5)}
+                  onAction={() => adjust(-60)}
                 />
                 <Action
-                  title="Move 5 Minutes Later"
+                  title="Move 1 Hour Later"
                   icon={Icon.ArrowRight}
                   shortcut={{ modifiers: ["shift"], key: "arrowRight" }}
-                  onAction={() => adjust(5)}
+                  onAction={() => adjust(60)}
                 />
               </ActionPanel.Section>
               {extraActions}
