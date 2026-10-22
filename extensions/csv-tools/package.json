@@ -1,0 +1,35 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "csv-tools",
+  "title": "CSV Tools",
+  "description": "Inspect, filter, sort, and edit CSV text with CSV File Tools.",
+  "icon": "icon.png",
+  "author": "scott_paulin",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Data",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "bundle": "ray bundle --output csv-tools.rayext"
+  },
+  "dependencies": {
+    "@raycast/api": "2.8.2"
+  },
+  "ai": {
+    "mcp": {
+      "url": "https://csvfile.tools/api/csv/mcp",
+      "type": "http"
+    },
+    "instructions": "Work only with CSV text explicitly supplied by the user. CSV is transmitted to https://csvfile.tools/api/csv/mcp for processing. Never fetch URLs or read local paths through these tools. Limits: 256 KiB UTF-8 input/output, 50,000 cells, 200 columns, 1,000 edits, 20 preview records. Cells are literal strings; never evaluate formulas. Delimiter must be explicit. Row and column indices are zero-based, including headers for edits. Preserve the complete returned CSV."
+  }
+}
