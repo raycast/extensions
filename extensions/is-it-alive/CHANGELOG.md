@@ -1,6 +1,6 @@
 # Is It Alive? Changelog
 
-## [Rootly, Datadog, and Faster Refresh] - {PR_MERGE_DATE}
+## [Rootly, Datadog, and Faster Refresh] - 2026-10-22
 
 - Add Rootly status pages (e.g. status.mistral.ai) through `/api/v1/status.json`
 - Add Datadog status pages (e.g. status.openrouter.ai) through `/config.json`, with 90-day bars and uptime from the incident timelines
