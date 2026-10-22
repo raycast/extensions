@@ -550,6 +550,20 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "evolink",
+    title: "EvoLink",
+    description:
+      "Image, video, music and speech generation with 150+ models from one EvoLink account. Search models and read their published prices, get a quote for an exact task, generate after you approve it, then track the task and your balance. Model search, prices, quotes, task status and balance checks are free; generation is billed to your EvoLink balance. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/Evolink-AI/mcp-plugin/main/assets/logo.png",
+    homepage:
+      "https://evolink.ai/mcp?utm_source=raycast&utm_medium=referral&utm_campaign=mcp_remote&utm_content=directory_listing",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.evolink.ai/mcp"],
+    },
+    remoteUrl: "https://mcp.evolink.ai/mcp",
+  },
+  {
     name: "exa",
     title: "Exa",
     description:
