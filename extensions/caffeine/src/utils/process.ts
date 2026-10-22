@@ -1,5 +1,5 @@
 import { environment } from "@raycast/api";
-import { execFile, execFileSync } from "child_process";
+import { execFile, execFileSync, ExecFileException } from "child_process";
 import fs from "fs";
 import os from "os";
 import path from "path";
@@ -103,21 +103,31 @@ export function isPidAlive(pid: number | undefined, processStartTime?: number, s
   return true;
 }
 
+export type HelperVerificationResult =
+  | { status: "verified" }
+  | { status: "not_running" }
+  | { status: "mismatch"; reason: string }
+  | { status: "lookup_failed"; error: Error };
+
 /**
  * Thoroughly verifies the process identity and creation time before terminating or replacing it.
- * Ensures unrelated PowerShell jobs that reused the PID are never killed.
+ * Distinguishes between confirmed identity mismatches vs lookup failures/timeouts.
  */
-export function verifyHelperIdentity(pid: number, expectedStartTime?: number): Promise<boolean> {
+export function verifyHelperIdentity(
+  pid: number,
+  expectedStartTime?: number,
+  timeoutMs = 4000,
+): Promise<HelperVerificationResult> {
   return new Promise((resolve) => {
     if (!pid || typeof pid !== "number" || isNaN(pid) || pid <= 0) {
-      resolve(false);
+      resolve({ status: "not_running" });
       return;
     }
 
     try {
       process.kill(pid, 0);
     } catch {
-      resolve(false);
+      resolve({ status: "not_running" });
       return;
     }
 
@@ -153,10 +163,48 @@ try {
       ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", checkCmd],
       {
         windowsHide: true,
-        timeout: 2500,
+        timeout: timeoutMs,
       },
-      (error: Error | null) => {
-        resolve(!error);
+      (error: ExecFileException | null) => {
+        if (!error) {
+          resolve({ status: "verified" });
+          return;
+        }
+
+        // Check if timeout occurred
+        if (error.killed || error.signal === "SIGTERM" || error.code === "ETIMEDOUT") {
+          resolve({
+            status: "lookup_failed",
+            error: new Error(`Helper identity lookup timed out after ${timeoutMs}ms`),
+          });
+          return;
+        }
+
+        // Check exit codes from PowerShell
+        if (typeof error.code === "number") {
+          if (error.code === 1) {
+            resolve({ status: "not_running" });
+            return;
+          }
+          if (error.code === 2) {
+            resolve({ status: "mismatch", reason: "Process name is not PowerShell" });
+            return;
+          }
+          if (error.code === 3) {
+            resolve({ status: "mismatch", reason: "Process creation time does not match expected session" });
+            return;
+          }
+          if (error.code === 4) {
+            resolve({ status: "mismatch", reason: "Process command line does not match caffeine-helper" });
+            return;
+          }
+        }
+
+        // Any other execution error
+        resolve({
+          status: "lookup_failed",
+          error: error instanceof Error ? error : new Error(String(error)),
+        });
       },
     );
   });
@@ -293,8 +341,8 @@ export async function launchHelperProcess(
 
 /**
  * Safely and gracefully terminates the background helper process by PID.
- * Verifies helper identity and creation time before sending signals or killing,
- * ensuring unrelated processes are never affected.
+ * Verifies helper identity and creation time before sending signals or killing.
+ * If identity check fails or times out, throws an error and preserves state.
  */
 export async function terminateHelperProcess(
   pid: number | undefined,
@@ -308,17 +356,34 @@ export async function terminateHelperProcess(
   try {
     process.kill(pid, 0);
   } catch {
+    // Process does not exist in the OS
     if (statusFilePath) cleanFile(statusFilePath);
     return;
   }
 
   // Verify identity and creation time before terminating to protect unrelated processes
-  const isHelper = await verifyHelperIdentity(pid, processStartTime);
-  if (!isHelper) {
+  const verification = await verifyHelperIdentity(pid, processStartTime);
+
+  if (verification.status === "not_running") {
     if (statusFilePath) cleanFile(statusFilePath);
     return;
   }
 
+  if (verification.status === "mismatch") {
+    // PID was reused by an unrelated process. Clean state and do not kill the unrelated process!
+    if (statusFilePath) cleanFile(statusFilePath);
+    return;
+  }
+
+  if (verification.status === "lookup_failed") {
+    // Identity verification timed out or failed.
+    // Do NOT delete status file, do NOT clear saved PID; report failure to caller!
+    throw new Error(
+      `Unable to verify helper process identity (${verification.error.message}). Saved session preserved; please retry stopping Caffeine.`,
+    );
+  }
+
+  // Verification status is "verified" - proceed with graceful stop
   try {
     const stopCmd = `
 Add-Type -TypeDefinition @"
@@ -379,20 +444,20 @@ Start-Sleep -Milliseconds 150
         ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", stopCmd],
         {
           windowsHide: true,
-          timeout: 2500,
+          timeout: 3000,
         },
         () => resolve(),
       );
     });
   } catch {
-    // Ignore error
+    // Ignore stop event signaling error
   }
 
   // Fallback: If still running after grace period, re-verify and terminate
   try {
     process.kill(pid, 0);
-    const stillOurHelper = await verifyHelperIdentity(pid, processStartTime);
-    if (stillOurHelper) {
+    const recheck = await verifyHelperIdentity(pid, processStartTime);
+    if (recheck.status === "verified") {
       execFileSync("taskkill", ["/PID", String(pid), "/F", "/T"], {
         windowsHide: true,
         stdio: "ignore",

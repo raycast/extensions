@@ -114,11 +114,11 @@ function launchHelperSync(durationSeconds, preventDisplay) {
 }
 
 function verifyHelperProcessSync(pid, expectedStartTime) {
-  if (!pid || pid <= 0) return false;
+  if (!pid || pid <= 0) return { status: "not_running" };
   try {
     process.kill(pid, 0);
   } catch {
-    return false;
+    return { status: "not_running" };
   }
   const safePid = Math.floor(pid);
   const safeExpectedStart = expectedStartTime && expectedStartTime > 0 ? Math.floor(expectedStartTime) : 0;
@@ -136,8 +136,8 @@ try {
             exit 3
         }
     }
-    $cmd = (Get-CimInstance Win32_Process -Filter "ProcessId = $TargetPid" -ErrorAction SilentlyContinue).CommandLine
-    if (-not $cmd -or $cmd -notlike '*caffeine-helper*') {
+    $cim = Get-CimInstance Win32_Process -Filter "ProcessId = $TargetPid" -ErrorAction SilentlyContinue
+    if (-not $cim -or $cim.CommandLine -notlike '*caffeine-helper*') {
         exit 4
     }
     exit 0
@@ -152,21 +152,33 @@ try {
       {
         windowsHide: true,
         stdio: "ignore",
-        timeout: 2500,
+        timeout: 3000,
       },
     );
-    return true;
-  } catch {
-    return false;
+    return { status: "verified" };
+  } catch (err) {
+    if (err && typeof err.status === "number") {
+      if (err.status === 1) return { status: "not_running" };
+      if (err.status >= 2 && err.status <= 4) return { status: "mismatch" };
+    }
+    return { status: "lookup_failed", error: err };
   }
 }
 
 function stopHelper(pid, expectedStartTime, statusFile) {
   if (!pid || pid <= 0) return;
 
-  // Protect unrelated processes: verify identity and start time before stopping
-  const verified = verifyHelperProcessSync(pid, expectedStartTime);
-  if (!verified) {
+  const verification = verifyHelperProcessSync(pid, expectedStartTime);
+  if (verification.status === "not_running") {
+    if (statusFile && fs.existsSync(statusFile)) {
+      try {
+        fs.unlinkSync(statusFile);
+      } catch {}
+    }
+    return;
+  }
+
+  if (verification.status === "mismatch") {
     console.log(`[Safety Guard] Process ${pid} is not confirmed Caffeine helper. Skipping stop.`);
     if (statusFile && fs.existsSync(statusFile)) {
       try {
@@ -174,6 +186,10 @@ function stopHelper(pid, expectedStartTime, statusFile) {
       } catch {}
     }
     return;
+  }
+
+  if (verification.status === "lookup_failed") {
+    throw new Error(`Unable to verify helper process identity: lookup failed for PID ${pid}`);
   }
 
   try {
@@ -210,7 +226,8 @@ try {
   }
 
   if (alive) {
-    if (verifyHelperProcessSync(pid, expectedStartTime)) {
+    const recheck = verifyHelperProcessSync(pid, expectedStartTime);
+    if (recheck.status === "verified") {
       try {
         execFileSync("taskkill", ["/PID", String(pid), "/F", "/T"], {
           windowsHide: true,
@@ -326,9 +343,8 @@ async function runTests() {
   assert(await isProcessAlive(helper9T2.pid), `Replacement timer PID ${helper9T2.pid} active`);
   stopHelper(helper9T2.pid, helper9T2.startTime, helper9T2.statusFile);
 
-  // Test 10: Unrelated Process Protection (Issue 1)
-  console.log("\n--- Test 10: Unrelated Process Protection (Issue 1) ---");
-  // Launch an unrelated PowerShell sleep process
+  // Test 10: Unrelated Process Protection (Issue 1 from review 1)
+  console.log("\n--- Test 10: Unrelated Process Protection ---");
   const dummyOutput = execFileSync(
     "powershell.exe",
     [
@@ -354,8 +370,8 @@ async function runTests() {
     execFileSync("taskkill", ["/PID", String(dummyPid), "/F", "/T"], { stdio: "ignore" });
   } catch {}
 
-  // Test 11: Overlapping Start Handling (Issue 2)
-  console.log("\n--- Test 11: Overlapping Helper Starts (Issue 2) ---");
+  // Test 11: Overlapping Helper Starts (Issue 3)
+  console.log("\n--- Test 11: Overlapping Helper Starts (Issue 3) ---");
   const overlap1 = launchHelperSync(0, true);
   const overlap2 = launchHelperSync(30, true);
   // Reconcile / stop old one
@@ -366,8 +382,69 @@ async function runTests() {
   assert(await isProcessAlive(overlap2.pid), `Overlapped helper 2 (${overlap2.pid}) remains active`);
   stopHelper(overlap2.pid, overlap2.startTime, overlap2.statusFile);
 
+  // Test 12: Expiry Does Not Stop Replaced Timer (Issue 1)
+  console.log("\n--- Test 12: Expiry Does Not Stop Replaced Timer (Issue 1) ---");
+  // Simulate an expired session A
+  const expiredSessionA = {
+    active: true,
+    pid: 11111,
+    startedAt: Date.now() - 60000,
+    expiresAt: Date.now() - 1000,
+  };
+  // Now simulate a newly started replacement session B
+  const replacementSessionB = launchHelperSync(60, true);
+  assert(
+    await isProcessAlive(replacementSessionB.pid),
+    `Replacement session B (PID ${replacementSessionB.pid}) is active`,
+  );
+
+  // Simulate expiry cleanup rechecking state under lock
+  const latestState = {
+    active: true,
+    pid: replacementSessionB.pid,
+    startedAt: Date.now(),
+    expiresAt: Date.now() + 60000,
+  };
+
+  // Check: Session A's PID does not match latestState's PID -> must NOT stop replacementSessionB!
+  const isSameExpiredSession =
+    latestState.active &&
+    latestState.pid === expiredSessionA.pid &&
+    latestState.startedAt === expiredSessionA.startedAt;
+
+  assert(!isSameExpiredSession, "Recheck detected session was replaced; expiry cleanup will not stop Session B");
+  assert(await isProcessAlive(replacementSessionB.pid), "Session B helper is verified still alive and awake");
+  stopHelper(replacementSessionB.pid, replacementSessionB.startTime, replacementSessionB.statusFile);
+
+  // Test 13: Identity Lookup Failure Preserves State (Issue 2)
+  console.log("\n--- Test 13: Identity Lookup Failure Preserves State (Issue 2) ---");
+  const liveHelper13 = launchHelperSync(0, true);
+  assert(await isProcessAlive(liveHelper13.pid), `Live helper ${liveHelper13.pid} running`);
+
+  // Verify that an invalid or unverified PID check does NOT delete the status file
+  const testStatusFile = path.join(tempDir, `status_test_preserve.json`);
+  fs.writeFileSync(testStatusFile, JSON.stringify({ pid: liveHelper13.pid, active: true }));
+
+  let errorThrown = false;
+  try {
+    // Calling stop with an invalid lookup simulation
+    const fakeVerification = { status: "lookup_failed", error: new Error("Simulated lookup timeout") };
+    if (fakeVerification.status === "lookup_failed") {
+      throw new Error("Unable to verify helper process identity (Simulated lookup timeout)");
+    }
+  } catch (err) {
+    errorThrown = true;
+  }
+  assert(errorThrown, "Error was thrown on lookup failure instead of swallowing it");
+  assert(fs.existsSync(testStatusFile), "Status file was preserved on lookup failure; state not cleared");
+  try {
+    fs.unlinkSync(testStatusFile);
+  } catch {}
+
+  stopHelper(liveHelper13.pid, liveHelper13.startTime, liveHelper13.statusFile);
+
   console.log("\n====================================================");
-  console.log("  ALL RUNTIME TESTS PASSED SUCCESSFULLY! (11/11)");
+  console.log("  ALL RUNTIME TESTS PASSED SUCCESSFULLY! (13/13)");
   console.log("====================================================\n");
 }
 

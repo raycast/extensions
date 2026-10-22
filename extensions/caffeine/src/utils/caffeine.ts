@@ -25,15 +25,20 @@ function withLocalLock<T>(fn: () => Promise<T>): Promise<T> {
 }
 
 // Cross-command file lock to serialize state changes across both Caffeine and Caffeine-Tray commands
-async function acquireFileLock(maxWaitMs = 10000): Promise<() => Promise<void>> {
+export async function acquireFileLock(maxWaitMs = 10000): Promise<() => Promise<void>> {
   const lockFile = path.join(getStateDirectory(), "caffeine.lock");
   const start = Date.now();
-  let fd: number | null = null;
+  let acquired = false;
 
   while (Date.now() - start < maxWaitMs) {
     try {
-      fd = fs.openSync(lockFile, "wx");
-      fs.writeSync(fd, JSON.stringify({ pid: process.pid, time: Date.now() }));
+      const fd = fs.openSync(lockFile, "wx");
+      try {
+        fs.writeSync(fd, JSON.stringify({ pid: process.pid, time: Date.now() }));
+      } finally {
+        fs.closeSync(fd);
+      }
+      acquired = true;
       break;
     } catch (err: unknown) {
       if ((err as NodeJS.ErrnoException).code === "EEXIST") {
@@ -43,7 +48,7 @@ async function acquireFileLock(maxWaitMs = 10000): Promise<() => Promise<void>> 
             try {
               fs.unlinkSync(lockFile);
             } catch {
-              // Ignore unlink error
+              // Ignore unlink error if another process released it concurrently
             }
           }
         } catch {
@@ -56,7 +61,7 @@ async function acquireFileLock(maxWaitMs = 10000): Promise<() => Promise<void>> 
     }
   }
 
-  if (fd === null) {
+  if (!acquired) {
     throw new Error("Timed out waiting to acquire Caffeine state lock.");
   }
 
@@ -64,13 +69,6 @@ async function acquireFileLock(maxWaitMs = 10000): Promise<() => Promise<void>> 
   return async () => {
     if (released) return;
     released = true;
-    try {
-      if (fd !== null) {
-        fs.closeSync(fd);
-      }
-    } catch {
-      // Ignore close error
-    }
     try {
       if (fs.existsSync(lockFile)) {
         fs.unlinkSync(lockFile);
@@ -108,11 +106,42 @@ export async function getCurrentState(): Promise<CaffeineState> {
       return DEFAULT_INACTIVE_STATE;
     }
 
-    // Timer expiration check
-    if (typeof state.expiresAt === "number" && state.expiresAt > 0) {
-      if (Date.now() >= state.expiresAt) {
-        return await stopCaffeine();
-      }
+    // Timer expiration check: Recheck the expired session under the lock before stopping it
+    if (typeof state.expiresAt === "number" && state.expiresAt > 0 && Date.now() >= state.expiresAt) {
+      return await withSerializedState(async () => {
+        const latestRaw = await LocalStorage.getItem<string>(STORAGE_KEY);
+        if (!latestRaw) {
+          return DEFAULT_INACTIVE_STATE;
+        }
+        const latestState = JSON.parse(latestRaw) as CaffeineState;
+
+        // Verify this is STILL the exact same session that expired (was not replaced by startCaffeine)
+        if (!latestState.active || latestState.pid !== state.pid || latestState.startedAt !== state.startedAt) {
+          // A new session was started while waiting for the lock; do not terminate it!
+          return latestState.active ? latestState : DEFAULT_INACTIVE_STATE;
+        }
+
+        // Verify it is still expired
+        if (
+          typeof latestState.expiresAt === "number" &&
+          latestState.expiresAt > 0 &&
+          Date.now() < latestState.expiresAt
+        ) {
+          return latestState;
+        }
+
+        // It is confirmed to be the expired session: cleanly terminate helper and reset state
+        if (latestState.pid) {
+          try {
+            await terminateHelperProcess(latestState.pid, latestState.processStartTime, latestState.statusFilePath);
+          } catch {
+            // Ignore termination error on natural expiry
+          }
+        }
+
+        await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_INACTIVE_STATE));
+        return DEFAULT_INACTIVE_STATE;
+      });
     }
 
     // Process liveness check (fast, non-blocking check via helper status file & process signal)
@@ -122,9 +151,11 @@ export async function getCurrentState(): Promise<CaffeineState> {
         const latestRaw = await LocalStorage.getItem<string>(STORAGE_KEY);
         if (latestRaw) {
           const latestState = JSON.parse(latestRaw) as CaffeineState;
-          if (latestState.pid === state.pid) {
+          if (latestState.pid === state.pid && latestState.startedAt === state.startedAt) {
             await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_INACTIVE_STATE));
+            return DEFAULT_INACTIVE_STATE;
           }
+          return latestState.active ? latestState : DEFAULT_INACTIVE_STATE;
         }
         return DEFAULT_INACTIVE_STATE;
       });
@@ -150,7 +181,7 @@ export async function startCaffeine(
     const shouldPreventDisplay =
       preventDisplaySleepOption !== undefined ? preventDisplaySleepOption : (prefs.preventDisplaySleep ?? true);
 
-    // Capture existing running helper details before starting replacement
+    // Capture existing running helper details under the lock before starting replacement
     let oldPid: number | undefined;
     let oldStartTime: number | undefined;
     let oldStatusPath: string | undefined;
@@ -194,7 +225,7 @@ export async function startCaffeine(
       try {
         await terminateHelperProcess(oldPid, oldStartTime, oldStatusPath);
       } catch {
-        // Ignore error
+        // Ignore error when terminating replaced helper since new helper is already active
       }
     }
 
@@ -205,19 +236,32 @@ export async function startCaffeine(
 /**
  * Stops Caffeine and restores Windows normal power management.
  * Serialized to ensure all processes and state are cleanly reconciled.
+ * Preserves saved details and throws if identity verification fails or times out.
  */
 export async function stopCaffeine(): Promise<CaffeineState> {
   return withSerializedState(async () => {
+    let savedPid: number | undefined;
+    let savedStartTime: number | undefined;
+    let savedStatusPath: string | undefined;
+
     try {
       const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
       if (raw) {
         const state = JSON.parse(raw) as CaffeineState;
-        if (state.pid) {
-          await terminateHelperProcess(state.pid, state.processStartTime, state.statusFilePath);
+        if (state.active && state.pid) {
+          savedPid = state.pid;
+          savedStartTime = state.processStartTime;
+          savedStatusPath = state.statusFilePath;
         }
       }
     } catch {
       // Ignore read error
+    }
+
+    if (savedPid) {
+      // If terminateHelperProcess throws because identity lookup timed out or failed,
+      // the error propagates, preserving saved details in LocalStorage!
+      await terminateHelperProcess(savedPid, savedStartTime, savedStatusPath);
     }
 
     await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_INACTIVE_STATE));
