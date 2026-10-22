@@ -1,4 +1,4 @@
-/** ISO 3166-1 alpha-2 codes; display names come from Intl so they follow the system language. */
+/** ISO 3166-1 alpha-2 codes; display names come from Intl, in English (Raycast extensions use US English). */
 const CODES =
   "AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ " +
   "CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR " +
@@ -17,16 +17,16 @@ export interface Country {
 /**
  * All countries sorted by display name.
  *
- * @returns Countries with localized names.
+ * @returns Countries with English names.
  */
 export function listCountries(): Country[] {
   let names: Intl.DisplayNames | undefined;
   try {
-    names = new Intl.DisplayNames(undefined, { type: "region" });
+    names = new Intl.DisplayNames(["en"], { type: "region" });
   } catch {
     names = undefined;
   }
   return CODES.split(" ")
     .map((code) => ({ code, name: names?.of(code) ?? code }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => a.name.localeCompare(b.name, "en"));
 }
