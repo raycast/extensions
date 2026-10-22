@@ -426,6 +426,15 @@ async function performExchange(
       })
       .then((currencyData: CurrencyResult | void) => {
         if (currencyData) {
+          // The keyless ECB table covers ~30 currencies; don't divide by a missing source rate
+          if (!currencyData.conversion_rates[fromCode]) {
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Error",
+              message: `${PROVIDER_LABELS[provider]} has no rate for ${fromCode}`,
+            });
+            return;
+          }
           return enrichExchangeData(currencyData, amount, fromCode, filter.toLocaleLowerCase(), pinned);
         }
       });
@@ -643,6 +652,7 @@ function enrichExchangeData(
   currencyData.conversion_rate_pin_exchanged = pinned
     ?.filter(
       (it) =>
+        currencyData.conversion_rates[it] !== undefined &&
         currencyCode2CountryAndRegion[it] !== undefined &&
         currencyCode2Name[it] !== undefined &&
         it !== fromCode &&

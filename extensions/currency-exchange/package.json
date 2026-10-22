@@ -7,8 +7,7 @@
   "author": "xeric",
   "contributors": [
     "daudln",
-    "taken",
-    "cahthuranag"
+    "taken"
   ],
   "license": "MIT",
   "commands": [
@@ -37,7 +36,7 @@
           "value": "unirate"
         },
         {
-          "title": "AllRatesToday (ECB reference rates, no key)",
+          "title": "AllRatesToday (ECB Reference Rates, No Key)",
           "value": "allratestoday"
         }
       ]

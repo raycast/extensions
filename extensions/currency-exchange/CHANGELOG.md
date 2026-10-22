@@ -2,7 +2,7 @@
 
 ## [Add AllRatesToday provider] - {PR_MERGE_DATE}
 
-- Added "AllRatesToday (ECB reference rates, no key)" as a third Rate Provider option. It needs no API key and serves the ECB daily reference table (~30 currencies, latest only).
+- Added "AllRatesToday (ECB Reference Rates, No Key)" as a third Rate Provider option. It needs no API key and serves the ECB daily reference table (~30 currencies, latest only). Picking a source currency the provider has no rate for now shows an error instead of infinite amounts, and pins it does not cover are hidden.
 - API Key preference is no longer required, since the new provider does not use one.
 
 ## [Add UniRateAPI as alternate provider] - 2026-04-29
