@@ -109,6 +109,18 @@ export type HelperVerificationResult =
   | { status: "mismatch"; reason: string }
   | { status: "lookup_failed"; error: Error };
 
+export type VerifierFunction = (
+  pid: number,
+  expectedStartTime?: number,
+  timeoutMs?: number,
+) => Promise<HelperVerificationResult>;
+
+let customVerifier: VerifierFunction | null = null;
+
+export function setCustomVerifier(verifier: VerifierFunction | null): void {
+  customVerifier = verifier;
+}
+
 /**
  * Thoroughly verifies the process identity and creation time before terminating or replacing it.
  * Distinguishes between confirmed identity mismatches vs lookup failures/timeouts.
@@ -118,6 +130,10 @@ export function verifyHelperIdentity(
   expectedStartTime?: number,
   timeoutMs = 4000,
 ): Promise<HelperVerificationResult> {
+  if (customVerifier) {
+    return customVerifier(pid, expectedStartTime, timeoutMs);
+  }
+
   return new Promise((resolve) => {
     if (!pid || typeof pid !== "number" || isNaN(pid) || pid <= 0) {
       resolve({ status: "not_running" });

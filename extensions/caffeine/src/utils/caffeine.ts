@@ -4,7 +4,7 @@ import path from "path";
 import { getStateDirectory, isPidAlive, launchHelperProcess, terminateHelperProcess } from "./process";
 import { CaffeineState } from "./types";
 
-const STORAGE_KEY = "caffeine_state_v1";
+export const STORAGE_KEY = "caffeine_state_v1";
 
 export const DEFAULT_INACTIVE_STATE: CaffeineState = {
   active: false,

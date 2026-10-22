@@ -1,3 +1,4 @@
+const Module = require("module");
 const { execFileSync } = require("child_process");
 const fs = require("fs");
 const os = require("os");
@@ -12,6 +13,44 @@ const tempDir = path.join(os.tmpdir(), "raycast-caffeine-tests");
 if (!fs.existsSync(tempDir)) {
   fs.mkdirSync(tempDir, { recursive: true });
 }
+
+// Set up controlled mock for @raycast/api so production functions can run under Node test runner
+const mockLocalStorage = {
+  _store: new Map(),
+  async getItem(key) {
+    return this._store.get(key);
+  },
+  async setItem(key, value) {
+    this._store.set(key, String(value));
+  },
+  async removeItem(key) {
+    this._store.delete(key);
+  },
+  clear() {
+    this._store.clear();
+  },
+};
+
+const mockRaycastApi = {
+  environment: {
+    supportPath: tempDir,
+    assetsPath: path.resolve("assets"),
+  },
+  LocalStorage: mockLocalStorage,
+  getPreferenceValues: () => ({ preventDisplaySleep: true }),
+};
+
+const originalRequire = Module.prototype.require;
+Module.prototype.require = function (id) {
+  if (id === "@raycast/api") {
+    return mockRaycastApi;
+  }
+  return originalRequire.apply(this, arguments);
+};
+
+// Import production compiled functions
+const { startCaffeine, stopCaffeine, getCurrentState, STORAGE_KEY } = require("../.tmp/dist/utils/caffeine.js");
+const { verifyHelperIdentity, terminateHelperProcess, setCustomVerifier } = require("../.tmp/dist/utils/process.js");
 
 function assert(condition, message) {
   if (!condition) {
@@ -343,7 +382,7 @@ async function runTests() {
   assert(await isProcessAlive(helper9T2.pid), `Replacement timer PID ${helper9T2.pid} active`);
   stopHelper(helper9T2.pid, helper9T2.startTime, helper9T2.statusFile);
 
-  // Test 10: Unrelated Process Protection (Issue 1 from review 1)
+  // Test 10: Unrelated Process Protection
   console.log("\n--- Test 10: Unrelated Process Protection ---");
   const dummyOutput = execFileSync(
     "powershell.exe",
@@ -370,78 +409,102 @@ async function runTests() {
     execFileSync("taskkill", ["/PID", String(dummyPid), "/F", "/T"], { stdio: "ignore" });
   } catch {}
 
-  // Test 11: Overlapping Helper Starts (Issue 3)
-  console.log("\n--- Test 11: Overlapping Helper Starts (Issue 3) ---");
-  const overlap1 = launchHelperSync(0, true);
-  const overlap2 = launchHelperSync(30, true);
-  // Reconcile / stop old one
-  stopHelper(overlap1.pid, overlap1.startTime, overlap1.statusFile);
-  await new Promise((r) => setTimeout(r, 400));
+  // Test 11: Production startCaffeine() Overlapping Calls (Issue 1 & 3)
+  console.log("\n--- Test 11: Production startCaffeine() Overlapping Calls (Issue 1 & 3) ---");
+  mockLocalStorage.clear();
 
-  assert(!(await isProcessAlive(overlap1.pid, 1)), `Overlapped helper 1 (${overlap1.pid}) stopped`);
-  assert(await isProcessAlive(overlap2.pid), `Overlapped helper 2 (${overlap2.pid}) remains active`);
-  stopHelper(overlap2.pid, overlap2.startTime, overlap2.statusFile);
+  // Trigger two real startCaffeine() calls concurrently
+  const [res1, res2] = await Promise.all([startCaffeine(30), startCaffeine(60)]);
 
-  // Test 12: Expiry Does Not Stop Replaced Timer (Issue 1)
-  console.log("\n--- Test 12: Expiry Does Not Stop Replaced Timer (Issue 1) ---");
-  // Simulate an expired session A
+  assert(res1 && res1.pid, `First start call resolved with PID ${res1.pid}`);
+  assert(res2 && res2.pid, `Second start call resolved with PID ${res2.pid}`);
+  assert(res1.pid !== res2.pid, "Two distinct helper processes were spawned");
+
+  // State must track the winning helper
+  const currentState11 = await getCurrentState();
+  assert(currentState11.active === true, "Current state is active");
+  const activePid = currentState11.pid;
+  const replacedPid = activePid === res1.pid ? res2.pid : res1.pid;
+
+  // Wait grace period for termination of the replaced helper
+  await new Promise((r) => setTimeout(r, 800));
+  assert(!(await isProcessAlive(replacedPid, 1)), `Replaced helper ${replacedPid} was cleanly terminated`);
+  assert(await isProcessAlive(activePid), `Active helper ${activePid} is still running`);
+
+  // Clean up active helper via production stopCaffeine()
+  await stopCaffeine();
+  assert(!(await isProcessAlive(activePid, 1)), `Active helper ${activePid} was stopped by stopCaffeine()`);
+  const finalState11 = await getCurrentState();
+  assert(finalState11.active === false, "State is cleanly inactive after stopCaffeine()");
+
+  // Test 12: Production getCurrentState() Expiry Does Not Stop Replaced Timer (Issue 1 & 3)
+  console.log("\n--- Test 12: Production getCurrentState() Expiry Recheck (Issue 1 & 3) ---");
+  mockLocalStorage.clear();
+
+  // 1. Seed storage with an expired session A
+  const expiredPid = 88888;
   const expiredSessionA = {
     active: true,
-    pid: 11111,
+    pid: expiredPid,
+    processStartTime: Date.now() - 60000,
+    statusFilePath: path.join(tempDir, "status_expired_a.json"),
     startedAt: Date.now() - 60000,
-    expiresAt: Date.now() - 1000,
+    expiresAt: Date.now() - 1000, // Expired 1 second ago
+    durationSeconds: 60,
+    preventDisplaySleep: true,
   };
-  // Now simulate a newly started replacement session B
-  const replacementSessionB = launchHelperSync(60, true);
-  assert(
-    await isProcessAlive(replacementSessionB.pid),
-    `Replacement session B (PID ${replacementSessionB.pid}) is active`,
-  );
+  await mockLocalStorage.setItem(STORAGE_KEY, JSON.stringify(expiredSessionA));
 
-  // Simulate expiry cleanup rechecking state under lock
-  const latestState = {
-    active: true,
-    pid: replacementSessionB.pid,
-    startedAt: Date.now(),
-    expiresAt: Date.now() + 60000,
-  };
+  // 2. Start replacement session B using production startCaffeine()
+  const sessionB = await startCaffeine(60);
+  assert(await isProcessAlive(sessionB.pid), `Replacement session B (PID ${sessionB.pid}) is active`);
 
-  // Check: Session A's PID does not match latestState's PID -> must NOT stop replacementSessionB!
-  const isSameExpiredSession =
-    latestState.active &&
-    latestState.pid === expiredSessionA.pid &&
-    latestState.startedAt === expiredSessionA.startedAt;
+  // 3. Invoke production getCurrentState() - rechecks under lock and must NOT stop session B
+  const stateAfterCheck = await getCurrentState();
+  assert(stateAfterCheck.active === true, "Session remains active after expiry check");
+  assert(stateAfterCheck.pid === sessionB.pid, "Session B PID is preserved in state");
+  assert(await isProcessAlive(sessionB.pid), "Session B helper is verified still running");
 
-  assert(!isSameExpiredSession, "Recheck detected session was replaced; expiry cleanup will not stop Session B");
-  assert(await isProcessAlive(replacementSessionB.pid), "Session B helper is verified still alive and awake");
-  stopHelper(replacementSessionB.pid, replacementSessionB.startTime, replacementSessionB.statusFile);
+  // Clean up session B
+  await stopCaffeine();
+  assert(!(await isProcessAlive(sessionB.pid, 1)), "Session B cleanly terminated");
 
-  // Test 13: Identity Lookup Failure Preserves State (Issue 2)
-  console.log("\n--- Test 13: Identity Lookup Failure Preserves State (Issue 2) ---");
-  const liveHelper13 = launchHelperSync(0, true);
-  assert(await isProcessAlive(liveHelper13.pid), `Live helper ${liveHelper13.pid} running`);
+  // Test 13: Production stopCaffeine() Preserves State on Identity Lookup Failure (Issue 2 & 3)
+  console.log("\n--- Test 13: Production stopCaffeine() Identity Lookup Failure (Issue 2 & 3) ---");
+  mockLocalStorage.clear();
 
-  // Verify that an invalid or unverified PID check does NOT delete the status file
-  const testStatusFile = path.join(tempDir, `status_test_preserve.json`);
-  fs.writeFileSync(testStatusFile, JSON.stringify({ pid: liveHelper13.pid, active: true }));
+  // 1. Start a real helper using production startCaffeine()
+  const liveState = await startCaffeine(0);
+  assert(await isProcessAlive(liveState.pid), `Live helper ${liveState.pid} running`);
 
-  let errorThrown = false;
+  // 2. Set controlled process response: simulate identity lookup timeout/failure
+  setCustomVerifier(async () => ({
+    status: "lookup_failed",
+    error: new Error("Simulated PowerShell lookup timeout"),
+  }));
+
+  // 3. Call production stopCaffeine() - must throw and NOT clear state or delete status file!
+  let errorCaught = false;
   try {
-    // Calling stop with an invalid lookup simulation
-    const fakeVerification = { status: "lookup_failed", error: new Error("Simulated lookup timeout") };
-    if (fakeVerification.status === "lookup_failed") {
-      throw new Error("Unable to verify helper process identity (Simulated lookup timeout)");
-    }
+    await stopCaffeine();
   } catch (err) {
-    errorThrown = true;
+    errorCaught = true;
+    assert(err.message.includes("Unable to verify helper process identity"), `Error message matches: ${err.message}`);
   }
-  assert(errorThrown, "Error was thrown on lookup failure instead of swallowing it");
-  assert(fs.existsSync(testStatusFile), "Status file was preserved on lookup failure; state not cleared");
-  try {
-    fs.unlinkSync(testStatusFile);
-  } catch {}
+  assert(errorCaught, "stopCaffeine() threw error on lookup failure instead of swallowing it");
 
-  stopHelper(liveHelper13.pid, liveHelper13.startTime, liveHelper13.statusFile);
+  // 4. Verify state and status file were preserved!
+  const preservedState = await getCurrentState();
+  assert(preservedState.active === true, "State was preserved as active in LocalStorage");
+  assert(preservedState.pid === liveState.pid, "Helper PID was preserved in LocalStorage");
+  assert(fs.existsSync(liveState.statusFilePath), "Status file was preserved on disk");
+
+  // 5. Restore normal verifier and stop helper cleanly
+  setCustomVerifier(null);
+  await stopCaffeine();
+  assert(!(await isProcessAlive(liveState.pid, 1)), "Helper cleanly stopped after verifier restored");
+  const finalState13 = await getCurrentState();
+  assert(finalState13.active === false, "State cleanly marked inactive after successful stop");
 
   console.log("\n====================================================");
   console.log("  ALL RUNTIME TESTS PASSED SUCCESSFULLY! (13/13)");
