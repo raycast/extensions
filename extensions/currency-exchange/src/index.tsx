@@ -544,7 +544,7 @@ async function uniRateAPI(historyDate: Date | null, signal: AbortSignal): Promis
         historyDate.getDate(),
       ).padStart(2, "0")}`
     : "";
-  const url = `https://api.unirateapi.com/api/${path}?from=USD${dateParam}&api_key=${encodeURIComponent(api_key)}`;
+  const url = `https://api.unirateapi.com/api/${path}?from=USD${dateParam}&api_key=${encodeURIComponent(api_key ?? "")}`;
   console.log(`make API call to https://api.unirateapi.com/api/${path}?from=USD${dateParam}&api_key=***`);
 
   const upstream = await fetch(url, {
