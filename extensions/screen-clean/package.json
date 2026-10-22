@@ -1,0 +1,113 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screen-clean",
+  "title": "Screen Clean",
+  "description": "Black out every display and optionally lock the keyboard so you can clean your screen and keyboard.",
+  "icon": "icon.png",
+  "author": "yanggong-zi",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Fun",
+    "System"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "duration",
+      "title": "Cleaning Duration",
+      "description": "How long the screen stays black. The session always ends automatically.",
+      "type": "dropdown",
+      "required": true,
+      "default": "300",
+      "data": [
+        {
+          "title": "30 seconds",
+          "value": "30"
+        },
+        {
+          "title": "1 minute",
+          "value": "60"
+        },
+        {
+          "title": "2 minutes",
+          "value": "120"
+        },
+        {
+          "title": "5 minutes",
+          "value": "300"
+        },
+        {
+          "title": "Until manually stopped (max 30 min)",
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "name": "strictKeyboardLock",
+      "title": "Strict Keyboard Lock",
+      "description": "Swallow keyboard events system-wide. macOS needs Accessibility permission; Windows uses a low-level keyboard hook.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Lock keyboard globally"
+    },
+    {
+      "name": "showExitHint",
+      "title": "Exit Hint",
+      "description": "Show a faint hint explaining how to exit before the screen goes fully black.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show the exit hint"
+    }
+  ],
+  "commands": [
+    {
+      "name": "start-cleaning",
+      "title": "Start Cleaning Mode",
+      "subtitle": "Screen Clean",
+      "description": "Black out all displays and optionally lock the keyboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-cleaning",
+      "title": "Stop Cleaning Mode",
+      "subtitle": "Screen Clean",
+      "description": "Exit cleaning mode immediately.",
+      "mode": "no-view"
+    },
+    {
+      "name": "grant-accessibility",
+      "title": "Grant Keyboard Lock Permission",
+      "subtitle": "Screen Clean",
+      "description": "Request Accessibility permission for the ScreenCleaner helper used by strict keyboard lock.",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "node scripts/build-helper.cjs && ray build",
+    "build:helper": "node scripts/build-helper.cjs",
+    "dev": "node scripts/build-helper.cjs && ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish this extension to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
