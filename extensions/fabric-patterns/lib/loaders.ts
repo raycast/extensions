@@ -24,6 +24,8 @@ export interface PatternItem {
   description?: string;
   /** Lives in the Custom Patterns folder (editable). */
   own: boolean;
+  /** Own, and a built-in of the same name sits under it: the name's pin, run count and model pin are the built-in's too. */
+  shadows: boolean;
 }
 
 export interface SessionItem {
@@ -106,9 +108,11 @@ export async function loadPatterns(fabricPath: string, dirs: PatternDirs = {}): 
   const names = await listNames(fabricPath, "--listpatterns", dirs.env);
   const explained = parseExplanations(readText(join(patternsDir, "pattern_explanations.md")) ?? "");
   const own = dirNames(myDir);
+  const builtIn = dirNames(patternsDir);
   return names.map((name) => ({
     name,
     own: own.has(name),
+    shadows: own.has(name) && builtIn.has(name),
     description:
       explained.get(name) ?? firstProseLine(readText(join(own.has(name) ? myDir : patternsDir, name, "system.md"))),
   }));
@@ -175,7 +179,6 @@ export const loadStrategies = (fabricPath: string, env?: NodeJS.ProcessEnv) =>
   listNames(fabricPath, "--liststrategies", env);
 export const loadContexts = (fabricPath: string, env?: NodeJS.ProcessEnv) =>
   listNames(fabricPath, "--listcontexts", env);
-export const loadModels = (fabricPath: string, env?: NodeJS.ProcessEnv) => listNames(fabricPath, "--listmodels", env);
 /** `-L`'s table, each model with its vendor: the same name under two vendors stays two rows. */
 export const loadModelRows = async (fabricPath: string, env?: NodeJS.ProcessEnv): Promise<ModelRow[]> =>
   parseModels(await fabricOut(fabricPath, ["--listmodels"], env));

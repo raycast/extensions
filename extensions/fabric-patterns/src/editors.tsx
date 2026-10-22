@@ -17,7 +17,7 @@ import { useMemo, useRef, useState } from "react";
 import {
   CONTEXTS_DIR,
   listNames,
-  loadModels,
+  loadModelRows,
   orEmpty,
   profileKey,
   readStrategy,
@@ -25,6 +25,7 @@ import {
   SESSIONS_DIR,
   STRATEGIES_DIR,
 } from "../lib/loaders";
+import { groupByVendor, pairKey, parsePairKey } from "../lib/models";
 import { lastAnswer, messageCount, parseSession, renderTranscript } from "../lib/session";
 import { isModelName, isVendorName, modelLabel, readWorkflow, stepsText, type WorkflowStep } from "../lib/workflow";
 import {
@@ -221,10 +222,12 @@ export function EditContext({ name, onSaved }: { name?: string; onSaved?: (name:
 
 const checkedName = (v: string) => checkName(v.trim());
 
-function readProfile(name: string) {
-  const yaml = readText(join(PROFILES_DIR, `${name}.yaml`)) ?? "";
+/** A Config's fields as saved; a new one (no name) starts blank. */
+function readProfile(name?: string) {
+  const yaml = (name && readText(join(PROFILES_DIR, `${name}.yaml`))) || "";
   return {
     model: profileKey(yaml, "model") ?? "",
+    vendor: profileKey(yaml, "vendor") ?? "",
     temperature: profileKey(yaml, "temperature") ?? "",
     topp: profileKey(yaml, "topp") ?? "",
     suppressThink: profileKey(yaml, "suppressThink") === "true",
@@ -232,20 +235,23 @@ function readProfile(name: string) {
 }
 
 export function EditProfile({ name, onSaved }: { name?: string; onSaved?: (name: string) => void }) {
-  const [start] = useState(() =>
-    name ? readProfile(name) : { model: "", temperature: "", topp: "", suppressThink: false },
-  );
+  const [start] = useState(() => readProfile(name));
+  // The Model value is a vendor|model pair key, as on the Run form; "" lets fabric choose. The saved pair
+  // keys the same way (vendor blank when the file names none) and stays an item while fabric doesn't list
+  // it, so a hand-written Config's model and vendor round-trip unchanged.
+  const savedKey = start.model && `${start.vendor}|${start.model}`;
   const [newName, setNewName] = useState(name ?? "");
-  const [model, setModel] = useState(start.model);
+  const [model, setModel] = useState(savedKey);
   const [temperature, setTemperature] = useState(start.temperature);
   const [topp, setTopp] = useState(start.topp);
   const [suppressThink, setSuppressThink] = useState(start.suppressThink);
   const { error, setError, run, nameRef } = useSave(() => newName.trim(), onSaved);
-  const { data: models } = usePromise(() => orEmpty(loadModels(prefs().fabricPath)));
+  const { data: rows } = usePromise(() => orEmpty(loadModelRows(prefs().fabricPath)));
+  const pair = model === savedKey ? start : parsePairKey(model);
   return (
     <Form
       navigationTitle={name ? `Config · ${name}` : "New Config"}
-      isLoading={!models}
+      isLoading={!rows}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -257,7 +263,7 @@ export function EditProfile({ name, onSaved }: { name?: string; onSaved?: (name:
                   saveOwnFile(
                     PROFILES_DIR,
                     `${checkedName(newName)}.yaml`,
-                    profileYaml({ model, temperature, topp, suppressThink }),
+                    profileYaml({ model: pair?.model, vendor: pair?.vendor, temperature, topp, suppressThink }),
                     PATTERNS_ROOT,
                     name && `${name}.yaml`,
                   );
@@ -286,8 +292,18 @@ export function EditProfile({ name, onSaved }: { name?: string; onSaved?: (name:
       />
       <Form.Dropdown id="model" title="Model" value={model} onChange={setModel}>
         <Form.Dropdown.Item value="" title="Let fabric choose" />
-        {(models ?? []).map((m) => (
-          <Form.Dropdown.Item key={m} value={m} title={m} />
+        {savedKey && !rows?.some((r) => pairKey(r) === savedKey) && (
+          <Form.Dropdown.Item
+            value={savedKey}
+            title={`${start.model} (saved; ${start.vendor ? `${start.vendor} doesn't list it` : "no vendor"})`}
+          />
+        )}
+        {groupByVendor(rows ?? []).map(([vendor, rs]) => (
+          <Form.Dropdown.Section key={vendor} title={vendor}>
+            {rs.map((r) => (
+              <Form.Dropdown.Item key={pairKey(r)} value={pairKey(r)} title={r.model} />
+            ))}
+          </Form.Dropdown.Section>
         ))}
       </Form.Dropdown>
       <Form.TextField

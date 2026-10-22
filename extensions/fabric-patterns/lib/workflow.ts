@@ -10,6 +10,7 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { extname, join } from "node:path";
 import { isPlainName, VAR_NAME } from "./argv";
+import { dict } from "./dict";
 import { variableSpellings, variableValues } from "./variables";
 
 export interface WorkflowStep {
@@ -70,8 +71,7 @@ function readStep(raw: unknown, n: number, installed?: ReadonlySet<string>): Wor
   const variables = own(o, "variables");
   if (variables !== undefined) {
     if (!isObject(variables)) refuse(`step ${n}: variables must be an object`);
-    // No prototype: a variable named `__proto__` stays an own key on the copy.
-    const out: Record<string, string> = Object.create(null);
+    const out = dict<string>();
     for (const [k, v] of Object.entries(variables as Record<string, unknown>)) {
       if (!VAR_NAME.test(k)) refuse(`step ${n}: variable name must be a plain identifier: ${quote(k)}`);
       if (typeof v !== "string" || v.includes("\0"))
@@ -218,7 +218,7 @@ export function workflowVariableValues(
   systemFor: SystemFor,
   values: Record<string, string>,
 ): Record<string, string> {
-  return Object.assign({}, ...steps.map((s) => variableValues(systemFor(s.pattern), values)));
+  return dict(...steps.map((s) => variableValues(systemFor(s.pattern), values)));
 }
 
 export interface StepProgress {

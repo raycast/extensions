@@ -6,6 +6,8 @@
 // `{{ name }}` and `{{name}}` are two variables (probed on 1.4.518). The form
 // shows one field per trimmed name and sends its value under every spelling.
 
+import { dict } from "./dict";
+
 const VAR = /\{\{([ \t]*([A-Za-z_][A-Za-z0-9_-]*)[ \t]*)\}\}/g;
 const BUILT_IN = new Set(["input"]);
 
@@ -26,7 +28,8 @@ export function patternVariables(systemMd: string | undefined): string[] {
 
 /** The `--variable` map fabric needs: each form value under every spelling the pattern uses. */
 export function variableValues(systemMd: string | undefined, values: Record<string, string>): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const [name, raws] of variableSpellings(systemMd)) for (const raw of raws) out[raw] = values[name] ?? "";
+  const out = dict<string>();
+  for (const [name, raws] of variableSpellings(systemMd))
+    for (const raw of raws) out[raw] = Object.hasOwn(values, name) ? values[name] : "";
   return out;
 }

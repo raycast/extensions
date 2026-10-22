@@ -20,7 +20,7 @@ import { basename, dirname, join } from "node:path";
 import { BUILT_IN_STRATEGIES } from "./actions";
 import { isPlainName, NAME } from "./argv";
 import { guardDir, inProtected, PathError } from "./paths";
-import { chainJson, parseWorkflow, type WorkflowStep } from "./workflow";
+import { chainJson, isModelName, isVendorName, parseWorkflow, type WorkflowStep } from "./workflow";
 
 export function checkName(name: string, what = "name"): string {
   // Editors title the field Name (New Name for a rename), so a blank one says so rather than listing
@@ -204,6 +204,7 @@ export function strategyJson(description: string, prompt: string): string {
 
 export interface ProfileFields {
   model?: string;
+  vendor?: string;
   temperature?: string;
   topp?: string;
   suppressThink?: boolean;
@@ -211,8 +212,8 @@ export interface ProfileFields {
 
 /**
  * A run profile as fabric `--config` YAML. Only keys fabric was probed to
- * honor are written (it ignores unknown ones silently), never `pattern:`,
- * and blank fields are left out.
+ * honor are written (it ignores unknown ones silently), plus `vendor`, which
+ * loadProfiles reads back for --vendor; never `pattern:`, and blank fields are left out.
  */
 export function profileYaml(f: ProfileFields): string {
   const lines: string[] = [];
@@ -223,8 +224,12 @@ export function profileYaml(f: ProfileFields): string {
     lines.push(`${k}: ${n}`);
   };
   if (f.model?.trim()) {
-    if (!/^[A-Za-z0-9_./:@-]+$/.test(f.model)) throw new PathError(`not a model name: ${f.model}`);
+    if (!isModelName(f.model)) throw new PathError(`not a model name: ${f.model}`);
     lines.push(`model: ${f.model}`);
+    if (f.vendor?.trim()) {
+      if (!isVendorName(f.vendor)) throw new PathError(`not a vendor name: ${f.vendor}`);
+      lines.push(`vendor: ${f.vendor}`);
+    }
   }
   num("temperature", f.temperature, 2);
   num("topp", f.topp, 1);

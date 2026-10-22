@@ -15,6 +15,7 @@ import { join } from "node:path";
 import { notifyArgv, openInEditorArgv } from "../lib/macos";
 import { classifyFailure, type StateAction, type StateId, stateFor } from "../lib/states";
 import { missingPins } from "../lib/store";
+import { FAKE_ANTHROPIC_KEY } from "./fake-secrets";
 import { fixture } from "./view-helpers";
 
 describe("ISC-38: fabric's failures map to plain-language states", () => {
@@ -170,7 +171,7 @@ describe("ISC-7: no code path opens fabric's .env", () => {
       writeFileSync(env2, "DEFAULT_VENDOR=x\n");
       linkSync(env2, join(d, "hard.png"));
       linkSync(env2, join(d, "hard.txt"));
-      writeFileSync(join(d, "copy.txt"), "# keys\nexport ANTHROPIC_API_KEY=sk-ant-api03-notreal0123456789\n");
+      writeFileSync(join(d, "copy.txt"), `# keys\nexport ANTHROPIC_API_KEY=${FAKE_ANTHROPIC_KEY}\n`);
       expect(() => classifyFile(join(d, "notes.txt"))).toThrow(/secrets/);
       expect(() => classifyFile(join(d, "pic.png"))).toThrow(/secrets/);
       expect(() => classifyFile(join(d, "hard.png"))).toThrow(/hard-linked/);

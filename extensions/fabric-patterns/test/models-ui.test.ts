@@ -4,7 +4,7 @@
 // Each claim here was shown red by reverting the code it covers; a mutation battery
 // checked each one.
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { ReactElement } from "react";
 import { fake, resetFake, tmp } from "./raycast-mock";
@@ -13,9 +13,9 @@ import { action, actions, dropdown, field, item, lists, loggedArgv, submit } fro
 
 const FAKE = join(import.meta.dir, "fake-fabric.sh");
 const { parseModels, pairKey } = await import("../lib/models");
-const { readText } = await import("../lib/loaders");
+const { loadPatterns, readText } = await import("../lib/loaders");
 const Search = (await import("../src/search")).default;
-const Browse = (await import("../src/browse")).default;
+const { default: Browse, patternRows } = await import("../src/browse");
 const { ConfigureRun } = await import("../src/configure");
 const { PinModel } = await import("../src/pin-model");
 const { ResultView } = await import("../src/result");
@@ -300,6 +300,66 @@ describe("ISC-61.1 / ISC-60: Pin Model stores the pair it was picked under", () 
     expect(pins()).toEqual({});
   });
 
+  const emptyView = (tree: unknown) => elements(tree).find((e) => typeName(e) === "List.EmptyView")!;
+  const pinLoaded = (tree: unknown) =>
+    elements(tree).find((e) => typeName(e) === "List")?.props.selectedItemId === pairKey(HAIKU_CC);
+
+  test("with no models listed, the empty view still offers Unpin Model for a saved pin", async () => {
+    setPins({ summarize: HAIKU_CC });
+    const v = render(PinModel, { pattern: "summarize", rows: [] } as never);
+    await until(() => elements(v.tree).some((e) => e.props.title === "Unpin Model"));
+    expect(emptyView(v.tree).props.title).toBe("fabric listed no models");
+    await action(v.tree, "Unpin Model").onAction();
+    expect(pins()).toEqual({});
+    expect(fake.nav.pops).toBe(1);
+  });
+
+  // Raycast shows the empty view while the list loads and when the search text filters every row away;
+  // ↵ there must not unpin. The mock doesn't filter on search text, so that case is read as its condition:
+  // rows exist, and the empty view carries no action. Both wait for the pin to load (selectedItemId).
+  test("while models load, the empty view offers no Unpin, even with a pin", async () => {
+    setPins({ summarize: HAIKU_CC });
+    process.env.FAKE_FABRIC_SLEEP = "2";
+    try {
+      const v = render(PinModel, { pattern: "summarize" } as never);
+      await until(() => pinLoaded(v.tree));
+      expect(pinLoaded(v.tree)).toBe(true);
+      expect(emptyView(v.tree).props.title).toBe("Loading models…");
+      expect(actions(emptyView(v.tree))).toEqual([]);
+    } finally {
+      delete process.env.FAKE_FABRIC_SLEEP;
+    }
+  });
+
+  // With rows listed, Raycast shows the empty view only when the search text matches none of them.
+  test("with models listed, the empty view (a search that matches nothing) says so and offers no Unpin", async () => {
+    setPins({ summarize: HAIKU_CC });
+    const v = render(PinModel, { pattern: "summarize", rows: ROWS } as never);
+    await until(() => pinLoaded(v.tree));
+    expect(pinLoaded(v.tree)).toBe(true);
+    expect(emptyView(v.tree).props.title).toBe("No models match");
+    expect(actions(emptyView(v.tree))).toEqual([]);
+  });
+
+  // fabric lists no models here (an empty -L), so the empty view settles only after that load, by when
+  // the pin store has answered too: the absence below is read after both, not before either.
+  test("with no models listed and no pin, the empty view offers nothing", async () => {
+    const fixtures = join(tmp, "no-models");
+    mkdirSync(fixtures, { recursive: true });
+    writeFileSync(join(fixtures, "models.txt"), "Available models:\n");
+    process.env.FAKE_FABRIC_FIXTURES = fixtures;
+    try {
+      const v = render(PinModel, { pattern: "summarize" } as never);
+      const empty = () => elements(v.tree).find((e) => typeName(e) === "List.EmptyView")?.props.title;
+      expect(empty()).toBe("Loading models…");
+      await until(() => empty() === "fabric listed no models");
+      expect(empty()).toBe("fabric listed no models");
+      expect(actions(v.tree)).toEqual([]);
+    } finally {
+      delete process.env.FAKE_FABRIC_FIXTURES;
+    }
+  });
+
   test("Manage Fabric offers Pin Model… on pattern rows only, and hands it the models it loaded", async () => {
     fake.promiseData = lists({ strategy: [{ id: "strategy:cot", name: "cot", type: "strategy", own: false }] });
     const v = render(Browse, undefined as never);
@@ -359,23 +419,54 @@ describe("ISC-60.1 / ISC-60.2: a model pin follows a rename and goes with a dele
     expect(pins()).toEqual({ "zz-a": HAIKU_CC });
   });
 
-  test("deleting a custom pattern that shadows a built-in keeps the pin, which is the built-in's now", async () => {
-    const dir = join(tmp, "custom-shadow");
-    mkdirSync(join(dir, "zz-shadow"), { recursive: true });
-    writeFileSync(join(dir, "zz-shadow", "system.md"), "x\n");
+  // A custom summarize over a built-in one, in folders of its own; the rows come from loadPatterns itself,
+  // as Manage Fabric maps them, with summarize's pin, run count and model pin set.
+  const usageBefore = { pins: ["pattern:summarize"], counts: { "pattern:summarize": 3 } };
+  const shadowing = async () => {
+    const root = join(tmp, `shadow-${Math.random().toString(36).slice(2)}`);
+    const [dir, patternsDir] = [join(root, "custom"), join(root, "patterns")];
+    for (const d of [dir, patternsDir]) {
+      mkdirSync(join(d, "summarize"), { recursive: true });
+      writeFileSync(join(d, "summarize", "system.md"), "x\n");
+    }
     fake.prefs = { ...fake.prefs, customPatternsFolder: dir };
-    setPins({ "zz-shadow": HAIKU_CC });
+    setPins({ summarize: HAIKU_CC });
+    fake.kv.set("usage.v1", JSON.stringify(usageBefore));
+    const loaded = await loadPatterns(FAKE, { patternsDir, myPatternsDir: dir });
+    expect(loaded.find((x) => x.name === "summarize")).toMatchObject({ own: true, shadows: true });
+    const pattern = patternRows(loaded);
+    expect(pattern.filter((x) => x.shadows).map((x) => x.id)).toEqual(["pattern:summarize"]);
     fake.promiseData = lists({
-      pattern: [{ id: "pattern:zz-shadow", name: "zz-shadow", type: "pattern", own: false }],
-      mine: [{ id: "pattern:zz-shadow", name: "zz-shadow", type: "pattern", own: true }],
+      pattern,
+      mine: [{ id: "pattern:summarize", name: "summarize", type: "pattern", own: true }],
     });
     const v = render(Browse, undefined as never);
     dropdown(v.tree).onChange("mine");
+    return { dir, v };
+  };
+
+  test("deleting a custom pattern that shadows a built-in keeps its pin, run count and model pin", async () => {
+    const { dir, v } = await shadowing();
     await action(v.tree, "Delete").onAction();
     await until(() => fake.toasts.length > 0);
+    // Nothing signals a forget that didn't happen; a wrong one is in-memory KV writes, done well inside 20 ms.
     await Bun.sleep(20);
-    expect(fake.toasts.map((t) => t.title)).toEqual(["Deleted zz-shadow"]);
-    expect(pins()).toEqual({ "zz-shadow": HAIKU_CC });
+    expect(fake.toasts.map((t) => t.title)).toEqual(["Deleted summarize"]);
+    expect(existsSync(join(dir, "summarize"))).toBe(false);
+    expect(pins()).toEqual({ summarize: HAIKU_CC });
+    expect(JSON.parse(fake.kv.get("usage.v1")!)).toEqual(usageBefore);
+  });
+
+  test("renaming a custom pattern that shadows a built-in leaves its pin, run count and model pin behind", async () => {
+    const { dir, v } = await shadowing();
+    action(v.tree, "Edit").onAction();
+    expect(typeName(lastPushed())).toBe("EditPattern");
+    const form = render(lastPushed().type as never, lastPushed().props as never);
+    field(form.tree, "name").onChange("zz_mine");
+    await submit(form.tree).onSubmit();
+    expect(existsSync(join(dir, "zz_mine"))).toBe(true);
+    expect(pins()).toEqual({ summarize: HAIKU_CC });
+    expect(JSON.parse(fake.kv.get("usage.v1")!)).toEqual(usageBefore);
   });
 
   test("deleting a custom pattern drops its model pin, run count and pin", async () => {

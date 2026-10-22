@@ -122,14 +122,13 @@ export default function Command() {
 
   const togglePin = async (e: Entry) => setUsage(await store.togglePin(e.id));
   const quickRun = async (e: Runnable) => {
-    let workflow: RunSpec["workflow"];
-    if (e.kind === "workflow") {
-      const chain = recheckChain(e.chain.path, installed);
-      if (!chain) return;
-      // fabric refuses a run with a variable unset, so a chain that needs any opens the form.
-      if (unionVariables(chain.steps, systemPromptFor).length) return configure(e, chain);
-      workflow = { name: e.name, path: e.chain.path, steps: chain.steps };
-    }
+    const chain = e.kind === "workflow" ? recheckChain(e.chain.path, installed) : undefined;
+    if (e.kind === "workflow" && !chain) return;
+    // fabric refuses a run with a variable unset, so a chain or pattern that needs any opens the form,
+    // which asks for the same unionVariables.
+    if (unionVariables(chain?.steps ?? [{ pattern: e.name }], systemPromptFor).length) return configure(e, chain);
+    const workflow: RunSpec["workflow"] =
+      e.kind === "workflow" && chain ? { name: e.name, path: e.chain.path, steps: chain.steps } : undefined;
     const [got, pin] = await Promise.all([readInput(), e.kind === "pattern" ? modelPinFor(e.name) : undefined]);
     if (got.source === "none") {
       const st = stateFor("nothing-selected");

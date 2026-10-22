@@ -310,6 +310,14 @@ describe("variables across a chain", () => {
       extra: "",
     });
   });
+
+  test("a variable named __proto__ stays a key, across steps, and an unset one is blank", () => {
+    const proto = [{ pattern: "p" }, { pattern: "q" }];
+    const sys = () => "Use {{__proto__}}.";
+    const values = JSON.parse('{"__proto__":"fr"}') as Record<string, string>;
+    expect(Object.entries(workflowVariableValues(proto, sys, values))).toEqual([["__proto__", "fr"]]);
+    expect(Object.entries(workflowVariableValues(proto, sys, {}))).toEqual([["__proto__", ""]]);
+  });
 });
 
 describe("fabric's step progress lines", () => {

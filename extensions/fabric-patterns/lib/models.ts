@@ -6,6 +6,7 @@
 // (Anthropic and ClaudeCode share 14), so a model is always kept and sent with its vendor.
 
 import { isPlainName } from "./argv";
+import { dict } from "./dict";
 import { type KV, serialize } from "./store";
 
 export interface ModelPair {
@@ -72,9 +73,7 @@ export class ModelStore {
       return {};
     }
     if (!pins || typeof pins !== "object" || Array.isArray(pins)) return {};
-    // No prototype: a pattern may be named `constructor` or `__proto__` (plain names), and a lookup
-    // must find its own pin or nothing, never an inherited member (review, 2026-10-19).
-    const out: ModelPins = Object.create(null);
+    const out: ModelPins = dict();
     for (const [name, p] of Object.entries(pins))
       if (isPlainName(name) && goodPair(p)) out[name] = { vendor: p.vendor, model: p.model };
     return out;
@@ -92,13 +91,13 @@ export class ModelStore {
   pin(pattern: string, pair: ModelPair): Promise<ModelPins> {
     if (!isPlainName(pattern) || !goodPair(pair))
       return Promise.reject(new Error(`can't pin ${pairKey(pair)} to ${pattern}`));
-    return this.change((pins) => ({ ...pins, [pattern]: { vendor: pair.vendor, model: pair.model } }));
+    return this.change((pins) => dict(pins, { [pattern]: { vendor: pair.vendor, model: pair.model } }));
   }
 
   /** Also how a deleted pattern's pin goes. */
   unpin(pattern: string): Promise<ModelPins> {
     return this.change((pins) => {
-      const rest = { ...pins };
+      const rest = dict(pins);
       delete rest[pattern];
       return rest;
     });
@@ -108,8 +107,10 @@ export class ModelStore {
   rename(from: string, to: string): Promise<ModelPins> {
     return this.change((pins) => {
       if (from === to || !Object.hasOwn(pins, from)) return pins;
-      const { [from]: moved, ...rest } = pins;
-      return { ...rest, [to]: Object.hasOwn(rest, to) ? rest[to] : moved };
+      const next = dict(pins);
+      if (!Object.hasOwn(next, to)) next[to] = pins[from];
+      delete next[from];
+      return next;
     });
   }
 }

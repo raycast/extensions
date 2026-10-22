@@ -57,6 +57,18 @@ const chain = (name: string, body: unknown) => {
   writeFileSync(path, typeof body === "string" ? body : JSON.stringify(body));
   return path;
 };
+/** A built-in pattern with this system.md, under the test's patterns folder. */
+const pattern = (name: string, systemMd: string) => {
+  mkdirSync(join(PATTERNS_DIR, name), { recursive: true });
+  writeFileSync(join(PATTERNS_DIR, name, "system.md"), systemMd);
+};
+/** Search over the fixture patterns plus `name`, then ↵ on its row with text selected. */
+const runPattern = async (name: string) => {
+  fake.promiseData = searchData([...PATTERNS, name]);
+  fake.selected = "some text";
+  const v = render(Search, undefined as never);
+  await action(item(v.tree, `pattern:${name}`), "Run Pattern").onAction();
+};
 const steps = (...ps: string[]) => ({ steps: ps.map((pattern) => ({ pattern })) });
 const argvSent = () => loggedArgv(readText(log));
 const lastPushed = () => fake.nav.pushed.at(-1) as ReactElement<Record<string, unknown>>;
@@ -151,10 +163,8 @@ describe("ISC-88 / ISC-88.1: a missing pattern is refused, not a crash; ↵ re-c
 
 describe("ISC-88.2: ↵ on a chain whose steps need variables opens Configure", () => {
   test("one field per variable across the steps, deduped", async () => {
-    mkdirSync(join(PATTERNS_DIR, "zz_vars"), { recursive: true });
-    writeFileSync(join(PATTERNS_DIR, "zz_vars", "system.md"), "Write in {{lang}} with {{ tone }}.\n");
-    mkdirSync(join(PATTERNS_DIR, "zz_vars2"), { recursive: true });
-    writeFileSync(join(PATTERNS_DIR, "zz_vars2", "system.md"), "Again {{lang}}, then {{input}}.\n");
+    pattern("zz_vars", "Write in {{lang}} with {{ tone }}.\n");
+    pattern("zz_vars2", "Again {{lang}}, then {{input}}.\n");
     const path = chain("vars.json", steps("zz_vars", "zz_vars2"));
     fake.promiseData = searchData([...PATTERNS, "zz_vars", "zz_vars2"]);
     fake.selected = "some text";
@@ -168,6 +178,27 @@ describe("ISC-88.2: ↵ on a chain whose steps need variables opens Configure", 
       .map((e) => e.props.id as string)
       .filter((id) => id?.startsWith("var:"));
     expect(varFields).toEqual(["var:lang", "var:tone"]);
+  });
+});
+
+describe("↵ on a pattern whose system.md needs variables opens Configure, as a chain does", () => {
+  test("Run Pattern pushes ConfigureRun with the pattern and its pin, and spawns nothing", async () => {
+    pattern("zz_pvars", "Translate into {{lang_code}}.\n");
+    fake.kv.set("models.v1", JSON.stringify({ pins: { zz_pvars: { vendor: "Ollama", model: "llama3.2:1b" } } }));
+    await runPattern("zz_pvars");
+    expect(typeName(lastPushed())).toBe("ConfigureRun");
+    expect(lastPushed().props).toMatchObject({
+      pattern: "zz_pvars",
+      pinned: { vendor: "Ollama", model: "llama3.2:1b" },
+    });
+    expect(readText(log)).toBeUndefined();
+  });
+
+  test("a pattern with only {{input}} still runs straight away", async () => {
+    pattern("zz_novars", "Summarize {{input}}.\n");
+    await runPattern("zz_novars");
+    expect(typeName(lastPushed())).not.toBe("ConfigureRun");
+    expect(lastPushed().props.spec).toMatchObject({ pattern: "zz_novars" });
   });
 });
 
@@ -447,8 +478,7 @@ describe("Manage Fabric acts on the row's own file", () => {
 
 describe("Configure sends every spelling; a failed chain toasts its error, not its progress", () => {
   test("ISC-88.2 at submit: each value under every spelling the steps use", async () => {
-    mkdirSync(join(PATTERNS_DIR, "zz_vars"), { recursive: true });
-    writeFileSync(join(PATTERNS_DIR, "zz_vars", "system.md"), "Write in {{lang}} with {{ tone }}.\n");
+    pattern("zz_vars", "Write in {{lang}} with {{ tone }}.\n");
     const path = chain("vars.json", steps("zz_vars"));
     const v = render(ConfigureRun, {
       workflow: { name: "vars", path, steps: steps("zz_vars").steps },

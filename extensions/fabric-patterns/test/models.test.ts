@@ -107,6 +107,13 @@ describe("ISC-60: a model pin persists, follows a rename and is forgotten", () =
     expect(await s.load()).toEqual({ b: other });
   });
 
+  test("pin, unpin and rename hand back records a pattern named constructor can't read through", async () => {
+    const s = new ModelStore(memoryKV());
+    for (const pins of [await s.pin("a", pair), await s.rename("a", "b"), await s.unpin("b")])
+      expect(Object.hasOwn(pins, "constructor") || pins.constructor === undefined).toBe(true);
+    expect(Object.keys(await s.pin("__proto__", pair))).toEqual(["__proto__"]);
+  });
+
   test("ISC-60.2: unpin drops it and only it", async () => {
     const kv = memoryKV();
     const s = new ModelStore(kv);

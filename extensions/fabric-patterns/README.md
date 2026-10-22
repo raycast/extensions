@@ -28,7 +28,7 @@ Raycast is a free Mac launcher you open with a keyboard shortcut. This extension
 
 - **Strategy:** a way of thinking added to a pattern, like step by step. See [lesson 8b](https://michaelhixon.com/guides/fabric/models/#thinking).
 
-- **Config:** a saved set of model settings (model, temperature and Top P, two dials for how varied the answer is) that you make in Manage Fabric and pick in the run form. Temperature is a creativity dial. Lesson 8b uses one to fix a [thinking error](https://michaelhixon.com/guides/fabric/models/#thinking).
+- **Config:** a saved set of model settings (model and its vendor, temperature and Top P, two dials for how varied the answer is) that you make in Manage Fabric and pick in the run form. Temperature is a creativity dial. Lesson 8b uses one to fix a [thinking error](https://michaelhixon.com/guides/fabric/models/#thinking).
 
 - **Chain:** patterns run one after another, each one working on the last one's answer. Fabric calls it a workflow. See [lesson 9b](https://michaelhixon.com/guides/fabric/build-your-own/#chains).
 
@@ -119,7 +119,7 @@ The Terminal is an app where you type commands instead of clicking. Type a line,
 ## Commands
 
 - **Run Fabric Pattern**: find a pattern, chain or session and run it. The list shows your most-used patterns at the top, with the selected pattern's instructions on the right.
-  - ↵ runs it on what you've selected: the file selected in Finder, else the selected text, else the clipboard. A single link in the selection or clipboard is fetched as a web page, not sent as text.
+  - ↵ runs it on what you've selected: the file selected in Finder, else the selected text, else the clipboard. A single link in the selection or clipboard is fetched as a web page, not sent as text. A pattern or chain that needs {{variables}} opens the run form instead, to ask for them.
   - ⌘↵ opens the run form. Type or paste a link or text into **URL or Text**, or choose a file under **Or a File** (text, image, audio or video; a file wins over the text). Tick **Show Advanced Options** for Config, Strategy, Context, Session, Vendor, Model, [Thinking](https://michaelhixon.com/guides/fabric/models/#thinking) and [Web Search](https://michaelhixon.com/guides/fabric/models/#search). In the form, ⌘↵ runs it, and ⇧⌘D shows the prompt fabric would send without running it. That preview calls no AI, so it is free.
 
 - **Manage Fabric**: create, edit and organize your own patterns, strategies, contexts, sessions, configs and chains, and read the built-in patterns. Pick a kind in the dropdown. ⌘N makes a new one. ⌘D on a built-in pattern makes a copy in your Custom Patterns folder, ready to edit.

@@ -70,6 +70,22 @@ describe("ISC-10: the search lists every pattern fabric lists", () => {
   });
 });
 
+describe("a custom pattern that shadows a built-in is marked so", () => {
+  test("shadows is set only where both folders hold the name", async () => {
+    const root = join(tmp, "shadow-flag");
+    for (const [d, n] of [
+      ["patterns", "summarize"],
+      ["patterns", "translate"],
+      ["custom", "summarize"],
+      ["custom", "extract_wisdom"],
+    ])
+      mkdirSync(join(root, d, n), { recursive: true });
+    const ps = await loadPatterns(FAKE, { patternsDir: join(root, "patterns"), myPatternsDir: join(root, "custom") });
+    expect(ps.filter((p) => p.shadows).map((p) => p.name)).toEqual(["summarize"]);
+    expect(ps.filter((p) => p.own).map((p) => p.name)).toEqual(["extract_wisdom", "summarize"]);
+  });
+});
+
 describe("ISC-10.1: the search lists saved sessions", () => {
   test("names match the fabric list, with message counts from the JSON", async () => {
     const sessionsDir = join(tmp, "sessions");

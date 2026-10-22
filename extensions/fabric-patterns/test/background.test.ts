@@ -15,6 +15,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { FAKE_ANTHROPIC_KEY } from "./fake-secrets";
 import type { RunSpec } from "../lib/argv";
 import {
   canCopyError,
@@ -151,7 +152,7 @@ describe("ISC-26 / 26.1: a failed run keeps its exit code and stderr, and says s
 
 describe("ISC-26.2: records are owner-only and hold no key text", () => {
   const secrets = [
-    "sk-ant-api03-AbCdEf123456",
+    FAKE_ANTHROPIC_KEY,
     "AIzaSyD-abcdefghijk",
     "gsk_abcdef123456",
     "xai-abcdef123456",

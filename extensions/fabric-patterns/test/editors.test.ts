@@ -245,6 +245,16 @@ describe("ISC-36: a run profile is --config YAML with no pattern key", () => {
     expect(() => profileYaml({ temperature: "hot" })).toThrow();
     expect(() => profileYaml({ topp: "3" })).toThrow();
     expect(() => profileYaml({ model: "m\npattern: summarize" })).toThrow();
+    expect(() => profileYaml({ model: "-m" })).toThrow();
+    expect(() => profileYaml({ model: "a/../b" })).toThrow();
+    expect(() => profileYaml({ model: "m", vendor: "ClaudeCode\npattern: summarize" })).toThrow();
+  });
+
+  test("a vendor is written only beside a model", () => {
+    expect(profileYaml({ model: "claude-haiku-4-5", vendor: "ClaudeCode" })).toBe(
+      "model: claude-haiku-4-5\nvendor: ClaudeCode\n",
+    );
+    expect(profileYaml({ vendor: "ClaudeCode" })).toBe("\n");
   });
 });
 

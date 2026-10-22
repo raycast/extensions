@@ -3,6 +3,7 @@ import { usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { type Input, isPlainName, isThinking, type RunSpec } from "../lib/argv";
 import { classifyFile, classifyText, describeInput, isLong } from "../lib/classify";
+import { dict } from "../lib/dict";
 import { type Resolved, sourceLabel } from "../lib/input";
 import {
   loadContexts,
@@ -71,7 +72,7 @@ export function ConfigureRun({
   const [comments, setComments] = useState(false);
   const [metadata, setMetadata] = useState(false);
   const [transcribeModel, setTranscribeModel] = useState("");
-  const [vars, setVars] = useState<Record<string, string>>({});
+  const [vars, setVars] = useState(() => dict<string>());
   const [output, setOutput] = useState<OutputMode>(p.defaultOutput);
   const [advanced, setAdvanced] = useState(!!initialSession);
   const [profile, setProfile] = useState("");
@@ -341,7 +342,7 @@ export function ConfigureRun({
             value={vars[v] ?? ""}
             error={errors[`var:${v}`]}
             onChange={(val) => {
-              setVars((s) => ({ ...s, [v]: val }));
+              setVars((s) => dict(s, { [v]: val }));
               setErrors((e) => ({ ...e, [`var:${v}`]: undefined }));
             }}
           />

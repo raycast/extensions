@@ -4,9 +4,10 @@ import { beforeEach, describe, expect, test } from "bun:test";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { ReactElement, ReactNode } from "react";
+import { FAKE_ANTHROPIC_KEY } from "./fake-secrets";
 import { fake, resetFake, tmp } from "./raycast-mock";
 import { elements, render, settle, typeName, until } from "./render-harness";
-import { action, dropdown, field, label, lists, submit, titles } from "./view-helpers";
+import { action, dropdown, field, fixture, label, lists, submit, titles } from "./view-helpers";
 
 // React's hooks and @raycast/api are the preloaded stand-ins (test/preload.ts).
 
@@ -28,6 +29,7 @@ const { EditPattern } = await import("../src/edit-pattern");
 const { FABRIC_DIR, PATTERNS_DIR, CUSTOM_DIR, STRATEGIES_DIR, CONTEXTS_DIR, SESSIONS_DIR } =
   await import("../lib/loaders");
 const { PROFILES_DIR, errorText } = await import("../src/deliver");
+const { parseModels } = await import("../lib/models");
 
 beforeEach(() => {
   resetFake();
@@ -318,7 +320,7 @@ describe("Stop feedback names every outcome", () => {
   test("Show Background Runs: a lost run says so; an exited one keeps its code", async () => {
     // pid 1 is never a wrapper of ours, so with no exit file a record is lost.
     // The key is written raw, as a stray write past the wrapper's sed would leave it: readRun redacts.
-    const lost = record("20261018-180000-lost01", 1, { stderr: "partial\nkey sk-ant-api03-AbCdEf123456\n" });
+    const lost = record("20261018-180000-lost01", 1, { stderr: `partial\nkey ${FAKE_ANTHROPIC_KEY}\n` });
     const silent = record("20261018-180030-lost02", 1);
     const exited = record("20261018-180100-exit01", 1, { exit: "1\n", stderr: "HTTP Error 429\n" });
     const quiet = record("20261018-180130-exit02", 1, { exit: "1\n" });
@@ -426,6 +428,123 @@ describe("Configure says why Run or Preview did nothing", () => {
     action(v.tree, "Preview Prompt").onAction();
     await settle(10);
     expect(fake.toasts.filter((t) => t.title === "Can't run yet")).toEqual([]);
+  });
+});
+
+describe("A Config's model is a vendor and model pair", () => {
+  const file = join(PROFILES_DIR, "zz-vendor.yaml");
+  const edit = (yaml = "model: claude-haiku-4-5\nvendor: ClaudeCode\ntemperature: 0.7\n") => {
+    writeFileSync(file, yaml);
+    return render(EditProfile, { name: "zz-vendor" });
+  };
+  const save = async (v: { tree: unknown }) => {
+    await submit(v.tree).onSubmit();
+    return readFileSync(file, "utf8");
+  };
+  /** The Model dropdown's item values. */
+  const models = (tree: unknown) =>
+    elements(elements(tree).find((e) => e.props.id === "model"))
+      .filter((e) => typeName(e) === "Form.Dropdown.Item")
+      .map((e) => e.props.value as string);
+  beforeEach(() => {
+    mkdirSync(PROFILES_DIR, { recursive: true });
+    fake.promiseData = parseModels(fixture("models.txt"));
+  });
+
+  test("the Model list holds one item per pair, so a name two vendors share is two items", () => {
+    const v = edit();
+    expect(field(v.tree, "model").value).toBe("ClaudeCode|claude-haiku-4-5");
+    expect(models(v.tree)).toEqual(
+      expect.arrayContaining(["Anthropic|claude-haiku-4-5", "ClaudeCode|claude-haiku-4-5"]),
+    );
+  });
+
+  test("changing only Temperature keeps model and vendor", async () => {
+    const v = edit();
+    field(v.tree, "temperature").onChange("0.2");
+    expect(await save(v)).toBe("model: claude-haiku-4-5\nvendor: ClaudeCode\ntemperature: 0.2\n");
+  });
+
+  test("picking the same model under another vendor saves that vendor", async () => {
+    const v = edit();
+    field(v.tree, "model").onChange("Anthropic|claude-haiku-4-5");
+    expect(await save(v)).toBe("model: claude-haiku-4-5\nvendor: Anthropic\ntemperature: 0.7\n");
+  });
+
+  test("picking another model under another vendor saves both", async () => {
+    const v = edit();
+    field(v.tree, "model").onChange("Anthropic|claude-opus-4-5");
+    expect(await save(v)).toBe("model: claude-opus-4-5\nvendor: Anthropic\ntemperature: 0.7\n");
+  });
+
+  test("Let fabric choose drops the saved model and its vendor", async () => {
+    const v = edit();
+    field(v.tree, "model").onChange("");
+    expect(await save(v)).toBe("temperature: 0.7\n");
+  });
+
+  test("a saved pair fabric lists is one item, not two", () => {
+    const v = edit();
+    expect(models(v.tree).filter((m) => m === "ClaudeCode|claude-haiku-4-5")).toHaveLength(1);
+  });
+
+  test("a saved pair fabric doesn't list stays an item and round-trips", async () => {
+    const v = edit("model: zz-gone\nvendor: Gone\ntemperature: 0.7\n");
+    expect(models(v.tree)).toContain(field(v.tree, "model").value as string);
+    field(v.tree, "temperature").onChange("0.2");
+    expect(await save(v)).toBe("model: zz-gone\nvendor: Gone\ntemperature: 0.2\n");
+  });
+
+  test("a hand-written model with no vendor round-trips with none", async () => {
+    const v = edit("model: gpt-4o\ntemperature: 0.7\n");
+    expect(models(v.tree)).toContain(field(v.tree, "model").value as string);
+    field(v.tree, "temperature").onChange("0.2");
+    expect(await save(v)).toBe("model: gpt-4o\ntemperature: 0.2\n");
+  });
+});
+
+describe("A variable named __proto__ reaches fabric", () => {
+  beforeEach(() => {
+    const dir = join(tmp, "custom-patterns");
+    mkdirSync(join(dir, "zz-proto"), { recursive: true });
+    writeFileSync(join(dir, "zz-proto", "system.md"), "Use {{__proto__}} and {{ __proto__ }}.\n");
+    mkdirSync(join(dir, "zz-ctor"), { recursive: true });
+    writeFileSync(join(dir, "zz-ctor", "system.md"), "Use {{lang}} and {{constructor}}.\n");
+    fake.prefs = { ...fake.prefs, customPatternsFolder: dir };
+  });
+  const form = () =>
+    render(ConfigureRun, { pattern: "zz-proto", resolved: { source: "clipboard", text: "hello" }, onRun: () => {} });
+
+  test("the run sends it under both spellings", async () => {
+    const v = form();
+    field(v.tree, "var:__proto__").onChange("fr");
+    await submit(v.tree).onSubmit();
+    const vars = (fake.nav.pushed.at(-1)!.props as { spec: { variables: Record<string, string> } }).spec.variables;
+    expect(Object.entries(vars)).toEqual([
+      ["__proto__", "fr"],
+      [" __proto__ ", "fr"],
+    ]);
+  });
+
+  // After a keystroke the form's values are rebuilt; a plain object there would hand {{constructor}}
+  // Object's constructor function as its value.
+  test("after typing in another field, an untouched {{constructor}} is still blank and a field error", () => {
+    const v = render(ConfigureRun, {
+      pattern: "zz-ctor",
+      resolved: { source: "clipboard", text: "hello" },
+      onRun: () => {},
+    });
+    field(v.tree, "var:lang").onChange("fr");
+    expect(field(v.tree, "var:constructor").value).toBe("");
+    action(v.tree, "Preview Prompt").onAction();
+    expect(fake.toasts).toEqual([{ style: "failure", title: "Can't run yet", message: "Check constructor" }]);
+  });
+
+  test("left blank, it is a field error, not a crash", async () => {
+    const v = form();
+    expect(field(v.tree, "var:__proto__").value).toBe("");
+    action(v.tree, "Preview Prompt").onAction();
+    expect(fake.toasts).toEqual([{ style: "failure", title: "Can't run yet", message: "Check __proto__" }]);
   });
 });
 

@@ -37,6 +37,7 @@ import {
   loadSessions,
   loadStrategies,
   orEmpty,
+  type PatternItem,
   readStrategy,
   readSystemPrompt,
   readText,
@@ -77,6 +78,8 @@ interface Item {
   name: string;
   type: ItemType;
   own: boolean;
+  /** Patterns view: an own pattern with a built-in of the same name (loadPatterns). */
+  shadows?: boolean;
   subtitle?: string;
   /** Own pattern that `fabric -l` doesn't list. */
   hidden?: boolean;
@@ -85,6 +88,17 @@ interface Item {
   /** A chain's own file: a refused foo.yaml is not foo.json. */
   path?: string;
 }
+
+/** The Patterns view's rows, as loadPatterns reports them. Exported so a test reads the real mapping. */
+export const patternRows = (patterns: PatternItem[]): Item[] =>
+  patterns.map((x) => ({
+    id: itemId("pattern", x.name),
+    name: x.name,
+    type: "pattern",
+    own: x.own,
+    shadows: x.shadows,
+    subtitle: x.description,
+  }));
 
 export default function Command() {
   const p = prefs();
@@ -124,13 +138,7 @@ export default function Command() {
       ]);
       const fabricNames = new Set(patterns.map((x) => x.name));
       const lists: Record<Exclude<BrowseView, "workflow">, Item[]> = {
-        pattern: patterns.map((x) => ({
-          id: itemId("pattern", x.name),
-          name: x.name,
-          type: "pattern",
-          own: x.own,
-          subtitle: x.description,
-        })),
+        pattern: patternRows(patterns),
         mine: listMyPatterns(p.myPatternsFolder).map((name) => ({
           id: itemId("pattern", name),
           name,
@@ -302,9 +310,15 @@ export default function Command() {
     }
   }
 
+  // A custom pattern can shadow a built-in of the same name: the name's pin, run count and model pin are
+  // the built-in's too, so a rename or delete of the custom one leaves them. Read from the Patterns list,
+  // the one loadPatterns fills, whichever view the row is in.
+  const shadowsBuiltIn = (it: Item) =>
+    it.type === "pattern" && !!data?.pattern.some((x) => x.name === it.name && x.shadows);
+
   function edit(it: Item) {
     const editors: Record<ItemType, ReactNode> = {
-      pattern: <EditPattern name={it.name} onSaved={savedAs("pattern")} />,
+      pattern: <EditPattern name={it.name} keepPins={shadowsBuiltIn(it)} onSaved={savedAs("pattern")} />,
       strategy: <EditStrategy name={it.name} onSaved={savedAs("strategy")} />,
       context: <EditContext name={it.name} onSaved={savedAs("context")} />,
       profile: <EditProfile name={it.name} onSaved={savedAs("profile")} />,
@@ -339,9 +353,7 @@ export default function Command() {
     }
     await showToast({ style: Toast.Style.Success, title: `Deleted ${it.name}` });
     relist();
-    // A custom pattern can shadow a built-in of the same name; the built-in (and its pin) stays.
-    const shadowed = it.type === "pattern" && data?.pattern.some((x) => x.name === it.name && !x.own);
-    if (shadowed) return true;
+    if (shadowsBuiltIn(it)) return true;
     // The file is gone either way; a storage failure here only leaves a pin Search shows as gone
     // (unpin it by hand from the "Pinned pattern is gone" row).
     const u = await forgetItem(store, it.type, it.name);

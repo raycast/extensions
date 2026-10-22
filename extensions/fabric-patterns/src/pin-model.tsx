@@ -5,6 +5,9 @@ import { groupByVendor, type ModelPair, type ModelRow, pairKey } from "../lib/mo
 import { errorText } from "./deliver";
 import { modelStore, prefs } from "./storage";
 
+/** Unpin Model, on every model row and on the empty view. */
+const unpinAction = (onUnpin: () => void) => <Action title="Unpin Model" icon={Icon.TackDisabled} onAction={onUnpin} />;
+
 /**
  * fabric's models, one section per vendor. With `pattern`, ↵ pins the chosen model to it (Result
  * and Manage Fabric); without, it is Manage Fabric's Models list, where ↵ copies the name.
@@ -40,7 +43,7 @@ export function modelSections({
                 {onPin && <Action title="Pin Model" icon={Icon.Tack} onAction={() => onPin(r)} />}
                 <Action.CopyToClipboard title="Copy Name" content={r.model} />
                 <Action.CopyToClipboard title="Copy Vendor and Name" content={pairKey(r)} />
-                {onUnpin && pinned && <Action title="Unpin Model" icon={Icon.TackDisabled} onAction={onUnpin} />}
+                {onUnpin && pinned && unpinAction(onUnpin)}
               </ActionPanel>
             }
           />
@@ -78,6 +81,7 @@ export function PinModel({ pattern, rows: given }: { pattern: string; rows?: Mod
     pop();
   };
 
+  const unpin = () => change(() => store.unpin(pattern), `${pattern} runs on fabric's choice again`);
   return (
     <List
       navigationTitle={`Pin a Model to ${pattern}`}
@@ -85,12 +89,18 @@ export function PinModel({ pattern, rows: given }: { pattern: string; rows?: Mod
       searchBarPlaceholder="Search models…"
       selectedItemId={pinned && pairKey(pinned)}
     >
-      <List.EmptyView title={isLoading ? "Loading models…" : "fabric listed no models"} />
+      {/* When fabric lists no models, no row carries Unpin, so the empty view does: a pin fabric no longer
+          lists still runs. Not while loading, nor when a search hides every row: ↵ there would unpin. */}
+      <List.EmptyView
+        // With rows listed, Raycast shows this view only when the search text matches none of them.
+        title={isLoading ? "Loading models…" : rows?.length ? "No models match" : "fabric listed no models"}
+        actions={pinned && rows?.length === 0 && <ActionPanel>{unpinAction(unpin)}</ActionPanel>}
+      />
       {modelSections({
         rows: rows ?? [],
         pinned,
         onPin: (r) => change(() => store.pin(pattern, r), `Pinned ${r.model} (${r.vendor}) to ${pattern}`),
-        onUnpin: () => change(() => store.unpin(pattern), `${pattern} runs on fabric's choice again`),
+        onUnpin: unpin,
       })}
     </List>
   );

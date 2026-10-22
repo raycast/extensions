@@ -16,10 +16,13 @@ const read = (p: string) => readText(p) ?? "";
 export function EditPattern({
   name,
   copiedFrom,
+  keepPins,
   onSaved,
 }: {
   name?: string;
   copiedFrom?: string;
+  /** A rename leaves the old name's pin, run count and model pin: a built-in of that name still has them. */
+  keepPins?: boolean;
   onSaved?: (name: string) => void;
 }) {
   const p = prefs();
@@ -41,7 +44,7 @@ export function EditPattern({
       await saveFailed(e);
       return;
     }
-    await movePin("pattern", name, newName.trim());
+    if (!keepPins) await movePin("pattern", name, newName.trim());
     onSaved?.(newName.trim());
     let names: string[];
     try {
