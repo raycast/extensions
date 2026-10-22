@@ -406,6 +406,15 @@
       "type": "checkbox",
       "required": false,
       "default": false
+    },
+    {
+      "name": "strictRedaction",
+      "type": "checkbox",
+      "required": false,
+      "title": "Strict Redaction",
+      "label": "Also hide URL query strings and fragments in logs",
+      "description": "Turn on before reproducing an issue, then share only the new log lines.",
+      "default": false
     }
   ]
 }

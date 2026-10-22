@@ -9,6 +9,8 @@ import {
   Image,
   Clipboard,
   LocalStorage,
+  getPreferenceValues,
+  Detail,
 } from "@raycast/api";
 import React, { useState, useEffect, useRef } from "react";
 import { writeFile } from "fs/promises";
@@ -30,15 +32,40 @@ import {
   getEmotePage,
 } from "./providers";
 
-import { createSavedEmotesStore } from "./saved-emotes";
+import { type UserEmoteSource, getUsageDescription } from "./user-emotes";
 
-export default function Command() {
+import { createSavedEmotesStore } from "./saved-emotes";
+import {
+  type SearchPreferences,
+  DEFAULT_SEARCH_PREFERENCES,
+  createSearchPreferencesStore,
+  getSavedEmoteMatches,
+} from "./search-state";
+
+const validSelections = PROVIDERS.flatMap((provider) =>
+  provider.sorts.map((sort) => `${provider.id}:${sort}`),
+);
+
+export function EmoteBrowser({ source }: { source?: UserEmoteSource }) {
+  const defaultSize = Number(getPreferenceValues<Preferences>().size);
   const [searchText, setSearchText] = useState("");
   const [items, setItems] = useState<Emote[]>([]);
   const [favorites, setFavorites] = useState<Emote[]>([]);
   const [history, setHistory] = useState<Emote[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isGridView, setIsGridView] = useState(true);
+  const [preferences, setPreferences] = useState<SearchPreferences>();
+  const { isGridView, selection, animatedOnly } =
+    preferences ?? DEFAULT_SEARCH_PREFERENCES;
+  const preferencesLoaded = preferences !== undefined;
+  const preferencesStoreRef =
+    useRef<ReturnType<typeof createSearchPreferencesStore>>(undefined);
+  preferencesStoreRef.current ??= createSearchPreferencesStore(
+    {
+      getItem: (key) => LocalStorage.getItem<string>(key),
+      setItem: (key, value) => LocalStorage.setItem(key, value),
+    },
+    validSelections,
+  );
   const savedStoreRef =
     useRef<ReturnType<typeof createSavedEmotesStore>>(undefined);
   savedStoreRef.current ??= createSavedEmotesStore(
@@ -52,19 +79,59 @@ export default function Command() {
   const nextCursorRef = useRef<string>(undefined);
 
   const [retry, setRetry] = useState(0);
-  const [selection, setSelection] = useState("7tv:popular");
-  const [provider, sortMode] = selection.split(":") as [Provider, SortMode];
-  const [animatedOnly, setAnimatedOnly] = useState(false);
+  const [selectedProvider, selectedSort] = selection.split(":") as [
+    Provider,
+    SortMode,
+  ];
+  const provider = source ? "7tv" : selectedProvider;
+  const sortMode = source ? "popular" : selectedSort;
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState<number>();
   const [hasMore, setHasMore] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
   const providerTitle = PROVIDERS.find((p) => p.id === provider)!.title;
-  const resultsTitle = `${providerTitle} · ${getSortTitle(provider, sortMode, searchText)}`;
+  const resultsTitle =
+    source?.title ??
+    `${providerTitle} · ${getSortTitle(provider, sortMode, searchText)}`;
   const resultCount =
     total === undefined
       ? `${items.length} loaded`
       : `${items.length} of ${total.toLocaleString()}`;
+
+  useEffect(() => {
+    let active = true;
+    preferencesStoreRef
+      .current!.load()
+      .then((saved) => {
+        if (active) setPreferences(saved);
+      })
+      .catch((error) => {
+        if (!active) return;
+        setPreferences({ ...DEFAULT_SEARCH_PREFERENCES });
+        void showToast({
+          style: Toast.Style.Failure,
+          title: "Could Not Restore View Preferences",
+          message: String(error),
+        });
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  function updatePreferences(patch: Partial<SearchPreferences>) {
+    setPreferences((previous) => ({
+      ...(previous ?? DEFAULT_SEARCH_PREFERENCES),
+      ...patch,
+    }));
+    void preferencesStoreRef.current!.update(patch).catch((error) => {
+      void showToast({
+        style: Toast.Style.Failure,
+        title: "Could Not Save View Preferences",
+        message: String(error),
+      });
+    });
+  }
 
   useEffect(() => {
     let active = true;
@@ -89,13 +156,14 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
+    if (!preferencesLoaded) return;
     const fetchId = ++fetchIdRef.current;
     const controller = new AbortController();
     setIsLoading(true);
     setErrorMessage(undefined);
     const timeout = setTimeout(async () => {
       try {
-        const result = await searchEmotes(
+        const result = await (source?.load ?? searchEmotes)(
           {
             provider,
             sort: sortMode,
@@ -135,6 +203,8 @@ export default function Command() {
       clearTimeout(timeout);
     };
   }, [
+    preferencesLoaded,
+    source,
     searchText,
     provider,
     sortMode,
@@ -157,13 +227,14 @@ export default function Command() {
   function changeSearch(text: string) {
     if (text === searchText) return;
     resetResults();
-    if (provider === "bttv" && text.trim()) setSelection("bttv:popular");
+    if (provider === "bttv" && text.trim() && selection !== "bttv:popular")
+      updatePreferences({ selection: "bttv:popular" });
     setSearchText(text);
   }
   function changeSelection(value: string) {
     if (value === selection) return;
     resetResults();
-    setSelection(value);
+    updatePreferences({ selection: value });
   }
 
   async function addToHistory(item: Emote) {
@@ -198,8 +269,12 @@ export default function Command() {
     }
   }
 
-  async function pasteEmote(item: Emote, mode: "file" | "url" = "file") {
-    const { url, ext } = getEmoteFile(item);
+  async function pasteEmote(
+    item: Emote,
+    mode: "file" | "url" = "file",
+    size = defaultSize,
+  ) {
+    const { url, ext } = getEmoteFile(item, size);
     await addToHistory(item);
 
     if (mode === "url") {
@@ -222,7 +297,7 @@ export default function Command() {
       const safeName = item.name.replace(/[^a-z0-9]/gi, "_").toLowerCase();
       const tempPath = join(
         tmpdir(),
-        `vault_${item.provider ?? "7tv"}_${safeName}_${item.id}.${ext}`,
+        `vault_${item.provider ?? "7tv"}_${safeName}_${item.id}_${size}x.${ext}`,
       );
       await writeFile(tempPath, data);
 
@@ -257,14 +332,14 @@ export default function Command() {
       shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
       onAction={() => {
         resetResults();
-        setAnimatedOnly((value) => !value);
+        updatePreferences({ animatedOnly: !animatedOnly });
       }}
     />
   );
 
   const renderActions = (item: Emote) => {
     const isFav = favorites.some((f) => getEmoteKey(f) === getEmoteKey(item));
-    const { url: highResUrl, ext } = getEmoteFile(item);
+    const { url: highResUrl, ext } = getEmoteFile(item, defaultSize);
     const markdown = `![${item.name}](${highResUrl})`;
 
     return (
@@ -314,7 +389,7 @@ export default function Command() {
                   .toLowerCase();
                 const tempPath = join(
                   tmpdir(),
-                  `copy_${item.provider ?? "7tv"}_${safeName}_${item.id}.${ext}`,
+                  `copy_${item.provider ?? "7tv"}_${safeName}_${item.id}_${defaultSize}x.${ext}`,
                 );
                 await writeFile(tempPath, data);
                 await Clipboard.copy({ file: tempPath });
@@ -328,6 +403,15 @@ export default function Command() {
               }
             }}
           />
+          <ActionPanel.Submenu title="Paste Emote at Size" icon={Icon.Maximize}>
+            {[1, 2, 3, 4].map((size) => (
+              <Action
+                key={size}
+                title={`${size}×`}
+                onAction={() => pasteEmote(item, "file", size)}
+              />
+            ))}
+          </ActionPanel.Submenu>
         </ActionPanel.Section>
         <ActionPanel.Section>
           {renderFilterAction()}
@@ -335,6 +419,7 @@ export default function Command() {
             title="Reload Results"
             icon={Icon.ArrowClockwise}
             onAction={() => {
+              source?.invalidate?.();
               resetResults();
               setRetry((value) => value + 1);
             }}
@@ -346,7 +431,7 @@ export default function Command() {
           <Action
             title={isGridView ? "Switch to List View" : "Switch to Grid View"}
             icon={isGridView ? Icon.List : Icon.AppWindowGrid3x3}
-            onAction={() => setIsGridView(!isGridView)}
+            onAction={() => updatePreferences({ isGridView: !isGridView })}
             shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
           />
           <Action.CopyToClipboard
@@ -354,6 +439,26 @@ export default function Command() {
             content={item.id}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           />
+          {item.usage && (
+            <Action.Push
+              title="View 7TV Usage Status"
+              icon={Icon.Info}
+              target={
+                <Detail
+                  markdown={`# 7TV Usage Status
+
+${getUsageDescription(item.usage)}
+
+This status applies to 7TV personal emote sets. It does not describe general permission to reuse the image elsewhere.
+
+- Public listing: ${item.usage.publicListed ? "Listed" : "Unlisted"}
+- Private: ${item.usage.private ? "Yes" : "No"}
+
+[View emote on 7TV](${getEmotePage(item)})`}
+                />
+              }
+            />
+          )}
         </ActionPanel.Section>
       </ActionPanel>
     );
@@ -376,11 +481,16 @@ export default function Command() {
         ))}
       </Dropdown.Section>
     ));
-  const localItems = (data: Emote[]) =>
-    data.filter(
-      (e) =>
-        (e.provider ?? "7tv") === provider && (!animatedOnly || e.animated),
-    );
+  const savedMatches = source
+    ? { favorites: [], history: [] }
+    : getSavedEmoteMatches(
+        favorites,
+        history,
+        { provider, query: searchText, animatedOnly },
+        getEmoteKey,
+      );
+  const hasSavedMatches =
+    savedMatches.favorites.length > 0 || savedMatches.history.length > 0;
   const pagination = {
     pageSize: provider === "bttv" ? BTTV_PAGE_SIZE : PAGE_SIZE,
     hasMore,
@@ -426,6 +536,11 @@ export default function Command() {
     </List.Section>
   );
 
+  if (!preferences)
+    return (
+      <List isLoading searchBarPlaceholder="Restoring view preferences..." />
+    );
+
   if (isGridView) {
     return (
       <Grid
@@ -434,27 +549,32 @@ export default function Command() {
         searchText={searchText}
         filtering={false}
         pagination={pagination}
-        searchBarPlaceholder={`Search ${providerTitle} Emotes...`}
+        navigationTitle={source?.title}
+        searchBarPlaceholder={
+          source
+            ? "Search These Emotes..."
+            : `Search ${providerTitle} Emotes...`
+        }
         searchBarAccessory={
-          <Grid.Dropdown
-            tooltip="Provider & Sort"
-            value={selection}
-            onChange={changeSelection}
-          >
-            {dropdownSections(Grid.Dropdown)}
-          </Grid.Dropdown>
+          source ? undefined : (
+            <Grid.Dropdown
+              tooltip="Provider & Sort"
+              value={selection}
+              onChange={changeSelection}
+            >
+              {dropdownSections(Grid.Dropdown)}
+            </Grid.Dropdown>
+          )
         }
         columns={6}
         fit={Grid.Fit.Contain}
       >
-        {!searchText &&
-          favorites.length > 0 &&
-          renderGridItems(localItems(favorites), "Starred Emotes")}
-        {!searchText &&
-          history.length > 0 &&
-          renderGridItems(localItems(history), "Recently Used")}
+        {savedMatches.favorites.length > 0 &&
+          renderGridItems(savedMatches.favorites, "Starred Emotes")}
+        {savedMatches.history.length > 0 &&
+          renderGridItems(savedMatches.history, "Recently Used")}
         {renderGridItems(items, resultsTitle)}
-        {items.length === 0 && (
+        {items.length === 0 && !hasSavedMatches && (
           <Grid.EmptyView
             title={
               errorMessage
@@ -464,13 +584,20 @@ export default function Command() {
                   : "No Emotes Found"
             }
             description={
-              errorMessage ?? "Try another name, provider, or filter."
+              errorMessage ??
+              source?.emptyDescription ??
+              "Try another name, provider, or filter."
             }
             actions={
               <ActionPanel>
                 <Action
                   title="Retry Search"
-                  onAction={() => setRetry((value) => value + 1)}
+                  icon={Icon.ArrowClockwise}
+                  onAction={() => {
+                    source?.invalidate?.();
+                    resetResults();
+                    setRetry((value) => value + 1);
+                  }}
                 />
                 {renderFilterAction()}
               </ActionPanel>
@@ -488,26 +615,29 @@ export default function Command() {
       searchText={searchText}
       filtering={false}
       pagination={pagination}
-      searchBarPlaceholder={`Search ${providerTitle} Emotes...`}
+      navigationTitle={source?.title}
+      searchBarPlaceholder={
+        source ? "Search These Emotes..." : `Search ${providerTitle} Emotes...`
+      }
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Provider & Sort"
-          value={selection}
-          onChange={changeSelection}
-        >
-          {dropdownSections(List.Dropdown)}
-        </List.Dropdown>
+        source ? undefined : (
+          <List.Dropdown
+            tooltip="Provider & Sort"
+            value={selection}
+            onChange={changeSelection}
+          >
+            {dropdownSections(List.Dropdown)}
+          </List.Dropdown>
+        )
       }
       throttle
     >
-      {!searchText &&
-        favorites.length > 0 &&
-        renderListItems(localItems(favorites), "Starred Emotes")}
-      {!searchText &&
-        history.length > 0 &&
-        renderListItems(localItems(history), "Recently Used")}
+      {savedMatches.favorites.length > 0 &&
+        renderListItems(savedMatches.favorites, "Starred Emotes")}
+      {savedMatches.history.length > 0 &&
+        renderListItems(savedMatches.history, "Recently Used")}
       {renderListItems(items, resultsTitle)}
-      {items.length === 0 && (
+      {items.length === 0 && !hasSavedMatches && (
         <List.EmptyView
           title={
             errorMessage
@@ -516,12 +646,21 @@ export default function Command() {
                 ? "Loading Emotes"
                 : "No Emotes Found"
           }
-          description={errorMessage ?? "Try another name, provider, or filter."}
+          description={
+            errorMessage ??
+            source?.emptyDescription ??
+            "Try another name, provider, or filter."
+          }
           actions={
             <ActionPanel>
               <Action
                 title="Retry Search"
-                onAction={() => setRetry((value) => value + 1)}
+                icon={Icon.ArrowClockwise}
+                onAction={() => {
+                  source?.invalidate?.();
+                  resetResults();
+                  setRetry((value) => value + 1);
+                }}
               />
               {renderFilterAction()}
             </ActionPanel>
@@ -530,4 +669,8 @@ export default function Command() {
       )}
     </List>
   );
+}
+
+export default function Command() {
+  return <EmoteBrowser />;
 }

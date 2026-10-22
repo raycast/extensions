@@ -22,7 +22,7 @@ Saved profiles and Caffeinate presets are read from Tethered's local preferences
 
 Run **Get Tethered** to use the same download link as the Tethered website. Install and open the current Tethered app, then use the extension's controls. Search for **Tethered** in Raycast to find its commands. You can assign aliases or hotkeys in Raycast's Extensions settings.
 
-The extension sends requests to the running Tethered app. If **Show Status** cannot get a fresh response, check that Tethered is running and updated. Raycast's action confirmation means the request was sent; use **Show Status** or Tethered itself to confirm the resulting state.
+The extension sends requests to the running Tethered app. If **Show Status** cannot get a fresh response, check that Tethered is running and updated. Control commands wait for a matching app response and show its result or rejection reason. A timeout is not a confirmed failure; check the app before retrying. These acknowledgments require the updated Tethered app. Success confirms the app setting or accepted operation, not completion of asynchronous hardware changes.
 
 **Get Tethered Pro** requires the updated Tethered app to be running and an account signed in. It opens Tethered's checkout in your browser; payment and license activation remain handled by Tethered.
 
@@ -59,3 +59,5 @@ The **Next Event** command shows the next enabled upcoming event in its root-sea
 **Toggle MCP Bridge** requires the updated Tethered app to be running. Use **Show Status** to confirm whether the bridge is enabled and inspect its current status.
 
 **Toggle Companion Sync** is reserved for the upcoming feature. The command waits for a matching app acknowledgment. The current app returns an unavailable error; a future supporting app can report success or a specific failure through the same response without another extension update. Older apps that do not respond produce a timeout error.
+
+**Share Profile** lets you pick a saved profile and opens Tethered’s save dialog to export a `.tetheredprofile` file. **Post Profile** opens Tethered’s existing submission editor for the selected profile; review its public details and submit there. Tethered displays the final upload result, including any publication review requirement. Both require Pro access and the updated app; posting also requires signing in. Raycast confirms the handoff, not a completed file export or publication.

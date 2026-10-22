@@ -91,7 +91,7 @@ test("7TV maps response files, author, count and page boundary", async () => {
   assert.equal(result.total, 101);
   assert.equal(result.hasMore, false);
   assert.equal(result.items[0].owner?.display_name, "author");
-  assert.equal(getEmoteFile(result.items[0]).ext, "gif");
+  assert.equal(getEmoteFile(result.items[0], 4).ext, "gif");
 });
 
 test("legacy favorites keep identity and pick GIF/PNG before WebP", () => {
@@ -108,7 +108,7 @@ test("legacy favorites keep identity and pick GIF/PNG before WebP", () => {
     },
   };
   assert.equal(getEmoteKey(old), "7tv:one");
-  assert.deepEqual(getEmoteFile(old), {
+  assert.deepEqual(getEmoteFile(old, 4), {
     url: "https://cdn.7tv.app/emote/one/2x.gif",
     ext: "gif",
   });
@@ -137,7 +137,7 @@ test("BetterTTV uses server search pagination and keeps totals unknown", async (
   assert.match(requested, /offset=50/);
   assert.equal(r.total, undefined);
   assert.equal(r.hasMore, false);
-  assert.equal(getEmoteFile(r.items[0]).ext, "gif");
+  assert.equal(getEmoteFile(r.items[0], 4).ext, "gif");
 });
 
 test("FFZ chooses actual GIF endpoint instead of animated WebP", async () => {
@@ -169,7 +169,7 @@ test("FFZ chooses actual GIF endpoint instead of animated WebP", async () => {
     undefined,
     fetcher,
   );
-  assert.deepEqual(getEmoteFile(r.items[0]), {
+  assert.deepEqual(getEmoteFile(r.items[0], 4), {
     url: "https://cdn.frankerfacez.com/emote/724094/animated/4.gif",
     ext: "gif",
   });
@@ -251,5 +251,31 @@ test("static legacy emotes select the largest actual PNG", () => {
       ],
     },
   };
-  assert.equal(getEmoteFile(e).url, "https://cdn.7tv.app/emote/static/4x.png");
+  assert.equal(
+    getEmoteFile(e, 4).url,
+    "https://cdn.7tv.app/emote/static/4x.png",
+  );
+});
+
+test("size picks the largest file at or below it, else the smallest above", () => {
+  const gifs = (...scales: number[]): Emote => ({
+    id: "e",
+    name: "e",
+    animated: true,
+    host: {
+      url: "//cdn.7tv.app/emote/e",
+      files: scales.map((s) => ({
+        name: `${s}x.gif`,
+        format: "GIF",
+        width: 32 * s,
+        height: 32 * s,
+      })),
+    },
+  });
+  const pick = (e: Emote, size: number) =>
+    getEmoteFile(e, size).url.split("/").pop();
+  assert.equal(pick(gifs(1, 2, 3, 4), 2), "2x.gif");
+  assert.equal(pick(gifs(1, 2, 3), 4), "3x.gif"); // BetterTTV stops at 3x
+  assert.equal(pick(gifs(1, 2, 4), 3), "2x.gif"); // FrankerFaceZ has no 3x
+  assert.equal(pick(gifs(2, 4), 1), "2x.gif");
 });

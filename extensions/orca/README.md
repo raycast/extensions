@@ -14,11 +14,19 @@ Its job is to answer one question fast: **which agent is stuck waiting on me?**
 
 Agents that stopped for input lead the list in their own **Waiting for input**
 section, longest wait first — the one blocked for 40 minutes sits above the one
-blocked for two. Everything else stays grouped by project below. The list
-re-reads Orca every 5 seconds while open, so a wait time never goes stale.
+blocked for two. Right under them, **Finished, not seen** holds the agents
+that are done but still carry Orca's unread dot, most recently finished first.
+Everything else is grouped by project below — or, with **Group List By** set to
+*Status*, into *Working*, *Finished* and *Other terminals*. Outside a project
+section each row names its project next to the branch, in grey after the title:
+Raycast puts nothing but the icon before it. With the details pane open, which
+hides that grey text, the project goes back in front of the title. The list re-reads Orca every 5 seconds while open, so a wait
+time never goes stale.
 
-Each row carries its state (`waiting` / `working` / `done`), how long it has been
-waiting, and — in the details pane (`⌘D`) — the task, the agent's last reply and
+The icon on the left is the row's state — red question mark waiting, green
+check finished unseen, blue circle working, grey check finished, terminal for
+the rest — and the agent gets its own coloured tag on the right. Each row also
+shows how long it has been waiting, and — in the details pane (`⌘D`) — the task, the agent's last reply and
 the raw terminal, plus what it is blocked on, e.g. `AskUserQuestion` or a `Bash`
 command awaiting permission.
 
@@ -35,6 +43,7 @@ Actions:
 | --- | --- |
 | Switch to terminal in Orca (focuses the app) | `↵` |
 | Show/hide details (last output + metadata) | `⌘D` |
+| Mark as read (clears Orca's unread dot for the whole worktree) | `⌘⇧R` |
 | Copy terminal handle | `⌘C` |
 | Copy worktree path | `⌘⇧C` |
 | Show worktree in Finder | — |
@@ -59,9 +68,10 @@ out of space:
 The project is never dropped before the session name is: it is what tells two
 panes in different checkouts apart.
 
-Set to *Counts only* it reports the mix instead, `2 waiting · 1 working`. With
-nobody blocked in either mode it falls back to the plain extension name rather
-than leave a number behind — `null` would clear the subtitle outright, and the
+Set to *Counts only* it reports the mix instead, `2 waiting · 1 working · 3 done`,
+where *done* counts only the agents that finished unseen. *Blocked sessions*
+switches to these counts while nobody is blocked. With nothing to report at all
+it falls back to the plain extension name rather than leave a number behind — `null` would clear the subtitle outright, and the
 row would stop matching a search for "orca".
 
 This preference reaches only this command. **List All Agents** has its own
@@ -146,6 +156,7 @@ Started on its own it has no prompt to run, so it opens **Add Prompt** instead.
 | Preference | Default | What it does |
 | --- | --- | --- |
 | Root Search Subtitle | Blocked Sessions | What **Show Waiting Agents** writes under its name in the root search: the blocked sessions by project and name, or plain counts. Affects that command only. |
+| Group List By | Project | How **List All Agents** groups the rows below the waiting and unseen ones: by project, or by state. |
 | Agent Types | All agents | Which panes count as agents, in **List All Agents** and in the root search subtitle alike: all, Claude only, Codex only, or every pane including plain shells. |
 | Orca CLI Path | bundled binary | Where the `orca` executable lives. |
 
@@ -164,6 +175,11 @@ They are joined on `paneKey`, which equals `tabId:leafId` from the terminal list
 `state` comes straight from Orca — no guessing from terminal output. `waiting`
 means the agent asked something and is blocked on the answer; it was verified
 against a live session sitting on `AskUserQuestion`.
+
+Whether a finished agent has been seen comes from the same `worktree ps` call:
+`worktrees[].unread` is Orca's unread dot. Orca keeps it per worktree, not per
+pane, so every agent in an unread worktree counts as unseen, and **Mark as
+Read** (`orca worktree set --worktree id:… --read`) clears it for all of them.
 
 ## Requirements
 

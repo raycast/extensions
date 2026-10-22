@@ -1,5 +1,13 @@
 # Passbolt Changelog
 
+## [Current Website Matching] - 2026-10-21
+
+- Show passwords matching the current website above Favorites in Search Passwords, ordered by exact hostname, favorite status, and name.
+- Enable optional Website Matching in the Search Passwords preferences, using the browser extension or launch context.
+- Keep the current-website match selected while the rest of the vault loads in both commands, instead of letting progressive loading move it.
+- Match entries by tab title and known aliases (such as Oracle) when no saved URL matches, and handle several open browser windows.
+- Share the website matching helpers between Search Passwords and Authenticator while preserving their ranking behavior.
+
 ## [Faster TOTP Codes and Leaner Loading] - 2026-10-17
 
 - Load the vault list without secret payloads and download secrets only for TOTP-capable entries, in ID-filtered batches.
