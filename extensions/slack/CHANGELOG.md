@@ -1,5 +1,10 @@
 # Slack Changelog
 
+## [Profile photos in Find Users] - {PR_MERGE_DATE}
+
+- Return each person's profile photo URL from the **Find Users** AI tool, so AI can use it, for example to add a photo to a contact. It uses the 1024px photo when someone uploaded their own and the 512px image otherwise.
+- Add a `hasCustomPhoto` flag so AI can tell an uploaded photo apart from Slack's default avatar.
+
 ## [Added new screenshots] - 2026-10-13
 
 ## [Rename Channel AI Tool] - 2026-10-12
