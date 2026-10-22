@@ -10,7 +10,7 @@ type Input = {
    */
   numResults?: number;
   /**
-   * Research mode: deep (default) performs multi-step research with synthesis; deep-reasoning is a legacy option with stronger reasoning at each step.
+   * Research mode: deep (default) performs multi-step research with synthesis.
    */
   type?: "deep" | "deep-reasoning";
   /**

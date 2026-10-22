@@ -3,7 +3,7 @@
 ## [Exa 3.0 Search Modes] - {PR_MERGED_AT}
 
 - Added lite and deep search modes while keeping auto as the Search default.
-- Search Deep now defaults to deep; deep-reasoning remains an explicit legacy option.
+- Search Deep now defaults to deep.
 - Updated the Exa SDK for lite support and preserved the research paper input using the publication API category.
 - Updated AI instructions and the Research with Sources skill to explain when to use each search mode.
 

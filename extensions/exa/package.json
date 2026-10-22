@@ -62,7 +62,7 @@
     {
       "name": "search-deep",
       "title": "Search Deep",
-      "description": "Run multi-step research with Exa deep search by default, with an explicit legacy deep-reasoning option.",
+      "description": "Run multi-step research with Exa Deep and return relevant highlights.",
       "icon": "icon.png",
       "keywords": [
         "deep",

@@ -20,4 +20,4 @@ See [validation results](VALIDATION.md) for checks after the API 2.5.0 update.
 
 ## Exa 3.0 search modes
 
-Mode guidance was checked against the [official search reference](https://exa.ai/docs/reference/search) on October 21, 2026. The tools support `lite`, `auto`, and `deep`, with `deep-reasoning` retained as an explicit legacy option. `lite` serves cached content only and never fetches live content. The original upstream adaptation and attribution above remain unchanged.
+Mode guidance was checked against the [official search reference](https://exa.ai/docs/reference/search) on October 21, 2026. The tools support `lite`, `auto`, and `deep`. `deep-reasoning` is still accepted for backward compatibility; use `deep` instead. `lite` serves cached content only and never fetches live content. The original upstream adaptation and attribution above remain unchanged.

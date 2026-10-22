@@ -11,7 +11,7 @@ instructions: |
 
   When using `search`:
   - Default to `type: "auto"` with highlights. Use `type: "lite"` only when low cost or low latency matters and cached content is sufficient; lite never fetches live content.
-  - Use `type: "deep"` for multi-step research. Keep `type: "deep-reasoning"` only for an explicit request for the legacy mode.
+  - Use `type: "deep"` for multi-step research.
   - Write natural, specific queries.
   - Only set `category` when a documented category clearly applies.
   - If `category` is `people`, do not pass `includeDomains` or `excludeDomains`. Put constraints like LinkedIn, GitHub, or company names into the query itself.
@@ -19,7 +19,7 @@ instructions: |
   - Start with the returned highlights before pulling full page content.
 
   When using `search-deep`:
-  - Defaults to `type: "deep"`, which performs multi-step research with synthesis. Select `type: "deep-reasoning"` only when the legacy mode is explicitly requested.
+  - Defaults to `type: "deep"`, which performs multi-step research with synthesis.
   - Reserve it for research-heavy requests where better reasoning is worth the extra latency.
   - Use the same category restrictions as `search`.
   - Start with the returned highlights before pulling full page content.
