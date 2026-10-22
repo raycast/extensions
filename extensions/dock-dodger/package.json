@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dock-dodger",
+  "title": "Dock Dodger",
+  "description": "Move windows that hide behind the Dock back into view.",
+  "icon": "icon.png",
+  "author": "timbroddin",
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "lift-windows",
+      "title": "Lift Windows Above Dock",
+      "description": "Move every window that sits behind the Dock up into the visible area.",
+      "mode": "no-view"
+    },
+    {
+      "name": "keep-above-dock",
+      "title": "Keep Windows Above Dock",
+      "description": "Check every 10 seconds in the background and lift windows that slipped behind the Dock. Run once to activate, use Deactivate Command to stop.",
+      "mode": "no-view",
+      "interval": "10s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "margin",
+      "title": "Gap Above Dock",
+      "description": "Pixels to keep between a window and the Dock.",
+      "type": "textfield",
+      "required": false,
+      "default": "8"
+    },
+    {
+      "name": "shrink",
+      "title": "Fit",
+      "label": "Shrink windows that are too tall to fit",
+      "description": "If a window is taller than the space above the Dock, resize it instead of leaving it partly hidden.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "ignoredApps",
+      "title": "Ignored Apps",
+      "description": "Comma-separated app names to never move, e.g. Finder, Preview",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
