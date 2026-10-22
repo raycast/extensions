@@ -369,6 +369,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://databricks.techfabric.com/mcp",
   },
   {
+    name: "datawebot",
+    title: "datawebot",
+    description:
+      "Ecommerce product data for agents. Search products across online shops worldwide (title, price, shop, rating, reviews, image, link), list every seller's price for one product with direct shop links, and run extraction Jobs on Amazon search and product pages (10 countries) and 1,100+ Shopify stores. Paid from 200 free trial credits. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in by email (free), or an optional API key as a Bearer header.",
+    icon: "https://raw.githubusercontent.com/datawebot/datawebot-mcp/main/assets/logo.png",
+    homepage: "https://www.datawebot.com/docs/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.datawebot.com/mcp"],
+    },
+    remoteUrl: "https://mcp.datawebot.com/mcp",
+  },
+  {
     name: "desearch",
     title: "Desearch",
     description:
