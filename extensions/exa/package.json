@@ -47,7 +47,7 @@
     {
       "name": "search",
       "title": "Search",
-      "description": "Search the live web with Exa and return compact result highlights.",
+      "description": "Search with Exa using auto, cached-content-only lite, or deep modes and return compact result highlights.",
       "icon": "icon.png",
       "keywords": [
         "web",
@@ -62,7 +62,7 @@
     {
       "name": "search-deep",
       "title": "Search Deep",
-      "description": "Run a deeper Exa search with extra reasoning for research-heavy questions.",
+      "description": "Run multi-step research with Exa deep search by default, with an explicit legacy deep-reasoning option.",
       "icon": "icon.png",
       "keywords": [
         "deep",
@@ -130,7 +130,7 @@
   "dependencies": {
     "@raycast/api": "^2.5.0",
     "@raycast/utils": "^2.2.4",
-    "exa-js": "^2.13.0"
+    "exa-js": "^2.26.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

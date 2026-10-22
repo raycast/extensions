@@ -1,4 +1,4 @@
-import { compactSearchResults, searchDeepReasoning } from "../exa";
+import { compactSearchResults, searchDeep } from "../exa";
 
 type Input = {
   /**
@@ -9,6 +9,10 @@ type Input = {
    * Number of search results to return.
    */
   numResults?: number;
+  /**
+   * Research mode: deep (default) performs multi-step research with synthesis; deep-reasoning is a legacy option with stronger reasoning at each step.
+   */
+  type?: "deep" | "deep-reasoning";
   /**
    * Restrict results to these domains, separated by commas or new lines.
    */
@@ -24,7 +28,7 @@ type Input = {
 };
 
 /**
- * @returns Deep-reasoning search results with highlights and published dates when available.
+ * @returns Deep search results with highlights and published dates when available.
  */
 export default async function (input: Input) {
   const splitDomains = (domains?: string) =>
@@ -55,7 +59,7 @@ export default async function (input: Input) {
             excludeDomains: splitDomains(input.excludeDomains),
           };
 
-  return compactSearchResults(await searchDeepReasoning(normalizedInput)).map((result) => ({
+  return compactSearchResults(await searchDeep(normalizedInput)).map((result) => ({
     title: result.title,
     url: result.url,
     highlights: result.highlights,
