@@ -88,7 +88,7 @@ Helper 为 `assets/ScreenCleaner.ps1`，通过 Windows PowerShell 5.1 执行，�
 - **Raycast**（macOS 或 Windows）
 - macOS helper：**macOS 12 或更高版本**
 - Windows helper：**Windows 10/11**，使用系统自带的 Windows PowerShell 5.1
-- 开发环境：**Node.js 20+**；在 macOS 上编译 helper 还需要 **Xcode Command Line Tools**
+- 开发环境：**Node.js 22.22.2 或更高版本**；在 macOS 上编译 helper 还需要 **Xcode Command Line Tools**
 
 ### 从源码安装
 

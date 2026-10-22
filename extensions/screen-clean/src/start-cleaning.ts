@@ -1,5 +1,5 @@
 import { getPreferenceValues, showHUD } from "@raycast/api";
-import { Preferences, readRunningPid, startHelper } from "./lib/screen-cleaner";
+import { readRunningPid, startHelper } from "./lib/screen-cleaner";
 
 export default async function main() {
   const preferences = getPreferenceValues<Preferences>();
@@ -12,7 +12,7 @@ export default async function main() {
   const duration = Number(preferences.duration);
 
   try {
-    startHelper({
+    await startHelper({
       seconds: Number.isFinite(duration) ? duration : 60,
       lockKeyboard: preferences.strictKeyboardLock,
       showHint: preferences.showExitHint,

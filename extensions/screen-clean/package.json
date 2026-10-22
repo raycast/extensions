@@ -25,23 +25,23 @@
       "default": "300",
       "data": [
         {
-          "title": "30 seconds",
+          "title": "30 Seconds",
           "value": "30"
         },
         {
-          "title": "1 minute",
+          "title": "1 Minute",
           "value": "60"
         },
         {
-          "title": "2 minutes",
+          "title": "2 Minutes",
           "value": "120"
         },
         {
-          "title": "5 minutes",
+          "title": "5 Minutes",
           "value": "300"
         },
         {
-          "title": "Until manually stopped (max 30 min)",
+          "title": "Until Manually Stopped (Max 30 Min)",
           "value": "0"
         }
       ]
@@ -90,8 +90,7 @@
   ],
   "tools": [],
   "dependencies": {
-    "@raycast/api": "^2.8.2",
-    "@raycast/utils": "^2.2.7"
+    "@raycast/api": "^2.8.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

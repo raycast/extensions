@@ -10,6 +10,7 @@ private struct Options {
     var lockKeyboard = false
     var showHint = true
     var requestAccessibilityOnly = false
+    var readyFile: String?
 }
 
 private let escapePressTarget = 5
@@ -25,6 +26,7 @@ private func usage() -> String {
       --seconds <n>            Auto-exit after n seconds (0 = until stopped, hard-capped at 30 min)
       --lock-keyboard          Swallow keyboard events system-wide (needs Accessibility permission)
       --no-hint                Do not show the exit hint
+      --ready-file <path>      Write this file once the overlay is visible
       --request-accessibility  Ask macOS for Accessibility permission, then exit
       -h, --help               Show this help
     """
@@ -46,6 +48,11 @@ private func parseOptions() -> Options {
             options.lockKeyboard = true
         case "--no-hint":
             options.showHint = false
+        case "--ready-file":
+            index += 1
+            if index < arguments.count {
+                options.readyFile = arguments[index]
+            }
         case "--request-accessibility":
             options.requestAccessibilityOnly = true
         case "-h", "--help":
@@ -137,6 +144,10 @@ private final class CleanerController: NSObject, NSApplicationDelegate {
         scheduleAutoExit()
 
         NSApp.activate(ignoringOtherApps: true)
+
+        if let readyFile = options.readyFile {
+            try? "ready".write(toFile: readyFile, atomically: true, encoding: .utf8)
+        }
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {

@@ -2,6 +2,7 @@ param(
     [int]$Seconds = 60,
     [int]$LockKeyboard = 1,
     [int]$ShowHint = 1,
+    [string]$ReadyFile = "",
     [string]$LogPath = ""
 )
 
@@ -23,6 +24,7 @@ try {
     $source = @'
 using System;
 using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -85,7 +87,7 @@ public static class ScreenCleanerApp
     private static bool _escapeDown;
     private static bool _exiting;
 
-    public static void Run(int seconds, bool lockKeyboard, bool showHint)
+    public static void Run(int seconds, bool lockKeyboard, bool showHint, string readyFile)
     {
         _seconds = seconds > 0 ? seconds : 1800;
         _lockKeyboard = lockKeyboard;
@@ -156,6 +158,17 @@ public static class ScreenCleanerApp
         if (_forms.Length > 0)
         {
             _forms[0].Activate();
+        }
+
+        if (!String.IsNullOrEmpty(readyFile))
+        {
+            try
+            {
+                File.WriteAllText(readyFile, "ready");
+            }
+            catch
+            {
+            }
         }
 
         Application.Run();
@@ -362,7 +375,7 @@ public static class ScreenCleanerApp
 '@
 
     Add-Type -TypeDefinition $source -ReferencedAssemblies $references -ErrorAction Stop
-    [ScreenCleanerApp]::Run($Seconds, ($LockKeyboard -ne 0), ($ShowHint -ne 0))
+    [ScreenCleanerApp]::Run($Seconds, ($LockKeyboard -ne 0), ($ShowHint -ne 0), $ReadyFile)
 }
 catch {
     if ($LogPath -ne "") {

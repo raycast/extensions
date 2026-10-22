@@ -9,43 +9,34 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 
 SDK="$(xcrun --sdk macosx --show-sdk-path)"
 TARGET_MIN="12.0"
-ARCHS=()
 
 build_arch() {
   local arch="$1"
   echo "Building ScreenCleaner for ${arch}..."
-  xcrun swiftc \
+  if ! xcrun swiftc \
     -O \
     -whole-module-optimization \
     -sdk "$SDK" \
     -target "${arch}-apple-macos${TARGET_MIN}" \
     -o "${TMP_DIR}/${arch}" \
-    main.swift
+    main.swift; then
+    echo "error: failed to build for ${arch}; refusing to replace ${OUT}" >&2
+    exit 1
+  fi
 }
 
-for arch in arm64 x86_64; do
-  if build_arch "$arch"; then
-    ARCHS+=("$arch")
-  else
-    echo "warning: failed to build for ${arch}" >&2
-  fi
-done
+# Both architectures are required. A single-arch build must never replace the
+# universal helper that ships with the extension.
+build_arch arm64
+build_arch x86_64
 
-if [[ ${#ARCHS[@]} -eq 0 ]]; then
-  echo "error: no architectures were built" >&2
-  exit 1
-fi
+UNIVERSAL="${TMP_DIR}/ScreenCleaner"
+xcrun lipo -create -output "$UNIVERSAL" "${TMP_DIR}/arm64" "${TMP_DIR}/x86_64"
 
 mkdir -p "$(dirname "$OUT")"
-
-if [[ ${#ARCHS[@]} -eq 2 ]]; then
-  xcrun lipo -create -output "$OUT" "${TMP_DIR}/arm64" "${TMP_DIR}/x86_64"
-else
-  cp "${TMP_DIR}/${ARCHS[0]}" "$OUT"
-fi
-
+cp "$UNIVERSAL" "$OUT"
 chmod 755 "$OUT"
 codesign --force --sign - --timestamp=none "$OUT" >/dev/null 2>&1 || \
   echo "warning: ad-hoc codesign failed; the helper may need to be re-authorized" >&2
 
-echo "Built ${OUT} ($(lipo -archs "$OUT" 2>/dev/null || echo "${ARCHS[*]}"))"
+echo "Built ${OUT} ($(lipo -archs "$OUT"))"

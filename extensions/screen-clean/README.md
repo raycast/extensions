@@ -90,7 +90,7 @@ If compilation or startup fails, the error is written to
 - **Raycast** on macOS or Windows
 - **macOS 12 or newer** for the macOS helper
 - **Windows 10/11** with the built-in Windows PowerShell 5.1 for the Windows helper
-- **Node.js 20+** and **Xcode Command Line Tools** (macOS only) for development
+- **Node.js 22.22.2 or newer** and **Xcode Command Line Tools** (macOS only) for development
 
 ### From source
 
