@@ -32,7 +32,7 @@ import {
   smaller,
 } from "./logic";
 import { PICK_CIRCLE, SELECTED_CIRCLE, outcomeIcon } from "./look";
-import { deleteAll, loadState, mutate, refreshMenuBar, todayKey } from "./storage";
+import { StaleDayError, deleteAll, loadState, mutate, refreshMenuBar, todayKey } from "./storage";
 
 const FEEDBACK_URL = "https://x.com/carlomakes";
 
@@ -72,13 +72,16 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Today 
 
   // Each change goes through mutate: it re-reads what is saved and works out today again.
   async function run(change: (s: State, t: string) => State, hud?: string) {
-    if (todayKey() !== shownDay) {
+    let next: State;
+    try {
+      next = await mutate(change, { expectedDay: shownDay });
+    } catch (error) {
+      if (!(error instanceof StaleDayError)) throw error;
       setState(await loadState());
       setSearch("");
       await showToast({ style: Toast.Style.Success, title: "A new day started", message: "Nothing was changed." });
       return;
     }
-    const next = await mutate(change);
     if (hud) {
       await showHUD(hud, { popToRootType: PopToRootType.Immediate });
       return;
