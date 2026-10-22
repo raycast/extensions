@@ -1,6 +1,6 @@
 # Wordle Changelog
 
-## [Board View Redesign] - {PR_MERGE_DATE}
+## [Board View Redesign] - 2026-10-22
 
 - Show the game as a Wordle board with six rows of tiles and a keyboard of used letters that never changes size
 - Keep the board visible after winning or losing and reveal the word after a loss
