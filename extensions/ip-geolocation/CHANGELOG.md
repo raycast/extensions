@@ -1,6 +1,6 @@
 # IP Geolocation Changelog
 
-## [Compare IP Providers] - {PR_MERGE_DATE}
+## [Compare IP Providers] - 2026-10-22
 
 - Add Compare IP Providers command: looks up an IP at ip-api, ipwho.is, ipapi.is, ipinfo and RDAP and shows where they agree
 
