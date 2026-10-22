@@ -73,5 +73,27 @@ export async function getStudios(): Promise<Studio[]> {
     ["-l", "JavaScript", "-e", discoveryScript],
     { timeout: 30_000 },
   );
-  return JSON.parse(stdout);
+  const studios: Studio[] = JSON.parse(stdout);
+  const ranked = await Promise.all(
+    studios.map(async (studio) => {
+      // Launch Services increments this sequence when an app becomes frontmost.
+      // Window stacking is unreliable for Studio's floating and hidden windows.
+      try {
+        const { stdout: activity } = await exec(
+          "/usr/bin/lsappinfo",
+          ["-all", "info", "-only", "LSFrontApplicationSeed", `#${studio.pid}`],
+          { timeout: 5_000 },
+        );
+        const sequence = Number(
+          activity.match(/"LSFrontApplicationSeed"\s*=\s*(\d+)/)?.[1] ?? 0,
+        );
+        return { studio, sequence };
+      } catch {
+        return { studio, sequence: 0 };
+      }
+    }),
+  );
+  return ranked
+    .sort((a, b) => b.sequence - a.sequence)
+    .map(({ studio }) => studio);
 }
