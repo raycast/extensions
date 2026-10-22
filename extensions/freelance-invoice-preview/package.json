@@ -1,0 +1,39 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "freelance-invoice-preview",
+  "title": "Invoice Preview",
+  "description": "Paste invoice JSON and instantly preview it, then copy or save as clean HTML - no account, no upload, works offline.",
+  "icon": "icon.png",
+  "author": "kleogeos",
+  "platforms": ["macOS", "Windows"],
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "preview-invoice",
+      "title": "Preview Invoice",
+      "subtitle": "Invoice Preview",
+      "description": "Paste invoice JSON and preview it as a formatted invoice, then copy or save as HTML",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
