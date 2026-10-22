@@ -1,5 +1,9 @@
 # Folder Search Changelog
 
+## [Move Selection to Trash] - {PR_MERGE_DATE}
+
+- Added action to move selected Finder items to the Trash in the Move to a Folder command
+
 ## [Finder Open Behavior] - 2026-08-29
 
 - **enhanced** Added "Open Behavior" preference to open folders in a new Finder window, a new tab, or the current tab

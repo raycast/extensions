@@ -1,11 +1,17 @@
 import {
   Action,
   ActionPanel,
+  Alert,
+  confirmAlert,
+  getSelectedFinderItems,
   Icon,
   List,
   closeMainWindow,
   popToRoot,
   open,
+  showToast,
+  Toast,
+  trash,
   Keyboard,
   LaunchProps,
   getPreferenceValues,
@@ -114,6 +120,67 @@ function Command(props: LaunchProps) {
             )}
           </>
         )}
+        <Action
+          title="Move Finder Selection to Trash"
+          style={Action.Style.Destructive}
+          icon={Icon.Trash}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          onAction={async () => {
+            try {
+              let selectedItems;
+              try {
+                selectedItems = await getSelectedFinderItems();
+              } catch {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "No items selected",
+                  message: "Please select files in Finder first",
+                  primaryAction: {
+                    title: "Open Finder",
+                    onAction: () => {
+                      open("file:///System/Library/CoreServices/Finder.app");
+                    },
+                  },
+                });
+                return;
+              }
+
+              if (selectedItems.length === 0) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "No items selected",
+                  message: "Select files in Finder first",
+                });
+                return;
+              }
+
+              const count = selectedItems.length;
+              const options: Alert.Options = {
+                title: "Move to Trash",
+                message:
+                  count === 1
+                    ? `Are you sure you want to move "${path.basename(selectedItems[0].path)}" to the Trash?`
+                    : `Are you sure you want to move ${count} items to the Trash?`,
+                icon: Icon.Trash,
+                primaryAction: {
+                  title: "Move to Trash",
+                  style: Alert.ActionStyle.Destructive,
+                },
+              };
+
+              if (await confirmAlert(options)) {
+                await trash(selectedItems.map((item) => item.path));
+                await showToast({
+                  style: Toast.Style.Success,
+                  title: "Moved to Trash",
+                  message: `${count} ${count === 1 ? "item" : "items"}`,
+                });
+              }
+            } catch (error) {
+              showFailureToast(error, { title: "Could not move Finder selection to Trash" });
+            }
+          }}
+        />
         <ActionPanel.Section>
           <Action.Push
             title="Enclosing Folder"
