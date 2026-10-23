@@ -4,6 +4,8 @@ import {
   exchangeAuthorizationCode,
   refreshAccessToken,
   registerPublicClient,
+  sessionRejected,
+  TokenEndpointError,
 } from "./taskit-oauth";
 import {
   createTask,
@@ -151,6 +153,43 @@ describe("Taskit OAuth", () => {
     expect(new URLSearchParams(calls[2].body).get("grant_type")).toBe(
       "refresh_token",
     );
+  });
+
+  it("keeps a session after a server error and drops it when the server rejects it", async () => {
+    const fetchImpl: typeof fetch = async () =>
+      new Response(JSON.stringify({ error: "server_error" }), { status: 503 });
+    await expect(
+      refreshAccessToken({
+        issuer: "https://taskit.example",
+        clientId: "client-1",
+        refreshToken: "refresh-1",
+        fetchImpl,
+      }),
+    ).rejects.toBeInstanceOf(TokenEndpointError);
+    try {
+      await refreshAccessToken({
+        issuer: "https://taskit.example",
+        clientId: "client-1",
+        refreshToken: "refresh-1",
+        fetchImpl,
+      });
+    } catch (error) {
+      expect(sessionRejected(error)).toBe(false);
+    }
+
+    const rejected: typeof fetch = async () =>
+      new Response(JSON.stringify({ error: "invalid_grant" }), { status: 400 });
+    try {
+      await refreshAccessToken({
+        issuer: "https://taskit.example",
+        clientId: "client-1",
+        refreshToken: "refresh-1",
+        fetchImpl: rejected,
+      });
+    } catch (error) {
+      expect(sessionRejected(error)).toBe(true);
+    }
+    expect(sessionRejected(new Error("offline"))).toBe(false);
   });
 });
 

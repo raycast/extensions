@@ -7,7 +7,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { taskit } from "./auth";
+import { taskit, usesHostedApi } from "./auth";
 import {
   batchTasks,
   listLists,
@@ -87,6 +87,7 @@ export function TaskActions({
   onChanged: () => void;
 }) {
   const completed = task.status === "completed";
+  const webUrl = usesHostedApi() ? taskUrl(task.id, view) : undefined;
   const destinations = [
     { id: "inbox", name: "Inbox" },
     ...lists.filter((list) => list.id !== "inbox"),
@@ -188,10 +189,9 @@ export function TaskActions({
         </ActionPanel.Submenu>
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <Action.OpenInBrowser
-          title="Open in Taskit"
-          url={taskUrl(task.id, view)}
-        />
+        {webUrl ? (
+          <Action.OpenInBrowser title="Open in Taskit" url={webUrl} />
+        ) : null}
         <Action.CopyToClipboard title="Copy Title" content={task.title} />
       </ActionPanel.Section>
     </ActionPanel>

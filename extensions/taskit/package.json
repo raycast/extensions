@@ -17,7 +17,7 @@
     {
       "name": "create-task",
       "title": "Create Task",
-      "description": "Add a task from a sentence. Dates, tags, and priority are parsed for you.",
+      "description": "Add a task from a sentence and choose its list.",
       "mode": "view",
       "subtitle": "Taskit",
       "keywords": [

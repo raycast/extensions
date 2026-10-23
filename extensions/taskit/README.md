@@ -10,7 +10,7 @@ No API key is required. The extension uses the hosted Taskit API.
 
 ## Commands
 
-- **Create Task** — add a task from a sentence. Dates, tags, and priority are parsed for you. Example: `Buy milk tomorrow #errands !!`
+- **Create Task** — add a task from a sentence, then choose the list from the dropdown. Dates, tags, and priority are parsed for you. Example: `Buy milk tomorrow #errands !!`
 - **My Tasks** — browse Today, Inbox, Upcoming, Overdue, and Backlog. Complete, reopen, schedule, set priority, or move a task.
 - **Search Tasks** — find a task by words in its title.
 - **Today in Menu Bar** — show how many tasks are still open today. Refreshes every 10 minutes.

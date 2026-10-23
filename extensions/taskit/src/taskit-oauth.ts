@@ -15,6 +15,30 @@ interface OAuthErrorBody {
   error_description?: string;
 }
 
+const REJECTED_SESSION = new Set([
+  "invalid_grant",
+  "invalid_token",
+  "invalid_client",
+]);
+
+export class TokenEndpointError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly oauthError?: string,
+  ) {
+    super(message);
+    this.name = "TokenEndpointError";
+  }
+}
+
+/** The server refused this session. Network and server errors are not a refusal. */
+export function sessionRejected(error: unknown): boolean {
+  if (!(error instanceof TokenEndpointError)) return false;
+  if (error.status === 401) return true;
+  return !!error.oauthError && REJECTED_SESSION.has(error.oauthError);
+}
+
 export async function registerPublicClient(
   issuer: string,
   redirectUri: string,
@@ -107,11 +131,13 @@ async function readBody<T extends OAuthErrorBody>(
     }
   }
   if (!response.ok || payload.error) {
-    throw new Error(
+    throw new TokenEndpointError(
       payload.error_description ||
         payload.error ||
         response.statusText ||
         "Sign-in failed",
+      response.status,
+      payload.error,
     );
   }
   return payload;

@@ -4,6 +4,7 @@ import {
   exchangeAuthorizationCode,
   refreshAccessToken,
   registerPublicClient,
+  sessionRejected,
   type OAuthTokenResponse,
 } from "./taskit-oauth";
 
@@ -11,10 +12,7 @@ export const DEFAULT_API_BASE_URL =
   "https://func-taskit-dev-872f21.azurewebsites.net";
 
 const CLIENT_ID_PREFIX = "taskit-oauth-client:";
-
-interface Preferences {
-  apiBaseUrl?: string;
-}
+const ISSUER_KEY = "taskit-token-issuer";
 
 export class NotSignedInError extends Error {
   constructor() {
@@ -32,15 +30,21 @@ export const oauthClient = new OAuth.PKCEClient({
 });
 
 let accessToken: string | undefined;
+let boundIssuer: string | undefined;
 
 export function readConfig(): { apiBaseUrl: string } {
   const prefs = getPreferenceValues<Preferences>();
   return {
-    apiBaseUrl: (prefs.apiBaseUrl?.trim() || DEFAULT_API_BASE_URL).replace(
+    apiBaseUrl: (prefs.apiBaseUrl.trim() || DEFAULT_API_BASE_URL).replace(
       /\/$/,
       "",
     ),
   };
+}
+
+/** The hosted API has a known web app. A custom API address does not. */
+export function usesHostedApi(): boolean {
+  return readConfig().apiBaseUrl === DEFAULT_API_BASE_URL;
 }
 
 function clientKey(issuer: string): string {
@@ -58,7 +62,34 @@ async function clientIdFor(
   return client.client_id;
 }
 
-async function storeTokens(tokens: OAuthTokenResponse): Promise<void> {
+async function rememberIssuer(issuer: string): Promise<void> {
+  boundIssuer = issuer;
+  await LocalStorage.setItem(ISSUER_KEY, issuer);
+}
+
+async function clearSession(issuer: string): Promise<void> {
+  await LocalStorage.removeItem(clientKey(issuer));
+  await LocalStorage.removeItem(ISSUER_KEY);
+  await oauthClient.removeTokens();
+  accessToken = undefined;
+  boundIssuer = undefined;
+}
+
+async function requireMatchingServer(): Promise<string> {
+  const issuer = readConfig().apiBaseUrl;
+  const stored = await LocalStorage.getItem<string>(ISSUER_KEY);
+  if (stored && stored !== issuer) {
+    accessToken = undefined;
+    boundIssuer = undefined;
+    throw new NotSignedInError();
+  }
+  return issuer;
+}
+
+async function storeTokens(
+  issuer: string,
+  tokens: OAuthTokenResponse,
+): Promise<void> {
   if (!tokens.refresh_token) {
     throw new Error("Taskit did not return a refresh token");
   }
@@ -69,33 +100,39 @@ async function storeTokens(tokens: OAuthTokenResponse): Promise<void> {
     scope: tokens.scope,
   });
   accessToken = tokens.access_token;
+  await rememberIssuer(issuer);
 }
 
 async function refreshStored(refreshToken: string): Promise<void> {
-  const issuer = readConfig().apiBaseUrl;
+  const issuer = await requireMatchingServer();
   const clientId = await LocalStorage.getItem<string>(clientKey(issuer));
   if (!clientId) throw new NotSignedInError();
   try {
     await storeTokens(
+      issuer,
       await refreshAccessToken({ issuer, clientId, refreshToken }),
     );
   } catch (error) {
-    await LocalStorage.removeItem(clientKey(issuer));
-    await oauthClient.removeTokens();
-    accessToken = undefined;
+    if (sessionRejected(error)) await clearSession(issuer);
     throw error;
   }
 }
 
 export async function ensureAccessToken(): Promise<string> {
+  const issuer = await requireMatchingServer();
   const tokens = await oauthClient.getTokens();
   if (!tokens?.accessToken) throw new NotSignedInError();
   if (tokens.refreshToken && tokens.isExpired()) {
     await refreshStored(tokens.refreshToken);
   } else {
     accessToken = tokens.accessToken;
+    if (!(await LocalStorage.getItem<string>(ISSUER_KEY))) {
+      await rememberIssuer(issuer);
+    } else {
+      boundIssuer = issuer;
+    }
   }
-  if (!accessToken) throw new NotSignedInError();
+  if (!accessToken || boundIssuer !== issuer) throw new NotSignedInError();
   return accessToken;
 }
 
@@ -114,7 +151,9 @@ export function taskitClient(): TaskitClient {
   return new TaskitClient({
     baseUrl: apiBaseUrl,
     getToken: () => {
-      if (!accessToken) throw new NotSignedInError();
+      if (!accessToken || boundIssuer !== readConfig().apiBaseUrl) {
+        throw new NotSignedInError();
+      }
       return accessToken;
     },
     refresh: async () => {
@@ -150,7 +189,7 @@ export async function signIn(): Promise<void> {
     codeVerifier: draft.codeVerifier,
     redirectUri: draft.redirectURI,
   });
-  await storeTokens(tokens);
+  await storeTokens(issuer, tokens);
 }
 
 export function messageFrom(error: unknown): string {
