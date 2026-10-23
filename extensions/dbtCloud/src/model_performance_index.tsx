@@ -5,6 +5,7 @@ import { buildDbtCloudUrl, buildDocsUrl, formatRelativeTime } from "./api";
 import { CatalogEnvironment, describeEnvironment, resolveCatalogEnvironments } from "./catalog_environments";
 import { buildDurationChart, ChartPoint, ChartStatus } from "./duration_chart";
 import { fetchModelHistoricalRuns, fetchModelPerformance, ModelPerformanceNode } from "./model_performance_api";
+import { ModelByUniqueId } from "./navigation";
 
 const RUN_COUNT = 50;
 
@@ -34,7 +35,7 @@ const median = (values: number[]): number | null => {
   return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 };
 
-function ModelPerformanceDetail({
+export function ModelPerformanceDetail({
   model,
   environment,
 }: {
@@ -128,8 +129,25 @@ ${runRows || "| — | — | — | — | — |"}
       }
       actions={
         <ActionPanel>
-          {explorerUrl && <Action.OpenInBrowser url={explorerUrl} title="Open in dbt Explorer" />}
-          {runs[0] && <Action.OpenInBrowser url={runUrl(runs[0].runId)} title="Open Latest Run" icon={Icon.Play} />}
+          {environment.projectId > 0 && (
+            <Action.Push
+              title="View Model Details"
+              icon={Icon.Document}
+              target={
+                <ModelByUniqueId
+                  uniqueId={model.uniqueId}
+                  environmentId={environment.id}
+                  projectId={environment.projectId}
+                />
+              }
+            />
+          )}
+          <ActionPanel.Section title="Open in dbt Cloud">
+            {explorerUrl && <Action.OpenInBrowser url={explorerUrl} title="Open in dbt Explorer" />}
+            {runs[0] && (
+              <Action.OpenInBrowser url={runUrl(runs[0].runId)} title="Open Latest Run in dbt Cloud" icon={Icon.Play} />
+            )}
+          </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard title="Copy Unique ID" content={model.uniqueId} />
             <Action.CopyToClipboard title="Copy Average Execution" content={formatSeconds(average)} />
@@ -192,6 +210,19 @@ export default function ModelPerformanceIndex() {
                       icon={Icon.BarChart}
                       target={<ModelPerformanceDetail model={model} environment={environment} />}
                     />
+                    {environment.projectId > 0 && (
+                      <Action.Push
+                        title="View Model Details"
+                        icon={Icon.Document}
+                        target={
+                          <ModelByUniqueId
+                            uniqueId={model.uniqueId}
+                            environmentId={environment.id}
+                            projectId={environment.projectId}
+                          />
+                        }
+                      />
+                    )}
                     {environment.projectId > 0 && (
                       <Action.OpenInBrowser
                         url={buildDocsUrl(environment.projectId, model.uniqueId)}

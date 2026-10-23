@@ -3,6 +3,7 @@ import { JSX, useEffect, useState, useCallback } from "react";
 import { returnRuns } from "./fetch_runs";
 import { RunsFetchResponse, RunModel } from "./types";
 import { buildDbtCloudUrl, formatRelativeTime, formatDuration, cancelRun } from "./api";
+import { JobById } from "./navigation";
 
 type StatusFilter = "all" | "success" | "error" | "running" | "queued" | "cancelled";
 
@@ -54,7 +55,7 @@ const matchesStatusFilter = (run: RunModel, filter: StatusFilter): boolean => {
 };
 
 // Run Detail Component
-function RunDetail({ run }: { run: RunModel }) {
+export function RunDetail({ run }: { run: RunModel }) {
   const runUrl = run.href || buildDbtCloudUrl(`/projects/${run.project_id}/runs/${run.id}`);
   const jobUrl = buildDbtCloudUrl(`/projects/${run.project_id}/jobs/${run.job_definition_id}`);
 
@@ -132,8 +133,11 @@ ${run.trigger?.cause ? `\n## Trigger\n\n**Cause:** ${run.trigger.cause}` : ""}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={runUrl} title="Open Run in dbt Cloud" />
-          <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" />
+          <Action.Push title="View Job" icon={Icon.Hammer} target={<JobById jobId={run.job_definition_id} />} />
           {run.status === 3 && <Action title="Cancel Run" icon={Icon.XmarkCircle} onAction={() => cancelRun(run.id)} />}
+          <ActionPanel.Section title="Open in dbt Cloud">
+            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" />
+          </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard title="Copy Run ID" content={run.id.toString()} />
             <Action.CopyToClipboard title="Copy Run URL" content={runUrl} />
@@ -168,9 +172,12 @@ const RunListItem = ({ run }: RunListItemProps): JSX.Element => {
       actions={
         <ActionPanel>
           <Action title="View Details" icon={Icon.Eye} onAction={() => push(<RunDetail run={run} />)} />
-          <Action.OpenInBrowser url={runUrl} title="Open in dbt Cloud" />
-          <Action.OpenInBrowser url={jobUrl} title="Open Job" icon={Icon.Hammer} />
+          <Action.Push title="View Job" icon={Icon.Hammer} target={<JobById jobId={run.job_definition_id} />} />
           {run.status === 3 && <Action title="Cancel Run" icon={Icon.XmarkCircle} onAction={() => cancelRun(run.id)} />}
+          <ActionPanel.Section title="Open in dbt Cloud">
+            <Action.OpenInBrowser url={runUrl} title="Open Run in dbt Cloud" />
+            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" icon={Icon.Hammer} />
+          </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard title="Copy Run ID" content={run.id.toString()} />
             <Action.CopyToClipboard title="Copy Run URL" content={runUrl} />
@@ -181,7 +188,11 @@ const RunListItem = ({ run }: RunListItemProps): JSX.Element => {
   );
 };
 
-export default function RunsList() {
+export default function Command() {
+  return <RunsList />;
+}
+
+export function RunsList({ jobId, scopeTitle }: { jobId?: number; scopeTitle?: string } = {}) {
   const [runs, setRuns] = useState<RunsFetchResponse>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -189,14 +200,14 @@ export default function RunsList() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await returnRuns();
+      const response = await returnRuns(jobId);
       setRuns(response);
     } catch {
       showToast(Toast.Style.Failure, "Failed loading Runs");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [jobId]);
 
   useEffect(() => {
     fetchData();
@@ -220,6 +231,7 @@ export default function RunsList() {
   return (
     <List
       isLoading={loading}
+      navigationTitle={scopeTitle ? `Runs · ${scopeTitle}` : undefined}
       searchBarPlaceholder="Filter runs by job name..."
       throttle
       searchBarAccessory={

@@ -11,6 +11,7 @@
 - AI tools search the production environment of every project when no environment is given
 - Show Job Performance lists every active job by project and environment, with success rate, run counts, and a build-duration chart over 7, 14, or 30 days
 - Add Show Model Performance: slowest models per environment, with each model's execution time and status across its recent runs
+- Actions such as View Jobs, View Environments, View Run History, and View Lineage open the matching extension view, scoped to the project, environment, or job; the dbt Cloud page for each is still available under Open in dbt Cloud
 
 ## [Modernize + Specify Endpoint] - 2026-06-30
 

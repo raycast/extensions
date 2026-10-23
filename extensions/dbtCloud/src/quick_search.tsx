@@ -6,6 +6,10 @@ import { returnEnvironments } from "./fetch_environments";
 import { returnRuns } from "./fetch_runs";
 import { ProjectModel, JobModel, EnvironmentModel, RunModel } from "./types";
 import { buildDbtCloudUrl, formatRelativeTime } from "./api";
+import { EnvironmentDetail } from "./environments_index";
+import { JobDetail } from "./jobs_index";
+import { ProjectDetail } from "./projects_index";
+import { RunDetail } from "./runs_index";
 
 type SearchResult =
   | { type: "project"; data: ProjectModel }
@@ -47,6 +51,20 @@ function getResultUrl(result: SearchResult): string {
       const run = result.data as RunModel;
       return run.href || buildDbtCloudUrl(`/projects/${run.project_id}/runs/${run.id}`);
     }
+  }
+}
+
+// The extension's own detail view for each result type
+function getResultDetail(result: SearchResult) {
+  switch (result.type) {
+    case "project":
+      return <ProjectDetail project={result.data} />;
+    case "job":
+      return <JobDetail job={result.data} />;
+    case "environment":
+      return <EnvironmentDetail environment={result.data} />;
+    case "run":
+      return <RunDetail run={result.data} />;
   }
 }
 
@@ -102,6 +120,7 @@ const SearchResultItem = ({ result }: SearchResultItemProps) => {
       accessories={[{ text: result.type.charAt(0).toUpperCase() + result.type.slice(1) }]}
       actions={
         <ActionPanel>
+          <Action.Push title="View Details" icon={Icon.Eye} target={getResultDetail(result)} />
           <Action.OpenInBrowser url={url} title="Open in dbt Cloud" />
           <Action.CopyToClipboard title="Copy URL" content={url} />
           <Action.CopyToClipboard title="Copy ID" content={result.data.id.toString()} />

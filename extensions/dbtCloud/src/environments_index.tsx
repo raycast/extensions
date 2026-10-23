@@ -4,6 +4,10 @@ import { returnEnvironments } from "./fetch_environments";
 import { EnvironmentsFetchResponse, EnvironmentModel } from "./types";
 import { buildDbtCloudUrl, formatRelativeTime } from "./api";
 import { openEnvironmentLineageDiagram } from "./lineage_diagram";
+import { CatalogList } from "./catalog_index";
+import { JobsList } from "./jobs_index";
+import { ProjectById } from "./navigation";
+import { SourcesList } from "./sources_index";
 
 function getEnvironmentIcon(env: EnvironmentModel): { source: Icon; tintColor: Color } {
   const envType = env.type?.toLowerCase() || "";
@@ -23,8 +27,49 @@ function getEnvironmentTypeEmoji(env: EnvironmentModel): string {
   return "🌍";
 }
 
+// In-extension equivalents of the environment's dbt Cloud pages
+function EnvironmentNavigationActions({ environment }: { environment: EnvironmentModel }) {
+  const isDeployment = environment.type?.toLowerCase() === "deployment";
+  return (
+    <ActionPanel.Section title="Navigate">
+      <Action.Push
+        title="View Project"
+        icon={Icon.Document}
+        target={<ProjectById projectId={environment.project_id} />}
+      />
+      <Action.Push
+        title="View Jobs"
+        icon={Icon.Hammer}
+        target={
+          <JobsList projectId={environment.project_id} environmentId={environment.id} scopeTitle={environment.name} />
+        }
+      />
+      {isDeployment && (
+        <>
+          <Action.Push
+            title="Browse Models"
+            icon={Icon.Box}
+            target={<CatalogList environmentId={environment.id} scopeTitle={environment.name} />}
+          />
+          <Action.Push
+            title="Browse Sources"
+            icon={Icon.HardDrive}
+            target={
+              <SourcesList
+                environmentId={environment.id}
+                environmentName={environment.name}
+                projectId={environment.project_id}
+              />
+            }
+          />
+        </>
+      )}
+    </ActionPanel.Section>
+  );
+}
+
 // Environment Detail Component
-function EnvironmentDetail({ environment }: { environment: EnvironmentModel }) {
+export function EnvironmentDetail({ environment }: { environment: EnvironmentModel }) {
   const envUrl = buildDbtCloudUrl(`/projects/${environment.project_id}/environments/${environment.id}`);
   const projectUrl = buildDbtCloudUrl(`/projects/${environment.project_id}`);
   const jobsUrl = buildDbtCloudUrl(`/projects/${environment.project_id}/jobs`);
@@ -127,7 +172,6 @@ ${environment.supports_docs ? "✅ Supports Documentation" : "❌ Does not suppo
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={envUrl} title="Open in dbt Cloud" />
           <Action
             title="Explore Lineage Graph"
             icon={Icon.Network}
@@ -136,11 +180,13 @@ ${environment.supports_docs ? "✅ Supports Documentation" : "❌ Does not suppo
               await openEnvironmentLineageDiagram(environment.id, environment.name);
             }}
           />
-          <ActionPanel.Section title="Navigate">
-            <Action.OpenInBrowser url={projectUrl} title="View Project" icon={Icon.Document} />
-            <Action.OpenInBrowser url={jobsUrl} title="View Jobs" icon={Icon.Hammer} />
+          <EnvironmentNavigationActions environment={environment} />
+          <ActionPanel.Section title="Open in dbt Cloud">
+            <Action.OpenInBrowser url={envUrl} title="Open Environment in dbt Cloud" />
+            <Action.OpenInBrowser url={projectUrl} title="Open Project in dbt Cloud" icon={Icon.Document} />
+            <Action.OpenInBrowser url={jobsUrl} title="Open Jobs in dbt Cloud" icon={Icon.Hammer} />
             {environment.supports_docs && (
-              <Action.OpenInBrowser url={docsUrl} title="View Documentation" icon={Icon.Document} />
+              <Action.OpenInBrowser url={docsUrl} title="Open Documentation in dbt Cloud" icon={Icon.Document} />
             )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
@@ -191,14 +237,17 @@ const EnvironmentListItem = ({ environment }: EnvironmentListItemProps): JSX.Ele
               await openEnvironmentLineageDiagram(environment.id, environment.name);
             }}
           />
-          <Action.OpenInBrowser url={envUrl} title="Open in dbt Cloud" />
-          {environment.supports_docs && (
-            <Action.OpenInBrowser
-              url={buildDbtCloudUrl(`/projects/${environment.project_id}/docs`)}
-              title="View Documentation"
-              icon={Icon.Document}
-            />
-          )}
+          <EnvironmentNavigationActions environment={environment} />
+          <ActionPanel.Section title="Open in dbt Cloud">
+            <Action.OpenInBrowser url={envUrl} title="Open Environment in dbt Cloud" />
+            {environment.supports_docs && (
+              <Action.OpenInBrowser
+                url={buildDbtCloudUrl(`/projects/${environment.project_id}/docs`)}
+                title="Open Documentation in dbt Cloud"
+                icon={Icon.Document}
+              />
+            )}
+          </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard title="Copy Environment ID" content={environment.id.toString()} />
             <Action.CopyToClipboard title="Copy Environment Name" content={environment.name} />
@@ -214,7 +263,11 @@ const EnvironmentListItem = ({ environment }: EnvironmentListItemProps): JSX.Ele
 
 type EnvFilter = "all" | "deployment" | "development";
 
-export default function EnvironmentsList() {
+export default function Command() {
+  return <EnvironmentsList />;
+}
+
+export function EnvironmentsList({ projectId, scopeTitle }: { projectId?: number; scopeTitle?: string } = {}) {
   const [environments, setEnvironments] = useState<EnvironmentsFetchResponse>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filter, setFilter] = useState<EnvFilter>("all");
@@ -222,14 +275,14 @@ export default function EnvironmentsList() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await returnEnvironments();
+      const response = await returnEnvironments(projectId);
       setEnvironments(response);
     } catch {
       showToast(Toast.Style.Failure, "Failed loading Environments");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [projectId]);
 
   useEffect(() => {
     fetchData();
@@ -256,6 +309,7 @@ export default function EnvironmentsList() {
   return (
     <List
       isLoading={loading}
+      navigationTitle={scopeTitle ? `Environments · ${scopeTitle}` : undefined}
       searchBarPlaceholder="Filter environments by name..."
       throttle
       searchBarAccessory={

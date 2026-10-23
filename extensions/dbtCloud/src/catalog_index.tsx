@@ -25,6 +25,8 @@ import {
 import { ModelNode, LineageNode } from "./types";
 import { fetchProductionEnvironments, selectOneEnvPerProject } from "./environment_utils";
 import { openEnvironmentLineageDiagram } from "./lineage_diagram";
+import { LineageDetail } from "./lineage_index";
+import { ModelPerformanceDetail } from "./model_performance_index";
 
 // Model extended with project/environment context for flat catalog view
 interface CatalogModel extends ModelNode {
@@ -304,7 +306,7 @@ function ExpandedLineageView({ model, environmentId }: { model: ModelNode; envir
   );
 }
 
-function ModelDetail({
+export function ModelDetail({
   model,
   environmentId,
   projectId,
@@ -440,14 +442,43 @@ function ModelDetail({
       }
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Navigation">
+          <ActionPanel.Section title="Navigate">
+            <Action.Push
+              title="View Lineage"
+              icon={Icon.Link}
+              target={<LineageDetail node={displayModel} environmentId={environmentId} projectId={projectId} />}
+            />
+            <Action.Push
+              title="View Performance"
+              icon={Icon.BarChart}
+              target={
+                <ModelPerformanceDetail
+                  model={{
+                    uniqueId: displayModel.uniqueId,
+                    name: displayModel.name,
+                    description: displayModel.description ?? null,
+                    materializedType: displayModel.materializedType ?? null,
+                    tags: displayModel.tags ?? null,
+                    executionInfo: null,
+                  }}
+                  environment={{
+                    id: environmentId,
+                    name: (model as Partial<CatalogModel>).environmentName ?? `Environment ${environmentId}`,
+                    projectName: (model as Partial<CatalogModel>).projectName ?? "",
+                    projectId,
+                  }}
+                />
+              }
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser
-              title="View in dbt Cloud Docs"
+              title="Open Docs in dbt Cloud"
               url={buildDocsUrl(projectId, displayModel.uniqueId)}
               icon={Icon.Globe}
             />
             <Action.OpenInBrowser
-              title="View Lineage Graph"
+              title="Open Lineage in dbt Cloud"
               url={buildLineageUrl(projectId, displayModel.uniqueId)}
               icon={Icon.Link}
             />
@@ -529,7 +560,15 @@ function ModelDetail({
   );
 }
 
-export default function CatalogIndex() {
+export default function Command() {
+  return <CatalogList />;
+}
+
+export function CatalogList({
+  projectId,
+  environmentId,
+  scopeTitle,
+}: { projectId?: number; environmentId?: number; scopeTitle?: string } = {}) {
   const [models, setModels] = useState<CatalogModel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [projectFilter, setProjectFilter] = useState<string>("all");
@@ -548,7 +587,9 @@ export default function CatalogIndex() {
         return;
       }
 
-      const selectedEnvs = selectOneEnvPerProject(allEnvs);
+      const selectedEnvs = environmentId
+        ? allEnvs.filter((env) => env.id === environmentId)
+        : selectOneEnvPerProject(projectId ? allEnvs.filter((env) => env.project_id === projectId) : allEnvs);
 
       showToast(Toast.Style.Animated, "Loading models...", `Fetching from ${selectedEnvs.length} project(s)`);
 
@@ -571,7 +612,7 @@ export default function CatalogIndex() {
       showToast(Toast.Style.Success, `Loaded ${allModels.length} models`, `From ${selectedEnvs.length} project(s)`);
     }
     loadAllModels();
-  }, []);
+  }, [projectId, environmentId]);
 
   // Derive unique projects for the dropdown
   const projectList = Array.from(new Map(models.map((m) => [m.projectId, m.projectName]))).sort(([, a], [, b]) =>
@@ -607,7 +648,8 @@ export default function CatalogIndex() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search models across all projects..."
+      navigationTitle={scopeTitle ? `Models · ${scopeTitle}` : undefined}
+      searchBarPlaceholder={scopeTitle ? "Search models..." : "Search models across all projects..."}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by Project"

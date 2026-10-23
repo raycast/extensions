@@ -3,6 +3,32 @@ import { JSX, useEffect, useState, useCallback } from "react";
 import { returnProjects } from "./fetch_projects";
 import { ProjectsFetchResponse, ProjectModel } from "./types";
 import { buildDbtCloudUrl, formatRelativeTime } from "./api";
+import { CatalogList } from "./catalog_index";
+import { EnvironmentsList } from "./environments_index";
+import { JobsList } from "./jobs_index";
+
+// In-extension equivalents of the project's dbt Cloud pages
+function ProjectNavigationActions({ project }: { project: ProjectModel }) {
+  return (
+    <ActionPanel.Section title="Navigate">
+      <Action.Push
+        title="View Jobs"
+        icon={Icon.Hammer}
+        target={<JobsList projectId={project.id} scopeTitle={project.name} />}
+      />
+      <Action.Push
+        title="View Environments"
+        icon={Icon.Globe}
+        target={<EnvironmentsList projectId={project.id} scopeTitle={project.name} />}
+      />
+      <Action.Push
+        title="Browse Models"
+        icon={Icon.Document}
+        target={<CatalogList projectId={project.id} scopeTitle={project.name} />}
+      />
+    </ActionPanel.Section>
+  );
+}
 
 function getProjectStateIcon(state: number): { source: Icon; tintColor: Color } {
   switch (state) {
@@ -27,7 +53,7 @@ function getProjectStateText(state: number): string {
 }
 
 // Project Detail Component
-function ProjectDetail({ project }: { project: ProjectModel }) {
+export function ProjectDetail({ project }: { project: ProjectModel }) {
   const projectUrl = buildDbtCloudUrl(`/projects/${project.id}`);
   const jobsUrl = buildDbtCloudUrl(`/projects/${project.id}/jobs`);
   const environmentsUrl = buildDbtCloudUrl(`/projects/${project.id}/environments`);
@@ -124,14 +150,15 @@ ${project.semantic_layer_config_id ? "✅ Semantic Layer Configured" : "❌ No S
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={projectUrl} title="Open in dbt Cloud" />
-          <ActionPanel.Section title="Navigate">
-            <Action.OpenInBrowser url={jobsUrl} title="View Jobs" icon={Icon.Hammer} />
-            <Action.OpenInBrowser url={environmentsUrl} title="View Environments" icon={Icon.Globe} />
+          <ProjectNavigationActions project={project} />
+          <ActionPanel.Section title="Open in dbt Cloud">
+            <Action.OpenInBrowser url={projectUrl} title="Open Project in dbt Cloud" />
+            <Action.OpenInBrowser url={jobsUrl} title="Open Jobs in dbt Cloud" icon={Icon.Hammer} />
+            <Action.OpenInBrowser url={environmentsUrl} title="Open Environments in dbt Cloud" icon={Icon.Globe} />
             {project.docs_job_id && (
-              <Action.OpenInBrowser url={docsUrl} title="View Documentation" icon={Icon.Document} />
+              <Action.OpenInBrowser url={docsUrl} title="Open Documentation in dbt Cloud" icon={Icon.Document} />
             )}
-            <Action.OpenInBrowser url={settingsUrl} title="Project Settings" icon={Icon.Gear} />
+            <Action.OpenInBrowser url={settingsUrl} title="Open Project Settings in dbt Cloud" icon={Icon.Gear} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard title="Copy Project ID" content={project.id.toString()} />
@@ -171,11 +198,12 @@ const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element => {
       actions={
         <ActionPanel>
           <Action title="View Details" icon={Icon.Eye} onAction={() => push(<ProjectDetail project={project} />)} />
-          <Action.OpenInBrowser url={projectUrl} title="Open in dbt Cloud" />
-          <ActionPanel.Section title="Navigate">
-            <Action.OpenInBrowser url={jobsUrl} title="View Jobs" icon={Icon.Hammer} />
+          <ProjectNavigationActions project={project} />
+          <ActionPanel.Section title="Open in dbt Cloud">
+            <Action.OpenInBrowser url={projectUrl} title="Open Project in dbt Cloud" />
+            <Action.OpenInBrowser url={jobsUrl} title="Open Jobs in dbt Cloud" icon={Icon.Hammer} />
             {project.docs_job_id && (
-              <Action.OpenInBrowser url={docsUrl} title="View Documentation" icon={Icon.Document} />
+              <Action.OpenInBrowser url={docsUrl} title="Open Documentation in dbt Cloud" icon={Icon.Document} />
             )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">

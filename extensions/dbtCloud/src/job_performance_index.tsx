@@ -7,6 +7,8 @@ import { returnEnvironments } from "./fetch_environments";
 import { returnJobs } from "./fetch_jobs";
 import { returnProjects } from "./fetch_projects";
 import { buildDurationChart, ChartPoint, ChartStatus } from "./duration_chart";
+import { JobDetail } from "./jobs_index";
+import { RunsList } from "./runs_index";
 import { EnvironmentModel, JobModel } from "./types";
 
 // Enough history for a 30-day window on jobs that run every couple of hours
@@ -56,7 +58,7 @@ interface JobContext {
   environment?: EnvironmentModel;
 }
 
-function JobPerformanceDetail({ job, projectName, environment }: JobContext) {
+export function JobPerformanceDetail({ job, projectName, environment }: JobContext) {
   const [days, setDays] = useState(14);
   const { data: runs = [], isLoading } = useCachedPromise(fetchJobRunMetrics, [job.id, MAX_RUNS]);
 
@@ -148,8 +150,18 @@ ${runRows || "| — | — | — | — | — | — |"}
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" />
-          {inWindow[0] && <Action.OpenInBrowser url={inWindow[0].href} title="Open Latest Run" icon={Icon.Play} />}
+          <Action.Push title="View Job" icon={Icon.Hammer} target={<JobDetail job={job} />} />
+          <Action.Push
+            title="View Run History"
+            icon={Icon.List}
+            target={<RunsList jobId={job.id} scopeTitle={job.name} />}
+          />
+          <ActionPanel.Section title="Open in dbt Cloud">
+            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" />
+            {inWindow[0] && (
+              <Action.OpenInBrowser url={inWindow[0].href} title="Open Latest Run in dbt Cloud" icon={Icon.Play} />
+            )}
+          </ActionPanel.Section>
           <ActionPanel.Section title="Time Window">
             {WINDOWS.filter((window) => window !== days).map((window) => (
               <Action
@@ -240,6 +252,7 @@ export default function JobPerformanceIndex() {
                       icon={Icon.BarChart}
                       target={<JobPerformanceDetail job={job} projectName={projectName} environment={environment} />}
                     />
+                    <Action.Push title="View Job" icon={Icon.Hammer} target={<JobDetail job={job} />} />
                     <Action.OpenInBrowser
                       url={buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}`)}
                       title="Open Job in dbt Cloud"
