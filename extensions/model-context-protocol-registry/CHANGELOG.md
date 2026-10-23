@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add send21 MCP Server] - {PR_MERGE_DATE}
+## [Add send21 MCP Server] - 2026-10-23
 
 - Add send21 to the official registry: crypto pay links and API for people and AI agents. Create fiat-priced pay links and payment drafts paid to the owner's approved addresses, check payment status and propose receiving addresses for the owner to approve; send21 is non-custodial and the payer signs in their own wallet. Hosted Streamable HTTP server at https://send21.io/mcp, through mcp-remote with a send21 API key as an `Authorization: Bearer` header.
 
