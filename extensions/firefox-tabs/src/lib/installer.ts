@@ -57,7 +57,7 @@ async function getLatestNativeHostRelease(): Promise<{
 
   if (res.status === 403) {
     throw new Error(
-      "GitHub rate limit reached. Please try again in a few minutes.",
+      "GitHub rate limit reached. Please try again in a few minutes."
     );
   }
   if (!res.ok) {
@@ -71,11 +71,11 @@ async function getLatestNativeHostRelease(): Promise<{
 
   // Find the first release whose tag starts with "native-host@"
   const release = releases.find((r) =>
-    r.tag_name.startsWith(NATIVE_HOST_TAG_PREFIX),
+    r.tag_name.startsWith(NATIVE_HOST_TAG_PREFIX)
   );
   if (!release) {
     throw new Error(
-      "No native host release found. Please check https://github.com/toshi38/raycast-firefox/releases",
+      "No native host release found. Please check https://github.com/toshi38/raycast-firefox/releases"
     );
   }
 
@@ -129,18 +129,18 @@ function parseSha256Sums(content: string): Map<string, string> {
 function verifyChecksum(
   buffer: Buffer,
   filename: string,
-  checksums: Map<string, string>,
+  checksums: Map<string, string>
 ): void {
   const expected = checksums.get(filename);
   if (!expected) {
     throw new Error(
-      `No checksum found for ${filename} in SHA256SUMS.txt. The release may be malformed.`,
+      `No checksum found for ${filename} in SHA256SUMS.txt. The release may be malformed.`
     );
   }
   const actual = sha256(buffer);
   if (actual !== expected) {
     throw new Error(
-      `Checksum mismatch for ${filename}. The download may be corrupted. Please try again.`,
+      `Checksum mismatch for ${filename}. The download may be corrupted. Please try again.`
     );
   }
 }
@@ -152,7 +152,7 @@ function verifyChecksum(
 function atomicInstall(
   tempDir: string,
   files: Array<{ name: string; buffer: Buffer; executable?: boolean }>,
-  version: string,
+  version: string
 ): void {
   // Write files to temp dir first
   for (const file of files) {
@@ -232,7 +232,7 @@ function createNodeSymlink(): void {
  * 5. Create Node.js symlink at ~/.raycast-firefox/node
  */
 export async function installNativeHost(
-  onProgress: (message: string) => void,
+  onProgress: (message: string) => void
 ): Promise<InstallResult> {
   // Step 1: Fetch release info
   onProgress("Downloading native host...");
@@ -249,13 +249,13 @@ export async function installNativeHost(
 
   // Validate required assets exist in the release
   const missingAssets = REQUIRED_ASSETS.filter(
-    (name) => !releaseInfo.assets.has(name),
+    (name) => !releaseInfo.assets.has(name)
   );
   if (missingAssets.length > 0) {
     throw new Error(
       `Release is missing required files: ${missingAssets.join(
-        ", ",
-      )}. Please report this issue.`,
+        ", "
+      )}. Please report this issue.`
     );
   }
 
@@ -287,7 +287,7 @@ export async function installNativeHost(
         { name: "host.bundle.js", buffer: hostBundleBuf },
         { name: "run.sh", buffer: runShBuf, executable: true },
       ],
-      releaseInfo.version,
+      releaseInfo.version
     );
   } finally {
     // Clean up temp dir

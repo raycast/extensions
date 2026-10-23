@@ -58,7 +58,7 @@ export function resolveNativeHostPath(): string {
 
   // Neither found
   throw new Error(
-    "Native host not found. Run the 'Setup Firefox Bridge' command to install it.",
+    "Native host not found. Run the 'Setup Firefox Bridge' command to install it."
   );
 }
 
@@ -77,7 +77,7 @@ export function generateManifest(runShPath: string): string {
       allowed_extensions: ["raycast-firefox@lau.engineering"],
     },
     null,
-    2,
+    2
   );
 }
 
@@ -96,7 +96,7 @@ export function writeManifest(manifestJson: string): string {
     "Library",
     "Application Support",
     "Mozilla",
-    "NativeMessagingHosts",
+    "NativeMessagingHosts"
   );
   mkdirSync(targetDir, { recursive: true });
   const manifestPath = join(targetDir, "raycast_firefox.json");
@@ -115,7 +115,7 @@ export function writeManifest(manifestJson: string): string {
  */
 export function validateManifest(
   manifestPath: string,
-  expectedRunShPath: string,
+  expectedRunShPath: string
 ): { valid: boolean; error?: string } {
   try {
     const content = readFileSync(manifestPath, "utf-8");
@@ -165,7 +165,7 @@ export function validateManifest(
  * - Catches all errors gracefully (connection refused, timeout, etc.)
  */
 export async function verifyChain(
-  port: number,
+  port: number
 ): Promise<{ reachable: boolean; tabsOk: boolean }> {
   try {
     const healthRes = await fetch(`http://127.0.0.1:${port}/health`, {
