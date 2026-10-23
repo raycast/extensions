@@ -1,5 +1,10 @@
 # OpenCode Sessions Changelog
 
+## [Support OpenCode v2 sessions] - {PR_MERGE_DATE}
+
+- Sessions from OpenCode v2 (stored in the `session_v2` table) are now listed alongside v1 sessions
+- Deleting a session works correctly whether it lives in `session` or `session_v2`
+
 ## [Fix iTerm2 resume with no open windows] - 2026-06-18
 
 - Create an iTerm2 window when the app is running but has no windows, so "Resume in Terminal" no longer fails silently

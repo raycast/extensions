@@ -217,7 +217,9 @@ export async function loadSessions(): Promise<Session[]> {
             time_created, time_updated, time_compacting, time_archived`;
   const parts = tables.map((tbl) => `SELECT ${cols} FROM ${tbl} WHERE parent_id IS NULL`);
   const sql =
-    parts.length === 1 ? `${parts[0]} ORDER BY time_updated DESC` : `${parts.join(" UNION ALL ")} ORDER BY time_updated DESC`;
+    parts.length === 1
+      ? `${parts[0]} ORDER BY time_updated DESC`
+      : `${parts.join(" UNION ALL ")} ORDER BY time_updated DESC`;
 
   const rows = await executeSQL<SessionRow>(getDbPath(), sql);
   return rows.map(toSession);
