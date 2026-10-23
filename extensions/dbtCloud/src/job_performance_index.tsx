@@ -1,178 +1,169 @@
-import { List, showToast, Toast, ActionPanel, Action, Icon, Color, Detail, useNavigation } from "@raycast/api";
-import { JSX, useEffect, useState, useCallback } from "react";
-import { returnJobs } from "./fetch_jobs";
-import { JobModel } from "./types";
+import { Action, ActionPanel, Color, Detail, Icon, Keyboard, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useMemo, useState } from "react";
 import { buildDbtCloudUrl, fetchJobRunMetrics, formatRelativeTime } from "./api";
+import { DEPLOYMENT_TYPE_INFO, inferDeploymentType } from "./environment_utils";
+import { returnEnvironments } from "./fetch_environments";
+import { returnJobs } from "./fetch_jobs";
+import { returnProjects } from "./fetch_projects";
+import { buildDurationChart, ChartPoint, ChartStatus } from "./duration_chart";
+import { EnvironmentModel, JobModel } from "./types";
 
-interface JobRunMetric {
-  runId: number;
-  jobId: number;
-  jobName: string;
-  status: number;
-  statusHumanized: string;
-  executeStartedAt: string | null;
-  executeCompletedAt: string | null;
-  executionTime: number;
-  runElapsedTime: number;
-  createdAt: string;
-  finishedAt: string | null;
-}
+// Enough history for a 30-day window on jobs that run every couple of hours
+const MAX_RUNS = 500;
+const WINDOWS = [7, 14, 30];
+const DAY_MS = 24 * 60 * 60 * 1000;
 
-const getStatusEmoji = (statusHumanized: string): string => {
-  switch (statusHumanized?.toLowerCase()) {
-    case "success":
-      return "🎉";
-    case "error":
-      return "❌";
-    case "cancelled":
-      return "⚠️";
-    case "running":
+const STATUS = { success: 10, error: 20, cancelled: 30 };
+
+const getStatusEmoji = (status: number): string => {
+  switch (status) {
+    case STATUS.success:
+      return "🟢";
+    case STATUS.error:
+      return "🔴";
+    case STATUS.cancelled:
+      return "⚪️";
+    case 3:
       return "🏃";
-    case "queued":
-      return "🕒";
     default:
-      return "❓";
+      return "🕒";
   }
 };
 
-const formatSeconds = (seconds: number): string => {
+const formatSeconds = (seconds: number | null): string => {
+  if (seconds === null) return "—";
   if (seconds < 60) return `${Math.round(seconds)}s`;
-  const mins = Math.floor(seconds / 60);
+  const hours = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
   const secs = Math.round(seconds % 60);
-  return `${mins}m ${secs}s`;
+  return hours > 0 ? `${hours}h ${mins}m` : `${mins}m ${secs}s`;
 };
 
-// Job Performance Detail Component
-function JobPerformanceDetail({ job }: { job: JobModel }) {
-  const [runs, setRuns] = useState<JobRunMetric[]>([]);
-  const [loading, setLoading] = useState(true);
+const median = (values: number[]): number | null => {
+  if (values.length === 0) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+};
 
-  useEffect(() => {
-    async function loadRunMetrics() {
-      try {
-        setLoading(true);
-        const metrics = await fetchJobRunMetrics(job.id, 50);
-        // Filter to only successful runs for cleaner metrics
-        const successfulRuns = metrics.filter((m: JobRunMetric) => m.status === 10);
-        setRuns(successfulRuns);
-      } catch {
-        showToast(Toast.Style.Failure, "Failed to load run metrics");
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadRunMetrics();
-  }, [job.id]);
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
 
-  const jobUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}`);
-  const runHistoryUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}/runs`);
+interface JobContext {
+  job: JobModel;
+  projectName: string;
+  environment?: EnvironmentModel;
+}
 
-  // Calculate statistics
-  const executionTimes = runs.map((r) => r.executionTime).filter((t) => t > 0);
-  const avgExecution =
-    executionTimes.length > 0 ? executionTimes.reduce((sum, t) => sum + t, 0) / executionTimes.length : 0;
-  const minExecution = executionTimes.length > 0 ? Math.min(...executionTimes) : 0;
-  const maxExecution = executionTimes.length > 0 ? Math.max(...executionTimes) : 0;
+function JobPerformanceDetail({ job, projectName, environment }: JobContext) {
+  const [days, setDays] = useState(14);
+  const { data: runs = [], isLoading } = useCachedPromise(fetchJobRunMetrics, [job.id, MAX_RUNS]);
 
-  // Create sparkline for execution times (simple text-based)
-  const createSparkline = () => {
-    if (runs.length === 0) return "";
+  const windowEnd = new Date();
+  const windowStart = new Date(windowEnd.getTime() - days * DAY_MS);
+  const inWindow = runs.filter((run) => new Date(run.createdAt) >= windowStart);
+  const succeeded = inWindow.filter((run) => run.status === STATUS.success);
+  const errored = inWindow.filter((run) => run.status === STATUS.error);
+  const cancelled = inWindow.filter((run) => run.status === STATUS.cancelled);
+  const completed = succeeded.length + errored.length;
+  const successRate = completed > 0 ? `${((succeeded.length / completed) * 100).toFixed(2)}%` : "—";
 
-    const recentRuns = runs.slice(0, 20).reverse(); // Get most recent 20 runs
-    const times = recentRuns.map((r) => r.executionTime);
-    const max = Math.max(...times);
-    const min = Math.min(...times);
-    const range = max - min;
+  const durations = succeeded.map((run) => run.executionTime).filter((t): t is number => t !== null);
+  const average = durations.length > 0 ? durations.reduce((sum, t) => sum + t, 0) / durations.length : null;
+  const slowest = durations.length > 0 ? Math.max(...durations) : null;
 
-    if (range === 0) return "▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅"; // All same value
-
-    const bars = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"];
-    return times
-      .map((time) => {
-        const normalized = (time - min) / range;
-        const barIndex = Math.min(Math.floor(normalized * bars.length), bars.length - 1);
-        return bars[barIndex];
-      })
-      .join("");
+  const chartStatus: Record<number, ChartStatus> = {
+    [STATUS.success]: "success",
+    [STATUS.error]: "error",
+    [STATUS.cancelled]: "cancelled",
   };
+  const points: ChartPoint[] = inWindow.flatMap((run) =>
+    run.executionTime !== null && run.finishedAt && chartStatus[run.status]
+      ? [{ time: new Date(run.finishedAt), seconds: run.executionTime, status: chartStatus[run.status] }]
+      : [],
+  );
+  const chart = buildDurationChart(points, windowStart, windowEnd);
+  const truncated =
+    runs.length >= MAX_RUNS && runs[runs.length - 1] && new Date(runs[runs.length - 1].createdAt) > windowStart;
 
-  // Create run history table
-  const runHistoryTable = runs
-    .slice(0, 10)
-    .map((run, index) => {
-      const trend =
-        index > 0 && runs[index - 1] ? (run.executionTime > runs[index - 1].executionTime ? "📈" : "📉") : "—";
-      return `| ${getStatusEmoji(run.statusHumanized)} | #${run.runId} | ${formatSeconds(
-        run.executionTime,
-      )} | ${trend} | ${formatRelativeTime(run.finishedAt)} |`;
-    })
+  const runRows = inWindow
+    .slice(0, 15)
+    .map(
+      (run) =>
+        `| ${getStatusEmoji(run.status)} ${run.statusHumanized} | [#${run.runId}](${run.href}) | ${formatSeconds(run.executionTime)} | ${
+          run.gitBranch ?? "—"
+        } | ${(run.triggerCause ?? "—").replace(/\|/g, "\\|")} | ${formatRelativeTime(run.finishedAt ?? run.createdAt)} |`,
+    )
     .join("\n");
 
-  const markdown = `
-# ${job.name} - Performance Analytics
+  const environmentName = environment?.name ?? `Environment ${job.environment_id}`;
+  const markdown = isLoading
+    ? `# ${job.name}\n\nLoading runs...`
+    : `# ${job.name}
 
-${
-  loading
-    ? "Loading metrics..."
-    : `
-## Overview
+**Recent runs** · ${formatDate(windowStart)} – ${formatDate(windowEnd)}
 
-| Metric | Value |
-|--------|-------|
-| **Total Successful Runs** | ${runs.length} |
-| **Average Execution Time** | ${formatSeconds(avgExecution)} |
-| **Fastest Run** | ${formatSeconds(minExecution)} |
-| **Slowest Run** | ${formatSeconds(maxExecution)} |
+| Success rate | Completed | Succeeded | Errored | Cancelled |
+|:--:|:--:|:--:|:--:|:--:|
+| **${successRate}** | ${completed} | ${succeeded.length} | ${errored.length} | ${cancelled.length} |
 
-## Execution Time Trend (Last 20 Runs)
+${chart ? `![Build duration in minutes](${chart})\n\n🟢 success · 🔴 error · ⚪️ cancelled — execution time per run` : "_No finished runs in this window._"}
+${truncated ? `\n> Only the newest ${MAX_RUNS} runs were loaded, so the start of this window is incomplete.\n` : ""}
+## Runs
 
-\`\`\`
-${createSparkline()}
-\`\`\`
-
-_Each bar represents one run, from oldest (left) to newest (right)_
-
-## Recent Run History
-
-| Status | Run | Duration | Trend | Finished |
-|--------|-----|----------|-------|----------|
-${runHistoryTable}
-
----
-
-💡 **Tip:** Track execution times to identify performance degradation or improvements in your dbt jobs.
-`
-}
+| Status | Run | Duration | Branch | Trigger | Finished |
+|--------|-----|----------|--------|---------|----------|
+${runRows || "| — | — | — | — | — | — |"}
 `;
+
+  const jobUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}`);
 
   return (
     <Detail
+      isLoading={isLoading}
       markdown={markdown}
-      navigationTitle={`${job.name} - Performance`}
-      isLoading={loading}
+      navigationTitle={`${job.name} · Last ${days} days`}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Job Name" text={job.name} />
-          <Detail.Metadata.Label title="Project" text={job.project?.name || `ID: ${job.project_id}`} />
+          <Detail.Metadata.Label title="Project" text={projectName} />
+          <Detail.Metadata.TagList title="Environment">
+            <Detail.Metadata.TagList.Item
+              text={environmentName}
+              color={environment && inferDeploymentType(environment) === "production" ? Color.Green : Color.Orange}
+            />
+          </Detail.Metadata.TagList>
+          <Detail.Metadata.Label
+            title="Schedule"
+            text={job.triggers?.schedule ? job.schedule?.cron || "Scheduled" : "Not scheduled"}
+          />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Avg Duration" text={formatSeconds(avgExecution)} icon={Icon.Clock} />
-          <Detail.Metadata.Label title="Min Duration" text={formatSeconds(minExecution)} icon={Icon.ArrowDown} />
-          <Detail.Metadata.Label title="Max Duration" text={formatSeconds(maxExecution)} icon={Icon.ArrowUp} />
+          <Detail.Metadata.Label title="Success Rate" text={successRate} />
+          <Detail.Metadata.Label title="Average Duration" text={formatSeconds(average)} icon={Icon.Clock} />
+          <Detail.Metadata.Label title="Median Duration" text={formatSeconds(median(durations))} icon={Icon.Clock} />
+          <Detail.Metadata.Label title="Slowest Run" text={formatSeconds(slowest)} icon={Icon.ArrowUp} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Successful Runs" text={String(runs.length)} />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Link title="Open in dbt Cloud" target={jobUrl} text="View Job" />
-          <Detail.Metadata.Link title="Run History" target={runHistoryUrl} text="View All Runs" />
+          <Detail.Metadata.Link title="dbt Cloud" target={jobUrl} text="Open Job" />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={runHistoryUrl} title="View Run History" />
           <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" />
+          {inWindow[0] && <Action.OpenInBrowser url={inWindow[0].href} title="Open Latest Run" icon={Icon.Play} />}
+          <ActionPanel.Section title="Time Window">
+            {WINDOWS.filter((window) => window !== days).map((window) => (
+              <Action
+                key={window}
+                title={`Show Last ${window} Days`}
+                icon={Icon.Calendar}
+                shortcut={{ modifiers: ["cmd"], key: String(WINDOWS.indexOf(window) + 1) as Keyboard.KeyEquivalent }}
+                onAction={() => setDays(window)}
+              />
+            ))}
+          </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard title="Copy Job ID" content={job.id.toString()} />
-            <Action.CopyToClipboard title="Copy Job Name" content={job.name} />
-            <Action.CopyToClipboard title="Copy Average Duration" content={formatSeconds(avgExecution)} />
+            <Action.CopyToClipboard title="Copy Success Rate" content={successRate} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -180,88 +171,85 @@ ${runHistoryTable}
   );
 }
 
-interface JobListItemProps {
-  job: JobModel;
-}
-
-const JobPerformanceListItem = ({ job }: JobListItemProps): JSX.Element => {
-  const { push } = useNavigation();
-  const recentRunStatus = job.most_recent_run?.status_humanized;
-  const recentRunEmoji = getStatusEmoji(recentRunStatus || "");
-  const recentDuration = job.most_recent_run?.duration_humanized || "N/A";
-
-  return (
-    <List.Item
-      id={job.id.toString()}
-      title={job.name}
-      subtitle={job.project?.name || `Project ${job.project_id}`}
-      icon={{ source: Icon.BarChart, tintColor: Color.Blue }}
-      accessories={[{ text: `Last: ${recentRunEmoji} ${recentDuration}` }]}
-      actions={
-        <ActionPanel>
-          <Action
-            title="View Performance"
-            icon={Icon.BarChart}
-            onAction={() => push(<JobPerformanceDetail job={job} />)}
-          />
-          <Action.OpenInBrowser
-            url={buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}/runs`)}
-            title="View Run History"
-          />
-        </ActionPanel>
-      }
-    />
-  );
-};
-
 export default function JobPerformanceIndex() {
-  const [jobs, setJobs] = useState<JobModel[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [projectFilter, setProjectFilter] = useState("all");
+  const { data, isLoading } = useCachedPromise(async () => {
+    const [jobs, projects, environments] = await Promise.all([returnJobs(), returnProjects(), returnEnvironments()]);
+    return { jobs, projects, environments };
+  });
 
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await returnJobs();
-      // Filter to only active jobs with recent runs
-      const activeJobs = response.filter((job) => !job.deactivated && job.most_recent_run);
-      setJobs(activeJobs);
-    } catch {
-      showToast(Toast.Style.Failure, "Failed loading jobs");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const projectNames = useMemo(() => new Map((data?.projects ?? []).map((p) => [p.id, p.name])), [data]);
+  const environments = useMemo(() => new Map((data?.environments ?? []).map((e) => [e.id, e])), [data]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  // Group jobs by project
-  const jobsByProject = jobs.reduce(
-    (acc, job) => {
-      const projectKey = job.project?.name || `Project ${job.project_id}`;
-      if (!acc[projectKey]) {
-        acc[projectKey] = [];
+  // Group active jobs by project, then environment (production first)
+  const sections = useMemo(() => {
+    const groups = new Map<string, { title: string; order: string; jobs: JobContext[] }>();
+    for (const job of data?.jobs ?? []) {
+      if (job.deactivated) continue;
+      if (projectFilter !== "all" && String(job.project_id) !== projectFilter) continue;
+      const projectName = projectNames.get(job.project_id) ?? `Project ${job.project_id}`;
+      const environment = environments.get(job.environment_id);
+      const rank = environment ? DEPLOYMENT_TYPE_INFO[inferDeploymentType(environment)].sortOrder : 9;
+      const key = `${job.project_id}:${job.environment_id}`;
+      if (!groups.has(key)) {
+        groups.set(key, {
+          title: `${projectName} › ${environment?.name ?? `Environment ${job.environment_id}`}`,
+          order: `${projectName}\u0000${rank}`,
+          jobs: [],
+        });
       }
-      acc[projectKey].push(job);
-      return acc;
-    },
-    {} as Record<string, JobModel[]>,
-  );
+      groups.get(key)?.jobs.push({ job, projectName, environment });
+    }
+    return Array.from(groups.values()).sort((a, b) => a.order.localeCompare(b.order));
+  }, [data, projectFilter, projectNames, environments]);
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search jobs..." throttle>
-      <List.EmptyView
-        title="No active jobs found"
-        description="Only active jobs with recent runs are shown"
-        icon="icon_64p.png"
-      />
-
-      {Object.entries(jobsByProject).map(([projectName, projectJobs]) => (
-        <List.Section key={projectName} title={projectName} subtitle={`${projectJobs.length} jobs`}>
-          {projectJobs.map((job) => (
-            <JobPerformanceListItem key={job.id} job={job} />
-          ))}
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search jobs..."
+      searchBarAccessory={
+        <List.Dropdown tooltip="Project" storeValue onChange={setProjectFilter}>
+          <List.Dropdown.Item title="All Projects" value="all" />
+          {[...(data?.projects ?? [])]
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((project) => (
+              <List.Dropdown.Item key={project.id} title={project.name} value={String(project.id)} />
+            ))}
+        </List.Dropdown>
+      }
+    >
+      <List.EmptyView title="No active jobs found" icon="icon_64p.png" />
+      {sections.map((section) => (
+        <List.Section key={section.title} title={section.title} subtitle={`${section.jobs.length} jobs`}>
+          {section.jobs.map(({ job, projectName, environment }) => {
+            const deployment = environment ? DEPLOYMENT_TYPE_INFO[inferDeploymentType(environment)] : undefined;
+            return (
+              <List.Item
+                key={job.id}
+                title={job.name}
+                keywords={[projectName, environment?.name ?? ""]}
+                icon={{ source: Icon.BarChart, tintColor: Color.Blue }}
+                accessories={[
+                  ...(deployment ? [{ tag: deployment.displayName }] : []),
+                  { text: job.triggers?.schedule ? "Scheduled" : "Not scheduled", icon: Icon.Calendar },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <Action.Push
+                      title="View Performance"
+                      icon={Icon.BarChart}
+                      target={<JobPerformanceDetail job={job} projectName={projectName} environment={environment} />}
+                    />
+                    <Action.OpenInBrowser
+                      url={buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}`)}
+                      title="Open Job in dbt Cloud"
+                    />
+                    <Action.CopyToClipboard title="Copy Job ID" content={job.id.toString()} />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>
       ))}
     </List>

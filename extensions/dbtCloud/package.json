@@ -139,6 +139,19 @@
         "duration",
         "runs"
       ]
+    },
+    {
+      "name": "model_performance_index",
+      "title": "Show Model Performance",
+      "subtitle": "dbt Cloud",
+      "description": "See which models take longest to build and how their execution time and status change across runs",
+      "mode": "view",
+      "keywords": [
+        "model",
+        "performance",
+        "slow",
+        "execution time"
+      ]
     }
   ],
   "tools": [

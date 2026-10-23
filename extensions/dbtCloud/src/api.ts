@@ -331,7 +331,7 @@ export const getStatusText = (status: number): string => {
 // ============================================
 
 // Generic GraphQL query function
-async function fetchDiscoveryConnection<TNode, TData>(
+export async function fetchDiscoveryConnection<TNode, TData>(
   query: string,
   baseVariables: Record<string, unknown>,
   getConnection: (data: TData) => DiscoveryConnection<TNode> | undefined,
@@ -779,26 +779,53 @@ export const buildLineageUrl = (projectId: number, uniqueId: string): string => 
 // Job Performance / Run Analytics
 // ============================================
 
-// Fetch job run details including timing information
+// Fetch the newest runs of a job, newest first (ordered by id so queued and running runs sort correctly)
 export async function fetchJobRunDetails(jobId: number, limit = 50): Promise<RunModel[]> {
   const endpoint = buildApiUrl("/runs/", {
     job_definition_id: jobId,
-    limit,
-    order_by: "-finished_at",
+    limit: Math.min(limit, 100),
+    order_by: "-id",
     include_related: JSON.stringify(["trigger", "job", "environment"]),
   });
 
-  try {
-    const runs = await fetchFromApi<RunModel>(endpoint, "Could not fetch job run details", limit);
-    return runs;
-  } catch {
-    showToast(Toast.Style.Failure, "Failed to fetch job run details");
-    return [];
-  }
+  return fetchFromApi<RunModel>(endpoint, "Could not fetch job run details", limit);
+}
+
+// Duration strings come back as "HH:MM:SS" (optionally with fractional seconds) or as plain seconds
+export const parseDurationSeconds = (value: string | number | null | undefined): number | null => {
+  if (value === null || value === undefined || value === "") return null;
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  const parts = value.trim().split(":").map(Number);
+  if (parts.some((part) => !Number.isFinite(part))) return null;
+  return parts.reduce((total, part) => total * 60 + part, 0);
+};
+
+const secondsBetween = (start: string | null, end: string | null): number | null => {
+  if (!start || !end) return null;
+  const seconds = (new Date(end).getTime() - new Date(start).getTime()) / 1000;
+  return Number.isFinite(seconds) && seconds >= 0 ? seconds : null;
+};
+
+export interface JobRunMetric {
+  runId: number;
+  jobId: number;
+  jobName: string;
+  status: number;
+  statusHumanized: string;
+  triggerCause: string | null;
+  gitBranch: string | null;
+  href: string;
+  createdAt: string;
+  startedAt: string | null;
+  finishedAt: string | null;
+  // Execution time (started -> finished), in seconds
+  executionTime: number | null;
+  // Queue + execution time (created -> finished), in seconds
+  totalTime: number | null;
 }
 
 // Fetch job run metrics with execution time data
-export async function fetchJobRunMetrics(jobId: number, limit = 50) {
+export async function fetchJobRunMetrics(jobId: number, limit = 50): Promise<JobRunMetric[]> {
   const runs = await fetchJobRunDetails(jobId, limit);
 
   return runs.map((run) => ({
@@ -807,11 +834,13 @@ export async function fetchJobRunMetrics(jobId: number, limit = 50) {
     jobName: run.job?.name || "Unknown",
     status: run.status,
     statusHumanized: run.status_humanized,
-    executeStartedAt: run.started_at,
-    executeCompletedAt: run.finished_at,
-    executionTime: run.duration ? parseFloat(run.duration) : 0,
-    runElapsedTime: run.run_duration ? parseFloat(run.run_duration) : 0,
+    triggerCause: run.trigger?.cause || null,
+    gitBranch: run.trigger?.git_branch || run.git_branch || null,
+    href: run.href,
     createdAt: run.created_at,
-    finishedAt: run.finished_at,
+    startedAt: run.started_at || null,
+    finishedAt: run.finished_at || null,
+    executionTime: parseDurationSeconds(run.run_duration) ?? secondsBetween(run.started_at, run.finished_at),
+    totalTime: parseDurationSeconds(run.duration) ?? secondsBetween(run.created_at, run.finished_at),
   }));
 }
