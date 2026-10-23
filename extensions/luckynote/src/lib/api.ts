@@ -1,17 +1,14 @@
 import { getPreferenceValues, LocalStorage, OAuth } from "@raycast/api";
 
 export function serverUrl() {
-  const url = new URL(
-    getPreferenceValues<{ serverUrl: string }>().serverUrl?.trim() || "https://luckynote.io"
-  );
+  const url = new URL(getPreferenceValues<Preferences>().serverUrl?.trim() || "https://luckynote.io");
   if (
     url.username ||
     url.password ||
     url.search ||
     url.hash ||
     url.pathname !== "/" ||
-    (url.protocol !== "https:" &&
-      !(url.protocol === "http:" && ["localhost", "127.0.0.1"].includes(url.hostname)))
+    (url.protocol !== "https:" && !(url.protocol === "http:" && ["localhost", "127.0.0.1"].includes(url.hostname)))
   ) {
     throw new Error("Use an HTTPS Luckynote server origin, or HTTP localhost for development.");
   }
@@ -40,8 +37,7 @@ export function authClient() {
 export async function disconnect() {
   await authClient().removeTokens();
   // Remove credentials and folder data from the previous password-based extension.
-  for (const key of ["accessToken", "refreshToken", "homeFolder"])
-    await LocalStorage.removeItem(key);
+  for (const key of ["accessToken", "refreshToken", "homeFolder"]) await LocalStorage.removeItem(key);
 }
 
 export async function graphql<T>(
@@ -51,8 +47,7 @@ export async function graphql<T>(
 ): Promise<T> {
   const client = authClient();
   const tokens = authenticated ? await client.getTokens() : undefined;
-  if (authenticated && !tokens?.accessToken)
-    throw new Error("Open Save Message to connect to Luckynote.");
+  if (authenticated && !tokens?.accessToken) throw new Error("Open Save Message to connect to Luckynote.");
   const response = await fetch(`${apiUrl()}/graphql`, {
     method: "POST",
     headers: {
@@ -74,8 +69,7 @@ export async function graphql<T>(
     if (authenticated) await disconnect();
     throw new Error("Your connection expired. Open Save Message to connect again.");
   }
-  if (!response.ok)
-    throw new Error(`Luckynote request failed (${response.status}). Please try again.`);
+  if (!response.ok) throw new Error(`Luckynote request failed (${response.status}). Please try again.`);
   const result = (await response.json()) as {
     data?: T;
     errors?: { extensions?: { code?: string } }[];
@@ -125,9 +119,7 @@ export async function connect() {
   );
   const payload = data.exchangeExtensionAuthCode;
   if (payload.__typename !== "AuthPayload" || !payload.token || !payload.refreshToken) {
-    throw new Error(
-      "This connection request expired or could not be completed. Please try connecting again."
-    );
+    throw new Error("This connection request expired or could not be completed. Please try connecting again.");
   }
   await disconnect();
   await client.setTokens({ accessToken: payload.token, refreshToken: payload.refreshToken });
@@ -139,11 +131,8 @@ export interface Account {
   homeFolder: string;
 }
 export async function getAccount(): Promise<Account> {
-  const data = await graphql<{ me: Account }>(
-    "query RaycastAccount { me { id fullName homeFolder } }"
-  );
-  if (!data.me?.homeFolder)
-    throw new Error("Your account has no Inbox available. Open Luckynote to finish setup.");
+  const data = await graphql<{ me: Account }>("query RaycastAccount { me { id fullName homeFolder } }");
+  if (!data.me?.homeFolder) throw new Error("Your account has no Inbox available. Open Luckynote to finish setup.");
   return data.me;
 }
 
@@ -208,7 +197,6 @@ export async function saveMessage(folderId: string, title: string, body = "", ta
       },
     }
   );
-  if (!data.createMessage?.id)
-    throw new Error("Luckynote did not confirm the save. Check your Inbox before retrying.");
+  if (!data.createMessage?.id) throw new Error("Luckynote did not confirm the save. Check your Inbox before retrying.");
   return data.createMessage;
 }

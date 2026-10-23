@@ -27,6 +27,6 @@
     "types": ["node", "react"],
     "typeRoots": ["./node_modules/@types", "./node_modules/@raycast/api"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "raycast-env.d.ts"],
   "exclude": ["node_modules", "dist"]
-} 
+}

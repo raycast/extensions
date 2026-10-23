@@ -5,11 +5,11 @@ async function openEditor(note: string) {
   await launchCommand({ name: "save-message", type: LaunchType.UserInitiated, context: { note } });
 }
 
-export default async function QuickNote({
-  arguments: { note },
-}: LaunchProps<{ arguments: { note: string } }>) {
+export default async function QuickNote({ arguments: { note } }: LaunchProps<{ arguments: Arguments.QuickNote }>) {
+  let client: ReturnType<typeof authClient> | undefined;
   try {
-    if (!(await authClient().getTokens())?.accessToken) {
+    client = authClient();
+    if (!(await client.getTokens())?.accessToken) {
       await openEditor(note);
       return;
     }
@@ -17,9 +17,13 @@ export default async function QuickNote({
     await saveMessage(account.homeFolder, note);
     await showHUD("Note saved to Inbox");
   } catch (error) {
-    if (!(await authClient().getTokens())?.accessToken) {
-      await openEditor(note);
-      return;
+    try {
+      if (client && !(await client.getTokens())?.accessToken) {
+        await openEditor(note);
+        return;
+      }
+    } catch {
+      // Keep the original failure visible if checking the session also fails.
     }
     await showToast({
       style: Toast.Style.Failure,

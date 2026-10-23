@@ -1,23 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  LaunchProps,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import {
-  Account,
-  authClient,
-  connect,
-  Folder,
-  getAccount,
-  getFolders,
-  saveMessage,
-} from "./lib/api";
+import { Action, ActionPanel, Form, Icon, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
+import { Account, authClient, connect, Folder, getAccount, getFolders, saveMessage } from "./lib/api";
 
 interface Values {
   title: string;
@@ -36,6 +19,7 @@ export default function SaveMessage(props: LaunchProps<{ launchContext: { note?:
   const [folderId, setFolderId] = useState("");
   const searchGeneration = useRef(0);
   const submitting = useRef(false);
+  const editRevision = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -109,14 +93,20 @@ export default function SaveMessage(props: LaunchProps<{ launchContext: { note?:
   async function submit(values: Values, task = false) {
     if (submitting.current || !account) return;
     submitting.current = true;
+    const submittedRevision = editRevision.current;
     setLoading(true);
     try {
       await saveMessage(values.folderId || account.homeFolder, values.title, values.body, task);
-      setTitle("");
-      setBody("");
-      setSearch("");
-      setFolderId(account.homeFolder);
-      await showHUD("Saved to Luckynote");
+      if (editRevision.current === submittedRevision) {
+        setTitle("");
+        setBody("");
+        setSearch("");
+        setFolderId(account.homeFolder);
+        await showHUD("Saved to Luckynote");
+      } else {
+        // Keep the editor open with the newer draft and its selected folder.
+        await showToast({ style: Toast.Style.Success, title: "Saved to Luckynote" });
+      }
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -150,11 +140,7 @@ export default function SaveMessage(props: LaunchProps<{ launchContext: { note?:
       isLoading={loading || searching}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Message"
-            icon={Icon.Message}
-            onSubmit={(values: Values) => submit(values)}
-          />
+          <Action.SubmitForm title="Save Message" icon={Icon.Message} onSubmit={(values: Values) => submit(values)} />
           <Action.SubmitForm
             title="Save as Task"
             icon={Icon.Checkmark}
@@ -169,16 +155,25 @@ export default function SaveMessage(props: LaunchProps<{ launchContext: { note?:
         title="Title"
         placeholder="Note title (start with - for a task)"
         value={title}
-        onChange={setTitle}
+        onChange={(value) => {
+          ++editRevision.current;
+          setTitle(value);
+        }}
         autoFocus
       />
       <Form.Dropdown
         id="folderId"
         title="Folder"
         value={folderId}
-        onChange={setFolderId}
+        onChange={(value) => {
+          ++editRevision.current;
+          setFolderId(value);
+        }}
         filtering={false}
-        onSearchTextChange={setSearch}
+        onSearchTextChange={(value) => {
+          ++editRevision.current;
+          setSearch(value);
+        }}
       >
         <Form.Dropdown.Item value={account.homeFolder} title="Inbox" icon={Icon.Tray} />
         {folderId && folderId !== account.homeFolder && !selectedFolder && (
@@ -199,7 +194,10 @@ export default function SaveMessage(props: LaunchProps<{ launchContext: { note?:
         title="Message"
         placeholder="Your message (optional)"
         value={body}
-        onChange={setBody}
+        onChange={(value) => {
+          ++editRevision.current;
+          setBody(value);
+        }}
       />
       <Form.Description text="Use ⌘⇧↵ to save as a task, or start the title with -." />
     </Form>
