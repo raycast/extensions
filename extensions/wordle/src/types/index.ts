@@ -24,12 +24,6 @@ export type Guess = {
   hints: Hint[];
 };
 
-export type ValidatorAccessory = {
-  id: string;
-  accessory: { tag: { value: string; color: Color } };
-  validators: boolean[];
-};
-
 export type LocalStorageEntry = {
   language: Language;
   date: Date;
@@ -43,6 +37,10 @@ export type LanguageWordSetMap = {
 
 export type LanguageUnicodeMap = {
   [key in Language]: string;
+};
+
+export type LanguageKeyboardLayoutMap = {
+  [key in Language]: string[];
 };
 
 export type EntryStateColorMap = {

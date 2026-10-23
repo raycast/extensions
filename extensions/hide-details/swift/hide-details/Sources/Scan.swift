@@ -15,6 +15,7 @@ struct Configuration {
   let inputURL: URL?
   let outputURL: URL
   let style: Style
+  let blurFaces: Bool
   let padding: CGFloat
   let categories: Set<String>
   let extraWords: [String]
@@ -24,7 +25,7 @@ struct Configuration {
 
 func parseConfiguration(
   inputPath: String?, outputPath: String, style: String, padding: String,
-  categories: String, extraWords: String, recognition: String, customRegex: String
+  categories: String, extraWords: String, recognition: String, customRegex: String, blurFaces: Bool
 ) throws -> Configuration {
   guard let style = Style(rawValue: style) else {
     throw RedactionError(message: "Invalid redaction style. Choose blackout, blur, or pixelate.")
@@ -45,7 +46,7 @@ func parseConfiguration(
   let regex = customRegex.isEmpty ? nil : try CustomRegex(pattern: customRegex)
   return Configuration(
     inputURL: inputPath.map { URL(fileURLWithPath: $0) },
-    outputURL: URL(fileURLWithPath: outputPath), style: style, padding: CGFloat(padding),
+    outputURL: URL(fileURLWithPath: outputPath), style: style, blurFaces: blurFaces, padding: CGFloat(padding),
     categories: categories,
     extraWords: extraWords.split(separator: ",").map { $0.filter { !$0.isWhitespace } }.filter { $0.count >= 2 },
     recognition: recognition == "accurate" ? .accurate : .fast,
@@ -137,13 +138,14 @@ func redact(_ configuration: Configuration, forReview: Bool = false) throws -> R
   for face in faceRequest.results ?? [] {
     try add(kind: "face", text: "face", confidence: face.confidence, rect: face.boundingBox, confidenceSource: "face")
   }
-  let regions = try redactionRegions(boxes: hits.map(\.box), imageWidth: width, imageHeight: height)
-  let output = try renderRedactions(image: image, regions: regions, style: configuration.style)
+  let rendered = try renderMasks(image: image, masks: hits.map { RedactionMask(kind: $0.kind, box: $0.box) },
+                                 style: configuration.style, blurFaces: configuration.blurFaces)
+  let output = rendered.image
   guard let png = NSBitmapImageRep(cgImage: output).representation(using: .png, properties: [:]) else {
     throw RedactionError(message: "Could not encode the redacted image. No image was published.")
   }
   try png.write(to: configuration.outputURL, options: .atomic)
   let reviewKey = forReview ? try saveReviewSource(image, beside: configuration.outputURL) : nil
-  return Report(hits: hits, regionCount: regions.count, output: configuration.outputURL.path,
+  return Report(hits: hits, regionCount: rendered.regionCount, output: configuration.outputURL.path,
                 clipboardChangeCount: clipboardChangeCount, reviewKey: reviewKey)
 }

@@ -6,7 +6,8 @@
   "icon": "extension-icon.png",
   "author": "koinzhang",
   "contributors": [
-    "foof"
+    "foof",
+    "afshany"
   ],
   "categories": [
     "Developer Tools",
@@ -33,6 +34,21 @@
         {
           "name": "ipAddress",
           "placeholder": "IP Address or Domain",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "compare-ip-providers",
+      "title": "Compare IP Providers",
+      "subtitle": "IP Geolocation",
+      "description": "Look up an IP address at five geolocation providers and see where they agree or differ.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ipAddress",
+          "placeholder": "IP Address",
           "type": "text",
           "required": false
         }
