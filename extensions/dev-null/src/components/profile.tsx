@@ -17,7 +17,7 @@ const date = (iso: string | undefined) => (iso ? new Date(iso) : undefined);
  * (⌘⇧D). Raycast's cache is shared by every command, so the key names the command.
  */
 export function useSidebar(view: string): { show: boolean; action: ReactNode } {
-  const [show, setShow] = useCachedState<boolean>(`show-detail-${environment.commandName}-${view}`, true);
+  const [show, setShow] = useCachedState<boolean>(`show-detail-${environment.entryPointName}-${view}`, true);
   const action = (
     <Action
       title={show ? "Hide Sidebar" : "Show Sidebar"}
@@ -105,6 +105,8 @@ export function UserItem({ user }: { user: User }) {
       icon={avatar(user)}
       title={user.name || user.username}
       subtitle={`@${user.username}`}
+      // The filter searches titles and keywords, not subtitles, so a handle finds its person.
+      keywords={[user.username]}
       accessories={user.bio ? [{ text: user.bio }] : undefined}
       actions={
         <ActionPanel>

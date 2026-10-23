@@ -41,6 +41,8 @@ export default function Command() {
   const [isCommitting, setIsCommitting] = useState(false);
   // Set before the first await, so a second ⌘⏎ during image checks can't post the commit twice.
   const committing = useRef(false);
+  // One clipboard image at a time: two saves finishing together would each add to the same list and drop the other.
+  const attaching = useRef(false);
   // The commit posted from this form, so it stays reachable after the toast is gone.
   const [lastCommitUrl, setLastCommitUrl] = useState<string | undefined>();
 
@@ -90,12 +92,15 @@ export default function Command() {
   // A file copied in Finder is attached as it is. Image data, such as a screenshot copied with ⌃⇧⌘4, is saved as a
   // PNG first. Either way the image check runs on it like any picked file.
   async function attachClipboardImage() {
+    if (attaching.current) return;
     if (imagePaths.length >= MAX_IMAGES) {
       await showError(new Error(`A commit can carry up to ${MAX_IMAGES} images.`), { title: "Couldn't Attach Image" });
       return;
     }
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Attaching image…" });
+    attaching.current = true;
+    let toast: Toast | undefined;
     try {
+      toast = await showToast({ style: Toast.Style.Animated, title: "Attaching image…" });
       const { file } = await Clipboard.read();
       const copied = file?.startsWith("file://") ? fileURLToPath(file) : file;
       const path =
@@ -120,7 +125,11 @@ export default function Command() {
       toast.title = "Image attached";
     } catch (error) {
       logger.error("Attach image from clipboard failed", error);
-      failToast(toast, error, { title: "Couldn't Attach Image" });
+      const options = { title: "Couldn't Attach Image" };
+      if (toast) failToast(toast, error, options);
+      else await showError(error, options);
+    } finally {
+      attaching.current = false;
     }
   }
 
