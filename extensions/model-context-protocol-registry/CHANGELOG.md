@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add CSolar Energia MCP Server] - {PR_MERGE_DATE}
+
+- Add CSolar Energia to the official registry: solar power estimates from the electricity bill or consumption (panels, installed power, generation, estimated price, savings and payback) and the service area check for São Paulo state, Brazil. Read-only, answers in Portuguese. Remote Streamable HTTP server with no sign-in and no API key. Direct HTTP connection in Raycast at https://csolar.com.br/mcp.
+
 ## [Add Wave AI MCP Server] - 2026-10-22
 
 - Add Wave AI to the official registry: an AI note taker for phone calls, meetings and in-person conversations. Search and quote recordings, ask what a person said with Voice ID, and update action items, folders and sharing. Hosted Streamable HTTP server at https://mcp.wave.co with OAuth 2.0 sign-in (PKCE and dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.

@@ -343,6 +343,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "csolar-energia",
+    title: "CSolar Energia",
+    description:
+      "Solar power estimates for homes and businesses in São Paulo state, Brazil, from CSolar Energia, a solar installer. From the monthly electricity bill in reais or the consumption in kWh, get the number of 630 W panels, installed power, monthly generation, estimated installed price, monthly savings and payback, and check whether CSolar serves a city (all 645 municipalities of São Paulo state). Estimates, not quotes; answers in Portuguese. Read-only, no personal data. Remote Streamable HTTP server at https://csolar.com.br/mcp; no sign-in, no API key.",
+    icon: "https://csolar.com.br/favicon.png",
+    homepage: "https://csolar.com.br/para-agentes#mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://csolar.com.br/mcp"],
+    },
+    remoteUrl: "https://csolar.com.br/mcp",
+  },
+  {
     name: "datacircle",
     title: "Datacircle",
     description:
