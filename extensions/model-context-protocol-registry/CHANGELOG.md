@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add send21 MCP Server] - 2026-10-23
+
+- Add send21 to the official registry: crypto pay links and API for people and AI agents. Create fiat-priced pay links and payment drafts paid to the owner's approved addresses, check payment status and propose receiving addresses for the owner to approve; send21 is non-custodial and the payer signs in their own wallet. Hosted Streamable HTTP server at https://send21.io/mcp, through mcp-remote with a send21 API key as an `Authorization: Bearer` header.
+
 ## [Add OverlayQA MCP Server] - 2026-10-23
 
 - Add OverlayQA to the official registry: design QA for coding agents, with WCAG accessibility (axe-core), color-contrast and design-token audits and AI visual reviews on any public URL, plus QA issues, comments, labels and client review links in OverlayQA. Hosted Streamable HTTP server at https://api.overlayqa.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
