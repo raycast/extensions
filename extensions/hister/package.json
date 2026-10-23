@@ -186,6 +186,15 @@
       "description": "The access_token from your Hister config, or your profile's token on a multi-user server. Leave empty if your server has none.",
       "type": "password",
       "required": false
+    },
+    {
+      "name": "includeHisterSearches",
+      "title": "Recent Searches",
+      "label": "Include searches made outside Raycast",
+      "description": "Also list searches you opened a result from in Hister's web page or your browser.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {

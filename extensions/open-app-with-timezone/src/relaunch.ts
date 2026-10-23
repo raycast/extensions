@@ -1,0 +1,123 @@
+import { execFile } from "node:child_process";
+import { realpathSync, statSync } from "node:fs";
+import { basename, join } from "node:path";
+import { promisify } from "node:util";
+
+const run = promisify(execFile);
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const QUIT_TIMEOUT_MS = 30_000;
+const CANCELED_QUIT_GRACE_MS = 5_000;
+const LAUNCH_TIMEOUT_MS = 10_000;
+
+export function isValidTimeZone(tz: string): boolean {
+  if (!tz || tz.split("/").includes("..")) return false;
+  try {
+    return statSync(join("/usr/share/zoneinfo", tz)).isFile();
+  } catch {
+    return false;
+  }
+}
+
+async function readBundle(bundlePath: string): Promise<{ executable?: string; bundleId?: string }> {
+  const script = [
+    "function run(argv) {",
+    "  const bundle = $.NSBundle.bundleWithPath(argv[0]);",
+    "  return JSON.stringify(bundle ? { executable: bundle.executablePath.js, bundleId: bundle.bundleIdentifier.js } : {});",
+    "}",
+  ];
+  const { stdout } = await run("/usr/bin/osascript", [
+    "-l",
+    "JavaScript",
+    ...script.flatMap((line) => ["-e", line]),
+    bundlePath,
+  ]);
+  return JSON.parse(stdout);
+}
+
+async function mainPid(executable: string): Promise<number | undefined> {
+  const { stdout } = await run("/bin/ps", ["-ww", "-Ao", "pid=,comm="], { maxBuffer: 16 * 1024 * 1024 });
+  for (const line of stdout.split("\n")) {
+    const match = /^\s*(\d+) (.*)$/.exec(line);
+    if (match?.[2] === executable) return Number(match[1]);
+  }
+}
+
+async function waitFor<T>(probe: () => Promise<T>, done: (value: T) => boolean, timeoutMs: number): Promise<T> {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const value = await probe();
+    if (done(value) || Date.now() >= deadline) return value;
+    await sleep(500);
+  }
+}
+
+/**
+ * Quit the app if it is running, relaunch it with TZ (and __XPC_TZ, which propagates TZ into
+ * XPC services such as WKWebView's WebKit processes), then verify the new process carries TZ.
+ * `verified` is false when macOS hides the process environment (e.g. Apple system apps),
+ * in which case TZ was passed but cannot be confirmed.
+ * If the app is running, `confirmQuit` is asked first; declining resolves with `undefined`
+ * and leaves the app untouched.
+ */
+export async function relaunchWithTimeZone(
+  appPath: string,
+  tz: string,
+  hooks: { onProgress?: (message: string) => void; confirmQuit?: () => Promise<boolean> } = {},
+): Promise<{ pid: number; verified: boolean } | undefined> {
+  const { onProgress = () => {}, confirmQuit = async () => true } = hooks;
+  const appName = basename(appPath);
+  if (!isValidTimeZone(tz)) throw new Error(`Unknown time zone: ${tz}`);
+
+  const bundlePath = realpathSync(appPath);
+  const { executable, bundleId } = await readBundle(bundlePath);
+  if (!executable || !bundleId) throw new Error(`${appName} has no executable or bundle identifier`);
+
+  const runningPid = await mainPid(executable);
+  if (runningPid !== undefined) {
+    if (!(await confirmQuit())) return undefined;
+    onProgress(`Quitting ${appName}…`);
+    let quitBy = Date.now() + QUIT_TIMEOUT_MS;
+    const timedOut = new Error(`${appName} did not quit within 30s (unsaved-changes dialog?)`);
+    let notQuit = timedOut;
+    try {
+      const script = ["on run argv", "tell application id (item 1 of argv) to quit", "end run"];
+      await run("/usr/bin/osascript", [...script.flatMap((line) => ["-e", line]), bundleId], {
+        timeout: QUIT_TIMEOUT_MS,
+      });
+    } catch (error) {
+      const { killed, stderr = "" } = error as { killed?: boolean; stderr?: string };
+      if (killed) throw timedOut;
+      if (stderr.includes("(-128)")) {
+        quitBy = Math.min(quitBy, Date.now() + CANCELED_QUIT_GRACE_MS);
+        notQuit = new Error(`Quitting ${appName} was canceled`);
+      } else {
+        process.kill(runningPid, "SIGTERM");
+      }
+    }
+    const stillRunning = await waitFor(
+      () => mainPid(executable),
+      (pid) => pid === undefined,
+      quitBy - Date.now(),
+    );
+    if (stillRunning !== undefined) throw notQuit;
+  }
+
+  onProgress(`Launching ${appName} with TZ=${tz}…`);
+  await run("/usr/bin/open", ["-n", "--env", `TZ=${tz}`, "--env", `__XPC_TZ=${tz}`, appPath]);
+
+  const pid = await waitFor(
+    () => mainPid(executable),
+    (p) => p !== undefined,
+    LAUNCH_TIMEOUT_MS,
+  );
+  if (pid === undefined) throw new Error(`${appName} did not start`);
+
+  const ps = (...flags: string[]) => run("/bin/ps", [...flags, "-ww", "-o", "command=", "-p", String(pid)]);
+  const [withEnv, withoutEnv] = await Promise.all([ps("-E"), ps()]);
+  if (withEnv.stdout.trim() === withoutEnv.stdout.trim()) return { pid, verified: false };
+  if (!withEnv.stdout.split(/\s+/).includes(`TZ=${tz}`)) {
+    throw new Error(`${appName} started (pid ${pid}) but TZ=${tz} not found in its environment`);
+  }
+  return { pid, verified: true };
+}

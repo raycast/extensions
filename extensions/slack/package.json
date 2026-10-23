@@ -194,7 +194,7 @@
     {
       "title": "Find Users",
       "name": "find-users",
-      "description": "Find Slack users by name, username, display name, or email address. Use this to resolve a person to a user ID. Before uploading files to that person, pass the user ID to Read Conversation and use its returned DM channel ID."
+      "description": "Find Slack users by name, username, display name, or email address. Use this to resolve a person to a user ID, or to get their profile photo URL; hasCustomPhoto is false when the photo is Slack's default avatar. Before uploading files to that person, pass the user ID to Read Conversation and use its returned DM channel ID."
     },
     {
       "title": "Set Status",
