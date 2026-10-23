@@ -11,6 +11,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { ContextMetadata } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { useEffect, useState } from "react";
 import {
@@ -403,10 +404,7 @@ export function ModelDetail({
       markdown={markdown}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Unique ID" text={displayModel.uniqueId} />
-          <Detail.Metadata.Label title="Database" text={displayModel.database || "N/A"} />
-          <Detail.Metadata.Label title="Schema" text={displayModel.schema || "N/A"} />
-          <Detail.Metadata.Label title="Alias" text={displayModel.alias || displayModel.name} />
+          <ContextMetadata projectId={projectId} environmentId={environmentId} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label
             title="Materialization"
@@ -419,7 +417,6 @@ export function ModelDetail({
           <Detail.Metadata.Label title="Language" text={displayModel.language || "sql"} />
           <Detail.Metadata.Separator />
           {displayModel.group && <Detail.Metadata.Label title="Group" text={displayModel.group} />}
-          <Detail.Metadata.Separator />
           {displayModel.contractEnforced && <Detail.Metadata.Label title="Contract" text="✅ Enforced" />}
           {displayModel.latestVersion && (
             <Detail.Metadata.Label title="Version" text={`v${displayModel.latestVersion}`} />
@@ -438,6 +435,17 @@ export function ModelDetail({
           {fullModel?.children && (
             <Detail.Metadata.Label title="Downstream" text={`${fullModel.children.length} dependencies`} />
           )}
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label title="Database" text={displayModel.database || "N/A"} />
+          <Detail.Metadata.Label title="Schema" text={displayModel.schema || "N/A"} />
+          <Detail.Metadata.Label title="Alias" text={displayModel.alias || displayModel.name} />
+          <Detail.Metadata.Label title="Unique ID" text={displayModel.uniqueId} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Link
+            title="dbt Cloud"
+            target={buildDocsUrl(projectId, displayModel.uniqueId)}
+            text="Open Docs"
+          />
         </Detail.Metadata>
       }
       actions={

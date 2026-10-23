@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, Keyboard, List } from "@raycast/api";
+import { ContextMetadata, successRateColor } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
@@ -58,7 +59,7 @@ interface JobContext {
   environment?: EnvironmentModel;
 }
 
-export function JobPerformanceDetail({ job, projectName, environment }: JobContext) {
+export function JobPerformanceDetail({ job }: JobContext) {
   const [days, setDays] = useState(14);
   const { data: runs = [], isLoading } = useCachedPromise(fetchJobRunMetrics, [job.id, MAX_RUNS]);
 
@@ -69,7 +70,8 @@ export function JobPerformanceDetail({ job, projectName, environment }: JobConte
   const errored = inWindow.filter((run) => run.status === STATUS.error);
   const cancelled = inWindow.filter((run) => run.status === STATUS.cancelled);
   const completed = succeeded.length + errored.length;
-  const successRate = completed > 0 ? `${((succeeded.length / completed) * 100).toFixed(2)}%` : "—";
+  const successRatio = completed > 0 ? (succeeded.length / completed) * 100 : null;
+  const successRate = successRatio !== null ? `${successRatio.toFixed(2)}%` : "—";
 
   const durations = succeeded.map((run) => run.executionTime).filter((t): t is number => t !== null);
   const average = durations.length > 0 ? durations.reduce((sum, t) => sum + t, 0) / durations.length : null;
@@ -99,7 +101,6 @@ export function JobPerformanceDetail({ job, projectName, environment }: JobConte
     )
     .join("\n");
 
-  const environmentName = environment?.name ?? `Environment ${job.environment_id}`;
   const markdown = isLoading
     ? `# ${job.name}\n\nLoading runs...`
     : `# ${job.name}
@@ -128,19 +129,15 @@ ${runRows || "| — | — | — | — | — | — |"}
       navigationTitle={`${job.name} · Last ${days} days`}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Project" text={projectName} />
-          <Detail.Metadata.TagList title="Environment">
-            <Detail.Metadata.TagList.Item
-              text={environmentName}
-              color={environment && inferDeploymentType(environment) === "production" ? Color.Green : Color.Orange}
-            />
+          <Detail.Metadata.TagList title="Success Rate">
+            <Detail.Metadata.TagList.Item text={successRate} color={successRateColor(successRatio)} />
           </Detail.Metadata.TagList>
+          <ContextMetadata projectId={job.project_id} environmentId={job.environment_id} jobName={job.name} />
           <Detail.Metadata.Label
             title="Schedule"
             text={job.triggers?.schedule ? job.schedule?.cron || "Scheduled" : "Not scheduled"}
           />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Success Rate" text={successRate} />
           <Detail.Metadata.Label title="Average Duration" text={formatSeconds(average)} icon={Icon.Clock} />
           <Detail.Metadata.Label title="Median Duration" text={formatSeconds(median(durations))} icon={Icon.Clock} />
           <Detail.Metadata.Label title="Slowest Run" text={formatSeconds(slowest)} icon={Icon.ArrowUp} />

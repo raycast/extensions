@@ -1,4 +1,5 @@
 import { List, showToast, Toast, ActionPanel, Action, Icon, Color, Detail, useNavigation } from "@raycast/api";
+import { ContextMetadata, DateLabel, environmentTag, useAccountNames } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnEnvironments } from "./fetch_environments";
@@ -102,14 +103,16 @@ ${environment.supports_docs ? "✅ Supports Documentation" : "❌ Does not suppo
       navigationTitle={environment.name}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Type"
-            text={environment.type || "Unknown"}
-            icon={getEnvironmentIcon(environment)}
-          />
-          <Detail.Metadata.Label title="Project" text={environment.project?.name || `ID: ${environment.project_id}`} />
+          <Detail.Metadata.TagList title="Type">
+            <Detail.Metadata.TagList.Item
+              text={environmentTag(environment).value}
+              color={environmentTag(environment).color}
+            />
+            <Detail.Metadata.TagList.Item text={environment.type || "Unknown"} color={Color.SecondaryText} />
+          </Detail.Metadata.TagList>
+          <ContextMetadata projectId={environment.project_id} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="dbt Version" text={environment.dbt_version || "Not set"} />
+          <Detail.Metadata.Label title="dbt Version" text={environment.dbt_version || "Not set"} icon={Icon.Tag} />
           {environment.connection && (
             <Detail.Metadata.Label
               title="Connection"
@@ -120,11 +123,13 @@ ${environment.supports_docs ? "✅ Supports Documentation" : "❌ Does not suppo
             <Detail.Metadata.Label title="Schema" text={environment.credentials.schema} />
           )}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Created" text={formatRelativeTime(environment.created_at)} />
-          <Detail.Metadata.Label title="Updated" text={formatRelativeTime(environment.updated_at)} />
+          <DateLabel title="Created" date={environment.created_at} />
+          <DateLabel title="Updated" date={environment.updated_at} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link title="Open Environment" target={envUrl} text="View in dbt Cloud" />
-          <Detail.Metadata.Link title="Project" target={projectUrl} text="View Project" />
+          <Detail.Metadata.Label title="Environment ID" text={environment.id.toString()} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Link title="dbt Cloud" target={envUrl} text="Open Environment" />
+          <Detail.Metadata.Link title="" target={projectUrl} text="Open Project" />
         </Detail.Metadata>
       }
       actions={
@@ -213,9 +218,11 @@ const EnvironmentListItem = ({ environment }: EnvironmentListItemProps): JSX.Ele
       subtitle={`${getEnvironmentTypeEmoji(environment)} ${environment.type || "Unknown Type"}`}
       icon={envIcon}
       accessories={[
-        { text: `dbt ${environment.dbt_version || "N/A"}` },
-        { text: environment.connection?.type || "No connection" },
-        { text: environment.credentials?.schema || "" },
+        ...(environment.credentials?.schema
+          ? [{ text: environment.credentials.schema, icon: Icon.HardDrive, tooltip: "Schema" }]
+          : []),
+        { text: environment.dbt_version || "N/A", icon: Icon.Tag, tooltip: "dbt version" },
+        { tag: { value: environmentTag(environment).value, color: environmentTag(environment).color } },
       ]}
       actions={
         <ActionPanel>
@@ -288,6 +295,7 @@ export default function Command() {
 }
 
 export function EnvironmentsList({ projectId, scopeTitle }: { projectId?: number; scopeTitle?: string } = {}) {
+  const names = useAccountNames();
   const [environments, setEnvironments] = useState<EnvironmentsFetchResponse>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filter, setFilter] = useState<EnvFilter>("all");
@@ -316,7 +324,7 @@ export function EnvironmentsList({ projectId, scopeTitle }: { projectId?: number
   // Group environments by project name
   const envsByProject = filteredEnvs.reduce(
     (acc, env) => {
-      const projectKey = env.project?.name || `Project ${env.project_id}`;
+      const projectKey = names.projectName(env.project_id);
       if (!acc[projectKey]) {
         acc[projectKey] = [];
       }

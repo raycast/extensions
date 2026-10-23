@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
+import { ContextMetadata, dateAccessory, successRateColor } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
@@ -52,7 +53,8 @@ export function ModelPerformanceDetail({
   const built = runs.filter((run) => ["success", "warn"].includes(run.status?.toLowerCase() ?? ""));
   const errored = runs.filter((run) => run.status?.toLowerCase() === "error");
   const completed = built.length + errored.length;
-  const successRate = completed > 0 ? `${((built.length / completed) * 100).toFixed(2)}%` : "—";
+  const successRatio = completed > 0 ? (built.length / completed) * 100 : null;
+  const successRate = successRatio !== null ? `${successRatio.toFixed(2)}%` : "—";
   const durations = built.map((run) => run.executionTime).filter((t): t is number => t !== null);
   const average = durations.length > 0 ? durations.reduce((sum, t) => sum + t, 0) / durations.length : null;
   const slowest = durations.length > 0 ? Math.max(...durations) : null;
@@ -106,10 +108,12 @@ ${runRows || "| — | — | — | — | — |"}
       navigationTitle={`${model.name} · Performance`}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Environment" text={describeEnvironment(environment)} />
-          <Detail.Metadata.Label title="Materialization" text={model.materializedType ?? "—"} />
+          <Detail.Metadata.TagList title="Success Rate">
+            <Detail.Metadata.TagList.Item text={successRate} color={successRateColor(successRatio)} />
+          </Detail.Metadata.TagList>
+          <ContextMetadata projectId={environment.projectId} environmentId={environment.id} />
+          {model.materializedType && <Detail.Metadata.Label title="Materialization" text={model.materializedType} />}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Success Rate" text={successRate} />
           <Detail.Metadata.Label title="Average Execution" text={formatSeconds(average)} icon={Icon.Clock} />
           <Detail.Metadata.Label title="Median Execution" text={formatSeconds(median(durations))} icon={Icon.Clock} />
           <Detail.Metadata.Label title="Slowest Run" text={formatSeconds(slowest)} icon={Icon.ArrowUp} />
@@ -221,7 +225,7 @@ export function ModelPerformanceList({ environment: fixed }: { environment?: Cat
                 accessories={[
                   ...(info?.lastRunStatus ? [{ tag: { value: info.lastRunStatus, color: style?.color } }] : []),
                   { text: formatSeconds(info?.executionTime), tooltip: "Last execution time" },
-                  { text: formatRelativeTime(info?.lastRunGeneratedAt ?? null), tooltip: "Last run" },
+                  dateAccessory(info?.lastRunGeneratedAt, "Last run"),
                 ]}
                 actions={
                   <ActionPanel>

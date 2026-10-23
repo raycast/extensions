@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { ContextMetadata, dateAccessory, freshnessColor } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { useEffect, useState } from "react";
 import { fetchSources, buildDocsUrl, getResourceTypeIcon, getFreshnessStatus, formatRelativeTime } from "./api";
@@ -53,23 +54,24 @@ export function SourceDetail({
       markdown={markdown}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Unique ID" text={source.uniqueId} />
-          <Detail.Metadata.Label title="Source Name" text={source.sourceName} />
-          <Detail.Metadata.Label title="Table Name" text={source.name} />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Database" text={source.database || "N/A"} />
-          <Detail.Metadata.Label title="Schema" text={source.schema || "N/A"} />
-          <Detail.Metadata.Label title="Identifier" text={source.identifier || source.name} />
-          <Detail.Metadata.Separator />
-          {source.loader && <Detail.Metadata.Label title="Loader" text={source.loader} />}
-          <Detail.Metadata.Separator />
-          {source.freshness && (
+          <Detail.Metadata.TagList title="Freshness">
+            <Detail.Metadata.TagList.Item
+              text={source.freshness ? getFreshnessStatus(source.freshness.freshnessStatus) : "Not checked"}
+              color={freshnessColor(source.freshness?.freshnessStatus)}
+            />
+          </Detail.Metadata.TagList>
+          {source.freshness?.maxLoadedAt && (
             <Detail.Metadata.Label
-              title="Freshness Status"
-              text={getFreshnessStatus(source.freshness.freshnessStatus)}
+              title="Last Loaded"
+              text={formatRelativeTime(source.freshness.maxLoadedAt)}
+              icon={Icon.Clock}
             />
           )}
+          <ContextMetadata projectId={projectId} environmentId={environmentId} />
           <Detail.Metadata.Separator />
+          <Detail.Metadata.Label title="Source Name" text={source.sourceName} />
+          <Detail.Metadata.Label title="Table Name" text={source.name} />
+          {source.loader && <Detail.Metadata.Label title="Loader" text={source.loader} />}
           {source.tags && source.tags.length > 0 && (
             <Detail.Metadata.TagList title="Tags">
               {source.tags.map((tag) => (
@@ -80,6 +82,13 @@ export function SourceDetail({
           {source.children && (
             <Detail.Metadata.Label title="Downstream" text={`${source.children.length} dependencies`} />
           )}
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label title="Database" text={source.database || "N/A"} />
+          <Detail.Metadata.Label title="Schema" text={source.schema || "N/A"} />
+          <Detail.Metadata.Label title="Identifier" text={source.identifier || source.name} />
+          <Detail.Metadata.Label title="Unique ID" text={source.uniqueId} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Link title="dbt Cloud" target={buildDocsUrl(projectId, source.uniqueId)} text="Open Docs" />
         </Detail.Metadata>
       }
       actions={
@@ -205,10 +214,18 @@ export function SourcesList({
                   title={source.name}
                   subtitle={source.description?.slice(0, 50) || ""}
                   accessories={[
-                    source.freshness?.freshnessStatus
-                      ? { text: getFreshnessStatus(source.freshness.freshnessStatus) }
+                    source.children && source.children.length > 0
+                      ? { text: String(source.children.length), icon: Icon.ArrowDown, tooltip: "Downstream" }
                       : {},
-                    source.children && source.children.length > 0 ? { text: `⬇️ ${source.children.length}` } : {},
+                    source.freshness?.maxLoadedAt ? dateAccessory(source.freshness.maxLoadedAt, "Last loaded") : {},
+                    source.freshness?.freshnessStatus
+                      ? {
+                          tag: {
+                            value: getFreshnessStatus(source.freshness.freshnessStatus),
+                            color: freshnessColor(source.freshness.freshnessStatus),
+                          },
+                        }
+                      : {},
                   ].filter((a) => Object.keys(a).length > 0)}
                   actions={
                     <ActionPanel>

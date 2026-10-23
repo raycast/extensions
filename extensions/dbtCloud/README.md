@@ -8,19 +8,23 @@ Browse your [dbt Cloud](https://www.getdbt.com/) account from Raycast: models, s
 
 ## Commands
 
-| Command                 | Description                                                           |
-| ----------------------- | --------------------------------------------------------------------- |
-| Show Job Runs           | View recent job runs with status filtering                            |
-| Quick Search            | Search across projects, jobs, environments, and runs                  |
-| Browse Models (Catalog) | Browse models with columns, tests, lineage, and metadata              |
-| Browse Sources          | Browse data sources with freshness status and downstream dependencies |
-| Explore Lineage         | Explore upstream and downstream lineage for models and sources        |
-| Trigger Job             | Trigger a dbt Cloud job run                                           |
-| Show Projects           | Browse projects with repository and connection details                |
-| Show Jobs               | Browse, view, and trigger jobs                                        |
-| Show Environments       | Browse environments and their configurations                          |
-| Show Job Performance    | Success rate, run counts, and build-duration chart per job            |
-| Show Model Performance  | Slowest models and each model's execution time across runs            |
+| Command                 | Description                                                               |
+| ----------------------- | ------------------------------------------------------------------------- |
+| Quick Search            | Search projects, jobs, environments, and runs in one place                |
+| Show Projects           | Browse projects with their repository and connection details              |
+| Show Environments       | Browse environments and their jobs, models, and sources                   |
+| Show Jobs               | Browse jobs by project, view their runs and performance, and trigger them |
+| Show Job Runs           | Show recent job runs with status filtering, durations, and run details    |
+| Trigger Job             | Trigger a job run, with confirmation                                      |
+| Browse Models (Catalog) | Browse models with their columns, tests, lineage, and compiled SQL        |
+| Browse Sources          | Browse sources with freshness status and downstream models                |
+| Explore Lineage         | Explore upstream and downstream lineage, with an interactive diagram      |
+| Show Job Performance    | Each job's success rate, run counts, and build durations over 7–30 days   |
+| Show Model Performance  | The slowest models, with their execution time and status across runs      |
+
+## Navigation
+
+Every list and detail view has a **Go To** section that moves up and down the dbt hierarchy without leaving Raycast: from a job up to its environment and project or down to its runs and performance, and from a model to its last run, last job, lineage, and performance. The matching dbt Cloud page is always one action away under **Open in dbt Cloud**.
 
 ## Keyboard Shortcuts
 

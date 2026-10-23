@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { ContextMetadata } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { useEffect, useState } from "react";
 import {
@@ -159,7 +160,7 @@ export function LineageDetail({
             title="Resource Type"
             text={`${getResourceTypeIcon(displayNode.resourceType)} ${displayNode.resourceType}`}
           />
-          <Detail.Metadata.Label title="Unique ID" text={displayNode.uniqueId} />
+          <ContextMetadata projectId={projectId} environmentId={environmentId} />
           <Detail.Metadata.Separator />
           {isModel && fullModel && (
             <>
@@ -176,6 +177,8 @@ export function LineageDetail({
               text={`${(node as SourceNode).children?.length || 0} dependencies`}
             />
           )}
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label title="Unique ID" text={displayNode.uniqueId} />
         </Detail.Metadata>
       }
       actions={

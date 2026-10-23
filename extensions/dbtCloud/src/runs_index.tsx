@@ -1,4 +1,5 @@
 import { List, showToast, Toast, ActionPanel, Action, Icon, Color, Detail, useNavigation } from "@raycast/api";
+import { ContextMetadata, dateAccessory, DateLabel, runStatus } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnRuns } from "./fetch_runs";
@@ -106,19 +107,30 @@ ${run.trigger?.cause ? `\n## Trigger\n\n**Cause:** ${run.trigger.cause}` : ""}
       navigationTitle={`Run #${run.id}`}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Status" text={run.status_humanized} icon={getStatusIcon(run.status)} />
-          <Detail.Metadata.Label title="Job" text={run.job?.name || "N/A"} />
+          <Detail.Metadata.TagList title="Status">
+            <Detail.Metadata.TagList.Item text={runStatus(run.status).label} color={runStatus(run.status).color} />
+          </Detail.Metadata.TagList>
+          <ContextMetadata
+            projectId={run.project_id}
+            environmentId={run.environment_id}
+            jobName={run.job?.name || `Job ${run.job_definition_id}`}
+          />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label
             title="Duration"
             text={run.duration_humanized || formatDuration(run.started_at, run.finished_at)}
+            icon={Icon.Clock}
           />
-          <Detail.Metadata.Label
-            title="Finished"
-            text={run.finished_at_humanized || formatRelativeTime(run.finished_at)}
-          />
+          {run.queued_duration_humanized && (
+            <Detail.Metadata.Label title="Queued For" text={run.queued_duration_humanized} />
+          )}
+          {run.run_duration_humanized && <Detail.Metadata.Label title="Ran For" text={run.run_duration_humanized} />}
+          <DateLabel title="Started" date={run.started_at} />
+          <DateLabel title="Finished" date={run.finished_at} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Git Branch" text={run.git_branch || "default"} />
+          {run.trigger?.cause && <Detail.Metadata.Label title="Trigger" text={run.trigger.cause} />}
+          <Detail.Metadata.Label title="Git Branch" text={run.git_branch || "default"} icon={Icon.Code} />
+          {run.git_sha && <Detail.Metadata.Label title="Git SHA" text={run.git_sha.slice(0, 7)} />}
           <Detail.Metadata.Label title="dbt Version" text={run.dbt_version || "N/A"} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.TagList title="Features">
@@ -127,8 +139,10 @@ ${run.trigger?.cause ? `\n## Trigger\n\n**Cause:** ${run.trigger.cause}` : ""}
             {run.has_sources_generated && <Detail.Metadata.TagList.Item text="Sources" color={Color.Purple} />}
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link title="Open in dbt Cloud" target={runUrl} text="View Run" />
-          <Detail.Metadata.Link title="View Job" target={jobUrl} text="Open Job" />
+          <Detail.Metadata.Label title="Run ID" text={run.id.toString()} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Link title="dbt Cloud" target={runUrl} text="Open Run" />
+          <Detail.Metadata.Link title="" target={jobUrl} text="Open Job" />
         </Detail.Metadata>
       }
       actions={
@@ -175,9 +189,14 @@ const RunListItem = ({ run }: RunListItemProps): JSX.Element => {
       subtitle={`${getStatusEmoji(run.status_humanized)} ${run.status_humanized}`}
       icon={getStatusIcon(run.status)}
       accessories={[
-        { text: run.duration_humanized || formatDuration(run.started_at, run.finished_at) },
-        { text: run.finished_at_humanized || formatRelativeTime(run.finished_at) },
-        { text: `🌿 ${run.git_branch || "main"}` },
+        ...(run.git_branch ? [{ tag: run.git_branch, tooltip: "Git branch" }] : []),
+        {
+          text: run.duration_humanized || formatDuration(run.started_at, run.finished_at),
+          icon: Icon.Clock,
+          tooltip: "Duration",
+        },
+        dateAccessory(run.finished_at || run.created_at, run.finished_at ? "Finished" : "Created"),
+        { tag: { value: runStatus(run.status).label, color: runStatus(run.status).color } },
       ]}
       actions={
         <ActionPanel>
