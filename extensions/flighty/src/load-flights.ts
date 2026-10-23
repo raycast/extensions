@@ -18,7 +18,7 @@ export async function loadFlights() {
         rows = await executeSQL(flightDatabasePath, flightQuery)
     } catch (error) {
         throw new Error(
-            'Unable to read Flighty data. Open Flighty, then enable Full Disk Access in System Settings > Privacy & Security for the Raycast app you are using (Raycast Development for the dev flavor). Quit and reopen that app, then try again.',
+            'Unable to read Flighty data. Open Flighty, then enable Full Disk Access for Raycast in System Settings > Privacy & Security. Quit and reopen Raycast, then try again.',
             {cause: error}
         )
     }

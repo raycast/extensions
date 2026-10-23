@@ -11,8 +11,7 @@ type FlightState = AsyncState<Flight[]> & {permissionView?: ReactNode}
 function useFlightQuery(): FlightState {
     try {
         return useSQL<Flight>(flightDatabasePath, flightQuery, {
-            permissionPriming:
-                'This is required to read flights saved in Flighty. Enable Full Disk Access for the Raycast app you are using (Raycast Development for the dev flavor), then quit and reopen that app.',
+            permissionPriming: 'This is required to read flights saved in Flighty.',
         })
     } catch {
         return {isLoading: false, error: new Error('Unable to read Flighty data. Please restart it and try again.')}
