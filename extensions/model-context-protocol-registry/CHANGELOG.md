@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add 3Dsellers MCP Server] - 2026-10-23
+
+- Add 3Dsellers to the official registry: run eBay, Amazon, Walmart, Etsy, Shopify and TikTok Shop stores from your AI assistant (products, listings, inventory, prices, orders, bulk edits, CSV imports and buyer messages, 150+ tools). Hosted Streamable HTTP server at https://api.3dsellers.com/mcp with OAuth 2.0 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add EvoLink MCP Server] - 2026-10-23
 
 - Add EvoLink to the official registry: image, video, music and speech generation with 150+ models from one EvoLink account. Search models and published prices, get a quote for an exact task, generate after approval, and track tasks and balance. Hosted Streamable HTTP server at https://mcp.evolink.ai/mcp with OAuth 2.1 sign-in (PKCE and dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
