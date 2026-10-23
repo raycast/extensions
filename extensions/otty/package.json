@@ -50,15 +50,15 @@
           "default": "2",
           "data": [
             {
-              "title": "1 level",
+              "title": "1 Level",
               "value": "1"
             },
             {
-              "title": "2 levels",
+              "title": "2 Levels",
               "value": "2"
             },
             {
-              "title": "3 levels",
+              "title": "3 Levels",
               "value": "3"
             }
           ]
