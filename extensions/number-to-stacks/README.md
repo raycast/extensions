@@ -57,17 +57,6 @@ npm run build
 
 `npm run build` writes a production build to `dist`. `npm run bundle` creates a local `.rayext` archive. Neither command publishes anything.
 
-## Publishing to the Raycast Store
-
-The manifest already uses the Raycast handle `sergi`, the MIT license, a 512×512 icon, and a store-formatted changelog.
-
-1. Log in once with `npx ray login`.
-2. Run `npm run publish`.
-3. The command forks [`raycast/extensions`](https://github.com/raycast/extensions), copies this extension into `extensions/number-to-stacks`, and opens a pull request.
-4. Push fixes to the same PR by running `npm run publish` again. Once Raycast approves and merges, the extension appears in the store.
-
-For the manual route, fork `raycast/extensions`, add this folder as `extensions/number-to-stacks` (without `node_modules` or `dist`), and open a pull request. Screenshots are optional but recommended: capture up to six 2000×1250 PNGs in development mode and place them in a `metadata` folder.
-
 The test suite checks exact conversions, round trips for counts from 0–4,096 with both stack sizes, fallback and argument input, live edits, copy-action content, validation, and restoring the selected size. Component tests use a simulated Raycast host and storage; they do not verify the native clipboard or Raycast's fallback settings.
 
 Built using Raycast's [command arguments](https://developers.raycast.com/information/lifecycle/arguments), [fallback launch text](https://developers.raycast.com/information/lifecycle), [List UI](https://developers.raycast.com/api-reference/user-interface/list), and [local-storage hook](https://developers.raycast.com/utilities/react-hooks/uselocalstorage).
