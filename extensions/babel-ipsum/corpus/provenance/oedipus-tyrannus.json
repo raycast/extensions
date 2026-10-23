@@ -1,0 +1,30 @@
+{
+  "tlg0011.tlg004.perseus-grc2.xml": {
+    "sourceUrl": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/0189b9c8d8d1f148133f2f0af309b4ee90ea4332/data/tlg0011/tlg004/tlg0011.tlg004.perseus-grc2.xml",
+    "responseUrl": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/0189b9c8d8d1f148133f2f0af309b4ee90ea4332/data/tlg0011/tlg004/tlg0011.tlg004.perseus-grc2.xml",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-23",
+    "sha256": "e414e50310aa3155e7ab80cd4e6944734c00055fbe2a702542705a69730bfc4f"
+  },
+  "README.md": {
+    "sourceUrl": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/0189b9c8d8d1f148133f2f0af309b4ee90ea4332/README.md",
+    "responseUrl": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/0189b9c8d8d1f148133f2f0af309b4ee90ea4332/README.md",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-23",
+    "sha256": "9733e53be0cb9adf77c1e3359fffc81911bbf0dc17b9095b3912768b1a663275"
+  },
+  "__cts__.xml": {
+    "sourceUrl": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/0189b9c8d8d1f148133f2f0af309b4ee90ea4332/data/tlg0011/tlg004/__cts__.xml",
+    "responseUrl": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/0189b9c8d8d1f148133f2f0af309b4ee90ea4332/data/tlg0011/tlg004/__cts__.xml",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-23",
+    "sha256": "6fab459fdaa346423518e4db90a687e51ce6bec94bb99343ddcebcef60c4b106"
+  },
+  "commit.json": {
+    "sourceUrl": "https://api.github.com/repos/PerseusDL/canonical-greekLit/commits/0189b9c8d8d1f148133f2f0af309b4ee90ea4332",
+    "responseUrl": "https://api.github.com/repos/PerseusDL/canonical-greekLit/commits/0189b9c8d8d1f148133f2f0af309b4ee90ea4332",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-23",
+    "sha256": "42edfc43b137340f6a93c69465438616b2805f0f367f74b64a32f3fa61b9cbce"
+  }
+}

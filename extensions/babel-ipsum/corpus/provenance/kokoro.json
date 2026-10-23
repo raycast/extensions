@@ -1,0 +1,23 @@
+{
+  "773_14560.html": {
+    "sourceUrl": "https://www.aozora.gr.jp/cards/000148/files/773_14560.html",
+    "responseUrl": "https://www.aozora.gr.jp/cards/000148/files/773_14560.html",
+    "encoding": "shift_jis",
+    "retrievedOn": "2026-10-22",
+    "sha256": "2f993b95343af9ca631d6fc8f050371d0d6df3423a4541669dee89430257b871"
+  },
+  "card773.html": {
+    "sourceUrl": "https://www.aozora.gr.jp/cards/000148/card773.html",
+    "responseUrl": "https://www.aozora.gr.jp/cards/000148/card773.html",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-22",
+    "sha256": "e530f5b56e038572db52cf428fd882e5df3085442cbec8f808284923b85b78fe"
+  },
+  "handling.html": {
+    "sourceUrl": "https://www.aozora.gr.jp/guide/kijyunn.html",
+    "responseUrl": "https://www.aozora.gr.jp/guide/kijyunn.html",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-22",
+    "sha256": "1cc5417bf036b96a8fdb7201cd9ab9c262f849e27926867e4d26cc6072c81da6"
+  }
+}

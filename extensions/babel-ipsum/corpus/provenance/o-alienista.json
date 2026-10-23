@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "encoding": "UTF-8; snapshots retain exact response bytes",
+  "sources": {
+    "papeis-avulsos-1882-gutenberg.html": {
+      "sourceUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "2d82b19b1222bacee6bbc3f98d381d43ceafd7aa60d0a4f3efbf77c11bc6c445"
+    },
+    "chapter-1.html": {
+      "sourceUrl": "https://pt.wikisource.org/wiki/O_Alienista/I",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "a131abfa2f0ef123fa46fe597d0e193f8a139996d752f847b1f7f2aaea47742c"
+    },
+    "chapter-2.html": {
+      "sourceUrl": "https://pt.wikisource.org/wiki/O_Alienista/II",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "fcae99860d888e302353a852767389a48d7f842ef81dce6b0d61417af59ccb07"
+    },
+    "chapter-3.html": {
+      "sourceUrl": "https://pt.wikisource.org/wiki/O_Alienista/III",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "fe3251132f55af7c0090be127b7937cf108dcd4f1130f1bad7fefeb4ffc99ff4"
+    },
+    "chapter-4.html": {
+      "sourceUrl": "https://pt.wikisource.org/wiki/O_Alienista/IV",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "eb1632a14d8b4e73bf286033783f2a32adf0d188f1e8d8ef45d01bf44619a787"
+    },
+    "chapter-5.html": {
+      "sourceUrl": "https://pt.wikisource.org/wiki/O_Alienista/V",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "e9a23d2e214c928dbfb000559ad0a44905d45e6f9290a1f0e0b0f5f9dd9647c7"
+    },
+    "chapter-6.html": {
+      "sourceUrl": "https://pt.wikisource.org/wiki/O_Alienista/VI",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "ce578b865501e973668373e5c7cb360eac6f4b3cba97106d8651119259d7484f"
+    },
+    "chapter-7.html": {
+      "sourceUrl": "https://pt.wikisource.org/wiki/O_Alienista/VII",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "54487ad7ea1d6e958f6f5144acd0ab5cb972223535fbef1628c8ac21a1b3ca08"
+    },
+    "chapter-8.html": {
+      "sourceUrl": "https://pt.wikisource.org/wiki/O_Alienista/VIII",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "288f210ea0c22ef4f127c282943d0f813b28ad2e96ce57984cfc5b4fc0b8ab35"
+    },
+    "chapter-9.html": {
+      "sourceUrl": "https://pt.wikisource.org/wiki/O_Alienista/IX",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "3597ac0176e404456fd25483dfddb49d02b075300cc9be7a19662fbfba6ff98f"
+    },
+    "chapter-10.html": {
+      "sourceUrl": "https://pt.wikisource.org/wiki/O_Alienista/X",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "354cdb49c492488e109ff9b8297253810741c4d9266e578bf752799844e9b1ea"
+    },
+    "chapter-11.html": {
+      "sourceUrl": "https://pt.wikisource.org/wiki/O_Alienista/XI",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "60fb55a7a9d1814f2334186e2f9437f4ef5b90cc36017643dc3f9c983fcf2f71"
+    },
+    "chapter-12.html": {
+      "sourceUrl": "https://pt.wikisource.org/wiki/O_Alienista/XII",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "aaaa6987f8211902d8955d8d7aed6c8971ef73a3d0c1f76bfc745c43b854d1e9"
+    },
+    "chapter-13.html": {
+      "sourceUrl": "https://pt.wikisource.org/wiki/O_Alienista/XIII",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "90e1287d26f1fee6d45cbf14c4ee10209b9004a459264d125ab0d153fccc9485"
+    }
+  }
+}

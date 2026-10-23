@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "encoding": "UTF-8; snapshots retain exact response bytes",
+  "sources": {
+    "story-1.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/La_tortuga_gigante",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "27a333719e0790462bd7d1379ee4174cf5ce5f20d7a6e017e38f6ebb0fef836e"
+    },
+    "story-2.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/Las_medias_de_los_flamencos",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "bd0beda6a380630dec09eae4b1a9618724cdf944978cd1dcd88ed4ac508fecf6"
+    },
+    "story-3.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/El_loro_pelado",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "047f4d71435dc0d442749efc47b87043e53c44639aac7731084ae4cbdf394c16"
+    },
+    "story-4.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/La_guerra_de_los_yacarés",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "e456885ca6ed4072e00b0be1dc9714efc4368cf95218a2d9d24f59e9885423e6"
+    },
+    "story-5.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/La_gama_ciega",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "4a3574b9e1ffa8e8d22ba7fc2c21b7f9ab066449f32bcded209c28f34606bd76"
+    },
+    "story-6.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/Historia_de_dos_cachorros_de_coatí_y_de_dos_cachorros_de_hombre",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "ce1940be5df6825cde2328d1eac408d4d5adb1fa12ba7bebfab9bf2e57a02ac6"
+    },
+    "story-7.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/El_paso_del_Yabebirí",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "62f325f23a8e44d245bd4bd94566afbaf49fdc99af07f01db9c46f9877209e39"
+    },
+    "story-8.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/La_abeja_haragana",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "860e0210e5d1df58a42ea616f38eaaa856a4065f6915185360b416dc1960518a"
+    }
+  }
+}

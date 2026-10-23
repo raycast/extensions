@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 1,
+  "bookId": "godaan",
+  "importer": "scripts/import-historical-hindi-korean.py",
+  "snapshots": [
+    {
+      "sourceUrl": "https://hi.wikisource.org/wiki/प्रेमचंद_रचनावली_६/गोदान-१",
+      "responseUrl": "https://hi.wikisource.org/wiki/%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A5%87%E0%A4%AE%E0%A4%9A%E0%A4%82%E0%A4%A6_%E0%A4%B0%E0%A4%9A%E0%A4%A8%E0%A4%BE%E0%A4%B5%E0%A4%B2%E0%A5%80_%E0%A5%AC/%E0%A4%97%E0%A5%8B%E0%A4%A6%E0%A4%BE%E0%A4%A8-%E0%A5%A7",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "0c5e573d7c28e4a7fce2c08f600e55c78567ca9118d9bbfbea1eb218c53649f3",
+      "snapshotPath": ".cache/corpus/sources/godaan/chapter-01.html"
+    },
+    {
+      "sourceUrl": "https://hi.wikisource.org/wiki/प्रेमचंद_रचनावली_६/गोदान-४",
+      "responseUrl": "https://hi.wikisource.org/wiki/%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A5%87%E0%A4%AE%E0%A4%9A%E0%A4%82%E0%A4%A6_%E0%A4%B0%E0%A4%9A%E0%A4%A8%E0%A4%BE%E0%A4%B5%E0%A4%B2%E0%A5%80_%E0%A5%AC/%E0%A4%97%E0%A5%8B%E0%A4%A6%E0%A4%BE%E0%A4%A8-%E0%A5%AA",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "76dfc19e4e1fee91365be25fc615eaf760a0f51bbd7d715f45ebc99610315211",
+      "snapshotPath": ".cache/corpus/sources/godaan/chapter-04.html"
+    },
+    {
+      "sourceUrl": "https://hi.wikisource.org/wiki/प्रेमचंद_रचनावली_६/गोदान-७",
+      "responseUrl": "https://hi.wikisource.org/wiki/%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A5%87%E0%A4%AE%E0%A4%9A%E0%A4%82%E0%A4%A6_%E0%A4%B0%E0%A4%9A%E0%A4%A8%E0%A4%BE%E0%A4%B5%E0%A4%B2%E0%A5%80_%E0%A5%AC/%E0%A4%97%E0%A5%8B%E0%A4%A6%E0%A4%BE%E0%A4%A8-%E0%A5%AD",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "4e6324aa67c9fbd0fbf0ecf511237dda945e1d5dffc47dae77dd8e38379d6486",
+      "snapshotPath": ".cache/corpus/sources/godaan/chapter-07.html"
+    },
+    {
+      "sourceUrl": "https://hi.wikisource.org/wiki/प्रेमचंद_रचनावली_६/गोदान-१०",
+      "responseUrl": "https://hi.wikisource.org/wiki/%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A5%87%E0%A4%AE%E0%A4%9A%E0%A4%82%E0%A4%A6_%E0%A4%B0%E0%A4%9A%E0%A4%A8%E0%A4%BE%E0%A4%B5%E0%A4%B2%E0%A5%80_%E0%A5%AC/%E0%A4%97%E0%A5%8B%E0%A4%A6%E0%A4%BE%E0%A4%A8-%E0%A5%A7%E0%A5%A6",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "d383fe98a51b08520ecb1cfe2d92c07ce88983a83a6b193af9ecc90409708d51",
+      "snapshotPath": ".cache/corpus/sources/godaan/chapter-10.html"
+    },
+    {
+      "sourceUrl": "https://hi.wikisource.org/wiki/प्रेमचंद_रचनावली_६/गोदान-१४",
+      "responseUrl": "https://hi.wikisource.org/wiki/%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A5%87%E0%A4%AE%E0%A4%9A%E0%A4%82%E0%A4%A6_%E0%A4%B0%E0%A4%9A%E0%A4%A8%E0%A4%BE%E0%A4%B5%E0%A4%B2%E0%A5%80_%E0%A5%AC/%E0%A4%97%E0%A5%8B%E0%A4%A6%E0%A4%BE%E0%A4%A8-%E0%A5%A7%E0%A5%AA",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "acb1ba21d4500bf6f22d7ec1d5ed1c08ee84273f324a2d0ac2613632e4330bbc",
+      "snapshotPath": ".cache/corpus/sources/godaan/chapter-14.html"
+    },
+    {
+      "sourceUrl": "https://hi.wikisource.org/wiki/प्रेमचंद_रचनावली_६/गोदान-१७",
+      "responseUrl": "https://hi.wikisource.org/wiki/%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A5%87%E0%A4%AE%E0%A4%9A%E0%A4%82%E0%A4%A6_%E0%A4%B0%E0%A4%9A%E0%A4%A8%E0%A4%BE%E0%A4%B5%E0%A4%B2%E0%A5%80_%E0%A5%AC/%E0%A4%97%E0%A5%8B%E0%A4%A6%E0%A4%BE%E0%A4%A8-%E0%A5%A7%E0%A5%AD",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "eb2d7ccf7e8d3372686eaddb8abb7a2bd766115a4bc18f8f0b35b7225e97f43f",
+      "snapshotPath": ".cache/corpus/sources/godaan/chapter-17.html"
+    },
+    {
+      "sourceUrl": "https://hi.wikisource.org/wiki/प्रेमचंद_रचनावली_६/गोदान-२०",
+      "responseUrl": "https://hi.wikisource.org/wiki/%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A5%87%E0%A4%AE%E0%A4%9A%E0%A4%82%E0%A4%A6_%E0%A4%B0%E0%A4%9A%E0%A4%A8%E0%A4%BE%E0%A4%B5%E0%A4%B2%E0%A5%80_%E0%A5%AC/%E0%A4%97%E0%A5%8B%E0%A4%A6%E0%A4%BE%E0%A4%A8-%E0%A5%A8%E0%A5%A6",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "c3d40db0b1c2d2367e1c3a80b957ecde73b058c52adb535013f5252f26936099",
+      "snapshotPath": ".cache/corpus/sources/godaan/chapter-20.html"
+    },
+    {
+      "sourceUrl": "https://hi.wikisource.org/wiki/प्रेमचंद_रचनावली_६/गोदान-२३",
+      "responseUrl": "https://hi.wikisource.org/wiki/%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A5%87%E0%A4%AE%E0%A4%9A%E0%A4%82%E0%A4%A6_%E0%A4%B0%E0%A4%9A%E0%A4%A8%E0%A4%BE%E0%A4%B5%E0%A4%B2%E0%A5%80_%E0%A5%AC/%E0%A4%97%E0%A5%8B%E0%A4%A6%E0%A4%BE%E0%A4%A8-%E0%A5%A8%E0%A5%A9",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "55a37c28034a0c2faee11c251a9fbc29504cfc0d56c9400e62a479982b7b9fcb",
+      "snapshotPath": ".cache/corpus/sources/godaan/chapter-23.html"
+    },
+    {
+      "sourceUrl": "https://hi.wikisource.org/wiki/प्रेमचंद_रचनावली_६/गोदान-२७",
+      "responseUrl": "https://hi.wikisource.org/wiki/%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A5%87%E0%A4%AE%E0%A4%9A%E0%A4%82%E0%A4%A6_%E0%A4%B0%E0%A4%9A%E0%A4%A8%E0%A4%BE%E0%A4%B5%E0%A4%B2%E0%A5%80_%E0%A5%AC/%E0%A4%97%E0%A5%8B%E0%A4%A6%E0%A4%BE%E0%A4%A8-%E0%A5%A8%E0%A5%AD",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "77b77358eb02fa09361775110ddcffba94f1d3f4422512727d2079f462c9db8a",
+      "snapshotPath": ".cache/corpus/sources/godaan/chapter-27.html"
+    },
+    {
+      "sourceUrl": "https://hi.wikisource.org/wiki/प्रेमचंद_रचनावली_६/गोदान-३०",
+      "responseUrl": "https://hi.wikisource.org/wiki/%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A5%87%E0%A4%AE%E0%A4%9A%E0%A4%82%E0%A4%A6_%E0%A4%B0%E0%A4%9A%E0%A4%A8%E0%A4%BE%E0%A4%B5%E0%A4%B2%E0%A5%80_%E0%A5%AC/%E0%A4%97%E0%A5%8B%E0%A4%A6%E0%A4%BE%E0%A4%A8-%E0%A5%A9%E0%A5%A6",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "e6b1a17ff4bff78ea36e460abd110117a2e9058699295053f92d6976ef1f0915",
+      "snapshotPath": ".cache/corpus/sources/godaan/chapter-30.html"
+    },
+    {
+      "sourceUrl": "https://hi.wikisource.org/wiki/प्रेमचंद_रचनावली_६/गोदान-३३",
+      "responseUrl": "https://hi.wikisource.org/wiki/%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A5%87%E0%A4%AE%E0%A4%9A%E0%A4%82%E0%A4%A6_%E0%A4%B0%E0%A4%9A%E0%A4%A8%E0%A4%BE%E0%A4%B5%E0%A4%B2%E0%A5%80_%E0%A5%AC/%E0%A4%97%E0%A5%8B%E0%A4%A6%E0%A4%BE%E0%A4%A8-%E0%A5%A9%E0%A5%A9",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "862aa92a70d585589fffe4eaed23ec5cdbd296a21232d8e2f91a790af81d391b",
+      "snapshotPath": ".cache/corpus/sources/godaan/chapter-33.html"
+    },
+    {
+      "sourceUrl": "https://hi.wikisource.org/wiki/प्रेमचंद_रचनावली_६/गोदान-३६",
+      "responseUrl": "https://hi.wikisource.org/wiki/%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A5%87%E0%A4%AE%E0%A4%9A%E0%A4%82%E0%A4%A6_%E0%A4%B0%E0%A4%9A%E0%A4%A8%E0%A4%BE%E0%A4%B5%E0%A4%B2%E0%A5%80_%E0%A5%AC/%E0%A4%97%E0%A5%8B%E0%A4%A6%E0%A4%BE%E0%A4%A8-%E0%A5%A9%E0%A5%AC",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "1add90fe7bb6fd7c6a3411e5eb28b324185d3e03575a321454c97da966918df8",
+      "snapshotPath": ".cache/corpus/sources/godaan/chapter-36.html"
+    },
+    {
+      "sourceUrl": "https://hi.wikisource.org/wiki/गो-दान",
+      "requestUrl": "https://hi.wikisource.org/wiki/गो-दान",
+      "responseUrl": "https://hi.wikisource.org/wiki/%E0%A4%97%E0%A5%8B-%E0%A4%A6%E0%A4%BE%E0%A4%A8",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-23",
+      "sha256": "0b961b0e88fc2385624922d9a3e7890bcf0325862397692046e2c0eaaf8be93e",
+      "userAgent": "BabelIpsumHistorical/1.0 (+https://git.cafe/felrov/vibed-ipsum)",
+      "snapshotPath": ".cache/corpus/sources/godaan/historical-candidate-go-dan.html"
+    },
+    {
+      "sourceUrl": "https://archive.org/metadata/godan_premchand",
+      "requestUrl": "https://archive.org/metadata/godan_premchand",
+      "responseUrl": "https://archive.org/metadata/godan_premchand",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-23",
+      "sha256": "b7fe07586b8819abbb611afc09f25745d66077f6131edfdb851f3531ef89d4fb",
+      "userAgent": "BabelIpsumHistorical/1.0 (+https://git.cafe/felrov/vibed-ipsum)",
+      "snapshotPath": ".cache/corpus/sources/godaan/historical-candidate-ia-other.json"
+    },
+    {
+      "sourceUrl": "https://archive.org/metadata/GodanByPremchand",
+      "requestUrl": "https://archive.org/metadata/GodanByPremchand",
+      "responseUrl": "https://archive.org/metadata/GodanByPremchand",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-23",
+      "sha256": "f7e77bb0efb339a7b92a6c20466191ed931d7ffd9058932969848943b0a852e8",
+      "userAgent": "BabelIpsumHistorical/1.0 (+https://git.cafe/felrov/vibed-ipsum)",
+      "snapshotPath": ".cache/corpus/sources/godaan/historical-candidate-ia.json"
+    },
+    {
+      "sourceUrl": "https://archive.org/download/GodanByPremchand/Godan_by_Premchand_djvu.txt",
+      "requestUrl": "https://archive.org/download/GodanByPremchand/Godan_by_Premchand_djvu.txt",
+      "responseUrl": "https://dn760005.eu.archive.org/0/items/GodanByPremchand/Godan_by_Premchand_djvu.txt",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-23",
+      "sha256": "48d81b0b54cb143cf520d6e9bc1214522cb20d948a64f9a8297e5c7d8f75a09f",
+      "userAgent": "BabelIpsumHistorical/1.0 (+https://git.cafe/felrov/vibed-ipsum)",
+      "snapshotPath": ".cache/corpus/sources/godaan/historical-candidate-ia.txt"
+    },
+    {
+      "sourceUrl": "https://hi.wikisource.org/wiki/प्रेमचंद_रचनावली_६",
+      "requestUrl": "https://hi.wikisource.org/wiki/प्रेमचंद_रचनावली_६",
+      "responseUrl": "https://hi.wikisource.org/wiki/%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A5%87%E0%A4%AE%E0%A4%9A%E0%A4%82%E0%A4%A6_%E0%A4%B0%E0%A4%9A%E0%A4%A8%E0%A4%BE%E0%A4%B5%E0%A4%B2%E0%A5%80_%E0%A5%AC",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-23",
+      "sha256": "99195b9910986b2e07d92b974dcbbac7630d5511d2e2232f8789ae4cbc6c9ff2",
+      "userAgent": "BabelIpsumHistorical/1.0 (+https://git.cafe/felrov/vibed-ipsum)",
+      "snapshotPath": ".cache/corpus/sources/godaan/historical-collected-edition.html"
+    },
+    {
+      "sourceUrl": "https://www.wipo.int/wipolex/en/legislation/details/17860",
+      "requestUrl": "https://www.wipo.int/wipolex/en/legislation/details/17860",
+      "responseUrl": "https://www.wipo.int/wipolex/en/legislation/details/17860",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-23",
+      "sha256": "048e452ca327af854cb3a8776dc4d9b743d68dd59954e5b65655fa3be196b7ff",
+      "userAgent": "BabelIpsumHistorical/1.0 (+https://git.cafe/felrov/vibed-ipsum)",
+      "snapshotPath": ".cache/corpus/sources/godaan/historical-india-1992.html"
+    },
+    {
+      "sourceUrl": "https://www.copyright.gov/circs/circ38b.pdf",
+      "requestUrl": "https://www.copyright.gov/circs/circ38b.pdf",
+      "responseUrl": "https://www.copyright.gov/circs/circ38b.pdf",
+      "encoding": "binary",
+      "retrievedOn": "2026-10-23",
+      "sha256": "8fa4bea09add40392b090a5816ca328fd5e1d232c4d49bf73df6230e2dbe9947",
+      "userAgent": "BabelIpsumHistorical/1.0 (+https://git.cafe/felrov/vibed-ipsum)",
+      "snapshotPath": ".cache/corpus/sources/godaan/historical-uraa.pdf"
+    }
+  ],
+  "remediation": {
+    "status": "blocked-historical-replacement-existing-text-retained",
+    "editionEvidence": [
+      "https://hi.wikisource.org/wiki/गो-दान",
+      "https://archive.org/metadata/GodanByPremchand",
+      "https://archive.org/download/GodanByPremchand/Godan_by_Premchand_djvu.txt",
+      "https://archive.org/metadata/godan_premchand",
+      "https://hi.wikisource.org/wiki/प्रेमचंद_रचनावली_६",
+      "https://www.wipo.int/wipolex/en/legislation/details/17860",
+      "https://www.copyright.gov/circs/circ38b.pdf"
+    ],
+    "rejectedCandidates": [
+      {
+        "url": "https://hi.wikisource.org/wiki/गो-दान",
+        "reason": "Colophon: © सरस्वती प्रेस इलाहाबाद; प्रथम संस्करण १९३६, वर्तमान संस्करण १९६१; Allahabad Law Journal Press. A 1961 edition, not a verified 1936 printing."
+      },
+      {
+        "url": "https://archive.org/details/GodanByPremchand",
+        "reason": "Uploader metadata dates the work 1936, but the downloaded text opens with HindiKosh and a Unicode-edition credit to Sanjay Khatri. This is a digital retype, not verified evidence of a named 1936 printing; no upstream early imprint was established."
+      },
+      {
+        "url": "https://archive.org/details/godan_premchand",
+        "reason": "Uploader date 1936 and Public Domain Mark do not establish a named early edition or a US formalities history."
+      }
+    ],
+    "remainingQuestions": [
+      "Locate and verify an actual early edition's title page and colophon.",
+      "Establish US publication/formality/renewal history separately from URAA non-restoration.",
+      "Identify permission or expiry for any retained modern editorial contributions."
+    ]
+  }
+}

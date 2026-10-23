@@ -1,0 +1,99 @@
+{
+  "retrievedOn": "2026-10-22",
+  "method": "Firecrawl scrape, formats=['rawHtml'], onlyMainContent=false, maxAge=0; UTF-8 encode the returned rawHtml string without adding a newline.",
+  "replay": "Offline extraction: python3 scripts/multilingual_ar_russian.py. Missing snapshot acquisition: FIRECRAWL_API_KEY configured in environment, python3 scripts/multilingual_ar_russian.py --fetch. Existing snapshots are never refreshed.",
+  "limitation": "Proxy/browser HTML may differ from origin wire bytes. Publisher supplies no immutable revision URLs; these hashes pin the exact returned snapshot strings.",
+  "snapshots": [
+    {
+      "sourceUrl": "https://www.safahat.org/books/46094724/",
+      "snapshotPath": ".cache/corpus/sources/the-broken-wings/contents.html",
+      "snapshotSha256": "fb27496ab7415a9703c1528b028b8ec9177629c1eb8281ea1a16280222f943fe",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22"
+    },
+    {
+      "sourceUrl": "https://www.safahat.org/books/46094724/0.1/",
+      "snapshotPath": ".cache/corpus/sources/the-broken-wings/0.1.html",
+      "snapshotSha256": "6306bf8dbb85030b6cbe72cf6fb3f1d7b486e43215e100b22ce7f3e0c8e22e96",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22"
+    },
+    {
+      "sourceUrl": "https://www.safahat.org/books/46094724/0.2/",
+      "snapshotPath": ".cache/corpus/sources/the-broken-wings/0.2.html",
+      "snapshotSha256": "ab10970fdfc25d628007dd0f74d33404a6a7cd8b809b6928f3c388ac2d9f4e51",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22"
+    },
+    {
+      "sourceUrl": "https://www.safahat.org/books/46094724/1/",
+      "snapshotPath": ".cache/corpus/sources/the-broken-wings/1.html",
+      "snapshotSha256": "56fcbce1de2d976ffcb00839878bbbb8a9cac83c28497a0a02a6ba20016a3270",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22"
+    },
+    {
+      "sourceUrl": "https://www.safahat.org/books/46094724/2/",
+      "snapshotPath": ".cache/corpus/sources/the-broken-wings/2.html",
+      "snapshotSha256": "7f6ea80564b09123da4fc8ad52a0f1830a419d347375e67856cca52f765a3f01",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22"
+    },
+    {
+      "sourceUrl": "https://www.safahat.org/books/46094724/3/",
+      "snapshotPath": ".cache/corpus/sources/the-broken-wings/3.html",
+      "snapshotSha256": "b598ee0e1b119027cb255ba60e3604303b3e27abbce27145e644c44b46c79b2e",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22"
+    },
+    {
+      "sourceUrl": "https://www.safahat.org/books/46094724/4/",
+      "snapshotPath": ".cache/corpus/sources/the-broken-wings/4.html",
+      "snapshotSha256": "d99cda6c014aecddbfc235a6d63c386cf43345f690a26da5da5329853d079ffc",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22"
+    },
+    {
+      "sourceUrl": "https://www.safahat.org/books/46094724/5/",
+      "snapshotPath": ".cache/corpus/sources/the-broken-wings/5.html",
+      "snapshotSha256": "b2f1205509e64564ebb89c73d2b6920faf6c790c6f11571c264f2fc288572bcd",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22"
+    },
+    {
+      "sourceUrl": "https://www.safahat.org/books/46094724/6/",
+      "snapshotPath": ".cache/corpus/sources/the-broken-wings/6.html",
+      "snapshotSha256": "d21364f90a887957a7ede0ca3b8c8d9cb36f63107ad86ccd3e7131c3457cc8b1",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22"
+    },
+    {
+      "sourceUrl": "https://www.safahat.org/books/46094724/7/",
+      "snapshotPath": ".cache/corpus/sources/the-broken-wings/7.html",
+      "snapshotSha256": "dff49a295ee6718c8a2f22edc376c4c06dc012a72189099a6a909b13a8af5d65",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22"
+    },
+    {
+      "sourceUrl": "https://www.safahat.org/books/46094724/8/",
+      "snapshotPath": ".cache/corpus/sources/the-broken-wings/8.html",
+      "snapshotSha256": "a65e508e2d8b8d7edb660257ffd6bfaf3d5101122d9f8971bc3f34e81f2ec7bf",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22"
+    },
+    {
+      "sourceUrl": "https://www.safahat.org/books/46094724/9/",
+      "snapshotPath": ".cache/corpus/sources/the-broken-wings/9.html",
+      "snapshotSha256": "378ca0d3f32660a366a8cb14701fdb948b383482c6b5cfabeb23388753cbf163",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22"
+    },
+    {
+      "sourceUrl": "https://www.safahat.org/books/46094724/10/",
+      "snapshotPath": ".cache/corpus/sources/the-broken-wings/10.html",
+      "snapshotSha256": "17e19bb040a5312ff2d9db8007192d941ccf0c68e268a49bdcc4cd4562ab3024",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22"
+    }
+  ]
+}

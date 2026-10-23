@@ -1,0 +1,2570 @@
+[
+  {
+    "story": "los-invalidos",
+    "paragraph": 8,
+    "find": "ran tambor, carrete jiganteseo, la potente máquina",
+    "replace": "ran tambor, carrete gigantesco, la potente máquina",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 7,
+    "find": "quella maniobra les desparaba.",
+    "replace": "quella maniobra les deparaba.",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 14,
+    "find": "íamos, en la primer enbestida, como un puñado de ",
+    "replace": "íamos, en la primer embestida, como un puñado de ",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 35,
+    "find": "erminado el escrito arancó la hoja y haciendo ",
+    "replace": "erminado el escrito arrancó la hoja y haciendo ",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 77,
+    "find": "uramentos y atroces blafemias resonaron en las ti",
+    "replace": "uramentos y atroces blasfemias resonaron en las ti",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 91,
+    "find": "tante su fugitivo y muribundo resplandor.",
+    "replace": "tante su fugitivo y moribundo resplandor.",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 138,
+    "find": " estaba aun intacto enrrollado en la bobina. Con r",
+    "replace": " estaba aun intacto enrollado en la bobina. Con r",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 130,
+    "find": "en la ancha faz del inieniero. Había domado la fi",
+    "replace": "en la ancha faz del ingeniero. Había domado la fi",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 152,
+    "find": "Faltaba el inieniero, y sin detenerse si",
+    "replace": "Faltaba el ingeniero, y sin detenerse si",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 2,
+    "find": " impurezas, pesado, asfixciante, le producía ahogos",
+    "replace": " impurezas, pesado, asfixiante, le producía ahogos",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 6,
+    "find": "uy abiertos como de medroza bestezuela, lo impr",
+    "replace": "uy abiertos como de medrosa bestezuela, lo impr",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 10,
+    "find": "xplotación, el jefe cuva atención estaba fij",
+    "replace": "xplotación, el jefe cuya atención estaba fij",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 16,
+    "find": " la oscura galería. Caminadban entre dos hileras d",
+    "replace": " la oscura galería. Caminaban entre dos hileras d",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 8,
+    "find": "res y estrechísimos pazadisos llenos de lodo.",
+    "replace": "res y estrechísimos pasadizos llenos de lodo.",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 10,
+    "find": "A la entrada de un pazadizo que conducía a las ",
+    "replace": "A la entrada de un pasadizo que conducía a las ",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 38,
+    "find": "calizar, llenaba la macisa bóveda de aquella h",
+    "replace": "calizar, llenaba la maciza bóveda de aquella h",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 30,
+    "find": "s quedándose mudos, sobrecoiidos y sintiendo que la ",
+    "replace": "s quedándose mudos, sobrecogidos y sintiendo que la ",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 43,
+    "find": "ponía en tortura su majin haciendo cálculos t",
+    "replace": "ponía en tortura su magín haciendo cálculos t",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 76,
+    "find": "suelo muy pronto un sueno pesado lleno de imá",
+    "replace": "suelo muy pronto un sueño pesado lleno de imá",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 9,
+    "find": " de la mano contaba meticulosarnente los Doce Pares, doc",
+    "replace": " de la mano contaba meticulosamente los Doce Pares, doc",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 47,
+    "find": ", una virtud arisca inaccecible hasta entonces a la",
+    "replace": ", una virtud arisca inaccesible hasta entonces a la",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 96,
+    "find": " agolpó al corazón, empañárose sus ojos y un roja ",
+    "replace": " agolpó al corazón, empañáronse sus ojos y un roja ",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 116,
+    "find": " hacia inútiles sus efuerzos se deslizó al fondo",
+    "replace": " hacia inútiles sus esfuerzos se deslizó al fondo",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 136,
+    "find": "La madre escarvando rabiosamente aquell",
+    "replace": "La madre escarbando rabiosamente aquell",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 21,
+    "find": "l. Arrastrándose en alalgunos sitios sobre las ma",
+    "replace": "l. Arrastrándose en algunos sitios sobre las ma",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 59,
+    "find": "ños en la noche del aniverversario del terrible accide",
+    "replace": "ños en la noche del aniversario del terrible accide",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 30,
+    "find": "nte del incógnito y noturno obrero, cuando de p",
+    "replace": "nte del incógnito y nocturno obrero, cuando de p",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 26,
+    "find": " prisa endemoniada: inscrustado en el nacimiento de",
+    "replace": " prisa endemoniada: incrustado en el nacimiento de",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 10,
+    "find": "zando la dificultad indifinidamente. Lo mejor era concl",
+    "replace": "zando la dificultad indefinidamente. Lo mejor era concl",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 2,
+    "find": "errarnos el camino. Entretando nuestros jefes no s",
+    "replace": "errarnos el camino. Entretanto nuestros jefes no s",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 10,
+    "find": "omo lo mas práctico oara cortar la cuestión ",
+    "replace": "omo lo mas práctico para cortar la cuestión ",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "era-el-solo",
+    "paragraph": 13,
+    "find": " pero creo, y él me pedone, que educó muy mal ",
+    "replace": " pero creo, y él me perdone, que educó muy mal ",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 2,
+    "find": "rior de la vivienda unn claridad deslumbrad",
+    "replace": "rior de la vivienda una claridad deslumbrad",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 3,
+    "find": "cos están solos esa manana. El viejo Pedro y s",
+    "replace": "cos están solos esa mañana. El viejo Pedro y s",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 4,
+    "find": "del arma, y sentado cn el borde del lecho ",
+    "replace": "del arma, y sentado en el borde del lecho ",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 4,
+    "find": "rastan notablemente cen la cabellera renegr",
+    "replace": "rastan notablemente con la cabellera renegr",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 4,
+    "find": " de Petaca, que dos anos mayor que su primo,",
+    "replace": " de Petaca, que dos años mayor que su primo,",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 4,
+    "find": " es la antítesis de Canuela a quien maneja y go",
+    "replace": " es la antítesis de Cañuela a quien maneja y go",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 31,
+    "find": "usto el cartucho de ainamita que tenía allá en e",
+    "replace": "usto el cartucho de dinamita que tenía allá en e",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 38,
+    "find": "l canon, por la que asomabo parte del último ta",
+    "replace": "l canon, por la que asomaba parte del último ta",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 22,
+    "find": "rla y caer ambos de bruoes sobre la yerba fue ",
+    "replace": "rla y caer ambos de bruces sobre la yerba fue ",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 22,
+    "find": "uerzas, se echó, la escapeta a la cara. Pero, en",
+    "replace": "uerzas, se echó, la escopeta a la cara. Pero, en",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 24,
+    "find": "mo una flecha en el horizante.",
+    "replace": "mo una flecha en el horizonte.",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 20,
+    "find": "de sus infatigables perseguidnres, quienes, después d",
+    "replace": "de sus infatigables perseguidores, quienes, después d",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 21,
+    "find": "a de tan insistente persecusion, se elevó en los ai",
+    "replace": "a de tan insistente persecución, se elevó en los ai",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 35,
+    "find": "la inutilidad de la pesquiza, la abandonaron, de",
+    "replace": "la inutilidad de la pesquisa, la abandonaron, de",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 38,
+    "find": "bustible, cuando un estampldo formidable los enso",
+    "replace": "bustible, cuando un estampido formidable los enso",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 38,
+    "find": "ue miró no encontró vestijos del fusil. Cañuela,",
+    "replace": "ue miró no encontró vestigios del fusil. Cañuela,",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 38,
+    "find": "se detuvo de pronto petríficado por el terror! En l",
+    "replace": "se detuvo de pronto petrificado por el terror! En l",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 34,
+    "find": "ría. Por último, un ímpertérrito chincol tuvo la com",
+    "replace": "ría. Por último, un impertérrito chincol tuvo la com",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 34,
+    "find": "perar el fin de tan estranas y complicadas manip",
+    "replace": "perar el fin de tan extrañas y complicadas manip",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 10,
+    "find": "ndole con la tierra estralda y volviendo a su si",
+    "replace": "ndole con la tierra extraída y volviendo a su si",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 150,
+    "find": " a internarse en el correddor.",
+    "replace": " a internarse en el corredor.",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 9,
+    "find": "boca del canon: era Cárlo Magno que, iba a ha",
+    "replace": "boca del canon: era Carlo Magno que, iba a ha",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 47,
+    "find": "dad de cuerpo sano, exhuberante de vida con la grac",
+    "replace": "dad de cuerpo sano, exuberante de vida con la grac",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 61,
+    "find": "l agujero, Valentín pretestando que tenía sed, tiró",
+    "replace": "l agujero, Valentín pretextando que tenía sed, tiró",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 20,
+    "find": "antena que se movía axilmente en todas direccione",
+    "replace": "antena que se movía ágilmente en todas direccione",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 39,
+    "find": "—¡Ai, madre! El huerto e",
+    "replace": "—¡Ay, madre! El huerto e",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 60,
+    "find": "s ágiles remeros y ¡ai! de la que se avent",
+    "replace": "s ágiles remeros y ¡ay! de la que se avent",
+    "reason": "Errata de transcripción evidente en este contexto."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 5,
+    "find": "Nada mas tétrico que esa des",
+    "replace": "Nada más tétrico que esa des",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 6,
+    "find": "nrarecido, haciendo mas sombrío el aspecto ",
+    "replace": "nrarecido, haciendo más sombrío el aspecto ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 10,
+    "find": " baja e inmóvil, el mas viejo de los minero",
+    "replace": " baja e inmóvil, el más viejo de los minero",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 20,
+    "find": "ncia del aire hacia mas radiante e intensa,",
+    "replace": "ncia del aire hacia más radiante e intensa,",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 21,
+    "find": " cegándolo cada vez mas; atontado dio algun",
+    "replace": " cegándolo cada vez más; atontado dio algun",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 34,
+    "find": "ada instante tintes mas opacos y sombríos. ",
+    "replace": "ada instante tintes más opacos y sombríos. ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 1,
+    "find": " sin trepidación ni mas ruido que el del ag",
+    "replace": " sin trepidación ni más ruido que el del ag",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 2,
+    "find": "ies asentáronse con mas solidez en el piso ",
+    "replace": "ies asentáronse con más solidez en el piso ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 14,
+    "find": "ocupe tu sitio otro mas activo.",
+    "replace": "ocupe tu sitio otro más activo.",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 16,
+    "find": "ada día se acercaba mas el fatal lindero qu",
+    "replace": "ada día se acercaba más el fatal lindero qu",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 16,
+    "find": " aun, iba delante y mas atrás con el pequeñ",
+    "replace": " aun, iba delante y más atrás con el pequeñ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 17,
+    "find": "l hambre es aguijón mas eficaz que el látig",
+    "replace": "l hambre es aguijón más eficaz que el látig",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 17,
+    "find": "os decrépitos a los mas jóvenes y vigorosos",
+    "replace": "os decrépitos a los más jóvenes y vigorosos",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 31,
+    "find": "sus labios cada vez mas dolorido y apremian",
+    "replace": "sus labios cada vez más dolorido y apremian",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 36,
+    "find": " la tierna víctima, mas desdichada que el b",
+    "replace": " la tierna víctima, más desdichada que el b",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 4,
+    "find": "eran víctimas de la mas mínima omisión en l",
+    "replace": "eran víctimas de la más mínima omisión en l",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 5,
+    "find": "omo una rebelión la mas tímida protesta de ",
+    "replace": "omo una rebelión la más tímida protesta de ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 6,
+    "find": " de su linterna era mas temida en la mina l",
+    "replace": " de su linterna era más temida en la mina l",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 9,
+    "find": ". Dos muchachos sin mas traje que el pantal",
+    "replace": ". Dos muchachos sin más traje que el pantal",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 16,
+    "find": "strar aún, yacía el mas joven de los los co",
+    "replace": "strar aún, yacía el más joven de los los co",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 29,
+    "find": "onomía la expresión mas consternada y trági",
+    "replace": "onomía la expresión más consternada y trági",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 37,
+    "find": "aban las aberturas, mas negras aun, de sini",
+    "replace": "aban las aberturas, más negras aun, de sini",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 46,
+    "find": "a tropezado y caído mas de una vez. Además ",
+    "replace": "a tropezado y caído más de una vez. Además ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 53,
+    "find": "uplementario era el mas duro de la faena, p",
+    "replace": "uplementario era el más duro de la faena, p",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 53,
+    "find": "r cuatro decímetros mas de arcilla para dar",
+    "replace": "r cuatro decímetros más de arcilla para dar",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 67,
+    "find": "rbón resultaba allí mas caro que en los dem",
+    "replace": "rbón resultaba allí más caro que en los dem",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 68,
+    "find": "repercutiendo en lo mas hondo de sus almas ",
+    "replace": "repercutiendo en lo más hondo de sus almas ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 73,
+    "find": "l capataz el camino mas corto para llegar a",
+    "replace": "l capataz el camino más corto para llegar a",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 83,
+    "find": "e ganábamos un poco mas, rebajarían los sue",
+    "replace": "e ganábamos un poco más, rebajarían los sue",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 86,
+    "find": "nciano, Uds y nadie mas que Uds, tienen la ",
+    "replace": "nciano, Uds y nadie más que Uds, tienen la ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 102,
+    "find": "añeros generalmente mas débiles que él por ",
+    "replace": "añeros generalmente más débiles que él por ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 134,
+    "find": " hasta los rincones mas ocultos de la incli",
+    "replace": " hasta los rincones más ocultos de la incli",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 140,
+    "find": "cieron en medio del mas profundo silencio.",
+    "replace": "cieron en medio del más profundo silencio.",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 142,
+    "find": "los escombros en lo mas hondo del pozo.",
+    "replace": "los escombros en lo más hondo del pozo.",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 149,
+    "find": "i segura. Que hacia mas de dos horas que se",
+    "replace": "i segura. Que hacia más de dos horas que se",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 151,
+    "find": "azos. Algunos pasos mas y tropezaron con el",
+    "replace": "azos. Algunos pasos más y tropezaron con el",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 152,
+    "find": "ontón de piedras de mas de un metro de elev",
+    "replace": "ontón de piedras de más de un metro de elev",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 156,
+    "find": "sas se deshacían al mas ligero contacto, lo",
+    "replace": "sas se deshacían al más ligero contacto, lo",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 156,
+    "find": "ientre y sobresalía mas de un metro por ent",
+    "replace": "ientre y sobresalía más de un metro por ent",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 2,
+    "find": "on precisión, hacia mas difícil la dura e i",
+    "replace": "on precisión, hacia más difícil la dura e i",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 4,
+    "find": "osturas buscando la mas cómoda para atacar ",
+    "replace": "osturas buscando la más cómoda para atacar ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 13,
+    "find": "cama parecida, pero mas confortable, pues s",
+    "replace": "cama parecida, pero más confortable, pues s",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 13,
+    "find": "tos sacos, no tenía mas abrigo que una mant",
+    "replace": "tos sacos, no tenía más abrigo que una mant",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 18,
+    "find": "le hacían aparentar mas de cincuenta.",
+    "replace": "le hacían aparentar más de cincuenta.",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 21,
+    "find": "ueñuelo había hecho mas difícil y penosa.",
+    "replace": "ueñuelo había hecho más difícil y penosa.",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 41,
+    "find": "o que no aparentaba mas de ocho.",
+    "replace": "o que no aparentaba más de ocho.",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 76,
+    "find": "es daban un aspecto mas miserable aun. Su p",
+    "replace": "es daban un aspecto más miserable aun. Su p",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 4,
+    "find": " y robusto. El otro mas alto, un tanto flac",
+    "replace": " y robusto. El otro más alto, un tanto flac",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 4,
+    "find": "pálidos rostros. El mas joven, muchacho de ",
+    "replace": "pálidos rostros. El más joven, muchacho de ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 12,
+    "find": "Por fin el de mas edad, dijo:",
+    "replace": "Por fin el de más edad, dijo:",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 23,
+    "find": "mar las medidas que mas convengan a sus int",
+    "replace": "mar las medidas que más convengan a sus int",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 33,
+    "find": "os cuantos centavos mas en los salarios y l",
+    "replace": "os cuantos centavos más en los salarios y l",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 35,
+    "find": "esta en el platillo mas leve, equilibraba l",
+    "replace": "esta en el platillo más leve, equilibraba l",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 36,
+    "find": "che a su habitación mas tarde que de costum",
+    "replace": "che a su habitación más tarde que de costum",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 37,
+    "find": "a y dulce que hacia mas suave aun el brillo",
+    "replace": "a y dulce que hacia más suave aun el brillo",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 58,
+    "find": "untalamientos. Hace mas de una semana que n",
+    "replace": "untalamientos. Hace más de una semana que n",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 70,
+    "find": "os ojos fijos en un mas allí invisible y aj",
+    "replace": "os ojos fijos en un más allí invisible y aj",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 13,
+    "find": "este corazón que es mas tuyo que mío? ¡Acué",
+    "replace": "este corazón que es más tuyo que mío? ¡Acué",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 32,
+    "find": "ordinario furor. El mas bajo, de miembros d",
+    "replace": "ordinario furor. El más bajo, de miembros d",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 32,
+    "find": "s. Silenciosos, sin mas armas que los puños",
+    "replace": "s. Silenciosos, sin más armas que los puños",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 32,
+    "find": "joven, era un palmo mas alto que su antagon",
+    "replace": "joven, era un palmo más alto que su antagon",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 48,
+    "find": "Entre los que mas de cerca la asediab",
+    "replace": "Entre los que más de cerca la asediab",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 51,
+    "find": "no inquietaba en lo mas mínimo a los padres",
+    "replace": "no inquietaba en lo más mínimo a los padres",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 54,
+    "find": "ue dejaba parado al mas atrevido, no acudía",
+    "replace": "ue dejaba parado al más atrevido, no acudía",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 56,
+    "find": "fraguaba los planes mas descabellados para ",
+    "replace": "fraguaba los planes más descabellados para ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 59,
+    "find": "ontándose entre los mas entusiastas a Remig",
+    "replace": "ontándose entre los más entusiastas a Remig",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 61,
+    "find": "dversarios eran los mas empeñosos en la tar",
+    "replace": "dversarios eran los más empeñosos en la tar",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 82,
+    "find": "anojo de claveles y mas dulces que el panal",
+    "replace": "anojo de claveles y más dulces que el panal",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 82,
+    "find": "cias de esos labios mas encendidos que un m",
+    "replace": "cias de esos labios más encendidos que un m",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 89,
+    "find": "—Dios sabe mas y averigua menos.",
+    "replace": "—Dios sabe más y averigua menos.",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 94,
+    "find": " suplicantes y otra mas grave y varonil la ",
+    "replace": " suplicantes y otra más grave y varonil la ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 117,
+    "find": "s se alargaba mas y mas hacia el oriente cu",
+    "replace": "s se alargaba mas y más hacia el oriente cu",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 117,
+    "find": "objetos se alargaba mas y más hacia el orie",
+    "replace": "objetos se alargaba más y más hacia el orie",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 126,
+    "find": " Oíanse las órdenes mas contradictorias. Al",
+    "replace": " Oíanse las órdenes más contradictorias. Al",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 130,
+    "find": "cía a cada instante mas infranqueable y ten",
+    "replace": "cía a cada instante más infranqueable y ten",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 136,
+    "find": "mbros y sobrepasaba mas de un metro por enc",
+    "replace": "mbros y sobrepasaba más de un metro por enc",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 3,
+    "find": "En lo mas alto, dominando la ",
+    "replace": "En lo más alto, dominando la ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 6,
+    "find": "a carretera parecía mas bien un campesino q",
+    "replace": "a carretera parecía más bien un campesino q",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 20,
+    "find": "se inclinaban mas y mas, obligándole a enco",
+    "replace": "se inclinaban mas y más, obligándole a enco",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 20,
+    "find": "nzaba se inclinaban mas y más, obligándole ",
+    "replace": "nzaba se inclinaban más y más, obligándole ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 21,
+    "find": ", mezclábase el son mas claro del martillo ",
+    "replace": ", mezclábase el son más claro del martillo ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 25,
+    "find": "an al infeliz a las mas bárbaras pruebas. Y",
+    "replace": "an al infeliz a las más bárbaras pruebas. Y",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 26,
+    "find": "apasionaba cada vez mas los ánimos dentro d",
+    "replace": "apasionaba cada vez más los ánimos dentro d",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 27,
+    "find": "desconcertaba a los mas esforzados barreter",
+    "replace": "desconcertaba a los más esforzados barreter",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 33,
+    "find": "iera quebrantado la mas robusta constitució",
+    "replace": "iera quebrantado la más robusta constitució",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 34,
+    "find": "a conducta cada vez mas extraña del ciego. ",
+    "replace": "a conducta cada vez más extraña del ciego. ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 34,
+    "find": "o de la mina, dando mas fuerza a aquellas s",
+    "replace": "o de la mina, dando más fuerza a aquellas s",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 36,
+    "find": "aba ya. Los mineros mas antiguos recordaban",
+    "replace": "aba ya. Los mineros más antiguos recordaban",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 46,
+    "find": "s filtraciones eran mas copiosas, gruesas v",
+    "replace": "s filtraciones eran más copiosas, gruesas v",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 48,
+    "find": " iluminó los sitios mas recónditos de la ga",
+    "replace": " iluminó los sitios más recónditos de la ga",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 52,
+    "find": "del viento cada vez mas flojo a medida que ",
+    "replace": "del viento cada vez más flojo a medida que ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 59,
+    "find": "destruyó uno de los mas poderosos estableci",
+    "replace": "destruyó uno de los más poderosos estableci",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 4,
+    "find": "atisface apenas sus mas premiosas necesidad",
+    "replace": "atisface apenas sus más premiosas necesidad",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 5,
+    "find": " encorvadas, hacían mas penosa su marcha so",
+    "replace": " encorvadas, hacían más penosa su marcha so",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 7,
+    "find": " seca, se adivinaba mas bien que se veía oc",
+    "replace": " seca, se adivinaba más bien que se veía oc",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 8,
+    "find": "provisado proyectil mas mortífero que un si",
+    "replace": "provisado proyectil más mortífero que un si",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 9,
+    "find": "tomando un perdigón mas grueso que los demá",
+    "replace": "tomando un perdigón más grueso que los demá",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 10,
+    "find": "spa los nervios del mas flemático lo hizo v",
+    "replace": "spa los nervios del más flemático lo hizo v",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 22,
+    "find": "ente por los sitios mas áridos y descubiert",
+    "replace": "ente por los sitios más áridos y descubiert",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 24,
+    "find": "lor y el desaliento mas profundo se pintaro",
+    "replace": "lor y el desaliento más profundo se pintaro",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 1,
+    "find": " de ahora. No había mas que dos piques: el ",
+    "replace": " de ahora. No había más que dos piques: el ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 10,
+    "find": "propusieron como lo mas práctico para corta",
+    "replace": "propusieron como lo más práctico para corta",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 11,
+    "find": "demás tenían número mas altos se iban a sus",
+    "replace": "demás tenían número más altos se iban a sus",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 13,
+    "find": "espués de dos horas mas o menos nos marcaro",
+    "replace": "espués de dos horas más o menos nos marcaro",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 14,
+    "find": "bre la piedra. Puse mas atención y cuando e",
+    "replace": "bre la piedra. Puse más atención y cuando e",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 14,
+    "find": "Era imposible hacer mas, pero a los jefes t",
+    "replace": "Era imposible hacer más, pero a los jefes t",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 15,
+    "find": " sintiendo cada vez mas fuertes. En ese mom",
+    "replace": " sintiendo cada vez más fuertes. En ese mom",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 19,
+    "find": "osca que caían eran mas grandes, hasta que,",
+    "replace": "osca que caían eran más grandes, hasta que,",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 22,
+    "find": "ado. Como estábamos mas altos que ellos, ni",
+    "replace": "ado. Como estábamos más altos que ellos, ni",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 26,
+    "find": "ado una estratagema mas eficaz. El humo del",
+    "replace": "ado una estratagema más eficaz. El humo del",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 12,
+    "find": "pensamiento cobraba mas fuerza al ver a su ",
+    "replace": "pensamiento cobraba más fuerza al ver a su ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 16,
+    "find": "u dueño, no restaba mas que emprender la ma",
+    "replace": "u dueño, no restaba más que emprender la ma",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 20,
+    "find": "n centenar de pasos mas allá. Como si se pr",
+    "replace": "n centenar de pasos más allá. Como si se pr",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 30,
+    "find": " Era un ganso, nada mas que un ganso.",
+    "replace": " Era un ganso, nada más que un ganso.",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 34,
+    "find": "s costillas razones mas contundentes, vació",
+    "replace": "s costillas razones más contundentes, vació",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 34,
+    "find": "! Se necesitaba ser mas borrico que un buey",
+    "replace": "! Se necesitaba ser más borrico que un buey",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 38,
+    "find": "en rastrillado. Por mas que miró no encontr",
+    "replace": "en rastrillado. Por más que miró no encontr",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 38,
+    "find": "amente, para añadir mas combustible, cuando",
+    "replace": "amente, para añadir más combustible, cuando",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 38,
+    "find": " meter ahí un grano mas de pólvora o de lo ",
+    "replace": " meter ahí un grano más de pólvora o de lo ",
+    "reason": "Tilde diacrítica: cantidad o comparación; no conjunción adversativa."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 9,
+    "find": "enta huella se veía aun fresca en el hundid",
+    "replace": "enta huella se veía aún fresca en el hundid",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 21,
+    "find": "es como si caminase aun entre las traviesas",
+    "replace": "es como si caminase aún entre las traviesas",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 22,
+    "find": "ncón de la mina que aun no conocía y donde ",
+    "replace": "ncón de la mina que aún no conocía y donde ",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 35,
+    "find": "dos parecían sentir aun el roce aplastador ",
+    "replace": "dos parecían sentir aún el roce aplastador ",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 3,
+    "find": "la mina no empezaba aun. De la galería bast",
+    "replace": "la mina no empezaba aún. De la galería bast",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 16,
+    "find": "ía, un hombre joven aun, iba delante y más ",
+    "replace": "ía, un hombre joven aún, iba delante y más ",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 21,
+    "find": "a costa. Anduvieron aun un corto trecho y s",
+    "replace": "a costa. Anduvieron aún un corto trecho y s",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 37,
+    "find": "erturas, más negras aun, de siniestros pasa",
+    "replace": "erturas, más negras aún, de siniestros pasa",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 138,
+    "find": "pero el otro estaba aun intacto enrollado e",
+    "replace": "pero el otro estaba aún intacto enrollado e",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 76,
+    "find": "pecto más miserable aun. Su primer impulso ",
+    "replace": "pecto más miserable aún. Su primer impulso ",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 77,
+    "find": " mina y por los que aun poblaban sus infern",
+    "replace": " mina y por los que aún poblaban sus infern",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 37,
+    "find": "que hacia más suave aun el brillo de sus oj",
+    "replace": "que hacia más suave aún el brillo de sus oj",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 38,
+    "find": "n su corazón, joven aun, pasaba en continuo",
+    "replace": "n su corazón, joven aún, pasaba en continuo",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 77,
+    "find": "uienes se ignoraban aun los nombres. Por lo",
+    "replace": "uienes se ignoraban aún los nombres. Por lo",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 53,
+    "find": "cuyo corazón dormía aun, había acogido con ",
+    "replace": "cuyo corazón dormía aún, había acogido con ",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 103,
+    "find": "undimiento galopaba aun, allá lejos, levant",
+    "replace": "undimiento galopaba aún, allá lejos, levant",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 5,
+    "find": "fatiga era grande y aun no había disparado ",
+    "replace": "fatiga era grande y aún no había disparado ",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 9,
+    "find": "cuyo recuerdo tengo aun en la memoria. Desp",
+    "replace": "cuyo recuerdo tengo aún en la memoria. Desp",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 6,
+    "find": "iejos no regresaban aun del pueblo, puso de",
+    "replace": "iejos no regresaban aún del pueblo, puso de",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 31,
+    "find": "es no habían tenido aun oportunidad de ver ",
+    "replace": "es no habían tenido aún oportunidad de ver ",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 31,
+    "find": "rgado el arma! Pero aun era tiempo de repar",
+    "replace": "rgado el arma! Pero aún era tiempo de repar",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 10,
+    "find": "ro y soltó el tiro. Aun no se disipaba el h",
+    "replace": "ro y soltó el tiro. Aún no se disipaba el h",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 23,
+    "find": " al maldito animal. Aun era tiempo de recup",
+    "replace": " al maldito animal. Aún era tiempo de recup",
+    "reason": "Tilde diacrítica: equivale a todavía en este pasaje."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 20,
+    "find": "aire hacia",
+    "replace": "aire hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 4,
+    "find": "años hacia",
+    "replace": "años hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 4,
+    "find": "traje hacia",
+    "replace": "traje hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 26,
+    "find": "rápido hacia",
+    "replace": "rápido hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 9,
+    "find": "laterales, hacia",
+    "replace": "laterales, hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 16,
+    "find": "pendiente hacia",
+    "replace": "pendiente hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 121,
+    "find": "allí hacia",
+    "replace": "allí hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 130,
+    "find": "que hacia",
+    "replace": "que hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 149,
+    "find": "Que hacia",
+    "replace": "Que hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 2,
+    "find": "Hacia algunas",
+    "replace": "Hacía algunas",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 2,
+    "find": "precisión, hacia",
+    "replace": "precisión, hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 3,
+    "find": "le hacia",
+    "replace": "le hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 8,
+    "find": "agujereaba hacia",
+    "replace": "agujereaba hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 25,
+    "find": "se hacia",
+    "replace": "se hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 27,
+    "find": "le hacia",
+    "replace": "le hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 35,
+    "find": "se hacia",
+    "replace": "se hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 36,
+    "find": "le hacia",
+    "replace": "le hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 37,
+    "find": "que hacia",
+    "replace": "que hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 62,
+    "find": "Hacia mucho",
+    "replace": "Hacía mucho",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 66,
+    "find": "nada hacia",
+    "replace": "nada hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 70,
+    "find": "que hacia",
+    "replace": "que hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 77,
+    "find": "trabajaba hacia",
+    "replace": "trabajaba hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 3,
+    "find": "alto, hacia",
+    "replace": "alto, hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 83,
+    "find": "que hacia",
+    "replace": "que hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 116,
+    "find": "cubría hacia",
+    "replace": "cubría hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 116,
+    "find": "le hacia",
+    "replace": "le hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 20,
+    "find": "le hacia",
+    "replace": "le hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 41,
+    "find": "hacia gemir",
+    "replace": "hacía gemir",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 50,
+    "find": "no hacia",
+    "replace": "no hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 8,
+    "find": "hacia las veces",
+    "replace": "hacía las veces",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 15,
+    "find": "que hacia",
+    "replace": "que hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 14,
+    "find": "Hacia ya",
+    "replace": "Hacía ya",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 21,
+    "find": "bajado hacia",
+    "replace": "bajado hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 22,
+    "find": "No hacia",
+    "replace": "No hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 34,
+    "find": "cazador hacia",
+    "replace": "cazador hacía",
+    "reason": "Tilde verbal: imperfecto de hacer; no preposición de dirección."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 60,
+    "find": "— Señor, lo justo seria que se nos pagase p",
+    "replace": "— Señor, lo justo sería que se nos pagase p",
+    "reason": "Tilde verbal: condicional de ser en este contexto."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 86,
+    "find": "esta vida de perros seria menos dura.",
+    "replace": "esta vida de perros sería menos dura.",
+    "reason": "Tilde verbal: condicional de ser en este contexto."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 86,
+    "find": " la rústica belleza seria suya. Su experienci",
+    "replace": " la rústica belleza sería suya. Su experienci",
+    "reason": "Tilde verbal: condicional de ser en este contexto."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 23,
+    "find": "la maleza. Sin duda seria alguna raposa inter",
+    "replace": "la maleza. Sin duda sería alguna raposa inter",
+    "reason": "Tilde verbal: condicional de ser en este contexto."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 9,
+    "find": "spojo que realizado seria la ruina de todos. ",
+    "replace": "spojo que realizado sería la ruina de todos. ",
+    "reason": "Tilde verbal: condicional de ser en este contexto."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 83,
+    "find": "— Seria la misma cosa, comp",
+    "replace": "— Sería la misma cosa, comp",
+    "reason": "Tilde verbal: condicional de ser en este contexto."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 3,
+    "find": "trataba con su tren",
+    "replace": "trotaba con su tren",
+    "reason": "Errata: el caballo trotaba arrastrando las vagonetas."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 9,
+    "find": "huesudas almas",
+    "replace": "huesudas ancas",
+    "reason": "Errata de lectura: se describen las ancas del caballo."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 14,
+    "find": "cuan presto",
+    "replace": "cuán presto",
+    "reason": "Tilde en expresión exclamativa."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 17,
+    "find": "viniendo hacía ellos",
+    "replace": "viniendo hacia ellos",
+    "reason": "La dirección se expresa con hacia, sin tilde."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 24,
+    "find": "pudieran sin duda distinguido",
+    "replace": "pudieran sin duda distinguirlo",
+    "reason": "Errata de transcripción: infinitivo con pronombre tras pudieran."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 25,
+    "find": "en el nuca para obligado",
+    "replace": "en la nuca para obligarlo",
+    "reason": "Erratas de transcripción en la descripción de la palmada y su propósito."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 26,
+    "find": "chacras de agua cenagosa",
+    "replace": "charcas de agua cenagosa",
+    "reason": "Errata: pequeños depósitos de agua, no terrenos de cultivo."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 4,
+    "find": "rostro sumado por",
+    "replace": "rostro surcado por",
+    "reason": "Errata de transcripción: rostro surcado de arrugas."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 8,
+    "find": "Si, señor",
+    "replace": "Sí, señor",
+    "reason": "Tilde diacrítica de la respuesta afirmativa."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 28,
+    "find": "a ver como cumples",
+    "replace": "a ver cómo cumples",
+    "reason": "Tilde en interrogativa indirecta."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 6,
+    "find": "en la mina las que",
+    "replace": "en la mina que",
+    "reason": "Intrusión de las en la comparación."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 16,
+    "find": "los los conductores",
+    "replace": "los conductores",
+    "reason": "Repetición accidental de palabra."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 17,
+    "find": "fuera de si,",
+    "replace": "fuera de sí,",
+    "reason": "Tilde del pronombre reflexivo."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 21,
+    "find": "del carroi se",
+    "replace": "del carro y se",
+    "reason": "Palabras pegadas: carro y."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 50,
+    "find": "¡Qué despachen pronto!",
+    "replace": "¡Que despachen pronto!",
+    "reason": "Que introduce el mandato, no una exclamación interrogativa."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 69,
+    "find": "iba va a marcharse",
+    "replace": "iba ya a marcharse",
+    "reason": "Errata de lectura: ya, adverbio temporal."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 92,
+    "find": "Ocupabánse",
+    "replace": "Ocupábanse",
+    "reason": "Acentuación de ocupaban con pronombre enclítico."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 110,
+    "find": "porque tu para nada",
+    "replace": "porque tú para nada",
+    "reason": "Tilde del pronombre personal sujeto."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 148,
+    "find": "¡Si, si!",
+    "replace": "¡Sí, sí!",
+    "reason": "Tilde de las respuestas afirmativas."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 29,
+    "find": "¿Cuanto te",
+    "replace": "¿Cuánto te",
+    "reason": "Tilde del interrogativo."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 38,
+    "find": "se acerco",
+    "replace": "se acercó",
+    "reason": "Tilde del pretérito en el contexto narrativo."
+  },
+  {
+    "story": "el-pago",
+    "paragraph": 74,
+    "find": "redoblo su llanto",
+    "replace": "redobló su llanto",
+    "reason": "Tilde del pretérito en el contexto narrativo."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 1,
+    "find": "delante de si un",
+    "replace": "delante de sí un",
+    "reason": "Tilde del pronombre reflexivo."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 9,
+    "find": "—Si, señor",
+    "replace": "—Sí, señor",
+    "reason": "Tilde de la respuesta afirmativa."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 26,
+    "find": "e] resultado",
+    "replace": "el resultado",
+    "reason": "Corchete leído en lugar de la letra l."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 32,
+    "find": "siempre, si, pero",
+    "replace": "siempre, sí, pero",
+    "reason": "Tilde del adverbio afirmativo."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 40,
+    "find": "el por qué de",
+    "replace": "el porqué de",
+    "reason": "Sustantivo porqué: el motivo."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 49,
+    "find": "—Si, estuve",
+    "replace": "—Sí, estuve",
+    "reason": "Tilde de la respuesta afirmativa."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 57,
+    "find": "Ah, si, dicen",
+    "replace": "Ah, sí, dicen",
+    "reason": "Tilde de la respuesta afirmativa."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 62,
+    "find": "sus vividos rayos",
+    "replace": "sus vívidos rayos",
+    "reason": "Adjetivo vívidos: rayos intensos y luminosos."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 68,
+    "find": "tras de si la",
+    "replace": "tras de sí la",
+    "reason": "Tilde del pronombre reflexivo."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 70,
+    "find": "un más allí invisible",
+    "replace": "un más allá invisible",
+    "reason": "Errata de lectura en la expresión más allá."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 78,
+    "find": "entre si misma",
+    "replace": "entre sí misma",
+    "reason": "Tilde del pronombre reflexivo."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 2,
+    "find": "isu boca",
+    "replace": "y su boca",
+    "reason": "Conjunción y pronombre pegados."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 6,
+    "find": "sorpresa ide marcado",
+    "replace": "sorpresa y de marcado",
+    "reason": "Conjunción y preposición pegadas."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 19,
+    "find": "se rían de mi",
+    "replace": "se rían de mí",
+    "reason": "Tilde del pronombre personal tras preposición."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 36,
+    "find": "mujer encuclillas",
+    "replace": "mujer en cuclillas",
+    "reason": "Locución en cuclillas escrita en dos palabras."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 60,
+    "find": "balde dehierro",
+    "replace": "balde de hierro",
+    "reason": "Palabras pegadas."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 96,
+    "find": "Toda Ja sangre",
+    "replace": "Toda la sangre",
+    "reason": "J mayúscula leída en lugar de l."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 98,
+    "find": "rechi, naron",
+    "replace": "rechinaron",
+    "reason": "Palabra rota por una coma de transcripción."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 106,
+    "find": "a quién la felicidad",
+    "replace": "a quien la felicidad",
+    "reason": "Relativo sin valor interrogativo."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 116,
+    "find": "se enderezo:",
+    "replace": "se enderezó:",
+    "reason": "Tilde del pretérito en el contexto narrativo."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 116,
+    "find": "¿Mas como rematarlo?",
+    "replace": "¿Mas cómo rematarlo?",
+    "reason": "Tilde del interrogativo; mas conserva el sentido adversativo."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 121,
+    "find": "la acha, có al",
+    "replace": "la achacó al",
+    "reason": "Palabra rota por espacio y coma de transcripción."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 2,
+    "find": "hacinamiento ele escombros",
+    "replace": "hacinamiento de escombros",
+    "reason": "Lectura ele por de."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 3,
+    "find": "grietas delas desiertas",
+    "replace": "grietas de las desiertas",
+    "reason": "Palabras pegadas."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 6,
+    "find": "delante de si.",
+    "replace": "delante de sí.",
+    "reason": "Tilde del pronombre reflexivo."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 25,
+    "find": "Nadie sabia quien era ni de donde venía",
+    "replace": "Nadie sabía quién era ni de dónde venía",
+    "reason": "Tilde verbal e interrogativas indirectas; se conserva sabia erudición en otro cuento."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 25,
+    "find": "lo contrarío",
+    "replace": "lo contrario",
+    "reason": "Adjetivo contrario, sin tilde."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 26,
+    "find": "las «anteras de",
+    "replace": "las canteras de",
+    "reason": "Signo espurio leído en lugar de la c inicial."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 47,
+    "find": "del grueso mido",
+    "replace": "del grueso nudo",
+    "reason": "Errata de lectura en el haz de mechas atadas."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 49,
+    "find": "temblando de frió",
+    "replace": "temblando de frío",
+    "reason": "Sustantivo frío; no pretérito de freír."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 50,
+    "find": "¡Cuan ajenos",
+    "replace": "¡Cuán ajenos",
+    "reason": "Tilde del exclamativo."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 57,
+    "find": "los in jeme ros",
+    "replace": "los ingenieros",
+    "reason": "Palabra fragmentada en la transcripción."
+  },
+  {
+    "story": "caza-mayor",
+    "paragraph": 9,
+    "find": "del canon:",
+    "replace": "del cañón:",
+    "reason": "Errata: cañón del arma."
+  },
+  {
+    "story": "la-mano-pegada",
+    "paragraph": 78,
+    "find": "que él representante",
+    "replace": "que el representante",
+    "reason": "Artículo el ante el sustantivo representante."
+  },
+  {
+    "story": "el-registro",
+    "paragraph": 5,
+    "find": "pequeño hececillo",
+    "replace": "pequeño hacecillo",
+    "reason": "Diminutivo de haz de ramas; errata de vocal."
+  },
+  {
+    "story": "el-registro",
+    "paragraph": 26,
+    "find": "Apréciale que",
+    "replace": "Parecíale que",
+    "reason": "Errata de transcripción: le parecía que su cuerpo se achicaba."
+  },
+  {
+    "story": "el-registro",
+    "paragraph": 35,
+    "find": "cuando su irguió",
+    "replace": "cuando se irguió",
+    "reason": "Errata de vocal en el pronombre reflexivo."
+  },
+  {
+    "story": "el-registro",
+    "paragraph": 37,
+    "find": "El patrón ordeno",
+    "replace": "El patrón ordenó",
+    "reason": "Tilde del pretérito en el contexto narrativo."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 1,
+    "find": "Aquellos si que",
+    "replace": "Aquellos sí que",
+    "reason": "Sí enfático afirmativo."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 1,
+    "find": "el abue lo dirigiéndose",
+    "replace": "el abuelo dirigiéndose",
+    "reason": "Palabra rota por espacio."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 12,
+    "find": "Aquello si que",
+    "replace": "Aquello sí que",
+    "reason": "Sí enfático afirmativo."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 14,
+    "find": "Hablaban, median y volvían",
+    "replace": "Hablaban, medían y volvían",
+    "reason": "Imperfecto de medir, no presente de mediar."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 14,
+    "find": "averiguar en que paraba",
+    "replace": "averiguar en qué paraba",
+    "reason": "Tilde en interrogativa indirecta."
+  },
+  {
+    "story": "era-el-solo",
+    "paragraph": 36,
+    "find": "Si, él no era",
+    "replace": "Sí, él no era",
+    "reason": "Sí afirmativo."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 7,
+    "find": "en la pena viva",
+    "replace": "en la peña viva",
+    "reason": "Errata: roca donde se excava el depósito."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 7,
+    "find": "En valde",
+    "replace": "En balde",
+    "reason": "Ortografía de la locución en balde."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 7,
+    "find": "junto a si en",
+    "replace": "junto a sí en",
+    "reason": "Tilde del pronombre reflexivo."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 7,
+    "find": "proyectiles lezumbaron",
+    "replace": "proyectiles le zumbaron",
+    "reason": "Palabras pegadas."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 7,
+    "find": "escondite, el estaba",
+    "replace": "escondite, él estaba",
+    "reason": "Tilde del pronombre personal sujeto."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 10,
+    "find": "rara escencian",
+    "replace": "rara excepción",
+    "reason": "Errata de lectura: por una rara excepción a la oposición habitual."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 13,
+    "find": "Ahora si que",
+    "replace": "Ahora sí que",
+    "reason": "Sí enfático afirmativo."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 15,
+    "find": "de la montana",
+    "replace": "de la montaña",
+    "reason": "Errata de transcripción: sendero de la montaña."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 18,
+    "find": "le rogabo",
+    "replace": "le rogaba",
+    "reason": "Errata de vocal en la forma verbal."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 19,
+    "find": "todo vicho viviente",
+    "replace": "todo bicho viviente",
+    "reason": "Errata de b/v."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 20,
+    "find": "delante de si una",
+    "replace": "delante de sí una",
+    "reason": "Tilde del pronombre reflexivo."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 22,
+    "find": "un pequeno arbusto",
+    "replace": "un pequeño arbusto",
+    "reason": "Errata: falta de ñ."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 25,
+    "find": "¡Que bestia",
+    "replace": "¡Qué bestia",
+    "reason": "Tilde del exclamativo."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 31,
+    "find": "reflexiones para si.",
+    "replace": "reflexiones para sí.",
+    "reason": "Tilde del pronombre reflexivo."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 31,
+    "find": "oculto debajo debajo de",
+    "replace": "oculto debajo de",
+    "reason": "Repetición accidental de palabra."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 31,
+    "find": "maldita laica",
+    "replace": "maldita loica",
+    "reason": "Errata en el nombre del ave que persiguen."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 31,
+    "find": "como confesar su torpeza",
+    "replace": "cómo confesar su torpeza",
+    "reason": "Interrogativa indirecta deliberativa."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 34,
+    "find": "¿Y por donde salía",
+    "replace": "¿Y por dónde salía",
+    "reason": "Tilde del interrogativo."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 34,
+    "find": "en el canon del arma",
+    "replace": "en el cañón del arma",
+    "reason": "Errata: cañón del arma."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 34,
+    "find": "Carmela, que no resollaba",
+    "replace": "Cañuela, que no resollaba",
+    "reason": "Errata en el nombre del primo que obedece a Petaca."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 36,
+    "find": "recordando como las flechas",
+    "replace": "recordando cómo las flechas",
+    "reason": "Tilde en interrogativa indirecta."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 36,
+    "find": "ver de que parte",
+    "replace": "ver de qué parte",
+    "reason": "Tilde en interrogativa indirecta."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 36,
+    "find": "Canada, que acababa",
+    "replace": "Cañuela, que acababa",
+    "reason": "Errata en el nombre del primo que carga el fusil."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 36,
+    "find": "en el canon,",
+    "replace": "en el cañón,",
+    "reason": "Errata: cañón del arma."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 38,
+    "find": "boca del canon,",
+    "replace": "boca del cañón,",
+    "reason": "Errata: cañón del arma."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 38,
+    "find": "caja de fosfatos",
+    "replace": "caja de fósforos",
+    "reason": "Errata en el objeto utilizado para encender la pira."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 10,
+    "find": "luz del medio día",
+    "replace": "luz del mediodía",
+    "reason": "Mediodía designa la hora central del día, no una duración de medio día."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 65,
+    "find": "hora del medio día",
+    "replace": "hora del mediodía",
+    "reason": "Mediodía designa la hora central del día."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 60,
+    "find": "al medio día",
+    "replace": "al mediodía",
+    "reason": "Mediodía designa la hora central del día."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 90,
+    "find": "me burle de los viejos",
+    "replace": "me burlé de los viejos",
+    "reason": "Tilde del pretérito en la evocación del pasado."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 97,
+    "find": "se supo como salvó",
+    "replace": "se supo cómo salvó",
+    "reason": "Tilde en interrogativa indirecta."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 28,
+    "find": "sin hallar que responder",
+    "replace": "sin hallar qué responder",
+    "reason": "Tilde en interrogativa indirecta."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 15,
+    "find": "vi como brillaron",
+    "replace": "vi cómo brillaron",
+    "reason": "Tilde en interrogativa indirecta."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 15,
+    "find": "listo el bracero",
+    "replace": "listo el brasero",
+    "reason": "Recipiente para el fuego, no trabajador bracero."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 21,
+    "find": "un gran bracero de carbón",
+    "replace": "un gran brasero de carbón",
+    "reason": "Recipiente para el fuego, no trabajador bracero."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 14,
+    "find": "¿Con que ya les tapamos",
+    "replace": "¿Conque ya les tapamos",
+    "reason": "Conjunción conque de consecuencia o sorpresa."
+  },
+  {
+    "story": "era-el-solo",
+    "paragraph": 8,
+    "find": "¡Ah, con que tenías pena!",
+    "replace": "¡Ah, conque tenías pena!",
+    "reason": "Conjunción conque de sorpresa o confirmación."
+  },
+  {
+    "story": "era-el-solo",
+    "paragraph": 25,
+    "find": "Con que ya sabes:",
+    "replace": "Conque ya sabes:",
+    "reason": "Conjunción consecutiva conque."
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 7,
+    "find": "los canteras abandonaron",
+    "replace": "los canteros abandonaron",
+    "reason": "Errata de lectura: los trabajadores que se habían refugiado."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 87,
+    "find": "¡A pagaste la sed?",
+    "replace": "¡Apagaste la sed?",
+    "reason": "Palabra partida por espacio; se conserva la puntuación de la fuente."
+  },
+  {
+    "story": "los-invalidos",
+    "paragraph": 15,
+    "find": "a travez de",
+    "replace": "a través de",
+    "reason": "Ortografía de la locución a través de."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 69,
+    "find": "plañider clamor",
+    "replace": "plañidero clamor",
+    "reason": "Adjetivo plañidero: pérdida de la vocal final."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 4,
+    "find": "el wiskey había",
+    "replace": "el whiskey había",
+    "reason": "Errata en la palabra inglesa: falta la h."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 4,
+    "find": "un jentleman que",
+    "replace": "un gentleman que",
+    "reason": "Ortografía del extranjerismo inglés."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 146,
+    "find": "denes, el barretero Tomas, un mocetón alto y ",
+    "replace": "denes, el barretero Tomás, un mocetón alto y ",
+    "reason": "Tilde del nombre propio del barretero."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 152,
+    "find": " resonó un crujido. Tomas que era el primero ",
+    "replace": " resonó un crujido. Tomás que era el primero ",
+    "reason": "Tilde del nombre propio del barretero."
+  },
+  {
+    "story": "la-compuerta-numero-12",
+    "paragraph": 14,
+    "find": "o cajones que es el mínimun diario que se exige",
+    "replace": "o cajones que es el mínimum diario que se exige",
+    "reason": "Errata final n por m en la forma latina mínimum; se conserva el término."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 27,
+    "find": "gonetas superior al mínimun reglamentario. Aque",
+    "replace": "gonetas superior al mínimum reglamentario. Aque",
+    "reason": "Errata final n por m en la forma latina mínimum; se conserva el término."
+  },
+  {
+    "story": "el-chiflon-del-diablo",
+    "paragraph": 67,
+    "find": "erda del arco en su máximun de tensión.",
+    "replace": "erda del arco en su máximum de tensión.",
+    "reason": "Errata final n por m en la forma latina máximum; se conserva el término."
+  },
+  {
+    "story": "el-pozo",
+    "paragraph": 46,
+    "find": "madre, la aguardaba talvez una paliza, penetró",
+    "replace": "madre, la aguardaba tal vez una paliza, penetró",
+    "reason": "Ortografía actual de la locución tal vez."
+  },
+  {
+    "story": "juan-farina",
+    "paragraph": 34,
+    "find": "traordinario de que talvez iban a ser en breve",
+    "replace": "traordinario de que tal vez iban a ser en breve",
+    "reason": "Ortografía actual de la locución tal vez."
+  },
+  {
+    "story": "la-barrena",
+    "paragraph": 15,
+    "find": "chas horas y serían talvez las tres de la tard",
+    "replace": "chas horas y serían tal vez las tres de la tard",
+    "reason": "Ortografía actual de la locución tal vez."
+  },
+  {
+    "story": "el-grisu",
+    "paragraph": 151,
+    "find": "comprender que es imposible conservara",
+    "replace": "comprender que era imposible conservara",
+    "reason": "El impreso dice era; se conserva conservara porque también figura así en el impreso.",
+    "source": "https://es.wikisource.org/wiki/P%C3%A1gina:Sub_Terra.pdf/81"
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 7,
+    "find": "emprendime en seguida",
+    "replace": "emprendiendo en seguida",
+    "reason": "Lectura emprendiendo comprobada visualmente en el impreso, página 105.",
+    "source": "https://es.wikisource.org/wiki/P%C3%A1gina:Sub_Sole.pdf/93"
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 36,
+    "find": "pólvora estuviera altura",
+    "replace": "pólvora estuviera chueca",
+    "reason": "El impreso dice chueca, en cursiva; no altura. Se conserva la voz original.",
+    "source": "https://es.wikisource.org/wiki/P%C3%A1gina:Sub_Sole.pdf/103"
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 38,
+    "find": "le sentó entonces la boca del cañón",
+    "replace": "le señaló entonces la boca del cañón",
+    "reason": "Lectura señaló comprobada visualmente en el impreso, página 115.",
+    "source": "https://es.wikisource.org/wiki/P%C3%A1gina:Sub_Sole.pdf/103"
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 38,
+    "find": "silbidos sumaron el aire",
+    "replace": "silbidos surcaron el aire",
+    "reason": "Lectura surcaron comprobada visualmente en el impreso, página 117.",
+    "source": "https://es.wikisource.org/wiki/P%C3%A1gina:Sub_Sole.pdf/105"
+  },
+  {
+    "story": "canuela-y-petaca",
+    "paragraph": 38,
+    "find": "se fabricada un trabuco",
+    "replace": "se fabricaría un trabuco",
+    "reason": "El impreso dice fabricaria; se restituye su lectura y la tilde actual.",
+    "source": "https://es.wikisource.org/wiki/P%C3%A1gina:Sub_Sole.pdf/105"
+  }
+]

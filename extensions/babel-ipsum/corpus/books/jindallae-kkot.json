@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "book": {
+    "id": "jindallae-kkot",
+    "title": "진달래꽃",
+    "author": "김소월 (김정식)",
+    "language": "Korean",
+    "locale": "ko",
+    "direction": "ltr",
+    "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)",
+    "edition": "Explicit 원문 (original) columns in Korean Wikisource's collection labelled 매문사, 26 December 1925. Historical spelling transcription; not independently collated to a verified 1925 scan.",
+    "scope": "Eleven complete poems with explicit historical columns, at contents positions 1, 4, 11, 14, 16, 31, 95, 104, 108, 110, 124. The other 115 of the retained 126 contents entries are omitted because their historical text is not established; this is not the complete collection.",
+    "license": "The original text published in 1925 is public domain in the US from 1 January 2021, even under a full 95-year publication term (17 USC 304–305): https://www.copyright.gov/title17/92chap3.html. Kim Sowŏl died in 1934; the original is beyond South Korea's ordinary life-plus-70 economic term. Wikisource contributions: CC BY-SA 4.0, https://creativecommons.org/licenses/by-sa/4.0/. This does not clear unidentified modern adaptations or establish worldwide clearance.",
+    "attribution": "김소월; Korean Wikisource contributors. Each selected original column records its page, revision and exact HTML snapshot; both columns remain in source snapshots for audit only.",
+    "editorialNote": "Only explicitly labelled 원문 columns are imported, once per poem; 현대어 columns and single unlabelled transcriptions are excluded. Historical spelling, Hanja, archaic Hangul jamo, punctuation, verse lines and stanza boundaries retained; titles and page furniture excluded. Source-supplied bracketed Hanja readings are retained as contributor transcription, not independently verified author text. HTML entities decoded, layout whitespace trimmed, NFC applied without spelling conversion. The contents page links a scan indexed as 숭문사 1951, not the 1925 first edition; that scan is not used as proof of 1925 fidelity. No OCR or invented textual repairs. Full 126-poem historical coverage remains blocked on a verified early source.",
+    "sentenceSeparator": " "
+  },
+  "retrievedOn": "2026-10-22",
+  "sections": [
+    {
+      "id": "poem-001",
+      "title": "먼 후일",
+      "position": 1,
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/먼_후일",
+      "revisionUrl": "https://ko.wikisource.org/w/index.php?oldid=430584",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/001.html",
+      "snapshotSha256": "702d920e6f37d0bf9d1ce2dca270f5ea8bfd40b3869b9b9ec336aba3e85012d0",
+      "passages": [
+        {
+          "position": 1,
+          "text": "먼훗날 당신이 차즈시면\n그ᄯᅢ에 내말이 「니젓노라」\n\n당신이 속으로나무리면\n「뭇쳑그리다가 니젓노라」\n\n그래도 당신이 나무리면\n「밋기지안어서 니젓노라」\n\n오늘도어제도 아니닛고\n먼훗날 그ᄯᅢ에 「니젓노라」",
+          "kind": "verse"
+        }
+      ]
+    },
+    {
+      "id": "poem-004",
+      "title": "산 위에",
+      "position": 4,
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/산_위에",
+      "revisionUrl": "https://ko.wikisource.org/w/index.php?oldid=430970",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/004.html",
+      "snapshotSha256": "117462dc8d23650762438d27057a675709eff41e5d6df55236f029c262b1b471",
+      "passages": [
+        {
+          "position": 1,
+          "text": "山[산]우헤올나섯서 바라다보면\n가루막킨바다를 마주건너서\n님게시는 마을이 내눈압프로\nᄭᅮᆷ하눌 하눌가치 ᄯᅥ오릅니다\n\n흰모래 모래빗긴船倉[선창]ᄭᅡ에는\n한가한배노래가 멀니자즈며\n날점을고 안개는 깁피덥펴서\n흐터지는물ᄭᅩᆺᄲᅮᆫ 안득입니다\n\n이윽고 밤어둡는물새가 울면\n물ᄭᅧᆯ조차 하나둘 배는ᄯᅥ나서\n저멀니 한바다로 아주바다로\n마치 가랑닙가치 ᄯᅥ나갑니다\n\n나는 혼자山[산]에서 밤을새우고\n아츰해붉은볏헤 몸을씻츠며\n귀기울고 솔곳이 엿듯노라면\n님게신窓[창]아래로 가는물노래\n\n흔들어ᄭᅢ우치는 물노래에는\n내님이놀나 니러차즈신대도\n내몸은 山[산]우헤서 그山[산]우헤서\n고히깁피 잠드러 다 모릅니다.",
+          "kind": "verse"
+        }
+      ]
+    },
+    {
+      "id": "poem-011",
+      "title": "봄 밤",
+      "position": 11,
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/봄_밤",
+      "revisionUrl": "https://ko.wikisource.org/w/index.php?oldid=430586",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/011.html",
+      "snapshotSha256": "6de75dba8435bb3be495778f4786c2b98f97f0f320d4bc673d395f008c781212",
+      "passages": [
+        {
+          "position": 1,
+          "text": "실버드나무의 검으스렷한머리결인 낡은가지에\n제비의 넓은깃나래의 紺色치마에\n술집의窓녑페、보아라、봄이 안잣지안는가。\n\n소리도업시 바람은불며、울며、한숨지워라\n아무런줄도업시 설고 그립은색캄한 봄밤\n보드랍은 濕氣는 ᄯᅥ돌며 ᄯᅡᆼ을덥펴라。",
+          "kind": "verse"
+        }
+      ]
+    },
+    {
+      "id": "poem-014",
+      "title": "꿈으로 오는 한 사람",
+      "position": 14,
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/꿈으로_오는_한_사람",
+      "revisionUrl": "https://ko.wikisource.org/w/index.php?oldid=430971",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/014.html",
+      "snapshotSha256": "9cc0e73ae1132cdf58eac05622d6053c683ee7c2cb3b7fac287c9939e4dfa545",
+      "passages": [
+        {
+          "position": 1,
+          "text": "나히차라지면서 가지게되엿노라\n숨어잇든한사람이, 언제나 나의,\n다시깁픈 잠속의ᄭᅮᆷ으로 와라\n붉으렷한 얼골에 가늣한손가락의,\n모르는듯한 擧動[거동]도 前[전]날의모양대로\n그는 야저시 나의팔우헤 누어라\n그러나, 그래도 그러나!\n말할 아무것이 다시업는가!\n그냥 먹먹할ᄲᅮᆫ, 그대로\n그는 니러라. 닭의 홰치는소래.\nᄭᅢ여서도 늘, 길ᄭᅥ리엣사람을\n밝은대낫에 빗보고는 하노라",
+          "kind": "verse"
+        }
+      ]
+    },
+    {
+      "id": "poem-016",
+      "title": "자주 구름",
+      "position": 16,
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/자주_구름",
+      "revisionUrl": "https://ko.wikisource.org/w/index.php?oldid=430972",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/016.html",
+      "snapshotSha256": "07cf3c8d096c028f8b706c9379f55ed5c81c0f9764dc2eda9cf8b68f64670353",
+      "passages": [
+        {
+          "position": 1,
+          "text": "물고흔 紫朱구름,\n하눌은 개여오네.\n밤즁에 몰내 온눈\n솔숩페 ᄭᅩᆺ픠엿네.\n\n아츰볏 빗나는데\n알알이 ᄯᅱ노는눈\n\n밤새에 지난일을……\n다닛고 바라보네.\n\n움직어리는 紫朱구름.",
+          "kind": "verse"
+        }
+      ]
+    },
+    {
+      "id": "poem-031",
+      "title": "담배",
+      "position": 31,
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/담배",
+      "revisionUrl": "https://ko.wikisource.org/w/index.php?oldid=430974",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/031.html",
+      "snapshotSha256": "b51aac0ed0b8ad8b098aa5423bc2e4b400772c6b895b1183090535912cdf7db2",
+      "passages": [
+        {
+          "position": 1,
+          "text": "나의 긴한숨을 동무하는\n못닛게 생각나는 나의담배!\n來歷[내력]을 니저바린 옛時節[시절]에\n낫다가 새업시 몸이가신\n아씨님무덤우의 풀이라고\n말하는사람도 보앗서라.\n어물어물눈압페 스러지는검은煙氣[연기],\n다만 타붓고 업서지는불ᄭᅩᆺ.\n아 나의괴롭은 이맘이어.\n나의하욤업시 쓸쓸한만흔날은\n너와한가지로 지나가라.",
+          "kind": "verse"
+        }
+      ]
+    },
+    {
+      "id": "poem-095",
+      "title": "여수",
+      "position": 95,
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/여수",
+      "revisionUrl": "https://ko.wikisource.org/w/index.php?oldid=430587",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/095.html",
+      "snapshotSha256": "9a54c9cba987bc251ff88febbebbeda0a7ddecea9f5bb08413c6765fbf723ad8",
+      "passages": [
+        {
+          "position": 1,
+          "text": "一\n\n六月어스름ᄯᅢ의 빗줄기는\n暗黃色의屍骨을 묵거세운 듯,\nᄯᅳ며흐르며 잠기는손의 널ᄷᅳᆨ은\n支向도 업서라, 丹靑의紅門!\n\n二\n\n저 오늘도 그립은바다,\n건너다보자니 눈물겨워라!\n조고마한보드랍은 그옛적心情의\n분결갓든 그대의손의\n사시나무보다도 더한압픔이\n내몸을에워싸고 휘ᄯᅥᆯ며ᄶᅵᆯ너라,\n나서자란故鄕의 해돗는바다요.",
+          "kind": "verse"
+        }
+      ]
+    },
+    {
+      "id": "poem-104",
+      "title": "진달래꽃",
+      "position": 104,
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/진달래꽃",
+      "revisionUrl": "https://ko.wikisource.org/w/index.php?oldid=430575",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/104.html",
+      "snapshotSha256": "299f0300bb5b0c2936e3734f54bc6a19c1ffe99e0e3e78efd8a513cc4936a42e",
+      "passages": [
+        {
+          "position": 1,
+          "text": "나보기가 역겨워\n가실ᄯᅢ에는\n말업시 고히 보내드리우리다\n\n寧邊에藥山\n진달내ᄭᅩᆺ\n아름ᄯᅡ다 가실길에 ᄲᅮ리우리다\n\n가시는거름거름\n노힌그ᄭᅩᆺ츨\n삽분히즈려밟고 가시옵소서\n\n나보기가 역겨워\n가실ᄯᅢ에는\n죽어도아니 눈물흘니우리다",
+          "kind": "verse"
+        }
+      ]
+    },
+    {
+      "id": "poem-108",
+      "title": "접동새",
+      "position": 108,
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/접동새",
+      "revisionUrl": "https://ko.wikisource.org/w/index.php?oldid=430975",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/108.html",
+      "snapshotSha256": "9e58eae99de867818e57e93da3144e309be4db6e8e92178e4055720a571211ba",
+      "passages": [
+        {
+          "position": 1,
+          "text": "접동\n접동\n아우래비접동\n\n津頭江[진두강]가람ᄭᅡ에 살든누나는\n津頭江[진두강]압마을에\n와서웁니다\n\n옛날, 우리나라\n먼뒤ᄶᅩᆨ의\n津頭江[진두강]가람ᄭᅡ에 살든누나는\n이붓어미싀샘에 죽엇습니다\n\n누나라고 불너보랴\n오오 불설워\n싀새움에 몸이죽은 우리누나는\n죽어서 접동새가 되엿습니다\n\n아웁이나 납아되든 오랩동생을\n죽어서도 못니저 참아못니저\n夜三更[야삼경] 남다자는 밤이깁프면\n이山[산] 저山[산] 올마가며 슬피웁니다",
+          "kind": "verse"
+        }
+      ]
+    },
+    {
+      "id": "poem-110",
+      "title": "산유화",
+      "position": 110,
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/산유화",
+      "revisionUrl": "https://ko.wikisource.org/w/index.php?oldid=430577",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/110.html",
+      "snapshotSha256": "555f4677202352fca65df360d8a9d0ed54591b92324aa542949fddac5333edc3",
+      "passages": [
+        {
+          "position": 1,
+          "text": "山에는 ᄭᅩᆺ픠네\nᄭᅩᆺ치픠네\n갈 봄 녀름업시\nᄭᅩᆺ치픠네\n\n山에\n山에\n픠는ᄭᅩᆺ츤\n저만치 혼자서 픠여잇네\n\n山에서우는 적은새요\nᄭᅩᆺ치죠와\n山에서\n사노라네\n\n山에는 ᄭᅩᆺ지네\nᄭᅩᆺ치지네\n갈 봄 녀름업시\nᄭᅩᆺ치지네",
+          "kind": "verse"
+        }
+      ]
+    },
+    {
+      "id": "poem-124",
+      "title": "달맞이",
+      "position": 124,
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/달맞이",
+      "revisionUrl": "https://ko.wikisource.org/w/index.php?oldid=430599",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/124.html",
+      "snapshotSha256": "ae765e7c2d978bb3caff0f18396fb8f2cea591b6137fa71ef69876a19625553a",
+      "passages": [
+        {
+          "position": 1,
+          "text": "正月대보름날 달마지,\n달마지 달마즁을, 가쟈고!\n새라새옷은 가라닙고도\n가슴엔 묵은설음 그대로,\n달마지 달마즁을, 가쟈고!\n달마즁가쟈고 니웃집들!\n山우헤水面에 달소슬ᄯᅢ,\n도라들가쟈고, 니웃집들!\n모작별삼셩이 ᄯᅥ러질ᄯᅢ.\n달마지 달마즁을 가쟈고!\n다니든옛동무 무덤ᄭᅡ에\n正月대보름날 달마지!",
+          "kind": "verse"
+        }
+      ]
+    }
+  ]
+}

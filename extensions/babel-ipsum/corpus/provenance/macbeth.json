@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "encoding": "UTF-8; snapshots retain exact response bytes",
+  "sources": {
+    "act-1.html": {
+      "sourceUrl": "https://en.wikisource.org/wiki/Macbeth_(1918)_Yale/Text/Act_I",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "d91a72a0da1c9605903ecfb5218bbc0cda83cafb923f02c3ca3e9b3c906ad426"
+    },
+    "act-2.html": {
+      "sourceUrl": "https://en.wikisource.org/wiki/Macbeth_(1918)_Yale/Text/Act_II",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "992acbb29ee5a01de89c00490df55a24458f6260672e30b3c9680cfbf484e28b"
+    },
+    "act-3.html": {
+      "sourceUrl": "https://en.wikisource.org/wiki/Macbeth_(1918)_Yale/Text/Act_III",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "6e1b138fc648c2b4c2c48594d3412849e9fcd2699633d924936c0f8a8194cc01"
+    },
+    "act-4.html": {
+      "sourceUrl": "https://en.wikisource.org/wiki/Macbeth_(1918)_Yale/Text/Act_IV",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "e5b7411facc65e9aa3a7c579c8cf30effc0bdfd18b430f87c3febb9260f54bac"
+    },
+    "act-5.html": {
+      "sourceUrl": "https://en.wikisource.org/wiki/Macbeth_(1918)_Yale/Text/Act_V",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "6ba97d4b14b84cf8ec00e3d18afd908eed3151083065dc6a1c5c8f8140e017da"
+    }
+  }
+}

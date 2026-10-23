@@ -1,0 +1,3311 @@
+{
+  "schemaVersion": 1,
+  "book": {
+    "id": "macbeth",
+    "title": "Macbeth",
+    "author": "William Shakespeare",
+    "language": "English",
+    "locale": "en",
+    "direction": "ltr",
+    "sourceUrl": "https://en.wikisource.org/wiki/Macbeth_(1918)_Yale",
+    "edition": "The Yale Shakespeare: Macbeth, edited by Charlton M. Lewis, Yale University Press, 1918",
+    "scope": "Dramatic dialogue from all five acts, excluding editorial apparatus and stage directions.",
+    "license": "Public-domain original text; Wikisource transcription contributions reused under Creative Commons Attribution-ShareAlike 4.0, as linked by each retained source-page footer (https://creativecommons.org/licenses/by-sa/4.0/). Additional terms may apply as stated in the source notices.",
+    "attribution": "William Shakespeare, Macbeth. The Yale Shakespeare: Macbeth, edited by Charlton M. Lewis, Yale University Press, 1918. Source: Wikisource and its contributors; revision and snapshot provenance recorded per section.",
+    "editorialNote": "Speaker labels, stage directions, line/page numbers, gloss metadata and footnotes omitted. Verse line breaks retained; prose layout wrapping flattened in the letter, porter exchanges, the latter mother/son dialogue in IV.ii and V.i. Reviewed printed word splits are rejoined; the compound devil-porter retains its hyphen.",
+    "sentenceSeparator": " "
+  },
+  "retrievedOn": "2026-10-22",
+  "sections": [
+    {
+      "id": "act-1",
+      "title": "Act I",
+      "position": 1,
+      "sourceUrl": "https://en.wikisource.org/wiki/Macbeth_(1918)_Yale/Text/Act_I",
+      "revisionUrl": "https://en.wikisource.org/w/index.php?oldid=11177207",
+      "snapshotPath": ".cache/corpus/sources/macbeth/act-1.html",
+      "snapshotSha256": "d91a72a0da1c9605903ecfb5218bbc0cda83cafb923f02c3ca3e9b3c906ad426",
+      "passages": [
+        {
+          "position": 1,
+          "text": "When shall we three meet again\nIn thunder, lightning, or in rain?",
+          "kind": "speech"
+        },
+        {
+          "position": 2,
+          "text": "When the hurlyburly's done,\nWhen the battle's lost and won.",
+          "kind": "speech"
+        },
+        {
+          "position": 3,
+          "text": "That will be ere the set of sun.",
+          "kind": "speech"
+        },
+        {
+          "position": 4,
+          "text": "Where the place?",
+          "kind": "speech"
+        },
+        {
+          "position": 5,
+          "text": "Upon the heath.",
+          "kind": "speech"
+        },
+        {
+          "position": 6,
+          "text": "There to meet with Macbeth.",
+          "kind": "speech"
+        },
+        {
+          "position": 7,
+          "text": "I come, Graymalkin!",
+          "kind": "speech"
+        },
+        {
+          "position": 8,
+          "text": "Paddock calls.",
+          "kind": "speech"
+        },
+        {
+          "position": 9,
+          "text": "Anon!",
+          "kind": "speech"
+        },
+        {
+          "position": 10,
+          "text": "Fair is foul, and foul is fair:\nHover through the fog and filthy air.",
+          "kind": "speech"
+        },
+        {
+          "position": 11,
+          "text": "What bloody man is that? He can report,\nAs seemeth by his plight, of the revolt\nThe newest state.",
+          "kind": "speech"
+        },
+        {
+          "position": 12,
+          "text": "This is the sergeant\nWho like a good and hardy soldier fought\n'Gainst my captivity. Hail, brave friend!\nSay to the king the knowledge of the broil\nAs thou didst leave it.",
+          "kind": "speech"
+        },
+        {
+          "position": 13,
+          "text": "Doubtful it stood;\nAs two spent swimmers, that do cling together\nAnd choke their art. The merciless Macdonwald—\nWorthy to be a rebel, for to that\nThe multiplying villainies of nature\nDo swarm upon him—from the western isles\nOf kerns and gallowglasses is supplied;\nAnd fortune, on his damned quarrel smiling,\nShow'd like a rebel's whore: but all's too weak;\nFor brave Macbeth,—well he deserves that name,—\nDisdaining fortune, with his brandish'd steel,\nWhich smok'd with bloody execution,\nLike valour's minion carv'd out his passage\nTill he fac'd the slave;\nWhich ne'er shook hands, nor bade farewell to him,\nTill he unseam'd him from the nave to the chops,\nAnd fix'd his head upon our battlements.",
+          "kind": "speech"
+        },
+        {
+          "position": 14,
+          "text": "O valiant cousin! worthy gentleman!",
+          "kind": "speech"
+        },
+        {
+          "position": 15,
+          "text": "As whence the sun 'gins his reflection\nShipwracking storms and direful thunders break,\nSo from that spring whence comfort seem'd to come\nDiscomfort swells. Mark, King of Scotland, mark:\nNo sooner justice had with valour arm'd\nCompell'd these skipping kerns to trust their heels,\nBut the Norweyan lord, surveying vantage,\nWith furbish'd arms and new supplies of men\nBegan a fresh assault.",
+          "kind": "speech"
+        },
+        {
+          "position": 16,
+          "text": "Dismay'd not this\nOur captains, Macbeth and Banquo?",
+          "kind": "speech"
+        },
+        {
+          "position": 17,
+          "text": "Yes;\nAs sparrows eagles, or the hare the lion.\nIf I say sooth, I must report they were\nAs cannons overcharg'd with double cracks; so they\nDoubly redoubled strokes upon the foe:\nExcept they meant to bathe in reeking wounds,\nOr memorize another Golgotha,\nI cannot tell—\nBut I am faint, my gashes cry for help.",
+          "kind": "speech"
+        },
+        {
+          "position": 18,
+          "text": "So well thy words become thee as thy wounds;\nThey smack of honour both. Go, get him surgeons.",
+          "kind": "speech"
+        },
+        {
+          "position": 19,
+          "text": "The worthy Thane of Ross.",
+          "kind": "speech"
+        },
+        {
+          "position": 20,
+          "text": "What a haste looks through his eyes! So should he look\nThat seems to speak things strange.",
+          "kind": "speech"
+        },
+        {
+          "position": 21,
+          "text": "God save the king!",
+          "kind": "speech"
+        },
+        {
+          "position": 22,
+          "text": "Whence cam'st thou, worthy thane?",
+          "kind": "speech"
+        },
+        {
+          "position": 23,
+          "text": "From Fife, great king;\nWhere the Norweyan banners flout the sky\nAnd fan our people cold. Norway himself,\nWith terrible numbers,\nAssisted by that most disloyal traitor,\nThe Thane of Cawdor, began a dismal conflict;\nTill that Bellona's bridegroom, lapp'd in proof,\nConfronted him with self-comparisons,\nPoint against point, rebellious arm 'gainst arm,\nCurbing his lavish spirit: and, to conclude,\nThe victory fell on us.—",
+          "kind": "speech"
+        },
+        {
+          "position": 24,
+          "text": "Great happiness!",
+          "kind": "speech"
+        },
+        {
+          "position": 25,
+          "text": "That now\nSweno, the Norways' king, craves composition;\nNor would we deign him burial of his men\nTill he disbursed, at Saint Colme's Inch,\nTen thousand dollars to our general use.",
+          "kind": "speech"
+        },
+        {
+          "position": 26,
+          "text": "No more that Thane of Cawdor shall deceive\nOur bosom interest. Go pronounce his present death,\nAnd with his former title greet Macbeth.",
+          "kind": "speech"
+        },
+        {
+          "position": 27,
+          "text": "I'll see it done.",
+          "kind": "speech"
+        },
+        {
+          "position": 28,
+          "text": "What he hath lost noble Macbeth hath won.",
+          "kind": "speech"
+        },
+        {
+          "position": 29,
+          "text": "Where hast thou been, sister?",
+          "kind": "speech"
+        },
+        {
+          "position": 30,
+          "text": "Killing swine.",
+          "kind": "speech"
+        },
+        {
+          "position": 31,
+          "text": "Sister, where thou?",
+          "kind": "speech"
+        },
+        {
+          "position": 32,
+          "text": "A sailor's wife had chestnuts in her lap,\nAnd munch'd, and munch'd, and munch'd: 'Give me,' quoth I:\n'Aroint thee, witch!' the rump-fed ronyon cries.\nHer husband's to Aleppo gone, master o' the Tiger:\nBut in a sieve I'll thither sail,\nAnd, like a rat without a tail,\nI'll do, I'll do, and I'll do.",
+          "kind": "speech"
+        },
+        {
+          "position": 33,
+          "text": "I'll give thee a wind.",
+          "kind": "speech"
+        },
+        {
+          "position": 34,
+          "text": "Thou'rt kind.",
+          "kind": "speech"
+        },
+        {
+          "position": 35,
+          "text": "And I another.",
+          "kind": "speech"
+        },
+        {
+          "position": 36,
+          "text": "I myself have all the other;\nAnd the very ports they blow,\nAll the quarters that they know\nI' the shipman's card.\nI'll drain him dry as hay:\nSleep shall neither night nor day\nHang upon his pent-house lid;\nHe shall live a man forbid.\nWeary sev'nnights nine times nine\nShall he dwindle, peak and pine:\nThough his bark cannot be lost,\nYet it shall be tempest-tost.\nLook what I have.",
+          "kind": "speech"
+        },
+        {
+          "position": 37,
+          "text": "Show me, show me.",
+          "kind": "speech"
+        },
+        {
+          "position": 38,
+          "text": "Here I have a pilot's thumb,\nWrack'd as homeward he did come.",
+          "kind": "speech"
+        },
+        {
+          "position": 39,
+          "text": "A drum! a drum!\nMacbeth doth come.",
+          "kind": "speech"
+        },
+        {
+          "position": 40,
+          "text": "The weird sisters, hand in hand,\nPosters of the sea and land,\nThus do go about, about:\nThrice to thine, and thrice to mine,\nAnd thrice again, to make up nine.\nPeace! the charm's wound up.",
+          "kind": "speech"
+        },
+        {
+          "position": 41,
+          "text": "So foul and fair a day I have not seen.",
+          "kind": "speech"
+        },
+        {
+          "position": 42,
+          "text": "How far is 't call'd to Forres? What are these,\nSo wither'd and so wild in their attire,\nThat look not like th' inhabitants o' the earth,\nAnd yet are on 't? Live you? or are you aught\nThat man may question? You seem to understand me,\nBy each at once her choppy finger laying\nUpon her skinny lips: you should be women,\nAnd yet your beards, forbid me to interpret\nThat you are so.",
+          "kind": "speech"
+        },
+        {
+          "position": 43,
+          "text": "Speak, if you can: what are you?",
+          "kind": "speech"
+        },
+        {
+          "position": 44,
+          "text": "All hail, Macbeth! hail to thee, Thane of Glamis!",
+          "kind": "speech"
+        },
+        {
+          "position": 45,
+          "text": "All hail, Macbeth! hail to thee, Thane of Cawdor!",
+          "kind": "speech"
+        },
+        {
+          "position": 46,
+          "text": "All hail, Macbeth! that shalt be king hereafter.",
+          "kind": "speech"
+        },
+        {
+          "position": 47,
+          "text": "Good sir, why do you start, and seem to fear\nThings that do sound so fair? I' the name of truth,\nAre ye fantastical, or that indeed\nWhich outwardly ye show? My noble partner\nYou greet with present grace and great prediction\nOf noble having and of royal hope,\nThat he seems rapt withal: to me you speak not.\nIf you can look into the seeds of time,\nAnd say which grain will grow and which will not,\nSpeak then to me, who neither beg nor fear\nYour favours nor your hate.",
+          "kind": "speech"
+        },
+        {
+          "position": 48,
+          "text": "Hail!",
+          "kind": "speech"
+        },
+        {
+          "position": 49,
+          "text": "Hail!",
+          "kind": "speech"
+        },
+        {
+          "position": 50,
+          "text": "Hail!",
+          "kind": "speech"
+        },
+        {
+          "position": 51,
+          "text": "Lesser than Macbeth, and greater.",
+          "kind": "speech"
+        },
+        {
+          "position": 52,
+          "text": "Not so happy, yet much happier.",
+          "kind": "speech"
+        },
+        {
+          "position": 53,
+          "text": "Thou shalt get kings, though thou be none:\nSo, all hail, Macbeth and Banquo!",
+          "kind": "speech"
+        },
+        {
+          "position": 54,
+          "text": "Banquo and Macbeth, all hail!",
+          "kind": "speech"
+        },
+        {
+          "position": 55,
+          "text": "Stay, you imperfect speakers, tell me more:\nBy Sinel's death I know I am Thane of Glamis;\nBut how of Cawdor? the Thane of Cawdor lives,\nA prosperous gentleman; and to be king\nStands not within the prospect of belief\nNo more than to be Cawdor. Say, from whence\nYou owe this strange intelligence? or why\nUpon this blasted heath you stop our way\nWith such prophetic greeting? Speak, I charge you.",
+          "kind": "speech"
+        },
+        {
+          "position": 56,
+          "text": "The earth hath bubbles, as the water has,\nAnd these are of them. Whither are they vanish'd?",
+          "kind": "speech"
+        },
+        {
+          "position": 57,
+          "text": "Into the air, and what seem'd corporal melted\nAs breath into the wind. Would they had stay'd!",
+          "kind": "speech"
+        },
+        {
+          "position": 58,
+          "text": "Were such things here as we do speak about?\nOr have we eaten on the insane root\nThat takes the reason prisoner?",
+          "kind": "speech"
+        },
+        {
+          "position": 59,
+          "text": "Your children shall be kings.",
+          "kind": "speech"
+        },
+        {
+          "position": 60,
+          "text": "You shall be king.",
+          "kind": "speech"
+        },
+        {
+          "position": 61,
+          "text": "And Thane of Cawdor too; went it not so?",
+          "kind": "speech"
+        },
+        {
+          "position": 62,
+          "text": "To the self-same tune and words. Who's here?",
+          "kind": "speech"
+        },
+        {
+          "position": 63,
+          "text": "The king hath happily receiv'd, Macbeth,\nThe news of thy success; and when he reads\nThy personal venture in the rebels' fight,\nHis wonders and his praises do contend\nWhich should be thine, or his. Silenc'd with that,\nIn viewing o'er the rest o' the self-same day,\nHe finds thee in the stout Norweyan ranks,\nNothing afeard of what thyself didst make\nStrange images of death. As thick as tale\nCame post with post, and every one did bear\nThy praises in his kingdom's great defence,\nAnd pour'd them down before him.",
+          "kind": "speech"
+        },
+        {
+          "position": 64,
+          "text": "We are sent\nTo give thee from our royal master thanks;\nOnly to herald thee into his sight,\nNot pay thee.",
+          "kind": "speech"
+        },
+        {
+          "position": 65,
+          "text": "And, for an earnest of a greater honour,\nHe bade me, from him, call thee Thane of Cawdor:\nIn which addition, hail, most worthy thane!\nFor it is thine.",
+          "kind": "speech"
+        },
+        {
+          "position": 66,
+          "text": "What! can the devil speak true?",
+          "kind": "speech"
+        },
+        {
+          "position": 67,
+          "text": "The Thane of Cawdor lives: why do you dress me\nIn borrow'd robes?",
+          "kind": "speech"
+        },
+        {
+          "position": 68,
+          "text": "Who was the thane lives yet;\nBut under heavy judgment bears that life\nWhich he deserves to lose. Whether he was combin'd\nWith those of Norway, or did line the rebel\nWith hidden help and vantage, or that with both\nHe labour'd in his country's wrack, I know not;\nBut treasons capital, confess'd and prov'd,\nHave overthrown him.",
+          "kind": "speech"
+        },
+        {
+          "position": 69,
+          "text": "Glamis, and Thane of Cawdor:\nThe greatest is behind.\nThanks for your pains.\nDo you not hope your children shall be kings,\nWhen those that gave the Thane of Cawdor to me\nPromis'd no less to them?",
+          "kind": "speech"
+        },
+        {
+          "position": 70,
+          "text": "That, trusted home,\nMight yet enkindle you unto the crown,\nBesides the Thane of Cawdor. But 'tis strange:\nAnd oftentimes, to win us to our harm,\nThe instruments of darkness tell us truths,\nWin us with honest trifles, to betray's\nIn deepest consequence.\nCousins, a word, I pray you.",
+          "kind": "speech"
+        },
+        {
+          "position": 71,
+          "text": "Two truths are told,\nAs happy prologues to the swelling act\nOf the imperial theme.—I thank you, gentlemen.—\nThis supernatural soliciting\nCannot be ill, cannot be good; if ill,\nWhy hath it given me earnest of success,\nCommencing in a truth? I am Thane of Cawdor.\nIf good, why do I yield to that suggestion\nWhose horrid image doth unfix my hair\nAnd make my seated heart knock at my ribs,\nAgainst the use of nature? Present fears\nAre less than horrible imaginings;\nMy thought, whose murder yet is but fantastical,\nShakes so my single state of man that function\nIs smother'd in surmise, and nothing is\nBut what is not.",
+          "kind": "speech"
+        },
+        {
+          "position": 72,
+          "text": "Look, how our partner's rapt.",
+          "kind": "speech"
+        },
+        {
+          "position": 73,
+          "text": "If chance will have me king, why, chance may crown me,\nWithout my stir.",
+          "kind": "speech"
+        },
+        {
+          "position": 74,
+          "text": "New honours come upon him,\nLike our strange garments, cleave not to their mould\nBut with the aid of use.",
+          "kind": "speech"
+        },
+        {
+          "position": 75,
+          "text": "Come what come may,\nTime and the hour runs through the roughest day.",
+          "kind": "speech"
+        },
+        {
+          "position": 76,
+          "text": "Worthy Macbeth, we stay upon your leisure.",
+          "kind": "speech"
+        },
+        {
+          "position": 77,
+          "text": "Give me your favour: my dull brain was wrought\nWith things forgotten. Kind gentlemen, your pains\nAre register'd where every day I turn\nThe leaf to read them. Let us toward the king.\nThink upon what hath chanc'd; and, at more time,\nThe interim having weigh'd it, let us speak\nOur free hearts each to other.",
+          "kind": "speech"
+        },
+        {
+          "position": 78,
+          "text": "Very gladly.",
+          "kind": "speech"
+        },
+        {
+          "position": 79,
+          "text": "Till then, enough. Come, friends.",
+          "kind": "speech"
+        },
+        {
+          "position": 80,
+          "text": "Is execution done on Cawdor? Are not\nThose in commission yet return'd?",
+          "kind": "speech"
+        },
+        {
+          "position": 81,
+          "text": "My liege,\nThey are not yet come back; but I have spoke\nWith one that saw him die; who did report\nThat very frankly he confess'd his treasons,\nImplor'd your highness' pardon and set forth\nA deep repentance. Nothing in his life\nBecame him like the leaving it; he died\nAs one that had been studied in his death\nTo throw away the dearest thing he ow'd\nAs 'twere a careless trifle.",
+          "kind": "speech"
+        },
+        {
+          "position": 82,
+          "text": "There's no art\nTo find the mind's construction in the face:\nHe was a gentleman on whom I built\nAn absolute trust.",
+          "kind": "speech"
+        },
+        {
+          "position": 83,
+          "text": "The service and the loyalty I owe,\nIn doing it, pays itself. Your highness' part\nIs to receive our duties; and our duties\nAre to your throne and state children and servants,\nWhich do but what they should, by doing everything\nSafe toward your love and honour.",
+          "kind": "speech"
+        },
+        {
+          "position": 84,
+          "text": "Welcome hither:\nI have begun to plant thee, and will labour\nTo make thee full of growing. Noble Banquo,\nThat hast no less deserv'd, nor must be known\nNo less to have done so, let me infold thee\nAnd hold thee to my heart.",
+          "kind": "speech"
+        },
+        {
+          "position": 85,
+          "text": "There if I grow,\nThe harvest is your own.",
+          "kind": "speech"
+        },
+        {
+          "position": 86,
+          "text": "My plenteous joys,\nWanton in fulness, seek to hide themselves\nIn drops of sorrow. Sons, kinsmen, thanes,\nAnd you whose places are the nearest, know\nWe will establish our estate upon\nOur eldest, Malcolm, whom we name hereafter\nThe Prince of Cumberland; which honour must\nNot unaccompanied invest him only,\nBut signs of nobleness, like stars, shall shine\nOn all deservers. From hence to Inverness,\nAnd bind us further to you.",
+          "kind": "speech"
+        },
+        {
+          "position": 87,
+          "text": "The rest is labour, which is not us'd for you:\nI'll be myself the harbinger, and make joyful\nThe hearing of my wife with your approach;\nSo, humbly take my leave.",
+          "kind": "speech"
+        },
+        {
+          "position": 88,
+          "text": "My worthy Cawdor!",
+          "kind": "speech"
+        },
+        {
+          "position": 89,
+          "text": "The Prince of Cumberland! that is a step\nOn which I must fall down, or else o'er-leap,\nFor in my way it lies. Stars, hide your fires!\nLet not light see my black and deep desires;\nThe eye wink at the hand; yet let that be\nWhich the eye fears, when it is done, to see.",
+          "kind": "speech"
+        },
+        {
+          "position": 90,
+          "text": "True, worthy Banquo; he is full so valiant,\nAnd in his commendations I am fed;\nIt is a banquet to me. Let's after him,\nWhose care is gone before to bid us welcome:\nIt is a peerless kinsman.",
+          "kind": "speech"
+        },
+        {
+          "position": 91,
+          "text": "'They met me in the day of success; and I have learned by the perfectest report, they have more in them than mortal knowledge. When I burned in desire to question them further, they made themselves air, into which they vanished. Whiles I stood rapt in the wonder of it, came missives from the king, who all-hailed me, \"Thane of Cawdor\"; by which title, before, these weird sisters saluted me, and referred me to the coming on of time, with \"Hail, king that shalt be!\" This have I thought good to deliver thee, my dearest partner of greatness, that thou mightst not lose the dues of rejoicing, by being ignorant of what greatness is promised thee. Lay it to thy heart, and farewell.'\nGlamis thou art, and Cawdor; and shalt be\nWhat thou art promis'd. Yet do I fear thy nature;\nIt is too full o' the milk of human kindness\nTo catch the nearest way; thou wouldst be great,\nArt not without ambition, but without\nThe illness should attend it; what thou wouldst highly\nThat thou wouldst holily; wouldst not play false,\nAnd yet wouldst wrongly win; thou 'dst have, great Glamis,\nThat which cries, 'Thus thou must do,' if thou have it;\nAnd that which rather thou dost fear to do\nThan wishest should be undone. Hie thee hither,\nThat I may pour my spirits in thine ear,\nAnd chastise with the valour of my tongue\nAll that impedes thee from the golden round,\nWhich fate and metaphysical aid doth seem\nTo have thee crown'd withal.",
+          "kind": "speech"
+        },
+        {
+          "position": 92,
+          "text": "The king comes here to-night.",
+          "kind": "speech"
+        },
+        {
+          "position": 93,
+          "text": "Thou 'rt mad to say it.\nIs not thy master with him? who, were 't so,\nWould have inform'd for preparation.",
+          "kind": "speech"
+        },
+        {
+          "position": 94,
+          "text": "So please you, it is true: our thane is coming;\nOne of my fellows had the speed of him,\nWho, almost dead for breath, had scarcely more\nThan would make up his message.",
+          "kind": "speech"
+        },
+        {
+          "position": 95,
+          "text": "Give him tending;\nHe brings great news.—\nThe raven himself is hoarse\nThat croaks the fatal entrance of Duncan\nUnder my battlements. Come, you spirits\nThat tend on mortal thoughts! unsex me here,\nAnd fill me from the crown to the toe top-full\nOf direst cruelty; make thick my blood,—\nStop up the access and passage to remorse,\nThat no compunctious visitings of nature\nShake my fell purpose, nor keep peace between\nThe effect and it! Come to my woman's breasts,\nAnd take my milk for gall, you murdering ministers,\nWherever in your sightless substances\nYou wait on nature's mischief! Come, thick night,\nAnd pall thee in the dunnest smoke of hell,\nThat my keen knife see not the wound it makes,\nNor heaven peep through the blanket of the dark,\nTo cry 'Hold, hold!'",
+          "kind": "speech"
+        },
+        {
+          "position": 96,
+          "text": "My dearest love,\nDuncan comes here to-night.",
+          "kind": "speech"
+        },
+        {
+          "position": 97,
+          "text": "And when goes hence?",
+          "kind": "speech"
+        },
+        {
+          "position": 98,
+          "text": "To-morrow, as he purposes.",
+          "kind": "speech"
+        },
+        {
+          "position": 99,
+          "text": "O! never\nShall sun that morrow see.\nYour face, my thane, is as a book where men\nMay read strange matters. To beguile the time,\nLook like the time; bear welcome in your eye,\nYour hand, your tongue: look like the innocent flower,\nBut be the serpent under 't. He that's coming\nMust be provided for; and you shall put\nThis night's great business into my dispatch;\nWhich shall to all our nights and days to come\nGive solely sovereign sway and masterdom.",
+          "kind": "speech"
+        },
+        {
+          "position": 100,
+          "text": "We will speak further.",
+          "kind": "speech"
+        },
+        {
+          "position": 101,
+          "text": "Only look up clear;\nTo alter favour ever is to fear.\nLeave all the rest to me.",
+          "kind": "speech"
+        },
+        {
+          "position": 102,
+          "text": "This castle hath a pleasant seat; the air\nNimbly and sweetly recommends itself\nUnto our gentle senses.",
+          "kind": "speech"
+        },
+        {
+          "position": 103,
+          "text": "This guest of summer,\nThe temple-haunting martlet, does approve\nBy his lov'd mansionry that the heaven's breath\nSmells wooingly here: no jutty, frieze,\nButtress, nor coign of vantage, but this bird\nHath made his pendent bed and procreant cradle:\nWhere they most breed and haunt, I have observ'd\nThe air is delicate.",
+          "kind": "speech"
+        },
+        {
+          "position": 104,
+          "text": "See, see, our honour'd hostess!\nThe love that follows us sometime is our trouble,\nWhich still we thank as love. Herein I teach you\nHow you shall bid God 'eyld us for your pains,\nAnd thank us for your trouble.",
+          "kind": "speech"
+        },
+        {
+          "position": 105,
+          "text": "All our service,\nIn every point twice done, and then done double,\nWere poor and single business, to contend\nAgainst those honours deep and broad wherewith\nYour majesty loads our house: for those of old,\nAnd the late dignities heap'd up to them,\nWe rest your hermits.",
+          "kind": "speech"
+        },
+        {
+          "position": 106,
+          "text": "Where's the Thane of Cawdor?\nWe cours'd him at the heels, and had a purpose\nTo be his purveyor; but he rides well,\nAnd his great love, sharp as his spur, hath holp him\nTo his home before us. Fair and noble hostess,\nWe are your guest to-night.",
+          "kind": "speech"
+        },
+        {
+          "position": 107,
+          "text": "Your servants ever\nHave theirs, themselves, and what is theirs, in compt,\nTo make their audit at your highness' pleasure,\nStill to return your own.",
+          "kind": "speech"
+        },
+        {
+          "position": 108,
+          "text": "Give me your hand;\nConduct me to mine host: we love him highly,\nAnd shall continue our graces towards him.\nBy your leave, hostess.",
+          "kind": "speech"
+        },
+        {
+          "position": 109,
+          "text": "If it were done when 'tis done, then 'twere well\nIt were done quickly; if the assassination\nCould trammel up the consequence, and catch\nWith his surcease success; that but this blow\nMight be the be-all and the end-all here,\nBut here, upon this bank and shoal of time,\nWe'd jump the life to come. But in these cases\nWe still have judgment here; that we but teach\nBloody instructions, which, being taught, return\nTo plague the inventor; this even-handed justice\nCommends the ingredients of our poison'd chalice\nTo our own lips. He's here in double trust:\nFirst, as I am his kinsman and his subject,\nStrong both against the deed; then, as his host,\nWho should against his murderer shut the door,\nNot bear the knife myself. Besides, this Duncan\nHath borne his faculties so meek, hath been\nSo clear in his great office, that his virtues\nWill plead like angels trumpet-tongu'd against\nThe deep damnation of his taking-off;\nAnd pity, like a naked new-born babe,\nStriding the blast, or heaven's cherubin, hors'd\nUpon the sightless couriers of the air,\nShall blow the horrid deed in every eye,\nThat tears shall drown the wind. I have no spur\nTo prick the sides of my intent, but only\nVaulting ambition, which o'er-leaps itself\nAnd falls on the other.",
+          "kind": "speech"
+        },
+        {
+          "position": 110,
+          "text": "He has almost supp'd: why have you left the chamber?",
+          "kind": "speech"
+        },
+        {
+          "position": 111,
+          "text": "Hath he ask'd for me?",
+          "kind": "speech"
+        },
+        {
+          "position": 112,
+          "text": "Know you not he has?",
+          "kind": "speech"
+        },
+        {
+          "position": 113,
+          "text": "We will proceed no further in this business:\nHe hath honour'd me of late; and I have bought\nGolden opinions from all sorts of people,\nWhich would be worn now in their newest gloss,\nNot cast aside so soon.",
+          "kind": "speech"
+        },
+        {
+          "position": 114,
+          "text": "Was the hope drunk,\nWherein you dress'd yourself? hath it slept since,\nAnd wakes it now, to look so green and pale\nAt what it did so freely? From this time\nSuch I account thy love. Art thou afeard\nTo be the same in thine own act and valour\nAs thou art in desire? Wouldst thou have that\nWhich thou esteem'st the ornament of life,\nAnd live a coward in thine own esteem,\nLetting 'I dare not' wait upon 'I would,'\nLike the poor cat i' the adage?",
+          "kind": "speech"
+        },
+        {
+          "position": 115,
+          "text": "Prithee, peace.\nI dare do all that may become a man;\nWho dares do more is none.",
+          "kind": "speech"
+        },
+        {
+          "position": 116,
+          "text": "What beast was 't, then,\nThat made you break this enterprise to me?\nWhen you durst do it then you were a man;\nAnd, to be more than what you were, you would\nBe so much more the man. Nor time nor place\nDid then adhere, and yet you would make both:\nThey have made themselves, and that their fitness now\nDoes unmake you. I have given suck, and know\nHow tender 'tis to love the babe that milks me:\nI would, while it was smiling in my face,\nHave pluck'd my nipple from his boneless gums,\nAnd dash'd the brains out, had I so sworn as you\nHave done to this.",
+          "kind": "speech"
+        },
+        {
+          "position": 117,
+          "text": "If we should fail,—",
+          "kind": "speech"
+        },
+        {
+          "position": 118,
+          "text": "We fail!\nBut screw your courage to the sticking-place,\nAnd we'll not fail. When Duncan is asleep,\nWhereto the rather shall his day's hard journey\nSoundly invite him, his two chamberlains\nWill I with wine and wassail so convince\nThat memory, the warder of the brain,\nShall be a fume, and the receipt of reason\nA limbeck only; when in swinish sleep\nTheir drenched natures lie, as in a death,\nWhat cannot you and I perform upon\nThe unguarded Duncan? what not put upon\nHis spongy officers, who shall bear the guilt\nOf our great quell?",
+          "kind": "speech"
+        },
+        {
+          "position": 119,
+          "text": "Bring forth men-children only;\nFor thy undaunted mettle should compose\nNothing but males. Will it not be receiv'd,\nWhen we have mark'd with blood those sleepy two\nOf his own chamber and us'd their very daggers,\nThat they have done 't?",
+          "kind": "speech"
+        },
+        {
+          "position": 120,
+          "text": "Who dares receive it other,\nAs we shall make our griefs and clamour roar\nUpon his death?",
+          "kind": "speech"
+        },
+        {
+          "position": 121,
+          "text": "I am settled, and bend up\nEach corporal agent to this terrible feat.\nAway, and mock the time with fairest show:\nFalse face must hide what the false heart doth know.",
+          "kind": "speech"
+        }
+      ]
+    },
+    {
+      "id": "act-2",
+      "title": "Act II",
+      "position": 2,
+      "sourceUrl": "https://en.wikisource.org/wiki/Macbeth_(1918)_Yale/Text/Act_II",
+      "revisionUrl": "https://en.wikisource.org/w/index.php?oldid=11177208",
+      "snapshotPath": ".cache/corpus/sources/macbeth/act-2.html",
+      "snapshotSha256": "992acbb29ee5a01de89c00490df55a24458f6260672e30b3c9680cfbf484e28b",
+      "passages": [
+        {
+          "position": 1,
+          "text": "How goes the night, boy?",
+          "kind": "speech"
+        },
+        {
+          "position": 2,
+          "text": "The moon is down; I have not heard the clock.",
+          "kind": "speech"
+        },
+        {
+          "position": 3,
+          "text": "And she goes down at twelve.",
+          "kind": "speech"
+        },
+        {
+          "position": 4,
+          "text": "I take 't, 'tis later, sir.",
+          "kind": "speech"
+        },
+        {
+          "position": 5,
+          "text": "Hold, take my sword. There's husbandry in heaven;\nTheir candles are all out. Take thee that too.\nA heavy summons lies like lead upon me,\nAnd yet I would not sleep: merciful powers!\nRestrain in me the cursed thoughts that nature\nGives way to in repose.\nGive me my sword.—\nWho's there?",
+          "kind": "speech"
+        },
+        {
+          "position": 6,
+          "text": "A friend.",
+          "kind": "speech"
+        },
+        {
+          "position": 7,
+          "text": "What, sir! not yet at rest? The king's a-bed:\nHe hath been in unusual pleasure, and\nSent forth great largess to your offices.\nThis diamond he greets your wife withal,\nBy the name of most kind hostess; and shut up\nIn measureless content.",
+          "kind": "speech"
+        },
+        {
+          "position": 8,
+          "text": "Being unprepar'd,\nOur will became the servant to defect,\nWhich else should free have wrought.",
+          "kind": "speech"
+        },
+        {
+          "position": 9,
+          "text": "All's well.\nI dreamt last night of the three weird sisters:\nTo you they have show'd some truth.",
+          "kind": "speech"
+        },
+        {
+          "position": 10,
+          "text": "I think not of them:\nYet, when we can entreat an hour to serve,\nWe would spend it in some words upon that business,\nIf you would grant the time.",
+          "kind": "speech"
+        },
+        {
+          "position": 11,
+          "text": "At your kind'st leisure.",
+          "kind": "speech"
+        },
+        {
+          "position": 12,
+          "text": "If you shall cleave to my consent, when 'tis,\nIt shall make honour for you.",
+          "kind": "speech"
+        },
+        {
+          "position": 13,
+          "text": "So I lose none\nIn seeking to augment it, but still keep\nMy bosom franchis'd and allegiance clear,\nI shall be counsell'd.",
+          "kind": "speech"
+        },
+        {
+          "position": 14,
+          "text": "Good repose the while!",
+          "kind": "speech"
+        },
+        {
+          "position": 15,
+          "text": "Thanks, sir: the like to you.",
+          "kind": "speech"
+        },
+        {
+          "position": 16,
+          "text": "Go bid thy mistress, when my drink is ready\nShe strike upon the bell. Get thee to bed.\nIs this a dagger which I see before me,\nThe handle toward my hand? Come, let me clutch thee:\nI have thee not, and yet I see thee still.\nArt thou not, fatal vision, sensible\nTo feeling as to sight? or art thou but\nA dagger of the mind, a false creation,\nProceeding from the heat-oppressed brain?\nI see thee yet, in form as palpable\nAs this which now I draw.\nThou marshall'st me the way that I was going;\nAnd such an instrument I was to use.\nMine eyes are made the fools o' the other senses,\nOr else worth all the rest: I see thee still;\nAnd on thy blade and dudgeon gouts of blood,\nWhich was not so before. There's no such thing:\nIt is the bloody business which informs\nThus to mine eyes. Now o'er the one half-world\nNature seems dead, and wicked dreams abuse\nThe curtain'd sleep; witchcraft celebrates\nPale Hecate's offerings; and wither'd murder,\nAlarum'd by his sentinel, the wolf,\nWhose howl's his watch, thus with his stealthy pace,\nWith Tarquin's ravishing strides, towards his design\nMoves like a ghost. Thou sure and firm-set earth,\nHear not my steps, which way they walk, for fear\nThy very stones prate of my whereabout,\nAnd take the present horror from the time,\nWhich now suits with it. Whiles I threat he lives:\nWords to the heat of deeds too cold breath gives.\nI go, and it is done; the bell invites me.\nHear it not, Duncan; for it is a knell\nThat summons thee to heaven or to hell.",
+          "kind": "speech"
+        },
+        {
+          "position": 17,
+          "text": "That which hath made them drunk hath made me bold,\nWhat hath quench'd them hath given me fire. Hark! Peace!\nIt was the owl that shriek'd, the fatal bellman,\nWhich gives the stern'st good-night. He is about it:\nThe doors are open, and the surfeited grooms\nDo mock their charge with snores: I have drugg'd their possets,\nThat death and nature do contend about them,\nWhether they live or die.",
+          "kind": "speech"
+        },
+        {
+          "position": 18,
+          "text": "Who's there? what, ho!",
+          "kind": "speech"
+        },
+        {
+          "position": 19,
+          "text": "Alack! I am afraid they have awak'd,\nAnd 'tis not done; the attempt and not the deed\nConfounds us. Hark! I laid their daggers ready;\nHe could not miss them. Had he not resembled\nMy father as he slept I had done 't. My husband!",
+          "kind": "speech"
+        },
+        {
+          "position": 20,
+          "text": "I have done the deed. Didst thou not hear a noise?",
+          "kind": "speech"
+        },
+        {
+          "position": 21,
+          "text": "I heard the owl scream and the crickets cry.\nDid not you speak?",
+          "kind": "speech"
+        },
+        {
+          "position": 22,
+          "text": "When?",
+          "kind": "speech"
+        },
+        {
+          "position": 23,
+          "text": "Now.",
+          "kind": "speech"
+        },
+        {
+          "position": 24,
+          "text": "As I descended?",
+          "kind": "speech"
+        },
+        {
+          "position": 25,
+          "text": "Ay.",
+          "kind": "speech"
+        },
+        {
+          "position": 26,
+          "text": "Hark!\nWho lies i' the second chamber?",
+          "kind": "speech"
+        },
+        {
+          "position": 27,
+          "text": "Donalbain.",
+          "kind": "speech"
+        },
+        {
+          "position": 28,
+          "text": "This is a sorry sight.",
+          "kind": "speech"
+        },
+        {
+          "position": 29,
+          "text": "A foolish thought to say a sorry sight.",
+          "kind": "speech"
+        },
+        {
+          "position": 30,
+          "text": "There's one did laugh in 's sleep, and one cried 'Murder!'\nThat they did wake each other: I stood and heard them;\nBut they did say their prayers, and address'd them\nAgain to sleep.",
+          "kind": "speech"
+        },
+        {
+          "position": 31,
+          "text": "There are two lodg'd together.",
+          "kind": "speech"
+        },
+        {
+          "position": 32,
+          "text": "One cried 'God bless us!' and 'Amen' the other,\nAs they had seen me with these hangman's hands.\nListening their fear, I could not say 'Amen,'\nWhen they did say 'God bless us!'",
+          "kind": "speech"
+        },
+        {
+          "position": 33,
+          "text": "Consider it not so deeply.",
+          "kind": "speech"
+        },
+        {
+          "position": 34,
+          "text": "But wherefore could not I pronounce 'Amen'?\nI had most need of blessing, and 'Amen'\nStuck in my throat.",
+          "kind": "speech"
+        },
+        {
+          "position": 35,
+          "text": "These deeds must not be thought\nAfter these ways; so, it will make us mad.",
+          "kind": "speech"
+        },
+        {
+          "position": 36,
+          "text": "Methought I heard a voice cry 'Sleep no more!\nMacbeth does murder sleep,' the innocent sleep,\nSleep that knits up the ravell'd sleeve of care,\nThe death of each day's life, sore labour's bath,\nBalm of hurt minds, great nature's second course,\nChief nourisher in life's feast,—",
+          "kind": "speech"
+        },
+        {
+          "position": 37,
+          "text": "What do you mean?",
+          "kind": "speech"
+        },
+        {
+          "position": 38,
+          "text": "Still it cried, 'Sleep no more!' to all the house:\n'Glamis hath murder'd sleep, and therefore Cawdor\nShall sleep no more, Macbeth shall sleep no more!'",
+          "kind": "speech"
+        },
+        {
+          "position": 39,
+          "text": "Who was it that thus cried? Why, worthy thane,\nYou do unbend your noble strength to think\nSo brainsickly of things. Go get some water,\nAnd wash this filthy witness from your hand.\nWhy did you bring these daggers from the place?\nThey must lie there: go carry them, and smear\nThe sleepy grooms with blood.",
+          "kind": "speech"
+        },
+        {
+          "position": 40,
+          "text": "I'll go no more:\nI am afraid to think what I have done;\nLook on 't again I dare not.",
+          "kind": "speech"
+        },
+        {
+          "position": 41,
+          "text": "Infirm of purpose!\nGive me the daggers. The sleeping and the dead\nAre but as pictures; 'tis the eye of childhood\nThat fears a painted devil. If he do bleed,\nI'll gild the faces of the grooms withal;\nFor it must seem their guilt.",
+          "kind": "speech"
+        },
+        {
+          "position": 42,
+          "text": "Whence is that knocking?\nHow is 't with me, when every noise appals me?\nWhat hands are here? Ha! they pluck out mine eyes.\nWill all great Neptune's ocean wash this blood\nClean from my hand? No, this my hand will rather\nThe multitudinous seas incarnadine,\nMaking the green one red.",
+          "kind": "speech"
+        },
+        {
+          "position": 43,
+          "text": "My hands are of your colour, but I shame\nTo wear a heart so white.—\nI hear a knocking\nAt the south entry; retire we to our chamber;\nA little water clears us of this deed;\nHow easy is it, then! Your constancy\nHath left you unattended.\nHark! more knocking.\nGet on your night-gown, lest occasion call us,\nAnd show us to be watchers. Be not lost\nSo poorly in your thoughts.",
+          "kind": "speech"
+        },
+        {
+          "position": 44,
+          "text": "To know my deed 'twere best not know myself.\nWake Duncan with thy knocking! I would thou couldst!",
+          "kind": "speech"
+        },
+        {
+          "position": 45,
+          "text": "Here's a knocking, indeed! If a man were porter of hell-gate he should have old turning the key. Knock, knock, knock! Who's there, i' the name of Beelzebub? Here's a farmer that hanged himself on the expectation of plenty: come in time; have napkins enow about you; here you'll sweat for 't. Knock, knock! Who's there i' the other devil's name! Faith, here's an equivocator, that could swear in both the scales against either scale; who committed treason enough for God's sake, yet could not equivocate to heaven: O! come in, equivocator. Knock, knock, knock! Who's there? Faith, here's an English tailor come hither for stealing out of a French hose: come in, tailor; here you may roast your goose. Knock, knock; never at quiet! What are you? But this place is too cold for hell. I'll devil-porter it no further: I had thought to have let in some of all professions, that go the primrose way to the everlasting bonfire. Anon, anon! I pray you, remember the porter.",
+          "kind": "speech"
+        },
+        {
+          "position": 46,
+          "text": "Was it so late, friend, ere you went to bed, That you do lie so late?",
+          "kind": "speech"
+        },
+        {
+          "position": 47,
+          "text": "Faith, sir, we were carousing till the second cock; and drink, sir, is a great provoker of three things.",
+          "kind": "speech"
+        },
+        {
+          "position": 48,
+          "text": "What three things does drink especially provoke?",
+          "kind": "speech"
+        },
+        {
+          "position": 49,
+          "text": "Marry, sir, nose-painting, sleep, and urine. Lechery, sir, it provokes, and unprovokes; it provokes the desire, but it takes away the performance. Therefore much drink may be said to be an equivocator with lechery; it makes him, and it mars him; it sets him on, and it takes him off; it persuades him, and disheartens him; makes him stand to, and not stand to; in conclusion, equivocates him in a sleep, and, giving him the lie, leaves him.",
+          "kind": "speech"
+        },
+        {
+          "position": 50,
+          "text": "I believe drink gave thee the lie last night.",
+          "kind": "speech"
+        },
+        {
+          "position": 51,
+          "text": "That it did, sir, i' the very throat o' me: but I requited him for his lie; and, I think, being too strong for him, though he took up my legs sometime, yet I made a shift to cast him.",
+          "kind": "speech"
+        },
+        {
+          "position": 52,
+          "text": "Is thy master stirring?",
+          "kind": "speech"
+        },
+        {
+          "position": 53,
+          "text": "Good morrow, noble sir.",
+          "kind": "speech"
+        },
+        {
+          "position": 54,
+          "text": "Good morrow, both.",
+          "kind": "speech"
+        },
+        {
+          "position": 55,
+          "text": "Is the king stirring, worthy thane?",
+          "kind": "speech"
+        },
+        {
+          "position": 56,
+          "text": "Not yet.",
+          "kind": "speech"
+        },
+        {
+          "position": 57,
+          "text": "He did command me to call timely on him:\nI have almost slipp'd the hour.",
+          "kind": "speech"
+        },
+        {
+          "position": 58,
+          "text": "I'll bring you to him.",
+          "kind": "speech"
+        },
+        {
+          "position": 59,
+          "text": "I know this is a joyful trouble to you;\nBut yet 'tis one.",
+          "kind": "speech"
+        },
+        {
+          "position": 60,
+          "text": "The labour we delight in physics pain.\nThis is the door.",
+          "kind": "speech"
+        },
+        {
+          "position": 61,
+          "text": "I'll make so bold to call,\nFor 'tis my limited service.",
+          "kind": "speech"
+        },
+        {
+          "position": 62,
+          "text": "Goes the king hence to-day?",
+          "kind": "speech"
+        },
+        {
+          "position": 63,
+          "text": "He does: he did appoint so.",
+          "kind": "speech"
+        },
+        {
+          "position": 64,
+          "text": "The night has been unruly: where we lay,\nOur chimneys were blown down; and, as they say,\nLamentings heard i' the air; strange screams of death,\nAnd prophesying with accents terrible\nOf dire combustion and confus'd events\nNew hatch'd to the woeful time. The obscure bird\nClamour'd the livelong night: some say the earth\nWas feverous and did shake.",
+          "kind": "speech"
+        },
+        {
+          "position": 65,
+          "text": "'Twas a rough night.",
+          "kind": "speech"
+        },
+        {
+          "position": 66,
+          "text": "My young remembrance cannot parallel\nA fellow to it.",
+          "kind": "speech"
+        },
+        {
+          "position": 67,
+          "text": "O horror! horror! horror! Tongue nor heart\nCannot conceive nor name thee!",
+          "kind": "speech"
+        },
+        {
+          "position": 68,
+          "text": "Confusion now hath made his masterpiece!\nMost sacrilegious murder hath broke ope\nThe Lord's anointed temple, and stole thence\nThe life o' the building!",
+          "kind": "speech"
+        },
+        {
+          "position": 69,
+          "text": "What is 't you say? the life?",
+          "kind": "speech"
+        },
+        {
+          "position": 70,
+          "text": "Mean you his majesty?",
+          "kind": "speech"
+        },
+        {
+          "position": 71,
+          "text": "Approach the chamber, and destroy your sight\nWith a new Gorgon: do not bid me speak;\nSee, and then speak yourselves.",
+          "kind": "speech"
+        },
+        {
+          "position": 72,
+          "text": "What's the business,\nThat such a hideous trumpet calls to parley\nThe sleepers of the house? speak, speak!",
+          "kind": "speech"
+        },
+        {
+          "position": 73,
+          "text": "O gentle lady!\n'Tis not for you to hear what I can speak;\nThe repetition in a woman's ear\nWould murder as it fell.",
+          "kind": "speech"
+        },
+        {
+          "position": 74,
+          "text": "Woe, alas!\nWhat! in our house?",
+          "kind": "speech"
+        },
+        {
+          "position": 75,
+          "text": "Too cruel anywhere.\nDear Duff, I prithee, contradict thyself,\nAnd say it is not so.",
+          "kind": "speech"
+        },
+        {
+          "position": 76,
+          "text": "Had I but died an hour before this chance,\nI had liv'd a blessed time; for, from this instant,\nThere's nothing serious in mortality:\nAll is but toys; renown and grace is dead,\nThe wine of life is drawn, and the mere lees\nIs left this vault to brag of.",
+          "kind": "speech"
+        },
+        {
+          "position": 77,
+          "text": "What is amiss?",
+          "kind": "speech"
+        },
+        {
+          "position": 78,
+          "text": "You are, and do not know 't:\nThe spring, the head, the fountain of your blood\nIs stopp'd; the very source of it is stopp'd.",
+          "kind": "speech"
+        },
+        {
+          "position": 79,
+          "text": "Your royal father's murder'd.",
+          "kind": "speech"
+        },
+        {
+          "position": 80,
+          "text": "O! by whom?",
+          "kind": "speech"
+        },
+        {
+          "position": 81,
+          "text": "Those of his chamber, as it seem'd, had done 't:\nTheir hands and faces were all badg'd with blood;\nSo were their daggers, which unwip'd we found\nUpon their pillows: they star'd, and were distracted;\nNo man's life was to be trusted with them.",
+          "kind": "speech"
+        },
+        {
+          "position": 82,
+          "text": "O! yet I do repent me of my fury,\nThat I did kill them.",
+          "kind": "speech"
+        },
+        {
+          "position": 83,
+          "text": "Wherefore did you so?",
+          "kind": "speech"
+        },
+        {
+          "position": 84,
+          "text": "Who can be wise, amaz'd, temperate and furious,\nLoyal and neutral, in a moment? No man:\nThe expedition of my violent love\nOutran the pauser, reason. Here lay Duncan,\nHis silver skin lac'd with his golden blood;\nAnd his gash'd stabs look'd like a breach in nature\nFor ruin's wasteful entrance: there, the murderers,\nSteep'd in the colours of their trade, their daggers\nUnmannerly breech'd with gore: who could refrain,\nThat had a heart to love, and in that heart\nCourage to make 's love known?",
+          "kind": "speech"
+        },
+        {
+          "position": 85,
+          "text": "Help me hence, ho!",
+          "kind": "speech"
+        },
+        {
+          "position": 86,
+          "text": "Look to the lady.",
+          "kind": "speech"
+        },
+        {
+          "position": 87,
+          "text": "Why do we hold our tongues,\nThat most may claim this argument for ours?",
+          "kind": "speech"
+        },
+        {
+          "position": 88,
+          "text": "What should be spoken\nHere where our fate, hid in an auger-hole,\nMay rush and seize us? Let's away: our tears\nAre not yet brew'd.",
+          "kind": "speech"
+        },
+        {
+          "position": 89,
+          "text": "Nor our strong sorrow\nUpon the foot of motion.",
+          "kind": "speech"
+        },
+        {
+          "position": 90,
+          "text": "Look to the lady:\nAnd when we have our naked frailties hid,\nThat suffer in exposure, let us meet,\nAnd question this most bloody piece of work,\nTo know it further. Fears and scruples shake us:\nIn the great hand of God I stand, and thence\nAgainst the undivulg'd pretence I fight\nOf treasonous malice.",
+          "kind": "speech"
+        },
+        {
+          "position": 91,
+          "text": "And so do I.",
+          "kind": "speech"
+        },
+        {
+          "position": 92,
+          "text": "So all.",
+          "kind": "speech"
+        },
+        {
+          "position": 93,
+          "text": "Let's briefly put on manly readiness,\nAnd meet i' the hall together.",
+          "kind": "speech"
+        },
+        {
+          "position": 94,
+          "text": "Well contented.",
+          "kind": "speech"
+        },
+        {
+          "position": 95,
+          "text": "What will you do? Let's not consort with them:\nTo show an unfelt sorrow is an office\nWhich the false man does easy. I'll to England.",
+          "kind": "speech"
+        },
+        {
+          "position": 96,
+          "text": "To Ireland, I; our separated fortune\nShall keep us both the safer: where we are,\nThere's daggers in men's smiles: the near in blood,\nThe nearer bloody.",
+          "kind": "speech"
+        },
+        {
+          "position": 97,
+          "text": "This murderous shaft that's shot\nHath not yet lighted, and our safest way\nIs to avoid the aim: therefore, to horse;\nAnd let us not be dainty of leave-taking,\nBut shift away: there's warrant in that theft\nWhich steals itself when there's no mercy left.",
+          "kind": "speech"
+        },
+        {
+          "position": 98,
+          "text": "Threescore and ten I can remember well;\nWithin the volume of which time I have seen\nHours dreadful and things strange, but this sore night\nHath trifled former knowings.",
+          "kind": "speech"
+        },
+        {
+          "position": 99,
+          "text": "Ah! good father,\nThou seest, the heavens, as troubled with man's act,\nThreatens his bloody stage: by the clock 'tis day,\nAnd yet dark night strangles the travelling lamp.\nIs 't night's predominance, or the day's shame,\nThat darkness does the face of earth entomb,\nWhen living light should kiss it?",
+          "kind": "speech"
+        },
+        {
+          "position": 100,
+          "text": "'Tis unnatural,\nEven like the deed that's done. On Tuesday last,\nA falcon, towering in her pride of place,\nWas by a mousing owl hawk'd at and kill'd.",
+          "kind": "speech"
+        },
+        {
+          "position": 101,
+          "text": "And Duncan's horses,—a thing most strange and certain,—\nBeauteous and swift, the minions of their race,\nTurn'd wild in nature, broke their stalls, flung out,\nContending 'gainst obedience, as they would\nMake war with mankind.",
+          "kind": "speech"
+        },
+        {
+          "position": 102,
+          "text": "'Tis said they eat each other.",
+          "kind": "speech"
+        },
+        {
+          "position": 103,
+          "text": "They did so; to the amazement of mine eyes,\nThat look'd upon 't. Here comes the good Macduff.",
+          "kind": "speech"
+        },
+        {
+          "position": 104,
+          "text": "Why, see you not?",
+          "kind": "speech"
+        },
+        {
+          "position": 105,
+          "text": "Is 't known who did this more than bloody deed?",
+          "kind": "speech"
+        },
+        {
+          "position": 106,
+          "text": "Those that Macbeth hath slain.",
+          "kind": "speech"
+        },
+        {
+          "position": 107,
+          "text": "Alas, the day!\nWhat good could they pretend?\nMacd. They were suborn'd.\nMalcolm and Donalbain, the king's two sons,\nAre stol'n away and fled, which puts upon them\nSuspicion of the deed.",
+          "kind": "speech"
+        },
+        {
+          "position": 108,
+          "text": "'Gainst nature still!\nThriftless ambition, that will ravin up\nThine own life's means! Then 'tis most like\nThe sovereignty will fall upon Macbeth.",
+          "kind": "speech"
+        },
+        {
+          "position": 109,
+          "text": "He is already nam'd, and gone to Scone\nTo be invested.",
+          "kind": "speech"
+        },
+        {
+          "position": 110,
+          "text": "Where is Duncan's body?",
+          "kind": "speech"
+        },
+        {
+          "position": 111,
+          "text": "Carried to Colmekill,\nThe sacred storehouse of his predecessors\nAnd guardian of their bones.",
+          "kind": "speech"
+        },
+        {
+          "position": 112,
+          "text": "Will you to Scone?",
+          "kind": "speech"
+        },
+        {
+          "position": 113,
+          "text": "No, cousin, I'll to Fife.",
+          "kind": "speech"
+        },
+        {
+          "position": 114,
+          "text": "Well, I will thither.",
+          "kind": "speech"
+        },
+        {
+          "position": 115,
+          "text": "Well, may you see things well done there: adieu!\nLest our old robes sit easier than our new!",
+          "kind": "speech"
+        },
+        {
+          "position": 116,
+          "text": "Farewell, father.",
+          "kind": "speech"
+        },
+        {
+          "position": 117,
+          "text": "God's benison go with you; and with those\nThat would make good of bad, and friends of foes!",
+          "kind": "speech"
+        }
+      ]
+    },
+    {
+      "id": "act-3",
+      "title": "Act III",
+      "position": 3,
+      "sourceUrl": "https://en.wikisource.org/wiki/Macbeth_(1918)_Yale/Text/Act_III",
+      "revisionUrl": "https://en.wikisource.org/w/index.php?oldid=11177215",
+      "snapshotPath": ".cache/corpus/sources/macbeth/act-3.html",
+      "snapshotSha256": "6e1b138fc648c2b4c2c48594d3412849e9fcd2699633d924936c0f8a8194cc01",
+      "passages": [
+        {
+          "position": 1,
+          "text": "Thou hast it now: King, Cawdor, Glamis, all,\nAs the weird women promis'd; and, I fear,\nThou play'dst most foully for 't; yet it was said\nIt should not stand in thy posterity,\nBut that myself should be the root and father\nOf many kings. If there come truth from them,—\nAs upon thee, Macbeth, their speeches shine,—\nWhy, by the verities on thee made good,\nMay they not be my oracles as well,\nAnd set me up in hope? But, hush! no more.",
+          "kind": "speech"
+        },
+        {
+          "position": 2,
+          "text": "Here's our chief guest.",
+          "kind": "speech"
+        },
+        {
+          "position": 3,
+          "text": "If he had been forgotten,\nIt had been as a gap in our great feast,\nAnd all-thing unbecoming.",
+          "kind": "speech"
+        },
+        {
+          "position": 4,
+          "text": "To-night we hold a solemn supper, sir,\nAnd I'll request your presence.",
+          "kind": "speech"
+        },
+        {
+          "position": 5,
+          "text": "Let your highness\nCommand upon me; to the which my duties\nAre with a most indissoluble tie\nFor ever knit.",
+          "kind": "speech"
+        },
+        {
+          "position": 6,
+          "text": "Ride you this afternoon?",
+          "kind": "speech"
+        },
+        {
+          "position": 7,
+          "text": "Ay, my good lord.",
+          "kind": "speech"
+        },
+        {
+          "position": 8,
+          "text": "We should have else desir'd your good advice—\nWhich still hath been both grave and prosperous—\nIn this day's council; but we'll take to-morrow.\nIs 't far you ride?",
+          "kind": "speech"
+        },
+        {
+          "position": 9,
+          "text": "As far, my lord, as will fill up the time\n'Twixt this and supper; go not my horse the better,\nI must become a borrower of the night\nFor a dark hour or twain.",
+          "kind": "speech"
+        },
+        {
+          "position": 10,
+          "text": "Fail not our feast.",
+          "kind": "speech"
+        },
+        {
+          "position": 11,
+          "text": "My lord, I will not.",
+          "kind": "speech"
+        },
+        {
+          "position": 12,
+          "text": "We hear our bloody cousins are bestow'd\nIn England and in Ireland, not confessing\nTheir cruel parricide, filling their hearers\nWith strange invention; but of that to-morrow,\nWhen therewithal we shall have cause of state\nCraving us jointly. Hie you to horse; adieu\nTill you return at night. Goes Fleance with you?",
+          "kind": "speech"
+        },
+        {
+          "position": 13,
+          "text": "Ay, my good lord: our time does call upon 's.",
+          "kind": "speech"
+        },
+        {
+          "position": 14,
+          "text": "I wish your horses swift and sure of foot;\nAnd so I do commend you to their backs.\nFarewell.\nLet every man be master of his time\nTill seven at night; to make society\nThe sweeter welcome, we will keep ourself\nTill supper-time alone; while then, God be with you!\nSirrah, a word with you. Attend those men\nOur pleasure?",
+          "kind": "speech"
+        },
+        {
+          "position": 15,
+          "text": "They are, my lord, without the palace gate.",
+          "kind": "speech"
+        },
+        {
+          "position": 16,
+          "text": "Bring them before us.\nTo be thus is nothing;\nBut to be safely thus. Our fears in Banquo\nStick deep, and in his royalty of nature\nReigns that which would be fear'd: 'tis much he dares,\nAnd, to that dauntless temper of his mind,\nHe hath a wisdom that doth guide his valour\nTo act in safety. There is none but he\nWhose being I do fear; and under him\nMy genius is rebuk'd, as it is said\nMark Antony's was by Cæsar. He chid the sisters\nWhen first they put the name of king upon me,\nAnd bade them speak to him; then, prophet-like,\nThey hail'd him father to a line of kings.\nUpon my head they plac'd a fruitless crown,\nAnd put a barren sceptre in my gripe,\nThence to be wrench'd with an unlineal hand,\nNo son of mine succeeding. If 't be so,\nFor Banquo's issue have I fil'd my mind;\nFor them the gracious Duncan have I murder'd;\nPut rancours in the vessel of my peace\nOnly for them; and mine eternal jewel\nGiven to the common enemy of man,\nTo make them kings, the seed of Banquo kings!\nRather than so, come fate into the list,\nAnd champion me to the utterance! Who's there?",
+          "kind": "speech"
+        },
+        {
+          "position": 17,
+          "text": "It was, so please your highness.",
+          "kind": "speech"
+        },
+        {
+          "position": 18,
+          "text": "Well then, now\nHave you consider'd of my speeches? Know\nThat it was he in the times past which held you\nSo under fortune, which you thought had been\nOur innocent self. This I made good to you\nIn our last conference; pass'd in probation with you\nHow you were borne in hand, how cross'd, the instruments,\nWho wrought with them, and all things else that might\nTo half a soul and to a notion craz'd\nSay, 'Thus did Banquo.'",
+          "kind": "speech"
+        },
+        {
+          "position": 19,
+          "text": "You made it known to us.",
+          "kind": "speech"
+        },
+        {
+          "position": 20,
+          "text": "I did so; and went further, which is now\nOur point of second meeting. Do you find\nYour patience so predominant in your nature\nThat you can let this go? Are you so gospell'd\nTo pray for this good man and for his issue,\nWhose heavy hand hath bow'd you to the grave\nAnd beggar'd yours for ever?",
+          "kind": "speech"
+        },
+        {
+          "position": 21,
+          "text": "We are men, my liege.",
+          "kind": "speech"
+        },
+        {
+          "position": 22,
+          "text": "Ay, in the catalogue ye go for men;\nAs hounds and greyhounds, mongrels, spaniels, curs,\nShoughs, water-rugs, and demi-wolves, are clept\nAll by the name of dogs: the valu'd file\nDistinguishes the swift, the slow, the subtle,\nThe housekeeper, the hunter, every one\nAccording to the gift which bounteous nature\nHath in him clos'd; whereby he does receive\nParticular addition, from the bill\nThat writes them all alike: and so of men.\nNow, if you have a station in the file,\nNot i' the worst rank of manhood, say it;\nAnd I will put that business in your bosoms,\nWhose execution takes your enemy off,\nGrapples you to the heart and love of us,\nWho wear our health but sickly in his life,\nWhich in his death were perfect.",
+          "kind": "speech"
+        },
+        {
+          "position": 23,
+          "text": "I am one, my liege,\nWhom the vile blows and buffets of the world\nHave so incens'd that I am reckless what\nI do to spite the world.",
+          "kind": "speech"
+        },
+        {
+          "position": 24,
+          "text": "And I another,\nSo weary with disasters, tugg'd with fortune,\nThat I would set my life on any chance,\nTo mend it or be rid on 't.",
+          "kind": "speech"
+        },
+        {
+          "position": 25,
+          "text": "Both of you\nKnow Banquo was your enemy.",
+          "kind": "speech"
+        },
+        {
+          "position": 26,
+          "text": "True, my lord.",
+          "kind": "speech"
+        },
+        {
+          "position": 27,
+          "text": "So is he mine; and in such bloody distance\nThat every minute of his being thrusts\nAgainst my near'st of life: and though I could\nWith bare-fac'd power sweep him from my sight\nAnd bid my will avouch it, yet I must not,\nFor certain friends that are both his and mine,\nWhose loves I may not drop, but wail his fall\nWho I myself struck down; and thence it is\nThat I to your assistance do make love,\nMasking the business from the common eye\nFor sundry weighty reasons.",
+          "kind": "speech"
+        },
+        {
+          "position": 28,
+          "text": "We shall, my lord,\nPerform what you command us.",
+          "kind": "speech"
+        },
+        {
+          "position": 29,
+          "text": "Though our lives—",
+          "kind": "speech"
+        },
+        {
+          "position": 30,
+          "text": "Your spirits shine through you. Within this hour at most\nI will advise you where to plant yourselves,\nAcquaint you with the perfect spy o' the time,\nThe moment on 't; for 't must be done to-night,\nAnd something from the palace; always thought\nThat I require a clearness: and with him—\nTo leave no rubs nor botches in the work—\nFleance his son, that keeps him company,\nWhose absence is no less material to me\nThan is his father's, must embrace the fate\nOf that dark hour. Resolve yourselves apart;\nI'll come to you anon.",
+          "kind": "speech"
+        },
+        {
+          "position": 31,
+          "text": "We are resolv'd, my lord.",
+          "kind": "speech"
+        },
+        {
+          "position": 32,
+          "text": "I'll call upon you straight: abide within.\nIt is concluded: Banquo, thy soul's flight,\nIf it find heaven, must find it out to-night.",
+          "kind": "speech"
+        },
+        {
+          "position": 33,
+          "text": "Is Banquo gone from court?",
+          "kind": "speech"
+        },
+        {
+          "position": 34,
+          "text": "Ay, madam, but returns again to-night.",
+          "kind": "speech"
+        },
+        {
+          "position": 35,
+          "text": "Say to the king, I would attend his leisure\nFor a few words.",
+          "kind": "speech"
+        },
+        {
+          "position": 36,
+          "text": "Madam, I will.",
+          "kind": "speech"
+        },
+        {
+          "position": 37,
+          "text": "Nought's had, all's spent,\nWhere our desire is got without content:\n'Tis safer to be that which we destroy\nThan by destruction dwell in doubtful joy.",
+          "kind": "speech"
+        },
+        {
+          "position": 38,
+          "text": "We have scotch'd the snake, not kill'd it:\nShe'll close and be herself, whilst our poor malice\nRemains in danger of her former tooth.\nBut let the frame of things disjoint, both the worlds suffer,\nEre we will eat our meal in fear, and sleep\nIn the affliction of these terrible dreams\nThat shake us nightly. Better be with the dead,\nWhom we, to gain our peace, have sent to peace,\nThan on the torture of the mind to lie\nIn restless ecstasy. Duncan is in his grave;\nAfter life's fitful fever he sleeps well;\nTreason has done his worst: nor steel, nor poison,\nMalice domestic, foreign levy, nothing\nCan touch him further.",
+          "kind": "speech"
+        },
+        {
+          "position": 39,
+          "text": "Come on;\nGentle my lord, sleek o'er your rugged looks;\nBe bright and jovial among your guests to-night.",
+          "kind": "speech"
+        },
+        {
+          "position": 40,
+          "text": "So shall I, love; and so, I pray, be you.\nLet your remembrance apply to Banquo;\nPresent him eminence, both with eye and tongue:\nUnsafe the while that we\nMust lave our honours in these flattering streams,\nAnd make our faces vizards to our hearts,\nDisguising what they are.",
+          "kind": "speech"
+        },
+        {
+          "position": 41,
+          "text": "You must leave this.",
+          "kind": "speech"
+        },
+        {
+          "position": 42,
+          "text": "O! full of scorpions is my mind, dear wife;\nThou know'st that Banquo and his Fleance lives.",
+          "kind": "speech"
+        },
+        {
+          "position": 43,
+          "text": "But in them nature's copy's not eterne.",
+          "kind": "speech"
+        },
+        {
+          "position": 44,
+          "text": "There's comfort yet; they are assailable;\nThen be thou jocund. Ere the bat hath flown\nHis cloister'd flight, ere to black Hecate's summons\nThe shard-borne beetle with his drowsy hums\nHath rung night's yawning peal, there shall be done\nA deed of dreadful note.",
+          "kind": "speech"
+        },
+        {
+          "position": 45,
+          "text": "What's to be done?",
+          "kind": "speech"
+        },
+        {
+          "position": 46,
+          "text": "Be innocent of the knowledge, dearest chuck,\nTill thou applaud the deed. Come, seeling night,\nScarf up the tender eye of pitiful day,\nAnd with thy bloody and invisible hand\nCancel and tear to pieces that great bond\nWhich keeps me pale! Light thickens, and the crow\nMakes wing to the rooky wood;\nGood things of day begin to droop and drowse,\nWhiles night's black agents to their preys do rouse.\nThou marvell'st at my words: but hold thee still;\nThings bad begun make strong themselves by ill:\nSo, prithee, go with me.",
+          "kind": "speech"
+        },
+        {
+          "position": 47,
+          "text": "But who did bid thee join with us?",
+          "kind": "speech"
+        },
+        {
+          "position": 48,
+          "text": "Macbeth.",
+          "kind": "speech"
+        },
+        {
+          "position": 49,
+          "text": "He needs not our mistrust, since he delivers\nOur offices and what we have to do\nTo the direction just.",
+          "kind": "speech"
+        },
+        {
+          "position": 50,
+          "text": "Then stand with us.\nThe west yet glimmers with some streaks of day:\nNow spurs the lated traveller apace\nTo gain the timely inn; and near approaches\nThe subject of our watch.",
+          "kind": "speech"
+        },
+        {
+          "position": 51,
+          "text": "Hark! I hear horses.",
+          "kind": "speech"
+        },
+        {
+          "position": 52,
+          "text": "Give us a light there, ho!",
+          "kind": "speech"
+        },
+        {
+          "position": 53,
+          "text": "Then 'tis he: the rest\nThat are within the note of expectation\nAlready are i' the court.",
+          "kind": "speech"
+        },
+        {
+          "position": 54,
+          "text": "His horses go about.",
+          "kind": "speech"
+        },
+        {
+          "position": 55,
+          "text": "Almost a mile; but he does usually,\nSo all men do, from hence to the palace gate\nMake it their walk.",
+          "kind": "speech"
+        },
+        {
+          "position": 56,
+          "text": "A light, a light!",
+          "kind": "speech"
+        },
+        {
+          "position": 57,
+          "text": "'Tis he.",
+          "kind": "speech"
+        },
+        {
+          "position": 58,
+          "text": "Stand to 't.",
+          "kind": "speech"
+        },
+        {
+          "position": 59,
+          "text": "It will be rain to-night.",
+          "kind": "speech"
+        },
+        {
+          "position": 60,
+          "text": "Let it come down.",
+          "kind": "speech"
+        },
+        {
+          "position": 61,
+          "text": "O, treachery! Fly, good Fleance, fly, fly, fly!\nThou mayst revenge. O slave!",
+          "kind": "speech"
+        },
+        {
+          "position": 62,
+          "text": "Who did strike out the light?",
+          "kind": "speech"
+        },
+        {
+          "position": 63,
+          "text": "Was 't not the way?",
+          "kind": "speech"
+        },
+        {
+          "position": 64,
+          "text": "There's but one down; the son is fled.",
+          "kind": "speech"
+        },
+        {
+          "position": 65,
+          "text": "We have lost\nBest half of our affair.",
+          "kind": "speech"
+        },
+        {
+          "position": 66,
+          "text": "Well, let's away, and say how much is done.",
+          "kind": "speech"
+        },
+        {
+          "position": 67,
+          "text": "You know your own degrees; sit down: at first and last,\nThe hearty welcome.",
+          "kind": "speech"
+        },
+        {
+          "position": 68,
+          "text": "Thanks to your majesty.",
+          "kind": "speech"
+        },
+        {
+          "position": 69,
+          "text": "Ourself will mingle with society\nAnd play the humble host.\nOur hostess keeps her state, but in best time\nWe will require her welcome.",
+          "kind": "speech"
+        },
+        {
+          "position": 70,
+          "text": "Pronounce it for me, sir, to all our friends;\nFor my heart speaks they are welcome.",
+          "kind": "speech"
+        },
+        {
+          "position": 71,
+          "text": "See, they encounter thee with their hearts' thanks;\nBoth sides are even: here I'll sit i' the midst:\nBe large in mirth; anon, we'll drink a measure\nThe table round. There's blood upon thy face.",
+          "kind": "speech"
+        },
+        {
+          "position": 72,
+          "text": "'Tis Banquo's, then.",
+          "kind": "speech"
+        },
+        {
+          "position": 73,
+          "text": "'Tis better thee without than he within.\nIs he dispatch'd?",
+          "kind": "speech"
+        },
+        {
+          "position": 74,
+          "text": "My lord, his throat is cut; that I did for him.",
+          "kind": "speech"
+        },
+        {
+          "position": 75,
+          "text": "Thou art the best o' the cut-throats; yet he's good\nThat did the like for Fleance: if thou didst it,\nThou art the nonpareil.",
+          "kind": "speech"
+        },
+        {
+          "position": 76,
+          "text": "Most royal sir,\nFleance is 'scap'd.",
+          "kind": "speech"
+        },
+        {
+          "position": 77,
+          "text": "Then comes my fit again: I had else been perfect;\nWhole as the marble, founded as the rock,\nAs broad and general as the casing air:\nBut now I am cabin'd, cribb'd, confin'd, bound in\nTo saucy doubts and fears. But Banquo's safe?",
+          "kind": "speech"
+        },
+        {
+          "position": 78,
+          "text": "Ay, my good lord; safe in a ditch he bides,\nWith twenty trenched gashes on his head;\nThe least a death to nature.",
+          "kind": "speech"
+        },
+        {
+          "position": 79,
+          "text": "Thanks for that.\nThere the grown serpent lies: the worm that's fled\nHath nature that in time will venom breed,\nNo teeth for the present. Get thee gone; to-morrow\nWe'll hear ourselves again.",
+          "kind": "speech"
+        },
+        {
+          "position": 80,
+          "text": "My royal lord,\nYou do not give the cheer: the feast is sold\nThat is not often vouch'd, while 'tis a-making,\n'Tis given with welcome: to feed were best at home;\nFrom thence, the sauce to meat is ceremony;\nMeeting were bare without it.",
+          "kind": "speech"
+        },
+        {
+          "position": 81,
+          "text": "Sweet remembrancer!\nNow good digestion wait on appetite,\nAnd health on both!",
+          "kind": "speech"
+        },
+        {
+          "position": 82,
+          "text": "May it please your highness sit?",
+          "kind": "speech"
+        },
+        {
+          "position": 83,
+          "text": "Here had we now our country's honour roof'd,\nWere the grac'd person of our Banquo present;\nWho may I rather challenge for unkindness\nThan pity for mischance!",
+          "kind": "speech"
+        },
+        {
+          "position": 84,
+          "text": "His absence, sir,\nLays blame upon his promise. Please 't your highness\nTo grace us with your royal company?",
+          "kind": "speech"
+        },
+        {
+          "position": 85,
+          "text": "The table's full.",
+          "kind": "speech"
+        },
+        {
+          "position": 86,
+          "text": "Here is a place reserv'd, sir.",
+          "kind": "speech"
+        },
+        {
+          "position": 87,
+          "text": "Where?",
+          "kind": "speech"
+        },
+        {
+          "position": 88,
+          "text": "Here, my good lord. What is 't that moves your highness?",
+          "kind": "speech"
+        },
+        {
+          "position": 89,
+          "text": "Which of you have done this?",
+          "kind": "speech"
+        },
+        {
+          "position": 90,
+          "text": "What, my good lord?",
+          "kind": "speech"
+        },
+        {
+          "position": 91,
+          "text": "Thou canst not say I did it: never shake\nThy gory locks at me.",
+          "kind": "speech"
+        },
+        {
+          "position": 92,
+          "text": "Gentlemen, rise; his highness is not well.",
+          "kind": "speech"
+        },
+        {
+          "position": 93,
+          "text": "Sit, worthy friends: my lord is often thus,\nAnd hath been from his youth: pray you, keep seat;\nThe fit is momentary; upon a thought\nHe will again be well. If much you note him\nYou shall offend him and extend his passion:\nFeed and regard him not. Are you a man?",
+          "kind": "speech"
+        },
+        {
+          "position": 94,
+          "text": "Ay, and a bold one, that dare look on that\nWhich might appal the devil.",
+          "kind": "speech"
+        },
+        {
+          "position": 95,
+          "text": "O proper stuff!\nThis is the very painting of your fear;\nThis is the air-drawn dagger which, you said,\nLed you to Duncan. O! these flaws and starts—\nImpostors to true fear—would well become\nA woman's story at a winter's fire,\nAuthoriz'd by her grandam. Shame itself!\nWhy do you make such faces? When all's done\nYou look but on a stool.",
+          "kind": "speech"
+        },
+        {
+          "position": 96,
+          "text": "Prithee, see there! behold! look! lo! how say you?\nWhy, what care I? If thou canst nod, speak too.\nIf charnel-houses and our graves must send\nThose that we bury back, our monuments\nShall be the maws of kites.",
+          "kind": "speech"
+        },
+        {
+          "position": 97,
+          "text": "What! quite unmann'd in folly?",
+          "kind": "speech"
+        },
+        {
+          "position": 98,
+          "text": "If I stand here, I saw him.",
+          "kind": "speech"
+        },
+        {
+          "position": 99,
+          "text": "Fie, for shame!",
+          "kind": "speech"
+        },
+        {
+          "position": 100,
+          "text": "Blood hath been shed ere now, i' the olden time,\nEre human statute purg'd the gentle weal;\nAy, and since too, murders have been perform'd\nToo terrible for the ear: the time has been,\nThat, when the brains were out, the man would die,\nAnd there an end; but now they rise again,\nWith twenty mortal murders on their crowns,\nAnd push us from our stools: this is more strange\nThan such a murder is.",
+          "kind": "speech"
+        },
+        {
+          "position": 101,
+          "text": "My worthy lord,\nYour noble friends do lack you.",
+          "kind": "speech"
+        },
+        {
+          "position": 102,
+          "text": "I do forget.\nDo not muse at me, my most worthy friends;\nI have a strange infirmity, which is nothing\nTo those that know me. Come, love and health to all;\nThen, I'll sit down. Give me some wine; fill full.\nI drink to the general joy of the whole table,\nAnd to our dear friend Banquo, whom we miss;\nWould he were here! to all, and him, we thirst,\nAnd all to all.",
+          "kind": "speech"
+        },
+        {
+          "position": 103,
+          "text": "Our duties, and the pledge.",
+          "kind": "speech"
+        },
+        {
+          "position": 104,
+          "text": "Avaunt! and quit my sight! Let the earth hide thee!\nThy bones are marrowless, thy blood is cold;\nThou hast no speculation in those eyes\nWhich thou dost glare with.",
+          "kind": "speech"
+        },
+        {
+          "position": 105,
+          "text": "Think of this, good peers,\nBut as a thing of custom: 'tis no other;\nOnly it spoils the pleasure of the time.",
+          "kind": "speech"
+        },
+        {
+          "position": 106,
+          "text": "What man dare, I dare:\nApproach thou like the rugged Russian bear,\nThe arm'd rhinoceros, or the Hyrcan tiger;\nTake any shape but that, and my firm nerves\nShall never tremble: or be alive again,\nAnd dare me to the desert with thy sword;\nIf trembling I inhabit then, protest me\nThe baby of a girl. Hence, horrible shadow!\nUnreal mockery, hence!\nWhy, so; being gone,\nI am a man again. Pray you, sit still.",
+          "kind": "speech"
+        },
+        {
+          "position": 107,
+          "text": "You have displac'd the mirth, broke the good meeting,\nWith most admir'd disorder.",
+          "kind": "speech"
+        },
+        {
+          "position": 108,
+          "text": "Can such things be\nAnd overcome us like a summer's cloud,\nWithout our special wonder? You make me strange\nEven to the disposition that I owe,\nWhen now I think you can behold such sights,\nAnd keep the natural ruby of your cheeks,\nWhen mine are blanch'd with fear.",
+          "kind": "speech"
+        },
+        {
+          "position": 109,
+          "text": "What sights, my lord?",
+          "kind": "speech"
+        },
+        {
+          "position": 110,
+          "text": "I pray you, speak not; he grows worse and worse;\nQuestion enrages him. At once, good-night:\nStand not upon the order of your going,\nBut go at once.",
+          "kind": "speech"
+        },
+        {
+          "position": 111,
+          "text": "Good-night; and better health\nAttend his majesty!",
+          "kind": "speech"
+        },
+        {
+          "position": 112,
+          "text": "A kind good-night to all!",
+          "kind": "speech"
+        },
+        {
+          "position": 113,
+          "text": "It will have blood, they say; blood will have blood:\nStones have been known to move and trees to speak;\nAugures and understood relations have\nBy maggot-pies and choughs and rooks brought forth\nThe secret'st man of blood. What is the night?",
+          "kind": "speech"
+        },
+        {
+          "position": 114,
+          "text": "Almost at odds with morning, which is which.",
+          "kind": "speech"
+        },
+        {
+          "position": 115,
+          "text": "How sayst thou, that Macduff denies his person\nAt our great bidding?",
+          "kind": "speech"
+        },
+        {
+          "position": 116,
+          "text": "Did you send to him, sir?",
+          "kind": "speech"
+        },
+        {
+          "position": 117,
+          "text": "I hear it by the way; but I will send.\nThere's not a one of them but in his house\nI keep a servant fee'd. I will to-morrow—\nAnd betimes I will—to the weird sisters:\nMore shall they speak; for now I am bent to know,\nBy the worst means, the worst. For mine own good\nAll causes shall give way: I am in blood\nStepp'd in so far, that, should I wade no more,\nReturning were as tedious as go o'er.\nStrange things I have in head that will to hand,\nWhich must be acted ere they may be scann'd.",
+          "kind": "speech"
+        },
+        {
+          "position": 118,
+          "text": "You lack the season of all natures, sleep.",
+          "kind": "speech"
+        },
+        {
+          "position": 119,
+          "text": "Come, we'll to sleep. My strange and self-abuse\nIs the initiate fear that wants hard use:\nWe are yet but young in deed.",
+          "kind": "speech"
+        },
+        {
+          "position": 120,
+          "text": "Why, how now, Hecate! you look angerly.",
+          "kind": "speech"
+        },
+        {
+          "position": 121,
+          "text": "Have I not reason, beldams as you are,\nSaucy and overbold? How did you dare\nTo trade and traffic with Macbeth\nIn riddles and affairs of death;\nAnd I, the mistress of your charms,\nThe close contriver of all harms,\nWas never call'd to bear my part,\nOr show the glory of our art?\nAnd, which is worse, all you have done\nHath been but for a wayward son,\nSpiteful and wrathful; who, as others do,\nLoves for his own ends, not for you.\nBut make amends now: get you gone,\nAnd at the pit of Acheron\nMeet me i' the morning: thither he\nWill come to know his destiny:\nYour vessels and your spells provide,\nYour charms and every thing beside.\nI am for the air; this night I'll spend\nUnto a dismal and a fatal end:\nGreat business must be wrought ere noon:\nUpon the corner of the moon\nThere hangs a vaporous drop profound;\nI'll catch it ere it come to ground:\nAnd that distill' d by magic sleights\nShall raise such artificial sprites\nAs by the strength of their illusion\nShall draw him on to his confusion:\nHe shall spurn fate, scorn death, and bear\nHis hopes 'bove wisdom, grace, and fear;\nAnd you all know security\nIs mortals' chiefest enemy.\nHark! I am call'd; my little spirit, see,\nSits in a foggy cloud, and stays for me.",
+          "kind": "speech"
+        },
+        {
+          "position": 122,
+          "text": "Come, let's make haste; she'll soon be back again.",
+          "kind": "speech"
+        },
+        {
+          "position": 123,
+          "text": "My former speeches have but hit your thoughts,\nWhich can interpret further: only, I say,\nThings have been strangely borne. The gracious Duncan\nWas pitied of Macbeth: marry, he was dead:\nAnd the right-valiant Banquo walk'd too late;\nWhom, you may say, if 't please you, Fleance kill'd,\nFor Fleance fled: men must not walk too late.\nWho cannot want the thought how monstrous\nIt was for Malcolm and for Donalbain\nTo kill their gracious father? damned fact!\nHow it did grieve Macbeth! did he not straight\nIn pious rage the two delinquents tear,\nThat were the slaves of drink and thralls of sleep?\nWas not that nobly done? Ay, and wisely too;\nFor 'twould have anger'd any heart alive\nTo hear the men deny 't. So that, I say,\nHe has borne all things well; and I do think\nThat, had he Duncan's sons under his key,—\nAs, an 't please heaven, he shall not,—they should find\nWhat 'twere to kill a father; so should Fleance.\nBut, peace! for from broad words, and 'cause he fail'd\nHis presence at the tyrant's feast, I hear,\nMacduff lives in disgrace. Sir, can you tell\nWhere he bestows himself?",
+          "kind": "speech"
+        },
+        {
+          "position": 124,
+          "text": "The son of Duncan,\nFrom whom this tyrant holds the due of birth,\nLives in the English court, and is receiv'd\nOf the most pious Edward with such grace\nThat the malevolence of fortune nothing\nTakes from his high respect. Thither Macduff\nIs gone to pray the holy king, upon his aid\nTo wake Northumberland and warlike Siward:\nThat, by the help of these—with him above\nTo ratify the work—we may again\nGive to our tables meat, sleep to our nights,\nFree from our feasts and banquets bloody knives,\nDo faithful homage and receive free honours;\nAll which we pine for now. And this report\nHath so exasperate the king that he\nPrepares for some attempt at war.",
+          "kind": "speech"
+        },
+        {
+          "position": 125,
+          "text": "Sent he to Macduff?",
+          "kind": "speech"
+        },
+        {
+          "position": 126,
+          "text": "He did: and with an absolute, 'Sir, not I,'\nThe cloudy messenger turns me his back,\nAnd hums, as who should say, 'You'll rue the time\nThat clogs me with this answer.'",
+          "kind": "speech"
+        },
+        {
+          "position": 127,
+          "text": "And that well might\nAdvise him to a caution, to hold what distance\nHis wisdom can provide. Some holy angel\nFly to the court of England and unfold\nHis message ere he come, that a swift blessing\nMay soon return to this our suffering country\nUnder a hand accurs'd!",
+          "kind": "speech"
+        },
+        {
+          "position": 128,
+          "text": "I'll send my prayers with him!",
+          "kind": "speech"
+        }
+      ]
+    },
+    {
+      "id": "act-4",
+      "title": "Act IV",
+      "position": 4,
+      "sourceUrl": "https://en.wikisource.org/wiki/Macbeth_(1918)_Yale/Text/Act_IV",
+      "revisionUrl": "https://en.wikisource.org/w/index.php?oldid=11177216",
+      "snapshotPath": ".cache/corpus/sources/macbeth/act-4.html",
+      "snapshotSha256": "e5b7411facc65e9aa3a7c579c8cf30effc0bdfd18b430f87c3febb9260f54bac",
+      "passages": [
+        {
+          "position": 1,
+          "text": "Thrice the brinded cat hath mew'd.",
+          "kind": "speech"
+        },
+        {
+          "position": 2,
+          "text": "Thrice, and once the hedge-pig whin'd.",
+          "kind": "speech"
+        },
+        {
+          "position": 3,
+          "text": "Harpier cries; 'tis time, 'tis time.",
+          "kind": "speech"
+        },
+        {
+          "position": 4,
+          "text": "Round about the cauldron go;\nIn the poison'd entrails throw.\nToad, that under cold stone\nDays and nights hast thirty-one\nSwelter'd venom sleeping got,\nBoil thou first i' the charmed pot.",
+          "kind": "speech"
+        },
+        {
+          "position": 5,
+          "text": "Double, double, toil and trouble;\nFire burn, and cauldron bubble.",
+          "kind": "speech"
+        },
+        {
+          "position": 6,
+          "text": "Fillet of a fenny snake,\nIn the cauldron boil and bake;\nEye of newt, and toe of frog,\nWool of bat, and tongue of dog,\nAdder's fork, and blind-worm's sting,\nLizard's leg, and howlet's wing,\nFor a charm of powerful trouble,\nLike a hell-broth boil and bubble.",
+          "kind": "speech"
+        },
+        {
+          "position": 7,
+          "text": "Double, double, toil and trouble;\nFire burn, and cauldron bubble.",
+          "kind": "speech"
+        },
+        {
+          "position": 8,
+          "text": "Scale of dragon, tooth of wolf,\nWitches' mummy, maw and gulf\nOf the ravin'd salt-sea shark,\nRoot of hemlock digg'd i' the dark,\nLiver of blaspheming Jew,\nGall of goat, and slips of yew\nSliver'd in the moon's eclipse,\nNose of Turk, and Tartar's lips,\nFinger of birth-strangled babe\nDitch-deliver'd by a drab,\nMake the gruel thick and slab:\nAdd thereto a tiger's chaudron,\nFor the ingredients of our cauldron.",
+          "kind": "speech"
+        },
+        {
+          "position": 9,
+          "text": "Double, double, toil and trouble;\nFire burn, and cauldron bubble.",
+          "kind": "speech"
+        },
+        {
+          "position": 10,
+          "text": "Cool it with a baboon's blood;\nThen the charm is firm and good.",
+          "kind": "speech"
+        },
+        {
+          "position": 11,
+          "text": "O! well done! I commend your pains,\nAnd every one shall share i' the gains.\nAnd now about the cauldron sing,\nLike elves and fairies in a ring,\nEnchanting all that you put in.",
+          "kind": "speech"
+        },
+        {
+          "position": 12,
+          "text": "By the pricking of my thumbs,\nSomething wicked this way comes.\nOpen, locks,\nWhoever knocks.",
+          "kind": "speech"
+        },
+        {
+          "position": 13,
+          "text": "How now, you secret, black, and midnight hags!\nWhat is 't you do?",
+          "kind": "speech"
+        },
+        {
+          "position": 14,
+          "text": "A deed without a name.",
+          "kind": "speech"
+        },
+        {
+          "position": 15,
+          "text": "I conjure you, by that which you profess,—\nHowe'er you come to know it,—answer me:\nThough you untie the winds and let them fight\nAgainst the churches; though the yesty waves\nConfound and swallow navigation up;\nThough bladed corn be lodg'd and trees blown down;\nThough castles topple on their warders' heads;\nThough palaces and pyramids do slope\nTheir heads to their foundations; though the treasure\nOf Nature's germens tumble all together,\nEven till destruction sicken; answer me\nTo what I ask you.",
+          "kind": "speech"
+        },
+        {
+          "position": 16,
+          "text": "Speak.",
+          "kind": "speech"
+        },
+        {
+          "position": 17,
+          "text": "Demand.",
+          "kind": "speech"
+        },
+        {
+          "position": 18,
+          "text": "We'll answer.",
+          "kind": "speech"
+        },
+        {
+          "position": 19,
+          "text": "Say if thou'dst rather hear it from our mouths,\nOr from our masters'?",
+          "kind": "speech"
+        },
+        {
+          "position": 20,
+          "text": "Call 'em: let me see 'em.",
+          "kind": "speech"
+        },
+        {
+          "position": 21,
+          "text": "Pour in sow's blood, that hath eaten\nHer nine farrow; grease, that's sweaten\nFrom the murderer's gibbet, throw\nInto the flame.",
+          "kind": "speech"
+        },
+        {
+          "position": 22,
+          "text": "Come, high or low;\nThyself and office deftly show.",
+          "kind": "speech"
+        },
+        {
+          "position": 23,
+          "text": "Tell me, thou unknown power,—",
+          "kind": "speech"
+        },
+        {
+          "position": 24,
+          "text": "He knows thy thought:\nHear his speech, but say thou nought.",
+          "kind": "speech"
+        },
+        {
+          "position": 25,
+          "text": "Macbeth! Macbeth! Macbeth! beware Macduff;\nBeware the Thane of Fife. Dismiss me. Enough.",
+          "kind": "speech"
+        },
+        {
+          "position": 26,
+          "text": "Whate'er thou art, for thy good caution thanks;\nThou hast harp'd my fear aright. But one word more,—",
+          "kind": "speech"
+        },
+        {
+          "position": 27,
+          "text": "He will not be commanded: here's another,\nMore potent than the first.",
+          "kind": "speech"
+        },
+        {
+          "position": 28,
+          "text": "Macbeth! Macbeth! Macbeth!—",
+          "kind": "speech"
+        },
+        {
+          "position": 29,
+          "text": "Had I three ears, I'd hear thee.",
+          "kind": "speech"
+        },
+        {
+          "position": 30,
+          "text": "Be bloody, bold, and resolute; laugh to scorn\nThe power of man: for none of woman born\nShall harm Macbeth.",
+          "kind": "speech"
+        },
+        {
+          "position": 31,
+          "text": "Then live, Macduff: what need I fear of thee?\nBut yet I'll make assurance double sure,\nAnd take a bond of fate: thou shalt not live;\nThat I may tell pale-hearted fear it lies,\nAnd sleep in spite of thunder.",
+          "kind": "speech"
+        },
+        {
+          "position": 32,
+          "text": "Listen, but speak not to 't.",
+          "kind": "speech"
+        },
+        {
+          "position": 33,
+          "text": "Be lion-mettled, proud, and take no care\nWho chafes, who frets, or where conspirers are:\nMacbeth shall never vanquish'd be until\nGreat Birnam wood to high Dunsinane hill\nShall come against him.",
+          "kind": "speech"
+        },
+        {
+          "position": 34,
+          "text": "That will never be:\nWho can impress the forest, bid the tree\nUnfix his earth-bound root? Sweet bodements! good!\nRebellious dead, rise never till the wood\nOf Birnam rise, and our high-plac'd Macbeth\nShall live the lease of nature, pay his breath\nTo time and mortal custom. Yet my heart\nThrobs to know one thing: tell me—if your art\nCan tell so much,—shall Banquo's issue ever\nReign in this kingdom?",
+          "kind": "speech"
+        },
+        {
+          "position": 35,
+          "text": "Seek to know no more.",
+          "kind": "speech"
+        },
+        {
+          "position": 36,
+          "text": "I will be satisfied: deny me this,\nAnd an eternal curse fall on you! Let me know.\nWhy sinks that cauldron? and what noise is this?",
+          "kind": "speech"
+        },
+        {
+          "position": 37,
+          "text": "Show!",
+          "kind": "speech"
+        },
+        {
+          "position": 38,
+          "text": "Show!",
+          "kind": "speech"
+        },
+        {
+          "position": 39,
+          "text": "Show!",
+          "kind": "speech"
+        },
+        {
+          "position": 40,
+          "text": "Show his eyes, and grieve his heart;\nCome like shadows, so depart.",
+          "kind": "speech"
+        },
+        {
+          "position": 41,
+          "text": "Thou art too like the spirit of Banquo; down!\nThy crown does sear mine eyeballs: and thy hair,\nThou other gold-bound brow, is like the first:\nA third is like the former. Filthy hags!\nWhy do you show me this? A fourth! Start, eyes!\nWhat! will the line stretch out to the crack of doom?\nAnother yet? A seventh! I'll see no more:\nAnd yet the eighth appears, who bears a glass\nWhich shows me many more; and some I see\nThat two-fold balls and treble sceptres carry.\nHorrible sight! Now, I see, 'tis true;\nFor the blood-bolter'd Banquo smiles upon me,\nAnd points at them for his.\nWhat! is this so?",
+          "kind": "speech"
+        },
+        {
+          "position": 42,
+          "text": "Ay, sir, all this is so: but why\nStands Macbeth thus amazedly?\nCome, sisters, cheer we up his sprites,\nAnd show the best of our delights.\nI'll charm the air to give a sound,\nWhile you perform your antic round,\nThat this great king may kindly say,\nOur duties did his welcome pay.",
+          "kind": "speech"
+        },
+        {
+          "position": 43,
+          "text": "Where are they? Gone? Let this pernicious hour\nStand aye accursed in the calendar!\nCome in, without there!",
+          "kind": "speech"
+        },
+        {
+          "position": 44,
+          "text": "What's your Grace's will?",
+          "kind": "speech"
+        },
+        {
+          "position": 45,
+          "text": "Saw you the weird sisters?",
+          "kind": "speech"
+        },
+        {
+          "position": 46,
+          "text": "No, my lord.",
+          "kind": "speech"
+        },
+        {
+          "position": 47,
+          "text": "Came they not by you?",
+          "kind": "speech"
+        },
+        {
+          "position": 48,
+          "text": "No indeed, my lord.",
+          "kind": "speech"
+        },
+        {
+          "position": 49,
+          "text": "Infected be the air whereon they ride,\nAnd damn'd all those that trust them! I did hear\nThe galloping of horse: who was 't came by?",
+          "kind": "speech"
+        },
+        {
+          "position": 50,
+          "text": "'Tis two or three, my lord, that bring you word\nMacduff is fled to England.",
+          "kind": "speech"
+        },
+        {
+          "position": 51,
+          "text": "Fled to England!",
+          "kind": "speech"
+        },
+        {
+          "position": 52,
+          "text": "Ay, my good lord.",
+          "kind": "speech"
+        },
+        {
+          "position": 53,
+          "text": "Time, thou anticipat'st my dread exploits;\nThe flighty purpose never is o'ertook\nUnless the deed go with it; from this moment\nThe very firstlings of my heart shall be\nThe firstlings of my hand. And even now,\nTo crown my thoughts with acts, be it thought and done:\nThe castle of Macduff I will surprise;\nSeize upon Fife; give to the edge of the sword\nHis wife, his babes, and all unfortunate souls\nThat trace him in his line. No boasting like a fool;\nThis deed I'll do, before this purpose cool:\nBut no more sights! Where are these gentlemen?\nCome, bring me where they are.",
+          "kind": "speech"
+        },
+        {
+          "position": 54,
+          "text": "What had he done to make him fly the land?",
+          "kind": "speech"
+        },
+        {
+          "position": 55,
+          "text": "You must have patience, madam.",
+          "kind": "speech"
+        },
+        {
+          "position": 56,
+          "text": "He had none:\nHis flight was madness: when our actions do not,\nOur fears do make us traitors.",
+          "kind": "speech"
+        },
+        {
+          "position": 57,
+          "text": "You know not\nWhether it was his wisdom or his fear.",
+          "kind": "speech"
+        },
+        {
+          "position": 58,
+          "text": "Wisdom! to leave his wife, to leave his babes,\nHis mansion, and his titles, in a place\nFrom whence himself does fly? He loves us not;\nHe wants the natural touch; for the poor wren,\nThe most diminutive of birds, will fight—\nHer young ones in her nest—against the owl.\nAll is the fear and nothing is the love;\nAs little is the wisdom, where the flight\nSo runs against all reason.",
+          "kind": "speech"
+        },
+        {
+          "position": 59,
+          "text": "My dearest coz,\nI pray you, school yourself: but, for your husband,\nHe is noble, wise, judicious, and best knows\nThe fits o' the season. I dare not speak much further:\nBut cruel are the times, when we are traitors\nAnd do not know ourselves, when we hold rumour\nFrom what we fear, yet know not what we fear,\nBut float upon a wild and violent sea\nEach way and move. I take my leave of you:\nShall not be long but I'll be here again.\nThings at the worst will cease, or else climb upward\nTo what they were before. My pretty cousin,\nBlessing upon you!",
+          "kind": "speech"
+        },
+        {
+          "position": 60,
+          "text": "Father'd he is, and yet he's fatherless.",
+          "kind": "speech"
+        },
+        {
+          "position": 61,
+          "text": "I am so much a fool, should I stay longer,\nIt would be my disgrace, and your discomfort:\nI take my leave at once.",
+          "kind": "speech"
+        },
+        {
+          "position": 62,
+          "text": "Sirrah, your father's dead:\nAnd what will you do now? How will you live?",
+          "kind": "speech"
+        },
+        {
+          "position": 63,
+          "text": "As birds do, mother.",
+          "kind": "speech"
+        },
+        {
+          "position": 64,
+          "text": "What! with worms and flies?",
+          "kind": "speech"
+        },
+        {
+          "position": 65,
+          "text": "With what I get, I mean; and so do they.",
+          "kind": "speech"
+        },
+        {
+          "position": 66,
+          "text": "Poor bird! thou'dst never fear the net nor lime,\nThe pit-fall nor the gin.",
+          "kind": "speech"
+        },
+        {
+          "position": 67,
+          "text": "Why should I, mother? Poor birds they are not set for.\nMy father is not dead, for all your saying.",
+          "kind": "speech"
+        },
+        {
+          "position": 68,
+          "text": "Yes, he is dead: how wilt thou do for a father?",
+          "kind": "speech"
+        },
+        {
+          "position": 69,
+          "text": "Nay, how will you do for a husband?",
+          "kind": "speech"
+        },
+        {
+          "position": 70,
+          "text": "Why, I can buy me twenty at any market.",
+          "kind": "speech"
+        },
+        {
+          "position": 71,
+          "text": "Then you'll buy 'em to sell again.",
+          "kind": "speech"
+        },
+        {
+          "position": 72,
+          "text": "Thou speak'st with all thy wit; and yet, i' faith,\nWith wit enough for thee.",
+          "kind": "speech"
+        },
+        {
+          "position": 73,
+          "text": "Was my father a traitor, mother?",
+          "kind": "speech"
+        },
+        {
+          "position": 74,
+          "text": "Ay, that he was.",
+          "kind": "speech"
+        },
+        {
+          "position": 75,
+          "text": "What is a traitor?",
+          "kind": "speech"
+        },
+        {
+          "position": 76,
+          "text": "Why, one that swears and lies.",
+          "kind": "speech"
+        },
+        {
+          "position": 77,
+          "text": "And be all traitors that do so?",
+          "kind": "speech"
+        },
+        {
+          "position": 78,
+          "text": "Every one that does so is a traitor, and must be hanged.",
+          "kind": "speech"
+        },
+        {
+          "position": 79,
+          "text": "And must they all be hanged that swear and lie?",
+          "kind": "speech"
+        },
+        {
+          "position": 80,
+          "text": "Every one.",
+          "kind": "speech"
+        },
+        {
+          "position": 81,
+          "text": "Who must hang them?",
+          "kind": "speech"
+        },
+        {
+          "position": 82,
+          "text": "Why, the honest men.",
+          "kind": "speech"
+        },
+        {
+          "position": 83,
+          "text": "Then the liars and swearers are fools, for there are liars and swearers enow to beat the honest men, and hang up them.",
+          "kind": "speech"
+        },
+        {
+          "position": 84,
+          "text": "Now God help thee, poor monkey! But how wilt thou do for a father?",
+          "kind": "speech"
+        },
+        {
+          "position": 85,
+          "text": "If he were dead, you'd weep for him: if you would not, it were a good sign that I should quickly have a new father.",
+          "kind": "speech"
+        },
+        {
+          "position": 86,
+          "text": "Poor prattler, how thou talk'st!",
+          "kind": "speech"
+        },
+        {
+          "position": 87,
+          "text": "Bless you, fair dame! I am not to you known,\nThough in your state of honour I am perfect.\nI doubt some danger does approach you nearly:\nIf you will take a homely man's advice,\nBe not found here; hence, with your little ones.\nTo fright you thus, methinks, I am too savage;\nTo do worse to you were fell cruelty,\nWhich is too nigh your person. Heaven preserve you!\nI dare abide no longer.",
+          "kind": "speech"
+        },
+        {
+          "position": 88,
+          "text": "Whither should I fly?\nI have done no harm. But I remember now\nI am in this earthly world, where to do harm\nIs often laudable, to do good sometime\nAccounted dangerous folly; why then, alas,\nDo I put up that womanly defence,\nTo say I have done no harm?",
+          "kind": "speech"
+        },
+        {
+          "position": 89,
+          "text": "Where is your husband?",
+          "kind": "speech"
+        },
+        {
+          "position": 90,
+          "text": "I hope in no place so unsanctified\nWhere such as thou mayst find him.",
+          "kind": "speech"
+        },
+        {
+          "position": 91,
+          "text": "He's a traitor.",
+          "kind": "speech"
+        },
+        {
+          "position": 92,
+          "text": "Thou liest, thou shag-ear'd villain.",
+          "kind": "speech"
+        },
+        {
+          "position": 93,
+          "text": "What! you egg.\nYoung fry of treachery!",
+          "kind": "speech"
+        },
+        {
+          "position": 94,
+          "text": "He has killed me, mother:\nRun away, I pray you!",
+          "kind": "speech"
+        },
+        {
+          "position": 95,
+          "text": "Let us seek out some desolate shade, and there\nWeep our sad bosoms empty.",
+          "kind": "speech"
+        },
+        {
+          "position": 96,
+          "text": "Let us rather\nHold fast the mortal sword, and like good men\nBestride our down-fall'n birthdom; each new morn\nNew widows howl, new orphans cry, new sorrows\nStrike heaven on the face, that it resounds\nAs if it felt with Scotland and yell'd out\nLike syllable of dolour.",
+          "kind": "speech"
+        },
+        {
+          "position": 97,
+          "text": "What I believe I'll wail,\nWhat know believe, and what I can redress,\nAs I shall find the time to friend, I will.\nWhat you have spoke, it may be so perchance.\nThis tyrant, whose sole name blisters our tongues,\nWas once thought honest: you have lov'd him well;\nHe hath not touch'd you yet. I am young; but something\nYou may discern of him through me, and wisdom\nTo offer up a weak, poor, innocent lamb\nTo appease an angry god.",
+          "kind": "speech"
+        },
+        {
+          "position": 98,
+          "text": "I am not treacherous.",
+          "kind": "speech"
+        },
+        {
+          "position": 99,
+          "text": "But Macbeth is.\nA good and virtuous nature may recoil\nIn an imperial charge. But I shall crave your pardon;\nThat which you are my thoughts cannot transpose;\nAngels are bright still, though the brightest fell;\nThough all things foul would wear the brows of grace,\nYet grace must still look so.",
+          "kind": "speech"
+        },
+        {
+          "position": 100,
+          "text": "I have lost my hopes.",
+          "kind": "speech"
+        },
+        {
+          "position": 101,
+          "text": "Perchance even there where I did find my doubts.\nWhy in that rawness left you wife and child—\nThose precious motives, those strong knots of love—\nWithout leave-taking? I pray you,\nLet not my jealousies be your dishonours,\nBut mine own safeties: you may be rightly just,\nWhatever I shall think.",
+          "kind": "speech"
+        },
+        {
+          "position": 102,
+          "text": "Bleed, bleed, poor country!\nGreat tyranny, lay thou thy basis sure,\nFor goodness dare not check thee! wear thou thy wrongs;\nThe title is affeer'd! Fare thee well, lord:\nI would not be the villain that thou think'st\nFor the whole space that's in the tyrant's grasp,\nAnd the rich East to boot.",
+          "kind": "speech"
+        },
+        {
+          "position": 103,
+          "text": "Be not offended:\nI speak not as in absolute fear of you.\nI think our country sinks beneath the yoke;\nIt weeps, it bleeds, and each new day a gash\nIs added to her wounds: I think withal,\nThere would be hands uplifted in my right;\nAnd here from gracious England have I offer\nOf goodly thousands: but, for all this,\nWhen I shall tread upon the tyrant's head,\nOr wear it on my sword, yet my poor country\nShall have more vices than it had before,\nMore suffer, and more sundry ways than ever,\nBy him that shall succeed.",
+          "kind": "speech"
+        },
+        {
+          "position": 104,
+          "text": "What should he be?",
+          "kind": "speech"
+        },
+        {
+          "position": 105,
+          "text": "It is myself I mean; in whom I know\nAll the particulars of vice so grafted,\nThat, when they shall be open'd, black Macbeth\nWill seem as pure as snow, and the poor state\nEsteem him as a lamb, being compar'd\nWith my confineless harms.",
+          "kind": "speech"
+        },
+        {
+          "position": 106,
+          "text": "Not in the legions\nOf horrid hell can come a devil more damn'd\nIn evils to top Macbeth.",
+          "kind": "speech"
+        },
+        {
+          "position": 107,
+          "text": "I grant him bloody,\nLuxurious, avaricious, false, deceitful,\nSudden, malicious, smacking of every sin\nThat has a name; but there's no bottom, none,\nIn my voluptuousness: your wives, your daughters,\nYour matrons, and your maids, could not fill up\nThe cistern of my lust; and my desire\nAll continent impediments would o'erbear\nThat did oppose my will; better Macbeth\nThan such an one to reign.",
+          "kind": "speech"
+        },
+        {
+          "position": 108,
+          "text": "Boundless intemperance\nIn nature is a tyranny; it hath been\nTh' untimely emptying of the happy throne,\nAnd fall of many kings. But fear not yet\nTo take upon you what is yours; you may\nConvey your pleasures in a spacious plenty,\nAnd yet seem cold, the time you may so hoodwink.\nWe have willing dames enough; there cannot be\nThat vulture in you, to devour so many\nAs will to greatness dedicate themselves,\nFinding it so inclin'd.",
+          "kind": "speech"
+        },
+        {
+          "position": 109,
+          "text": "With this there grows\nIn my most ill-compos'd affection such\nA stanchless avarice that, were I king,\nI should cut off the nobles for their lands,\nDesire his jewels and this other's house;\nAnd my more-having would be as a sauce\nTo make me hunger more, that I should forge\nQuarrels unjust against the good and loyal,\nDestroying them for wealth.",
+          "kind": "speech"
+        },
+        {
+          "position": 110,
+          "text": "This avarice\nSticks deeper, grows with more pernicious root\nThan summer-seeming lust, and it hath been\nThe sword of our slain kings: yet do not fear;\nScotland hath foisons to fill up your will,\nOf your mere own; all these are portable,\nWith other graces weigh'd.",
+          "kind": "speech"
+        },
+        {
+          "position": 111,
+          "text": "But I have none: the king-becoming graces,\nAs justice, verity, temperance, stableness,\nBounty, perseverance, mercy, lowliness,\nDevotion, patience, courage, fortitude,\nI have no relish of them, but abound\nIn the division of each several crime,\nActing it many ways. Nay, had I power, I should\nPour the sweet milk of concord into hell,\nUproar the universal peace, confound\nAll unity on earth.",
+          "kind": "speech"
+        },
+        {
+          "position": 112,
+          "text": "O Scotland, Scotland!",
+          "kind": "speech"
+        },
+        {
+          "position": 113,
+          "text": "If such a one be fit to govern, speak:\nI am as I have spoken.",
+          "kind": "speech"
+        },
+        {
+          "position": 114,
+          "text": "Fit to govern.\nNo, not to live. O nation miserable,\nWith an untitled tyrant bloody-scepter'd,\nWhen shalt thou see thy wholesome days again,\nSince that the truest issue of thy throne\nBy his own interdiction stands accurs'd,\nAnd does blaspheme his breed? Thy royal father\nWas a most sainted king; the queen that bore thee,\nOft'ner upon her knees than on her feet,\nDied every day she liv'd. Fare thee well!\nThese evils thou repeat' st upon thyself\nHave banish'd me from Scotland. O my breast,\nThy hope ends here!",
+          "kind": "speech"
+        },
+        {
+          "position": 115,
+          "text": "Macduff, this noble passion,\nChild of integrity, hath from my soul\nWip'd the black scruples, reconcil'd my thoughts\nTo thy good truth and honour. Devilish Macbeth\nBy many of these trains hath sought to win me\nInto his power, and modest wisdom plucks me\nFrom over-credulous haste; but God above\nDeal between thee and me! for even now\nI put myself to thy direction, and\nUnspeak mine own detraction, here abjure\nThe taints and blames I laid upon myself,\nFor strangers to my nature. I am yet\nUnknown to woman, never was forsworn,\nScarcely have coveted what was mine own;\nAt no time broke my faith, would not betray\nThe devil to his fellow, and delight\nNo less in truth than life; my first false speaking\nWas this upon myself. What I am truly,\nIs thine and my poor country's to command;\nWhither indeed, before thy here-approach,\nOld Siward, with ten thousand warlike men,\nAlready at a point, was setting forth.\nNow we'll together, and the chance of goodness\nBe like our warranted quarrel. Why are you silent?",
+          "kind": "speech"
+        },
+        {
+          "position": 116,
+          "text": "Such welcome and unwelcome things at once\n'Tis hard to reconcile.",
+          "kind": "speech"
+        },
+        {
+          "position": 117,
+          "text": "Well; more anon. Comes the king forth, I pray you?",
+          "kind": "speech"
+        },
+        {
+          "position": 118,
+          "text": "Ay, sir; there are a crew of wretched souls\nThat stay his cure; their malady convinces\nThe great assay of art; but, at his touch,\nSuch sanctity hath heaven given his hand,\nThey presently amend.",
+          "kind": "speech"
+        },
+        {
+          "position": 119,
+          "text": "I thank you, doctor.",
+          "kind": "speech"
+        },
+        {
+          "position": 120,
+          "text": "What's the disease he means?",
+          "kind": "speech"
+        },
+        {
+          "position": 121,
+          "text": "'Tis call'd the evil:\nA most miraculous work in this good king,\nWhich often, since my here-remain in England,\nI have seen him do. How he solicits heaven,\nHimself best knows; but strangely-visited people,\nAll swoln and ulcerous, pitiful to the eye,\nThe mere despair of surgery, he cures;\nHanging a golden stamp about their necks,\nPut on with holy prayers; and 'tis spoken\nTo the succeeding royalty he leaves\nThe healing benediction. With this strange virtue,\nHe hath a heavenly gift of prophecy,\nAnd sundry blessings hang about his throne\nThat speak him full of grace.",
+          "kind": "speech"
+        },
+        {
+          "position": 122,
+          "text": "See, who comes here?",
+          "kind": "speech"
+        },
+        {
+          "position": 123,
+          "text": "My countryman; but yet I know him not.",
+          "kind": "speech"
+        },
+        {
+          "position": 124,
+          "text": "My ever-gentle cousin, welcome hither.",
+          "kind": "speech"
+        },
+        {
+          "position": 125,
+          "text": "I know him now. Good God, betimes remove\nThe means that make us strangers!",
+          "kind": "speech"
+        },
+        {
+          "position": 126,
+          "text": "Sir, amen.",
+          "kind": "speech"
+        },
+        {
+          "position": 127,
+          "text": "Stands Scotland where it did?",
+          "kind": "speech"
+        },
+        {
+          "position": 128,
+          "text": "Alas! poor country;\nAlmost afraid to know itself. It cannot\nBe call'd our mother, but our grave; where nothing,\nBut who knows nothing, is once seen to smile;\nWhere sighs and groans and shrieks that rent the air\nAre made, not mark'd; where violent sorrow seems\nA modern ecstasy; the dead man's knell\nIs there scarce ask'd for who; and good men's lives\nExpire before the flowers in their caps,\nDying or ere they sicken.",
+          "kind": "speech"
+        },
+        {
+          "position": 129,
+          "text": "O! relation\nToo nice, and yet too true!",
+          "kind": "speech"
+        },
+        {
+          "position": 130,
+          "text": "What's the newest grief?",
+          "kind": "speech"
+        },
+        {
+          "position": 131,
+          "text": "That of an hour's age doth hiss the speaker;\nEach minute teems a new one.",
+          "kind": "speech"
+        },
+        {
+          "position": 132,
+          "text": "How does my wife?",
+          "kind": "speech"
+        },
+        {
+          "position": 133,
+          "text": "Why, well.",
+          "kind": "speech"
+        },
+        {
+          "position": 134,
+          "text": "And all my children?",
+          "kind": "speech"
+        },
+        {
+          "position": 135,
+          "text": "Well too.",
+          "kind": "speech"
+        },
+        {
+          "position": 136,
+          "text": "The tyrant has not batter'd at their peace?",
+          "kind": "speech"
+        },
+        {
+          "position": 137,
+          "text": "No; they were well at peace when I did leave 'em.",
+          "kind": "speech"
+        },
+        {
+          "position": 138,
+          "text": "Be not a niggard of your speech: how goes 't?",
+          "kind": "speech"
+        },
+        {
+          "position": 139,
+          "text": "When I came hither to transport the tidings,\nWhich I have heavily borne, there ran a rumour\nOf many worthy fellows that were out;\nWhich was to my belief witness'd the rather\nFor that I saw the tyrant's power a-foot.\nNow is the time of help; your eye in Scotland\nWould create soldiers, make our women fight,\nTo doff their dire distresses.",
+          "kind": "speech"
+        },
+        {
+          "position": 140,
+          "text": "Be 't their comfort,\nWe are coming thither. Gracious England hath\nLent us good Siward and ten thousand men;\nAn older and a better soldier none\nThat Christendom gives out.",
+          "kind": "speech"
+        },
+        {
+          "position": 141,
+          "text": "Would I could answer\nThis comfort with the like! But I have words\nThat would be howl'd out in the desert air,\nWhere hearing should not latch them.",
+          "kind": "speech"
+        },
+        {
+          "position": 142,
+          "text": "What concern they?\nThe general cause? or is it a fee-grief\nDue to some single breast?",
+          "kind": "speech"
+        },
+        {
+          "position": 143,
+          "text": "No mind that's honest\nBut in it shares some woe, though the main part\nPertains to you alone.",
+          "kind": "speech"
+        },
+        {
+          "position": 144,
+          "text": "If it be mine,\nKeep it not from me; quickly let me have it.",
+          "kind": "speech"
+        },
+        {
+          "position": 145,
+          "text": "Let not your ears despise my tongue for ever,\nWhich shall possess them with the heaviest sound\nThat ever yet they heard.",
+          "kind": "speech"
+        },
+        {
+          "position": 146,
+          "text": "Hum! I guess at it.",
+          "kind": "speech"
+        },
+        {
+          "position": 147,
+          "text": "Your castle is surpris'd; your wife and babes\nSavagely slaughter'd; to relate the manner,\nWere, on the quarry of these murder'd deer,\nTo add the death of you.",
+          "kind": "speech"
+        },
+        {
+          "position": 148,
+          "text": "Merciful heaven!\nWhat! man; ne'er pull your hat upon your brows;\nGive sorrow words; the grief that does not speak\nWhispers the o'er-fraught heart and bids it break.",
+          "kind": "speech"
+        },
+        {
+          "position": 149,
+          "text": "My children too?",
+          "kind": "speech"
+        },
+        {
+          "position": 150,
+          "text": "Wife, children, servants, all\nThat could be found.",
+          "kind": "speech"
+        },
+        {
+          "position": 151,
+          "text": "And I must be from thence!\nMy wife kill'd too?",
+          "kind": "speech"
+        },
+        {
+          "position": 152,
+          "text": "I have said.",
+          "kind": "speech"
+        },
+        {
+          "position": 153,
+          "text": "Be comforted:\nLet's make us medicines of our great revenge,\nTo cure this deadly grief.",
+          "kind": "speech"
+        },
+        {
+          "position": 154,
+          "text": "He has no children. All my pretty ones?\nDid you say all? O hell-kite! All?\nWhat! all my pretty chickens and their dam\nAt one fell swoop?",
+          "kind": "speech"
+        },
+        {
+          "position": 155,
+          "text": "Dispute it like a man.",
+          "kind": "speech"
+        },
+        {
+          "position": 156,
+          "text": "I shall do so;\nBut I must also feel it as a man:\nI cannot but remember such things were,\nThat were most precious to me. Did heaven look on,\nAnd would not take their part? Sinful Macduff!\nThey were all struck for thee. Naught that I am,\nNot for their own demerits, but for mine,\nFell slaughter on their souls. Heaven rest them now!",
+          "kind": "speech"
+        },
+        {
+          "position": 157,
+          "text": "Be this the whetstone of your sword: let grief\nConvert to anger; blunt not the heart, enrage it.",
+          "kind": "speech"
+        },
+        {
+          "position": 158,
+          "text": "O! I could play the woman with mine eyes,\nAnd braggart with my tongue. But, gentle heavens,\nCut short all intermission; front to front\nBring thou this fiend of Scotland and myself;\nWithin my sword's length set him; if he scape,\nHeaven forgive him too!",
+          "kind": "speech"
+        },
+        {
+          "position": 159,
+          "text": "This tune goes manly.\nCome, go we to the king; our power is ready;\nOur lack is nothing but our leave. Macbeth\nIs ripe for shaking, and the powers above\nPut on their instruments. Receive what cheer you may;\nThe night is long that never finds the day.",
+          "kind": "speech"
+        }
+      ]
+    },
+    {
+      "id": "act-5",
+      "title": "Act V",
+      "position": 5,
+      "sourceUrl": "https://en.wikisource.org/wiki/Macbeth_(1918)_Yale/Text/Act_V",
+      "revisionUrl": "https://en.wikisource.org/w/index.php?oldid=11177425",
+      "snapshotPath": ".cache/corpus/sources/macbeth/act-5.html",
+      "snapshotSha256": "6ba97d4b14b84cf8ec00e3d18afd908eed3151083065dc6a1c5c8f8140e017da",
+      "passages": [
+        {
+          "position": 1,
+          "text": "I have two nights watched with you, but can perceive no truth in your report. When was it she last walked?",
+          "kind": "speech"
+        },
+        {
+          "position": 2,
+          "text": "Since his majesty went into the field, I have seen her rise from her bed, throw her night-gown upon her, unlock her closet, take forth paper, fold it, write upon 't, read it, afterwards seal it, and again return to bed; yet all this while in a most fast sleep.",
+          "kind": "speech"
+        },
+        {
+          "position": 3,
+          "text": "A great perturbation in nature, to receive at once the benefit of sleep and do the effects of watching! In this slumbery agitation, besides her walking and other actual performances, what, at any time, have you heard her say?",
+          "kind": "speech"
+        },
+        {
+          "position": 4,
+          "text": "That, sir, which I will not report after her.",
+          "kind": "speech"
+        },
+        {
+          "position": 5,
+          "text": "You may to me, and 'tis most meet you should.",
+          "kind": "speech"
+        },
+        {
+          "position": 6,
+          "text": "Neither to you nor any one, having no witness to confirm my speech. Lo you! here she comes. This is her very guise; and, upon my life, fast asleep. Observe her; stand close.",
+          "kind": "speech"
+        },
+        {
+          "position": 7,
+          "text": "How came she by that light?",
+          "kind": "speech"
+        },
+        {
+          "position": 8,
+          "text": "Why, it stood by her: she has light by her continually; 'tis her command.",
+          "kind": "speech"
+        },
+        {
+          "position": 9,
+          "text": "You see, her eyes are open.",
+          "kind": "speech"
+        },
+        {
+          "position": 10,
+          "text": "Ay, but their sense are shut.",
+          "kind": "speech"
+        },
+        {
+          "position": 11,
+          "text": "What is it she does now? Look, how she rubs her hands.",
+          "kind": "speech"
+        },
+        {
+          "position": 12,
+          "text": "It is an accustomed action with her, to seem thus washing her hands. I have known her continue in this a quarter of an hour.",
+          "kind": "speech"
+        },
+        {
+          "position": 13,
+          "text": "Yet here's a spot.",
+          "kind": "speech"
+        },
+        {
+          "position": 14,
+          "text": "Hark! she speaks. I will set down what comes from her, to satisfy my remembrance the more strongly.",
+          "kind": "speech"
+        },
+        {
+          "position": 15,
+          "text": "Out, damned spot! out, I say! One; two: why, then, 'tis time to do 't. Hell is murky! Fie, my lord, fie! a soldier, and afeard? What need we fear who knows it, when none can call our power to account? Yet who would have thought the old man to have had so much blood in him?",
+          "kind": "speech"
+        },
+        {
+          "position": 16,
+          "text": "Do you mark that?",
+          "kind": "speech"
+        },
+        {
+          "position": 17,
+          "text": "The Thane of Fife had a wife: where is she now? What! will these hands ne'er be clean? No more o' that, my lord, no more o' that: you mar all with this starting.",
+          "kind": "speech"
+        },
+        {
+          "position": 18,
+          "text": "Go to, go to; you have known what you should not.",
+          "kind": "speech"
+        },
+        {
+          "position": 19,
+          "text": "She has spoke what she should not, I am sure of that: Heaven knows what she has known.",
+          "kind": "speech"
+        },
+        {
+          "position": 20,
+          "text": "Here's the smell of the blood still: all the perfumes of Arabia will not sweeten this little hand. Oh! oh! oh!",
+          "kind": "speech"
+        },
+        {
+          "position": 21,
+          "text": "What a sigh is there! The heart is sorely charged.",
+          "kind": "speech"
+        },
+        {
+          "position": 22,
+          "text": "I would not have such a heart in my bosom for the dignity of the whole body.",
+          "kind": "speech"
+        },
+        {
+          "position": 23,
+          "text": "Well, well, well.",
+          "kind": "speech"
+        },
+        {
+          "position": 24,
+          "text": "Pray God it be, sir.",
+          "kind": "speech"
+        },
+        {
+          "position": 25,
+          "text": "This disease is beyond my practice: yet I have known those which have walked in their sleep who have died holily in their beds.",
+          "kind": "speech"
+        },
+        {
+          "position": 26,
+          "text": "Wash your hands, put on your night-gown; look not so pale. I tell you yet again, Banquo's buried; he cannot come out on 's grave.",
+          "kind": "speech"
+        },
+        {
+          "position": 27,
+          "text": "Even so?",
+          "kind": "speech"
+        },
+        {
+          "position": 28,
+          "text": "To bed, to bed: there's knocking at the gate. Come, come, come, come, give me your hand. What's done cannot be undone. To bed, to bed, to bed.",
+          "kind": "speech"
+        },
+        {
+          "position": 29,
+          "text": "Will she go now to bed?",
+          "kind": "speech"
+        },
+        {
+          "position": 30,
+          "text": "Directly.",
+          "kind": "speech"
+        },
+        {
+          "position": 31,
+          "text": "Foul whisperings are abroad. Unnatural deeds Do breed unnatural troubles; infected minds To their deaf pillows will discharge their secrets; More needs she the divine than the physician. God, God forgive us all! Look after her; Remove from her the means of all annoyance, And still keep eyes upon her. So, good-night: My mind she has mated, and amaz'd my sight. I think, but dare not speak.",
+          "kind": "speech"
+        },
+        {
+          "position": 32,
+          "text": "Good night, good doctor.",
+          "kind": "speech"
+        },
+        {
+          "position": 33,
+          "text": "The English power is near, led on by Malcolm,\nHis uncle Siward, and the good Macduff.\nRevenges burn in them; for their dear causes\nWould to the bleeding and the grim alarm\nExcite the mortified man.",
+          "kind": "speech"
+        },
+        {
+          "position": 34,
+          "text": "Near Birnam wood\nShall we well meet them; that way are they coming.",
+          "kind": "speech"
+        },
+        {
+          "position": 35,
+          "text": "Who knows if Donalbain be with his brother?",
+          "kind": "speech"
+        },
+        {
+          "position": 36,
+          "text": "For certain, sir, he is not: I have a file\nOf all the gentry: there is Siward's son,\nAnd many unrough youths that even now\nProtest their first of manhood.",
+          "kind": "speech"
+        },
+        {
+          "position": 37,
+          "text": "What does the tyrant?",
+          "kind": "speech"
+        },
+        {
+          "position": 38,
+          "text": "Great Dunsinane he strongly fortifies.\nSome say he's mad; others that lesser hate him\nDo call it valiant fury; but, for certain,\nHe cannot buckle his distemper'd cause\nWithin the belt of rule.",
+          "kind": "speech"
+        },
+        {
+          "position": 39,
+          "text": "Now does he feel\nHis secret murders sticking on his hands;\nNow minutely revolts upbraid his faith-breach;\nThose he commands move only in command,\nNothing in love; now does he feel his title\nHang loose about him, like a giant's robe\nUpon a dwarfish thief.",
+          "kind": "speech"
+        },
+        {
+          "position": 40,
+          "text": "Who then shall blame\nHis pester'd senses to recoil and start,\nWhen all that is within him does condemn\nItself for being there?",
+          "kind": "speech"
+        },
+        {
+          "position": 41,
+          "text": "Well, march we on,\nTo give obedience where 'tis truly ow'd;\nMeet we the medicine of the sickly weal,\nAnd with him pour we, in our country's purge,\nEach drop of us.",
+          "kind": "speech"
+        },
+        {
+          "position": 42,
+          "text": "Or so much as it needs\nTo dew the sovereign flower and drown the weeds.\nMake we our march towards Birnam.",
+          "kind": "speech"
+        },
+        {
+          "position": 43,
+          "text": "Bring me no more reports; let them fly all:\nTill Birnam wood remove to Dunsinane\nI cannot taint with fear. What's the boy Malcolm?\nWas he not born of woman? The spirits that know\nAll mortal consequences have pronounc'd me thus:\n'Fear not, Macbeth; no man that's born of woman\nShall e'er have power upon thee.' Then fly, false thanes,\nAnd mingle with the English epicures:\nThe mind I sway by and the heart I bear\nShall never sag with doubt nor shake with fear.",
+          "kind": "speech"
+        },
+        {
+          "position": 44,
+          "text": "There is ten thousand—",
+          "kind": "speech"
+        },
+        {
+          "position": 45,
+          "text": "Geese, villain?",
+          "kind": "speech"
+        },
+        {
+          "position": 46,
+          "text": "Soldiers, sir.",
+          "kind": "speech"
+        },
+        {
+          "position": 47,
+          "text": "Go, prick thy face, and over-red thy fear,\nThou lily-liver'd boy. What soldiers, patch?\nDeath of thy soul! those linen cheeks of thine\nAre counsellors to fear. What soldiers, whey-face?",
+          "kind": "speech"
+        },
+        {
+          "position": 48,
+          "text": "The English force, so please you.",
+          "kind": "speech"
+        },
+        {
+          "position": 49,
+          "text": "Take thy face hence.\nSeyton!—I am sick at heart\nWhen I behold—Seyton, I say!—This push\nWill cheer me ever or disease me now.\nI have liv'd long enough: my way of life\nIs fall'n into the sear, the yellow leaf;\nAnd that which should accompany old age,\nAs honour, love, obedience, troops of friends,\nI must not look to have; but, in their stead,\nCurses, not loud but deep, mouth-honour, breath,\nWhich the poor heart would fain deny, and dare not.\nSeyton!",
+          "kind": "speech"
+        },
+        {
+          "position": 50,
+          "text": "What's your gracious pleasure?",
+          "kind": "speech"
+        },
+        {
+          "position": 51,
+          "text": "What news more?",
+          "kind": "speech"
+        },
+        {
+          "position": 52,
+          "text": "All is confirm'd, my lord, which was reported.",
+          "kind": "speech"
+        },
+        {
+          "position": 53,
+          "text": "I'll fight till from my bones my flesh be hack'd.\nGive me my armour.",
+          "kind": "speech"
+        },
+        {
+          "position": 54,
+          "text": "'Tis not needed yet.",
+          "kind": "speech"
+        },
+        {
+          "position": 55,
+          "text": "I'll put it on.\nSend out moe horses, skirr the country round;\nHang those that talk of fear. Give me mine armour.\nHow does your patient, doctor?",
+          "kind": "speech"
+        },
+        {
+          "position": 56,
+          "text": "Not so sick, my lord,\nAs she is troubled with thick-coming fancies,\nThat keep her from her rest.",
+          "kind": "speech"
+        },
+        {
+          "position": 57,
+          "text": "Cure her of that:\nCanst thou not minister to a mind diseas'd,\nPluck from the memory a rooted sorrow,\nRaze out the written troubles of the brain,\nAnd with some sweet oblivious antidote\nCleanse the stuff'd bosom of that perilous stuff\nWhich weighs upon the heart?",
+          "kind": "speech"
+        },
+        {
+          "position": 58,
+          "text": "Therein the patient\nMust minister to himself.",
+          "kind": "speech"
+        },
+        {
+          "position": 59,
+          "text": "Throw physic to the dogs; I'll none of it.\nCome, put mine armour on; give me my staff.\nSeyton, send out.—Doctor, the thanes fly from me.—\nCome, sir, dispatch.—If thou couldst, doctor, cast\nThe water of my land, find her disease,\nAnd purge it to a sound and pristine health,\nI would applaud thee to the very echo,\nThat should applaud again.—Pull 't off, I say.—\nWhat rhubarb, senna, or what purgative drug\nWould scour these English hence? Hear'st thou of them?",
+          "kind": "speech"
+        },
+        {
+          "position": 60,
+          "text": "Ay, my good lord; your royal preparation\nMakes us hear something.",
+          "kind": "speech"
+        },
+        {
+          "position": 61,
+          "text": "Bring it after me.\nI will not be afraid of death and bane\nTill Birnam forest come to Dunsinane.",
+          "kind": "speech"
+        },
+        {
+          "position": 62,
+          "text": "Were I from Dunsinane away and clear,\nProfit again should hardly draw me here.",
+          "kind": "speech"
+        },
+        {
+          "position": 63,
+          "text": "Cousins, I hope the days are near at hand\nThat chambers will be safe.",
+          "kind": "speech"
+        },
+        {
+          "position": 64,
+          "text": "We doubt it nothing.",
+          "kind": "speech"
+        },
+        {
+          "position": 65,
+          "text": "What wood is this before us?",
+          "kind": "speech"
+        },
+        {
+          "position": 66,
+          "text": "The wood of Birnam.",
+          "kind": "speech"
+        },
+        {
+          "position": 67,
+          "text": "Let every soldier hew him down bough\nAnd bear 't before him: thereby shall we shadow\nThe numbers of our host, and make discovery\nErr in report of us.",
+          "kind": "speech"
+        },
+        {
+          "position": 68,
+          "text": "It shall be done.",
+          "kind": "speech"
+        },
+        {
+          "position": 69,
+          "text": "We learn no other but the confident tyrant\nKeeps still in Dunsinane, and will endure\nOur setting down before 't.",
+          "kind": "speech"
+        },
+        {
+          "position": 70,
+          "text": "'Tis his main hope;\nFor where there is advantage to be given,\nBoth more and less have given him the revolt,\nAnd none serve with him but constrained things\nWhose hearts are absent too.",
+          "kind": "speech"
+        },
+        {
+          "position": 71,
+          "text": "Let our just censures\nAttend the true event, and put we on\nIndustrious soldiership.",
+          "kind": "speech"
+        },
+        {
+          "position": 72,
+          "text": "The time approaches\nThat will with due decision make us know\nWhat we shall say we have and what we owe.\nThoughts speculative their unsure hopes relate,\nBut certain issue strokes must arbitrate,\nTowards which advance the war.",
+          "kind": "speech"
+        },
+        {
+          "position": 73,
+          "text": "Hang out our banners on the outward walls;\nThe cry is still, 'They come'; our castle's strength\nWill laugh a siege to scorn; here let them lie\nTill famine and the ague eat them up;\nWere they not forc'd with those that should be ours,\nWe might have met them dareful, beard to beard,\nAnd beat them backward home.\nWhat is that noise?",
+          "kind": "speech"
+        },
+        {
+          "position": 74,
+          "text": "It is the cry of women, my good lord.",
+          "kind": "speech"
+        },
+        {
+          "position": 75,
+          "text": "I have almost forgot the taste of fears.\nThe time has been, my senses would have cool'd\nTo hear a night-shriek, and my fell of hair\nWould at a dismal treatise rouse and stir\nAs life were in 't. I have supp'd full with horrors;\nDireness, familiar to my slaughterous thoughts,\nCannot once start me.",
+          "kind": "speech"
+        },
+        {
+          "position": 76,
+          "text": "The queen, my lord, is dead.",
+          "kind": "speech"
+        },
+        {
+          "position": 77,
+          "text": "She should have died hereafter;\nThere would have been a time for such a word.\nTo-morrow, and to-morrow, and to-morrow,\nCreeps in this petty pace from day to day,\nTo the last syllable of recorded time;\nAnd all our yesterdays have lighted fools\nThe way to dusty death. Out, out, brief candle!\nLife's but a walking shadow, a poor player\nThat struts and frets his hour upon the stage,\nAnd then is heard no more; it is a tale\nTold by an idiot, full of sound and fury,\nSignifying nothing.",
+          "kind": "speech"
+        },
+        {
+          "position": 78,
+          "text": "Gracious my lord,\nI should report that which I say I saw,\nBut know not how to do it.",
+          "kind": "speech"
+        },
+        {
+          "position": 79,
+          "text": "Well, say, sir.",
+          "kind": "speech"
+        },
+        {
+          "position": 80,
+          "text": "As I did stand my watch upon the hill,\nI look'd toward Birnam, and anon, methought,\nThe wood began to move.",
+          "kind": "speech"
+        },
+        {
+          "position": 81,
+          "text": "Liar and slave!",
+          "kind": "speech"
+        },
+        {
+          "position": 82,
+          "text": "Let me endure your wrath if 't be not so:\nWithin this three mile may you see it coming;\nI say, a moving grove.",
+          "kind": "speech"
+        },
+        {
+          "position": 83,
+          "text": "If thou speak'st false,\nUpon the next tree shalt thou hang alive,\nTill famine cling thee; if thy speech be sooth,\nI care not if thou dost for me as much.\nI pull in resolution and begin\nTo doubt the equivocation of the fiend\nThat lies like truth; 'Fear not, till Birnam wood\nDo come to Dunsinane'; and now a wood\nComes toward Dunsinane. Arm, arm, and out!\nIf this which he avouches does appear,\nThere is nor flying hence, nor tarrying here.\nI 'gin to be aweary of the sun,\nAnd wish the estate o' the world were now undone.\nRing the alarum-bell! Blow, wind! come, wrack!\nAt least we'll die with harness on our back.",
+          "kind": "speech"
+        },
+        {
+          "position": 84,
+          "text": "Now near enough; your leavy screens throw down,\nAnd show like those you are. You, worthy uncle,\nShall, with my cousin, your right-noble son,\nLead our first battle; worthy Macduff and we\nShall take upon 's what else remains to do,\nAccording to our order.",
+          "kind": "speech"
+        },
+        {
+          "position": 85,
+          "text": "Fare you well.\nDo we but find the tyrant's power to-night,\nLet us be beaten, if we cannot fight.",
+          "kind": "speech"
+        },
+        {
+          "position": 86,
+          "text": "Make all our trumpets speak; give them all breath,\nThose clamorous harbingers of blood and death.",
+          "kind": "speech"
+        },
+        {
+          "position": 87,
+          "text": "They have tied me to a stake; I cannot fly,\nBut bear-like I must fight the course. What's he\nThat was not born of woman? Such a one\nAm I to fear, or none.",
+          "kind": "speech"
+        },
+        {
+          "position": 88,
+          "text": "What is thy name?",
+          "kind": "speech"
+        },
+        {
+          "position": 89,
+          "text": "Thou'lt be afraid to hear it.",
+          "kind": "speech"
+        },
+        {
+          "position": 90,
+          "text": "No; though thou call'st thyself a hotter name\nThan any is in hell.",
+          "kind": "speech"
+        },
+        {
+          "position": 91,
+          "text": "My name's Macbeth.",
+          "kind": "speech"
+        },
+        {
+          "position": 92,
+          "text": "The devil himself could not pronounce a title\nMore hateful to mine ear.",
+          "kind": "speech"
+        },
+        {
+          "position": 93,
+          "text": "No, nor more fearful.",
+          "kind": "speech"
+        },
+        {
+          "position": 94,
+          "text": "Thou liest, abhorred tyrant; with my sword\nI'll prove the lie thou speak'st.",
+          "kind": "speech"
+        },
+        {
+          "position": 95,
+          "text": "Thou wast born of woman:\nBut swords I smile at, weapons laugh to scorn,\nBrandish'd by man that's of a woman born.",
+          "kind": "speech"
+        },
+        {
+          "position": 96,
+          "text": "That way the noise is. Tyrant, show thy face:\nIf thou be'st slain and with no stroke of mine,\nMy wife and children's ghosts will haunt me still.\nI cannot strike at wretched kerns, whose arms\nAre hir'd to bear their staves: either thou, Macbeth,\nOr else my sword with an unbatter'd edge\nI sheathe again undeeded. There thou shouldst be;\nBy this great clatter, one of greatest note\nSeems bruited. Let me find him, fortune!\nAnd more I beg not.",
+          "kind": "speech"
+        },
+        {
+          "position": 97,
+          "text": "This way, my lord; the castle's gently render'd:\nThe tyrant's people on both sides do fight;\nThe noble thanes do bravely in the war;\nThe day almost itself professes yours,\nAnd little is to do.",
+          "kind": "speech"
+        },
+        {
+          "position": 98,
+          "text": "We have met with foes\nThat strike beside us.",
+          "kind": "speech"
+        },
+        {
+          "position": 99,
+          "text": "Enter, sir, the castle.",
+          "kind": "speech"
+        },
+        {
+          "position": 100,
+          "text": "Why should I play the Roman fool, and die\nOn mine own sword? whiles I see lives, the gashes\nDo better upon them.",
+          "kind": "speech"
+        },
+        {
+          "position": 101,
+          "text": "Turn, hell-hound, turn!",
+          "kind": "speech"
+        },
+        {
+          "position": 102,
+          "text": "Of all men else I have avoided thee:\nBut get thee back, my soul is too much charg'd\nWith blood of thine already.",
+          "kind": "speech"
+        },
+        {
+          "position": 103,
+          "text": "I have no words;\nMy voice is in my sword, thou bloodier villain\nThan terms can give thee out!",
+          "kind": "speech"
+        },
+        {
+          "position": 104,
+          "text": "Thou losest labour:\nAs easy mayst thou the intrenchant air\nWith thy keen sword impress, as make me bleed:\nLet fall thy blade on vulnerable crests;\nI bear a charmed life, which must not yield\nTo one of woman born.",
+          "kind": "speech"
+        },
+        {
+          "position": 105,
+          "text": "Despair thy charm;\nAnd let the angel whom thou still hast serv'd\nTell thee, Macduff was from his mother's womb\nUntimely ripp'd.",
+          "kind": "speech"
+        },
+        {
+          "position": 106,
+          "text": "Accursed be that tongue that tells me so,\nFor it hath cow'd my better part of man:\nAnd be these juggling fiends no more believ'd,\nThat palter with us in a double sense;\nThat keep the word of promise to our ear,\nAnd break it to our hope. I'll not fight with thee.",
+          "kind": "speech"
+        },
+        {
+          "position": 107,
+          "text": "Then yield thee, coward,\nAnd live to be the show and gaze o' the time:\nWe'll have thee, as our rarer monsters are,\nPainted upon a pole, and underwrit,\n'Here may you see the tyrant.'",
+          "kind": "speech"
+        },
+        {
+          "position": 108,
+          "text": "I will not yield,\nTo kiss the ground before young Malcolm's feet,\nAnd to be baited with the rabble's curse.\nThough Birnam wood be come to Dunsinane,\nAnd thou oppos'd, being of no woman born,\nYet I will try the last: before my body\nI throw my warlike shield. Lay on, Macduff,\nAnd damn'd be him that first cries, 'Hold, enough!'",
+          "kind": "speech"
+        },
+        {
+          "position": 109,
+          "text": "I would the friends we miss were safe arriv'd.",
+          "kind": "speech"
+        },
+        {
+          "position": 110,
+          "text": "Some must go off; and yet, by these I see,\nSo great a day as this is cheaply bought.",
+          "kind": "speech"
+        },
+        {
+          "position": 111,
+          "text": "Macduff is missing, and your noble son.",
+          "kind": "speech"
+        },
+        {
+          "position": 112,
+          "text": "Your son, my lord, has paid a soldier's debt:\nHe only liv'd but till he was a man;\nThe which no sooner had his prowess confirm'd\nIn the unshrinking station where he fought,\nBut like a man he died.",
+          "kind": "speech"
+        },
+        {
+          "position": 113,
+          "text": "Then he is dead?",
+          "kind": "speech"
+        },
+        {
+          "position": 114,
+          "text": "Ay, and brought off the field. Your cause of sorrow\nMust not be measur'd by his worth, for then\nIt hath no end.",
+          "kind": "speech"
+        },
+        {
+          "position": 115,
+          "text": "Had he his hurts before?",
+          "kind": "speech"
+        },
+        {
+          "position": 116,
+          "text": "Ay, on the front.",
+          "kind": "speech"
+        },
+        {
+          "position": 117,
+          "text": "Why then, God's soldier be he!\nHad I as many sons as I have hairs,\nI would not wish them to a fairer death:\nAnd so, his knell is knoll'd.",
+          "kind": "speech"
+        },
+        {
+          "position": 118,
+          "text": "He's worth more sorrow,\nAnd that I'll spend for him.",
+          "kind": "speech"
+        },
+        {
+          "position": 119,
+          "text": "He's worth no more;\nThey say he parted well, and paid his score:\nAnd so, God be with him! Here comes newer comfort.",
+          "kind": "speech"
+        },
+        {
+          "position": 120,
+          "text": "Hail, king! for so thou art. Behold, where stands\nThe usurper's cursed head: the time is free:\nI see thee compass'd with thy kingdom's pearl,\nThat speak my salutation in their minds;\nWhose voices I desire aloud with mine;\nHail, King of Scotland!",
+          "kind": "speech"
+        },
+        {
+          "position": 121,
+          "text": "Hail, King of Scotland!",
+          "kind": "speech"
+        },
+        {
+          "position": 122,
+          "text": "We shall not spend a large expense of time\nBefore we reckon with your several loves,\nAnd make us even with you. My thanes and kinsmen,\nHenceforth be earls, the first that ever Scotland\nIn such an honour nam'd. What's more to do,\nWhich would be planted newly with the time,\nAs calling home our exil'd friends abroad\nThat fled the snares of watchful tyranny;\nProducing forth the cruel ministers\nOf this dead butcher and his fiend-like queen,\nWho, as 'tis thought, by self and violent hands\nTook off her life; this, and what needful else\nThat calls upon us, by the grace of Grace\nWe will perform in measure, time, and place:\nSo, thanks to all at once and to each one,\nWhom we invite to see us crown'd at Scone.",
+          "kind": "speech"
+        }
+      ]
+    }
+  ]
+}

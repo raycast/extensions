@@ -1,0 +1,93 @@
+[
+  {
+    "id": 1,
+    "slug": "los-invalidos",
+    "title": "Los inválidos",
+    "edition": 1904,
+    "url": "https://es.wikisource.org/wiki/Los_inv%C3%A1lidos_(Lillo)"
+  },
+  {
+    "id": 2,
+    "slug": "la-compuerta-numero-12",
+    "title": "La compuerta número 12",
+    "edition": 1904,
+    "url": "https://es.wikisource.org/wiki/La_compuerta_n%C3%BAmero_12"
+  },
+  {
+    "id": 3,
+    "slug": "el-grisu",
+    "title": "El grisú",
+    "edition": 1904,
+    "url": "https://es.wikisource.org/wiki/El_gris%C3%BA"
+  },
+  {
+    "id": 4,
+    "slug": "el-pago",
+    "title": "El pago",
+    "edition": 1904,
+    "url": "https://es.wikisource.org/wiki/El_pago"
+  },
+  {
+    "id": 5,
+    "slug": "el-chiflon-del-diablo",
+    "title": "El Chiflón del Diablo",
+    "edition": 1904,
+    "url": "https://es.wikisource.org/wiki/El_Chifl%C3%B3n_del_Diablo"
+  },
+  {
+    "id": 6,
+    "slug": "el-pozo",
+    "title": "El pozo",
+    "edition": 1904,
+    "url": "https://es.wikisource.org/wiki/El_pozo_(Lillo)"
+  },
+  {
+    "id": 7,
+    "slug": "juan-farina",
+    "title": "Juan Fariña",
+    "edition": 1904,
+    "url": "https://es.wikisource.org/wiki/Juan_Fari%C3%B1a"
+  },
+  {
+    "id": 8,
+    "slug": "caza-mayor",
+    "title": "Caza mayor",
+    "edition": 1904,
+    "url": "https://es.wikisource.org/wiki/Caza_mayor"
+  },
+  {
+    "id": 9,
+    "slug": "la-mano-pegada",
+    "title": "La mano pegada",
+    "edition": 1917,
+    "url": "https://es.wikisource.org/wiki/La_mano_pegada"
+  },
+  {
+    "id": 10,
+    "slug": "el-registro",
+    "title": "El registro",
+    "edition": 1917,
+    "url": "https://es.wikisource.org/wiki/El_registro"
+  },
+  {
+    "id": 11,
+    "slug": "la-barrena",
+    "title": "La barrena",
+    "edition": 1917,
+    "url": "https://es.wikisource.org/wiki/La_barrena"
+  },
+  {
+    "id": 12,
+    "slug": "era-el-solo",
+    "title": "Era él solo",
+    "edition": 1917,
+    "url": "https://es.wikisource.org/wiki/Era_%C3%A9l_solo"
+  },
+  {
+    "id": 13,
+    "slug": "canuela-y-petaca",
+    "title": "Cañuela y Petaca",
+    "edition": 1917,
+    "url": "https://es.wikisource.org/wiki/Ca%C3%B1uela_y_Petaca"
+  }
+]

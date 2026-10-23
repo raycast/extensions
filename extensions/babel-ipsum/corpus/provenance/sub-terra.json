@@ -1,0 +1,73 @@
+{
+  "retrievedOn": "2026-10-22",
+  "method": "Wikisource HTML snapshots retrieved with Firecrawl",
+  "schemaVersion": 1,
+  "encoding": "UTF-8",
+  "sources": {
+    "los-invalidos.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/Los_inv%C3%A1lidos_(Lillo)",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "b3c7a56f059caeac482a427054fa2e18dcdb5f88b7cf743d70af01905f1ece0b"
+    },
+    "la-compuerta-numero-12.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/La_compuerta_n%C3%BAmero_12",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "9526b2aca4b67d6a253227c3f95f6abc553dd2a8ff115897e709de1de30404be"
+    },
+    "el-grisu.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/El_gris%C3%BA",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "25569179c020de1d124e2f07b93fc32e1435f1ae399f99bee76f0a4599688efd"
+    },
+    "el-pago.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/El_pago",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "263b14b972830021e57c237ad72c35776b636b051db31116b8d68c058af87eb9"
+    },
+    "el-chiflon-del-diablo.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/El_Chifl%C3%B3n_del_Diablo",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "914010557c802e4a6232e95a7917ca6a329bc481996f47e1561dc4a8fbe002ba"
+    },
+    "el-pozo.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/El_pozo_(Lillo)",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "211add6c72a1bc3f59a3d3674b2b2a117677ea421175d70dc9abc767b3b3216a"
+    },
+    "juan-farina.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/Juan_Fari%C3%B1a",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "f92edacb4f23371ed6d69c067db00abb5a42fc527a3cb9a7b59648dc828373de"
+    },
+    "caza-mayor.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/Caza_mayor",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "0c36841cac81074640cdea6bc8b41e35734066f434bd9f7504fa0a6aab7a2751"
+    },
+    "la-mano-pegada.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/La_mano_pegada",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "035b6b96eea3faf88b21fa49c203c4e88c8bba86ae200d9845bcea87f7d50c0e"
+    },
+    "el-registro.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/El_registro",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "95a4ae0ca1fc755a74f1b46bacba052087fcccd7bb650fbdfc1478f2a780b65b"
+    },
+    "la-barrena.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/La_barrena",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "a814d3930c5503a3d6c0e100350f57ad89db58231f7213e2c009be0aa5a5dc0c"
+    },
+    "era-el-solo.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/Era_%C3%A9l_solo",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "0e31a2b8d05b1ac2008c25db6e1c9a2b69aa12498c5ecca953d3e49cc8976462"
+    },
+    "canuela-y-petaca.html": {
+      "sourceUrl": "https://es.wikisource.org/wiki/Ca%C3%B1uela_y_Petaca",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "b3568fdb4e81c7bb5aedfac1a38522c87fb24cf1136b7790dd5a7a0f3ba7ce0b"
+    }
+  }
+}

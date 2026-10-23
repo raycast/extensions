@@ -1,0 +1,7 @@
+corpus/books/*.json
+corpus/editorial/sub-terra/original.json
+.cache/
+dist/
+tests/fixtures/**/*.html
+tests/fixtures/**/*.json
+.artwork-explorations/

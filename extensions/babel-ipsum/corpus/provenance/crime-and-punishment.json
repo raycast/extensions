@@ -1,0 +1,107 @@
+{
+  "I-I.html": {
+    "sourceUrl": "https://ru.wikisource.org/wiki/Преступление_и_наказание_(Достоевский)/Часть_I/Глава_I",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-22",
+    "sha256": "7f0c0e73421e2362f58573d1f96c6f1cba553366960c9ae9170ec921b5785fba",
+    "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded."
+  },
+  "I-VII.html": {
+    "sourceUrl": "https://ru.wikisource.org/wiki/Преступление_и_наказание_(Достоевский)/Часть_I/Глава_VII",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-22",
+    "sha256": "93a451ff8f1978185fd502fa9699a3aa5934ef8c876d0fb84630a3437fab1c88",
+    "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded."
+  },
+  "II-I.html": {
+    "sourceUrl": "https://ru.wikisource.org/wiki/Преступление_и_наказание_(Достоевский)/Часть_II/Глава_I",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-22",
+    "sha256": "917fae4ce51f6950ea77fc6be12b3ad837599afb2f3cd562f471eed7fb0f116e",
+    "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded."
+  },
+  "II-VII.html": {
+    "sourceUrl": "https://ru.wikisource.org/wiki/Преступление_и_наказание_(Достоевский)/Часть_II/Глава_VII",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-22",
+    "sha256": "fb76d3080a8322a5d3baff6b59bc31b9d9bfa54a3bf50ab1c15c0457aad7252e",
+    "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded."
+  },
+  "III-I.html": {
+    "sourceUrl": "https://ru.wikisource.org/wiki/Преступление_и_наказание_(Достоевский)/Часть_III/Глава_I",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-22",
+    "sha256": "3f4e06a4c13f7b146e37461d192e6a444ee17994630a0fedf696b51227ec17da",
+    "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded."
+  },
+  "III-VI.html": {
+    "sourceUrl": "https://ru.wikisource.org/wiki/Преступление_и_наказание_(Достоевский)/Часть_III/Глава_VI",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-22",
+    "sha256": "8277ae0632ad2723ab1117384efbc3ac86d6659ea01069122d833d4adec6b8b0",
+    "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded."
+  },
+  "IV-I.html": {
+    "sourceUrl": "https://ru.wikisource.org/wiki/Преступление_и_наказание_(Достоевский)/Часть_IV/Глава_I",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-22",
+    "sha256": "60111cf4cd98efb48ac90c97f16c47ce76cb6469b73d03630a8c2331303f2f50",
+    "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded."
+  },
+  "IV-VI.html": {
+    "sourceUrl": "https://ru.wikisource.org/wiki/Преступление_и_наказание_(Достоевский)/Часть_IV/Глава_VI",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-22",
+    "sha256": "2d37dd86ab13211a461b6b8d5d51aefe446700703fd88d4b8d3de61ec5b8da57",
+    "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded."
+  },
+  "V-I.html": {
+    "sourceUrl": "https://ru.wikisource.org/wiki/Преступление_и_наказание_(Достоевский)/Часть_V/Глава_I",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-22",
+    "sha256": "ef00ab32f84ae49ebfffa04e7ef8a893c469e9d7784eef4634ae34f52adbd82f",
+    "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded."
+  },
+  "V-V.html": {
+    "sourceUrl": "https://ru.wikisource.org/wiki/Преступление_и_наказание_(Достоевский)/Часть_V/Глава_V",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-22",
+    "sha256": "6009f86df0bb57cfb099dd1afb7adb094e3418b6fc367e5acb66d811c2073ae8",
+    "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded."
+  },
+  "VI-I.html": {
+    "sourceUrl": "https://ru.wikisource.org/wiki/Преступление_и_наказание_(Достоевский)/Часть_VI/Глава_I",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-22",
+    "sha256": "cc983c3ab6b42794af8bfa7704eea064d3bfb737f8d65a20303f6e1bd6b32566",
+    "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded."
+  },
+  "VI-VIII.html": {
+    "sourceUrl": "https://ru.wikisource.org/wiki/Преступление_и_наказание_(Достоевский)/Часть_VI/Глава_VIII",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-22",
+    "sha256": "17dde12deb543bf1b2ceeac7e64abba7a108c5800126d230ef4c7ba83f39c455",
+    "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded."
+  },
+  "contents.html": {
+    "sourceUrl": "https://ru.wikisource.org/wiki/Преступление_и_наказание_(Достоевский)",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-22",
+    "sha256": "d89d46992298da9cf3b9cae91145408074e85f948871f91d5b0360866a0894ba",
+    "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded."
+  },
+  "Эпилог-I.html": {
+    "sourceUrl": "https://ru.wikisource.org/wiki/Преступление_и_наказание_(Достоевский)/Эпилог/I",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-22",
+    "sha256": "fcc92e8c72eca6452e2d8457ccb2f731ceed5e9ddd211a21ad9491399ff22510",
+    "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded."
+  },
+  "Эпилог-II.html": {
+    "sourceUrl": "https://ru.wikisource.org/wiki/Преступление_и_наказание_(Достоевский)/Эпилог/II",
+    "encoding": "utf-8",
+    "retrievedOn": "2026-10-22",
+    "sha256": "32af4a203ba78bfdfc0c9707fa69833f3f4fd736dbc09cad3c136efc232cef5a",
+    "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded."
+  }
+}

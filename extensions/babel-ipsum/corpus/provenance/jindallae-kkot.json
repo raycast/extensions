@@ -1,0 +1,1088 @@
+{
+  "schemaVersion": 1,
+  "bookId": "jindallae-kkot",
+  "importer": "scripts/import-historical-hindi-korean.py",
+  "snapshots": [
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/먼_후일",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "702d920e6f37d0bf9d1ce2dca270f5ea8bfd40b3869b9b9ec336aba3e85012d0",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/001.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/풀_따기",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "781359ba1853bf2d763a23127eba4c8309f9b213af53dc6275660ceaad629fed",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/002.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/바다",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "a1b7702c4888b81d6d732e7797353ae1a7bdb0ab16db1e4cebe39c033f88d7c0",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/003.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/산_위에",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "117462dc8d23650762438d27057a675709eff41e5d6df55236f029c262b1b471",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/004.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/옛이야기",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "e08aa13dfe330b3c57813153bc1b339dbefbcef74f43a03e3017fdb271ad9119",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/005.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/님의_노래",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "62844610293c02e24d3541ee61eb7bb1a8fd65e174505c901faf5109a05319b7",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/006.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/실제_1",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "e20bb490d6efc8f12aae5c14e78ba735a3b3940d9eb54fbb0c8b3cec3a40d2fe",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/007.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/님의_말씀",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "36afdd0dffdae9b5838f50a89ff4a07a01879408c5457fadd2dc46a182526711",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/008.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/님에게",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "eb498cf759943810fe5202571bb2dbcd0b3bc0690b4686e7d489ef95d47632df",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/009.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/마른강_두덕에서",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "7ea03e601ae65babea17dfcaa5e19de084d4ace3d922c74f9577f6983fd45e4d",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/010.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/봄_밤",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "6de75dba8435bb3be495778f4786c2b98f97f0f320d4bc673d395f008c781212",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/011.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/밤",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "51c447678ab73a7d6d01aa20665ad1e6fe8d05ac7ced4eba3233c2357b5a253b",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/012.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/꿈꾼_그_옛날",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "0ef675196821a0e3077abb809895d9eef3f0bd0cd0e2bebad5bb55dabe6a2f3c",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/013.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/꿈으로_오는_한_사람",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "9cc0e73ae1132cdf58eac05622d6053c683ee7c2cb3b7fac287c9939e4dfa545",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/014.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/눈_오는_저녁",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "c2738d352ac907bdb59f41970dd9cb125aa672c865881ed01b4db33e3fee9df9",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/015.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/자주_구름",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "07cf3c8d096c028f8b706c9379f55ed5c81c0f9764dc2eda9cf8b68f64670353",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/016.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/두_사람",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "0c2e9ff95a092c227bd71412ac6972f58ff9d79a53b0a3c55236e2aa9ab16cdb",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/017.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/닭소리",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "d9675e3dfe917b8e4f6b3827e7f00d7c4098bbbb34d121530ca2b0db00b9068c",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/018.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/못_잊어",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "1bfd0bae2679c04abf592b7cae427e887f3dd56a5138a618f9fa4bee294cf476",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/019.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/예전엔_미처_몰랐어요",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "337ee3909fb77c97451829480317e887061d8906553be05da00f696a0dad5a9f",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/020.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/자나_깨나_앉으나_서나",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "e1efd8e867cc848e66c7bacdddc7bea10dd33bf3771539e195b49c7a9ce4e32d",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/021.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/해가_산마루에_저물어도",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "3e60ab28bb0cb33c969ec53d499dee4e1d35cf60f92655742d25293f4c150270",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/022.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/꿈_1",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "9d470abda9f6c3078b593332f06774b7d6987fe62af1d2edf4b99063235b16bb",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/023.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/맘_켕기는_날",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "73abdc87e44e64db1ef41693e070cc3863a4cd03a0eb70287a0386b3ec37b127",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/024.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/하늘_끝",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "a1d6b3ad14ec8ceb49fe61a3629f6c2ab2b31ad35aab6e0e51781b3cd46b4f20",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/025.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/개아미",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "ef8c9fd4ef84e81780d2ee5d9c5904040b8c60ccda6952c4d6a4a2086862424a",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/026.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/제비",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "8423a42311bf55d8828843a05a7a06c588f428f73cfa81a8c577c36bf7f6c805",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/027.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/부헝새",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "a3393eff6d01f305ce53c5a2dca56965407170ae198633335ddf31a6805fab56",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/028.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/만리성",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "10d4581f33b4676da440ca7a5a7dad304f23b8bfc655bc7d04605d681ce17961",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/029.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/수아",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "482b85fe6ab4d9720017e4665a842cf7d41609bfc772bdaca0810ebc8c684cdf",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/030.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/담배",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "b51aac0ed0b8ad8b098aa5423bc2e4b400772c6b895b1183090535912cdf7db2",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/031.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/실제_2",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "79c6c44d49d6eb662a5df14def9120e89688413f7e7eda84b74394a109ff14f6",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/032.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/어버이",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "7819cc9c082286898bac6766938627066b16712c2cac60859c5b194e0fed99d7",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/033.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/부모",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "df7e9054aafbc1b0f4ebd1012120a497d782c025581ffdc78799f8c91ed731e1",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/034.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/후살이",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "3c0498279e80c598392a7f2fec848802d303d0d771e149ed322740234b729af1",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/035.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/잊었던_맘",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "d7bfce1568c130077522aa62eed342d4995e02db321ec1e6ef32e78f03d1dde8",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/036.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/봄비",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "afd859b1046beaeec0c94eec43354362ab75de0fa0e5f5f8b7d085b71caeb3b3",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/037.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/비단_안개",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "a98e1d51a9e8f4635c360e953a5e8d5b2df86357e18955b22cc27deaef9aff58",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/038.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/기억",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "f5bf3b70ac08bf6283b0a0e451fa6eb0a62c74e8da1830fe9aa457cef671a58f",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/039.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/애모",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "30fd90ac93c5ce104f5557d556c75baabbbc579ba3a4935288631094201fea9d",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/040.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/몹쓸_꿈",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "818f8ae0bf3e80a42897febc63c9c6fd182c828fdf4f1acd1c0700549c61ff8e",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/041.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/그를_꿈꾼_밤",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "c4c74e7065149823af050154fa792a8d4c96beefad922db17ec3d1268bf4c28e",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/042.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/여자의_냄새",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "b39503fb2364c6290b411c9c60ce52e3977a4a3bf67d94fca939ec7bbe9177d1",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/043.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/분_얼굴",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "89c2c0fa351d7b5efad7a74727afb10c79ab4fc2919aa801329e9325ad8db901",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/044.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/아내_몸",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "3752d6986d4b2d7940b900c266ef3a58ff8623b205578ca3f5b793b5dbaa71ad",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/045.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/서울_밤",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "62e81f64914d18bdd1606dcd7abd8471ecd62283336b68490a8fe5c421880ee1",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/046.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/가을_아침에",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "a2ea2d9882527fe20eb4999d8d99893a9b0afe2190d572c200cb38ddd56017b0",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/047.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/가을_저녁에",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "74a0ac6fc6e6dfe61df8f3f717a55437ae089e8c45bff54d6b8c94c49d91a252",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/048.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/반달",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "66d77fb87b21b2cea886d7f659cf2fd4f29e56cf9e589fa4972839c99c6ca412",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/049.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/만나려는_심사",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "357a869363b4f7bce2a2c5d8a7539d50e1945725c958b64682bdb5a88e3ef74e",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/050.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/옛날",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "8c812d323935c006962c1d6d4d46edbdd659d6772e94520d07b727d1d7b76445",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/051.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/깊이_믿던_심성",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "59982a33f2f20eb052a3a03c56432a9a29ee22c6f6d059f1e54e6c731251cead",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/052.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/꿈_2",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "43e104340979b3ecf3e512b35d5b342539247e86bfbdb3fa2152d548c03e917e",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/053.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/님과_벗",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "7ceb1406d20872edb6d9231ce77d6087e39c22fc91b32ee053650ad9de795529",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/054.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/지연",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "84f8177214bafd32ac4e464fe4a0c1747f87200b56ae9e507ca8780f9436e001",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/055.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/오시는_눈",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "67b98e80001a9b993212e73acd32fb4b4043837b553112dd3924de18397d7d65",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/056.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/설움의_덩이",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "ca90fff4096432a09659d60300471b58625f65fe74ea4e81d0a0b357ff6f610e",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/057.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/낙천",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "e6ea12a63ab9a2ed71ef61d46ef456488829fa75a11f39c6195dd7bdb4095674",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/058.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/바람과_봄",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "9e8eec0eab0f22324185a05714ff393b80aa12582631f8ecf0f8b25c23f7d5d5",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/059.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/눈",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "2a3552a24d93fdcb11475939765e63a11711735ab51960ddc2e307c15f6a9a50",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/060.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/깊고_깊은_언약",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "2458988000f941bcff9de1a989fec891370490a6c142d639e00ccd1d6d49da77",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/061.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/붉은_조수",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "f30a2c8201e0e060904918e2121573a0a7df7c4a2d7a6f20cd264a9b15f07143",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/062.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/남의_나라_땅",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "d5f60add006fbee1e84366509bfe254d923a308c1cb2ca3b721f9d60ff153149",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/063.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/천리만리",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "4f265309672294ffd2b74d84f8ad8d45418502d0445ec172c045193ee672511c",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/064.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/생과_사",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "d8b1bd9b3a80c44f10f8f8ba17c56db8213aac0add982b1cca877ec3e5558f73",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/065.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/어인",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "449a256c46dc5f87fd043a6681f5c9221324ec1f2554c0041a0c19255b852c78",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/066.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/귀뚜라미",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "56df1191c152c581277e1d4c2d069a5070e9a017333c5ca12c4bda903e141cb5",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/067.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/월색",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "6a035f3376744d65fef49a80379e58122e4f8bdfb11865f27e9cfe19bf4a988c",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/068.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/불운에_우는_그대여",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "afdf10b6deff3573836ab8c69621eedd1ba3a8b15897b41d1316b4f20625e967",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/069.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/바다가_변하야_뽕나무밭_된다고",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "7eeea2068e6560b920df4482673db2cd6a76938c8cf80b3a5dbd4f90d3141734",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/070.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/황촉불",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "6fa680c38f0307f2ebae48a5e1b32142d45b99af7fca89196ca5b81fea303b8c",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/071.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/맘에_있는_말이라고_다_할까_보냐",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "159818ea7168b399e225d30c6302b8f3d9f6e8fd693c347d47421c2a4c0e704e",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/072.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/훗길",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "7bb6becb1dcf63bf92aa62ea663e75b13bb8cf08b4970a3e700f315aa80b475d",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/073.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/부부",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "9f86bd5637b91d5ecc2aa9c85c9dfb8946ed72bf99d0a40367e837f4f7147035",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/074.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/나의_집",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "2e9bfb1ec586a1b37763fec328d3c6cad53712ae66cb971c185673e6ec388b02",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/075.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/새벽",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "1fb3ee8a345754ebe4cd965f5645fb459a52a70f67b8f664140a25cb5e2dbfa3",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/076.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/구름",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "ffe61df42adaff1acda54846dae49a26face2e2fbd39e186276f41631359f503",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/077.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/여름의_달밤",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "b4dff8e15c344b15b97577c0ee31835b4c9b9dbc2d4c62f24ee5679ece443408",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/078.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/오는_봄",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "014f3cdf8cdf0e65a8e36b775fef60b8327755107bae232cae698ce9c57140ab",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/079.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/물마름",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "17861ce9940819698995760df121bea8e5653a70aeed51912a69ef086b4f0529",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/080.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/우리_집",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "4d68f0b65b3044bd42784c924659f466885c6974e52641340d2ba4d2140eb8d1",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/081.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/들돌이",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "20733c5502b0ec74bff4babcbc385846cccb5b57d17ab92369379f95529a5fe5",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/082.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/바리운_몸",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "ff3088aa132d3c89d560d947745d0e4376702de4e3224a4274f1a0ca8de70f87",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/083.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/엄숙",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "9d2e8b88568e15ad2e3750063df98ce1e997d1917a0e51175215f1031cf1c12d",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/084.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/바라건대는_우리에게_우리의_보습_대일_땅이_있었더면",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "09e1236afecd23da313eb2de08cd5f4f0fbc14d4dcb704f084c87e06e8ed216e",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/085.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/밭고랑_위에서",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "5abb9871eca78c270db2e81df39c207f5c1a85b3791f78e0b78e54526792f1ad",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/086.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/저녁때",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "38f86d045e6a6458c6ff06d038bd8dc481bf365a23f5e0efc3cc213643b8808f",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/087.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/합장",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "ad52ca09eb30488d9831eed28dad1868b4ad7ea1b771990a06de05f56f8babdf",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/088.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/묵념",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "4cf0989c70fcf213fb025d4fdb27b6acac6ef883bb5f414ab384add0849d37a7",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/089.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/열락",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "acd4144a00ba25b4fc087e4379b656c832697ba2d7fc050ee79aebc2cbeb781b",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/090.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/무덤",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "ac9572aeb64445b4a4f58b1af58977dd7450220b5f43829c920c26af510c480e",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/091.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/비난수_하는_맘",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "23e93d37ef122a9318698a4c6ab363d009d49952fcc051e7e06e51dcc964b6ed",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/092.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/찬_저녁",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "172ba1308412f88aa39e25a12fb4e961c8a8098dfac53da9c3367b6f2d04337b",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/093.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/초혼",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "6ab596f29c0702b0f7ac428fca4f4680fc17c962a29e144bc83ac558c892e208",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/094.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/여수",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "9a54c9cba987bc251ff88febbebbeda0a7ddecea9f5bb08413c6765fbf723ad8",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/095.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/개여울의_노래",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "33f57c798ba764d0997a3b80fba4780df92218e7cdf2d8317e1a30a308da30b0",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/096.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/길",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "d54af6269061d5610f4411a72cc61b73c692f9efa9645bf184dc88eea7c9adac",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/097.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/개여울",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "e462cc7567309bdf07b74def682a19b10624d952ab84e1475e519fa93d5de85d",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/098.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/가는_길",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "c501d40c674425e4363b9e676ca32b18bb420af7a31fccbea51b7a8581ba6306",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/099.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/왕십리",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "2d6fd82663c966243d57adf3931e7d3a5248717f827f8f9b9a3b6b69220db258",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/100.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/원앙침",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "2040152dd8a17439ef30ba6a8f5d3ff09ddf0b2e4cd53e3b147ae751a55035e4",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/101.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/무심",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "14fecdcedd088f218209acd9907ad92b488f5bb87710f433509efe73be1f2ee5",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/102.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/산",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "65d8659d307f52662f69dd12089352c47ab3533f9567171079a1c3a25ef95538",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/103.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/진달래꽃",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "299f0300bb5b0c2936e3734f54bc6a19c1ffe99e0e3e78efd8a513cc4936a42e",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/104.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/삭주구성",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "23aa13d8cd17c6197affab11e1f951532358a5577bda7e949fa59e610f0a04e3",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/105.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/널",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "7501bdfd91a5c0982da73552ef2527858254157ca65f3b1db026867d20ec205c",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/106.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/춘향과_이도령",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "de6569a3f4dcbabef32186b05b0044e52712648c254b2110fb1b1a38f41ea754",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/107.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/접동새",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "9e58eae99de867818e57e93da3144e309be4db6e8e92178e4055720a571211ba",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/108.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/집생각",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "1f0cfcf2b44fb9cb0b27e8addf47078f4661de7cd3083b89eb0fc17e4cca99ff",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/109.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/산유화",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "555f4677202352fca65df360d8a9d0ed54591b92324aa542949fddac5333edc3",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/110.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/꽃촉불_켜는_밤",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "cfa8c6f3148a6252c4f5fec946b02718a1f1fbbd5449b027b9469ceff0698d11",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/111.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/부귀공명",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "1b43a566d1916126713a67765520ba55702ada4ce9c782d311d81cec3bf30b88",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/112.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/추회",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "9126d03e7db7ef912f07b3f7532433d38fb230150d0d61cd144a47efc3a9a4df",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/113.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/무신",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "262c1479678187f429e8542d5c365e7804963d822f84ff227cd5c9fb0a2c7684",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/114.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/꿈길",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "f6063d71a09839c8b21bee755a3bac4f97d6f591ec52db71122ebb739a46c27d",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/115.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/사노라면_사람은_죽는_것을",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "2bd27499e5648c3b53d325ebdbebc0ba3dc6977a2644e54115ba7ff6495827f4",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/116.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/하다못해_죽어_달려가_올라",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "15c47c9bca23670cc86c50a1662c4cde0a584e15dd9d5d9a00e2dd95a885ebfa",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/117.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/희망",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "f64218f06e61bc54ab4d9be0c27e46d6a6db40d5745b870f2997e3be4bb0f8cc",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/118.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/전망",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "7d41953375bd49b2236e437146eea0bf16b9a1414176f1b92d04ec70d9a8887d",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/119.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/나는_세상모르고_살았노라",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "4959891795fd61d9f921ddae7b8024a9c98519a792d23dd2ac473e9738a0b3b0",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/120.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/금잔디",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "f0a02004fb1c70c3f16a55ba6d1e53fee9baa6afa0a739a1ad13ead13c1df401",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/121.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/강촌",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "7f8eb9c6f6100c0d542354e86d94a43871a6e901330b89e77a43aca2a7023b55",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/122.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/첫_치마",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "9080de6edf045c33f059f2f2a81df9366cf17aa48b4e0056ef570cba83584199",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/123.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/달맞이",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "ae765e7c2d978bb3caff0f18396fb8f2cea591b6137fa71ef69876a19625553a",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/124.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/엄마야_누나야",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "294bd5669587227781f526fb6a7c6f812e4268bdc3f5f7bfecb593bd31f251c5",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/125.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)/닭은_꼬꾸요",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "5c8649810e1c99554d16cf47f41c787918b78a3e9102fce6f2ccac71389885c0",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/126.html"
+    },
+    {
+      "sourceUrl": "https://www.copyright.or.kr/eng/laws-and-treaties/copyright-law/chapter02/section04.do",
+      "requestUrl": "https://www.copyright.or.kr/eng/laws-and-treaties/copyright-law/chapter02/section04.do",
+      "responseUrl": "https://www.copyright.or.kr/eng/laws-and-treaties/copyright-law/chapter02/section04.do",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-23",
+      "sha256": "f8784c005bb4c529bb11fda835ee1311fa912e4fd71b72b402a7aa3a26da18c7",
+      "userAgent": "BabelIpsumHistorical/1.0 (+https://git.cafe/felrov/vibed-ipsum)",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/historical-korean-term.html"
+    },
+    {
+      "sourceUrl": "https://geumcheon.go.kr/portal/contents.do?key=3621",
+      "requestUrl": "https://geumcheon.go.kr/portal/contents.do?key=3621",
+      "responseUrl": "https://geumcheon.go.kr/portal/contents.do?key=3621",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-23",
+      "sha256": "925372980db6a6772268996b5b90afc4634907b2c2d77a671bb695dd83a8a327",
+      "userAgent": "BabelIpsumHistorical/1.0 (+https://git.cafe/felrov/vibed-ipsum)",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/historical-publication.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/색인:CNTS-00067642119_(素月詩集)진달래꽃.pdf",
+      "requestUrl": "https://ko.wikisource.org/wiki/색인:CNTS-00067642119_(素月詩集)진달래꽃.pdf",
+      "responseUrl": "https://ko.wikisource.org/wiki/%EC%83%89%EC%9D%B8:CNTS-00067642119_(%E7%B4%A0%E6%9C%88%E8%A9%A9%E9%9B%86)%EC%A7%84%EB%8B%AC%EB%9E%98%EA%BD%83.pdf",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-23",
+      "sha256": "cc7c015a25c4eb2be18fbb920ca51a10b522d38eb3c49bad04f728e598cb1b27",
+      "userAgent": "BabelIpsumHistorical/1.0 (+https://git.cafe/felrov/vibed-ipsum)",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/historical-scan-index.html"
+    },
+    {
+      "sourceUrl": "https://www.copyright.gov/title17/92chap3.html",
+      "requestUrl": "https://www.copyright.gov/title17/92chap3.html",
+      "responseUrl": "https://www.copyright.gov/title17/92chap3.html",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-23",
+      "sha256": "121ed92e20b6fc9325e22a2f0f33cadabc56fda923b06902e8f8372292d0db6d",
+      "userAgent": "BabelIpsumHistorical/1.0 (+https://git.cafe/felrov/vibed-ipsum)",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/historical-us-term.html"
+    },
+    {
+      "sourceUrl": "https://ko.wikisource.org/wiki/진달래꽃_(시집)",
+      "encoding": "utf-8",
+      "retrievedOn": "2026-10-22",
+      "sha256": "7a0d8fd12db6dad356ec5d94eecf7ce0c86ad8a302e0849315327ad4dea242e9",
+      "acquisitionNote": "Recorded from the retained snapshot and prepared corpus; the original response URL was not recorded.",
+      "snapshotPath": ".cache/corpus/sources/jindallae-kkot/index.html"
+    }
+  ],
+  "remediation": {
+    "status": "partial-historical-replacement",
+    "selectedSections": [
+      "poem-001",
+      "poem-004",
+      "poem-011",
+      "poem-014",
+      "poem-016",
+      "poem-031",
+      "poem-095",
+      "poem-104",
+      "poem-108",
+      "poem-110",
+      "poem-124"
+    ],
+    "omittedContentsEntries": 115,
+    "editionEvidence": [
+      "https://ko.wikisource.org/wiki/진달래꽃_(시집)",
+      "https://ko.wikisource.org/wiki/색인:CNTS-00067642119_(素月詩集)진달래꽃.pdf"
+    ],
+    "remainingQuestions": [
+      "Collate the historical columns to a verified 1925 scan.",
+      "Acquire historical text for the other 115 contents entries."
+    ]
+  }
+}

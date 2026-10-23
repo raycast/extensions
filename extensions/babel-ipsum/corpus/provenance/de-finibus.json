@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "encoding": "UTF-8; snapshots retain exact response bytes",
+  "sources": {
+    "liber-i.html": {
+      "sourceUrl": "https://la.wikisource.org/wiki/De_finibus_bonorum_et_malorum/Liber_I",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "d6cc8bfbc7ab3ba4b6adb01c4c96fd04f9a480e070660afa9da3a0056625d83b"
+    }
+  }
+}

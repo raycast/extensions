@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "encoding": "UTF-8; snapshots retain exact response bytes",
+  "sources": {
+    "book-1-chapter-1.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_1/01",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "53d1ca9d17398245d0611df9dabd97f47ac09fb62508272536d6ef43a9b1d8f5"
+    },
+    "book-1-chapter-5.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_1/05",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "1c26c66f4227c1da5016a9a31c22cfbc9a8b214f59fabe184561acb36e112e39"
+    },
+    "book-1-chapter-9.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_1/09",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "cca3d0ecc736e6f7276471b904ebceec6519211aa01bb983a1ab06c76769adf1"
+    },
+    "book-1-chapter-14.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_1/14",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "021f3019f854a826954bc64304f24cc401b84a0028f83e639c6ebb456fd10770"
+    },
+    "book-2-chapter-1.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_2/01",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "ff9ca153333100d21538ed2c1c35fa8870d2bc8791238f01f0587e855469698d"
+    },
+    "book-2-chapter-5.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_2/05",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "a6357f2b72335338b9d41ba318e1ec4c80dc1666cff5634f3d5c7e18283f7ca4"
+    },
+    "book-2-chapter-9.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_2/09",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "bf6103b2d8589863d1f1b6e963d557992232f3020a1dbb1ea43fe02df7855108"
+    },
+    "book-2-chapter-13.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_2/13",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "0da4ca99bee098e40741f7c37fad6e380169c006701a5b3241a7bb54ec692f62"
+    },
+    "book-3-chapter-1.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_3/01",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "7d923200d86bb282aee80d8e86248cb0d6ec98dee0aea8f4f259378f3086b6bf"
+    },
+    "book-3-chapter-3.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_3/03",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "574a608413a6ce7445db10317c47ced81a845fde1d21633428e720124e137b3a"
+    },
+    "book-3-chapter-6.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_3/06",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "c391cefca62b5e96f35e05ec5e30a0cfab9bed6cb2ce62b6220f098fafd9fed5"
+    },
+    "book-3-chapter-9.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_3/09",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "0522a8baf907364495e13d1cdb8aeb5366ed077198ef07c3f4bd6dc4173cdccc"
+    },
+    "book-4-chapter-1.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_4/01",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "48d2a55569d54d6fbb08d4b8938717473ff8b1e889e736a03b4bc530145055df"
+    },
+    "book-4-chapter-2.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_4/02",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "3ba2d7c7deb8f811b77056f36528f6fb34352f0c90a69ceabc95d6578a521ffa"
+    },
+    "book-4-chapter-3.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_4/03",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "f597a72005d6764cf8efd1f154f9fd7aac753d37f4c840af39cd630b4a05fea6"
+    },
+    "book-5-chapter-1.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_5/01",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "45939834917045f3c6e48d2cbe68371be939684f05f7bb50b0f2fafb3c13ff89"
+    },
+    "book-5-chapter-5.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_5/05",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "680c7fbb1a04b6cef99cb6518f5d6753bd971f2498a6ee213288898b9c3a9836"
+    },
+    "book-5-chapter-9.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_5/09",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "eaaa9078472d01d247bf409e51b37409993eb64620915ba374a29c3093c00704"
+    },
+    "book-5-chapter-13.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_5/13",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "642751c34b396089ae7d0e6359d3dc5e07e3f359b9fdeb6d361129f56949d754"
+    },
+    "book-6-chapter-1.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_6/01",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "c4c1d26555d7c24c3e6f222fa04ab0c8ec5b316b706750a2e06a330531ce8912"
+    },
+    "book-6-chapter-2.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_6/02",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "5620ad90fa6b83494191d4f230f6ba83563b0b141690e9131c389ba1c2bb14eb"
+    },
+    "book-7-chapter-1.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_7/01",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "346d543d8254d86f00d0d1769887f0d2d3c0ee36333985007ecfaaf0a9312666"
+    },
+    "book-7-chapter-4.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_7/04",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "d16216610a78afd78c6465aebf62d2e08cce94022d1f813badf86e7038de1a5a"
+    },
+    "book-7-chapter-7.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_7/07",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "35fd0151c0776556715cd38d9f135e0d1dc4a58de8333ebbf156a4f4a8ed4145"
+    },
+    "book-7-chapter-11.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_7/11",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "bbfcd1840c304f34a0a5204d885235b01d392fa562535dc62c20a02538b10b42"
+    },
+    "book-8-chapter-1.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_8/01",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "4d05a2599d44a089709c1cdf73dba44d690f26b138052092ec5e5629763cffbb"
+    },
+    "book-8-chapter-2.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_8/02",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "643237e3c838409c380c8e5f500db63128606d0c246d1ed903eeb83ac7b14479"
+    },
+    "book-8-chapter-3.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_8/03",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "bf85417ffd2479616d23cddb2b04c2700f7039f8601fbaee7dca2dbfb459b63c"
+    },
+    "book-8-chapter-5.html": {
+      "sourceUrl": "https://fr.wikisource.org/wiki/Les_Misérables/Tome_1/Livre_8/05",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "43e1762a53a62864102a91397e18a7dc3ec5ad406a93be5b42c39887aff6569b"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+<TEI xmlns="http://www.tei-c.org/ns/1.0"><text xml:lang="grc"><body><div type="edition" xml:lang="grc" n="urn:cts:greekLit:tlg0011.tlg004.perseus-grc2">
+<sp><speaker>Οἰδίπους</speaker><stage>Exit stage</stage>
+<l n="1">ὦ <add>τέκνα</add>, <del>παλαιά</del> <note>editor's note</note>λέγω<gap reason="lost"/>· <app><lem>νέα</lem><rdg>WRONG</rdg></app>.</l>
+<l n="2">καὶ <hi>πάλιν</hi>.<milestone unit="card" n="2"/> τέλος.</l></sp>
+<sp><speaker>Χορός</speaker><l n="3"><gap reason="lost"/></l></sp>
+<sp><speaker>Χορός</speaker><l n="4">ἰὼ πόλις.</l></sp>
+</div></body></text></TEI>

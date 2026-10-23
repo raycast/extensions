@@ -1,0 +1,13 @@
+# Corpus licensing
+
+The MIT license at the repository root covers the extension's software and documentation outside this corpus. It does not relicense the books, third-party transcriptions, or `assets/corpus.db`.
+
+Underlying literary text that is public domain remains public domain in the jurisdictions where its copyright has expired. A website's Creative Commons footer does not create new copyright over that text.
+
+To the extent copyright applies to Babel Ipsum's own editorial adaptations of Wikisource or Perseus material, those adaptations are provided under [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/). This includes the prepared Sub terra modernization. This grant covers only rights held by the project; it cannot grant permission for unidentified third-party editorial contributions.
+
+Third-party contributions retain their applicable licenses. Per-book source, edition, attribution, modification and license notes are stored in each prepared book and the runtime database, and displayed in **Information**. `corpus/NOTICE.md` records coverage, source terms and unresolved edition questions. These records distinguish evidence of reuse permission from incomplete provenance; they are not a worldwide clearance guarantee.
+
+When sharing protected CC BY-SA material, retain appropriate attribution, the license link and an indication of modifications, and apply a compatible license to adaptations. **Copy with Attribution** exports the selected text and its source information for that purpose. Ordinary Copy and Paste export plain text; using them does not waive any applicable source terms. The CC conditions do not apply to public-domain elements or uses permitted by an applicable exception.
+
+This file is also shipped as `assets/corpus-license.txt`. Source-specific attribution and license notes accompany the text in `assets/corpus.db`.

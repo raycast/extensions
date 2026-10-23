@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "encoding": "UTF-8; snapshots retain exact response bytes",
+  "sources": {
+    "complete.html": {
+      "sourceUrl": "https://de.wikisource.org/wiki/Die_Verwandlung_(Franz_Kafka)",
+      "retrievedOn": "2026-10-22",
+      "snapshotSha256": "dbe4f4736a417ed6831db3745633d0588f7e4ac70c4ba35bed4bcc8b9b40e479"
+    }
+  }
+}

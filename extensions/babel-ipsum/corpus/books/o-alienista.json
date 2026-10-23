@@ -1,0 +1,1519 @@
+{
+  "schemaVersion": 1,
+  "book": {
+    "id": "o-alienista",
+    "title": "O Alienista",
+    "author": "Machado de Assis",
+    "language": "Portuguese",
+    "locale": "pt",
+    "direction": "ltr",
+    "sourceUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#O_ALIENISTA",
+    "edition": "Rio de Janeiro: Lombaerts & C., 1882; Project Gutenberg ebook 57001 (2018 transcription)",
+    "scope": "All thirteen chapters.",
+    "license": "Public-domain original text. Project Gutenberg ebook 57001; reuse terms: https://www.gutenberg.org/policy/license.html",
+    "attribution": "Machado de Assis, O Alienista, in Papeis Avulsos (Rio de Janeiro: Lombaerts & C., 1882). Project Gutenberg ebook 57001; produced by Laura Natal Rodrigues and Marc D'Hooghe, using page images from the Biblioteca Brasiliana Guita e José Mindlin, Universidade de São Paulo.",
+    "editorialNote": "The requested Wikisource chapters mix historical and modernized spelling; the complete 1882 Project Gutenberg transcription is used instead. Its readings, including apparent transcription errors such as ltaguahy and preoecupação, are retained without conjectural correction. No modernization or Sub terra corrections applied. Publisher URL and SHA-256 identify the exact UTF-8 snapshot; no publisher revision ID is asserted.",
+    "sentenceSeparator": " "
+  },
+  "retrievedOn": "2026-10-22",
+  "sections": [
+    {
+      "id": "chapter-1",
+      "title": "Capítulo I",
+      "position": 1,
+      "sourceUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#I",
+      "revisionUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#I",
+      "snapshotPath": ".cache/corpus/sources/o-alienista/papeis-avulsos-1882-gutenberg.html",
+      "snapshotSha256": "2d82b19b1222bacee6bbc3f98d381d43ceafd7aa60d0a4f3efbf77c11bc6c445",
+      "passages": [
+        {
+          "position": 1,
+          "text": "As chronicas da villa de ltaguahy dizem que em tempos remotos vivera alli um certo medico, o Dr. Simão Bacamarte, filho da nobreza da terra e o maior dos medicos do Brazil, de Portugal e das Hespanhas. Estudara em Coimbra e Padua. Aos trinta e quatro annos regressou ao Brazil, não podendo el-rei alcançar delle que ficasse em Coimbra, regendo a universidade, ou era Lisboa, expedindo os negocios da monarchia.",
+          "kind": "prose"
+        },
+        {
+          "position": 2,
+          "text": "—A sciencia, disse elle a Sua Magestade, é o meu emprego unico; ltaguahy é o meu universo.",
+          "kind": "prose"
+        },
+        {
+          "position": 3,
+          "text": "Dito isto, metteu-se em ltaguahy, e entregou-se de corpo e alma ao estudo da sciencia, alternando as curas com as leituras, e demonstrando os theoremas com cataplasmas. Aos quarenta annos casou com D. Evarista da Costa e Mascarenhas, senhora de vinte e cinco annos, viuva de um juiz de fóra, e não bonita nem sympathica. Um dos tios delle, caçador de pacas perante o Eterno, e não menos franco, admirou-se de semelhante escolha e disse-lh'o. Simão Bacamarte explicou-lhe que D. Evarista reunia condições physiologicas e anatomicas de primeira ordem, digeria com facilidade, dormia regularmente, tinha bom pulso, e excellente vista; estava assim apta para dar-lhe filhos robustos, sãos e intelligentes. Se além dessas prendas,—unicas dignas da preoecupação de um sabio, D. Evarista era mal composta de feições, longe de lastimal-o, agradecia-o a Deus, porquanto não corria o risco de preterir os interesses da sciencia na contemplação exclusiva, miuda e vulgar da consorte.",
+          "kind": "prose"
+        },
+        {
+          "position": 4,
+          "text": "D. Evarista mentiu ás esperanças do Dr. Bacamarte, não lhe deu filhos robustos nem mofinos. A indole natural da sciencia é a longanimidade; o nosso medico esperou tres annos, depois quatro, depois cinco. Ao cabo desse tempo fez um estudo profundo da materia, releu todos os escriptores arabes e outros, que trouxera para Itaguahy, enviou consultas ás universidades italianas e allemãs, e acabou por aconselhar á mulher um regimen alimenticio especial. A illustre dama, nutrida exclusivamente com a bella carne de porco de Itaguahy, não attendeu ás admoestações do esposo; e á sua resistencia,—explicavel, mas inqualificavel,—devemos a total extincção da dynastia dos Bacamartes.",
+          "kind": "prose"
+        },
+        {
+          "position": 5,
+          "text": "Mas a sciencia tem o ineffavel dom de curar todas as magoas; o nosso medico mergulhou inteiramente no estudo e na pratica da medicina. Foi então que um dos recantos desta lhe chamou especialmente a attenção,—o recanto psychico, o exame da pathologia cerebral. Não havia na colonia, e ainda no reino, uma só autoridade em semelhante materia, mal explorada, ou quasi inexplorada. Simão Bacamarte comprehendeu que a sciencia lusitana, e particularmente a brazileira, podia cobrir-se de «louros immarcessiveis,»—expressão usada por elle mesmo, mas em um arroubo de intimidade domestica; exteriormente era modesto, segundo convém aos sabedores.",
+          "kind": "prose"
+        },
+        {
+          "position": 6,
+          "text": "—A saude da alma, bradou elle, é a occupação mais digna do medico.",
+          "kind": "prose"
+        },
+        {
+          "position": 7,
+          "text": "—Do verdadeiro medico, emendou Crispim Soares, boticario da villa, e um dos seus amigos e comensaes.",
+          "kind": "prose"
+        },
+        {
+          "position": 8,
+          "text": "A vereança de Itaguahy, entre outros peccados de que é arguida pelos chronistas, tinha o de não fazer caso dos dementes. Assim é que cada louco furioso era trancado em uma alcova, na propria casa, e, não curado, mas descurado, até que a morte o vinha defraudar do beneficio da vida; os mansos andavam á solta pela rua. Simão Bacamarte entendeu desde logo reformar tão ruim costume; pediu licença á camara para agasalhar e tratar no edificio que ia construir todos os loucos de Itaguahy e das demais villas e cidades, mediante um estipendio, que a camara lhe daria quando a familia do enfermo o não podesse fazer. A proposta excitou a curiosidade de toda a villa, e encontrou grande resistencia, tão certo é que difficilmente se desarraigam habitos absurdos, ou ainda máus. A idéa de metter os loucos na mesma casa, vivendo em commum, pareceu em si mesma um symptoma de demencia, e não faltou quem o insinuasse á propria mulher do medico.",
+          "kind": "prose"
+        },
+        {
+          "position": 9,
+          "text": "—Olhe, D. Evarista, disse-lhe o padre Lopes, vigario do logar, veja se seu marido dá um passeio ao Rio de Janeiro. Isso de estudar sempre, sempre, não é bom, vira o juizo.",
+          "kind": "prose"
+        },
+        {
+          "position": 10,
+          "text": "D. Evarista ficou aterrada, foi ter com o marido, disse-lhe «que estava com desejos», um principalmente, o de vir ao Rio de Janeiro e comer tudo o que a elle lhe parecesse adequado a certo fim. Mas aquelle grande homem, com a rara sagacidade que o distinguia, penetrou a intenção da esposa e redarguiu-lhe sorrindo que não tivesse medo. Dalli foi á camara, onde os vereadores debatiam a proposta, e defendeu-a com tanta eloquencia, que a maioria resolveu autorisal-o ao que pedira, votando ao mesmo tempo um imposto destinado a subsidiar o tratamento, alojamento e mantimento dos doudos pobres. A materia do imposto não foi facil achal-a, tudo estava tributado em Itaguahy. Depois de longos estudos, assentou-se em permittir o uso de dous pennachos nos cavallos dos enterros. Quem quizesse emplumar os cavallos de um coche mortuario pagaria dois tostões á camara, repetindo-se tantas vezes esta quantia quantas fossem as horas decorridas entre a do fallecimento e a da ultima benção na sepultura. O escrivão perdeu-se nos calculos arithmeticos do rendimento possivel da nova taxa: e um dos vereadores, que não acreditava na empreza do medico, pediu que se relevasse o escrivão de um trabalho inutil.",
+          "kind": "prose"
+        },
+        {
+          "position": 11,
+          "text": "—Os calculos não são precisos, disse elle, porque o Dr. Bacamarte não arranja nada. Quem é que viu agora metter todos os doudos dentro da mesma casa?",
+          "kind": "prose"
+        },
+        {
+          "position": 12,
+          "text": "Enganava-se o digno magistrado; o medico arranjou tudo. Uma vez empossado da licença começou logo a construir a casa. Era na rua Nova, a mais bella rua de Itaguahy naquelle tempo, tinha cincoenta janellas por lado, um pateo no centro, e numerosos cubiculos para os hospedes. Como fosse grande arabista, achou no Koran que Mahomet declara veneraveis os doudos, pela consideração de que Allah lhes tira o juizo para que não pequem. A idéa pareceu-lbe bonita e profunda, e elle a fez gravar no frontespicio da casa; mas, como tinha medo ao vigario, e por tabella ao bispo, attribuiu o pensamento a Benedicto VIII, merecendo com essa fraude, aliás pia, que o padre Lopes lhe contasse, ao almoço, a vida daquelle pontifice eminente.",
+          "kind": "prose"
+        },
+        {
+          "position": 13,
+          "text": "A Casa Verde foi o nome dado ao asylo, por allusão á côr das janellas, que pela primeira vez appareciam verdes em Itaguahy. Inaugurou-se com immensa pompa; de todas as villas e povoações proximas, e até remotas, e da propria cidade do Rio de Janeito, correu gente para assistir ás ceremonias, que duraram sete dias. Muitos dementes já estavam recolhidos; e os parentes tiveram occasião de ver o carinho paternal e a caridade christã com que elles iam ser tratados. D. Evarista, contentissima com a gloria do marido, vestira-se luxuosamente, cobriu-se de joias, flôres e sedas. Ella foi uma verdadeira rainha naquelles dias memoraveis; ninguem deixou de ir visital-a duas e trez vezes, apezar dos costumes caseiros e recatados do seculo, e não só a cortejavam como a louvavam; porquanto,—e este facto é um documento altamente honroso para a sociedade do tempo,—porquanto viam nella a feliz esposa de um alto espirito, de um varão illustre, e, se lhe tinham inveja, era a santa e nobre inveja dos admiradores.",
+          "kind": "prose"
+        },
+        {
+          "position": 14,
+          "text": "Ao cabo de sete dias expiraram as festas publicas; Itaguahy tinha finalmente uma casa de Orates.",
+          "kind": "prose"
+        }
+      ]
+    },
+    {
+      "id": "chapter-2",
+      "title": "Capítulo II",
+      "position": 2,
+      "sourceUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#II",
+      "revisionUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#II",
+      "snapshotPath": ".cache/corpus/sources/o-alienista/papeis-avulsos-1882-gutenberg.html",
+      "snapshotSha256": "2d82b19b1222bacee6bbc3f98d381d43ceafd7aa60d0a4f3efbf77c11bc6c445",
+      "passages": [
+        {
+          "position": 1,
+          "text": "Tres dias depois, n'uma expansão intima com o boticario Crispim Soares, desvendou o alienista o mysterio do seu coração.",
+          "kind": "prose"
+        },
+        {
+          "position": 2,
+          "text": "—A caridade, Sr. Soares, entra de certo no meu procedimento, mas entra como tempero, como o sal das cousas, que é assim que interpreto o dito de S. Paulo aos Corinthios: «Se eu conhecer quanto se pode saber, e não tiver caridade, não sou nada.» O principal nesta minha obra da Casa Verde é estudar profundamente a loucura, os seus diversos grãos, classificar-lbe os casos, descobrir emfim a causa do phenomeno e o remedio universal. Este é o mysterio do meu coração. Creio que com isto presto um bom serviço á humanidade.",
+          "kind": "prose"
+        },
+        {
+          "position": 3,
+          "text": "—Um excellente serviço, corrigiu o boticario.",
+          "kind": "prose"
+        },
+        {
+          "position": 4,
+          "text": "—Sem este asylo, continuou o alienista, pouco poderia fazer; elle dá-me, porém, muito maior campo aos meus estudos.",
+          "kind": "prose"
+        },
+        {
+          "position": 5,
+          "text": "—Muito maior, accrescentou o outro.",
+          "kind": "prose"
+        },
+        {
+          "position": 6,
+          "text": "E tinham razão. De todas as villas e arraiaes visinhos affluiam loucos á Casa Verde. Eram furiosos, eram mansos, eram monomaniacos, era toda a familia dos desherdados do espirito. Ao cabo de quatro mezes, a Casa Verde era uma povoação. Não bastaram os primeiros cubiculos: mandou-se annexar uma galeria de mais trinte e sete. O padre Lopes confessou que não imaginara a existencia de tantos doudos no mundo, e menos ainda o inexplicavel de alguns casos. Um, por exemplo, um rapaz bronco e villão, que todos os dias, depois do almoço, fazia regularmente um discurso academico, ornado de tropos, de antitheses, de apostrophes, com seus recamos de grego e latim, e suas borlas de Cicero, Apuleo e Tertuliano. O vigario não queria acabar do crer. Que! um rapaz que elle vira, tres mezes antes, jogando peteca na rua!",
+          "kind": "prose"
+        },
+        {
+          "position": 7,
+          "text": "—Não digo que não, respondia-lhe o alienista; mas a verdade é o que Vossa Reverendissima está vendo. Isto é todos os dias.",
+          "kind": "prose"
+        },
+        {
+          "position": 8,
+          "text": "—Quanto a mim, tornou o vigario, só se póde explicar pela confusão das linguas na torre de Babel, segundo nos conta a Escriptura; provavelmente, confundidas antigamente as linguas, é facil trocal-as agora, desde que a razão não trabalhe...",
+          "kind": "prose"
+        },
+        {
+          "position": 9,
+          "text": "—Essa póde ser, com effeito, a explicação divina do phenomeno, concordou o alienista, depois de reflectir um instante, mas não é impossivel que haja tambem alguma razão humana, e puramente scientifica, e disso trato...",
+          "kind": "prose"
+        },
+        {
+          "position": 10,
+          "text": "—Vá que seja, e fico ancioso. Realmente!",
+          "kind": "prose"
+        },
+        {
+          "position": 11,
+          "text": "Os loucos por amor eram tres ou quatro, mas só dous espantavam pelo curioso do delirio. O primeiro, um Falcão, rapaz de vinte e cinco annos, suppunha-se estrella d’alva, abria os braços e alargava as pernas, para dar-lhes certa feição de raios, e ficava assim horas esquecidas a perguntar se o sol já tinha sahido para elle recolher-se. O outro andava sempre, sempre, sempre, á roda das salas ou do pateo, ao longo dos corredores, á procura do fim do mundo. Era um desgraçado, a quem a mulher deixou por seguir um peralvilho. Mal descobrira a fuga, armou-se de uma garrucha, e sahiu-lhes no encalço; achou-os duas horas depois, ao pé de uma lagoa, matou-os a ambos com os maiores requintes de crueldade. O ciume satisfez-se, mas o vingado estava louco. E então começou aquella ancia de ir ao fim do mundo á cata dos fugitivos.",
+          "kind": "prose"
+        },
+        {
+          "position": 12,
+          "text": "A mania das grandezas tinha exemplares notaveis. O mais notavel era um pobre diabo, filho de um algibebe, que narrava ás paredes (porque não olhava nunca para nenhuma pessoa) toda a sua genealogia, que era esta:",
+          "kind": "prose"
+        },
+        {
+          "position": 13,
+          "text": "—Deus engendrou um ovo, o ovo engendrou a espada, a espada engendrou David, David engendrou a purpura, a purpura engendrou o duque, o duque engendrou o marquez, o marquez engendrou o conde, que sou eu.",
+          "kind": "prose"
+        },
+        {
+          "position": 14,
+          "text": "Dava uma pancada na testa, um estalo com os dedos, e repetia cinco, seis vezes seguidas:",
+          "kind": "prose"
+        },
+        {
+          "position": 15,
+          "text": "—Deus engendrou um ovo, o ovo, etc.",
+          "kind": "prose"
+        },
+        {
+          "position": 16,
+          "text": "Outro da mesma especie era um escrivão, que se vendia por mordomo do rei; outro era um boiadeiro de Minas, cuja mania era distribuir boiadas a toda a gente, dava trezentas cabeças a um, seiscentas a outro, mil e duzentas a outro, e não acabava mais. Não fallo dos casos de monomania religiosa; apenas citarei um sujeito que, chamando-se João de Deus, dizia agora ser o deus João, e promettia o reino dos céos a quem o adorasse, e as penas do inferno aos outros; e depois desse, o licenciado Garcia, que não dizia nada, porque imaginava que no dia em que chegasse a proferir uma só palavra, todas as estrellas se despegariam do céu e abrasariam a terra; tal era o poder que recebera de Deus. Assim o escrevia elle no papel que o alienista lhe mandava dar, menos por caridade do que por interesse scientifico.",
+          "kind": "prose"
+        },
+        {
+          "position": 17,
+          "text": "Que, na verdade, a paciencia do alienista era ainda mais extraordinaria do que todas as manias hospedadas na Casa Verde; nada menos que assombrosa. Simão Bacamarte começou por organisar um pessoal de administração; e, aceitando essa idéa ao boticario Crispim Soares, aceitou-lhe tambem dous sobrinhos, a quem incumbiu da execução de um regimento que lhes deu, approvado pela camara, da distribuição da comida e da roupa, e assim tambem da escripta, etc. Era o melhor que podia fazer, para sómente cuidar do seu officio.—A Casa Verde, disse elle ao vigario, é agora uma especie de mundo, em que ha o governo temporal e o governo espiritual. E o padre Lopes ria deste pio trocado,—e accrescentava,—com o unico fim de dizer tambem uma chalaça:—Deixe estar, deixe estar, que hei de mandal-o denunciar ao papa.",
+          "kind": "prose"
+        },
+        {
+          "position": 18,
+          "text": "Uma vez desonerado da administração, o alienista procedeu a uma vasta classificação dos seus enfermos. Dividiu-os primeiramente em duas classes principaes: os furiosos e os mansos; dahi passou ás sub-classes, monomanias, delirios, allucinações diversas. Isto feito, começou um estudo aturado e continuo; analysava os habitos de cada louco, as horas do accesso, as aversões, as sympathias, as palavras, os gestos, as tendencias; inquiria da vida dos enfermos, profissão, costumes, circumstancias da revelação morbida, accidentes da infancia e da mocidade, doenças de outra especie, antecedentes na familia, uma devassa, emfim, como a não faria o mais atilado corregedor. E cada dia notava uma observação nova, uma descoberta interessante, um phenomeno extraordinario. Ao mesmo tempo estudava o melhor regimen, as substancias medicamentosas, os meios curativos e os meios palliativos, não só os que vinham nos seus amados arabes, como os que elle mesmo descobria, á força de sagacidade e paciencia. Ora, todo esse trabalho levava-lhe o melhor e o mais do tempo. Mal dormia e mal comia; e, ainda comendo, era como se trabalhasse, porque ora interrogava um texto antigo, ora ruminava uma questão, e ia muitas vezes de um cabo a outro do jantar sem dizer uma só palavra a D. Evarista.",
+          "kind": "prose"
+        }
+      ]
+    },
+    {
+      "id": "chapter-3",
+      "title": "Capítulo III",
+      "position": 3,
+      "sourceUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#III",
+      "revisionUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#III",
+      "snapshotPath": ".cache/corpus/sources/o-alienista/papeis-avulsos-1882-gutenberg.html",
+      "snapshotSha256": "2d82b19b1222bacee6bbc3f98d381d43ceafd7aa60d0a4f3efbf77c11bc6c445",
+      "passages": [
+        {
+          "position": 1,
+          "text": "A illustre dama, no fim de dous mezes, achou-se a mais desgraçada das mulheres; cahiu em profunda melancholia, ficou amarella, magra, comia pouco e suspirava a cada canto. Não ousava fazer-lhe nenhuma queixa ou reproche, porque respeitava nelle o seu marido e senhor, mas padecia calada, e definhava a olhos vistos. Um dia, ao jantar, como lhe perguntasse o marido o que é que tinha, respondeu tristemente que nada; depois atreveu-se um pouco, e foi ao ponto de dizer que se considerava tão viuva como dantes. E accrescentou:",
+          "kind": "prose"
+        },
+        {
+          "position": 2,
+          "text": "—Quem diria nunca que meia duzia de lunaticos...",
+          "kind": "prose"
+        },
+        {
+          "position": 3,
+          "text": "Não acabou a phrase; ou antes, acabou-a levantando os olhos ao tecto,—os olhos, que eram a sua feição mais insinuante,—negros, grandes, lavados de uma luz humida, como os da aurora. Quanto ao gesto, era o mesmo que empregara no dia em que Simão Bacamarte a pediu era casamento. Não dizem as chronicas se D. Evarista brandiu aquella arma com o perverso intuito de degolar de uma vez a sciencia, out pelo menos, decepar-lhe as mãos; mas a conjectura é verosimil. Em todo caso, o alienista, não lhe attribuiu outra intenção. E não se irritou o grande homem, não ficou sequer consternado. O metal de seus olhos não deixou de ser o mesmo metal, duro, liso, eterno, nem a menor prega veiu quebrar a superficie da fronte quieta como a agua de Botafogo. Talvez um sorriso lhe descerrou os labios, por entre os quaes filtrou esta palavra macia como o oleo do Cantico:",
+          "kind": "prose"
+        },
+        {
+          "position": 4,
+          "text": "—Consinto que vás dar um passeio ao Rio de Janeiro.",
+          "kind": "prose"
+        },
+        {
+          "position": 5,
+          "text": "D. Evarista sentiu faltar-lhe o chão debaixo dos pés. Nunca dos nuncas vira o Rio de Janeiro, que posto não fosse sequer uma pallida sombra do que hoje é, todavia era alguma cousa mais do que Itaguahy. Ver o Rio de Janeiro, para ella, equivalia ao sonho do hebreu captivo. Agora, principalmente, que o marido assentára de vez naquella povoação interior, agora é que ella perdera as ultimas esperanças de respirar os ares da nossa boa cidade; e justamente agora é que elle a convidava a realisar os seus desejos de menina e moça. D. Evarista não pôde dissimular o gosto de semelhante proposta. Simão Bacamarte pegou-lhe na mão e sorriu,—um sorriso tanto ou quanto philosophico, além de conjugal, em que parecia traduzir-se este pensamento:—«Não ha remedio certo para as dôres da alma; esta senhora definha, porque lhe parece que a não amo; dou-lhe o Rio de Janeiro, e consola-se.» E porque era homem estudioso tomou nota da observação.",
+          "kind": "prose"
+        },
+        {
+          "position": 6,
+          "text": "Mas um dardo atravessou o coração de D. Evarista. Conteve-se, entretanto; limitou-se a dizer ao marido, que, se elle não ia, ella não iria tambem, porque não havia de metter-se sózinha pelas estradas.",
+          "kind": "prose"
+        },
+        {
+          "position": 7,
+          "text": "—Irá com sua tia, redarguiu o alienista.",
+          "kind": "prose"
+        },
+        {
+          "position": 8,
+          "text": "Note-se que D. Evarista tinha pensado nisso mesmo; mas não quizera pedil-o nem insinual-o, em primeiro logar porque seria impôr grandes despezas ao marido, em segundo logar porque era melhor, mais methodico e racional que a proposta viesse delle.",
+          "kind": "prose"
+        },
+        {
+          "position": 9,
+          "text": "—Oh! mas o dinheiro que será preciso gastar! suspirou D. Evarista sem convicção.",
+          "kind": "prose"
+        },
+        {
+          "position": 10,
+          "text": "—Que importa? Temos ganho muito, disse o marido. Ainda hontem o escripturario prestou-me contas. Queres ver?",
+          "kind": "prose"
+        },
+        {
+          "position": 11,
+          "text": "E levou-a aos livros. D. Evarista ficou deslumbrada. Era uma via-lactea de algarismos. E depois levou-a ás arcas, onde estava o dinheiro. Deus! eram montes de ouro, eram mil cruzados sobre mil cruzados, dobrões sobre dobrões; era a opulencia. Emquanto ella comia o ouro com os seus olhos negros, o alienista fitava-a, e dizia-lhe ao ouvido com a mais perfida das allusões.",
+          "kind": "prose"
+        },
+        {
+          "position": 12,
+          "text": "—Quem diria que meia duzia de lunaticos...",
+          "kind": "prose"
+        },
+        {
+          "position": 13,
+          "text": "D. Evarista comprehendeu, sorriu e respondeu com muita resignação:",
+          "kind": "prose"
+        },
+        {
+          "position": 14,
+          "text": "—Deus sabe o que faz!",
+          "kind": "prose"
+        },
+        {
+          "position": 15,
+          "text": "Tres mezes depois effectuava-se a jornada. D. Evarista, a tia, a mulher do boticario, um sobrinho deste, um padre que o alienista conhecera em Lisboa, e que de aventura achava-se em Itaguahy, cinco ou seis pagens, quatro mucamas, tal foi a comitiva que a população viu dalli sahir em certa manhã do mez de maio. As despedidas foram tristes para todos, menos para o alienista. Comquanto as lagrimas de D. Evarista fossem abundantes e sinceras, não chegaram a abalal-o. Homem de sciencia, e só de sciencia, nada o consternava fóra da sciencia; e se alguma cousa o preoccupava naquella occasião, se elle deixava correr pela multidão um olhar inquieto e policial, não era outra cousa mais do que a idéa de que algum demente podia achar-se alli misturado com a gente de juizo.",
+          "kind": "prose"
+        },
+        {
+          "position": 16,
+          "text": "—Adeus! soluçaram emfim as damas e o boticario.",
+          "kind": "prose"
+        },
+        {
+          "position": 17,
+          "text": "E partiu a comitiva. Crispim Soares, ao tornar a casa, trazia os olhos entre as duas orelhas da besta ruana em que vinha montado; Simão Bacamarte alongava os seus pelo horisonte adiante, deixando ao cavallo a responsabilidade do regresso. Imagem vivaz do genio e do vulgo! Um fita o presente, com todas as suas lagrimas e saudades, outro devassa o futuro com todas as suas auroras.",
+          "kind": "prose"
+        }
+      ]
+    },
+    {
+      "id": "chapter-4",
+      "title": "Capítulo IV",
+      "position": 4,
+      "sourceUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#IV",
+      "revisionUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#IV",
+      "snapshotPath": ".cache/corpus/sources/o-alienista/papeis-avulsos-1882-gutenberg.html",
+      "snapshotSha256": "2d82b19b1222bacee6bbc3f98d381d43ceafd7aa60d0a4f3efbf77c11bc6c445",
+      "passages": [
+        {
+          "position": 1,
+          "text": "Ao passo que D. Evarista, em lagrimas, vinha buscando o Rio de Janeiro, Simão Bacamarte estudava por todos os lados uma certa idéa arrojada e nova, propria a alargar as bases da psychologia. Todo o tempo que lhe sobrava dos cuidados da Casa Verde, era pouco para andar na rua, ou de casa em casa, conversando as gentes, sobre trinta mil assumptos, e virgulando as fallas de um olhar que mettia medo aos mais heroicos.",
+          "kind": "prose"
+        },
+        {
+          "position": 2,
+          "text": "Um dia de manhã,—eram passadas tres semanas,—estando Crispim Soares occupado em temperar um medicamento, vieram dizer-lhe que o alienista o mandava chamar.",
+          "kind": "prose"
+        },
+        {
+          "position": 3,
+          "text": "—Trata-se de negocio importante, segundo elle me disse, aecrescentou o portador.",
+          "kind": "prose"
+        },
+        {
+          "position": 4,
+          "text": "Crispim empallideceu. Que negocio importante podia ser, se não alguma triste noticia da comitiva, e especialmente da mulher? Porque este topico deve ficar claramente definido, visto insistirem nelle os chronistas: Crispim amava a mulher, e, desde trinta annos, nunca estiveram separados um só dia. Assim se explicam os monologos que elle fazia agora, e que os famulos lhe ouviam muita vez:—«Anda, bem feito, quem te mandou consentir na viagem de Cesaria? Bajulador, torpe bajulador! Só para adular ao Dr. Bacamarte. Pois agora aguenta-te; anda, aguenta-te, alma de lacaio, fracalhão, vil, miseravel. Dizes amen a tudo, não é? ahi tens o lucro, biltre!—E muitos outros nomes feios, que um homem não deve dizer aos outros, quanto mais a si mesmo. Daqui a imaginar o effeito do recado é um nada. Tão depressa elle o recebeu como abriu mão das drogas e voou á Casa Verde.",
+          "kind": "prose"
+        },
+        {
+          "position": 5,
+          "text": "Simão Bacamarte recebeu-o com a alegria propria de um sabio, uma alegria abotoada de circumspecção até o pescoço.",
+          "kind": "prose"
+        },
+        {
+          "position": 6,
+          "text": "—Estou muito contente, disse elle.",
+          "kind": "prose"
+        },
+        {
+          "position": 7,
+          "text": "—Noticias do nosso povo? perguntou o boticario com a voz tremula.",
+          "kind": "prose"
+        },
+        {
+          "position": 8,
+          "text": "O alienista fez um gesto magnifico, e respondeu:",
+          "kind": "prose"
+        },
+        {
+          "position": 9,
+          "text": "—Trata-se de cousa mais alta, trata-se de uma experiencia scientifica. Digo experiencia, porque não me atrevo a assegurar desde já a minha idéa; nem a sciencia é outra cousa, Sr. Soares, se não uma investigação constante. Trata-se, pois, de uma experiencia, mas uma experiencia que vai mudar a face da terra. A loucura, objecto dos meus estudos, era até agora uma ilha perdida no oceano da razão; começo a suspeitar que é um continente.",
+          "kind": "prose"
+        },
+        {
+          "position": 10,
+          "text": "Disse isto, e calou-se, para ruminar o pasmo do boticario. Depois explicou compridamente a sua idéa. No conceito delle a insania abrangia uma vasta superficie de cerebros; e desenvolveu isto com grande cópia de raciocinios, de textos, de exemplos. Os exemplos achou-os na historia e em ltaguahy; mas, como um raro espirito que era, reconheceu o perigo de citar todos os casos de Itaguahy, e refugiou-se na historia. Assim, apontou com especialidade alguns personagens celebres, Socrates, que tinha um demonio familiar, Pascal, que via um abysmo á esquerda, Mahomet, Caracalla, Domiciano, Caligula, etc., uma enfiada de casos e pessoas, em que de mistura vinham entidades odiosas, e entidades ridiculas. E porque o boticario se admirasse de uma tal promiscuidade, o alienista disse-lhe que era tudo a mesma cousa, e até accrescentou sentenciosamcnte:",
+          "kind": "prose"
+        },
+        {
+          "position": 11,
+          "text": "—A ferocidade, Sr. Soares, é o grotesco a serio.",
+          "kind": "prose"
+        },
+        {
+          "position": 12,
+          "text": "—Gracioso, muito gracioso! exclamou Crispim Soares lovantando as mãos ao céu.",
+          "kind": "prose"
+        },
+        {
+          "position": 13,
+          "text": "Quanto á ideia de ampliar o territorio da loucura, achou-a o boticario extravagante; mas a modestia, principal adorno de seu espirito, não lhe sofreu confessar outra cousa além de um nobre enthusiasmo; declarou-a sublime e verdadeira, e acerescentou que era «caso de matraca.» Esta expressão não tem equivalente no estylo moderno. Naquelle tempo, Itaguahy, que como as demais villas, arraiaes e povoações da colonia, não dispunha de imprensa, tinha dous modos de divulgar uma noticia: ou por meio de cartazes manuscriptos e pregados na porta da camara e da matriz;—ou por meio de matraca. Eis em que consistia este segundo uso. Contractava-se um homem, por um ou mais dias, para andar as ruas do povoado, com uma matraca na mão. De quando em quando tocava a matraca, reunia-se gente, e elle annunciava o que lhe incumbiam,—um remedio para sezões, umas terras lavradias, um soneto, um donativo eeclesiastico, a melhor thesoura da villa, o mais bello discurso do anno, etc. O systema tinha inconvenientes para a paz publica; mas era conservado pela grande energia de divulgação que possuia. Por exemplo, um dos vereadores,—aquelle justamente que mais se oppuzera á creação da Casa Verde,—desfructava a reputação de perfeito educador de cobras e macacos, e aliás nunca domesticára um só desses bichos; mas, tinha o cuidado de fazer trabalhar a matraca todos os mezes. E dizem as chronicas que algumas pessoas affirmavam ter visto cascaveis dansando no peito do vereador; affirmação perfeitamente falsa, mas só devida á absoluta confiança no systema. Verdade, verdade; nem todas as instituições do antigo regimen, mereciam o desprezo do nosso seculo.",
+          "kind": "prose"
+        },
+        {
+          "position": 14,
+          "text": "—Ha melhor do que annunciar a minha ideia, é pratical-a, respondeu o alienista á insinuação do boticario.",
+          "kind": "prose"
+        },
+        {
+          "position": 15,
+          "text": "E o boticario, não divergindo sensivelmente deste modo de ver, disse-lhe que sim, que era melhor começar pela execução.",
+          "kind": "prose"
+        },
+        {
+          "position": 16,
+          "text": "—Sempre haverá tempo de a dar á matraca, concluiu elle.",
+          "kind": "prose"
+        },
+        {
+          "position": 17,
+          "text": "Simão Bacamarte reflectiu ainda um instante, e disse:",
+          "kind": "prose"
+        },
+        {
+          "position": 18,
+          "text": "—Suppondo o espirito humano uma vasta concha, o meu fim, Sr. Soares, é ver se posso extrahir a perola, que é a razão; por outros termos, demarquemos definitivamente os limites da razão e da loucura. A razão é o perfeito equilibrio de todas as faculdades; fora dahi insania, insania, e só insania.",
+          "kind": "prose"
+        },
+        {
+          "position": 19,
+          "text": "O vigario Lopes, a quem elle confiou a nova theoria, declarou lisamente que não chegava a entendel-a, que era uma obra absurda, e, se não era absurda, era de tal modo collossal que não merecia principio de execução.",
+          "kind": "prose"
+        },
+        {
+          "position": 20,
+          "text": "—Com a definição actual, que é a de todos os tempos, accrescentou, a loucura e a razão estão perperfeitamente delimitadas. Sabe-se onde uma acaba e onde a outra começa. Para que transpor a cerca?",
+          "kind": "prose"
+        },
+        {
+          "position": 21,
+          "text": "Sobre o labio fino e discreto do alienista roçou a vaga sombra de uma intenção de riso, em que o desdem vinha casado á commiseração; mas nenhuma palavra sahiu de suas egregias entranhas. A sciencia contentou-se em estender a mão á theologia,—com tal segurança, que a theologia não soube emfim se devia crêr em si ou na outra. Itaguahy e o universo ficavam á beira de uma revolução.",
+          "kind": "prose"
+        }
+      ]
+    },
+    {
+      "id": "chapter-5",
+      "title": "Capítulo V",
+      "position": 5,
+      "sourceUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#V",
+      "revisionUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#V",
+      "snapshotPath": ".cache/corpus/sources/o-alienista/papeis-avulsos-1882-gutenberg.html",
+      "snapshotSha256": "2d82b19b1222bacee6bbc3f98d381d43ceafd7aa60d0a4f3efbf77c11bc6c445",
+      "passages": [
+        {
+          "position": 1,
+          "text": "Quatro dias depois, a população do Itaguahy ouviu consternada, a noticia de que um certo Costa fôra recolhido á Casa Verde.",
+          "kind": "prose"
+        },
+        {
+          "position": 2,
+          "text": "—Impossivel!",
+          "kind": "prose"
+        },
+        {
+          "position": 3,
+          "text": "—Qual impossivel! foi recolhido hoje de manhã.",
+          "kind": "prose"
+        },
+        {
+          "position": 4,
+          "text": "—Mas, na verdade, elle não merecia... Ainda em cima! depois de tanto que elle fez...",
+          "kind": "prose"
+        },
+        {
+          "position": 5,
+          "text": "Costa era um dos cidadãos mais estimados de Itaguahy. Herdára quatrocentos mil cruzados em boa moeda de el-rei D. João V, dinheiro cuja renda bastava, segundo lhe declarou o tio no testamento, para viver «até o fim do mundo.» Tão depressa recolheu a herança, como entrou a dividil-a em emprestimos, sem usura, mil cruzados a um, dous mil a outro, trezentos a este, oitocentos áquelle, a tal ponto que, no fim de cinco annos, estava sem nada, Se a miseria viesse de chofre, o pasmo de Itaguahy seria enorme; mas veiu de vagar; elle foi passando da opulencia á abastança, da abastança á mediania, da mediania á pobreza, da pobreza á miseria, gradualmente. Ao cabo daquelles cinco annos, pessoas que levavam o chapeu ao chão, logo que elle assomava no fim da rua, agora batiam-lhe no hombro, com intimidade, davam-lhe piparotes no nariz, diziam-lhe pulhas. E o Costa sempre lhano, risonho. Nem se lhe dava de ver que os menos cortezes eram justamente os que tinham ainda a divida em aberto; ao contrario, parece que os agazalhava com maior prazer, e mais sublime resignação. Um dia, como um desses incuraveis devedores lhe atirasse uma chalaça grossa, e elle se risse della, observou um desaffeiçoado, com certa perfidia:—«Você supporta esse sujeito para ver se elle lhe paga.» Costa não se deteve um minuto, foi ao devedor e perdoou-lhe a divida.—«Não admira, retorquiu o outro; o Costa abriu mão de uma estrella, que está no céu.» Costa era perspicaz, entendeu que elle negava todo o merecimento ao acto, attribuindo-lhe a intenção de rejeitar o que não vinham metter-lhe na algibeira. Era tambem pundonoroso e inventivo; duas horas depois achou um meio de provar que lhe não cabia um tal labéo: pegou de algumas dobras, e mandou-as de emprestimo ao devedor.",
+          "kind": "prose"
+        },
+        {
+          "position": 6,
+          "text": "—Agora espero que...—pensou elle sem concluir a phrase.",
+          "kind": "prose"
+        },
+        {
+          "position": 7,
+          "text": "Esse ultimo rasgo do Costa persuadiu a credulos e incredulos; ninguem mais pôz em duvida os sentimentos cavalheirescos daquelle digno cidadão. As necessidades mais acanhadas sahiram á rua, vieram bater-lhe á porta, com os seus chinellos velhos, com as suas capas remendadas. Um verme, entretanto, roia a alma do Costa: era o conceito do desaffecto. Mas isso mesmo acabou; trez mezes depois veiu este pedir-lhe uns cento e vinte cruzados com promessa de restituir-lh'os dahi a dous dias; era o residuo da grande herança, mas era tambem uma nobre desforra: Costa emprestou o dinheiro logo, logo, e sem juros. Infelizmente não teve tempo de ser pago; cinco mezes depois era recolhido á Casa Verde.",
+          "kind": "prose"
+        },
+        {
+          "position": 8,
+          "text": "Imagina-se a consternação de Itaguahy, quando soube do caso. Não se fallou em outra cousa, dizia-se que o Costa ensandecera, ao almoço, outros que de madrugada; e contavam-se os accessos, que eram furiosos, sombrios, terriveis,—ou mansos, e até engraçados, conforme as versões. Muita gente correu á Casa Verde, e achou o pobre Costa, tranquillo, um pouco espantado, faltando com muita clareza, e perguntando porque motivo o tinham levado para alli. Alguns foram ter com o alienista. Bacamarte approvava esses sentimentos de estima e compaixão, mas accrescentava que a sciencia era a sciencia, e que elle não podia deixar na rua um mentecapto. A ultima pessoa que intercedeu por elle (porque depois do que vou contar ninguem mais se atreveu a procurar o terrivel medico) foi uma pobre senhora, prima do Costa. O alienista disse-lhe confidencialmente que esse digno homem não estava no perfeito equilibrio das faculdades mentaes, á vista do modo como dissipára os cabedaes que...",
+          "kind": "prose"
+        },
+        {
+          "position": 9,
+          "text": "—Isso, não! isso não! interrompeu a boa senhora com energia. Se elle gastou tão depressa o que recebeu, a culpa não é delle.",
+          "kind": "prose"
+        },
+        {
+          "position": 10,
+          "text": "—Não?",
+          "kind": "prose"
+        },
+        {
+          "position": 11,
+          "text": "—Não, senhor. Eu lhe digo como o negocio se passou. O defuncto meu tio não era máu homem; mas quando estava furioso era capaz de nem tirar o chapéo ao Santissimo. Ora, um dia, pouco tempo antes de morrer, descobriu que um escravo lhe roubára um boi; imagine como ficou. A cara era um pimentão; todo elle tremia, a boca escumava; lembra-me como se fosse hoje. Então um homem feio, cabelludo, em mangas de camiza, chegou-se a elle e pediu agua. Meu tio (Deus lhe falle n'alma!) respondeu que fosse beber ao rio ou ao inferno. O homem olhou para elle, abriu a mão em ar de ameaça, e rogou esta praga:—«Todo o seu dinheiro não hade durar mais de sete annos e um dia, tão certo como isto ser o sino salamão!» E mostrou o sino salamão impresso no braço. Foi isto, meu senhor; foi esta praga daquelle maldito.",
+          "kind": "prose"
+        },
+        {
+          "position": 12,
+          "text": "Bacamarte espetára na pobre senhora um par de olhos agudos como punhaes. Quando ella acabou, estendeu-lhe a mão polidamente, como se o fizesse á propria esposa do vice-rei, e convidou-a a ir fallar ao primo. A misera acreditou; elle levou-a á Casa Verde e encerrou-a na galeria dos allucinados.",
+          "kind": "prose"
+        },
+        {
+          "position": 13,
+          "text": "A noticia desta aleivosia do illustre Bacamarte lançou o terror á alma da população. Ninguem queria acabar de crer, que, sem motivo, sem inimizade, o alienista trancasse na Casa Verde uma senhora perfeitamente ajuizada, que não tinha outro crime senão o de interceder por um infeliz. Commentava-se o caso nas esquinas, nos barbeiros; edificou-se um romance, umas finezas namoradas que o alienista outr'ora dirigira á prima do Costa, a indignação do Costa e o desprezo da prima. E dahi a vingança. Era claro. Mas a austeridade do alienista, a vida de estudos que elle levava, pareciam desmentir uma tal hypotbese. Historias! Tudo isso era naturalmente a capa do velhaco. E um dos mais credulos chegou a murmurar que sabia de outras cousas, não as dizia, por não ter certeza plena, mas sabia, quasi que podia jurar.",
+          "kind": "prose"
+        },
+        {
+          "position": 14,
+          "text": "—Você, que é intimo delle, não nos podia dizer o que ha, o que houve, que motivo...",
+          "kind": "prose"
+        },
+        {
+          "position": 15,
+          "text": "Crispim Soares derretia-se todo. Esse interrogar da gente inquieta e curiosa, dos amigos attonitos, era para elle uma consagração publica. Não havia duvidar; toda a povoação sabia emfim que o privado do alienista era elle, Crispim, o boticario, o collaborador do grande homem e das grandes cousas; dahi a corrida á botica. Tudo isso dizia o carão jocundo e o riso discreto do boticario, o riso e o silencio, porque elle não respondia nada; um, dous, trez monosyllabos, quando muito, soltos, seccos, encapados no fiel sorriso, constante e miudo, cheio de mysterios scientificos, que elle não podia, sem desdouro nem perigo, desvendar a nenhuma pessoa humana.",
+          "kind": "prose"
+        },
+        {
+          "position": 16,
+          "text": "—Ha cousa, pensavam os mais desconfiados.",
+          "kind": "prose"
+        },
+        {
+          "position": 17,
+          "text": "Um desses limitou-se a, pensal-o, deu de hombros e foi embora. Tinha negocios pessoaes. Acabava de construir uma casa sumptuosa. Só a casa bastava para deter e chamar toda a gente; mas havia mais,—a mobilia, que elle mandara vir da Hungria e da Hollanda, segundo contava, e que se podia ver do lado de fóra, porque as janellas viviam abertas,—e o jardim, que era uma obra-prima de arte e de gosto. Esse homem, que enriquecera no fabrico de albardas, tinha tido sempre o sonho de uma casa magnifica, jardim pomposo, mobilia rara. Não deixou o negocio das albardas, mas repousava delle na contemplação da casa nova, a primeira de Itaguahy, mais grandiosa do que a Casa Verde, mais nobre do que a da camara. Entre a gente illustre da povoação havia choro e ranger de dentes, quando se pensava, ou se fallava, ou se louvava a casa do albardeiro,—um simples albardeiro, Deus do céu!",
+          "kind": "prose"
+        },
+        {
+          "position": 18,
+          "text": "—Lá está elle embasbacado, diziam os transeuntes, de manhã.",
+          "kind": "prose"
+        },
+        {
+          "position": 19,
+          "text": "De manhã, com effeito, era costume do Matheus estatelar-se, no meio do jardim, com os olhos na casa, namorado, durante uma longa hora, até que vinham chamal-o para almoçar. Os visinhos, embora o comprimentassem com certo respeito, riam-se por traz delle, que era um gosto. Um desses chegou a dizer que o Matheus seria muito mais economico, e estaria riquissimo, se fabricasse as albardas para si mesmo; epigramma inintelligivel, mas que fazia rir ás bandeiras despregadas.",
+          "kind": "prose"
+        },
+        {
+          "position": 20,
+          "text": "—Agora lá está o Matheus a ser contemplado, diziam á tarde.",
+          "kind": "prose"
+        },
+        {
+          "position": 21,
+          "text": "A razão deste outro dito era que, de tarde, quando as familias sahiam a passeio (jantavam cedo) usava o Matheus postar-se á janella, bem no centro, vistoso, sobre um fundo escuro, trajado de branco, attitude senhoril, e assim ficava duas e tres horas até que anoitecia de todo. Pode crer-se que a intenção do Matheus era ser admirado e invejado, posto que elle não a confessasse a nenhuma pessoa, nem ao boticario, nem ao padre Lopes, seus grandes amigos. E entretanto não foi outra a allegação do boticario, quando o alienista lhe disse que o albardeiro talvez padecesse do amor das pedras, mania que elle Bacamarte descubrira e estudava desde algum tempo. Aquillo de contemplar a casa...",
+          "kind": "prose"
+        },
+        {
+          "position": 22,
+          "text": "—Não, senhor, acudiu vivamente Crispim Soares.",
+          "kind": "prose"
+        },
+        {
+          "position": 23,
+          "text": "—Não?",
+          "kind": "prose"
+        },
+        {
+          "position": 24,
+          "text": "—Hade perdoar-me, mas talvez não saiba que elle de manhã examina a obra, não a admira; de tarde, são os outros que o admirara a elle e á obra.—E contou o uso do albardeiro, todas as tardes, desde cedo até o cahir da noite.",
+          "kind": "prose"
+        },
+        {
+          "position": 25,
+          "text": "Uma volupia scientifica alumiou os olhos de Simão Bacamarte. Ou elle não conhecia todos os costumes do albardeiro, ou nada mais quiz, interrogando o Crispim, do que confirmar alguma noticia incerta ou suspeita vaga. A explicação satisfel-o; mas como tinha as alegrias proprias de um sabio, concentradas, nada viu o boticario que fizesse suspeitar uma intenção sinistra. Ao contrario, era de tarde, e o alienista pediu-lhe o braço para irem a passeio. Deus! era a primeira vez que Simão Bacamarte dava ao seu privado tamanha honra; Crispim ficou tremulo, atarantado, disse que sim, que estava prompto. Chegaram duas ou tres pessoas de fóra, Crispim mandou-as mentalmente a todos os diabos; não só atrazavam o passeio, como podia acontecer que Bacamarte elegesse alguma dellas, para acompanhal-o, e o dispensasse a elle. Que impaciencia! que afflicção! Emfim, sahiram. O alienista guiou para os lados da casa do albaideiro, viu-o á janella, passou cinco, seis vezes por diante, devagar, parando, examinando as attitudes, a expressão do rosto. O pobre Matheus, apenas notou que era objecto da curiosidade ou admiração do primeiro vulto de ltaguahy, redobrou de expressão, deu outro relevo ás attitudes... Triste! triste! não fez mais do que condemnar-se; no dia seguinte, foi recolhido á Casa Verde.",
+          "kind": "prose"
+        },
+        {
+          "position": 26,
+          "text": "—A Casa Verde é um carcere privado, disse um medico sem clinica.",
+          "kind": "prose"
+        },
+        {
+          "position": 27,
+          "text": "Nunca uma opinião pegou e grassou tão rapidamente. Carcere privado: eis o que se repetia de norte a sul e de leste a oéste de ltaguahy,—a medo, é verdade, porque durante a semana que se seguiu á captura do pobre Matheus, vinte e tantas pessoas,—duas ou tres de consideração,—foram recolhidas á Casa Verde. O alienista dizia que só eram admittidos os casos pathologicos, mas pouca gente lhe dava credito. Succediam-se as versões populares. Vingança, cobiça de dinheiro, castigo de Deus, monomania do proprio medico, plano secreto do Rio de Janeiro com o fim de destruir em Itaguahy qualquer germen de prosperidade que viesse a brotar, arvorecer, florir, com desdouro e mingua daquella cidade, mil outras explicações, que não explicavam nada, tal era o producto diario da imaginação publica.",
+          "kind": "prose"
+        },
+        {
+          "position": 28,
+          "text": "Nisto chegou do Rio de Janeiro a esposa do alienista, a tia, a mulher do Crispim Soares, e toda a mais comitiva,—ou quasi toda,—que algumas semanas antes partira de Itaguahy. O alienista foi recebel-a, com o boticario, o padre Lopes, os vereadores, e varios outros magistrados. O momento em que D. Evarista poz os olhos na pessoa do marido é considerado pelos chronistas de tempo como um dos mais sublimes da historia moral dos homens, e isto pelo contraste das duas naturezas, ambas extremas, ambas egregias. D. Evarista soltou um grito, balbuciou uma palavra, e atirou-se ao consorte, de um gesto que não se pode melhor definir do que comparando-o a uma mistura de onça e rola. Não assim o illustre Bacamarte; frio como um diagnostico, sem desengonçar por um instante a rigidez scientifica, estendeu os braços á dona, que caiu nelles, e desmaiou. Curto incidente; ao cabo de dons minutos, D. Evarista recebia os comprimentos dos amigos, e o prestito punha-se em marcha.",
+          "kind": "prose"
+        },
+        {
+          "position": 29,
+          "text": "D. Evarista era a esperança de Itaguahy; contava-se com ella para minorar o flagello da Casa Verde. Dahi as acclamações publicas, a immensa gente que atulhava as ruas, as flammulas, as flores e damascos ás janellas. Com o braço apoiado no do padre Lopes,—porque o eminente Bacamarte confiára a mulher ao vigario, e acompanhava-os a passo meditativo,—D. Evarista voltava a cabeça a um lado e outro, curiosa, inquieta, petulante. O vigario indagava do Rio de Janeiro, que elle não vira desde o vice-veinado anterior; o D. Evarista respondia, enthusiasmada, que era a cousa mais bella que podia haver no mundo. O Passeio Publico estava acabado, um paraiso, onde ella fôra muitas vezes, o a rua das Bellas Noites, o chafariz das Marrecas... Ah! o chafariz das Marrecas! Eram mesmo marrecas,—feitas de metal e despejando agua pela bocca fóra. Uma cousa galantissima. O vigario dizia que sim, que o Ro de Janeiro devia estar agora muito mais bonito. Se já o era neutro tempo! Não admira, maior do que Itaguahy, e de mais a mais séde do governo... Mas não se pode dizer que Itaguahy fosse feio; tinha bellas casas, a casa do Matheus, a Casa Verde...,",
+          "kind": "prose"
+        },
+        {
+          "position": 30,
+          "text": "—A proposito de Casa Verde, disso o padre Lopes escorregando habilmente para o assumpto da occasião, a senhora vem achal-a muito cheia de gente.",
+          "kind": "prose"
+        },
+        {
+          "position": 31,
+          "text": "—Sim?",
+          "kind": "prose"
+        },
+        {
+          "position": 32,
+          "text": "—É verdade. Lá está o Matheus...",
+          "kind": "prose"
+        },
+        {
+          "position": 33,
+          "text": "—O albardeiro?",
+          "kind": "prose"
+        },
+        {
+          "position": 34,
+          "text": "—O albardeiro; está o Costa, a prima do Costa, e Fulano, e Sicrano, e...",
+          "kind": "prose"
+        },
+        {
+          "position": 35,
+          "text": "—Tudo isso doudo?",
+          "kind": "prose"
+        },
+        {
+          "position": 36,
+          "text": "—Ou quasi doudo, obtemperou o padre.",
+          "kind": "prose"
+        },
+        {
+          "position": 37,
+          "text": "—Mas então?",
+          "kind": "prose"
+        },
+        {
+          "position": 38,
+          "text": "O vigario derreou os cantos da boca, á maneira de quem não sabe nada, ou não quer dizer tudo; resposta vaga, que se não póde repetir a outra pessoa, por falta de texto. D. Evarista achou realmente extraordinario que toda aquella gente ensandecesse; um ou outro, vá; mas todos? Entretanto, custava-lhe duvidar; o marido era um sabio, não recolheria ninguem á Casa Verde sem prova evidente de loucura.",
+          "kind": "prose"
+        },
+        {
+          "position": 39,
+          "text": "—Sem duvida... sem duvida... ia pontuando o vigario.",
+          "kind": "prose"
+        },
+        {
+          "position": 40,
+          "text": "Tres horas depois, cerca de cincoenta convivas sentavam-se em volta da mesa de Simão Bacamarte; era o jantar das boas-vindas. D. Evarista foi o assumpto obrigado dos brindes, discursos, versos de toda a casta, metaphoras, amplificações, apologos. Ella era a esposa do novo Hippocrates, a musa da sciencia, anjo, divina, aurora, caridade, vida, consolação; trazia nos olhos duas estrellas, segundo a versão modesta de Crispim Soares, e dous sóes, no conceito de um vereador. O alienista ouvia essas cousas um tanto enfastiado, mas sem visivel impaciencia. Quando muito dizia ao ouvido da mulher, que a rhetorica permittia taes arrojos sem significação. D. Evarista fazia esforços para adherir a esta opinião do marido; mas, ainda descontando tres quartas partes das louvaminhas, ficava muito com que enfunar-lhe a alma. Um dos oradores, por exemplo, Martim Brito, rapaz de vinte e cinco annos, pintalegrete acabado, curtido de namoros e aventuras, declamou um discurso em que o nascimento de D. Evarista era explicado polo mais singular dos reptos. «Deus, disse elle, depois de dar ao universo o homem e a mulher, esse diamante e essa perola da corôa divina (e o orador arrastava triumphalmente esta phrase de uma ponta a outra da mesa) Deus quiz vencer a Deus, e creou D. Evarista.»",
+          "kind": "prose"
+        },
+        {
+          "position": 41,
+          "text": "D. Evarista baixou os olhos com exemplar modestia. Duas senhoras, achando a cortezanice excessiva e audaciosa, interrogaram os olhos do dono da casa; e, na verdade, o gesto do alienista pareceu-lhes nublado de suspeitas, de ameaças, e, provavelmente, de sangue. O atrevimento foi grande, pensaram as duas damas. E uma e outra pediam a Deus que removesse qualquer episodio tragico,—ou que o adiasse, ao menos, para o dia seguinte. Sim, que o adiasse. Uma dellas, a mais piedosa, chegou a admittir, comsigo mesma, que D. Evarisla não merecia nenhuma desconfiança, tão longe estava de ser attrahente ou bonita. Uma simples agua-morna. Verdade é que, se todos os gostos fossem eguaes, o que seria do amarello? E esta ideia fel-a tremer outra vez, embora menos; menos, porque o alienista sorria agora para o Martim Brito, e, levantados todos, foi ter com elle e fallou-lhe do discurso. Não lhe negou que era era improviso brilhante, cheio de rasgos magnificos. Seria delle mesmo a ideia relativa ao nascimento de D. Evarista, ou tel-a-hia encontrado em algum autor que...? Não, senhor; era delle mesmo; achou-a naquella occasião e parecera-lhe adequada a um arroubo oratorio. De resto, suas ideias eram antes arrojadas do que ternas ou jocosas. Dava para o épico. Uma vez, por exemplo, compôz uma ode á queda do marquez de Pombal, em que dizia que esse ministro era o «dragão asperrimo do Nada,» esmagado pelas «garras vingadoras do Todo»; e assim outras, mais ou menos fóra do commum; gostava das ideias sublimes e raras, das imagens grandes e nobres...",
+          "kind": "prose"
+        },
+        {
+          "position": 42,
+          "text": "—Pobre moço! pensou o alienista. E continuou comsigo:—Trata-se de um caso do lesão cerebral; phenomeno sem gravidade, mas digno de estudo...",
+          "kind": "prose"
+        },
+        {
+          "position": 43,
+          "text": "D. Evarista ficou estupefacta quando soube, tres dias depois, que o Martim Brito fôra alojado na Casa Verde. Um moço que tinha idéas tão bonitas! As duas senhoras attribuiram o acto a ciumes do alienista. Não podia ser outra cousa; realmente a declaração do moço fôra audaciosa de mais.",
+          "kind": "prose"
+        },
+        {
+          "position": 44,
+          "text": "Ciumes? Mas como explicar que, logo em seguida, fossem recolhidos José Borges do Couto Leme, pessoa estimavel, o Chico das Cambraias, folgazão emerito, o escrivão Fabricio, e ainda outros? O terror accentuou-se. Não se sabia já quem estava são, nem quem estava doudo. As mulheres, quando os maridos saiam, mandavam accender uma lamparina a Nossa Senhora; e nem todos os maridos eram valorosos, alguns não andavam fóra sem um ou dous capangas. Positivamente o terror. Quem podia, emigrava. Um desses fugitivos, chegou a ser preso a duzentos passos da villa. Era um rapaz de trinta annos, amavel, conversado, polido, tão polido que não cumprimentava alguem sem levar o chapéu ao chão; na rua, acontecia-lhe correr uma distancia de dez a vinte braças para ir apertar a mão a um homem grave, a uma senhora, ás vezes a um menino, como acontecera ao filho do juiz de fóra. Tinha a vocação das cortezias. De resto, devia as boas relações da sociedade, não só aos dotes pessoaes, que eram raros, como á nobre tenacidade com que nunca desanimava deante de uma, duas, quatro, seis recusas, caras feias, etc. O que acontecia era que, uma vez entrado n'uma casa, não a deixava mais, nem os da casa o deixavam a elle, tão gracioso era o Gil Bernardes. Pois o Gil Bernardes, apezar de se saber estimado, teve medo quando lhe disseram um dia, que o alienista o trazia de olho; na madrugada seguinte fugiu da villa, mas foi logo apanhado e couduzido á Casa Verde.",
+          "kind": "prose"
+        },
+        {
+          "position": 45,
+          "text": "—Devemos acabar com isto!",
+          "kind": "prose"
+        },
+        {
+          "position": 46,
+          "text": "—Não pode continuar!",
+          "kind": "prose"
+        },
+        {
+          "position": 47,
+          "text": "—Abaixo a tyrania!",
+          "kind": "prose"
+        },
+        {
+          "position": 48,
+          "text": "—Despota! violento! Golias!",
+          "kind": "prose"
+        },
+        {
+          "position": 49,
+          "text": "Não eram gritos na rua, eram suspiros em casa mas não tardava a hora dos gritos. O terror crescia: avisinhava-se a rebellião. A idéa de uma petição ao governo para que Simão Bacamarte fosse capturado e deportado, andou por algumas cabeças, antes que o barbeiro Porfirio a expendesse na loja, com grandes gestos de indignação. Note-se,—e essa é uma das laudas mais puras desta sombria historia,—note-se que o Porfirio, desde que a Casa Verde começára a povoar-se tão extraordinariamente, viu crescerem-lhe os lucros pela applicação assidua de sanguesugas que dalli lhe pediam: mas o interesse particular, dizia elle, deve ceder ao interesse publico. E accrescentava:—é preciso derrubar o tyranno! Note-se mais que elle soltou esse grito justamente no dia em Simão Bacamarte fizera recolher á Casa Verde um homem que trazia com elle uma demanda, o Coelho.",
+          "kind": "prose"
+        },
+        {
+          "position": 50,
+          "text": "—Não me dirão em que é que o Coelho é doudo? bradou o Porfirio.",
+          "kind": "prose"
+        },
+        {
+          "position": 51,
+          "text": "E ninguem lhe respondia; todos repetiam que era um homem perfeitamente ajuizado. A mesma demanda que elle trazia com o barbeiro, ácerca de uns chãos da villa, era filha da obscuridade de um alvará, e não da cobiça ou odio. Um excellente caracter o Coelho. Os unicos desafeiçoados que tinha eram alguns sujeitos que, dizendo-se taciturnos, ou allegando andar com pressa, mal o viam de as esquinas, entravam nas lojas, etc. Na verdade, elle amava a boa palestra, a palestra comprida, gostada a sorvos largos, e assim é que nunca estava só, preferindo os que sabiam dizer duas palavras, mas não desdenhando os outros. O padre Lopes, que cultivava o Dante, e era inimigo do Coelho, nunca o via desligar-se de uma pessoa que não declamasse e emendasse este trecho:",
+          "kind": "prose"
+        },
+        {
+          "position": 52,
+          "text": "La bocca solevò dal fero pasto Quel seccatore...",
+          "kind": "prose"
+        },
+        {
+          "position": 53,
+          "text": "mas uns sabiam do odio do padre, e outros pensavam que isto era uma oração em latim.",
+          "kind": "prose"
+        }
+      ]
+    },
+    {
+      "id": "chapter-6",
+      "title": "Capítulo VI",
+      "position": 6,
+      "sourceUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#VI",
+      "revisionUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#VI",
+      "snapshotPath": ".cache/corpus/sources/o-alienista/papeis-avulsos-1882-gutenberg.html",
+      "snapshotSha256": "2d82b19b1222bacee6bbc3f98d381d43ceafd7aa60d0a4f3efbf77c11bc6c445",
+      "passages": [
+        {
+          "position": 1,
+          "text": "Cerca de trinta pessoas ligaram-se ao barbeiro, redigiram e levaram uma representação á camara. A camara recusou aceital-a, declarando que a Casa Verde era uma instituição publica, e que a sciencia não podia ser emendada por votação administrativa, menos ainda por movimentos de rua.",
+          "kind": "prose"
+        },
+        {
+          "position": 2,
+          "text": "—Voltai ao trabalho, concluiu o presidente, é o conselho que vos damos.",
+          "kind": "prose"
+        },
+        {
+          "position": 3,
+          "text": "A irritação dos agitadores foi enorme. O barbeiro declarou que iam d'alli levantar a bandeira da rebellião, e destruir a Casa Verde; que ltaguahy não podia continuar a servir de cadaver aos estudos e experiencias de um despota; que muitas pessoas estimaveis, algumas distinctas, outras humildes mas dignas de apreço, jaziam nos cubiculos da Casa Verde; que o despotismo scientifico do alienista complicava-se do espirito de ganancia, visto que os loucos, ou suppostos taes, não eram tratados de graça: as familias, e a camara, pagavam ao alienista...",
+          "kind": "prose"
+        },
+        {
+          "position": 4,
+          "text": "—É falso, interrompeu o presidente.",
+          "kind": "prose"
+        },
+        {
+          "position": 5,
+          "text": "—Falso?",
+          "kind": "prose"
+        },
+        {
+          "position": 6,
+          "text": "—Ha cerca de duas semanas recebemos um officio do illustre medico, em que nos declara que, tratando de fazer experiencias de alto valor psychologico, desiste do estipendio votado pela camara, bem como nada receberá das familias dos enfermos.",
+          "kind": "prose"
+        },
+        {
+          "position": 7,
+          "text": "A noticia deste acto tão nobre, tão puro, suspendeu um pouco a alma dos rebeldes. Seguramente o alienista podia estar em erro, mas nenhum interesse alheio á sciencia o instigava; e para demonstrar o erro era preciso alguma cousa mais do que arruaças e clamores, isto disse o presidente, com applauso de toda a camara. O barbeiro, depois de alguns instantes de concentração, declarou que estava investido de um mandato publico, e não restituiria a paz a Itaguahy antes de vêr por terra a Casa Verde,—«essa Bastilha da razão humana»,—expressão que ouvira a um poeta local, e que elle repetiu com muita emphasis. Disse, e a um signal todos sairam com elle.",
+          "kind": "prose"
+        },
+        {
+          "position": 8,
+          "text": "Imagine-se a situação dos vereadores; urgia obstar ao ajuntamento, á rebellião, á luta, ao sangue. Para accrescentar ao mal, um dos vereadores, que apoiara o presidente, ouvindo agora a denominação dada pelo barbeiro á Casa Verde—«Bastilha da razão humana»,—achou-a tão elegante, que mudou de parecer. Disse que entendia de bom aviso decretar alguma medida que reduzisse a Casa Verde; e porque o presidente, indignado, manifestasse em temos energicos o seu pasmo, o vereador fez esta reflexão:",
+          "kind": "prose"
+        },
+        {
+          "position": 9,
+          "text": "—Nada tenho que ver com a sciencia; mas se tantos homens em quem suppomos juizo são reclusos por dementes, quem nos aflirma que o alienado não é o alienista?",
+          "kind": "prose"
+        },
+        {
+          "position": 10,
+          "text": "Sebastião Freitas, o vereador dissidente, tinha o dom da palavra, e fallou ainda por algum tempo com prudencia, mas com firmesa. Os collegas estavam attonitos; o presidente pediu-lhe que, ao menos, désse o exemplo da ordem e do respeito á lei, não aventasse as suas idéas na rua, para não dar corpo e alma á rebellião, que era por ora um turbilhão de atomos dispersos. Esta figura corrigiu um pouco a effeito da outra: Sebastião Freitas prometteu suspender qualquer acção, reservando-se o direito de pedir pelos meios legaes a reducção da Casa Verde. E repetia com sigo, namorado:—Bastilha da razão humana!",
+          "kind": "prose"
+        },
+        {
+          "position": 11,
+          "text": "Entretanto, a arruaça crescia. Já não eram trinta, mas trezentas pessoas que acompanhavam o barbeiro, cuja alcunha familiar deve ser mencionada, porque ella deu o nome á revolta; chamavam-lhe o Cangica,—e o movimento ficou celebre com o nome de revolta dos Cangicas. A acção podia ser restricta,—visto que muita gente, ou por medo, ou por habitos de educação, não descia á rua; mas o sentimento era unanime, ou quasi unanime, e os trezentos que caminhavam para a Casa Verde,—dada a diferença de Paris a Itaguahy,—podiam ser comparados aos que tomaram a Bastilha.",
+          "kind": "prose"
+        },
+        {
+          "position": 12,
+          "text": "D. Evarista teve noticia da rebellião antes que ella chegasse; veiu dar-lh'a uma de suas crias. Ella provava nessa occasião um vestido do seda,—um dos trinta e sete que trouxera do Rio de Janeiro,—e não quiz crer.",
+          "kind": "prose"
+        },
+        {
+          "position": 13,
+          "text": "—Hade ser alguma patuscada, dizia ella mudando a posição de um alfinete. Benedicta, vê se a barra está boa.",
+          "kind": "prose"
+        },
+        {
+          "position": 14,
+          "text": "—Está, sinhá, respondia a mucama de cocaras no chão, está boa. Sinhá vira um bocadinho. Assim, Está muito boa.",
+          "kind": "prose"
+        },
+        {
+          "position": 15,
+          "text": "—Não é patuscada, não, senhora; elles estão gritando:—Morra o Dr. Bacamarte! o tyranno! dizia o moleque assustado.",
+          "kind": "prose"
+        },
+        {
+          "position": 16,
+          "text": "—Cala a hoca, tolo! Benedicta, olha ahi do lado esquerdo; não parece que a costura está um pouco enviezada? A risca azul não segue até abaixo; está muito feio assim; é preciso descozer para ficar egualzinho e...",
+          "kind": "prose"
+        },
+        {
+          "position": 17,
+          "text": "—Morra o Dr. Bacamarte! morra o tyranno! uivaram fóra trezentas vozes. Era a rebellião que desembocava na rua Nova.",
+          "kind": "prose"
+        },
+        {
+          "position": 18,
+          "text": "D. Evarista ficou sem pinga de sangue. No primeiro instante não deu um passo, não fez um gesto; o terror petrificou-a. A mucama correu instinctivamente para a porta do fundo. Quanto ao moleque, a quem D. Evarista. não dera credito, teve um instante de triumpho, um certo movimento subito, imperceptivel, entranhado, de satisfação moral, ao ver que a realidade vinha jurar por elle.",
+          "kind": "prose"
+        },
+        {
+          "position": 19,
+          "text": "—Morra o alienista! bradavam as vozes mais perto.",
+          "kind": "prose"
+        },
+        {
+          "position": 20,
+          "text": "D. Evarista, se não resistia facilmente ás commoções de prazer, sabia entestar com os momentos de perigo. Não desmaiou; correu á sala interior onde o marido estudava. Quando ella alli entrou, precipitada, o illustre medico escrutava um texto de Averróes, os olhos delle, empanados pela cogitação, subiam do livro ao tecto e baixavam do tecto ao livro, cégos para a realidade exterior, videntes para os profundos trabalhos mentaes. D. Evarista chamou pelo marido duas vezes, sem que elle lhe désse attenção; á terceira, ouviu e perguntou-lhe o que tinha, se estava doente.",
+          "kind": "prose"
+        },
+        {
+          "position": 21,
+          "text": "—Você não ouve estes gritos? perguntou a digna esposa em lagrimas.",
+          "kind": "prose"
+        },
+        {
+          "position": 22,
+          "text": "O alienista attendeu então; os gritos approximavam-se, terriveis, ameaçadores; elle comprehendeu tudo. Levantou-se da cadeira de espaldar em que estava sentado, fechou o livro, e, a passo firme e tranquillo, foi deposital-o na estante. Como a introducção do volume desconcertasse um pouco a linha dos dous tomos contiguos, Simão Bacamarte cuidou de corrigir esse defeito minimo, e, aliás, interessante. Depois disse á mulher que se recolhesse, que não fizesse nada.",
+          "kind": "prose"
+        },
+        {
+          "position": 23,
+          "text": "—Não, não, implorava a digna senhora, quero morrer ao lado de você...",
+          "kind": "prose"
+        },
+        {
+          "position": 24,
+          "text": "Simão Bacamarte teimou que não, que não era caso de morte; e ainda que o fosse, intimava-lhe em nome da vida que ficasse. A infeliz dama curvou a cabeça, obediente e chorosa.",
+          "kind": "prose"
+        },
+        {
+          "position": 25,
+          "text": "—Abaixo a Casa Verde! bradavam os Cangicas.",
+          "kind": "prose"
+        },
+        {
+          "position": 26,
+          "text": "O alienista caminhou para a varanda da frente, e chegou alli no momento em que a rebellião tambem chegava e parava, defronte, com as suas trezentas cabeças rutilantes de civismo e sombrias de desespero.—Morra! morra! bradaram de todos os lados, apenas o vulto do alienista assomou na varanda. Simão Bacamarte fez um signal pedindo para fallar; os revoltosos cobriram-lhe a voz com brados de indignação. Então, o barbeiro agitando o chapéo, afim de impôr silencio á turba, conseguiu aquietar os amigos, e declarou ao alienista que podia fallar, mas accrescentou que não abusasse da paciencia, do povo como fizera até então.",
+          "kind": "prose"
+        },
+        {
+          "position": 27,
+          "text": "—Direi pouco, ou até não direi nada, se fôr preciso. Desejo saber primeiro o que pedis.",
+          "kind": "prose"
+        },
+        {
+          "position": 28,
+          "text": "—Não pedimos nada, replicou fremente o barbeiro; ordenamos que a Casa Verde seja demolida ou pelo menos despojada dos infelizes que lá estão.",
+          "kind": "prose"
+        },
+        {
+          "position": 29,
+          "text": "—Não entendo.",
+          "kind": "prose"
+        },
+        {
+          "position": 30,
+          "text": "—Entendeis bem, tyranno; queremos dar liberdade ás victimas do vosso odio, capricho, ganancia...",
+          "kind": "prose"
+        },
+        {
+          "position": 31,
+          "text": "O alienista sorriu, mas o sorriso desse grande homem não era cousa visivel aos olhos da multidão; era uma contracção leve de dous ou tres musculos, nada mais. Sorriu e respondeu:",
+          "kind": "prose"
+        },
+        {
+          "position": 32,
+          "text": "—Meus senhores, a sciencia é cousa seria, e merece ser tratada com seriedade. Não dou razão dos meus actos de alienista a ninguem, salvo aos mestres e a Deus. Se quereis emendar a administração da Casa Verde, estou prompto a ouvir-vos; mas se exigis que me negue a mim mesmo, não ganhareis nada. Poderia convidar alguns de vós, em commissão dos outros, a vir ver commigo os loucos reclusos; mas não o faço, porque seria dar-vos mão do meu systema, o que não farei a leigos, nem a rebeldes.",
+          "kind": "prose"
+        },
+        {
+          "position": 33,
+          "text": "Disse isto o alienista, e a multidão ficou attonita; era claro que não esperava tanta energia e menos ainda tamanha serenidade. Mas o assombro cresceu de ponto quando o alienista, cortejando a multidão com muita gravidade, deu-lhe as costas e retirou-se lentamente para dentro. O barbeiro tornou logo a si, e, agitando o chapéo, convidou os amigos á demolição da Casa Verde; poucas vozes e frouxas lhe responderam. Foi nesse momento decisivo que o barbeiro sentiu despontar em si a ambição do governo; pareceu-lhe então que, demolindo a Casa Verde, e derrocando a influencia do alienista, chegaria a apoderar-se da camara, dominar as demais autoridades e constituir-se senhor de Itaguahy. Desde alguns annos que elle forcejava por ver o seu nome incluido nos pellouros para o sorteio dos vereadores, mas era recusado por não ter uma posição compativel com tão grande cargo. A occasião era agora ou nunca. Demais fôra tão longe na arruaça, que a derrota seria a prisão, ou talvez a forca, ou o degredo. Infelizmente, a resposta do alienista diminuira o furor dos sequazes. O barbeiro, logo que o percebeu, sentiu um impulso de indignação, e quiz bradar-lhes:—Canalha! covardes!—mas conteve-se, e rompeu deste modo:",
+          "kind": "prose"
+        },
+        {
+          "position": 34,
+          "text": "—Meus amigos, lutemos até o fim! A salvação de ltaguahy está nas vossas mãos dignas e heroicas. Destruamos o carcere de vossos filhos e paes, de vossas mães e irmãs, de vossos parentes e amigos, e de vós mesmos. Ou morrereis a pão e agua, talvez a chicote, ua masmorra daquelle indigno.",
+          "kind": "prose"
+        },
+        {
+          "position": 35,
+          "text": "A multidão agitou-se, murmurou, bradou, ameaçou, congregou-se toda em derredor do barbeiro. Era a revolta que tomava a si da ligeira syncope, e ameaçava arrazar a Casa Verde.",
+          "kind": "prose"
+        },
+        {
+          "position": 36,
+          "text": "—Vamos! bradou Porfirio agitando o chapéo.",
+          "kind": "prose"
+        },
+        {
+          "position": 37,
+          "text": "—Vamos! repetiram todos.",
+          "kind": "prose"
+        },
+        {
+          "position": 38,
+          "text": "Deteve-os um incidente: era um corpo de dragões que, a marche-marche, entrava na rua Nova.",
+          "kind": "prose"
+        }
+      ]
+    },
+    {
+      "id": "chapter-7",
+      "title": "Capítulo VII",
+      "position": 7,
+      "sourceUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#VII",
+      "revisionUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#VII",
+      "snapshotPath": ".cache/corpus/sources/o-alienista/papeis-avulsos-1882-gutenberg.html",
+      "snapshotSha256": "2d82b19b1222bacee6bbc3f98d381d43ceafd7aa60d0a4f3efbf77c11bc6c445",
+      "passages": [
+        {
+          "position": 1,
+          "text": "Chegados os dragões em frente aos Cangicas, houve um instante de estupefacção; os Cangicas não queriam crer que a força publica fosse mandada contra elles; mas o barbeiro comprehendeu tudo e esperou. Os dragões pararam, o capitão intimou á multidão que se dispersasse; mas, comquanto uma parte della estivesse inclinada a isso, a outra parte apoiou fortemente o barbeiro, cuja resposta consistiu nestes termos alevantados:",
+          "kind": "prose"
+        },
+        {
+          "position": 2,
+          "text": "—Não nos dispersaremos. Se quereis os nossos cadaveres, podeis tomal-os; mas só os cadaveres; não levareis a nossa honra, o nosso credito, os nossos direitos, e com elles a salvação da Itaguahy.",
+          "kind": "prose"
+        },
+        {
+          "position": 3,
+          "text": "Nada mais imprudente do que essa resposta do barbeiro; e nada mais natural. Era a vertigem das grandes crises. Talvez fosse tambem um excesso de confiança na abstenção das armas por parte dos dragões; confiança que o capitão dissipou logo, mandando carregar sobre os Cangicas. O momento foi indescriptivel. A multidão urrou furiosa; alguns, trepando ás janellas das casas, ou correndo pela rua fóra, conseguiram escapar; mas a maioria ficou, bufando de colera, indignada, animada pela exhortação do barbeiro. A derrota dos Cangicas estava imininente, quando um terço dos dragões,—qualquer que fosse o motivo, as chronicas não o declaram,—passou subitamente para o lado da rebellião. Este inesperado reforço deu alma aos Cangicas, ao mesmo tempo que lançou o desanimo ás fileiras da legalidade. Os soldados fieis não tiveram coragem de atacar os seus proprios camaradas, e, um a um, foram passando para elles, de modo que ao cabo de alguns minutos, o aspecto das cousas era totalmente outro. O capitão estava de um lado, com alguma gente, contra uma massa compacta que o ameaçava de morte. Não teve remedio, declarou-se vencido e entregou a espada ao barbeiro.",
+          "kind": "prose"
+        },
+        {
+          "position": 4,
+          "text": "A revolução triumphante não perdeu um só minuto; recolheu os feridos ás casas proximas, e guiou para a camara. Povo e tropa fraternisavam, davam vivas a el-rei, ao vice-rei, a Itaguahy, ao «illustre Porfirio.» Este ia na frento, empunhando tão destramente a espada, como se ella fosse apenas uma navalha um pouco mais comprida. A victoria cingia-lhe a fronte de um nimbo mysterioso. A dignidade de governo começava a enrijar-lhe os quadris.",
+          "kind": "prose"
+        },
+        {
+          "position": 5,
+          "text": "Os vereadores, ás janellas, vendo a multidão e a tropa, cuidaram que a tropa capturára a multidão, e sem mais exame, entraram e votaram uma petição ao vice-rei para que mandasse dar um mez de soldo aos dragões, «cujo denodo salvou Itaguahy do abysmo a que o tinha lançado uma cáfila de rebeldes.» Esta phrase foi proposta por Sebastião Freitas, o vereador dissidente, cuja defeza dos Cangicas tanto escandalisára os collegas. Mas bem depressa a illusão se desfez. Os vivas ao barbeiro, os morras aos vereadores e ao alienista vieram dar-lhes noticia da triste realidade. O presidente não desanimou:—Qualquer que seja a nossa sorte, disse elle, lembremo-nos que estamos ao serviço de Sua Magestade e do povo.—Sebastião Freitas insinuou que melhor se poderia servir á corôa e á villa sahindo pelos fundos e indo conferenciar com o juiz de fóra, mas toda a camara rejeitou esse alvitre.",
+          "kind": "prose"
+        },
+        {
+          "position": 6,
+          "text": "D'ahi a nada o barbeiro, acompanhado de alguns de seus tenentes, entrava na sala da vereança, e intimava á camara a sua queda. A camara não resistiu, entregou-se, e foi dalli para a cadeia. Então os amigos do barbeiro propozeram-lhe que assumisse o governo da villa, em nome de Sua Magestade. Porfirio aceitou o encargo, embora não desconhecesse (accrescentou) os espinhos que trazia; disse mais que não podia dispensar o concurso dos amigos presentes; ao que elles promptamente annuiram. O barbeiro veiu á janella, e communicou ao povo essas resoluções, quo o povo ratificou, acclamando o barbeiro. Este tomou a denominação de—«Protector da villa em nome de Sua Magestade e do povo.»—Expediram-se logo varias ordens importantes, communicações officiaes do novo governo, uma exposição minuciosa ao vice-rei, com muitos protestos de obediencia ás ordens de Sua Magestade; finalmente, uma proclamação ao povo, curta, mas energica:",
+          "kind": "prose"
+        },
+        {
+          "position": 7,
+          "text": "«Itaguahyenses!",
+          "kind": "prose"
+        },
+        {
+          "position": 8,
+          "text": "Uma camara corrupta e violenta conspirava contra os interesses de Sua Magestade e do povo. A opinião publica tinha-a condemnado; um punhado de cidadãos, fortemente apoiados pelos bravos dragões de Sua Magestade, acaba de a dissolver ignominiosamente, e por unanime consenso da villa, foi-me confiado o mando supremo, até que Sua Magestade se sirva ordenar o que parecer melhor ao seu real serviço. Itaguahyenses! não vos peço se não que me rodeeis de confiança, que me auxilieis em restaurar a paz e a fazenda publica, tão desbaratada pela camara que ora findou ás vossas mãos. Contai com o meu sacrificio, e ficai certos de que a coroa será por nós.",
+          "kind": "prose"
+        },
+        {
+          "position": 9,
+          "text": "O Protector da villa em nome de Sua Magestade e do povo",
+          "kind": "prose"
+        },
+        {
+          "position": 10,
+          "text": "Porfirio Caetano das Neves.»",
+          "kind": "prose"
+        },
+        {
+          "position": 11,
+          "text": "Toda a gente advertiu no absoluto silencio desta proclamação ácerca da Casa Verde; e, segundo uns, não podia haver mais vivo indicio dos projectos tenebrosos do barbeiro. O perigo era tanto maior quanto que, no meio mesmo desses graves successos, o alienista mettera na Casa Verde umas sete ou oito pessoas, entre ellas duas senhoras, sendo um dos homens aparentado com o Protector. Não era um repto, um acto intencional; mas todos o interpretaram dessa maneira, e a villa respirou com a esperança de que o alienista dentro de vinte e quatro horas estaria a ferros, e destruido o terrivel carcere.",
+          "kind": "prose"
+        },
+        {
+          "position": 12,
+          "text": "O dia acabou alegremente. Emquanto o arauto da matraca ia recitando de esquina em esquina a proclamação, o povo espalhava-se nas ruas e jurava morrer em defeza do illustre Porfirio. Poucos gritos contra a Casa Verde, prova de confiança na acção do governo. O barbeiro fez expedir um acto declarando feriado aquelle dia, e entabolou negociações com o vigario para a celebração de um Te-Deum, tão conveniente era aos olhos delle a conjuncção do poder temporal com o espiritual; mas o padre Lopes recusou abertamente o seu concurso.",
+          "kind": "prose"
+        },
+        {
+          "position": 13,
+          "text": "—Em todo caso, Vossa Reverendissima não se alistará entre os inimigos do governo? disse-lhe o barbeiro dando á physionomia um aspecto tenebroso.",
+          "kind": "prose"
+        },
+        {
+          "position": 14,
+          "text": "Ao que o padre Lopes respondeu, sem responder:",
+          "kind": "prose"
+        },
+        {
+          "position": 15,
+          "text": "—Como alistar-me, se o novo governo não tem inimigos?",
+          "kind": "prose"
+        },
+        {
+          "position": 16,
+          "text": "O barbeiro sorriu; era a pura verdade. Salvo o capitão, os vereadores e os principaes da villa, toda a gente o acclamava. Os mesmos principaes, se o não acclamavam, não tinham saido contra elle. Nenhum dos almotacés deixou de vir receber as suas ordens. No geral, as familias abençoavam o nome daquelle que ia emfim libertar Itaguahy da Casa Verde e do terrivel Simão Bacamarte.",
+          "kind": "prose"
+        }
+      ]
+    },
+    {
+      "id": "chapter-8",
+      "title": "Capítulo VIII",
+      "position": 8,
+      "sourceUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#VIII",
+      "revisionUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#VIII",
+      "snapshotPath": ".cache/corpus/sources/o-alienista/papeis-avulsos-1882-gutenberg.html",
+      "snapshotSha256": "2d82b19b1222bacee6bbc3f98d381d43ceafd7aa60d0a4f3efbf77c11bc6c445",
+      "passages": [
+        {
+          "position": 1,
+          "text": "Vinte e quatro horas depois dos successos narrados no capitulo anterior, o barbeiro saiu do palacio do governo—foi a denominação dada á casa da camara—, com dous ajudantes de ordens, e dirigiu-se á residencia de Simão Bacamarte. Não ignorava elle que era mais decoroso ao governo mandal-o chamar; o receio, porém, de que o alienista não obedecesse, obrigou-o a parecer tolerante e moderado.",
+          "kind": "prose"
+        },
+        {
+          "position": 2,
+          "text": "Não descrevo o terror do boticario ao ouvir dizer que o barbeiro ia á casa do alienista.—Vae prendel-o, pensou elle. E redobraram-lhe as angustias. Com effeito, a tortura moral do boticario naquelles dias de revolução excede a toda a descripção possivel. Nunca um homem se achou em mais apertado lance:—a privança do alienista chamava-o ao lado deste, a victoria do barbeiro attrahia-o ao barbeiro. Já a simples noticia da sublevação tinha-lhe sacudido fortemente a alma, porque elle sabia a unanimidade do odio ao alienista; mas a victoria final foi tambem o golpe final. A esposa, senhora mascula, amiga particular de D. Evarista, dizia que o lugar delle era ao lado de Simão Bacamarte; ao passo que o coração lhe bradava que não, que a causa do alienista estava perdida, e que ninguem, por acto proprio, se amarra a um cadaver. Fel-o Catão, é verdade, sed victa Catoni, pensava elle, relembrando algumas palestras habituaes do padre Lopes; mas Catão não se atou a uma causa vencida, elle era a propria causa vencida, a causa da republica; o seu acto, portanto, foi de egoista, de um miseravel egoista; minha situação é outra. Insistindo, porém, a mulher, não achou Crispim Soares outra sahida em tal crise senão adoecer; declarou-se doente, e metteu-se na cama.",
+          "kind": "prose"
+        },
+        {
+          "position": 3,
+          "text": "—Lá vai o Porfirio á casa do Dr. Bacamarte, disse-lhe a mulher no dia seguinte á cabeceira da cama; vai acompanhado de gente.",
+          "kind": "prose"
+        },
+        {
+          "position": 4,
+          "text": "—Vai prendel-o, pensou o boticario.",
+          "kind": "prose"
+        },
+        {
+          "position": 5,
+          "text": "Uma idéa traz outra; o boticario imaginou que, uma vez preso o alienista, viriam tambem buscal-o a elle, na qualidade de complice. Esta idéa foi o melhor dos visicatorios. Crispim Soares ergueu-se, disse que estava bom, que ia sahir; e apesar de todos os esforços e protestos da consorte, vestiu-se e sahiu. Os velhos chronistas são unanimes em dizer que a certeza de que o marido ia collocar-se nobremente ao lado do alienista consolou grandemente a esposa do boticario; e notam, com muita perspicacia, o immenso poder moral de uma illusão; porquanto, o boticario caminhou resolutamente ao palacio do governo, não á casa do alienista. Alli chegando, mostrou-se admirado de não ver o barbeiro, a quem ia apresentar os seus protestos de adhesão, não o tendo feito desde a vespera por enfermo. E tossia com algum custo. Os altos funccionarios que lhe ouviam esta declaração, sabedores da intimidade do boticario com o alienista, comprehenderam toda a importancia da adhesão nova, e trataram a Crispim Soares com apurado carinho; affirmaram-lhe que o barbeiro não tardava; Sua Senhoria tinha ido á Casa Verde, a negocio importante, mas não tardava. Deram-lhe cadeira, refrescos, elogios; disseram-lhe que a causa do iIlustre Porfirio era a de todos os patriotas; ao que o boticario ia repetindo que sim, que nunca pensára outra cousa, que isso mesmo mandaria declarar Sua Magestade.",
+          "kind": "prose"
+        }
+      ]
+    },
+    {
+      "id": "chapter-9",
+      "title": "Capítulo IX",
+      "position": 9,
+      "sourceUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#IX",
+      "revisionUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#IX",
+      "snapshotPath": ".cache/corpus/sources/o-alienista/papeis-avulsos-1882-gutenberg.html",
+      "snapshotSha256": "2d82b19b1222bacee6bbc3f98d381d43ceafd7aa60d0a4f3efbf77c11bc6c445",
+      "passages": [
+        {
+          "position": 1,
+          "text": "Não se demorou o alienista em receber o barbeiro; declarou-lhe que não tinha meios de resistir, e portanto estava prestes a obedecer. Só uma cousa pedia, é que o não constrangesse a assistir pessoalmente á destruição da Casa Verde.",
+          "kind": "prose"
+        },
+        {
+          "position": 2,
+          "text": "—Engana-se Vossa Senhoria, disse o barbeiro depois de alguma pausa, engana-se em attribuir ao governo intenções vandalicas. Com razão ou sem ella, a opinião crê que a maior parte dos doudos alli mettidos estão era seu perfeito juizo, mas o governo reconhece que a questão é puramente scientifica, e não cogita em resolver com posturas as questões scientificas. Demais, a Casa Verde é uma instituição publica; tal a aceitamos das mãos da camara dissolvida. Ha, entretanto,—por força que ha de haver um alvitre intermedio que restitua o socego ao espirito publico.",
+          "kind": "prose"
+        },
+        {
+          "position": 3,
+          "text": "O alienista mal podia dissimular o assombro; confessou que esperava outra cousa, o arrazamento do hospicio, a prisão delle, o desterro, tudo, menos...",
+          "kind": "prose"
+        },
+        {
+          "position": 4,
+          "text": "—O pasmo de Vossa Senhoria, atalhou gravemente o barbeiro, vem de não attender á grave responsabilidade do governo. O povo, tomado de uma céga piedade, que lhe dá em tal caso legitima indignação, póde exigir do governo certa ordem de actos; mas este, com a responsabilidade que lhe incumbe, não os deve praticar, ao menos integralmente, e tal é a nossa situação. A generosa revolução que hontem derrubou uma camara villipendiada e corrupta, pediu em altos brados o arrazamento da Casa Verde; mas pode entrar no animo do governo eliminar a loucura? Não. E se o governo não a pode eliminar, está ao menos apto para discriminal-a, reconhecel-a? Tambem não; é materia de sciencia. Logo, em assumpto tão melindroso, o governo não póde, não deve, não quer dispensar o concurso de Vossa Senhoria. O que lhe pede é que de certa maneira demos alguma satisfação ao povo. Unamo-nos, e o povo saberá obedecer. Um dos alvitres aceitaveis, se Vossa Senhoria não indicar outro, seria fazer retinir da Casa Verde aquelles enfermos que estiverem quasi curados, e bem assim os maniacos de pouca monta, etc. Desse modo, sem grande perigo, mostraremos alguma tolerancia e benignidade.",
+          "kind": "prose"
+        },
+        {
+          "position": 5,
+          "text": "—Quantos mortos e feridos houve hontem no conflicto? perguntou Simão Bacamarte, depois de uns tres minutos.",
+          "kind": "prose"
+        },
+        {
+          "position": 6,
+          "text": "O barbeiro ficou espantado da pergunta, mas respondeu logo que onze mortos e vinte e cinco feridos.",
+          "kind": "prose"
+        },
+        {
+          "position": 7,
+          "text": "—Onze mortos e vinte e cinco feridos! repetiu duas ou trez vezes o alienista.",
+          "kind": "prose"
+        },
+        {
+          "position": 8,
+          "text": "E em seguida declarou que o alvitre lhe não parecia bom, mas que elle ia catar algum outro, e dentro de poucos dias lhe daria resposta. E fez-lhe varias perguntas ácerca dos successos da vespera, ataque, defeza, adhesão dos dragões, resistencia da camara, etc., ao que o barbeiro ia respondendo com grande abundancia, insistindo principalmente no descredito em que a camara cahira. O barbeiro confessou que o novo governo não tinha ainda por si a confiança dos principaes da villa, mas o alienista podia fazer muito nesse ponto. O govemo, concluiu o barbeiro, folgaria se pudesse contar, não já com a sympathia, senão com a benevolencia do mais alto espirito de Itaguahy, e seguramente do reino. Mas nada disso alterava a nobre e austera physionomia daquelle grande homem, que ouvia calado, sem desvanecimento, nem modestia, mas impassivel como um deus de pedra.",
+          "kind": "prose"
+        },
+        {
+          "position": 9,
+          "text": "—Onze mortos e vinte e cinco feridos, repetiu o alienista, depois de acompanhar o barbeiro ate á porta. Eis ahi dous lindos casos de doença cerebral. Os symptomas de duplicidade e descaramento deste barbeiro são positivos. Quanto á toleima dos que o acclamaram não é preciso outra prova além dos onze mortos e vinte e cinco feridos.—Dous lindos casos!",
+          "kind": "prose"
+        },
+        {
+          "position": 10,
+          "text": "—Viva o illustre Porfirio! bradaram umas trinta pessoas que aguardavam o barbeiro á porta.",
+          "kind": "prose"
+        },
+        {
+          "position": 11,
+          "text": "O alienista espiou pela janella, e ainda ouviu este resto de uma pequena falla do barbeiro ás trinta pessoas que o acclamavam.",
+          "kind": "prose"
+        },
+        {
+          "position": 12,
+          "text": "—... porque eu vélo, podeis estar certos disso, eu vélo pela execução das vontades do povo. Confiai em mim; e tudo se fará pela melhor maneira. Só vos recommendo ordem. A ordem, meus amigos, é a base do governo...",
+          "kind": "prose"
+        },
+        {
+          "position": 13,
+          "text": "—Viva o illustre Porfirio! bradaram as trinta vozes, agitando os chapéos.",
+          "kind": "prose"
+        },
+        {
+          "position": 14,
+          "text": "—Dous lindos casos! murmurou o alienista.",
+          "kind": "prose"
+        }
+      ]
+    },
+    {
+      "id": "chapter-10",
+      "title": "Capítulo X",
+      "position": 10,
+      "sourceUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#X",
+      "revisionUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#X",
+      "snapshotPath": ".cache/corpus/sources/o-alienista/papeis-avulsos-1882-gutenberg.html",
+      "snapshotSha256": "2d82b19b1222bacee6bbc3f98d381d43ceafd7aa60d0a4f3efbf77c11bc6c445",
+      "passages": [
+        {
+          "position": 1,
+          "text": "Dentro de cinco dias, o alienista metteu na Casa Verde cerca de cincoenta acclamadores do novo governo. O povo indignou-se. O governo, atarantado, não sabia reagir. João Pina, outro barbeiro, dizia abertamente nas ruas, que o Porfirio estava «vendido ao ouro de Simão Bacamarte,» phrase que congregou em torno de João Pina a gente mais resoluta da villa. Porfirio, vendo o antigo rival da navalha á testa da insurreição, comprehendeu que a sua perda era irremediavel, se não désse um grande golpe; expediu dous decretos, um abolindo a Casa Verde, outro desterrando o alienista. João Pina mostrou claramente, com grandes phrases, que o acto de Porfirio era um simples apparato, um engodo, em que o povo não devia crer. Duas horas depois cahia Porfirio ignominiosamente, e João Pina assumia a difficil tarefa do governo. Como achasse nas gavetas as minutas da proclamação, da exposição ao vice-rei e de outros actos inauguraes do governo anterior, deu-se pressa em os fazer copiar e expedir; accrescentam os chronistas, e aliás sub entende-se, que elle lhes mudou os nomes, e onde o outro barbeiro fallára de uma camara corrupta, fallou este de «um intruso eivado das más doutrinas francesas, e contrario aos sacrosantos interesses de Sua Magestade, etc.»",
+          "kind": "prose"
+        },
+        {
+          "position": 2,
+          "text": "Nisto entrou na villa uma força mandada pelo vice-rei, e restabeleceu a ordem. O alienista exigiu desde logo a entrega do barbeiro Porfirio, e bem assim a de uns cincoenta e tantos individuos, que declarou mentecaptos; e não só lhe deram esses, como afiançaram entregar-lhe mais desenove sequazes do barbeiro, que convaleciam das feridas apanhadas na primeira rebellião.",
+          "kind": "prose"
+        },
+        {
+          "position": 3,
+          "text": "Este ponto da crise de Itaguahy marca tambem o grau maximo da influencia de Simão Bacamarte. Tudo quanto quiz, deu-se-lhe; e uma das mais vivas provas do poder do illustre medico achamol-a na promptidão com que os vereadores, restituidos a seus logares, consentiram em que Sebastião Freitas tambem fosse recolhido ao hospicio. O alienista, sabendo da extraordinaria inconsistencia das opiniões desse vereador, entendeu que era um caso pathologico, e pediu-o. A mesma cousa aconteceu ao boticario. O alienista, desde que lhe fallaram da momentanea adhesão de Crispim Soares á rebellião dos Cangicas, comparou-a á approvação que sempre recebera delle, ainda na vespera, e mandou captural-o. Crispim Soares não negou o facto, mas explicou-o dizendo que cedera a um movimento de terror, ao ver a rebellião triumphante, e deu como prova a ausencia de nenhum outro acto seu, accrescentando que voltára logo á cama, doente. Simão Bacamarte não o contrariou; disse, porém, aos circumstantes que o terror tambem é pae da loucura, e que o caso de Crispim Soares lhe parecia dos mais caracterisados.",
+          "kind": "prose"
+        },
+        {
+          "position": 4,
+          "text": "Mas a prova mais evidente da influencia de Simão Bacamarte foi a docilidade com que a camara lhe entregou o proprio presidente. Este digno magistrado tinha declarado em plena sessão, que não se contentava, para laval-o da affronta dos Cangicas, com menos de trinta almudes de sangue; palavra que chegou aos ouvidos do alienista por boca do secretario da camara, enthusiasmado de tamanha energia. Simão Bacamarte começou por metter o secretario na Casa Verde, e foi d'alli á camara, á qual declarou que o presidente estava padecendo da «demencia dos touros», um genero que elle pretendia estudar, com grande vantagem para os povos. A camara a principio hesitou, mas acabou cedendo.",
+          "kind": "prose"
+        },
+        {
+          "position": 5,
+          "text": "Dahi em diante foi uma collecta desenfreada. Um homem não podia dar nascença ou curso á mais simples mentira do mundo, ainda daquellas que aproveitam ao inventor ou divulgador, que não fosse logo mettido na Casa Verde. Tudo era loucura. Os cultores de enigmas, os fabricantes de charadas, de anagrammas, os maldizentes, os curiosos da vida alheia, os que põem todo o seu cuidado na tafularia, um ou outro almotacé enfunado, ninguem escapava aos emissarios do alienista. Elle respeitava as namoradas e não poupava as namoradeiras, dizendo que as primeiras cediam a um impulso natural, e as segundas a um vicio. Se um homem era avaro ou prodigo ia do mesmo modo para a Casa Verde; dahi a allegação de que não havia regra para a completa sanidade mental. Alguns chronistas crêem que Simão Bacamarte, nem sempre procedia com lisura, e citam em abono da affirmação (que não sei se póde ser aceita) o facto de ter alcançado da camara uma postura autorisando o uso de um anel de prata no dedo pollegar da mão esquerda, a toda a pessoa que, sem outra prova documental ou tradiccional, declarasse ter nas veias duas ou tres onças de sangue godo. Dizem esses chronistas que o fim secreto da insinuação á camara foi enriquecer um ourives, amigo e compadre delle; mas, comquanto seja certo que o ourives viu prosperar o negocio depois da nova ordenação municipal, não o é menos que essa postura deu á Casa Verde uma multidão de inquilinos; pelo que, não se póde definir, sem temeridade, o verdadeiro fim do illustre medico. Quanto á razão determinativa da captura e aposentação na Casa Verde de todos quantos usaram do annel, é um dos pontos mais obscuros da historia de Itaguahy; a opinião mais verosimil é que elles foram recolhidos por andarem a gesticular, á toa, nas ruas, em casa, na egreja. Ninguem ignora que os doudos gesticulam muito. Em todo caso é uma simples conjectura; de positivo nada ha.",
+          "kind": "prose"
+        },
+        {
+          "position": 6,
+          "text": "—Onde é que este homem vae parar? diziam os principaes da terra. Ah! se nós tivessemos apoiado os Cangicas...",
+          "kind": "prose"
+        },
+        {
+          "position": 7,
+          "text": "Um dia de manhã,—dia em que a camara devia dar um grande baile,—a villa inteira ficou abalada com a noticia de que a propria esposa do alienista fôra mettida na Casa Verde. Ninguem acreditou; devia ser invenção de algum gaiato. E não era: era a verdade pura. D. Evarista fôra recolhida ás duas horas da noite. O padre Lopes correu ao alienista e interrogou-o discretamente ácerca do facto.",
+          "kind": "prose"
+        },
+        {
+          "position": 8,
+          "text": "—Já ha algum tempo que eu desconfiava, disse gravemente o marido. A modestia com que ella vivera em ambos os matrimonios não podia conciliar-se com o furor das sedas, velludos, rendas e pedras preciosas que manifestou, logo que voltou do Rio de Janeiro. Desde então comecei a observal-a. Suas conversas eram todas sobre esses objectos; se eu lhe fallava das antigas côrtes, inquiria logo da fórma dos vestidos das damas; se uma senhora a visitava, na minha ausencia, antes de me dizer o objecto da visita, descrevia-me o trajo, approvando umas cousas e censurando outras. Um dia, creio que Vossa Reverendissima hade lembrar-se, propôz-se a fazer annualmente um vestido para a imagem de Nossa Senhora da matriz. Tudo isto eram symptomas graves; esta noite, porém, declarou-se a total demencia. Tinha escolhido, preparado, enfeitado o vestuario que levaria ao baile da camara municipal; só hesitava entre um collar de granada e outro de saphyra. Ante-hontem perguntou-me qual delles levaria; respondi-lhe que um ou outro lhe ficava bem. Hontem repetiu a pergunta, ao almoço; pouco depois de jantar fui achal-a calada e pensativa.—Que tem? perguntei-lhe.—Queria levar o collar de granada, mas acho o de saphyra tão bonito!—Pois leve o de saphyra.—Ah! mas onde fica o de granada?—Emfim, passou a tarde sem novidade. Ceamos, e deitamo-nos. Alta noite, seria hora e meia, accordo e não a vejo; levanto-me, vou ao quarto de vestir, acho-a diante dos dous collares, ensaiando-os ao espelho, ora um, ora outro. Era evidente a demencia; recolhi-a logo.",
+          "kind": "prose"
+        },
+        {
+          "position": 9,
+          "text": "O padre Lopes não se satisfez com a resposta, mas não objectou nada. O alienista, porém, percebeu e explicou-lhe que o caso de D. Evarista era de «mania sumptuaria,» não incuravel, e em todo caso digno de estudo.",
+          "kind": "prose"
+        },
+        {
+          "position": 10,
+          "text": "—Conto pôl-a boa dentro de seis semanas, concluiu elle.",
+          "kind": "prose"
+        },
+        {
+          "position": 11,
+          "text": "A abnegação do illustre medico deu-lhe grande realce. Conjecturas, invenções, desconfianças, tudo cahiu por terra, desde que elle não duvidou recolher á Casa Verde a propria mulher, a quem amava com todas as forças da alma. Ninguem mais tinha o direito de resistir-lhe,—menos ainda o de attribuir-lhe intuitos alheios á sciencia. Era um grande homem austero, Hippocrates forrado de Catão.",
+          "kind": "prose"
+        }
+      ]
+    },
+    {
+      "id": "chapter-11",
+      "title": "Capítulo XI",
+      "position": 11,
+      "sourceUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#XI",
+      "revisionUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#XI",
+      "snapshotPath": ".cache/corpus/sources/o-alienista/papeis-avulsos-1882-gutenberg.html",
+      "snapshotSha256": "2d82b19b1222bacee6bbc3f98d381d43ceafd7aa60d0a4f3efbf77c11bc6c445",
+      "passages": [
+        {
+          "position": 1,
+          "text": "E agora prepare-se o leitor para o mesmo assombro em que ficou a villa, ao saber um dia que os loucos da Casa Verde iam todos ser póstos na rua.",
+          "kind": "prose"
+        },
+        {
+          "position": 2,
+          "text": "—Todos?",
+          "kind": "prose"
+        },
+        {
+          "position": 3,
+          "text": "—Todos.",
+          "kind": "prose"
+        },
+        {
+          "position": 4,
+          "text": "—É impossivel; alguns, sim, mas todos...",
+          "kind": "prose"
+        },
+        {
+          "position": 5,
+          "text": "—Todos. Assim o disse elle no officio que mandou hoje de manhã á camara.",
+          "kind": "prose"
+        },
+        {
+          "position": 6,
+          "text": "De facto, o alienista officiára á camara expondo:—1°, que verificára das estatisticas da villa e da Casa Verde, que quatro quintos da população estavam aposentados naquelle estabelecimento; 2°, que esta deslocação de população levára-o a examinar os fundamentos da sua theoria das molestias cerebraes, theoria que excluia do dominio da razão todos os casos em que o equilibrio das faculdades, não fosse perfeito e absoluto; 3°, que desse exame e do facto estatistico resultára para elle a convicção de que a verdadeira doutrina não era aquella, mas a opposta, e portanto que se devia admittir como normal e exemplar o desequilibrio das faculdades, e como hypotheses pathologicas todos os casos em que aquelle equilibrio fosse ininterrupto; 4°, que á vista disso, declarava á camara que ia dar liberdade aos reclusos da Casa Verde e agazalhar nella as pessoas que se achassem nas condições agora expostas; 5°, que tratando de descobrir a verdade scientifica, não se pouparia a esforços de toda a natureza, esperando da camara egual dedicação; 6°, que restituia á camara e aos particulares a somma do estipendio recebido para alojamento dos suppostos loucos, descontada a parte effectivamente gasta com a alimentação, roupa, etc.; o que a camara mandaria verificar nos livros e arcas da Casa Verde.",
+          "kind": "prose"
+        },
+        {
+          "position": 7,
+          "text": "O assombro de Itaguahy for grande; não foi menor a alegria dos parentes e amigos dos reclusos. Jantares, dansas, luminarias, musicas, tudo houve para celebrar tão fausto acontecimento. Não descrevo as festas por não interessarem ao nosso proposito; mas foram esplendidas, tocantes e prolongadas.",
+          "kind": "prose"
+        },
+        {
+          "position": 8,
+          "text": "E vão assim as cousas humanas! No meio do regosijo produzido pelo officio de Simão Bacamarte, ninguem advertia na phrase final do § 4°, uma phrase cheia de experiencias futuras.",
+          "kind": "prose"
+        }
+      ]
+    },
+    {
+      "id": "chapter-12",
+      "title": "Capítulo XII",
+      "position": 12,
+      "sourceUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#XII",
+      "revisionUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#XII",
+      "snapshotPath": ".cache/corpus/sources/o-alienista/papeis-avulsos-1882-gutenberg.html",
+      "snapshotSha256": "2d82b19b1222bacee6bbc3f98d381d43ceafd7aa60d0a4f3efbf77c11bc6c445",
+      "passages": [
+        {
+          "position": 1,
+          "text": "Apagaram-se as luminarias, reconstituiram-se as familias, tudo parecia reposto uos antigos eixos. Reinava a ordem, a camara exercia outra vez o governo, sem nenhuma pressão externa; o proprio presidente e o vereador Freitas tornaram aos seus logares. O barbeiro Porfirio, ensinado pelos acontecimentos, tendo «provado tudo,» como o poeta disse de Napoleão, e mais alguma cousa, porque Napoleão não provou a Casa Verde, o barbeiro achou preferivel a gloria obscura da navalha e da tesoura ás calamidades brilhantes do poder; foi, é certo, processado; mas a população da villa implorou a clemencia de Sua Magestade; dahi o perdão. João Pina foi absolvido, attendendo-se a que elle derrocára um rebelde. Os chronistas pensam que deste facto é que nasceu o nosso adagio:—ladrão que furta a ladrão, tem cem annos de perdão;—adagio immoral, é verdade, mas grandemente util.",
+          "kind": "prose"
+        },
+        {
+          "position": 2,
+          "text": "Não só findaram as queixas contra o alienista, mas até nenhum resentimento ficou dos actos que elle praticára; accrescendo que os reclusos da Casa Verde, desde que elle os declarara plenamente ajuizados, sentiram-se tomados de profundo reconhecimento e férvido enthusiasmo. Muitos entenderam que o alienista merecia uma especial manifestação, e deram-lhe um baile, ao qual se seguiram outros bailes e jantares. Dizem as chronicas que D. Evarista a principio tivera ideia de separar-se do consorte, mas a dôr de perder a companhia de tão grande homem venceu qualquer resentimento de amor-proprio, e o casal veiu a ser ainda mais feliz do que antes.",
+          "kind": "prose"
+        },
+        {
+          "position": 3,
+          "text": "Não menos intima ficou a amizade do alienista e do boticario. Este concluiu do officio de Simão Bacamarte que a prudencia e a primeira das virtudes em tempos de revolução, e apreciou muito a magnanimidade do alienista que, ao dar-lhe a liberdade, ostendeu-lhe a mão de amigo velho.",
+          "kind": "prose"
+        },
+        {
+          "position": 4,
+          "text": "—É um grande homem, disse elle á mulher, referindo aquella circumstancia.",
+          "kind": "prose"
+        },
+        {
+          "position": 5,
+          "text": "Não é preciso fallar do albardeiro, do Costa, do Coelho, do Martim Brito e outros, especialmente nomeados neste escripto; basta dizer que puderam exercer livremente os seus habitos anteriores. O proprio Martim Brito, recluso por um discurso em que louvára emphaticamente D. Evarista, fez agora outro em honra do insigne medico—«cujo altissimo genio, elevando as azas muito acima do sol, deixou abaixo de si todos os demais espiritos da terra.»",
+          "kind": "prose"
+        },
+        {
+          "position": 6,
+          "text": "—Agradeço as suas palavras, retorquiu-lhe o alienista, e ainda me não arrependo de o haver restituido á liberdade.",
+          "kind": "prose"
+        },
+        {
+          "position": 7,
+          "text": "Entretanto, a camara, que respondera ao officio de Simão Bacamarte, com a resalva de que opportunamente estatuiria em relação ao final do § 4°, tratou emfim de legislar sobre elle. Foi adoptada, sem debate, uma postura autorisando o alienista a agazalhar na Casa Verde as pessoas que se achassem no gozo do perfeito equilibrio das faculdades mentaes. E porque a experiencia da camara tivesse sido dolorosa, estabeleceu ella a clausula, de que a autorisação era provisoria, limitada a um anno, para o fim de ser experimentada a nova theoria psychologica, podendo a camara, antes mesmo daquelle prazo, mandar fechar a Casa Verde, se a isso fosse aconselhada por motivos de ordem publica. O vereador Freitas propôz tambem a declaração de que em nenhum caso fossem os vereadores recolhidos ao asylo dos alienados: clausula que foi aceita, votada o incluida na postura, apezar das reclamações do vereador Galvão. O argumento principal deste magistrado é que a camara, legislando sobre uma experiencia scientifica, não podia excluir as pessoas dos seus membros das consequencias da lei; a excepção era odiosa e ridicula. Mal proferira estas duras palavras, romperam os vereadores em altos brados contra a audacia e insensatez do collega; este, porém, ouviu-os e limitou-se a dizer que votava contra a excepção.",
+          "kind": "prose"
+        },
+        {
+          "position": 8,
+          "text": "—A vereança, concluiu elle, não nos dá nenhum poder especial nem nos elimina do espirito humano.",
+          "kind": "prose"
+        },
+        {
+          "position": 9,
+          "text": "Simão Bacamarte aceitou a postura com todas as restricções. Quanto á exclusão dos vereadores, declarou que teria profundo sentimento se fosse compellido a recolhel-os á Casa Verde; a clausula, porém, era a melhor prova de que elles não padeciam do perfeito equilibrio das faculdades mentaes. Não acontecia o mesmo ao vereador Galvão, cujo acerto na objecção feita, e cuja moderação na resposta dada ás invectivas dos collegas mostravam da parte delle um cerebro bem organisado; pelo que, rogava á camara que lh'o entregasse. A camara, sentindo-se ainda aggravada pelo proceder do vereador Galvão, estimou o pedido do alienista, e votou unanimamente a entrega.",
+          "kind": "prose"
+        },
+        {
+          "position": 10,
+          "text": "Comprehende-se que, pela theoria nova, não bastava um facto ou um dito, para recolher alguem á Casa Verde; era preciso um longo exame, um vasto inquerito do passado e do presente. O padre Lopes, por exemplo, só foi capturado trinta dias depois da postura, a mulher do boticario quarenta dias. A reclusão desta senhora encheu o consorte de indignação. Crispim Soares sahiu de casa espumando de colera, e declarando ás pessoas a quem encontrava que ia arrancar as orelhas ao tyranno. Um sujeito, adversario do alienista, ouvindo na rua essa noticia, esqueceu os motivos de dissidencia, e correu á casa de Simão Bacamarte a participar-lhe o perigo que corria. Simão Bacamarte mostrou-se grato ao procedimento do adversario, e poucos minutos lhe bastaram para conhecer a rectidão dos seus sentimentos, a boa fé, o respeito humano, a generosidade; apertou-lhe muito as mãos, e recolheu-o á Casa Verde.",
+          "kind": "prose"
+        },
+        {
+          "position": 11,
+          "text": "—Um caso destes é raro, disse elle á mulher pasmada. Agora esperemos o nosso Crispim.",
+          "kind": "prose"
+        },
+        {
+          "position": 12,
+          "text": "Crispim Soares entrou. A dôr vencera a raiva, o boticario não arrancou as orelhas ao alienista. Este consolou o seu privado, assegurando-lhe que não era caso perdido; talvez a mulher tivesse alguma lesão cerebral; ia examinal-a com muita attenção; mas antes disso não podia deixal-a na rua. E parecendo-lhe vantajoso reunil-os, porque a astucia e velhacaria do marido poderiam de certo modo curar a belleza moral que elle descobrira na esposa, disse Simão Bacamarte:",
+          "kind": "prose"
+        },
+        {
+          "position": 13,
+          "text": "—O senhor trabalhará durante o dia na botica, mas almoçará e jantará, com sua mulher, e cá passará as noites, e os domingos e dias santos.",
+          "kind": "prose"
+        },
+        {
+          "position": 14,
+          "text": "A proposta collocou o pobre boticario na situação do asno de Buridan. Queria viver com a mulher, mas temia voltar á Casa Verde; e nessa luta esteve algum tempo, até que D. Evarista o tirou da difficuldade, promettendo que se incumbiria de vêr a amiga e transmittir os recados de um para outro. Crispim Soares beijou-lhe as mãos agradecido. Este ultimo rasgo do egoismo pusillanime pareceu sublime ao alienista.",
+          "kind": "prose"
+        },
+        {
+          "position": 15,
+          "text": "Ao cabo de cinco mezes estavam alojadas umas dezoito pessoas; mas Simão Bacamarte não afrouxava; ia de rua em rua, de casa em casa, espreitando, interrogando, estudando; e quando colhia um enfermo, levava-o com a mesma alegria com que ontrora os arrebanhava ás duzias. Essa mesma desproporção confirmava a theoria nova; achára-se enfim a verdadeira pathologia cerebral. Um dia, conseguiu metter na Casa Verde o juiz de fóra; mas procedia com tanto escrupulo, que o não fez senão depois de estudar minuciosamente todos os seus actos, e interrogar os principaes da villa. Mais de uma vez esteve prestes a recolher pessoas perfeitamente desequilibradas; foi o que se deu com um advogado, em quem reconheceu um tal conjuncto de qualidades moraes e mentaes, que era perigoso deixal-o na rua. Mandou prendel-o; mas o agente, desconfiado, pediu-lhe para fazer uma experiencia; foi ter com um compadre, demandado por um testamento falso, e deu-lhe de conselho que tomasse por advogado o Salustiano; era o nome da pessoa em questão.",
+          "kind": "prose"
+        },
+        {
+          "position": 16,
+          "text": "—Então, parece-lhe...?",
+          "kind": "prose"
+        },
+        {
+          "position": 17,
+          "text": "—Sem duvida: vá, confesse tudo, a verdade inteira, seja qual fôr, e confie-lhe a causa.",
+          "kind": "prose"
+        },
+        {
+          "position": 18,
+          "text": "O homem foi ter com o advogado, confessou ter falsificado o testamento, e acabou pedindo que lhe tomasse a causa. Não se negou o advogado, estudou os papeis, arrazoou longamente, e provou a todas as luzes que o testamento era mais que verdadeiro. A innocencia do réu foi solemnemente proclamada pelo juiz, e a herança passou-lhe ás mãos. O distincto jurisconsulto deveu a esta experiencia a liberdade. Mas nada escapa a um espirito original e penetrante. Sirnão Bacamarte, que desde algum tempo notava o zelo, a sagacidade, a paciencia, a moderação daquelle agente, reconheceu a habilidade e o tino com que elle levára a cabo uma experiencia tão melindrosa e complicada, e determinou recolhel-o immediatamente á Casa Verde; deu-lhe, todavia, um dos melhores cubiculos.",
+          "kind": "prose"
+        },
+        {
+          "position": 19,
+          "text": "Os alienados foram alojados por classes. Fez-se uma galeria de modestos, isto é, os loucos em quem predominava esta perfeição moral; outra de tolerantes, outra de veridicos, outra de simplices, outra de leaes, outra de magnanimos, outra de sagazes, outra de sinceros, etc. Naturalmente, as familias e os amigos dos reclusos bradavam contra a theoria; e alguns tentaram compellir a camara a cassar a licença. A camara, porem, não esquecera a linguagem do vereador Galvão, e se cassasse a licença, vel-o-hia na rua, e restituido ao logar; pelo que, recusou. Simão Bacamarte officiou aos vereadores, não agradecendo, mas felicitando-os por esse acto de vingança pessoal.",
+          "kind": "prose"
+        },
+        {
+          "position": 20,
+          "text": "Desenganados da legalidade, alguns principaes da villa recorreram secretamente ao barbeiro Porfirio e afiançaram-lhe todo o apoio de gente, dinheiro e influencia na côrte, se elle se puzesse á testa de outro movimento contra a camara e o alienista. O barbeiro respondeu-lhes que não; que a ambição o levara da primeira vez a transgredir as leis, mas que elle se emendára, reconhecendo o erro proprio e a pouca consistencia da opinião dos seus mesmos sequazes; que a camara entendera autorisar a nova experiencia do alienista, por um anno: cumpria, ou esperar o fim do praso, ou requerer ao vice-rei, caso a mesma camara rejeitasse o pedido. Jámais aconselharia o emprego de um recurso que elle viu falhar em suas mãos, e isso a troco de mortes e ferimentos que seriam o seu eterno remorso.",
+          "kind": "prose"
+        },
+        {
+          "position": 21,
+          "text": "—O que é que me está dizendo? perguntou o alienista quando um agente secreto lhe contou a conversação do barbeiro com os principaes da villa.",
+          "kind": "prose"
+        },
+        {
+          "position": 22,
+          "text": "Dous dias depois o barbeiro era recolhido á Casa Verde.—Preso por ter cão, preso por não ter cão! exclamou o infeliz.",
+          "kind": "prose"
+        },
+        {
+          "position": 23,
+          "text": "Chegou o fim do praso, a camara autorisou um praso supplementar de seis mezes para ensaio dos meios therapeuticos. O desfecho deste episodio da chronica itaguahyense, é de tal ordem, e tão inesperado, que merecia nada menos de dez capitulos de exposição; mas contento-me com um, que será o remate da narrativa, e um dos mais bellos exemplos de convicção scientifica e abnegação humana.",
+          "kind": "prose"
+        }
+      ]
+    },
+    {
+      "id": "chapter-13",
+      "title": "Capítulo XIII",
+      "position": 13,
+      "sourceUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#XIII",
+      "revisionUrl": "https://www.gutenberg.org/files/57001/57001-h/57001-h.htm#XIII",
+      "snapshotPath": ".cache/corpus/sources/o-alienista/papeis-avulsos-1882-gutenberg.html",
+      "snapshotSha256": "2d82b19b1222bacee6bbc3f98d381d43ceafd7aa60d0a4f3efbf77c11bc6c445",
+      "passages": [
+        {
+          "position": 1,
+          "text": "Era a vez da therapeutica. Simão Bacamarte, activo e sagaz em descobrir enfermos, excedeu-se ainda na diligencia e penetração com que principiou a tratal-os. N'este ponto todos os chronistas estão de pleno accordo: o illustre alienista fez curas pasmosas, que excitaram a mais viva admiração em Itaguahy.",
+          "kind": "prose"
+        },
+        {
+          "position": 2,
+          "text": "Com effeito, era difficil imaginar mais racional systema therapeutico. Estando os loucos divididos por classes, segundo a perfeição moral que em cada um d'elles excedia ás outras, Simão Bacamarte cuidou em attacar de frente a qualidade predominante. Supponhamos um modesto. Elle applicava a medicação que pudesse incutir-lhe o sentimento opposto; e não ia logo ás dóses maximas,—graduava-as, conforme o estado, a edade, o temperamento, a posição social do enfermo. Ás vezes bastava uma casaca, uma fita, uma cabelleira, uma bengala, para restituir a razão ao alienado: em outros casos a molestia era mais rebelde; recorria então aos aneis de brilhantes, ás distincções honorificas, etc. Houve um doente, poeta, que resistiu a tudo. Simão Bacamarte começava a desesperar da cura, quando teve ideia de mandar correr matraca, para o fim de o apregoar como um rival de Garção e de Pindaro.",
+          "kind": "prose"
+        },
+        {
+          "position": 3,
+          "text": "—Foi um santo remedio, contava a mãe do infeliz a uma comadre; foi um santo remedio.",
+          "kind": "prose"
+        },
+        {
+          "position": 4,
+          "text": "Outro doente, tambem modesto, oppoz a mesma rebeldia á medicação; mas não sendo escriptor, (mal sabia assignar o nome) não se lhe podia applicar o remedio da matraca. Simão Bacamarte lembrou-se de pedir para elle o lugar de secretario de Academia dos Encobertos estabelecida em Itaguahy. Os logares de presidente e secretarios eram de nomeação regia, por especial graça do finado rei D. João V, e implicavam o tratamento de Excellencia e o uso de uma placa de ouro no chapéu. O governo de Lisboa recusou o diploma; mas representando o alienista que o não pedia como premio honorifico ou distincção legitima, e sómente como um meio therapeutico para um caso difficil, o governo cedeu excepcionalmente á supplica; e ainda assim não o fez sem extraordinario esforço do ministro de marinha e ultramar, que vinha a ser primo do alienado. Foi outro santo remedio.",
+          "kind": "prose"
+        },
+        {
+          "position": 5,
+          "text": "—Realmente, é admiravel! dizia-se nas ruas, ao ver a expressão sadia e enfunada dos dois ex-dementes.",
+          "kind": "prose"
+        },
+        {
+          "position": 6,
+          "text": "Tal era o systema. Imagina-se o resto. Cada belleza moral ou mental era atacada no ponto em que a perfeição parecia mais solida; e o effeito era certo. Nem sempre era certo. Casos houve em que a qualidade predominante resistia a tudo; então, o alienista atacava outra parte, applicando á therapeutica o methodo da estrategia militar, que toma uma fortaleza por um ponto, se por outro o não póde conseguir.",
+          "kind": "prose"
+        },
+        {
+          "position": 7,
+          "text": "No fim de cinco mezes e meio estava vazia a Casa Verde; todos curados! O vereador Galvão tão cruelmente affligido de moderação e equidade, teve a felicidade de perder um tio; digo felicidade, porque o tio deixou um testamento ambiguo, e elle obteve uma boa interpretação, corrompendo os juizes, e embaçando os outros herdeiros. A sinceridade do alienista manifestou-se nesse lance; confessou ingenuamente que não teve parte na cura: foi a simples vis medicatrix da natureza. Não aconteceu o mesmo com o padre Lopes. Sabendo o alienista que elle ignorava perfeitamente o hebraico e o grego, incumbiu-o de fazer uma analyse critica da versão dos Setenta; o padre aceitou a incumbencia, e em boa hora o fez; ao cabo de dous mezes possuia um livro e a liberdade. Quanto á senhora do boticario, não ficou muito tempo na cellula que lhe coube, e onde aliás lhe não faltaram carinhos.",
+          "kind": "prose"
+        },
+        {
+          "position": 8,
+          "text": "—Porque é que o Crispim não vem visitar-me? dizia ella todos os dias.",
+          "kind": "prose"
+        },
+        {
+          "position": 9,
+          "text": "Respondiam-lhe ora uma cousa, ora outra; afinal disseram-lhe a verdade inteira. A digna matrona, não pôde conter a indignação e a vergonha. Nas explosões da colera escaparam-lhe expressões soltas e vagas, como estas:",
+          "kind": "prose"
+        },
+        {
+          "position": 10,
+          "text": "—Tratante!... velhaco!... ingrato!... Um patife que tem feito casas á custa de unguentos falsificados e pôdres... Ah! tratante!...",
+          "kind": "prose"
+        },
+        {
+          "position": 11,
+          "text": "Simão Bacamarte advertiu que, ainda quando não fosse verdadeira a accusação contida nestas palavras, bastavam ellas para mostrar que a excellente senhora estava emfim restituida ao perfeito desequilibrio das faculdades; e promptamente lhe deu alta.",
+          "kind": "prose"
+        },
+        {
+          "position": 12,
+          "text": "Agora, se imaginaes que o alienista ficou radiante ao ver sair o ultimo hospede da Casa Verde, mostraes com isso que ainda não conheceis o nosso homem. Plus ultra! era a sua divisa. Não lhe bastava ter descoberto a theoria verdadeira da loucura; não o contentava ter estabelecido em Itaguahy o reinado da razão. Plus ultra! Não ficou alegre, ficou preoccupado, cogitativo; alguma cousa lhe dizia que a theoria nova tinha, em si mesma, outra e novissima theoria.",
+          "kind": "prose"
+        },
+        {
+          "position": 13,
+          "text": "—Vejamos, pensava elle; vejamos se chego enfim á ultima verdade.",
+          "kind": "prose"
+        },
+        {
+          "position": 14,
+          "text": "Dizia isto, passeando ao longo da vasta sala, onde fulgurava a mais rica bibliotheca dos dominios ultramarinos de Sua Magestade. Um amplo chambre de damasco, preso á cintura por um cordão de seda, com borlas de ouro (presente de uma Universidade) envolvia o corpo magestoso e austero do illustre alienista. A cabelleira cobria-lhe uma extensa e nobre calva adquirida nas cogitações quotidianas da sciencia. Os pés, não delgados e femininos, não graudos e mariolas, mas proporcionados ao vulto, eram resguardados por um par de sapatos cujas fivelas não passavam de simples e modesto latão. Vede a differença:—só se lhe notava luxo naquillo que era de origem scientifica; o que propriamente vinha delle trazia a côr da moderação e da singelleza, virtudes tão ajustadas á pessôa de um sabio.",
+          "kind": "prose"
+        },
+        {
+          "position": 15,
+          "text": "Era assim que elle ia, o grande alienista, de um cabo a outro da vasta bibliotheca, mettido em si mesmo, estranho a todas as cousas que não fosse o tenebroso problema da pathologia cerebral. Subito, parou. Em pé, deante de uma janella, com o cotovello esquerdo apoiado na mão direita, aberta, e o queixo na mão esquerda, fechada, perguntou elle a si:",
+          "kind": "prose"
+        },
+        {
+          "position": 16,
+          "text": "—Mas deveras estariam elles doudos, e foram curados por mim,— ou o que pareceu cura, não foi mais do que a descoberta do perfeito desequilibrio do cerebro?",
+          "kind": "prose"
+        },
+        {
+          "position": 17,
+          "text": "E cavando por ahi abaixo, eis o resultado a que chegou: os cerebros bem organisados que elle acabava de curar, eram tão desequilibrados como os outros. Sim, dizia elle comsigo, eu não posso ter a pretenção de haver-lhes incutido um sentimento ou uma faculdade nova;uma e outra cousa existiam no estado latente, mas existiam.",
+          "kind": "prose"
+        },
+        {
+          "position": 18,
+          "text": "Chegado a esta conclusão, o illustre alienista teve duas sensações contrarias, uma de gozo, outra de abatimento. A de gozo foi por vêr que, ao cabo de longas e pacientes investigações, constantes trabalhos, lucta ingente com o povo, podia affirmar esta verdade:—não havia loucos em Itaguahy; Itaguahy não possuia um só mentecapto. Mas tão depressa esta idéa lhe refrescara a alma, outra appareceu que neutralisou o primeiro effeito; foi a idéa da duvida. Pois que! Itaguahy não possuiria um unico cerebro concertado? Esta conclusão tão absoluta, não seria por isso mesmo erronea, e não vinha, portanto, destruir o largo e magestoso edificio da nova doutrina psychologica?",
+          "kind": "prose"
+        },
+        {
+          "position": 19,
+          "text": "A afflicção do egregio Simão Bacamarte é definida pelos chronistas itaguahyenses como uma das mais medonhas tempestades moraes que tem desabado sobre o homem. Mas as tempestades só atterram os fracos; os fortes enrijam-se contra ellas e fitam o trovão. Vinte minutos depois allumiou-se a physionomia do alienista de uma suave claridade.",
+          "kind": "prose"
+        },
+        {
+          "position": 20,
+          "text": "—Sim, ha de ser isso, pensou elle.",
+          "kind": "prose"
+        },
+        {
+          "position": 21,
+          "text": "Isso é isto. Simão Bacamarte achou em si os caracteristicos do perfeito equilibrio mental e moral; pareceu-lhe que possuia a sagacidade, a paciencia, a perseverança, a tolerancia, a veracidade, o vigor moral, a lealdade, todas as qualidades emfim que pódem formar um acabado mentecapto. Duvidou logo, é certo, e chegou mesmo a concluir que era illusão; mas sendo homem prudente, resolveu convocar um conselho de amigos, a quem interrogou com franqueza. A opinião foi affirmativa.",
+          "kind": "prose"
+        },
+        {
+          "position": 22,
+          "text": "—Nenhum defeito?",
+          "kind": "prose"
+        },
+        {
+          "position": 23,
+          "text": "—Nenhum, disse em côro a assembléa.",
+          "kind": "prose"
+        },
+        {
+          "position": 24,
+          "text": "—Nenhum vicio?",
+          "kind": "prose"
+        },
+        {
+          "position": 25,
+          "text": "—Nada.",
+          "kind": "prose"
+        },
+        {
+          "position": 26,
+          "text": "—Tudo perfeito?",
+          "kind": "prose"
+        },
+        {
+          "position": 27,
+          "text": "—Tudo.",
+          "kind": "prose"
+        },
+        {
+          "position": 28,
+          "text": "—Não, impossivel, bradou o alienista. Digo que não sinto em mim essa superioridade que acabo de ver definir com tanta magnificencia. A sympathia é que vos faz fallar. Estudo-me e nada acho que justifique os excessos da vossa bondade.",
+          "kind": "prose"
+        },
+        {
+          "position": 29,
+          "text": "A assembléa insistiu; o alienista resistiu; finalmente o padre Lopes explicou tudo com este conceito digno de um observador.",
+          "kind": "prose"
+        },
+        {
+          "position": 30,
+          "text": "—Sabe a razão porque não vê as suas elevadas qualidades, que aliás todos nós admiramos? É porque tem ainda uma qualidade que realça as outras:—a modestia.",
+          "kind": "prose"
+        },
+        {
+          "position": 31,
+          "text": "Era decisivo. Simão Bacamarte curvou a cabeça, juntamente alegre e triste, e ainda mais alegre do que triste. Acto continuo, recolheu-se á Casa Verde. Em vão a mulher e os amigos lhe disseram que ficasse, que estava perfeitamente são e equilibrado: nem rogos nem suggestões nem lagrimas o detiveram um só instante. A questão é scientifica, dizia elle; trata-se de uma doutrina nova, cujo primeiro exemplo sou eu. Reuno em mim mesmo a theoria e a pratica.",
+          "kind": "prose"
+        },
+        {
+          "position": 32,
+          "text": "—Simão! Simão! meu amor! dizia-lhe a esposa com o rosto lavado em lagrimas.",
+          "kind": "prose"
+        },
+        {
+          "position": 33,
+          "text": "Mas o illustre medico, com os olhos accesos da convicção scientifica, trancou os ouvidos á saudade da mulher, e brandamente a repelliu. Fechada a porta da Casa Verde, entregou-se ao estudo e á cura de si mesmo. Dizem os chronistas que elle morreu dalli a dezesete mezes, no mesmo estado em que entrou, sem ter podido alcançar nada. Alguns chegam ao ponto de conjecturar que nunca houve outro louco, além delle, em ltaguahy; mas esta opinião, fundada em um boato que correu desde que o alienista expirou, não tem outra prova, senão o boato; e boato duvidoso, pois é attribuido ao padre Lopes, que com tanto fogo realçara as qualidades do grande homem. Seja como fôr, effectuou-se o enterro com muita pompa e rara solemnidade.",
+          "kind": "prose"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,550 @@
+{
+  "schemaVersion": 1,
+  "encoding": "UTF-8 text; JPEG scans; snapshots retain exact response bytes",
+  "sources": {
+    "buti-inferno-1.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_I",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "72237f1bedebb5e11ac7df6ceb8b63e3b0eff14ce8c8a56fe14ca40d0f932257",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_I",
+      "encoding": "utf-8",
+      "sha256": "72237f1bedebb5e11ac7df6ceb8b63e3b0eff14ce8c8a56fe14ca40d0f932257"
+    },
+    "buti-inferno-3.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_III",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "5535a1b2d9149f8e9076168e4b10cd4544e623ecc075b7bc1a03f3f9c05fab2e",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_III",
+      "encoding": "utf-8",
+      "sha256": "5535a1b2d9149f8e9076168e4b10cd4544e623ecc075b7bc1a03f3f9c05fab2e"
+    },
+    "buti-inferno-4.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_IV",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "cf35eda17302afec474ae6238127d98d7b6a887d0eb164a73b41574592a1fccf",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_IV",
+      "encoding": "utf-8",
+      "sha256": "cf35eda17302afec474ae6238127d98d7b6a887d0eb164a73b41574592a1fccf"
+    },
+    "buti-inferno-7.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_VII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "8032dcfe8bb8cb037a66b76bb98e582444a8512bcd1669ec438fe58b74a36291",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_VII",
+      "encoding": "utf-8",
+      "sha256": "8032dcfe8bb8cb037a66b76bb98e582444a8512bcd1669ec438fe58b74a36291"
+    },
+    "buti-inferno-9.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_IX",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "41833df6b4ee5e70ed179652c655da5152bdaf158eb4b32fe344ba8dfe495f35",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_IX",
+      "encoding": "utf-8",
+      "sha256": "41833df6b4ee5e70ed179652c655da5152bdaf158eb4b32fe344ba8dfe495f35"
+    },
+    "buti-inferno-11.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XI",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "bdbc9a93777ce5734e194699706b3ac3466f502190a4f6fda75f2434c5e34976",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XI",
+      "encoding": "utf-8",
+      "sha256": "bdbc9a93777ce5734e194699706b3ac3466f502190a4f6fda75f2434c5e34976"
+    },
+    "buti-inferno-12.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "e4d4af4ef5f0598aedecb779309dc5b6b396532898a7c43501fab2ced262e4ac",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XII",
+      "encoding": "utf-8",
+      "sha256": "e4d4af4ef5f0598aedecb779309dc5b6b396532898a7c43501fab2ced262e4ac"
+    },
+    "buti-inferno-15.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XV",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "d4dbe27216771f56f8600f35dab7c6e2aa04ba1fefd5df3b7f4de9a217af2b3a",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XV",
+      "encoding": "utf-8",
+      "sha256": "d4dbe27216771f56f8600f35dab7c6e2aa04ba1fefd5df3b7f4de9a217af2b3a"
+    },
+    "buti-inferno-17.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XVII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "0985e2d15306c664986dd18fc1b212f45ee0a882804fc182497b4278e507bca7",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XVII",
+      "encoding": "utf-8",
+      "sha256": "0985e2d15306c664986dd18fc1b212f45ee0a882804fc182497b4278e507bca7"
+    },
+    "buti-inferno-19.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XIX",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "e8a78a1ae7e1a1a9c6870e92bd1207a8067a7b4f75d53e94de6355e462baab50",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XIX",
+      "encoding": "utf-8",
+      "sha256": "e8a78a1ae7e1a1a9c6870e92bd1207a8067a7b4f75d53e94de6355e462baab50"
+    },
+    "buti-inferno-20.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XX",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "f0e1bc5d811ae1316dac36f2350976dcacb46cd788ae32dd66ab741b01a2724f",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XX",
+      "encoding": "utf-8",
+      "sha256": "f0e1bc5d811ae1316dac36f2350976dcacb46cd788ae32dd66ab741b01a2724f"
+    },
+    "buti-inferno-23.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XXIII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "f25323571f5cce07ac68469d63cf2404ea38e2505a2fb037fd08a94039444ad4",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XXIII",
+      "encoding": "utf-8",
+      "sha256": "f25323571f5cce07ac68469d63cf2404ea38e2505a2fb037fd08a94039444ad4"
+    },
+    "buti-inferno-26.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XXVI",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "08480fe8cebe89f11523762f7d1a1abde3444030db09d6a65930820a75f7266a",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XXVI",
+      "encoding": "utf-8",
+      "sha256": "08480fe8cebe89f11523762f7d1a1abde3444030db09d6a65930820a75f7266a"
+    },
+    "buti-inferno-27.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XXVII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "1fab89edc6f46393669bec1a91c50e575b20f3928220b4781491b9a1a8f3414f",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XXVII",
+      "encoding": "utf-8",
+      "sha256": "1fab89edc6f46393669bec1a91c50e575b20f3928220b4781491b9a1a8f3414f"
+    },
+    "buti-inferno-29.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XXIX",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "e3b6df72468cc0252e26698e150878bd5b9aa1ac4e8d2b02ae12c7e07dbd4c81",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XXIX",
+      "encoding": "utf-8",
+      "sha256": "e3b6df72468cc0252e26698e150878bd5b9aa1ac4e8d2b02ae12c7e07dbd4c81"
+    },
+    "buti-inferno-31.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XXXI",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "4bb04545b16034f0be3f5f7aabfbee58b447031177b92a4d38ba09259e688a90",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XXXI",
+      "encoding": "utf-8",
+      "sha256": "4bb04545b16034f0be3f5f7aabfbee58b447031177b92a4d38ba09259e688a90"
+    },
+    "buti-inferno-33.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XXXIII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "d14f5c2e709853dd5bddf212aaeb76d5241c1bf4c4b199717d52854b0bceb7f6",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XXXIII",
+      "encoding": "utf-8",
+      "sha256": "d14f5c2e709853dd5bddf212aaeb76d5241c1bf4c4b199717d52854b0bceb7f6"
+    },
+    "buti-inferno-34.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XXXIV",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "00ed70b04e2e766007d3b8478bd6bdeb127909a4e5f7af2b2f23da4d68dfcd74",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Inferno/Canto_XXXIV",
+      "encoding": "utf-8",
+      "sha256": "00ed70b04e2e766007d3b8478bd6bdeb127909a4e5f7af2b2f23da4d68dfcd74"
+    },
+    "buti-inferno-edition.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Indice:Commedia_-_Inferno_(Buti).djvu",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "286fd28912e7d04342176d0250d6418e3a7a6a83d513d3bcbea536ddab61f912",
+      "responseUrl": "https://it.wikisource.org/wiki/Indice:Commedia_-_Inferno_(Buti).djvu",
+      "encoding": "utf-8",
+      "sha256": "286fd28912e7d04342176d0250d6418e3a7a6a83d513d3bcbea536ddab61f912"
+    },
+    "buti-inferno-title.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Pagina:Commedia_-_Inferno_(Buti).djvu/3",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "638879226c670833561681b22c88ca5bdb19e623c7b569adff2188cdabf7d86a",
+      "responseUrl": "https://it.wikisource.org/wiki/Pagina:Commedia_-_Inferno_(Buti).djvu/3",
+      "encoding": "utf-8",
+      "sha256": "638879226c670833561681b22c88ca5bdb19e623c7b569adff2188cdabf7d86a"
+    },
+    "buti-purgatorio-1.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_I",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "2b56f7f46c8c0dd8e27a2f9f48e442f214ac4c6b64b5726280195e3a51765aa2",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_I",
+      "encoding": "utf-8",
+      "sha256": "2b56f7f46c8c0dd8e27a2f9f48e442f214ac4c6b64b5726280195e3a51765aa2"
+    },
+    "buti-purgatorio-3.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_III",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "88b866d642c29c77f87fdfc0fd948edff21353d75c8c785b4dabbbc6d619aad3",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_III",
+      "encoding": "utf-8",
+      "sha256": "88b866d642c29c77f87fdfc0fd948edff21353d75c8c785b4dabbbc6d619aad3"
+    },
+    "buti-purgatorio-4.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_IV",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "3881fa542aa7402f74a0d82865c4ae739414f0be204274e2471adb1b15e80aa7",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_IV",
+      "encoding": "utf-8",
+      "sha256": "3881fa542aa7402f74a0d82865c4ae739414f0be204274e2471adb1b15e80aa7"
+    },
+    "buti-purgatorio-6.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_VI",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "0da85a6f1f292ca52aa10067de7d3163c98608f8185d485ff48d8dedc9fc33eb",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_VI",
+      "encoding": "utf-8",
+      "sha256": "0da85a6f1f292ca52aa10067de7d3163c98608f8185d485ff48d8dedc9fc33eb"
+    },
+    "buti-purgatorio-9.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_IX",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "b02644ce72f5683f6fe14cb3c95af6f79ec28d12c51f0d7d101c3c4c686ad3b1",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_IX",
+      "encoding": "utf-8",
+      "sha256": "b02644ce72f5683f6fe14cb3c95af6f79ec28d12c51f0d7d101c3c4c686ad3b1"
+    },
+    "buti-purgatorio-11.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XI",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "52fc40e1a079dcdffa4128e5339cddcb1e0d591a6a11e29f553b7ee0266c0f76",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XI",
+      "encoding": "utf-8",
+      "sha256": "52fc40e1a079dcdffa4128e5339cddcb1e0d591a6a11e29f553b7ee0266c0f76"
+    },
+    "buti-purgatorio-12.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "f74fdb48a07d55d87ba5cb990646e89c0de35f1372b328215e7aae68ea2c395f",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XII",
+      "encoding": "utf-8",
+      "sha256": "f74fdb48a07d55d87ba5cb990646e89c0de35f1372b328215e7aae68ea2c395f"
+    },
+    "buti-purgatorio-14.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XIV",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "0fedce0b516f597308b08c78b1f394ae8fd66fefee5bf01f556c77d941b370e2",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XIV",
+      "encoding": "utf-8",
+      "sha256": "0fedce0b516f597308b08c78b1f394ae8fd66fefee5bf01f556c77d941b370e2"
+    },
+    "buti-purgatorio-17.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XVII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "3ca1f3bc8a99e46767a7eded73daef2a5c3d1f7eb2aa64de907bec34cf980f82",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XVII",
+      "encoding": "utf-8",
+      "sha256": "3ca1f3bc8a99e46767a7eded73daef2a5c3d1f7eb2aa64de907bec34cf980f82"
+    },
+    "buti-purgatorio-19.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XIX",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "e55d94700d0c84bb18d37ace12e8b140a475c0b0ec8181c08eb29e9dc64335ed",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XIX",
+      "encoding": "utf-8",
+      "sha256": "e55d94700d0c84bb18d37ace12e8b140a475c0b0ec8181c08eb29e9dc64335ed"
+    },
+    "buti-purgatorio-20.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XX",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "3e51e9c616eb990c279133fc20f0b925343fec137eef8ca621b178da0ff4d544",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XX",
+      "encoding": "utf-8",
+      "sha256": "3e51e9c616eb990c279133fc20f0b925343fec137eef8ca621b178da0ff4d544"
+    },
+    "buti-purgatorio-22.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XXII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "5f0336211aa72c09611f1e33d1c7db28ecc884a134b72772875bbfa2aa767aa4",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XXII",
+      "encoding": "utf-8",
+      "sha256": "5f0336211aa72c09611f1e33d1c7db28ecc884a134b72772875bbfa2aa767aa4"
+    },
+    "buti-purgatorio-25.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XXV",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "576bc6679102813e2bb50ce57f6237222a08fae37e1b318e33c1411d884d6848",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XXV",
+      "encoding": "utf-8",
+      "sha256": "576bc6679102813e2bb50ce57f6237222a08fae37e1b318e33c1411d884d6848"
+    },
+    "buti-purgatorio-27.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XXVII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "df8c8044bc7c3ea26da7d71a0943f3233b2bf5ad89dc9d1069f7b9a47d24cf3e",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XXVII",
+      "encoding": "utf-8",
+      "sha256": "df8c8044bc7c3ea26da7d71a0943f3233b2bf5ad89dc9d1069f7b9a47d24cf3e"
+    },
+    "buti-purgatorio-28.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XXVIII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "77d6022069a1a91d82c9189eb5e7fcdd98eab4412c4362065718965227eab2cf",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XXVIII",
+      "encoding": "utf-8",
+      "sha256": "77d6022069a1a91d82c9189eb5e7fcdd98eab4412c4362065718965227eab2cf"
+    },
+    "buti-purgatorio-30.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XXX",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "d1b673c9f4e098dc550f5a4dcd95aaa4f3beb6247aa49c79a7662d868fa825c0",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XXX",
+      "encoding": "utf-8",
+      "sha256": "d1b673c9f4e098dc550f5a4dcd95aaa4f3beb6247aa49c79a7662d868fa825c0"
+    },
+    "buti-purgatorio-33.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XXXIII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "8f056bb5e112d31cd83c127e9e7cc749c0adf65ce7308af8e92779d08ded2c5e",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Purgatorio/Canto_XXXIII",
+      "encoding": "utf-8",
+      "sha256": "8f056bb5e112d31cd83c127e9e7cc749c0adf65ce7308af8e92779d08ded2c5e"
+    },
+    "buti-purgatorio-edition.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Indice:Commedia_-_Purgatorio_(Buti).djvu",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "85046162b4e6d1b16c9b97947add83c77d5a30aea99380a01d974cf21cf73aed",
+      "responseUrl": "https://it.wikisource.org/wiki/Indice:Commedia_-_Purgatorio_(Buti).djvu",
+      "encoding": "utf-8",
+      "sha256": "85046162b4e6d1b16c9b97947add83c77d5a30aea99380a01d974cf21cf73aed"
+    },
+    "buti-purgatorio-title.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Pagina:Commedia_-_Purgatorio_(Buti).djvu/3",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "752d928f93423c8ebceafcdf487acd9b677aa1bedf099f72f0dc8d3ef93b05a9",
+      "responseUrl": "https://it.wikisource.org/wiki/Pagina:Commedia_-_Purgatorio_(Buti).djvu/3",
+      "encoding": "utf-8",
+      "sha256": "752d928f93423c8ebceafcdf487acd9b677aa1bedf099f72f0dc8d3ef93b05a9"
+    },
+    "buti-paradiso-1.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_I",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "6d585d906503bb64ac86f46d755561c59162a101aa0056101da599662a6bb268",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_I",
+      "encoding": "utf-8",
+      "sha256": "6d585d906503bb64ac86f46d755561c59162a101aa0056101da599662a6bb268"
+    },
+    "buti-paradiso-3.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_III",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "0ade4ee7b3c0672b35c8f2e1672b803a4b29698671eb224fd2db2d20141f5aec",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_III",
+      "encoding": "utf-8",
+      "sha256": "0ade4ee7b3c0672b35c8f2e1672b803a4b29698671eb224fd2db2d20141f5aec"
+    },
+    "buti-paradiso-4.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_IV",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "1ebddd8292051556988a6e34d827c4852f79d29f8279c846bb7335a22611ba09",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_IV",
+      "encoding": "utf-8",
+      "sha256": "1ebddd8292051556988a6e34d827c4852f79d29f8279c846bb7335a22611ba09"
+    },
+    "buti-paradiso-6.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_VI",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "a63dc09c8393ba9723c6638ea43d97fcd1e8e8cf69e65a96529dc2f91c77edcb",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_VI",
+      "encoding": "utf-8",
+      "sha256": "a63dc09c8393ba9723c6638ea43d97fcd1e8e8cf69e65a96529dc2f91c77edcb"
+    },
+    "buti-paradiso-9.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_IX",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "88d91ad0748e8085c80ac2f54eb4c3124df7e9fbe2b2684f74ccb73bf6d8586a",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_IX",
+      "encoding": "utf-8",
+      "sha256": "88d91ad0748e8085c80ac2f54eb4c3124df7e9fbe2b2684f74ccb73bf6d8586a"
+    },
+    "buti-paradiso-11.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XI",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "97345a9d2425661b7adbc1aa5970ce7473f105b7af3ba0fa5ebdc6724e2347ac",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XI",
+      "encoding": "utf-8",
+      "sha256": "97345a9d2425661b7adbc1aa5970ce7473f105b7af3ba0fa5ebdc6724e2347ac"
+    },
+    "buti-paradiso-12.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "60ef500db42f2446ded7d5dad2e089d4791a2cff2b4eb5fd3c029d1b5375bcb4",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XII",
+      "encoding": "utf-8",
+      "sha256": "60ef500db42f2446ded7d5dad2e089d4791a2cff2b4eb5fd3c029d1b5375bcb4"
+    },
+    "buti-paradiso-14.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XIV",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "6f46c9ec68840e83432a4f335e3d58ffecb46c9c858b90277de74fab9ff32c42",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XIV",
+      "encoding": "utf-8",
+      "sha256": "6f46c9ec68840e83432a4f335e3d58ffecb46c9c858b90277de74fab9ff32c42"
+    },
+    "buti-paradiso-17.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XVII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "9e5c33443252700b16fcf341eb4d1fd7ba8e7de0b96b2d9c82de0916b22d7387",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XVII",
+      "encoding": "utf-8",
+      "sha256": "9e5c33443252700b16fcf341eb4d1fd7ba8e7de0b96b2d9c82de0916b22d7387"
+    },
+    "buti-paradiso-19.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XIX",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "de4d58eda90138fb845e42d22409672fa5f0608fa34c76e6cc7f445ee2ec3128",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XIX",
+      "encoding": "utf-8",
+      "sha256": "de4d58eda90138fb845e42d22409672fa5f0608fa34c76e6cc7f445ee2ec3128"
+    },
+    "buti-paradiso-20.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XX",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "f063b288fc0a180da12d040395d771a2f878fbabd72cf6aefab42c37143e1fb1",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XX",
+      "encoding": "utf-8",
+      "sha256": "f063b288fc0a180da12d040395d771a2f878fbabd72cf6aefab42c37143e1fb1"
+    },
+    "buti-paradiso-22.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XXII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "9caa3bdc713237450d8be36744bee90b881da30f3917eb8cb5068dcf96213981",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XXII",
+      "encoding": "utf-8",
+      "sha256": "9caa3bdc713237450d8be36744bee90b881da30f3917eb8cb5068dcf96213981"
+    },
+    "buti-paradiso-25.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XXV",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "4244d5033f17846083bba78e6b159916f45d2c7d840bfd94c96c62c382d99de2",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XXV",
+      "encoding": "utf-8",
+      "sha256": "4244d5033f17846083bba78e6b159916f45d2c7d840bfd94c96c62c382d99de2"
+    },
+    "buti-paradiso-27.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XXVII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "92259c395bc4bd8647242ac4d747ca275b29806727c7fcb71358cd03542a14e9",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XXVII",
+      "encoding": "utf-8",
+      "sha256": "92259c395bc4bd8647242ac4d747ca275b29806727c7fcb71358cd03542a14e9"
+    },
+    "buti-paradiso-28.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XXVIII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "c8a38ae67a818b5113a6946d90dc6cd3e542542838cbda075f3618b9e869bcc7",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XXVIII",
+      "encoding": "utf-8",
+      "sha256": "c8a38ae67a818b5113a6946d90dc6cd3e542542838cbda075f3618b9e869bcc7"
+    },
+    "buti-paradiso-30.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XXX",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "28c87483542310b16724aabf49843de3ec5e9d368177a2537f48fea097282452",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XXX",
+      "encoding": "utf-8",
+      "sha256": "28c87483542310b16724aabf49843de3ec5e9d368177a2537f48fea097282452"
+    },
+    "buti-paradiso-33.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XXXIII",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "60b9295082a45f972a8c0fc0dfc3ffd416e59bcc69e7a854b2098feb3b727118",
+      "responseUrl": "https://it.wikisource.org/wiki/Commedia_(Buti)/Paradiso/Canto_XXXIII",
+      "encoding": "utf-8",
+      "sha256": "60b9295082a45f972a8c0fc0dfc3ffd416e59bcc69e7a854b2098feb3b727118"
+    },
+    "buti-paradiso-edition.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Indice:Commedia_-_Paradiso_(Buti).djvu",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "988005802164033c91c1ee545dca9edb913b82fa79de86d044ec00faf32e120d",
+      "responseUrl": "https://it.wikisource.org/wiki/Indice:Commedia_-_Paradiso_(Buti).djvu",
+      "encoding": "utf-8",
+      "sha256": "988005802164033c91c1ee545dca9edb913b82fa79de86d044ec00faf32e120d"
+    },
+    "buti-paradiso-title.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Pagina:Commedia_-_Paradiso_(Buti).djvu/3",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "2fe9f75792dfae24608b5341608fe5d0b62515c1ecbcaad0201c3211bb051324",
+      "responseUrl": "https://it.wikisource.org/wiki/Pagina:Commedia_-_Paradiso_(Buti).djvu/3",
+      "encoding": "utf-8",
+      "sha256": "2fe9f75792dfae24608b5341608fe5d0b62515c1ecbcaad0201c3211bb051324"
+    },
+    "buti-editor.html": {
+      "sourceUrl": "https://it.wikisource.org/wiki/Autore:Crescentino_Giannini",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "bc494eacd737192b5af040ef7adc4a64bc6abe5315ae1da02b68aaefee8bc986",
+      "responseUrl": "https://it.wikisource.org/wiki/Autore:Crescentino_Giannini",
+      "encoding": "utf-8",
+      "sha256": "bc494eacd737192b5af040ef7adc4a64bc6abe5315ae1da02b68aaefee8bc986"
+    },
+    "buti-inferno-scan-3.jpg": {
+      "sourceUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/Commedia_-_Inferno_%28Buti%29.djvu/page3-1280px-Commedia_-_Inferno_%28Buti%29.djvu.jpg",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "63d23b998ae36ccdcf7a9f6e594b1fbcc28f584ee698230ba02fa923a12d2f20",
+      "responseUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/Commedia_-_Inferno_%28Buti%29.djvu/page3-1280px-Commedia_-_Inferno_%28Buti%29.djvu.jpg",
+      "encoding": "binary/jpeg",
+      "sha256": "63d23b998ae36ccdcf7a9f6e594b1fbcc28f584ee698230ba02fa923a12d2f20"
+    },
+    "buti-purgatorio-scan-3.jpg": {
+      "sourceUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/Commedia_-_Purgatorio_%28Buti%29.djvu/page3-1280px-Commedia_-_Purgatorio_%28Buti%29.djvu.jpg",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "b2be2566115ccd6967d621b64e6a793dd1b06fcff5cbaf950a6ecc6e37ddb1c5",
+      "responseUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/Commedia_-_Purgatorio_%28Buti%29.djvu/page3-1280px-Commedia_-_Purgatorio_%28Buti%29.djvu.jpg",
+      "encoding": "binary/jpeg",
+      "sha256": "b2be2566115ccd6967d621b64e6a793dd1b06fcff5cbaf950a6ecc6e37ddb1c5"
+    },
+    "buti-paradiso-scan-3.jpg": {
+      "sourceUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Commedia_-_Paradiso_%28Buti%29.djvu/page3-1280px-Commedia_-_Paradiso_%28Buti%29.djvu.jpg",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "e8fdfbb876f51a75090c27956a22858229044f044bc926bdc3824875f3f68166",
+      "responseUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Commedia_-_Paradiso_%28Buti%29.djvu/page3-1280px-Commedia_-_Paradiso_%28Buti%29.djvu.jpg",
+      "encoding": "binary/jpeg",
+      "sha256": "e8fdfbb876f51a75090c27956a22858229044f044bc926bdc3824875f3f68166"
+    },
+    "buti-paradiso-scan-288.jpg": {
+      "sourceUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Commedia_-_Paradiso_%28Buti%29.djvu/page288-1280px-Commedia_-_Paradiso_%28Buti%29.djvu.jpg",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "2627047bc418fe6c248efe7ca3902595c7aee5ce2146aea2e1114079ada52a13",
+      "responseUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Commedia_-_Paradiso_%28Buti%29.djvu/page288-1280px-Commedia_-_Paradiso_%28Buti%29.djvu.jpg",
+      "encoding": "binary/jpeg",
+      "sha256": "2627047bc418fe6c248efe7ca3902595c7aee5ce2146aea2e1114079ada52a13"
+    },
+    "buti-paradiso-scan-368.jpg": {
+      "sourceUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Commedia_-_Paradiso_%28Buti%29.djvu/page368-1280px-Commedia_-_Paradiso_%28Buti%29.djvu.jpg",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "355f24fd951458a66c722fe5eaf9f0d724791ec30652ed5494a5b81a5a77da18",
+      "responseUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Commedia_-_Paradiso_%28Buti%29.djvu/page368-1280px-Commedia_-_Paradiso_%28Buti%29.djvu.jpg",
+      "encoding": "binary/jpeg",
+      "sha256": "355f24fd951458a66c722fe5eaf9f0d724791ec30652ed5494a5b81a5a77da18"
+    },
+    "buti-paradiso-scan-369.jpg": {
+      "sourceUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Commedia_-_Paradiso_%28Buti%29.djvu/page369-1280px-Commedia_-_Paradiso_%28Buti%29.djvu.jpg",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "962fe05f8e90893b9183819786fa663c374a588edf0445c97b67e9a50bb07088",
+      "responseUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Commedia_-_Paradiso_%28Buti%29.djvu/page369-1280px-Commedia_-_Paradiso_%28Buti%29.djvu.jpg",
+      "encoding": "binary/jpeg",
+      "sha256": "962fe05f8e90893b9183819786fa663c374a588edf0445c97b67e9a50bb07088"
+    },
+    "buti-paradiso-scan-550.jpg": {
+      "sourceUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Commedia_-_Paradiso_%28Buti%29.djvu/page550-1280px-Commedia_-_Paradiso_%28Buti%29.djvu.jpg",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "3ea82fb37366eae35dcc352311b77d05a3c31b9b701f350991c3f7153c4ec7e7",
+      "responseUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Commedia_-_Paradiso_%28Buti%29.djvu/page550-1280px-Commedia_-_Paradiso_%28Buti%29.djvu.jpg",
+      "encoding": "binary/jpeg",
+      "sha256": "3ea82fb37366eae35dcc352311b77d05a3c31b9b701f350991c3f7153c4ec7e7"
+    },
+    "buti-paradiso-scan-744.jpg": {
+      "sourceUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Commedia_-_Paradiso_%28Buti%29.djvu/page744-1280px-Commedia_-_Paradiso_%28Buti%29.djvu.jpg",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "60f89c4da622562c72d9af67ebb8eb0e075cc1e74fbcc1586154ad090fa228a7",
+      "responseUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Commedia_-_Paradiso_%28Buti%29.djvu/page744-1280px-Commedia_-_Paradiso_%28Buti%29.djvu.jpg",
+      "encoding": "binary/jpeg",
+      "sha256": "60f89c4da622562c72d9af67ebb8eb0e075cc1e74fbcc1586154ad090fa228a7"
+    },
+    "buti-paradiso-scan-865.jpg": {
+      "sourceUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Commedia_-_Paradiso_%28Buti%29.djvu/page865-1280px-Commedia_-_Paradiso_%28Buti%29.djvu.jpg",
+      "retrievedOn": "2026-10-23",
+      "snapshotSha256": "73f74e8e11a53f620e55009ceec4b8da48ed078570f75246bedf27a03ccfdcee",
+      "responseUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Commedia_-_Paradiso_%28Buti%29.djvu/page865-1280px-Commedia_-_Paradiso_%28Buti%29.djvu.jpg",
+      "encoding": "binary/jpeg",
+      "sha256": "73f74e8e11a53f620e55009ceec4b8da48ed078570f75246bedf27a03ccfdcee"
+    }
+  }
+}
