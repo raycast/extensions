@@ -271,9 +271,9 @@ const SCREENS = [
   ["folnaro-1.png", searchScreen],
   ["folnaro-2.png", detailScreen],
   ["folnaro-3.png", timerScreen],
-  ["folnaro-4.png", menuBarScreen],
-  ["folnaro-5.png", draftScreen],
-  ["folnaro-6.png", receiptScreen],
+  // No menu bar shot: the store's metadata check accepts only Raycast window captures.
+  ["folnaro-4.png", draftScreen],
+  ["folnaro-5.png", receiptScreen],
 ];
 
 mkdirSync(out, { recursive: true });
