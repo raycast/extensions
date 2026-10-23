@@ -3,8 +3,7 @@ import { JSX, useEffect, useState, useCallback } from "react";
 import { returnJobs } from "./fetch_jobs";
 import { JobsFetchResponse, JobModel } from "./types";
 import { buildDbtCloudUrl, triggerJobRun } from "./api";
-import { JobDetail } from "./jobs_index";
-import { RunsList } from "./runs_index";
+import { JobGoTo } from "./navigation";
 
 function getJobIcon(job: JobModel): { source: Icon; tintColor: Color } {
   if (job.deactivated) {
@@ -65,12 +64,7 @@ const TriggerJobItem = ({ job, onTrigger }: TriggerJobItemProps): JSX.Element =>
       actions={
         <ActionPanel>
           <Action title="🚀 Trigger Job Run" icon={Icon.Terminal} onAction={handleTrigger} />
-          <Action.Push title="View Job" icon={Icon.Hammer} target={<JobDetail job={job} />} />
-          <Action.Push
-            title="View Run History"
-            icon={Icon.List}
-            target={<RunsList jobId={job.id} scopeTitle={job.name} />}
-          />
+          <JobGoTo job={job} />
           <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" />
           </ActionPanel.Section>

@@ -5,7 +5,7 @@ import { buildDbtCloudUrl, buildDocsUrl, formatRelativeTime } from "./api";
 import { CatalogEnvironment, describeEnvironment, resolveCatalogEnvironments } from "./catalog_environments";
 import { buildDurationChart, ChartPoint, ChartStatus } from "./duration_chart";
 import { fetchModelHistoricalRuns, fetchModelPerformance, ModelPerformanceNode } from "./model_performance_api";
-import { ModelByUniqueId } from "./navigation";
+import { ModelGoTo } from "./navigation";
 
 const RUN_COUNT = 50;
 
@@ -130,16 +130,15 @@ ${runRows || "| — | — | — | — | — |"}
       actions={
         <ActionPanel>
           {environment.projectId > 0 && (
-            <Action.Push
-              title="View Model Details"
-              icon={Icon.Document}
-              target={
-                <ModelByUniqueId
-                  uniqueId={model.uniqueId}
-                  environmentId={environment.id}
-                  projectId={environment.projectId}
-                />
-              }
+            <ModelGoTo
+              uniqueId={model.uniqueId}
+              name={model.name}
+              environmentId={environment.id}
+              projectId={environment.projectId}
+              environmentName={environment.name}
+              projectName={environment.projectName}
+              withLastRun
+              omit={["performance"]}
             />
           )}
           <ActionPanel.Section title="Open in dbt Cloud">
@@ -158,10 +157,16 @@ ${runRows || "| — | — | — | — | — |"}
   );
 }
 
-export default function ModelPerformanceIndex() {
+export default function Command() {
+  return <ModelPerformanceList />;
+}
+
+export function ModelPerformanceList({ environment: fixed }: { environment?: CatalogEnvironment } = {}) {
   const [environmentId, setEnvironmentId] = useState<string>();
-  const { data: environments = [], isLoading: loadingEnvironments } = useCachedPromise(resolveCatalogEnvironments, []);
-  const environment = environments.find((env) => String(env.id) === environmentId) ?? environments[0];
+  const { data: environments = [], isLoading: loadingEnvironments } = useCachedPromise(resolveCatalogEnvironments, [], {
+    execute: !fixed,
+  });
+  const environment = fixed ?? environments.find((env) => String(env.id) === environmentId) ?? environments[0];
 
   const { data: models = [], isLoading: loadingModels } = useCachedPromise(
     async (id: number) => {
@@ -175,14 +180,17 @@ export default function ModelPerformanceIndex() {
 
   return (
     <List
-      isLoading={loadingEnvironments || loadingModels}
+      isLoading={(!fixed && loadingEnvironments) || loadingModels}
+      navigationTitle={fixed ? `Model Performance · ${describeEnvironment(fixed)}` : undefined}
       searchBarPlaceholder="Search models..."
       searchBarAccessory={
-        <List.Dropdown tooltip="Environment" storeValue onChange={setEnvironmentId}>
-          {environments.map((env) => (
-            <List.Dropdown.Item key={env.id} title={describeEnvironment(env)} value={String(env.id)} />
-          ))}
-        </List.Dropdown>
+        fixed ? undefined : (
+          <List.Dropdown tooltip="Environment" storeValue onChange={setEnvironmentId}>
+            {environments.map((env) => (
+              <List.Dropdown.Item key={env.id} title={describeEnvironment(env)} value={String(env.id)} />
+            ))}
+          </List.Dropdown>
+        )
       }
     >
       <List.EmptyView title="No models found" description="This environment has no models in the catalog yet" />
@@ -211,16 +219,14 @@ export default function ModelPerformanceIndex() {
                       target={<ModelPerformanceDetail model={model} environment={environment} />}
                     />
                     {environment.projectId > 0 && (
-                      <Action.Push
-                        title="View Model Details"
-                        icon={Icon.Document}
-                        target={
-                          <ModelByUniqueId
-                            uniqueId={model.uniqueId}
-                            environmentId={environment.id}
-                            projectId={environment.projectId}
-                          />
-                        }
+                      <ModelGoTo
+                        uniqueId={model.uniqueId}
+                        name={model.name}
+                        environmentId={environment.id}
+                        projectId={environment.projectId}
+                        environmentName={environment.name}
+                        projectName={environment.projectName}
+                        omit={["performance"]}
                       />
                     )}
                     {environment.projectId > 0 && (

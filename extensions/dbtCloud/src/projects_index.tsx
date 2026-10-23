@@ -3,32 +3,7 @@ import { JSX, useEffect, useState, useCallback } from "react";
 import { returnProjects } from "./fetch_projects";
 import { ProjectsFetchResponse, ProjectModel } from "./types";
 import { buildDbtCloudUrl, formatRelativeTime } from "./api";
-import { CatalogList } from "./catalog_index";
-import { EnvironmentsList } from "./environments_index";
-import { JobsList } from "./jobs_index";
-
-// In-extension equivalents of the project's dbt Cloud pages
-function ProjectNavigationActions({ project }: { project: ProjectModel }) {
-  return (
-    <ActionPanel.Section title="Navigate">
-      <Action.Push
-        title="View Jobs"
-        icon={Icon.Hammer}
-        target={<JobsList projectId={project.id} scopeTitle={project.name} />}
-      />
-      <Action.Push
-        title="View Environments"
-        icon={Icon.Globe}
-        target={<EnvironmentsList projectId={project.id} scopeTitle={project.name} />}
-      />
-      <Action.Push
-        title="Browse Models"
-        icon={Icon.Document}
-        target={<CatalogList projectId={project.id} scopeTitle={project.name} />}
-      />
-    </ActionPanel.Section>
-  );
-}
+import { ProjectGoTo } from "./navigation";
 
 function getProjectStateIcon(state: number): { source: Icon; tintColor: Color } {
   switch (state) {
@@ -150,7 +125,7 @@ ${project.semantic_layer_config_id ? "✅ Semantic Layer Configured" : "❌ No S
       }
       actions={
         <ActionPanel>
-          <ProjectNavigationActions project={project} />
+          <ProjectGoTo projectId={project.id} projectName={project.name} omit={["details"]} />
           <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser url={projectUrl} title="Open Project in dbt Cloud" />
             <Action.OpenInBrowser url={jobsUrl} title="Open Jobs in dbt Cloud" icon={Icon.Hammer} />
@@ -198,7 +173,7 @@ const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element => {
       actions={
         <ActionPanel>
           <Action title="View Details" icon={Icon.Eye} onAction={() => push(<ProjectDetail project={project} />)} />
-          <ProjectNavigationActions project={project} />
+          <ProjectGoTo projectId={project.id} projectName={project.name} omit={["details"]} />
           <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser url={projectUrl} title="Open Project in dbt Cloud" />
             <Action.OpenInBrowser url={jobsUrl} title="Open Jobs in dbt Cloud" icon={Icon.Hammer} />

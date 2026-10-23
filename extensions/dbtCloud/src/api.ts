@@ -178,6 +178,26 @@ export async function fetchFromApi<T>(
   }
 }
 
+// GET a single record (endpoints such as /runs/{id}/ return an object, not a list)
+export async function fetchOneFromApi<T>(
+  endpoint: string,
+  errorMessage = "Could not fetch from API",
+): Promise<T | null> {
+  try {
+    const url = new URL(endpoint, getBaseUrl());
+    const response = await fetch(url.toString(), { method: "GET", headers: getHeaders() });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status} from ${url.pathname}`);
+    }
+    const json = (await response.json()) as { data?: T };
+    return json.data ?? null;
+  } catch (error) {
+    console.error("GET Error:", error);
+    showToast(Toast.Style.Failure, errorMessage, error instanceof Error ? error.message : String(error));
+    return null;
+  }
+}
+
 // POST request to API
 export async function postToApi<T>(
   endpoint: string,

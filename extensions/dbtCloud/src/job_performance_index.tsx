@@ -7,8 +7,7 @@ import { returnEnvironments } from "./fetch_environments";
 import { returnJobs } from "./fetch_jobs";
 import { returnProjects } from "./fetch_projects";
 import { buildDurationChart, ChartPoint, ChartStatus } from "./duration_chart";
-import { JobDetail } from "./jobs_index";
-import { RunsList } from "./runs_index";
+import { JobGoTo } from "./navigation";
 import { EnvironmentModel, JobModel } from "./types";
 
 // Enough history for a 30-day window on jobs that run every couple of hours
@@ -150,12 +149,7 @@ ${runRows || "| — | — | — | — | — | — |"}
       }
       actions={
         <ActionPanel>
-          <Action.Push title="View Job" icon={Icon.Hammer} target={<JobDetail job={job} />} />
-          <Action.Push
-            title="View Run History"
-            icon={Icon.List}
-            target={<RunsList jobId={job.id} scopeTitle={job.name} />}
-          />
+          <JobGoTo job={job} omit={["performance"]} />
           <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" />
             {inWindow[0] && (
@@ -183,8 +177,13 @@ ${runRows || "| — | — | — | — | — | — |"}
   );
 }
 
-export default function JobPerformanceIndex() {
-  const [projectFilter, setProjectFilter] = useState("all");
+export default function Command() {
+  return <JobPerformanceList />;
+}
+
+export function JobPerformanceList({ projectId }: { projectId?: number } = {}) {
+  const [selectedProject, setProjectFilter] = useState("all");
+  const projectFilter = projectId ? String(projectId) : selectedProject;
   const { data, isLoading } = useCachedPromise(async () => {
     const [jobs, projects, environments] = await Promise.all([returnJobs(), returnProjects(), returnEnvironments()]);
     return { jobs, projects, environments };
@@ -219,15 +218,20 @@ export default function JobPerformanceIndex() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search jobs..."
+      navigationTitle={
+        projectId ? `Job Performance · ${projectNames.get(projectId) ?? `Project ${projectId}`}` : undefined
+      }
       searchBarAccessory={
-        <List.Dropdown tooltip="Project" storeValue onChange={setProjectFilter}>
-          <List.Dropdown.Item title="All Projects" value="all" />
-          {[...(data?.projects ?? [])]
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map((project) => (
-              <List.Dropdown.Item key={project.id} title={project.name} value={String(project.id)} />
-            ))}
-        </List.Dropdown>
+        projectId ? undefined : (
+          <List.Dropdown tooltip="Project" storeValue onChange={setProjectFilter}>
+            <List.Dropdown.Item title="All Projects" value="all" />
+            {[...(data?.projects ?? [])]
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((project) => (
+                <List.Dropdown.Item key={project.id} title={project.name} value={String(project.id)} />
+              ))}
+          </List.Dropdown>
+        )
       }
     >
       <List.EmptyView title="No active jobs found" icon="icon_64p.png" />
@@ -252,7 +256,7 @@ export default function JobPerformanceIndex() {
                       icon={Icon.BarChart}
                       target={<JobPerformanceDetail job={job} projectName={projectName} environment={environment} />}
                     />
-                    <Action.Push title="View Job" icon={Icon.Hammer} target={<JobDetail job={job} />} />
+                    <JobGoTo job={job} omit={["performance"]} />
                     <Action.OpenInBrowser
                       url={buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}`)}
                       title="Open Job in dbt Cloud"

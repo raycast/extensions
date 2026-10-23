@@ -25,8 +25,7 @@ import {
 import { ModelNode, LineageNode } from "./types";
 import { fetchProductionEnvironments, selectOneEnvPerProject } from "./environment_utils";
 import { openEnvironmentLineageDiagram } from "./lineage_diagram";
-import { LineageDetail } from "./lineage_index";
-import { ModelPerformanceDetail } from "./model_performance_index";
+import { ModelGoTo } from "./navigation";
 
 // Model extended with project/environment context for flat catalog view
 interface CatalogModel extends ModelNode {
@@ -442,35 +441,16 @@ export function ModelDetail({
       }
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Navigate">
-            <Action.Push
-              title="View Lineage"
-              icon={Icon.Link}
-              target={<LineageDetail node={displayModel} environmentId={environmentId} projectId={projectId} />}
-            />
-            <Action.Push
-              title="View Performance"
-              icon={Icon.BarChart}
-              target={
-                <ModelPerformanceDetail
-                  model={{
-                    uniqueId: displayModel.uniqueId,
-                    name: displayModel.name,
-                    description: displayModel.description ?? null,
-                    materializedType: displayModel.materializedType ?? null,
-                    tags: displayModel.tags ?? null,
-                    executionInfo: null,
-                  }}
-                  environment={{
-                    id: environmentId,
-                    name: (model as Partial<CatalogModel>).environmentName ?? `Environment ${environmentId}`,
-                    projectName: (model as Partial<CatalogModel>).projectName ?? "",
-                    projectId,
-                  }}
-                />
-              }
-            />
-          </ActionPanel.Section>
+          <ModelGoTo
+            uniqueId={displayModel.uniqueId}
+            name={displayModel.name}
+            environmentId={environmentId}
+            projectId={projectId}
+            environmentName={(model as Partial<CatalogModel>).environmentName}
+            projectName={(model as Partial<CatalogModel>).projectName}
+            withLastRun
+            omit={["details"]}
+          />
           <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser
               title="Open Docs in dbt Cloud"
@@ -693,6 +673,15 @@ export function CatalogList({
                         <ModelDetail model={model} environmentId={model.environmentId} projectId={model.projectId} />,
                       )
                     }
+                  />
+                  <ModelGoTo
+                    uniqueId={model.uniqueId}
+                    name={model.name}
+                    environmentId={model.environmentId}
+                    projectId={model.projectId}
+                    environmentName={model.environmentName}
+                    projectName={model.projectName}
+                    omit={["details"]}
                   />
                   <Action.OpenInBrowser title="Open in dbt Cloud" url={buildDocsUrl(model.projectId, model.uniqueId)} />
                   <Action.CopyToClipboard title="Copy Unique ID" content={model.uniqueId} />

@@ -3,7 +3,7 @@ import { JSX, useEffect, useState, useCallback } from "react";
 import { returnRuns } from "./fetch_runs";
 import { RunsFetchResponse, RunModel } from "./types";
 import { buildDbtCloudUrl, formatRelativeTime, formatDuration, cancelRun } from "./api";
-import { JobById } from "./navigation";
+import { RunGoTo } from "./navigation";
 
 type StatusFilter = "all" | "success" | "error" | "running" | "queued" | "cancelled";
 
@@ -133,7 +133,7 @@ ${run.trigger?.cause ? `\n## Trigger\n\n**Cause:** ${run.trigger.cause}` : ""}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={runUrl} title="Open Run in dbt Cloud" />
-          <Action.Push title="View Job" icon={Icon.Hammer} target={<JobById jobId={run.job_definition_id} />} />
+          <RunGoTo run={run} omit={["details"]} />
           {run.status === 3 && <Action title="Cancel Run" icon={Icon.XmarkCircle} onAction={() => cancelRun(run.id)} />}
           <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" />
@@ -172,7 +172,7 @@ const RunListItem = ({ run }: RunListItemProps): JSX.Element => {
       actions={
         <ActionPanel>
           <Action title="View Details" icon={Icon.Eye} onAction={() => push(<RunDetail run={run} />)} />
-          <Action.Push title="View Job" icon={Icon.Hammer} target={<JobById jobId={run.job_definition_id} />} />
+          <RunGoTo run={run} omit={["details"]} />
           {run.status === 3 && <Action title="Cancel Run" icon={Icon.XmarkCircle} onAction={() => cancelRun(run.id)} />}
           <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser url={runUrl} title="Open Run in dbt Cloud" />

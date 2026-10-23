@@ -4,10 +4,7 @@ import { returnEnvironments } from "./fetch_environments";
 import { EnvironmentsFetchResponse, EnvironmentModel } from "./types";
 import { buildDbtCloudUrl, formatRelativeTime } from "./api";
 import { openEnvironmentLineageDiagram } from "./lineage_diagram";
-import { CatalogList } from "./catalog_index";
-import { JobsList } from "./jobs_index";
-import { ProjectById } from "./navigation";
-import { SourcesList } from "./sources_index";
+import { EnvironmentGoTo } from "./navigation";
 
 function getEnvironmentIcon(env: EnvironmentModel): { source: Icon; tintColor: Color } {
   const envType = env.type?.toLowerCase() || "";
@@ -25,47 +22,6 @@ function getEnvironmentTypeEmoji(env: EnvironmentModel): string {
   if (envType === "deployment") return "🚀";
   if (envType === "development") return "💻";
   return "🌍";
-}
-
-// In-extension equivalents of the environment's dbt Cloud pages
-function EnvironmentNavigationActions({ environment }: { environment: EnvironmentModel }) {
-  const isDeployment = environment.type?.toLowerCase() === "deployment";
-  return (
-    <ActionPanel.Section title="Navigate">
-      <Action.Push
-        title="View Project"
-        icon={Icon.Document}
-        target={<ProjectById projectId={environment.project_id} />}
-      />
-      <Action.Push
-        title="View Jobs"
-        icon={Icon.Hammer}
-        target={
-          <JobsList projectId={environment.project_id} environmentId={environment.id} scopeTitle={environment.name} />
-        }
-      />
-      {isDeployment && (
-        <>
-          <Action.Push
-            title="Browse Models"
-            icon={Icon.Box}
-            target={<CatalogList environmentId={environment.id} scopeTitle={environment.name} />}
-          />
-          <Action.Push
-            title="Browse Sources"
-            icon={Icon.HardDrive}
-            target={
-              <SourcesList
-                environmentId={environment.id}
-                environmentName={environment.name}
-                projectId={environment.project_id}
-              />
-            }
-          />
-        </>
-      )}
-    </ActionPanel.Section>
-  );
 }
 
 // Environment Detail Component
@@ -180,7 +136,14 @@ ${environment.supports_docs ? "✅ Supports Documentation" : "❌ Does not suppo
               await openEnvironmentLineageDiagram(environment.id, environment.name);
             }}
           />
-          <EnvironmentNavigationActions environment={environment} />
+          <EnvironmentGoTo
+            environmentId={environment.id}
+            environmentName={environment.name}
+            projectId={environment.project_id}
+            projectName={environment.project?.name}
+            isDeployment={environment.type?.toLowerCase() === "deployment"}
+            omit={["details"]}
+          />
           <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser url={envUrl} title="Open Environment in dbt Cloud" />
             <Action.OpenInBrowser url={projectUrl} title="Open Project in dbt Cloud" icon={Icon.Document} />
@@ -237,7 +200,14 @@ const EnvironmentListItem = ({ environment }: EnvironmentListItemProps): JSX.Ele
               await openEnvironmentLineageDiagram(environment.id, environment.name);
             }}
           />
-          <EnvironmentNavigationActions environment={environment} />
+          <EnvironmentGoTo
+            environmentId={environment.id}
+            environmentName={environment.name}
+            projectId={environment.project_id}
+            projectName={environment.project?.name}
+            isDeployment={environment.type?.toLowerCase() === "deployment"}
+            omit={["details"]}
+          />
           <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser url={envUrl} title="Open Environment in dbt Cloud" />
             {environment.supports_docs && (

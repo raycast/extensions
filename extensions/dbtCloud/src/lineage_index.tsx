@@ -9,7 +9,7 @@ import {
   getResourceTypeIcon,
   getMaterializationIcon,
 } from "./api";
-import { ModelByUniqueId, SourceByUniqueId } from "./navigation";
+import { ModelGoTo, SourceByUniqueId, SourceGoTo } from "./navigation";
 import { ModelNode, SourceNode, LineageNode } from "./types";
 import {
   DEPLOYMENT_TYPE_INFO,
@@ -191,17 +191,23 @@ export function LineageDetail({
               />
             </>
           )}
-          <Action.Push
-            title={isModel ? "View Model Details" : "View Source Details"}
-            icon={Icon.Document}
-            target={
-              isModel ? (
-                <ModelByUniqueId uniqueId={displayNode.uniqueId} environmentId={environmentId} projectId={projectId} />
-              ) : (
-                <SourceByUniqueId uniqueId={displayNode.uniqueId} environmentId={environmentId} projectId={projectId} />
-              )
-            }
-          />
+          {isModel ? (
+            <ModelGoTo
+              uniqueId={displayNode.uniqueId}
+              name={displayNode.name}
+              environmentId={environmentId}
+              projectId={projectId}
+              withLastRun
+              omit={["lineage"]}
+            />
+          ) : (
+            <SourceGoTo
+              source={node as SourceNode}
+              environmentId={environmentId}
+              projectId={projectId}
+              omit={["lineage"]}
+            />
+          )}
           {isModel && fullModel?.ancestors && fullModel.ancestors.length > 0 && (
             <ActionPanel.Submenu title="Explore Upstream" icon={Icon.ChevronUp}>
               {fullModel.ancestors.map((ancestor) =>
@@ -250,7 +256,7 @@ export function LineageDetail({
   );
 }
 
-function LineageList({
+export function LineageList({
   environmentId,
   environmentName,
   projectId,

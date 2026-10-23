@@ -10,6 +10,7 @@ import { EnvironmentDetail } from "./environments_index";
 import { JobDetail } from "./jobs_index";
 import { ProjectDetail } from "./projects_index";
 import { RunDetail } from "./runs_index";
+import { EnvironmentGoTo, JobGoTo, ProjectGoTo, RunGoTo } from "./navigation";
 
 type SearchResult =
   | { type: "project"; data: ProjectModel }
@@ -68,6 +69,29 @@ function getResultDetail(result: SearchResult) {
   }
 }
 
+// The same up/down links the result has in its own command
+function getResultGoTo(result: SearchResult) {
+  switch (result.type) {
+    case "project":
+      return <ProjectGoTo projectId={result.data.id} projectName={result.data.name} omit={["details"]} />;
+    case "job":
+      return <JobGoTo job={result.data} omit={["details"]} />;
+    case "environment":
+      return (
+        <EnvironmentGoTo
+          environmentId={result.data.id}
+          environmentName={result.data.name}
+          projectId={result.data.project_id}
+          projectName={result.data.project?.name}
+          isDeployment={result.data.type?.toLowerCase() === "deployment"}
+          omit={["details"]}
+        />
+      );
+    case "run":
+      return <RunGoTo run={result.data} omit={["details"]} />;
+  }
+}
+
 function getResultTitle(result: SearchResult): string {
   switch (result.type) {
     case "project":
@@ -121,6 +145,7 @@ const SearchResultItem = ({ result }: SearchResultItemProps) => {
       actions={
         <ActionPanel>
           <Action.Push title="View Details" icon={Icon.Eye} target={getResultDetail(result)} />
+          {getResultGoTo(result)}
           <Action.OpenInBrowser url={url} title="Open in dbt Cloud" />
           <Action.CopyToClipboard title="Copy URL" content={url} />
           <Action.CopyToClipboard title="Copy ID" content={result.data.id.toString()} />

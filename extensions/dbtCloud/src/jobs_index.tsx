@@ -14,8 +14,7 @@ import { JSX, useEffect, useState, useCallback } from "react";
 import { returnJobs } from "./fetch_jobs";
 import { JobsFetchResponse, JobModel } from "./types";
 import { buildDbtCloudUrl, triggerJobRun, formatRelativeTime } from "./api";
-import { JobPerformanceDetail } from "./job_performance_index";
-import { RunsList } from "./runs_index";
+import { JobGoTo } from "./navigation";
 
 function getJobIcon(job: JobModel): { source: Icon; tintColor: Color } {
   if (job.deactivated) {
@@ -48,24 +47,6 @@ function getTriggerTypes(job: JobModel): string[] {
 }
 
 // Job Detail Component
-// In-extension equivalents of the job's dbt Cloud pages
-export function JobNavigationActions({ job }: { job: JobModel }) {
-  return (
-    <>
-      <Action.Push
-        title="View Run History"
-        icon={Icon.List}
-        target={<RunsList jobId={job.id} scopeTitle={job.name} />}
-      />
-      <Action.Push
-        title="View Performance"
-        icon={Icon.BarChart}
-        target={<JobPerformanceDetail job={job} projectName={job.project?.name ?? `Project ${job.project_id}`} />}
-      />
-    </>
-  );
-}
-
 export function JobDetail({ job, onTrigger }: { job: JobModel; onTrigger?: () => void }) {
   const jobUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}`);
   const runHistoryUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}/runs`);
@@ -177,7 +158,7 @@ ${
               shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
             />
           )}
-          <JobNavigationActions job={job} />
+          <JobGoTo job={job} omit={["details"]} />
           <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" />
             <Action.OpenInBrowser url={runHistoryUrl} title="Open Run History in dbt Cloud" icon={Icon.List} />
@@ -259,7 +240,7 @@ const JobListItem = ({ job, onRefresh }: JobListItemProps): JSX.Element => {
               shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
             />
           )}
-          <JobNavigationActions job={job} />
+          <JobGoTo job={job} omit={["details"]} />
           <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" />
             <Action.OpenInBrowser url={runHistoryUrl} title="Open Run History in dbt Cloud" icon={Icon.List} />

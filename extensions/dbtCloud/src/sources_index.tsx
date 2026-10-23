@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchSources, buildDocsUrl, getResourceTypeIcon, getFreshnessStatus, formatRelativeTime } from "./api";
-import { LineageDetail } from "./lineage_index";
+import { SourceGoTo } from "./navigation";
 import { SourceNode, LineageNode } from "./types";
 import {
   DEPLOYMENT_TYPE_INFO,
@@ -83,13 +83,7 @@ export function SourceDetail({
       }
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Navigate">
-            <Action.Push
-              title="View Lineage"
-              icon={Icon.Link}
-              target={<LineageDetail node={source} environmentId={environmentId} projectId={projectId} />}
-            />
-          </ActionPanel.Section>
+          <SourceGoTo source={source} environmentId={environmentId} projectId={projectId} omit={["details"]} />
           <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser
               title="Open Docs in dbt Cloud"
@@ -231,6 +225,12 @@ export function SourcesList({
                             `${source.sourceName}.${source.name}`,
                           );
                         }}
+                      />
+                      <SourceGoTo
+                        source={source}
+                        environmentId={environmentId}
+                        projectId={projectId}
+                        omit={["details"]}
                       />
                       <Action.OpenInBrowser title="Open in dbt Cloud" url={buildDocsUrl(projectId, source.uniqueId)} />
                       <Action.CopyToClipboard title="Copy Unique ID" content={source.uniqueId} />
