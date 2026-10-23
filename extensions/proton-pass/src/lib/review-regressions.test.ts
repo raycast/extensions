@@ -1547,6 +1547,84 @@ test("a slow session check doesn't hold the saved items back, and an ended sessi
   assert.equal(listings, 0);
 });
 
+test("an item list opened from the vault list once the session is confirmed doesn't ask pass-cli again", async () => {
+  let checks = 0;
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      endedSessionError: async () => {
+        checks++;
+        return undefined;
+      },
+      listItems: async () => [],
+      // Still listing: the saved items are on screen.
+      listVaultsAndItems: () => new Promise(() => undefined),
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: false }),
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: false }),
+    },
+  });
+  const props = { initialVault: { shareId: "vault", name: "Personal" }, sessionConfirmed: true };
+  harness.render(SearchItemsView, props);
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.equal(checks, 0);
+  // The saved items show at once, rather than after pass-cli answers.
+  assert.equal((harness.render(SearchItemsView, props).props.items as Item[]).length, 1);
+});
+
+test("the vault list passes on a session it confirmed to the item lists it opens", async () => {
+  const harness = hookHarness();
+  const { VaultsView } = loadView("vaults-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      List: { Item: {}, EmptyView: {} },
+      ActionPanel: {},
+      Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Copy: {} } } },
+      getPreferenceValues: () => ({}),
+      useNavigation: () => ({ push: () => undefined }),
+    },
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listVaultSharing: async () => new Map(),
+      listVaultsAndItems: async () => ({
+        vaults: [{ shareId: "vault", name: "Personal" }],
+        items: [],
+        failedVaults: [],
+      }),
+    },
+    "./types": { PassCliError },
+    "./search-items-view": {},
+    "./error-views": {},
+    "./login-view": {},
+    "./cache": {
+      getCachedItems: async () => null,
+      getCachedVaults: async () => null,
+      getCachedSharing: async () => null,
+      setCachedSharing: async () => undefined,
+      setCachedItems: async () => undefined,
+      setCachedVaults: async () => undefined,
+    },
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
+  });
+  const confirmed = () =>
+    actions(harness.render(VaultsView, { startOnItems: false }))
+      .flatMap((entry) => (entry.actions ? actions(entry.actions) : []))
+      .filter((entry) => entry.title === "View Items")
+      .map((entry) => (entry.target as Element).props.sessionConfirmed);
+  harness.render(VaultsView, { startOnItems: false });
+  const [load] = harness.effects;
+  load();
+  await new Promise(setImmediate);
+  // All Vaults and the vault.
+  assert.equal(confirmed().join(), "true,true");
+});
+
 test("the vault list shows and saves items before optional sharing, from complete listings only", async () => {
   const personal = { shareId: "vault", name: "Personal" };
   const added = { shareId: "added", name: "Added" };

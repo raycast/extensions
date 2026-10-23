@@ -37,6 +37,8 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
   const [itemCounts, setItemCounts] = useState<Map<string, number>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<PassCliError | null>(null);
+  // Once pass-cli has confirmed the session, the item lists opened from here don't ask it again.
+  const [sessionConfirmed, setSessionConfirmed] = useState(false);
   const preferences = getPreferenceValues<Preferences.SearchItems>();
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const hasLoadedFromCache = useRef(false);
@@ -87,6 +89,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
       const ended = await sessionCheck;
       if (!isLatest()) return;
       if (ended) throw ended;
+      setSessionConfirmed(true);
       if (isFresh) return;
       // Items are listed too, for their number per vault; the listing also refreshes the item list's cache.
       const listing = listingSaves.start();
@@ -121,6 +124,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
       if (err instanceof PassCliError && err.type === "not_authenticated") {
         setVaults([]);
         setItemCounts(new Map());
+        setSessionConfirmed(false);
       }
       if (!hasLoadedFromCache.current || (err instanceof PassCliError && err.type === "not_authenticated")) {
         if (err instanceof PassCliError) {
@@ -237,7 +241,11 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
               accessories={allItemsCount === undefined ? [] : [{ text: formatItemCount(allItemsCount) }]}
               actions={
                 <ActionPanel>
-                  <Action.Push title="View Items" icon={Icon.List} target={<SearchItemsView allVaults />} />
+                  <Action.Push
+                    title="View Items"
+                    icon={Icon.List}
+                    target={<SearchItemsView allVaults sessionConfirmed={sessionConfirmed} />}
+                  />
                 </ActionPanel>
               }
             />
@@ -253,7 +261,11 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
               ].filter((accessory) => accessory !== undefined)}
               actions={
                 <ActionPanel>
-                  <Action.Push title="View Items" icon={Icon.List} target={<SearchItemsView initialVault={vault} />} />
+                  <Action.Push
+                    title="View Items"
+                    icon={Icon.List}
+                    target={<SearchItemsView initialVault={vault} sessionConfirmed={sessionConfirmed} />}
+                  />
                   <Action.CopyToClipboard
                     title="Copy Vault Name"
                     content={vault.name}

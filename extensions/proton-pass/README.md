@@ -2,11 +2,6 @@
 
 Search and manage your Proton Pass items directly from Raycast.
 
-## Project Notes
-
-- This extension is maintained as an independent `proton-pass` implementation.
-- It uses local `pass-cli` execution, local caching, and command-specific flows implemented in this repository.
-
 ## Setup
 
 This extension requires the Proton Pass CLI (`pass-cli`) to be authenticated.
@@ -121,21 +116,3 @@ If the CLI is installed but not detected, set the full path in extension prefere
 ### Re-download CLI
 
 If the auto-installed CLI becomes corrupted or you want to force a re-download, use the "Clear CLI Cache" action available in the error screens.
-
-## Platform Verification
-
-Run on Windows x86_64 from this extension directory:
-
-```powershell
-npm ci; if ($LASTEXITCODE) { exit $LASTEXITCODE }; npm test; if ($LASTEXITCODE) { exit $LASTEXITCODE }; npx tsc --noEmit
-```
-
-Then verify a fresh automatic install keeps `pass-cli.exe` beside `libcrypto-3-x64.dll`, browser login persists through Windows Credential Manager (or shows the documented `keyring_error` guidance), search/copy/TOTP work, shortcuts display Ctrl-based keys, and Browser Extension plus Terminal fallback actions stay absent.
-
-Run on macOS:
-
-```bash
-npm ci && npm test && npm run lint && npm run build
-```
-
-Then verify a fresh install passes Gatekeeper after chmod/quarantine removal, browser re-login works with CLI 2.3.3, and all commands complete a smoke test. Sessions from CLI 1.4.1 may require login again.

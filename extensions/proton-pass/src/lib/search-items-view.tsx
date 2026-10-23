@@ -74,10 +74,12 @@ interface SearchItemsViewProps {
   initialVault?: Vault;
   /** Opened from All Vaults in the vault list: shows every vault rather than the last selection. */
   allVaults?: boolean;
+  /** Opened from the vault list once pass-cli confirmed the session there: saved items show without asking it again. */
+  sessionConfirmed?: boolean;
 }
 
 /** The item list of Browse Items, with every vault, or the one opened from the vault list. */
-export function SearchItemsView({ initialVault, allVaults = false }: SearchItemsViewProps) {
+export function SearchItemsView({ initialVault, allVaults = false, sessionConfirmed = false }: SearchItemsViewProps) {
   const [items, setItems] = useState<Item[]>([]);
   const [vaults, setVaults] = useState<Vault[]>([]);
   // A vault opened from the vault list brings its count, kept if its own listing fails.
@@ -135,7 +137,8 @@ export function SearchItemsView({ initialVault, allVaults = false }: SearchItems
     // Saved items wait for pass-cli to confirm the session: an ended one shows the login screen right away, rather
     // than items whose passwords can't load. When pass-cli is slow, they show anyway after a moment, and the login
     // screen replaces them once it answers that the session has ended.
-    const sessionCheck = hasLoadedFromCache.current ? Promise.resolve(undefined) : endedSessionError();
+    const sessionCheck =
+      hasLoadedFromCache.current || sessionConfirmed ? Promise.resolve(undefined) : endedSessionError();
     const [sharedItems, cachedVaults, legacyItems, sessionEnded] = await Promise.all([
       getCachedItems(),
       getCachedVaults(),
