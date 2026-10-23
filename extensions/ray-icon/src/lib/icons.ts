@@ -20,7 +20,7 @@ export function resolveIconName(input: string): string | undefined {
     .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
     .replace(/[\s_]+/g, "-")
     .toLowerCase();
-  if (ICONS[normalized]) return normalized;
+  if (Object.hasOwn(ICONS, normalized)) return normalized;
   const compact = normalized.replace(/-/g, "");
   return ICON_NAMES.find((name) => name.replace(/-/g, "") === compact);
 }

@@ -3,11 +3,13 @@ const { test, after } = require("node:test");
 const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
+const { createHash } = require("node:crypto");
 const { fileURLToPath } = require("node:url");
 const Module = require("node:module");
 const ts = require("typescript");
 const React = require("react");
 const { create, act } = require("react-test-renderer");
+const { Resvg } = require("@resvg/resvg-wasm");
 
 const root = path.resolve(__dirname, "..");
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "ray-icon-test-"));
@@ -38,7 +40,10 @@ Action.SubmitForm = host("Action.SubmitForm");
 const Form = host("Form");
 Form.TextField = host("Form.TextField");
 const api = {
-  environment: { assetsPath: path.join(root, "assets"), supportPath: path.join(temporary, "support") },
+  environment: {
+    assetsPath: path.join(root, "assets"),
+    supportPath: path.join(temporary, "support"),
+  },
   getPreferenceValues: () => ({ exportDirectory: exported }),
   List,
   Action,
@@ -102,12 +107,19 @@ for (const extension of [".ts", ".tsx"]) {
 const { DEFAULT_SETTINGS, PRESETS, applyPreset } = require("../src/lib/settings.ts");
 const { applyAppearance, luminance } = require("../src/lib/appearance.ts");
 const { fileUrl, imageMarkdown } = require("../src/lib/preview.ts");
-const { previewPng } = require("../src/lib/render.ts");
+const { exportPng, exportSvg, parseCustomSvg, previewFile, previewPng, renderPng } = require("../src/lib/render.ts");
+const { resolveIconName } = require("../src/lib/icons.ts");
 const createIcon = require("../src/tools/create-icon.ts").default;
 const { IconEditor } = require("../src/components/IconEditor.tsx");
+const previewCache = path.join(
+  os.tmpdir(),
+  "ray-icon-previews",
+  createHash("sha256").update(api.environment.supportPath).digest("hex"),
+);
 
 after(() => {
   Module._load = originalLoad;
+  fs.rmSync(previewCache, { recursive: true, force: true });
   fs.rmSync(temporary, { recursive: true, force: true });
 });
 
@@ -198,6 +210,129 @@ test("Markdown file URLs survive spaces, fragments, parentheses, and Unicode", (
   assert(!url.includes("#"));
   assert(!url.includes("("));
   assert.equal(imageMarkdown(target, "Light Icon"), `![Light Icon](${url})`);
+});
+
+test("previews use disposable cache storage and remove legacy permanent previews", async () => {
+  const legacy = path.join(api.environment.supportPath, "previews");
+  fs.mkdirSync(legacy, { recursive: true });
+  fs.writeFileSync(path.join(legacy, "old.svg"), "old preview");
+  const png = await previewPng(DEFAULT_SETTINGS);
+  const svg = previewFile(DEFAULT_SETTINGS);
+  for (const file of [png, svg]) {
+    assert.equal(path.dirname(file), previewCache);
+    assert(fs.existsSync(file));
+  }
+  assert(!fs.existsSync(legacy));
+});
+
+test("custom SVG root presentation survives preview and PNG/SVG export", async () => {
+  const glyph = '<path d="M4 12h16M12 4v16"/>';
+  const presentation =
+    'fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.65"';
+  for (const viewport of ['viewBox="0 0 24 24" width="48" height="48"', "width='24' height='24'"]) {
+    const settings = {
+      ...DEFAULT_SETTINGS,
+      fileName: "root-stroke",
+      customSvg: `<svg ${viewport} ${presentation}>${glyph}</svg>`,
+    };
+    const reference = {
+      ...settings,
+      customSvg: `<svg viewBox="0 0 24 24"><path ${presentation} d="M4 12h16M12 4v16"/></svg>`,
+    };
+    assert.equal(parseCustomSvg(settings.customSvg).viewBox, "0 0 24 24");
+    const expected = await renderPng(reference, 64);
+    assert.deepEqual(fs.readFileSync(await exportPng(settings, 64)), expected);
+    assert.notDeepEqual(expected, await renderPng({ ...settings, customSvg: '<svg viewBox="0 0 24 24"></svg>' }, 64));
+    assert.deepEqual(fs.readFileSync(await previewPng(settings)), await renderPng(reference, 320));
+    for (const file of [exportSvg(settings), previewFile(settings)]) {
+      const renderer = new Resvg(fs.readFileSync(file, "utf8"), { fitTo: { mode: "width", value: 64 } });
+      const image = renderer.render();
+      try {
+        assert.deepEqual(Buffer.from(image.asPng()), expected);
+      } finally {
+        image.free();
+        renderer.free();
+      }
+    }
+  }
+
+  const filled = {
+    ...DEFAULT_SETTINGS,
+    customSvg: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>',
+  };
+  const reference = {
+    ...filled,
+    customSvg: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="currentColor"/></svg>',
+  };
+  assert.deepEqual(await renderPng(filled, 64), await renderPng(reference, 64));
+});
+
+test("overlapping PNG exports keep separate files and their rendered contents", async () => {
+  const settings = ["rocket", "moon", "sun"].map((icon) => ({
+    ...DEFAULT_SETTINGS,
+    icon,
+    fileName: "overlapping.png",
+  }));
+  const files = await Promise.all(settings.map((value) => exportPng(value, 64)));
+  assert.equal(new Set(files).size, settings.length);
+  for (let index = 0; index < settings.length; index++) {
+    assert.deepEqual(fs.readFileSync(files[index]), await renderPng(settings[index], 64));
+  }
+});
+
+test("exports retry an exclusively occupied filename and propagate other write failures", async (t) => {
+  const originalWrite = fs.writeFileSync;
+  const occupied = path.join(exported, "exclusive.svg");
+  const denied = path.join(exported, "denied.svg");
+  t.mock.method(fs, "writeFileSync", (file, content, options) => {
+    if (file === occupied && !fs.existsSync(occupied)) originalWrite(occupied, "another writer");
+    if (file === denied) throw Object.assign(new Error("permission denied"), { code: "EACCES" });
+    return originalWrite(file, content, options);
+  });
+  const saved = exportSvg({ ...DEFAULT_SETTINGS, fileName: "exclusive" });
+  assert.equal(saved, path.join(exported, "exclusive-2.svg"));
+  assert.equal(fs.readFileSync(occupied, "utf8"), "another writer");
+  assert.match(fs.readFileSync(saved, "utf8"), /<svg/);
+  assert.throws(() => exportSvg({ ...DEFAULT_SETTINGS, fileName: "denied" }), /permission denied/);
+});
+
+test("prototype keys return the unknown-icon error before exporting", async () => {
+  const before = fs.readdirSync(exported);
+  for (const name of ["constructor", "__proto__", "hasOwnProperty", "toString"]) {
+    assert.equal(resolveIconName(name), undefined);
+    await assert.rejects(createIcon({ icon: name, pngSize: 64 }), /Unknown icon/);
+  }
+  assert.deepEqual(fs.readdirSync(exported), before);
+  assert.equal(resolveIconName("Rocket Icon"), "rocket");
+  assert.equal(resolveIconName("CloudSunIcon"), "cloud-sun");
+});
+
+test("SVG and PNG previews prune old entries while retaining recently reused files", async () => {
+  const recentPng = await previewPng(DEFAULT_SETTINGS);
+  const recentSvg = previewFile(DEFAULT_SETTINGS);
+  const dir = path.dirname(recentPng);
+  const stale = new Date(1980, 0, 1);
+  for (const file of [recentPng, recentSvg]) fs.utimesSync(file, stale, stale);
+  assert.equal(await previewPng(DEFAULT_SETTINGS), recentPng);
+  assert.equal(previewFile(DEFAULT_SETTINGS), recentSvg);
+  let index = 0;
+  for (const extension of ["svg", "png"]) {
+    const seeded = [];
+    while (fs.readdirSync(dir).length < 1024) {
+      const file = path.join(dir, `${(index++).toString(16).padStart(64, "0")}.${index % 2 ? "svg" : "png"}`);
+      fs.writeFileSync(file, "old preview");
+      const old = new Date(seeded.length === 0 ? 1990 : 2000, 0, 1, 0, 0, index);
+      fs.utimesSync(file, old, old);
+      seeded.push(file);
+    }
+    const settings = { ...DEFAULT_SETTINGS, iconOffsetY: extension === "svg" ? 13 : 17 };
+    const current = extension === "svg" ? previewFile(settings) : await previewPng(settings);
+    assert(fs.readdirSync(dir).length <= 1024);
+    assert(!fs.existsSync(seeded[0]));
+    for (const file of [current, recentSvg, recentPng]) assert(fs.existsSync(file));
+    assert.equal(previewFile(DEFAULT_SETTINGS), recentSvg);
+    assert.equal(await previewPng(DEFAULT_SETTINGS), recentPng);
+  }
 });
 
 test("full preview changes for noise, border, and glyph and reuses identical renders", async () => {

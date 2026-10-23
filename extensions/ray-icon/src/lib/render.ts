@@ -1,26 +1,33 @@
 import { environment, getPreferenceValues } from "@raycast/api";
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, existsSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
+import { mkdirSync, readFileSync, existsSync, writeFileSync, readdirSync, rmSync, statSync, utimesSync } from "node:fs";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { initWasm, Resvg } from "@resvg/resvg-wasm";
 import { ICONS } from "./icons";
 import { IconSettings } from "./settings";
 
 const SIZE = 512;
+const PREVIEW_CACHE_LIMIT = 1024;
+const PREVIEW_CACHE_RETAIN = 768;
 
 type Glyph = { viewBox: string; body: string };
 
-/** Pulls the viewBox and inner markup out of a pasted SVG so it can be nested like a built-in icon. */
+/** Keeps root styling on a group while the renderer controls the SVG viewport. */
 export function parseCustomSvg(source: string): Glyph | undefined {
   const match = source.match(/<svg\b([^>]*)>([\s\S]*)<\/svg>/i);
   if (!match) return undefined;
   const [, attributes, body] = match;
+  const rootAttributes = Array.from(attributes.matchAll(/([^\s=]+)\s*=\s*("[^"]*"|'[^']*')/g))
+    .filter(([, name]) => !["viewbox", "width", "height"].includes(name.toLowerCase()))
+    .map(([attribute]) => attribute)
+    .join(" ");
+  const content = `<g${rootAttributes ? ` ${rootAttributes}` : ""}>${body}</g>`;
   const viewBox = attributes.match(/viewBox\s*=\s*["']([^"']+)["']/i)?.[1];
-  if (viewBox) return { viewBox, body };
+  if (viewBox) return { viewBox, body: content };
   const width = parseFloat(attributes.match(/\bwidth\s*=\s*["']([\d.]+)/i)?.[1] ?? "24");
   const height = parseFloat(attributes.match(/\bheight\s*=\s*["']([\d.]+)/i)?.[1] ?? "24");
-  return { viewBox: `0 0 ${width} ${height}`, body };
+  return { viewBox: `0 0 ${width} ${height}`, body: content };
 }
 
 function glyphFor(settings: IconSettings): Glyph | undefined {
@@ -102,28 +109,63 @@ export async function renderPng(settings: IconSettings, size = SIZE): Promise<Bu
   }
 }
 
+let legacyPreviewsRemoved = false;
+function previewDirectory(): string {
+  if (!legacyPreviewsRemoved) {
+    rmSync(join(environment.supportPath, "previews"), { recursive: true, force: true });
+    legacyPreviewsRemoved = true;
+  }
+  const extensionId = createHash("sha256").update(environment.supportPath).digest("hex");
+  const dir = join(tmpdir(), "ray-icon-previews", extensionId);
+  mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+function prunePreviews(dir: string, currentPath: string) {
+  const files = readdirSync(dir).filter((name) => /^[a-f0-9]{64}\.(png|svg)$/.test(name));
+  if (files.length <= PREVIEW_CACHE_LIMIT) return;
+  const oldest = files
+    .map((name) => join(dir, name))
+    .filter((path) => path !== currentPath)
+    .map((path) => ({ path, modified: statSync(path).mtimeMs }))
+    .sort((a, b) => a.modified - b.modified);
+  // Prune in batches so browsing a grid doesn't sort the cache for every new glyph.
+  for (const { path } of oldest.slice(0, files.length - PREVIEW_CACHE_RETAIN)) rmSync(path, { force: true });
+}
+
+function reusePreview(path: string): boolean {
+  if (!existsSync(path)) return false;
+  const now = new Date();
+  utimesSync(path, now, now);
+  return true;
+}
+
 /** Full-fidelity preview, including border and texture, cached by rendered content. */
 export async function previewPng(settings: IconSettings): Promise<string> {
   const svg = renderSvg(settings);
-  const dir = join(environment.supportPath, "previews");
-  mkdirSync(dir, { recursive: true });
+  const dir = previewDirectory();
   const path = join(dir, `${createHash("sha256").update(svg).digest("hex")}.png`);
-  if (!existsSync(path)) writeFileSync(path, await renderPng(settings, 320));
+  if (!reusePreview(path)) {
+    writeFileSync(path, await renderPng(settings, 320));
+    prunePreviews(dir, path);
+  }
   return path;
 }
 
-/** Writes a preview SVG to the support folder and returns its path; Grid and Detail render SVG files natively. */
+/** Caches a preview SVG; Grid and Detail render SVG files natively. */
 export function previewFile(settings: IconSettings): string {
   const svg = renderSvg(settings, { preview: true });
-  const dir = join(environment.supportPath, "previews");
-  mkdirSync(dir, { recursive: true });
-  const path = join(dir, `${createHash("sha1").update(svg).digest("hex").slice(0, 16)}.svg`);
-  if (!existsSync(path)) writeFileSync(path, svg);
+  const dir = previewDirectory();
+  const path = join(dir, `${createHash("sha256").update(svg).digest("hex")}.svg`);
+  if (!reusePreview(path)) {
+    writeFileSync(path, svg);
+    prunePreviews(dir, path);
+  }
   return path;
 }
 
 export function exportDirectory(): string {
-  const { exportDirectory } = getPreferenceValues<{ exportDirectory?: string }>();
+  const { exportDirectory } = getPreferenceValues<Preferences>();
   const dir = exportDirectory || join(homedir(), "Downloads");
   mkdirSync(dir, { recursive: true });
   return dir;
@@ -133,24 +175,27 @@ function safeFileName(name: string): string {
   return (name || "extension_icon").replace(/[^\w.-]+/g, "_").replace(/\.(png|svg)$/i, "");
 }
 
-/** Picks name.ext, then name-2.ext, … so exports never overwrite each other. */
-function uniquePath(dir: string, base: string, ext: string): string {
-  let path = join(dir, `${base}.${ext}`);
-  for (let i = 2; existsSync(path); i++) path = join(dir, `${base}-${i}.${ext}`);
-  return path;
+/** Creates name.ext, then name-2.ext, … without replacing an existing export. */
+function writeExport(dir: string, base: string, ext: string, content: string | Buffer): string {
+  for (let i = 1; ; i++) {
+    const path = join(dir, `${base}${i === 1 ? "" : `-${i}`}.${ext}`);
+    try {
+      writeFileSync(path, content, { flag: "wx" });
+      return path;
+    } catch (error) {
+      if (!(error instanceof Error && "code" in error && error.code === "EEXIST")) throw error;
+    }
+  }
 }
 
 export async function exportPng(settings: IconSettings, size = SIZE): Promise<string> {
   const suffix = size === SIZE ? "" : `@${size}`;
-  const path = uniquePath(exportDirectory(), `${safeFileName(settings.fileName)}${suffix}`, "png");
-  writeFileSync(path, await renderPng(settings, size));
-  return path;
+  const png = await renderPng(settings, size);
+  return writeExport(exportDirectory(), `${safeFileName(settings.fileName)}${suffix}`, "png", png);
 }
 
 export function exportSvg(settings: IconSettings): string {
-  const path = uniquePath(exportDirectory(), safeFileName(settings.fileName), "svg");
-  writeFileSync(path, renderSvg(settings));
-  return path;
+  return writeExport(exportDirectory(), safeFileName(settings.fileName), "svg", renderSvg(settings));
 }
 
 /** Renders a PNG into the support folder (for clipboard copies) and returns the path. */
