@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add EvoLink MCP Server] - {PR_MERGE_DATE}
+## [Add EvoLink MCP Server] - 2026-10-23
 
 - Add EvoLink to the official registry: image, video, music and speech generation with 150+ models from one EvoLink account. Search models and published prices, get a quote for an exact task, generate after approval, and track tasks and balance. Hosted Streamable HTTP server at https://mcp.evolink.ai/mcp with OAuth 2.1 sign-in (PKCE and dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
