@@ -1,6 +1,6 @@
 # Genki Wave Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-23
 
 - Map each Wave button and swipe to dictation, slides, media, hold-and-turn
   volume, a key, or any Raycast command or URL.
