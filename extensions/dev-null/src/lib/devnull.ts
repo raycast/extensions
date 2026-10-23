@@ -64,8 +64,12 @@ export interface CommitOptions {
   agentSockets?: string[];
   /** Diagnostics sink; the command passes the Raycast logger. Never receives the signature or message. */
   log?: Log;
-  /** SHA-256 of each image as the user approved it. The commit is refused if any file has changed since. */
-  approvedImageHashes?: string[];
+  /**
+   * SHA-256 of each image as the user approved it. The commit is refused if any file has changed since.
+   * `null` means the caller looked for the user's approval and found none, so nothing can be compared;
+   * leave it out when there is no approval step, as in the form.
+   */
+  approvedImageHashes?: string[] | null;
 }
 
 export type Log = (message: string, data?: Record<string, unknown>) => void;
@@ -149,7 +153,23 @@ async function findCandidates(home: string, sockets: string[]): Promise<Candidat
   return candidates.filter((candidate) => !seen.has(candidate.id) && seen.add(candidate.id));
 }
 
-async function request(url: string, init: RequestInit, log: Log, timeoutMs = REQUEST_TIMEOUT_MS): Promise<string> {
+/** A non-2xx answer. Its message is the server's body, trimmed. */
+export class HttpError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "HttpError";
+  }
+}
+
+export async function request(
+  url: string,
+  init: RequestInit,
+  log: Log,
+  timeoutMs = REQUEST_TIMEOUT_MS,
+): Promise<string> {
   const method = init.method ?? "GET";
   const started = performance.now();
   const elapsedMs = () => Math.round(performance.now() - started);
@@ -178,7 +198,10 @@ async function request(url: string, init: RequestInit, log: Log, timeoutMs = REQ
     bytes: Buffer.byteLength(body, "utf8"),
   });
   if (!response.ok) {
-    throw new Error(body.trim() || `Unexpected answer from ${new URL(url).origin} (HTTP ${response.status}).`);
+    throw new HttpError(
+      body.trim() || `Unexpected answer from ${new URL(url).origin} (HTTP ${response.status}).`,
+      response.status,
+    );
   }
   return body;
 }
@@ -262,8 +285,9 @@ export async function postCommit(commit: Commit, options: CommitOptions = {}): P
   log("Checked commit", {
     images: images.length,
     imageBytes: images.reduce((sum, image) => sum + image.data.length, 0),
-    // "not recorded" means the AI tool found no approval for this exact commit, so nothing was compared.
-    approval: approved ? "matched" : "not recorded",
+    // "not recorded": the AI tool found no approval for this exact commit, so nothing was compared.
+    // "not used": the caller, such as the form, has no approval step.
+    approval: approved ? "matched" : approved === null ? "not recorded" : "not used",
   });
 
   const sockets = options.agentSockets ?? (await agentSockets(home));
