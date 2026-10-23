@@ -1,9 +1,19 @@
 # Changelog
 
-## [Grid Size] - 2026-10-23
+## [Grid Size] - {PR_MERGE_DATE}
 
 - Add a Grid Size preference: Small (8 columns, the new default), Medium (6 columns, the previous layout) or Large (4 columns).
 - Add a Grid Size submenu to the Action Panel. The choice is remembered until the preference is changed.
+
+## [User Browsing and Saved Search] - 2026-10-22
+
+- Add 7TV user search with separate channel-emote and creator-upload commands.
+- Remember recently opened users separately in both browsing commands, with remove and clear actions.
+- Show complete user avatars without a circular crop.
+- Show personal-set usage status and exclude private or unlisted entries from user browsing.
+- Show matching favorites and recently used emotes while searching in grid and list views.
+- Remember the provider, sort order, view, and animated-only filter between command sessions.
+- Restore README credit for n4kama’s GIF/PNG clipboard contribution.
 
 ## [Emote Size] - 2026-10-20
 
