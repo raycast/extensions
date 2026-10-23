@@ -19,7 +19,8 @@ Browse your [dbt Cloud](https://www.getdbt.com/) account from Raycast: models, s
 | Show Projects           | Browse projects with repository and connection details                |
 | Show Jobs               | Browse, view, and trigger jobs                                        |
 | Show Environments       | Browse environments and their configurations                          |
-| Show Job Performance    | View per-job execution metrics and performance trends                 |
+| Show Job Performance    | Success rate, run counts, and build-duration chart per job            |
+| Show Model Performance  | Slowest models and each model's execution time across runs            |
 
 ## ⚙️ Configuration
 

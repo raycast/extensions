@@ -331,7 +331,7 @@ export const getStatusText = (status: number): string => {
 // ============================================
 
 // Generic GraphQL query function
-async function fetchDiscoveryConnection<TNode, TData>(
+export async function fetchDiscoveryConnection<TNode, TData>(
   query: string,
   baseVariables: Record<string, unknown>,
   getConnection: (data: TData) => DiscoveryConnection<TNode> | undefined,

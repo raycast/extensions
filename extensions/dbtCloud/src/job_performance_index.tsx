@@ -6,7 +6,7 @@ import { DEPLOYMENT_TYPE_INFO, inferDeploymentType } from "./environment_utils";
 import { returnEnvironments } from "./fetch_environments";
 import { returnJobs } from "./fetch_jobs";
 import { returnProjects } from "./fetch_projects";
-import { buildDurationChart } from "./job_performance_chart";
+import { buildDurationChart, ChartPoint, ChartStatus } from "./duration_chart";
 import { EnvironmentModel, JobModel } from "./types";
 
 // Enough history for a 30-day window on jobs that run every couple of hours
@@ -73,7 +73,17 @@ function JobPerformanceDetail({ job, projectName, environment }: JobContext) {
   const average = durations.length > 0 ? durations.reduce((sum, t) => sum + t, 0) / durations.length : null;
   const slowest = durations.length > 0 ? Math.max(...durations) : null;
 
-  const chart = buildDurationChart(inWindow, windowStart, windowEnd);
+  const chartStatus: Record<number, ChartStatus> = {
+    [STATUS.success]: "success",
+    [STATUS.error]: "error",
+    [STATUS.cancelled]: "cancelled",
+  };
+  const points: ChartPoint[] = inWindow.flatMap((run) =>
+    run.executionTime !== null && run.finishedAt && chartStatus[run.status]
+      ? [{ time: new Date(run.finishedAt), seconds: run.executionTime, status: chartStatus[run.status] }]
+      : [],
+  );
+  const chart = buildDurationChart(points, windowStart, windowEnd);
   const truncated =
     runs.length >= MAX_RUNS && runs[runs.length - 1] && new Date(runs[runs.length - 1].createdAt) > windowStart;
 
