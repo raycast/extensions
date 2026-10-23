@@ -1,5 +1,9 @@
 # Simulator Control Changelog
 
+## [Fix Device Hub compatibility] - {PR_MERGE_DATE}
+
+- Open DeviceHub (Xcode 27+) or Simulator (older Xcode) when booting a device
+
 ## [Update] - 2024-12-20
 
 - Merge boot and open actions into a single action

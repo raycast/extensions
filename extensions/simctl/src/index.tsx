@@ -1,7 +1,13 @@
 import { ActionPanel, List, Action, Color, Icon, useNavigation, closeMainWindow } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { exec } from "child_process";
+import { existsSync } from "fs";
 import { useEffect, useState } from "react";
+
+// Xcode 27 renamed Simulator.app to DeviceHub.app.
+const SIMULATOR_APP = existsSync("/Applications/Xcode.app/Contents/Applications/DeviceHub.app")
+  ? "DeviceHub"
+  : "Simulator";
 
 export default function Command() {
   const [state, setState] = useCachedState<State[]>("state", []);
@@ -51,19 +57,19 @@ export default function Command() {
           exec(`xcrun simctl boot ${device.udid}`, () => {
             fetchSimulators();
           });
-          exec(`open -g -a Simulator`);
+          exec(`open -g -a ${SIMULATOR_APP}`);
           const appleScript = `
             tell application "System Events"
               repeat
                 set windowFound to false
-                set theWindows to windows of process "Simulator"
+                set theWindows to windows of process "${SIMULATOR_APP}"
                 repeat with theWindow in theWindows
                   set theWindowName to name of theWindow
                   if theWindowName contains "${device.name}" then
-                    tell application "Simulator" to activate
+                    tell application "${SIMULATOR_APP}" to activate
                     perform action "AXRaise" of theWindow
                     set windowFound to true
-                    exit repeat 
+                    exit repeat
                   end if
                   delay 0.1
                 end repeat
