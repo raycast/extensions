@@ -5,6 +5,7 @@
     "lib": ["ES2023"],
     "types": ["node"],
     "module": "commonjs",
+    "moduleResolution": "bundler",
     "target": "ES2023",
     "strict": true,
     "isolatedModules": true,
