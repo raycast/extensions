@@ -933,6 +933,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "overlayqa",
+    title: "OverlayQA",
+    description:
+      "Design QA for coding agents. Run WCAG accessibility (axe-core), color-contrast and design-token audits and AI visual reviews on any public URL, then create and manage QA issues, comments, labels and client review links in OverlayQA. 31 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. A free OverlayQA account includes 3 scans a day; creating issues needs a paid plan after a 14-day trial.",
+    icon: "https://raw.githubusercontent.com/OverlayQA/mcp/main/icon.png",
+    homepage: "https://overlayqa.com/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.overlayqa.com/mcp"],
+    },
+    remoteUrl: "https://api.overlayqa.com/mcp",
+  },
+  {
     name: "paddle",
     title: "Paddle",
     description:
@@ -1215,6 +1228,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.scout7.ai/mcp"],
+    },
+  },
+  {
+    name: "send21",
+    title: "send21",
+    description:
+      "Crypto pay links and API for people and AI agents. Create pay links and payment drafts priced in any of 161 fiat currencies, paid in BTC (on-chain or Lightning), USDC, USDT, EURC, SOL or ETH to the owner's approved addresses, check whether they are paid, and propose new receiving addresses for the owner to approve. Non-custodial: send21 never holds keys or funds, and the payer signs in their own wallet. Hosted remote Streamable HTTP server through `mcp-remote`; send21 API key as an `Authorization: Bearer` header (free account).",
+    icon: "https://raw.githubusercontent.com/send21io/send21-plugin/main/assets/logo.png",
+    homepage: "https://send21.io/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://send21.io/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
   },
   {
@@ -1542,6 +1567,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://app.voicemoat.com/api/mcp"],
     },
+  },
+  {
+    name: "wave-ai",
+    title: "Wave AI",
+    description:
+      "Wave AI is an AI note taker for phone calls, meetings and in-person conversations. Ask what was decided, what a person said (Voice ID finds people you have named in Wave), or what you still owe, then update action items, organize folders and share recordings without opening Wave. Wave never deletes recordings or edits transcripts, and it asks before sharing. Hosted remote Streamable HTTP server; OAuth 2.0 sign-in with PKCE and dynamic client registration, free Wave account, no API key to paste.",
+    icon: "https://wave.co/brand/icon-rounded-512.png",
+    homepage: "https://help.wave.co/integrations/connect-wave-to-other-ai-tools",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.wave.co"],
+    },
+    remoteUrl: "https://mcp.wave.co",
   },
   {
     name: "weio-site-check",

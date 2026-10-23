@@ -5,7 +5,7 @@
 
 Access your KeePass database directly from Raycast
 
-Search entries &nbsp;⸱&nbsp; Copy & paste any field &nbsp;⸱&nbsp; Generate TOTP codes &nbsp;⸱&nbsp; Mark entries as favorites
+Fuzzy search entries &nbsp;⸱&nbsp; Copy & paste any field &nbsp;⸱&nbsp; Generate TOTP codes &nbsp;⸱&nbsp; Mark entries as favorites
 
 </div>
 
@@ -15,12 +15,17 @@ To use this extension, you will need:
 
 - [KeePassXC](https://keepassxc.org)
 
+## Search Filters
+
+- **Folder:** Pick a folder from the dropdown next to the search bar
+- **Username:** Type `u:<name>` anywhere in the search bar (e.g. `u:alice github`)
+
 ## Available Options
 
 Configure the following preferences in the extension settings:
 
 - **Inactivity Timer:** Automatically locks the database after a period of inactivity
-- **Display Favicon:** Shows website favicons for entries
+- **Display Favicon:** Shows website favicons for entries (enabled by default)
 
 ## Security
 

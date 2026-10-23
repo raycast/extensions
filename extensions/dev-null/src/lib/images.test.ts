@@ -4,7 +4,7 @@ import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { crc32, deflateSync } from "node:zlib";
 import { afterAll, describe, expect, it } from "vitest";
-import { loadImages, MAX_IMAGE_BYTES, resolvePath, sniffType } from "./images";
+import { imageSize, loadImages, MAX_IMAGE_BYTES, resolvePath, sniffType } from "./images";
 
 const dir = mkdtempSync(join(tmpdir(), "devnull-images-"));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
@@ -31,6 +31,56 @@ function png(width: number, height: number): Buffer {
     chunk("IDAT", deflateSync(rows)),
     chunk("IEND", Buffer.alloc(0)),
   ]);
+}
+
+/** A JPEG header up to its frame: SOI, an APP0 segment, then a SOF marker carrying the size. */
+function jpeg(width: number, height: number, sof = 0xc0): Buffer {
+  const app0 = Buffer.from([0xff, 0xe0, 0x00, 0x10, ...Buffer.from("JFIF\0", "latin1"), 1, 1, 0, 0, 1, 0, 1, 0, 0]);
+  // A DHT segment first, whose marker (C4) sits in the SOF range but holds no size.
+  const dht = Buffer.from([0xff, 0xc4, 0x00, 0x04, 0x00, 0x00]);
+  const frame = Buffer.from([
+    0xff,
+    sof,
+    0x00,
+    0x0b,
+    8,
+    height >> 8,
+    height & 0xff,
+    width >> 8,
+    width & 0xff,
+    1,
+    1,
+    0x11,
+    0,
+  ]);
+  return Buffer.concat([Buffer.from([0xff, 0xd8]), app0, dht, frame, Buffer.from([0xff, 0xd9])]);
+}
+
+/** A WebP header in one of its three forms: lossy (VP8), lossless (VP8L) or extended (VP8X). */
+function webp(kind: "VP8 " | "VP8L" | "VP8X", width: number, height: number): Buffer {
+  let payload: Buffer;
+  if (kind === "VP8 ") {
+    payload = Buffer.alloc(10);
+    payload.set([0x9d, 0x01, 0x2a], 3);
+    payload.writeUInt16LE(width & 0x3fff, 6);
+    payload.writeUInt16LE(height & 0x3fff, 8);
+  } else if (kind === "VP8L") {
+    payload = Buffer.alloc(5);
+    payload[0] = 0x2f;
+    payload.writeUInt32LE(((width - 1) & 0x3fff) | (((height - 1) & 0x3fff) << 14), 1);
+  } else {
+    payload = Buffer.alloc(10);
+    payload.writeUIntLE(width - 1, 4, 3);
+    payload.writeUIntLE(height - 1, 7, 3);
+  }
+  const chunkHeader = Buffer.alloc(8);
+  chunkHeader.write(kind, 0, "latin1");
+  chunkHeader.writeUInt32LE(payload.length, 4);
+  const body = Buffer.concat([Buffer.from("WEBP", "latin1"), chunkHeader, payload]);
+  const riff = Buffer.alloc(8);
+  riff.write("RIFF", 0, "latin1");
+  riff.writeUInt32LE(body.length, 4);
+  return Buffer.concat([riff, body]);
 }
 
 function file(name: string, data: Buffer): string {
@@ -85,6 +135,50 @@ describe("loadImages", () => {
   it("refuses a relative path and a missing file", async () => {
     await expect(loadImages(["shot.png"])).rejects.toThrow("not a full path");
     await expect(loadImages([join(dir, "missing.png")])).rejects.toThrow("Could not read the image missing.png.");
+  });
+});
+
+describe("imageSize", () => {
+  it("reads a PNG's size from its header", () => {
+    expect(imageSize(png(640, 480))).toEqual({ width: 640, height: 480 });
+  });
+
+  it("reads a JPEG's size from its frame, skipping segments that come before it", () => {
+    expect(imageSize(jpeg(6001, 2))).toEqual({ width: 6001, height: 2 });
+    // Progressive JPEGs use SOF2.
+    expect(imageSize(jpeg(300, 200, 0xc2))).toEqual({ width: 300, height: 200 });
+  });
+
+  it("reads a WebP's size in each of its three forms", () => {
+    expect(imageSize(webp("VP8 ", 6001, 3))).toEqual({ width: 6001, height: 3 });
+    expect(imageSize(webp("VP8L", 4, 6001))).toEqual({ width: 4, height: 6001 });
+    expect(imageSize(webp("VP8X", 7000, 5))).toEqual({ width: 7000, height: 5 });
+  });
+
+  it("refuses a header that is cut off after the size or lacks its signature", () => {
+    // A PNG cut inside its IHDR chunk, with the width and height still there.
+    expect(imageSize(png(10, 10).subarray(0, 24))).toBeUndefined();
+    // A lossy WebP whose frame has no start code.
+    const noStartCode = webp("VP8 ", 10, 10);
+    noStartCode.fill(0, 23, 26);
+    expect(imageSize(noStartCode)).toBeUndefined();
+    // A lossless WebP without its signature byte.
+    const noSignature = webp("VP8L", 10, 10);
+    noSignature[20] = 0;
+    expect(imageSize(noSignature)).toBeUndefined();
+  });
+
+  it("gives up on a truncated header rather than guessing", () => {
+    expect(imageSize(png(10, 10).subarray(0, 20))).toBeUndefined();
+    expect(imageSize(jpeg(10, 10).subarray(0, 30))).toBeUndefined();
+    expect(imageSize(webp("VP8X", 10, 10).subarray(0, 24))).toBeUndefined();
+  });
+});
+
+describe("loadImages, beyond PNG", () => {
+  it("refuses a JPEG or WebP over 6,000 pixels on a side", async () => {
+    await expect(loadImages([file("wide.jpg", jpeg(6001, 1))])).rejects.toThrow("wide.jpg is 6001×1");
+    await expect(loadImages([file("tall.webp", webp("VP8L", 1, 6001))])).rejects.toThrow("tall.webp is 1×6001");
   });
 });
 
