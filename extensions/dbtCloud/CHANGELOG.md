@@ -11,6 +11,8 @@
 - AI tools search the production environment of every project when no environment is given
 - Show Job Performance lists every active job by project and environment, with success rate, run counts, and a build-duration chart over 7, 14, or 30 days
 - Add Show Model Performance: slowest models per environment, with each model's execution time and status across its recent runs
+- Every view has a Go To section that moves up and down the dbt hierarchy (project, environment, job, run, model, source): for example from a job to its runs and performance or up to its environment and project, and from a model to its last run, last job, lineage, and performance. The dbt Cloud page for each is still available under Open in dbt Cloud
+- Add keyboard shortcuts for every action, using one scheme: ⌘⌥ + letter to go to a view, ⌥⇧ + the same letter to open it in dbt Cloud, ⌘⇧ to copy
 
 ## [Modernize + Specify Endpoint] - 2026-06-30
 

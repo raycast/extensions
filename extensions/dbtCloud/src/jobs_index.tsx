@@ -10,10 +10,12 @@ import {
   useNavigation,
   confirmAlert,
 } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnJobs } from "./fetch_jobs";
 import { JobsFetchResponse, JobModel } from "./types";
 import { buildDbtCloudUrl, triggerJobRun, formatRelativeTime } from "./api";
+import { JobGoTo } from "./navigation";
 
 function getJobIcon(job: JobModel): { source: Icon; tintColor: Color } {
   if (job.deactivated) {
@@ -46,7 +48,7 @@ function getTriggerTypes(job: JobModel): string[] {
 }
 
 // Job Detail Component
-function JobDetail({ job, onTrigger }: { job: JobModel; onTrigger: () => void }) {
+export function JobDetail({ job, onTrigger }: { job: JobModel; onTrigger?: () => void }) {
   const jobUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}`);
   const runHistoryUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}/runs`);
   const settingsUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}/settings`);
@@ -119,7 +121,7 @@ ${
 
     if (confirmed) {
       await triggerJobRun(job.id, "Triggered from Raycast");
-      onTrigger();
+      onTrigger?.();
     }
   };
 
@@ -157,14 +159,31 @@ ${
               shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
             />
           )}
-          <Action.OpenInBrowser url={jobUrl} title="Open in dbt Cloud" />
-          <Action.OpenInBrowser url={runHistoryUrl} title="View Run History" icon={Icon.List} />
-          <Action.OpenInBrowser url={settingsUrl} title="Job Settings" icon={Icon.Gear} />
+          <JobGoTo job={job} omit={["details"]} />
+          <ActionPanel.Section title="Open in dbt Cloud">
+            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" shortcut={Shortcuts.webJob} />
+            <Action.OpenInBrowser
+              url={runHistoryUrl}
+              title="Open Run History in dbt Cloud"
+              shortcut={Shortcuts.webRun}
+              icon={Icon.List}
+            />
+            <Action.OpenInBrowser
+              url={settingsUrl}
+              title="Open Job Settings in dbt Cloud"
+              shortcut={Shortcuts.webSettings}
+              icon={Icon.Gear}
+            />
+          </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Job ID" content={job.id.toString()} />
-            <Action.CopyToClipboard title="Copy Job Name" content={job.name} />
+            <Action.CopyToClipboard title="Copy Job ID" shortcut={Shortcuts.copyId} content={job.id.toString()} />
+            <Action.CopyToClipboard title="Copy Job Name" shortcut={Shortcuts.copyName} content={job.name} />
             {job.execute_steps?.length > 0 && (
-              <Action.CopyToClipboard title="Copy Execute Steps" content={job.execute_steps.join("\n")} />
+              <Action.CopyToClipboard
+                title="Copy Execute Steps"
+                shortcut={Shortcuts.copySteps}
+                content={job.execute_steps.join("\n")}
+              />
             )}
           </ActionPanel.Section>
         </ActionPanel>
@@ -225,6 +244,7 @@ const JobListItem = ({ job, onRefresh }: JobListItemProps): JSX.Element => {
         <ActionPanel>
           <Action
             title="View Details"
+            shortcut={Shortcuts.details}
             icon={Icon.Eye}
             onAction={() => push(<JobDetail job={job} onTrigger={onRefresh} />)}
           />
@@ -236,15 +256,25 @@ const JobListItem = ({ job, onRefresh }: JobListItemProps): JSX.Element => {
               shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
             />
           )}
-          <ActionPanel.Section title="Links">
-            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" />
-            <Action.OpenInBrowser url={runHistoryUrl} title="View Run History" icon={Icon.List} />
+          <JobGoTo job={job} omit={["details"]} />
+          <ActionPanel.Section title="Open in dbt Cloud">
+            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" shortcut={Shortcuts.webJob} />
+            <Action.OpenInBrowser
+              url={runHistoryUrl}
+              title="Open Run History in dbt Cloud"
+              shortcut={Shortcuts.webRun}
+              icon={Icon.List}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Job ID" content={job.id.toString()} />
-            <Action.CopyToClipboard title="Copy Job Name" content={job.name} />
+            <Action.CopyToClipboard title="Copy Job ID" shortcut={Shortcuts.copyId} content={job.id.toString()} />
+            <Action.CopyToClipboard title="Copy Job Name" shortcut={Shortcuts.copyName} content={job.name} />
             {job.execute_steps?.length > 0 && (
-              <Action.CopyToClipboard title="Copy Execute Steps" content={job.execute_steps.join("\n")} />
+              <Action.CopyToClipboard
+                title="Copy Execute Steps"
+                shortcut={Shortcuts.copySteps}
+                content={job.execute_steps.join("\n")}
+              />
             )}
           </ActionPanel.Section>
         </ActionPanel>
@@ -255,7 +285,17 @@ const JobListItem = ({ job, onRefresh }: JobListItemProps): JSX.Element => {
 
 type JobFilter = "all" | "active" | "inactive" | "scheduled" | "webhook";
 
-export default function JobsList() {
+export interface JobsScope {
+  projectId?: number;
+  environmentId?: number;
+  scopeTitle?: string;
+}
+
+export default function Command() {
+  return <JobsList />;
+}
+
+export function JobsList({ projectId, environmentId, scopeTitle }: JobsScope = {}) {
   const [jobs, setJobs] = useState<JobsFetchResponse>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filter, setFilter] = useState<JobFilter>("all");
@@ -263,14 +303,14 @@ export default function JobsList() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await returnJobs();
-      setJobs(response);
+      const response = await returnJobs(projectId);
+      setJobs(environmentId ? response.filter((job) => job.environment_id === environmentId) : response);
     } catch {
       showToast(Toast.Style.Failure, "Failed loading Jobs");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [projectId, environmentId]);
 
   useEffect(() => {
     fetchData();
@@ -307,6 +347,7 @@ export default function JobsList() {
   return (
     <List
       isLoading={loading}
+      navigationTitle={scopeTitle ? `Jobs · ${scopeTitle}` : undefined}
       searchBarPlaceholder="Filter jobs by name..."
       throttle
       searchBarAccessory={

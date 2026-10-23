@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, Keyboard, List } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { buildDbtCloudUrl, fetchJobRunMetrics, formatRelativeTime } from "./api";
@@ -7,6 +8,7 @@ import { returnEnvironments } from "./fetch_environments";
 import { returnJobs } from "./fetch_jobs";
 import { returnProjects } from "./fetch_projects";
 import { buildDurationChart, ChartPoint, ChartStatus } from "./duration_chart";
+import { JobGoTo } from "./navigation";
 import { EnvironmentModel, JobModel } from "./types";
 
 // Enough history for a 30-day window on jobs that run every couple of hours
@@ -56,7 +58,7 @@ interface JobContext {
   environment?: EnvironmentModel;
 }
 
-function JobPerformanceDetail({ job, projectName, environment }: JobContext) {
+export function JobPerformanceDetail({ job, projectName, environment }: JobContext) {
   const [days, setDays] = useState(14);
   const { data: runs = [], isLoading } = useCachedPromise(fetchJobRunMetrics, [job.id, MAX_RUNS]);
 
@@ -148,8 +150,18 @@ ${runRows || "| — | — | — | — | — | — |"}
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" />
-          {inWindow[0] && <Action.OpenInBrowser url={inWindow[0].href} title="Open Latest Run" icon={Icon.Play} />}
+          <JobGoTo job={job} omit={["performance"]} />
+          <ActionPanel.Section title="Open in dbt Cloud">
+            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" shortcut={Shortcuts.webJob} />
+            {inWindow[0] && (
+              <Action.OpenInBrowser
+                url={inWindow[0].href}
+                title="Open Latest Run in dbt Cloud"
+                shortcut={Shortcuts.webRun}
+                icon={Icon.Play}
+              />
+            )}
+          </ActionPanel.Section>
           <ActionPanel.Section title="Time Window">
             {WINDOWS.filter((window) => window !== days).map((window) => (
               <Action
@@ -162,8 +174,12 @@ ${runRows || "| — | — | — | — | — | — |"}
             ))}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Job ID" content={job.id.toString()} />
-            <Action.CopyToClipboard title="Copy Success Rate" content={successRate} />
+            <Action.CopyToClipboard title="Copy Job ID" shortcut={Shortcuts.copyId} content={job.id.toString()} />
+            <Action.CopyToClipboard
+              title="Copy Success Rate"
+              shortcut={Shortcuts.copySuccessRate}
+              content={successRate}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -171,8 +187,13 @@ ${runRows || "| — | — | — | — | — | — |"}
   );
 }
 
-export default function JobPerformanceIndex() {
-  const [projectFilter, setProjectFilter] = useState("all");
+export default function Command() {
+  return <JobPerformanceList />;
+}
+
+export function JobPerformanceList({ projectId }: { projectId?: number } = {}) {
+  const [selectedProject, setProjectFilter] = useState("all");
+  const projectFilter = projectId ? String(projectId) : selectedProject;
   const { data, isLoading } = useCachedPromise(async () => {
     const [jobs, projects, environments] = await Promise.all([returnJobs(), returnProjects(), returnEnvironments()]);
     return { jobs, projects, environments };
@@ -207,15 +228,20 @@ export default function JobPerformanceIndex() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search jobs..."
+      navigationTitle={
+        projectId ? `Job Performance · ${projectNames.get(projectId) ?? `Project ${projectId}`}` : undefined
+      }
       searchBarAccessory={
-        <List.Dropdown tooltip="Project" storeValue onChange={setProjectFilter}>
-          <List.Dropdown.Item title="All Projects" value="all" />
-          {[...(data?.projects ?? [])]
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map((project) => (
-              <List.Dropdown.Item key={project.id} title={project.name} value={String(project.id)} />
-            ))}
-        </List.Dropdown>
+        projectId ? undefined : (
+          <List.Dropdown tooltip="Project" storeValue onChange={setProjectFilter}>
+            <List.Dropdown.Item title="All Projects" value="all" />
+            {[...(data?.projects ?? [])]
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((project) => (
+                <List.Dropdown.Item key={project.id} title={project.name} value={String(project.id)} />
+              ))}
+          </List.Dropdown>
+        )
       }
     >
       <List.EmptyView title="No active jobs found" icon="icon_64p.png" />
@@ -237,14 +263,21 @@ export default function JobPerformanceIndex() {
                   <ActionPanel>
                     <Action.Push
                       title="View Performance"
+                      shortcut={Shortcuts.performance}
                       icon={Icon.BarChart}
                       target={<JobPerformanceDetail job={job} projectName={projectName} environment={environment} />}
                     />
+                    <JobGoTo job={job} omit={["performance"]} />
                     <Action.OpenInBrowser
                       url={buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}`)}
                       title="Open Job in dbt Cloud"
+                      shortcut={Shortcuts.webJob}
                     />
-                    <Action.CopyToClipboard title="Copy Job ID" content={job.id.toString()} />
+                    <Action.CopyToClipboard
+                      title="Copy Job ID"
+                      shortcut={Shortcuts.copyId}
+                      content={job.id.toString()}
+                    />
                   </ActionPanel>
                 }
               />

@@ -1,10 +1,12 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { buildDbtCloudUrl, buildDocsUrl, formatRelativeTime } from "./api";
 import { CatalogEnvironment, describeEnvironment, resolveCatalogEnvironments } from "./catalog_environments";
 import { buildDurationChart, ChartPoint, ChartStatus } from "./duration_chart";
 import { fetchModelHistoricalRuns, fetchModelPerformance, ModelPerformanceNode } from "./model_performance_api";
+import { ModelGoTo } from "./navigation";
 
 const RUN_COUNT = 50;
 
@@ -34,7 +36,7 @@ const median = (values: number[]): number | null => {
   return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 };
 
-function ModelPerformanceDetail({
+export function ModelPerformanceDetail({
   model,
   environment,
 }: {
@@ -128,11 +130,38 @@ ${runRows || "| — | — | — | — | — |"}
       }
       actions={
         <ActionPanel>
-          {explorerUrl && <Action.OpenInBrowser url={explorerUrl} title="Open in dbt Explorer" />}
-          {runs[0] && <Action.OpenInBrowser url={runUrl(runs[0].runId)} title="Open Latest Run" icon={Icon.Play} />}
+          {environment.projectId > 0 && (
+            <ModelGoTo
+              uniqueId={model.uniqueId}
+              name={model.name}
+              environmentId={environment.id}
+              projectId={environment.projectId}
+              environmentName={environment.name}
+              projectName={environment.projectName}
+              withLastRun
+              omit={["performance"]}
+            />
+          )}
+          <ActionPanel.Section title="Open in dbt Cloud">
+            {explorerUrl && (
+              <Action.OpenInBrowser url={explorerUrl} title="Open in dbt Explorer" shortcut={Shortcuts.webDocs} />
+            )}
+            {runs[0] && (
+              <Action.OpenInBrowser
+                url={runUrl(runs[0].runId)}
+                title="Open Latest Run in dbt Cloud"
+                shortcut={Shortcuts.webRun}
+                icon={Icon.Play}
+              />
+            )}
+          </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Unique ID" content={model.uniqueId} />
-            <Action.CopyToClipboard title="Copy Average Execution" content={formatSeconds(average)} />
+            <Action.CopyToClipboard title="Copy Unique ID" shortcut={Shortcuts.copyId} content={model.uniqueId} />
+            <Action.CopyToClipboard
+              title="Copy Average Execution"
+              shortcut={Shortcuts.copyAverage}
+              content={formatSeconds(average)}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -140,10 +169,16 @@ ${runRows || "| — | — | — | — | — |"}
   );
 }
 
-export default function ModelPerformanceIndex() {
+export default function Command() {
+  return <ModelPerformanceList />;
+}
+
+export function ModelPerformanceList({ environment: fixed }: { environment?: CatalogEnvironment } = {}) {
   const [environmentId, setEnvironmentId] = useState<string>();
-  const { data: environments = [], isLoading: loadingEnvironments } = useCachedPromise(resolveCatalogEnvironments, []);
-  const environment = environments.find((env) => String(env.id) === environmentId) ?? environments[0];
+  const { data: environments = [], isLoading: loadingEnvironments } = useCachedPromise(resolveCatalogEnvironments, [], {
+    execute: !fixed,
+  });
+  const environment = fixed ?? environments.find((env) => String(env.id) === environmentId) ?? environments[0];
 
   const { data: models = [], isLoading: loadingModels } = useCachedPromise(
     async (id: number) => {
@@ -157,14 +192,17 @@ export default function ModelPerformanceIndex() {
 
   return (
     <List
-      isLoading={loadingEnvironments || loadingModels}
+      isLoading={(!fixed && loadingEnvironments) || loadingModels}
+      navigationTitle={fixed ? `Model Performance · ${describeEnvironment(fixed)}` : undefined}
       searchBarPlaceholder="Search models..."
       searchBarAccessory={
-        <List.Dropdown tooltip="Environment" storeValue onChange={setEnvironmentId}>
-          {environments.map((env) => (
-            <List.Dropdown.Item key={env.id} title={describeEnvironment(env)} value={String(env.id)} />
-          ))}
-        </List.Dropdown>
+        fixed ? undefined : (
+          <List.Dropdown tooltip="Environment" storeValue onChange={setEnvironmentId}>
+            {environments.map((env) => (
+              <List.Dropdown.Item key={env.id} title={describeEnvironment(env)} value={String(env.id)} />
+            ))}
+          </List.Dropdown>
+        )
       }
     >
       <List.EmptyView title="No models found" description="This environment has no models in the catalog yet" />
@@ -189,18 +227,39 @@ export default function ModelPerformanceIndex() {
                   <ActionPanel>
                     <Action.Push
                       title="View Performance"
+                      shortcut={Shortcuts.performance}
                       icon={Icon.BarChart}
                       target={<ModelPerformanceDetail model={model} environment={environment} />}
                     />
                     {environment.projectId > 0 && (
+                      <ModelGoTo
+                        uniqueId={model.uniqueId}
+                        name={model.name}
+                        environmentId={environment.id}
+                        projectId={environment.projectId}
+                        environmentName={environment.name}
+                        projectName={environment.projectName}
+                        omit={["performance"]}
+                      />
+                    )}
+                    {environment.projectId > 0 && (
                       <Action.OpenInBrowser
                         url={buildDocsUrl(environment.projectId, model.uniqueId)}
                         title="Open in dbt Explorer"
+                        shortcut={Shortcuts.webDocs}
                       />
                     )}
-                    <Action.CopyToClipboard title="Copy Unique ID" content={model.uniqueId} />
+                    <Action.CopyToClipboard
+                      title="Copy Unique ID"
+                      shortcut={Shortcuts.copyId}
+                      content={model.uniqueId}
+                    />
                     {info?.lastRunError && (
-                      <Action.CopyToClipboard title="Copy Last Error" content={info.lastRunError} />
+                      <Action.CopyToClipboard
+                        title="Copy Last Error"
+                        shortcut={Shortcuts.copyError}
+                        content={info.lastRunError}
+                      />
                     )}
                   </ActionPanel>
                 }

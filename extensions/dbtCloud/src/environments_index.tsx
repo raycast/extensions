@@ -1,9 +1,11 @@
 import { List, showToast, Toast, ActionPanel, Action, Icon, Color, Detail, useNavigation } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnEnvironments } from "./fetch_environments";
 import { EnvironmentsFetchResponse, EnvironmentModel } from "./types";
 import { buildDbtCloudUrl, formatRelativeTime } from "./api";
 import { openEnvironmentLineageDiagram } from "./lineage_diagram";
+import { EnvironmentGoTo } from "./navigation";
 
 function getEnvironmentIcon(env: EnvironmentModel): { source: Icon; tintColor: Color } {
   const envType = env.type?.toLowerCase() || "";
@@ -24,7 +26,7 @@ function getEnvironmentTypeEmoji(env: EnvironmentModel): string {
 }
 
 // Environment Detail Component
-function EnvironmentDetail({ environment }: { environment: EnvironmentModel }) {
+export function EnvironmentDetail({ environment }: { environment: EnvironmentModel }) {
   const envUrl = buildDbtCloudUrl(`/projects/${environment.project_id}/environments/${environment.id}`);
   const projectUrl = buildDbtCloudUrl(`/projects/${environment.project_id}`);
   const jobsUrl = buildDbtCloudUrl(`/projects/${environment.project_id}/jobs`);
@@ -127,7 +129,6 @@ ${environment.supports_docs ? "✅ Supports Documentation" : "❌ Does not suppo
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={envUrl} title="Open in dbt Cloud" />
           <Action
             title="Explore Lineage Graph"
             icon={Icon.Network}
@@ -136,18 +137,58 @@ ${environment.supports_docs ? "✅ Supports Documentation" : "❌ Does not suppo
               await openEnvironmentLineageDiagram(environment.id, environment.name);
             }}
           />
-          <ActionPanel.Section title="Navigate">
-            <Action.OpenInBrowser url={projectUrl} title="View Project" icon={Icon.Document} />
-            <Action.OpenInBrowser url={jobsUrl} title="View Jobs" icon={Icon.Hammer} />
+          <EnvironmentGoTo
+            environmentId={environment.id}
+            environmentName={environment.name}
+            projectId={environment.project_id}
+            projectName={environment.project?.name}
+            isDeployment={environment.type?.toLowerCase() === "deployment"}
+            omit={["details"]}
+          />
+          <ActionPanel.Section title="Open in dbt Cloud">
+            <Action.OpenInBrowser
+              url={envUrl}
+              title="Open Environment in dbt Cloud"
+              shortcut={Shortcuts.webEnvironment}
+            />
+            <Action.OpenInBrowser
+              url={projectUrl}
+              title="Open Project in dbt Cloud"
+              shortcut={Shortcuts.webProject}
+              icon={Icon.Document}
+            />
+            <Action.OpenInBrowser
+              url={jobsUrl}
+              title="Open Jobs in dbt Cloud"
+              shortcut={Shortcuts.webJob}
+              icon={Icon.Hammer}
+            />
             {environment.supports_docs && (
-              <Action.OpenInBrowser url={docsUrl} title="View Documentation" icon={Icon.Document} />
+              <Action.OpenInBrowser
+                url={docsUrl}
+                title="Open Documentation in dbt Cloud"
+                shortcut={Shortcuts.webDocs}
+                icon={Icon.Document}
+              />
             )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Environment ID" content={environment.id.toString()} />
-            <Action.CopyToClipboard title="Copy Environment Name" content={environment.name} />
+            <Action.CopyToClipboard
+              title="Copy Environment ID"
+              shortcut={Shortcuts.copyId}
+              content={environment.id.toString()}
+            />
+            <Action.CopyToClipboard
+              title="Copy Environment Name"
+              shortcut={Shortcuts.copyName}
+              content={environment.name}
+            />
             {environment.credentials?.schema && (
-              <Action.CopyToClipboard title="Copy Schema" content={environment.credentials.schema} />
+              <Action.CopyToClipboard
+                title="Copy Schema"
+                shortcut={Shortcuts.copySchema}
+                content={environment.credentials.schema}
+              />
             )}
           </ActionPanel.Section>
         </ActionPanel>
@@ -180,6 +221,7 @@ const EnvironmentListItem = ({ environment }: EnvironmentListItemProps): JSX.Ele
         <ActionPanel>
           <Action
             title="View Details"
+            shortcut={Shortcuts.details}
             icon={Icon.Eye}
             onAction={() => push(<EnvironmentDetail environment={environment} />)}
           />
@@ -191,19 +233,46 @@ const EnvironmentListItem = ({ environment }: EnvironmentListItemProps): JSX.Ele
               await openEnvironmentLineageDiagram(environment.id, environment.name);
             }}
           />
-          <Action.OpenInBrowser url={envUrl} title="Open in dbt Cloud" />
-          {environment.supports_docs && (
+          <EnvironmentGoTo
+            environmentId={environment.id}
+            environmentName={environment.name}
+            projectId={environment.project_id}
+            projectName={environment.project?.name}
+            isDeployment={environment.type?.toLowerCase() === "deployment"}
+            omit={["details"]}
+          />
+          <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser
-              url={buildDbtCloudUrl(`/projects/${environment.project_id}/docs`)}
-              title="View Documentation"
-              icon={Icon.Document}
+              url={envUrl}
+              title="Open Environment in dbt Cloud"
+              shortcut={Shortcuts.webEnvironment}
             />
-          )}
+            {environment.supports_docs && (
+              <Action.OpenInBrowser
+                url={buildDbtCloudUrl(`/projects/${environment.project_id}/docs`)}
+                title="Open Documentation in dbt Cloud"
+                shortcut={Shortcuts.webDocs}
+                icon={Icon.Document}
+              />
+            )}
+          </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Environment ID" content={environment.id.toString()} />
-            <Action.CopyToClipboard title="Copy Environment Name" content={environment.name} />
+            <Action.CopyToClipboard
+              title="Copy Environment ID"
+              shortcut={Shortcuts.copyId}
+              content={environment.id.toString()}
+            />
+            <Action.CopyToClipboard
+              title="Copy Environment Name"
+              shortcut={Shortcuts.copyName}
+              content={environment.name}
+            />
             {environment.credentials?.schema && (
-              <Action.CopyToClipboard title="Copy Schema" content={environment.credentials.schema} />
+              <Action.CopyToClipboard
+                title="Copy Schema"
+                shortcut={Shortcuts.copySchema}
+                content={environment.credentials.schema}
+              />
             )}
           </ActionPanel.Section>
         </ActionPanel>
@@ -214,7 +283,11 @@ const EnvironmentListItem = ({ environment }: EnvironmentListItemProps): JSX.Ele
 
 type EnvFilter = "all" | "deployment" | "development";
 
-export default function EnvironmentsList() {
+export default function Command() {
+  return <EnvironmentsList />;
+}
+
+export function EnvironmentsList({ projectId, scopeTitle }: { projectId?: number; scopeTitle?: string } = {}) {
   const [environments, setEnvironments] = useState<EnvironmentsFetchResponse>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filter, setFilter] = useState<EnvFilter>("all");
@@ -222,14 +295,14 @@ export default function EnvironmentsList() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await returnEnvironments();
+      const response = await returnEnvironments(projectId);
       setEnvironments(response);
     } catch {
       showToast(Toast.Style.Failure, "Failed loading Environments");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [projectId]);
 
   useEffect(() => {
     fetchData();
@@ -256,6 +329,7 @@ export default function EnvironmentsList() {
   return (
     <List
       isLoading={loading}
+      navigationTitle={scopeTitle ? `Environments · ${scopeTitle}` : undefined}
       searchBarPlaceholder="Filter environments by name..."
       throttle
       searchBarAccessory={

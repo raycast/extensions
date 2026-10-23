@@ -1,8 +1,10 @@
 import { List, showToast, Toast, ActionPanel, Action, Icon, Color, Detail, useNavigation } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnProjects } from "./fetch_projects";
 import { ProjectsFetchResponse, ProjectModel } from "./types";
 import { buildDbtCloudUrl, formatRelativeTime } from "./api";
+import { ProjectGoTo } from "./navigation";
 
 function getProjectStateIcon(state: number): { source: Icon; tintColor: Color } {
   switch (state) {
@@ -27,7 +29,7 @@ function getProjectStateText(state: number): string {
 }
 
 // Project Detail Component
-function ProjectDetail({ project }: { project: ProjectModel }) {
+export function ProjectDetail({ project }: { project: ProjectModel }) {
   const projectUrl = buildDbtCloudUrl(`/projects/${project.id}`);
   const jobsUrl = buildDbtCloudUrl(`/projects/${project.id}/jobs`);
   const environmentsUrl = buildDbtCloudUrl(`/projects/${project.id}/environments`);
@@ -124,20 +126,49 @@ ${project.semantic_layer_config_id ? "✅ Semantic Layer Configured" : "❌ No S
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={projectUrl} title="Open in dbt Cloud" />
-          <ActionPanel.Section title="Navigate">
-            <Action.OpenInBrowser url={jobsUrl} title="View Jobs" icon={Icon.Hammer} />
-            <Action.OpenInBrowser url={environmentsUrl} title="View Environments" icon={Icon.Globe} />
+          <ProjectGoTo projectId={project.id} projectName={project.name} omit={["details"]} />
+          <ActionPanel.Section title="Open in dbt Cloud">
+            <Action.OpenInBrowser url={projectUrl} title="Open Project in dbt Cloud" shortcut={Shortcuts.webProject} />
+            <Action.OpenInBrowser
+              url={jobsUrl}
+              title="Open Jobs in dbt Cloud"
+              shortcut={Shortcuts.webJob}
+              icon={Icon.Hammer}
+            />
+            <Action.OpenInBrowser
+              url={environmentsUrl}
+              title="Open Environments in dbt Cloud"
+              shortcut={Shortcuts.webEnvironment}
+              icon={Icon.Globe}
+            />
             {project.docs_job_id && (
-              <Action.OpenInBrowser url={docsUrl} title="View Documentation" icon={Icon.Document} />
+              <Action.OpenInBrowser
+                url={docsUrl}
+                title="Open Documentation in dbt Cloud"
+                shortcut={Shortcuts.webDocs}
+                icon={Icon.Document}
+              />
             )}
-            <Action.OpenInBrowser url={settingsUrl} title="Project Settings" icon={Icon.Gear} />
+            <Action.OpenInBrowser
+              url={settingsUrl}
+              title="Open Project Settings in dbt Cloud"
+              shortcut={Shortcuts.webSettings}
+              icon={Icon.Gear}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Project ID" content={project.id.toString()} />
-            <Action.CopyToClipboard title="Copy Project Name" content={project.name} />
+            <Action.CopyToClipboard
+              title="Copy Project ID"
+              shortcut={Shortcuts.copyId}
+              content={project.id.toString()}
+            />
+            <Action.CopyToClipboard title="Copy Project Name" shortcut={Shortcuts.copyName} content={project.name} />
             {project.repository?.remote_url && (
-              <Action.CopyToClipboard title="Copy Repository URL" content={project.repository.remote_url} />
+              <Action.CopyToClipboard
+                title="Copy Repository URL"
+                shortcut={Shortcuts.copyPath}
+                content={project.repository.remote_url}
+              />
             )}
           </ActionPanel.Section>
         </ActionPanel>
@@ -170,17 +201,37 @@ const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element => {
       ]}
       actions={
         <ActionPanel>
-          <Action title="View Details" icon={Icon.Eye} onAction={() => push(<ProjectDetail project={project} />)} />
-          <Action.OpenInBrowser url={projectUrl} title="Open in dbt Cloud" />
-          <ActionPanel.Section title="Navigate">
-            <Action.OpenInBrowser url={jobsUrl} title="View Jobs" icon={Icon.Hammer} />
+          <Action
+            title="View Details"
+            shortcut={Shortcuts.details}
+            icon={Icon.Eye}
+            onAction={() => push(<ProjectDetail project={project} />)}
+          />
+          <ProjectGoTo projectId={project.id} projectName={project.name} omit={["details"]} />
+          <ActionPanel.Section title="Open in dbt Cloud">
+            <Action.OpenInBrowser url={projectUrl} title="Open Project in dbt Cloud" shortcut={Shortcuts.webProject} />
+            <Action.OpenInBrowser
+              url={jobsUrl}
+              title="Open Jobs in dbt Cloud"
+              shortcut={Shortcuts.webJob}
+              icon={Icon.Hammer}
+            />
             {project.docs_job_id && (
-              <Action.OpenInBrowser url={docsUrl} title="View Documentation" icon={Icon.Document} />
+              <Action.OpenInBrowser
+                url={docsUrl}
+                title="Open Documentation in dbt Cloud"
+                shortcut={Shortcuts.webDocs}
+                icon={Icon.Document}
+              />
             )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Project ID" content={project.id.toString()} />
-            <Action.CopyToClipboard title="Copy Project Name" content={project.name} />
+            <Action.CopyToClipboard
+              title="Copy Project ID"
+              shortcut={Shortcuts.copyId}
+              content={project.id.toString()}
+            />
+            <Action.CopyToClipboard title="Copy Project Name" shortcut={Shortcuts.copyName} content={project.name} />
           </ActionPanel.Section>
         </ActionPanel>
       }

@@ -22,6 +22,18 @@ Browse your [dbt Cloud](https://www.getdbt.com/) account from Raycast: models, s
 | Show Job Performance    | Success rate, run counts, and build-duration chart per job            |
 | Show Model Performance  | Slowest models and each model's execution time across runs            |
 
+## Keyboard Shortcuts
+
+Shortcuts follow one scheme across every command, and the same letter means the same thing everywhere.
+
+| Modifier | Does                        | Letters                                                                                                                                       |
+| -------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| ⌘⌥       | Go to / view inside Raycast | **P** project · **E** environment · **J** job · **R** runs · **M** models · **S** sources · **L** lineage · **D** details · **G** performance |
+| ⌥⇧       | Open the dbt Cloud page     | **P** project · **E** environment · **J** job · **R** run · **L** lineage · **D** docs · **S** settings                                       |
+| ⌘⇧       | Copy                        | **C** ID · **.** name · **,** path or URL                                                                                                     |
+
+Other actions: ⌘⇧T trigger a job, ⌘⌥X cancel a run, ⌘D open the lineage diagram, ⌘1–3 change the job performance window.
+
 ## ⚙️ Configuration
 
 - dbt Cloud Endpoint - **Settings** > **Account** # **Access URLS**. If your Access URL looks like

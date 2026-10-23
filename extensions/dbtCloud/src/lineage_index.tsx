@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { useEffect, useState } from "react";
 import {
   fetchModels,
@@ -9,6 +10,7 @@ import {
   getResourceTypeIcon,
   getMaterializationIcon,
 } from "./api";
+import { ModelGoTo, SourceByUniqueId, SourceGoTo } from "./navigation";
 import { ModelNode, SourceNode, LineageNode } from "./types";
 import {
   DEPLOYMENT_TYPE_INFO,
@@ -18,7 +20,7 @@ import {
 } from "./environment_utils";
 import { openEnvironmentLineageDiagram } from "./lineage_diagram";
 
-function LineageDetail({
+export function LineageDetail({
   node,
   environmentId,
   projectId,
@@ -190,12 +192,23 @@ function LineageDetail({
               />
             </>
           )}
-          <Action.OpenInBrowser
-            title="View Full Lineage in dbt Cloud"
-            url={buildLineageUrl(projectId, displayNode.uniqueId)}
-            icon={Icon.Globe}
-          />
-          <Action.OpenInBrowser title="View in Docs" url={buildDocsUrl(projectId, displayNode.uniqueId)} />
+          {isModel ? (
+            <ModelGoTo
+              uniqueId={displayNode.uniqueId}
+              name={displayNode.name}
+              environmentId={environmentId}
+              projectId={projectId}
+              withLastRun
+              omit={["lineage"]}
+            />
+          ) : (
+            <SourceGoTo
+              source={node as SourceNode}
+              environmentId={environmentId}
+              projectId={projectId}
+              omit={["lineage"]}
+            />
+          )}
           {isModel && fullModel?.ancestors && fullModel.ancestors.length > 0 && (
             <ActionPanel.Submenu title="Explore Upstream" icon={Icon.ChevronUp}>
               {fullModel.ancestors.map((ancestor) =>
@@ -205,6 +218,18 @@ function LineageDetail({
                     title={`${getResourceTypeIcon(ancestor.resourceType)} ${ancestor.name}`}
                     target={
                       <LineageDetail node={ancestor as ModelNode} environmentId={environmentId} projectId={projectId} />
+                    }
+                  />
+                ) : ancestor.resourceType === "source" ? (
+                  <Action.Push
+                    key={ancestor.uniqueId}
+                    title={`${getResourceTypeIcon(ancestor.resourceType)} ${ancestor.name}`}
+                    target={
+                      <SourceByUniqueId
+                        uniqueId={ancestor.uniqueId}
+                        environmentId={environmentId}
+                        projectId={projectId}
+                      />
                     }
                   />
                 ) : (
@@ -217,14 +242,27 @@ function LineageDetail({
               )}
             </ActionPanel.Submenu>
           )}
-          <Action.CopyToClipboard title="Copy Unique ID" content={displayNode.uniqueId} />
+          <ActionPanel.Section title="Open in dbt Cloud">
+            <Action.OpenInBrowser
+              title="Open Lineage in dbt Cloud"
+              shortcut={Shortcuts.webLineage}
+              url={buildLineageUrl(projectId, displayNode.uniqueId)}
+              icon={Icon.Globe}
+            />
+            <Action.OpenInBrowser
+              title="Open Docs in dbt Cloud"
+              shortcut={Shortcuts.webDocs}
+              url={buildDocsUrl(projectId, displayNode.uniqueId)}
+            />
+          </ActionPanel.Section>
+          <Action.CopyToClipboard title="Copy Unique ID" shortcut={Shortcuts.copyId} content={displayNode.uniqueId} />
         </ActionPanel>
       }
     />
   );
 }
 
-function LineageList({
+export function LineageList({
   environmentId,
   environmentName,
   projectId,
@@ -321,14 +359,20 @@ function LineageList({
                       <ActionPanel>
                         <Action.Push
                           title="View Lineage"
+                          shortcut={Shortcuts.lineage}
                           icon={Icon.Eye}
                           target={<LineageDetail node={node} environmentId={environmentId} projectId={projectId} />}
                         />
                         <Action.OpenInBrowser
                           title="Open Lineage in dbt Cloud"
+                          shortcut={Shortcuts.webLineage}
                           url={buildLineageUrl(projectId, node.uniqueId)}
                         />
-                        <Action.CopyToClipboard title="Copy Unique ID" content={node.uniqueId} />
+                        <Action.CopyToClipboard
+                          title="Copy Unique ID"
+                          shortcut={Shortcuts.copyId}
+                          content={node.uniqueId}
+                        />
                       </ActionPanel>
                     }
                   />
@@ -371,6 +415,7 @@ function LineageEnvironmentListItem({ env, projectName }: { env: EnvironmentWith
         <ActionPanel>
           <Action.Push
             title="Explore Lineage"
+            shortcut={Shortcuts.lineage}
             icon={Icon.Link}
             target={
               <LineageList

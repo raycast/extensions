@@ -11,6 +11,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { useEffect, useState } from "react";
 import {
   fetchModels,
@@ -25,6 +26,7 @@ import {
 import { ModelNode, LineageNode } from "./types";
 import { fetchProductionEnvironments, selectOneEnvPerProject } from "./environment_utils";
 import { openEnvironmentLineageDiagram } from "./lineage_diagram";
+import { ModelGoTo } from "./navigation";
 
 // Model extended with project/environment context for flat catalog view
 interface CatalogModel extends ModelNode {
@@ -304,7 +306,7 @@ function ExpandedLineageView({ model, environmentId }: { model: ModelNode; envir
   );
 }
 
-function ModelDetail({
+export function ModelDetail({
   model,
   environmentId,
   projectId,
@@ -440,14 +442,26 @@ function ModelDetail({
       }
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Navigation">
+          <ModelGoTo
+            uniqueId={displayModel.uniqueId}
+            name={displayModel.name}
+            environmentId={environmentId}
+            projectId={projectId}
+            environmentName={(model as Partial<CatalogModel>).environmentName}
+            projectName={(model as Partial<CatalogModel>).projectName}
+            withLastRun
+            omit={["details"]}
+          />
+          <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser
-              title="View in dbt Cloud Docs"
+              title="Open Docs in dbt Cloud"
+              shortcut={Shortcuts.webDocs}
               url={buildDocsUrl(projectId, displayModel.uniqueId)}
               icon={Icon.Globe}
             />
             <Action.OpenInBrowser
-              title="View Lineage Graph"
+              title="Open Lineage in dbt Cloud"
+              shortcut={Shortcuts.webLineage}
               url={buildLineageUrl(projectId, displayModel.uniqueId)}
               icon={Icon.Link}
             />
@@ -509,12 +523,23 @@ function ModelDetail({
             )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Unique ID" content={displayModel.uniqueId} />
+            <Action.CopyToClipboard
+              title="Copy Unique ID"
+              shortcut={Shortcuts.copyId}
+              content={displayModel.uniqueId}
+            />
             <Action.CopyToClipboard
               title="Copy Full Path"
+              shortcut={Shortcuts.copyPath}
               content={`${displayModel.database}.${displayModel.schema}.${displayModel.alias || displayModel.name}`}
             />
-            {fullModel?.rawCode && <Action.CopyToClipboard title="Copy Source Code" content={fullModel.rawCode} />}
+            {fullModel?.rawCode && (
+              <Action.CopyToClipboard
+                title="Copy Source Code"
+                shortcut={Shortcuts.copySourceCode}
+                content={fullModel.rawCode}
+              />
+            )}
             {fullModel?.compiledCode && (
               <Action.CopyToClipboard
                 title="Copy Compiled Code"
@@ -529,7 +554,15 @@ function ModelDetail({
   );
 }
 
-export default function CatalogIndex() {
+export default function Command() {
+  return <CatalogList />;
+}
+
+export function CatalogList({
+  projectId,
+  environmentId,
+  scopeTitle,
+}: { projectId?: number; environmentId?: number; scopeTitle?: string } = {}) {
   const [models, setModels] = useState<CatalogModel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [projectFilter, setProjectFilter] = useState<string>("all");
@@ -548,7 +581,9 @@ export default function CatalogIndex() {
         return;
       }
 
-      const selectedEnvs = selectOneEnvPerProject(allEnvs);
+      const selectedEnvs = environmentId
+        ? allEnvs.filter((env) => env.id === environmentId)
+        : selectOneEnvPerProject(projectId ? allEnvs.filter((env) => env.project_id === projectId) : allEnvs);
 
       showToast(Toast.Style.Animated, "Loading models...", `Fetching from ${selectedEnvs.length} project(s)`);
 
@@ -571,7 +606,7 @@ export default function CatalogIndex() {
       showToast(Toast.Style.Success, `Loaded ${allModels.length} models`, `From ${selectedEnvs.length} project(s)`);
     }
     loadAllModels();
-  }, []);
+  }, [projectId, environmentId]);
 
   // Derive unique projects for the dropdown
   const projectList = Array.from(new Map(models.map((m) => [m.projectId, m.projectName]))).sort(([, a], [, b]) =>
@@ -607,7 +642,8 @@ export default function CatalogIndex() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search models across all projects..."
+      navigationTitle={scopeTitle ? `Models · ${scopeTitle}` : undefined}
+      searchBarPlaceholder={scopeTitle ? "Search models..." : "Search models across all projects..."}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by Project"
@@ -645,6 +681,7 @@ export default function CatalogIndex() {
                 <ActionPanel>
                   <Action
                     title="View Details & Lineage"
+                    shortcut={Shortcuts.details}
                     icon={Icon.Eye}
                     onAction={() =>
                       push(
@@ -652,10 +689,24 @@ export default function CatalogIndex() {
                       )
                     }
                   />
-                  <Action.OpenInBrowser title="Open in dbt Cloud" url={buildDocsUrl(model.projectId, model.uniqueId)} />
-                  <Action.CopyToClipboard title="Copy Unique ID" content={model.uniqueId} />
+                  <ModelGoTo
+                    uniqueId={model.uniqueId}
+                    name={model.name}
+                    environmentId={model.environmentId}
+                    projectId={model.projectId}
+                    environmentName={model.environmentName}
+                    projectName={model.projectName}
+                    omit={["details"]}
+                  />
+                  <Action.OpenInBrowser
+                    title="Open in dbt Cloud"
+                    shortcut={Shortcuts.open}
+                    url={buildDocsUrl(model.projectId, model.uniqueId)}
+                  />
+                  <Action.CopyToClipboard title="Copy Unique ID" shortcut={Shortcuts.copyId} content={model.uniqueId} />
                   <Action.CopyToClipboard
                     title="Copy Full Path"
+                    shortcut={Shortcuts.copyPath}
                     content={`${model.database}.${model.schema}.${model.alias || model.name}`}
                   />
                 </ActionPanel>
