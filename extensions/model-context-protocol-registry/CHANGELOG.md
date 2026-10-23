@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Mnemoverse MCP Server] - {PR_MERGE_DATE}
+
+- Mnemoverse now connects to its hosted Streamable HTTP server at https://mcp.mnemoverse.com/mcp through mcp-remote, with OAuth 2.1 sign-in (dynamic client registration and PKCE) instead of an API key, and the description no longer counts tools.
+
 ## [Add EvoLink MCP Server] - 2026-10-23
 
 - Add EvoLink to the official registry: image, video, music and speech generation with 150+ models from one EvoLink account. Search models and published prices, get a quote for an exact task, generate after approval, and track tasks and balance. Hosted Streamable HTTP server at https://mcp.evolink.ai/mcp with OAuth 2.1 sign-in (PKCE and dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
