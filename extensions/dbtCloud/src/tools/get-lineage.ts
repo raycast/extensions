@@ -1,5 +1,10 @@
-import { fetchModelWithLineage, fetchModels, fetchSources } from "../api";
-import { fetchFromApi, buildApiUrl } from "../api";
+import { fetchModelWithLineage } from "../api";
+import {
+  describeEnvironment,
+  fetchModelsAcross,
+  fetchSourcesAcross,
+  resolveCatalogEnvironments,
+} from "../catalog_environments";
 
 type Input = {
   /**
@@ -8,33 +13,18 @@ type Input = {
    */
   resourceName: string;
   /**
-   * The environment ID. If not provided, will use the first production environment.
+   * The environment ID. If not provided, searches the production environment of every project.
    */
   environmentId?: number;
 };
-
-interface Environment {
-  id: number;
-  name: string;
-  type: string;
-  dbt_project_id: number;
-  project_id: number;
-}
 
 /**
  * Get upstream and downstream lineage for a model or source
  */
 export default async function tool(input: Input) {
-  let environmentId = input.environmentId;
-
-  // If no environment ID provided, fetch the first production environment
-  if (!environmentId) {
-    const environments = await fetchFromApi<Environment>(buildApiUrl("/environments/"));
-    const prodEnv = environments.find((e) => e.type === "deployment") || environments[0];
-    if (!prodEnv) {
-      return { error: "No environments found. Please configure a dbt Cloud environment." };
-    }
-    environmentId = prodEnv.id;
+  const environments = await resolveCatalogEnvironments(input.environmentId);
+  if (environments.length === 0) {
+    return { error: "No environments found. Please configure a dbt Cloud environment." };
   }
 
   // Determine if this is a source or model
@@ -45,14 +35,17 @@ export default async function tool(input: Input) {
 
   if (isSource && !resourceName.startsWith("source.")) {
     // This might be a source in "source_name.table_name" format
-    const sources = await fetchSources(environmentId);
+    const sources = await fetchSourcesAcross(environments);
     const [sourceName, tableName] = resourceName.split(".");
-    const matchingSource = sources.find(
-      (s) => s.sourceName?.toLowerCase() === sourceName && s.name.toLowerCase() === tableName,
+    const sourceMatch = sources.find(
+      ({ node: s }) => s.sourceName?.toLowerCase() === sourceName && s.name.toLowerCase() === tableName,
     );
 
-    if (matchingSource) {
+    if (sourceMatch) {
+      const matchingSource = sourceMatch.node;
       return {
+        environment: describeEnvironment(sourceMatch.environment),
+        environmentId: sourceMatch.environment.id,
         resource: {
           name: `${matchingSource.sourceName}.${matchingSource.name}`,
           uniqueId: matchingSource.uniqueId,
@@ -72,23 +65,25 @@ export default async function tool(input: Input) {
   }
 
   // Try to find as a model
-  const models = await fetchModels(environmentId);
-  const matchingModel = models.find(
-    (m) => m.name.toLowerCase() === resourceName || m.uniqueId.toLowerCase() === resourceName,
+  const models = await fetchModelsAcross(environments);
+  const modelMatch = models.find(
+    ({ node: m }) => m.name.toLowerCase() === resourceName || m.uniqueId.toLowerCase() === resourceName,
   );
 
-  if (!matchingModel) {
-    return { error: `Resource "${input.resourceName}" not found.` };
+  if (!modelMatch) {
+    return { error: `Resource "${input.resourceName}" not found in ${environments.length} environment(s).` };
   }
 
   // Fetch full model with lineage
-  const modelWithLineage = await fetchModelWithLineage(environmentId, matchingModel.uniqueId);
+  const modelWithLineage = await fetchModelWithLineage(modelMatch.environment.id, modelMatch.node.uniqueId);
 
   if (!modelWithLineage) {
     return { error: `Could not fetch lineage for "${input.resourceName}".` };
   }
 
   return {
+    environment: describeEnvironment(modelMatch.environment),
+    environmentId: modelMatch.environment.id,
     resource: {
       name: modelWithLineage.name,
       uniqueId: modelWithLineage.uniqueId,

@@ -23,8 +23,10 @@ Browse your [dbt Cloud](https://www.getdbt.com/) account from Raycast: models, s
 
 ## ⚙️ Configuration
 
-- dbt Cloud Endpoint - **Settings** > **Account** # **Access URLS**
-- dbt Cloud Account Prefix - **Settings** > **Account** # **Account information**
+- dbt Cloud Endpoint - **Settings** > **Account** # **Access URLS**. If your Access URL looks like
+  `ab123.us1.dbt.com`, `ab123.eu1.dbt.com`, or `ab123.au1.dbt.com`, pick the matching `[w/ Account Prefix]` option:
+  the catalog and lineage commands need your account's own Discovery API host.
+- dbt Cloud Account Prefix - **Settings** > **Account** # **Account information** (e.g. `ab123`)
 - dbt Cloud API Token - **Settings** > **API tokens** > **Personal tokens**
 - dbt Cloud Account ID - **Settings** > **Account** # **Account information**
 - Custom Discovery API URL (optional) - only needed if the catalog and lineage commands cannot reach the Discovery API URL derived from your endpoint

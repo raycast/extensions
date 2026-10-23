@@ -1,4 +1,4 @@
-import { fetchModels, fetchFromApi, buildApiUrl } from "../api";
+import { describeEnvironment, fetchModelsAcross, resolveCatalogEnvironments } from "../catalog_environments";
 
 type Input = {
   /**
@@ -7,41 +7,24 @@ type Input = {
    */
   query?: string;
   /**
-   * The environment ID to search in. If not provided, will search the first production environment.
+   * The environment ID to search in. If not provided, searches the production environment of every project.
    */
   environmentId?: number;
 };
-
-interface Environment {
-  id: number;
-  name: string;
-  type: string;
-  dbt_project_id: number;
-  project_id: number;
-}
 
 /**
  * Search dbt models by name, description, or tags in the catalog
  */
 export default async function tool(input: Input) {
-  let environmentId = input.environmentId;
-  let environmentName = "Unknown";
-
-  // If no environment ID provided, fetch the first production environment
-  if (!environmentId) {
-    const environments = await fetchFromApi<Environment>(buildApiUrl("/environments/"));
-    const prodEnv = environments.find((e) => e.type === "deployment") || environments[0];
-    if (!prodEnv) {
-      return { error: "No environments found. Please configure a dbt Cloud environment." };
-    }
-    environmentId = prodEnv.id;
-    environmentName = prodEnv.name;
+  const environments = await resolveCatalogEnvironments(input.environmentId);
+  if (environments.length === 0) {
+    return { error: "No environments found. Please configure a dbt Cloud environment." };
   }
 
-  const models = await fetchModels(environmentId);
+  const models = await fetchModelsAcross(environments);
 
-  if (!models || models.length === 0) {
-    return { models: [], message: "No models found in this environment." };
+  if (models.length === 0) {
+    return { models: [], message: `No models found in ${environments.length} environment(s).` };
   }
 
   // Filter by query if provided
@@ -49,7 +32,7 @@ export default async function tool(input: Input) {
   if (input.query) {
     const query = input.query.toLowerCase();
     filteredModels = models.filter(
-      (m) =>
+      ({ node: m }) =>
         m.name.toLowerCase().includes(query) ||
         m.description?.toLowerCase().includes(query) ||
         m.tags?.some((t) => t.toLowerCase().includes(query)),
@@ -57,11 +40,13 @@ export default async function tool(input: Input) {
   }
 
   return {
-    environmentName,
+    environmentsSearched: environments.length,
     count: filteredModels.length,
-    models: filteredModels.slice(0, 20).map((m) => ({
+    models: filteredModels.slice(0, 20).map(({ node: m, environment }) => ({
       name: m.name,
       uniqueId: m.uniqueId,
+      environment: describeEnvironment(environment),
+      environmentId: environment.id,
       description: m.description || null,
       database: m.database,
       schema: m.schema,

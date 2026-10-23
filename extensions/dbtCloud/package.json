@@ -327,8 +327,16 @@
           "value": "https://emea.dbt.com"
         },
         {
+          "title": "Production (Europe) [w/ Account Prefix]",
+          "value": "https://{account_prefix}.eu1.dbt.com"
+        },
+        {
           "title": "Production (AU)",
           "value": "https://au.dbt.com"
+        },
+        {
+          "title": "Production (AU) [w/ Account Prefix]",
+          "value": "https://{account_prefix}.au1.dbt.com"
         }
       ]
     },

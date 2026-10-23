@@ -43,9 +43,14 @@ interface Run {
  */
 export default async function tool(input: Input) {
   const limit = input.limit || 10;
-  const endpoint = buildApiUrl("/runs/", { job_definition_id: input.jobId, limit });
+  const endpoint = buildApiUrl("/runs/", {
+    job_definition_id: input.jobId,
+    limit,
+    order_by: "-id",
+    include_related: "trigger,run_steps",
+  });
 
-  const runs = await fetchFromApi<Run>(endpoint);
+  const runs = await fetchFromApi<Run>(endpoint, "Could not fetch job runs", limit);
 
   if (!runs || runs.length === 0) {
     return { runs: [], message: `No runs found for job ${input.jobId}.` };

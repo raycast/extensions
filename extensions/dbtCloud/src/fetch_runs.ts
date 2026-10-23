@@ -9,5 +9,5 @@ export const returnRuns = async (): Promise<RunsFetchResponse> => {
     limit: 100,
     order_by: "-finished_at",
   });
-  return fetchFromApi<RunsFetchResponse[number]>(url, "Could not fetch runs, check your credentials");
+  return fetchFromApi<RunsFetchResponse[number]>(url, "Could not fetch runs, check your credentials", 100);
 };

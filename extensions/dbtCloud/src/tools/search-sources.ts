@@ -1,5 +1,4 @@
-import { fetchSources } from "../api";
-import { fetchFromApi, buildApiUrl } from "../api";
+import { describeEnvironment, fetchSourcesAcross, resolveCatalogEnvironments } from "../catalog_environments";
 
 type Input = {
   /**
@@ -8,39 +7,24 @@ type Input = {
    */
   query?: string;
   /**
-   * The environment ID to search in. If not provided, will search the first production environment.
+   * The environment ID to search in. If not provided, searches the production environment of every project.
    */
   environmentId?: number;
 };
-
-interface Environment {
-  id: number;
-  name: string;
-  type: string;
-  dbt_project_id: number;
-  project_id: number;
-}
 
 /**
  * Search dbt sources with freshness status
  */
 export default async function tool(input: Input) {
-  let environmentId = input.environmentId;
-
-  // If no environment ID provided, fetch the first production environment
-  if (!environmentId) {
-    const environments = await fetchFromApi<Environment>(buildApiUrl("/environments/"));
-    const prodEnv = environments.find((e) => e.type === "deployment") || environments[0];
-    if (!prodEnv) {
-      return { error: "No environments found. Please configure a dbt Cloud environment." };
-    }
-    environmentId = prodEnv.id;
+  const environments = await resolveCatalogEnvironments(input.environmentId);
+  if (environments.length === 0) {
+    return { error: "No environments found. Please configure a dbt Cloud environment." };
   }
 
-  const sources = await fetchSources(environmentId);
+  const sources = await fetchSourcesAcross(environments);
 
-  if (!sources || sources.length === 0) {
-    return { sources: [], message: "No sources found in this environment." };
+  if (sources.length === 0) {
+    return { sources: [], message: `No sources found in ${environments.length} environment(s).` };
   }
 
   // Filter by query if provided
@@ -48,7 +32,7 @@ export default async function tool(input: Input) {
   if (input.query) {
     const query = input.query.toLowerCase();
     filteredSources = sources.filter(
-      (source) =>
+      ({ node: source }) =>
         source.name.toLowerCase().includes(query) ||
         source.sourceName?.toLowerCase().includes(query) ||
         source.description?.toLowerCase().includes(query) ||
@@ -58,12 +42,15 @@ export default async function tool(input: Input) {
 
   // Return simplified source data for AI consumption
   return {
+    environmentsSearched: environments.length,
     count: filteredSources.length,
-    sources: filteredSources.slice(0, 20).map((source) => ({
+    sources: filteredSources.slice(0, 20).map(({ node: source, environment }) => ({
       name: source.name,
       sourceName: source.sourceName,
       fullName: `${source.sourceName}.${source.name}`,
       uniqueId: source.uniqueId,
+      environment: describeEnvironment(environment),
+      environmentId: environment.id,
       description: source.description || null,
       database: source.database,
       schema: source.schema,

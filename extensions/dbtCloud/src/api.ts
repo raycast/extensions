@@ -132,7 +132,12 @@ const getNextRestPageUrl = (currentUrl: URL, pagination: RestPagination | undefi
   return nextUrl;
 };
 
-export async function fetchFromApi<T>(endpoint: string, errorMessage = "Could not fetch from API"): Promise<T[]> {
+// maxResults stops pagination early for endpoints where only the newest items matter (e.g. runs)
+export async function fetchFromApi<T>(
+  endpoint: string,
+  errorMessage = "Could not fetch from API",
+  maxResults?: number,
+): Promise<T[]> {
   const baseUrl = getBaseUrl();
 
   try {
@@ -146,15 +151,15 @@ export async function fetchFromApi<T>(endpoint: string, errorMessage = "Could no
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP ${response.status} from ${nextUrl.pathname}`);
       }
 
       const json = (await response.json()) as RestResponse<T>;
       const pageData = Array.isArray(json.data) ? json.data : [];
       results.push(...pageData);
 
-      if (pageData.length === 0) {
-        break;
+      if (pageData.length === 0 || (maxResults !== undefined && results.length >= maxResults)) {
+        return maxResults !== undefined ? results.slice(0, maxResults) : results;
       }
 
       nextUrl = getNextRestPageUrl(nextUrl, json.extra?.pagination, pageData.length);
@@ -167,7 +172,7 @@ export async function fetchFromApi<T>(endpoint: string, errorMessage = "Could no
     return results;
   } catch (error) {
     console.error("GET Error:", error);
-    showToast(Toast.Style.Failure, "An error occurred", errorMessage);
+    showToast(Toast.Style.Failure, errorMessage, error instanceof Error ? error.message : String(error));
     return [];
   }
 }
@@ -375,23 +380,28 @@ export async function queryDiscoveryApi<T>(
       body: JSON.stringify({ query, variables }),
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+    const body = await response.text();
+    let json: DiscoveryResponse<T> | null = null;
+    try {
+      json = JSON.parse(body) as DiscoveryResponse<T>;
+    } catch {
+      // Non-JSON body (e.g. a proxy error page); reported below with the status code
     }
 
-    const json = (await response.json()) as DiscoveryResponse<T>;
-
-    if (json.errors && json.errors.length > 0) {
+    if (json?.errors && json.errors.length > 0) {
       console.error("GraphQL Errors:", json.errors);
-      showToast(Toast.Style.Failure, "GraphQL Error", json.errors[0].message);
+      showToast(Toast.Style.Failure, errorMessage, json.errors[0].message);
       return null;
+    }
+
+    if (!response.ok || !json) {
+      throw new Error(`HTTP ${response.status} from ${discoveryUrl}: ${body.slice(0, 200)}`);
     }
 
     return json.data;
   } catch (error) {
     console.error("Discovery API Error:", error);
-    showToast(Toast.Style.Failure, "An error occurred", errorMessage);
+    showToast(Toast.Style.Failure, errorMessage, error instanceof Error ? error.message : String(error));
     return null;
   }
 }
@@ -769,14 +779,15 @@ export const buildLineageUrl = (projectId: number, uniqueId: string): string => 
 
 // Fetch job run details including timing information
 export async function fetchJobRunDetails(jobId: number, limit = 50): Promise<RunModel[]> {
-  const endpoint = buildApiUrl(`/jobs/${jobId}/runs/`, {
+  const endpoint = buildApiUrl("/runs/", {
+    job_definition_id: jobId,
     limit,
     order_by: "-finished_at",
     include_related: "trigger,job,environment",
   });
 
   try {
-    const runs = await fetchFromApi<RunModel>(endpoint, "Could not fetch job run details");
+    const runs = await fetchFromApi<RunModel>(endpoint, "Could not fetch job run details", limit);
     return runs;
   } catch {
     showToast(Toast.Style.Failure, "Failed to fetch job run details");

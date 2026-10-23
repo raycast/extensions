@@ -1,5 +1,5 @@
-import { fetchModelWithLineage, fetchModels } from "../api";
-import { fetchFromApi, buildApiUrl } from "../api";
+import { fetchModelWithLineage } from "../api";
+import { describeEnvironment, fetchModelsAcross, resolveCatalogEnvironments } from "../catalog_environments";
 
 type Input = {
   /**
@@ -8,50 +8,31 @@ type Input = {
    */
   modelName: string;
   /**
-   * The environment ID. If not provided, will use the first production environment.
+   * The environment ID. If not provided, searches the production environment of every project.
    */
   environmentId?: number;
 };
-
-interface Environment {
-  id: number;
-  name: string;
-  type: string;
-  dbt_project_id: number;
-  project_id: number;
-}
 
 /**
  * Get detailed information about a specific dbt model including columns, tests, and lineage
  */
 export default async function tool(input: Input) {
-  let environmentId = input.environmentId;
-
-  // If no environment ID provided, fetch the first production environment
-  if (!environmentId) {
-    const environments = await fetchFromApi<Environment>(buildApiUrl("/environments/"));
-    const prodEnv = environments.find((e) => e.type === "deployment") || environments[0];
-    if (!prodEnv) {
-      return { error: "No environments found. Please configure a dbt Cloud environment." };
-    }
-    environmentId = prodEnv.id;
+  const environments = await resolveCatalogEnvironments(input.environmentId);
+  if (environments.length === 0) {
+    return { error: "No environments found. Please configure a dbt Cloud environment." };
   }
 
-  // First, find the model by name if not a full uniqueId
-  let uniqueId = input.modelName;
-  if (!uniqueId.startsWith("model.")) {
-    const models = await fetchModels(environmentId);
-    const matchingModel = models.find(
-      (m) => m.name.toLowerCase() === input.modelName.toLowerCase() || m.uniqueId === input.modelName,
-    );
-    if (!matchingModel) {
-      return { error: `Model "${input.modelName}" not found.` };
-    }
-    uniqueId = matchingModel.uniqueId;
+  const wanted = input.modelName.toLowerCase();
+  const matches = (await fetchModelsAcross(environments)).filter(
+    ({ node: m }) => m.name.toLowerCase() === wanted || m.uniqueId.toLowerCase() === wanted,
+  );
+  if (matches.length === 0) {
+    return { error: `Model "${input.modelName}" not found in ${environments.length} environment(s).` };
   }
+  const { node: match, environment } = matches[0];
 
   // Fetch full model details with lineage
-  const model = await fetchModelWithLineage(environmentId, uniqueId);
+  const model = await fetchModelWithLineage(environment.id, match.uniqueId);
 
   if (!model) {
     return { error: `Could not fetch details for model "${input.modelName}".` };
@@ -60,6 +41,9 @@ export default async function tool(input: Input) {
   return {
     name: model.name,
     uniqueId: model.uniqueId,
+    environment: describeEnvironment(environment),
+    environmentId: environment.id,
+    alsoFoundIn: matches.slice(1).map((m) => describeEnvironment(m.environment)),
     description: model.description || null,
     database: model.database,
     schema: model.schema,
