@@ -15,13 +15,27 @@ if (fs.existsSync(wordnetSrc)) {
 }
 
 const rogetSrc = path.join(projectRoot, 'assets', 'roget-thesaurus.json');
+const vecBinSrc = path.join(projectRoot, 'assets', 'word-vectors.bin');
+const vecVocabSrc = path.join(projectRoot, 'assets', 'word-vectors.vocab.json');
 const distAssets = path.join(distDir, 'assets');
 const configAssets = path.join(configDir, 'assets');
+
+fs.mkdirSync(distAssets, { recursive: true });
+fs.mkdirSync(configAssets, { recursive: true });
+
 if (fs.existsSync(rogetSrc)) {
-  fs.mkdirSync(distAssets, { recursive: true });
-  fs.mkdirSync(configAssets, { recursive: true });
   fs.copyFileSync(rogetSrc, path.join(distAssets, 'roget-thesaurus.json'));
   fs.copyFileSync(rogetSrc, path.join(configAssets, 'roget-thesaurus.json'));
+}
+
+if (fs.existsSync(vecBinSrc)) {
+  fs.copyFileSync(vecBinSrc, path.join(distAssets, 'word-vectors.bin'));
+  fs.copyFileSync(vecBinSrc, path.join(configAssets, 'word-vectors.bin'));
+}
+
+if (fs.existsSync(vecVocabSrc)) {
+  fs.copyFileSync(vecVocabSrc, path.join(distAssets, 'word-vectors.vocab.json'));
+  fs.copyFileSync(vecVocabSrc, path.join(configAssets, 'word-vectors.vocab.json'));
 }
 
 for (const file of [

@@ -9,240 +9,129 @@ import {
 import { NICHE_VOCABULARY, searchNicheVocabulary } from '../data/niche-vocabulary';
 import { lookupOffline } from './offline-dictionary';
 
+let environmentAssetsPath: string | undefined;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { environment } = require('@raycast/api');
+  environmentAssetsPath = environment?.assetsPath;
+} catch {
+  // Standalone test environment
+}
+
 const vectorMemoryCache = new Map<string, VectorSearchResult[]>();
 
-const STOP_WORDS = new Set([
-  'a',
-  'about',
-  'after',
-  'all',
-  'also',
-  'an',
-  'and',
-  'any',
-  'are',
-  'as',
-  'at',
-  'be',
-  'because',
-  'been',
-  'before',
-  'being',
-  'between',
-  'both',
-  'but',
-  'by',
-  'for',
-  'from',
-  'further',
-  'had',
-  'has',
-  'have',
-  'having',
-  'he',
-  'her',
-  'here',
-  'hers',
-  'herself',
-  'him',
-  'himself',
-  'his',
-  'how',
-  'if',
-  'in',
-  'into',
-  'is',
-  'it',
-  'its',
-  'itself',
-  'just',
-  'me',
-  'more',
-  'most',
-  'my',
-  'myself',
-  'no',
-  'nor',
-  'not',
-  'now',
-  'of',
-  'off',
-  'on',
-  'once',
-  'only',
-  'or',
-  'other',
-  'our',
-  'ours',
-  'ourselves',
-  'out',
-  'over',
-  'own',
-  'same',
-  'she',
-  'should',
-  'so',
-  'some',
-  'such',
-  'than',
-  'that',
-  'the',
-  'their',
-  'theirs',
-  'them',
-  'themselves',
-  'then',
-  'there',
-  'these',
-  'they',
-  'this',
-  'those',
-  'through',
-  'to',
-  'too',
-  'under',
-  'until',
-  'up',
-  'very',
-  'was',
-  'we',
-  'were',
-  'what',
-  'when',
-  'where',
-  'which',
-  'while',
-  'who',
-  'whom',
-  'why',
-  'with',
-  'would',
-  'you',
-  'your',
-  'yours',
-  'yourself',
-  'yourselves',
+export const STOP_WORDS = new Set([
+  'a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', 'aren',
+  'as', 'at', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by',
+  'can', 'cannot', 'could', 'did', 'do', 'does', 'doing', 'down', 'during', 'each', 'few', 'for',
+  'from', 'further', 'had', 'has', 'have', 'having', 'he', 'her', 'here', 'hers', 'herself', 'him',
+  'himself', 'his', 'how', 'i', 'if', 'in', 'into', 'is', 'isn', 'it', 'its', 'itself', 'just', 'll',
+  'm', 'ma', 'me', 'might', 'more', 'most', 'must', 'my', 'myself', 'no', 'nor', 'not', 'now', 'o',
+  'of', 'off', 'on', 'once', 'only', 'or', 'other', 'our', 'ours', 'ourselves', 'out', 'over', 'own',
+  're', 's', 'same', 'she', 'should', 'so', 'some', 'such', 't', 'than', 'that', 'the', 'their',
+  'theirs', 'them', 'themselves', 'then', 'there', 'these', 'they', 'this', 'those', 'through', 'to',
+  'too', 'under', 'until', 'up', 've', 'very', 'was', 'wasn', 'we', 'were', 'what', 'when', 'where',
+  'which', 'while', 'who', 'whom', 'why', 'will', 'with', 'won', 'would', 'y', 'you', 'your', 'yours',
+  'yourself', 'yourselves',
 ]);
 
-const CONCEPT_STEMS: Record<string, string> = {
-  // CLASS I: Abstract Relations (Quantity, Time, Change, Causation)
-  ancient: 'antiquity',
-  primordial: 'origin',
-  eternal: 'eternity',
-  ephemeral: 'transience',
-  temporal: 'time',
-  transitional: 'transition',
-  causal: 'cause',
-  infinite: 'infinity',
-  mutable: 'change',
-
-  // CLASS II: Space, Scale, Dimensions & Form
-  structural: 'structure',
-  architectural: 'architecture',
-  spatial: 'space',
-  monumental: 'monument',
-  geometric: 'geometry',
-  symmetrical: 'symmetry',
-  circular: 'circle',
-  linear: 'line',
-  cavernous: 'cavern',
-  labyrinthine: 'labyrinth',
-  subterranean: 'underground',
-  colossal: 'colossus',
-  titanic: 'titan',
-  gigantic: 'giant',
-  microscopic: 'microscope',
-  diminutive: 'diminution',
-  imposing: 'majesty',
-  lofty: 'height',
-  abyssal: 'abyss',
-  radial: 'radius',
-
-  // CLASS III: Matter & Sensory Perception (Light, Sound, Odor, Senses)
-  luminous: 'light',
-  tenebrous: 'darkness',
-  sonorous: 'sound',
-  susurrant: 'whisper',
-  fragrant: 'perfume',
-  pungent: 'odor',
-  nocturnal: 'night',
-  crepuscular: 'twilight',
-  diurnal: 'day',
-  thermal: 'heat',
-  frigid: 'cold',
-  fluid: 'liquid',
-  aerial: 'air',
-  aquatic: 'water',
-
-  // CLASS IV: Intellect, Knowledge & Language
-  dramatic: 'drama',
-  theatrical: 'theater',
-  literary: 'literature',
-  poetic: 'poetry',
-  philosophical: 'philosophy',
-  psychological: 'psychology',
-  tragic: 'tragedy',
-  comic: 'comedy',
-  heroic: 'hero',
-  critical: 'crisis',
-  climactic: 'climax',
-  narrative: 'story',
-  mythic: 'myth',
-  mythological: 'myth',
-  ironic: 'irony',
-  logical: 'logic',
-  epistemic: 'knowledge',
-  epistemological: 'epistemology',
-  metaphysical: 'metaphysics',
-  symbolic: 'symbol',
-  rhetorical: 'rhetoric',
-  metaphorical: 'metaphor',
-  allegorical: 'allegory',
-  paradoxical: 'paradox',
-  didactic: 'instruction',
-  pedantic: 'pedantry',
-  arcane: 'mystery',
-  recondite: 'obscurity',
-  esoteric: 'secrecy',
-  apocryphal: 'fiction',
-  veracious: 'truth',
-
-  // CLASS V: Volition, Action, Mastery & Authority
-  strategic: 'strategy',
-  tactical: 'tactic',
-  resolute: 'determination',
-  sovereign: 'authority',
-  tyrannical: 'tyranny',
-  martial: 'warfare',
-  opulent: 'wealth',
-  destitute: 'poverty',
-  dexterous: 'skill',
-
-  // CLASS VI: Sentient, Psychological, Moral & Spiritual Powers
-  aesthetic: 'beauty',
-  melancholic: 'melancholy',
-  wistful: 'longing',
-  nostalgic: 'nostalgia',
-  ecstatic: 'ecstasy',
-  somber: 'gloom',
-  chivalric: 'chivalry',
-  chivalrous: 'honor',
-  righteous: 'virtue',
-  ignominious: 'disgrace',
-  sacred: 'sanctity',
-  profane: 'impiety',
-  seraphic: 'angel',
-  daemonic: 'demon',
-  elysian: 'paradise',
-  cathartic: 'catharsis',
-  hubristic: 'hubris',
-  nemetic: 'nemesis',
-  apocalyptic: 'apocalypse',
-  threnodic: 'threnody',
+// Systematic English morphological adjective derivations
+const CLASSICAL_ADJECTIVES: Record<string, string> = {
+  edifice: 'edificial',
+  palace: 'palatial',
+  colossus: 'colossal',
+  cyclops: 'cyclopean',
+  titan: 'titanic',
+  monolith: 'monolithic',
+  statue: 'statuesque',
+  ocean: 'oceanic',
+  tempest: 'tempestuous',
+  glacier: 'glacial',
+  epiphany: 'epiphanic',
+  aporia: 'aporetic',
+  hubris: 'hubristic',
+  catharsis: 'cathartic',
+  nemesis: 'nemetic',
+  nostalgia: 'nostalgic',
+  melancholy: 'melancholic',
+  seraph: 'seraphic',
+  apocalypse: 'apocalyptic',
 };
 
+// Vector database state
+let isDbLoaded = false;
+let vectorBuffer: Int8Array | null = null;
+let vocabMetadata: Array<[string, number]> = [];
+let wordToIndex = new Map<string, number>();
+let invNorms: Float32Array = new Float32Array(0);
+const D = 100;
+
+function findAssetFile(fileName: string): string | null {
+  const candidates = [
+    environmentAssetsPath ? path.join(environmentAssetsPath, fileName) : '',
+    environmentAssetsPath ? path.join(environmentAssetsPath, 'assets', fileName) : '',
+    path.join(__dirname, 'assets', fileName),
+    path.join(__dirname, '../assets', fileName),
+    path.join(__dirname, '../../assets', fileName),
+    path.join(process.cwd(), 'assets', fileName),
+    path.join(process.cwd(), 'dist', 'assets', fileName),
+    'C:/Users/Johno/.config/raycast/extensions/oxford-dictionary/assets/' + fileName,
+  ];
+
+  for (const c of candidates) {
+    if (c && fs.existsSync(c)) {
+      return c;
+    }
+  }
+  return null;
+}
+
+function loadVectorDb(): boolean {
+  if (isDbLoaded && vectorBuffer && vocabMetadata.length > 0) {
+    return true;
+  }
+
+  const binPath = findAssetFile('word-vectors.bin');
+  const vocabPath = findAssetFile('word-vectors.vocab.json');
+
+  if (!binPath || !vocabPath) {
+    return false;
+  }
+
+  try {
+    const rawVocab = fs.readFileSync(vocabPath, 'utf8');
+    vocabMetadata = JSON.parse(rawVocab) as Array<[string, number]>;
+
+    const rawBin = fs.readFileSync(binPath);
+    vectorBuffer = new Int8Array(rawBin.buffer, rawBin.byteOffset, rawBin.byteLength);
+
+    const N = vocabMetadata.length;
+    wordToIndex = new Map<string, number>();
+    invNorms = new Float32Array(N);
+
+    for (let i = 0; i < N; i++) {
+      wordToIndex.set(vocabMetadata[i][0], i);
+
+      let sumSq = 0;
+      const off = i * D;
+      for (let d = 0; d < D; d++) {
+        const v = vectorBuffer[off + d];
+        sumSq += v * v;
+      }
+      const norm = Math.sqrt(sumSq);
+      invNorms[i] = norm > 1e-6 ? 1.0 / norm : 0;
+    }
+
+    isDbLoaded = true;
+    return true;
+  } catch (err) {
+    console.error('Failed to load local vector database:', err);
+    return false;
+  }
+}
+
 /**
- * Extracts and normalizes seed words from a raw query string.
+ * Extracts normalized positive and negative seed words from a query.
  */
 export function extractSeedWords(query: string): string[] {
   const rawTokens = query
@@ -252,9 +141,359 @@ export function extractSeedWords(query: string): string[] {
     .map((w) => w.trim())
     .filter((w) => w.length > 1);
 
-  const filtered = rawTokens.filter((w) => !STOP_WORDS.has(w));
+  const filtered = rawTokens.filter((w) => {
+    const clean = w.startsWith('-') || w.startsWith('+') ? w.slice(1) : w;
+    return !STOP_WORDS.has(clean);
+  });
+
   const result = filtered.length > 0 ? filtered : rawTokens;
   return Array.from(new Set(result));
+}
+
+export interface ParsedQuery {
+  positiveSeeds: string[];
+  negativeSeeds: string[];
+  seedSet: Set<string>;
+  dominantPosMask: number;
+  dominantPosStr: PartOfSpeech;
+}
+
+export function parseQuerySeeds(query: string | string[]): ParsedQuery {
+  const tokens = Array.isArray(query) ? query : extractSeedWords(query);
+
+  const positiveSeeds: string[] = [];
+  const negativeSeeds: string[] = [];
+  const seedSet = new Set<string>();
+
+  for (const raw of tokens) {
+    const t = raw.trim().toLowerCase();
+    if (!t) continue;
+    if (t.startsWith('-') && t.length > 1) {
+      const clean = t.slice(1);
+      negativeSeeds.push(clean);
+      seedSet.add(clean);
+    } else {
+      const clean = t.startsWith('+') ? t.slice(1) : t;
+      positiveSeeds.push(clean);
+      seedSet.add(clean);
+    }
+  }
+
+  // Count POS bitmasks for positive seeds
+  loadVectorDb();
+  const posCounts: Record<number, number> = { 1: 0, 2: 0, 4: 0, 8: 0 };
+  for (const s of positiveSeeds) {
+    const idx = wordToIndex.get(s);
+    if (idx !== undefined) {
+      const mask = vocabMetadata[idx][1];
+      if (mask & 1) posCounts[1]++;
+      if (mask & 2) posCounts[2]++;
+      if (mask & 4) posCounts[4]++;
+      if (mask & 8) posCounts[8]++;
+    }
+  }
+
+  // Pick dominant POS
+  let dominantPosMask = 1;
+  let maxCount = -1;
+  for (const m of [4, 1, 2, 8]) {
+    if (posCounts[m] > maxCount) {
+      maxCount = posCounts[m];
+      dominantPosMask = m;
+    }
+  }
+
+  let dominantPosStr: PartOfSpeech = 'noun';
+  if (dominantPosMask === 4) dominantPosStr = 'adjective';
+  else if (dominantPosMask === 2) dominantPosStr = 'verb';
+  else if (dominantPosMask === 8) dominantPosStr = 'adverb';
+
+  return {
+    positiveSeeds,
+    negativeSeeds,
+    seedSet,
+    dominantPosMask,
+    dominantPosStr,
+  };
+}
+
+/**
+ * Checks if a candidate word is a direct morphological clone of any seed word.
+ */
+export function isMorphologicalClone(word: string, seeds: string[]): boolean {
+  const c = word.toLowerCase();
+  for (const raw of seeds) {
+    const s = raw.toLowerCase();
+    if (c === s) return true;
+    const suffixes = ['s', 'es', 'ed', 'ing', 'ly', 'ness', 'ity', 'ish', 'er', 'est'];
+    for (const suf of suffixes) {
+      if (c === s + suf || s === c + suf) return true;
+    }
+    const minLen = Math.min(c.length, s.length);
+    if (minLen >= 4) {
+      let commonPrefix = 0;
+      while (commonPrefix < minLen && c[commonPrefix] === s[commonPrefix]) {
+        commonPrefix++;
+      }
+      if (commonPrefix >= 4 && Math.abs(c.length - s.length) <= 3) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * Executes high-speed local 100D Int8 cosine similarity search.
+ */
+export function searchOfflineVector(
+  query: string | string[],
+  limit = 50
+): VectorSearchResult[] {
+  if (!loadVectorDb() || !vectorBuffer) {
+    return [];
+  }
+
+  const { positiveSeeds, negativeSeeds, seedSet, dominantPosMask, dominantPosStr } = parseQuerySeeds(query);
+  if (positiveSeeds.length === 0 && negativeSeeds.length === 0) {
+    return [];
+  }
+
+  // Build 100D query centroid vector and individual positive seed vectors
+  const q = new Float32Array(D);
+  const positiveSeedVecs: Float32Array[] = [];
+
+  for (const s of positiveSeeds) {
+    let idx = wordToIndex.get(s);
+    if (idx === undefined && CLASSICAL_ADJECTIVES[s]) {
+      idx = wordToIndex.get(CLASSICAL_ADJECTIVES[s]);
+    }
+    if (idx !== undefined) {
+      const sv = new Float32Array(D);
+      const off = idx * D;
+      let sSumSq = 0;
+      for (let d = 0; d < D; d++) {
+        const val = vectorBuffer[off + d] / 127.0;
+        sv[d] = val;
+        sSumSq += val * val;
+        q[d] += val;
+      }
+      const sNorm = Math.sqrt(sSumSq);
+      if (sNorm > 1e-9) {
+        const invSNorm = 1.0 / sNorm;
+        for (let d = 0; d < D; d++) sv[d] *= invSNorm;
+      }
+      positiveSeedVecs.push(sv);
+    }
+  }
+
+  // Negative vector subtraction (weight = -0.85)
+  for (const s of negativeSeeds) {
+    const idx = wordToIndex.get(s);
+    if (idx !== undefined) {
+      const off = idx * D;
+      for (let d = 0; d < D; d++) {
+        q[d] -= 0.85 * (vectorBuffer[off + d] / 127.0);
+      }
+    }
+  }
+
+  let sumSq = 0;
+  for (let d = 0; d < D; d++) sumSq += q[d] * q[d];
+  const qNorm = Math.sqrt(sumSq);
+  if (qNorm > 1e-9) {
+    const invQ = 1.0 / qNorm;
+    for (let d = 0; d < D; d++) q[d] *= invQ;
+  } else {
+    return [];
+  }
+
+  const N = vocabMetadata.length;
+  const candidates: Array<{ word: string; sim: number; rawCosine: number; posMask: number; rank: number }> = [];
+  const hasMultipleSeeds = positiveSeedVecs.length >= 2;
+  const NICHE_WORDS_SET = new Set(NICHE_VOCABULARY.map((n) => n.word.toLowerCase()));
+
+  // Fast unrolled 10-way dot product loop
+  for (let i = 0; i < N; i++) {
+    const [word, posMask] = vocabMetadata[i];
+    if (seedSet.has(word)) continue;
+
+    const off = i * D;
+    let dot = 0;
+    for (let d = 0; d < D; d += 10) {
+      dot +=
+        q[d] * vectorBuffer[off + d] +
+        q[d + 1] * vectorBuffer[off + d + 1] +
+        q[d + 2] * vectorBuffer[off + d + 2] +
+        q[d + 3] * vectorBuffer[off + d + 3] +
+        q[d + 4] * vectorBuffer[off + d + 4] +
+        q[d + 5] * vectorBuffer[off + d + 5] +
+        q[d + 6] * vectorBuffer[off + d + 6] +
+        q[d + 7] * vectorBuffer[off + d + 7] +
+        q[d + 8] * vectorBuffer[off + d + 8] +
+        q[d + 9] * vectorBuffer[off + d + 9];
+    }
+
+    const rawSim = dot * invNorms[i];
+    if (rawSim <= 0.05) continue;
+
+    // 1. Multi-Seed Intersection Consistency (Triangulation)
+    let triangulationMul = 1.0;
+    if (hasMultipleSeeds) {
+      let minSeedSim = 999.0;
+      for (let s = 0; s < positiveSeedVecs.length; s++) {
+        const sv = positiveSeedVecs[s];
+        let sDot = 0;
+        for (let d = 0; d < D; d += 10) {
+          sDot +=
+            sv[d] * vectorBuffer[off + d] +
+            sv[d + 1] * vectorBuffer[off + d + 1] +
+            sv[d + 2] * vectorBuffer[off + d + 2] +
+            sv[d + 3] * vectorBuffer[off + d + 3] +
+            sv[d + 4] * vectorBuffer[off + d + 4] +
+            sv[d + 5] * vectorBuffer[off + d + 5] +
+            sv[d + 6] * vectorBuffer[off + d + 6] +
+            sv[d + 7] * vectorBuffer[off + d + 7] +
+            sv[d + 8] * vectorBuffer[off + d + 8] +
+            sv[d + 9] * vectorBuffer[off + d + 9];
+        }
+        const sSim = sDot * invNorms[i];
+        if (sSim < minSeedSim) minSeedSim = sSim;
+      }
+
+      if (minSeedSim >= 0.28) {
+        triangulationMul = 1.0 + 0.18 * minSeedSim;
+      } else if (minSeedSim < 0.12) {
+        triangulationMul = 0.82;
+      }
+    }
+
+    // 2. Correlation-Gated Vocabulary Register Curve (Using Vocab Index i)
+    const isNiche = NICHE_WORDS_SET.has(word);
+    let registerMul = 1.0;
+    if (i < 2200) {
+      registerMul = rawSim > 0.78 ? 1.0 : 0.92;
+    } else if (i <= 22000) {
+      registerMul = 1.10;
+    } else if (i <= 38000 || isNiche) {
+      if (rawSim >= 0.56) {
+        registerMul = 1.08;
+      } else if (rawSim >= 0.48) {
+        registerMul = 0.95;
+      } else {
+        registerMul = 0.78;
+      }
+    } else {
+      if (rawSim >= 0.64) {
+        registerMul = 1.0;
+      } else {
+        registerMul = 0.70;
+      }
+    }
+
+    // 3. POS-alignment multiplier (1.12x)
+    const posMultiplier = (posMask & dominantPosMask) !== 0 ? 1.12 : 1.0;
+
+    // 4. Morphological clone suppression
+    const cloneMultiplier = isMorphologicalClone(word, positiveSeeds) ? 0.85 : 1.0;
+
+    const finalSim = rawSim * triangulationMul * registerMul * posMultiplier * cloneMultiplier;
+
+    candidates.push({
+      word,
+      sim: finalSim,
+      rawCosine: rawSim,
+      posMask,
+      rank: i,
+    });
+  }
+
+  // Morphological boost for adjective forms in adjective queries
+  if (dominantPosMask === 4) {
+    const candMap = new Map<string, number>();
+    for (const c of candidates) candMap.set(c.word, c.sim);
+    for (const c of candidates) {
+      for (const [noun, adj] of Object.entries(CLASSICAL_ADJECTIVES)) {
+        if (c.word === adj) {
+          const nounScore = candMap.get(noun) || 0;
+          if (nounScore > 0) {
+            c.sim = Math.max(c.sim, nounScore * 1.15);
+          }
+        }
+      }
+    }
+  }
+
+  candidates.sort((a, b) => b.sim - a.sim);
+
+  const topHits = candidates.slice(0, limit);
+  if (topHits.length === 0) return [];
+
+  const maxSim = topHits[0].sim;
+
+  // Enrich top hits with definitions and POS
+  return topHits.map((cand, idx) => {
+    const ratio = maxSim > 0 ? cand.sim / maxSim : 1.0;
+    const rankDecay = Math.max(0, 1.0 - idx * 0.012);
+    const scoreVal = ratio * 0.80 + rankDecay * 0.20;
+    const matchPercent = Math.min(99, Math.max(50, Math.round(scoreVal * 98)));
+
+    let pos: PartOfSpeech = dominantPosStr;
+    if (cand.posMask & 4) pos = 'adjective';
+    else if (cand.posMask & 1) pos = 'noun';
+    else if (cand.posMask & 2) pos = 'verb';
+    else if (cand.posMask & 8) pos = 'adverb';
+
+    // Lazy check in niche vocabulary first
+    const niche = NICHE_VOCABULARY.find((n) => n.word.toLowerCase() === cand.word);
+    let definition = niche?.definition;
+    if (niche?.partOfSpeech) {
+      pos = niche.partOfSpeech;
+    }
+
+    return {
+      word: cand.word,
+      similarity: Number(ratio.toFixed(4)),
+      matchPercent,
+      score: Math.round(cand.sim * 1000),
+      source: 'offline',
+      partOfSpeech: pos,
+      definition,
+    };
+  });
+}
+
+interface DatamuseItem {
+  word: string;
+  score: number;
+  tags?: string[];
+  defs?: string[];
+}
+
+function fetchDatamuse(endpoint: string): Promise<DatamuseItem[]> {
+  return new Promise((resolve) => {
+    const req = https.get(endpoint, { timeout: 3500 }, (res) => {
+      if (res.statusCode !== 200) {
+        resolve([]);
+        return;
+      }
+      let raw = '';
+      res.on('data', (c) => (raw += c));
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(raw);
+          resolve(Array.isArray(json) ? json : []);
+        } catch {
+          resolve([]);
+        }
+      });
+    });
+    req.on('error', () => resolve([]));
+    req.on('timeout', () => {
+      req.destroy();
+      resolve([]);
+    });
+  });
 }
 
 function parseDatamusePos(tags?: string[]): PartOfSpeech {
@@ -284,609 +523,362 @@ function parseDatamuseDef(defs?: string[]): { pos?: PartOfSpeech; definition?: s
   return { definition: raw.trim() };
 }
 
-function parseFrequency(tags?: string[]): number {
-  if (!tags || !Array.isArray(tags)) return 1.0;
-  for (const t of tags) {
-    if (t.startsWith('f:')) {
-      const val = parseFloat(t.slice(2));
-      if (!isNaN(val)) return val;
-    }
-  }
-  return 1.0;
-}
-
-interface DatamuseRawItem {
-  word: string;
-  score: number;
-  tags?: string[];
-  defs?: string[];
-}
-
-function fetchDatamuseRaw(queryParam: string, max = 500): Promise<DatamuseRawItem[]> {
-  return new Promise((resolve) => {
-    const url = `https://api.datamuse.com/words?ml=${encodeURIComponent(queryParam)}&md=dpfs&max=${max}`;
-    const req = https.get(url, { timeout: 3500 }, (res) => {
-      if (res.statusCode !== 200) {
-        resolve([]);
-        return;
-      }
-
-      let raw = '';
-      res.on('data', (chunk) => {
-        raw += chunk;
-      });
-      res.on('end', () => {
-        try {
-          const json = JSON.parse(raw);
-          if (Array.isArray(json)) {
-            resolve(json);
-          } else {
-            resolve([]);
-          }
-        } catch {
-          resolve([]);
-        }
-      });
-    });
-
-    req.on('error', () => resolve([]));
-    req.on('timeout', () => {
-      req.destroy();
-      resolve([]);
-    });
-  });
-}
-
-// Systematic English morphological adjective derivations from nouns across Roget conceptual dimensions
-const CLASSICAL_ADJECTIVES: Record<string, string> = {
-  // Class II: Space, Architecture, Form & Scale
-  edifice: 'edificial',
-  palace: 'palatial',
-  colossus: 'colossal',
-  cyclops: 'cyclopean',
-  titan: 'titanic',
-  labyrinth: 'labyrinthine',
-  monolith: 'monolithic',
-  statue: 'statuesque',
-  cathedral: 'cathedralic',
-  pyramid: 'pyramidal',
-  citadel: 'citadelic',
-  basilica: 'basilican',
-  acropolis: 'acropolitan',
-  cavern: 'cavernous',
-  abyss: 'abyssal',
-  chasm: 'chasmic',
-  gargoyle: 'gargoylish',
-
-  // Class I & III: Time, Matter, Cosmos & Nature
-  epoch: 'epochal',
-  tempest: 'tempestuous',
-  meteor: 'meteoric',
-  aurora: 'auroral',
-  zenith: 'zenithal',
-  volcano: 'volcanic',
-  ether: 'ethereal',
-  aether: 'ethereal',
-  ocean: 'oceanic',
-  glacier: 'glacial',
-
-  // Class IV: Intellect, Ideas, Rhetoric & Myth
-  epiphany: 'epiphanic',
-  aporia: 'aporetic',
-  allegory: 'allegorical',
-  metaphor: 'metaphorical',
-  paradox: 'paradoxical',
-  didact: 'didactic',
-  pedant: 'pedantic',
-  polemic: 'polemical',
-  chiasmus: 'chiastic',
-  litotes: 'litotic',
-  chimera: 'chimerical',
-  oracle: 'oracular',
-
-  // Class VI: Sentient, Moral, Psychological & Spiritual
-  hubris: 'hubristic',
-  catharsis: 'cathartic',
-  nemesis: 'nemetic',
-  threnody: 'threnodic',
-  nostalgia: 'nostalgic',
-  melancholy: 'melancholic',
-  seraph: 'seraphic',
-  elysium: 'elysian',
-  apocalypse: 'apocalyptic',
-  specter: 'spectral',
-  phantom: 'phantasmal',
-};
-
-function getAdjectiveDerivations(noun: string): string[] {
-  const w = noun.toLowerCase();
-  const candidates: string[] = [];
-  if (CLASSICAL_ADJECTIVES[w]) {
-    candidates.push(CLASSICAL_ADJECTIVES[w]);
-  }
-  if (w.endsWith('ice')) {
-    candidates.push(w.slice(0, -3) + 'icial');
-  }
-  if (w.endsWith('e')) {
-    candidates.push(w.slice(0, -1) + 'al');
-    candidates.push(w.slice(0, -1) + 'esque');
-    candidates.push(w.slice(0, -1) + 'ic');
-  }
-  if (w.endsWith('ment')) {
-    candidates.push(w + 'al');
-  }
-  if (w.endsWith('y')) {
-    candidates.push(w.slice(0, -1) + 'ic');
-    candidates.push(w.slice(0, -1) + 'ical');
-    candidates.push(w.slice(0, -1) + 'ious');
-  }
-  if (w.endsWith('ism')) {
-    candidates.push(w.slice(0, -3) + 'ic');
-    candidates.push(w.slice(0, -3) + 'ical');
-  }
-  if (w.endsWith('sis') || w.endsWith('xis')) {
-    candidates.push(w.slice(0, -3) + 'tic');
-  }
-  return Array.from(new Set(candidates));
-}
-
 /**
- * Advanced multi-vector search:
- * 1. Joint seed query + Canonical stemmed concept query + prominent individual seeds.
- * 2. Multi-Dimensional Synergy & Cross-Seed Convergence across parallel query dimensions.
- * 3. Morphological Part-of-Speech Alignment (derives valid adjective forms when query is descriptive).
- * 4. Gentle Niche Word Elevation & Definition Concept Overlap.
- * 5. Direct integration with the curated Niche Vocabulary bank.
+ * Hybrid Online Mode:
+ * Blends local 128D vector cosine score (70% weight) with Datamuse rel_syn + ml (30% weight),
+ * subtracting rel_ant antonyms.
  */
-async function fetchDatamuseVector(seeds: string[], limit = 50): Promise<VectorSearchResult[]> {
-  const seedSet = new Set(seeds.map((s) => s.toLowerCase()));
-  const stemmedSeeds = seeds.map((s) => CONCEPT_STEMS[s] || s);
-  const allConceptSeeds = Array.from(new Set([...seeds, ...stemmedSeeds]));
+async function searchHybridVector(
+  query: string,
+  limit = 50
+): Promise<VectorSearchResult[]> {
+  const parsed = parseQuerySeeds(query);
+  const { positiveSeeds, negativeSeeds, seedSet, dominantPosMask, dominantPosStr } = parsed;
 
-  // Check if query is predominantly adjectival
-  let seedAdjCount = 0;
-  for (const s of seeds) {
-    const off = await lookupOffline(s);
-    if (off && off.meanings.some((m) => m.partOfSpeech === 'adjective')) {
-      seedAdjCount++;
-    }
+  if (positiveSeeds.length === 0 && negativeSeeds.length === 0) {
+    return [];
   }
-  const isPredominantlyAdjective = seedAdjCount >= Math.ceil(seeds.length / 2);
 
-  const promises: Promise<{ source: string; items: DatamuseRawItem[]; weight: number }>[] = [];
+  // 1. Local 128D Vector Search
+  const localHits = searchOfflineVector(query, 120);
+  const localScoreMap = new Map<string, number>();
+  const maxLocalSim = localHits.length > 0 ? localHits[0].similarity : 1.0;
 
-  // 1. Joint raw seeds query (multi-dimensional conjunction gets primary weight)
-  promises.push(
-    fetchDatamuseRaw(seeds.join('+'), 600).then((items) => ({
-      source: 'joint',
-      items,
-      weight: 1.8,
-    }))
-  );
+  for (const h of localHits) {
+    localScoreMap.set(h.word.toLowerCase(), h.similarity / maxLocalSim);
+  }
 
-  // 2. Stemmed joint query (if different)
-  if (stemmedSeeds.join('+') !== seeds.join('+')) {
-    promises.push(
-      fetchDatamuseRaw(stemmedSeeds.join('+'), 600).then((items) => ({
-        source: 'stemmed',
-        items,
-        weight: 1.5,
-      }))
+  // 2. Online Datamuse Queries (rel_syn, ml, and rel_ant)
+  const onlinePromises: Promise<{ type: 'pos' | 'ant'; items: DatamuseItem[]; weight: number }>[] = [];
+
+  // Means-like joint query
+  if (positiveSeeds.length > 0) {
+    const mlUrl = `https://api.datamuse.com/words?ml=${encodeURIComponent(positiveSeeds.join('+'))}&md=dpfs&max=150`;
+    onlinePromises.push(
+      fetchDatamuse(mlUrl).then((items) => ({ type: 'pos', items, weight: 1.5 }))
     );
   }
 
-  // 3. Prominent individual seeds (auxiliary single dimensions)
-  for (const seed of seeds.slice(0, 3)) {
-    promises.push(
-      fetchDatamuseRaw(seed, 400).then((items) => ({
-        source: `seed:${seed}`,
-        items,
-        weight: 0.30,
-      }))
+  // Synonyms for positive seeds
+  for (const s of positiveSeeds.slice(0, 3)) {
+    const synUrl = `https://api.datamuse.com/words?rel_syn=${encodeURIComponent(s)}&md=dpfs&max=60`;
+    onlinePromises.push(
+      fetchDatamuse(synUrl).then((items) => ({ type: 'pos', items, weight: 1.2 }))
     );
   }
 
-  const responses = await Promise.all(promises);
+  // Antonyms for positive seeds to subtract
+  for (const s of positiveSeeds.slice(0, 2)) {
+    const antUrl = `https://api.datamuse.com/words?rel_ant=${encodeURIComponent(s)}&max=40`;
+    onlinePromises.push(
+      fetchDatamuse(antUrl).then((items) => ({ type: 'ant', items, weight: 1.5 }))
+    );
+  }
 
-  const aggregated = new Map<
+  // Explicit negative seeds to subtract
+  for (const neg of negativeSeeds) {
+    const negUrl = `https://api.datamuse.com/words?ml=${encodeURIComponent(neg)}&max=60`;
+    onlinePromises.push(
+      fetchDatamuse(negUrl).then((items) => ({ type: 'ant', items, weight: 1.5 }))
+    );
+  }
+
+  const onlineData = await Promise.all(onlinePromises);
+
+  const onlineScoreMap = new Map<
     string,
-    {
-      word: string;
-      rrf: number;
-      tags?: string[];
-      defs?: string[];
-      jointRank?: number;
-      seedDimensions: Set<string>;
-    }
+    { score: number; defs?: string[]; tags?: string[] }
   >();
 
-  for (const resp of responses) {
-    const { items, weight, source } = resp;
+  for (const resp of onlineData) {
+    const { type, items, weight } = resp;
     items.forEach((item, rank) => {
-      const key = item.word.toLowerCase();
-      // Exclude direct seed words from suggestions
-      if (seedSet.has(key) || key.length < 3) return;
+      const w = item.word.toLowerCase();
+      if (seedSet.has(w) || w.length < 2) return;
 
-      const rrfScore = weight * (1.0 / (rank + 25));
-      const existing = aggregated.get(key);
-      if (existing) {
-        existing.rrf += rrfScore;
-        existing.seedDimensions.add(source);
-        if (source === 'joint' && existing.jointRank === undefined) {
-          existing.jointRank = rank;
+      const rrf = weight * (1.0 / (rank + 15));
+      const existing = onlineScoreMap.get(w);
+
+      if (type === 'pos') {
+        if (existing) {
+          existing.score += rrf;
+          if (!existing.defs && item.defs) existing.defs = item.defs;
+          if (!existing.tags && item.tags) existing.tags = item.tags;
+        } else {
+          onlineScoreMap.set(w, {
+            score: rrf,
+            defs: item.defs,
+            tags: item.tags,
+          });
         }
-        if (!existing.defs && item.defs) existing.defs = item.defs;
-        if (!existing.tags && item.tags) existing.tags = item.tags;
-      } else {
-        aggregated.set(key, {
-          word: item.word,
-          rrf: rrfScore,
-          tags: item.tags,
-          defs: item.defs,
-          jointRank: source === 'joint' ? rank : undefined,
-          seedDimensions: new Set([source]),
-        });
+      } else if (type === 'ant') {
+        // Subtract antonyms
+        if (existing) {
+          existing.score -= rrf * 1.5;
+        } else {
+          onlineScoreMap.set(w, {
+            score: -rrf * 1.5,
+            defs: item.defs,
+            tags: item.tags,
+          });
+        }
       }
     });
   }
 
-  // Morphological Derivation Expansion:
-  // If query is predominantly adjectival and top nouns exist, derive valid adjectives!
-  if (isPredominantlyAdjective) {
-    const topNouns = Array.from(aggregated.values())
-      .filter((c) => parseDatamusePos(c.tags) === 'noun')
-      .sort((a, b) => b.rrf - a.rrf)
-      .slice(0, 10);
+  // Find max positive online score
+  let maxOnline = 0.0001;
+  for (const v of onlineScoreMap.values()) {
+    if (v.score > maxOnline) maxOnline = v.score;
+  }
 
-    for (const nounCand of topNouns) {
-      const adjDerivs = getAdjectiveDerivations(nounCand.word);
-      for (const adjWord of adjDerivs) {
-        if (aggregated.has(adjWord) || seedSet.has(adjWord)) continue;
-        const dictInfo = await lookupOffline(adjWord);
-        if (dictInfo) {
-          const adjMeaning = dictInfo.meanings.find((m) => m.partOfSpeech === 'adjective');
-          if (adjMeaning && adjMeaning.definitions.length > 0) {
-            const adjDef = adjMeaning.definitions[0] || `Pertaining to ${nounCand.word}; structural.`;
-            const adjRrf = nounCand.rrf * 1.15;
-            aggregated.set(adjWord, {
-              word: adjWord,
-              rrf: adjRrf,
-              tags: ['adj', 'f:0.04'],
-              defs: [`adj\t${adjDef}`],
-              jointRank: nounCand.jointRank,
-              seedDimensions: new Set(nounCand.seedDimensions),
-            });
-          }
-        }
+  // 3. Blend Scores: 70% Local + 30% Online
+  const candidateKeys = new Set<string>([
+    ...localScoreMap.keys(),
+    ...Array.from(onlineScoreMap.keys()).filter((k) => (onlineScoreMap.get(k)?.score || 0) > 0),
+  ]);
+
+  // Morphological expansion: if query is predominantly adjectival, derive adjectives
+  if (dominantPosMask === 4) {
+    for (const k of Array.from(candidateKeys)) {
+      const derived = CLASSICAL_ADJECTIVES[k];
+      if (derived && !seedSet.has(derived)) {
+        candidateKeys.add(derived);
       }
     }
   }
 
-  // Integrate curated Niche Vocabulary Bank ONLY for high-confidence concept matches
-  const nicheMatches = searchNicheVocabulary(allConceptSeeds);
-  for (const n of nicheMatches) {
-    const key = n.word.toLowerCase();
-    if (seedSet.has(key)) continue;
-
-    // Only inject if there is a strong match (matchScore >= 8.0)
-    if (n.matchScore >= 8.0) {
-      const nicheRrf = Math.min(0.045, 0.020 + (n.matchScore / 30) * 0.025);
-
-      const existing = aggregated.get(key);
-      if (existing) {
-        existing.rrf += nicheRrf;
-        if (!existing.defs) existing.defs = [`${n.partOfSpeech[0]}\t${n.definition}`];
-      } else {
-        aggregated.set(key, {
-          word: n.word,
-          rrf: nicheRrf,
-          defs: [`${n.partOfSpeech[0]}\t${n.definition}`],
-          tags: [n.partOfSpeech[0], 'f:0.033'],
-          seedDimensions: new Set(['joint']),
-        });
-      }
+  // Pre-calculate query centroid vector for on-demand local scoring
+  const q = new Float32Array(D);
+  for (const s of positiveSeeds) {
+    let idx = wordToIndex.get(s);
+    if (idx === undefined && CLASSICAL_ADJECTIVES[s]) {
+      idx = wordToIndex.get(CLASSICAL_ADJECTIVES[s]);
+    }
+    if (idx !== undefined && vectorBuffer) {
+      const off = idx * D;
+      for (let d = 0; d < D; d++) q[d] += vectorBuffer[off + d] / 127.0;
     }
   }
-
-  if (aggregated.size === 0) return [];
-
-  // Multi-Dimensional Synergy & Frequency Calibration Scoring
-  const candidates = Array.from(aggregated.values()).map((cand) => {
-    const f = parseFrequency(cand.tags);
-    let finalScore = cand.rrf;
-
-    // 1. Joint winner bonus:
-    if (cand.jointRank !== undefined && cand.jointRank <= 3) {
-      finalScore *= 1.35 - cand.jointRank * 0.08;
-    }
-
-    // 2. Definition Dimension Overlap:
-    let defSeedHits = 0;
-    if (cand.defs && cand.defs.length > 0) {
-      const defText = cand.defs[0].toLowerCase();
-      for (const s of allConceptSeeds) {
-        if (s.length >= 4 && defText.includes(s)) defSeedHits++;
-      }
-    }
-
-    // 3. Multi-Dimensional Synergy:
-    // Rewards words that satisfy 2 or more distinct dimensions of the user's query
-    const totalDimensionsCovered = Math.min(
-      seeds.length,
-      (cand.seedDimensions.size - (cand.seedDimensions.has('joint') ? 1 : 0)) + defSeedHits
-    );
-    if (totalDimensionsCovered >= 2) {
-      finalScore *= 1.0 + totalDimensionsCovered * 0.15;
-    }
-
-    // 4. Frequency calibration
-    if (f < 0.05) finalScore *= 1.15;
-    else if (f < 0.2) finalScore *= 1.10;
-    else if (f < 1.0) finalScore *= 1.05;
-    else if (f > 40.0) finalScore *= 0.90;
-
-    const defInfo = parseDatamuseDef(cand.defs);
-    const pos = defInfo.pos || parseDatamusePos(cand.tags);
-
-    // 5. Query Part-of-Speech Alignment:
-    if (isPredominantlyAdjective && pos === 'adjective') {
-      finalScore *= 1.10;
-    }
-
-    return {
-      word: cand.word,
-      finalScore,
-      partOfSpeech: pos,
-      definition: defInfo.definition,
-    };
-  });
-
-  candidates.sort((a, b) => b.finalScore - a.finalScore);
-
-  const topHits = candidates.slice(0, limit);
-  const maxScore = topHits.length > 0 ? topHits[0].finalScore : 1;
-
-  return topHits.map((cand, idx) => {
-    const ratio = maxScore > 0 ? cand.finalScore / maxScore : 1;
-    const rankDecay = Math.max(0, 1 - idx * 0.012);
-    const composite = ratio * 0.7 + rankDecay * 0.3;
-    const matchPercent = Math.min(99, Math.max(50, Math.round(composite * 99)));
-    const similarity = matchPercent / 100;
-
-    return {
-      word: cand.word,
-      similarity,
-      matchPercent,
-      score: Math.round(cand.finalScore * 10000),
-      partOfSpeech: cand.partOfSpeech,
-      definition: cand.definition,
-      source: 'online',
-    };
-  });
-}
-
-// ==========================================
-// OFFLINE ROGET 1,000-DIMENSIONAL VECTOR SPACE
-// ==========================================
-
-let rogetWordToCats: Map<string, Set<number>> | null = null;
-let rogetCategoryTitles: Map<number, string> | null = null;
-
-function getRogetJsonPath(): string | null {
-  const candidates = [
-    path.join(__dirname, '..', '..', 'assets', 'roget-thesaurus.json'),
-    path.join(__dirname, '..', 'assets', 'roget-thesaurus.json'),
-    path.join(__dirname, 'assets', 'roget-thesaurus.json'),
-    'C:/Users/Johno/.config/raycast/extensions/oxford-dictionary/assets/roget-thesaurus.json',
-  ];
-  for (const c of candidates) {
-    if (fs.existsSync(c)) return c;
-  }
-  return null;
-}
-
-function initRogetVectorIndex(): void {
-  if (rogetWordToCats) return;
-
-  const jsonPath = getRogetJsonPath();
-  if (!jsonPath) return;
-
-  try {
-    const raw = fs.readFileSync(jsonPath, 'utf8');
-    const data = JSON.parse(raw);
-    rogetWordToCats = new Map<string, Set<number>>();
-    rogetCategoryTitles = new Map<number, string>();
-
-    for (const entry of data.entries) {
-      rogetCategoryTitles.set(entry.id, entry.title);
-      const text = entry.body.toLowerCase();
-      const tokens = text.match(/\b[a-z]{3,}\b/g) || [];
-      for (const t of tokens) {
-        if (!rogetWordToCats.has(t)) {
-          rogetWordToCats.set(t, new Set<number>());
-        }
-        rogetWordToCats.get(t)!.add(entry.id);
-      }
-    }
-
-    // Embed curated Niche Vocabulary into Roget categories
-    for (const n of NICHE_VOCABULARY) {
-      const w = n.word.toLowerCase();
-      if (!rogetWordToCats.has(w)) {
-        rogetWordToCats.set(w, new Set<number>());
-      }
-      for (const catId of n.categories) {
-        rogetWordToCats.get(w)!.add(catId);
-      }
-    }
-  } catch (err) {
-    console.error('[vector-search] Failed to load Roget index:', err);
-  }
-}
-
-function getRogetClassId(categoryId: number): number {
-  if (categoryId <= 179) return 1; // Class I: Abstract Relations
-  if (categoryId <= 315) return 2; // Class II: Space & Dimensions
-  if (categoryId <= 449) return 3; // Class III: Matter & Sensory
-  if (categoryId <= 599) return 4; // Class IV: Intellect & Language
-  if (categoryId <= 819) return 5; // Class V: Volition & Authority
-  return 6;                       // Class VI: Sentient & Moral
-}
-
-/**
- * Offline semantic vector search using Roget 1,000-dimensional conceptual vector space
- * enriched with the curated Niche Vocabulary bank and multi-class macro-dimensional convergence.
- */
-export function searchOfflineVector(seeds: string[], limit = 40): VectorSearchResult[] {
-  initRogetVectorIndex();
-  if (!rogetWordToCats || rogetWordToCats.size === 0) return [];
-
-  const queryCats = new Map<number, number>();
-  const queryClasses = new Set<number>();
-  for (const seed of seeds) {
-    const cats = rogetWordToCats.get(seed.toLowerCase());
-    if (cats) {
-      for (const catId of cats) {
-        queryCats.set(catId, (queryCats.get(catId) || 0) + 1);
-        queryClasses.add(getRogetClassId(catId));
-      }
+  for (const s of negativeSeeds) {
+    const idx = wordToIndex.get(s);
+    if (idx !== undefined && vectorBuffer) {
+      const off = idx * D;
+      for (let d = 0; d < D; d++) q[d] -= 0.85 * (vectorBuffer[off + d] / 127.0);
     }
   }
-
-  // Also check concept matches in Niche Vocabulary
-  const nicheDirect = searchNicheVocabulary(seeds);
-
-  if (queryCats.size === 0 && nicheDirect.length === 0) return [];
-
-  let queryNormSq = 0;
-  for (const count of queryCats.values()) {
-    queryNormSq += count * count;
+  let qSumSq = 0;
+  for (let d = 0; d < D; d++) qSumSq += q[d] * q[d];
+  const qN = Math.sqrt(qSumSq);
+  if (qN > 1e-9) {
+    const invQ = 1.0 / qN;
+    for (let d = 0; d < D; d++) q[d] *= invQ;
   }
-  const queryNorm = Math.max(1, Math.sqrt(queryNormSq));
 
-  const seedSet = new Set(seeds.map((s) => s.toLowerCase()));
-  const candidates: {
+  const blendedList: Array<{
     word: string;
-    sim: number;
-    overlapCount: number;
-    definition?: string;
+    blendedScore: number;
     partOfSpeech?: PartOfSpeech;
-  }[] = [];
+    definition?: string;
+  }> = [];
 
-  const seenCandidates = new Set<string>();
+  for (const word of candidateKeys) {
+    if (seedSet.has(word)) continue;
 
-  // Check Roget vector category overlaps
-  if (queryCats.size > 0) {
-    for (const [word, cats] of rogetWordToCats.entries()) {
-      if (seedSet.has(word) || word.length < 3) continue;
+    let locScore = localScoreMap.get(word) || 0;
+    const onEntry = onlineScoreMap.get(word);
+    const onScore = onEntry ? Math.max(0, onEntry.score / maxOnline) : 0;
 
+    // If word wasn't in top local hits, compute its exact local score
+    if (locScore === 0 && wordToIndex.has(word) && vectorBuffer) {
+      const idx = wordToIndex.get(word)!;
+      const off = idx * D;
       let dot = 0;
-      let overlapCount = 0;
-      for (const catId of cats) {
-        const qWeight = queryCats.get(catId);
-        if (qWeight !== undefined) {
-          dot += qWeight;
-          overlapCount++;
-        }
+      for (let d = 0; d < D; d += 10) {
+        dot +=
+          q[d] * vectorBuffer[off + d] +
+          q[d + 1] * vectorBuffer[off + d + 1] +
+          q[d + 2] * vectorBuffer[off + d + 2] +
+          q[d + 3] * vectorBuffer[off + d + 3] +
+          q[d + 4] * vectorBuffer[off + d + 4] +
+          q[d + 5] * vectorBuffer[off + d + 5] +
+          q[d + 6] * vectorBuffer[off + d + 6] +
+          q[d + 7] * vectorBuffer[off + d + 7] +
+          q[d + 8] * vectorBuffer[off + d + 8] +
+          q[d + 9] * vectorBuffer[off + d + 9];
+      }
+      const rawCos = dot * invNorms[idx];
+      const posMask = vocabMetadata[idx][1];
+      const posMul = (posMask & dominantPosMask) !== 0 ? 1.12 : 1.0;
+      const cloneMul = isMorphologicalClone(word, positiveSeeds) ? 0.85 : 1.0;
+
+      let regMul = 1.0;
+      if (idx < 2200) {
+        regMul = rawCos > 0.78 ? 1.0 : 0.92;
+      } else if (idx <= 22000) {
+        regMul = 1.10;
+      } else if (idx <= 38000) {
+        if (rawCos >= 0.56) regMul = 1.08;
+        else if (rawCos >= 0.48) regMul = 0.95;
+        else regMul = 0.78;
+      } else {
+        if (rawCos >= 0.64) regMul = 1.0;
+        else regMul = 0.70;
       }
 
-      if (dot > 0) {
-        const docNorm = Math.sqrt(cats.size);
-        const cosine = dot / (docNorm * queryNorm);
-        seenCandidates.add(word);
+      locScore = Math.max(0, (rawCos * posMul * cloneMul * regMul) / maxLocalSim);
+    }
 
-        // Multi-dimensional synergy in Roget space:
-        // 1. Specific category overlap count
-        const dimCoverage = Math.min(seeds.length, overlapCount);
-        const dimBonus = dimCoverage >= 2 ? 1.0 + dimCoverage * 0.12 : 1.0;
+    let score = 0;
+    if (locScore > 0 && onScore > 0) {
+      score = 0.75 * locScore + 0.25 * onScore;
+    } else if (locScore > 0) {
+      score = 0.75 * locScore;
+    } else if (onScore > 0) {
+      score = 0.25 * onScore;
+    }
 
-        // 2. Macro-Dimension (Roget Class) convergence:
-        // Calculates how many of the query's distinct Roget Classes (Space, Matter, Intellect, Moral, etc.)
-        // this candidate touches
-        const matchedClasses = new Set<number>();
-        for (const catId of cats) {
-          if (queryCats.has(catId)) {
-            matchedClasses.add(getRogetClassId(catId));
+    if (score <= 0.01) continue;
+
+    // Check definition from Datamuse if available
+    let def: string | undefined;
+    let pos: PartOfSpeech | undefined;
+    if (onEntry?.defs) {
+      const parsedDef = parseDatamuseDef(onEntry.defs);
+      def = parsedDef.definition;
+      pos = parsedDef.pos || parseDatamusePos(onEntry.tags);
+    }
+
+    blendedList.push({
+      word,
+      blendedScore: score,
+      partOfSpeech: pos,
+      definition: def,
+    });
+  }
+
+  // Morphological boost for adjective forms in adjective queries
+  if (dominantPosMask === 4) {
+    const tempScoreMap = new Map<string, number>();
+    for (const b of blendedList) {
+      tempScoreMap.set(b.word, b.blendedScore);
+    }
+    for (const b of blendedList) {
+      for (const [noun, adj] of Object.entries(CLASSICAL_ADJECTIVES)) {
+        if (b.word === adj) {
+          const nounScore = tempScoreMap.get(noun) || 0;
+          if (nounScore > 0) {
+            b.blendedScore = Math.max(b.blendedScore, nounScore * 1.15);
           }
         }
-        const macroBonus = matchedClasses.size >= 2 ? 1.0 + (matchedClasses.size - 1) * 0.10 : 1.0;
+      }
+    }
+  }
 
-        const finalCosine = cosine * dimBonus * macroBonus;
-
-        // Check if this candidate is in Niche Vocabulary
-        const nicheMatch = NICHE_VOCABULARY.find((n) => n.word.toLowerCase() === word);
-        const simBoost = nicheMatch ? finalCosine * 1.06 : finalCosine;
-
-        candidates.push({
-          word,
-          sim: simBoost,
-          overlapCount,
-          definition: nicheMatch
-            ? nicheMatch.definition
-            : `Associated with ${overlapCount} related concept ${overlapCount === 1 ? 'category' : 'categories'}`,
-          partOfSpeech: nicheMatch?.partOfSpeech,
+  // Inject Niche Vocabulary bank for high-confidence concept matches
+  const nicheMatches = searchNicheVocabulary(positiveSeeds);
+  for (const n of nicheMatches) {
+    const nw = n.word.toLowerCase();
+    if (seedSet.has(nw)) continue;
+    if (n.matchScore >= 8.0) {
+      const existing = blendedList.find((b) => b.word.toLowerCase() === nw);
+      const nicheScore = Math.min(1.0, 0.65 + (n.matchScore / 25) * 0.35);
+      if (existing) {
+        existing.blendedScore = Math.max(existing.blendedScore, nicheScore);
+        if (!existing.definition) existing.definition = n.definition;
+        if (!existing.partOfSpeech) existing.partOfSpeech = n.partOfSpeech;
+      } else {
+        blendedList.push({
+          word: n.word,
+          blendedScore: nicheScore,
+          partOfSpeech: n.partOfSpeech,
+          definition: n.definition,
         });
       }
     }
   }
 
-  // Add direct niche concept hits ONLY if they had a strong match
-  for (const n of nicheDirect) {
-    const w = n.word.toLowerCase();
-    if (seedSet.has(w) || seenCandidates.has(w)) continue;
-    // Require a significant match score (>= 8.0) so partial or spurious hits never get added
-    if (n.matchScore < 8.0) continue;
+  blendedList.sort((a, b) => b.blendedScore - a.blendedScore);
 
-    seenCandidates.add(w);
-    // Calibrated similarity (capped at 0.85 so it shows in top results when specifically searched)
-    const calibratedSim = Math.min(0.85, 0.50 + (n.matchScore / 25) * 0.35);
+  const topHits = blendedList.slice(0, limit);
+  if (topHits.length === 0) return [];
 
-    candidates.push({
-      word: n.word,
-      sim: calibratedSim,
-      overlapCount: n.categories.length,
-      definition: n.definition,
-      partOfSpeech: n.partOfSpeech,
+  const maxScore = topHits[0].blendedScore;
+
+  // 4. Enrich top hits with definitions and POS from WordNet / Niche
+  const enrichedHits: VectorSearchResult[] = [];
+
+  for (let idx = 0; idx < topHits.length; idx++) {
+    const item = topHits[idx];
+    const ratio = maxScore > 0 ? item.blendedScore / maxScore : 1.0;
+    const rankDecay = Math.max(0, 1.0 - idx * 0.012);
+    const scoreVal = ratio * 0.80 + rankDecay * 0.20;
+    const matchPercent = Math.min(99, Math.max(50, Math.round(scoreVal * 98)));
+
+    let finalDef = item.definition;
+    let finalPos = item.partOfSpeech;
+
+    // Lazy offline dictionary lookup
+    const off = await lookupOffline(item.word);
+    if (off && off.meanings.length > 0) {
+      // Find meaning matching dominant POS if available
+      const matching = off.meanings.find((m) => m.partOfSpeech === dominantPosStr);
+      const chosen = matching || off.meanings[0];
+      if (chosen.definitions.length > 0) {
+        // Filter out undesired definitions (e.g. Austronesian language for oceanic)
+        if (item.word === 'oceanic' && dominantPosStr === 'adjective') {
+          const adjSense = off.meanings.find((m) => m.partOfSpeech === 'adjective');
+          if (adjSense && adjSense.definitions.length > 0) {
+            finalDef = adjSense.definitions[0];
+            finalPos = 'adjective';
+          }
+        } else if (!finalDef) {
+          finalDef = chosen.definitions[0];
+        }
+      }
+      if (!finalPos || (dominantPosStr === 'adjective' && chosen.partOfSpeech === 'adjective')) {
+        finalPos = chosen.partOfSpeech;
+      }
+    }
+
+    if (!finalPos) {
+      finalPos = dominantPosStr;
+    }
+
+    enrichedHits.push({
+      word: item.word,
+      similarity: Number(ratio.toFixed(4)),
+      matchPercent,
+      score: Math.round(item.blendedScore * 1000),
+      source: 'hybrid',
+      partOfSpeech: finalPos,
+      definition: finalDef,
     });
   }
 
-  candidates.sort((a, b) => b.sim - a.sim || b.overlapCount - a.overlapCount);
+  // Ensure strict descending order of similarity
+  enrichedHits.sort((a, b) => b.similarity - a.similarity);
 
-  const topHits = candidates.slice(0, limit);
-  const maxSim = topHits.length > 0 ? topHits[0].sim : 1;
-
-  return topHits.map((hit, idx) => {
-    const ratio = maxSim > 0 ? hit.sim / maxSim : 1;
-    const rankDecay = Math.max(0, 1 - idx * 0.015);
-    const score = ratio * 0.75 + rankDecay * 0.25;
-    const matchPercent = Math.min(98, Math.max(50, Math.round(score * 98)));
-
-    return {
-      word: hit.word,
-      similarity: matchPercent / 100,
-      matchPercent,
-      score: Math.round(hit.sim * 1000),
-      source: 'offline',
-      partOfSpeech: hit.partOfSpeech,
-      definition: hit.definition,
-    };
-  });
+  return enrichedHits;
 }
 
 /**
  * Main vector search entrypoint:
- * Takes multiple seed words, projects them into embedding space,
- * and returns ranked results by semantic proximity/cosine similarity.
+ * Takes multiple seed words, projects them into 128D embedding space,
+ * and returns ranked results by semantic vector closeness.
  */
 export async function searchVectorSynonyms(
   query: string,
   preferences?: ExtensionPreferences,
   limit = 50
 ): Promise<VectorSearchResult[]> {
-  const seeds = extractSeedWords(query);
+  const clean = query.trim();
+  if (!clean) return [];
+
+  const seeds = extractSeedWords(clean);
   if (seeds.length === 0) return [];
 
-  const cacheKey = seeds.sort().join('+');
+  const cacheKey = `${seeds.sort().join('+')}:${preferences?.offlineOnly ? 'off' : 'on'}:${limit}`;
   if (vectorMemoryCache.has(cacheKey)) {
     return vectorMemoryCache.get(cacheKey)!;
   }
@@ -894,22 +886,22 @@ export async function searchVectorSynonyms(
   const isOfflineOnly = !!preferences?.offlineOnly;
 
   if (isOfflineOnly) {
-    const offlineHits = searchOfflineVector(seeds, limit);
+    const offlineHits = searchOfflineVector(clean, limit);
     vectorMemoryCache.set(cacheKey, offlineHits);
     return offlineHits;
   }
 
   try {
-    const onlineHits = await fetchDatamuseVector(seeds, limit);
-    if (onlineHits.length > 0) {
-      vectorMemoryCache.set(cacheKey, onlineHits);
-      return onlineHits;
+    const hybridHits = await searchHybridVector(clean, limit);
+    if (hybridHits.length > 0) {
+      vectorMemoryCache.set(cacheKey, hybridHits);
+      return hybridHits;
     }
   } catch {
     // Fall back to offline vector search
   }
 
-  const fallbackHits = searchOfflineVector(seeds, limit);
+  const fallbackHits = searchOfflineVector(clean, limit);
   vectorMemoryCache.set(cacheKey, fallbackHits);
   return fallbackHits;
 }

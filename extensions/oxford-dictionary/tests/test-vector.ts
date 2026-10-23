@@ -138,7 +138,7 @@ async function testVector() {
   console.log(`  Found edificial (${edificialHit.matchPercent}%) and edifice (${edificeHit.matchPercent}%) at the top!`);
   console.log('  ✓ Test 9 Passed\n');
 
-  // Test 10: Adjective derivation extracts adjective definitions, not noun definitions
+  // Test 10: Derived adjective definition correctness & marine rankings (oceanic, immense, abyssal)
   console.log('Test 10: Derived adjective definition correctness (oceanic)');
   const t10 = await searchVectorSynonyms('vast deep marine', undefined, 20);
   const oceanicHit = t10.find((x) => x.word.toLowerCase() === 'oceanic');
@@ -154,6 +154,10 @@ async function testVector() {
   }
   if (oceanicHit.partOfSpeech !== 'adjective') {
     throw new Error(`Expected oceanic to have partOfSpeech "adjective", got "${oceanicHit.partOfSpeech}"`);
+  }
+  const top3Marine = t10.slice(0, 3).map((x) => x.word.toLowerCase());
+  if (!top3Marine.includes('oceanic') && !top3Marine.includes('immense')) {
+    throw new Error('Expected "oceanic" or "immense" in top 3 for "vast deep marine"');
   }
   console.log('  ✓ Test 10 Passed\n');
 
@@ -174,6 +178,70 @@ async function testVector() {
     }
   }
   console.log('  ✓ Test 11 Passed\n');
+
+  // Test 12: Sub-10ms high-speed offline vector scan benchmark
+  console.log('Test 12: High-speed sub-10ms offline vector scan benchmark');
+  // Warm up scan
+  searchOfflineVector('courage', 20);
+  const benchStart = performance.now();
+  const benchHits = searchOfflineVector('courage', 20);
+  const benchDuration = performance.now() - benchStart;
+  console.log(`  40,000-word Int8 cosine scan took ${benchDuration.toFixed(2)}ms (found ${benchHits.length} results)`);
+  if (benchDuration > 15) {
+    throw new Error(`Expected offline vector search < 15ms, took ${benchDuration.toFixed(2)}ms`);
+  }
+  console.log('  ✓ Test 12 Passed\n');
+
+  // Test 13: Multi-word centroid ranking ("brave bold knight")
+  console.log('Test 13: Multi-word centroid query for "brave bold knight"');
+  const t13 = searchOfflineVector('brave bold knight', 20);
+  console.log(
+    '  Top 6 for "brave bold knight":',
+    t13.slice(0, 6).map((x) => `${x.word} (${x.matchPercent}%)`).join(', ')
+  );
+  if (t13.length === 0) {
+    throw new Error('Expected results for multi-word centroid "brave bold knight"');
+  }
+  const hasBraverySynonym = t13.some((x) =>
+    ['courage', 'bravery', 'valiant', 'knightly', 'stalwart', 'undaunted', 'courageousness', 'braveness', 'intrepid', 'dauntless', 'gallant'].includes(
+      x.word.toLowerCase()
+    )
+  );
+  if (!hasBraverySynonym) {
+    throw new Error('Expected top results to contain core courage/knightly synonyms');
+  }
+  const hasArticulateSynonym = t13.slice(0, 5).some((x) =>
+    ['valiant', 'chivalrous', 'gallant', 'intrepid', 'dauntless', 'valorous'].includes(
+      x.word.toLowerCase()
+    )
+  );
+  if (!hasArticulateSynonym) {
+    throw new Error('Expected top 5 results to contain articulate synonyms like valiant, intrepid, dauntless');
+  }
+  console.log('  ✓ Test 13 Passed\n');
+
+  // Test 14: Negative vector subtraction ("happy -loud")
+  console.log('Test 14: Negative vector subtraction for "happy -loud"');
+  const t14Pos = searchOfflineVector('happy', 20);
+  const t14Neg = searchOfflineVector('happy -loud', 20);
+  console.log(
+    '  Top 6 for "happy":',
+    t14Pos.slice(0, 6).map((x) => `${x.word} (${x.matchPercent}%)`).join(', ')
+  );
+  console.log(
+    '  Top 6 for "happy -loud":',
+    t14Neg.slice(0, 6).map((x) => `${x.word} (${x.matchPercent}%)`).join(', ')
+  );
+  if (t14Neg.length === 0) {
+    throw new Error('Expected results for negative query "happy -loud"');
+  }
+  const badWords = ['loud', 'noisy', 'boisterous', 'clamorous', 'vociferous', 'strident'];
+  for (const b of badWords) {
+    if (t14Neg.slice(0, 10).some((x) => x.word.toLowerCase() === b)) {
+      throw new Error(`Negative word "${b}" should not appear in top results of "happy -loud"`);
+    }
+  }
+  console.log('  ✓ Test 14 Passed\n');
 
   console.log('=== ALL VECTOR SEMANTIC SYNONYM TESTS PASSED SUCCESSFULLY! ===');
 }

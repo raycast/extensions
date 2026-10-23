@@ -127,6 +127,7 @@
   },
   "scripts": {
     "build": "ray build -e dist -o dist && node build-sync.js",
+    "build:vector-db": "tsx scripts/build-vector-db.ts",
     "test": "tsx tests/test-dictionary.ts && tsx tests/test-roget.ts && tsx tests/test-reverse.ts && tsx tests/test-vector.ts",
     "dev": "ray develop",
     "lint": "ray lint",
