@@ -8,12 +8,12 @@ private struct BridgeError: Error, CustomStringConvertible {
 
 @raycast func redactImage(
   outputPath: String, style: String, padding: String, categories: String,
-  extraWords: String, recognition: String, customRegex: String, inputPath: String?, forReview: Bool
+  extraWords: String, recognition: String, customRegex: String, inputPath: String?, forReview: Bool, blurFaces: Bool
 ) throws -> Report {
   do {
     let configuration = try parseConfiguration(
       inputPath: inputPath, outputPath: outputPath, style: style, padding: padding,
-      categories: categories, extraWords: extraWords, recognition: recognition, customRegex: customRegex
+      categories: categories, extraWords: extraWords, recognition: recognition, customRegex: customRegex, blurFaces: blurFaces
     )
     return try redact(configuration, forReview: forReview)
   } catch {
@@ -36,9 +36,9 @@ private struct BridgeError: Error, CustomStringConvertible {
   NSPasteboard.general.changeCount
 }
 
-@raycast func updateReviewImage(sourcePath: String, key: String, boxesJSON: String, style: String, outputPath: String) throws -> Int {
+@raycast func updateReviewImage(sourcePath: String, key: String, masksJSON: String, style: String, outputPath: String, blurFaces: Bool) throws -> Int {
   do {
-    return try renderReview(sourcePath: sourcePath, key: key, boxesJSON: boxesJSON, style: style, outputPath: outputPath)
+    return try renderReview(sourcePath: sourcePath, key: key, masksJSON: masksJSON, style: style, outputPath: outputPath, blurFaces: blurFaces)
   } catch {
     throw BridgeError(description: error.localizedDescription)
   }

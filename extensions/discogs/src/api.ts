@@ -6,6 +6,12 @@ const USER_AGENT = "RaycastDiscogsSearch/1.0";
 
 function getDiscogsHeaders() {
   const { token } = getPreferenceValues<Preferences>();
+  if (!token) {
+    throw new Error(
+      "Missing Personal Access Token. Please update your extension preferences and try again.",
+    );
+  }
+
   return {
     "User-Agent": USER_AGENT,
     Authorization: `Discogs token=${token}`,
