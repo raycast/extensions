@@ -1,0 +1,130 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "taskit",
+  "title": "Taskit",
+  "description": "Create tasks and work your lists from Raycast",
+  "icon": "icon.png",
+  "author": "sridhar_chaitanya_gudur",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Add a task from a sentence. Dates, tags, and priority are parsed for you.",
+      "mode": "view",
+      "subtitle": "Taskit",
+      "keywords": [
+        "add",
+        "new",
+        "todo",
+        "capture"
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Buy milk tomorrow",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "my-tasks",
+      "title": "My Tasks",
+      "description": "Browse Today, Inbox, Upcoming, Overdue, and Backlog",
+      "mode": "view",
+      "subtitle": "Taskit",
+      "keywords": [
+        "today",
+        "inbox",
+        "upcoming",
+        "overdue",
+        "backlog"
+      ]
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "description": "Find a task by words in its title",
+      "mode": "view",
+      "subtitle": "Taskit",
+      "keywords": [
+        "find",
+        "query"
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Today in Menu Bar",
+      "description": "Show today's open tasks in the menu bar",
+      "mode": "menu-bar",
+      "subtitle": "Taskit",
+      "interval": "10m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Create a task from a sentence. The Taskit API parses dates, priority, and tags, then saves the task. Optional list is a list name or id. Returns the created task."
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "description": "Search the user's tasks by text. Does not change anything."
+    },
+    {
+      "name": "list-tasks",
+      "title": "List Tasks",
+      "description": "Read open tasks for a smart view (today, inbox, upcoming, overdue, backlog) or for one list. Pass a list name or id to read that list instead of a view. Defaults to today."
+    },
+    {
+      "name": "complete-task",
+      "title": "Complete Task",
+      "description": "Mark a task completed. Returns the updated task."
+    },
+    {
+      "name": "update-task",
+      "title": "Update Task",
+      "description": "Change a task's title, list, schedule (startAt), deadline (dueAt), or priority. Dates must be ISO-8601 with a timezone offset. Pass an empty string to clear a date. Returns the updated task."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiBaseUrl",
+      "title": "API Base URL",
+      "description": "Leave the default. Use http://localhost:7071 only when the API is running on this Mac.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://func-taskit-dev-872f21.azurewebsites.net"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "~5.9.3",
+    "vitest": "^3.0.8"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  }
+}
