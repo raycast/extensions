@@ -10,7 +10,9 @@ export async function loadFlights() {
         throw new Error('Flighty is not installed. Please install it to look up your flights.')
     }
     if (!existsSync(flightDatabasePath)) {
-        throw new Error('Unable to find Flighty data. Open Flighty and let your flights sync, then try again.')
+        throw new Error(
+            'Unable to find or access Flighty data. Open Flighty and let your flights sync. If access is blocked, enable Full Disk Access for Raycast in System Settings > Privacy & Security, then quit and reopen Raycast.'
+        )
     }
 
     let rows: unknown[]
