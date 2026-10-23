@@ -8,6 +8,7 @@ import { saveSession, tokenStore, write } from "../src/lib/store";
 import {
   cacheValues,
   credentials,
+  LocalStorage,
   open,
   preferences,
   showHUD,
@@ -475,6 +476,70 @@ describe("Reports", () => {
     });
     await settle();
     expect(reportCalls()).toBe(4);
+  });
+  it("keeps the newer selection when an older report finishes later", async () => {
+    await act(async () => {
+      renderer = create(<Reports />);
+    });
+    await settle();
+    const total = () =>
+      nodes("item").find((n) => n.props.title === "Total Time")!.props
+        .accessories[1].text;
+    expect(total()).toBe("2h 0m");
+    // Hold the older report's cache write open while the selection changes back.
+    const original = LocalStorage.setItem.getMockImplementation()!;
+    let release = () => {};
+    LocalStorage.setItem.mockImplementation(
+      async (key: string, value: string) => {
+        if (key.includes("report:"))
+          await new Promise<void>((resolve) => (release = resolve));
+        return original(key, value);
+      },
+    );
+    const older = {
+      ...report,
+      summary: { ...report.summary, totalDurationMs: 32_400_000 },
+    };
+    fetcher.mockImplementation(async (url: string) =>
+      url.includes("/api/v1/report") ? Response.json(older) : baseFetch(url),
+    );
+    try {
+      await act(async () => nodes("dropdown")[0].props.onChange("last-month"));
+      await settle();
+      await act(async () => nodes("dropdown")[0].props.onChange("this-week"));
+      await settle();
+      expect(total()).toBe("2h 0m");
+      await act(async () => release());
+      await settle();
+      expect(total()).toBe("2h 0m");
+    } finally {
+      LocalStorage.setItem.mockImplementation(original);
+    }
+  });
+  it("never shows a report that finished after another account signed in", async () => {
+    const pending: ((response: Response) => void)[] = [];
+    fetcher.mockImplementation(async (url: string) =>
+      url.includes("/api/v1/report")
+        ? new Promise<Response>((resolve) => pending.push(resolve))
+        : baseFetch(url),
+    );
+    await act(async () => {
+      renderer = create(<Reports />);
+    });
+    await settle();
+    await saveSession("another-account", 3600);
+    await act(async () =>
+      pending.forEach((resolve) => resolve(Response.json(report))),
+    );
+    await settle();
+    await act(async () => renderer!.unmount());
+    fetcher.mockImplementation(async (url: string) => baseFetch(url));
+    const before = reportCalls();
+    await act(async () => {
+      renderer = create(<Reports />);
+    });
+    await settle();
+    expect(reportCalls()).toBe(before + 2);
   });
   it("stops loading when returning to a cached timeframe", async () => {
     await act(async () => {

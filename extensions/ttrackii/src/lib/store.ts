@@ -103,6 +103,13 @@ export async function accessToken() {
   }
   return tokens.accessToken;
 }
+/** Identifies the current session without exposing it; cache keys include it. */
+export async function sessionKey() {
+  const tokens = await tokenStore().getTokens();
+  return tokens?.accessToken
+    ? createHash("sha256").update(tokens.accessToken).digest("hex").slice(0, 16)
+    : undefined;
+}
 export async function isSignedIn() {
   const tokens = await tokenStore().getTokens();
   const signedIn = Boolean(tokens?.accessToken && !tokens.isExpired());

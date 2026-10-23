@@ -13,7 +13,7 @@ import {
   type Timeframe,
 } from "./lib/domain";
 import { message } from "./lib/actions";
-import { origin, read, write, type Snapshot } from "./lib/store";
+import { origin, read, sessionKey, write, type Snapshot } from "./lib/store";
 import { useAuth, withAuth } from "./components/auth";
 import {
   AccountSection,
@@ -24,8 +24,9 @@ import {
 import type { Group, Report, Resources } from "./lib/types";
 
 // Each timeframe costs two requests (period + comparison); keep them briefly.
-// Stored per server and wiped on sign-out and sign-in, so another account's
-// report (every personal workspace is "personal") is never reused.
+// Keyed by session (every personal workspace is "personal"), so a report can
+// never be shown to another account, even one written by a request that
+// finished after a sign-out. Sign-out and sign-in also wipe the cache.
 const CACHE_MS = 2 * 60_000;
 
 function share(part: number, total: number) {
@@ -48,10 +49,10 @@ function Reports() {
     if (!ws.workspaceId) return;
     const workspaceId = ws.workspaceId;
     const run = ++generation.current;
-    const key = `report:${workspaceId}|${range.from}|${range.to}`;
     setError("");
     setLoading(true);
     void (async () => {
+      const key = `report:${await sessionKey()}|${workspaceId}|${range.from}|${range.to}`;
       const saved =
         revision === 0
           ? await read<Snapshot<[Report, Report]>>(key)
@@ -67,12 +68,12 @@ function Reports() {
         resources(workspaceId).catch(() => undefined),
       ]);
       if (generation.current !== run) return;
+      setData([currentPeriod, previousPeriod]);
+      setAvailable(lookup);
       await write(key, {
         savedAt: Date.now(),
         data: [currentPeriod, previousPeriod],
       });
-      setData([currentPeriod, previousPeriod]);
-      setAvailable(lookup);
     })()
       .catch((error) => {
         if (generation.current !== run || auth.handle(error)) return;
@@ -82,6 +83,9 @@ function Reports() {
       .finally(() => {
         if (generation.current === run) setLoading(false);
       });
+    return () => {
+      generation.current++;
+    };
   }, [ws.workspaceId, range.from, range.to, revision]);
 
   useEffect(() => {
