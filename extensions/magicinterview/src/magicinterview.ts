@@ -38,7 +38,7 @@ export async function callTool<T>(
       }),
     );
     const result = await client.callTool({
-      name: write ? "execute_tool" : "read_tool",
+      name: write ? "magicinterview_execute_tool" : "magicinterview_read_tool",
       arguments: { toolName: operation, arguments: args },
     });
     if (result.isError) {
