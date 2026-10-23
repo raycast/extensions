@@ -1,6 +1,6 @@
 # Changelog
 
-## [Grid Size] - {PR_MERGE_DATE}
+## [Grid Size] - 2026-10-23
 
 - Add a Grid Size preference: Small (8 columns, the new default), Medium (6 columns, the previous layout) or Large (4 columns).
 - Add a Grid Size submenu to the Action Panel. The choice is remembered until the preference is changed.
