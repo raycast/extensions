@@ -12,6 +12,7 @@ const expiry = 24 * 60 * 60 * 1000;
 type Session = {
   directory: string;
   style: string;
+  blurFaces: boolean;
   reviewKey?: string;
   width: number;
   height: number;
@@ -239,6 +240,7 @@ async function scanImage(
 ): Promise<Scan> {
   const prefs = getPreferenceValues<Preferences>();
   const style = prefs.style || "blackout";
+  const blurFaces = prefs.blurFaces ?? false;
   const recognition = recognitionOverride || prefs.recognition || "fast";
   const padding = prefs.padding?.trim() || "4";
   const selection = (await loadCategories()).join(",");
@@ -266,6 +268,7 @@ async function scanImage(
         ? windows.redactImage({
             outputPath: output,
             style,
+            blurFaces,
             padding: Number(padding),
             categories: new Set(selected),
             extraWords: prefs.extraWords || "",
@@ -284,6 +287,7 @@ async function scanImage(
               prefs.customRegex || "",
               inputPath,
               forReview,
+              blurFaces,
             ),
           ),
     );
@@ -303,6 +307,7 @@ async function scanImage(
     sessions.set(scan, {
       directory,
       style,
+      blurFaces,
       reviewKey: typeof reviewKey === "string" ? reviewKey : undefined,
       width,
       height,
@@ -406,9 +411,10 @@ export async function updateRedactions(scan: Scan, excludedIds: readonly string[
           native.updateReviewImage(
             path.join(session.directory, "source.sealed"),
             session.reviewKey!,
-            JSON.stringify(included.map((hit) => hit.box)),
+            JSON.stringify(included.map(({ kind, box }) => ({ kind, box }))),
             session.style,
             output,
+            session.blurFaces,
           ),
         ),
       );

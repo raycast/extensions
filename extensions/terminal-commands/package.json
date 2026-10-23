@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "terminal-commands",
+  "title": "Terminal Commands",
+  "description": "Save your shell commands and run them in Terminal straight from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "alvarez",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "commands",
+      "title": "My Commands",
+      "subtitle": "Terminal Commands",
+      "description": "List your saved commands, run them in Terminal, or create new ones.",
+      "mode": "view"
+    },
+    {
+      "name": "run-command",
+      "title": "Run Saved Command",
+      "subtitle": "Terminal Commands",
+      "description": "Runs a saved command in Terminal. Target of the quicklinks created from My Commands; opens My Commands when launched directly.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.6.0",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.9",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

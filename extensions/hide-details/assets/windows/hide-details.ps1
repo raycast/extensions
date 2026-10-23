@@ -49,7 +49,7 @@ function Get-Innermost([Exception]$exception) {
   $exception
 }
 
-function Sequence { [HideDetails.Native]::GetClipboardSequenceNumber() }
+function Get-ClipboardSequence { [HideDetails.Native]::GetClipboardSequenceNumber() }
 
 function Copy-Bitmap([System.Drawing.Image]$image) {
   $copy = New-Object System.Drawing.Bitmap $image.Width, $image.Height, ([System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
@@ -79,7 +79,7 @@ function Read-StreamBitmap($value) {
 }
 
 function Read-ClipboardBitmap {
-  $before = Sequence
+  $before = Get-ClipboardSequence
   $bitmap = $null
   $data = [System.Windows.Forms.Clipboard]::GetDataObject()
   if ($data) {
@@ -95,7 +95,7 @@ function Read-ClipboardBitmap {
       }
     }
   }
-  if ((Sequence) -ne $before) { throw $Changed }
+  if ((Get-ClipboardSequence) -ne $before) { throw $Changed }
   if (-not $bitmap) { throw $NoImage }
   @{ Bitmap = $bitmap; ChangeCount = $before }
 }
@@ -198,17 +198,20 @@ function Render([System.Drawing.Bitmap]$source, $regions, [string]$style, [strin
     $attributes = New-Object System.Drawing.Imaging.ImageAttributes
     $attributes.SetWrapMode([System.Drawing.Drawing2D.WrapMode]::TileFlipXY)
     foreach ($region in $regions) {
+      $regionStyle = $style
+      if ($region.PSObject.Properties['style']) { $regionStyle = [string]$region.style }
+      if ($regionStyle -notin @('blackout', 'blur', 'pixelate')) { throw 'Invalid redaction style.' }
       $x = [int]$region.x; $y = [int]$region.y; $width = [int]$region.width; $height = [int]$region.height
       if ($x -lt 0 -or $y -lt 0 -or $width -le 0 -or $height -le 0 -or $x + $width -gt $source.Width -or $y + $height -gt $source.Height) {
         throw 'Redaction region exceeds the image. No image was published.'
       }
       $target = New-Object System.Drawing.Rectangle $x, $y, $width, $height
-      if ($style -eq 'blackout') {
+      if ($regionStyle -eq 'blackout') {
         $graphics.FillRectangle([System.Drawing.Brushes]::Black, $target)
         continue
       }
       # Pixelate keeps hard blocks; blur downsamples smoothly and scales back up.
-      if ($style -eq 'pixelate') {
+      if ($regionStyle -eq 'pixelate') {
         $block = [Math]::Max(8, [int][Math]::Floor([Math]::Min($width, $height) / 8))
         $mode = [System.Drawing.Drawing2D.InterpolationMode]::NearestNeighbor
       } else {
@@ -220,7 +223,7 @@ function Render([System.Drawing.Bitmap]$source, $regions, [string]$style, [strin
       $small = New-Object System.Drawing.Bitmap $smallWidth, $smallHeight, ([System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
       $smallGraphics = [System.Drawing.Graphics]::FromImage($small)
       try {
-        $smallGraphics.InterpolationMode = if ($style -eq 'pixelate') { [System.Drawing.Drawing2D.InterpolationMode]::Bilinear } else { $mode }
+        $smallGraphics.InterpolationMode = if ($regionStyle -eq 'pixelate') { [System.Drawing.Drawing2D.InterpolationMode]::Bilinear } else { $mode }
         $smallGraphics.DrawImage($source, (New-Object System.Drawing.Rectangle 0, 0, $smallWidth, $smallHeight),
           $x, $y, $width, $height, [System.Drawing.GraphicsUnit]::Pixel, $attributes)
       } finally { $smallGraphics.Dispose() }
@@ -273,7 +276,7 @@ function Invoke-Copy($request) {
   try { $bytes = [System.IO.File]::ReadAllBytes($request.outputPath); $bitmap = Read-BitmapBytes $bytes }
   catch { throw 'Could not read the redacted image. Scan the current clipboard again.' }
   try {
-    if ($null -ne $request.expectedChangeCount -and (Sequence) -ne [uint32]$request.expectedChangeCount) { throw $Changed }
+    if ($null -ne $request.expectedChangeCount -and (Get-ClipboardSequence) -ne [uint32]$request.expectedChangeCount) { throw $Changed }
     $data = New-Object System.Windows.Forms.DataObject
     $data.SetData('PNG', $false, (New-Object System.IO.MemoryStream (, $bytes)))
     $data.SetData([System.Windows.Forms.DataFormats]::Bitmap, $true, $bitmap)
@@ -288,7 +291,7 @@ try {
   switch ($request.operation) {
     'scan' { Invoke-Scan $request }
     'copy' { Invoke-Copy $request }
-    'changeCount' { Write-Response @{ changeCount = (Sequence) } }
+    'changeCount' { Write-Response @{ changeCount = (Get-ClipboardSequence) } }
     default { throw 'Unknown operation.' }
   }
   exit 0
