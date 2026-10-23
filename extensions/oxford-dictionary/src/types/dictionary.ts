@@ -77,6 +77,7 @@ export interface VectorSearchResult {
   similarity: number; // 0.0 to 1.0 (e.g. 0.98 = 98%)
   matchPercent: number; // 0 to 100
   score?: number;
+  rawScore?: number;
   partOfSpeech?: PartOfSpeech;
   definition?: string;
   source: 'online' | 'offline' | 'hybrid';

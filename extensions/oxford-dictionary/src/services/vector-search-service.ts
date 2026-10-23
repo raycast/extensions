@@ -456,6 +456,7 @@ export function searchOfflineVector(
       similarity: Number(ratio.toFixed(4)),
       matchPercent,
       score: Math.round(cand.sim * 1000),
+      rawScore: cand.sim,
       source: 'offline',
       partOfSpeech: pos,
       definition,
@@ -525,7 +526,7 @@ function parseDatamuseDef(defs?: string[]): { pos?: PartOfSpeech; definition?: s
 
 /**
  * Hybrid Online Mode:
- * Blends local 128D vector cosine score (70% weight) with Datamuse rel_syn + ml (30% weight),
+ * Blends local 100D vector cosine score (75% weight) with Datamuse rel_syn + ml (25% weight),
  * subtracting rel_ant antonyms.
  */
 async function searchHybridVector(
@@ -539,17 +540,25 @@ async function searchHybridVector(
     return [];
   }
 
-  // 1. Local 128D Vector Search
+  // 1. Local 100D Vector Search
   const localHits = searchOfflineVector(query, 120);
   const localScoreMap = new Map<string, number>();
-  const maxLocalSim = localHits.length > 0 ? localHits[0].similarity : 1.0;
+  const maxRawLocal =
+    localHits.length > 0
+      ? Math.max(
+          ...localHits.map((h) => (h.rawScore !== undefined ? h.rawScore : (h.score || 0) / 1000)),
+          0.0001
+        )
+      : 1.0;
 
   for (const h of localHits) {
-    localScoreMap.set(h.word.toLowerCase(), h.similarity / maxLocalSim);
+    const raw = h.rawScore !== undefined ? h.rawScore : (h.score || 0) / 1000;
+    localScoreMap.set(h.word.toLowerCase(), Math.max(0, raw / maxRawLocal));
   }
 
   // 2. Online Datamuse Queries (rel_syn, ml, and rel_ant)
   const onlinePromises: Promise<{ type: 'pos' | 'ant'; items: DatamuseItem[]; weight: number }>[] = [];
+  const directAntonyms = new Set<string>();
 
   // Means-like joint query
   if (positiveSeeds.length > 0) {
@@ -612,7 +621,7 @@ async function searchHybridVector(
           });
         }
       } else if (type === 'ant') {
-        // Subtract antonyms
+        directAntonyms.add(w);
         if (existing) {
           existing.score -= rrf * 1.5;
         } else {
@@ -632,7 +641,7 @@ async function searchHybridVector(
     if (v.score > maxOnline) maxOnline = v.score;
   }
 
-  // 3. Blend Scores: 70% Local + 30% Online
+  // 3. Blend Scores: 75% Local + 25% Online
   const candidateKeys = new Set<string>([
     ...localScoreMap.keys(),
     ...Array.from(onlineScoreMap.keys()).filter((k) => (onlineScoreMap.get(k)?.score || 0) > 0),
@@ -648,16 +657,31 @@ async function searchHybridVector(
     }
   }
 
-  // Pre-calculate query centroid vector for on-demand local scoring
+  // Pre-calculate query centroid vector and individual seed vectors for on-demand local scoring
   const q = new Float32Array(D);
+  const positiveSeedVecs: Float32Array[] = [];
+
   for (const s of positiveSeeds) {
     let idx = wordToIndex.get(s);
     if (idx === undefined && CLASSICAL_ADJECTIVES[s]) {
       idx = wordToIndex.get(CLASSICAL_ADJECTIVES[s]);
     }
     if (idx !== undefined && vectorBuffer) {
+      const sv = new Float32Array(D);
       const off = idx * D;
-      for (let d = 0; d < D; d++) q[d] += vectorBuffer[off + d] / 127.0;
+      let sSumSq = 0;
+      for (let d = 0; d < D; d++) {
+        const val = vectorBuffer[off + d] / 127.0;
+        sv[d] = val;
+        sSumSq += val * val;
+        q[d] += val;
+      }
+      const sNorm = Math.sqrt(sSumSq);
+      if (sNorm > 1e-9) {
+        const invSNorm = 1.0 / sNorm;
+        for (let d = 0; d < D; d++) sv[d] *= invSNorm;
+      }
+      positiveSeedVecs.push(sv);
     }
   }
   for (const s of negativeSeeds) {
@@ -674,6 +698,8 @@ async function searchHybridVector(
     const invQ = 1.0 / qN;
     for (let d = 0; d < D; d++) q[d] *= invQ;
   }
+  const hasMultipleSeeds = positiveSeedVecs.length >= 2;
+  const NICHE_WORDS_SET = new Set(NICHE_VOCABULARY.map((n) => n.word.toLowerCase()));
 
   const blendedList: Array<{
     word: string;
@@ -683,11 +709,11 @@ async function searchHybridVector(
   }> = [];
 
   for (const word of candidateKeys) {
-    if (seedSet.has(word)) continue;
+    if (seedSet.has(word) || directAntonyms.has(word)) continue;
 
     let locScore = localScoreMap.get(word) || 0;
     const onEntry = onlineScoreMap.get(word);
-    const onScore = onEntry ? Math.max(0, onEntry.score / maxOnline) : 0;
+    const onScore = onEntry ? Math.max(-1.5, onEntry.score / maxOnline) : 0;
 
     // If word wasn't in top local hits, compute its exact local score
     if (locScore === 0 && wordToIndex.has(word) && vectorBuffer) {
@@ -708,29 +734,70 @@ async function searchHybridVector(
           q[d + 9] * vectorBuffer[off + d + 9];
       }
       const rawCos = dot * invNorms[idx];
-      const posMask = vocabMetadata[idx][1];
-      const posMul = (posMask & dominantPosMask) !== 0 ? 1.12 : 1.0;
-      const cloneMul = isMorphologicalClone(word, positiveSeeds) ? 0.85 : 1.0;
+      if (rawCos > 0.05) {
+        // 1. Triangulation multiplier
+        let triMul = 1.0;
+        if (hasMultipleSeeds) {
+          let minSeedSim = 999.0;
+          for (let s = 0; s < positiveSeedVecs.length; s++) {
+            const sv = positiveSeedVecs[s];
+            let sDot = 0;
+            for (let d = 0; d < D; d += 10) {
+              sDot +=
+                sv[d] * vectorBuffer[off + d] +
+                sv[d + 1] * vectorBuffer[off + d + 1] +
+                sv[d + 2] * vectorBuffer[off + d + 2] +
+                sv[d + 3] * vectorBuffer[off + d + 3] +
+                sv[d + 4] * vectorBuffer[off + d + 4] +
+                sv[d + 5] * vectorBuffer[off + d + 5] +
+                sv[d + 6] * vectorBuffer[off + d + 6] +
+                sv[d + 7] * vectorBuffer[off + d + 7] +
+                sv[d + 8] * vectorBuffer[off + d + 8] +
+                sv[d + 9] * vectorBuffer[off + d + 9];
+            }
+            const sSim = sDot * invNorms[idx];
+            if (sSim < minSeedSim) minSeedSim = sSim;
+          }
 
-      let regMul = 1.0;
-      if (idx < 2200) {
-        regMul = rawCos > 0.78 ? 1.0 : 0.92;
-      } else if (idx <= 22000) {
-        regMul = 1.10;
-      } else if (idx <= 38000) {
-        if (rawCos >= 0.56) regMul = 1.08;
-        else if (rawCos >= 0.48) regMul = 0.95;
-        else regMul = 0.78;
-      } else {
-        if (rawCos >= 0.64) regMul = 1.0;
-        else regMul = 0.70;
+          if (minSeedSim >= 0.28) {
+            triMul = 1.0 + 0.18 * minSeedSim;
+          } else if (minSeedSim < 0.12) {
+            triMul = 0.82;
+          }
+        }
+
+        // 2. Register curve
+        const isNiche = NICHE_WORDS_SET.has(word);
+        let regMul = 1.0;
+        if (idx < 2200) {
+          regMul = rawCos > 0.78 ? 1.0 : 0.92;
+        } else if (idx <= 22000) {
+          regMul = 1.10;
+        } else if (idx <= 38000 || isNiche) {
+          if (rawCos >= 0.56) regMul = 1.08;
+          else if (rawCos >= 0.48) regMul = 0.95;
+          else regMul = 0.78;
+        } else {
+          if (rawCos >= 0.64) regMul = 1.0;
+          else regMul = 0.70;
+        }
+
+        // 3. POS-alignment multiplier
+        const posMask = vocabMetadata[idx][1];
+        const posMul = (posMask & dominantPosMask) !== 0 ? 1.12 : 1.0;
+
+        // 4. Morphological clone suppression
+        const cloneMul = isMorphologicalClone(word, positiveSeeds) ? 0.85 : 1.0;
+
+        const rawScore = rawCos * triMul * regMul * posMul * cloneMul;
+        locScore = maxRawLocal > 0 ? Math.max(0, rawScore / maxRawLocal) : 0;
       }
-
-      locScore = Math.max(0, (rawCos * posMul * cloneMul * regMul) / maxLocalSim);
     }
 
     let score = 0;
     if (locScore > 0 && onScore > 0) {
+      score = 0.75 * locScore + 0.25 * onScore;
+    } else if (locScore > 0 && onScore < 0) {
       score = 0.75 * locScore + 0.25 * onScore;
     } else if (locScore > 0) {
       score = 0.75 * locScore;
@@ -738,7 +805,7 @@ async function searchHybridVector(
       score = 0.25 * onScore;
     }
 
-    if (score <= 0.01) continue;
+    if (score <= 0.05) continue;
 
     // Check definition from Datamuse if available
     let def: string | undefined;
@@ -850,6 +917,7 @@ async function searchHybridVector(
       similarity: Number(ratio.toFixed(4)),
       matchPercent,
       score: Math.round(item.blendedScore * 1000),
+      rawScore: item.blendedScore,
       source: 'hybrid',
       partOfSpeech: finalPos,
       definition: finalDef,

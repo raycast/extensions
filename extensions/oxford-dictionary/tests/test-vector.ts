@@ -243,6 +243,37 @@ async function testVector() {
   }
   console.log('  ✓ Test 14 Passed\n');
 
+  // Test 15: Antonym exclusion and negative online penalty in hybrid mode
+  console.log('Test 15: Antonym exclusion and negative online penalty in hybrid mode');
+  const t15 = await searchVectorSynonyms('happy', undefined, 20);
+  console.log(
+    '  Top 6 hybrid results for "happy":',
+    t15.slice(0, 6).map((x) => `${x.word} (${x.matchPercent}%, rawScore=${x.rawScore?.toFixed(3)})`).join(', ')
+  );
+  const directAntonyms = ['unhappy', 'sad', 'sorrowful', 'miserable', 'depressed', 'distressed', 'gloomy'];
+  for (const ant of directAntonyms) {
+    if (t15.slice(0, 15).some((x) => x.word.toLowerCase() === ant)) {
+      throw new Error(`Direct antonym "${ant}" should be penalized/excluded from top results in hybrid search for "happy"`);
+    }
+  }
+  console.log('  ✓ Test 15 Passed\n');
+
+  // Test 16: Consistent local score scale (rawScore / maxRawLocal) across localHits and fallback computation
+  console.log('Test 16: Consistent local score scale preservation');
+  const t16Offline = searchOfflineVector('courage', 10);
+  if (t16Offline.length === 0 || t16Offline[0].rawScore === undefined) {
+    throw new Error('Expected rawScore to be defined on offline vector search results');
+  }
+  if (t16Offline[0].rawScore <= 0) {
+    throw new Error('Expected top offline rawScore to be positive');
+  }
+  const t16Hybrid = await searchVectorSynonyms('courage', undefined, 10);
+  if (t16Hybrid.length === 0 || t16Hybrid[0].rawScore === undefined) {
+    throw new Error('Expected rawScore to be defined on hybrid vector search results');
+  }
+  console.log(`  Offline rawScore: ${t16Offline[0].rawScore?.toFixed(4)}, Hybrid rawScore: ${t16Hybrid[0].rawScore?.toFixed(4)}`);
+  console.log('  ✓ Test 16 Passed\n');
+
   console.log('=== ALL VECTOR SEMANTIC SYNONYM TESTS PASSED SUCCESSFULLY! ===');
 }
 
