@@ -1,5 +1,11 @@
 import { fetchModelWithLineage } from "../api";
-import { describeEnvironment, fetchModelsAcross, resolveCatalogEnvironments } from "../catalog_environments";
+import {
+  describeEnvironment,
+  fetchModelsAcross,
+  InEnvironment,
+  resolveCatalogEnvironments,
+} from "../catalog_environments";
+import { ModelNode } from "../types";
 
 type Input = {
   /**
@@ -22,17 +28,28 @@ export default async function tool(input: Input) {
     return { error: "No environments found. Please configure a dbt Cloud environment." };
   }
 
-  const wanted = input.modelName.toLowerCase();
-  const matches = (await fetchModelsAcross(environments)).filter(
-    ({ node: m }) => m.name.toLowerCase() === wanted || m.uniqueId.toLowerCase() === wanted,
-  );
+  const isUniqueId = input.modelName.toLowerCase().startsWith("model.");
+  let matches: InEnvironment<ModelNode>[];
+  if (isUniqueId) {
+    // Full IDs are looked up directly, so models beyond the paginated model list are still found
+    const direct = await Promise.all(
+      environments.map(async (environment) => ({
+        node: await fetchModelWithLineage(environment.id, input.modelName),
+        environment,
+      })),
+    );
+    matches = direct.filter((m): m is InEnvironment<ModelNode> => m.node !== null);
+  } else {
+    const wanted = input.modelName.toLowerCase();
+    matches = (await fetchModelsAcross(environments)).filter(({ node: m }) => m.name.toLowerCase() === wanted);
+  }
   if (matches.length === 0) {
     return { error: `Model "${input.modelName}" not found in ${environments.length} environment(s).` };
   }
   const { node: match, environment } = matches[0];
 
   // Fetch full model details with lineage
-  const model = await fetchModelWithLineage(environment.id, match.uniqueId);
+  const model = isUniqueId ? match : await fetchModelWithLineage(environment.id, match.uniqueId);
 
   if (!model) {
     return { error: `Could not fetch details for model "${input.modelName}".` };

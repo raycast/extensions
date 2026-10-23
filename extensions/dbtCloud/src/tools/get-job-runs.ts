@@ -47,7 +47,7 @@ export default async function tool(input: Input) {
     job_definition_id: input.jobId,
     limit,
     order_by: "-id",
-    include_related: "trigger,run_steps",
+    include_related: JSON.stringify(["trigger", "run_steps"]),
   });
 
   const runs = await fetchFromApi<Run>(endpoint, "Could not fetch job runs", limit);

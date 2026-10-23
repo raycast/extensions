@@ -785,7 +785,7 @@ export async function fetchJobRunDetails(jobId: number, limit = 50): Promise<Run
     job_definition_id: jobId,
     limit,
     order_by: "-finished_at",
-    include_related: "trigger,job,environment",
+    include_related: JSON.stringify(["trigger", "job", "environment"]),
   });
 
   try {
