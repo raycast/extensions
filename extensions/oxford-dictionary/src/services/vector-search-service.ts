@@ -150,9 +150,117 @@ export function extractSeedWords(query: string): string[] {
   return Array.from(new Set(result));
 }
 
+/**
+ * Generates potential base lemma and inflectional forms of a word.
+ */
+export function getBaseForms(word: string): string[] {
+  const lower = word.toLowerCase();
+  const forms = new Set<string>([lower]);
+  if (lower.endsWith('ies') && lower.length > 3) {
+    forms.add(lower.slice(0, -3) + 'y');
+  }
+  if (lower.endsWith('es') && lower.length > 3) {
+    forms.add(lower.slice(0, -2));
+    forms.add(lower.slice(0, -1));
+  }
+  if (lower.endsWith('s') && !lower.endsWith('ss') && lower.length > 2) {
+    forms.add(lower.slice(0, -1));
+  }
+  if (lower.endsWith('ed') && lower.length > 3) {
+    forms.add(lower.slice(0, -2));
+    forms.add(lower.slice(0, -1));
+  }
+  if (lower.endsWith('ing') && lower.length > 4) {
+    forms.add(lower.slice(0, -3));
+    forms.add(lower.slice(0, -3) + 'e');
+  }
+  if (CLASSICAL_ADJECTIVES[lower]) {
+    forms.add(CLASSICAL_ADJECTIVES[lower]);
+  }
+  return Array.from(forms);
+}
+
+/**
+ * Resolves a query seed word to its primary vocabulary index, handling plurals,
+ * inflections, and classical adjective derivations.
+ */
+export function resolveVocabIndex(
+  word: string
+): { index: number; resolvedWord: string; baseForms: string[] } | null {
+  loadVectorDb();
+  const lower = word.toLowerCase();
+  const baseForms = getBaseForms(lower);
+
+  const exactIdx = wordToIndex.get(lower);
+  let bestIdx = exactIdx;
+  let bestWord = exactIdx !== undefined ? lower : undefined;
+
+  for (const cand of baseForms) {
+    const cIdx = wordToIndex.get(cand);
+    if (cIdx !== undefined) {
+      if (bestIdx === undefined || cIdx < bestIdx) {
+        bestIdx = cIdx;
+        bestWord = cand;
+      }
+    }
+  }
+
+  if (bestIdx !== undefined && bestWord !== undefined) {
+    return {
+      index: bestIdx,
+      resolvedWord: bestWord,
+      baseForms,
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Extracts a normalized 100D seed vector, prioritizing singular base lemmas and
+ * blending if both plural and singular exist.
+ */
+function getSeedVector(word: string): Float32Array | null {
+  if (!vectorBuffer) return null;
+  const resolved = resolveVocabIndex(word);
+  if (!resolved) return null;
+
+  const idx = resolved.index;
+  const sv = new Float32Array(D);
+  const off = idx * D;
+  let sumSq = 0;
+  for (let d = 0; d < D; d++) {
+    const val = vectorBuffer[off + d] / 127.0;
+    sv[d] = val;
+    sumSq += val * val;
+  }
+
+  const lower = word.toLowerCase();
+  const exactIdx = wordToIndex.get(lower);
+  if (exactIdx !== undefined && exactIdx !== idx) {
+    const offExact = exactIdx * D;
+    sumSq = 0;
+    for (let d = 0; d < D; d++) {
+      const val = 0.75 * (vectorBuffer[off + d] / 127.0) + 0.25 * (vectorBuffer[offExact + d] / 127.0);
+      sv[d] = val;
+      sumSq += val * val;
+    }
+  }
+
+  const sNorm = Math.sqrt(sumSq);
+  if (sNorm > 1e-9) {
+    const inv = 1.0 / sNorm;
+    for (let d = 0; d < D; d++) sv[d] *= inv;
+    return sv;
+  }
+  return null;
+}
+
 export interface ParsedQuery {
   positiveSeeds: string[];
   negativeSeeds: string[];
+  resolvedPositiveSeeds: string[];
+  resolvedNegativeSeeds: string[];
   seedSet: Set<string>;
   dominantPosMask: number;
   dominantPosStr: PartOfSpeech;
@@ -163,26 +271,43 @@ export function parseQuerySeeds(query: string | string[]): ParsedQuery {
 
   const positiveSeeds: string[] = [];
   const negativeSeeds: string[] = [];
+  const resolvedPositiveSeeds: string[] = [];
+  const resolvedNegativeSeeds: string[] = [];
   const seedSet = new Set<string>();
 
   for (const raw of tokens) {
     const t = raw.trim().toLowerCase();
     if (!t) continue;
-    if (t.startsWith('-') && t.length > 1) {
-      const clean = t.slice(1);
+    const isNeg = t.startsWith('-') && t.length > 1;
+    const clean = isNeg ? t.slice(1) : (t.startsWith('+') ? t.slice(1) : t);
+
+    const baseForms = getBaseForms(clean);
+    for (const bf of baseForms) {
+      seedSet.add(bf);
+    }
+    seedSet.add(clean);
+
+    const resolved = resolveVocabIndex(clean);
+    const effectiveWord = resolved ? resolved.resolvedWord : clean;
+    if (resolved) {
+      for (const bf of resolved.baseForms) {
+        seedSet.add(bf);
+      }
+    }
+
+    if (isNeg) {
       negativeSeeds.push(clean);
-      seedSet.add(clean);
+      resolvedNegativeSeeds.push(effectiveWord);
     } else {
-      const clean = t.startsWith('+') ? t.slice(1) : t;
       positiveSeeds.push(clean);
-      seedSet.add(clean);
+      resolvedPositiveSeeds.push(effectiveWord);
     }
   }
 
-  // Count POS bitmasks for positive seeds
+  // Count POS bitmasks for positive seeds using resolved base words
   loadVectorDb();
   const posCounts: Record<number, number> = { 1: 0, 2: 0, 4: 0, 8: 0 };
-  for (const s of positiveSeeds) {
+  for (const s of resolvedPositiveSeeds) {
     const idx = wordToIndex.get(s);
     if (idx !== undefined) {
       const mask = vocabMetadata[idx][1];
@@ -211,6 +336,8 @@ export function parseQuerySeeds(query: string | string[]): ParsedQuery {
   return {
     positiveSeeds,
     negativeSeeds,
+    resolvedPositiveSeeds,
+    resolvedNegativeSeeds,
     seedSet,
     dominantPosMask,
     dominantPosStr,
@@ -264,36 +391,21 @@ export function searchOfflineVector(
   const positiveSeedVecs: Float32Array[] = [];
 
   for (const s of positiveSeeds) {
-    let idx = wordToIndex.get(s);
-    if (idx === undefined && CLASSICAL_ADJECTIVES[s]) {
-      idx = wordToIndex.get(CLASSICAL_ADJECTIVES[s]);
-    }
-    if (idx !== undefined) {
-      const sv = new Float32Array(D);
-      const off = idx * D;
-      let sSumSq = 0;
-      for (let d = 0; d < D; d++) {
-        const val = vectorBuffer[off + d] / 127.0;
-        sv[d] = val;
-        sSumSq += val * val;
-        q[d] += val;
-      }
-      const sNorm = Math.sqrt(sSumSq);
-      if (sNorm > 1e-9) {
-        const invSNorm = 1.0 / sNorm;
-        for (let d = 0; d < D; d++) sv[d] *= invSNorm;
-      }
+    const sv = getSeedVector(s);
+    if (sv) {
       positiveSeedVecs.push(sv);
+      for (let d = 0; d < D; d++) {
+        q[d] += sv[d];
+      }
     }
   }
 
   // Negative vector subtraction (weight = -0.85)
   for (const s of negativeSeeds) {
-    const idx = wordToIndex.get(s);
-    if (idx !== undefined) {
-      const off = idx * D;
+    const sv = getSeedVector(s);
+    if (sv) {
       for (let d = 0; d < D; d++) {
-        q[d] -= 0.85 * (vectorBuffer[off + d] / 127.0);
+        q[d] -= 0.85 * sv[d];
       }
     }
   }
@@ -335,12 +447,18 @@ export function searchOfflineVector(
     }
 
     const rawSim = dot * invNorms[i];
-    if (rawSim <= 0.05) continue;
+    if (hasMultipleSeeds) {
+      if (rawSim < 0.20) continue;
+    } else {
+      if (rawSim < 0.25) continue;
+    }
 
     // 1. Multi-Seed Intersection Consistency (Triangulation)
     let triangulationMul = 1.0;
     if (hasMultipleSeeds) {
       let minSeedSim = 999.0;
+      let sumSeedSim = 0;
+      let passingSeeds = 0;
       for (let s = 0; s < positiveSeedVecs.length; s++) {
         const sv = positiveSeedVecs[s];
         let sDot = 0;
@@ -359,12 +477,24 @@ export function searchOfflineVector(
         }
         const sSim = sDot * invNorms[i];
         if (sSim < minSeedSim) minSeedSim = sSim;
+        sumSeedSim += sSim;
+        if (sSim >= 0.10) passingSeeds++;
       }
 
-      if (minSeedSim >= 0.28) {
+      const meanSeedSim = sumSeedSim / positiveSeedVecs.length;
+      if (meanSeedSim < 0.22) continue;
+      if (positiveSeedVecs.length === 2) {
+        if (minSeedSim < 0.12) continue;
+      } else {
+        if (passingSeeds < positiveSeedVecs.length - 1 || minSeedSim < -0.06) continue;
+      }
+
+      if (meanSeedSim >= 0.35) {
+        triangulationMul = 1.0 + 0.20 * (meanSeedSim - 0.20);
+      } else if (minSeedSim < 0.10) {
+        triangulationMul = 0.90;
+      } else if (minSeedSim >= 0.28) {
         triangulationMul = 1.0 + 0.18 * minSeedSim;
-      } else if (minSeedSim < 0.12) {
-        triangulationMul = 0.82;
       }
     }
 
@@ -430,10 +560,11 @@ export function searchOfflineVector(
   if (topHits.length === 0) return [];
 
   const maxSim = topHits[0].sim;
+  const effectiveMaxSim = Math.max(0.55, maxSim);
 
   // Enrich top hits with definitions and POS
   return topHits.map((cand, idx) => {
-    const ratio = maxSim > 0 ? cand.sim / maxSim : 1.0;
+    const ratio = effectiveMaxSim > 0 ? Math.min(1.0, cand.sim / effectiveMaxSim) : 1.0;
     const rankDecay = Math.max(0, 1.0 - idx * 0.012);
     const scoreVal = ratio * 0.80 + rankDecay * 0.20;
     const matchPercent = Math.min(99, Math.max(50, Math.round(scoreVal * 98)));
@@ -457,6 +588,7 @@ export function searchOfflineVector(
       matchPercent,
       score: Math.round(cand.sim * 1000),
       rawScore: cand.sim,
+      rawCosine: cand.rawCosine,
       source: 'offline',
       partOfSpeech: pos,
       definition,
@@ -534,7 +666,15 @@ async function searchHybridVector(
   limit = 50
 ): Promise<VectorSearchResult[]> {
   const parsed = parseQuerySeeds(query);
-  const { positiveSeeds, negativeSeeds, seedSet, dominantPosMask, dominantPosStr } = parsed;
+  const {
+    positiveSeeds,
+    negativeSeeds,
+    resolvedPositiveSeeds,
+    resolvedNegativeSeeds,
+    seedSet,
+    dominantPosMask,
+    dominantPosStr,
+  } = parsed;
 
   if (positiveSeeds.length === 0 && negativeSeeds.length === 0) {
     return [];
@@ -543,6 +683,7 @@ async function searchHybridVector(
   // 1. Local 100D Vector Search
   const localHits = searchOfflineVector(query, 120);
   const localScoreMap = new Map<string, number>();
+  const localRawCosMap = new Map<string, number>();
   const maxRawLocal =
     localHits.length > 0
       ? Math.max(
@@ -550,45 +691,51 @@ async function searchHybridVector(
           0.0001
         )
       : 1.0;
+  const effectiveMaxLocal = Math.max(0.55, maxRawLocal);
 
   for (const h of localHits) {
     const raw = h.rawScore !== undefined ? h.rawScore : (h.score || 0) / 1000;
-    localScoreMap.set(h.word.toLowerCase(), Math.max(0, raw / maxRawLocal));
+    localScoreMap.set(h.word.toLowerCase(), Math.max(0, raw / effectiveMaxLocal));
+    localRawCosMap.set(h.word.toLowerCase(), h.rawCosine !== undefined ? h.rawCosine : raw);
   }
 
-  // 2. Online Datamuse Queries (rel_syn, ml, and rel_ant)
-  const onlinePromises: Promise<{ type: 'pos' | 'ant'; items: DatamuseItem[]; weight: number }>[] = [];
+  // 2. Online Datamuse Queries (rel_syn, ml, rel_ant, and negative seeds)
+  const onlinePromises: Promise<{ type: 'pos' | 'ant' | 'neg_ml'; items: DatamuseItem[]; weight: number }>[] = [];
   const directAntonyms = new Set<string>();
 
-  // Means-like joint query
-  if (positiveSeeds.length > 0) {
-    const mlUrl = `https://api.datamuse.com/words?ml=${encodeURIComponent(positiveSeeds.join('+'))}&md=dpfs&max=150`;
+  // Means-like joint query using resolved positive base lemmas
+  const mlTokens = resolvedPositiveSeeds.length > 0 ? resolvedPositiveSeeds : positiveSeeds;
+  if (mlTokens.length > 0) {
+    const mlUrl = `https://api.datamuse.com/words?ml=${encodeURIComponent(mlTokens.join('+'))}&md=dpfs&max=150`;
     onlinePromises.push(
-      fetchDatamuse(mlUrl).then((items) => ({ type: 'pos', items, weight: 1.5 }))
+      fetchDatamuse(mlUrl).then((items) => ({ type: 'pos' as const, items, weight: 1.5 }))
     );
   }
 
-  // Synonyms for positive seeds
-  for (const s of positiveSeeds.slice(0, 3)) {
+  // Synonyms for positive seeds (query base lemmas first, then original if different)
+  const synSeedsToQuery = Array.from(new Set([...resolvedPositiveSeeds, ...positiveSeeds])).slice(0, 4);
+  for (const s of synSeedsToQuery) {
     const synUrl = `https://api.datamuse.com/words?rel_syn=${encodeURIComponent(s)}&md=dpfs&max=60`;
     onlinePromises.push(
-      fetchDatamuse(synUrl).then((items) => ({ type: 'pos', items, weight: 1.2 }))
+      fetchDatamuse(synUrl).then((items) => ({ type: 'pos' as const, items, weight: 1.2 }))
     );
   }
 
   // Antonyms for positive seeds to subtract
-  for (const s of positiveSeeds.slice(0, 2)) {
+  for (const s of synSeedsToQuery.slice(0, 2)) {
     const antUrl = `https://api.datamuse.com/words?rel_ant=${encodeURIComponent(s)}&max=40`;
     onlinePromises.push(
-      fetchDatamuse(antUrl).then((items) => ({ type: 'ant', items, weight: 1.5 }))
+      fetchDatamuse(antUrl).then((items) => ({ type: 'ant' as const, items, weight: 1.5 }))
     );
   }
 
   // Explicit negative seeds to subtract
-  for (const neg of negativeSeeds) {
+  const negSeedsToQuery = Array.from(new Set([...resolvedNegativeSeeds, ...negativeSeeds]));
+  for (const neg of negSeedsToQuery) {
+    directAntonyms.add(neg);
     const negUrl = `https://api.datamuse.com/words?ml=${encodeURIComponent(neg)}&max=60`;
     onlinePromises.push(
-      fetchDatamuse(negUrl).then((items) => ({ type: 'ant', items, weight: 1.5 }))
+      fetchDatamuse(negUrl).then((items) => ({ type: 'neg_ml' as const, items, weight: 1.2 }))
     );
   }
 
@@ -631,6 +778,16 @@ async function searchHybridVector(
             tags: item.tags,
           });
         }
+      } else if (type === 'neg_ml') {
+        if (existing) {
+          existing.score -= rrf * 1.0;
+        } else {
+          onlineScoreMap.set(w, {
+            score: -rrf * 1.0,
+            defs: item.defs,
+            tags: item.tags,
+          });
+        }
       }
     });
   }
@@ -641,7 +798,7 @@ async function searchHybridVector(
     if (v.score > maxOnline) maxOnline = v.score;
   }
 
-  // 3. Blend Scores: 75% Local + 25% Online
+  // 3. Blend Scores
   const candidateKeys = new Set<string>([
     ...localScoreMap.keys(),
     ...Array.from(onlineScoreMap.keys()).filter((k) => (onlineScoreMap.get(k)?.score || 0) > 0),
@@ -662,33 +819,16 @@ async function searchHybridVector(
   const positiveSeedVecs: Float32Array[] = [];
 
   for (const s of positiveSeeds) {
-    let idx = wordToIndex.get(s);
-    if (idx === undefined && CLASSICAL_ADJECTIVES[s]) {
-      idx = wordToIndex.get(CLASSICAL_ADJECTIVES[s]);
-    }
-    if (idx !== undefined && vectorBuffer) {
-      const sv = new Float32Array(D);
-      const off = idx * D;
-      let sSumSq = 0;
-      for (let d = 0; d < D; d++) {
-        const val = vectorBuffer[off + d] / 127.0;
-        sv[d] = val;
-        sSumSq += val * val;
-        q[d] += val;
-      }
-      const sNorm = Math.sqrt(sSumSq);
-      if (sNorm > 1e-9) {
-        const invSNorm = 1.0 / sNorm;
-        for (let d = 0; d < D; d++) sv[d] *= invSNorm;
-      }
+    const sv = getSeedVector(s);
+    if (sv) {
       positiveSeedVecs.push(sv);
+      for (let d = 0; d < D; d++) q[d] += sv[d];
     }
   }
   for (const s of negativeSeeds) {
-    const idx = wordToIndex.get(s);
-    if (idx !== undefined && vectorBuffer) {
-      const off = idx * D;
-      for (let d = 0; d < D; d++) q[d] -= 0.85 * (vectorBuffer[off + d] / 127.0);
+    const sv = getSeedVector(s);
+    if (sv) {
+      for (let d = 0; d < D; d++) q[d] -= 0.85 * sv[d];
     }
   }
   let qSumSq = 0;
@@ -712,6 +852,7 @@ async function searchHybridVector(
     if (seedSet.has(word) || directAntonyms.has(word)) continue;
 
     let locScore = localScoreMap.get(word) || 0;
+    let rawCos = localRawCosMap.get(word) || 0;
     const onEntry = onlineScoreMap.get(word);
     const onScore = onEntry ? Math.max(-1.5, onEntry.score / maxOnline) : 0;
 
@@ -733,12 +874,14 @@ async function searchHybridVector(
           q[d + 8] * vectorBuffer[off + d + 8] +
           q[d + 9] * vectorBuffer[off + d + 9];
       }
-      const rawCos = dot * invNorms[idx];
+      rawCos = dot * invNorms[idx];
       if (rawCos > 0.05) {
         // 1. Triangulation multiplier
         let triMul = 1.0;
         if (hasMultipleSeeds) {
           let minSeedSim = 999.0;
+          let sumSeedSim = 0;
+          let passingSeeds = 0;
           for (let s = 0; s < positiveSeedVecs.length; s++) {
             const sv = positiveSeedVecs[s];
             let sDot = 0;
@@ -757,12 +900,25 @@ async function searchHybridVector(
             }
             const sSim = sDot * invNorms[idx];
             if (sSim < minSeedSim) minSeedSim = sSim;
+            sumSeedSim += sSim;
+            if (sSim >= 0.10) passingSeeds++;
           }
 
-          if (minSeedSim >= 0.28) {
-            triMul = 1.0 + 0.18 * minSeedSim;
-          } else if (minSeedSim < 0.12) {
-            triMul = 0.82;
+          const meanSeedSim = sumSeedSim / positiveSeedVecs.length;
+          if (positiveSeedVecs.length === 2) {
+            if (minSeedSim < 0.12 || meanSeedSim < 0.22) {
+              triMul = 0.65;
+            } else if (minSeedSim >= 0.28) {
+              triMul = 1.0 + 0.18 * minSeedSim;
+            }
+          } else {
+            if (passingSeeds < positiveSeedVecs.length - 1 || meanSeedSim < 0.20 || minSeedSim < -0.06) {
+              triMul = 0.65;
+            } else if (meanSeedSim >= 0.35) {
+              triMul = 1.0 + 0.20 * (meanSeedSim - 0.20);
+            } else if (minSeedSim >= 0.28) {
+              triMul = 1.0 + 0.18 * minSeedSim;
+            }
           }
         }
 
@@ -790,19 +946,23 @@ async function searchHybridVector(
         const cloneMul = isMorphologicalClone(word, positiveSeeds) ? 0.85 : 1.0;
 
         const rawScore = rawCos * triMul * regMul * posMul * cloneMul;
-        locScore = maxRawLocal > 0 ? Math.max(0, rawScore / maxRawLocal) : 0;
+        locScore = effectiveMaxLocal > 0 ? Math.max(0, rawScore / effectiveMaxLocal) : 0;
+        localRawCosMap.set(word, rawCos);
       }
     }
 
     let score = 0;
     if (locScore > 0 && onScore > 0) {
-      score = 0.75 * locScore + 0.25 * onScore;
+      score = 0.55 * locScore + 0.45 * onScore + 0.15;
     } else if (locScore > 0 && onScore < 0) {
-      score = 0.75 * locScore + 0.25 * onScore;
+      score = 0.55 * locScore + 0.45 * onScore;
+      if (score <= 0.05 || directAntonyms.has(word)) continue;
     } else if (locScore > 0) {
-      score = 0.75 * locScore;
+      const rawCosVal = localRawCosMap.get(word) || 0;
+      if (rawCosVal < 0.42) continue;
+      score = 0.50 * locScore;
     } else if (onScore > 0) {
-      score = 0.25 * onScore;
+      score = 0.45 * onScore;
     }
 
     if (score <= 0.05) continue;

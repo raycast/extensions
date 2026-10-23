@@ -115,6 +115,23 @@ export async function buildVectorDb() {
   const satellitePairs: Array<[string, string]> = [];
   const antonymPairs: Array<[string, string]> = [];
 
+  // Scan WordNet index.* files to collect all official base lemmas
+  for (const [pos, mask] of Object.entries(posBitmasks)) {
+    const idxFile = path.join(wordnetDir, `index.${pos}`);
+    if (fs.existsSync(idxFile)) {
+      const content = fs.readFileSync(idxFile, 'utf8');
+      const lines = content.split('\n');
+      for (const line of lines) {
+        if (!line || line.startsWith('  ')) continue;
+        const lemma = line.split(' ')[0].toLowerCase();
+        if (isValidLemma(lemma)) {
+          validLemmas.add(lemma);
+          lemmaPosMap.set(lemma, (lemmaPosMap.get(lemma) || 0) | mask);
+        }
+      }
+    }
+  }
+
   // Parse WordNet data.* files
   // Pass 1: Scan all synsets across all 4 files to populate synsetByOffset
   const parsedMetaLines: Array<{ meta: string[]; synsetLemmas: string[]; mask: number }> = [];
@@ -208,7 +225,7 @@ export async function buildVectorDb() {
     }
   }
 
-  // Parse Roget Thesaurus semicolon clauses
+  // Parse Roget Thesaurus semicolon clauses (only linking valid WordNet lemmas)
   console.log('Parsing Roget Thesaurus semicolon clauses...');
   const rogetClauses: string[][] = [];
   if (fs.existsSync(rogetJsonPath)) {
@@ -225,13 +242,9 @@ export async function buildVectorDb() {
             .replace(/&c\.?/g, '')
             .split(/[,/\s]+/)
             .map((w) => w.replace(/^[^a-z]+|[^a-z]+$/g, ''))
-            .filter((w) => isValidLemma(w));
+            .filter((w) => isValidLemma(w) && validLemmas.has(w));
 
           const unique = Array.from(new Set(rawTokens));
-          for (const u of unique) {
-            validLemmas.add(u);
-            if (!lemmaPosMap.has(u)) lemmaPosMap.set(u, 1);
-          }
           if (unique.length >= 2) {
             rogetClauses.push(unique);
           }

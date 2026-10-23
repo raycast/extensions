@@ -78,6 +78,7 @@ export interface VectorSearchResult {
   matchPercent: number; // 0 to 100
   score?: number;
   rawScore?: number;
+  rawCosine?: number;
   partOfSpeech?: PartOfSpeech;
   definition?: string;
   source: 'online' | 'offline' | 'hybrid';
