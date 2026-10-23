@@ -161,7 +161,7 @@
           "content": [
             {
               "type": "text",
-              "text": "Folnaro ist im Lesemodus, weil die Testphase abgelaufen oder das Abo beendet ist. Lesen und Exportieren funktionieren weiter (Aufbewahrung nach GoBD). Für neue Dokumente, Ausgaben und Zeiten bitte den Nutzer, Folnaro in der App freizuschalten."
+              "text": "Folnaro is in read-only mode because the trial has ended or the subscription has lapsed. Reading and export keep working (GoBD retention). To create new documents, expenses and time entries again, ask the user to unlock Folnaro in the app."
             }
           ],
           "isError": true

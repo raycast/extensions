@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import { documentStatusKey, documentStatusTone, formatMoney } from "../src/lib/format";
 import { filterProjects, isEmpty, recordLink, runSearch, splitDocuments } from "../src/lib/search";
 import { byId } from "../src/lib/timer";
+import type { FolnaroApi } from "../src/lib/folnaro";
+import type { DocumentSummary } from "../src/lib/types";
 import { harness, toolCalls, type Harness } from "./helpers";
 
 let current: Harness | undefined;
@@ -24,6 +26,25 @@ describe("Search Folnaro", () => {
     expect(results.projects.map((project) => project.name)).toContain("Website-Relaunch");
     expect(results.projectCustomers.get("C-NORD")?.display_name).toBe("Nordlicht Medien GmbH");
     expect(h.sent().filter((message) => message.method === "initialize")).toHaveLength(1);
+  });
+
+  it("gives invoices and quotes their own limit in the Everything scope", async () => {
+    const document = (id: string, kind: DocumentSummary["kind"]) => ({ id, kind, number: id }) as DocumentSummary;
+    const all = [
+      ...Array.from({ length: 20 }, (_, index) => document(`RE-${index}`, "invoice")),
+      ...Array.from({ length: 3 }, (_, index) => document(`AN-${index}`, "quote")),
+    ];
+    const api = {
+      // Like documents_list: filter by kind, then cut at the limit.
+      documents: async (options: { kinds?: string[]; limit?: number }) =>
+        all.filter((item) => options.kinds?.includes(item.kind)).slice(0, options.limit),
+      customers: async () => [],
+      expenses: async () => [],
+      projects: async () => [],
+    } as unknown as FolnaroApi;
+    const results = await runSearch(api, "", "all");
+    expect(results.invoices).toHaveLength(8);
+    expect(results.quotes.map((item) => item.id)).toEqual(["AN-0", "AN-1", "AN-2"]);
   });
 
   it("passes the query and the kinds of the chosen scope to documents_list", async () => {
@@ -56,14 +77,14 @@ describe("Search Folnaro", () => {
     expect(filterProjects(projects, "p-2026-09", map).map((project) => project.name)).toEqual(["App-Prototyp"]);
   });
 
-  it("shows overdue before the stored status and formats money per language", async () => {
+  it("shows overdue before the stored status and formats money in the given locale", async () => {
     const h = (current = harness("demo.json"));
     const documents = await h.api.documents();
     const overdue = documents.find((document) => document.number === "RE-2026-0139")!;
     expect(documentStatusKey(overdue)).toBe("status.overdue");
     expect(documentStatusTone(overdue)).toBe("overdue");
-    expect(formatMoney(overdue.gross_total_cents, "de")).toBe("2.142,00\u00a0€");
-    expect(formatMoney(overdue.gross_total_cents, "en")).toBe("€2,142.00");
+    expect(formatMoney(overdue.gross_total_cents, "de-DE")).toBe("2.142,00\u00a0€");
+    expect(formatMoney(overdue.gross_total_cents, "en-US")).toBe("€2,142.00");
     const { invoices, quotes } = splitDocuments(documents);
     expect(invoices.length + quotes.length).toBe(documents.length);
   });

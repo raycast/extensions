@@ -10,47 +10,15 @@ import {
 import { execFile, execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { FolnaroApi } from "./folnaro";
-import { parseAppleLanguages, resolveLanguage, translator, type Language, type Translate } from "./i18n";
 import { BUNDLE_ID, locateHelper } from "./locate";
 import { McpClient, type ToolClient, type ToolResult } from "./mcp-client";
 import { describeError } from "./presentation";
+import { t } from "./text";
 
 /** Folnaro on the Mac App Store; the product page id is set once the app is listed. */
 export const APP_STORE_SEARCH_URL = "macappstore://search.itunes.apple.com/WebObjects/MZSearch.woa/wa/search?q=Folnaro";
-
-interface ExtensionPreferences {
-  language?: "auto" | "en" | "de";
-  helperPath?: string;
-}
-
-let cachedSystemLanguages: string[] | undefined;
-
-function systemLanguages(): string[] {
-  if (!cachedSystemLanguages) {
-    try {
-      cachedSystemLanguages = parseAppleLanguages(
-        execFileSync("/usr/bin/defaults", ["read", "-g", "AppleLanguages"], { encoding: "utf8", timeout: 1000 }),
-      );
-    } catch {
-      cachedSystemLanguages = [Intl.DateTimeFormat().resolvedOptions().locale];
-    }
-  }
-  return cachedSystemLanguages;
-}
-
-export function currentLanguage(): Language {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  return resolveLanguage(preferences.language, systemLanguages());
-}
-
-export function useTranslation(): { language: Language; t: Translate } {
-  return useMemo(() => {
-    const language = currentLanguage();
-    return { language, t: translator(language) };
-  }, []);
-}
 
 function spotlightApps(): string[] {
   try {
@@ -71,8 +39,8 @@ function spotlightApps(): string[] {
  * that only shows cached data never spawns it. Errors locating the helper surface on that first
  * call, as a `FolnaroError` like every other failure.
  */
-export function createFolnaro(language: Language = currentLanguage()): FolnaroApi {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+export function createFolnaro(): FolnaroApi {
+  const preferences = getPreferenceValues<Preferences>();
   let client: McpClient | undefined;
   let failure: unknown;
   try {
@@ -80,7 +48,7 @@ export function createFolnaro(language: Language = currentLanguage()): FolnaroAp
     client = new McpClient({
       command: helper.command,
       args: helper.args,
-      env: { FOLNARO_LANGUAGE: language },
+      env: { FOLNARO_LANGUAGE: "en" },
       clientName: "raycast",
       clientVersion: "1.0.0",
     });
@@ -103,16 +71,16 @@ class FailingClient implements ToolClient {
 }
 
 /** One helper process for the lifetime of a view command, closed when the command closes. */
-export function useFolnaro(language: Language): FolnaroApi {
+export function useFolnaro(): FolnaroApi {
   const ref = useRef<FolnaroApi | null>(null);
-  if (!ref.current) ref.current = createFolnaro(language);
+  if (!ref.current) ref.current = createFolnaro();
   useEffect(() => () => ref.current?.client.close(), []);
   return ref.current;
 }
 
 /** Runs `body` with a fresh helper and always ends it (no-view and menu bar commands). */
-export async function withFolnaro<T>(language: Language, body: (api: FolnaroApi) => Promise<T>): Promise<T> {
-  const api = createFolnaro(language);
+export async function withFolnaro<T>(body: (api: FolnaroApi) => Promise<T>): Promise<T> {
+  const api = createFolnaro();
   try {
     return await body(api);
   } finally {
@@ -129,8 +97,8 @@ export function openFolnaro(url?: string): Promise<void> {
 }
 
 /** A calm failure toast with the next step as its action. */
-export async function showError(error: unknown, t: Translate): Promise<Toast> {
-  const presentation = describeError(error, t);
+export async function showError(error: unknown): Promise<Toast> {
+  const presentation = describeError(error);
   const options: Toast.Options = {
     style: Toast.Style.Failure,
     title: presentation.title,

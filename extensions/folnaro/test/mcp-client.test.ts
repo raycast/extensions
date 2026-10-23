@@ -48,7 +48,7 @@ describe("McpClient", () => {
   });
 
   it("turns an unknown tool into a protocol error", async () => {
-    const h = open("timer-not-running-de.json");
+    const h = open("demo.json");
     await expect(h.client.callTool("no_such_tool")).rejects.toMatchObject({ kind: "protocol", code: -32602 });
   });
 

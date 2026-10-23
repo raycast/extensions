@@ -1,5 +1,5 @@
 import { FolnaroError, isFolnaroError, type PermissionSwitch } from "./errors";
-import type { StringKey, Translate } from "./i18n";
+import { t, type StringKey } from "./text";
 
 export interface ErrorPresentation {
   title: string;
@@ -12,15 +12,15 @@ export interface ErrorPresentation {
   offerOpenFolnaro: boolean;
 }
 
-export function permissionLabel(permission: PermissionSwitch | undefined, t: Translate): string {
+export function permissionLabel(permission: PermissionSwitch | undefined): string {
   return t(`permission.${permission ?? "read"}` as StringKey);
 }
 
 /**
  * Turns any error into a calm toast: a known cause and a next step. Tool errors without a known
- * cause show the helper's own message, which is already in the person's language.
+ * cause show the helper's own message, which is already in English (FOLNARO_LANGUAGE is set).
  */
-export function describeError(error: unknown, t: Translate): ErrorPresentation {
+export function describeError(error: unknown): ErrorPresentation {
   const base = { needsUserAction: false, offerAppStore: false, offerOpenFolnaro: false };
   if (!isFolnaroError(error)) {
     return { ...base, title: t("error.tool.title"), message: error instanceof Error ? error.message : String(error) };
@@ -53,7 +53,7 @@ export function describeError(error: unknown, t: Translate): ErrorPresentation {
     case "timeout":
       return { ...base, title: t("error.timeout.title"), message: t("error.timeout.message") };
     case "permissionDenied": {
-      const permission = permissionLabel(folnaroError.permission, t);
+      const permission = permissionLabel(folnaroError.permission);
       return {
         ...base,
         title: t("error.permission.title", { permission }),

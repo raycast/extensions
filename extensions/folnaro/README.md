@@ -59,7 +59,6 @@ in the app. Your data always stays readable.
 
 | Preference | Default | |
 |---|---|---|
-| Language | Automatic | English or German. Automatic follows your first macOS language, the same rule Folnaro's helper uses. |
 | Helper Path | empty | Only needed when Folnaro lives somewhere unusual: the full path of `folnaro-mcp` inside `Folnaro.app/Contents/MacOS`. |
 | Hide when no timer runs (Running Timer) | off | Shows the menu bar item only while a timer runs. |
 

@@ -79,31 +79,31 @@ export const TOOL_PERMISSIONS: Record<string, PermissionSwitch> = {
 export const LOCKED_AFTER_TRIAL = new Set(["documents_create_draft", "expenses_create", "time_start_timer"]);
 
 /**
- * Classifies the text of a tool result with `isError: true`. The helper answers in English or
- * German (`FOLNARO_LANGUAGE`), so every check matches both catalogs of
- * mac/Packages/FolnaroKit/Sources/FolnaroMCP/Resources/Localizable.xcstrings:
+ * Classifies the text of a tool result with `isError: true`. The helper is always started in English
+ * (`FOLNARO_LANGUAGE=en`), so every check matches the English catalog entries (FolnaroMCP and FolnaroData
+ * Localizable.xcstrings):
  *
  * - error.permission_denied always names the setting `mcp.permissions`.
- * - error.entitlement_locked: "read-only mode" / "Lesemodus".
- * - store.error.timer_running: "already running" / "läuft schon ein Timer".
- * - store.error.duplicate_receipt: "already imported this receipt" / "schon importiert".
- * - error.timer_not_running: "No timer is running." / "Gerade läuft kein Timer."
+ * - error.entitlement_locked: "read-only mode".
+ * - store.error.timer_running: "A timer is already running.".
+ * - store.error.duplicate_receipt: "You already imported this receipt.".
+ * - error.timer_not_running: "No timer is running."
  */
 export function classifyToolError(tool: string, message: string): FolnaroError {
   const text = message.trim();
   if (text.includes("mcp.permissions")) {
     return new FolnaroError("permissionDenied", text, { tool, permission: TOOL_PERMISSIONS[tool] });
   }
-  if (/read-only mode|Lesemodus/i.test(text)) {
+  if (/read-only mode/i.test(text)) {
     return new FolnaroError("readOnlyMode", text, { tool });
   }
-  if (/timer is already running|läuft schon ein Timer/i.test(text)) {
+  if (/timer is already running/i.test(text)) {
     return new FolnaroError("timerRunning", text, { tool });
   }
-  if (/already imported this receipt|Beleg hast du schon importiert/i.test(text)) {
+  if (/already imported this receipt/i.test(text)) {
     return new FolnaroError("duplicateReceipt", text, { tool });
   }
-  if (/No timer is running|läuft kein Timer/i.test(text)) {
+  if (/No timer is running/i.test(text)) {
     return new FolnaroError("timerNotRunning", text, { tool });
   }
   return new FolnaroError("tool", text, { tool });

@@ -16,14 +16,15 @@ import { useEffect, useRef, useState } from "react";
 import { BRAND_ACCENT } from "./lib/brand";
 import type { FolnaroApi } from "./lib/folnaro";
 import { elapsedSeconds, formatDuration, formatTime, isoDay } from "./lib/format";
-import type { Translate } from "./lib/i18n";
-import { openFolnaro, showError, useFolnaro, useTranslation } from "./lib/raycast";
+import { t } from "./lib/text";
+import { openFolnaro, showError, useFolnaro } from "./lib/raycast";
 import {
   byId,
   describeEntry,
   describeTarget,
   recentTargets,
   rememberTarget,
+  chosenActivity,
   startTimerFor,
   targetKey,
   workableProjects,
@@ -90,11 +91,10 @@ async function start(
 }
 
 export default function StartTimer(props: LaunchProps<{ launchContext?: LaunchContext }>) {
-  const { language, t } = useTranslation();
-  const api = useFolnaro(language);
+  const api = useFolnaro();
   const [searchText, setSearchText] = useState("");
   const { data, isLoading, revalidate } = usePromise(() => load(api), [], {
-    onError: (error) => void showError(error, t),
+    onError: (error) => void showError(error),
   });
   const launchedFor = props.launchContext?.projectId;
   const startedFromContext = useRef(false);
@@ -109,7 +109,7 @@ export default function StartTimer(props: LaunchProps<{ launchContext?: LaunchCo
         popToRootType: PopToRootType.Immediate,
       });
     } catch (error) {
-      await showError(error, t);
+      await showError(error);
       revalidate();
     }
   };
@@ -169,9 +169,7 @@ export default function StartTimer(props: LaunchProps<{ launchContext?: LaunchCo
           title={t("timer.startWithDetails")}
           icon={Icon.Pencil}
           shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-          target={
-            <StartTimerForm t={t} target={target} activities={activities} initialNote={timerNote} onStart={run} />
-          }
+          target={<StartTimerForm target={target} activities={activities} initialNote={timerNote} onStart={run} />}
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
@@ -201,14 +199,7 @@ export default function StartTimer(props: LaunchProps<{ launchContext?: LaunchCo
       ) : null}
       {data?.running ? (
         <List.Section title={t("timer.section.running")}>
-          <RunningItem
-            entry={data.running}
-            t={t}
-            language={language}
-            name={describeEntry(data.running, known)}
-            api={api}
-            onChange={revalidate}
-          />
+          <RunningItem entry={data.running} name={describeEntry(data.running, known)} api={api} onChange={revalidate} />
         </List.Section>
       ) : null}
       <List.Section title={t("timer.section.recent")}>
@@ -271,15 +262,8 @@ function matches(target: TimerTarget, known: Parameters<typeof describeTarget>[1
     .every((word) => haystack.includes(word));
 }
 
-function RunningItem(props: {
-  entry: TimeEntry;
-  name?: string;
-  t: Translate;
-  language: "de" | "en";
-  api: FolnaroApi;
-  onChange: () => void;
-}) {
-  const { entry, t, language } = props;
+function RunningItem(props: { entry: TimeEntry; name?: string; api: FolnaroApi; onChange: () => void }) {
+  const { entry } = props;
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 30000);
@@ -292,10 +276,8 @@ function RunningItem(props: {
       title={props.name ?? t("timer.withoutProject")}
       subtitle={entry.note || entry.activity || undefined}
       accessories={[
-        ...(entry.started_at
-          ? [{ text: t("timer.runningSince", { time: formatTime(entry.started_at, language) }) }]
-          : []),
-        { text: formatDuration(elapsed, language) },
+        ...(entry.started_at ? [{ text: t("timer.runningSince", { time: formatTime(entry.started_at) }) }] : []),
+        { text: formatDuration(elapsed) },
       ]}
       actions={
         <ActionPanel>
@@ -305,11 +287,11 @@ function RunningItem(props: {
             onAction={async () => {
               try {
                 const stopped = await props.api.stopTimer();
-                await showHUD(t("timer.stopped", { duration: formatDuration(stopped.duration_seconds, language) }), {
+                await showHUD(t("timer.stopped", { duration: formatDuration(stopped.duration_seconds) }), {
                   popToRootType: PopToRootType.Immediate,
                 });
               } catch (error) {
-                await showError(error, t);
+                await showError(error);
                 props.onChange();
               }
             }}
@@ -326,13 +308,11 @@ function RunningItem(props: {
 }
 
 function StartTimerForm(props: {
-  t: Translate;
   target: TimerTarget;
   activities: string[];
   initialNote: string;
   onStart: (target: TimerTarget, note?: string) => Promise<void>;
 }) {
-  const { t } = props;
   const { pop } = useNavigation();
   return (
     <Form
@@ -342,7 +322,10 @@ function StartTimerForm(props: {
             title={t("timer.start")}
             icon={Icon.Play}
             onSubmit={async (values: { note: string; activity?: string }) => {
-              await props.onStart({ ...props.target, activity: values.activity || props.target.activity }, values.note);
+              await props.onStart(
+                { ...props.target, activity: chosenActivity(values.activity, props.target.activity) },
+                values.note,
+              );
               pop();
             }}
           />

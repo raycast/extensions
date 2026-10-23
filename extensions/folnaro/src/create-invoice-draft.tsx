@@ -15,8 +15,8 @@ import { useState } from "react";
 import type { FolnaroApi } from "./lib/folnaro";
 import { TAX_RATES, UNITS, buildLines, type FormValues, type LineState } from "./lib/draft";
 import { isoDay } from "./lib/format";
-import type { StringKey, Translate } from "./lib/i18n";
-import { openFolnaro, showError, useFolnaro, useTranslation } from "./lib/raycast";
+import { t, type StringKey } from "./lib/text";
+import { openFolnaro, showError, useFolnaro } from "./lib/raycast";
 import { recordLink } from "./lib/search";
 import { workableProjects } from "./lib/timer";
 import type { Customer, Project } from "./lib/types";
@@ -39,9 +39,8 @@ async function load(api: FolnaroApi): Promise<{ canCreate: boolean; customers: C
 }
 
 export default function CreateInvoiceDraft(props: LaunchProps<{ launchContext?: LaunchContext }>) {
-  const { language, t } = useTranslation();
-  const api = useFolnaro(language);
-  const { data, isLoading } = usePromise(() => load(api), [], { onError: (error) => void showError(error, t) });
+  const api = useFolnaro();
+  const { data, isLoading } = usePromise(() => load(api), [], { onError: (error) => void showError(error) });
   const [customerId, setCustomerId] = useState<string>(props.launchContext?.customerId ?? "");
   const [lines, setLines] = useState<LineState[]>([{ key: 0 }]);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -76,7 +75,7 @@ export default function CreateInvoiceDraft(props: LaunchProps<{ launchContext?: 
     const nextErrors: Record<string, string> = {};
     const customer = data?.customers.find((item) => item.id === values.customer);
     if (!customer) nextErrors.customer = t("draft.validation.customer");
-    const built = buildLines(values, lines, t);
+    const built = buildLines(values, lines);
     Object.assign(nextErrors, built.errors);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length || !customer || !built.lines) return;
@@ -102,7 +101,7 @@ export default function CreateInvoiceDraft(props: LaunchProps<{ launchContext?: 
       });
     } catch (error) {
       await toast.hide();
-      await showError(error, t);
+      await showError(error);
     }
   };
 
@@ -164,7 +163,7 @@ export default function CreateInvoiceDraft(props: LaunchProps<{ launchContext?: 
       <Form.DatePicker id="serviceStart" title={t("draft.serviceStart")} type={Form.DatePicker.Type.Date} />
       <Form.DatePicker id="serviceEnd" title={t("draft.serviceEnd")} type={Form.DatePicker.Type.Date} />
       {lines.map(({ key }, index) => (
-        <LineFields key={key} lineKey={key} index={index} t={t} errors={errors} clearError={clearError} />
+        <LineFields key={key} lineKey={key} index={index} errors={errors} clearError={clearError} />
       ))}
     </Form>
   );
@@ -173,11 +172,10 @@ export default function CreateInvoiceDraft(props: LaunchProps<{ launchContext?: 
 function LineFields(props: {
   lineKey: number;
   index: number;
-  t: Translate;
   errors: Record<string, string>;
   clearError: (id: string) => () => void;
 }) {
-  const { lineKey: key, t, errors } = props;
+  const { lineKey: key, errors } = props;
   return (
     <>
       <Form.Separator />

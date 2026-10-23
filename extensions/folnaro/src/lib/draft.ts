@@ -1,5 +1,5 @@
 import { parseDecimalInput } from "./format";
-import type { Translate } from "./i18n";
+import { t } from "./text";
 import type { DraftLineInput } from "./types";
 
 /** Units offered in the form; the helper takes any UN/ECE Rec. 20 code (docs/mcp/documents.md). */
@@ -14,13 +14,12 @@ export interface LineState {
 export type FormValues = Record<string, string | Date | null | undefined>;
 
 /**
- * Turns the form into documents_create_draft lines, or field errors in the person's language.
+ * Turns the form into documents_create_draft lines, or field errors.
  * Unit prices are net; Folnaro computes line totals and VAT itself.
  */
 export function buildLines(
   values: FormValues,
   lines: LineState[],
-  t: Translate,
 ): { lines?: DraftLineInput[]; errors: Record<string, string> } {
   const errors: Record<string, string> = {};
   const result: DraftLineInput[] = [];

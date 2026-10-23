@@ -9,5 +9,5 @@
 - Create invoice drafts with line items
 - Capture the receipt selected in Finder into the receipt inbox
 - Jump to any section of Folnaro
-- English and German, following the macOS language
+- Amounts and dates follow your Mac's regional format
 - Clear notes when a permission is off in Folnaro or Folnaro is in read-only mode

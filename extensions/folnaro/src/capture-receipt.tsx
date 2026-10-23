@@ -11,13 +11,13 @@ import {
   showToast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { readFileSync, statSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { basename } from "node:path";
 import { useState } from "react";
 import { isoDay, parseAmountInput } from "./lib/format";
-import type { StringKey } from "./lib/i18n";
-import { openFolnaro, showError, useFolnaro, useTranslation } from "./lib/raycast";
-import { EXPENSE_CATEGORIES, MAX_RECEIPT_BYTES, guessDate, guessVendor, isReceiptFile } from "./lib/receipt";
+import { t, type StringKey } from "./lib/text";
+import { openFolnaro, showError, useFolnaro } from "./lib/raycast";
+import { EXPENSE_CATEGORIES, guessDate, guessVendor, isReceiptFile, receiptFileProblem } from "./lib/receipt";
 
 interface FormValues {
   files: string[];
@@ -45,15 +45,14 @@ async function selectedReceipt(): Promise<string | undefined> {
 }
 
 export default function CaptureReceipt() {
-  const { language, t } = useTranslation();
-  const api = useFolnaro(language);
+  const api = useFolnaro();
   const { data, isLoading } = usePromise(
     async () => {
       const [allowed, path] = await Promise.all([api.allowedTools(), selectedReceipt()]);
       return { canCapture: allowed.has("expenses_create") && allowed.has("expenses_add_receipt_file"), path };
     },
     [],
-    { onError: (error) => void showError(error, t) },
+    { onError: (error) => void showError(error) },
   );
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
 
@@ -82,9 +81,8 @@ export default function CaptureReceipt() {
     const next: typeof errors = {};
     const file = values.files?.[0];
     const amount = parseAmountInput(values.amount ?? "");
-    if (!file) next.files = t("receipt.validation.file");
-    else if (!isReceiptFile(file)) next.files = t("receipt.validation.type");
-    else if (statSync(file).size > MAX_RECEIPT_BYTES) next.files = t("receipt.validation.size");
+    const fileProblem = receiptFileProblem(file);
+    if (fileProblem) next.files = t(fileProblem);
     if (!values.vendor?.trim()) next.vendor = t("receipt.validation.vendor");
     if (!amount) next.amount = t("receipt.validation.amount");
     setErrors(next);
@@ -106,7 +104,7 @@ export default function CaptureReceipt() {
       await showHUD(t("receipt.saved", { vendor: expense.vendor }), { popToRootType: PopToRootType.Immediate });
     } catch (error) {
       await toast.hide();
-      await showError(error, t);
+      await showError(error);
     }
   };
 

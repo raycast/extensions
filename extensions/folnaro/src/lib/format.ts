@@ -1,9 +1,13 @@
-import { locale, type Language, type Translate } from "./i18n";
+import { systemLocale } from "./locale";
+import { t } from "./text";
 import type { DocumentSummary, TimeEntry } from "./types";
 
-/** Euro amount from cents, in the language's format: "1.234,56 €" or "€1,234.56". */
-export function formatMoney(cents: number, language: Language, currency = "EUR"): string {
-  return new Intl.NumberFormat(locale(language), { style: "currency", currency }).format(cents / 100);
+/**
+ * Euro amount from cents in the number format of the system locale ("1.234,56 €" or "€1,234.56").
+ * `locale` is for tests; the extension passes none and gets the macOS region (see locale.ts).
+ */
+export function formatMoney(cents: number, locale: string | undefined = systemLocale(), currency = "EUR"): string {
+  return new Intl.NumberFormat(locale, { style: "currency", currency }).format(cents / 100);
 }
 
 /** Cents from a decimal string of the helper ("1234.56"). Never through floating point sums. */
@@ -44,11 +48,11 @@ export function parseDecimalInput(input: string, maxDecimals = 4): string | unde
   return pattern.test(text) ? text : undefined;
 }
 
-/** ISO date ("2026-10-05") for a person: "05.10.2026" / "Oct 5, 2026". */
-export function formatDate(isoDate: string, language: Language): string {
+/** ISO date ("2026-10-05") for a person, in the system locale: "05.10.2026" / "Oct 5, 2026". */
+export function formatDate(isoDate: string, locale: string | undefined = systemLocale()): string {
   const date = parseIsoDate(isoDate);
   if (!date) return isoDate;
-  return new Intl.DateTimeFormat(locale(language), { dateStyle: "medium", timeZone: "UTC" }).format(date);
+  return new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" }).format(date);
 }
 
 export function parseIsoDate(isoDate: string): Date | undefined {
@@ -64,8 +68,8 @@ export function isoDay(date: Date): string {
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
-export function formatTime(timestamp: string, language: Language): string {
-  return new Intl.DateTimeFormat(locale(language), { hour: "2-digit", minute: "2-digit" }).format(new Date(timestamp));
+export function formatTime(timestamp: string, locale: string | undefined = systemLocale()): string {
+  return new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }).format(new Date(timestamp));
 }
 
 /** Duration as "1:05" (hours and minutes), the format of Folnaro's menu bar timer. */
@@ -77,9 +81,9 @@ export function formatClock(seconds: number): string {
 }
 
 /** Duration for a sentence: "1:05 h" / "12 min". */
-export function formatDuration(seconds: number, language: Language): string {
+export function formatDuration(seconds: number): string {
   const minutes = Math.max(0, Math.round(seconds / 60));
-  if (minutes < 60) return language === "de" ? `${minutes} Min.` : `${minutes} min`;
+  if (minutes < 60) return `${minutes} min`;
   return `${formatClock(minutes * 60)} h`;
 }
 
@@ -130,6 +134,6 @@ export function documentStatusTone(document: DocumentSummary): StatusTone {
 }
 
 /** The label shown for a document's number: drafts have none yet. */
-export function documentNumberLabel(document: DocumentSummary, t: Translate): string {
+export function documentNumberLabel(document: DocumentSummary): string {
   return document.number ?? t("search.draft");
 }

@@ -1,4 +1,4 @@
-import type { StringKey } from "./i18n";
+import type { StringKey } from "./text";
 
 /**
  * The sections of Folnaro's main window in sidebar order (mac/Folnaro/App/SidebarItem.swift) with

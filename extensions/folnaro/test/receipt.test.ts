@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { guessDate, guessVendor, isReceiptFile } from "../src/lib/receipt";
+import { MAX_RECEIPT_BYTES, guessDate, guessVendor, isReceiptFile, receiptFileProblem } from "../src/lib/receipt";
 import { harness, toolCalls, type Harness } from "./helpers";
 
 let current: Harness | undefined;
@@ -41,6 +41,18 @@ describe("Capture Receipt", () => {
     expect(guessDate("2026-10-02_Wolkenhost.pdf")?.getDate()).toBe(2);
     expect(guessDate("Beleg 07.10.2026.pdf")?.getMonth()).toBe(9);
     expect(guessDate("beleg.pdf")).toBeUndefined();
+  });
+
+  it("reports a file that vanished after it was chosen instead of throwing", () => {
+    const vanished = () => {
+      throw Object.assign(new Error("ENOENT: no such file or directory"), { code: "ENOENT" });
+    };
+    expect(receiptFileProblem("/tmp/moved.pdf", vanished)).toBe("receipt.validation.unreadable");
+    expect(receiptFileProblem("/tmp/ok.pdf", () => 1024)).toBeUndefined();
+    expect(receiptFileProblem("/tmp/big.pdf", () => MAX_RECEIPT_BYTES + 1)).toBe("receipt.validation.size");
+    expect(receiptFileProblem("/tmp/a.docx", () => 1)).toBe("receipt.validation.type");
+    expect(receiptFileProblem(undefined)).toBe("receipt.validation.file");
+    expect(receiptFileProblem("/definitely/not/here.pdf")).toBe("receipt.validation.unreadable");
   });
 
   it("takes PDFs and images only", () => {

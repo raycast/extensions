@@ -22,14 +22,13 @@ import {
   formatDate,
   formatMoney,
 } from "./lib/format";
-import type { Language, StringKey, Translate } from "./lib/i18n";
-import { openFolnaro, quickLook, savePdf, showError, useFolnaro, useTranslation } from "./lib/raycast";
+import { t, type StringKey } from "./lib/text";
+import { openFolnaro, quickLook, savePdf, showError, useFolnaro } from "./lib/raycast";
 import { EMPTY_RESULTS, SEARCH_SCOPES, isEmpty, recordLink, runSearch, type SearchScope } from "./lib/search";
 import type { Customer, DocumentSummary, Expense, Project } from "./lib/types";
 
 export default function SearchFolnaro() {
-  const { language, t } = useTranslation();
-  const api = useFolnaro(language);
+  const api = useFolnaro();
   const [query, setQuery] = useState("");
   const [scope, setScope] = useState<SearchScope>("all");
   const [showingDetail, setShowingDetail] = useState(false);
@@ -37,14 +36,12 @@ export default function SearchFolnaro() {
   const { data, isLoading, revalidate } = usePromise(
     (text: string, selected: SearchScope) => runSearch(api, text.trim(), selected),
     [query, scope],
-    { onError: (error) => void showError(error, t) },
+    { onError: (error) => void showError(error) },
   );
 
   const results = data ?? EMPTY_RESULTS;
   const customers = results.projectCustomers;
   const shared = {
-    t,
-    language,
     api,
     showingDetail,
     toggleDetail: () => setShowingDetail((value) => !value),
@@ -112,8 +109,6 @@ export default function SearchFolnaro() {
 }
 
 interface SharedProps {
-  t: Translate;
-  language: Language;
   api: FolnaroApi;
   showingDetail: boolean;
   toggleDetail: () => void;
@@ -125,18 +120,18 @@ function CommonActions(props: SharedProps & { link: string }) {
     <>
       <ActionPanel.Section>
         <Action
-          title={props.t("action.toggleDetails")}
+          title={t("action.toggleDetails")}
           icon={Icon.Sidebar}
           shortcut={{ modifiers: ["cmd"], key: "d" }}
           onAction={props.toggleDetail}
         />
         <Action.CopyToClipboard
-          title={props.t("action.copyLink")}
+          title={t("action.copyLink")}
           content={props.link}
           shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
         />
         <Action
-          title={props.t("action.refresh")}
+          title={t("action.refresh")}
           icon={Icon.ArrowClockwise}
           shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={props.revalidate}
@@ -146,31 +141,31 @@ function CommonActions(props: SharedProps & { link: string }) {
   );
 }
 
-function OpenInFolnaro({ t, link }: { t: Translate; link: string }) {
+function OpenInFolnaro({ link }: { link: string }) {
   return (
     <Action
       title={t("action.openInFolnaro")}
       icon={Icon.AppWindow}
-      onAction={() => openFolnaro(link).catch((error) => showError(error, t))}
+      onAction={() => openFolnaro(link).catch((error) => showError(error))}
     />
   );
 }
 
 function DocumentItem(props: SharedProps & { document: DocumentSummary }) {
-  const { document, t, language, api } = props;
+  const { document, api } = props;
   const link = recordLink("document", document.id);
   const tone = documentStatusTone(document);
   const status = t(documentStatusKey(document) as StringKey);
-  const amount = formatMoney(document.gross_total_cents, language);
+  const amount = formatMoney(document.gross_total_cents);
   const openCents =
     document.open_amount_cents ?? (document.open_amount ? centsFromDecimal(document.open_amount) : undefined);
   const accessories: List.Item.Accessory[] = [];
   if (!props.showingDetail) {
     if (document.due_date && !document.is_draft && document.status !== "paid" && document.status !== "cancelled") {
       accessories.push({
-        text: formatDate(document.due_date, language),
+        text: formatDate(document.due_date),
         icon: Icon.Calendar,
-        tooltip: t("search.dueOn", { date: formatDate(document.due_date, language) }),
+        tooltip: t("search.dueOn", { date: formatDate(document.due_date) }),
       });
     }
     accessories.push({ text: amount });
@@ -191,7 +186,7 @@ function DocumentItem(props: SharedProps & { document: DocumentSummary }) {
       else quickLook(path);
     } catch (error) {
       await toast.hide();
-      await showError(error, t);
+      await showError(error);
     }
   };
 
@@ -201,7 +196,7 @@ function DocumentItem(props: SharedProps & { document: DocumentSummary }) {
         source: document.kind === "quote" || document.kind === "orderConfirmation" ? Icon.Document : Icon.Receipt,
         tintColor: BRAND_ACCENT,
       }}
-      title={documentNumberLabel(document, t)}
+      title={documentNumberLabel(document)}
       subtitle={props.showingDetail ? undefined : [document.customer_name, document.title].filter(Boolean).join(" · ")}
       keywords={[document.customer_name ?? "", document.title ?? ""].filter(Boolean)}
       accessories={accessories}
@@ -210,7 +205,7 @@ function DocumentItem(props: SharedProps & { document: DocumentSummary }) {
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title={t("field.kind")} text={t(`kind.${document.kind}` as StringKey)} />
-              <List.Item.Detail.Metadata.Label title={t("field.number")} text={documentNumberLabel(document, t)} />
+              <List.Item.Detail.Metadata.Label title={t("field.number")} text={documentNumberLabel(document)} />
               <List.Item.Detail.Metadata.Label
                 title={t("field.status")}
                 text={status}
@@ -223,32 +218,20 @@ function DocumentItem(props: SharedProps & { document: DocumentSummary }) {
                 <List.Item.Detail.Metadata.Label title={t("field.title")} text={document.title} />
               ) : null}
               <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label
-                title={t("field.issueDate")}
-                text={formatDate(document.issue_date, language)}
-              />
+              <List.Item.Detail.Metadata.Label title={t("field.issueDate")} text={formatDate(document.issue_date)} />
               {document.due_date ? (
-                <List.Item.Detail.Metadata.Label
-                  title={t("field.dueDate")}
-                  text={formatDate(document.due_date, language)}
-                />
+                <List.Item.Detail.Metadata.Label title={t("field.dueDate")} text={formatDate(document.due_date)} />
               ) : null}
               <List.Item.Detail.Metadata.Separator />
               {document.net_total_cents !== undefined ? (
-                <List.Item.Detail.Metadata.Label
-                  title={t("field.net")}
-                  text={formatMoney(document.net_total_cents, language)}
-                />
+                <List.Item.Detail.Metadata.Label title={t("field.net")} text={formatMoney(document.net_total_cents)} />
               ) : null}
               {document.tax_total_cents !== undefined ? (
-                <List.Item.Detail.Metadata.Label
-                  title={t("field.vat")}
-                  text={formatMoney(document.tax_total_cents, language)}
-                />
+                <List.Item.Detail.Metadata.Label title={t("field.vat")} text={formatMoney(document.tax_total_cents)} />
               ) : null}
               <List.Item.Detail.Metadata.Label title={t("field.gross")} text={amount} />
               {openCents !== undefined && !document.is_draft && openCents !== 0 ? (
-                <List.Item.Detail.Metadata.Label title={t("field.open")} text={formatMoney(openCents, language)} />
+                <List.Item.Detail.Metadata.Label title={t("field.open")} text={formatMoney(openCents)} />
               ) : null}
             </List.Item.Detail.Metadata>
           }
@@ -257,7 +240,7 @@ function DocumentItem(props: SharedProps & { document: DocumentSummary }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInFolnaro t={t} link={link} />
+            <OpenInFolnaro link={link} />
             <Action
               title={t("action.quickLookPdf")}
               icon={Icon.Eye}
@@ -300,7 +283,7 @@ function formatAddress(customer: Customer): string {
 }
 
 function CustomerItem(props: SharedProps & { customer: Customer }) {
-  const { customer, t } = props;
+  const { customer } = props;
   const link = recordLink("customer", customer.id);
   return (
     <List.Item
@@ -329,7 +312,7 @@ function CustomerItem(props: SharedProps & { customer: Customer }) {
               {customer.hourly_rate ? (
                 <List.Item.Detail.Metadata.Label
                   title={t("field.hourlyRate")}
-                  text={formatMoney(centsFromDecimal(customer.hourly_rate), props.language)}
+                  text={formatMoney(centsFromDecimal(customer.hourly_rate))}
                 />
               ) : null}
             </List.Item.Detail.Metadata>
@@ -339,7 +322,7 @@ function CustomerItem(props: SharedProps & { customer: Customer }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInFolnaro t={t} link={link} />
+            <OpenInFolnaro link={link} />
             <Action
               title={t("action.createInvoiceForCustomer")}
               icon={Icon.NewDocument}
@@ -349,7 +332,7 @@ function CustomerItem(props: SharedProps & { customer: Customer }) {
                   name: "create-invoice-draft",
                   type: LaunchType.UserInitiated,
                   context: { customerId: customer.id },
-                }).catch((error) => showError(error, t))
+                }).catch((error) => showError(error))
               }
             />
           </ActionPanel.Section>
@@ -375,9 +358,9 @@ function CustomerItem(props: SharedProps & { customer: Customer }) {
 }
 
 function ExpenseItem(props: SharedProps & { expense: Expense }) {
-  const { expense, t, language } = props;
+  const { expense } = props;
   const link = recordLink("expense", expense.id);
-  const amount = formatMoney(expense.gross_amount_cents, language);
+  const amount = formatMoney(expense.gross_amount_cents);
   const statusTone = expense.status === "booked" ? "paid" : expense.status === "voided" ? "cancelled" : "open";
   const status = t(`expenseStatus.${expense.status}` as StringKey);
   return (
@@ -393,7 +376,7 @@ function ExpenseItem(props: SharedProps & { expense: Expense }) {
                 icon: expense.has_receipt ? Icon.Paperclip : undefined,
                 tooltip: expense.has_receipt ? t("search.hasReceipt") : undefined,
               },
-              { text: formatDate(expense.date, language) },
+              { text: formatDate(expense.date) },
               { text: amount },
             ]),
         { icon: { source: Icon.CircleFilled, tintColor: statusColor(statusTone) }, text: status },
@@ -403,7 +386,7 @@ function ExpenseItem(props: SharedProps & { expense: Expense }) {
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title={t("field.vendor")} text={expense.vendor} />
-              <List.Item.Detail.Metadata.Label title={t("field.issueDate")} text={formatDate(expense.date, language)} />
+              <List.Item.Detail.Metadata.Label title={t("field.issueDate")} text={formatDate(expense.date)} />
               {expense.category_title ? (
                 <List.Item.Detail.Metadata.Label title={t("field.category")} text={expense.category_title} />
               ) : null}
@@ -419,13 +402,13 @@ function ExpenseItem(props: SharedProps & { expense: Expense }) {
               {expense.net_amount ? (
                 <List.Item.Detail.Metadata.Label
                   title={t("field.net")}
-                  text={formatMoney(centsFromDecimal(expense.net_amount), language)}
+                  text={formatMoney(centsFromDecimal(expense.net_amount))}
                 />
               ) : null}
               {expense.tax_amount ? (
                 <List.Item.Detail.Metadata.Label
                   title={t("field.vat")}
-                  text={formatMoney(centsFromDecimal(expense.tax_amount), language)}
+                  text={formatMoney(centsFromDecimal(expense.tax_amount))}
                 />
               ) : null}
               <List.Item.Detail.Metadata.Label title={t("field.gross")} text={amount} />
@@ -445,7 +428,7 @@ function ExpenseItem(props: SharedProps & { expense: Expense }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInFolnaro t={t} link={link} />
+            <OpenInFolnaro link={link} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
@@ -469,7 +452,7 @@ function ExpenseItem(props: SharedProps & { expense: Expense }) {
 }
 
 function ProjectItem(props: SharedProps & { project: Project; customer?: Customer }) {
-  const { project, customer, t, language } = props;
+  const { project, customer } = props;
   const link = recordLink("project", project.id);
   const status = project.status ? t(`projectStatus.${project.status}` as StringKey) : undefined;
   const tone = project.status === "active" ? "open" : project.status === "done" ? "paid" : "draft";
@@ -481,7 +464,7 @@ function ProjectItem(props: SharedProps & { project: Project; customer?: Custome
       accessories={[
         ...(props.showingDetail || !project.hourly_rate
           ? []
-          : [{ text: `${formatMoney(centsFromDecimal(project.hourly_rate), language)}/h` }]),
+          : [{ text: `${formatMoney(centsFromDecimal(project.hourly_rate))}/h` }]),
         ...(status ? [{ icon: { source: Icon.CircleFilled, tintColor: statusColor(tone) }, text: status }] : []),
       ]}
       detail={
@@ -499,13 +482,13 @@ function ProjectItem(props: SharedProps & { project: Project; customer?: Custome
               {project.hourly_rate ? (
                 <List.Item.Detail.Metadata.Label
                   title={t("field.hourlyRate")}
-                  text={formatMoney(centsFromDecimal(project.hourly_rate), language)}
+                  text={formatMoney(centsFromDecimal(project.hourly_rate))}
                 />
               ) : null}
               {project.budget_amount ? (
                 <List.Item.Detail.Metadata.Label
                   title={t("field.budget")}
-                  text={formatMoney(centsFromDecimal(project.budget_amount), language)}
+                  text={formatMoney(centsFromDecimal(project.budget_amount))}
                 />
               ) : null}
               {project.budget_hours ? (
@@ -519,7 +502,7 @@ function ProjectItem(props: SharedProps & { project: Project; customer?: Custome
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInFolnaro t={t} link={link} />
+            <OpenInFolnaro link={link} />
             <Action
               title={t("action.startTimerForProject")}
               icon={Icon.Play}
@@ -529,7 +512,7 @@ function ProjectItem(props: SharedProps & { project: Project; customer?: Custome
                   name: "start-timer",
                   type: LaunchType.UserInitiated,
                   context: { projectId: project.id },
-                }).catch((error) => showError(error, t))
+                }).catch((error) => showError(error))
               }
             />
           </ActionPanel.Section>

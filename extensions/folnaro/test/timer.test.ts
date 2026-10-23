@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { describeError } from "../src/lib/presentation";
 import { elapsedSeconds, formatClock, formatDuration } from "../src/lib/format";
-import { translator } from "../src/lib/i18n";
 import {
   byId,
+  chosenActivity,
   describeEntry,
   describeTarget,
   recentTargets,
@@ -17,6 +17,14 @@ let current: Harness | undefined;
 afterEach(() => current?.client.close());
 
 describe("Start Timer", () => {
+  it("lets the person clear a preselected activity with No activity", () => {
+    expect(chosenActivity("", "Consulting")).toBeUndefined();
+    expect(chosenActivity("Design", "Consulting")).toBe("Design");
+    // A form without the activity dropdown submits no value and keeps the target's activity.
+    expect(chosenActivity(undefined, "Consulting")).toBe("Consulting");
+    expect(chosenActivity(undefined, undefined)).toBeUndefined();
+  });
+
   it("starts an approved timer for a project and returns the running entry", async () => {
     const h = (current = harness("timer-start.json"));
     const entry = await startTimerFor(h.api, { projectId: "P-WEB" }, "  Startseite  ", false);
@@ -55,7 +63,7 @@ describe("Start Timer", () => {
     const h = (current = harness("timer-already-running.json"));
     const error = await startTimerFor(h.api, { projectId: "P-WEB" }, undefined, false).catch((failure) => failure);
     expect(error.kind).toBe("timerRunning");
-    expect(describeError(error, translator("de")).title).toBe("Es läuft schon ein Timer");
+    expect(describeError(error).title).toBe("A timer is already running");
   });
 });
 
@@ -69,15 +77,12 @@ describe("Stop Timer", () => {
     expect(describeEntry(entry, known)).toBe("Website-Relaunch");
   });
 
-  it("says when no timer runs, in English and German", async () => {
+  it("says when no timer runs", async () => {
     const h = (current = harness("timer-stop.json"));
     await h.api.stopTimer();
     await expect(h.api.stopTimer()).rejects.toMatchObject({ kind: "timerNotRunning" });
-    const de = harness("timer-not-running-de.json");
-    const error = await de.api.stopTimer().catch((failure) => failure);
-    de.client.close();
-    expect(error.kind).toBe("timerNotRunning");
-    expect(describeError(error, translator("de")).title).toBe("Gerade läuft kein Timer");
+    const error = await h.api.stopTimer().catch((failure) => failure);
+    expect(describeError(error).title).toBe("No timer is running");
   });
 });
 

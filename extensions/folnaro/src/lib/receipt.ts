@@ -1,4 +1,6 @@
+import { statSync } from "node:fs";
 import { basename, extname } from "node:path";
+import type { StringKey } from "./text";
 
 /** File types Folnaro keeps as receipts (PDF and images, docs/mcp/expenses.md). */
 export const RECEIPT_EXTENSIONS = new Set(["pdf", "png", "jpg", "jpeg", "heic", "heif", "tif", "tiff"]);
@@ -8,6 +10,24 @@ export const MAX_RECEIPT_BYTES = 25 * 1024 * 1024;
 
 export function isReceiptFile(path: string): boolean {
   return RECEIPT_EXTENSIONS.has(extname(path).slice(1).toLowerCase());
+}
+
+/**
+ * Why a chosen file cannot be a receipt, as the text key to show under the file field, or
+ * undefined when it can. A file that was moved or deleted after the form opened is reported as
+ * unreadable instead of throwing.
+ */
+export function receiptFileProblem(
+  file: string | undefined,
+  size: (path: string) => number = (path) => statSync(path).size,
+): StringKey | undefined {
+  if (!file) return "receipt.validation.file";
+  if (!isReceiptFile(file)) return "receipt.validation.type";
+  try {
+    return size(file) > MAX_RECEIPT_BYTES ? "receipt.validation.size" : undefined;
+  } catch {
+    return "receipt.validation.unreadable";
+  }
 }
 
 /**

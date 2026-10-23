@@ -142,28 +142,6 @@
   ],
   "preferences": [
     {
-      "name": "language",
-      "title": "Language",
-      "description": "Language of the extension. Automatic follows your macOS language, like Folnaro.",
-      "type": "dropdown",
-      "required": false,
-      "default": "auto",
-      "data": [
-        {
-          "title": "Automatic",
-          "value": "auto"
-        },
-        {
-          "title": "English",
-          "value": "en"
-        },
-        {
-          "title": "Deutsch",
-          "value": "de"
-        }
-      ]
-    },
-    {
       "name": "helperPath",
       "title": "Helper Path",
       "description": "Only if Folnaro is not in Applications: the full path of folnaro-mcp inside Folnaro.app.",

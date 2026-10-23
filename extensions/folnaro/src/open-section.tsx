@@ -1,16 +1,16 @@
 import { Action, ActionPanel, Icon, List, PopToRootType, Toast, showHUD, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { BRAND_ACCENT } from "./lib/brand";
-import type { StringKey, Translate } from "./lib/i18n";
-import { openFolnaro, showError, useTranslation } from "./lib/raycast";
+import { t, type StringKey } from "./lib/text";
+import { openFolnaro, showError } from "./lib/raycast";
 import { SECTION_GROUPS, sectionScript, type Section } from "./lib/sections";
 
-async function openSection(section: Section, t: Translate) {
+async function openSection(section: Section) {
   const name = t(`section.${section.id}` as StringKey);
   try {
     await openFolnaro();
   } catch (error) {
-    await showError(error, t);
+    await showError(error);
     return;
   }
   try {
@@ -23,7 +23,6 @@ async function openSection(section: Section, t: Translate) {
 }
 
 export default function OpenSection() {
-  const { t } = useTranslation();
   return (
     <List searchBarPlaceholder={t("section.placeholder")}>
       {SECTION_GROUPS.map((group, index) => (
@@ -40,7 +39,7 @@ export default function OpenSection() {
                 accessories={[{ text: shortcut, tooltip: shortcut }]}
                 actions={
                   <ActionPanel>
-                    <Action title={t("section.open")} icon={Icon.AppWindow} onAction={() => openSection(section, t)} />
+                    <Action title={t("section.open")} icon={Icon.AppWindow} onAction={() => openSection(section)} />
                   </ActionPanel>
                 }
               />

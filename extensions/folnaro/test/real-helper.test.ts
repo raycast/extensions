@@ -182,18 +182,6 @@ describe.skipIf(!BIN)("real folnaro-mcp", () => {
     }
   });
 
-  it("recognizes the timer errors in German too", async () => {
-    const { client, api } = connect("de");
-    try {
-      expect((await failure(api.stopTimer())).kind).toBe("timerNotRunning");
-      await api.startTimer({ customer_id: customerId });
-      expect((await failure(api.startTimer({ customer_id: customerId }))).kind).toBe("timerRunning");
-      await api.stopTimer();
-    } finally {
-      client.close();
-    }
-  });
-
   it("captures a receipt into the inbox and refuses the same file twice", async () => {
     const { client, api } = connect();
     try {
@@ -220,15 +208,13 @@ describe.skipIf(!BIN)("real folnaro-mcp", () => {
   it("asks for the read switch while reading is off", async () => {
     setSetting("mcp.permissions", { read: false, writeDrafts: true, expenses: true, time: true });
     try {
-      for (const language of ["en", "de"] as const) {
-        const off = connect(language);
-        try {
-          const denied = await failure(off.api.customers());
-          expect(denied.kind).toBe("permissionDenied");
-          expect(denied.permission).toBe("read");
-        } finally {
-          off.client.close();
-        }
+      const off = connect();
+      try {
+        const denied = await failure(off.api.customers());
+        expect(denied.kind).toBe("permissionDenied");
+        expect(denied.permission).toBe("read");
+      } finally {
+        off.client.close();
       }
     } finally {
       setSetting("mcp.permissions", { read: true, writeDrafts: true, expenses: true, time: true });
@@ -237,7 +223,7 @@ describe.skipIf(!BIN)("real folnaro-mcp", () => {
 
   it("names the switch when a permission is off and recognizes read-only mode", async () => {
     setSetting("mcp.permissions", { read: true, writeDrafts: true, expenses: true, time: false });
-    const off = connect("de");
+    const off = connect();
     try {
       expect((await off.api.allowedTools()).has("time_start_timer")).toBe(false);
       const denied = await failure(off.api.startTimer({ customer_id: customerId }));
@@ -249,18 +235,16 @@ describe.skipIf(!BIN)("real folnaro-mcp", () => {
     }
 
     setSetting("entitlement.state", { canWrite: false });
-    for (const language of ["en", "de"] as const) {
-      const locked = connect(language);
-      try {
-        expect((await failure(locked.api.startTimer({ customer_id: customerId }))).kind).toBe("readOnlyMode");
-        expect((await failure(locked.api.createDraft({ kind: "invoice", customer_id: customerId }))).kind).toBe(
-          "readOnlyMode",
-        );
-        // Reading keeps working.
-        expect((await locked.api.customers()).length).toBeGreaterThan(0);
-      } finally {
-        locked.client.close();
-      }
+    const locked = connect();
+    try {
+      expect((await failure(locked.api.startTimer({ customer_id: customerId }))).kind).toBe("readOnlyMode");
+      expect((await failure(locked.api.createDraft({ kind: "invoice", customer_id: customerId }))).kind).toBe(
+        "readOnlyMode",
+      );
+      // Reading keeps working.
+      expect((await locked.api.customers()).length).toBeGreaterThan(0);
+    } finally {
+      locked.client.close();
     }
     setSetting("entitlement.state", { canWrite: true });
   });

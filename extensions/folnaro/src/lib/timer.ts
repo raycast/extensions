@@ -91,6 +91,16 @@ export function byId<T extends { id: string }>(items: T[]): Map<string, T> {
 }
 
 /**
+ * The activity to start with. A form that shows the activity dropdown submits the person's
+ * explicit choice, and "No activity" (an empty string) must clear a preselected activity. Only a
+ * form without the dropdown (`submitted` is undefined) keeps the target's own activity.
+ */
+export function chosenActivity(submitted: string | undefined, preselected: string | undefined): string | undefined {
+  if (submitted === undefined) return preselected;
+  return submitted || undefined;
+}
+
+/**
  * Starts the timer for `target`, stopping a running one first when asked ("Stop and Start").
  * The person starts it themselves, so the entry counts right away (`approved`); `proposed` is for
  * time an agent suggests on its own (docs/mcp/time.md, time_start_timer).

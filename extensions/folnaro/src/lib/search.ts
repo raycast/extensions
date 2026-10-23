@@ -1,6 +1,6 @@
 import { INVOICE_KINDS, QUOTE_KINDS, type FolnaroApi } from "./folnaro";
 import { byId } from "./timer";
-import type { Customer, DocumentSummary, Expense, Project } from "./types";
+import type { Customer, DocumentKind, DocumentSummary, Expense, Project } from "./types";
 
 export type SearchScope = "all" | "invoices" | "quotes" | "customers" | "expenses" | "projects";
 
@@ -80,25 +80,23 @@ export function recordLink(kind: "document" | "customer" | "project" | "expense"
  */
 export async function runSearch(api: FolnaroApi, query: string, scope: SearchScope): Promise<SearchResults> {
   const limit = sectionLimit(scope);
-  const kinds = [
-    ...(includes(scope, "invoices") ? INVOICE_KINDS : []),
-    ...(includes(scope, "quotes") ? QUOTE_KINDS : []),
-  ];
+  // Invoices and quotes are fetched separately so that many invoices never crowd out the quotes.
+  const documentsOf = (kinds: DocumentKind[]) => api.documents({ query, kinds, limit });
   const wantsProjects = includes(scope, "projects");
   // Customers are also needed to name the customer of each project.
   const wantsCustomers = includes(scope, "customers") || wantsProjects;
-  const [documents, customers, expenses, allCustomers, projects] = await Promise.all([
-    kinds.length ? api.documents({ query, kinds, limit: scope === "all" ? 16 : limit }) : Promise.resolve([]),
+  const [invoices, quotes, customers, expenses, allCustomers, projects] = await Promise.all([
+    includes(scope, "invoices") ? documentsOf(INVOICE_KINDS) : Promise.resolve([]),
+    includes(scope, "quotes") ? documentsOf(QUOTE_KINDS) : Promise.resolve([]),
     wantsCustomers && query ? api.customers({ query, limit }) : Promise.resolve(undefined),
     includes(scope, "expenses") ? api.expenses({ query, limit }) : Promise.resolve([]),
     wantsCustomers ? api.customers({ limit: 500 }) : Promise.resolve([]),
     wantsProjects ? api.projects() : Promise.resolve([]),
   ]);
   const customerMap = byId(allCustomers);
-  const split = splitDocuments(documents);
   return {
-    invoices: split.invoices.slice(0, limit),
-    quotes: split.quotes.slice(0, limit),
+    invoices: splitDocuments(invoices).invoices.slice(0, limit),
+    quotes: splitDocuments(quotes).quotes.slice(0, limit),
     customers: includes(scope, "customers") ? (customers ?? allCustomers).slice(0, limit) : [],
     expenses: expenses.slice(0, limit),
     projects: filterProjects(projects, query, customerMap).slice(0, limit),

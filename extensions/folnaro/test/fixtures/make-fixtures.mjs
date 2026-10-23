@@ -27,11 +27,8 @@ export const TEXT = {
   permissionTimeEn: "Agents may not use “time_start_timer”. Allow “Track time” in Folnaro under Settings > Agents (setting mcp.permissions).",
   permissionDraftDe: "Agenten dürfen „documents_create_draft“ nicht verwenden. Erlaube „Kunden und Entwürfe anlegen und bearbeiten“ in Folnaro unter „Einstellungen“ > „Agenten“ (Einstellung mcp.permissions).",
   lockedEn: "Folnaro is in read-only mode because the trial has ended or the subscription has lapsed. Reading and export keep working (GoBD retention). To create new documents, expenses and time entries again, ask the user to unlock Folnaro in the app.",
-  lockedDe: "Folnaro ist im Lesemodus, weil die Testphase abgelaufen oder das Abo beendet ist. Lesen und Exportieren funktionieren weiter (Aufbewahrung nach GoBD). Für neue Dokumente, Ausgaben und Zeiten bitte den Nutzer, Folnaro in der App freizuschalten.",
   timerRunningEn: "A timer is already running. Stop it first.",
-  timerRunningDe: "Es läuft schon ein Timer. Stoppe ihn zuerst.",
   noTimerEn: "No timer is running.",
-  noTimerDe: "Gerade läuft kein Timer.",
   duplicateReceiptEn: "You already imported this receipt. Look for it under Expenses.",
 };
 
@@ -169,14 +166,13 @@ const fixtures = {
       failing("time_stop_timer", TEXT.noTimerEn),
     ],
   },
-  "timer-not-running-de.json": { exchanges: [failing("time_stop_timer", TEXT.noTimerDe)] },
   "timer-already-running.json": { exchanges: [failing("time_start_timer", TEXT.timerRunningEn)] },
   // Read-only mode after the trial: the write tools stay listed and answer with the lock text.
   "locked.json": {
     exchanges: [
       toolsList([...READ_TOOLS, ...WRITE_TOOLS]),
       failing("time_start_timer", TEXT.lockedEn),
-      failing("expenses_create", TEXT.lockedDe),
+      failing("expenses_create", TEXT.lockedEn),
       call("time_stop_timer", { entry: { ...RUNNING, is_running: false, duration_seconds: 600, duration_minutes: 10 } }),
     ],
   },

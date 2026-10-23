@@ -2,14 +2,10 @@ import { Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, sho
 import { useCachedPromise } from "@raycast/utils";
 import { BRAND_ACCENT } from "./lib/brand";
 import { elapsedSeconds, formatClock, formatDuration, formatTime } from "./lib/format";
-import { translator } from "./lib/i18n";
-import { currentLanguage, openFolnaro, showError, withFolnaro } from "./lib/raycast";
+import { openFolnaro, showError, withFolnaro } from "./lib/raycast";
 import { byId, describeEntry } from "./lib/timer";
 import type { TimeEntry } from "./lib/types";
-
-interface Preferences {
-  hideWhenIdle?: boolean;
-}
+import { t } from "./lib/text";
 
 interface TimerState {
   entry: TimeEntry | null;
@@ -22,7 +18,7 @@ interface TimerState {
  * project name is only looked up while a timer runs.
  */
 async function loadState(): Promise<TimerState> {
-  return withFolnaro(currentLanguage(), async (api) => {
+  return withFolnaro(async (api) => {
     const entry = await api.runningTimer();
     if (!entry) return { entry: null };
     const name = await Promise.all([api.projects(), api.customers({ limit: 500 })])
@@ -33,9 +29,7 @@ async function loadState(): Promise<TimerState> {
 }
 
 export default function RunningTimer() {
-  const language = currentLanguage();
-  const t = translator(language);
-  const { hideWhenIdle } = getPreferenceValues<Preferences>();
+  const { hideWhenIdle } = getPreferenceValues<Preferences.RunningTimer>();
   // The cached value draws the menu bar at once; the fresh one replaces it when it arrives.
   const { data, isLoading, error, mutate } = useCachedPromise(loadState, [], {
     keepPreviousData: true,
@@ -53,11 +47,11 @@ export default function RunningTimer() {
 
   const stop = async () => {
     try {
-      const stopped = await withFolnaro(language, (api) => api.stopTimer());
+      const stopped = await withFolnaro((api) => api.stopTimer());
       await mutate(Promise.resolve({ entry: null }), { optimisticUpdate: () => ({ entry: null }) });
-      await showHUD(t("timer.stopped", { duration: formatDuration(stopped.duration_seconds, language) }));
+      await showHUD(t("timer.stopped", { duration: formatDuration(stopped.duration_seconds) }));
     } catch (failure) {
-      await showError(failure, t);
+      await showError(failure);
     }
   };
 
@@ -79,8 +73,8 @@ export default function RunningTimer() {
           <MenuBarExtra.Item
             title={
               entry.started_at
-                ? t("timer.runningSince", { time: formatTime(entry.started_at, language) })
-                : t("timer.elapsed", { duration: formatDuration(elapsed, language) })
+                ? t("timer.runningSince", { time: formatTime(entry.started_at) })
+                : t("timer.elapsed", { duration: formatDuration(elapsed) })
             }
           />
           <MenuBarExtra.Item
@@ -102,7 +96,7 @@ export default function RunningTimer() {
           shortcut={Keyboard.Shortcut.Common.New}
           onAction={() =>
             launchCommand({ name: "start-timer", type: LaunchType.UserInitiated }).catch((failure) =>
-              showError(failure, t),
+              showError(failure),
             )
           }
         />

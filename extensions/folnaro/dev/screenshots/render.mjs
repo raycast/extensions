@@ -6,7 +6,7 @@
 // Raycast's Window Capture (see docs/research/raycast-store.md); this script is the stand-in
 // that keeps the set reviewable and the demo data consistent.
 //
-//   NODE_PATH="$(npm root -g)" node dev/screenshots/render.mjs [--language de] [--out metadata] [--captions]
+//   NODE_PATH="$(npm root -g)" node dev/screenshots/render.mjs [--out metadata] [--captions]
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
@@ -19,8 +19,7 @@ const require = createRequire(import.meta.url);
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const args = process.argv.slice(2);
 const option = (name, fallback) => (args.includes(name) ? args[args.indexOf(name) + 1] : fallback);
-const language = option("--language", "en");
-const out = join(root, option("--out", language === "en" ? "metadata" : `dev/screenshots/out-${language}`));
+const out = join(root, option("--out", "metadata"));
 
 // Bundle collect.ts with the esbuild that @raycast/api already brings along.
 const esbuild = require(require.resolve("esbuild", { paths: [join(root, "node_modules", "@raycast", "api")] }));
@@ -28,7 +27,7 @@ const bundle = join(mkdtempSync(join(tmpdir(), "folnaro-shots-")), "collect.cjs"
 await esbuild.build({ entryPoints: [join(root, "dev/screenshots/collect.ts")], bundle: true, platform: "node", format: "cjs", outfile: bundle, logLevel: "error" });
 const { collect } = require(bundle);
 // A fixed "now" keeps the running timer at the same minute in every run.
-const data = await collect(root, language, new Date("2026-10-09T09:59:00+02:00"));
+const data = await collect(root, "en-US", new Date("2026-10-09T09:59:00+02:00"));
 const t = data.t;
 
 const { chromium } = require("playwright");
@@ -164,7 +163,7 @@ function searchScreen() {
   }
   return page(
     windowFrame({ placeholder: t["search.placeholder"], dropdown: t["search.scope.all"], body: `<div class="list">${blocks.join("")}</div>`, command: "Search Folnaro", primary: t["action.openInFolnaro"] }),
-    language === "de" ? "Rechnungen, Angebote, Kunden und Belege mit Status, Betrag und Fälligkeit" : "Invoices, quotes, customers and receipts with status, amount and due date",
+    "Invoices, quotes, customers and receipts with status, amount and due date",
   );
 }
 
@@ -178,13 +177,13 @@ function detailScreen() {
   return page(
     windowFrame({
       search: "RE-2026",
-      dropdown: language === "de" ? "Rechnungen" : "Invoices",
+      dropdown: "Invoices",
       body: `<div class="list narrow"><div class="section">${esc(invoices.title)}</div>${list}</div><div class="detail"><div class="meta">${status}${meta}</div></div>`,
       command: "Search Folnaro",
       primary: t["action.quickLookPdf"],
       primaryKey: "⌘Y",
     }),
-    language === "de" ? "Details auf einen Blick, PDF in der Schnellansicht" : "Details at a glance, the PDF in Quick Look",
+    "Details at a glance, the PDF in Quick Look",
   );
 }
 
@@ -200,7 +199,7 @@ function timerScreen() {
   ];
   return page(
     windowFrame({ placeholder: t["timer.placeholder"], body: `<div class="list">${rows.join("")}</div>`, command: "Start Timer", primary: t["timer.stopAndStart"] }),
-    language === "de" ? "Timer starten, zuletzt genutzte Projekte zuerst" : "Start the timer, recent projects first",
+    "Start the timer, recent projects first",
   );
 }
 
@@ -213,7 +212,7 @@ function menuBarScreen() {
   const inner = `
     <div style="position:absolute;left:0;right:0;top:0;height:30px;background:rgba(20,22,25,0.55);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:flex-end;gap:18px;padding:0 18px;font-size:13.5px;color:#F4F4F5;font-weight:500">
       <span style="display:flex;align-items:center;gap:5px;padding:2px 7px;border-radius:5px;background:rgba(255,255,255,0.18)">${glyph("stopwatch", "#72DED9", 15)}${esc(r.clock)}</span>
-      <span>${language === "de" ? "Do. 9. Okt." : "Thu Oct 9"}&nbsp;&nbsp;09:59</span>
+      <span>Thu Oct 9&nbsp;&nbsp;09:59</span>
     </div>
     <div style="position:absolute;right:120px;top:36px;width:300px;padding:5px 0;border-radius:10px;background:rgba(36,38,42,0.97);border:1px solid rgba(255,255,255,0.12);box-shadow:0 18px 50px rgba(0,0,0,0.5)">
       ${item(r.title, { icon: "stopwatch" })}
@@ -224,7 +223,7 @@ function menuBarScreen() {
       ${item(t["menu.start"], { icon: "stopwatch", key: "⌘N" })}
       ${item(t["menu.openFolnaro"], { icon: "app", key: "⌘O" })}
     </div>`;
-  return page(inner, language === "de" ? "Der laufende Timer in der Menüleiste" : "The running timer in the menu bar");
+  return page(inner, "The running timer in the menu bar");
 }
 
 function field(label, content, opts = {}) {
@@ -236,19 +235,19 @@ function draftScreen() {
   const body = `<div class="form">
     <div class="field"><div></div><div class="desc">${esc(t["draft.info"])}</div></div>
     ${field(t["draft.customer"], esc(data.customers[0]), { dropdown: true })}
-    ${field(t["draft.project"], language === "de" ? "Website-Relaunch" : "Website-Relaunch", { dropdown: true })}
-    ${field(t["draft.title"], language === "de" ? "Website-Relaunch, Phase 3" : "Website relaunch, phase 3")}
-    ${field(t["draft.serviceStart"], language === "de" ? "01.10.2026" : "Oct 1, 2026")}
-    ${field(t["draft.serviceEnd"], language === "de" ? "31.10.2026" : "Oct 31, 2026")}
+    ${field(t["draft.project"], "Website-Relaunch", { dropdown: true })}
+    ${field(t["draft.title"], "Website relaunch, phase 3")}
+    ${field(t["draft.serviceStart"], "Oct 1, 2026")}
+    ${field(t["draft.serviceEnd"], "Oct 31, 2026")}
     <div class="formsep"></div>
-    ${field(t["draft.lineTitle"], language === "de" ? "Design und Umsetzung Startseite" : "Design and build of the home page", { focus: true })}
+    ${field(t["draft.lineTitle"], "Design and build of the home page", { focus: true })}
     ${field(t["draft.quantity"], "24")}
     ${field(t["draft.unit"], esc(t["unit.HUR"]), { dropdown: true })}
-    ${field(t["draft.unitPrice"], "95,00".replace(",", language === "de" ? "," : "."))}
+    ${field(t["draft.unitPrice"], "95.00")}
   </div>`;
   return page(
     windowFrame({ back: true, placeholder: "", body, command: "Create Invoice Draft", primary: t["draft.submit"], primaryKey: "⌘↵" }),
-    language === "de" ? "Rechnungsentwurf in Sekunden, Summen rechnet Folnaro" : "An invoice draft in seconds, Folnaro does the math",
+    "An invoice draft in seconds, Folnaro does the math",
   );
 }
 
@@ -257,14 +256,14 @@ function receiptScreen() {
     <div class="field"><div></div><div class="desc">${esc(t["receipt.info"])}</div></div>
     ${field(t["receipt.file"], `${glyph("invoice", "#72DED9", 15)}<span style="flex:1;margin-left:8px">2026-10-07_Papeterie_Nord.pdf</span>`)}
     ${field(t["receipt.vendor"], "Papeterie Nord")}
-    ${field(t["receipt.amount"], language === "de" ? "35,70" : "35.70", { focus: true })}
-    ${field(t["receipt.date"], language === "de" ? "07.10.2026" : "Oct 7, 2026")}
+    ${field(t["receipt.amount"], "35.70", { focus: true })}
+    ${field(t["receipt.date"], "Oct 7, 2026")}
     ${field(t["receipt.category"], esc(t["category.office"]), { dropdown: true })}
-    ${field(t["receipt.note"], language === "de" ? "Skizzenbücher" : "Sketchbooks")}
+    ${field(t["receipt.note"], "Sketchbooks")}
   </div>`;
   return page(
     windowFrame({ back: true, placeholder: "", body, command: "Capture Receipt", primary: t["receipt.submit"], primaryKey: "⌘↵" }),
-    language === "de" ? "Beleg aus dem Finder direkt in den Belegeingang" : "A receipt from Finder straight into the receipt inbox",
+    "A receipt from Finder straight into the receipt inbox",
   );
 }
 
