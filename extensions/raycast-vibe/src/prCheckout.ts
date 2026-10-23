@@ -39,8 +39,14 @@ export async function checkoutPullRequestAsWorktree(
     );
   }
 
+  // A dedicated ref (not FETCH_HEAD) so a concurrent fetch can't swap the PR head.
+  const fetchedRef = `refs/vibe/pr/${pr.number}`;
   try {
-    await runGit(repoRoot, ["fetch", "origin", `refs/pull/${pr.number}/head`]);
+    await runGit(repoRoot, [
+      "fetch",
+      "origin",
+      `+refs/pull/${pr.number}/head:${fetchedRef}`,
+    ]);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`git fetch of PR #${pr.number} head failed: ${message}`);
@@ -53,12 +59,13 @@ export async function checkoutPullRequestAsWorktree(
       "-b",
       localBranch,
       worktreePath,
-      "FETCH_HEAD",
+      fetchedRef,
     ]);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`git worktree add failed: ${message}`);
   }
+  await runGit(repoRoot, ["update-ref", "-d", fetchedRef]);
 
   return { worktreePath };
 }

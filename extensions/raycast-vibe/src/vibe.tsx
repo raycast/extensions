@@ -17,13 +17,15 @@ import { runAICommit } from "./aiCommit";
 import { runAIPRDescription } from "./aiPRDescription";
 import { TemplateList } from "./views/TemplateList";
 import { existsSync } from "node:fs";
-import { basename, dirname } from "node:path";
+import { basename, dirname, isAbsolute, join } from "node:path";
+import { homedir } from "node:os";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { WorktreeList } from "./views/WorktreeList";
 import { WorktreeAgentPicker } from "./views/WorktreeAgentPicker";
 import { GitHubDashboard } from "./views/GitHubDashboard";
 import { createPullRequestWeb, ghAvailability } from "./github";
+import { directoryExists } from "./worktrees";
 
 const execFileAsync = promisify(execFile);
 export const RECENT_FOLDERS_KEY = "recent-vibe-folders";
@@ -263,9 +265,23 @@ async function enrichFolders(folders: Folder[]): Promise<Folder[]> {
 // Bounds the Windows profile walk so large profiles return within the timeout.
 const WINDOWS_SEARCH_DEPTH = 5;
 
+function expandHome(path: string): string {
+  return /^~(?=$|[\\/])/.test(path) ? join(homedir(), path.slice(1)) : path;
+}
+
+// Lets users open projects outside the bounded search by typing their full path.
+async function directPathFolder(query: string): Promise<Folder | undefined> {
+  const path = expandHome(query);
+  if (!isAbsolute(path) || !(await directoryExists(path))) return undefined;
+  const [folder] = await enrichFolders([{ name: basename(path), path }]);
+  return folder;
+}
+
 async function searchFolders(query: string): Promise<Folder[]> {
   const trimmed = query.trim();
   if (!trimmed) return [];
+  const direct = await directPathFolder(trimmed);
+  if (direct) return [direct];
   const escaped = escapeSpotlightText(trimmed);
   const spotlightQuery = `kMDItemContentType == 'public.folder' && (kMDItemFSName == '*${escaped}*'cd || kMDItemPath == '*${escaped}*'cd)`;
   const [{ stdout }, gitDirs] =
