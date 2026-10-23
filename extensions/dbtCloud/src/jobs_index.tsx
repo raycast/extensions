@@ -10,10 +10,11 @@ import {
   useNavigation,
   confirmAlert,
 } from "@raycast/api";
+import { ContextMetadata, dateAccessory, DateLabel, environmentTag, useAccountNames } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnJobs } from "./fetch_jobs";
-import { JobsFetchResponse, JobModel } from "./types";
+import { EnvironmentModel, JobsFetchResponse, JobModel } from "./types";
 import { buildDbtCloudUrl, triggerJobRun, formatRelativeTime } from "./api";
 import { JobGoTo } from "./navigation";
 
@@ -49,8 +50,8 @@ function getTriggerTypes(job: JobModel): string[] {
 
 // Job Detail Component
 export function JobDetail({ job, onTrigger }: { job: JobModel; onTrigger?: () => void }) {
+  const names = useAccountNames();
   const jobUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}`);
-  const runHistoryUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}/runs`);
   const settingsUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}/settings`);
 
   const triggerTypes = getTriggerTypes(job);
@@ -68,8 +69,8 @@ ${job.description || "_No description provided_"}
 | Property | Value |
 |----------|-------|
 | **Job ID** | ${job.id} |
-| **Project** | ${job.project?.name || job.project_id} |
-| **Environment** | ${job.environment?.name || job.environment_id} |
+| **Project** | ${names.projectName(job.project_id)} |
+| **Environment** | ${names.environmentName(job.environment_id)} |
 | **Status** | ${job.deactivated ? "⏸️ Inactive" : "✅ Active"} |
 | **dbt Version** | ${job.dbt_version || "Environment Default"} |
 | **Threads** | ${job.settings?.threads || "N/A"} |
@@ -131,22 +132,34 @@ ${
       navigationTitle={job.name}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Status"
-            text={job.deactivated ? "Inactive" : "Active"}
-            icon={job.deactivated ? Icon.XmarkCircle : Icon.Checkmark}
-          />
-          <Detail.Metadata.Label title="Project" text={job.project?.name || `ID: ${job.project_id}`} />
-          <Detail.Metadata.Label title="Environment" text={job.environment?.name || `ID: ${job.environment_id}`} />
+          <Detail.Metadata.TagList title="Status">
+            <Detail.Metadata.TagList.Item
+              text={job.deactivated ? "Inactive" : "Active"}
+              color={job.deactivated ? Color.SecondaryText : Color.Green}
+            />
+          </Detail.Metadata.TagList>
+          <ContextMetadata projectId={job.project_id} environmentId={job.environment_id} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Triggers" text={triggerTypes.join(", ")} />
-          {job.next_run_humanized && <Detail.Metadata.Label title="Next Run" text={job.next_run_humanized} />}
-          <Detail.Metadata.Separator />
+          <Detail.Metadata.TagList title="Triggers">
+            {triggerTypes.map((trigger) => (
+              <Detail.Metadata.TagList.Item key={trigger} text={trigger} color={Color.Blue} />
+            ))}
+          </Detail.Metadata.TagList>
+          {job.triggers?.schedule && job.schedule?.cron && (
+            <Detail.Metadata.Label title="Schedule" text={job.schedule.cron} icon={Icon.Calendar} />
+          )}
+          {job.next_run_humanized && (
+            <Detail.Metadata.Label title="Next Run" text={job.next_run_humanized} icon={Icon.Clock} />
+          )}
           <Detail.Metadata.Label title="Threads" text={String(job.settings?.threads || "Default")} />
           <Detail.Metadata.Label title="Timeout" text={`${job.execution?.timeout_seconds || 0}s`} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link title="Open in dbt Cloud" target={jobUrl} text="View Job" />
-          <Detail.Metadata.Link title="Run History" target={runHistoryUrl} text="View Runs" />
+          <DateLabel title="Created" date={job.created_at} />
+          <DateLabel title="Updated" date={job.updated_at} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label title="Job ID" text={job.id.toString()} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Link title="dbt Cloud" target={jobUrl} text="Open Job" />
         </Detail.Metadata>
       }
       actions={
@@ -161,13 +174,7 @@ ${
           )}
           <JobGoTo job={job} omit={["details"]} />
           <ActionPanel.Section title="Open in dbt Cloud">
-            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" shortcut={Shortcuts.webJob} />
-            <Action.OpenInBrowser
-              url={runHistoryUrl}
-              title="Open Run History in dbt Cloud"
-              shortcut={Shortcuts.webRun}
-              icon={Icon.List}
-            />
+            <Action.OpenInBrowser url={jobUrl} title="Open Job and Runs in dbt Cloud" shortcut={Shortcuts.webJob} />
             <Action.OpenInBrowser
               url={settingsUrl}
               title="Open Job Settings in dbt Cloud"
@@ -195,12 +202,12 @@ ${
 interface JobListItemProps {
   job: JobModel;
   onRefresh: () => void;
+  environment?: EnvironmentModel;
 }
 
-const JobListItem = ({ job, onRefresh }: JobListItemProps): JSX.Element => {
+const JobListItem = ({ job, onRefresh, environment }: JobListItemProps): JSX.Element => {
   const { push } = useNavigation();
   const jobUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}`);
-  const runHistoryUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}/runs`);
   const jobIcon = getJobIcon(job);
   const triggerTypes = getTriggerTypes(job);
 
@@ -237,8 +244,14 @@ const JobListItem = ({ job, onRefresh }: JobListItemProps): JSX.Element => {
       icon={jobIcon}
       accessories={[
         ...(recentRunEmoji ? [{ text: `Last: ${recentRunEmoji}` }] : []),
-        { text: job.deactivated ? "⏸️ Inactive" : "✅ Active" },
-        ...(job.next_run_humanized ? [{ text: `Next: ${job.next_run_humanized}` }] : []),
+        ...(environment
+          ? [{ tag: { value: environment.name, color: environmentTag(environment).color }, tooltip: "Environment" }]
+          : []),
+        ...(job.next_run_humanized ? [{ text: job.next_run_humanized, icon: Icon.Calendar, tooltip: "Next run" }] : []),
+        job.deactivated
+          ? { tag: { value: "Inactive", color: Color.SecondaryText } }
+          : { tag: { value: "Active", color: Color.Green } },
+        dateAccessory(job.updated_at, "Updated"),
       ]}
       actions={
         <ActionPanel>
@@ -258,13 +271,7 @@ const JobListItem = ({ job, onRefresh }: JobListItemProps): JSX.Element => {
           )}
           <JobGoTo job={job} omit={["details"]} />
           <ActionPanel.Section title="Open in dbt Cloud">
-            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" shortcut={Shortcuts.webJob} />
-            <Action.OpenInBrowser
-              url={runHistoryUrl}
-              title="Open Run History in dbt Cloud"
-              shortcut={Shortcuts.webRun}
-              icon={Icon.List}
-            />
+            <Action.OpenInBrowser url={jobUrl} title="Open Job and Runs in dbt Cloud" shortcut={Shortcuts.webJob} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard title="Copy Job ID" shortcut={Shortcuts.copyId} content={job.id.toString()} />
@@ -296,6 +303,7 @@ export default function Command() {
 }
 
 export function JobsList({ projectId, environmentId, scopeTitle }: JobsScope = {}) {
+  const names = useAccountNames();
   const [jobs, setJobs] = useState<JobsFetchResponse>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filter, setFilter] = useState<JobFilter>("all");
@@ -334,7 +342,7 @@ export function JobsList({ projectId, environmentId, scopeTitle }: JobsScope = {
   // Group jobs by project name if available, otherwise by project_id
   const jobsByProject = filteredJobs.reduce(
     (acc, job) => {
-      const projectKey = job.project?.name || `Project ${job.project_id}`;
+      const projectKey = names.projectName(job.project_id);
       if (!acc[projectKey]) {
         acc[projectKey] = [];
       }
@@ -369,7 +377,12 @@ export function JobsList({ projectId, environmentId, scopeTitle }: JobsScope = {
       {Object.entries(jobsByProject).map(([projectName, projectJobs]) => (
         <List.Section key={projectName} title={projectName} subtitle={`${projectJobs.length} jobs`}>
           {projectJobs.map((job) => (
-            <JobListItem key={job.id} job={job} onRefresh={fetchData} />
+            <JobListItem
+              key={job.id}
+              job={job}
+              onRefresh={fetchData}
+              environment={names.environment(job.environment_id)}
+            />
           ))}
         </List.Section>
       ))}

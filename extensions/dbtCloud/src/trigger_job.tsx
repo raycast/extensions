@@ -1,4 +1,5 @@
 import { List, showToast, Toast, ActionPanel, Action, Icon, Color, confirmAlert } from "@raycast/api";
+import { useAccountNames } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnJobs } from "./fetch_jobs";
@@ -19,9 +20,10 @@ function getJobIcon(job: JobModel): { source: Icon; tintColor: Color } {
 interface TriggerJobItemProps {
   job: JobModel;
   onTrigger: () => void;
+  environmentName: string;
 }
 
-const TriggerJobItem = ({ job, onTrigger }: TriggerJobItemProps): JSX.Element => {
+const TriggerJobItem = ({ job, onTrigger, environmentName }: TriggerJobItemProps): JSX.Element => {
   const jobUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}`);
   const jobIcon = getJobIcon(job);
 
@@ -56,7 +58,7 @@ const TriggerJobItem = ({ job, onTrigger }: TriggerJobItemProps): JSX.Element =>
     <List.Item
       id={job.id.toString()}
       title={job.name}
-      subtitle={job.project?.name || `Project ${job.project_id}`}
+      subtitle={environmentName}
       icon={jobIcon}
       accessories={[
         { text: `Last: ${statusEmoji}` },
@@ -84,6 +86,7 @@ const TriggerJobItem = ({ job, onTrigger }: TriggerJobItemProps): JSX.Element =>
 };
 
 export default function TriggerJobCommand() {
+  const names = useAccountNames();
   const [jobs, setJobs] = useState<JobsFetchResponse>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -108,7 +111,7 @@ export default function TriggerJobCommand() {
   // Group jobs by project
   const jobsByProject = jobs.reduce(
     (acc, job) => {
-      const projectKey = job.project?.name || `Project ${job.project_id}`;
+      const projectKey = names.projectName(job.project_id);
       if (!acc[projectKey]) {
         acc[projectKey] = [];
       }
@@ -129,7 +132,12 @@ export default function TriggerJobCommand() {
       {Object.entries(jobsByProject).map(([projectName, projectJobs]) => (
         <List.Section key={projectName} title={projectName} subtitle={`${projectJobs.length} jobs`}>
           {projectJobs.map((job) => (
-            <TriggerJobItem key={job.id} job={job} onTrigger={fetchData} />
+            <TriggerJobItem
+              key={job.id}
+              job={job}
+              onTrigger={fetchData}
+              environmentName={names.environmentName(job.environment_id)}
+            />
           ))}
         </List.Section>
       ))}

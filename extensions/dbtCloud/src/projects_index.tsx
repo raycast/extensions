@@ -1,9 +1,16 @@
 import { List, showToast, Toast, ActionPanel, Action, Icon, Color, Detail, useNavigation } from "@raycast/api";
+import { dateAccessory, DateLabel } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnProjects } from "./fetch_projects";
 import { ProjectsFetchResponse, ProjectModel } from "./types";
-import { buildDbtCloudUrl, formatRelativeTime } from "./api";
+import {
+  buildDbtCloudUrl,
+  buildExplorerUrl,
+  buildProjectSettingsUrl,
+  buildProjectUrl,
+  formatRelativeTime,
+} from "./api";
 import { ProjectGoTo } from "./navigation";
 
 function getProjectStateIcon(state: number): { source: Icon; tintColor: Color } {
@@ -30,11 +37,11 @@ function getProjectStateText(state: number): string {
 
 // Project Detail Component
 export function ProjectDetail({ project }: { project: ProjectModel }) {
-  const projectUrl = buildDbtCloudUrl(`/projects/${project.id}`);
+  const projectUrl = buildProjectUrl(project.id);
   const jobsUrl = buildDbtCloudUrl(`/projects/${project.id}/jobs`);
   const environmentsUrl = buildDbtCloudUrl(`/projects/${project.id}/environments`);
-  const docsUrl = buildDbtCloudUrl(`/projects/${project.id}/docs`);
-  const settingsUrl = buildDbtCloudUrl(`/projects/${project.id}/settings`);
+  const docsUrl = buildExplorerUrl(project.id);
+  const settingsUrl = buildProjectSettingsUrl(project.id);
 
   const markdown = `
 # ${project.name}
@@ -101,27 +108,32 @@ ${project.semantic_layer_config_id ? "✅ Semantic Layer Configured" : "❌ No S
       navigationTitle={project.name}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Status"
-            text={getProjectStateText(project.state)}
-            icon={getProjectStateIcon(project.state)}
-          />
-          <Detail.Metadata.Label title="Project ID" text={project.id.toString()} />
+          <Detail.Metadata.TagList title="Status">
+            <Detail.Metadata.TagList.Item
+              text={getProjectStateText(project.state)}
+              color={project.state === 1 ? Color.Green : Color.SecondaryText}
+            />
+          </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Created" text={formatRelativeTime(project.created_at)} />
-          <Detail.Metadata.Label title="Updated" text={formatRelativeTime(project.updated_at)} />
-          <Detail.Metadata.Separator />
-          {project.repository && <Detail.Metadata.Label title="Repository" text={project.repository.full_name} />}
+          {project.repository && (
+            <Detail.Metadata.Label title="Repository" text={project.repository.full_name} icon={Icon.Code} />
+          )}
           {project.connection && (
             <Detail.Metadata.Label
               title="Connection"
-              text={`${project.connection.type} - ${project.connection.name}`}
+              text={`${project.connection.type} · ${project.connection.name}`}
+              icon={Icon.Plug}
             />
           )}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link title="Open Project" target={projectUrl} text="View in dbt Cloud" />
-          <Detail.Metadata.Link title="Jobs" target={jobsUrl} text="View Jobs" />
-          <Detail.Metadata.Link title="Environments" target={environmentsUrl} text="View Environments" />
+          <DateLabel title="Created" date={project.created_at} />
+          <DateLabel title="Updated" date={project.updated_at} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label title="Project ID" text={project.id.toString()} />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Link title="dbt Cloud" target={projectUrl} text="Open Project" />
+          <Detail.Metadata.Link title="" target={jobsUrl} text="Open Jobs" />
+          <Detail.Metadata.Link title="" target={environmentsUrl} text="Open Environments" />
         </Detail.Metadata>
       }
       actions={
@@ -141,14 +153,12 @@ ${project.semantic_layer_config_id ? "✅ Semantic Layer Configured" : "❌ No S
               shortcut={Shortcuts.webEnvironment}
               icon={Icon.Globe}
             />
-            {project.docs_job_id && (
-              <Action.OpenInBrowser
-                url={docsUrl}
-                title="Open Documentation in dbt Cloud"
-                shortcut={Shortcuts.webDocs}
-                icon={Icon.Document}
-              />
-            )}
+            <Action.OpenInBrowser
+              url={docsUrl}
+              title="Open in dbt Explorer"
+              shortcut={Shortcuts.webDocs}
+              icon={Icon.Document}
+            />
             <Action.OpenInBrowser
               url={settingsUrl}
               title="Open Project Settings in dbt Cloud"
@@ -183,9 +193,9 @@ interface ProjectListItemProps {
 
 const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element => {
   const { push } = useNavigation();
-  const projectUrl = buildDbtCloudUrl(`/projects/${project.id}`);
+  const projectUrl = buildProjectUrl(project.id);
   const jobsUrl = buildDbtCloudUrl(`/projects/${project.id}/jobs`);
-  const docsUrl = buildDbtCloudUrl(`/projects/${project.id}/docs`);
+  const docsUrl = buildExplorerUrl(project.id);
   const stateIcon = getProjectStateIcon(project.state);
 
   return (
@@ -195,9 +205,14 @@ const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element => {
       subtitle={project.description || "No description"}
       icon={stateIcon}
       accessories={[
-        { text: project.connection?.type || "No connection" },
-        { text: getProjectStateText(project.state) },
-        { text: formatRelativeTime(project.updated_at) },
+        ...(project.connection?.type ? [{ tag: project.connection.type, tooltip: "Connection" }] : []),
+        {
+          tag: {
+            value: getProjectStateText(project.state),
+            color: project.state === 1 ? Color.Green : Color.SecondaryText,
+          },
+        },
+        dateAccessory(project.updated_at, "Updated"),
       ]}
       actions={
         <ActionPanel>
@@ -216,14 +231,12 @@ const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element => {
               shortcut={Shortcuts.webJob}
               icon={Icon.Hammer}
             />
-            {project.docs_job_id && (
-              <Action.OpenInBrowser
-                url={docsUrl}
-                title="Open Documentation in dbt Cloud"
-                shortcut={Shortcuts.webDocs}
-                icon={Icon.Document}
-              />
-            )}
+            <Action.OpenInBrowser
+              url={docsUrl}
+              title="Open in dbt Explorer"
+              shortcut={Shortcuts.webDocs}
+              icon={Icon.Document}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard

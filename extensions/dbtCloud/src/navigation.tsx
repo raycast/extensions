@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { Shortcuts } from "./shortcuts";
 import { useCachedPromise } from "@raycast/utils";
-import { fetchModelWithLineage, fetchSources } from "./api";
+import { buildApiUrl, fetchModelWithLineage, fetchOneFromApi, fetchSourceById } from "./api";
 import { CatalogList, ModelDetail } from "./catalog_index";
 import { EnvironmentDetail, EnvironmentsList } from "./environments_index";
 import { returnEnvironments } from "./fetch_environments";
@@ -16,11 +16,21 @@ import { ModelPerformanceDetail, ModelPerformanceList } from "./model_performanc
 import { ProjectDetail } from "./projects_index";
 import { RunDetail, RunsList } from "./runs_index";
 import { SourceDetail, SourcesList } from "./sources_index";
-import { JobModel, ModelNode, RunModel, SourceNode } from "./types";
+import { EnvironmentModel, JobModel, ModelNode, ProjectModel, RunModel, SourceNode } from "./types";
 
 // ============================================
 // Loaders: views that start from an id load the record, then reuse the detail view
 // ============================================
+
+// Fetch one record by id; fall back to the list endpoint if the single-record endpoint is unavailable
+async function fetchById<T extends { id: number }>(
+  path: string,
+  id: number,
+  list: () => Promise<T[]>,
+): Promise<T | undefined> {
+  const record = await fetchOneFromApi<T>(buildApiUrl(`${path}${id}/`), "", true);
+  return record ?? (await list()).find((item) => item.id === id);
+}
 
 function NotFound({ isLoading, message }: { isLoading: boolean; message: string }) {
   return <Detail isLoading={isLoading} markdown={isLoading ? "" : message} />;
@@ -28,7 +38,7 @@ function NotFound({ isLoading, message }: { isLoading: boolean; message: string 
 
 export function ProjectById({ projectId }: { projectId: number }) {
   const { data: project, isLoading } = useCachedPromise(
-    async (id: number) => (await returnProjects()).find((p) => p.id === id),
+    (id: number) => fetchById<ProjectModel>("/projects/", id, returnProjects),
     [projectId],
   );
   return project ? (
@@ -40,7 +50,7 @@ export function ProjectById({ projectId }: { projectId: number }) {
 
 export function EnvironmentById({ environmentId }: { environmentId: number }) {
   const { data: environment, isLoading } = useCachedPromise(
-    async (id: number) => (await returnEnvironments()).find((e) => e.id === id),
+    (id: number) => fetchById<EnvironmentModel>("/environments/", id, () => returnEnvironments()),
     [environmentId],
   );
   return environment ? (
@@ -52,7 +62,7 @@ export function EnvironmentById({ environmentId }: { environmentId: number }) {
 
 export function JobById({ jobId }: { jobId: number }) {
   const { data: job, isLoading } = useCachedPromise(
-    async (id: number) => (await returnJobs()).find((j) => j.id === id),
+    (id: number) => fetchById<JobModel>("/jobs/", id, () => returnJobs()),
     [jobId],
   );
   return job ? <JobDetail job={job} /> : <NotFound isLoading={isLoading} message={`Job ${jobId} was not found.`} />;
@@ -89,10 +99,7 @@ export function SourceByUniqueId({
   environmentId: number;
   projectId: number;
 }) {
-  const { data: source, isLoading } = useCachedPromise(
-    async (envId: number, id: string) => (await fetchSources(envId)).find((s) => s.uniqueId === id),
-    [environmentId, uniqueId],
-  );
+  const { data: source, isLoading } = useCachedPromise(fetchSourceById, [environmentId, uniqueId]);
   return source ? (
     <SourceDetail source={source} environmentId={environmentId} projectId={projectId} />
   ) : (

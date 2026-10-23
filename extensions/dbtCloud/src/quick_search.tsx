@@ -1,4 +1,5 @@
 import { List, showToast, Toast, ActionPanel, Action, Icon, Color } from "@raycast/api";
+import { useAccountNames } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { useEffect, useState, useCallback } from "react";
 import { returnProjects } from "./fetch_projects";
@@ -6,7 +7,7 @@ import { returnJobs } from "./fetch_jobs";
 import { returnEnvironments } from "./fetch_environments";
 import { returnRuns } from "./fetch_runs";
 import { ProjectModel, JobModel, EnvironmentModel, RunModel } from "./types";
-import { buildDbtCloudUrl, formatRelativeTime } from "./api";
+import { buildDbtCloudUrl, buildProjectUrl, formatRelativeTime } from "./api";
 import { EnvironmentDetail } from "./environments_index";
 import { JobDetail } from "./jobs_index";
 import { ProjectDetail } from "./projects_index";
@@ -40,7 +41,7 @@ function getResultIcon(result: SearchResult): { source: Icon; tintColor: Color }
 function getResultUrl(result: SearchResult): string {
   switch (result.type) {
     case "project":
-      return buildDbtCloudUrl(`/projects/${result.data.id}`);
+      return buildProjectUrl(result.data.id);
     case "job": {
       const job = result.data as JobModel;
       return buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}`);
@@ -108,17 +109,17 @@ function getResultTitle(result: SearchResult): string {
   }
 }
 
-function getResultSubtitle(result: SearchResult): string {
+function getResultSubtitle(result: SearchResult, names: ReturnType<typeof useAccountNames>): string {
   switch (result.type) {
     case "project":
       return result.data.description || "Project";
     case "job": {
       const job = result.data as JobModel;
-      return job.project?.name || `Project ${job.project_id}`;
+      return `${names.projectName(job.project_id)} › ${names.environmentName(job.environment_id)}`;
     }
     case "environment": {
       const env = result.data as EnvironmentModel;
-      return `${env.type} • ${env.project?.name || `Project ${env.project_id}`}`;
+      return `${env.type} • ${names.projectName(env.project_id)}`;
     }
     case "run": {
       const run = result.data as RunModel;
@@ -129,13 +130,14 @@ function getResultSubtitle(result: SearchResult): string {
 
 interface SearchResultItemProps {
   result: SearchResult;
+  names: ReturnType<typeof useAccountNames>;
 }
 
-const SearchResultItem = ({ result }: SearchResultItemProps) => {
+const SearchResultItem = ({ result, names }: SearchResultItemProps) => {
   const url = getResultUrl(result);
   const icon = getResultIcon(result);
   const title = getResultTitle(result);
-  const subtitle = getResultSubtitle(result);
+  const subtitle = getResultSubtitle(result, names);
 
   return (
     <List.Item
@@ -162,6 +164,7 @@ const SearchResultItem = ({ result }: SearchResultItemProps) => {
 };
 
 export default function QuickSearch() {
+  const names = useAccountNames();
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchText, setSearchText] = useState<string>("");
@@ -201,7 +204,7 @@ export default function QuickSearch() {
   const filteredResults = searchText
     ? results.filter((result) => {
         const title = getResultTitle(result).toLowerCase();
-        const subtitle = getResultSubtitle(result).toLowerCase();
+        const subtitle = getResultSubtitle(result, names).toLowerCase();
         const search = searchText.toLowerCase();
         return title.includes(search) || subtitle.includes(search);
       })
@@ -238,7 +241,7 @@ export default function QuickSearch() {
       {Object.entries(groupedResults).map(([type, typeResults]) => (
         <List.Section key={type} title={typeLabels[type] || type} subtitle={`${typeResults.length} items`}>
           {typeResults.slice(0, 10).map((result, index) => (
-            <SearchResultItem key={`${result.type}-${result.data.id}-${index}`} result={result} />
+            <SearchResultItem key={`${result.type}-${result.data.id}-${index}`} result={result} names={names} />
           ))}
         </List.Section>
       ))}
