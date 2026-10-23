@@ -130,10 +130,16 @@ export function parseCapture(input: string, ref = new Date()): ParsedCapture {
       end = clockHM(result.end.date());
       // Calendar minutes match the API's wall-clock ranges, including DST days.
       rangeMinutes = wallMinutes(result.start.date(), result.end.date());
-      if (rangeMinutes <= 0) rangeMinutes += 24 * 60;
-      // Chrono reads "11-12 evening" as 23:00 to noon the next day. With no typed am/pm, the user means midnight.
-      const typedMeridiem = /\d\s*[ap]\.?m\b/i.test(result.text);
-      if (end === "12:00" && result.start.date().getHours() > 12 && !typedMeridiem) {
+      // Chrono can roll the start to next year but not the end ("on sep 15"). Keep the clock span.
+      if (rangeMinutes <= 0) rangeMinutes = ((rangeMinutes % (24 * 60)) + 24 * 60) % (24 * 60) || 24 * 60;
+      // Chrono reads "11-12 evening" as 23:00 to noon the next day, but the user means midnight.
+      // An uncertain start meridiem means a window word implied PM. Keep typed am/pm and 24-hour clocks.
+      if (
+        end === "12:00" &&
+        result.start.date().getHours() > 12 &&
+        !result.start.isCertain("meridiem") &&
+        !/\d\s*[ap]\.?m\b/i.test(result.text)
+      ) {
         end = "00:00";
         rangeMinutes -= 12 * 60;
       }

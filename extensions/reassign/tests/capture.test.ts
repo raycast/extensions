@@ -4,6 +4,10 @@ const ref = new Date(2026, 8, 21, 12);
 it.each([
   ["deep work tomorrow 9am-11am", "09:00", "11:00", 120],
   ["work tomorrow 11pm-1am", "23:00", "01:00", 120],
+  ["work tomorrow 23:00-12:00", "23:00", "12:00", 780],
+  ["work 15:00-12:00", "15:00", "12:00", 1260],
+  ["gym tonight 23:00-12:00", "23:00", "12:00", 780],
+  ["work 11p-12", "23:00", "12:00", 780],
   ["work tomorrow 9am for 90m", "09:00", "10:30", 90],
   ["work tomorrow 9am", "09:00", "09:30", 30],
 ])("preserves the preview duration for %s", (input, start, end, durationMinutes) => {
@@ -362,6 +366,8 @@ it.each([
   ["gym at 11-12 evening", "gym", "2026-09-21", "23:00", "00:00", 60],
   ["gym at 9-12 in the evening", "gym", "2026-09-21", "21:00", "00:00", 180],
   ["gym at 10-12 in the night", "gym", "2026-09-21", "22:00", "00:00", 120],
+  ["gym at 11:15-12 evening", "gym", "2026-09-21", "23:15", "00:00", 45],
+  ["gym at 11-12 evening on oct 20", "gym", "2026-10-20", "23:00", "00:00", 60],
 ])("reconciles a range with a window word for %s", (input, name, date, start, end, durationMinutes) => {
   expect(parseCapture(input, ref)).toMatchObject({ kind: "exact", name, date, start, end, durationMinutes });
 });
