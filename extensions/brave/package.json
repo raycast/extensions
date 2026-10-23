@@ -10,7 +10,8 @@
     "crisboarna",
     "tleo19",
     "faridrashidi",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "nengqi"
   ],
   "categories": [
     "Applications",
@@ -24,6 +25,13 @@
       "subtitle": "Brave",
       "description": "Open a new Brave tab.",
       "mode": "view"
+    },
+    {
+      "name": "new-window",
+      "title": "New Brave Window",
+      "subtitle": "Brave",
+      "description": "Open a new Brave window.",
+      "mode": "no-view"
     },
     {
       "name": "search-tab",

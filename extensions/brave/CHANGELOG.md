@@ -1,5 +1,9 @@
 # Brave Changelog
 
+## [New Brave Window Command] - {PR_MERGE_DATE}
+
+- Added "New Brave Window" command to open a new Brave window.
+
 ## [Fix Missing History Database] - 2026-08-16
 
 - Fixed New Brave Tab crashing when the selected Brave profile has not created a History database yet.

@@ -43,6 +43,11 @@ function NewTabActions({ query, incognito }: { query?: string; incognito?: boole
         title={query ? `Search "${query}"` : "Open New Tab"}
         icon={Icon.Globe}
       />
+      <Action
+        onAction={() => openNewTab({ query, profileCurrent, openTabInProfile, newWindow: true })}
+        title={query ? `Search "${query}" in New Window` : "Open in New Window"}
+        icon={Icon.Window}
+      />
     </ActionPanel>
   );
 }
