@@ -93,6 +93,7 @@ export default function Command(props: LaunchProps) {
 
   const abortable = useRef<AbortController>(null);
   const preferences = getPreferenceValues<SpotlightSearchPreferences>();
+  const { collapseSelectedFiles } = getPreferenceValues<Preferences>();
   const maxRecentFolders = parseInt(preferences.maxRecentFolders || "10");
   const cacheManager = CacheManager.getInstance();
   const normalizedSearchText = searchText.trim().toLowerCase();
@@ -638,12 +639,22 @@ export default function Command(props: LaunchProps) {
         <>
           {selectedFiles.length > 0 && (
             <List.Section title="Selected Files">
-              {preferences.collapseSelectedFiles && selectedFiles.length > 1 ? (
+              {collapseSelectedFiles && selectedFiles.length > 1 ? (
                 <List.Item
                   key="selected-files-summary"
                   title={`${selectedFiles.length} files selected`}
                   subtitle={path.basename(selectedFiles[0])}
                   icon={Icon.Document}
+                  actions={
+                    <ActionPanel>
+                      <Action
+                        title="Toggle Details"
+                        icon={Icon.Sidebar}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                        onAction={() => setIsShowingDetail(!isShowingDetail)}
+                      />
+                    </ActionPanel>
+                  }
                   detail={
                     <List.Item.Detail
                       metadata={
