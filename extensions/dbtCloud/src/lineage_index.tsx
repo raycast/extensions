@@ -198,16 +198,23 @@ function LineageDetail({
           <Action.OpenInBrowser title="View in Docs" url={buildDocsUrl(projectId, displayNode.uniqueId)} />
           {isModel && fullModel?.ancestors && fullModel.ancestors.length > 0 && (
             <ActionPanel.Submenu title="Explore Upstream" icon={Icon.ChevronUp}>
-              {fullModel.ancestors.map((ancestor) => (
-                <Action
-                  key={ancestor.uniqueId}
-                  title={`${getResourceTypeIcon(ancestor.resourceType)} ${ancestor.name}`}
-                  onAction={() => {
-                    // Navigate to ancestor (would need to fetch it)
-                    showToast(Toast.Style.Animated, "Loading...", ancestor.name);
-                  }}
-                />
-              ))}
+              {fullModel.ancestors.map((ancestor) =>
+                ancestor.resourceType === "model" ? (
+                  <Action.Push
+                    key={ancestor.uniqueId}
+                    title={`${getResourceTypeIcon(ancestor.resourceType)} ${ancestor.name}`}
+                    target={
+                      <LineageDetail node={ancestor as ModelNode} environmentId={environmentId} projectId={projectId} />
+                    }
+                  />
+                ) : (
+                  <Action.OpenInBrowser
+                    key={ancestor.uniqueId}
+                    title={`${getResourceTypeIcon(ancestor.resourceType)} ${ancestor.name}`}
+                    url={buildDocsUrl(projectId, ancestor.uniqueId)}
+                  />
+                ),
+              )}
             </ActionPanel.Submenu>
           )}
           <Action.CopyToClipboard title="Copy Unique ID" content={displayNode.uniqueId} />
@@ -292,7 +299,6 @@ function LineageList({
           >
             {nodes
               .sort((a, b) => a.name.localeCompare(b.name))
-              .slice(0, 50) // Limit for performance
               .map((node) => {
                 const isModel = node.resourceType === "model";
                 const modelNode = node as ModelNode;

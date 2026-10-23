@@ -138,10 +138,8 @@ export async function fetchFromApi<T>(
   errorMessage = "Could not fetch from API",
   maxResults?: number,
 ): Promise<T[]> {
-  const baseUrl = getBaseUrl();
-
   try {
-    let nextUrl: URL | null = new URL(endpoint, baseUrl);
+    let nextUrl: URL | null = new URL(endpoint, getBaseUrl());
     const results: T[] = [];
 
     for (let page = 0; nextUrl && page < MAX_REST_PAGES; page++) {
@@ -183,10 +181,8 @@ export async function postToApi<T>(
   body: Record<string, unknown>,
   errorMessage = "Could not post to API",
 ): Promise<T | null> {
-  const baseUrl = getBaseUrl();
-
   try {
-    const response = await fetch(`${baseUrl}${endpoint}`, {
+    const response = await fetch(`${getBaseUrl()}${endpoint}`, {
       method: "POST",
       headers: getHeaders(),
       body: JSON.stringify(body),
@@ -232,11 +228,10 @@ export async function triggerJobRun(jobId: number, cause?: string, gitBranch?: s
 // Cancel a run
 export async function cancelRun(runId: number): Promise<boolean> {
   const accountId = getAccountId();
-  const baseUrl = getBaseUrl();
   const endpoint = `/api/v2/accounts/${accountId}/runs/${runId}/cancel/`;
 
   try {
-    const response = await fetch(`${baseUrl}${endpoint}`, {
+    const response = await fetch(`${getBaseUrl()}${endpoint}`, {
       method: "POST",
       headers: getHeaders(),
     });
@@ -368,9 +363,9 @@ export async function queryDiscoveryApi<T>(
   variables: Record<string, unknown>,
   errorMessage = "Could not fetch from Discovery API",
 ): Promise<T | null> {
-  const discoveryUrl = getDiscoveryApiUrl();
-
+  let discoveryUrl = "";
   try {
+    discoveryUrl = getDiscoveryApiUrl();
     const response = await fetch(discoveryUrl, {
       method: "POST",
       headers: {

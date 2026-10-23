@@ -124,11 +124,15 @@ function replaceTableRefsWithCTEs(compiledCode: string, availableCTEs: TableToCT
     // Allow optional whitespace around dots
     const backtickPattern = new RegExp(`\`${dbEsc}\`\\s*\\.\\s*\`${schemaEsc}\`\\s*\\.\\s*\`${tableEsc}\``, "gi");
 
-    // Pattern 2: Match db.schema.table (unquoted style)
+    // Pattern 2: Match "db"."schema"."table" (Snowflake / Postgres double-quote style)
+    const doubleQuotePattern = new RegExp(`"${dbEsc}"\\s*\\.\\s*"${schemaEsc}"\\s*\\.\\s*"${tableEsc}"`, "gi");
+
+    // Pattern 3: Match db.schema.table (unquoted style)
     // Use word boundaries to avoid partial matches
     const plainPattern = new RegExp(`\\b${dbEsc}\\.${schemaEsc}\\.${tableEsc}\\b`, "gi");
 
     result = result.replace(backtickPattern, cte.cteName);
+    result = result.replace(doubleQuotePattern, cte.cteName);
     result = result.replace(plainPattern, cte.cteName);
   }
 

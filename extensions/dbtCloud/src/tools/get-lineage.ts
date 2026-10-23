@@ -33,12 +33,14 @@ export default async function tool(input: Input) {
   const isSource =
     resourceName.startsWith("source.") || (!resourceName.startsWith("model.") && resourceName.split(".").length === 2);
 
-  if (isSource && !resourceName.startsWith("source.")) {
-    // This might be a source in "source_name.table_name" format
+  if (isSource) {
+    // Full uniqueId ("source.<pkg>.<name>.<table>") or "source_name.table_name"
     const sources = await fetchSourcesAcross(environments);
     const [sourceName, tableName] = resourceName.split(".");
-    const sourceMatch = sources.find(
-      ({ node: s }) => s.sourceName?.toLowerCase() === sourceName && s.name.toLowerCase() === tableName,
+    const sourceMatch = sources.find(({ node: s }) =>
+      resourceName.startsWith("source.")
+        ? s.uniqueId.toLowerCase() === resourceName
+        : s.sourceName?.toLowerCase() === sourceName && s.name.toLowerCase() === tableName,
     );
 
     if (sourceMatch) {
