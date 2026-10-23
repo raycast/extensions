@@ -9,6 +9,7 @@
 - Add optional Custom Discovery API URL preference
 - Add Europe and AU account-prefix endpoints for cell-based accounts
 - AI tools search the production environment of every project when no environment is given
+- Show Job Performance lists every active job by project and environment, with success rate, run counts, and a build-duration chart over 7, 14, or 30 days
 
 ## [Modernize + Specify Endpoint] - 2026-06-30
 
