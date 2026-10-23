@@ -51,7 +51,7 @@ export default function Command() {
 
   const refreshDevice = async (device: LocalSendDevice) => {
     try {
-      const info = await getDeviceInfoHTTP(device.ip, device.port);
+      const info = await getDeviceInfoHTTP(device.ip, device.port, device.protocol);
       if (info) {
         const isFav = await isFavoriteDevice(device.fingerprint);
         setDevices((prev) =>
