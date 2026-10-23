@@ -52,7 +52,6 @@ function getTriggerTypes(job: JobModel): string[] {
 export function JobDetail({ job, onTrigger }: { job: JobModel; onTrigger?: () => void }) {
   const names = useAccountNames();
   const jobUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}`);
-  const runHistoryUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}/runs`);
   const settingsUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}/settings`);
 
   const triggerTypes = getTriggerTypes(job);
@@ -161,7 +160,6 @@ ${
           <Detail.Metadata.Label title="Job ID" text={job.id.toString()} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link title="dbt Cloud" target={jobUrl} text="Open Job" />
-          <Detail.Metadata.Link title="" target={runHistoryUrl} text="Open Run History" />
         </Detail.Metadata>
       }
       actions={
@@ -176,13 +174,7 @@ ${
           )}
           <JobGoTo job={job} omit={["details"]} />
           <ActionPanel.Section title="Open in dbt Cloud">
-            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" shortcut={Shortcuts.webJob} />
-            <Action.OpenInBrowser
-              url={runHistoryUrl}
-              title="Open Run History in dbt Cloud"
-              shortcut={Shortcuts.webRun}
-              icon={Icon.List}
-            />
+            <Action.OpenInBrowser url={jobUrl} title="Open Job and Runs in dbt Cloud" shortcut={Shortcuts.webJob} />
             <Action.OpenInBrowser
               url={settingsUrl}
               title="Open Job Settings in dbt Cloud"
@@ -216,7 +208,6 @@ interface JobListItemProps {
 const JobListItem = ({ job, onRefresh, environment }: JobListItemProps): JSX.Element => {
   const { push } = useNavigation();
   const jobUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}`);
-  const runHistoryUrl = buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}/runs`);
   const jobIcon = getJobIcon(job);
   const triggerTypes = getTriggerTypes(job);
 
@@ -280,13 +271,7 @@ const JobListItem = ({ job, onRefresh, environment }: JobListItemProps): JSX.Ele
           )}
           <JobGoTo job={job} omit={["details"]} />
           <ActionPanel.Section title="Open in dbt Cloud">
-            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" shortcut={Shortcuts.webJob} />
-            <Action.OpenInBrowser
-              url={runHistoryUrl}
-              title="Open Run History in dbt Cloud"
-              shortcut={Shortcuts.webRun}
-              icon={Icon.List}
-            />
+            <Action.OpenInBrowser url={jobUrl} title="Open Job and Runs in dbt Cloud" shortcut={Shortcuts.webJob} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard title="Copy Job ID" shortcut={Shortcuts.copyId} content={job.id.toString()} />

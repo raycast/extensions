@@ -835,18 +835,41 @@ export const getFreshnessStatus = (status: string | null): string => {
   }
 };
 
-// Build dbt Cloud docs URL
-export const buildDocsUrl = (projectId: number, uniqueId: string): string => {
-  const baseUrl = getBaseUrl();
-  const accountId = getAccountId();
-  return `${baseUrl}/explore/${accountId}/projects/${projectId}/docs/${encodeURIComponent(uniqueId)}`;
+// dbt Cloud web pages. Project pages live under /dashboard and project settings under /settings, while
+// jobs, runs and environments live under /deploy (buildDbtCloudUrl). Catalog pages are dbt Explorer's, per
+// environment ("production" or "staging").
+export type ExplorerEnvironment = "production" | "staging";
+
+export const buildProjectUrl = (projectId: number): string =>
+  `${getBaseUrl()}/dashboard/${getAccountId()}/projects/${projectId}`;
+
+export const buildProjectSettingsUrl = (projectId: number): string =>
+  `${getBaseUrl()}/settings/accounts/${getAccountId()}/pages/projects/${projectId}`;
+
+export const buildExplorerUrl = (projectId: number, environment: ExplorerEnvironment = "production"): string =>
+  `${getBaseUrl()}/explore/${getAccountId()}/projects/${projectId}/environments/${environment}`;
+
+// Explorer details page for a model, source, seed or snapshot
+export const buildDocsUrl = (
+  projectId: number,
+  uniqueId: string,
+  environment: ExplorerEnvironment = "production",
+): string => `${buildExplorerUrl(projectId, environment)}/details/${encodeURIComponent(uniqueId)}`;
+
+// dbt selector for the node and its direct neighbours: "+name+" for models, "source:src.table+" for sources
+const lineageSelector = (uniqueId: string): string => {
+  const parts = uniqueId.split(".");
+  return parts[0] === "source" ? `source:${parts.slice(2).join(".")}+` : `+${parts[parts.length - 1]}+`;
 };
 
-// Build lineage URL
-export const buildLineageUrl = (projectId: number, uniqueId: string): string => {
-  const baseUrl = getBaseUrl();
-  const accountId = getAccountId();
-  return `${baseUrl}/explore/${accountId}/projects/${projectId}/lineage/${encodeURIComponent(uniqueId)}`;
+// Explorer lineage graph focused on one node
+export const buildLineageUrl = (
+  projectId: number,
+  uniqueId: string,
+  environment: ExplorerEnvironment = "production",
+): string => {
+  const params = new URLSearchParams({ uniqueId, select: lineageSelector(uniqueId) });
+  return `${buildExplorerUrl(projectId, environment)}/lineage/?${params.toString()}`;
 };
 
 // ============================================

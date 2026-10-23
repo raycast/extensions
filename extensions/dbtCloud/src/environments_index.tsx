@@ -4,7 +4,7 @@ import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnEnvironments } from "./fetch_environments";
 import { EnvironmentsFetchResponse, EnvironmentModel } from "./types";
-import { buildDbtCloudUrl, formatRelativeTime } from "./api";
+import { buildDbtCloudUrl, buildExplorerUrl, buildProjectUrl, formatRelativeTime } from "./api";
 import { openEnvironmentLineageDiagram } from "./lineage_diagram";
 import { EnvironmentGoTo } from "./navigation";
 
@@ -29,9 +29,12 @@ function getEnvironmentTypeEmoji(env: EnvironmentModel): string {
 // Environment Detail Component
 export function EnvironmentDetail({ environment }: { environment: EnvironmentModel }) {
   const envUrl = buildDbtCloudUrl(`/projects/${environment.project_id}/environments/${environment.id}`);
-  const projectUrl = buildDbtCloudUrl(`/projects/${environment.project_id}`);
+  const projectUrl = buildProjectUrl(environment.project_id);
   const jobsUrl = buildDbtCloudUrl(`/projects/${environment.project_id}/jobs`);
-  const docsUrl = buildDbtCloudUrl(`/projects/${environment.project_id}/docs`);
+  const docsUrl = buildExplorerUrl(
+    environment.project_id,
+    environment.deployment_type === "staging" ? "staging" : "production",
+  );
 
   const markdown = `
 # ${environment.name}
@@ -168,10 +171,10 @@ ${environment.supports_docs ? "✅ Supports Documentation" : "❌ Does not suppo
               shortcut={Shortcuts.webJob}
               icon={Icon.Hammer}
             />
-            {environment.supports_docs && (
+            {environment.type?.toLowerCase() === "deployment" && (
               <Action.OpenInBrowser
                 url={docsUrl}
-                title="Open Documentation in dbt Cloud"
+                title="Open in dbt Explorer"
                 shortcut={Shortcuts.webDocs}
                 icon={Icon.Document}
               />
@@ -254,10 +257,13 @@ const EnvironmentListItem = ({ environment }: EnvironmentListItemProps): JSX.Ele
               title="Open Environment in dbt Cloud"
               shortcut={Shortcuts.webEnvironment}
             />
-            {environment.supports_docs && (
+            {environment.type?.toLowerCase() === "deployment" && (
               <Action.OpenInBrowser
-                url={buildDbtCloudUrl(`/projects/${environment.project_id}/docs`)}
-                title="Open Documentation in dbt Cloud"
+                url={buildExplorerUrl(
+                  environment.project_id,
+                  environment.deployment_type === "staging" ? "staging" : "production",
+                )}
+                title="Open in dbt Explorer"
                 shortcut={Shortcuts.webDocs}
                 icon={Icon.Document}
               />

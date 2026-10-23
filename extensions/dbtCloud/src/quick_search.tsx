@@ -7,7 +7,7 @@ import { returnJobs } from "./fetch_jobs";
 import { returnEnvironments } from "./fetch_environments";
 import { returnRuns } from "./fetch_runs";
 import { ProjectModel, JobModel, EnvironmentModel, RunModel } from "./types";
-import { buildDbtCloudUrl, formatRelativeTime } from "./api";
+import { buildDbtCloudUrl, buildProjectUrl, formatRelativeTime } from "./api";
 import { EnvironmentDetail } from "./environments_index";
 import { JobDetail } from "./jobs_index";
 import { ProjectDetail } from "./projects_index";
@@ -41,7 +41,7 @@ function getResultIcon(result: SearchResult): { source: Icon; tintColor: Color }
 function getResultUrl(result: SearchResult): string {
   switch (result.type) {
     case "project":
-      return buildDbtCloudUrl(`/projects/${result.data.id}`);
+      return buildProjectUrl(result.data.id);
     case "job": {
       const job = result.data as JobModel;
       return buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}`);

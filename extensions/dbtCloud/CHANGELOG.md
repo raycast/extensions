@@ -15,6 +15,7 @@
 - Add keyboard shortcuts for every action, using one scheme: ⌘⌥ + letter to go to a view, ⌥⇧ + the same letter to open it in dbt Cloud, ⌘⇧ to copy
 - Detail sidebars share one layout: coloured status, the project and environment by name, details, dates (relative and exact), IDs, and dbt Cloud links
 - List rows show coloured status, environment and freshness tags, and dates with the exact time on hover
+- Fix dbt Cloud links: project pages, project settings, run history (now the job page), and dbt Explorer details and lineage pages
 
 ## [Modernize + Specify Endpoint] - 2026-06-30
 

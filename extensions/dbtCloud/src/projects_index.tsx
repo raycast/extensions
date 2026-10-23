@@ -4,7 +4,13 @@ import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnProjects } from "./fetch_projects";
 import { ProjectsFetchResponse, ProjectModel } from "./types";
-import { buildDbtCloudUrl, formatRelativeTime } from "./api";
+import {
+  buildDbtCloudUrl,
+  buildExplorerUrl,
+  buildProjectSettingsUrl,
+  buildProjectUrl,
+  formatRelativeTime,
+} from "./api";
 import { ProjectGoTo } from "./navigation";
 
 function getProjectStateIcon(state: number): { source: Icon; tintColor: Color } {
@@ -31,11 +37,11 @@ function getProjectStateText(state: number): string {
 
 // Project Detail Component
 export function ProjectDetail({ project }: { project: ProjectModel }) {
-  const projectUrl = buildDbtCloudUrl(`/projects/${project.id}`);
+  const projectUrl = buildProjectUrl(project.id);
   const jobsUrl = buildDbtCloudUrl(`/projects/${project.id}/jobs`);
   const environmentsUrl = buildDbtCloudUrl(`/projects/${project.id}/environments`);
-  const docsUrl = buildDbtCloudUrl(`/projects/${project.id}/docs`);
-  const settingsUrl = buildDbtCloudUrl(`/projects/${project.id}/settings`);
+  const docsUrl = buildExplorerUrl(project.id);
+  const settingsUrl = buildProjectSettingsUrl(project.id);
 
   const markdown = `
 # ${project.name}
@@ -147,14 +153,12 @@ ${project.semantic_layer_config_id ? "✅ Semantic Layer Configured" : "❌ No S
               shortcut={Shortcuts.webEnvironment}
               icon={Icon.Globe}
             />
-            {project.docs_job_id && (
-              <Action.OpenInBrowser
-                url={docsUrl}
-                title="Open Documentation in dbt Cloud"
-                shortcut={Shortcuts.webDocs}
-                icon={Icon.Document}
-              />
-            )}
+            <Action.OpenInBrowser
+              url={docsUrl}
+              title="Open in dbt Explorer"
+              shortcut={Shortcuts.webDocs}
+              icon={Icon.Document}
+            />
             <Action.OpenInBrowser
               url={settingsUrl}
               title="Open Project Settings in dbt Cloud"
@@ -189,9 +193,9 @@ interface ProjectListItemProps {
 
 const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element => {
   const { push } = useNavigation();
-  const projectUrl = buildDbtCloudUrl(`/projects/${project.id}`);
+  const projectUrl = buildProjectUrl(project.id);
   const jobsUrl = buildDbtCloudUrl(`/projects/${project.id}/jobs`);
-  const docsUrl = buildDbtCloudUrl(`/projects/${project.id}/docs`);
+  const docsUrl = buildExplorerUrl(project.id);
   const stateIcon = getProjectStateIcon(project.state);
 
   return (
@@ -227,14 +231,12 @@ const ProjectListItem = ({ project }: ProjectListItemProps): JSX.Element => {
               shortcut={Shortcuts.webJob}
               icon={Icon.Hammer}
             />
-            {project.docs_job_id && (
-              <Action.OpenInBrowser
-                url={docsUrl}
-                title="Open Documentation in dbt Cloud"
-                shortcut={Shortcuts.webDocs}
-                icon={Icon.Document}
-              />
-            )}
+            <Action.OpenInBrowser
+              url={docsUrl}
+              title="Open in dbt Explorer"
+              shortcut={Shortcuts.webDocs}
+              icon={Icon.Document}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
