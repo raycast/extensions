@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Revid MCP Server] - {PR_MERGE_DATE}
+## [Add Revid MCP Server] - 2026-10-23
 
 - Add Revid to the official registry: research what goes viral on TikTok, YouTube, Instagram and X, make finished short-form videos with voice, captions, music and AI footage, and publish or schedule them to connected accounts. Hosted Streamable HTTP server at https://www.revid.ai/api/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
