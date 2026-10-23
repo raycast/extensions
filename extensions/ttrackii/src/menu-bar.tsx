@@ -61,7 +61,7 @@ export default function MenuBar() {
       setError("");
     } catch (error) {
       // A 401 clears credentials; make sure the old account's timer disappears with them.
-      if (!(await isSignedIn())) {
+      if (!(await isSignedIn().catch(() => false))) {
         setSignedIn(false);
         setData(undefined);
       }
@@ -83,7 +83,7 @@ export default function MenuBar() {
       setData(await read<Snapshot<Timer>>("timer"));
       setError("");
     } catch (error) {
-      if (!(await isSignedIn())) {
+      if (!(await isSignedIn().catch(() => false))) {
         setSignedIn(false);
         setData(undefined);
       }

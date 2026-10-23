@@ -6,6 +6,7 @@ import {
   parseRate,
   percentChange,
   rateInput,
+  repeatBilling,
   suggestTasks,
   timeframeRange,
   duration,
@@ -103,6 +104,36 @@ describe("billing", () => {
     expect(defaultRate(project, [unrated, rated])).toEqual(rated);
     expect(defaultRate(project, [unrated])).toEqual(project);
     expect(defaultRate(undefined, [])).toBeUndefined();
+  });
+  it("repeats an entry's rate choice from the entry alone", () => {
+    const base = { id: "e", taskName: "Task", startTime: 0, durationMs: 0 };
+    expect(
+      repeatBilling({
+        ...base,
+        isBillable: true,
+        billingSource: "custom",
+        billingRateMinor: 9000,
+        billingCurrency: "USD",
+      } as Entry),
+    ).toEqual({
+      mode: "custom",
+      billingRateMinor: 9000,
+      billingCurrency: "USD",
+    });
+    expect(
+      repeatBilling({
+        ...base,
+        isBillable: false,
+        billingSource: "none",
+      } as Entry),
+    ).toEqual({ mode: "none" });
+    expect(
+      repeatBilling({
+        ...base,
+        isBillable: true,
+        billingSource: "project",
+      } as Entry),
+    ).toEqual({ mode: "default" });
   });
   it("parses hourly amounts in the currency's minor units", () => {
     expect(parseRate("85", "EUR")).toBe(8500);

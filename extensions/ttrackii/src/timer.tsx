@@ -32,6 +32,7 @@ import {
   isCurrency,
   parseRate,
   rateInput,
+  repeatBilling,
   suggestTasks,
   timerSelection,
 } from "./lib/domain";
@@ -83,10 +84,17 @@ function TimerCommand(props: { launchContext?: { edit?: boolean } }) {
   const busy = useRef(false);
   const generation = useRef(0);
   const query = task.trim();
+  const loadedWorkspace = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (!ws.workspaceId) return;
     const run = ++generation.current;
+    // Another workspace's suggestions and projects must not be startable here.
+    if (loadedWorkspace.current !== ws.workspaceId) {
+      loadedWorkspace.current = ws.workspaceId;
+      setRecent(undefined);
+      setAvailable(undefined);
+    }
     setLoading(true);
     setResults({});
     void Promise.all([
@@ -125,7 +133,7 @@ function TimerCommand(props: { launchContext?: { edit?: boolean } }) {
     const run = generation.current;
     const wait = setTimeout(() => {
       setSearching(true);
-      void entries(ws.workspaceId, query)
+      void entries(ws.workspaceId, query, undefined, true)
         .then((page) => {
           if (generation.current === run)
             setResults((cached) => ({ ...cached, [query]: page }));
@@ -205,29 +213,6 @@ function TimerCommand(props: { launchContext?: { edit?: boolean } }) {
     setTagIds([...tagIds, tag.id]);
     if (projectId === NO_PROJECT && tag.projectId) setProjectId(tag.projectId);
   }
-  /** Repeat an entry's rate choice: custom stays custom, an opted-out entry stays non-billable. */
-  function billingOf(entry: Entry): Billing {
-    if (
-      entry.billingSource === "custom" &&
-      entry.billingRateMinor != null &&
-      entry.billingCurrency
-    )
-      return {
-        mode: "custom",
-        billingRateMinor: entry.billingRateMinor,
-        billingCurrency: entry.billingCurrency,
-      };
-    const tags = (entry.tagIds ?? [])
-      .map(tagById)
-      .filter((t) => t !== undefined);
-    const wouldBill = defaultRate(
-      available?.projects.find((p) => p.id === entry.projectId),
-      tags,
-    );
-    return !entry.isBillable && wouldBill
-      ? { mode: "none" }
-      : { mode: "default" };
-  }
   /** Autocomplete: take the entry's task, project, tags, and rate, ready to adjust. */
   function fillIn(entry: Entry) {
     setTask(entry.taskName);
@@ -238,7 +223,7 @@ function TimerCommand(props: { launchContext?: { edit?: boolean } }) {
         : NO_PROJECT,
     );
     setTagIds((entry.tagIds ?? []).filter((id) => tagById(id)));
-    setBilling(billingOf(entry));
+    setBilling(repeatBilling(entry));
   }
 
   async function start(
@@ -416,7 +401,7 @@ function TimerCommand(props: { launchContext?: { edit?: boolean } }) {
         taskName: running.entry.taskName,
         projectId: running.entry.projectId ?? null,
         tagIds: running.entry.tagIds ?? [],
-        billing: billingOf(running.entry),
+        billing: repeatBilling(running.entry),
       }
     : undefined;
   const editAction = running?.entry && (
@@ -636,7 +621,7 @@ function TimerCommand(props: { launchContext?: { edit?: boolean } }) {
                       projectId: entry.projectId ?? NO_PROJECT,
                       tagIds: entry.tagIds ?? [],
                     },
-                    billingOf(entry),
+                    repeatBilling(entry),
                   )
                 }
               />

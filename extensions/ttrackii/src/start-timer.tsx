@@ -81,6 +81,8 @@ export function StartTimerForm({
   const [revision, setRevision] = useState(0);
   // The draft's project and tags apply once, to the draft's own workspace.
   const pendingDraft = useRef(draft);
+  // Reloads of the same workspace (Refresh, a failed save) keep the choices made.
+  const loadedWorkspace = useRef<string | undefined>(undefined);
   const workspace = ws.data?.workspaces.find((w) => w.id === ws.workspaceId);
 
   useEffect(() => {
@@ -103,18 +105,24 @@ export function StartTimerForm({
         const applies =
           pending &&
           (!pending.workspaceId || pending.workspaceId === ws.workspaceId);
-        setProjectId(
-          applies && result.projects.some((p) => p.id === pending.projectId)
-            ? (pending.projectId ?? "")
-            : "",
-        );
-        setTagIds(
-          applies
-            ? (pending.tagIds ?? []).filter((id) =>
-                result.tags.some((t) => t.id === id),
-              )
-            : [],
-        );
+        const sameWorkspace = loadedWorkspace.current === ws.workspaceId;
+        loadedWorkspace.current = ws.workspaceId;
+        const hasProject = (id?: string | null) =>
+          result.projects.some((p) => p.id === id);
+        const knownTags = (ids: string[]) =>
+          ids.filter((id) => result.tags.some((t) => t.id === id));
+        if (applies) {
+          setProjectId(
+            hasProject(pending.projectId) ? (pending.projectId ?? "") : "",
+          );
+          setTagIds(knownTags(pending.tagIds ?? []));
+        } else if (sameWorkspace) {
+          setProjectId((chosen) => (hasProject(chosen) ? chosen : ""));
+          setTagIds((chosen) => knownTags(chosen));
+        } else {
+          setProjectId("");
+          setTagIds([]);
+        }
         if (applies && pending.billing?.mode === "custom") {
           const { billingRateMinor, billingCurrency } = pending.billing;
           setCustomCurrency(billingCurrency);

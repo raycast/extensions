@@ -13,7 +13,7 @@ import {
   type Timeframe,
 } from "./lib/domain";
 import { message } from "./lib/actions";
-import { origin } from "./lib/store";
+import { origin, read, write, type Snapshot } from "./lib/store";
 import { useAuth, withAuth } from "./components/auth";
 import {
   AccountSection,
@@ -24,8 +24,9 @@ import {
 import type { Group, Report, Resources } from "./lib/types";
 
 // Each timeframe costs two requests (period + comparison); keep them briefly.
+// Stored per server and wiped on sign-out and sign-in, so another account's
+// report (every personal workspace is "personal") is never reused.
 const CACHE_MS = 2 * 60_000;
-const cache = new Map<string, { savedAt: number; data: [Report, Report] }>();
 
 function share(part: number, total: number) {
   return total > 0 ? `${Math.round((part / total) * 100)}%` : "0%";
@@ -45,29 +46,34 @@ function Reports() {
 
   useEffect(() => {
     if (!ws.workspaceId) return;
+    const workspaceId = ws.workspaceId;
     const run = ++generation.current;
-    const key = `${ws.workspaceId}|${range.from}|${range.to}`;
-    const saved = cache.get(key);
+    const key = `report:${workspaceId}|${range.from}|${range.to}`;
     setError("");
-    if (saved && revision === 0 && Date.now() - saved.savedAt < CACHE_MS) {
-      setData(saved.data);
-      return;
-    }
     setLoading(true);
-    void Promise.all([
-      report(ws.workspaceId, range.from, range.to),
-      report(ws.workspaceId, range.previousFrom, range.previousTo),
-      resources(ws.workspaceId).catch(() => undefined),
-    ])
-      .then(([currentPeriod, previousPeriod, lookup]) => {
-        if (generation.current !== run) return;
-        cache.set(key, {
-          savedAt: Date.now(),
-          data: [currentPeriod, previousPeriod],
-        });
-        setData([currentPeriod, previousPeriod]);
-        setAvailable(lookup);
-      })
+    void (async () => {
+      const saved =
+        revision === 0
+          ? await read<Snapshot<[Report, Report]>>(key)
+          : undefined;
+      if (generation.current !== run) return;
+      if (saved && Date.now() - saved.savedAt < CACHE_MS) {
+        setData(saved.data);
+        return;
+      }
+      const [currentPeriod, previousPeriod, lookup] = await Promise.all([
+        report(workspaceId, range.from, range.to),
+        report(workspaceId, range.previousFrom, range.previousTo),
+        resources(workspaceId).catch(() => undefined),
+      ]);
+      if (generation.current !== run) return;
+      await write(key, {
+        savedAt: Date.now(),
+        data: [currentPeriod, previousPeriod],
+      });
+      setData([currentPeriod, previousPeriod]);
+      setAvailable(lookup);
+    })()
       .catch((error) => {
         if (generation.current !== run || auth.handle(error)) return;
         setData(undefined);

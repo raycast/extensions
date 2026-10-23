@@ -14,10 +14,10 @@ import { useWorkspaces } from "./lib/hooks";
 import {
   clock,
   dayLabel,
-  defaultRate,
   duration,
   elapsed,
   formatRate,
+  repeatBilling,
   timeRange,
 } from "./lib/domain";
 import { message, refreshMenuBar } from "./lib/actions";
@@ -29,13 +29,7 @@ import {
   tagColor,
 } from "./components/shared";
 import { StartTimerForm, type StartTimerDraft } from "./start-timer";
-import type {
-  Billing,
-  Entry,
-  EntriesPage,
-  Resources,
-  Timer,
-} from "./lib/types";
+import type { Entry, EntriesPage, Resources, Timer } from "./lib/types";
 
 // Server search costs API quota (50/hour on the free plan), so it waits for a
 // pause in typing; loaded entries are filtered instantly in the meantime.
@@ -66,10 +60,17 @@ function RecentEntries() {
   const inFlight = useRef(false);
   const busy = useRef(false);
   const query = search.trim();
+  const loadedWorkspace = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (!ws.workspaceId) return;
     const run = ++generation.current;
+    // Another workspace's entries must not stay actionable while this one loads.
+    if (loadedWorkspace.current !== ws.workspaceId) {
+      loadedWorkspace.current = ws.workspaceId;
+      setPage(undefined);
+      setAvailable(undefined);
+    }
     setLoading(true);
     setError("");
     setResults({});
@@ -111,7 +112,7 @@ function RecentEntries() {
     const run = generation.current;
     const wait = setTimeout(() => {
       setSearching(true);
-      void entries(ws.workspaceId, query)
+      void entries(ws.workspaceId, query, undefined, true)
         .then((result) => {
           if (generation.current === run)
             setResults((cached) => ({ ...cached, [query]: result }));
@@ -222,29 +223,12 @@ function RecentEntries() {
           projectId: null,
         },
     );
-  /** Repeat the entry's rate choice: a custom rate stays custom, an opted-out entry stays non-billable. */
-  function billingOf(entry: Entry): Billing {
-    if (
-      entry.billingSource === "custom" &&
-      entry.billingRateMinor != null &&
-      entry.billingCurrency
-    )
-      return {
-        mode: "custom",
-        billingRateMinor: entry.billingRateMinor,
-        billingCurrency: entry.billingCurrency,
-      };
-    const wouldBill = defaultRate(project(entry.projectId), tagsOf(entry));
-    return !entry.isBillable && wouldBill
-      ? { mode: "none" }
-      : { mode: "default" };
-  }
   const draftOf = (entry: Entry): StartTimerDraft => ({
     workspaceId: entry.workspaceId ?? ws.workspaceId,
     taskName: entry.taskName,
     projectId: entry.projectId ?? null,
     tagIds: entry.tagIds ?? [],
-    billing: billingOf(entry),
+    billing: repeatBilling(entry),
   });
   const resume = (entry: Entry) =>
     mutate(
@@ -253,11 +237,11 @@ function RecentEntries() {
       "Couldn't start timer",
       () =>
         startTimer({
-          workspaceId: ws.workspaceId,
+          workspaceId: entry.workspaceId ?? ws.workspaceId,
           taskName: entry.taskName,
           projectId: entry.projectId ?? null,
           tagIds: entry.tagIds ?? [],
-          billing: billingOf(entry),
+          billing: repeatBilling(entry),
         }),
     );
 

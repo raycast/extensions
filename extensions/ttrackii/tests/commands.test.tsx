@@ -4,7 +4,7 @@ import StartTimer, { StartTimerForm } from "../src/start-timer";
 import RecentEntries from "../src/recent-entries";
 import Reports from "../src/reports";
 import TimerCommand from "../src/timer";
-import { tokenStore, write } from "../src/lib/store";
+import { saveSession, tokenStore, write } from "../src/lib/store";
 import {
   cacheValues,
   credentials,
@@ -120,6 +120,9 @@ const startBody = () =>
     fetcher.mock.calls.find(([url]) => String(url).includes("/timer/start"))![1]
       .body,
   );
+const reportCalls = () =>
+  fetcher.mock.calls.filter(([url]) => String(url).includes("/api/v1/report"))
+    .length;
 beforeEach(async () => {
   vi.clearAllMocks();
   credentials.clear();
@@ -155,6 +158,22 @@ describe("Start Timer", () => {
     await settle();
     expect(field("dropdown", "project").props.value).toBe("");
     expect(field("tag-picker", "tags").props.value).toEqual([]);
+  });
+  it("keeps the chosen project and tags when the form reloads", async () => {
+    await act(async () => {
+      renderer = create(<StartTimer />);
+    });
+    await settle();
+    await act(async () => field("dropdown", "project").props.onChange("p1"));
+    await act(async () => field("tag-picker", "tags").props.onChange(["t2"]));
+    await act(async () =>
+      nodes("action")
+        .find((n) => n.props.title === "Refresh")!
+        .props.onAction(),
+    );
+    await settle();
+    expect(field("dropdown", "project").props.value).toBe("p1");
+    expect(field("tag-picker", "tags").props.value).toEqual(["t2"]);
   });
   it("starts with several tags in order and the default rate", async () => {
     await act(async () => {
@@ -270,6 +289,84 @@ describe("Recent Entries", () => {
       },
     });
   });
+  it("continues a non-billable entry as non-billable even when rates can't load", async () => {
+    fetcher.mockImplementation(async (url: string) => {
+      if (url.includes("/resources"))
+        return Response.json({ error: "Unavailable" }, { status: 503 });
+      if (url.includes("/entries"))
+        return Response.json({
+          entries: [
+            {
+              ...entry,
+              isBillable: false,
+              billingSource: "none",
+              billingRateMinor: null,
+              billingCurrency: null,
+            },
+          ],
+          nextCursor: null,
+        });
+      return baseFetch(url);
+    });
+    await act(async () => {
+      renderer = create(<RecentEntries />);
+    });
+    await settle();
+    await act(async () =>
+      nodes("action")
+        .find((n) => n.props.title === "Continue Timer")!
+        .props.onAction(),
+    );
+    expect(startBody().billing).toEqual({ mode: "none" });
+  });
+  it("continues an entry in its own workspace", async () => {
+    fetcher.mockImplementation(async (url: string) =>
+      url.includes("/entries")
+        ? Response.json({
+            entries: [{ ...entry, workspaceId: "team" }],
+            nextCursor: null,
+          })
+        : baseFetch(url),
+    );
+    await act(async () => {
+      renderer = create(<RecentEntries />);
+    });
+    await settle();
+    await act(async () =>
+      nodes("action")
+        .find((n) => n.props.title === "Continue Timer")!
+        .props.onAction(),
+    );
+    expect(startBody().workspaceId).toBe("team");
+  });
+  it("hides the previous workspace's entries while another workspace loads", async () => {
+    await act(async () => {
+      renderer = create(<RecentEntries />);
+    });
+    await settle();
+    expect(nodes("item").some((n) => n.props.title === "Landing page")).toBe(
+      true,
+    );
+    fetcher.mockImplementation(async (url: string) =>
+      url.includes("/entries") ? new Promise(() => {}) : baseFetch(url),
+    );
+    await act(async () => nodes("dropdown")[0].props.onChange("team"));
+    await settle();
+    expect(nodes("item").some((n) => n.props.title === "Landing page")).toBe(
+      false,
+    );
+  });
+  it("shows sign-in with Change Server URL when the server URL is invalid", async () => {
+    preferences.serverUrl = "https://app.ttrackii.com/some/path";
+    await act(async () => {
+      renderer = create(<RecentEntries />);
+    });
+    await settle();
+    expect(nodes("detail")[0].props.markdown).toContain("Connect to ttrackii");
+    expect(
+      nodes("action").some((n) => n.props.title === "Change Server URL"),
+    ).toBe(true);
+  });
   it("filters loaded entries at once, then searches the server after a pause", async () => {
     await act(async () => {
       renderer = create(<RecentEntries />);
@@ -363,6 +460,36 @@ describe("Reports", () => {
       source: "Folder",
       tintColor: "#46a69b",
     });
+  });
+  it("never reuses a report cached for another account", async () => {
+    await act(async () => {
+      renderer = create(<Reports />);
+    });
+    await settle();
+    expect(reportCalls()).toBe(2);
+    await act(async () => renderer!.unmount());
+    // A new sign-in replaces the account; every personal workspace is "personal".
+    await saveSession("another-account", 3600);
+    await act(async () => {
+      renderer = create(<Reports />);
+    });
+    await settle();
+    expect(reportCalls()).toBe(4);
+  });
+  it("stops loading when returning to a cached timeframe", async () => {
+    await act(async () => {
+      renderer = create(<Reports />);
+    });
+    await settle();
+    fetcher.mockImplementation(async (url: string) =>
+      url.includes("/api/v1/report") ? new Promise(() => {}) : baseFetch(url),
+    );
+    await act(async () => nodes("dropdown")[0].props.onChange("last-month"));
+    await settle();
+    expect(nodes("list")[0].props.isLoading).toBe(true);
+    await act(async () => nodes("dropdown")[0].props.onChange("this-week"));
+    await settle();
+    expect(nodes("list")[0].props.isLoading).toBe(false);
   });
 });
 describe("Timer", () => {
@@ -469,6 +596,20 @@ describe("Timer", () => {
           new URL(String(url)).searchParams.get("q") === "Landing page",
       ),
     ).toBe(true);
+  });
+  it("leaves the last requests to timer actions instead of searching", async () => {
+    await write("rate", { remaining: 3, resetAt: Date.now() + 3_600_000 });
+    await act(async () => {
+      renderer = create(<TimerCommand />);
+    });
+    await settle();
+    await act(async () => nodes("list")[0].props.onSearchTextChange("land"));
+    await settle(600);
+    expect(
+      fetcher.mock.calls.some(([url]) =>
+        new URL(String(url)).searchParams.has("q"),
+      ),
+    ).toBe(false);
   });
   it("continues a suggestion with ↵", async () => {
     await act(async () => {

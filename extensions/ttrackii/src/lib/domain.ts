@@ -1,4 +1,11 @@
-import type { Entry, Project, Resources, Tag, Workspace } from "./types";
+import type {
+  Billing,
+  Entry,
+  Project,
+  Resources,
+  Tag,
+  Workspace,
+} from "./types";
 
 export function serverOrigin(value: string): string {
   const url = new URL(value.trim() || "https://app.ttrackii.com");
@@ -124,6 +131,24 @@ export function defaultRate(project: Rated | undefined, tags: Rated[]) {
         billingCurrency: source.billingCurrency!,
       }
     : undefined;
+}
+/**
+ * Repeat an entry's rate choice: a custom rate stays custom, and a non-billable
+ * entry stays non-billable. Decided from the entry alone, so a failed project or
+ * tag lookup can never make an opted-out entry billable.
+ */
+export function repeatBilling(entry: Entry): Billing {
+  if (
+    entry.billingSource === "custom" &&
+    entry.billingRateMinor != null &&
+    entry.billingCurrency
+  )
+    return {
+      mode: "custom",
+      billingRateMinor: entry.billingRateMinor,
+      billingCurrency: entry.billingCurrency,
+    };
+  return entry.isBillable === false ? { mode: "none" } : { mode: "default" };
 }
 function fractionDigits(currency: string) {
   try {

@@ -119,11 +119,17 @@ export function report(workspaceId: string, from: string, to: string) {
   return api<Report>(`/api/v1/report?${query}`);
 }
 /** The user's entries, newest first across all dates; `search` matches task, project, or tags. */
-export function entries(workspaceId: string, search = "", cursor?: string) {
+/** `background` marks automatic searches, which leave the last requests to timer actions. */
+export function entries(
+  workspaceId: string,
+  search = "",
+  cursor?: string,
+  background = false,
+) {
   const query = new URLSearchParams({ workspaceId, limit: "50" });
   if (search) query.set("q", search);
   if (cursor) query.set("cursor", cursor);
-  return api<EntriesPage>(`/api/v1/entries?${query}`);
+  return api<EntriesPage>(`/api/v1/entries?${query}`, undefined, background);
 }
 export async function deviceRequest<T>(
   path: string,

@@ -43,7 +43,10 @@ export function withAuth<P extends object>(
   return function Authenticated(props: P) {
     const [state, setState] = useState<"checking" | "in" | "out">("checking");
     useEffect(() => {
-      void isSignedIn().then((signedIn) => setState(signedIn ? "in" : "out"));
+      // An invalid Server URL throws here; sign-in shows it and offers Change Server URL.
+      void isSignedIn()
+        .then((signedIn) => setState(signedIn ? "in" : "out"))
+        .catch(() => setState("out"));
     }, []);
     const signedOut = useCallback(() => setState("out"), []);
     const handle = useCallback((error: unknown) => {

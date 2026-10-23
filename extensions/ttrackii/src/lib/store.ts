@@ -9,9 +9,7 @@ import {
 import { serverOrigin } from "./domain";
 
 export function origin() {
-  const configured = getPreferenceValues<{
-    serverUrl?: string;
-  }>().serverUrl?.trim();
+  const configured = getPreferenceValues<Preferences>().serverUrl?.trim();
   // A blank Server URL follows the build: `ray develop` talks to the local app.
   return serverOrigin(
     configured ||

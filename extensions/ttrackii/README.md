@@ -32,7 +32,7 @@ The extension uses your account's hourly API quota, shared with the ttrackii CLI
 
 ## Privacy
 
-Your ttrackii session is stored in Raycast's secure storage, separately from the ttrackii CLI. Local storage holds only your workspace choice, cached timer and lookup data, and rate-limit info. Signing out revokes the session; if that can't be confirmed, remove it in ttrackii under **Settings → Sign-in & security**.
+Your ttrackii session is stored in Raycast's secure storage, separately from the ttrackii CLI. Local storage holds only your workspace choice, cached timer, lookup, and report data, and rate-limit info; it is cleared when you sign out or connect another account. Signing out revokes the session; if that can't be confirmed, remove it in ttrackii under **Settings → Sign-in & security**.
 
 ## Development
 
