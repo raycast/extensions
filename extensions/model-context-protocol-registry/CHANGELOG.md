@@ -4,6 +4,26 @@
 
 - Add Kimiko to the official registry: meetings, notes and tasks from Kimiko, the private AI note taker, with tools to search meetings, notes and transcripts, read a meeting's summary, and list, add or update tasks, plus three prompts. Local stdio server that ships inside the Kimiko desktop app at /Applications/Kimiko.app/Contents/MacOS/kimiko-mcp (Mac only), with no arguments, environment variables or API key; it stays off until Allow AI apps is turned on in Kimiko.
 
+## [Add EvoLink MCP Server] - 2026-10-23
+
+- Add EvoLink to the official registry: image, video, music and speech generation with 150+ models from one EvoLink account. Search models and published prices, get a quote for an exact task, generate after approval, and track tasks and balance. Hosted Streamable HTTP server at https://mcp.evolink.ai/mcp with OAuth 2.1 sign-in (PKCE and dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add Revid MCP Servezr] - 2026-10-23
+
+- Add Revid to the official registry: research what goes viral on TikTok, YouTube, Instagram and X, make finished short-form videos with voice, captions, music and AI footage, and publish or schedule them to connected accounts. Hosted Streamable HTTP server at https://www.revid.ai/api/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add datawebot MCP Server] - 2026-10-23
+
+- Add datawebot to the official registry: ecommerce product data for agents. Search products across online shops worldwide, list every seller's price for one product with direct shop links, and run extraction Jobs on Amazon search and product pages (10 countries) and 1,100+ Shopify stores. Hosted Streamable HTTP server at https://mcp.datawebot.com/mcp with OAuth 2.1 sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add send21 MCP Server] - 2026-10-23
+
+- Add send21 to the official registry: crypto pay links and API for people and AI agents. Create fiat-priced pay links and payment drafts paid to the owner's approved addresses, check payment status and propose receiving addresses for the owner to approve; send21 is non-custodial and the payer signs in their own wallet. Hosted Streamable HTTP server at https://send21.io/mcp, through mcp-remote with a send21 API key as an `Authorization: Bearer` header.
+
+## [Add OverlayQA MCP Server] - 2026-10-23
+
+- Add OverlayQA to the official registry: design QA for coding agents, with WCAG accessibility (axe-core), color-contrast and design-token audits and AI visual reviews on any public URL, plus QA issues, comments, labels and client review links in OverlayQA. Hosted Streamable HTTP server at https://api.overlayqa.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add Wave AI MCP Server] - 2026-10-22
 
 - Add Wave AI to the official registry: an AI note taker for phone calls, meetings and in-person conversations. Search and quote recordings, ask what a person said with Voice ID, and update action items, folders and sharing. Hosted Streamable HTTP server at https://mcp.wave.co with OAuth 2.0 sign-in (PKCE and dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
