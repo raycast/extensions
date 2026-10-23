@@ -161,6 +161,28 @@ export function fenceText(text: string): string {
 }
 
 /**
+ * The row whose sidebar captures its pane. `undefined` means Raycast hasn't
+ * reported a selection yet (use the first row); `null` means a search filtered
+ * every row out (none).
+ */
+export function activeRowId(sections: Section[], selectedId: string | null | undefined): string | undefined {
+  return selectedId === undefined ? sections[0]?.rows[0]?.id : (selectedId ?? undefined);
+}
+
+/**
+ * The sidebar preview's markdown. A failed refresh after a good capture keeps
+ * the last text but says it is no longer live.
+ */
+export function previewMarkdown({ paneId, data, error }: { paneId?: string; data?: string; error?: unknown }): string {
+  if (!paneId) return "No pane to preview.";
+  const errorMessage = error ? (error instanceof Error ? error.message : String(error)) : undefined;
+  if (data === undefined) return errorMessage ? `# Error\n\n${errorMessage}` : "";
+  const text = cleanCapture(data);
+  const body = text ? fenceText(text) : "*Pane is empty.*";
+  return errorMessage ? `**Preview stopped refreshing:** ${errorMessage}\n\n${body}` : body;
+}
+
+/**
  * Tidy captured pane text for the sidebar: drop lines that are only rules
  * (`─────`, `_____`), strip a prompt's `·····` filler, shorten rule runs inside
  * a line, and collapse blank runs.

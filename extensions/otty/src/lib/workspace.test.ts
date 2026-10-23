@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  activeRowId,
+  previewMarkdown,
   abbreviateHome,
   expandHome,
   agentStatus,
@@ -21,6 +23,7 @@ import {
   type OttyPane,
   type OttyTab,
   type OttyWindow,
+  type Section,
 } from "./workspace";
 
 const HOME = "/Users/alex";
@@ -533,5 +536,40 @@ describe("pushRecent", () => {
   it("moves a visit to the front, deduped and capped", () => {
     expect(pushRecent(["a", "b", "c"], "b", 3)).toEqual(["b", "a", "c"]);
     expect(pushRecent(["a", "b", "c"], "d", 3)).toEqual(["d", "a", "b"]);
+  });
+});
+
+describe("previewMarkdown", () => {
+  it("shows the error when nothing was captured yet", () => {
+    expect(previewMarkdown({ paneId: "p_1", error: new Error("pane gone") })).toBe("# Error\n\npane gone");
+  });
+
+  it("keeps the last capture but says refreshing stopped", () => {
+    expect(previewMarkdown({ paneId: "p_1", data: "hello", error: new Error("pane gone") })).toBe(
+      "**Preview stopped refreshing:** pane gone\n\n```text\nhello\n```",
+    );
+  });
+
+  it("renders a live capture without a notice", () => {
+    expect(previewMarkdown({ paneId: "p_1", data: "hello" })).toBe("```text\nhello\n```");
+    expect(previewMarkdown({ paneId: "p_1", data: "" })).toBe("*Pane is empty.*");
+    expect(previewMarkdown({ paneId: "p_1" })).toBe("");
+    expect(previewMarkdown({})).toBe("No pane to preview.");
+  });
+});
+
+describe("activeRowId", () => {
+  const sections = [{ id: "w_1", rows: [{ id: "t_1" }, { id: "t_2" }] }] as Section[];
+
+  it("falls back to the first row until Raycast reports a selection", () => {
+    expect(activeRowId(sections, undefined)).toBe("t_1");
+  });
+
+  it("follows the reported selection", () => {
+    expect(activeRowId(sections, "t_2")).toBe("t_2");
+  });
+
+  it("selects nothing when a search filtered every row out", () => {
+    expect(activeRowId(sections, null)).toBeUndefined();
   });
 });

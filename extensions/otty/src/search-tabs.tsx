@@ -15,7 +15,15 @@ import {
   useRefreshFailureToast,
   useSpinnerFrame,
 } from "./lib/ui";
-import { buildPaneLinkArgs, pushRecent, sidebarToggles, withRecent, type Row, type ViewMode } from "./lib/workspace";
+import {
+  activeRowId,
+  buildPaneLinkArgs,
+  pushRecent,
+  sidebarToggles,
+  withRecent,
+  type Row,
+  type ViewMode,
+} from "./lib/workspace";
 
 const REFRESH_MS = 3000;
 
@@ -49,6 +57,9 @@ export default function Command() {
   // unique across kinds (t_, p_, w_), so one list serves all three views.
   const { value: recentIds = [], setValue: setRecentIds } = useLocalStorage<string[]>("recent-targets", []);
   const sections = useMemo(() => (data ? withRecent(sectionsFor(mode, data), recentIds) : []), [data, mode, recentIds]);
+  // Only the selected row's sidebar captures its pane.
+  const [selectedId, setSelectedId] = useState<string | null>();
+  const activeId = activeRowId(sections, selectedId);
   const working = sections.some((section) => section.rows.some((row) => row.agentState === "processing"));
   const frame = useSpinnerFrame(working);
 
@@ -84,6 +95,7 @@ export default function Command() {
       isShowingDetail={sections.length > 0 && showDetail}
       searchBarPlaceholder={`Search ${noun.toLowerCase()}s`}
       searchBarAccessory={dropdown}
+      onSelectionChange={setSelectedId}
     >
       <List.EmptyView
         icon={Icon.MagnifyingGlass}
@@ -95,6 +107,7 @@ export default function Command() {
           {section.rows.map((row) => (
             <List.Item
               key={row.id}
+              id={row.id}
               icon={statusIcon(row.agent, row.agentState, mode === "windows" ? Icon.AppWindow : Icon.Terminal, frame)}
               title={row.title}
               // With the sidebar open, only the title fits; Details shows the folder.
@@ -103,7 +116,12 @@ export default function Command() {
               accessories={row.label && !showDetail ? [{ text: row.label, tooltip: row.labelTooltip }] : undefined}
               detail={
                 showDetail ? (
-                  <PaneDetail row={row} showPreview={sidebar.preview} showDetails={sidebar.details} />
+                  <PaneDetail
+                    row={row}
+                    selected={row.id === activeId}
+                    showPreview={sidebar.preview}
+                    showDetails={sidebar.details}
+                  />
                 ) : undefined
               }
               actions={
