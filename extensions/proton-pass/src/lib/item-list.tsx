@@ -45,7 +45,7 @@ export function ItemList({
   emptyView,
   onRefresh,
 }: ItemListProps) {
-  const showWebsiteIcons = getPreferenceValues<Preferences.SearchItems>().showWebsiteIcons ?? false;
+  const showWebsiteIcons = getPreferenceValues<Preferences>().showWebsiteIcons ?? false;
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-item-details", true);
   // A new store whenever the list is refreshed, so loaded details are never older than the items.
   const store = useMemo(() => new ItemDetailStore(), [items]);

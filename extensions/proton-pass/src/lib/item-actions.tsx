@@ -29,7 +29,7 @@ export const ItemActions = memo(function ItemActions({
   onRefresh,
   onUse,
 }: ItemActionsProps) {
-  const preferences = getPreferenceValues<Preferences.SearchItems>();
+  const preferences = getPreferenceValues<Preferences>();
   // Keeps secrets out of Raycast's clipboard history.
   const concealSecrets = preferences.copyPasswordTransient ?? true;
   // Loaded details are newer than the cached item, e.g. when a password was added since.

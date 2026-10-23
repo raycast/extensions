@@ -39,7 +39,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
   const [error, setError] = useState<PassCliError | null>(null);
   // Once pass-cli has confirmed the session, the item lists opened from here don't ask it again.
   const [sessionConfirmed, setSessionConfirmed] = useState(false);
-  const preferences = getPreferenceValues<Preferences.SearchItems>();
+  const preferences = getPreferenceValues<Preferences>();
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const hasLoadedFromCache = useRef(false);
   const hasOpenedItems = useRef(false);

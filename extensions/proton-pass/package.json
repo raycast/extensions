@@ -28,85 +28,14 @@
         "search",
         "vaults"
       ],
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "openOn",
-          "type": "dropdown",
-          "title": "Open On",
-          "description": "What Browse Items shows first. Esc goes from the items back to the vaults.",
-          "default": "items",
-          "required": false,
-          "data": [
-            {
-              "title": "Items",
-              "value": "items"
-            },
-            {
-              "title": "Vaults",
-              "value": "vaults"
-            }
-          ]
-        },
-        {
-          "name": "primaryAction",
-          "type": "dropdown",
-          "title": "Primary Action",
-          "description": "What Enter does on an item.",
-          "default": "details",
-          "required": false,
-          "data": [
-            {
-              "title": "View Details",
-              "value": "details"
-            },
-            {
-              "title": "Copy Password",
-              "value": "copy"
-            },
-            {
-              "title": "Fill Login (macOS)",
-              "value": "fill"
-            }
-          ]
-        },
-        {
-          "name": "submitAfterFill",
-          "type": "checkbox",
-          "title": "Fill Login",
-          "label": "Press Return after the password",
-          "description": "Submits the login form.",
-          "default": false,
-          "required": false
-        },
-        {
-          "name": "enableBackgroundRefresh",
-          "type": "checkbox",
-          "title": "Item List",
-          "label": "Refresh items in the background",
-          "description": "Even when the cache is still fresh.",
-          "default": true,
-          "required": false
-        },
-        {
-          "name": "enableWebIntegration",
-          "type": "checkbox",
-          "title": "",
-          "label": "Suggest logins for the active browser tab",
-          "description": "Requires the Raycast browser extension.",
-          "default": true,
-          "required": false
-        },
-        {
-          "name": "showWebsiteIcons",
-          "type": "checkbox",
-          "title": "",
-          "label": "Show website icons",
-          "description": "From Raycast's favicon provider, which receives the domains.",
-          "default": false,
-          "required": false
-        }
-      ]
+      "mode": "view"
+    },
+    {
+      "name": "list-vaults",
+      "title": "List Vaults",
+      "subtitle": "Proton Pass",
+      "description": "View all your Proton Pass vaults",
+      "mode": "view"
     },
     {
       "name": "generate-password",
@@ -284,6 +213,37 @@
       "required": false
     },
     {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "description": "What Enter does on an item.",
+      "default": "details",
+      "required": false,
+      "data": [
+        {
+          "title": "View Details",
+          "value": "details"
+        },
+        {
+          "title": "Copy Password",
+          "value": "copy"
+        },
+        {
+          "title": "Fill Login (macOS)",
+          "value": "fill"
+        }
+      ]
+    },
+    {
+      "name": "submitAfterFill",
+      "type": "checkbox",
+      "title": "Fill Login",
+      "label": "Press Return after the password",
+      "description": "Submits the login form.",
+      "default": false,
+      "required": false
+    },
+    {
       "name": "copyPasswordTransient",
       "type": "checkbox",
       "title": "Transient Clipboard",
@@ -325,6 +285,33 @@
           "value": "43200"
         }
       ]
+    },
+    {
+      "name": "enableBackgroundRefresh",
+      "type": "checkbox",
+      "title": "Item List",
+      "label": "Refresh items in the background",
+      "description": "Even when the cache is still fresh.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "enableWebIntegration",
+      "type": "checkbox",
+      "title": "",
+      "label": "Suggest logins for the active browser tab",
+      "description": "Requires the Raycast browser extension.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showWebsiteIcons",
+      "type": "checkbox",
+      "title": "",
+      "label": "Show website icons",
+      "description": "From Raycast's favicon provider, which receives the domains.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
