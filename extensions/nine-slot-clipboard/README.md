@@ -2,6 +2,14 @@
 
 A Raycast extension that keeps nine clipboard slots. Each slot has its own save command and its own paste command, so you can bind a hotkey to every one.
 
+## Why not Snippets?
+
+Snippets are for text you curate and reuse for weeks. Slots are meant to be overwritten constantly during one task, such as moving several fields between two windows, without each copy replacing the last one on the system clipboard.
+
+- One hotkey (suggested ⌘⌥1, which you assign in Raycast) saves the current selection to slot 1 and replaces what was there. There is no editor, no name to type, and no confirm step. If nothing is selected, it saves the clipboard instead.
+- A second hotkey (suggested ⌘⇧1) pastes the slot back into the app you were using.
+- Throwaway copies stay out of your Snippets library, and **Manage Clipboard Slots** shows all nine at once so you can paste, replace, or clear them.
+
 ## Shortcuts
 
 Raycast hotkeys are one key combination. macOS already uses **⌘C** for Copy, and Raycast cannot listen for a sequence such as “press ⌘C, then press 1”.
