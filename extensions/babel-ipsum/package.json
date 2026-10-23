@@ -45,7 +45,7 @@
     "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "node scripts/clean-build.mjs && ray build --output dist",
+    "build": "node scripts/clean-build.mjs && ray build --environment dist --output dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
