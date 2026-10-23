@@ -12,3 +12,5 @@ Manage your Roblox games from Raycast.
 - **Open in Creator Dashboard:** Open your game's overview.
 
 Both menu bar items refresh every 30 seconds and can hide when zero. Earnings cache between sessions and retry automatically after errors.
+
+Publish Place requires Studio to use English menus and Raycast to have Accessibility and Automation permissions in macOS System Settings.
