@@ -209,7 +209,10 @@ export function EarningsMenu({
 
   return (
     <MenuBarExtra
-      icon="robux-icon.png"
+      icon={{
+        source: "robux-icon.png",
+        tintColor: { light: "#15211F", dark: "#FFFFFF", adjustContrast: false },
+      }}
       title={amount ?? (error ? "—" : "…")}
       tooltip={[
         "Robux Earned",
