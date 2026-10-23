@@ -12,7 +12,7 @@ Each request uses Geekflare credits on your account; see [pricing](https://geekf
 ## Commands
 
 - **Search Web**: search the live web and open or copy results.
-- **Check Website**: run a check on a URL or domain: site status, DNS records, DNSSEC, TLS/SSL, redirect chain, broken links, load time, mixed content, or a Lighthouse audit.
+- **Check Website**: run a check on a URL or domain: site status, DNS records, TLS/SSL, redirect chain, broken links, load time, or a Lighthouse audit.
 - **Scrape Page to Clipboard**: copy a public page's content as Markdown.
 
 ## AI Extension

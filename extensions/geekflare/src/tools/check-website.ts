@@ -8,16 +8,7 @@ type Input = {
   /**
    * Which check to run. lighthouse is slow (a minute or more).
    */
-  check:
-    | "site_status"
-    | "dns_records"
-    | "dnssec"
-    | "tls_scan"
-    | "redirect_check"
-    | "broken_links"
-    | "load_time"
-    | "mixed_content"
-    | "lighthouse";
+  check: "site_status" | "dns_records" | "tls_scan" | "redirect_check" | "broken_links" | "load_time" | "lighthouse";
 };
 
 /**

@@ -6,12 +6,10 @@ const TIMEOUT_MS = 180_000;
 export const WEBSITE_CHECKS = {
   site_status: { path: "up", title: "Site Status" },
   dns_records: { path: "dnsrecord", title: "DNS Records" },
-  dnssec: { path: "dnssec", title: "DNSSEC" },
   tls_scan: { path: "tlsscan", title: "TLS / SSL Scan" },
   redirect_check: { path: "redirectcheck", title: "Redirect Chain" },
   broken_links: { path: "brokenlink", title: "Broken Links" },
   load_time: { path: "loadtime", title: "Load Time" },
-  mixed_content: { path: "mixedcontent", title: "Mixed Content" },
   lighthouse: { path: "lighthouse", title: "Lighthouse Audit" },
 } as const;
 

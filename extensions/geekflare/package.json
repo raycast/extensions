@@ -28,7 +28,7 @@
     {
       "name": "check-website",
       "title": "Check Website",
-      "description": "Run a website check: status, DNS, DNSSEC, TLS, redirects, broken links, load time, mixed content, or Lighthouse.",
+      "description": "Run a website check: status, DNS, TLS, redirects, broken links, load time, or Lighthouse.",
       "mode": "view",
       "arguments": [
         {
@@ -70,7 +70,7 @@
     {
       "name": "check-website",
       "title": "Check Website",
-      "description": "Run one website check: status, DNS records, DNSSEC, TLS, redirects, broken links, load time, mixed content, or Lighthouse.",
+      "description": "Run one website check: status, DNS records, TLS, redirects, broken links, load time, or Lighthouse.",
       "icon": "icon.png"
     }
   ],

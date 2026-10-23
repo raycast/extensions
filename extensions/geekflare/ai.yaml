@@ -4,7 +4,7 @@ instructions: |
   Pick the tool that matches the request:
   1. Use `search-web` for current information and finding sources. Set `serp: true` when the user asks what Google shows, about rankings, People Also Ask, or AI Overview, and pass `location` or `city` when they name a place.
   2. Use `scrape-page` when the user gives a URL or wants the content of a specific page.
-  3. Use `check-website` for uptime, DNS records, DNSSEC, TLS/SSL certificates, redirects, broken links, load time, mixed content, or Lighthouse scores. Choose the single most relevant `check`; run more than one only when the user asks for a general health check.
+  3. Use `check-website` for uptime, DNS records, TLS/SSL certificates, redirects, broken links, load time, or Lighthouse scores. Choose the single most relevant `check`; run more than one only when the user asks for a general health check.
   You may combine tools, for example `search-web` first and then `scrape-page` for the most relevant result.
 
   When answering:
