@@ -13,7 +13,7 @@ test("source assets retain the project grant and separate corpus license", () =>
   assert.match(read("assets/corpus-license.txt"), /Creative Commons Attribution-ShareAlike 4\.0/);
   assert.match(read("NOTICE.md"), /Books and sources/);
   assert.match(read("LICENSE"), /See NOTICE\.md\./);
-  assert.ok(!read("assets/corpus-license.txt").includes("`corpus/NOTICE.md`"));
+  assert.match(read("assets/corpus-license.txt"), /\[The source notice\]\(\.\.\/NOTICE\.md\)/);
 });
 
 test("isolated source generates declarations, typechecks, and ships unchanged licensed assets", (t) => {
