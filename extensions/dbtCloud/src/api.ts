@@ -61,7 +61,10 @@ export const getBaseUrl = (): string => {
 export const getDiscoveryApiUrl = (): string => {
   const preferences = getPreferences();
   if (preferences.dbtCloudCustomDiscoveryUrl) {
-    return toHttpsUrl(preferences.dbtCloudCustomDiscoveryUrl);
+    // The Discovery API only answers on /graphql, so a bare host or the /api base from the docs is pointed there
+    const custom = new URL(toHttpsUrl(preferences.dbtCloudCustomDiscoveryUrl));
+    if (/^\/(api\/?)?$/i.test(custom.pathname)) custom.pathname = "/graphql";
+    return custom.toString().replace(/\/$/, "");
   }
 
   const host = new URL(getBaseUrl()).hostname;
@@ -390,7 +393,11 @@ export async function queryDiscoveryApi<T>(
     }
 
     if (!response.ok || !json) {
-      throw new Error(`HTTP ${response.status} from ${discoveryUrl}: ${body.slice(0, 200)}`);
+      const detail = body
+        .replace(/<[^>]*>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+      throw new Error(`HTTP ${response.status} from ${discoveryUrl}${detail ? `: ${detail.slice(0, 160)}` : ""}`);
     }
 
     return json.data;

@@ -367,10 +367,10 @@
     {
       "name": "dbtCloudCustomDiscoveryUrl",
       "title": "Custom Discovery API URL",
-      "description": "Override the Discovery API (metadata) URL used by the catalog and lineage commands. Only needed if the URL derived from your endpoint is incorrect.",
+      "description": "Leave empty: the Discovery API URL is derived from your endpoint. Only set this if the catalog and lineage commands cannot reach it, e.g. https://ab123.metadata.eu1.dbt.com/graphql",
       "type": "textfield",
       "required": false,
-      "placeholder": "https://metadata.cloud.getdbt.com/graphql"
+      "placeholder": "Leave empty to derive from the endpoint"
     }
   ],
   "dependencies": {
