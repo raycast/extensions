@@ -146,10 +146,7 @@ export async function fetchWithRetry<T>(
  * Classifies the error and shows a user-friendly message.
  * For FirefoxNotRunning, adds a "Launch Firefox" recovery action.
  */
-export async function showActionError(
-  error: unknown,
-  actionName: string
-): Promise<void> {
+export async function showActionError(error: unknown, actionName: string): Promise<void> {
   const classified = await classifyError(error);
 
   const options: Toast.Options = {

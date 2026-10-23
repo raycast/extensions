@@ -1,15 +1,6 @@
 import { environment } from "@raycast/api";
 import { createHash } from "crypto";
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  renameSync,
-  statSync,
-  unlinkSync,
-  utimesSync,
-  writeFileSync,
-} from "fs";
+import { existsSync, mkdirSync, readdirSync, renameSync, statSync, unlinkSync, utimesSync, writeFileSync } from "fs";
 import { join } from "path";
 
 const CACHE_DIR = join(environment.supportPath, "favicons");
@@ -56,9 +47,7 @@ function pruneCache() {
  * `base64` (e.g. `charset=utf-8`) are ignored. Percent-escapes are decoded
  * byte by byte so a stray `%` or non-UTF-8 escape doesn't throw.
  */
-function decodeDataUri(
-  dataUri: string
-): { mime: string; bytes: Buffer } | null {
+function decodeDataUri(dataUri: string): { mime: string; bytes: Buffer } | null {
   const comma = dataUri.indexOf(",");
   if (!dataUri.startsWith("data:") || comma < 0) return null;
   const [mime, ...params] = dataUri.slice(5, comma).split(";");
