@@ -27,7 +27,7 @@ export class GeekflareError extends Error {}
 /** Accept bare domains such as `example.com` by adding `https://`. */
 export function normalizeUrl(url: string): string {
   const trimmed = url.trim();
-  return trimmed && !trimmed.includes("://") ? `https://${trimmed}` : trimmed;
+  return trimmed && !/^[a-z][a-z\d+.-]*:\/\//i.test(trimmed) ? `https://${trimmed}` : trimmed;
 }
 
 /** POST a JSON body to a Geekflare endpoint and return the parsed response. */
