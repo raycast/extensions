@@ -563,6 +563,20 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "evolink",
+    title: "EvoLink",
+    description:
+      "Image, video, music and speech generation with 150+ models from one EvoLink account. Search models and read their published prices, get a quote for an exact task, generate after you approve it, then track the task and your balance. Model search, prices, quotes, task status and balance checks are free; generation is billed to your EvoLink balance. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/Evolink-AI/mcp-plugin/main/assets/logo.png",
+    homepage:
+      "https://evolink.ai/mcp?utm_source=raycast&utm_medium=referral&utm_campaign=mcp_remote&utm_content=directory_listing",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.evolink.ai/mcp"],
+    },
+    remoteUrl: "https://mcp.evolink.ai/mcp",
+  },
+  {
     name: "exa",
     title: "Exa",
     description:
@@ -1647,6 +1661,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.xtiles.app/mcp"],
     },
     remoteUrl: "https://mcp.xtiles.app/mcp",
+  },
+  {
+    name: "revid",
+    title: "Revid",
+    description:
+      "Research what goes viral, make finished short-form videos and post them. Search viral TikTok, YouTube, Instagram and X videos for hooks and formats, render a finished video with voice, captions, music and AI footage from a prompt, script, article or upload, run recurring series, then publish or schedule it to your connected accounts. 30 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or a Revid API key as a bearer token.",
+    icon: "https://www.revid.ai/revid_logo_square_bg_512.png",
+    homepage: "https://www.revid.ai/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.revid.ai/api/mcp"],
+    },
+    remoteUrl: "https://www.revid.ai/api/mcp",
   },
   {
     name: "firecrawl",
