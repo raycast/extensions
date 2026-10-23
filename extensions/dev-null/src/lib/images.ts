@@ -1,14 +1,10 @@
 // The server's rules for attached images (app/Actions/CreateCommitImages.php and the `images.*` rules in
 // app/Http/Requests/CreateCommitRequest.php), checked before anything is signed or sent.
 
-import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { basename, isAbsolute, join } from "node:path";
-import { promisify } from "node:util";
-
-const execFileAsync = promisify(execFile);
 
 export const MAX_IMAGES = 3;
 // The official script's limit, a little under the server's 10 MB (10,485,760 bytes).
@@ -34,22 +30,73 @@ export function sniffType(data: Buffer): ImageType | undefined {
   return undefined;
 }
 
-// Measured from the bytes that were read, not the path, which another app could change in between.
-// The copy has a fixed name, because sips echoes the file name before the properties.
-async function dimensions(data: Buffer): Promise<{ width: number; height: number } | undefined> {
-  const dir = await mkdtemp(join(tmpdir(), "devnull-"));
+type Size = { width: number; height: number };
+
+const positive = (size: Size): Size | undefined => (size.width > 0 && size.height > 0 ? size : undefined);
+
+/**
+ * An image's size in pixels, read from its header the way PHP's getimagesize() does, which is how the server
+ * measures it (app/Actions/CreateImageFiles.php). Like getimagesize(), it ignores EXIF rotation. Measured from the
+ * bytes that were read, not the path, which another app could change in between. Undefined if the header is cut off.
+ */
+export function imageSize(data: Buffer): Size | undefined {
   try {
-    const copy = join(dir, "image");
-    await writeFile(copy, data);
-    const { stdout } = await execFileAsync("/usr/bin/sips", ["-g", "pixelWidth", "-g", "pixelHeight", copy]);
-    const width = Number(stdout.match(/^\s*pixelWidth:\s*(\d+)\s*$/m)?.[1]);
-    const height = Number(stdout.match(/^\s*pixelHeight:\s*(\d+)\s*$/m)?.[1]);
-    return width > 0 && height > 0 ? { width, height } : undefined;
+    switch (sniffType(data)) {
+      case "image/png":
+        // The IHDR chunk always comes first: 13 bytes, starting with the width and height, then its CRC.
+        return data.length >= 33 && data.readUInt32BE(8) === 13 && data.toString("latin1", 12, 16) === "IHDR"
+          ? positive({ width: data.readUInt32BE(16), height: data.readUInt32BE(20) })
+          : undefined;
+      case "image/jpeg":
+        return jpegSize(data);
+      case "image/webp":
+        return webpSize(data);
+      default:
+        return undefined;
+    }
   } catch {
+    // A read past the end of a truncated header.
     return undefined;
-  } finally {
-    await rm(dir, { recursive: true, force: true });
   }
+}
+
+// Walks the segments to the first start-of-frame marker (C0–CF, except C4, C8 and CC, which aren't frames).
+function jpegSize(data: Buffer): Size | undefined {
+  let offset = 2;
+  while (offset + 4 <= data.length) {
+    if (data[offset] !== 0xff) return undefined;
+    const marker = data[offset + 1];
+    // Fill bytes before a marker.
+    if (marker === 0xff) {
+      offset += 1;
+      continue;
+    }
+    if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+      return positive({ height: data.readUInt16BE(offset + 5), width: data.readUInt16BE(offset + 7) });
+    }
+    offset += 2 + data.readUInt16BE(offset + 2);
+  }
+  return undefined;
+}
+
+// The first chunk after "WEBP" says which form it is, and each keeps the size in its own place.
+function webpSize(data: Buffer): Size | undefined {
+  const chunk = data.toString("latin1", 12, 16);
+  if (chunk === "VP8 ") {
+    // A key frame's start code comes right before the size.
+    if (data[23] !== 0x9d || data[24] !== 0x01 || data[25] !== 0x2a) return undefined;
+    return positive({ width: data.readUInt16LE(26) & 0x3fff, height: data.readUInt16LE(28) & 0x3fff });
+  }
+  if (chunk === "VP8L") {
+    // The signature byte, then the size.
+    if (data[20] !== 0x2f) return undefined;
+    const bits = data.readUInt32LE(21);
+    return { width: (bits & 0x3fff) + 1, height: ((bits >> 14) & 0x3fff) + 1 };
+  }
+  if (chunk === "VP8X") {
+    return { width: data.readUIntLE(24, 3) + 1, height: data.readUIntLE(27, 3) + 1 };
+  }
+  return undefined;
 }
 
 const PREVIEW_DIR = join(tmpdir(), "devnull-preview");
@@ -109,11 +156,11 @@ export async function loadImages(paths: string[]): Promise<Image[]> {
     const type = sniffType(data);
     if (!type) throw new Error(`${name} is not a JPEG, PNG or WebP image.`);
 
-    const size2d = await dimensions(data);
+    const size2d = imageSize(data);
     if (!size2d) throw new Error(`Could not read the dimensions of ${name}.`);
     if (size2d.width > MAX_IMAGE_DIMENSION || size2d.height > MAX_IMAGE_DIMENSION) {
       throw new Error(
-        `${name} is ${size2d.width}×${size2d.height}. Images can be at most ${MAX_IMAGE_DIMENSION.toLocaleString("en-US")} pixels on a side.`,
+        `${name} is ${size2d.width}×${size2d.height}. Images can be at most ${MAX_IMAGE_DIMENSION.toLocaleString()} pixels on a side.`,
       );
     }
 

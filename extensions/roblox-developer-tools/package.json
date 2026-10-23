@@ -1,0 +1,149 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "roblox-developer-tools",
+  "title": "Roblox Developer Tools",
+  "description": "Launch Roblox games, open Studio, publish places, restart servers, view player counts, and open game pages and Creator Dashboard",
+  "icon": "extension-icon.png",
+  "author": "zw1ce",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "roblox",
+    "studio",
+    "universe",
+    "place",
+    "restart"
+  ],
+  "commands": [
+    {
+      "name": "player-count",
+      "title": "Player Count",
+      "subtitle": "Roblox",
+      "description": "Display your universe's player count in the menu bar",
+      "mode": "menu-bar",
+      "interval": "30s",
+      "preferences": [
+        {
+          "name": "hideZeroPlayers",
+          "type": "checkbox",
+          "title": "",
+          "label": "Hide when there are zero players",
+          "description": "Keep refreshing while hidden and show the item when players join",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "launch",
+      "title": "Launch Game",
+      "subtitle": "Roblox",
+      "description": "Play your place",
+      "mode": "no-view"
+    },
+    {
+      "name": "studio",
+      "title": "Open in Studio",
+      "subtitle": "Roblox",
+      "description": "Edit your place in Studio",
+      "mode": "no-view"
+    },
+    {
+      "name": "publish",
+      "title": "Publish Place",
+      "subtitle": "Roblox",
+      "description": "Publish the current place in Studio",
+      "mode": "no-view"
+    },
+    {
+      "name": "restart",
+      "title": "Restart Servers",
+      "subtitle": "Roblox",
+      "description": "Restart servers in your universe",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "closeAllVersions",
+          "type": "checkbox",
+          "title": "",
+          "label": "Restart all versions",
+          "description": "Turn off to restart outdated servers only",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "confirmRestart",
+          "type": "checkbox",
+          "title": "",
+          "label": "Ask before restarting",
+          "description": "Confirm each restart",
+          "required": false,
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "game-page",
+      "title": "Open Game Page",
+      "subtitle": "Roblox",
+      "description": "Open your universe's public Roblox game page",
+      "mode": "no-view"
+    },
+    {
+      "name": "dashboard",
+      "title": "Open in Creator Dashboard",
+      "subtitle": "Roblox",
+      "description": "Open your universe's Overview page in Creator Dashboard",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "universeId",
+      "type": "textfield",
+      "title": "Universe ID",
+      "description": "Required for Player Count, Studio, Game Page, Creator Dashboard, and Restart",
+      "required": false
+    },
+    {
+      "name": "placeId",
+      "type": "textfield",
+      "title": "Place ID",
+      "description": "Required for Launch and Studio",
+      "required": false
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "title": "API Key",
+      "description": "Required for Restart, Roblox Open Cloud key with universe:write access",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.7.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.9.0"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  }
+}

@@ -96,14 +96,14 @@ export function bodyError(body: string): string | undefined {
   const normalized = normalizeBody(body);
   if (codePoints(normalized) < MIN_BODY_LENGTH) return "Write something to commit.";
   if (codePoints(normalized) > MAX_RAW_BODY_LENGTH) {
-    return `A commit can't be longer than ${MAX_RAW_BODY_LENGTH.toLocaleString("en-US")} characters, links included.`;
+    return `A commit can't be longer than ${MAX_RAW_BODY_LENGTH.toLocaleString()} characters, links included.`;
   }
   if (proseLinks(normalized).some((link) => hrefLength(link) > MAX_URL_LENGTH)) {
-    return `Each link must not be greater than ${MAX_URL_LENGTH.toLocaleString("en-US")} characters.`;
+    return `Each link must not be greater than ${MAX_URL_LENGTH.toLocaleString()} characters.`;
   }
   const length = bodyCharacterCount(body);
   if (length > MAX_BODY_LENGTH) {
-    return `${length.toLocaleString("en-US")} of ${MAX_BODY_LENGTH.toLocaleString("en-US")} characters. Shorten it to commit.`;
+    return `${length.toLocaleString()} of ${MAX_BODY_LENGTH.toLocaleString()} characters. Shorten it to commit.`;
   }
   return undefined;
 }
