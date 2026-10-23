@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add datawebot MCP Server] - 2026-10-23
+
+- Add datawebot to the official registry: ecommerce product data for agents. Search products across online shops worldwide, list every seller's price for one product with direct shop links, and run extraction Jobs on Amazon search and product pages (10 countries) and 1,100+ Shopify stores. Hosted Streamable HTTP server at https://mcp.datawebot.com/mcp with OAuth 2.1 sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add send21 MCP Server] - 2026-10-23
 
 - Add send21 to the official registry: crypto pay links and API for people and AI agents. Create fiat-priced pay links and payment drafts paid to the owner's approved addresses, check payment status and propose receiving addresses for the owner to approve; send21 is non-custodial and the payer signs in their own wallet. Hosted Streamable HTTP server at https://send21.io/mcp, through mcp-remote with a send21 API key as an `Authorization: Bearer` header.
