@@ -1,25 +1,14 @@
 # Roblox Developer Tools
 
-Launch games, open and publish places in Studio, open Creator Dashboard, restart servers, and monitor player counts
+Manage your Roblox games from Raycast.
 
-## Setup
+- **Robux Earned:** View game or account earnings in Robux or estimated DevEx USD, from the last day to all-time (up to four years for games).
+- **Player Count:** See players online, open the game page, or launch the game from your menu bar.
+- **Launch Game:** Play your configured place in Roblox.
+- **Open in Studio:** Open your place for editing.
+- **Publish Place:** Publish the current place from Studio.
+- **Restart Servers:** Restart all or outdated servers, with optional confirmation.
+- **Open Game Page:** Visit your game's Roblox page.
+- **Open in Creator Dashboard:** Open your game's overview.
 
-Add these in Raycast Settings → Extensions → Roblox Developer Tools:
-
-| Setting     | Used by                                                                               |
-| ----------- | ------------------------------------------------------------------------------------- |
-| Universe ID | Player Count, Open in Studio, Open Game Page, Open in Creator Dashboard, Restart Servers |
-| Place ID    | Launch Game, Open in Studio                                                           |
-| API Key     | Restart Servers                                                                       |
-
-Find your IDs in the [Creator Dashboard](https://create.roblox.com/dashboard/creations)
-
-Create the API key in [Creator Dashboard → API Keys](https://create.roblox.com/dashboard/credentials), grant `universe:write` for the universe, and configure its allowed IP addresses
-
-## Using Publish Place
-
-Studio must be running with a place open and use English menus
-
-Allow Raycast access under System Settings → Privacy & Security → Accessibility and Automation
-
-Publish Place publishes the place currently open in Studio
+Both menu bar items refresh every 30 seconds and can hide when zero. Earnings cache between sessions and retry automatically after errors.
