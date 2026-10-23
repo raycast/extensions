@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
-import { ContextMetadata, dateAccessory, successRateColor } from "./display";
+import { ContextMetadata, dateAccessory, successRateColor, useExplorerEnvironment } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
@@ -44,6 +44,7 @@ export function ModelPerformanceDetail({
   model: ModelPerformanceNode;
   environment: CatalogEnvironment;
 }) {
+  const explorerEnv = useExplorerEnvironment();
   const { data: runs = [], isLoading } = useCachedPromise(fetchModelHistoricalRuns, [
     environment.id,
     model.uniqueId,
@@ -99,7 +100,9 @@ ${lastError ? `\n**Latest error** (run #${errored[0].runId})\n\n\`\`\`\n${lastEr
 ${runRows || "| — | — | — | — | — |"}
 `;
 
-  const explorerUrl = environment.projectId ? buildDocsUrl(environment.projectId, model.uniqueId) : undefined;
+  const explorerUrl = environment.projectId
+    ? buildDocsUrl(environment.projectId, model.uniqueId, explorerEnv(environment.id))
+    : undefined;
 
   return (
     <Detail
@@ -178,6 +181,7 @@ export default function Command() {
 }
 
 export function ModelPerformanceList({ environment: fixed }: { environment?: CatalogEnvironment } = {}) {
+  const explorerEnv = useExplorerEnvironment();
   const [environmentId, setEnvironmentId] = useState<string>();
   const { data: environments = [], isLoading: loadingEnvironments } = useCachedPromise(resolveCatalogEnvironments, [], {
     execute: !fixed,
@@ -248,7 +252,7 @@ export function ModelPerformanceList({ environment: fixed }: { environment?: Cat
                     )}
                     {environment.projectId > 0 && (
                       <Action.OpenInBrowser
-                        url={buildDocsUrl(environment.projectId, model.uniqueId)}
+                        url={buildDocsUrl(environment.projectId, model.uniqueId, explorerEnv(environment.id))}
                         title="Open in dbt Explorer"
                         shortcut={Shortcuts.webDocs}
                       />

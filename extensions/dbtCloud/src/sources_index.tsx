@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
-import { ContextMetadata, dateAccessory, freshnessColor } from "./display";
+import { ContextMetadata, dateAccessory, freshnessColor, useExplorerEnvironment } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { useEffect, useState } from "react";
 import { fetchSources, buildDocsUrl, getResourceTypeIcon, getFreshnessStatus, formatRelativeTime } from "./api";
@@ -22,6 +22,7 @@ export function SourceDetail({
   environmentId: number;
   projectId: number;
 }) {
+  const explorerEnv = useExplorerEnvironment();
   // Build markdown content
   let markdown = `# ${source.sourceName}.${source.name}\n\n`;
 
@@ -88,7 +89,11 @@ export function SourceDetail({
           <Detail.Metadata.Label title="Identifier" text={source.identifier || source.name} />
           <Detail.Metadata.Label title="Unique ID" text={source.uniqueId} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link title="dbt Cloud" target={buildDocsUrl(projectId, source.uniqueId)} text="Open Docs" />
+          <Detail.Metadata.Link
+            title="dbt Cloud"
+            target={buildDocsUrl(projectId, source.uniqueId, explorerEnv(environmentId))}
+            text="Open Docs"
+          />
         </Detail.Metadata>
       }
       actions={
@@ -98,7 +103,7 @@ export function SourceDetail({
             <Action.OpenInBrowser
               title="Open Docs in dbt Cloud"
               shortcut={Shortcuts.webDocs}
-              url={buildDocsUrl(projectId, source.uniqueId)}
+              url={buildDocsUrl(projectId, source.uniqueId, explorerEnv(environmentId))}
               icon={Icon.Globe}
             />
           </ActionPanel.Section>
@@ -145,6 +150,7 @@ export function SourcesList({
   environmentName: string;
   projectId: number;
 }) {
+  const explorerEnv = useExplorerEnvironment();
   const [sources, setSources] = useState<SourceNode[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
@@ -257,7 +263,7 @@ export function SourcesList({
                       <Action.OpenInBrowser
                         title="Open in dbt Cloud"
                         shortcut={Shortcuts.open}
-                        url={buildDocsUrl(projectId, source.uniqueId)}
+                        url={buildDocsUrl(projectId, source.uniqueId, explorerEnv(environmentId))}
                       />
                       <Action.CopyToClipboard
                         title="Copy Unique ID"

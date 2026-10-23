@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
-import { ContextMetadata } from "./display";
+import { ContextMetadata, useExplorerEnvironment } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { useEffect, useState } from "react";
 import {
@@ -30,6 +30,7 @@ export function LineageDetail({
   environmentId: number;
   projectId: number;
 }) {
+  const explorerEnv = useExplorerEnvironment();
   const [fullModel, setFullModel] = useState<ModelNode | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -239,7 +240,7 @@ export function LineageDetail({
                   <Action.OpenInBrowser
                     key={ancestor.uniqueId}
                     title={`${getResourceTypeIcon(ancestor.resourceType)} ${ancestor.name}`}
-                    url={buildDocsUrl(projectId, ancestor.uniqueId)}
+                    url={buildDocsUrl(projectId, ancestor.uniqueId, explorerEnv(environmentId))}
                   />
                 ),
               )}
@@ -249,13 +250,13 @@ export function LineageDetail({
             <Action.OpenInBrowser
               title="Open Lineage in dbt Cloud"
               shortcut={Shortcuts.webLineage}
-              url={buildLineageUrl(projectId, displayNode.uniqueId)}
+              url={buildLineageUrl(projectId, displayNode.uniqueId, explorerEnv(environmentId))}
               icon={Icon.Globe}
             />
             <Action.OpenInBrowser
               title="Open Docs in dbt Cloud"
               shortcut={Shortcuts.webDocs}
-              url={buildDocsUrl(projectId, displayNode.uniqueId)}
+              url={buildDocsUrl(projectId, displayNode.uniqueId, explorerEnv(environmentId))}
             />
           </ActionPanel.Section>
           <Action.CopyToClipboard title="Copy Unique ID" shortcut={Shortcuts.copyId} content={displayNode.uniqueId} />
@@ -274,6 +275,7 @@ export function LineageList({
   environmentName: string;
   projectId: number;
 }) {
+  const explorerEnv = useExplorerEnvironment();
   const [models, setModels] = useState<ModelNode[]>([]);
   const [sources, setSources] = useState<SourceNode[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -369,7 +371,7 @@ export function LineageList({
                         <Action.OpenInBrowser
                           title="Open Lineage in dbt Cloud"
                           shortcut={Shortcuts.webLineage}
-                          url={buildLineageUrl(projectId, node.uniqueId)}
+                          url={buildLineageUrl(projectId, node.uniqueId, explorerEnv(environmentId))}
                         />
                         <Action.CopyToClipboard
                           title="Copy Unique ID"

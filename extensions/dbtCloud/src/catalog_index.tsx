@@ -11,7 +11,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { ContextMetadata } from "./display";
+import { ContextMetadata, useExplorerEnvironment } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { useEffect, useState } from "react";
 import {
@@ -316,6 +316,7 @@ export function ModelDetail({
   environmentId: number;
   projectId: number;
 }) {
+  const explorerEnv = useExplorerEnvironment();
   const [fullModel, setFullModel] = useState<ModelNode | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { push } = useNavigation();
@@ -443,7 +444,7 @@ export function ModelDetail({
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link
             title="dbt Cloud"
-            target={buildDocsUrl(projectId, displayModel.uniqueId)}
+            target={buildDocsUrl(projectId, displayModel.uniqueId, explorerEnv(environmentId))}
             text="Open Docs"
           />
         </Detail.Metadata>
@@ -464,13 +465,13 @@ export function ModelDetail({
             <Action.OpenInBrowser
               title="Open Docs in dbt Cloud"
               shortcut={Shortcuts.webDocs}
-              url={buildDocsUrl(projectId, displayModel.uniqueId)}
+              url={buildDocsUrl(projectId, displayModel.uniqueId, explorerEnv(environmentId))}
               icon={Icon.Globe}
             />
             <Action.OpenInBrowser
               title="Open Lineage in dbt Cloud"
               shortcut={Shortcuts.webLineage}
-              url={buildLineageUrl(projectId, displayModel.uniqueId)}
+              url={buildLineageUrl(projectId, displayModel.uniqueId, explorerEnv(environmentId))}
               icon={Icon.Link}
             />
           </ActionPanel.Section>
@@ -571,6 +572,7 @@ export function CatalogList({
   environmentId,
   scopeTitle,
 }: { projectId?: number; environmentId?: number; scopeTitle?: string } = {}) {
+  const explorerEnv = useExplorerEnvironment();
   const [models, setModels] = useState<CatalogModel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [projectFilter, setProjectFilter] = useState<string>("all");
@@ -709,7 +711,7 @@ export function CatalogList({
                   <Action.OpenInBrowser
                     title="Open in dbt Cloud"
                     shortcut={Shortcuts.open}
-                    url={buildDocsUrl(model.projectId, model.uniqueId)}
+                    url={buildDocsUrl(model.projectId, model.uniqueId, explorerEnv(model.environmentId))}
                   />
                   <Action.CopyToClipboard title="Copy Unique ID" shortcut={Shortcuts.copyId} content={model.uniqueId} />
                   <Action.CopyToClipboard

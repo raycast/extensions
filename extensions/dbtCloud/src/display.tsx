@@ -1,6 +1,6 @@
 import { Color, Detail, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { formatRelativeTime } from "./api";
+import { ExplorerEnvironment, formatRelativeTime } from "./api";
 import { DEPLOYMENT_TYPE_INFO, inferDeploymentType } from "./environment_utils";
 import { returnEnvironments } from "./fetch_environments";
 import { returnProjects } from "./fetch_projects";
@@ -85,19 +85,27 @@ export function DateLabel({ title, date }: { title: string; date: string | null 
   );
 }
 
-// Project and environment names, cached across commands; the Admin API list endpoints do not include them
+// Project and environment names, cached across commands; the Admin API list endpoints do not include them.
+// One request is shared by every view in the command, so many sidebars and links do not each refetch.
+let namesRequest: { at: number; promise: Promise<AccountNames> } | undefined;
+interface AccountNames {
+  projects: Record<number, string>;
+  environments: Record<number, EnvironmentModel>;
+}
+
+function loadAccountNames(): Promise<AccountNames> {
+  if (!namesRequest || Date.now() - namesRequest.at > 60_000) {
+    const promise = Promise.all([returnProjects(), returnEnvironments()]).then(([projects, environments]) => ({
+      projects: Object.fromEntries(projects.map((p) => [p.id, p.name])),
+      environments: Object.fromEntries(environments.map((e) => [e.id, e])),
+    }));
+    namesRequest = { at: Date.now(), promise };
+  }
+  return namesRequest.promise;
+}
+
 export function useAccountNames() {
-  const { data } = useCachedPromise(
-    async () => {
-      const [projects, environments] = await Promise.all([returnProjects(), returnEnvironments()]);
-      return {
-        projects: Object.fromEntries(projects.map((p) => [p.id, p.name])) as Record<number, string>,
-        environments: Object.fromEntries(environments.map((e) => [e.id, e])) as Record<number, EnvironmentModel>,
-      };
-    },
-    [],
-    { keepPreviousData: true },
-  );
+  const { data } = useCachedPromise(loadAccountNames, [], { keepPreviousData: true });
   return {
     projectName: (id: number) => data?.projects[id] ?? `Project ${id}`,
     environment: (id: number): EnvironmentModel | undefined => data?.environments[id],
@@ -133,4 +141,12 @@ export function ContextMetadata({
       {jobName && <Detail.Metadata.Label title="Job" text={jobName} icon={Icon.Hammer} />}
     </>
   );
+}
+
+// dbt Explorer only has staging pages for environments whose deployment type is "staging"; everything else
+// (including a "general" environment named Staging) is linked to production
+export function useExplorerEnvironment() {
+  const names = useAccountNames();
+  return (environmentId: number): ExplorerEnvironment =>
+    names.environment(environmentId)?.deployment_type === "staging" ? "staging" : "production";
 }
