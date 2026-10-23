@@ -7,7 +7,7 @@ Switch the noise cancelling level on Bose QuietComfort 35 II headphones straight
 - **Toggle Noise Cancelling** - switches between high and off
 - **Set Noise Cancelling to High**
 - **Set Noise Cancelling to Low**
-- **Turn off Noise Cancelling**
+- **Turn Off Noise Cancelling**
 
 Assign a hotkey to any of them in Raycast's settings.
 

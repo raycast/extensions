@@ -36,7 +36,7 @@
     },
     {
       "name": "off",
-      "title": "Turn off Noise Cancelling",
+      "title": "Turn Off Noise Cancelling",
       "subtitle": "Bose",
       "description": "Turn noise cancelling off",
       "mode": "no-view"
