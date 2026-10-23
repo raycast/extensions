@@ -1,0 +1,113 @@
+{
+  "exchanges": [
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "expenses_create",
+          "arguments": {
+            "status": "inbox",
+            "vendor": "Papeterie Nord"
+          }
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"expense\":{\"id\":\"E-NEW\",\"vendor\":\"Papeterie Nord\",\"date\":\"2026-10-07\",\"status\":\"inbox\",\"category\":\"office\",\"category_title\":\"Bürobedarf\",\"vat_mode\":\"domestic\",\"tax_rate\":\"19\",\"currency_code\":\"EUR\",\"invoice_number\":\"\",\"note\":\"Skizzenbücher\",\"has_receipt\":false,\"receipt_original_name\":null,\"project_id\":null,\"business_share_percent\":\"100\",\"is_collective\":false,\"is_standing\":false,\"gross_amount\":\"35.70\",\"gross_amount_cents\":3570,\"net_amount\":\"30.00\",\"net_amount_cents\":3000,\"tax_amount\":\"5.70\",\"tax_amount_cents\":570,\"deductible_input_tax\":\"5.70\",\"deductible_input_tax_cents\":570}}"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "expense": {
+              "id": "E-NEW",
+              "vendor": "Papeterie Nord",
+              "date": "2026-10-07",
+              "status": "inbox",
+              "category": "office",
+              "category_title": "Bürobedarf",
+              "vat_mode": "domestic",
+              "tax_rate": "19",
+              "currency_code": "EUR",
+              "invoice_number": "",
+              "note": "Skizzenbücher",
+              "has_receipt": false,
+              "receipt_original_name": null,
+              "project_id": null,
+              "business_share_percent": "100",
+              "is_collective": false,
+              "is_standing": false,
+              "gross_amount": "35.70",
+              "gross_amount_cents": 3570,
+              "net_amount": "30.00",
+              "net_amount_cents": 3000,
+              "tax_amount": "5.70",
+              "tax_amount_cents": 570,
+              "deductible_input_tax": "5.70",
+              "deductible_input_tax_cents": 570
+            }
+          }
+        }
+      },
+      "repeat": true
+    },
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "expenses_add_receipt_file"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"expense\":{\"id\":\"E-NEW\",\"vendor\":\"Papeterie Nord\",\"date\":\"2026-10-07\",\"status\":\"inbox\",\"category\":\"office\",\"category_title\":\"Bürobedarf\",\"vat_mode\":\"domestic\",\"tax_rate\":\"19\",\"currency_code\":\"EUR\",\"invoice_number\":\"\",\"note\":\"Skizzenbücher\",\"has_receipt\":true,\"receipt_original_name\":null,\"project_id\":null,\"business_share_percent\":\"100\",\"is_collective\":false,\"is_standing\":false,\"gross_amount\":\"35.70\",\"gross_amount_cents\":3570,\"net_amount\":\"30.00\",\"net_amount_cents\":3000,\"tax_amount\":\"5.70\",\"tax_amount_cents\":570,\"deductible_input_tax\":\"5.70\",\"deductible_input_tax_cents\":570},\"file\":{\"id\":\"F-1\",\"original_name\":\"beleg.pdf\",\"content_type\":\"application/pdf\",\"page_order\":0,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\"}}"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "expense": {
+              "id": "E-NEW",
+              "vendor": "Papeterie Nord",
+              "date": "2026-10-07",
+              "status": "inbox",
+              "category": "office",
+              "category_title": "Bürobedarf",
+              "vat_mode": "domestic",
+              "tax_rate": "19",
+              "currency_code": "EUR",
+              "invoice_number": "",
+              "note": "Skizzenbücher",
+              "has_receipt": true,
+              "receipt_original_name": null,
+              "project_id": null,
+              "business_share_percent": "100",
+              "is_collective": false,
+              "is_standing": false,
+              "gross_amount": "35.70",
+              "gross_amount_cents": 3570,
+              "net_amount": "30.00",
+              "net_amount_cents": 3000,
+              "tax_amount": "5.70",
+              "tax_amount_cents": 570,
+              "deductible_input_tax": "5.70",
+              "deductible_input_tax_cents": 570
+            },
+            "file": {
+              "id": "F-1",
+              "original_name": "beleg.pdf",
+              "content_type": "application/pdf",
+              "page_order": 0,
+              "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          }
+        }
+      },
+      "repeat": true
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "exchanges": [
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "time_stop_timer"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Gerade läuft kein Timer."
+            }
+          ],
+          "isError": true
+        }
+      },
+      "repeat": true
+    }
+  ]
+}

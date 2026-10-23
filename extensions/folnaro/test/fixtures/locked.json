@@ -1,0 +1,213 @@
+{
+  "exchanges": [
+    {
+      "request": {
+        "method": "tools/list"
+      },
+      "response": {
+        "result": {
+          "tools": [
+            {
+              "name": "documents_list",
+              "description": "documents_list (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "documents_pdf",
+              "description": "documents_pdf (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "customers_search",
+              "description": "customers_search (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "projects_list",
+              "description": "projects_list (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "expenses_list",
+              "description": "expenses_list (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "time_running",
+              "description": "time_running (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "time_list",
+              "description": "time_list (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "documents_create_draft",
+              "description": "documents_create_draft (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "expenses_create",
+              "description": "expenses_create (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "expenses_add_receipt_file",
+              "description": "expenses_add_receipt_file (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "expenses_delete",
+              "description": "expenses_delete (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "time_start_timer",
+              "description": "time_start_timer (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "time_stop_timer",
+              "description": "time_stop_timer (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            }
+          ]
+        }
+      },
+      "repeat": true
+    },
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "time_start_timer"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Folnaro is in read-only mode because the trial has ended or the subscription has lapsed. Reading and export keep working (GoBD retention). To create new documents, expenses and time entries again, ask the user to unlock Folnaro in the app."
+            }
+          ],
+          "isError": true
+        }
+      },
+      "repeat": true
+    },
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "expenses_create"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Folnaro ist im Lesemodus, weil die Testphase abgelaufen oder das Abo beendet ist. Lesen und Exportieren funktionieren weiter (Aufbewahrung nach GoBD). Für neue Dokumente, Ausgaben und Zeiten bitte den Nutzer, Folnaro in der App freizuschalten."
+            }
+          ],
+          "isError": true
+        }
+      },
+      "repeat": true
+    },
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "time_stop_timer"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"entry\":{\"id\":\"T-RUN\",\"date\":\"2026-10-09\",\"duration_seconds\":600,\"duration_minutes\":10,\"hours\":\"0.78\",\"is_running\":false,\"is_billable\":true,\"started_at\":\"2026-10-09T09:12:00+02:00\",\"ended_at\":null,\"customer_id\":\"C-NORD\",\"project_id\":\"P-WEB\",\"activity\":\"Design\",\"note\":\"Logo-Varianten\",\"hourly_rate\":null,\"status\":\"approved\",\"billed_document_id\":null}}"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "entry": {
+              "id": "T-RUN",
+              "date": "2026-10-09",
+              "duration_seconds": 600,
+              "duration_minutes": 10,
+              "hours": "0.78",
+              "is_running": false,
+              "is_billable": true,
+              "started_at": "2026-10-09T09:12:00+02:00",
+              "ended_at": null,
+              "customer_id": "C-NORD",
+              "project_id": "P-WEB",
+              "activity": "Design",
+              "note": "Logo-Varianten",
+              "hourly_rate": null,
+              "status": "approved",
+              "billed_document_id": null
+            }
+          }
+        }
+      },
+      "repeat": true
+    }
+  ]
+}

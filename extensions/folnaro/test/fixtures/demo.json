@@ -1,0 +1,1173 @@
+{
+  "exchanges": [
+    {
+      "request": {
+        "method": "tools/list"
+      },
+      "response": {
+        "result": {
+          "tools": [
+            {
+              "name": "documents_list",
+              "description": "documents_list (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "documents_pdf",
+              "description": "documents_pdf (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "customers_search",
+              "description": "customers_search (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "projects_list",
+              "description": "projects_list (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "expenses_list",
+              "description": "expenses_list (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "time_running",
+              "description": "time_running (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "time_list",
+              "description": "time_list (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "documents_create_draft",
+              "description": "documents_create_draft (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "expenses_create",
+              "description": "expenses_create (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "expenses_add_receipt_file",
+              "description": "expenses_add_receipt_file (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "expenses_delete",
+              "description": "expenses_delete (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "time_start_timer",
+              "description": "time_start_timer (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "time_stop_timer",
+              "description": "time_stop_timer (mock)",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            }
+          ]
+        }
+      },
+      "repeat": true
+    },
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "documents_list"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"count\":7,\"total_count\":7,\"documents\":[{\"id\":\"D-142\",\"kind\":\"invoice\",\"number\":\"RE-2026-0142\",\"status\":\"sent\",\"customer_id\":\"C-NORD\",\"customer_name\":\"Nordlicht Medien GmbH\",\"project_id\":\"P-WEB\",\"title\":\"Website-Relaunch, Phase 2\",\"issue_date\":\"2026-10-02\",\"due_date\":\"2026-10-16\",\"is_draft\":false,\"is_overdue\":false,\"days_overdue\":0,\"is_queued_for_number\":false,\"related_document_id\":null,\"tax_treatment\":\"standard\",\"net_total\":\"4560.00\",\"net_total_cents\":456000,\"tax_total\":\"866.40\",\"tax_total_cents\":86640,\"gross_total\":\"5426.40\",\"gross_total_cents\":542640,\"paid_total\":\"0.00\",\"paid_total_cents\":0,\"open_amount\":\"5426.40\",\"open_amount_cents\":542640},{\"id\":\"D-139\",\"kind\":\"invoice\",\"number\":\"RE-2026-0139\",\"status\":\"sent\",\"customer_id\":\"C-HAFEN\",\"customer_name\":\"Hafenblick Architekten\",\"project_id\":\"P-BRAND\",\"title\":\"Markenworkshop September\",\"issue_date\":\"2026-09-12\",\"due_date\":\"2026-09-26\",\"is_draft\":false,\"is_overdue\":true,\"days_overdue\":13,\"is_queued_for_number\":false,\"related_document_id\":null,\"tax_treatment\":\"standard\",\"net_total\":\"1800.00\",\"net_total_cents\":180000,\"tax_total\":\"342.00\",\"tax_total_cents\":34200,\"gross_total\":\"2142.00\",\"gross_total_cents\":214200,\"paid_total\":\"0.00\",\"paid_total_cents\":0,\"open_amount\":\"2142.00\",\"open_amount_cents\":214200},{\"id\":\"D-141\",\"kind\":\"invoice\",\"number\":\"RE-2026-0141\",\"status\":\"partiallyPaid\",\"customer_id\":\"C-ELBE\",\"customer_name\":\"Elbe Robotics GmbH\",\"project_id\":\"P-APP\",\"title\":\"App-Prototyp, Sprint 3\",\"issue_date\":\"2026-09-30\",\"due_date\":\"2026-10-14\",\"is_draft\":false,\"is_overdue\":false,\"days_overdue\":0,\"is_queued_for_number\":false,\"related_document_id\":null,\"tax_treatment\":\"standard\",\"net_total\":\"3300.00\",\"net_total_cents\":330000,\"tax_total\":\"627.00\",\"tax_total_cents\":62700,\"gross_total\":\"3927.00\",\"gross_total_cents\":392700,\"paid_total\":\"2000.00\",\"paid_total_cents\":200000,\"open_amount\":\"1927.00\",\"open_amount_cents\":192700},{\"id\":\"D-137\",\"kind\":\"invoice\",\"number\":\"RE-2026-0137\",\"status\":\"paid\",\"customer_id\":\"C-GRUEN\",\"customer_name\":\"Grünwerk e.V.\",\"project_id\":null,\"title\":\"Jahresbericht Layout\",\"issue_date\":\"2026-09-01\",\"due_date\":\"2026-09-15\",\"is_draft\":false,\"is_overdue\":false,\"days_overdue\":0,\"is_queued_for_number\":false,\"related_document_id\":null,\"tax_treatment\":\"standard\",\"net_total\":\"980.00\",\"net_total_cents\":98000,\"tax_total\":\"186.20\",\"tax_total_cents\":18620,\"gross_total\":\"1166.20\",\"gross_total_cents\":116620,\"paid_total\":\"1166.20\",\"paid_total_cents\":116620,\"open_amount\":\"0.00\",\"open_amount_cents\":0},{\"id\":\"D-DRAFT\",\"kind\":\"invoice\",\"number\":null,\"status\":\"draft\",\"customer_id\":\"C-SONNE\",\"customer_name\":\"Café Sonnendeck\",\"project_id\":null,\"title\":\"Speisekarte und Aushänge\",\"issue_date\":\"2026-10-09\",\"due_date\":null,\"is_draft\":true,\"is_overdue\":false,\"days_overdue\":0,\"is_queued_for_number\":false,\"related_document_id\":null,\"tax_treatment\":\"standard\",\"net_total\":\"640.00\",\"net_total_cents\":64000,\"tax_total\":\"121.60\",\"tax_total_cents\":12160,\"gross_total\":\"761.60\",\"gross_total_cents\":76160,\"paid_total\":\"0.00\",\"paid_total_cents\":0,\"open_amount\":\"761.60\",\"open_amount_cents\":76160},{\"id\":\"D-Q31\",\"kind\":\"quote\",\"number\":\"AN-2026-031\",\"status\":\"sent\",\"customer_id\":\"C-ELBE\",\"customer_name\":\"Elbe Robotics GmbH\",\"project_id\":null,\"title\":\"App-Prototyp, Sprint 4 und 5\",\"issue_date\":\"2026-10-06\",\"due_date\":null,\"is_draft\":false,\"is_overdue\":false,\"days_overdue\":0,\"is_queued_for_number\":false,\"related_document_id\":null,\"tax_treatment\":\"standard\",\"net_total\":\"6600.00\",\"net_total_cents\":660000,\"tax_total\":\"1254.00\",\"tax_total_cents\":125400,\"gross_total\":\"7854.00\",\"gross_total_cents\":785400,\"paid_total\":\"0.00\",\"paid_total_cents\":0,\"open_amount\":\"7854.00\",\"open_amount_cents\":785400},{\"id\":\"D-Q29\",\"kind\":\"quote\",\"number\":\"AN-2026-029\",\"status\":\"accepted\",\"customer_id\":\"C-HAFEN\",\"customer_name\":\"Hafenblick Architekten\",\"project_id\":null,\"title\":\"Markenauftritt 2027\",\"issue_date\":\"2026-09-18\",\"due_date\":null,\"is_draft\":false,\"is_overdue\":false,\"days_overdue\":0,\"is_queued_for_number\":false,\"related_document_id\":null,\"tax_treatment\":\"standard\",\"net_total\":\"9400.00\",\"net_total_cents\":940000,\"tax_total\":\"1786.00\",\"tax_total_cents\":178600,\"gross_total\":\"11186.00\",\"gross_total_cents\":1118600,\"paid_total\":\"0.00\",\"paid_total_cents\":0,\"open_amount\":\"11186.00\",\"open_amount_cents\":1118600}]}"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "count": 7,
+            "total_count": 7,
+            "documents": [
+              {
+                "id": "D-142",
+                "kind": "invoice",
+                "number": "RE-2026-0142",
+                "status": "sent",
+                "customer_id": "C-NORD",
+                "customer_name": "Nordlicht Medien GmbH",
+                "project_id": "P-WEB",
+                "title": "Website-Relaunch, Phase 2",
+                "issue_date": "2026-10-02",
+                "due_date": "2026-10-16",
+                "is_draft": false,
+                "is_overdue": false,
+                "days_overdue": 0,
+                "is_queued_for_number": false,
+                "related_document_id": null,
+                "tax_treatment": "standard",
+                "net_total": "4560.00",
+                "net_total_cents": 456000,
+                "tax_total": "866.40",
+                "tax_total_cents": 86640,
+                "gross_total": "5426.40",
+                "gross_total_cents": 542640,
+                "paid_total": "0.00",
+                "paid_total_cents": 0,
+                "open_amount": "5426.40",
+                "open_amount_cents": 542640
+              },
+              {
+                "id": "D-139",
+                "kind": "invoice",
+                "number": "RE-2026-0139",
+                "status": "sent",
+                "customer_id": "C-HAFEN",
+                "customer_name": "Hafenblick Architekten",
+                "project_id": "P-BRAND",
+                "title": "Markenworkshop September",
+                "issue_date": "2026-09-12",
+                "due_date": "2026-09-26",
+                "is_draft": false,
+                "is_overdue": true,
+                "days_overdue": 13,
+                "is_queued_for_number": false,
+                "related_document_id": null,
+                "tax_treatment": "standard",
+                "net_total": "1800.00",
+                "net_total_cents": 180000,
+                "tax_total": "342.00",
+                "tax_total_cents": 34200,
+                "gross_total": "2142.00",
+                "gross_total_cents": 214200,
+                "paid_total": "0.00",
+                "paid_total_cents": 0,
+                "open_amount": "2142.00",
+                "open_amount_cents": 214200
+              },
+              {
+                "id": "D-141",
+                "kind": "invoice",
+                "number": "RE-2026-0141",
+                "status": "partiallyPaid",
+                "customer_id": "C-ELBE",
+                "customer_name": "Elbe Robotics GmbH",
+                "project_id": "P-APP",
+                "title": "App-Prototyp, Sprint 3",
+                "issue_date": "2026-09-30",
+                "due_date": "2026-10-14",
+                "is_draft": false,
+                "is_overdue": false,
+                "days_overdue": 0,
+                "is_queued_for_number": false,
+                "related_document_id": null,
+                "tax_treatment": "standard",
+                "net_total": "3300.00",
+                "net_total_cents": 330000,
+                "tax_total": "627.00",
+                "tax_total_cents": 62700,
+                "gross_total": "3927.00",
+                "gross_total_cents": 392700,
+                "paid_total": "2000.00",
+                "paid_total_cents": 200000,
+                "open_amount": "1927.00",
+                "open_amount_cents": 192700
+              },
+              {
+                "id": "D-137",
+                "kind": "invoice",
+                "number": "RE-2026-0137",
+                "status": "paid",
+                "customer_id": "C-GRUEN",
+                "customer_name": "Grünwerk e.V.",
+                "project_id": null,
+                "title": "Jahresbericht Layout",
+                "issue_date": "2026-09-01",
+                "due_date": "2026-09-15",
+                "is_draft": false,
+                "is_overdue": false,
+                "days_overdue": 0,
+                "is_queued_for_number": false,
+                "related_document_id": null,
+                "tax_treatment": "standard",
+                "net_total": "980.00",
+                "net_total_cents": 98000,
+                "tax_total": "186.20",
+                "tax_total_cents": 18620,
+                "gross_total": "1166.20",
+                "gross_total_cents": 116620,
+                "paid_total": "1166.20",
+                "paid_total_cents": 116620,
+                "open_amount": "0.00",
+                "open_amount_cents": 0
+              },
+              {
+                "id": "D-DRAFT",
+                "kind": "invoice",
+                "number": null,
+                "status": "draft",
+                "customer_id": "C-SONNE",
+                "customer_name": "Café Sonnendeck",
+                "project_id": null,
+                "title": "Speisekarte und Aushänge",
+                "issue_date": "2026-10-09",
+                "due_date": null,
+                "is_draft": true,
+                "is_overdue": false,
+                "days_overdue": 0,
+                "is_queued_for_number": false,
+                "related_document_id": null,
+                "tax_treatment": "standard",
+                "net_total": "640.00",
+                "net_total_cents": 64000,
+                "tax_total": "121.60",
+                "tax_total_cents": 12160,
+                "gross_total": "761.60",
+                "gross_total_cents": 76160,
+                "paid_total": "0.00",
+                "paid_total_cents": 0,
+                "open_amount": "761.60",
+                "open_amount_cents": 76160
+              },
+              {
+                "id": "D-Q31",
+                "kind": "quote",
+                "number": "AN-2026-031",
+                "status": "sent",
+                "customer_id": "C-ELBE",
+                "customer_name": "Elbe Robotics GmbH",
+                "project_id": null,
+                "title": "App-Prototyp, Sprint 4 und 5",
+                "issue_date": "2026-10-06",
+                "due_date": null,
+                "is_draft": false,
+                "is_overdue": false,
+                "days_overdue": 0,
+                "is_queued_for_number": false,
+                "related_document_id": null,
+                "tax_treatment": "standard",
+                "net_total": "6600.00",
+                "net_total_cents": 660000,
+                "tax_total": "1254.00",
+                "tax_total_cents": 125400,
+                "gross_total": "7854.00",
+                "gross_total_cents": 785400,
+                "paid_total": "0.00",
+                "paid_total_cents": 0,
+                "open_amount": "7854.00",
+                "open_amount_cents": 785400
+              },
+              {
+                "id": "D-Q29",
+                "kind": "quote",
+                "number": "AN-2026-029",
+                "status": "accepted",
+                "customer_id": "C-HAFEN",
+                "customer_name": "Hafenblick Architekten",
+                "project_id": null,
+                "title": "Markenauftritt 2027",
+                "issue_date": "2026-09-18",
+                "due_date": null,
+                "is_draft": false,
+                "is_overdue": false,
+                "days_overdue": 0,
+                "is_queued_for_number": false,
+                "related_document_id": null,
+                "tax_treatment": "standard",
+                "net_total": "9400.00",
+                "net_total_cents": 940000,
+                "tax_total": "1786.00",
+                "tax_total_cents": 178600,
+                "gross_total": "11186.00",
+                "gross_total_cents": 1118600,
+                "paid_total": "0.00",
+                "paid_total_cents": 0,
+                "open_amount": "11186.00",
+                "open_amount_cents": 1118600
+              }
+            ]
+          }
+        }
+      },
+      "repeat": true
+    },
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "customers_search"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"count\":5,\"customers\":[{\"id\":\"C-NORD\",\"number\":\"K-1001\",\"display_name\":\"Nordlicht Medien GmbH\",\"company\":\"Nordlicht Medien GmbH\",\"contact_name\":\"Jana Albers\",\"email\":\"rechnung@nordlicht.example\",\"phone\":\"+49 40 1234567\",\"vat_id\":\"DE123456789\",\"kind\":\"business\",\"language\":\"de\",\"is_archived\":false,\"hourly_rate\":\"95.00\",\"payment_term_days\":14,\"address\":{\"street\":\"Speicherstadt 4\",\"addition\":\"\",\"postal_code\":\"20457\",\"city\":\"Hamburg\",\"country_code\":\"DE\"}},{\"id\":\"C-HAFEN\",\"number\":\"K-1002\",\"display_name\":\"Hafenblick Architekten\",\"company\":\"Hafenblick Architekten\",\"contact_name\":\"Malte Brandt\",\"email\":\"buero@hafenblick.example\",\"phone\":\"\",\"vat_id\":\"\",\"kind\":\"business\",\"language\":\"de\",\"is_archived\":false,\"hourly_rate\":null,\"payment_term_days\":14,\"address\":{\"street\":\"Elbchaussee 88\",\"addition\":\"\",\"postal_code\":\"22763\",\"city\":\"Hamburg\",\"country_code\":\"DE\"}},{\"id\":\"C-GRUEN\",\"number\":\"K-1003\",\"display_name\":\"Grünwerk e.V.\",\"company\":\"Grünwerk e.V.\",\"contact_name\":\"\",\"email\":\"kasse@gruenwerk.example\",\"phone\":\"\",\"vat_id\":\"\",\"kind\":\"business\",\"language\":\"de\",\"is_archived\":false,\"hourly_rate\":null,\"payment_term_days\":14,\"address\":{\"street\":\"Lindenallee 3\",\"addition\":\"\",\"postal_code\":\"04109\",\"city\":\"Leipzig\",\"country_code\":\"DE\"}},{\"id\":\"C-ELBE\",\"number\":\"K-1004\",\"display_name\":\"Elbe Robotics GmbH\",\"company\":\"Elbe Robotics GmbH\",\"contact_name\":\"\",\"email\":\"ap@elbe-robotics.example\",\"phone\":\"\",\"vat_id\":\"DE987654321\",\"kind\":\"business\",\"language\":\"de\",\"is_archived\":false,\"hourly_rate\":\"110.00\",\"payment_term_days\":14,\"address\":{\"street\":\"Am Kai 7\",\"addition\":\"\",\"postal_code\":\"01067\",\"city\":\"Dresden\",\"country_code\":\"DE\"}},{\"id\":\"C-SONNE\",\"number\":\"K-1005\",\"display_name\":\"Café Sonnendeck\",\"company\":\"Café Sonnendeck\",\"contact_name\":\"\",\"email\":\"hallo@sonnendeck.example\",\"phone\":\"\",\"vat_id\":\"\",\"kind\":\"business\",\"language\":\"de\",\"is_archived\":false,\"hourly_rate\":null,\"payment_term_days\":14,\"address\":{\"street\":\"Uferweg 1\",\"addition\":\"\",\"postal_code\":\"24103\",\"city\":\"Kiel\",\"country_code\":\"DE\"}}]}"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "count": 5,
+            "customers": [
+              {
+                "id": "C-NORD",
+                "number": "K-1001",
+                "display_name": "Nordlicht Medien GmbH",
+                "company": "Nordlicht Medien GmbH",
+                "contact_name": "Jana Albers",
+                "email": "rechnung@nordlicht.example",
+                "phone": "+49 40 1234567",
+                "vat_id": "DE123456789",
+                "kind": "business",
+                "language": "de",
+                "is_archived": false,
+                "hourly_rate": "95.00",
+                "payment_term_days": 14,
+                "address": {
+                  "street": "Speicherstadt 4",
+                  "addition": "",
+                  "postal_code": "20457",
+                  "city": "Hamburg",
+                  "country_code": "DE"
+                }
+              },
+              {
+                "id": "C-HAFEN",
+                "number": "K-1002",
+                "display_name": "Hafenblick Architekten",
+                "company": "Hafenblick Architekten",
+                "contact_name": "Malte Brandt",
+                "email": "buero@hafenblick.example",
+                "phone": "",
+                "vat_id": "",
+                "kind": "business",
+                "language": "de",
+                "is_archived": false,
+                "hourly_rate": null,
+                "payment_term_days": 14,
+                "address": {
+                  "street": "Elbchaussee 88",
+                  "addition": "",
+                  "postal_code": "22763",
+                  "city": "Hamburg",
+                  "country_code": "DE"
+                }
+              },
+              {
+                "id": "C-GRUEN",
+                "number": "K-1003",
+                "display_name": "Grünwerk e.V.",
+                "company": "Grünwerk e.V.",
+                "contact_name": "",
+                "email": "kasse@gruenwerk.example",
+                "phone": "",
+                "vat_id": "",
+                "kind": "business",
+                "language": "de",
+                "is_archived": false,
+                "hourly_rate": null,
+                "payment_term_days": 14,
+                "address": {
+                  "street": "Lindenallee 3",
+                  "addition": "",
+                  "postal_code": "04109",
+                  "city": "Leipzig",
+                  "country_code": "DE"
+                }
+              },
+              {
+                "id": "C-ELBE",
+                "number": "K-1004",
+                "display_name": "Elbe Robotics GmbH",
+                "company": "Elbe Robotics GmbH",
+                "contact_name": "",
+                "email": "ap@elbe-robotics.example",
+                "phone": "",
+                "vat_id": "DE987654321",
+                "kind": "business",
+                "language": "de",
+                "is_archived": false,
+                "hourly_rate": "110.00",
+                "payment_term_days": 14,
+                "address": {
+                  "street": "Am Kai 7",
+                  "addition": "",
+                  "postal_code": "01067",
+                  "city": "Dresden",
+                  "country_code": "DE"
+                }
+              },
+              {
+                "id": "C-SONNE",
+                "number": "K-1005",
+                "display_name": "Café Sonnendeck",
+                "company": "Café Sonnendeck",
+                "contact_name": "",
+                "email": "hallo@sonnendeck.example",
+                "phone": "",
+                "vat_id": "",
+                "kind": "business",
+                "language": "de",
+                "is_archived": false,
+                "hourly_rate": null,
+                "payment_term_days": 14,
+                "address": {
+                  "street": "Uferweg 1",
+                  "addition": "",
+                  "postal_code": "24103",
+                  "city": "Kiel",
+                  "country_code": "DE"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "repeat": true
+    },
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "projects_list"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"count\":5,\"projects\":[{\"id\":\"P-WEB\",\"number\":\"P-2026-07\",\"name\":\"Website-Relaunch\",\"customer_id\":\"C-NORD\",\"status\":\"active\",\"is_archived\":false,\"hourly_rate\":\"95.00\",\"budget_amount\":\"12000.00\",\"budget_hours\":\"120\",\"activities\":[\"Konzept\",\"Design\",\"Entwicklung\",\"Abstimmung\"],\"color\":\"teal\",\"notes\":\"\"},{\"id\":\"P-BRAND\",\"number\":\"P-2026-08\",\"name\":\"Markenauftritt 2027\",\"customer_id\":\"C-HAFEN\",\"status\":\"active\",\"is_archived\":false,\"hourly_rate\":\"90.00\",\"budget_amount\":null,\"budget_hours\":null,\"activities\":[\"Konzept\",\"Design\",\"Entwicklung\",\"Abstimmung\"],\"color\":\"teal\",\"notes\":\"\"},{\"id\":\"P-APP\",\"number\":\"P-2026-09\",\"name\":\"App-Prototyp\",\"customer_id\":\"C-ELBE\",\"status\":\"active\",\"is_archived\":false,\"hourly_rate\":\"110.00\",\"budget_amount\":null,\"budget_hours\":\"80\",\"activities\":[\"Konzept\",\"Design\",\"Entwicklung\",\"Abstimmung\"],\"color\":\"teal\",\"notes\":\"\"},{\"id\":\"P-NEWS\",\"number\":\"P-2026-10\",\"name\":\"Newsletter-Vorlagen\",\"customer_id\":\"C-GRUEN\",\"status\":\"planned\",\"is_archived\":false,\"hourly_rate\":null,\"budget_amount\":null,\"budget_hours\":null,\"activities\":[\"Konzept\",\"Design\",\"Entwicklung\",\"Abstimmung\"],\"color\":\"teal\",\"notes\":\"\"},{\"id\":\"P-OLD\",\"number\":\"P-2025-03\",\"name\":\"Messestand 2025\",\"customer_id\":\"C-NORD\",\"status\":\"done\",\"is_archived\":false,\"hourly_rate\":null,\"budget_amount\":null,\"budget_hours\":null,\"activities\":[\"Konzept\",\"Design\",\"Entwicklung\",\"Abstimmung\"],\"color\":\"teal\",\"notes\":\"\"}]}"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "count": 5,
+            "projects": [
+              {
+                "id": "P-WEB",
+                "number": "P-2026-07",
+                "name": "Website-Relaunch",
+                "customer_id": "C-NORD",
+                "status": "active",
+                "is_archived": false,
+                "hourly_rate": "95.00",
+                "budget_amount": "12000.00",
+                "budget_hours": "120",
+                "activities": [
+                  "Konzept",
+                  "Design",
+                  "Entwicklung",
+                  "Abstimmung"
+                ],
+                "color": "teal",
+                "notes": ""
+              },
+              {
+                "id": "P-BRAND",
+                "number": "P-2026-08",
+                "name": "Markenauftritt 2027",
+                "customer_id": "C-HAFEN",
+                "status": "active",
+                "is_archived": false,
+                "hourly_rate": "90.00",
+                "budget_amount": null,
+                "budget_hours": null,
+                "activities": [
+                  "Konzept",
+                  "Design",
+                  "Entwicklung",
+                  "Abstimmung"
+                ],
+                "color": "teal",
+                "notes": ""
+              },
+              {
+                "id": "P-APP",
+                "number": "P-2026-09",
+                "name": "App-Prototyp",
+                "customer_id": "C-ELBE",
+                "status": "active",
+                "is_archived": false,
+                "hourly_rate": "110.00",
+                "budget_amount": null,
+                "budget_hours": "80",
+                "activities": [
+                  "Konzept",
+                  "Design",
+                  "Entwicklung",
+                  "Abstimmung"
+                ],
+                "color": "teal",
+                "notes": ""
+              },
+              {
+                "id": "P-NEWS",
+                "number": "P-2026-10",
+                "name": "Newsletter-Vorlagen",
+                "customer_id": "C-GRUEN",
+                "status": "planned",
+                "is_archived": false,
+                "hourly_rate": null,
+                "budget_amount": null,
+                "budget_hours": null,
+                "activities": [
+                  "Konzept",
+                  "Design",
+                  "Entwicklung",
+                  "Abstimmung"
+                ],
+                "color": "teal",
+                "notes": ""
+              },
+              {
+                "id": "P-OLD",
+                "number": "P-2025-03",
+                "name": "Messestand 2025",
+                "customer_id": "C-NORD",
+                "status": "done",
+                "is_archived": false,
+                "hourly_rate": null,
+                "budget_amount": null,
+                "budget_hours": null,
+                "activities": [
+                  "Konzept",
+                  "Design",
+                  "Entwicklung",
+                  "Abstimmung"
+                ],
+                "color": "teal",
+                "notes": ""
+              }
+            ]
+          }
+        }
+      },
+      "repeat": true
+    },
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "expenses_list"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"count\":4,\"expenses\":[{\"id\":\"E-1\",\"vendor\":\"Wolkenhost GmbH\",\"date\":\"2026-10-01\",\"status\":\"booked\",\"category\":\"telecom\",\"category_title\":\"Telefon, Internet, Hosting\",\"vat_mode\":\"domestic\",\"tax_rate\":\"19\",\"currency_code\":\"EUR\",\"invoice_number\":\"WH-88213\",\"note\":\"\",\"has_receipt\":true,\"receipt_original_name\":\"2026-10-01_Wolkenhost_Rechnung.pdf\",\"project_id\":null,\"business_share_percent\":\"100\",\"is_collective\":false,\"is_standing\":false,\"gross_amount\":\"46.41\",\"gross_amount_cents\":4641,\"net_amount\":\"39.00\",\"net_amount_cents\":3900,\"tax_amount\":\"7.41\",\"tax_amount_cents\":741,\"deductible_input_tax\":\"7.41\",\"deductible_input_tax_cents\":741},{\"id\":\"E-2\",\"vendor\":\"Typoladen\",\"date\":\"2026-09-28\",\"status\":\"booked\",\"category\":\"software\",\"category_title\":\"Software und Lizenzen\",\"vat_mode\":\"domestic\",\"tax_rate\":\"19\",\"currency_code\":\"EUR\",\"invoice_number\":\"TL-2026-4471\",\"note\":\"\",\"has_receipt\":true,\"receipt_original_name\":\"Typoladen_Lizenz.pdf\",\"project_id\":null,\"business_share_percent\":\"100\",\"is_collective\":false,\"is_standing\":false,\"gross_amount\":\"119.00\",\"gross_amount_cents\":11900,\"net_amount\":\"100.00\",\"net_amount_cents\":10000,\"tax_amount\":\"19.00\",\"tax_amount_cents\":1900,\"deductible_input_tax\":\"19.00\",\"deductible_input_tax_cents\":1900},{\"id\":\"E-3\",\"vendor\":\"Papeterie Nord\",\"date\":\"2026-10-07\",\"status\":\"inbox\",\"category\":\"office\",\"category_title\":\"Bürobedarf\",\"vat_mode\":\"domestic\",\"tax_rate\":\"19\",\"currency_code\":\"EUR\",\"invoice_number\":\"\",\"note\":\"Skizzenbücher\",\"has_receipt\":true,\"receipt_original_name\":null,\"project_id\":null,\"business_share_percent\":\"100\",\"is_collective\":false,\"is_standing\":false,\"gross_amount\":\"35.70\",\"gross_amount_cents\":3570,\"net_amount\":\"30.00\",\"net_amount_cents\":3000,\"tax_amount\":\"5.70\",\"tax_amount_cents\":570,\"deductible_input_tax\":\"5.70\",\"deductible_input_tax_cents\":570},{\"id\":\"E-4\",\"vendor\":\"Regiobahn\",\"date\":\"2026-10-05\",\"status\":\"inbox\",\"category\":\"travelFares\",\"category_title\":\"Fahrtkosten (Bahn, Flug, Taxi)\",\"vat_mode\":\"domestic\",\"tax_rate\":\"19\",\"currency_code\":\"EUR\",\"invoice_number\":\"\",\"note\":\"\",\"has_receipt\":false,\"receipt_original_name\":null,\"project_id\":null,\"business_share_percent\":\"100\",\"is_collective\":false,\"is_standing\":false,\"gross_amount\":\"69.90\",\"gross_amount_cents\":6990,\"net_amount\":\"58.74\",\"net_amount_cents\":5874,\"tax_amount\":\"11.16\",\"tax_amount_cents\":1116,\"deductible_input_tax\":\"11.16\",\"deductible_input_tax_cents\":1116}]}"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "count": 4,
+            "expenses": [
+              {
+                "id": "E-1",
+                "vendor": "Wolkenhost GmbH",
+                "date": "2026-10-01",
+                "status": "booked",
+                "category": "telecom",
+                "category_title": "Telefon, Internet, Hosting",
+                "vat_mode": "domestic",
+                "tax_rate": "19",
+                "currency_code": "EUR",
+                "invoice_number": "WH-88213",
+                "note": "",
+                "has_receipt": true,
+                "receipt_original_name": "2026-10-01_Wolkenhost_Rechnung.pdf",
+                "project_id": null,
+                "business_share_percent": "100",
+                "is_collective": false,
+                "is_standing": false,
+                "gross_amount": "46.41",
+                "gross_amount_cents": 4641,
+                "net_amount": "39.00",
+                "net_amount_cents": 3900,
+                "tax_amount": "7.41",
+                "tax_amount_cents": 741,
+                "deductible_input_tax": "7.41",
+                "deductible_input_tax_cents": 741
+              },
+              {
+                "id": "E-2",
+                "vendor": "Typoladen",
+                "date": "2026-09-28",
+                "status": "booked",
+                "category": "software",
+                "category_title": "Software und Lizenzen",
+                "vat_mode": "domestic",
+                "tax_rate": "19",
+                "currency_code": "EUR",
+                "invoice_number": "TL-2026-4471",
+                "note": "",
+                "has_receipt": true,
+                "receipt_original_name": "Typoladen_Lizenz.pdf",
+                "project_id": null,
+                "business_share_percent": "100",
+                "is_collective": false,
+                "is_standing": false,
+                "gross_amount": "119.00",
+                "gross_amount_cents": 11900,
+                "net_amount": "100.00",
+                "net_amount_cents": 10000,
+                "tax_amount": "19.00",
+                "tax_amount_cents": 1900,
+                "deductible_input_tax": "19.00",
+                "deductible_input_tax_cents": 1900
+              },
+              {
+                "id": "E-3",
+                "vendor": "Papeterie Nord",
+                "date": "2026-10-07",
+                "status": "inbox",
+                "category": "office",
+                "category_title": "Bürobedarf",
+                "vat_mode": "domestic",
+                "tax_rate": "19",
+                "currency_code": "EUR",
+                "invoice_number": "",
+                "note": "Skizzenbücher",
+                "has_receipt": true,
+                "receipt_original_name": null,
+                "project_id": null,
+                "business_share_percent": "100",
+                "is_collective": false,
+                "is_standing": false,
+                "gross_amount": "35.70",
+                "gross_amount_cents": 3570,
+                "net_amount": "30.00",
+                "net_amount_cents": 3000,
+                "tax_amount": "5.70",
+                "tax_amount_cents": 570,
+                "deductible_input_tax": "5.70",
+                "deductible_input_tax_cents": 570
+              },
+              {
+                "id": "E-4",
+                "vendor": "Regiobahn",
+                "date": "2026-10-05",
+                "status": "inbox",
+                "category": "travelFares",
+                "category_title": "Fahrtkosten (Bahn, Flug, Taxi)",
+                "vat_mode": "domestic",
+                "tax_rate": "19",
+                "currency_code": "EUR",
+                "invoice_number": "",
+                "note": "",
+                "has_receipt": false,
+                "receipt_original_name": null,
+                "project_id": null,
+                "business_share_percent": "100",
+                "is_collective": false,
+                "is_standing": false,
+                "gross_amount": "69.90",
+                "gross_amount_cents": 6990,
+                "net_amount": "58.74",
+                "net_amount_cents": 5874,
+                "tax_amount": "11.16",
+                "tax_amount_cents": 1116,
+                "deductible_input_tax": "11.16",
+                "deductible_input_tax_cents": 1116
+              }
+            ]
+          }
+        }
+      },
+      "repeat": true
+    },
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "time_list"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"count\":5,\"entries\":[{\"id\":\"T-5\",\"date\":\"2026-10-08\",\"duration_seconds\":12600,\"duration_minutes\":210,\"hours\":\"3.50\",\"is_running\":false,\"is_billable\":true,\"started_at\":\"2026-10-08T09:00:00+02:00\",\"ended_at\":\"2026-10-08T10:00:00+02:00\",\"customer_id\":\"C-ELBE\",\"project_id\":\"P-APP\",\"activity\":\"Entwicklung\",\"note\":\"\",\"hourly_rate\":null,\"status\":\"approved\",\"billed_document_id\":null},{\"id\":\"T-4\",\"date\":\"2026-10-08\",\"duration_seconds\":5700,\"duration_minutes\":95,\"hours\":\"1.58\",\"is_running\":false,\"is_billable\":true,\"started_at\":\"2026-10-08T09:00:00+02:00\",\"ended_at\":\"2026-10-08T10:00:00+02:00\",\"customer_id\":\"C-NORD\",\"project_id\":\"P-WEB\",\"activity\":\"Design\",\"note\":\"Startseite\",\"hourly_rate\":null,\"status\":\"approved\",\"billed_document_id\":null},{\"id\":\"T-3\",\"date\":\"2026-10-07\",\"duration_seconds\":3600,\"duration_minutes\":60,\"hours\":\"1.00\",\"is_running\":false,\"is_billable\":true,\"started_at\":\"2026-10-07T09:00:00+02:00\",\"ended_at\":\"2026-10-07T10:00:00+02:00\",\"customer_id\":\"C-SONNE\",\"project_id\":null,\"activity\":\"\",\"note\":\"Telefonat Speisekarte\",\"hourly_rate\":null,\"status\":\"approved\",\"billed_document_id\":null},{\"id\":\"T-2\",\"date\":\"2026-10-06\",\"duration_seconds\":10800,\"duration_minutes\":180,\"hours\":\"3.00\",\"is_running\":false,\"is_billable\":true,\"started_at\":\"2026-10-06T09:00:00+02:00\",\"ended_at\":\"2026-10-06T10:00:00+02:00\",\"customer_id\":\"C-HAFEN\",\"project_id\":\"P-BRAND\",\"activity\":\"Konzept\",\"note\":\"\",\"hourly_rate\":null,\"status\":\"approved\",\"billed_document_id\":null},{\"id\":\"T-1\",\"date\":\"2026-10-05\",\"duration_seconds\":7200,\"duration_minutes\":120,\"hours\":\"2.00\",\"is_running\":false,\"is_billable\":true,\"started_at\":\"2026-10-05T09:00:00+02:00\",\"ended_at\":\"2026-10-05T10:00:00+02:00\",\"customer_id\":\"C-NORD\",\"project_id\":\"P-WEB\",\"activity\":\"Design\",\"note\":\"\",\"hourly_rate\":null,\"status\":\"approved\",\"billed_document_id\":null}],\"total_hours\":\"11.08\"}"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "count": 5,
+            "entries": [
+              {
+                "id": "T-5",
+                "date": "2026-10-08",
+                "duration_seconds": 12600,
+                "duration_minutes": 210,
+                "hours": "3.50",
+                "is_running": false,
+                "is_billable": true,
+                "started_at": "2026-10-08T09:00:00+02:00",
+                "ended_at": "2026-10-08T10:00:00+02:00",
+                "customer_id": "C-ELBE",
+                "project_id": "P-APP",
+                "activity": "Entwicklung",
+                "note": "",
+                "hourly_rate": null,
+                "status": "approved",
+                "billed_document_id": null
+              },
+              {
+                "id": "T-4",
+                "date": "2026-10-08",
+                "duration_seconds": 5700,
+                "duration_minutes": 95,
+                "hours": "1.58",
+                "is_running": false,
+                "is_billable": true,
+                "started_at": "2026-10-08T09:00:00+02:00",
+                "ended_at": "2026-10-08T10:00:00+02:00",
+                "customer_id": "C-NORD",
+                "project_id": "P-WEB",
+                "activity": "Design",
+                "note": "Startseite",
+                "hourly_rate": null,
+                "status": "approved",
+                "billed_document_id": null
+              },
+              {
+                "id": "T-3",
+                "date": "2026-10-07",
+                "duration_seconds": 3600,
+                "duration_minutes": 60,
+                "hours": "1.00",
+                "is_running": false,
+                "is_billable": true,
+                "started_at": "2026-10-07T09:00:00+02:00",
+                "ended_at": "2026-10-07T10:00:00+02:00",
+                "customer_id": "C-SONNE",
+                "project_id": null,
+                "activity": "",
+                "note": "Telefonat Speisekarte",
+                "hourly_rate": null,
+                "status": "approved",
+                "billed_document_id": null
+              },
+              {
+                "id": "T-2",
+                "date": "2026-10-06",
+                "duration_seconds": 10800,
+                "duration_minutes": 180,
+                "hours": "3.00",
+                "is_running": false,
+                "is_billable": true,
+                "started_at": "2026-10-06T09:00:00+02:00",
+                "ended_at": "2026-10-06T10:00:00+02:00",
+                "customer_id": "C-HAFEN",
+                "project_id": "P-BRAND",
+                "activity": "Konzept",
+                "note": "",
+                "hourly_rate": null,
+                "status": "approved",
+                "billed_document_id": null
+              },
+              {
+                "id": "T-1",
+                "date": "2026-10-05",
+                "duration_seconds": 7200,
+                "duration_minutes": 120,
+                "hours": "2.00",
+                "is_running": false,
+                "is_billable": true,
+                "started_at": "2026-10-05T09:00:00+02:00",
+                "ended_at": "2026-10-05T10:00:00+02:00",
+                "customer_id": "C-NORD",
+                "project_id": "P-WEB",
+                "activity": "Design",
+                "note": "",
+                "hourly_rate": null,
+                "status": "approved",
+                "billed_document_id": null
+              }
+            ],
+            "total_hours": "11.08"
+          }
+        }
+      },
+      "repeat": true
+    },
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "time_running"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"entry\":{\"id\":\"T-RUN\",\"date\":\"2026-10-09\",\"duration_seconds\":2820,\"duration_minutes\":47,\"hours\":\"0.78\",\"is_running\":true,\"is_billable\":true,\"started_at\":\"2026-10-09T09:12:00+02:00\",\"ended_at\":null,\"customer_id\":\"C-NORD\",\"project_id\":\"P-WEB\",\"activity\":\"Design\",\"note\":\"Logo-Varianten\",\"hourly_rate\":null,\"status\":\"approved\",\"billed_document_id\":null}}"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "entry": {
+              "id": "T-RUN",
+              "date": "2026-10-09",
+              "duration_seconds": 2820,
+              "duration_minutes": 47,
+              "hours": "0.78",
+              "is_running": true,
+              "is_billable": true,
+              "started_at": "2026-10-09T09:12:00+02:00",
+              "ended_at": null,
+              "customer_id": "C-NORD",
+              "project_id": "P-WEB",
+              "activity": "Design",
+              "note": "Logo-Varianten",
+              "hourly_rate": null,
+              "status": "approved",
+              "billed_document_id": null
+            }
+          }
+        }
+      },
+      "repeat": true
+    },
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "time_start_timer"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"entry\":{\"id\":\"T-RUN\",\"date\":\"2026-10-09\",\"duration_seconds\":0,\"duration_minutes\":0,\"hours\":\"0.78\",\"is_running\":true,\"is_billable\":true,\"started_at\":\"2026-10-09T10:00:00+02:00\",\"ended_at\":null,\"customer_id\":\"C-NORD\",\"project_id\":\"P-WEB\",\"activity\":\"Design\",\"note\":\"Logo-Varianten\",\"hourly_rate\":null,\"status\":\"approved\",\"billed_document_id\":null}}"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "entry": {
+              "id": "T-RUN",
+              "date": "2026-10-09",
+              "duration_seconds": 0,
+              "duration_minutes": 0,
+              "hours": "0.78",
+              "is_running": true,
+              "is_billable": true,
+              "started_at": "2026-10-09T10:00:00+02:00",
+              "ended_at": null,
+              "customer_id": "C-NORD",
+              "project_id": "P-WEB",
+              "activity": "Design",
+              "note": "Logo-Varianten",
+              "hourly_rate": null,
+              "status": "approved",
+              "billed_document_id": null
+            }
+          }
+        }
+      },
+      "repeat": true
+    },
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "time_stop_timer"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"entry\":{\"id\":\"T-RUN\",\"date\":\"2026-10-09\",\"duration_seconds\":2820,\"duration_minutes\":47,\"hours\":\"0.78\",\"is_running\":false,\"is_billable\":true,\"started_at\":\"2026-10-09T09:12:00+02:00\",\"ended_at\":\"2026-10-09T09:59:00+02:00\",\"customer_id\":\"C-NORD\",\"project_id\":\"P-WEB\",\"activity\":\"Design\",\"note\":\"Logo-Varianten\",\"hourly_rate\":null,\"status\":\"approved\",\"billed_document_id\":null}}"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "entry": {
+              "id": "T-RUN",
+              "date": "2026-10-09",
+              "duration_seconds": 2820,
+              "duration_minutes": 47,
+              "hours": "0.78",
+              "is_running": false,
+              "is_billable": true,
+              "started_at": "2026-10-09T09:12:00+02:00",
+              "ended_at": "2026-10-09T09:59:00+02:00",
+              "customer_id": "C-NORD",
+              "project_id": "P-WEB",
+              "activity": "Design",
+              "note": "Logo-Varianten",
+              "hourly_rate": null,
+              "status": "approved",
+              "billed_document_id": null
+            }
+          }
+        }
+      },
+      "repeat": true
+    },
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "documents_create_draft"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"document\":{\"id\":\"D-DRAFT\",\"kind\":\"invoice\",\"number\":null,\"status\":\"draft\",\"customer_id\":\"C-SONNE\",\"customer_name\":\"Café Sonnendeck\",\"project_id\":null,\"title\":\"Speisekarte und Aushänge\",\"issue_date\":\"2026-10-09\",\"due_date\":null,\"is_draft\":true,\"is_overdue\":false,\"days_overdue\":0,\"is_queued_for_number\":false,\"related_document_id\":null,\"tax_treatment\":\"standard\",\"net_total\":\"640.00\",\"net_total_cents\":64000,\"tax_total\":\"121.60\",\"tax_total_cents\":12160,\"gross_total\":\"761.60\",\"gross_total_cents\":76160,\"paid_total\":\"0.00\",\"paid_total_cents\":0,\"open_amount\":\"761.60\",\"open_amount_cents\":76160,\"lines\":[]}}"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "document": {
+              "id": "D-DRAFT",
+              "kind": "invoice",
+              "number": null,
+              "status": "draft",
+              "customer_id": "C-SONNE",
+              "customer_name": "Café Sonnendeck",
+              "project_id": null,
+              "title": "Speisekarte und Aushänge",
+              "issue_date": "2026-10-09",
+              "due_date": null,
+              "is_draft": true,
+              "is_overdue": false,
+              "days_overdue": 0,
+              "is_queued_for_number": false,
+              "related_document_id": null,
+              "tax_treatment": "standard",
+              "net_total": "640.00",
+              "net_total_cents": 64000,
+              "tax_total": "121.60",
+              "tax_total_cents": 12160,
+              "gross_total": "761.60",
+              "gross_total_cents": 76160,
+              "paid_total": "0.00",
+              "paid_total_cents": 0,
+              "open_amount": "761.60",
+              "open_amount_cents": 76160,
+              "lines": []
+            }
+          }
+        }
+      },
+      "repeat": true
+    },
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "expenses_create"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"expense\":{\"id\":\"E-NEW\",\"vendor\":\"Papeterie Nord\",\"date\":\"2026-10-07\",\"status\":\"inbox\",\"category\":\"office\",\"category_title\":\"Bürobedarf\",\"vat_mode\":\"domestic\",\"tax_rate\":\"19\",\"currency_code\":\"EUR\",\"invoice_number\":\"\",\"note\":\"Skizzenbücher\",\"has_receipt\":false,\"receipt_original_name\":null,\"project_id\":null,\"business_share_percent\":\"100\",\"is_collective\":false,\"is_standing\":false,\"gross_amount\":\"35.70\",\"gross_amount_cents\":3570,\"net_amount\":\"30.00\",\"net_amount_cents\":3000,\"tax_amount\":\"5.70\",\"tax_amount_cents\":570,\"deductible_input_tax\":\"5.70\",\"deductible_input_tax_cents\":570}}"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "expense": {
+              "id": "E-NEW",
+              "vendor": "Papeterie Nord",
+              "date": "2026-10-07",
+              "status": "inbox",
+              "category": "office",
+              "category_title": "Bürobedarf",
+              "vat_mode": "domestic",
+              "tax_rate": "19",
+              "currency_code": "EUR",
+              "invoice_number": "",
+              "note": "Skizzenbücher",
+              "has_receipt": false,
+              "receipt_original_name": null,
+              "project_id": null,
+              "business_share_percent": "100",
+              "is_collective": false,
+              "is_standing": false,
+              "gross_amount": "35.70",
+              "gross_amount_cents": 3570,
+              "net_amount": "30.00",
+              "net_amount_cents": 3000,
+              "tax_amount": "5.70",
+              "tax_amount_cents": 570,
+              "deductible_input_tax": "5.70",
+              "deductible_input_tax_cents": 570
+            }
+          }
+        }
+      },
+      "repeat": true
+    },
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "expenses_add_receipt_file"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"expense\":{\"id\":\"E-NEW\",\"vendor\":\"Papeterie Nord\",\"date\":\"2026-10-07\",\"status\":\"inbox\",\"category\":\"office\",\"category_title\":\"Bürobedarf\",\"vat_mode\":\"domestic\",\"tax_rate\":\"19\",\"currency_code\":\"EUR\",\"invoice_number\":\"\",\"note\":\"Skizzenbücher\",\"has_receipt\":true,\"receipt_original_name\":null,\"project_id\":null,\"business_share_percent\":\"100\",\"is_collective\":false,\"is_standing\":false,\"gross_amount\":\"35.70\",\"gross_amount_cents\":3570,\"net_amount\":\"30.00\",\"net_amount_cents\":3000,\"tax_amount\":\"5.70\",\"tax_amount_cents\":570,\"deductible_input_tax\":\"5.70\",\"deductible_input_tax_cents\":570},\"file\":{\"id\":\"F-1\",\"page_order\":0}}"
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "expense": {
+              "id": "E-NEW",
+              "vendor": "Papeterie Nord",
+              "date": "2026-10-07",
+              "status": "inbox",
+              "category": "office",
+              "category_title": "Bürobedarf",
+              "vat_mode": "domestic",
+              "tax_rate": "19",
+              "currency_code": "EUR",
+              "invoice_number": "",
+              "note": "Skizzenbücher",
+              "has_receipt": true,
+              "receipt_original_name": null,
+              "project_id": null,
+              "business_share_percent": "100",
+              "is_collective": false,
+              "is_standing": false,
+              "gross_amount": "35.70",
+              "gross_amount_cents": 3570,
+              "net_amount": "30.00",
+              "net_amount_cents": 3000,
+              "tax_amount": "5.70",
+              "tax_amount_cents": 570,
+              "deductible_input_tax": "5.70",
+              "deductible_input_tax_cents": 570
+            },
+            "file": {
+              "id": "F-1",
+              "page_order": 0
+            }
+          }
+        }
+      },
+      "repeat": true
+    },
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "documents_pdf"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"document_id\":\"D-142\",\"number\":\"RE-2026-0142\",\"file_name\":\"RE-2026-0142.pdf\",\"mime_type\":\"application/pdf\",\"size_bytes\":9,\"sha256\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"is_draft\":false,\"is_archived\":true,\"archive_path\":\"2026/RE-2026-0142.pdf\",\"embeds_e_invoice\":false,\"resource_uri\":\"folnaro://document/D-142/pdf\"}"
+            },
+            {
+              "type": "resource",
+              "resource": {
+                "uri": "folnaro://document/D-142/pdf",
+                "mimeType": "application/pdf",
+                "blob": "JVBERi0xLjcK"
+              }
+            }
+          ],
+          "isError": false,
+          "structuredContent": {
+            "document_id": "D-142",
+            "number": "RE-2026-0142",
+            "file_name": "RE-2026-0142.pdf",
+            "mime_type": "application/pdf",
+            "size_bytes": 9,
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+            "is_draft": false,
+            "is_archived": true,
+            "archive_path": "2026/RE-2026-0142.pdf",
+            "embeds_e_invoice": false,
+            "resource_uri": "folnaro://document/D-142/pdf"
+          }
+        }
+      },
+      "repeat": true
+    }
+  ]
+}
