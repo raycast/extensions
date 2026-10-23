@@ -12,6 +12,7 @@ import type { Channel, Group } from "./conversation";
 import { isMemberDirectoryScanError, searchMemberDirectory } from "./memberSearch";
 import { toUserName } from "./member";
 import { getMemberPage } from "./memberDirectoryCache";
+import { getConversationPage } from "./channelDirectoryCache";
 
 export type { Channel, Group } from "./conversation";
 
@@ -104,6 +105,33 @@ const createMemberPageLoader = () => async (cursor?: string) => {
     async (nextCursor) => {
       const response = await slackWebClient.users.list({ limit: getDirectorySearchPageSize(), cursor: nextCursor });
       return { items: response.members ?? [], nextCursor: response.response_metadata?.next_cursor };
+    },
+    index,
+  );
+  return {
+    items: page.items,
+    nextCursor: page.hasMore ? String(index + 1) : undefined,
+    error: page.error,
+  };
+};
+
+/**
+ * Channel pages come from a shared, cached conversations.list scan. The cursor is the page index, so a search can
+ * filter locally as pages arrive instead of restarting a full directory walk on each keystroke.
+ */
+const createConversationPageLoader = () => async (cursor?: string) => {
+  const slackWebClient = getSlackWebClient();
+  const index = Number(cursor ?? 0);
+  const page = await getConversationPage(
+    getSlackToken(),
+    async (nextCursor) => {
+      const response = await slackWebClient.conversations.list({
+        exclude_archived: true,
+        types: "public_channel,private_channel,mpim",
+        limit: getDirectorySearchPageSize(),
+        cursor: nextCursor,
+      });
+      return { items: response.channels ?? [], nextCursor: response.response_metadata?.next_cursor };
     },
     index,
   );
@@ -225,7 +253,6 @@ export class SlackClient {
     loadUserNames?: () => Promise<ReadonlyMap<string, string>>,
     types: "channels" | "groups" | "all" = "all",
   ): Promise<[Channel[], Group[]]> {
-    const slackWebClient = getSlackWebClient();
     const [channels, groups] = await searchConversationDirectory({
       query,
       maxResultsPerType: maxSearchResultsPerType,
@@ -246,20 +273,7 @@ export class SlackClient {
             return error.partial.userNames;
           }
         }),
-      loadConversationsPage: async (cursor) => {
-        const response = await slackWebClient.conversations.list({
-          exclude_archived: true,
-          types:
-            types === "channels"
-              ? "public_channel,private_channel"
-              : types === "groups"
-                ? "mpim"
-                : "public_channel,private_channel,mpim",
-          limit: getDirectorySearchPageSize(),
-          cursor,
-        });
-        return { items: response.channels ?? [], nextCursor: response.response_metadata?.next_cursor };
-      },
+      loadConversationsPage: createConversationPageLoader(),
       signal,
     });
 
