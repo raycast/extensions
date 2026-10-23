@@ -178,10 +178,12 @@ export async function fetchFromApi<T>(
   }
 }
 
-// GET a single record (endpoints such as /runs/{id}/ return an object, not a list)
+// GET a single record (endpoints such as /runs/{id}/ return an object, not a list).
+// quiet skips the failure toast when the caller has a fallback.
 export async function fetchOneFromApi<T>(
   endpoint: string,
   errorMessage = "Could not fetch from API",
+  quiet = false,
 ): Promise<T | null> {
   try {
     const url = new URL(endpoint, getBaseUrl());
@@ -193,7 +195,7 @@ export async function fetchOneFromApi<T>(
     return json.data ?? null;
   } catch (error) {
     console.error("GET Error:", error);
-    showToast(Toast.Style.Failure, errorMessage, error instanceof Error ? error.message : String(error));
+    if (!quiet) showToast(Toast.Style.Failure, errorMessage, error instanceof Error ? error.message : String(error));
     return null;
   }
 }
@@ -711,6 +713,58 @@ export async function fetchSources(environmentId: number, first = 100): Promise<
     (data) => data.environment?.applied?.sources,
     "Could not fetch sources",
   );
+}
+
+const SOURCE_BY_ID_QUERY = `
+query GetSourceById($environmentId: BigInt!, $uniqueIds: [String!]) {
+  environment(id: $environmentId) {
+    applied {
+      sources(first: 1, filter: { uniqueIds: $uniqueIds }) {
+        edges {
+          node {
+            uniqueId
+            name
+            sourceName
+            description
+            database
+            schema
+            identifier
+            resourceType
+            tags
+            meta
+            loader
+            freshness {
+              freshnessJobDefinitionId
+              freshnessRunId
+              freshnessRunGeneratedAt
+              freshnessStatus
+              maxLoadedAt
+              snapshottedAt
+            }
+            children {
+              uniqueId
+              name
+              resourceType
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`;
+
+// Fetch one source by unique id, without paging through every source in the environment
+export async function fetchSourceById(environmentId: number, uniqueId: string): Promise<SourceNode | null> {
+  interface SourceResponse {
+    environment: { applied: { sources: { edges: Array<{ node: SourceNode }> } } };
+  }
+  const data = await queryDiscoveryApi<SourceResponse>(
+    SOURCE_BY_ID_QUERY,
+    { environmentId, uniqueIds: [uniqueId] },
+    "Could not fetch source",
+  );
+  return data?.environment?.applied?.sources?.edges?.[0]?.node ?? null;
 }
 
 // Resource type icons
