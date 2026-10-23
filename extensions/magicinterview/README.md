@@ -2,13 +2,29 @@
 
 Search saved conversations and create preparation conversations for interviews, meetings, sales calls, and practice. Open a saved conversation in MagicInterview for live suggestions about what to say next.
 
+## Start with a free account
+
+New to MagicInterview? [Try the free preparation preview](https://magicinterview.ai/interview-tomorrow) before creating an account. Your account and saved workspace are free, with no card required. Pro unlocks cloud coaching and AI tools in MagicInterview.
+
+```text
+Create a free account → Save interview or meeting context
+        → Connect Raycast → Search or create a conversation
+        → Open it in MagicInterview → Choose Pro when you want coaching
+```
+
 ## Connect your account
 
-1. Sign in at [MagicInterview](https://magicinterview.ai/app).
-2. Open **Settings → AI client access** and create a connection token. You can also open [AI client access settings](https://magicinterview.ai/app/settings/mcp).
-3. Paste the token into this extension's **MagicInterview Connection Token** password preference.
+This Raycast extension currently requires a manual connection token. Other compatible MCP clients can use browser sign-in, but that does not replace this extension's token preference.
+
+1. [Create a free account](https://magicinterview.ai/app?auth=sign-up) or [sign in](https://magicinterview.ai/app?auth=sign-in).
+2. Open **Settings → AI client access**, expand **Manual setup**, and choose **Create connection and copy configuration**. You can also open [AI client access settings](https://magicinterview.ai/app/settings/mcp).
+3. Copy the bearer token from the newly generated configuration and paste it into this extension's **MagicInterview Connection Token** password preference.
 
 The extension connects directly to `https://magicinterview.ai/mcp` using your token. Your token is used only to access your MagicInterview account and is never included in conversation links. Revoke it in MagicInterview's AI client access settings when you no longer need the connection.
+
+## Your first conversation
+
+If search is empty, use **Create Conversation** to save an interview or meeting with a title and your preparation notes. It opens in MagicInterview, where you can add your CV, job description or brief. Later, **Search Conversations** brings you back to that same context.
 
 ## Commands
 
