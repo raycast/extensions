@@ -1,6 +1,6 @@
 # /dev/null Changelog
 
-## [Profiles and Search] - {PR_MERGE_DATE}
+## [Profiles and Search] - 2026-10-23
 
 - **View Profile**: look anyone up by username to see their profile, commits, replies, followers and following. With no username, it searches people.
 - **Go to My Profile** and **My Commits**: your own profile and commits. Set your username in the preferences, or post a commit and it's remembered.
