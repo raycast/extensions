@@ -19,6 +19,53 @@
       "title": "Create Commit",
       "subtitle": "/dev/null",
       "description": "Sign a commit with your SSH key and post it to /dev/null.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "useSelectedText",
+          "title": "Selected Text",
+          "label": "Use selected text for new commits",
+          "description": "Selected text is appended to a draft you already started.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "view-profile",
+      "title": "View Profile",
+      "subtitle": "/dev/null",
+      "description": "Look up someone's /dev/null profile, commits and followers, or search for people.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "username",
+          "placeholder": "Username",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "my-profile",
+      "title": "Go to My Profile",
+      "subtitle": "/dev/null",
+      "description": "Open your own /dev/null profile, commits and followers.",
+      "mode": "view"
+    },
+    {
+      "name": "my-commits",
+      "title": "My Commits",
+      "subtitle": "/dev/null",
+      "description": "Browse the commits and replies you've posted to /dev/null.",
+      "mode": "view"
+    },
+    {
+      "name": "search-commits",
+      "title": "Search Commits",
+      "subtitle": "/dev/null",
+      "description": "Search everyone's commits on /dev/null.",
       "mode": "view"
     }
   ],
@@ -55,6 +102,14 @@
     "test": "vitest run"
   },
   "preferences": [
+    {
+      "name": "username",
+      "title": "Username",
+      "description": "Leave empty to use the account of your last commit.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "chrismessina"
+    },
     {
       "name": "verboseLogging",
       "title": "Debug Logging",
