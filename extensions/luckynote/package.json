@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "luckynote",
+  "title": "Luckynote",
+  "description": "Capture notes and tasks in Luckynote from anywhere with Raycast.",
+  "icon": "icon-original.png",
+  "author": "luckyursus",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "save-message",
+      "title": "Save Message",
+      "description": "Save a message to your Luckynote account",
+      "mode": "view",
+      "icon": "icon-original.png"
+    },
+    {
+      "name": "quick-note",
+      "title": "Quick Save Note",
+      "description": "Quickly save a note with just text",
+      "mode": "no-view",
+      "icon": "icon-original.png",
+      "arguments": [
+        {
+          "name": "note",
+          "placeholder": "Your note...",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Server URL",
+      "description": "Your Luckynote server URL",
+      "placeholder": "https://luckynote.io",
+      "default": "https://luckynote.io"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "react": "^19.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.0.3",
+    "typescript": "5.9"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/*.test.cjs"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
