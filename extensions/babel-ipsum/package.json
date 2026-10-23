@@ -1,0 +1,281 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "babel-ipsum",
+  "title": "Babel Ipsum",
+  "description": "Generate placeholder text from 13 classic books in 12 languages. Copy or paste sentences and passages, entirely offline",
+  "icon": "extension-icon.png",
+  "author": "felrov",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "commands": [
+    {
+      "name": "generate-paragraphs",
+      "title": "Generate Passages",
+      "subtitle": "Babel Ipsum",
+      "description": "Preview, copy, or paste random passages from classic books",
+      "mode": "view"
+    },
+    {
+      "name": "generate-sentences",
+      "title": "Generate Sentences",
+      "subtitle": "Babel Ipsum",
+      "description": "Preview, copy, or paste random sentences from classic books",
+      "mode": "view"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "node scripts/clean-build.mjs && ray build --output dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "npm run build && tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --experimental-strip-types --test tests/*.test.ts tests/*.test.mjs"
+  },
+  "preferences": [
+    {
+      "name": "defaultBook",
+      "title": "Default Book",
+      "description": "Book selected when opening either generator.",
+      "type": "dropdown",
+      "required": false,
+      "default": "de-finibus",
+      "data": [
+        {
+          "title": "De finibus bonorum et malorum — Liber I (Latin)",
+          "value": "de-finibus"
+        },
+        {
+          "title": "Οἰδίπους Τύραννος (Ancient Greek)",
+          "value": "oedipus-tyrannus"
+        },
+        {
+          "title": "الأجنحة المتكسرة (Arabic)",
+          "value": "the-broken-wings"
+        },
+        {
+          "title": "西遊記 (Chinese)",
+          "value": "journey-to-the-west"
+        },
+        {
+          "title": "Macbeth (English)",
+          "value": "macbeth"
+        },
+        {
+          "title": "Les Misérables — Fantine (French)",
+          "value": "les-miserables-fantine"
+        },
+        {
+          "title": "Die Verwandlung (German)",
+          "value": "die-verwandlung"
+        },
+        {
+          "title": "Divina Commedia (Italian)",
+          "value": "divina-commedia"
+        },
+        {
+          "title": "こころ (Japanese)",
+          "value": "kokoro"
+        },
+        {
+          "title": "진달래꽃 (Korean)",
+          "value": "jindallae-kkot"
+        },
+        {
+          "title": "O Alienista (Portuguese)",
+          "value": "o-alienista"
+        },
+        {
+          "title": "Cuentos de la selva (Spanish)",
+          "value": "cuentos-de-la-selva"
+        },
+        {
+          "title": "Sub terra (Spanish)",
+          "value": "sub-terra"
+        }
+      ]
+    },
+    {
+      "name": "defaultParagraphCount",
+      "title": "Default Passage Count",
+      "description": "Number of passages to generate when the count field is empty.",
+      "type": "dropdown",
+      "required": false,
+      "default": "3",
+      "data": [
+        {
+          "title": "1",
+          "value": "1"
+        },
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        },
+        {
+          "title": "7",
+          "value": "7"
+        },
+        {
+          "title": "8",
+          "value": "8"
+        },
+        {
+          "title": "9",
+          "value": "9"
+        },
+        {
+          "title": "10",
+          "value": "10"
+        }
+      ]
+    },
+    {
+      "name": "defaultSentenceCount",
+      "title": "Default Sentence Count",
+      "description": "Number of sentences to generate when the count field is empty.",
+      "type": "dropdown",
+      "required": false,
+      "default": "3",
+      "data": [
+        {
+          "title": "1",
+          "value": "1"
+        },
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        },
+        {
+          "title": "7",
+          "value": "7"
+        },
+        {
+          "title": "8",
+          "value": "8"
+        },
+        {
+          "title": "9",
+          "value": "9"
+        },
+        {
+          "title": "10",
+          "value": "10"
+        },
+        {
+          "title": "11",
+          "value": "11"
+        },
+        {
+          "title": "12",
+          "value": "12"
+        },
+        {
+          "title": "13",
+          "value": "13"
+        },
+        {
+          "title": "14",
+          "value": "14"
+        },
+        {
+          "title": "15",
+          "value": "15"
+        },
+        {
+          "title": "16",
+          "value": "16"
+        },
+        {
+          "title": "17",
+          "value": "17"
+        },
+        {
+          "title": "18",
+          "value": "18"
+        },
+        {
+          "title": "19",
+          "value": "19"
+        },
+        {
+          "title": "20",
+          "value": "20"
+        }
+      ]
+    },
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "Action performed when pressing Enter on generated text.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        }
+      ]
+    }
+  ]
+}
