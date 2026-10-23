@@ -3,7 +3,7 @@ import { useLocalStorage } from "@raycast/utils";
 import { useState } from "react";
 import { convertQuery, formatQuantity, type StackSize } from "./conversion";
 
-type CommandProps = LaunchProps<{ arguments: { query?: string } }>;
+type CommandProps = LaunchProps<{ arguments: Arguments.NumberToStacks }>;
 
 export default function Command(props: CommandProps) {
   const [query, setQuery] = useState(
