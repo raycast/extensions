@@ -34,6 +34,10 @@ The extension talks to Folnaro like an agent, through MCP, so it uses these agen
 **Launchers can read** switch under **Settings > Integrations** is only for Alfred and other launchers
 that use `folnaro-mcp --query`; it does not let Raycast read.
 
+The first time Raycast asks Folnaro for data, Folnaro asks you to allow Raycast. Open **Settings > Agents**,
+click **Allow** under **Programs** and confirm with Touch ID or your login password. You do this once; every
+program that starts `folnaro-mcp` needs it (see [Allow a new program](https://folnaro.app/en/help/agents-mcp/#agents-mcp-approval) in the Folnaro help).
+
 The switches apply immediately, no restart needed. When one is off, the extension says which one to turn
 on instead of failing. **Open Section** presses Folnaro's own Go shortcuts (⌘1 to ⌥⌘4), so Raycast needs
 Accessibility access (System Settings > Privacy & Security > Accessibility); without it the command still
