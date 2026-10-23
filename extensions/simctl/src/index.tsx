@@ -1,13 +1,25 @@
 import { ActionPanel, List, Action, Color, Icon, useNavigation, closeMainWindow } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { exec } from "child_process";
+import { exec, execSync } from "child_process";
 import { existsSync } from "fs";
 import { useEffect, useState } from "react";
 
 // Xcode 27 renamed Simulator.app to DeviceHub.app.
-const SIMULATOR_APP = existsSync("/Applications/Xcode.app/Contents/Applications/DeviceHub.app")
-  ? "DeviceHub"
-  : "Simulator";
+// Use xcode-select -p to find the active Xcode installation regardless of where it is installed.
+function resolveSimulatorApp(): string {
+  try {
+    const developerPath = execSync("xcode-select -p", { encoding: "utf8" }).trim();
+    const xcodeBundle = developerPath.replace(/\/Contents\/Developer$/, "");
+    if (existsSync(`${xcodeBundle}/Contents/Applications/DeviceHub.app`)) {
+      return "DeviceHub";
+    }
+  } catch {
+    // fall through to default
+  }
+  return "Simulator";
+}
+
+const SIMULATOR_APP = resolveSimulatorApp();
 
 export default function Command() {
   const [state, setState] = useCachedState<State[]>("state", []);
