@@ -8,7 +8,7 @@ import { ModelDirectory } from "./core/models.js";
 
 // Raycast store extensions have no package version; bump this with every
 // store update so usage logs can tell releases apart.
-const VERSION = "0.1.0";
+const VERSION = "0.1.1";
 
 export const UTM_SOURCE = "raycast";
 
@@ -24,14 +24,16 @@ export function modelflare(): { client: ModelflareClient; directory: ModelDirect
       plugin: "modelflare-raycast",
       version: VERSION,
     });
-    directory = new ModelDirectory({ client });
+    directory = new ModelDirectory({ client, includeProfiles: true });
   }
   return { client, directory };
 }
 
 export async function modelIds(kind: ModelKind): Promise<string[]> {
   const snapshot = await modelflare().directory.load();
-  return snapshot.models.filter((model) => model.kind === kind).map((model) => model.id);
+  return snapshot.models
+    .filter((model) => model.kind === kind && (kind !== "text" || model.endpoints.includes("openai")))
+    .map((model) => model.id);
 }
 
 export async function explain(error: unknown, modelId?: string): Promise<string> {

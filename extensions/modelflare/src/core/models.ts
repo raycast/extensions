@@ -1,10 +1,12 @@
-import { classifyModels, type CatalogEntry, type ClassifiedModel, type ModelListEntry } from './classify.js'
+import { classifyModels, needsCatalog, type CatalogEntry, type ClassifiedModel, type ModelListEntry } from './classify.js'
 import type { ModelflareClient } from './client.js'
 import { CATALOG_URL } from './config.js'
 import { ModelflareError, errorFromResponse } from './errors.js'
+import { fetchModelProfiles, resolveModelProfile, type ModelProfileIndex } from './profiles.js'
 
 export {
   classifyModels,
+  needsCatalog,
   supportsEndpoint,
   type CatalogEntry,
   type ClassifiedModel,
@@ -13,10 +15,19 @@ export {
   type ModelKind,
   type ModelListEntry,
 } from './classify.js'
+export {
+  MODEL_PROFILES_PATH,
+  buildModelProfileIndex,
+  fetchModelProfiles,
+  resolveModelProfile,
+  type ModelInputModality,
+  type ModelProfile,
+  type ModelProfileIndex,
+} from './profiles.js'
 
-/** `GET /v1/models` for the client's key. */
+/** Key-scoped `GET /v1/models?scope=authorized`. */
 export async function listModels(client: ModelflareClient, signal?: AbortSignal): Promise<ModelListEntry[]> {
-  const body = await client.json<{ data?: ModelListEntry[] }>('models', {
+  const body = await client.json<{ data?: ModelListEntry[] }>('models?scope=authorized', {
     method: 'GET',
     ...(signal ? { signal } : {}),
   })
@@ -60,6 +71,8 @@ export interface DirectorySnapshot {
   listedIds: ReadonlySet<string>
   /** False when the catalog could not be read and no earlier copy exists. */
   catalogAvailable: boolean
+  /** True when the gateway returned its cached profile catalog. */
+  profilesAvailable: boolean
   loadedAt: number
 }
 
@@ -69,6 +82,8 @@ export interface ModelDirectoryOptions {
   /** Cache lifetime. Defaults to one hour. */
   ttlMs?: number
   now?: () => number
+  /** Resolve context, modality, tool and reasoning metadata for chat hosts. */
+  includeProfiles?: boolean
 }
 
 const DEFAULT_TTL_MS = 60 * 60 * 1000
@@ -83,30 +98,44 @@ export class ModelDirectory {
   readonly #fetch: typeof fetch
   readonly #ttlMs: number
   readonly #now: () => number
+  readonly #includeProfiles: boolean
   #snapshot: DirectorySnapshot | undefined
   #catalog: CatalogEntry[] | undefined
+  #profiles: ModelProfileIndex | undefined
 
   constructor(options: ModelDirectoryOptions) {
     this.#client = options.client
     this.#fetch = options.fetch ?? globalThis.fetch.bind(globalThis)
     this.#ttlMs = options.ttlMs ?? DEFAULT_TTL_MS
     this.#now = options.now ?? Date.now
+    this.#includeProfiles = options.includeProfiles ?? false
   }
 
   async load(options: { force?: boolean; signal?: AbortSignal } = {}): Promise<DirectorySnapshot> {
     const cached = this.#snapshot
     if (!options.force && cached && this.#now() - cached.loadedAt < this.#ttlMs) return cached
 
-    const [models, catalog] = await Promise.all([
-      listModels(this.#client, options.signal),
-      fetchCatalog(this.#fetch, options.signal).catch(() => undefined),
+    const profilesPromise = this.#includeProfiles
+      ? fetchModelProfiles(this.#client, options.signal).catch(() => undefined)
+      : Promise.resolve(undefined)
+    const models = await listModels(this.#client, options.signal)
+    const requiresCatalog = needsCatalog(models)
+    const [catalog, profiles] = await Promise.all([
+      requiresCatalog ? fetchCatalog(this.#fetch, options.signal).catch(() => undefined) : Promise.resolve(undefined),
+      profilesPromise,
     ])
     if (catalog) this.#catalog = catalog
+    if (profiles) this.#profiles = profiles
     const effectiveCatalog = catalog ?? this.#catalog ?? null
+    const effectiveProfiles = profiles ?? this.#profiles ?? new Map()
+    const classified = classifyModels(models, effectiveCatalog)
     this.#snapshot = {
-      models: classifyModels(models, effectiveCatalog),
+      models: this.#includeProfiles
+        ? classified.map((model) => ({ ...model, profile: resolveModelProfile(model.id, effectiveProfiles) }))
+        : classified,
       listedIds: new Set(models.map((model) => model.id)),
-      catalogAvailable: effectiveCatalog !== null,
+      catalogAvailable: !requiresCatalog || effectiveCatalog !== null,
+      profilesAvailable: !this.#includeProfiles || profiles !== undefined || this.#profiles !== undefined,
       loadedAt: this.#now(),
     }
     return this.#snapshot

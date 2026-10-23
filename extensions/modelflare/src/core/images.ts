@@ -70,6 +70,9 @@ export async function generateImage(client: ModelflareClient, call: ImageCall): 
   if (model.kind !== 'image' || !model.imageRoute) {
     throw new TypeError(`${model.id} is not an image model`)
   }
+  if (edit && model.imageRoute !== 'images') {
+    throw new TypeError(`${model.id} does not use the OpenAI-compatible image edits route`)
+  }
   const requestOptions = { method: 'POST', ...(signal ? { signal } : {}) }
 
   let images: GeneratedImage[]
@@ -87,7 +90,7 @@ export async function generateImage(client: ModelflareClient, call: ImageCall): 
   } else {
     const response = await client.json<OpenAIImagesResponse>(edit ? 'images/edits' : 'images/generations', {
       ...requestOptions,
-      body: { model: model.id, prompt, ...parameters },
+      body: { ...parameters, model: model.id, prompt },
     })
     images = fromOpenAI(response)
   }

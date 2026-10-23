@@ -1,3 +1,6 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
 import { Action, ActionPanel, Detail, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
@@ -5,7 +8,30 @@ import { useEffect, useState } from "react";
 import { streamChatCompletion } from "./core/chat.js";
 import { explain, modelflare, modelIds } from "./modelflare";
 
-function Answer(props: { model: string; prompt: string }) {
+const IMAGE_MIME_TYPES: Record<string, string> = {
+  ".gif": "image/gif",
+  ".jpeg": "image/jpeg",
+  ".jpg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+};
+
+async function userContent(modelId: string, prompt: string, imagePath?: string) {
+  if (!imagePath) return prompt;
+  const model = (await modelflare().directory.load()).models.find((candidate) => candidate.id === modelId);
+  if (!model?.profile?.inputModalities.includes("image")) {
+    throw new TypeError(`${modelId} is not advertised as a vision-capable model.`);
+  }
+  const mimeType = IMAGE_MIME_TYPES[path.extname(imagePath).toLowerCase()];
+  if (!mimeType) throw new TypeError("Use a PNG, JPEG, WEBP, or GIF image.");
+  const base64 = (await readFile(imagePath)).toString("base64");
+  return [
+    { type: "text", text: prompt },
+    { type: "image_url", image_url: { url: `data:${mimeType};base64,${base64}` } },
+  ];
+}
+
+function Answer(props: { model: string; prompt: string; imagePath?: string }) {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -15,7 +41,10 @@ function Answer(props: { model: string; prompt: string }) {
       try {
         const events = streamChatCompletion(
           modelflare().client,
-          { model: props.model, messages: [{ role: "user", content: props.prompt }] },
+          {
+            model: props.model,
+            messages: [{ role: "user", content: await userContent(props.model, props.prompt, props.imagePath) }],
+          },
           controller.signal,
         );
         for await (const event of events) {
@@ -34,7 +63,7 @@ function Answer(props: { model: string; prompt: string }) {
       }
     })();
     return () => controller.abort();
-  }, [props.model, props.prompt]);
+  }, [props.imagePath, props.model, props.prompt]);
 
   return (
     <Detail
@@ -66,8 +95,10 @@ export default function Command() {
           <Action.SubmitForm
             title="Ask"
             icon={Icon.Message}
-            onSubmit={(values: { model: string; prompt: string }) => {
-              if (values.model && values.prompt.trim()) push(<Answer model={values.model} prompt={values.prompt} />);
+            onSubmit={(values: { model: string; prompt: string; image?: string[] }) => {
+              if (values.model && values.prompt.trim()) {
+                push(<Answer model={values.model} prompt={values.prompt} imagePath={values.image?.[0]} />);
+              }
             }}
           />
         </ActionPanel>
@@ -79,6 +110,7 @@ export default function Command() {
         ))}
       </Form.Dropdown>
       <Form.TextArea id="prompt" title="Prompt" placeholder="Ask anything" />
+      <Form.FilePicker id="image" title="Image" allowMultipleSelection={false} />
     </Form>
   );
 }

@@ -13,10 +13,10 @@ Open the extension preferences and paste your Smart API Key. Choose the China ba
 
 ## Commands
 
-- **Ask Modelflare** — pick any text model your key can call and stream the answer.
+- **Ask Modelflare** — pick any text model your key can call, optionally attach a PNG/JPEG/WEBP/GIF image for a vision model, and stream the answer.
 - **Generate Image** — pick an image model, write a prompt and optional model parameters (JSON, from the model's page at https://docs.modelflare.dev/models/image/). Images are saved to `~/Downloads/Modelflare`.
 
-The model lists come from your key's `GET /v1/models`, so new models appear without editing the key. Calls are billed to your Modelflare balance by actual usage; see https://modelflare.dev/usage-logs.
+The model lists come from your key's `GET /v1/models?scope=authorized`, so new models appear without editing the key. Calls are billed to your Modelflare balance by actual usage; see https://modelflare.dev/usage-logs.
 
 ## Troubleshooting
 

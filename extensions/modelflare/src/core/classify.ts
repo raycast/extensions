@@ -1,3 +1,5 @@
+import type { ModelProfile } from './profiles.js'
+
 /** Values of `supported_endpoint_types` the gateway publishes today. */
 export type EndpointType =
   | 'openai'
@@ -17,6 +19,8 @@ export interface ModelListEntry {
   id: string
   owned_by?: string
   supported_endpoint_types?: EndpointType[] | null
+  kind?: ModelKind | null
+  image_route?: ImageRoute | null
 }
 
 /** The fields of a public `GET /api/pricing` entry that classification reads. */
@@ -43,6 +47,8 @@ export interface ClassifiedModel {
   endpoints: EndpointType[]
   /** Set for image models only. */
   imageRoute?: ImageRoute
+  /** Present when the directory was created with `includeProfiles`. */
+  profile?: ModelProfile
 }
 
 const TEXT_ENDPOINTS: ReadonlySet<string> = new Set(['openai', 'openai-response', 'anthropic'])
@@ -104,6 +110,16 @@ export function classifyModels(
       ...(model.owned_by ? { ownedBy: model.owned_by } : {}),
     }
 
+    if (model.kind === 'image') {
+      const route = model.image_route ?? imageRoute(endpointSet)
+      if (route) classified.push({ ...base, kind: 'image', imageRoute: route })
+      continue
+    }
+    if (model.kind === 'video' || model.kind === 'embedding' || model.kind === 'rerank' || model.kind === 'text') {
+      classified.push({ ...base, kind: model.kind })
+      continue
+    }
+
     if (declaresImage(entry, endpointSet)) {
       const route = imageRoute(endpointSet)
       if (route) classified.push({ ...base, kind: 'image', imageRoute: route })
@@ -126,6 +142,17 @@ export function classifyModels(
     }
   }
   return classified
+}
+
+export function needsCatalog(models: readonly ModelListEntry[]): boolean {
+  return models.some((model) => {
+    if (model.kind != null) return false
+    const endpoints = model.supported_endpoint_types ?? []
+    if (endpoints.some((endpoint) => endpoint === 'image-generation' || endpoint === 'openai-video' || endpoint === 'embeddings' || endpoint === 'jina-rerank')) {
+      return false
+    }
+    return endpoints.some((endpoint) => endpoint === 'openai' || endpoint === 'openai-response' || endpoint === 'anthropic' || endpoint === 'gemini')
+  })
 }
 
 export function supportsEndpoint(model: ClassifiedModel, endpoint: EndpointType): boolean {
