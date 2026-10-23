@@ -24,7 +24,8 @@ function withLocalLock<T>(fn: () => Promise<T>): Promise<T> {
   return result;
 }
 
-// Cross-command file lock to serialize state changes across both Caffeine and Caffeine-Tray commands
+// Cross-command file lock to serialize state changes across both Caffeine and Caffeine-Tray commands.
+// Guarantees atomic transitions, prevents orphaned helpers, and ensures timer replacements recheck expired sessions.
 export async function acquireFileLock(maxWaitMs = 10000): Promise<() => Promise<void>> {
   const lockFile = path.join(getStateDirectory(), "caffeine.lock");
   const start = Date.now();
