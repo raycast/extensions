@@ -1,4 +1,5 @@
 import { List, showToast, Toast, ActionPanel, Action, Icon, Color, confirmAlert } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnJobs } from "./fetch_jobs";
 import { JobsFetchResponse, JobModel } from "./types";
@@ -63,13 +64,18 @@ const TriggerJobItem = ({ job, onTrigger }: TriggerJobItemProps): JSX.Element =>
       ]}
       actions={
         <ActionPanel>
-          <Action title="🚀 Trigger Job Run" icon={Icon.Terminal} onAction={handleTrigger} />
+          <Action
+            title="🚀 Trigger Job Run"
+            shortcut={Shortcuts.trigger}
+            icon={Icon.Terminal}
+            onAction={handleTrigger}
+          />
           <JobGoTo job={job} />
           <ActionPanel.Section title="Open in dbt Cloud">
-            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" />
+            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" shortcut={Shortcuts.webJob} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Job ID" content={job.id.toString()} />
+            <Action.CopyToClipboard title="Copy Job ID" shortcut={Shortcuts.copyId} content={job.id.toString()} />
           </ActionPanel.Section>
         </ActionPanel>
       }

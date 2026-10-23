@@ -1,4 +1,5 @@
 import { List, showToast, Toast, ActionPanel, Action, Icon, Color } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { useEffect, useState, useCallback } from "react";
 import { returnProjects } from "./fetch_projects";
 import { returnJobs } from "./fetch_jobs";
@@ -144,11 +145,16 @@ const SearchResultItem = ({ result }: SearchResultItemProps) => {
       accessories={[{ text: result.type.charAt(0).toUpperCase() + result.type.slice(1) }]}
       actions={
         <ActionPanel>
-          <Action.Push title="View Details" icon={Icon.Eye} target={getResultDetail(result)} />
+          <Action.Push
+            title="View Details"
+            shortcut={Shortcuts.details}
+            icon={Icon.Eye}
+            target={getResultDetail(result)}
+          />
           {getResultGoTo(result)}
-          <Action.OpenInBrowser url={url} title="Open in dbt Cloud" />
-          <Action.CopyToClipboard title="Copy URL" content={url} />
-          <Action.CopyToClipboard title="Copy ID" content={result.data.id.toString()} />
+          <Action.OpenInBrowser url={url} title="Open in dbt Cloud" shortcut={Shortcuts.open} />
+          <Action.CopyToClipboard title="Copy URL" shortcut={Shortcuts.copyPath} content={url} />
+          <Action.CopyToClipboard title="Copy ID" shortcut={Shortcuts.copyId} content={result.data.id.toString()} />
         </ActionPanel>
       }
     />

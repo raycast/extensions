@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { useEffect, useState } from "react";
 import {
   fetchModels,
@@ -244,12 +245,17 @@ export function LineageDetail({
           <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser
               title="Open Lineage in dbt Cloud"
+              shortcut={Shortcuts.webLineage}
               url={buildLineageUrl(projectId, displayNode.uniqueId)}
               icon={Icon.Globe}
             />
-            <Action.OpenInBrowser title="Open Docs in dbt Cloud" url={buildDocsUrl(projectId, displayNode.uniqueId)} />
+            <Action.OpenInBrowser
+              title="Open Docs in dbt Cloud"
+              shortcut={Shortcuts.webDocs}
+              url={buildDocsUrl(projectId, displayNode.uniqueId)}
+            />
           </ActionPanel.Section>
-          <Action.CopyToClipboard title="Copy Unique ID" content={displayNode.uniqueId} />
+          <Action.CopyToClipboard title="Copy Unique ID" shortcut={Shortcuts.copyId} content={displayNode.uniqueId} />
         </ActionPanel>
       }
     />
@@ -353,14 +359,20 @@ export function LineageList({
                       <ActionPanel>
                         <Action.Push
                           title="View Lineage"
+                          shortcut={Shortcuts.lineage}
                           icon={Icon.Eye}
                           target={<LineageDetail node={node} environmentId={environmentId} projectId={projectId} />}
                         />
                         <Action.OpenInBrowser
                           title="Open Lineage in dbt Cloud"
+                          shortcut={Shortcuts.webLineage}
                           url={buildLineageUrl(projectId, node.uniqueId)}
                         />
-                        <Action.CopyToClipboard title="Copy Unique ID" content={node.uniqueId} />
+                        <Action.CopyToClipboard
+                          title="Copy Unique ID"
+                          shortcut={Shortcuts.copyId}
+                          content={node.uniqueId}
+                        />
                       </ActionPanel>
                     }
                   />
@@ -403,6 +415,7 @@ function LineageEnvironmentListItem({ env, projectName }: { env: EnvironmentWith
         <ActionPanel>
           <Action.Push
             title="Explore Lineage"
+            shortcut={Shortcuts.lineage}
             icon={Icon.Link}
             target={
               <LineageList

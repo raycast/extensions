@@ -1,4 +1,5 @@
 import { List, showToast, Toast, ActionPanel, Action, Icon, Color, Detail, useNavigation } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnEnvironments } from "./fetch_environments";
 import { EnvironmentsFetchResponse, EnvironmentModel } from "./types";
@@ -145,18 +146,49 @@ ${environment.supports_docs ? "✅ Supports Documentation" : "❌ Does not suppo
             omit={["details"]}
           />
           <ActionPanel.Section title="Open in dbt Cloud">
-            <Action.OpenInBrowser url={envUrl} title="Open Environment in dbt Cloud" />
-            <Action.OpenInBrowser url={projectUrl} title="Open Project in dbt Cloud" icon={Icon.Document} />
-            <Action.OpenInBrowser url={jobsUrl} title="Open Jobs in dbt Cloud" icon={Icon.Hammer} />
+            <Action.OpenInBrowser
+              url={envUrl}
+              title="Open Environment in dbt Cloud"
+              shortcut={Shortcuts.webEnvironment}
+            />
+            <Action.OpenInBrowser
+              url={projectUrl}
+              title="Open Project in dbt Cloud"
+              shortcut={Shortcuts.webProject}
+              icon={Icon.Document}
+            />
+            <Action.OpenInBrowser
+              url={jobsUrl}
+              title="Open Jobs in dbt Cloud"
+              shortcut={Shortcuts.webJob}
+              icon={Icon.Hammer}
+            />
             {environment.supports_docs && (
-              <Action.OpenInBrowser url={docsUrl} title="Open Documentation in dbt Cloud" icon={Icon.Document} />
+              <Action.OpenInBrowser
+                url={docsUrl}
+                title="Open Documentation in dbt Cloud"
+                shortcut={Shortcuts.webDocs}
+                icon={Icon.Document}
+              />
             )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Environment ID" content={environment.id.toString()} />
-            <Action.CopyToClipboard title="Copy Environment Name" content={environment.name} />
+            <Action.CopyToClipboard
+              title="Copy Environment ID"
+              shortcut={Shortcuts.copyId}
+              content={environment.id.toString()}
+            />
+            <Action.CopyToClipboard
+              title="Copy Environment Name"
+              shortcut={Shortcuts.copyName}
+              content={environment.name}
+            />
             {environment.credentials?.schema && (
-              <Action.CopyToClipboard title="Copy Schema" content={environment.credentials.schema} />
+              <Action.CopyToClipboard
+                title="Copy Schema"
+                shortcut={Shortcuts.copySchema}
+                content={environment.credentials.schema}
+              />
             )}
           </ActionPanel.Section>
         </ActionPanel>
@@ -189,6 +221,7 @@ const EnvironmentListItem = ({ environment }: EnvironmentListItemProps): JSX.Ele
         <ActionPanel>
           <Action
             title="View Details"
+            shortcut={Shortcuts.details}
             icon={Icon.Eye}
             onAction={() => push(<EnvironmentDetail environment={environment} />)}
           />
@@ -209,20 +242,37 @@ const EnvironmentListItem = ({ environment }: EnvironmentListItemProps): JSX.Ele
             omit={["details"]}
           />
           <ActionPanel.Section title="Open in dbt Cloud">
-            <Action.OpenInBrowser url={envUrl} title="Open Environment in dbt Cloud" />
+            <Action.OpenInBrowser
+              url={envUrl}
+              title="Open Environment in dbt Cloud"
+              shortcut={Shortcuts.webEnvironment}
+            />
             {environment.supports_docs && (
               <Action.OpenInBrowser
                 url={buildDbtCloudUrl(`/projects/${environment.project_id}/docs`)}
                 title="Open Documentation in dbt Cloud"
+                shortcut={Shortcuts.webDocs}
                 icon={Icon.Document}
               />
             )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Environment ID" content={environment.id.toString()} />
-            <Action.CopyToClipboard title="Copy Environment Name" content={environment.name} />
+            <Action.CopyToClipboard
+              title="Copy Environment ID"
+              shortcut={Shortcuts.copyId}
+              content={environment.id.toString()}
+            />
+            <Action.CopyToClipboard
+              title="Copy Environment Name"
+              shortcut={Shortcuts.copyName}
+              content={environment.name}
+            />
             {environment.credentials?.schema && (
-              <Action.CopyToClipboard title="Copy Schema" content={environment.credentials.schema} />
+              <Action.CopyToClipboard
+                title="Copy Schema"
+                shortcut={Shortcuts.copySchema}
+                content={environment.credentials.schema}
+              />
             )}
           </ActionPanel.Section>
         </ActionPanel>

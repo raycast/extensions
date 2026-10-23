@@ -11,6 +11,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { useEffect, useState } from "react";
 import {
   fetchModels,
@@ -454,11 +455,13 @@ export function ModelDetail({
           <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser
               title="Open Docs in dbt Cloud"
+              shortcut={Shortcuts.webDocs}
               url={buildDocsUrl(projectId, displayModel.uniqueId)}
               icon={Icon.Globe}
             />
             <Action.OpenInBrowser
               title="Open Lineage in dbt Cloud"
+              shortcut={Shortcuts.webLineage}
               url={buildLineageUrl(projectId, displayModel.uniqueId)}
               icon={Icon.Link}
             />
@@ -520,12 +523,23 @@ export function ModelDetail({
             )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Unique ID" content={displayModel.uniqueId} />
+            <Action.CopyToClipboard
+              title="Copy Unique ID"
+              shortcut={Shortcuts.copyId}
+              content={displayModel.uniqueId}
+            />
             <Action.CopyToClipboard
               title="Copy Full Path"
+              shortcut={Shortcuts.copyPath}
               content={`${displayModel.database}.${displayModel.schema}.${displayModel.alias || displayModel.name}`}
             />
-            {fullModel?.rawCode && <Action.CopyToClipboard title="Copy Source Code" content={fullModel.rawCode} />}
+            {fullModel?.rawCode && (
+              <Action.CopyToClipboard
+                title="Copy Source Code"
+                shortcut={Shortcuts.copySourceCode}
+                content={fullModel.rawCode}
+              />
+            )}
             {fullModel?.compiledCode && (
               <Action.CopyToClipboard
                 title="Copy Compiled Code"
@@ -667,6 +681,7 @@ export function CatalogList({
                 <ActionPanel>
                   <Action
                     title="View Details & Lineage"
+                    shortcut={Shortcuts.details}
                     icon={Icon.Eye}
                     onAction={() =>
                       push(
@@ -683,10 +698,15 @@ export function CatalogList({
                     projectName={model.projectName}
                     omit={["details"]}
                   />
-                  <Action.OpenInBrowser title="Open in dbt Cloud" url={buildDocsUrl(model.projectId, model.uniqueId)} />
-                  <Action.CopyToClipboard title="Copy Unique ID" content={model.uniqueId} />
+                  <Action.OpenInBrowser
+                    title="Open in dbt Cloud"
+                    shortcut={Shortcuts.open}
+                    url={buildDocsUrl(model.projectId, model.uniqueId)}
+                  />
+                  <Action.CopyToClipboard title="Copy Unique ID" shortcut={Shortcuts.copyId} content={model.uniqueId} />
                   <Action.CopyToClipboard
                     title="Copy Full Path"
+                    shortcut={Shortcuts.copyPath}
                     content={`${model.database}.${model.schema}.${model.alias || model.name}`}
                   />
                 </ActionPanel>

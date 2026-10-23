@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { useEffect, useState } from "react";
 import { fetchSources, buildDocsUrl, getResourceTypeIcon, getFreshnessStatus, formatRelativeTime } from "./api";
 import { SourceGoTo } from "./navigation";
@@ -87,6 +88,7 @@ export function SourceDetail({
           <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser
               title="Open Docs in dbt Cloud"
+              shortcut={Shortcuts.webDocs}
               url={buildDocsUrl(projectId, source.uniqueId)}
               icon={Icon.Globe}
             />
@@ -107,13 +109,15 @@ export function SourceDetail({
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Unique ID" content={source.uniqueId} />
+            <Action.CopyToClipboard title="Copy Unique ID" shortcut={Shortcuts.copyId} content={source.uniqueId} />
             <Action.CopyToClipboard
               title="Copy Full Path"
+              shortcut={Shortcuts.copyPath}
               content={`${source.database}.${source.schema}.${source.identifier || source.name}`}
             />
             <Action.CopyToClipboard
               title="Copy Source Ref"
+              shortcut={Shortcuts.copyRef}
               content={`{{ source('${source.sourceName}', '${source.name}') }}`}
             />
           </ActionPanel.Section>
@@ -210,6 +214,7 @@ export function SourcesList({
                     <ActionPanel>
                       <Action.Push
                         title="View Details"
+                        shortcut={Shortcuts.details}
                         icon={Icon.Eye}
                         target={<SourceDetail source={source} environmentId={environmentId} projectId={projectId} />}
                       />
@@ -232,10 +237,19 @@ export function SourcesList({
                         projectId={projectId}
                         omit={["details"]}
                       />
-                      <Action.OpenInBrowser title="Open in dbt Cloud" url={buildDocsUrl(projectId, source.uniqueId)} />
-                      <Action.CopyToClipboard title="Copy Unique ID" content={source.uniqueId} />
+                      <Action.OpenInBrowser
+                        title="Open in dbt Cloud"
+                        shortcut={Shortcuts.open}
+                        url={buildDocsUrl(projectId, source.uniqueId)}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Unique ID"
+                        shortcut={Shortcuts.copyId}
+                        content={source.uniqueId}
+                      />
                       <Action.CopyToClipboard
                         title="Copy Source Ref"
+                        shortcut={Shortcuts.copyRef}
                         content={`{{ source('${source.sourceName}', '${source.name}') }}`}
                       />
                     </ActionPanel>
@@ -283,6 +297,7 @@ function SourcesEnvironmentListItem({ env, projectName }: { env: EnvironmentWith
         <ActionPanel>
           <Action.Push
             title="Browse Sources"
+            shortcut={Shortcuts.sources}
             icon={Icon.List}
             target={
               <SourcesList

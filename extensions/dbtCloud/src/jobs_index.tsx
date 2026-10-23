@@ -10,6 +10,7 @@ import {
   useNavigation,
   confirmAlert,
 } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnJobs } from "./fetch_jobs";
 import { JobsFetchResponse, JobModel } from "./types";
@@ -160,15 +161,29 @@ ${
           )}
           <JobGoTo job={job} omit={["details"]} />
           <ActionPanel.Section title="Open in dbt Cloud">
-            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" />
-            <Action.OpenInBrowser url={runHistoryUrl} title="Open Run History in dbt Cloud" icon={Icon.List} />
-            <Action.OpenInBrowser url={settingsUrl} title="Open Job Settings in dbt Cloud" icon={Icon.Gear} />
+            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" shortcut={Shortcuts.webJob} />
+            <Action.OpenInBrowser
+              url={runHistoryUrl}
+              title="Open Run History in dbt Cloud"
+              shortcut={Shortcuts.webRun}
+              icon={Icon.List}
+            />
+            <Action.OpenInBrowser
+              url={settingsUrl}
+              title="Open Job Settings in dbt Cloud"
+              shortcut={Shortcuts.webSettings}
+              icon={Icon.Gear}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Job ID" content={job.id.toString()} />
-            <Action.CopyToClipboard title="Copy Job Name" content={job.name} />
+            <Action.CopyToClipboard title="Copy Job ID" shortcut={Shortcuts.copyId} content={job.id.toString()} />
+            <Action.CopyToClipboard title="Copy Job Name" shortcut={Shortcuts.copyName} content={job.name} />
             {job.execute_steps?.length > 0 && (
-              <Action.CopyToClipboard title="Copy Execute Steps" content={job.execute_steps.join("\n")} />
+              <Action.CopyToClipboard
+                title="Copy Execute Steps"
+                shortcut={Shortcuts.copySteps}
+                content={job.execute_steps.join("\n")}
+              />
             )}
           </ActionPanel.Section>
         </ActionPanel>
@@ -229,6 +244,7 @@ const JobListItem = ({ job, onRefresh }: JobListItemProps): JSX.Element => {
         <ActionPanel>
           <Action
             title="View Details"
+            shortcut={Shortcuts.details}
             icon={Icon.Eye}
             onAction={() => push(<JobDetail job={job} onTrigger={onRefresh} />)}
           />
@@ -242,14 +258,23 @@ const JobListItem = ({ job, onRefresh }: JobListItemProps): JSX.Element => {
           )}
           <JobGoTo job={job} omit={["details"]} />
           <ActionPanel.Section title="Open in dbt Cloud">
-            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" />
-            <Action.OpenInBrowser url={runHistoryUrl} title="Open Run History in dbt Cloud" icon={Icon.List} />
+            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" shortcut={Shortcuts.webJob} />
+            <Action.OpenInBrowser
+              url={runHistoryUrl}
+              title="Open Run History in dbt Cloud"
+              shortcut={Shortcuts.webRun}
+              icon={Icon.List}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Job ID" content={job.id.toString()} />
-            <Action.CopyToClipboard title="Copy Job Name" content={job.name} />
+            <Action.CopyToClipboard title="Copy Job ID" shortcut={Shortcuts.copyId} content={job.id.toString()} />
+            <Action.CopyToClipboard title="Copy Job Name" shortcut={Shortcuts.copyName} content={job.name} />
             {job.execute_steps?.length > 0 && (
-              <Action.CopyToClipboard title="Copy Execute Steps" content={job.execute_steps.join("\n")} />
+              <Action.CopyToClipboard
+                title="Copy Execute Steps"
+                shortcut={Shortcuts.copySteps}
+                content={job.execute_steps.join("\n")}
+              />
             )}
           </ActionPanel.Section>
         </ActionPanel>

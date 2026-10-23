@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchModelWithLineage, fetchSources } from "./api";
 import { CatalogList, ModelDetail } from "./catalog_index";
@@ -130,11 +131,17 @@ export function ProjectGoTo({ projectId, projectName, omit }: GoToProps & { proj
   return (
     <ActionPanel.Section title="Go To">
       {show(omit, "details") && (
-        <Action.Push title="View Project Details" icon={Icon.Eye} target={<ProjectById projectId={projectId} />} />
+        <Action.Push
+          title="View Project Details"
+          shortcut={Shortcuts.details}
+          icon={Icon.Eye}
+          target={<ProjectById projectId={projectId} />}
+        />
       )}
       {show(omit, "environments") && (
         <Action.Push
           title="View Environments"
+          shortcut={Shortcuts.environment}
           icon={Icon.Globe}
           target={<EnvironmentsList projectId={projectId} scopeTitle={projectName} />}
         />
@@ -142,6 +149,7 @@ export function ProjectGoTo({ projectId, projectName, omit }: GoToProps & { proj
       {show(omit, "jobs") && (
         <Action.Push
           title="View Jobs"
+          shortcut={Shortcuts.job}
           icon={Icon.Hammer}
           target={<JobsList projectId={projectId} scopeTitle={projectName} />}
         />
@@ -149,6 +157,7 @@ export function ProjectGoTo({ projectId, projectName, omit }: GoToProps & { proj
       {show(omit, "models") && (
         <Action.Push
           title="View Models"
+          shortcut={Shortcuts.models}
           icon={Icon.Box}
           target={<CatalogList projectId={projectId} scopeTitle={projectName} />}
         />
@@ -156,6 +165,7 @@ export function ProjectGoTo({ projectId, projectName, omit }: GoToProps & { proj
       {show(omit, "jobPerformance") && (
         <Action.Push
           title="View Job Performance"
+          shortcut={Shortcuts.performance}
           icon={Icon.BarChart}
           target={<JobPerformanceList projectId={projectId} />}
         />
@@ -181,11 +191,17 @@ export function EnvironmentGoTo({
   return (
     <ActionPanel.Section title="Go To">
       {show(omit, "project") && (
-        <Action.Push title="Go to Project" icon={Icon.ArrowUp} target={<ProjectById projectId={projectId} />} />
+        <Action.Push
+          title="Go to Project"
+          shortcut={Shortcuts.project}
+          icon={Icon.ArrowUp}
+          target={<ProjectById projectId={projectId} />}
+        />
       )}
       {show(omit, "details") && (
         <Action.Push
           title="View Environment Details"
+          shortcut={Shortcuts.details}
           icon={Icon.Eye}
           target={<EnvironmentById environmentId={environmentId} />}
         />
@@ -193,6 +209,7 @@ export function EnvironmentGoTo({
       {show(omit, "jobs") && (
         <Action.Push
           title="View Jobs"
+          shortcut={Shortcuts.job}
           icon={Icon.Hammer}
           target={<JobsList projectId={projectId} environmentId={environmentId} scopeTitle={environmentName} />}
         />
@@ -202,6 +219,7 @@ export function EnvironmentGoTo({
           {show(omit, "models") && (
             <Action.Push
               title="View Models"
+              shortcut={Shortcuts.models}
               icon={Icon.Box}
               target={<CatalogList environmentId={environmentId} scopeTitle={environmentName} />}
             />
@@ -209,6 +227,7 @@ export function EnvironmentGoTo({
           {show(omit, "sources") && (
             <Action.Push
               title="View Sources"
+              shortcut={Shortcuts.sources}
               icon={Icon.HardDrive}
               target={
                 <SourcesList environmentId={environmentId} environmentName={environmentName} projectId={projectId} />
@@ -218,6 +237,7 @@ export function EnvironmentGoTo({
           {show(omit, "lineage") && (
             <Action.Push
               title="View Lineage"
+              shortcut={Shortcuts.lineage}
               icon={Icon.Link}
               target={
                 <LineageList environmentId={environmentId} environmentName={environmentName} projectId={projectId} />
@@ -227,6 +247,7 @@ export function EnvironmentGoTo({
           {show(omit, "modelPerformance") && (
             <Action.Push
               title="View Model Performance"
+              shortcut={Shortcuts.performance}
               icon={Icon.Clock}
               target={
                 <ModelPerformanceList
@@ -245,24 +266,41 @@ export function JobGoTo({ job, omit }: GoToProps & { job: JobModel }) {
   return (
     <ActionPanel.Section title="Go To">
       {show(omit, "project") && (
-        <Action.Push title="Go to Project" icon={Icon.ArrowUp} target={<ProjectById projectId={job.project_id} />} />
+        <Action.Push
+          title="Go to Project"
+          shortcut={Shortcuts.project}
+          icon={Icon.ArrowUp}
+          target={<ProjectById projectId={job.project_id} />}
+        />
       )}
       {show(omit, "environment") && (
         <Action.Push
           title="Go to Environment"
+          shortcut={Shortcuts.environment}
           icon={Icon.ArrowUp}
           target={<EnvironmentById environmentId={job.environment_id} />}
         />
       )}
       {show(omit, "details") && (
-        <Action.Push title="View Job Details" icon={Icon.Eye} target={<JobDetail job={job} />} />
+        <Action.Push
+          title="View Job Details"
+          shortcut={Shortcuts.details}
+          icon={Icon.Eye}
+          target={<JobDetail job={job} />}
+        />
       )}
       {show(omit, "runs") && (
-        <Action.Push title="View Runs" icon={Icon.List} target={<RunsList jobId={job.id} scopeTitle={job.name} />} />
+        <Action.Push
+          title="View Runs"
+          shortcut={Shortcuts.runs}
+          icon={Icon.List}
+          target={<RunsList jobId={job.id} scopeTitle={job.name} />}
+        />
       )}
       {show(omit, "performance") && (
         <Action.Push
           title="View Performance"
+          shortcut={Shortcuts.performance}
           icon={Icon.BarChart}
           target={<JobPerformanceDetail job={job} projectName={job.project?.name ?? `Project ${job.project_id}`} />}
         />
@@ -275,24 +313,41 @@ export function RunGoTo({ run, omit }: GoToProps & { run: RunModel }) {
   return (
     <ActionPanel.Section title="Go To">
       {show(omit, "project") && (
-        <Action.Push title="Go to Project" icon={Icon.ArrowUp} target={<ProjectById projectId={run.project_id} />} />
+        <Action.Push
+          title="Go to Project"
+          shortcut={Shortcuts.project}
+          icon={Icon.ArrowUp}
+          target={<ProjectById projectId={run.project_id} />}
+        />
       )}
       {show(omit, "environment") && (
         <Action.Push
           title="Go to Environment"
+          shortcut={Shortcuts.environment}
           icon={Icon.ArrowUp}
           target={<EnvironmentById environmentId={run.environment_id} />}
         />
       )}
       {show(omit, "job") && (
-        <Action.Push title="Go to Job" icon={Icon.ArrowUp} target={<JobById jobId={run.job_definition_id} />} />
+        <Action.Push
+          title="Go to Job"
+          shortcut={Shortcuts.job}
+          icon={Icon.ArrowUp}
+          target={<JobById jobId={run.job_definition_id} />}
+        />
       )}
       {show(omit, "details") && (
-        <Action.Push title="View Run Details" icon={Icon.Eye} target={<RunDetail run={run} />} />
+        <Action.Push
+          title="View Run Details"
+          shortcut={Shortcuts.details}
+          icon={Icon.Eye}
+          target={<RunDetail run={run} />}
+        />
       )}
       {show(omit, "runs") && (
         <Action.Push
           title="View Other Runs of This Job"
+          shortcut={Shortcuts.runs}
           icon={Icon.List}
           target={
             <RunsList jobId={run.job_definition_id} scopeTitle={run.job?.name ?? `Job ${run.job_definition_id}`} />
@@ -310,8 +365,20 @@ function ModelLastRunActions({ uniqueId, environmentId }: { uniqueId: string; en
   if (!last) return null;
   return (
     <>
-      <Action.Push title={`View Last Run (#${last.runId})`} icon={Icon.Play} target={<RunById runId={last.runId} />} />
-      {last.jobId && <Action.Push title="Go to Last Job" icon={Icon.Hammer} target={<JobById jobId={last.jobId} />} />}
+      <Action.Push
+        title={`View Last Run (#${last.runId})`}
+        shortcut={Shortcuts.runs}
+        icon={Icon.Play}
+        target={<RunById runId={last.runId} />}
+      />
+      {last.jobId && (
+        <Action.Push
+          title="Go to Last Job"
+          shortcut={Shortcuts.job}
+          icon={Icon.Hammer}
+          target={<JobById jobId={last.jobId} />}
+        />
+      )}
     </>
   );
 }
@@ -338,11 +405,17 @@ export function ModelGoTo({
   return (
     <ActionPanel.Section title="Go To">
       {show(omit, "project") && (
-        <Action.Push title="Go to Project" icon={Icon.ArrowUp} target={<ProjectById projectId={projectId} />} />
+        <Action.Push
+          title="Go to Project"
+          shortcut={Shortcuts.project}
+          icon={Icon.ArrowUp}
+          target={<ProjectById projectId={projectId} />}
+        />
       )}
       {show(omit, "environment") && (
         <Action.Push
           title="Go to Environment"
+          shortcut={Shortcuts.environment}
           icon={Icon.ArrowUp}
           target={<EnvironmentById environmentId={environmentId} />}
         />
@@ -351,6 +424,7 @@ export function ModelGoTo({
       {show(omit, "details") && (
         <Action.Push
           title="View Model Details"
+          shortcut={Shortcuts.details}
           icon={Icon.Eye}
           target={<ModelByUniqueId uniqueId={uniqueId} environmentId={environmentId} projectId={projectId} />}
         />
@@ -358,6 +432,7 @@ export function ModelGoTo({
       {show(omit, "lineage") && (
         <Action.Push
           title="View Lineage"
+          shortcut={Shortcuts.lineage}
           icon={Icon.Link}
           target={<LineageDetail node={node} environmentId={environmentId} projectId={projectId} />}
         />
@@ -365,6 +440,7 @@ export function ModelGoTo({
       {show(omit, "performance") && (
         <Action.Push
           title="View Performance"
+          shortcut={Shortcuts.performance}
           icon={Icon.BarChart}
           target={
             <ModelPerformanceDetail
@@ -396,11 +472,17 @@ export function SourceGoTo({
   return (
     <ActionPanel.Section title="Go To">
       {show(omit, "project") && (
-        <Action.Push title="Go to Project" icon={Icon.ArrowUp} target={<ProjectById projectId={projectId} />} />
+        <Action.Push
+          title="Go to Project"
+          shortcut={Shortcuts.project}
+          icon={Icon.ArrowUp}
+          target={<ProjectById projectId={projectId} />}
+        />
       )}
       {show(omit, "environment") && (
         <Action.Push
           title="Go to Environment"
+          shortcut={Shortcuts.environment}
           icon={Icon.ArrowUp}
           target={<EnvironmentById environmentId={environmentId} />}
         />
@@ -408,6 +490,7 @@ export function SourceGoTo({
       {show(omit, "details") && (
         <Action.Push
           title="View Source Details"
+          shortcut={Shortcuts.details}
           icon={Icon.Eye}
           target={<SourceByUniqueId uniqueId={source.uniqueId} environmentId={environmentId} projectId={projectId} />}
         />
@@ -415,6 +498,7 @@ export function SourceGoTo({
       {show(omit, "lineage") && source.children && (
         <Action.Push
           title="View Lineage"
+          shortcut={Shortcuts.lineage}
           icon={Icon.Link}
           target={<LineageDetail node={source as SourceNode} environmentId={environmentId} projectId={projectId} />}
         />

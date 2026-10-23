@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, Keyboard, List } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { buildDbtCloudUrl, fetchJobRunMetrics, formatRelativeTime } from "./api";
@@ -151,9 +152,14 @@ ${runRows || "| — | — | — | — | — | — |"}
         <ActionPanel>
           <JobGoTo job={job} omit={["performance"]} />
           <ActionPanel.Section title="Open in dbt Cloud">
-            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" />
+            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" shortcut={Shortcuts.webJob} />
             {inWindow[0] && (
-              <Action.OpenInBrowser url={inWindow[0].href} title="Open Latest Run in dbt Cloud" icon={Icon.Play} />
+              <Action.OpenInBrowser
+                url={inWindow[0].href}
+                title="Open Latest Run in dbt Cloud"
+                shortcut={Shortcuts.webRun}
+                icon={Icon.Play}
+              />
             )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Time Window">
@@ -168,8 +174,12 @@ ${runRows || "| — | — | — | — | — | — |"}
             ))}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Job ID" content={job.id.toString()} />
-            <Action.CopyToClipboard title="Copy Success Rate" content={successRate} />
+            <Action.CopyToClipboard title="Copy Job ID" shortcut={Shortcuts.copyId} content={job.id.toString()} />
+            <Action.CopyToClipboard
+              title="Copy Success Rate"
+              shortcut={Shortcuts.copySuccessRate}
+              content={successRate}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -253,6 +263,7 @@ export function JobPerformanceList({ projectId }: { projectId?: number } = {}) {
                   <ActionPanel>
                     <Action.Push
                       title="View Performance"
+                      shortcut={Shortcuts.performance}
                       icon={Icon.BarChart}
                       target={<JobPerformanceDetail job={job} projectName={projectName} environment={environment} />}
                     />
@@ -260,8 +271,13 @@ export function JobPerformanceList({ projectId }: { projectId?: number } = {}) {
                     <Action.OpenInBrowser
                       url={buildDbtCloudUrl(`/projects/${job.project_id}/jobs/${job.id}`)}
                       title="Open Job in dbt Cloud"
+                      shortcut={Shortcuts.webJob}
                     />
-                    <Action.CopyToClipboard title="Copy Job ID" content={job.id.toString()} />
+                    <Action.CopyToClipboard
+                      title="Copy Job ID"
+                      shortcut={Shortcuts.copyId}
+                      content={job.id.toString()}
+                    />
                   </ActionPanel>
                 }
               />

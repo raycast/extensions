@@ -1,4 +1,5 @@
 import { List, showToast, Toast, ActionPanel, Action, Icon, Color, Detail, useNavigation } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnRuns } from "./fetch_runs";
 import { RunsFetchResponse, RunModel } from "./types";
@@ -132,16 +133,25 @@ ${run.trigger?.cause ? `\n## Trigger\n\n**Cause:** ${run.trigger.cause}` : ""}
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={runUrl} title="Open Run in dbt Cloud" />
+          <Action.OpenInBrowser url={runUrl} title="Open Run in dbt Cloud" shortcut={Shortcuts.webRun} />
           <RunGoTo run={run} omit={["details"]} />
-          {run.status === 3 && <Action title="Cancel Run" icon={Icon.XmarkCircle} onAction={() => cancelRun(run.id)} />}
+          {run.status === 3 && (
+            <Action
+              title="Cancel Run"
+              shortcut={Shortcuts.cancel}
+              icon={Icon.XmarkCircle}
+              onAction={() => cancelRun(run.id)}
+            />
+          )}
           <ActionPanel.Section title="Open in dbt Cloud">
-            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" />
+            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" shortcut={Shortcuts.webJob} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Run ID" content={run.id.toString()} />
-            <Action.CopyToClipboard title="Copy Run URL" content={runUrl} />
-            {run.git_sha && <Action.CopyToClipboard title="Copy Git SHA" content={run.git_sha} />}
+            <Action.CopyToClipboard title="Copy Run ID" shortcut={Shortcuts.copyId} content={run.id.toString()} />
+            <Action.CopyToClipboard title="Copy Run URL" shortcut={Shortcuts.copyPath} content={runUrl} />
+            {run.git_sha && (
+              <Action.CopyToClipboard title="Copy Git SHA" shortcut={Shortcuts.copySha} content={run.git_sha} />
+            )}
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -171,16 +181,33 @@ const RunListItem = ({ run }: RunListItemProps): JSX.Element => {
       ]}
       actions={
         <ActionPanel>
-          <Action title="View Details" icon={Icon.Eye} onAction={() => push(<RunDetail run={run} />)} />
+          <Action
+            title="View Details"
+            shortcut={Shortcuts.details}
+            icon={Icon.Eye}
+            onAction={() => push(<RunDetail run={run} />)}
+          />
           <RunGoTo run={run} omit={["details"]} />
-          {run.status === 3 && <Action title="Cancel Run" icon={Icon.XmarkCircle} onAction={() => cancelRun(run.id)} />}
+          {run.status === 3 && (
+            <Action
+              title="Cancel Run"
+              shortcut={Shortcuts.cancel}
+              icon={Icon.XmarkCircle}
+              onAction={() => cancelRun(run.id)}
+            />
+          )}
           <ActionPanel.Section title="Open in dbt Cloud">
-            <Action.OpenInBrowser url={runUrl} title="Open Run in dbt Cloud" />
-            <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" icon={Icon.Hammer} />
+            <Action.OpenInBrowser url={runUrl} title="Open Run in dbt Cloud" shortcut={Shortcuts.webRun} />
+            <Action.OpenInBrowser
+              url={jobUrl}
+              title="Open Job in dbt Cloud"
+              shortcut={Shortcuts.webJob}
+              icon={Icon.Hammer}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Run ID" content={run.id.toString()} />
-            <Action.CopyToClipboard title="Copy Run URL" content={runUrl} />
+            <Action.CopyToClipboard title="Copy Run ID" shortcut={Shortcuts.copyId} content={run.id.toString()} />
+            <Action.CopyToClipboard title="Copy Run URL" shortcut={Shortcuts.copyPath} content={runUrl} />
           </ActionPanel.Section>
         </ActionPanel>
       }

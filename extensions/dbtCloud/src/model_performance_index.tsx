@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
+import { Shortcuts } from "./shortcuts";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { buildDbtCloudUrl, buildDocsUrl, formatRelativeTime } from "./api";
@@ -142,14 +143,25 @@ ${runRows || "| — | — | — | — | — |"}
             />
           )}
           <ActionPanel.Section title="Open in dbt Cloud">
-            {explorerUrl && <Action.OpenInBrowser url={explorerUrl} title="Open in dbt Explorer" />}
+            {explorerUrl && (
+              <Action.OpenInBrowser url={explorerUrl} title="Open in dbt Explorer" shortcut={Shortcuts.webDocs} />
+            )}
             {runs[0] && (
-              <Action.OpenInBrowser url={runUrl(runs[0].runId)} title="Open Latest Run in dbt Cloud" icon={Icon.Play} />
+              <Action.OpenInBrowser
+                url={runUrl(runs[0].runId)}
+                title="Open Latest Run in dbt Cloud"
+                shortcut={Shortcuts.webRun}
+                icon={Icon.Play}
+              />
             )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Unique ID" content={model.uniqueId} />
-            <Action.CopyToClipboard title="Copy Average Execution" content={formatSeconds(average)} />
+            <Action.CopyToClipboard title="Copy Unique ID" shortcut={Shortcuts.copyId} content={model.uniqueId} />
+            <Action.CopyToClipboard
+              title="Copy Average Execution"
+              shortcut={Shortcuts.copyAverage}
+              content={formatSeconds(average)}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -215,6 +227,7 @@ export function ModelPerformanceList({ environment: fixed }: { environment?: Cat
                   <ActionPanel>
                     <Action.Push
                       title="View Performance"
+                      shortcut={Shortcuts.performance}
                       icon={Icon.BarChart}
                       target={<ModelPerformanceDetail model={model} environment={environment} />}
                     />
@@ -233,11 +246,20 @@ export function ModelPerformanceList({ environment: fixed }: { environment?: Cat
                       <Action.OpenInBrowser
                         url={buildDocsUrl(environment.projectId, model.uniqueId)}
                         title="Open in dbt Explorer"
+                        shortcut={Shortcuts.webDocs}
                       />
                     )}
-                    <Action.CopyToClipboard title="Copy Unique ID" content={model.uniqueId} />
+                    <Action.CopyToClipboard
+                      title="Copy Unique ID"
+                      shortcut={Shortcuts.copyId}
+                      content={model.uniqueId}
+                    />
                     {info?.lastRunError && (
-                      <Action.CopyToClipboard title="Copy Last Error" content={info.lastRunError} />
+                      <Action.CopyToClipboard
+                        title="Copy Last Error"
+                        shortcut={Shortcuts.copyError}
+                        content={info.lastRunError}
+                      />
                     )}
                   </ActionPanel>
                 }
