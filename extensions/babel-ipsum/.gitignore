@@ -8,3 +8,5 @@
 /compiled_raycast_rust/
 .DS_Store
 *.rayext
+__pycache__/
+*.pyc
