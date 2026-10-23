@@ -85,7 +85,14 @@ export async function uniqueDest(
  */
 function isInSubtree(child: string, parent: string): boolean {
   const rel = path.relative(parent, child);
-  return rel !== "" && !rel.startsWith("..") && !path.isAbsolute(rel);
+  // Only a real ".." component escapes the parent. A child legitimately
+  // named "..notes.txt" is still inside it.
+  return (
+    rel !== "" &&
+    rel !== ".." &&
+    !rel.startsWith(`..${path.sep}`) &&
+    !path.isAbsolute(rel)
+  );
 }
 
 type PlanEntry =
@@ -261,7 +268,9 @@ export async function copyManyWithProgress(
   // Source directories whose destination could not be created. Their
   // subtree must not be poured into whatever occupies the path now, but
   // sibling files/folders in the same top-level selection still copy.
-  const poisonedDirs: string[] = [];
+  // Scoped to the owning plan: the basket may also contain a child of this
+  // directory as a separate top-level source with its own destination.
+  const poisonedDirs: { plan: number; src: string }[] = [];
   // Directory permission fixes wait until every child is written (deepest
   // first, best-effort each).
   const pendingDirModes: { dest: string; mode: number }[] = [];
@@ -283,7 +292,9 @@ export async function copyManyWithProgress(
 
   for (const { pair, plan } of pairs) {
     const current = path.basename(pair.src);
-    const poison = poisonedDirs.find((dir) => isInSubtree(pair.src, dir));
+    const poison = poisonedDirs.find(
+      (entry) => entry.plan === plan && isInSubtree(pair.src, entry.src),
+    );
     if (poison) {
       // A failed directory poisons only its own subtree: pouring children
       // into it (or into whatever occupies its path now) would scatter
@@ -292,7 +303,7 @@ export async function copyManyWithProgress(
       // siblings.
       failedPlans.add(plan);
       errors.push(
-        `${pair.src}: skipped because ${poison} could not be created`,
+        `${pair.src}: skipped because ${poison.src} could not be created`,
       );
       doneFiles++;
       showProgress(current, true);
@@ -331,7 +342,7 @@ export async function copyManyWithProgress(
       errors.push(`${pair.src}: ${String(e)}`);
       // Only a directory that failed to be created makes its descendants
       // unsafe. A bad file must not skip the rest of the folder.
-      if (pair.kind === "dir") poisonedDirs.push(pair.src);
+      if (pair.kind === "dir") poisonedDirs.push({ plan, src: pair.src });
     }
     doneFiles++;
     showProgress(current, true);
