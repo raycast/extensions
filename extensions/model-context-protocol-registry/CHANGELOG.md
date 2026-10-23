@@ -1,5 +1,10 @@
 # Model Context Protocol Registry Changelog
 
+## [Refresh MCP Registry Entries] - {PR_MERGE_DATE}
+
+- Connect ElevenLabs through its maintained hosted MCP endpoint with OAuth sign-in.
+- Remove the archived E2B and Google Drive listings and the unavailable Shopify Dev listing.
+
 ## [Add Wave AI MCP Server] - 2026-10-22
 
 - Add Wave AI to the official registry: an AI note taker for phone calls, meetings and in-person conversations. Search and quote recordings, ask what a person said with Voice ID, and update action items, folders and sharing. Hosted Streamable HTTP server at https://mcp.wave.co with OAuth 2.0 sign-in (PKCE and dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
@@ -103,11 +108,6 @@
 ## [Add TopxAI Models MCP Server] - 2026-10-16
 
 - Add TopxAI Models to the official registry: list the TopxAI catalogue's text models with their prices, ask Claude, GPT, Grok, GLM, Kimi or DeepSeek from inside another model's conversation, and ask TypeSafe's Jev typed questions about a piece of text. Hosted Streamable HTTP server at https://ai.topxea.com/mcp/models, connected through `mcp-remote` with a TopxAI API key as a bearer header.
-
-## [Refresh MCP Registry Entries] - 2026-10-16
-
-- Connect ElevenLabs through its maintained hosted MCP endpoint with OAuth sign-in.
-- Remove the archived E2B and Google Drive listings and the unavailable Shopify Dev listing.
 
 ## [Add Kolect Creator Search MCP Server] - 2026-10-15
 
