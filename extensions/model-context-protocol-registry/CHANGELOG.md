@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Revid MCP Server] - 2026-10-23
+
+- Add Revid to the official registry: research what goes viral on TikTok, YouTube, Instagram and X, make finished short-form videos with voice, captions, music and AI footage, and publish or schedule them to connected accounts. Hosted Streamable HTTP server at https://www.revid.ai/api/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add datawebot MCP Server] - 2026-10-23
 
 - Add datawebot to the official registry: ecommerce product data for agents. Search products across online shops worldwide, list every seller's price for one product with direct shop links, and run extraction Jobs on Amazon search and product pages (10 countries) and 1,100+ Shopify stores. Hosted Streamable HTTP server at https://mcp.datawebot.com/mcp with OAuth 2.1 sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.

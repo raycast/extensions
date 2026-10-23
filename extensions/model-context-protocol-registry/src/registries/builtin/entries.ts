@@ -1637,6 +1637,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.xtiles.app/mcp",
   },
   {
+    name: "revid",
+    title: "Revid",
+    description:
+      "Research what goes viral, make finished short-form videos and post them. Search viral TikTok, YouTube, Instagram and X videos for hooks and formats, render a finished video with voice, captions, music and AI footage from a prompt, script, article or upload, run recurring series, then publish or schedule it to your connected accounts. 30 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or a Revid API key as a bearer token.",
+    icon: "https://www.revid.ai/revid_logo_square_bg_512.png",
+    homepage: "https://www.revid.ai/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.revid.ai/api/mcp"],
+    },
+    remoteUrl: "https://www.revid.ai/api/mcp",
+  },
+  {
     name: "firecrawl",
     title: "Firecrawl",
     description:
