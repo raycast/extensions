@@ -14,10 +14,10 @@ The Raycast session lasts 72 hours, then the commands ask you to connect again. 
 
 | Command | What it does |
 | --- | --- |
-| Timer | Start a timer with a task, workspace, project, any number of tags, and a rate (Default, Non-billable, or Custom). While a timer runs, ↵ stops it and ⌘N switches to a new one. |
+| Timer | Start a timer with a task, workspace, project, any number of tags, and a rate (Default, Non-billable, or Custom). While a timer runs, ↵ on it stops it; type a task to rename it or switch to a new timer. |
 | Recent Entries | The running timer, then all your entries newest first, grouped by day. Search covers task, project, and every tag. Continue an entry, or edit it and start. |
 | Reports | Totals, change against the previous period, daily average, billable amounts, busiest day, top project, tag, and task, and breakdowns for a timeframe. |
-| Menu Bar Timer | Elapsed time in the menu bar while a timer runs; the menu offers Stop, Start/Switch, Recent Entries, Reports, and Open ttrackii. |
+| Menu Bar Timer | Elapsed time in the menu bar while a timer runs; the menu offers Stop, Edit, Start/Switch, Recent Entries, Reports, and Open ttrackii. |
 
 Projects and tags show in their ttrackii colors. Default billing uses the first tag with a rate, then the project, as the web app does. Full Business Insights (goals, forecasts, currency conversion) stay in the web app.
 
@@ -32,7 +32,7 @@ The extension uses your account's hourly API quota, shared with the ttrackii CLI
 
 ## Privacy
 
-Your ttrackii session is stored in Raycast's secure storage, separately from the ttrackii CLI. Local storage holds only your workspace choice and cached timer and lookup data. Signing out revokes the session; if that can't be confirmed, remove it in ttrackii under **Settings → Sign-in & security**.
+Your ttrackii session is stored in Raycast's secure storage, separately from the ttrackii CLI. Local storage holds only your workspace choice, cached timer and lookup data, and rate-limit info. Signing out revokes the session; if that can't be confirmed, remove it in ttrackii under **Settings → Sign-in & security**.
 
 ## Development
 
