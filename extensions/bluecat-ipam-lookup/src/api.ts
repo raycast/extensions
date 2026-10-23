@@ -4,12 +4,26 @@ import { BamEntity, IPAddress, ListResponse, Network, ResourceRecord, SearchResu
 
 const RESULT_LIMIT = 50;
 
-let authHeader: string | undefined;
+let session: { scope: string; header: Promise<string> } | undefined;
 
 export function baseUrl(): string {
   const { serverUrl } = getPreferenceValues<Preferences>();
   const trimmed = serverUrl.trim().replace(/\/+$/, "");
-  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  return /^[a-z][a-z0-9+.-]*:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
+function apiBaseUrl(): string {
+  const url = baseUrl();
+  if (!/^https:\/\//i.test(url)) {
+    throw new Error("Address Manager URL must use https:// to protect your credentials");
+  }
+  return `${url}/api/v2`;
+}
+
+/** Identifies the configured server and account so cached data isn't reused across them. */
+export function cacheScope(): string {
+  const { username } = getPreferenceValues<Preferences>();
+  return `${baseUrl()}|${username}`;
 }
 
 async function errorText(res: Response): Promise<string> {
@@ -23,7 +37,7 @@ async function errorText(res: Response): Promise<string> {
 
 async function login(): Promise<string> {
   const { username, password } = getPreferenceValues<Preferences>();
-  const res = await fetch(`${baseUrl()}/api/v2/sessions`, {
+  const res = await fetch(`${apiBaseUrl()}/sessions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({ username, password }),
@@ -35,20 +49,33 @@ async function login(): Promise<string> {
   if (!body.basicAuthenticationCredentials) {
     throw new Error("Login response did not include credentials");
   }
-  authHeader = `Basic ${body.basicAuthenticationCredentials}`;
-  return authHeader;
+  return `Basic ${body.basicAuthenticationCredentials}`;
+}
+
+// Concurrent requests share one in-flight login instead of each creating a session.
+function authorization(): Promise<string> {
+  const scope = cacheScope();
+  if (!session || session.scope !== scope) {
+    const header = login();
+    session = { scope, header };
+    header.catch(() => {
+      if (session?.header === header) session = undefined;
+    });
+  }
+  return session.header;
 }
 
 async function get<T>(path: string, params: Record<string, string> = {}, retry = true): Promise<T> {
-  const url = new URL(`${baseUrl()}/api/v2${path}`);
+  const url = new URL(`${apiBaseUrl()}${path}`);
   for (const [key, value] of Object.entries(params)) {
     url.searchParams.set(key, value);
   }
+  const auth = authorization();
   const res = await fetch(url, {
-    headers: { Authorization: authHeader ?? (await login()), Accept: "application/hal+json, application/json" },
+    headers: { Authorization: await auth, Accept: "application/hal+json, application/json" },
   });
   if (res.status === 401 && retry) {
-    authHeader = undefined;
+    if (session?.header === auth) session = undefined;
     return get<T>(path, params, false);
   }
   if (!res.ok) {

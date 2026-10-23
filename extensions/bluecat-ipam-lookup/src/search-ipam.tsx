@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Color, Icon, LaunchProps, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, LaunchProps, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { addressUrl, detectKind, getLinkedRecords, networkUrl, recordUrl, searchIPAM } from "./api";
+import { addressUrl, cacheScope, detectKind, getLinkedRecords, networkUrl, recordUrl, searchIPAM } from "./api";
 import { Network, ResourceRecord, SearchResult } from "./types";
 
 type AddressResult = Extract<SearchResult, { kind: "address" }>;
@@ -13,8 +13,10 @@ const KIND_LABELS = { ip: "IP address", network: "network", dns: "DNS record" } 
 export default function Command(props: LaunchProps<{ arguments: Arguments.SearchIpam }>) {
   const [searchText, setSearchText] = useState(props.arguments.query || props.fallbackText || "");
   const query = searchText.trim();
+  const scope = cacheScope();
 
-  const { data, isLoading } = useCachedPromise(searchIPAM, [query], {
+  // scope is part of the cache key so results from another server or account are never reused.
+  const { data, isLoading } = useCachedPromise((...args: [string, string]) => searchIPAM(args[0]), [query, scope], {
     execute: query.length > 0,
     keepPreviousData: true,
     failureToastOptions: { title: "BlueCat lookup failed" },
@@ -104,7 +106,12 @@ function stateColor(state?: string | null): Color {
 
 function AddressItem({ result }: { result: AddressResult }) {
   const { item: address, network } = result;
-  const { data: linked, isLoading } = useCachedPromise(getLinkedRecords, [address.id], {
+  const {
+    data: linked,
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise((...args: [number, string]) => getLinkedRecords(args[0]), [address.id, cacheScope()], {
     onError: () => undefined,
   });
   const url = addressUrl(address, network);
@@ -139,7 +146,13 @@ function AddressItem({ result }: { result: AddressResult }) {
                 </>
               )}
               <List.Item.Detail.Metadata.Separator />
-              {linked && linked.length > 0 ? (
+              {error ? (
+                <List.Item.Detail.Metadata.Label
+                  title="DNS Records"
+                  text={{ value: "Unavailable", color: Color.Red }}
+                  icon={Icon.ExclamationMark}
+                />
+              ) : linked && linked.length > 0 ? (
                 linked.map((r) => (
                   <List.Item.Detail.Metadata.Label
                     key={r.id}
@@ -158,16 +171,24 @@ function AddressItem({ result }: { result: AddressResult }) {
       actions={
         <ActionPanel>
           {url && <Action.OpenInBrowser title="Open in BlueCat" url={url} />}
-          <Action.CopyToClipboard title="Copy Address" content={address.address} />
-          {address.name && <Action.CopyToClipboard title="Copy Name" content={address.name} />}
-          {address.macAddress?.address && (
-            <Action.CopyToClipboard title="Copy MAC Address" content={address.macAddress.address} />
-          )}
           {network && (
             <Action.OpenInBrowser
               title="Open Network in BlueCat"
               url={networkUrl(network)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+            />
+          )}
+          <Action.CopyToClipboard title="Copy Address" content={address.address} />
+          {address.name && <Action.CopyToClipboard title="Copy Name" content={address.name} />}
+          {address.macAddress?.address && (
+            <Action.CopyToClipboard title="Copy MAC Address" content={address.macAddress.address} />
+          )}
+          {error && (
+            <Action
+              title="Retry DNS Record Lookup"
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={revalidate}
             />
           )}
           <EntityActions id={address.id} url={url} />
