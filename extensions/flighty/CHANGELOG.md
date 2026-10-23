@@ -1,6 +1,6 @@
 # Flighty Changelog
 
-## [AI Flight Lookup] - {PR_MERGE_DATE}
+## [AI Flight Lookup] - 2026-10-23
 
 - Add AI tools to search saved flights and retrieve flight details
 - Support flight number, airline, route, departure date, and upcoming/past filters
