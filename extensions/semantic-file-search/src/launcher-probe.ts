@@ -14,6 +14,10 @@ export type LauncherOwner = {
   extension_marker: string;
 };
 
+export function validExtensionName(value: unknown): boolean {
+  return value === "semantic-search" || value === "semantic-file-search";
+}
+
 // Read the actual native child's parent, including in hosts with a process shim.
 // The fixed shell expression reads one PID; no user text is interpreted by it.
 export async function readLauncherOwner(
@@ -21,7 +25,7 @@ export async function readLauncherOwner(
 ): Promise<LauncherOwner> {
   const folder = dirname(await realpath(assets));
   const content = await readFile(join(folder, "package.json"));
-  if (JSON.parse(content.toString()).name !== "semantic-search")
+  if (!validExtensionName(JSON.parse(content.toString()).name))
     throw new Error("Invalid extension identity");
   // Tinycast's fs shim does not expose dev/ino. Read the native identity in
   // both launchers so the server can detect uninstall/reinstall consistently.
@@ -86,5 +90,5 @@ export async function readLauncherOwner(
     if (next === pid) break;
     pid = next;
   }
-  throw new Error("Run this command from Tinycast or Raycast");
+  throw new Error("Run this command from Raycast");
 }

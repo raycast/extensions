@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "semantic-search",
-  "title": "Semantic Search",
+  "name": "semantic-file-search",
+  "title": "Semantic File Search",
   "description": "Find local documents, photos, video scenes and sounds by meaning. Requires the Semantic Search Engine.",
   "icon": "icon.png",
   "author": "nik_ustinovich",
@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "semantic-search",
-      "title": "Semantic Search",
+      "title": "Search Files",
       "description": "Find local files from a natural-language description",
       "mode": "view",
       "arguments": [
@@ -19,7 +19,8 @@
           "placeholder": "Describe a file",
           "required": false
         }
-      ]
+      ],
+      "subtitle": "Semantic File Search"
     },
     {
       "name": "automatic-index",
@@ -37,14 +38,21 @@
       "description": "Leave blank to use the installed Semantic Search Engine. Advanced: connect to your own local service.",
       "default": "",
       "required": false
+    },
+    {
+      "name": "serviceTokenPath",
+      "type": "textfield",
+      "title": "Custom Service Token File (Optional)",
+      "description": "Advanced: authentication file for your custom local service. Leave blank to use shared storage. Accepts an absolute path or ~/ path.",
+      "default": "",
+      "required": false
     }
   ],
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
-    "publish": "ray publish",
-    "test": "node scripts/test.mjs"
+    "publish": "ray publish"
   },
   "dependencies": {
     "@raycast/api": "2.7.3",
@@ -54,14 +62,11 @@
     "@raycast/eslint-config": "2.2.0",
     "@types/node": "24.19.2",
     "@types/react": "19.3.0",
-    "esbuild": "0.25.12",
     "eslint": "10.0.1",
     "prettier": "3.8.2",
-    "typescript": "5.9.3",
-    "react-test-renderer": "19.3.0",
-    "@types/react-test-renderer": "19.1.0"
+    "typescript": "5.9.3"
   },
-  "version": "0.7.0",
+  "version": "0.7.1",
   "categories": [
     "Productivity"
   ],

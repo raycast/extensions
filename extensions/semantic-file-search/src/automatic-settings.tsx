@@ -1,3 +1,4 @@
+import { engineFetch } from "./engine-auth";
 import { useEffect, useRef, useState } from "react";
 import {
   Form,
@@ -75,7 +76,7 @@ export function useAutomaticSettings(
       const launcher = submitted.enabled
         ? await getLauncherOwner(true)
         : undefined;
-      const response = await fetch(`${baseURL}/v1/automatic`, {
+      const response = await engineFetch(`${baseURL}/v1/automatic`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -123,7 +124,7 @@ export function useAutomaticSettings(
     try {
       const launcher =
         action === "resume" ? await getLauncherOwner(true) : undefined;
-      const response = await fetch(`${baseURL}/v1/index/${action}`, {
+      const response = await engineFetch(`${baseURL}/v1/index/${action}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ launcher }),
@@ -195,7 +196,7 @@ export function useAutomaticSettings(
               setDraft((value) => ({ ...value, only_on_power }))
             }
           />
-          <Form.Description text="Runs while Tinycast or Raycast is running. Closing its window is fine. Completed files are reused after interruptions. Save to activate the launcher's background checks." />
+          <Form.Description text="Runs while Raycast is running. Closing its window is fine. Completed files are reused after interruptions. Save to activate the launcher's background checks." />
         </>
       )}
     </>

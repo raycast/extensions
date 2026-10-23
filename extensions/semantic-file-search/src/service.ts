@@ -1,20 +1,15 @@
 import { environment, getPreferenceValues } from "@raycast/api";
-import { homedir } from "node:os";
-import { join } from "node:path";
 import { ensureService } from "./runtime";
 
-export const sharedStorage = join(
-  homedir(),
-  "Library",
-  "Application Support",
-  "Semantic Search",
-);
+import { configureEngineToken, sharedStorage } from "./engine-auth";
+export { engineFetch, sharedStorage } from "./engine-auth";
 let startup: Promise<string> | undefined;
 export async function connectService(
   progress: (message: string) => void,
   background = false,
 ) {
-  const custom = getPreferenceValues<Preferences>().serviceURL?.trim();
+  const preferences = getPreferenceValues<Preferences>();
+  const custom = preferences.serviceURL?.trim();
   if (custom) {
     let url: URL;
     try {
@@ -30,8 +25,11 @@ export async function connectService(
     ) {
       throw new Error("A custom service must use a local HTTP address.");
     }
-    return custom.replace(/\/$/, "");
+    const base = custom.replace(/\/$/, "");
+    configureEngineToken(base, preferences.serviceTokenPath?.trim());
+    return base;
   }
+  configureEngineToken("http://127.0.0.1:8766");
   if (!startup)
     startup = ensureService({
       background,

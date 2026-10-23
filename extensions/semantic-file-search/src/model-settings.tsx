@@ -10,7 +10,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 
-import { connectService } from "./service";
+import { connectService, engineFetch } from "./service";
 import { getLauncherOwner } from "./launcher";
 import { useAutomaticSettings } from "./automatic-settings";
 import { AutomaticStatus } from "./automatic-client";
@@ -147,12 +147,22 @@ export default function ModelSettings({
   const [indexStatus, setIndexStatus] = useState<IndexStatus>();
   const [error, setError] = useState("");
   const [values, setValues] = useState<Values>();
+  const valuesRef = useRef(values);
+  valuesRef.current = values;
   const [customModel, setCustomModel] = useState<ModelSource>();
   const [modelError, setModelError] = useState("");
   const [checkingModel, setCheckingModel] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [editExclusionPaths, setEditExclusionPaths] = useState(false);
   const submittedValues = useRef<Values | undefined>(undefined);
+  const editVersions = useRef<Partial<Record<keyof Values, number>>>({});
+  const submittedEditVersions = useRef<Partial<Record<keyof Values, number>>>(
+    {},
+  );
+  const markEdited = (...keys: (keyof Values)[]) => {
+    for (const key of keys)
+      editVersions.current[key] = (editVersions.current[key] || 0) + 1;
+  };
   const serverValues = useRef<Values | undefined>(undefined);
   const pollGuard = useRef(new SettingsPollGuard());
   const [applyingSettings, setApplyingSettings] = useState(false);
@@ -208,8 +218,8 @@ export default function ModelSettings({
       const revision = pollGuard.current.revision;
       try {
         const [response, statusResponse] = await Promise.all([
-          fetch(`${baseURL}/v1/settings`),
-          fetch(`${baseURL}/v1/status`),
+          engineFetch(`${baseURL}/v1/settings`),
+          engineFetch(`${baseURL}/v1/status`),
         ]);
         if (!response.ok || !statusResponse.ok)
           throw new Error(
@@ -231,8 +241,16 @@ export default function ModelSettings({
                   : String(v),
             ]),
           ) as Values;
+          const pendingSubmission = submittedValues.current;
+          const newerEdits = new Set(
+            (Object.keys(editVersions.current) as (keyof Values)[]).filter(
+              (key) =>
+                editVersions.current[key] !==
+                submittedEditVersions.current[key],
+            ),
+          );
           const submission =
-            data.job.state === "complete" ? submittedValues.current : undefined;
+            data.job.state === "complete" ? pendingSubmission : undefined;
           if (submission) {
             addedFolders.current = addedFolders.current.filter(
               (path) => !submittedFolders.current.includes(path),
@@ -244,10 +262,14 @@ export default function ModelSettings({
           const priorServer = serverValues.current;
           serverValues.current = normalized;
           setValues((previous) => ({
-            ...(submission &&
-            JSON.stringify(previous) === JSON.stringify(submission)
-              ? normalized
-              : reconcileValues(previous, priorServer, normalized)),
+            ...reconcileValues(
+              previous,
+              priorServer,
+              normalized,
+              pendingSubmission
+                ? { edited: newerEdits, complete: !!submission }
+                : undefined,
+            ),
             roots: addExclusionFolders(normalized.roots, addedFolders.current),
           }));
         }
@@ -279,7 +301,7 @@ export default function ModelSettings({
     setCheckingModel(true);
     const timer = setTimeout(async () => {
       try {
-        const response = await fetch(`${baseURL}/v1/models/inspect`, {
+        const response = await engineFetch(`${baseURL}/v1/models/inspect`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -293,7 +315,15 @@ export default function ModelSettings({
         if (!controller.signal.aborted) {
           const model = data as ModelSource;
           setCustomModel(model);
-          if (model.capabilities)
+          if (model.capabilities) {
+            const draft = valuesRef.current;
+            for (const [key, capability] of [
+              ["enable_images", "images"],
+              ["enable_video", "video"],
+              ["enable_audio", "audio"],
+            ] as const)
+              if (draft?.[key] && !model.capabilities[capability])
+                markEdited(key);
             setValues((previous) =>
               previous
                 ? {
@@ -307,6 +337,7 @@ export default function ModelSettings({
                   }
                 : previous,
             );
+          }
         }
       } catch (e) {
         if (!controller.signal.aborted) setModelError(String(e));
@@ -448,16 +479,18 @@ export default function ModelSettings({
               : settings?.job.state === "downloaded"
                 ? "Model downloaded. Apply your settings when ready."
                 : "");
-  const update = (key: keyof Values, value: string | boolean | string[]) =>
+  const update = (key: keyof Values, value: string | boolean | string[]) => {
+    markEdited(key);
     setValues((previous) =>
       previous ? { ...previous, [key]: value } : previous,
     );
+  };
   const connectPhotos = async () => {
     if (connectingPhotos) return;
     setConnectingPhotos(true);
     setPhotosMessage("Waiting for macOS Photos access…");
     try {
-      const response = await fetch(`${baseURL}/v1/photos/connect`, {
+      const response = await engineFetch(`${baseURL}/v1/photos/connect`, {
         method: "POST",
       });
       const data = await response.json();
@@ -488,7 +521,7 @@ export default function ModelSettings({
   const downloadModel = async (variant = values?.model_variant) => {
     if (!variant || busy) return;
     try {
-      const response = await fetch(`${baseURL}/v1/models/download`, {
+      const response = await engineFetch(`${baseURL}/v1/models/download`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -519,6 +552,14 @@ export default function ModelSettings({
   };
   const selectModel = (variant: string) => {
     const saved = settings?.profiles?.[variant];
+    markEdited(
+      "model_variant",
+      "chunk_tokens",
+      "audio_segment_seconds",
+      ...(Object.keys(saved || {}).filter(
+        (key) => values && key in values,
+      ) as (keyof Values)[]),
+    );
     setValues((previous) => {
       if (!previous) return previous;
       const next = { ...previous, model_variant: variant };
@@ -539,7 +580,7 @@ export default function ModelSettings({
   };
   const cancelIndex = async () => {
     try {
-      const response = await fetch(`${baseURL}/v1/index/cancel`, {
+      const response = await engineFetch(`${baseURL}/v1/index/cancel`, {
         method: "POST",
       });
       const data = await response.json();
@@ -565,7 +606,7 @@ export default function ModelSettings({
   const deleteModel = async () => {
     if (!values || busy || !selectedModel?.installed) return;
     try {
-      const response = await fetch(`${baseURL}/v1/models/delete`, {
+      const response = await engineFetch(`${baseURL}/v1/models/delete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -640,7 +681,7 @@ export default function ModelSettings({
     pollGuard.current.begin();
     setSavingFolders(true);
     try {
-      const response = await fetch(`${baseURL}/v1/folders/add`, {
+      const response = await engineFetch(`${baseURL}/v1/folders/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ paths: folderRequestPaths(submitted) }),
@@ -680,6 +721,7 @@ export default function ModelSettings({
         });
         return;
       }
+      markEdited("roots");
       addedFolders.current = addedFolders.current.filter(
         (root) => root !== path,
       );
@@ -697,7 +739,7 @@ export default function ModelSettings({
     pollGuard.current.begin();
     setSavingFolders(true);
     try {
-      const response = await fetch(`${baseURL}/v1/folders/remove`, {
+      const response = await engineFetch(`${baseURL}/v1/folders/remove`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -743,7 +785,7 @@ export default function ModelSettings({
   };
   const retryFolderCleanup = async () => {
     try {
-      const response = await fetch(`${baseURL}/v1/folders/cleanup`, {
+      const response = await engineFetch(`${baseURL}/v1/folders/cleanup`, {
         method: "POST",
       });
       const data = await response.json();
@@ -778,10 +820,11 @@ export default function ModelSettings({
   const saveExclusions = async () => {
     if (!values || pollGuard.current.pending) return;
     const submitted = values.excluded_paths;
+    const submittedVersion = editVersions.current.excluded_paths || 0;
     setSavingExclusions(true);
     pollGuard.current.begin();
     try {
-      const response = await fetch(`${baseURL}/v1/exclusions`, {
+      const response = await engineFetch(`${baseURL}/v1/exclusions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -797,6 +840,10 @@ export default function ModelSettings({
       };
       if (!response.ok)
         throw new Error(data.detail || "Could not save excluded folders");
+      const noNewerEdit =
+        (editVersions.current.excluded_paths || 0) === submittedVersion;
+      if (noNewerEdit && submittedValues.current)
+        submittedEditVersions.current.excluded_paths = submittedVersion;
       if (serverValues.current)
         serverValues.current = {
           ...serverValues.current,
@@ -818,7 +865,9 @@ export default function ModelSettings({
           : previous,
       );
       setValues((previous) =>
-        previous && sameSettingsValue(previous.excluded_paths, submitted)
+        previous &&
+        noNewerEdit &&
+        sameSettingsValue(previous.excluded_paths, submitted)
           ? { ...previous, excluded_paths: data.excluded_paths }
           : previous,
       );
@@ -899,9 +948,10 @@ export default function ModelSettings({
     pollGuard.current.begin();
     setApplyingSettings(true);
     const pendingFolders = [...addedFolders.current];
+    const editsAtSubmission = { ...editVersions.current };
     try {
       const launcher = await getLauncherOwner();
-      const response = await fetch(`${baseURL}/v1/settings`, {
+      const response = await engineFetch(`${baseURL}/v1/settings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -924,6 +974,7 @@ export default function ModelSettings({
       if (!response.ok)
         throw new Error(data.detail || "Could not apply settings");
       submittedValues.current = values;
+      submittedEditVersions.current = editsAtSubmission;
       submittedFolders.current = pendingFolders;
       setSettings((previous) =>
         previous ? { ...previous, job: data } : previous,
@@ -958,7 +1009,7 @@ export default function ModelSettings({
     }
     try {
       const launcher = await getLauncherOwner();
-      const response = await fetch(`${baseURL}/v1/index/start`, {
+      const response = await engineFetch(`${baseURL}/v1/index/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1228,6 +1279,7 @@ export default function ModelSettings({
         allowMultipleSelection={true}
         value={[]}
         onChange={(folders) => {
+          markEdited("roots");
           setFolderRemoval({ path: "", deleteSaved: false });
           addedFolders.current = addExclusionFolders(
             addedFolders.current,

@@ -13,6 +13,8 @@ import { promisify } from "node:util";
 import { join } from "node:path";
 import { arch, platform, release } from "node:os";
 
+import { engineFetch, engineCurlFetch } from "./engine-auth";
+
 const execute = promisify(execFile);
 export type RuntimeManifest = {
   version: string;
@@ -93,6 +95,8 @@ export function validateManifest(value: RuntimeManifest) {
 async function info(base: string) {
   try {
     const response = await fetch(`${base}/v1/info`, {
+      // Minimal public discovery also identifies an older engine for upgrades.
+      redirect: "error",
       signal: AbortSignal.timeout(1500),
     });
     if (!response.ok) return undefined;
@@ -327,10 +331,11 @@ export async function ensureService(options: Options) {
         "Cannot safely update this running engine. Close it before opening the new extension.",
       );
     }
-    const response = await fetch(`${base}/v1/engine/stop`, {
-      method: "POST",
-      signal: AbortSignal.timeout(5000),
-    });
+    const response = await stopRunningService(
+      base,
+      options.storage,
+      running.version,
+    );
     if (response.status === 404)
       throw new Error(
         "This older engine needs a one-time restart of your Mac to finish updating. Your indexes are preserved.",
@@ -365,6 +370,41 @@ export async function ensureService(options: Options) {
     );
   }
 }
+/** Called only after foreground upgrade verifies the running version's installed runtime. */
+export async function stopRunningService(
+  base: string,
+  storage: string,
+  version: string,
+): Promise<Response> {
+  if (/^0\.[0-4]\.\d+$/.test(version))
+    throw new Error(
+      "This older engine needs a one-time restart of your Mac to finish updating. Your indexes are preserved.",
+    );
+  // These published releases have a stop endpoint and predate authentication.
+  // No credential is read or sent, and curl prevents following any redirect.
+  if (
+    [
+      "0.5.0",
+      "0.5.1",
+      "0.6.0",
+      "0.6.2",
+      "0.6.3",
+      "0.6.4",
+      "0.6.5",
+      "0.7.0",
+    ].includes(version)
+  )
+    return engineCurlFetch(`${base}/v1/engine/stop`, {
+      method: "POST",
+      signal: AbortSignal.timeout(5000),
+    });
+  return engineFetch(
+    `${base}/v1/engine/stop`,
+    { method: "POST", signal: AbortSignal.timeout(5000) },
+    storage,
+  );
+}
+
 async function startRuntime(
   options: Options,
   runtime: string,

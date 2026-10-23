@@ -11,7 +11,7 @@ import {
   AutomaticStatus,
 } from "./automatic-client";
 import { getLauncherOwner } from "./launcher";
-import { connectService, sharedStorage } from "./service";
+import { connectService, engineFetch, sharedStorage } from "./service";
 import { BackgroundNotReady } from "./runtime";
 
 export default async function Command() {
@@ -35,7 +35,7 @@ export default async function Command() {
     return;
   }
   if (custom) {
-    const response = await fetch(`${base}/v1/automatic`, {
+    const response = await engineFetch(`${base}/v1/automatic`, {
       signal: AbortSignal.timeout(5000),
     });
     const status = (await response.json()) as AutomaticStatus & {
@@ -53,7 +53,7 @@ export default async function Command() {
     }
   }
   const launcher = await getLauncherOwner(true);
-  const response = await fetch(`${base}/v1/automatic/tick`, {
+  const response = await engineFetch(`${base}/v1/automatic/tick`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ launcher }),

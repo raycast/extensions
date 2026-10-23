@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022", "DOM"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
@@ -10,5 +13,8 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src", "tests", "raycast-env.d.ts"]
+  "include": [
+    "src",
+    "raycast-env.d.ts"
+  ]
 }

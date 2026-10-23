@@ -3,13 +3,24 @@ export function reconcileValues<T extends object>(
   draft: T | undefined,
   previousServer: T | undefined,
   currentServer: T,
+  submission?: { edited: ReadonlySet<keyof T>; complete: boolean },
 ): T {
   if (!draft) return currentServer;
   if (!previousServer) return draft;
   const next = { ...draft };
   for (const key of Object.keys(currentServer) as (keyof T)[]) {
-    if (sameSettingsValue(draft[key], previousServer[key]))
+    if (submission) {
+      // Explicit edits survive even when a user returns to an earlier server value.
+      // Untouched fields can follow repeated server updates during the running job.
+      if (
+        !submission.edited.has(key) &&
+        (submission.complete ||
+          sameSettingsValue(draft[key], previousServer[key]))
+      )
+        next[key] = currentServer[key];
+    } else if (sameSettingsValue(draft[key], previousServer[key])) {
       next[key] = currentServer[key];
+    }
   }
   return next;
 }

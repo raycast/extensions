@@ -8,7 +8,7 @@ export async function getLauncherOwner(required = false) {
   } catch {
     if (required)
       throw new Error(
-        "Run this command from the Semantic Search extension in Tinycast or Raycast and try again.",
+        "Run this command from the Semantic Search extension in Raycast and try again.",
       );
     return undefined;
   }

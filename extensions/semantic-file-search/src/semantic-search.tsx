@@ -13,7 +13,7 @@ import {
   environment,
 } from "@raycast/api";
 
-import { connectService } from "./service";
+import { connectService, engineFetch } from "./service";
 import { getLauncherOwner } from "./launcher";
 import { EngineSetup } from "./engine-setup";
 import ModelSettings from "./model-settings";
@@ -120,8 +120,8 @@ export default function SemanticSearch(
       if (pending) return;
       pending = true;
       try {
-        await fetch(`${baseURL}/v1/session`, { method: "POST" });
-        const response = await fetch(`${baseURL}/v1/status`);
+        await engineFetch(`${baseURL}/v1/session`, { method: "POST" });
+        const response = await engineFetch(`${baseURL}/v1/status`);
         if (response.ok && active) {
           const data = (await response.json()) as Status;
           const revision = data.index_revision || 0;
@@ -227,7 +227,7 @@ export default function SemanticSearch(
     // Request the sharper preview only after keyboard navigation settles.
     const timer = setTimeout(async () => {
       try {
-        const response = await fetch(`${baseURL}/v1/preview`, {
+        const response = await engineFetch(`${baseURL}/v1/preview`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -306,7 +306,7 @@ export default function SemanticSearch(
   ) => {
     for (let attempt = 0; ; attempt++) {
       if (!isActive()) throw new Error("Photo request is no longer active");
-      const response = await fetch(`${baseURL}/v1/photos/${action}`, {
+      const response = await engineFetch(`${baseURL}/v1/photos/${action}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ path }),
@@ -433,7 +433,7 @@ export default function SemanticSearch(
       title: "Preparing matched segment…",
     });
     try {
-      const response = await fetch(`${baseURL}/v1/segment`, {
+      const response = await engineFetch(`${baseURL}/v1/segment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -477,7 +477,7 @@ export default function SemanticSearch(
     // Tinycast's aborted fetch still runs on the server. Debounce and ignore stale responses.
     const timer = setTimeout(async () => {
       try {
-        const response = await fetch(`${baseURL}/v1/search`, {
+        const response = await engineFetch(`${baseURL}/v1/search`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query: text, kind, limit: 30 }),
@@ -507,7 +507,7 @@ export default function SemanticSearch(
     if (!baseURL || status?.indexing) return;
     try {
       const launcher = await getLauncherOwner();
-      const response = await fetch(`${baseURL}/v1/index/start`, {
+      const response = await engineFetch(`${baseURL}/v1/index/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -710,7 +710,7 @@ export default function SemanticSearch(
             : !baseURL && !!query.trim()
               ? setupMessage
               : status?.roots.length === 0 && !status.photos_library?.enabled
-                ? "Open Model Settings, add folders and download the recommended model."
+                ? "Open Manage Library, add folders and download the recommended model."
                 : status?.indexing
                   ? `${progress}. ${status.files} files are already searchable.`
                   : status?.runtime?.state === "loading"
