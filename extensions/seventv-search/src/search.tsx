@@ -468,18 +468,6 @@ export function EmoteBrowser({ source }: { source?: UserEmoteSource }) {
             content={item.id}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           />
-          {isGridView && (
-            <ActionPanel.Submenu title="Grid Size" icon={Icon.AppWindowGrid3x3}>
-              {(["small", "medium", "large"] as const).map((value) => (
-                <Action
-                  key={value}
-                  title={value[0].toUpperCase() + value.slice(1)}
-                  icon={value === gridSize ? Icon.Checkmark : undefined}
-                  onAction={() => changeGridSize(value)}
-                />
-              ))}
-            </ActionPanel.Submenu>
-          )}
           {item.usage && (
             <Action.Push
               title="View 7TV Usage Status"
@@ -499,6 +487,18 @@ This status applies to 7TV personal emote sets. It does not describe general per
                 />
               }
             />
+          )}
+          {isGridView && (
+            <ActionPanel.Submenu title="Grid Size" icon={Icon.AppWindowGrid3x3}>
+              {(["small", "medium", "large"] as const).map((value) => (
+                <Action
+                  key={value}
+                  title={value[0].toUpperCase() + value.slice(1)}
+                  icon={value === gridSize ? Icon.Checkmark : undefined}
+                  onAction={() => changeGridSize(value)}
+                />
+              ))}
+            </ActionPanel.Submenu>
           )}
         </ActionPanel.Section>
       </ActionPanel>
