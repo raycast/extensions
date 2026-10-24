@@ -7,8 +7,8 @@ reminders in Apple Reminders, and tracks which prayers were prayed on time.
 
 ![Prayer Menu Bar showing Asr jamaat in 7 minutes, with the day's prayers in the dropdown](media/menu-bar.png)
 
-- **Menu bar countdown**: `Asr -5` (until start), `Asr +12` (since start), mosque icon `Asr -5`
-  (until jamaat), `Asr (-5)` in red (time left). Icon color shows the state. The dropdown lists every
+- **Menu bar countdown**: only the time left until the next moment: `Asr -5` (until start), mosque
+  icon `Asr -5` (until jamaat), `Asr (-40)` (until the preferred end, the late boundary or the end). Icon color shows the state. The dropdown lists every
   prayer plus sunrise, midnight and tahajjud, color-coded as with jamaat, on time, late,
   made up (qaza), current or missed,
   with each prayer's preferred time. Click a prayer to mark it; hold ⌥ to mark a late one (or one

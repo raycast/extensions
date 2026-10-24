@@ -1,4 +1,5 @@
 import { ltrName } from "./format";
+import { PrayerSlot } from "./prayers";
 import { AlertWindows, MenuBarState } from "./state";
 
 const MINUTE = 60_000;
@@ -10,7 +11,7 @@ export type TitleTone = "plain" | "yellow" | "green" | "blue" | "orange" | "red"
 export interface MenuBarTitle {
   text: string;
   tone: TitleTone;
-  /** True while counting to or just past jamaat: the mosque replaces the minaret. */
+  /** True while counting down to jamaat: the mosque replaces the minaret. */
   mosque: boolean;
 }
 
@@ -28,58 +29,57 @@ export function formatMinutes(ms: number, round: "ceil" | "floor"): string {
 }
 
 /**
- * Menu bar text in the countdown format:
+ * The next moment the menu bar counts down to: the start, then the jamaat, the preferred end, the late
+ * boundary and the end, whichever comes first after `now`.
  *
- * - `Asr -5`    5 minutes until Asr starts
- * - `Asr +5`    5 minutes since Asr started
- * - 🕌 `Asr -5` 5 minutes until Asr jamaat (`+2` just after it)
- * - `Asr (-5)`  5 minutes until Asr becomes late (red)
- * - `Asr (-12)` past Asr's preferred time, 12 minutes left in its valid time (orange)
+ * @param slot - Prayer slot.
+ * @param now - Current instant.
+ * @returns The moment, and whether it is an end (shown in brackets) or the jamaat (shown with the mosque).
+ */
+export function nextMoment(slot: PrayerSlot, now: Date): { at: Date; kind: "start" | "jamaat" | "end" } {
+  const moments = [
+    { at: slot.start, kind: "start" as const },
+    ...(slot.jamaat ? [{ at: slot.jamaat, kind: "jamaat" as const }] : []),
+    ...(slot.preferredEnd ? [{ at: slot.preferredEnd, kind: "end" as const }] : []),
+    { at: slot.late, kind: "end" as const },
+    { at: slot.end, kind: "end" as const },
+  ].sort((a, b) => a.at.getTime() - b.at.getTime());
+  return moments.find((moment) => moment.at > now) ?? moments[moments.length - 1];
+}
+
+/**
+ * Menu bar text: only the time left until the prayer's next moment ({@link nextMoment}):
+ *
+ * - `Asr -5`     5 minutes until Asr starts
+ * - 🕌 `Asr -5`  5 minutes until Asr jamaat
+ * - `Asr (-40)`  40 minutes until Asr's next end: its preferred end, the moment it becomes late, or its end
+ *
+ * The icon color shows the state: yellow inside the heads-up, green after the start and around jamaat,
+ * blue while it runs, red before it becomes late, orange in the disliked time after its preferred end.
  *
  * @param state - What the menu bar shows.
  * @param now - Current instant.
- * @param windows - Minute settings (start window and heads-up decide some colors).
+ * @param windows - Minute settings (the heads-up decides the upcoming color).
  * @returns Text, color and whether to show the mosque.
  */
 export function menuBarTitle(state: MenuBarState, now: Date, windows: AlertWindows): MenuBarTitle {
   const { slot, kind } = state;
-  const t = now.getTime();
-  switch (kind) {
-    case "upcoming": {
-      const left = slot.start.getTime() - t;
-      const soon = windows.headsUpMinutes > 0 && left <= windows.headsUpMinutes * MINUTE;
-      return {
-        text: `${ltrName(slot.name)} -${formatMinutes(left, "ceil")}`,
-        tone: soon ? "yellow" : "plain",
-        mosque: false,
-      };
-    }
-    case "start":
-    case "pending":
-      return {
-        text: `${ltrName(slot.name)} +${formatMinutes(t - slot.start.getTime(), "floor")}`,
-        tone: kind === "start" ? "green" : "blue",
-        mosque: false,
-      };
-    case "jamaat": {
-      const jamaat = slot.jamaat?.getTime() ?? t;
-      const text =
-        jamaat > t
-          ? `${ltrName(slot.name)} -${formatMinutes(jamaat - t, "ceil")}`
-          : `${ltrName(slot.name)} +${formatMinutes(t - jamaat, "floor")}`;
-      return { text, tone: "green", mosque: true };
-    }
-    case "ending":
-      return {
-        text: `${ltrName(slot.name)} (-${formatMinutes(slot.late.getTime() - t, "ceil")})`,
-        tone: "red",
-        mosque: false,
-      };
-    case "disliked":
-      return {
-        text: `${ltrName(slot.name)} (-${formatMinutes(slot.end.getTime() - t, "ceil")})`,
-        tone: "orange",
-        mosque: false,
-      };
-  }
+  const moment = nextMoment(slot, now);
+  const ms = moment.at.getTime() - now.getTime();
+  const left = `-${formatMinutes(ms, "ceil")}`;
+  const name = ltrName(slot.name);
+  const soon = windows.headsUpMinutes > 0 && ms <= windows.headsUpMinutes * MINUTE;
+  const tones: Record<MenuBarState["kind"], TitleTone> = {
+    upcoming: soon ? "yellow" : "plain",
+    start: "green",
+    jamaat: "green",
+    pending: "blue",
+    ending: "red",
+    disliked: "orange",
+  };
+  return {
+    text: moment.kind === "end" ? `${name} (${left})` : `${name} ${left}`,
+    tone: tones[kind],
+    mosque: moment.kind === "jamaat",
+  };
 }

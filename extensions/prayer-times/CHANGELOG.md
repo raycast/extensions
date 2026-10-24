@@ -3,7 +3,7 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Offline prayer times (adhan) with calculation method, madhab, minute adjustments and Isha/Dhuhr end options
-- Menu bar countdown (`Asr -5`, `Asr +12`, `Asr (-5)`) with state-colored minaret and mosque icons
+- Menu bar countdown to the next start, jamaat or end (`Asr -5`, `Asr (-40)`) with state-colored minaret and mosque icons
 - Next Prayer root search subtitle, Today's Prayers list with 7-day stats
 - Prayer status: with jamaat, on time, late, made up or missed, kept in the reminder's notes (`prayer-status:` line)
 - Jamaat rules: fixed time, offset, rounding, minutes before the prayer time ends, or Asr/Isha combined with Dhuhr/Maghrib

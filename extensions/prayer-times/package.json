@@ -491,7 +491,7 @@
     {
       "name": "menuBarShowNext",
       "label": "Always show the next prayer in the menu bar",
-      "description": "A started prayer shows (e.g. \"Asr +12\") until marked prayed or its time ends. The next prayer's countdown (\"Maghrib -5\") shows during the heads-up window, or all the time with this on.",
+      "description": "A started prayer shows its time left (e.g. \"Asr (-40)\") until marked prayed or its time ends. The next prayer's countdown (\"Maghrib -5\") shows during the heads-up window, or all the time with this on.",
       "type": "checkbox",
       "required": false,
       "default": false,
