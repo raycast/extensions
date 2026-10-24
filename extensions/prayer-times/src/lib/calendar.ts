@@ -160,7 +160,9 @@ export function panelSvg(
   parts.push(text(WIDTH, y, 10, colors.muted, "Status", `text-anchor="end"`));
   for (const prayer of prayers) {
     y += 22;
-    const cells = [prayer.name, prayer.start, prayer.jamaat ?? "—", prayer.end];
+    // Names get 90px before the times; long custom titles are shortened rather than run over them.
+    const name = prayer.name.length > 12 ? `${prayer.name.slice(0, 11)}…` : prayer.name;
+    const cells = [name, prayer.start, prayer.jamaat ?? "—", prayer.end];
     // direction="ltr" keeps an Urdu or Arabic name starting at the left edge instead of running off it.
     cells.forEach((cell, i) =>
       parts.push(text(columns[i], y, 12, colors.text, cell, i === 0 ? `font-weight="600" direction="ltr"` : "")),

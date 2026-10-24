@@ -245,8 +245,9 @@ function prayerDetail(slot: PrayerSlot, record: PrayerRecord | undefined) {
           ) : (
             <List.Item.Detail.Metadata.Label title="Status" text={record ? "Not marked yet" : "No reminder"} />
           )}
+          {/* Cached history holds completedAt as a string. */}
           {record?.completedAt && (
-            <List.Item.Detail.Metadata.Label title="Prayed At" text={formatTime(record.completedAt)} />
+            <List.Item.Detail.Metadata.Label title="Prayed At" text={formatTime(new Date(record.completedAt))} />
           )}
         </List.Item.Detail.Metadata>
       }
