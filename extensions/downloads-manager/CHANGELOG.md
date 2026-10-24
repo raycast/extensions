@@ -1,5 +1,9 @@
 # Downloads Manager Changelog
 
+## [Fix render timeout for large Downloads folders] - 2026-10-24
+
+- Fixed a render timeout when loading large Downloads folders by making all file I/O (directory scans, stat calls) asynchronous so Raycast's UI thread is not blocked.
+
 ## [Align shortcuts with Search Screenshots] - 2026-09-09
 
 Bring Downloads Manager closer to Raycast's native Screenshots extension's "Search Screenshots" command, making common file actions and keyboard shortcuts more consistent across Raycast.
