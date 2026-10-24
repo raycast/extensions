@@ -1,0 +1,162 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "artificial-analysis-rankings",
+  "title": "Artificial Analysis",
+  "description": "Quickly compare AI models ranked by Artificial Analysis Intelligence Index.",
+  "icon": "icon.png",
+  "author": "NarenMedarametla",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "commands": [
+    {
+      "name": "ai-model-rankings",
+      "title": "AI Model Rankings",
+      "description": "Discover the top five distinct AI models with quick access to all rankings.",
+      "mode": "view",
+      "keywords": [
+        "llm",
+        "intelligence",
+        "benchmark",
+        "leaderboard",
+        "coding",
+        "models"
+      ]
+    },
+    {
+      "name": "all-ai-models",
+      "title": "All AI Models",
+      "description": "Browse every evaluated configuration ranked by intelligence.",
+      "mode": "view",
+      "keywords": [
+        "llm",
+        "intelligence",
+        "all",
+        "benchmark"
+      ]
+    },
+    {
+      "name": "best-coding-models",
+      "title": "Best Coding Models",
+      "description": "Find the strongest coding models by Coding Index.",
+      "mode": "view",
+      "keywords": [
+        "coding",
+        "programming",
+        "code"
+      ]
+    },
+    {
+      "name": "fastest-ai-models",
+      "title": "Fastest AI Models",
+      "description": "Rank models by median output tokens per second.",
+      "mode": "view",
+      "keywords": [
+        "speed",
+        "fast",
+        "throughput"
+      ]
+    },
+    {
+      "name": "model-pricing",
+      "title": "Model Pricing",
+      "description": "Compare input or output token prices, lowest first.",
+      "mode": "view",
+      "keywords": [
+        "cost",
+        "price",
+        "cheap",
+        "tokens"
+      ]
+    },
+    {
+      "name": "lowest-latency-models",
+      "title": "Lowest Latency Models",
+      "description": "Rank models by time to first token, lowest first.",
+      "mode": "view",
+      "keywords": [
+        "latency",
+        "response",
+        "ttft"
+      ]
+    },
+    {
+      "name": "compare-models",
+      "title": "Compare Models",
+      "description": "Compare up to four AI models side by side, with the better values highlighted.",
+      "mode": "view",
+      "keywords": [
+        "compare",
+        "versus",
+        "vs",
+        "side by side"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "title": "Artificial Analysis API Key",
+      "description": "Create a free key at https://artificialanalysis.ai/api-key-management-redirect. Your key is used only for requests to Artificial Analysis.",
+      "required": false
+    },
+    {
+      "name": "showCoding",
+      "type": "checkbox",
+      "title": "Model Details",
+      "label": "Show Coding Index",
+      "description": "Include the Coding Index in model details and copied summaries.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showPrice",
+      "type": "checkbox",
+      "title": "",
+      "label": "Show Input and Output Prices",
+      "description": "Include token prices, in USD per 1M tokens, in model details and copied summaries.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showSpeed",
+      "type": "checkbox",
+      "title": "",
+      "label": "Show Output Speed",
+      "description": "Include median output tokens per second in model details and copied summaries.",
+      "default": true,
+      "required": false
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.8.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.5"
+  }
+}
