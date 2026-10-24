@@ -1,0 +1,255 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-classroom",
+  "title": "Google Classroom",
+  "description": "Browse your Google Classroom courses, announcements and assignments, and download their attachments",
+  "icon": "google-classroom.png",
+  "author": "anupchavan",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "clientId",
+      "type": "textfield",
+      "required": true,
+      "title": "OAuth Client ID",
+      "description": "Client ID of your own iOS OAuth client (bundle ID com.raycast) from a Google Cloud project with the Classroom and Drive APIs enabled. See the README.",
+      "placeholder": "1234-abc.apps.googleusercontent.com"
+    },
+    {
+      "name": "groupAssignments",
+      "title": "All Assignments",
+      "type": "checkbox",
+      "label": "Group assignments by status",
+      "description": "When disabled, All Assignments is a single list ordered by most recently updated.",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "assignmentGroup1",
+      "title": "Assignment Group 1",
+      "type": "dropdown",
+      "description": "Choose the display order of assignment groups. Repeated groups appear once; any omitted groups follow.",
+      "required": false,
+      "default": "missing",
+      "data": [
+        {
+          "title": "Missing",
+          "value": "missing"
+        },
+        {
+          "title": "Due Soon",
+          "value": "dueSoon"
+        },
+        {
+          "title": "Due Later",
+          "value": "dueLater"
+        },
+        {
+          "title": "No Due Date",
+          "value": "noDueDate"
+        },
+        {
+          "title": "Done",
+          "value": "done"
+        }
+      ]
+    },
+    {
+      "name": "assignmentGroup2",
+      "title": "Assignment Group 2",
+      "type": "dropdown",
+      "description": "Choose the display order of assignment groups. Repeated groups appear once; any omitted groups follow.",
+      "required": false,
+      "default": "dueSoon",
+      "data": [
+        {
+          "title": "Missing",
+          "value": "missing"
+        },
+        {
+          "title": "Due Soon",
+          "value": "dueSoon"
+        },
+        {
+          "title": "Due Later",
+          "value": "dueLater"
+        },
+        {
+          "title": "No Due Date",
+          "value": "noDueDate"
+        },
+        {
+          "title": "Done",
+          "value": "done"
+        }
+      ]
+    },
+    {
+      "name": "assignmentGroup3",
+      "title": "Assignment Group 3",
+      "type": "dropdown",
+      "description": "Choose the display order of assignment groups. Repeated groups appear once; any omitted groups follow.",
+      "required": false,
+      "default": "dueLater",
+      "data": [
+        {
+          "title": "Missing",
+          "value": "missing"
+        },
+        {
+          "title": "Due Soon",
+          "value": "dueSoon"
+        },
+        {
+          "title": "Due Later",
+          "value": "dueLater"
+        },
+        {
+          "title": "No Due Date",
+          "value": "noDueDate"
+        },
+        {
+          "title": "Done",
+          "value": "done"
+        }
+      ]
+    },
+    {
+      "name": "assignmentGroup4",
+      "title": "Assignment Group 4",
+      "type": "dropdown",
+      "description": "Choose the display order of assignment groups. Repeated groups appear once; any omitted groups follow.",
+      "required": false,
+      "default": "noDueDate",
+      "data": [
+        {
+          "title": "Missing",
+          "value": "missing"
+        },
+        {
+          "title": "Due Soon",
+          "value": "dueSoon"
+        },
+        {
+          "title": "Due Later",
+          "value": "dueLater"
+        },
+        {
+          "title": "No Due Date",
+          "value": "noDueDate"
+        },
+        {
+          "title": "Done",
+          "value": "done"
+        }
+      ]
+    },
+    {
+      "name": "assignmentGroup5",
+      "title": "Assignment Group 5",
+      "type": "dropdown",
+      "description": "Choose the display order of assignment groups. Repeated groups appear once; any omitted groups follow.",
+      "required": false,
+      "default": "done",
+      "data": [
+        {
+          "title": "Missing",
+          "value": "missing"
+        },
+        {
+          "title": "Due Soon",
+          "value": "dueSoon"
+        },
+        {
+          "title": "Due Later",
+          "value": "dueLater"
+        },
+        {
+          "title": "No Due Date",
+          "value": "noDueDate"
+        },
+        {
+          "title": "Done",
+          "value": "done"
+        }
+      ]
+    },
+    {
+      "name": "searchTeachers",
+      "title": "Course Search",
+      "type": "checkbox",
+      "label": "Also search teacher names",
+      "description": "When enabled, course search fetches the teacher rosters of your courses. Disable for faster searches.",
+      "default": false,
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "show-courses",
+      "title": "Show Courses",
+      "subtitle": "Google Classroom",
+      "description": "Browse your Google Classroom courses and their announcements, assignments, questions and materials",
+      "mode": "view"
+    },
+    {
+      "name": "show-assignments",
+      "title": "Show Assignments",
+      "subtitle": "Google Classroom",
+      "description": "See your assignments across all courses, filtered by missing, due soon, no due date and more",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-courses",
+      "title": "Get Courses",
+      "description": "List the user's Google Classroom courses"
+    },
+    {
+      "name": "get-assignments",
+      "title": "Get Assignments",
+      "description": "List the user's assignments across courses with their due date and submission status"
+    },
+    {
+      "name": "get-course-stream",
+      "title": "Get Course Stream",
+      "description": "List the announcements, assignments, questions and materials of a course"
+    },
+    {
+      "name": "download-attachments",
+      "title": "Download Attachments",
+      "description": "Download the attachments of an assignment, announcement or material, or the files submitted for an assignment, to the Downloads folder"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
+    "date-fns": "^4.4.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "esbuild": "0.27.7",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test tests/*.test.mjs"
+  }
+}
