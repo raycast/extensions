@@ -1205,14 +1205,7 @@ function GameDetail({
   const knownPrices = new Map<string, number>();
 
   const addPoint = (time: number, price: number) => {
-    const date = new Date(time).toISOString().slice(0, 10);
-    const last = plotData[plotData.length - 1];
-
-    if (last?.x === date) {
-      last.y = price;
-    } else {
-      plotData.push({ x: date, y: price });
-    }
+    plotData.push({ x: new Date(time).toISOString(), y: price });
   };
 
   const sortedHistory = [...allowedHistory].sort(
@@ -1307,7 +1300,6 @@ function GameDetail({
             {
               type: "time",
               time: {
-                parser: "YYYY-MM-DD",
                 unit: "month",
                 displayFormats: { month: "MMM YY" },
               },
