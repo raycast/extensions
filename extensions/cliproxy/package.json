@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cliproxy",
+  "title": "CLIProxyAPI",
+  "description": "Manage CLIProxyAPI accounts, quotas and rate-limit resets",
+  "icon": "extension-icon.png",
+  "author": "richard",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "Server URL",
+      "description": "Base URL of your CLIProxyAPI server",
+      "type": "textfield",
+      "required": false,
+      "default": "http://localhost:8317",
+      "placeholder": "http://localhost:8317"
+    },
+    {
+      "name": "managementKey",
+      "title": "Management Key",
+      "description": "Plaintext remote-management secret-key from your CLIProxyAPI config",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "accounts",
+      "title": "CLIProxyAPI",
+      "description": "Accounts, quota windows, cooldowns and rate-limit resets",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "install-raycast": "ray build -e dist",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
