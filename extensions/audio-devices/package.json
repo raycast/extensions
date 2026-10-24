@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "audio-devices",
+  "title": "Audio Devices",
+  "description": "Switch your playback and recording devices, and set volume or mute.",
+  "icon": "icon.png",
+  "author": "snakeplisken47",
+  "license": "MIT",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "System"
+  ],
+  "keywords": [
+    "audio",
+    "speaker",
+    "microphone",
+    "headset",
+    "volume",
+    "mute",
+    "output",
+    "input"
+  ],
+  "commands": [
+    {
+      "name": "set-output-device",
+      "title": "Set Output Device",
+      "description": "Choose the speakers or headset sound plays through",
+      "mode": "view",
+      "keywords": [
+        "speaker",
+        "headset",
+        "playback",
+        "output"
+      ]
+    },
+    {
+      "name": "set-input-device",
+      "title": "Set Input Device",
+      "description": "Choose the microphone apps record from",
+      "mode": "view",
+      "keywords": [
+        "microphone",
+        "mic",
+        "recording",
+        "input"
+      ]
+    },
+    {
+      "name": "cycle-output-device",
+      "title": "Cycle Output Device",
+      "description": "Switch straight to the next output device",
+      "mode": "no-view",
+      "keywords": [
+        "speaker",
+        "next",
+        "toggle",
+        "output"
+      ]
+    },
+    {
+      "name": "cycle-input-device",
+      "title": "Cycle Input Device",
+      "description": "Switch straight to the next input device",
+      "mode": "no-view",
+      "keywords": [
+        "microphone",
+        "next",
+        "toggle",
+        "input"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "closeOnSwitch",
+      "title": "After Switching",
+      "description": "Close Raycast once a device is selected from the list",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Close Raycast after switching"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.32.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nThis is a Raycast extension. Publish it with npm run publish.\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
