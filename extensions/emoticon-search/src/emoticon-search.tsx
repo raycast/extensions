@@ -12,7 +12,7 @@ const DEFAULT_COLUMNS = 5;
 const PAGE_SIZE = 150;
 const WEEK = 7 * 24 * 60 * 60 * 1000;
 
-// Use count, halved for every week since last use, so old favourites fade out.
+// Use count, halved for every week since last use, so old favorites fade out.
 const frecency = (u: Usage) => u.count * 0.5 ** ((Date.now() - u.lastUsed) / WEEK);
 
 // ⌘ on macOS, Ctrl on Windows, same keys as Emoji Search.
@@ -113,6 +113,7 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
+      <Grid.EmptyView icon={Icon.MagnifyingGlass} title="No Emoticons Found" description="¯\_(ツ)_/¯" />
       {[...sections].map(([title, emoticons]) => (
         <Grid.Section key={title} title={title}>
           {emoticons.map((e) => (
