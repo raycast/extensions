@@ -1,6 +1,6 @@
 # Prayer Times Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-24
 
 - Offline prayer times (adhan) with calculation method, madhab, minute adjustments and Isha/Dhuhr end options
 - Menu bar countdown to the next start, jamaat or end (`Asr -5`, `Asr (-40)`) with state-colored minaret and mosque icons
