@@ -1,5 +1,12 @@
 # Google Tasks Changelog
 
+## [Show Assigned Tasks] - {PR_MERGE_DATE}
+
+- Show tasks assigned from Google Docs and Chat spaces in task lists and AI tools.
+- Show where an assigned task came from, with links to the source document or Chat space.
+- Add actions to open a task in its source or in Google Tasks.
+- Guide first-time setup step by step for personal and work accounts, with links to each Google Cloud page and a field to paste the Client ID.
+
 ## [Improve Google Tasks] - 2026-09-11
 
 - Browse tasks across every list by date, completion status, or individual task list.
