@@ -4,7 +4,7 @@ A Raycast extension that keeps nine clipboard slots. Each slot has its own save 
 
 ## Why not Snippets?
 
-Snippets are for text you curate and reuse for weeks. Slots are meant to be overwritten constantly during one task, such as moving several fields between two windows, without each copy replacing the last one on the system clipboard.
+Snippets are for text you curate and reuse for weeks. Slots are meant to be overwritten constantly during one task, such as moving several fields between two windows, while keeping earlier copies in their own slots. Saving a selection also copies it to the system clipboard unless you turn off **Also copy saved text to the system clipboard**.
 
 - One hotkey (suggested ⌘⌥1, which you assign in Raycast) saves the current selection to slot 1 and replaces what was there. There is no editor, no name to type, and no confirm step. If nothing is selected, it saves the clipboard instead.
 - A second hotkey (suggested ⌘⇧1) pastes the slot back into the app you were using.
