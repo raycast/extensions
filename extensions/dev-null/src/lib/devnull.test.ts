@@ -35,7 +35,9 @@ describe("postCommit", () => {
   const offline = { baseUrl: "http://127.0.0.1:9", agentSockets: [], home: "/nonexistent" };
 
   it("refuses a commit /dev/null would refuse before looking for keys or sending anything", async () => {
-    await expect(postCommit({ message: "x".repeat(4001) }, offline)).rejects.toThrow("4,001 of 4,000");
+    await expect(postCommit({ message: "x".repeat(4001) }, offline)).rejects.toThrow(
+      `${(4001).toLocaleString()} of ${(4000).toLocaleString()}`,
+    );
     await expect(postCommit({ message: "hi", imagePaths: ["/nonexistent/a.png"] }, offline)).rejects.toThrow(
       "Could not read the image a.png.",
     );
@@ -71,6 +73,25 @@ describe("postCommit", () => {
     await expect(
       postCommit({ message: "hi", imagePaths: [path] }, { ...offline, approvedImageHashes: [images[0].sha256] }),
     ).rejects.toThrow(/No Ed25519|Could not reach/);
+  });
+});
+
+describe("postCommit's approval log", () => {
+  const offline = { baseUrl: "http://127.0.0.1:9", agentSockets: [], home: "/nonexistent" };
+
+  async function approvalLogged(approvedImageHashes: string[] | null | undefined) {
+    const lines: Record<string, unknown>[] = [];
+    const log = (message: string, data?: Record<string, unknown>) => message === "Checked commit" && lines.push(data!);
+    await postCommit({ message: "hi" }, { ...offline, log, approvedImageHashes }).catch(() => undefined);
+    return lines[0]?.approval;
+  }
+
+  it("tells a post with no approval step from an AI post whose approval went missing", async () => {
+    // The form has no approval step.
+    expect(await approvalLogged(undefined)).toBe("not used");
+    // The AI tool looked for the user's approval and found none.
+    expect(await approvalLogged(null)).toBe("not recorded");
+    expect(await approvalLogged([])).toBe("matched");
   });
 });
 

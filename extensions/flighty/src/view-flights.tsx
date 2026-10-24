@@ -12,7 +12,7 @@ dayjs.extend(timezone)
 const timeFormat = 'h:mma'
 
 export default function () {
-    const {isLoading, error, data: allFlights} = useFlights()
+    const {isLoading, error, data: allFlights, permissionView} = useFlights()
     const allYears = getAllYears(allFlights)
     const [filter, setFilter] = useState<{type: 'future'} | {type: 'all'} | {type: 'year'; year: string}>({type: 'future'})
 
@@ -25,6 +25,8 @@ export default function () {
     })
 
     if (filter.type === 'future') filteredFlights?.reverse()
+
+    if (permissionView) return permissionView
 
     return (
         <List

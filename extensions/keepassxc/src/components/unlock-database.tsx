@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
+import { useState } from "react";
 import { JSX } from "react/jsx-runtime";
 import { useForm } from "@raycast/utils";
 
@@ -25,6 +26,7 @@ export default function UnlockDatabase({
 }: {
   setIsUnlocked: (isUnlocked: boolean) => void;
 }): JSX.Element {
+  const [showPassword, setShowPassword] = useState(false);
   const { handleSubmit, itemProps } = useForm<PasswordForm>({
     onSubmit(value) {
       showToast({
@@ -43,16 +45,24 @@ export default function UnlockDatabase({
     },
   });
 
+  const PasswordInput = showPassword ? Form.TextField : Form.PasswordField;
+
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Unlock" onSubmit={handleSubmit} />
+          <Action
+            title={showPassword ? "Hide Password" : "Show Password"}
+            icon={showPassword ? Icon.EyeDisabled : Icon.Eye}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "i" }, Windows: { modifiers: ["ctrl"], key: "i" } }}
+            onAction={() => setShowPassword(!showPassword)}
+          />
         </ActionPanel>
       }
     >
       <Form.Description text={"Your KeePass database is currently locked. Insert your credentials to unlock it."} />
-      <Form.PasswordField title="Database Password" {...itemProps.password} />
+      <PasswordInput title="Database Password" {...itemProps.password} />
       <Form.FilePicker id="keyFile" title="Key File" allowMultipleSelection={false} />
       <Form.Description text={"ⓘ Credentials will be stored in Raycast's local encrypted storage."} />
     </Form>
