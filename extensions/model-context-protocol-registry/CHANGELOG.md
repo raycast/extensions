@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add MCP Checkup MCP Server] - 2026-10-24
+
+- Add MCP Checkup to the official registry: look up observed status, reports and recent tool-list changes for public MCP servers, fetch the Ed25519-signed attestation behind a report, and request a one-off check of a server by URL. Hosted Streamable HTTP server at https://mcpcheckup.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add Shopify Speed Check MCP Server] - 2026-10-24
 
 - Add Shopify Speed Check to the registry: check a Shopify store's PageSpeed score and Core Web Vitals, find slow apps and scripts, and compare Shopify plan fees. Hosted Streamable HTTP server at https://tools.skaidigital.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients

@@ -850,6 +850,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "mcp-checkup",
+    title: "MCP Checkup",
+    description:
+      "Check a public MCP server before you connect it. Look up observed status and reports for servers MCP Checkup tracks, search them by what their tools do, see recent changes to a server's tool list, fetch the Ed25519-signed (DSSE) attestation behind a report, and request a one-off check of a server by URL. Attestations can be verified offline with the open-source verifier at github.com/mcpcheckup/checks (Apache-2.0). Hosted remote Streamable HTTP server at https://mcpcheckup.com/mcp; no sign-in, no API key.",
+    icon: "https://mcpcheckup.com/apple-touch-icon.png",
+    homepage: "https://mcpcheckup.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcpcheckup.com/mcp"],
+    },
+    remoteUrl: "https://mcpcheckup.com/mcp",
+  },
+  {
     name: "medbillanalyzer",
     title: "MedBillAnalyzer",
     description:
