@@ -20,7 +20,7 @@ export default async function KillPort(props: LaunchProps<{ arguments: Arguments
       return;
     }
     for (const t of targets) {
-      await stopProcess(t.pid, t.name);
+      await stopProcess(t);
     }
   } catch (err) {
     await showError(err);

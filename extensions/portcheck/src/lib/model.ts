@@ -9,6 +9,8 @@ export interface PortRow {
   /** e.g. "node", "docker:web", "(hidden)" */
   name: string;
   pid?: number;
+  /** When the process started; tells it apart from a later one with the same PID. */
+  startTime?: string;
   user?: string;
   cmdline?: string;
   /** "npm (4200) ← zsh (900)", or "" */
@@ -45,6 +47,7 @@ export function rows(data: ListData): PortRow[] {
       address: s.localAddress,
       name: holderName(s),
       pid: s.container ? undefined : s.pid,
+      startTime: s.process?.startTime,
       user: s.process?.user,
       cmdline: s.process?.cmdline,
       startedBy: startedBy(s),
@@ -79,16 +82,37 @@ export function checkMarkdown(port: number, data: CheckData): string {
   return lines.join("\n").trimEnd();
 }
 
+/** A process the user chose to stop. */
+export interface Target {
+  pid: number;
+  name: string;
+  startTime?: string;
+}
+
 /** Processes that can be stopped from a check (not containers or hidden owners). */
-export function stoppable(port: number, data: CheckData): { pid: number; name: string }[] {
+export function stoppable(port: number, data: CheckData): Target[] {
   const p = data.ports.find((x) => x.port === port);
-  const out: { pid: number; name: string }[] = [];
+  const out: Target[] = [];
   for (const s of p?.holders ?? []) {
     if (s.pid !== undefined && !s.container && !out.some((o) => o.pid === s.pid)) {
-      out.push({ pid: s.pid, name: s.process?.name ?? "process" });
+      out.push({ pid: s.pid, name: s.process?.name ?? "process", startTime: s.process?.startTime });
     }
   }
   return out;
+}
+
+/**
+ * Whether the target still holds a port in a fresh listing. A PID alone isn't
+ * enough: the process may have exited and the PID been reused, so the start
+ * time (or, without one, the name) must match too.
+ */
+export function stillRunning(t: Target, data: ListData): boolean {
+  return data.sockets.some(
+    (s) =>
+      s.pid === t.pid &&
+      !s.container &&
+      (t.startTime !== undefined ? s.process?.startTime === t.startTime : (s.process?.name ?? "process") === t.name),
+  );
 }
 
 /** "node (pid 42): terminated", one per process. */

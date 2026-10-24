@@ -32,7 +32,7 @@ export default function CheckPort(props: LaunchProps<{ arguments: Arguments.Chec
               icon={Icon.Stop}
               style={Action.Style.Destructive}
               onAction={async () => {
-                if (await stopProcess(t.pid, t.name)) revalidate();
+                if (await stopProcess(t)) revalidate();
               }}
             />
           ))}

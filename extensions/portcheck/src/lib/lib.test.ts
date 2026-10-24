@@ -1,6 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { checkMarkdown, killSummary, parsePort, rows, stoppable } from "./model";
-import { candidates, check, type Exec, free, kill, list, PortcheckError, resolveBinary, run } from "./portcheck";
+import { checkMarkdown, killSummary, parsePort, rows, stillRunning, stoppable } from "./model";
+import {
+  candidates,
+  check,
+  type Exec,
+  free,
+  kill,
+  list,
+  PortcheckError,
+  resolveBinary,
+  run,
+  type Socket,
+} from "./portcheck";
 
 const node = {
   proto: "tcp",
@@ -156,6 +167,28 @@ describe("check reports", () => {
     expect(md).toContain("sudo portcheck kill 8080");
     expect(stoppable(8080, other)).toEqual([{ pid: 42, name: "process" }]);
     expect(stoppable(9, { ports: [] })).toEqual([]);
+  });
+});
+
+describe("stopping only the process the user saw", () => {
+  const started: Socket = { ...node, process: { ...node.process, startTime: "2026-10-24T10:00:00Z" } };
+  const now = (...sockets: Socket[]) => ({ sockets, partial: false });
+  it("matches the PID and start time", () => {
+    const t = stoppable(3000, { ports: [{ port: 3000, proto: "tcp", status: "in-use", holders: [started] }] })[0];
+    expect(t).toEqual({ pid: 42, name: "node", startTime: "2026-10-24T10:00:00Z" });
+    expect(rows(now(started))[0].startTime).toBe("2026-10-24T10:00:00Z");
+    expect(stillRunning(t, now(started))).toBe(true);
+    // Exited, or the PID was reused by a later process.
+    expect(stillRunning(t, now())).toBe(false);
+    expect(stillRunning(t, now({ ...started, process: { ...node.process, startTime: "2026-10-24T11:00:00Z" } }))).toBe(
+      false,
+    );
+  });
+  it("falls back to the name without a start time, and never matches containers", () => {
+    expect(stillRunning({ pid: 42, name: "node" }, now(node))).toBe(true);
+    expect(stillRunning({ pid: 42, name: "python" }, now(node))).toBe(false);
+    expect(stillRunning({ pid: 42, name: "process" }, now({ ...node, process: undefined }))).toBe(true);
+    expect(stillRunning({ pid: 9, name: "?" }, now(web))).toBe(false);
   });
 });
 
