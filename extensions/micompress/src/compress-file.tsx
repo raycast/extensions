@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Form, Toast, showToast, popToRoot, open } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Toast, showToast, popToRoot, open } from "@raycast/api";
+import { basename } from "path";
 import { useState } from "react";
 import { compressFile, SITE } from "./api";
 
@@ -18,34 +19,41 @@ export default function Command() {
     setLoading(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Compressing…" });
 
-    let ok = 0;
     let inTotal = 0;
     let savedTotal = 0;
-    const errors: string[] = [];
+    const failures: { file: string; error: string }[] = [];
 
     for (const file of values.files) {
       try {
         const { meta } = await compressFile(file, values.preset);
-        ok += 1;
         inTotal += meta.inputSize || 0;
         savedTotal += (meta.inputSize || 0) - (meta.outputSize || 0);
       } catch (e) {
-        errors.push(e instanceof Error ? e.message : String(e));
+        failures.push({ file: basename(file), error: e instanceof Error ? e.message : String(e) });
       }
     }
 
     setLoading(false);
-    if (ok > 0) {
+    const ok = values.files.length - failures.length;
+    if (failures.length === 0) {
       const pct = inTotal ? Math.round((savedTotal / inTotal) * 100) : 0;
       toast.style = Toast.Style.Success;
       toast.title = `Compressed ${ok}/${values.files.length}`;
-      toast.message = `Saved ${pct}%${errors.length ? ` · ${errors.length} failed` : ""}`;
+      toast.message = `Saved ${pct}%`;
       await popToRoot();
-    } else {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Compression failed";
-      toast.message = errors[0];
+      return;
     }
+
+    // Keep the form open so the user can see what failed and retry.
+    const details = failures.map((f) => `${f.file}: ${f.error}`).join("\n");
+    toast.style = Toast.Style.Failure;
+    toast.title = ok > 0 ? `Compressed ${ok}/${values.files.length}, ${failures.length} failed` : "Compression failed";
+    toast.message =
+      failures.length === 1 ? details : `${failures[0].file}: ${failures[0].error} (+${failures.length - 1} more)`;
+    toast.primaryAction = {
+      title: "Copy Error Details",
+      onAction: () => Clipboard.copy(details),
+    };
   }
 
   return (
